@@ -9,7 +9,7 @@ Development setup
 -----------------
 
 To set up your system for *Argilla* development, you first of all have to
-`fork <https://guides.github.com/activities/forking/>`_ our `repository <https://github.com/recognai/rubrix>`_
+`fork <https://guides.github.com/activities/forking/>`_ our `repository <https://github.com/argilla-io/argilla>`_
 and clone the fork to your computer:
 
 .. code-block:: bash

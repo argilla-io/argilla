@@ -22,7 +22,7 @@ Once the profile is created (a new entry should appear in file `~/.aws/config`),
 export AWS_PROFILE=argilla
 ```
 
-### Create docker machine (aws)
+### Create docker machine
 
 ```bash
 docker-machine create --driver amazonec2 \

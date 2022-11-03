@@ -150,7 +150,7 @@ For instance, to search for *"(1+1)=2"* you need to write:
 
 This is a table with available fields that you can use in your query string:
 
-| Field name                               | Description                           | TextClass.                                 | TokenClass.                                 | Text2Text                                   |
+| Field name                               | Description                           | TextClass.                                 | TokenClass.                                 | TextGen.                                   |
 |------------------------------------------|---------------------------------------|--------------------------------------------|---------------------------------------------|---------------------------------------------|
 | annotated_as                             | annotation                            | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
 | annotated_by                             | annotation agent                      | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
