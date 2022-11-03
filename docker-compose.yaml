@@ -2,7 +2,7 @@ version: "3"
 
 services:
   argilla:
-    image: argilla/argilla-server:latest
+    image: argilla-io/argilla-server:latest
     restart: unless-stopped
     ports:
       - "6900:80"
