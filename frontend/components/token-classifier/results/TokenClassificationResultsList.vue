@@ -72,7 +72,7 @@ export default {
       await this.getRulesMetricsAndRecordsByQueryText(name, this.queryText);
 
     const rules = await this.fetchTokenClassificationRules(name);
-    
+
     rules?.forEach((rule) => {
       this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
       this.initRecordsModel(rule, records);
