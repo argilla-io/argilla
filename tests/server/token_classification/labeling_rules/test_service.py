@@ -80,15 +80,13 @@ def test_service(text, keywords, expected):
         span_selector="builtin::exact_match",
         author="Test",
     )
-    service.apply_rule(
+    record_spans = service.apply_rule(
         rule,
         records=records,
     )
 
-    for record in records:
-        assert rule.query in record.annotations
-        assert record.annotations[rule.query] == expected
-        for span in record.annotations[rule.query].entities:
+    for record in record_spans:
+        for span in record.spans:
             assert text[span.start : span.end] in keywords
 
 
