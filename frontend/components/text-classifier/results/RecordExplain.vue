@@ -183,7 +183,9 @@ export default {
     word-break: normal;
   }
   :deep(.highlight-text) {
-    line-height: 16px;
+    line-height: 12px;
+    display: inline-block;
+    background: #ffffffab;
   }
 }
 .white-space {
