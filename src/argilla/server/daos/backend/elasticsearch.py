@@ -289,11 +289,14 @@ class ElasticsearchBackend(LoggingMixin):
 
         """
         with backend_error_handler(index=index):
+            from pprint import pprint
+
+            pprint(query)
             if knn is not None:
                 return self.__client__.knn_search(
                     index=index,
                     knn=knn,
-                    # filter=query,  # filter=query??
+                    filter=query["query"],  # filter=query??
                     routing=routing,
                 )
             return self.__client__.search(
