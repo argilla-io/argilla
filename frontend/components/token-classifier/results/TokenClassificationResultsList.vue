@@ -67,9 +67,15 @@ export default {
   async beforeMount() {
     this.rulesHaveBeenFetched = false;
     const { name } = this.dataset;
+
+    const { rulesMetrics, records } =
+      await this.getRulesMetricsAndRecordsByQueryText(name, this.queryText);
+
     const rules = await this.fetchTokenClassificationRules(name);
-    rules?.forEach(async (rule) => {
-      await this.initRuleModelTable(name, rule);
+    
+    rules?.forEach((rule) => {
+      this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
+      this.initRecordsModel(rule, records);
     });
 
     this.insertOrUpdateEntityInTokenEntityModel();
@@ -129,15 +135,14 @@ export default {
     },
   },
   methods: {
-    async initRuleModelTable(name, rule) {
-      const rulesMetrics = await this.fetchRuleMetricsByRule(name, rule);
-      this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
-    },
-    async fetchRuleMetricsByRule(name, rule) {
-      return await this.fetchTokenClassificationRulesMetricsByRule(
-        name,
-        rule.query
-      );
+    async getRulesMetricsAndRecordsByQueryText(name, query) {
+      let rulesMetrics = null;
+      let records = null;
+      if (query) {
+        rulesMetrics = await this.fetchRuleMetricsByQueryText(name, query);
+        records = await this.fetchTokenRecordsByQueryText(name, query);
+      }
+      return { rulesMetrics, records };
     },
     async fetchTokenClassificationRules(name) {
       try {
@@ -153,7 +158,7 @@ export default {
         console.log("Error: ", error);
       }
     },
-    async fetchTokenClassificationRulesMetricsByRule(name, query) {
+    async fetchRuleMetricsByQueryText(name, query) {
       try {
         const { data, status } = await this.$axios.get(
           `/datasets/${name}/TokenClassification/labeling/rules/${query}/summary`
@@ -167,7 +172,25 @@ export default {
         console.log("Error: ", error);
       }
     },
-
+    async fetchTokenRecordsByQueryText(name, query) {
+      try {
+        const { data, status } = await this.$axios.get(
+          `/datasets/${name}/TokenClassification/labeling/rules/${query}/search`
+        );
+        if (status === 200) {
+          return data;
+        } else {
+          throw new Error("Error fetching API rule metrics");
+        }
+      } catch (error) {
+        console.log("Error: ", error);
+      }
+    },
+    initRecordsModel(rule, records) {
+      console.group(rule);
+      console.log(records);
+      console.groupEnd();
+    },
     insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
       RuleModel.insertOrUpdate({
         data: {
