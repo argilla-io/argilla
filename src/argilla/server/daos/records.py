@@ -175,6 +175,14 @@ class DatasetRecordsDAO:
                 exclude_fields=exclude_fields,
                 enable_highlight=highligth_results,
             )
+            print("-------------------------!!!!")
+            print(total)
+            print(records)
+            # if "value" in total:
+            #    total = total["value"]
+            if isinstance(total, dict):
+                total = total["value"]
+            print("--------------------------!!!!")
             return DaoRecordsSearchResults(total=total, records=records)
         except ClosedIndexError:
             raise ClosedDatasetError(dataset.name)

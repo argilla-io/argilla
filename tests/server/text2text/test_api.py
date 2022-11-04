@@ -97,6 +97,8 @@ def search_data(
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == expected_total
     for record in results.records:
+        print("\n Record info: \n")
+        print(record.dict())
         if embedding_name:
             assert record.embeddings is not None
             assert embedding_name in record.embeddings
@@ -143,8 +145,9 @@ def test_search_with_embeddings(mocked_client):
         expected_total=2,
         embedding_name="my_bert",
         query={
-            "knn": {
-                "my_bert": [1, 3, 5, 6],
+            "query": {
+                "embedding_name": "my_bert",
+                "embedding_vector": [1.2, 2.3, 4.1, 6.1],
             }
         },
     )

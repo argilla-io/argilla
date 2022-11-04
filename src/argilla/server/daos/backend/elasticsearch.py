@@ -293,9 +293,8 @@ class ElasticsearchBackend(LoggingMixin):
                 return self.__client__.knn_search(
                     index=index,
                     knn=knn,
-                    query=query,  # filter=query??
+                    # filter=query,  # filter=query??
                     routing=routing,
-                    size=size,
                 )
             return self.__client__.search(
                 index=index,
@@ -853,7 +852,7 @@ class ElasticsearchBackend(LoggingMixin):
                     embedding_name=query.embedding_name,
                     embedding_vector=query.embedding_vector,
                 )
-
+                print(knn_query)
             results = self._search(
                 index=index,
                 query=es_query,
