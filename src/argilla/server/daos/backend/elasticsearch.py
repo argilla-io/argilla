@@ -1199,7 +1199,7 @@ class ElasticsearchBackend(LoggingMixin):
                 "index": True,
                 ## can similarity property also be part of config @frascuchon ?
                 # relates vector search similarity metric
-                "similarity": "cosine",
+                "similarity": "l2_norm",
             }
             embedding_mappings[embedding_name] = index_mapping
 

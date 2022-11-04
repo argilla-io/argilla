@@ -94,17 +94,42 @@ def search_data(
         json=query or {},
     )
     assert response.status_code == 200, response.json()
-
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == expected_total
     for record in results.records:
         if embedding_name:
             assert record.embeddings is not None
             assert embedding_name in record.embeddings
+        assert embedding_name in record.dict()
 
 
-def test_search_with_embeddings(mocked_client, records_for_text2text_with_embeddings):
+def test_search_with_embeddings(mocked_client):
     dataset = "test_search_with_embeddings"
+
+    delete_dataset(dataset, mocked_client)
+
+    records_for_text2text_with_embeddings = [
+        Text2TextRecordInputs.parse_obj(data)
+        for data in [
+            {
+                "id": 0,
+                "text": "This is a text data",
+                "metadata": {
+                    "field_one": "value one",
+                },
+                "prediction": {
+                    "agent": "test",
+                    "sentences": [{"text": "This is a test data", "score": 0.6}],
+                },
+                "embeddings": {"my_bert": {"vector": [1, 2, 3, 4]}},
+            },
+            {
+                "id": 1,
+                "text": "Ånother data",
+                "embeddings": {"my_bert": {"vector": [4, 5, 6, 7]}},
+            },
+        ]
+    ]
 
     base_url = prepare_data(
         client=mocked_client,
@@ -118,9 +143,8 @@ def test_search_with_embeddings(mocked_client, records_for_text2text_with_embedd
         expected_total=2,
         embedding_name="my_bert",
         query={
-            "query": {
-                "embedding_name": "my_bert",
-                "embedding_vector": [1, 3],
+            "knn": {
+                "my_bert": [1, 3, 5, 6],
             }
         },
     )
