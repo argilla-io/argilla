@@ -10,8 +10,8 @@
       <BaseInputContainer class="searchbar">
         <svgicon v-if="!searchEntity" name="search" width="20" height="40" />
         <svgicon
-          v-else
           class="searchbar__button"
+          v-else
           name="close"
           width="20"
           height="20"
@@ -159,5 +159,9 @@ export default {
     flex-direction: row;
     gap: 10px;
   }
+}
+
+.searchbar__button {
+  cursor: pointer;
 }
 </style>
