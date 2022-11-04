@@ -102,7 +102,6 @@ def search_data(
         if embedding_name:
             assert record.embeddings is not None
             assert embedding_name in record.embeddings
-        assert embedding_name in record.dict()
 
 
 def test_search_with_embeddings(mocked_client):
@@ -129,6 +128,14 @@ def test_search_with_embeddings(mocked_client):
                 "id": 1,
                 "text": "Ånother data",
                 "embeddings": {"my_bert": {"vector": [4, 5, 6, 7]}},
+            },
+            {
+                "id": 3,
+                "text": "This is another text data",
+                "prediction": {
+                    "agent": "test",
+                    "sentences": [{"text": "This is another test data", "score": 0.6}],
+                },
             },
         ]
     ]
