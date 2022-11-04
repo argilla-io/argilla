@@ -1,5 +1,5 @@
 <template>
-  <div class="chips">
+  <transition-group name="chips" class="chips">
     <div class="chips__items" v-for="chip in chips" :key="chip.id">
       <label
         class="chip"
@@ -10,7 +10,7 @@
       />
       <input :id="chip.id" type="checkbox" v-model="chip.is_activate" />
     </div>
-  </div>
+  </transition-group>
 </template>
 
 <script>
@@ -62,7 +62,7 @@ export default {
   user-select: none;
 }
 
-input {
+input[type="checkbox"] {
   display: none;
 }
 .activate {
@@ -73,5 +73,16 @@ input {
 .not-activate {
   color: black;
   background-color: #e0e1ff;
+}
+
+.chips__items {
+  transition: all 1s;
+}
+.chips-enter,
+.chips-leave-to {
+  opacity: 0;
+}
+.chips-leave-active {
+  position: absolute;
 }
 </style>
