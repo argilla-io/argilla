@@ -7,12 +7,12 @@
 </h1>
 <p align="center">
 <a  href="https://pypi.org/project/argilla/">
-<img  alt="CI"  src="https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white">
+<img  alt="CI"  src="https://img.shields.io/pypi/v/argilla.svg?style=flat-square&logo=pypi&logoColor=white">
 </a>
 <!--a  href="https://anaconda.org/conda-forge/rubrix">
 <img  alt="CI"  src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
 </!a-->
-<img  alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
+<img alt="Codecov" src="https://codecov.io/gh/argilla-io/argilla/branch/main/graph/badge.svg?token=VDVR29VOMG"/>
 <a href="https://pepy.tech/project/argilla">
 <img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
