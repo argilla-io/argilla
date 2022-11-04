@@ -143,7 +143,8 @@ class DatasetRecordsDAO:
         size: int = 100,
         record_from: int = 0,
         exclude_fields: List[str] = None,
-        highligth_results: bool = True,
+        include_fields: List[str] = None,
+        highlight_results: bool = True,
     ) -> DaoRecordsSearchResults:
 
         try:
@@ -156,7 +157,8 @@ class DatasetRecordsDAO:
                 record_from=record_from,
                 size=size,
                 exclude_fields=exclude_fields,
-                enable_highlight=highligth_results,
+                include_fields=include_fields,
+                enable_highlight=highlight_results,
             )
             return DaoRecordsSearchResults(total=total, records=records)
         except ClosedIndexError:

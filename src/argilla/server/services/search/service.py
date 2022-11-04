@@ -64,6 +64,7 @@ class SearchRecordsService:
         record_from: int = 0,
         size: int = 100,
         exclude_metrics: bool = True,
+        only_fields: Optional[List[str]] = None,
         metrics: Optional[List[ServiceMetric]] = None,
     ) -> ServiceSearchResults:
 
@@ -78,7 +79,12 @@ class SearchRecordsService:
             size=size,
             record_from=record_from,
             exclude_fields=exclude_fields,
-            highligth_results=query is not None
+            include_fields=only_fields
+            or [
+                f"{prop_name}"
+                for prop_name in record_type.schema()["properties"].keys()
+            ],
+            highlight_results=query is not None
             and query.query_text is not None
             and len(query.query_text) > 0,
         )
