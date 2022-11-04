@@ -24,5 +24,5 @@ def test_api_compatibility(mocked_client):
     client = api.active_api().client
     dummy_api = AbstractApi(client)
     with pytest.raises(ApiCompatibilityError):
-        with api_compatibility(api=dummy_api, min_version="1.1.0"):
+        with api_compatibility(api=dummy_api, min_version="999.1.0"):
             handle_response_error(mocked_client.post("/api/datasets"))

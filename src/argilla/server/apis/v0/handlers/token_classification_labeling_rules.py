@@ -11,7 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 from datetime import datetime
 from typing import List, Optional
 
@@ -20,12 +19,8 @@ from pydantic import BaseModel, Field, validator
 
 from argilla.server.apis.v0.models.commons.model import BaseUpdateLabelingRule
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
-from argilla.server.apis.v0.models.token_classification import (
-    TokenClassificationRecord,
-    TokenClassificationSearchResults,
-)
 from argilla.server.commons.config import TasksFactory
-from argilla.server.commons.models import BaseRulesSummary, BaseRuleSummary, TaskType
+from argilla.server.commons.models import TaskType
 from argilla.server.security import auth
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
@@ -33,6 +28,7 @@ from argilla.server.services.tasks.token_classification import (
     TokenClassificationService,
 )
 from argilla.server.services.tasks.token_classification.labeling_rules.service import (
+    RuleRecordInfo,
     ServiceLabelingRule,
 )
 
@@ -69,7 +65,16 @@ class LabelingRuleSearchResults(BaseModel):
     total_records: int
     annotated_records: int
 
-    records: Optional[List[TokenClassificationRecord]] = None
+    records: Optional[List[RuleRecordInfo]] = None
+
+
+class SearchRecordsByRuleRequest(BaseModel):
+    record_ids: List[str]
+
+
+class SearchRecordsByRuleResponse(BaseModel):
+    total: int
+    records: List[RuleRecordInfo] = Field(default_factory=list)
 
 
 class DatasetLabelingRulesMetricsSummary(BaseModel):
@@ -151,16 +156,17 @@ def configure_router(router: APIRouter):
         )
         return LabelingRule.parse_obj(rule)
 
-    @router.get(
+    @router.post(
         path=f"{base_endpoint}/{{query_or_name:path}}/search",
         operation_id="search_rule_records",
         description="Fetch matched records by the provided rule",
-        response_model=TokenClassificationSearchResults,
+        response_model=SearchRecordsByRuleResponse,
         response_model_exclude_none=True,
     )
-    async def search_rule_records(
+    async def search_records_by_rule(
         name: str,
         query_or_name: str,
+        request: Optional[SearchRecordsByRuleRequest] = None,
         label: Optional[str] = Query(
             None,
             description="Label related to query rule",
@@ -171,7 +177,7 @@ def configure_router(router: APIRouter):
         service: TokenClassificationService = Depends(
             TokenClassificationService.get_instance
         ),
-    ) -> TokenClassificationSearchResults:
+    ) -> SearchRecordsByRuleResponse:
 
         dataset = datasets.find_by_name(
             user=current_user,
@@ -181,15 +187,16 @@ def configure_router(router: APIRouter):
             as_dataset_class=TasksFactory.get_task_dataset(task),
         )
 
-        results = service.search_by_rule(
-            dataset,
+        total, records = service.search_by_rule(
+            dataset=dataset,
             query=query_or_name,
+            record_ids=request.record_ids if request else None,
             label=label,
         )
 
-        return TokenClassificationSearchResults(
-            records=results.records,
-            total=results.total,
+        return SearchRecordsByRuleResponse(
+            records=records,
+            total=total,
         )
 
     @router.get(
@@ -241,9 +248,9 @@ def configure_router(router: APIRouter):
             None,
             description="Label related to query rule",
         ),
-        with_records: Optional[bool] = Query(
+        with_annotations: Optional[bool] = Query(
             default=False,
-            description="If true, will return also matched records for the rule",
+            description="If true, will return also matched records annotations the rule",
         ),
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
@@ -274,13 +281,13 @@ def configure_router(router: APIRouter):
             annotated_records=annotated_records,
         )
 
-        if with_records:
-            results = service.search_by_rule(
+        if with_annotations:
+            total, records = service.search_by_rule(
                 dataset,
                 query=query_or_name,
                 label=label,
             )
-            response.records = results.records
+            response.records = records
         return response
 
     @router.delete(

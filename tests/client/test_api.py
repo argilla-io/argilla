@@ -234,7 +234,7 @@ def test_log_background(mocked_client):
 
     # The dataset does not exist yet
     with pytest.raises(NotFoundApiError):
-        dataset = api.load(dataset_name)
+        api.load(dataset_name)
 
     # Log the record to argilla
     try:
