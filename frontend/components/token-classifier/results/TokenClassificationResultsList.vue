@@ -68,8 +68,7 @@ export default {
     this.rulesHaveBeenFetched = false;
     const { name } = this.dataset;
     const rules = await this.fetchTokenClassificationRules(name);
-
-    rules.forEach(async (rule) => {
+    rules?.forEach(async (rule) => {
       await this.initRuleModelTable(name, rule);
     });
 
@@ -87,7 +86,7 @@ export default {
       return this.dataset.viewSettings.viewMode;
     },
     isLabellingRules() {
-      return this.viewMode === "labelling-rules" && this.rulesHaveBeenFetched;
+      return this.viewMode === "labelling-rules";
     },
     datasetPrimaryKey() {
       const paramsToGetDatasetPrimaryKey = {
