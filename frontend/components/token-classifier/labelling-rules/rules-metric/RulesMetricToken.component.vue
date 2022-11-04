@@ -1,6 +1,6 @@
 <template>
   <div class="rules-metric-token" :style="cssVars">
-    <h2 class="rules-metric-token__title">{{ title }}</h2>
+    <h2 class="rule-metrics__title">{{ title }}</h2>
     <div class="rules-metric-token__metrics" v-if="subcardInputs">
       <div
         class="subcard"
@@ -20,7 +20,7 @@
         <span class="subcard__items"> {{ subValue }}</span>
       </div>
     </div>
-    <div class="rules-metric-token__bottom" v-if="btnLabel">
+    <div class="rule-metrics__bottom" v-if="btnLabel">
       <button @click="onClickBtnBottom" :disabled="isBtnDisabled">
         {{ btnLabel }}
       </button>
