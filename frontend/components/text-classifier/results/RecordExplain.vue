@@ -110,7 +110,7 @@ export default {
     }
   }
   .grad-neg-#{$i} {
-    $bg: hsla(200, 60%, 100% - $i * 0.5, 0.5);
+    $bg: hsla(200, 60%, 100% - $i * 0.3, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
@@ -132,7 +132,7 @@ export default {
     }
   }
   .grad-rest-#{$i} {
-    $bg: hsla(0, 80%, 100% - $i * 0.5, 0.5);
+    $bg: hsla(0, 80%, 100% - $i * 0.25, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
