@@ -20,12 +20,16 @@ from argilla.server.apis.v0.handlers.token_classification_labeling_rules import 
     DatasetLabelingRulesMetricsSummary,
     LabelingRule,
     LabelingRuleSearchResults,
+    SearchRecordsByRuleResponse,
 )
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
     TokenClassificationSearchResults,
 )
 from argilla.server.errors import EntityAlreadyExistsError, ServerError, ValidationError
+from argilla.server.services.tasks.token_classification.labeling_rules.service import (
+    RuleRecordInfo,
+)
 from argilla.server.services.tasks.token_classification.model import ServiceLabelingRule
 
 
@@ -331,7 +335,7 @@ def get_rule_summary(
     if label and send_label:
         params["label"] = label
     if fetch_records:
-        params["with_records"] = True
+        params["with_annotations"] = True
     if params:
         query_params = "&".join([f"{k}={v}" for k, v in params.items()])
         url += f"?{query_params}"
@@ -371,12 +375,11 @@ def search_by_rule(
     if label and send_label:
         url += f"?label={label}"
 
-    response = client.get(url)
+    response = client.post(url)
     data = response.json()
     assert response.status_code == 200, data
 
-    results = TokenClassificationSearchResults.parse_obj(data)
-    assert results.aggregations is None
+    results = SearchRecordsByRuleResponse.parse_obj(data)
     assert results.total == 4, results
 
     _validate_matched_records(
@@ -389,20 +392,15 @@ def search_by_rule(
 
 def _validate_matched_records(
     *,
-    records: List[TokenClassificationRecord],
+    records: List[RuleRecordInfo],
     query: str,
     label: Optional[str] = None,
 ):
+    def check_when_label(record: RuleRecordInfo):
+        assert record.spans
 
-    agent = ServiceLabelingRule.sanitize_query(query)
-
-    def check_when_label(record: TokenClassificationRecord):
-        assert agent in record.annotations
-        for entity in record.annotations[agent].entities:
-            assert entity.label == label
-
-    def check_when_no_label(record: TokenClassificationRecord):
-        assert agent not in record.annotations
+    def check_when_no_label(record: RuleRecordInfo):
+        assert not record.spans
 
     if label:
         validate = check_when_label

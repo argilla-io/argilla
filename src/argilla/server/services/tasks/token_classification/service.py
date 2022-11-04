@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Tuple
 
 from fastapi import Depends
 
@@ -27,6 +27,7 @@ from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
 from argilla.server.services.tasks.token_classification.labeling_rules.service import (
     NERLabelingRulesMixin,
+    RuleRecordInfo,
 )
 from argilla.server.services.tasks.token_classification.model import (
     ServiceLabelingRule,
@@ -155,33 +156,44 @@ class TokenClassificationService(NERLabelingRulesMixin):
         self,
         dataset: ServiceTokenClassificationDataset,
         query: str,
+        record_ids: List[str] = None,
         label: Optional[str] = None,
         span_selector: Optional[str] = None,
-    ):
-
+        record_from: int = 0,
+        size: int = 20,
+    ) -> Tuple[int, List[RuleRecordInfo]]:
         results = self.__search__.search(
             dataset=dataset,
             record_type=ServiceTokenClassificationRecord,
-            query=ServiceTokenClassificationQuery(query_text=query),
+            query=ServiceTokenClassificationQuery(
+                query_text=query,
+                ids=record_ids,
+            ),
+            only_fields=["text", "tokens"],
+            size=size,
+            record_from=record_from,
         )
+        rule = None
         if not label:
             try:
                 rule = self.find_labeling_rule(dataset=dataset, query_or_name=query)
                 label = rule.label
                 span_selector = span_selector or rule.span_selector
             except EntityNotFoundError:
-                return results
+                return results.total, []
 
-        rule = ServiceLabelingRule(
-            query=query,
-            label=label,
-            span_selector=span_selector,
-        )
-        self.apply_rule(
+        if not rule:
+            rule = ServiceLabelingRule(
+                query=query,
+                label=label,
+                span_selector=span_selector,
+            )
+
+        records = self.apply_rule(
             rule=rule,
             records=results.records,
         )
-        return results
+        return results.total, records
 
     def read_dataset(
         self,

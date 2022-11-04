@@ -14,15 +14,13 @@
 import re
 from typing import Callable, Dict, Iterable, List, Tuple, Union
 
+from pydantic import BaseModel
+
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.services.tasks.commons.mixins.labeling_rules import (
     LabelingRulesMixin,
 )
-from argilla.server.services.tasks.token_classification.model import EntitySpan as Span
 from argilla.server.services.tasks.token_classification.model import ServiceLabelingRule
-from argilla.server.services.tasks.token_classification.model import (
-    ServiceTokenClassificationAnnotation as Annotation,
-)
 from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationRecord,
 )
@@ -34,6 +32,16 @@ SpanSelector = Callable[
     [Record],
     Union[List[Tuple[int, int]], Tuple[List[Tuple[int, int]], str]],
 ]
+
+
+class EntitySpan(BaseModel):
+    start: int
+    end: int
+
+
+class RuleRecordInfo(BaseModel):
+    id: Union[str, int]
+    spans: List[EntitySpan]
 
 
 class LabelingFunctionsMixin:
@@ -56,19 +64,19 @@ class LabelingFunctionsMixin:
         self,
         rule: ServiceLabelingRule,
         records: Iterable[Record],
-    ) -> None:
+    ) -> List[RuleRecordInfo]:
         """Will update records annotation including a new agent corresponding to the rule id"""
         if not rule.span_selector:
             rule.span_selector = self._default_selector_id()
         span_selector_ = self._span_selector_by_rule(rule)
-        agent = rule.name
+        result_records = []
         for record in records:
-            entities = [
-                Span(start=start, end=end, label=rule.label)
+            spans = [
+                EntitySpan(start=start, end=end)
                 for start, end in span_selector_(record)
             ]
-            weak_labels = Annotation(entities=entities)
-            record.annotations[agent] = weak_labels
+            result_records.append(RuleRecordInfo(id=record.id, spans=spans))
+        return result_records
 
     def _span_selector_by_rule(self, rule: ServiceLabelingRule) -> SpanSelector:
         # The span selector can be defined in a decorated function or as a class implementation
