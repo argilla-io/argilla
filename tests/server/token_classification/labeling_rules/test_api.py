@@ -193,7 +193,7 @@ def test_search_records_by_rule(
         query=query,
     )
 
-    search_by_rule(
+    results = search_by_rule(
         client=mocked_client,
         base_url=base_api_url,
         query=query,
@@ -213,6 +213,7 @@ def test_search_records_by_rule(
         query=rule.query,
         label=rule.label,
         send_label=False,
+        ids=[results.records[0].id],
     )
     search_by_rule(
         client=mocked_client,
@@ -370,17 +371,17 @@ def search_by_rule(
     query: str,
     label: Optional[str] = None,
     send_label: bool = True,
+    ids: List[str] = None,
 ):
     url = f"{base_url}/labeling/rules/{query}/search"
     if label and send_label:
         url += f"?label={label}"
-
-    response = client.post(url)
+    response = client.post(url, json={"record_ids": ids or []})
     data = response.json()
     assert response.status_code == 200, data
 
     results = SearchRecordsByRuleResponse.parse_obj(data)
-    assert results.total == 4, results
+    assert results.total == len(ids) if ids else 4, results
 
     _validate_matched_records(
         records=results.records,
