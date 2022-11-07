@@ -217,7 +217,7 @@ If you have multiple predictions you can toggle between them using the arrows on
 ### Metrics
 
 
-From the side bar you can access the [_Stats_ metrics](view_dataset_metrics.md#stats) that provide support for your analysis of the dataset.
+From the side bar you can access the [_Stats_ metrics](pages.md) that provide support for your analysis of the dataset.
 
 
 ## Search Records
