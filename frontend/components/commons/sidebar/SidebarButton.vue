@@ -34,7 +34,7 @@ export default {
       type: String,
       required: true,
     },
-    type: {
+    buttonType: {
       type: [String, null],
       validator: (value) => {
         return ["Mode", "Metrics", "Refresh", "View-info", null].includes(value);
@@ -44,7 +44,7 @@ export default {
   computed: {
     sidebarButtonClass() {
       return [
-        this.type?.toLowerCase(),
+        this.buttonType?.toLowerCase(),
         this.activeView.includes(this.id) ? "active" : "",
       ];
     },

@@ -32,7 +32,7 @@
         :active-view="[viewMode, currentMetric]"
         :icon="button.icon"
         :tooltip="button.tooltip"
-        :type="group"
+        :button-type="group"
         @button-action="action(button.action, button.id)"
       />
     </div>
