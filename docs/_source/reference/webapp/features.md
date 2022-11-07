@@ -332,7 +332,7 @@ In this mode, **progress** is related to the coverage of the rules. It shows the
 
 In the **total rules** section, users can find the number of rules related to the different categories.
 
-![Progress menu 2](../../_static/reference/webapp/progress_definerules.png)
+![Progress menu 2](../../_static/reference/webapp/features-weak-labelling.png)
 
 #### Stats
 
