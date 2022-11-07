@@ -42,14 +42,17 @@ export default {
     },
   },
   computed: {
+    isActive() {
+      return this.activeView.includes(this.id);
+    },
     sidebarButtonClass() {
       return [
         this.buttonType?.toLowerCase(),
-        this.activeView.includes(this.id) ? "active" : "",
+        this.isActive ? "active" : "",
       ];
     },
     sidebarButtonTooltipText() {
-      return !this.activeView.includes(this.id) ? this.tooltip : null;
+      return !this.isActive ? this.tooltip : null;
     },
   },
 };
