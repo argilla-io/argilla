@@ -47,14 +47,14 @@ export default {
     currentMetric: undefined,
   }),
   computed: {
-    currentTaskSidebar() {
-      return this.currentTask + "Sidebar";
-    },
     currentTask() {
       return this.dataset.task;
     },
+    currentTaskSidebar() {
+      return `${this.currentTask}Sidebar`;
+    },
     currentTaskHelp() {
-      return this.currentTask + "ViewInfo";
+      return `${this.currentTask}ViewInfo`;
     },
     metricsByViewMode() {
       return this.sidebarItems.find(
