@@ -241,6 +241,7 @@ def test_create_records_for_token_classification_vector_search(
     expected_records = 3
     record_dicts = [
         {
+            "id": 0,
             "tokens": "This is a text".split(" "),
             "raw_text": "This is a text",
             "metadata": {"field_one": "value one", "field_two": "value 2"},
@@ -255,6 +256,7 @@ def test_create_records_for_token_classification_vector_search(
             "embeddings": {"my_bert": {"vector": [1, 2, 3, 4, 5, 6]}},
         },
         {
+            "id": 1,
             "tokens": "This is a text".split(" "),
             "raw_text": "This is a text",
             "metadata": {"field_one": "value one", "field_two": "value 2"},
@@ -266,9 +268,10 @@ def test_create_records_for_token_classification_vector_search(
                 "agent": "test",
                 "entities": [{"start": 0, "end": 4, "label": entity_label}],
             },
-            "embeddings": {"my_bert": {"vector": [5, 6, 7, 8, 9]}},
+            "embeddings": {"my_bert": {"vector": [5, 6, 7, 8, 9, 10]}},
         },
         {
+            "id": 2,
             "tokens": "This is a text".split(" "),
             "raw_text": "This is a text",
             "metadata": {"field_one": "value one", "field_two": "value 2"},
@@ -280,7 +283,7 @@ def test_create_records_for_token_classification_vector_search(
                 "agent": "test",
                 "entities": [{"start": 0, "end": 4, "label": entity_label}],
             },
-            "embeddings": {"my_bert": {"vector": [7, 8, 9, 10, 11]}},
+            "embeddings": {"my_bert": {"vector": [7, 8, 9, 10, 11, 12]}},
         },
     ]
 
@@ -308,7 +311,10 @@ def test_create_records_for_token_classification_vector_search(
     response = mocked_client.post(
         search_url,
         json={
-            "query": {"embedding_name": "my_bert", "embedding_vector": [5, 6, 7, 8, 9]}
+            "query": {
+                "embedding_name": "my_bert",
+                "embedding_vector": [5, 6, 7, 8, 9, 10],
+            }
         },
     )
     assert response.status_code == 200, response.json()
