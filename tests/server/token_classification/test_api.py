@@ -238,7 +238,7 @@ def test_create_records_for_token_classification_vector_search(
     dataset = "test_create_records_for_token_classification_vector_search"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     entity_label = "TEST"
-    expected_records = 2
+    expected_records = 3
     record_dicts = [
         {
             "tokens": "This is a text".split(" "),
@@ -252,7 +252,7 @@ def test_create_records_for_token_classification_vector_search(
                 "agent": "test",
                 "entities": [{"start": 0, "end": 4, "label": entity_label}],
             },
-            "embeddings": {"my_bert": [1, 2, 3, 4, 5, 6]},
+            "embeddings": {"my_bert": {"vector": [1, 2, 3, 4, 5, 6]}},
         },
         {
             "tokens": "This is a text".split(" "),
@@ -266,7 +266,7 @@ def test_create_records_for_token_classification_vector_search(
                 "agent": "test",
                 "entities": [{"start": 0, "end": 4, "label": entity_label}],
             },
-            "embeddings": {"my_bert": [5, 6, 7, 8, 9]},
+            "embeddings": {"my_bert": {"vector": [5, 6, 7, 8, 9]}},
         },
         {
             "tokens": "This is a text".split(" "),
@@ -280,7 +280,7 @@ def test_create_records_for_token_classification_vector_search(
                 "agent": "test",
                 "entities": [{"start": 0, "end": 4, "label": entity_label}],
             },
-            "embeddings": {"my_bert": [7, 8, 9, 10, 11]},
+            "embeddings": {"my_bert": {"vector": [7, 8, 9, 10, 11]}},
         },
     ]
 

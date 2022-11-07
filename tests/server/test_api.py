@@ -42,7 +42,7 @@ def create_some_data_for_text_classification(client, name: str, n: int):
                 },
                 "embeddings": {
                     "bert_cased": {
-                        "property_names": ["data"],
+                        "record_properties": ["data"],
                         "vector": [1.2, 2.3, 3.4, 4.5],
                     },
                 },
@@ -67,7 +67,7 @@ def create_some_data_for_text_classification(client, name: str, n: int):
                 },
                 "embeddings": {
                     "bert_cased": {
-                        "property_names": ["data"],
+                        "record_properties": ["data"],
                         "vector": [1.2, 2.3, 3.4, 4.5],
                     },
                 },
