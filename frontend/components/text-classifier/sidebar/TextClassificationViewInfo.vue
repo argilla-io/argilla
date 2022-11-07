@@ -63,7 +63,7 @@ export default {
   },
   computed: {
     visibleViewInfo() {
-      return this.dataset?.viewSettings.visibleViewInfo;
+      return this.dataset?.viewSettings.visibleViewInfo || false;
     },
   },
   methods: {
