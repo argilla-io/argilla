@@ -161,7 +161,7 @@ class TokenClassificationService(NERLabelingRulesMixin):
         span_selector: Optional[str] = None,
         record_from: int = 0,
         size: int = 20,
-    ) -> Tuple[int, List[RuleRecordInfo]]:
+    ) -> Tuple[int, str, List[RuleRecordInfo]]:
         results = self.__search__.search(
             dataset=dataset,
             record_type=ServiceTokenClassificationRecord,
@@ -180,7 +180,7 @@ class TokenClassificationService(NERLabelingRulesMixin):
                 label = rule.label
                 span_selector = span_selector or rule.span_selector
             except EntityNotFoundError:
-                return results.total, []
+                return results.total, query, []
 
         if not rule:
             rule = ServiceLabelingRule(
@@ -193,7 +193,7 @@ class TokenClassificationService(NERLabelingRulesMixin):
             rule=rule,
             records=results.records,
         )
-        return results.total, records
+        return results.total, rule.name, records
 
     def read_dataset(
         self,

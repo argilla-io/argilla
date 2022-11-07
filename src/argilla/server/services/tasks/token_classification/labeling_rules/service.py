@@ -41,7 +41,7 @@ class EntitySpan(BaseModel):
 
 class RuleRecordInfo(BaseModel):
     id: Union[str, int]
-    spans: List[EntitySpan]
+    entities: List[EntitySpan]
 
 
 class LabelingFunctionsMixin:
@@ -75,7 +75,7 @@ class LabelingFunctionsMixin:
                 EntitySpan(start=start, end=end)
                 for start, end in span_selector_(record)
             ]
-            result_records.append(RuleRecordInfo(id=record.id, spans=spans))
+            result_records.append(RuleRecordInfo(id=record.id, entities=spans))
         return result_records
 
     def _span_selector_by_rule(self, rule: ServiceLabelingRule) -> SpanSelector:

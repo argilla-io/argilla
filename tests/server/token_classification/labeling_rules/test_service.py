@@ -86,7 +86,7 @@ def test_service(text, keywords, expected):
     )
 
     for record in record_spans:
-        for span in record.spans:
+        for span in record.entities:
             assert text[span.start : span.end] in keywords
 
 

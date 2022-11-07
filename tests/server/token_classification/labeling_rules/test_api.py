@@ -398,10 +398,10 @@ def _validate_matched_records(
     label: Optional[str] = None,
 ):
     def check_when_label(record: RuleRecordInfo):
-        assert record.spans
+        assert record.entities
 
     def check_when_no_label(record: RuleRecordInfo):
-        assert not record.spans
+        assert not record.entities
 
     if label:
         validate = check_when_label
