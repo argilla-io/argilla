@@ -20,7 +20,7 @@
     <div
       v-for="group in sidebarGroups"
       :key="group"
-      :class="`sidebar__info --${!group ? 'ungruped' : 'group'}`"
+      :class="`sidebar__info ${groupClassName(group)}`"
     >
       <p>{{ group }}</p>
       <sidebar-button
@@ -87,6 +87,9 @@ export default {
     action(action, id) {
       this.$emit(action, id);
     },
+    groupClassName(group) {
+      return !group ? '--ungrouped' : '--group';
+    }
   },
 };
 </script>
@@ -123,7 +126,7 @@ $sidebar-button-size: 45px;
   &__info {
     position: relative;
     margin-bottom: 1em;
-    &.--ungruped {
+    &.--ungrouped {
       margin-top: auto;
       margin-bottom: 0em;
     }
