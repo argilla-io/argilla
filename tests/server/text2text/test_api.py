@@ -102,7 +102,6 @@ def search_data(
         if embedding_name:
             assert record.embeddings is not None
             assert embedding_name in record.embeddings
-        assert "a" in record.dict()
 
 
 def test_search_with_embeddings(mocked_client):
