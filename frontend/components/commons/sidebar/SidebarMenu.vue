@@ -97,6 +97,9 @@ export default {
 <style lang="scss" scoped>
 $sidebar-button-size: 45px;
 .sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
   top: 0;
   width: $sidebar-button-size;
   min-width: $sidebar-button-size;
@@ -106,8 +109,6 @@ $sidebar-button-size: 45px;
   box-shadow: none;
   pointer-events: all;
   transition: box-shadow 0.2s ease-in-out 0.4s;
-  display: flex;
-  flex-direction: column;
   .--metrics & {
     box-shadow: inset 1px 1px 5px -2px #c7c7c7;
     transition: box-shadow 0.2s ease-in-out;
@@ -125,10 +126,8 @@ $sidebar-button-size: 45px;
   }
   &__info {
     position: relative;
-    margin-bottom: 1em;
     &.--ungrouped {
       margin-top: auto;
-      margin-bottom: 0em;
     }
   }
 }
