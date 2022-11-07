@@ -15,7 +15,7 @@
 import concurrent.futures
 import datetime
 from time import sleep
-from typing import Iterable
+from typing import Iterable, List
 
 import datasets
 import httpx
@@ -535,17 +535,17 @@ def test_load_as_pandas(mocked_client):
     mocked_client.delete(f"/api/datasets/{dataset}")
     sleep(1)
 
-    expected_data = 3
+    expected_data = 4
     create_some_data_for_text_classification(mocked_client, dataset, n=expected_data)
 
     records = api.load(name=dataset)
     assert isinstance(records, ar.DatasetForTextClassification)
     assert isinstance(records[0], ar.TextClassificationRecord)
     assert [record.id for record in records] == [0, 1, 2, 3]
-    assert [
-        record.embeddings["inputs"]["embedding_vectors"]["bert_uncased"]
-        for record in records
-    ] == [[1.2, 2.3, 3.4, 4.5], [1.2, 2.3, 3.4, 4.5]]
+    expected_record_embedding_vector = [1.2, 2.3, 3.4, 4.5]
+    for record in records:
+        vector = [float(e) for e in record.embeddings["bert_cased"]["vector"]]
+        assert vector == expected_record_embedding_vector
 
 
 @pytest.mark.parametrize(
@@ -585,10 +585,10 @@ def test_load_text2text(mocked_client):
             prediction=["test prediction"],
             annotation="test annotation",
             embeddings={
-                "text": {
+                "bert_uncased": {
                     "property_names": ["text"],
-                    "embedding_vectors": {"bert_uncased": [1.2, 3.4, 6.4, 6.4]},
-                }
+                    "vector": [1.2, 3.4, 6.4, 6.4],
+                },
             },
             prediction_agent="test_model",
             annotation_agent="test_annotator",
@@ -606,10 +606,10 @@ def test_load_text2text(mocked_client):
 
     df = api.load(name=dataset)
     assert len(df) == 2
-    assert [
-        record.embeddings["text"]["embedding_vectors"]["bert_uncased"]
-        for record in records
-    ] == [[1.2, 3.4, 6.4, 6.4], [1.2, 3.4, 6.4, 6.4]]
+    expected_embedding_vector = [1.2, 3.4, 6.4, 6.4]
+    for record in records:
+        vector = [float(v) for v in record.embeddings["bert_uncased"]["vector"]]
+        assert vector == expected_embedding_vector
 
 
 def test_client_workspace(mocked_client):

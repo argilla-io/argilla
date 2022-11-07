@@ -41,10 +41,10 @@ def create_some_data_for_text_classification(client, name: str, n: int):
                     ],
                 },
                 "embeddings": {
-                    "inputs": {
+                    "bert_cased": {
                         "property_names": ["data"],
-                        "embedding_vectors": {"bert_cased": [1.2, 2.3, 3.4, 4.5]},
-                    }
+                        "vector": [1.2, 2.3, 3.4, 4.5],
+                    },
                 },
             },
             {
@@ -66,10 +66,10 @@ def create_some_data_for_text_classification(client, name: str, n: int):
                     ],
                 },
                 "embeddings": {
-                    "inputs": {
+                    "bert_cased": {
                         "property_names": ["data"],
-                        "embedding_vectors": {"bert_cased": [1.2, 2.3, 3.4, 4.5]},
-                    }
+                        "vector": [1.2, 2.3, 3.4, 4.5],
+                    },
                 },
             },
         ]
