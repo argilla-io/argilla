@@ -22,7 +22,7 @@
       modal-position="modal-center"
       :modal-custom="true"
       :prevent-body-scroll="true"
-      :modal-visible="visibleViewInfo === true"
+      :modal-visible="visibleViewInfo"
       @close-modal="closeModal"
     >
       <div class="help__panel">
