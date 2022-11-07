@@ -29,41 +29,21 @@ export default (context, inject) => {
     return `<span class="highlight-text">${htmlText(text)}</span>`;
   }
 
-  const regexFromTerm = function (term) {
-    let q = term.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, "");
-    return new RegExp(q, "gi");
-  };
-
   const escapeRegExp = function (text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-  };
-
-  const highlightSearch = function (query, text) {
-    const escapedText = htmlText(text);
-    if (!query) {
-      return text;
-    }
-
-    return escapedText.replace(
-      regexFromTerm(query),
-      (match) => `<span class="highlight-text">${match}</span>`
-    );
   };
 
   const highlightKeywords = function (text, keywords) {
     const sortedKeywords = ([...keywords] || []).sort(
       (a, b) => b.length - a.length
     );
-    text = htmlText(text);
-    sortedKeywords.forEach((keyword) => {
-      const regex = new RegExp(
-        `([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${escapeRegExp(keyword)}`,
-        "gmi"
-      );
-      text = text.replace(regex, (match) => htmlHighlightText(match));
-    });
-
-    return text;
+    const pattern = sortedKeywords.map(
+      (keyword) => `([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${escapeRegExp(keyword)}`
+    );
+    const regExp = new RegExp(`${pattern.join("|")}`, "gmi");
+    return htmlText(text).replace(regExp, (matched) =>
+      htmlHighlightText(matched)
+    );
   };
 
   const keywordsSpans = function (text, keywords) {
@@ -81,7 +61,6 @@ export default (context, inject) => {
     });
   };
 
-  inject("highlightSearch", highlightSearch);
   inject("highlightKeywords", highlightKeywords);
   inject("keywordsSpans", keywordsSpans);
   inject("htmlText", htmlText);
