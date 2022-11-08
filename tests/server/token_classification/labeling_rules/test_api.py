@@ -347,7 +347,7 @@ def get_rule_summary(
     assert response.status_code == 200, data
 
     results = LabelingRuleSearchResults.parse_obj(data)
-    assert results.dict(exclude={"records"}) == {
+    assert results.dict(exclude={"records", "agent"}) == {
         "annotated_records": 6,
         "coverage": 0.6666666666666666,
         "coverage_annotated": 0.6666666666666666,
@@ -355,6 +355,7 @@ def get_rule_summary(
     }
 
     if fetch_records:
+        assert results.agent == "a"
         _validate_matched_records(
             records=results.records,
             query=query,

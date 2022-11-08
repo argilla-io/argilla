@@ -37,6 +37,7 @@ SpanSelector = Callable[
 class EntitySpan(BaseModel):
     start: int
     end: int
+    label: str
 
 
 class RuleRecordInfo(BaseModel):
@@ -72,7 +73,11 @@ class LabelingFunctionsMixin:
         result_records = []
         for record in records:
             spans = [
-                EntitySpan(start=start, end=end)
+                EntitySpan(
+                    start=start,
+                    end=end,
+                    label=rule.label,
+                )
                 for start, end in span_selector_(record)
             ]
             result_records.append(RuleRecordInfo(id=record.id, entities=spans))

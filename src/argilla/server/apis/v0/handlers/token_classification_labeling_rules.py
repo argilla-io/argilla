@@ -65,6 +65,7 @@ class LabelingRuleSearchResults(BaseModel):
     total_records: int
     annotated_records: int
 
+    agent: Optional[str] = None
     records: Optional[List[RuleRecordInfo]] = None
 
 
@@ -290,6 +291,7 @@ def configure_router(router: APIRouter):
                 label=label,
             )
             response.records = records
+            response.agent = rule_name
         return response
 
     @router.delete(
