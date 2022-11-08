@@ -48,7 +48,7 @@ You can see how the `text.exact` field can be used to search in a more fine-grai
 
 ### TextClassificationRecord's `inputs`
 
-For [text classification records](../../python/python_client.rst#argilla.client.models.TextClassificationRecord) you can take advantage of the multiple `inputs` when performing a search.
+For [text classification records](../../reference/python/python_client.rst) you can take advantage of the multiple `inputs` when performing a search.
 For example, if we uploaded records with `inputs={"subject": ..., "body": ...}`, you can direct your searches to only one of those inputs by specifying the `inputs.subject` or `inputs.body` field in your query.
 So to look for records in which the *subject* contains the word *news*, you would search for
 

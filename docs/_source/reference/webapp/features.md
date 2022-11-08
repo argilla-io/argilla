@@ -217,7 +217,7 @@ If you have multiple predictions you can toggle between them using the arrows on
 ### Metrics
 
 
-From the side bar you can access the [_Stats_ metrics](view_dataset_metrics.md#stats) that provide support for your analysis of the dataset.
+From the side bar you can access the [_Stats_ metrics](pages.md) that provide support for your analysis of the dataset.
 
 
 ## Search Records
@@ -332,7 +332,7 @@ In this mode, **progress** is related to the coverage of the rules. It shows the
 
 In the **total rules** section, users can find the number of rules related to the different categories.
 
-![Progress menu 2](../../_static/reference/webapp/progress_definerules.png)
+![Progress menu 2](../../_static/reference/webapp/features-weak-labelling.png)
 
 #### Stats
 
