@@ -65,6 +65,25 @@ def test_delete_and_create_for_different_task(mocked_client):
     ar.load(dataset)
 
 
+def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
+    raise NotImplementedError(
+        """
+    Here, we should include a functional test with embedding updating.
+
+    Also a rg.log with heterogeneous vector dimension, expecting an error
+    """
+    )
+
+
+def test_log_data_with_embeddings_and_update_ko(mocked_client: SecuredClient):
+    raise NotImplementedError(
+        """
+    Here, we should include a functional test with embedding updating but with a different
+    dimension, expecting the proper error.
+    """
+    )
+
+
 def test_log_data_in_several_workspaces(mocked_client: SecuredClient):
 
     workspace = "test-ws"
