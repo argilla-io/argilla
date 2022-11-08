@@ -33,25 +33,33 @@ export default (context, inject) => {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
   };
 
-  const highlightKeywords = function (text, keywords) {
-    const sortedKeywords = ([...keywords] || []).sort(
-      (a, b) => b.length - a.length
-    );
-    const pattern = sortedKeywords.map(
-      (keyword) => `([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${escapeRegExp(keyword)}`
-    );
-    const regExp = new RegExp(`${pattern.join("|")}`, "gmi");
-    return htmlText(text).replace(regExp, (matched) =>
+  function sortByLength(keywords) {
+    return (keywords || []).sort((a, b) => b.length - a.length);
+  }
+
+  function createPattern(value) {
+    return `([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${escapeRegExp(value)}`;
+  }
+  function createRegExp(pattern) {
+    return new RegExp(pattern, "gmi");
+  }
+
+  function replaceText(regex, text) {
+    return htmlText(text).replace(regex, (matched) =>
       htmlHighlightText(matched)
     );
+  }
+
+  const highlightKeywords = function (text, keywords) {
+    const sortedKeywords = sortByLength([...keywords]);
+    const pattern = sortedKeywords.map((keyword) => createPattern(keyword));
+    const regExp = createRegExp(pattern.join("|"));
+    return replaceText(regExp, text);
   };
 
   const keywordsSpans = function (text, keywords) {
     return (keywords || []).flatMap((keyword) => {
-      const regex = new RegExp(
-        `([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${escapeRegExp(keyword)}`,
-        "gmi"
-      );
+      const regex = createRegExp(createPattern(keyword));
       return [...text.matchAll(regex)].map((match) => {
         return {
           start: match.index,
