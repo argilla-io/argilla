@@ -88,8 +88,8 @@ export default {
       this.$emit(action, id);
     },
     groupClassName(group) {
-      return !group ? '--ungrouped' : '--group';
-    }
+      return !group ? "--ungrouped" : "--group";
+    },
   },
 };
 </script>

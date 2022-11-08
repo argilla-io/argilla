@@ -3,6 +3,8 @@
 exports[`TextClassificationViewInfo renders properly 1`] = `
 <div class="help">
   <lazy-base-modal modal-class="modal-secondary" modal-position="modal-center" modal-custom="true" prevent-body-scroll="true" modal-visible="true">
+    <p class="modal__title">Info</p>
+    <p class="modal__subtitle">Highlight colors in token attributions</p>
     <div class="help__panel">
       <p class="help__panel__title">
         This dataset contains token attributions. What do highlight colors

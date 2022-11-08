@@ -37,7 +37,9 @@ export default {
     buttonType: {
       type: [String, null],
       validator: (value) => {
-        return ["Mode", "Metrics", "Refresh", "View-info", null].includes(value);
+        return ["Mode", "Metrics", "Refresh", "View-info", null].includes(
+          value
+        );
       },
     },
   },
@@ -46,10 +48,7 @@ export default {
       return this.activeView.includes(this.id);
     },
     sidebarButtonClass() {
-      return [
-        this.buttonType?.toLowerCase(),
-        this.isActive ? "active" : "",
-      ];
+      return [this.buttonType?.toLowerCase(), this.isActive ? "active" : ""];
     },
     sidebarButtonTooltipText() {
       return !this.isActive ? this.tooltip : null;
