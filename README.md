@@ -22,7 +22,8 @@
 <p align="center">Data Labeling + Data Curation + Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
-[![3 minute walkthrough](http://img.youtube.com/vi/jP3anvp7Rto/0.jpg)](https://www.youtube.com/watch?v=jP3anvp7Rto "3 minute walkthrough")
+
+{% include youtube.html id="jP3anvp7Rto" %}
 
 <br>
 
