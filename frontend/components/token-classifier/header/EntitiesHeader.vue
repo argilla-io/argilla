@@ -61,9 +61,7 @@ export default {
           ...ent,
         }));
 
-      return this.showExpandedList
-        ? entities
-        : entities.slice(0, this.maxEntitiesNumber);
+      return this.showExpandedList ? entities : this.showMaxEntities(entities);
     },
     entitiesNumber() {
       return this.dataset.entities.length;
@@ -80,6 +78,9 @@ export default {
   methods: {
     toggleEntitiesNumber() {
       this.showExpandedList = !this.showExpandedList;
+    },
+    showMaxEntities(entities) {
+      return entities.slice(0, this.maxEntitiesNumber);
     },
   },
 };
