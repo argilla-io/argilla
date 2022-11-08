@@ -92,6 +92,7 @@
 <script>
 import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
+import { TokenRecord } from "../../../models/token-classification/TokenRecord.modelTokenClassification";
 export default {
   props: {
     dataset: {
@@ -110,7 +111,7 @@ export default {
       return this.dataset.viewSettings.loading;
     },
     visibleRecords() {
-      return this.dataset.visibleRecords;
+      return TokenRecord.query().where("dataset_id", this.dataset.id).get();
     },
     paginationLimit() {
       return this.dataset.viewSettings.pagination.maxRecordsLimit;
