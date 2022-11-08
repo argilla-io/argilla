@@ -250,7 +250,7 @@ export default {
   },
   methods: {
     onClickOutside() {
-      this.initialVisibleGroup = undefined;
+      this.initialVisibleGroup = null;
     },
     itemsAppliedOnGroup(group) {
       if (group === "Sort") {
@@ -264,7 +264,7 @@ export default {
     },
     selectGroup(group) {
       if (this.initialVisibleGroup === group) {
-        this.initialVisibleGroup = undefined;
+        this.initialVisibleGroup =  null;
       } else {
         this.initialVisibleGroup = group;
       }
