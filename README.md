@@ -23,8 +23,6 @@
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
 
-{% include youtube.html id="jP3anvp7Rto" %}
-
 <br>
 
 <p align="center">
