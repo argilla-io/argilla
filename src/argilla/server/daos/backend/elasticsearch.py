@@ -85,6 +85,24 @@ class GenericSearchError(Exception):
         self.origin_error = origin_error
 
 
+# TODO(@ufuk): We need a separate  similar but separate implementation
+#  for the OpenSearch backend integration, handling the proper client exception errors
+#  (Maybe we can reuse the old implementation for that)
+#  Then, the each respective backend class should accept a way to setup the error handling
+#  decorator (maybe we can use them as mixin and apply multi-inheritance ot the the backend classes)
+"""
+
+class OpenSearchErrorHandler:
+    def __init(self, index: str):
+        ...
+    def __exit__(self, exception_type, exception_value, traceback):
+        ...
+
+class OpenSearchBackend(BaseElasticBackend,OpenSearchErrorHandler):
+    ...
+"""
+
+
 class backend_error_handler:
     def __init__(self, index: str):
         # Maybe a backend to detect the backend nature...
@@ -261,12 +279,16 @@ class ElasticsearchBackend(LoggingMixin):
         """
         return self.__client__.indices.exists(index=index)
 
+    # TODO(@ufuk): we could do an specific implementation for each backend if we can pass directly the
+    #  embedding field and the vector value as arguments to this method
     def _search(
         self,
         index: str,
         routing: str = None,
         size: int = 100,
-        knn: Dict[str, Any] = None,
+        knn: Dict[str, Any] = None,  # Remove it
+        # embedding_name: Optional[str] = None,
+        # embedding_vector: Optional[List[str]] = None,
         query: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """
@@ -289,7 +311,6 @@ class ElasticsearchBackend(LoggingMixin):
 
         """
         with backend_error_handler(index=index):
-
             if knn is not None:
                 filter = query["query"]
                 source = query["_source"]
@@ -860,6 +881,9 @@ class ElasticsearchBackend(LoggingMixin):
             results = self._search(
                 index=index,
                 query=es_query,
+                # TODO(@ufuk): if we refactor the _search method passing the embedding field name and the vector value
+                #  we could easily tackle the different implementations inside the _search method.
+                #  Otherwise, we should to the work in this method.
                 knn=knn_query,
                 size=size,
             )
@@ -1189,6 +1213,7 @@ class ElasticsearchBackend(LoggingMixin):
             ignore=[400, 404],
         )
 
+    # TODO(@ufuk): override in the open search backend implementation
     def configure_embeddings(
         self,
         id: str,
