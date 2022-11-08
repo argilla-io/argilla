@@ -179,6 +179,13 @@ export default {
   margin-top: 0;
   margin-right: 2em;
 }
+:deep(.modal__subtitle) {
+  @include font-size(14px);
+  color: $black-54;
+  font-weight: 600;
+  margin-top: 0;
+  margin-right: 2em;
+}
 
 .modal__message {
   margin-bottom: 1em;

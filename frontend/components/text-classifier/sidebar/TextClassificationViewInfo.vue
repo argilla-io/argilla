@@ -24,7 +24,8 @@
       :prevent-body-scroll="true"
       :modal-visible="visibleViewInfo"
       @close-modal="closeModal"
-    >
+      ><p class="modal__title">Info</p>
+      <p class="modal__subtitle">Highlight colors in token attributions</p>
       <div class="help__panel">
         <p class="help__panel__title">
           This dataset contains token attributions. What do highlight colors
