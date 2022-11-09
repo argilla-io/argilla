@@ -66,22 +66,50 @@ def test_delete_and_create_for_different_task(mocked_client):
 
 
 def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
-    raise NotImplementedError(
-        """
-    Here, we should include a functional test with embedding updating.
+    dataset = "test_log_data_with_embeddings_and_update_ok"
+    text = "This is a text"
+    embeddings = {"my_bert": {"vector": [1, 2, 3, 4]}}
 
-    Also a rg.log with heterogeneous vector dimension, expecting an error
-    """
+    ar.delete(dataset)
+    ar.log(
+        ar.TextClassificationRecord(id=0, inputs=text, embeddings=embeddings),
+        name=dataset,
     )
+    ar.load(dataset)
+
+    updated_embeddings = {"my_bert": {"vector": [2, 3, 5, 5]}}
+
+    ar.log(
+        ar.TextClassificationRecord(id=0, text=text, embeddings=updated_embeddings),
+        name=dataset,
+    )
+    ar.load(dataset)
+
+    dataset_rg = ar.load(dataset)
+    print(dataset_rg._records[0])
+    assert dataset_rg._records[0].id == 0
+    assert dataset_rg._records[0].embeddings["my_bert"]["vector"] == [
+        "2.0",
+        "3.0",
+        "5.0",
+        "5.0",
+    ]
 
 
 def test_log_data_with_embeddings_and_update_ko(mocked_client: SecuredClient):
-    raise NotImplementedError(
-        """
-    Here, we should include a functional test with embedding updating but with a different
-    dimension, expecting the proper error.
-    """
+    dataset = "test_log_data_with_embeddings_and_update_ko"
+    text = "This is a text"
+
+    ar.delete(dataset)
+    ar.log(ar.TextClassificationRecord(id=0, inputs=text), name=dataset)
+    ar.load(dataset)
+
+    ar.delete(dataset)
+    ar.log(
+        ar.TokenClassificationRecord(id=0, text=text, tokens=text.split(" ")),
+        name=dataset,
     )
+    ar.load(dataset)
 
 
 def test_log_data_in_several_workspaces(mocked_client: SecuredClient):
