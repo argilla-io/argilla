@@ -1,6 +1,10 @@
 <template>
   <div class="sidebar__container" v-if="dataset">
-    <component v-if="availableViewInfo" :is="currentTaskViewInfo" :dataset="dataset" />
+    <component
+      v-if="availableViewInfo"
+      :is="currentTaskViewInfo"
+      :dataset="dataset"
+    />
     <sidebar-panel
       :class="[currentTask, currentMetric ? 'visible' : '']"
       :dataset="dataset"
@@ -64,8 +68,8 @@ export default {
       ).relatedMetrics;
     },
     availableViewInfo() {
-      return this.sidebarItems.find(item => item.id === 'view-info')
-    }
+      return this.sidebarItems.find((item) => item.id === "view-info");
+    },
   },
   methods: {
     ...mapActions({

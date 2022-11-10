@@ -21,7 +21,13 @@
       <div class="modal-wrapper" :class="modalPosition">
         <div :class="['modal-container', modalClass]">
           <p v-if="modalTitle" class="modal__title">
-            <svgicon v-if="modalIcon" width="24" height="24" :name="modalIcon" color="#000000"></svgicon>
+            <svgicon
+              v-if="modalIcon"
+              width="24"
+              height="24"
+              :name="modalIcon"
+              color="#000000"
+            ></svgicon>
             {{ modalTitle }}
           </p>
           <div v-if="!modalCustom" />
@@ -141,7 +147,7 @@ export default {
   position: relative;
   text-align: left;
   pointer-events: all;
-  color: $black-54
+  color: $black-54;
 }
 .modal-primary {
   box-shadow: $shadow;

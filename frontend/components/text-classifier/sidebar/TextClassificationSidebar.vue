@@ -104,7 +104,7 @@ export default {
     };
   },
   beforeMount() {
-    this.$emit('set-sidebar-items', this.filteredSidebarItems);
+    this.$emit("set-sidebar-items", this.filteredSidebarItems);
   },
   computed: {
     recordHasExplanation() {
