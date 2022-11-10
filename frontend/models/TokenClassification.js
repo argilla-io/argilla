@@ -22,6 +22,7 @@ import {
 } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 import { TokenEntity } from "./token-classification/TokenEntity.modelTokenClassification";
+import { TokenRecord } from "./token-classification/TokenRecord.modelTokenClassification";
 
 class TokenClassificationRecord extends BaseRecord {
   // tokens;
@@ -102,6 +103,7 @@ class TokenClassificationDataset extends ObservationDataset {
 
       //relationships
       token_entities: this.hasMany(TokenEntity, "dataset_id"),
+      token_records: this.hasMany(TokenRecord, "dataset_id"),
     };
   }
 

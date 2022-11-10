@@ -28,6 +28,8 @@ import { TokenClassificationDataset } from "@/models/TokenClassification";
 import { Rule } from "@/models/token-classification/Rule.modelTokenClassification";
 import RulesMetric from "@/models/token-classification/RulesMetric.modelTokenClassification";
 import { TokenEntity } from "@/models/token-classification/TokenEntity.modelTokenClassification";
+import { TokenRecord } from "@/models/token-classification/TokenRecord.modelTokenClassification";
+import { TokenAnnotation } from "@/models/token-classification/TokenAnnotation.modelTokenClassification";
 
 import info from "@/database/modules/info";
 import datasets from "@/database/modules/datasets";
@@ -51,5 +53,7 @@ database.register(TokenClassificationDataset, token_classification);
 database.register(Rule);
 database.register(RulesMetric);
 database.register(TokenEntity);
+database.register(TokenRecord);
+database.register(TokenAnnotation);
 
 export default database;
