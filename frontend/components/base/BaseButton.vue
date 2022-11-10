@@ -177,6 +177,14 @@ export default {
       background: $black-4;
     }
   }
+  &.link {
+    background: none;
+    color: $primary-color;
+    &:hover {
+      text-decoration: underline;
+      background: none;
+    }
+  }
 }
 
 .secondary {
