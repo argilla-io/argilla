@@ -16,10 +16,10 @@ import pytest
 
 import argilla
 import argilla as ar
+from argilla.metrics import entity_consistency
 from argilla.metrics.token_classification import (
     Annotations,
     entity_capitalness,
-    entity_consistency,
     entity_density,
     entity_labels,
     f1,
@@ -221,10 +221,6 @@ def test_top_k_mentions_consistency(mocked_client):
     argilla.delete(dataset)
     log_some_data(dataset)
 
-    top_k_mentions(
-        name="spacy_sm_wnut17", k=100000, threshold=1, post_label_filter={"GPE"}
-    ).visualize()
-
     mentions = {
         "mentions": [
             {
@@ -276,7 +272,8 @@ def validate_mentions(*, dataset: str, expected_mentions: dict, **metric_args):
 @pytest.mark.parametrize(
     ("metric", "expected_results"),
     [
-        (entity_consistency, {"mentions": []}),
+        (top_k_mentions, {"mentions": []}),
+        (entity_consistency, {}),
         (mention_length, {}),
         (entity_density, {}),
         (entity_capitalness, {}),
