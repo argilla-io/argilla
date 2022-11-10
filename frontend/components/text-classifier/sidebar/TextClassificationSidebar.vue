@@ -103,6 +103,9 @@ export default {
       ],
     };
   },
+  beforeMount() {
+    this.$emit('set-sidebar-items', this.filteredSidebarItems);
+  },
   computed: {
     recordHasExplanation() {
       return this.dataset.results.records.some((record) => record.explanation);

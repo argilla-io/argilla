@@ -1,6 +1,6 @@
 <template>
   <div class="sidebar__container" v-if="dataset">
-    <component :is="currentTaskViewInfo" :dataset="dataset" />
+    <component v-if="availableViewInfo" :is="currentTaskViewInfo" :dataset="dataset" />
     <sidebar-panel
       :class="[currentTask, currentMetric ? 'visible' : '']"
       :dataset="dataset"
@@ -26,6 +26,7 @@
       @refresh="onRefresh"
       @show-metrics="onShowSidebarInfo"
       @change-view-mode="onChangeViewMode"
+      @set-sidebar-items="onSetSidebarItems"
     />
   </div>
 </template>
@@ -44,6 +45,7 @@ export default {
     },
   },
   data: () => ({
+    sidebarItems: [],
     currentMetric: undefined,
   }),
   computed: {
@@ -61,15 +63,18 @@ export default {
         (item) => item.id === this.dataset.viewSettings.viewMode
       ).relatedMetrics;
     },
-    sidebarItems() {
-      return this.$refs.menu.sidebarItems;
-    },
+    availableViewInfo() {
+      return this.sidebarItems.find(item => item.id === 'view-info')
+    }
   },
   methods: {
     ...mapActions({
       changeViewMode: "entities/datasets/changeViewMode",
       refresh: "entities/datasets/refresh",
     }),
+    onSetSidebarItems(items) {
+      this.sidebarItems = items;
+    },
     onRefresh() {
       this.refresh({
         dataset: this.dataset,
