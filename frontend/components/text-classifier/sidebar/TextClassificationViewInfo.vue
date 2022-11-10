@@ -16,39 +16,40 @@
   -->
 
 <template>
-  <div class="help">
+  <div class="view-info">
     <lazy-base-modal
       modal-class="modal-secondary"
       modal-position="modal-center"
+      modal-title="Info"
+      modal-icon="info"
       :modal-custom="true"
       :prevent-body-scroll="true"
       :modal-visible="visibleViewInfo"
       @close-modal="closeModal"
-      ><p class="modal__title">Info</p>
-      <p class="modal__subtitle">Highlight colors in token attributions</p>
-      <div class="help__panel">
-        <p class="help__panel__title">
-          This dataset contains token attributions. What do highlight colors
-          mean?
-        </p>
-        <p>
-          Argilla enables you to register token attributions as part of the
-          dataset records. For getting token attributions, you can use methods
-          such as Integrated Gradients or SHAP. These methods try to provide a
-          mechanism to interpret model predictions.
-        </p>
-        <p>The attributions work as follows:</p>
-        <p>
-          [0,1] <strong>Positive attributions</strong> (in blue) reflect those
-          tokens that are making the model predict the specific predicted label.
-        </p>
-        <p>
-          [-1, 0] <strong>Negative attributions</strong> (in red) reflect those
-          tokens that can influence the model to predict a label other than the
-          specific predicted label.
-        </p>
+      >
+      <div class="view-info__content">
+        <p class="view-info__title">Highlight colors in token attributions</p>
+      <p>
+        Argilla enables you to register token attributions as part of the
+        dataset records. For getting token attributions, you can use methods
+        such as Integrated Gradients or SHAP. These methods try to provide a
+        mechanism to interpret model predictions.
+      </p>
+      <p>The attributions work as follows:</p>
+      <p>
+        [0,1] <strong>Positive attributions</strong> (in blue) reflect those
+        tokens that are making the model predict the specific predicted label.
+      </p>
+      <p>
+        [-1, 0] <strong>Negative attributions</strong> (in red) reflect those
+        tokens that can influence the model to predict a label other than the
+        specific predicted label.
+      </p>
       </div>
-      <base-button class="primary" @click="closeModal"> Close </base-button>
+      <div class="modal-buttons">
+        <base-button class="primary" @click="closeModal">Ok, got it!</base-button>
+        <base-button class="primary link" href="https://docs.rubrix.ml/en/stable/tutorials/nlp_model_explainability.html" target="_blank">More in docs</base-button>
+      </div>
     </lazy-base-modal>
   </div>
 </template>
@@ -76,31 +77,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.help {
+.view-info {
   clear: both;
   margin-top: 0em;
   margin-bottom: 1em;
   padding-left: 4em;
   @extend %collapsable-if-metrics !optional;
-  &__panel {
-    color: $black-54;
-    border-radius: 1px;
-    position: relative;
-    margin-bottom: $base-space * 4;
-    &__title {
-      @include font-size(16px);
-      color: $black-54;
-      font-weight: 600;
-      margin-top: 0;
-    }
-    ul,
-    p {
-      @include font-size(13px);
-    }
-    ul {
-      padding-left: 1.5em;
-      margin-bottom: 1.5em;
-    }
+  @include font-size(13px);
+  &__content {
+    margin-bottom: 2em;
+  }
+  &__title {
+    margin-bottom: 1em;
+    @include font-size(14px);
+    font-weight: 600;
+    color: $black-87;
   }
 }
 </style>

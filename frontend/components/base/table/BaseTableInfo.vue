@@ -161,12 +161,12 @@
                   :modal-custom="true"
                   :prevent-body-scroll="true"
                   modal-class="modal-secondary"
-                  :modal-visible="visibleModalId === item.id"
                   modal-position="modal-center"
+                  :modal-title="deleteModalContent.title"
+                  :modal-visible="visibleModalId === item.id"
                   @close-modal="$emit('close-modal')"
                 >
                   <div>
-                    <p class="modal__title">{{ deleteModalContent.title }}</p>
                     <p v-html="deleteModalContent.text"></p>
                     <div class="modal-buttons">
                       <base-button
