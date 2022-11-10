@@ -1,11 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TextClassificationViewInfo renders properly 1`] = `
-<div class="help">
-  <lazy-base-modal modal-class="modal-secondary" modal-position="modal-center" modal-custom="true" prevent-body-scroll="true" modal-visible="true">
-    <p class="modal__title">Info</p>
-    <div class="help__panel">
-      <p class="help__title">Highlight colors in token attributions</p>
+<div class="view-info">
+  <lazy-base-modal modal-class="modal-secondary" modal-position="modal-center" modal-title="Info" modal-icon="info" modal-custom="true" prevent-body-scroll="true" modal-visible="true">
+    <div class="view-info__content">
+      <p class="view-info__title">Highlight colors in token attributions</p>
       <p>
         Argilla enables you to register token attributions as part of the
         dataset records. For getting token attributions, you can use methods
@@ -23,7 +22,10 @@ exports[`TextClassificationViewInfo renders properly 1`] = `
         specific predicted label.
       </p>
     </div>
-    <base-button class="primary"> Close </base-button>
+    <div class="modal-buttons">
+      <base-button class="primary">Ok, got it!</base-button>
+      <base-button href="https://docs.rubrix.ml/en/stable/tutorials/nlp_model_explainability.html" target="_blank" class="primary link">More in docs</base-button>
+    </div>
   </lazy-base-modal>
 </div>
 `;
