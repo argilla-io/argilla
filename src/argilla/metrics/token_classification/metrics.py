@@ -396,9 +396,11 @@ def top_k_mentions(
             ``Annotations`` and ``Predictions``. Default to ``Predictions``
         k: The number of mentions to retrieve.
         threshold: The entity variability threshold (must be greater or equal to 1).
+        post_label_filter: A set of labels used for filtering the results. This filter may affect to the expected
+        number of mentions
 
     Returns:
-        The summary entity capitalness distribution
+        The summary top k mentions distribution
 
     Examples:
         >>> from argilla.metrics.token_classification import entity_consistency
