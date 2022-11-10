@@ -18,6 +18,7 @@ from typing import Any, Callable, Dict
 from pydantic import BaseModel, PrivateAttr
 
 
+# TODO(@frascuchon): Define as dataclasses.dataclass
 class MetricSummary(BaseModel):
     """THe metric summary result data model"""
 
