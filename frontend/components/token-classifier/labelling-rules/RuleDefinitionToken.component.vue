@@ -4,7 +4,7 @@
       <RulesQueryToken
         :title="`Query: ${queryText}`"
         :entities="entities"
-        :recordLength="5"
+        :recordLength="this.numberOfRecords"
         @on-search-entity="
           (searchQuery) => $emit('on-search-entity', searchQuery)
         "
@@ -44,6 +44,9 @@ export default {
     entities: {
       type: Array,
       required: true,
+    },
+    numberOfRecords: {
+      type: Number,
     },
   },
   data() {
