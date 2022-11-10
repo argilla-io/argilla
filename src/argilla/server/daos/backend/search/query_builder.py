@@ -177,26 +177,29 @@ class EsQueryBuilder:
 
     @classmethod
     def _to_es_query(cls, query: BackendRecordsQuery) -> Dict[str, Any]:
-        if query.ids:
+
+        if query.ids and not query.query_text:
             return filters.ids_filter(query.ids)
 
         query_text = filters.text_query(query.query_text)
+        excluded_query_fields = {
+            "ids",
+            "advanced_query_dsl",
+            "query_text",
+            "metadata",
+            "uncovered_by_rules",
+            "has_annotation",
+            "has_prediction",
+        }
         all_filters = filters.metadata(query.metadata)
+
         if query.has_annotation:
             all_filters.append(filters.exists_field("annotated_by"))
         if query.has_prediction:
             all_filters.append(filters.exists_field("predicted_by"))
-
-        query_data = query.dict(
-            exclude={
-                "advanced_query_dsl",
-                "query_text",
-                "metadata",
-                "uncovered_by_rules",
-                "has_annotation",
-                "has_prediction",
-            }
-        )
+        if query.ids:
+            all_filters.append(filters.ids_filter(query.ids))
+        query_data = query.dict(exclude=excluded_query_fields)
         for key, value in query_data.items():
             if value is None:
                 continue

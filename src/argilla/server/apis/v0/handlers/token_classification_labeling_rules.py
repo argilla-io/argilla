@@ -65,6 +65,7 @@ class LabelingRuleSearchResults(BaseModel):
     total_records: int
     annotated_records: int
 
+    agent: Optional[str] = None
     records: Optional[List[RuleRecordInfo]] = None
 
 
@@ -74,6 +75,7 @@ class SearchRecordsByRuleRequest(BaseModel):
 
 class SearchRecordsByRuleResponse(BaseModel):
     total: int
+    agent: str
     records: List[RuleRecordInfo] = Field(default_factory=list)
 
 
@@ -187,7 +189,7 @@ def configure_router(router: APIRouter):
             as_dataset_class=TasksFactory.get_task_dataset(task),
         )
 
-        total, records = service.search_by_rule(
+        total, rule_name, records = service.search_by_rule(
             dataset=dataset,
             query=query_or_name,
             record_ids=request.record_ids if request else None,
@@ -196,6 +198,7 @@ def configure_router(router: APIRouter):
 
         return SearchRecordsByRuleResponse(
             records=records,
+            agent=rule_name,
             total=total,
         )
 
@@ -282,12 +285,13 @@ def configure_router(router: APIRouter):
         )
 
         if with_annotations:
-            total, records = service.search_by_rule(
+            total, rule_name, records = service.search_by_rule(
                 dataset,
                 query=query_or_name,
                 label=label,
             )
             response.records = records
+            response.agent = rule_name
         return response
 
     @router.delete(
