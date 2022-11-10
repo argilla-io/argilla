@@ -103,6 +103,9 @@ class BaseBackendErrorHandler(ABC):
 class OpenSearchBackendErrorHandler(BaseBackendErrorHandler):
     """Implements the Opensearch Error Handler"""
 
+    def __init__(self, index: str):
+        super().__init__(index=index)
+
     def __enter__(self):
         # This line disable all open search client warnings
         from opensearchpy.exceptions import OpenSearchWarning
@@ -163,7 +166,6 @@ class ElasticSearchBackendErrorHandler(BaseBackendErrorHandler):
         except NotFoundError as ex:
             raise IndexNotFoundError(ex)
         except ApiError as ex:
-            print(ex)
             raise GenericSearchError(ex)
 
 
@@ -520,9 +522,6 @@ class ElasticsearchBackend(LoggingMixin):
             id_ = doc_id(doc)
             if id_ is not None:
                 data["_id"] = id_
-            print("*******")
-            print(data)
-            print("*******")
             return data
 
         with self.error_handling(index=index):
@@ -897,7 +896,6 @@ class ElasticsearchBackend(LoggingMixin):
                     embedding_name=query.embedding_name,
                     embedding_vector=query.embedding_vector,
                 )
-                print(knn_query)
             results = self._search(
                 index=index,
                 query=es_query,
