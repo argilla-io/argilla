@@ -73,6 +73,8 @@ class GenericSearchError(Exception):
         self.origin_error = origin_error
 
 
+from elasticsearch import NotFoundError
+
 # TODO(@ufuk): We need a separate  similar but separate implementation
 #  for the OpenSearch backend integration, handling the proper client exception errors
 #  (Maybe we can reuse the old implementation for that)
