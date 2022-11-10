@@ -14,7 +14,8 @@
 #  limitations under the License.
 import re
 import warnings
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from elasticsearch import (
     ApiError,
@@ -26,6 +27,11 @@ from elasticsearch import (
 from elasticsearch.exceptions import AuthenticationException, AuthorizationException
 from elasticsearch.helpers import bulk as es_bulk
 from elasticsearch.helpers import reindex, scan
+from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
+from opensearchpy.exceptions import OpenSearchWarning
+from opensearchpy.helpers import bulk as open_search_bulk
+from opensearchpy.helpers import reindex as open_search_reindex
+from opensearchpy.helpers import scan as open_search_scan
 
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
@@ -58,12 +64,6 @@ from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 from argilla.server.errors import EntityNotFoundError, InvalidTextSearchError
 from argilla.server.errors.task_errors import MetadataLimitExceededError
 
-# from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
-# from opensearchpy.exceptions import OpenSearchWarning
-# from opensearchpy.helpers import bulk as es_bulk
-# from opensearchpy.helpers import reindex, scan
-
-
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -89,24 +89,66 @@ class GenericSearchError(Exception):
 #  for the OpenSearch backend integration, handling the proper client exception errors
 #  (Maybe we can reuse the old implementation for that)
 #  Then, the each respective backend class should accept a way to setup the error handling
-#  decorator (maybe we can use them as mixin and apply multi-inheritance ot the the backend classes)
-"""
-
-class OpenSearchErrorHandler:
-    def __init(self, index: str):
-        ...
-    def __exit__(self, exception_type, exception_value, traceback):
-        ...
-
-class OpenSearchBackend(BaseElasticBackend,OpenSearchErrorHandler):
-    ...
-"""
+#  decorator (maybe we can use them as mixin and apply multi-inheritance at the the backend classes)
 
 
-class backend_error_handler:
+class BaseBackendErrorHandler(ABC):
     def __init__(self, index: str):
         # Maybe a backend to detect the backend nature...
         self._index = index
+
+    @abstractmethod
+    def __enter__(self):
+        pass
+
+    @abstractmethod
+    def __exit__(self, exception_type, exception_value, traceback):
+        pass
+
+    def __get_es_error_detail__(self, ex, exception_value) -> Optional[str]:
+        detail = exception_value.info["error"]
+        detail = detail.get("root_cause")
+
+        return detail[0].get("reason")
+
+
+class OpenSearchBackendErrorHandler(BaseBackendErrorHandler):
+
+    """Implements the Opensearch Error Handler"""
+
+    def __init__(self, index: str):
+        super.__init__(index=index)
+
+    def __enter__(self):
+        # This line disable all open search client warnings
+        warnings.filterwarnings("ignore", category=OpenSearchWarning)
+        pass
+
+    def __exit__(
+        self, exception_type, exception_value, traceback
+    ):  ## the old implementation for opensearch-py == 1.0.0
+        if not exception_value:
+            return
+        try:
+            raise exception_value from exception_value
+        except RequestError as ex:
+            detail = self.__get_es_error_detail__(ex, exception_value)
+            if ex.error == "search_phase_execution_exception":
+                detail = detail or ex.info["error"]
+                raise InvalidTextSearchError(detail)
+            elif ex.error == "index_closed_exception":
+                raise ClosedIndexError(self._index)
+            raise GenericSearchError(exception_value) from exception_value
+        except NotFoundError as ex:
+            raise IndexNotFoundError(ex)
+        except OpenSearchException as ex:
+            raise GenericSearchError(ex)
+
+
+class ElasticSearchBackendErrorHandler(BaseBackendErrorHandler):
+    def __init__(self, index: str):
+        # Maybe a backend to detect the backend nature...
+        super.__init__(index=index)
 
     def __enter__(self):
         # This line disable all open search client warnings
@@ -132,11 +174,11 @@ class backend_error_handler:
             print(ex)
             raise GenericSearchError(ex)
 
-    def __get_es_error_detail__(self, ex, exception_value) -> Optional[str]:
-        detail = exception_value.info["error"]
-        detail = detail.get("root_cause")
 
-        return detail[0].get("reason")
+class backend_error_handler:
+    """Backend error handler mixin"""
+
+    pass
 
 
 class ElasticsearchBackend(LoggingMixin):
@@ -183,8 +225,10 @@ class ElasticsearchBackend(LoggingMixin):
                 retry_on_timeout=True,
                 max_retries=5,
             )
+            backend_error_handler = ElasticSearchBackendErrorHandler
             cls._INSTANCE = cls(
                 es_client,
+                backend_error_handler,
                 query_builder=EsQueryBuilder(),
                 metrics={**ALL_METRICS},
                 mappings={
@@ -286,9 +330,8 @@ class ElasticsearchBackend(LoggingMixin):
         index: str,
         routing: str = None,
         size: int = 100,
-        knn: Dict[str, Any] = None,  # Remove it
-        # embedding_name: Optional[str] = None,
-        # embedding_vector: Optional[List[str]] = None,
+        embedding_name: Optional[str] = None,
+        embedding_vector: Optional[List[float]] = None,
         query: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """
@@ -311,12 +354,15 @@ class ElasticsearchBackend(LoggingMixin):
 
         """
         with backend_error_handler(index=index):
-            if knn is not None:
+            if embedding_name is not None and embedding_vector is not None:
+                knn_query = self.query_builder.map_2_knn_query(
+                    embedding_name, embedding_vector
+                )
                 filter = query["query"]
                 source = query["_source"]
                 return self.__client__.knn_search(
                     index=index,
-                    knn=knn,
+                    knn=knn_query,
                     filter=filter,  # filter=query??
                     routing=routing,
                     source=source,
@@ -871,20 +917,11 @@ class ElasticsearchBackend(LoggingMixin):
 
             if enable_highlight:
                 es_query["highlight"] = self.__configure_query_highlight__()
-            knn_query = None
-            if hasattr(query, "embedding_vector"):
-                knn_query = self.query_builder.map_2_knn_query(
-                    embedding_name=query.embedding_name,
-                    embedding_vector=query.embedding_vector,
-                )
-                print(knn_query)
             results = self._search(
                 index=index,
                 query=es_query,
-                # TODO(@ufuk): if we refactor the _search method passing the embedding field name and the vector value
-                #  we could easily tackle the different implementations inside the _search method.
-                #  Otherwise, we should to the work in this method.
-                knn=knn_query,
+                embedding_name=query.embedding_name,
+                embedding_vector=query.embedding_vector,
                 size=size,
             )
             hits = results["hits"]
