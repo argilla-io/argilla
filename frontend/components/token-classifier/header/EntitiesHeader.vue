@@ -64,7 +64,7 @@ export default {
       return this.showExpandedList ? entities : this.showMaxEntities(entities);
     },
     entitiesNumber() {
-      return this.dataset.entities.length;
+      return this.dataset.entities?.length || null;
     },
     isCollapsable() {
       return this.entitiesNumber > this.maxEntitiesNumber;
