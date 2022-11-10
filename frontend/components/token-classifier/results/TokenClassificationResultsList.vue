@@ -42,10 +42,7 @@ import {
   Rule as RuleModel,
   getRuleModelPrimaryKey,
 } from "../../../models/token-classification/Rule.modelTokenClassification";
-import {
-  TokenClassificationDataset,
-  TokenClassificationDataset as TokenClassificationModel,
-} from "../../../models/TokenClassification";
+import { TokenClassificationDataset as TokenClassificationDatasetModel } from "../../../models/TokenClassification";
 import RuleDefinitionToken from "../labelling-rules/RuleDefinitionToken.component.vue";
 import { getDatasetModelPrimaryKey } from "../../../models/Dataset";
 import {
@@ -115,7 +112,8 @@ export default {
     },
     queryText() {
       return (
-        TokenClassificationModel.find(this.datasetPrimaryKey).query.text || ""
+        TokenClassificationDatasetModel.find(this.datasetPrimaryKey).query
+          .text || ""
       );
     },
     rulePrimaryKey() {
@@ -147,7 +145,7 @@ export default {
         .get();
     },
     records() {
-      return TokenClassificationDataset.query()
+      return TokenClassificationDatasetModel.query()
         .whereId(this.datasetPrimaryKey)
         .with("token_records")
         .first().token_records;
@@ -252,7 +250,7 @@ export default {
         entities.push(entity);
       });
 
-      TokenClassificationModel.insertOrUpdate({
+      TokenClassificationDatasetModel.insertOrUpdate({
         where: this.datasetPrimaryKey,
         data: {
           token_entities: entities,
