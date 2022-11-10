@@ -4,12 +4,8 @@ exports[`TextClassificationViewInfo renders properly 1`] = `
 <div class="help">
   <lazy-base-modal modal-class="modal-secondary" modal-position="modal-center" modal-custom="true" prevent-body-scroll="true" modal-visible="true">
     <p class="modal__title">Info</p>
-    <p class="modal__subtitle">Highlight colors in token attributions</p>
     <div class="help__panel">
-      <p class="help__panel__title">
-        This dataset contains token attributions. What do highlight colors
-        mean?
-      </p>
+      <p class="help__title">Highlight colors in token attributions</p>
       <p>
         Argilla enables you to register token attributions as part of the
         dataset records. For getting token attributions, you can use methods
