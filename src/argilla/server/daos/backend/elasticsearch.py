@@ -17,7 +17,7 @@ import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError
 from elasticsearch.helpers import bulk as es_bulk
 from elasticsearch.helpers import reindex, scan
 
@@ -72,8 +72,6 @@ class GenericSearchError(Exception):
     def __init__(self, origin_error: Exception):
         self.origin_error = origin_error
 
-
-from elasticsearch import NotFoundError
 
 # TODO(@ufuk): We need a separate  similar but separate implementation
 #  for the OpenSearch backend integration, handling the proper client exception errors
@@ -135,8 +133,11 @@ class OpenSearchBackendErrorHandler(BaseBackendErrorHandler):
 
 
 class ElasticSearchBackendErrorHandler(BaseBackendErrorHandler):
+    def __init__(self, index: str):
+        super().__init__(index=index)
+
     def __enter__(self):
-        # This line disable all open search client warnings
+        # This line disable all elastic search client warnings
         from elasticsearch import ElasticsearchWarning
 
         warnings.filterwarnings("ignore", category=ElasticsearchWarning)
@@ -316,8 +317,7 @@ class ElasticsearchBackend(LoggingMixin):
         index: str,
         routing: str = None,
         size: int = 100,
-        embedding_name: Optional[str] = None,
-        embedding_vector: Optional[List[float]] = None,
+        knn: Dict[str, Any] = None,
         query: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """
@@ -340,16 +340,12 @@ class ElasticsearchBackend(LoggingMixin):
 
         """
         with self.error_handling(index=index):
-            if embedding_name is not None and embedding_vector is not None:
-                knn_query = self.query_builder.map_2_knn_query(
-                    embedding_name=embedding_name,
-                    embedding_vector=embedding_vector,
-                )
+            if knn is not None:
                 filter = query["query"]
                 source = query["_source"]
                 return self.__client__.knn_search(
                     index=index,
-                    knn=knn_query,
+                    knn=knn,
                     filter=filter,  # filter=query??
                     routing=routing,
                     source=source,
@@ -895,15 +891,17 @@ class ElasticsearchBackend(LoggingMixin):
             if enable_highlight:
                 es_query["highlight"] = self.__configure_query_highlight__()
 
-            embedding_name, embedding_vector = (
-                query.embedding_name,
-                query.embedding_vector,
-            ) if query else None, None
+            knn_query = None
+            if hasattr(query, "embedding_vector"):
+                knn_query = self.query_builder.map_2_knn_query(
+                    embedding_name=query.embedding_name,
+                    embedding_vector=query.embedding_vector,
+                )
+                print(knn_query)
             results = self._search(
                 index=index,
                 query=es_query,
-                embedding_name=embedding_name,
-                embedding_vector=embedding_vector,
+                knn=knn_query,
                 size=size,
             )
             hits = results["hits"]
