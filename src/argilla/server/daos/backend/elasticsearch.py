@@ -15,23 +15,11 @@
 import re
 import warnings
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from elasticsearch import (
-    ApiError,
-    Elasticsearch,
-    ElasticsearchWarning,
-    NotFoundError,
-    RequestError,
-)
-from elasticsearch.exceptions import AuthenticationException, AuthorizationException
+from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk as es_bulk
 from elasticsearch.helpers import reindex, scan
-from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
-from opensearchpy.exceptions import OpenSearchWarning
-from opensearchpy.helpers import bulk as open_search_bulk
-from opensearchpy.helpers import reindex as open_search_reindex
-from opensearchpy.helpers import scan as open_search_scan
 
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
@@ -113,22 +101,21 @@ class BaseBackendErrorHandler(ABC):
 
 
 class OpenSearchBackendErrorHandler(BaseBackendErrorHandler):
-
     """Implements the Opensearch Error Handler"""
-
-    def __init__(self, index: str):
-        super.__init__(index=index)
 
     def __enter__(self):
         # This line disable all open search client warnings
+        from opensearchpy.exceptions import OpenSearchWarning
+
         warnings.filterwarnings("ignore", category=OpenSearchWarning)
         pass
 
-    def __exit__(
-        self, exception_type, exception_value, traceback
-    ):  ## the old implementation for opensearch-py == 1.0.0
+    def __exit__(self, exception_type, exception_value, traceback):
         if not exception_value:
             return
+
+        from opensearchpy import NotFoundError, OpenSearchException, RequestError
+
         try:
             raise exception_value from exception_value
         except RequestError as ex:
@@ -146,18 +133,20 @@ class OpenSearchBackendErrorHandler(BaseBackendErrorHandler):
 
 
 class ElasticSearchBackendErrorHandler(BaseBackendErrorHandler):
-    def __init__(self, index: str):
-        # Maybe a backend to detect the backend nature...
-        super.__init__(index=index)
-
     def __enter__(self):
         # This line disable all open search client warnings
+        from elasticsearch import ElasticsearchWarning
+
         warnings.filterwarnings("ignore", category=ElasticsearchWarning)
         pass
 
     def __exit__(self, exception_type, exception_value, traceback):
+
         if not exception_value:
             return
+
+        from elasticsearch import ApiError, NotFoundError, RequestError
+
         try:
             raise exception_value from exception_value
         except RequestError as ex:
@@ -173,12 +162,6 @@ class ElasticSearchBackendErrorHandler(BaseBackendErrorHandler):
         except ApiError as ex:
             print(ex)
             raise GenericSearchError(ex)
-
-
-class backend_error_handler:
-    """Backend error handler mixin"""
-
-    pass
 
 
 class ElasticsearchBackend(LoggingMixin):
@@ -225,10 +208,8 @@ class ElasticsearchBackend(LoggingMixin):
                 retry_on_timeout=True,
                 max_retries=5,
             )
-            backend_error_handler = ElasticSearchBackendErrorHandler
             cls._INSTANCE = cls(
                 es_client,
-                backend_error_handler,
                 query_builder=EsQueryBuilder(),
                 metrics={**ALL_METRICS},
                 mappings={
@@ -261,6 +242,11 @@ class ElasticsearchBackend(LoggingMixin):
     def query_builder(self):
         """The query builder"""
         return self.__query_builder__
+
+    @staticmethod
+    def error_handling(index: str):
+        """Wraps error from the server backend and normalizes them into generic argilla errors"""
+        return ElasticSearchBackendErrorHandler(index=index)
 
     def _list_documents(
         self,
@@ -323,8 +309,6 @@ class ElasticsearchBackend(LoggingMixin):
         """
         return self.__client__.indices.exists(index=index)
 
-    # TODO(@ufuk): we could do an specific implementation for each backend if we can pass directly the
-    #  embedding field and the vector value as arguments to this method
     def _search(
         self,
         index: str,
@@ -353,10 +337,11 @@ class ElasticsearchBackend(LoggingMixin):
         -------
 
         """
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             if embedding_name is not None and embedding_vector is not None:
                 knn_query = self.query_builder.map_2_knn_query(
-                    embedding_name, embedding_vector
+                    embedding_name=embedding_name,
+                    embedding_vector=embedding_vector,
                 )
                 filter = query["query"]
                 source = query["_source"]
@@ -398,7 +383,7 @@ class ElasticsearchBackend(LoggingMixin):
             The mapping configuration. Optional.
 
         """
-        with backend_error_handler(index):
+        with self.error_handling(index):
             if force_recreate:
                 self._delete_index(index=index)
             if not self._index_exists(index=index):
@@ -424,13 +409,13 @@ class ElasticsearchBackend(LoggingMixin):
             If True, the template will be recreated (if exists). Default=False
 
         """
-        with backend_error_handler(index=""):
+        with self.error_handling(index=""):
             if force_recreate or not self.__client__.indices.exists_template(name):
                 self.__client__.indices.put_template(name=name, body=template)
 
     def delete_index_template(self, index_template: str):
         """Deletes an index template"""
-        with backend_error_handler(index=""):
+        with self.error_handling(index=""):
 
             if self.__client__.indices.exists_index_template(name=index_template):
                 self.__client__.indices.delete_template(
@@ -439,7 +424,7 @@ class ElasticsearchBackend(LoggingMixin):
 
     def _delete_index(self, index: str, raises_error: bool = False):
         """Deletes an elasticsearch index"""
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             if self._index_exists(index):
                 ignore_errors = [400, 404]
                 if raises_error:
@@ -462,7 +447,7 @@ class ElasticsearchBackend(LoggingMixin):
             The document source
 
         """
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             self.__client__.index(
                 index=index, body=document, id=doc_id, refresh="wait_for"
             )
@@ -491,7 +476,7 @@ class ElasticsearchBackend(LoggingMixin):
         except NotFoundError:
             return None
         except Exception as ex:
-            with backend_error_handler(index=index):
+            with self.error_handling(index=index):
                 raise ex
 
     def _delete_document(self, index: str, doc_id: str):
@@ -511,7 +496,7 @@ class ElasticsearchBackend(LoggingMixin):
         -------
 
         """
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             if self.__client__.exists(index=index, id=doc_id):
                 self.__client__.delete(index=index, id=doc_id, refresh=True)
 
@@ -542,7 +527,7 @@ class ElasticsearchBackend(LoggingMixin):
             print("*******")
             return data
 
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             success, failed = es_bulk(
                 client=self.__client__,
                 index=index,
@@ -608,7 +593,7 @@ class ElasticsearchBackend(LoggingMixin):
             # No mapping data
             return {}
         except Exception as ex:
-            with backend_error_handler(index=index):
+            with self.error_handling(index=index):
                 raise ex
 
     def _update_document(
@@ -640,7 +625,7 @@ class ElasticsearchBackend(LoggingMixin):
 
         """
         # TODO: validate either doc or script are provided
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             if not partial_update:
                 return self.__client__.index(
                     index=index, id=doc_id, body=document, refresh=True
@@ -666,7 +651,7 @@ class ElasticsearchBackend(LoggingMixin):
         index:
             The index name
         """
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             self.__client__.indices.open(
                 index=index, wait_for_active_shards=settings.es_records_index_shards
             )
@@ -682,7 +667,7 @@ class ElasticsearchBackend(LoggingMixin):
         index:
             The index name
         """
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             self.__client__.indices.close(
                 index=index,
                 ignore_unavailable=True,
@@ -705,7 +690,7 @@ class ElasticsearchBackend(LoggingMixin):
         override:
             If True, destination index will be removed if exists
         """
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             try:
                 index_read_only = self.is_index_read_only(index)
                 if not index_read_only:
@@ -735,7 +720,7 @@ class ElasticsearchBackend(LoggingMixin):
             True if queried index is read-only, False otherwise
 
         """
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             response = self.__client__.indices.get_settings(
                 index=index,
                 name="index.blocks.write",
@@ -760,7 +745,7 @@ class ElasticsearchBackend(LoggingMixin):
             True for enable read-only, False otherwise
 
         """
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             self.__client__.indices.put_settings(
                 index=index,
                 body={"settings": {"index.blocks.write": read_only}},
@@ -781,7 +766,7 @@ class ElasticsearchBackend(LoggingMixin):
         index: str,
         mapping: Dict[str, Any],
     ):
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             self.__client__.indices.put_mapping(
                 index=index,
                 body={"properties": mapping},
@@ -793,16 +778,6 @@ class ElasticsearchBackend(LoggingMixin):
             return self.__client__.info()
         except Exception as ex:
             return {"error": ex}
-
-    def aggregate(self, index: str, aggregation: Dict[str, Any]) -> Dict[str, Any]:
-        """Apply an aggregation over the index returning ONLY the agg results"""
-        with backend_error_handler(index=index):
-            aggregation_name = "aggregation"
-            es_query = {"aggs": {aggregation_name: aggregation}}
-
-            results = self._search(index=index, size=0, query=es_query)
-            aggs_results = results["aggregations"]
-            return query_helpers.parse_aggregations(aggs_results).get(aggregation_name)
 
     def find_metric_by_id(self, metric_id: str) -> Optional[ElasticsearchMetric]:
         metric = self.__defined_metrics__.get(metric_id)
@@ -831,7 +806,7 @@ class ElasticsearchBackend(LoggingMixin):
 
     def get_schema(self, id: str) -> Dict[str, Any]:
         index = dataset_records_index(id)
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             response = self.__client__.indices.get_mapping(index=index)
             return self._extract_index_schema_from_response(
                 index=index, es_response=response
@@ -844,7 +819,7 @@ class ElasticsearchBackend(LoggingMixin):
         query: Optional[BaseDatasetsQuery],
     ) -> Tuple[int, int]:
         index = dataset_records_index(id)
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             es_query = self.query_builder.map_2_es_query(
                 schema=self.get_schema(id),
                 query=query,
@@ -874,7 +849,7 @@ class ElasticsearchBackend(LoggingMixin):
     ) -> Tuple[int, int]:
 
         index = dataset_records_index(id)
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             es_query = self.query_builder.map_2_es_query(
                 schema=self.get_schema(id),
                 query=query,
@@ -901,7 +876,7 @@ class ElasticsearchBackend(LoggingMixin):
     ) -> Tuple[int, List[Dict[str, Any]]]:
 
         index = dataset_records_index(id)
-        with backend_error_handler(index=index):
+        with self.error_handling(index=index):
             if not sort.sort_by and sort.shuffle is False:
                 sort.sort_by = [SortableField(id="id")]  # Default sort by id
 
@@ -917,11 +892,16 @@ class ElasticsearchBackend(LoggingMixin):
 
             if enable_highlight:
                 es_query["highlight"] = self.__configure_query_highlight__()
+
+            embedding_name, embedding_vector = (
+                query.embedding_name,
+                query.embedding_vector,
+            ) if query else None, None
             results = self._search(
                 index=index,
                 query=es_query,
-                embedding_name=query.embedding_name,
-                embedding_vector=query.embedding_vector,
+                embedding_name=embedding_name,
+                embedding_vector=embedding_vector,
                 size=size,
             )
             hits = results["hits"]
@@ -989,7 +969,7 @@ class ElasticsearchBackend(LoggingMixin):
         limit: Optional[int] = None,
     ) -> Iterable[Dict[str, Any]]:
         index = dataset_records_index(id)
-        with backend_error_handler(index):
+        with self.error_handling(index):
             es_query = {
                 **self.query_builder.map_2_es_query(
                     schema=self.get_schema(id),
@@ -1105,7 +1085,7 @@ class ElasticsearchBackend(LoggingMixin):
         source_index = settings.old_dataset_index_name
         target_index = DATASETS_INDEX_NAME
         try:
-            with backend_error_handler(index=source_index):
+            with self.error_handling(index=source_index):
                 reindex(
                     client=self.__client__,
                     source_index=source_index,
@@ -1120,7 +1100,7 @@ class ElasticsearchBackend(LoggingMixin):
             pass  # Nothing to migrate
 
     def list_datasets(self, query: BaseDatasetsQuery):
-        with backend_error_handler(index=DATASETS_INDEX_NAME):
+        with self.error_handling(index=DATASETS_INDEX_NAME):
             es_query = self.query_builder.map_2_es_query(query=query)
             return self._list_documents(
                 index=DATASETS_INDEX_NAME,
@@ -1143,7 +1123,7 @@ class ElasticsearchBackend(LoggingMixin):
     def find_dataset(
         self, id: str, name: Optional[str] = None, owner: Optional[str] = None
     ):
-        with backend_error_handler(index=DATASETS_INDEX_NAME):
+        with self.error_handling(index=DATASETS_INDEX_NAME):
             document = self._get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=id)
             if not document and owner is None and name:
                 # We must search by name since we have no owner

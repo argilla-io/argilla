@@ -26,6 +26,7 @@ def test_raise_proper_error():
     with pytest.raises(MissingDatasetRecordsError):
         dao.search_records(
             dataset=BaseDatasetDB(
-                name="mock-notfound", task=TaskType.text_classification
+                name="mock-notfound",
+                task=TaskType.text_classification,
             )
         )
