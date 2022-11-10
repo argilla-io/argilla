@@ -23,6 +23,7 @@ import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
+import { TokenClassificationDataset } from "../../models/TokenClassification";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -404,7 +405,10 @@ async function _updateDatasetRecords({
 }
 
 async function _updateTaskDataset({ dataset, data }) {
+  const datasetPrimaryKey = getDatasetModelPrimaryKey(dataset);
+
   const entity = dataset.getTaskDatasetClass();
+
   const { globalResults, results } = data;
 
   let datasetResults = dataset.$toJson().results || {};
@@ -419,7 +423,6 @@ async function _updateTaskDataset({ dataset, data }) {
       datasetResults.aggregations || {}
     );
   }
-
   await entity.insertOrUpdate({
     where: dataset.id,
     data: {
@@ -429,9 +432,39 @@ async function _updateTaskDataset({ dataset, data }) {
     },
   });
 
-  const datasetPrimaryKey = getDatasetModelPrimaryKey(dataset);
+  if (dataset.task === "TokenClassification") {
+    const records = data.results ? data.results.records : null;
+    if (records) {
+      updateTokenRecordsByDatasetId(datasetPrimaryKey, records);
+    }
+  }
+
   return entity.find(datasetPrimaryKey);
 }
+
+const updateTokenRecordsByDatasetId = (datasetPrimaryKey, records) => {
+  const tokenRecords = records.map(
+    ({ id, search_keywords, status, tokens, text, annotation, prediction }) => {
+      return {
+        dataset_id: datasetPrimaryKey.join("."),
+        id,
+        search_keywords,
+        status,
+        tokens,
+        text,
+        annotation,
+        prediction,
+      };
+    }
+  );
+
+  TokenClassificationDataset.insertOrUpdate({
+    were: datasetPrimaryKey,
+    data: {
+      token_records: tokenRecords,
+    },
+  });
+};
 
 async function _updatePagination({ id, size, page }) {
   const pagination = await Pagination.update({
@@ -445,7 +478,6 @@ async function _updatePagination({ id, size, page }) {
 const getters = {
   findByName: () => (name) => {
     const workspace = currentWorkspace($nuxt.$route);
-
     const inputForPrimaryKey = {
       owner: workspace,
       name,
