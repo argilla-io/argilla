@@ -23,6 +23,7 @@
           :rule="rule"
           :queryText="queryText"
           :entities="entities"
+          :numberOfRecords="numberOfRecords"
           @on-search-entity="(value) => (searchQuery = value)"
         />
       </transition>
@@ -41,13 +42,21 @@ import {
   Rule as RuleModel,
   getRuleModelPrimaryKey,
 } from "../../../models/token-classification/Rule.modelTokenClassification";
-import { TokenClassificationDataset as TokenClassificationModel } from "../../../models/TokenClassification";
+import {
+  TokenClassificationDataset,
+  TokenClassificationDataset as TokenClassificationModel,
+} from "../../../models/TokenClassification";
 import RuleDefinitionToken from "../labelling-rules/RuleDefinitionToken.component.vue";
 import { getDatasetModelPrimaryKey } from "../../../models/Dataset";
 import {
   formatDatasetIdForTokenEntityModel,
   TokenEntity,
 } from "../../../models/token-classification/TokenEntity.modelTokenClassification";
+import {
+  getTokenAnnotationModelPrimaryKey,
+  TokenAnnotation as TokenAnnotationModel,
+} from "../../../models/token-classification/TokenAnnotation.modelTokenClassification";
+
 export default {
   props: {
     dataset: {
@@ -68,15 +77,18 @@ export default {
     this.rulesHaveBeenFetched = false;
     const { name } = this.dataset;
 
-    const { rulesMetrics, records } =
-      await this.getRulesMetricsAndRecordsByQueryText(name, this.queryText);
+    const rulesMetrics = await this.getRulesMetricsByQueryText(
+      name,
+      this.queryText
+    );
 
     const rules = await this.fetchTokenClassificationRules(name);
 
     rules?.forEach((rule) => {
       this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
-      this.initRecordsModel(rule, records);
     });
+
+    await this.addAnnotationsToRecordsByQuery(name, this.queryText);
 
     this.insertOrUpdateEntityInTokenEntityModel();
     this.rulesHaveBeenFetched = true;
@@ -131,18 +143,33 @@ export default {
         .where("text", (value) =>
           this.isStringIncludeSubstring(value, this.searchQuery)
         )
+        .orderBy("text")
         .get();
+    },
+    records() {
+      return TokenClassificationDataset.query()
+        .whereId(this.datasetPrimaryKey)
+        .with("token_records")
+        .first().token_records;
+    },
+    recordsIds() {
+      return this.records.map((record) => record.id);
+    },
+    numberOfRecords() {
+      return (
+        this.rule.rule_metrics?.coverage *
+          this.rule.rule_metrics?.total_records || null
+      );
     },
   },
   methods: {
-    async getRulesMetricsAndRecordsByQueryText(name, query) {
+    async getRulesMetricsByQueryText(name, query) {
       let rulesMetrics = null;
-      let records = null;
+
       if (query) {
         rulesMetrics = await this.fetchRuleMetricsByQueryText(name, query);
-        records = await this.fetchTokenRecordsByQueryText(name, query);
       }
-      return { rulesMetrics, records };
+      return rulesMetrics;
     },
     async fetchTokenClassificationRules(name) {
       try {
@@ -172,24 +199,31 @@ export default {
         console.log("Error: ", error);
       }
     },
-    async fetchTokenRecordsByQueryText(name, query) {
+    async addAnnotationsToRecordsByQuery(name, query) {
+      const data = query
+        ? await this.fetchRecordsAnnotationByQueryText(name, query)
+        : null;
+
+      if (data) {
+        this.insertOrUpdateAnnotationsInTokenAnnotation(data, query);
+      }
+    },
+    async fetchRecordsAnnotationByQueryText(name, query) {
       try {
-        const { data, status } = await this.$axios.get(
-          `/datasets/${name}/TokenClassification/labeling/rules/${query}/search`
+        const { data, status } = await this.$axios.post(
+          `/datasets/${name}/TokenClassification/labeling/rules/${query}/search`,
+          {
+            record_ids: this.recordsIds,
+          }
         );
         if (status === 200) {
           return data;
         } else {
-          throw new Error("Error fetching API rule metrics");
+          throw new Error("Error fetching API records annotations");
         }
       } catch (error) {
         console.log("Error: ", error);
       }
-    },
-    initRecordsModel(rule, records) {
-      console.group(rule);
-      console.log(records);
-      console.groupEnd();
     },
     insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
       RuleModel.insertOrUpdate({
@@ -223,6 +257,33 @@ export default {
         data: {
           token_entities: entities,
         },
+      });
+    },
+    insertOrUpdateAnnotationsInTokenAnnotation({ agent, records }, query) {
+      const { owner, name } = this.dataset;
+
+      records.forEach(({ id: record_id, entities }) => {
+        const objToInitPrimaryKeys = {
+          record_id,
+          agent,
+          owner,
+          name,
+        };
+
+        const primaryKey =
+          getTokenAnnotationModelPrimaryKey(objToInitPrimaryKeys);
+
+        TokenAnnotationModel.insertOrUpdate({
+          where: primaryKey,
+          data: {
+            record_id,
+            entities,
+            agent,
+            query,
+            owner,
+            name,
+          },
+        });
       });
     },
     isStringIncludeSubstring(refString, substring) {
