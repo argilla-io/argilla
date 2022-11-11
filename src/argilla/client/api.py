@@ -610,9 +610,12 @@ class Api:
 
     def add_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
         """Adds the dataset labeling rules"""
-        text_classification_api.add_dataset_labeling_rules(
-            self._client, name=dataset, rules=rules
-        )
+        for rule in rules:
+            text_classification_api.add_dataset_labeling_rule(
+                self._client,
+                name=dataset,
+                rule=rule,
+            )
 
     def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
         response = text_classification_api.fetch_dataset_labeling_rules(
