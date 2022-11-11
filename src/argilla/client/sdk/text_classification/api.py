@@ -108,9 +108,9 @@ def delete_dataset_labeling_rule(
         rule=rule.query,
     )
 
-    httpx.delete(url)
+    response = httpx.delete(url)
 
-    ...
+    return build_typed_response(response, rule.__class__)
 
 
 def fetch_dataset_labeling_rules(
