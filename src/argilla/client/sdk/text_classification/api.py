@@ -58,6 +58,22 @@ def data(
         )
 
 
+def add_dataset_labeling_rules(
+    client: AuthenticatedClient, name: str, rules: List[LabelingRule]
+) -> Response[Union[HTTPValidationError, ErrorMessage]]:  # not sure if correct :)
+    url = "{}/api/datasets/TextClassification/{name}/labeling/add_rules".format(
+        client.base_url, name=name, data=rules
+    )  # probably wrong but hopefully close
+
+    response = httpx.post(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+    return build_list_response(response)
+
+
 def fetch_dataset_labeling_rules(
     client: AuthenticatedClient,
     name: str,

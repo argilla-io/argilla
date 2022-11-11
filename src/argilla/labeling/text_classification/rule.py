@@ -74,6 +74,10 @@ class Rule:
         """Who authored the rule."""
         return self._author
 
+    def add_to_dataset(self, dataset: str):
+        """Add to rule to the given dataset"""
+        pass
+
     def apply(self, dataset: str):
         """Apply the rule to a dataset and save matching ids of the records.
 
@@ -141,6 +145,18 @@ class Rule:
             return None
         else:
             return self._label
+
+
+def add_rules(dataset: str, rules: List[LabelingRule]):
+    """Adds the rules to a given dataset
+
+    Args:
+        dataset: Name of the dataset.
+
+    Returns:
+        api response
+    """
+    return api.active_api().add_dataset_labeling_rules(dataset, rules)
 
 
 def load_rules(dataset: str) -> List[Rule]:
