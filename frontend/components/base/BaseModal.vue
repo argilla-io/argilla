@@ -123,9 +123,9 @@ export default {
   height: 100vh;
   &.modal-bottom-right {
     align-items: flex-end;
-    padding-bottom: 1em;
+    padding-bottom: 3.5em;
     .modal-container {
-      margin-right: 1em;
+      margin-right: 1.5em;
     }
   }
   &.modal-top-right {
