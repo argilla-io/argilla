@@ -147,7 +147,7 @@ class Rule:
             return self._label
 
 
-def add_rules(dataset: str, rules: List[LabelingRule]):
+def add_rules(dataset: str, rules: List[Rule]):
     """Adds the rules to a given dataset
 
     Args:
