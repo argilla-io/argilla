@@ -19,11 +19,10 @@
   <div class="view-info">
     <lazy-base-modal
       modal-class="modal-secondary"
-      modal-position="modal-center"
+      modal-position="modal-bottom-right"
       modal-title="Info"
       modal-icon="info"
       :modal-custom="true"
-      :prevent-body-scroll="true"
       :modal-visible="visibleViewInfo"
       @close-modal="closeModal"
     >

@@ -161,7 +161,6 @@
                   :modal-custom="true"
                   :prevent-body-scroll="true"
                   modal-class="modal-secondary"
-                  modal-position="modal-center"
                   :modal-title="deleteModalContent.title"
                   :modal-visible="visibleModalId === item.id"
                   @close-modal="$emit('close-modal')"

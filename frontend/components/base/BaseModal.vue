@@ -30,7 +30,6 @@
             ></svgicon>
             {{ modalTitle }}
           </p>
-          <div v-if="!modalCustom" />
           <slot />
         </div>
       </div>
@@ -54,10 +53,6 @@ export default {
       type: Boolean,
       default: true,
     },
-    modalCustom: {
-      type: Boolean,
-      default: false,
-    },
     modalClass: {
       type: String,
       default: "modal-info",
@@ -80,7 +75,7 @@ export default {
     },
     modalPosition: {
       type: String,
-      default: "modal-bottom",
+      default: "modal-center",
     },
   },
   data: () => ({}),
@@ -124,30 +119,39 @@ export default {
 }
 
 .modal-wrapper {
-  display: table-cell;
-  vertical-align: middle;
-  &.modal-bottom {
-    vertical-align: bottom;
-    padding-bottom: 3em;
-    padding-left: 30%;
+  display: flex;
+  height: 100vh;
+  &.modal-bottom-right {
+    align-items: flex-end;
+    padding-bottom: 6em;
+    .modal-container {
+      margin-right: 6em;
+    }
+  }
+  &.modal-top-right {
+    align-items: flex-start;
+    padding-bottom: 6em;
+    .modal-container {
+      margin-right: 6em;
+    }
   }
   &.modal-center {
-    vertical-align: middle;
+    align-items: center;
   }
 }
 
 .modal-container {
+  position: relative;
   max-width: 460px;
   margin: 0px auto;
   padding: $base-space * 4;
   background-color: palette(white);
+  color: $black-87;
   border-radius: $border-radius;
   box-shadow: $shadow;
   transition: $swift-ease-in-out;
-  position: relative;
   text-align: left;
   pointer-events: all;
-  color: $black-54;
 }
 .modal-primary {
   box-shadow: $shadow;
@@ -183,8 +187,6 @@ export default {
   @include font-size(16px);
   font-weight: 600;
   margin-top: 0;
-  margin-right: 2em;
-  color: $black-87;
 }
 
 .modal-enter {
