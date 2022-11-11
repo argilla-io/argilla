@@ -91,7 +91,7 @@ def update_dataset_labeling_rule(
 
     response = httpx.patch(
         url,
-        json=rule,
+        json=rule.dict(),
     )
 
     return build_typed_response(response, rule.__class__)
