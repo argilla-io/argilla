@@ -92,6 +92,9 @@ def update_dataset_labeling_rule(
     response = httpx.patch(
         url,
         json=rule.dict(),
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
     )
 
     return build_typed_response(response, rule.__class__)
@@ -108,7 +111,12 @@ def delete_dataset_labeling_rule(
         rule=rule.query,
     )
 
-    response = httpx.delete(url)
+    response = httpx.delete(
+        url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
 
     return build_typed_response(response, rule.__class__)
 
