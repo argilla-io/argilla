@@ -2,7 +2,7 @@
 
 exports[`TextClassificationViewInfo renders properly 1`] = `
 <div class="view-info">
-  <lazy-base-modal modal-class="modal-secondary" modal-position="modal-center" modal-title="Info" modal-icon="info" modal-custom="true" prevent-body-scroll="true" modal-visible="true">
+  <lazy-base-modal modal-class="modal-secondary" modal-position="modal-bottom-right" modal-title="Info" modal-icon="info" modal-custom="true" modal-visible="true">
     <div class="view-info__content">
       <p class="view-info__title">Highlight colors in token attributions</p>
       <p>
