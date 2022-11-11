@@ -74,6 +74,41 @@ def add_dataset_labeling_rules(
     return build_list_response(response)
 
 
+def update_dataset_labeling_rule(
+    client: AuthenticatedClient,
+    name: str,
+    rule: LabelingRule,
+) -> Response[Union[HTTPValidationError, ErrorMessage]]:
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{rule}".format(
+        client.base_url,
+        name=name,
+        rule=rule.query,
+    )  # probably wrong but hopefully close
+
+    httpx.patch(
+        url,
+        json=rule,
+    )
+
+    ...
+
+
+def delete_dataset_labeling_rule(
+    client: AuthenticatedClient,
+    name: str,
+    rule: LabelingRule,
+):
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{rule}".format(
+        client.base_url,
+        name=name,
+        rule=rule.query,
+    )
+
+    httpx.delete(url)
+
+    ...
+
+
 def fetch_dataset_labeling_rules(
     client: AuthenticatedClient,
     name: str,
