@@ -123,16 +123,16 @@ export default {
   height: 100vh;
   &.modal-bottom-right {
     align-items: flex-end;
-    padding-bottom: 6em;
+    padding-bottom: 1em;
     .modal-container {
-      margin-right: 6em;
+      margin-right: 1em;
     }
   }
   &.modal-top-right {
     align-items: flex-start;
-    padding-bottom: 6em;
+    padding-bottom: 1em;
     .modal-container {
-      margin-right: 6em;
+      margin-right: 1em;
     }
   }
   &.modal-center {
