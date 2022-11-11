@@ -609,6 +609,7 @@ class Api:
         return MetricResults(**metric_.dict(), results=response.parsed)
 
     def add_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
+        """Adds the dataset labeling rules"""
         text_classification_api.add_dataset_labeling_rules(
             self._client, name=dataset, rules=rules
         )
