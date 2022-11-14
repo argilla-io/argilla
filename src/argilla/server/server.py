@@ -18,8 +18,6 @@ This module configures the global fastapi application
 """
 import inspect
 import os
-import sys
-import warnings
 from pathlib import Path
 
 from brotli_asgi import BrotliMiddleware
@@ -30,10 +28,8 @@ from pydantic import ConfigError
 
 from argilla import __version__ as argilla_version
 from argilla.logging import configure_logging
-from argilla.server.daos.backend.elasticsearch import (
-    ElasticsearchBackend,
-    GenericSearchError,
-)
+from argilla.server.daos.backend import GenericElasticEngineBackend
+from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.errors import APIErrorHandler, EntityNotFoundError
@@ -93,10 +89,11 @@ def configure_app_storage(app: FastAPI):
     @app.on_event("startup")
     async def configure_elasticsearch():
         try:
-            es_wrapper = ElasticsearchBackend.get_instance()
-            dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
+            backend = GenericElasticEngineBackend.get_instance()
+            dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(backend)
             datasets: DatasetsDAO = DatasetsDAO.get_instance(
-                es_wrapper, records_dao=dataset_records
+                es=backend,
+                records_dao=dataset_records,
             )
             datasets.init()
             dataset_records.init()
