@@ -14,7 +14,15 @@
 #  limitations under the License.
 import logging
 
+import pytest
+
 from argilla.logging import LoggingMixin, LoguruLoggerHandler
+
+logoru_not_found = None
+try:
+    import logoru
+except ModuleNotFoundError:
+    logoru_not_found = True
 
 
 class LoggingForTest(LoggingMixin):
@@ -49,6 +57,10 @@ def test_logging_mixin_without_breaking_constructors():
     assert another_child.__getattribute__("__logger__") == child.logger
 
 
+@pytest.mark.skipif(
+    condition=logoru_not_found,
+    reason="Logoru lob not installed",
+)
 def test_logging_handler(mocker):
     mocker.patch.object(LoguruLoggerHandler, "emit", autospec=True)
     handler = LoguruLoggerHandler()

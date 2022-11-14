@@ -16,13 +16,25 @@
 import logging
 import sys
 
+import pytest
+
 from argilla.logging import LoguruLoggerHandler
 from argilla.utils import LazyargillaModule
+
+logoru_not_found = None
+try:
+    import logoru
+except ModuleNotFoundError:
+    logoru_not_found = True
 
 
 def test_lazy_module():
     assert isinstance(sys.modules["argilla"], LazyargillaModule)
 
 
+@pytest.mark.skipif(
+    condition=logoru_not_found,
+    reason="Logoru lib not found",
+)
 def test_configure_logging_call():
     assert isinstance(logging.getLogger("argilla").handlers[0], LoguruLoggerHandler)
