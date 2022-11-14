@@ -262,7 +262,12 @@ def test_top_k_mentions_consistency(mocked_client):
     )
 
 
-def validate_mentions(*, dataset: str, expected_mentions: dict, **metric_args):
+def validate_mentions(
+    *,
+    dataset: str,
+    expected_mentions: dict,
+    **metric_args,
+):
     results = top_k_mentions(dataset, **metric_args)
     assert results
     assert results.data == expected_mentions
