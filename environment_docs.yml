@@ -3,7 +3,7 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - python=3.9.15
+  - python=3.9.14
   - _libgcc_mutex=0.1
   - _openmp_mutex=5.1
   - asttokens=2.0.5
