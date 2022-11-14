@@ -1,20 +1,18 @@
-name: argilla-docs
 channels:
   - defaults
 dependencies:
-  - python=3.8.13
   - _libgcc_mutex=0.1
   - _openmp_mutex=5.1
   - asttokens=2.0.5
   - backcall=0.2.0
-  - ca-certificates=2022.4.26
-  - certifi=2022.6.15
+  - ca-certificates=2022.9.24
+  - certifi=2022.9.24
   - decorator=5.1.1
   - executing=0.8.3
   - ipython=8.3.0
   - jedi=0.18.1
   - ld_impl_linux-64=2.38
-  - libffi=3.2.1
+  - libffi=3.3
   - libgcc-ng=11.2.0
   - libgomp=11.2.0
   - libstdcxx-ng=11.2.0
@@ -30,6 +28,7 @@ dependencies:
   - ptyprocess=0.7.0
   - pure_eval=0.2.2
   - pygments=2.11.2
+  - python=3.8.13
   - readline=8.1.2
   - setuptools=61.2.0
   - six=1.16.0
@@ -41,6 +40,8 @@ dependencies:
   - xz=5.2.5
   - zlib=1.2.12
   - pip:
+      - recommonmark
+      - readthedocs-sphinx-ext
       - alabaster==0.7.12
       - attrs==21.4.0
       - babel==2.10.3
