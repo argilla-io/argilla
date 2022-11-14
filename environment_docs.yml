@@ -1,7 +1,9 @@
 name: argilla-docs
 channels:
   - defaults
+  - conda-forge
 dependencies:
+  - python=3.9.15
   - _libgcc_mutex=0.1
   - _openmp_mutex=5.1
   - asttokens=2.0.5
@@ -29,7 +31,6 @@ dependencies:
   - ptyprocess=0.7.0
   - pure_eval=0.2.2
   - pygments=2.11.2
-  - python=3.8.13
   - readline=8.1.2
   - setuptools=61.2.0
   - six=1.16.0
