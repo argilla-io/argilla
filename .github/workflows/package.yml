@@ -15,6 +15,8 @@ on:
       - "main"
       - "develop"
       - "releases/**"
+      - "feature/**"
+      - "feat/**"
 
 jobs:
   src-test:
@@ -22,7 +24,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elasticsearch: [7.4, 7.10.2, 7.14, 7.16, 7.17, 8.0]
+        setup-action: [ankane/setup-elasticsearch@v1]
+        version: [7.14, 7.17, 8.0]
+        include:
+          - setup-action: ankane/setup-opensearch@v1
+            version: 1.2
+          - setup-action: ankane/setup-opensearch@v1
+            version: 2.2
+        elasticsearch:
     defaults:
       run:
         shell: bash -l {0}
@@ -42,9 +51,9 @@ jobs:
 
       - name: Setup ElasticSearch 🔎
         if: steps.filter.outputs.python_code == 'true'
-        uses: ankane/setup-elasticsearch@v1
+        uses: ${{ setup-action }}
         with:
-          elasticsearch-version: ${{ matrix.elasticsearch }}
+          elasticsearch-version: ${{ matrix.version }}
 
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
