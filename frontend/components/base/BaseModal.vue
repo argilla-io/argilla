@@ -16,10 +16,13 @@
   -->
 
 <template>
-  <div v-if="modalVisible" v-click-outside="onClickOutside" class="modal-mask">
+  <div v-if="modalVisible" :class="modalMaskClass">
     <transition name="fade" appear>
-      <div class="modal-wrapper" :class="modalPosition">
-        <div :class="['modal-container', modalClass]">
+      <div
+        class="modal-wrapper"
+        :class="modalPosition"
+      >
+        <div :class="['modal-container', modalClass]" v-click-outside="onClickOutside">
           <p v-if="!modalCustom" class="modal__title">
             <span
               class="state"
@@ -76,22 +79,10 @@ export default {
       default: "modal-bottom",
     },
   },
-  data: () => ({}),
-  watch: {
-    modalVisible() {
-      if (this.preventBodyScroll) {
-        if (this.modalVisible) {
-          document.body.classList.add("--fixed");
-        } else {
-          document.body.classList.remove("--fixed");
-        }
-      }
+  computed: {
+    modalMaskClass() {
+      return [this.preventBodyScroll ? "prevent-scroll" : null, "modal-mask"];
     },
-  },
-  beforeDestroy() {
-    if (this.preventBodyScroll) {
-      document.body.classList.remove("--fixed");
-    }
   },
   methods: {
     onClickOutside() {
@@ -111,9 +102,11 @@ export default {
   height: 100vh;
   display: table;
   transition: opacity 0.3s ease;
-  pointer-events: none;
   cursor: default;
   background: $black-4;
+  &:not(.prevent-scroll) {
+    pointer-events: none;
+  }
 }
 
 .modal-wrapper {
