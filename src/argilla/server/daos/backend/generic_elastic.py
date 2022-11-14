@@ -12,16 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
-from argilla.server.daos.backend import query_helpers
-from argilla.server.daos.backend.base import (
-    GenericSearchError,
-    IndexNotFoundError,
-    InvalidSearchError,
-)
+from argilla.server.daos.backend.base import IndexNotFoundError, InvalidSearchError
 from argilla.server.daos.backend.client_adapters.elasticsearch import IClientAdapter
 from argilla.server.daos.backend.client_adapters.factory import ClientAdapterFactory
 from argilla.server.daos.backend.mappings.datasets import (
