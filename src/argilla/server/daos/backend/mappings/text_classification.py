@@ -46,6 +46,11 @@ def text_classification_mappings():
             "score": mappings.decimal_field(),
         },
         "dynamic_templates": [
-            {"inputs.*": {"path_match": "inputs.*", "mapping": mappings.text_field()}}
+            {
+                "inputs.*": {
+                    "path_match": "inputs.*",
+                    "mapping": mappings.text_field(),
+                }
+            }
         ],
     }

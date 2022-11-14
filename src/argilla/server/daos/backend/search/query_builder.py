@@ -13,11 +13,13 @@
 #  limitations under the License.
 
 import logging
+import re
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
+from overrides import overrides
 
 from argilla.server.daos.backend.query_helpers import filters
 from argilla.server.daos.backend.search.model import (
@@ -29,6 +31,62 @@ from argilla.server.daos.backend.search.model import (
     SortableField,
     SortConfig,
 )
+
+
+class HighlightParser:
+
+    __HIGHLIGHT_PRE_TAG__ = "<@@-ar-key>"
+    __HIGHLIGHT_POST_TAG__ = "</@@-ar-key>"
+    __HIGHLIGHT_VALUES_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}"
+    )
+
+    __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
+    )
+
+    @classmethod
+    def build_query_highlight(cls):
+        return {
+            "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
+            "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
+            "require_field_match": True,
+            "fields": {
+                "text": {},
+                "text.*": {},
+                "inputs.*": {},
+            },
+        }
+
+    @classmethod
+    def parse_highligth_results(
+        cls,
+        doc: Dict[str, Any],
+        is_phrase_query: bool = False,
+    ) -> Optional[List[str]]:
+        highlight_info = doc.get("highlight")
+        if not highlight_info:
+            return None
+
+        search_keywords = []
+        for content in highlight_info.values():
+            if not isinstance(content, list):
+                content = [content]
+            text = " ".join(content)
+
+            if is_phrase_query:
+                text = re.sub(
+                    pattern=cls.__HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__,
+                    repl=" ",
+                    string=text,
+                )
+            search_keywords.extend(
+                re.findall(
+                    pattern=cls.__HIGHLIGHT_VALUES_REGEX__,
+                    string=text,
+                )
+            )
+        return list(set(search_keywords))
 
 
 class EsQueryBuilder:
@@ -68,7 +126,7 @@ class EsQueryBuilder:
             else:
                 query_filters.append(owners_filter)
 
-        if query.Tasks:
+        if query.tasks:
             query_filters.append(
                 filters.terms_filter(
                     field="task.keyword",
@@ -126,7 +184,9 @@ class EsQueryBuilder:
         schema: Optional[Dict[str, Any]] = None,
         query: Optional[BackendQuery] = None,
         sort: Optional[SortConfig] = None,
-        id_from: Optional[str] = None,
+        exclude_fields: Optional[List[str]] = None,
+        doc_from: Optional[int] = None,
+        highlight: Optional[HighlightParser] = None,
     ) -> Dict[str, Any]:
 
         es_query: Dict[str, Any] = (
@@ -135,13 +195,27 @@ class EsQueryBuilder:
             else {"query": self._search_to_es_query(schema, query)}
         )
 
-        if id_from:
-            es_query["search_after"] = [id_from]
-            sort = SortConfig()  # sort by id as default
-
         es_sort = self.map_2_es_sort_configuration(schema=schema, sort=sort)
         if es_sort:
             es_query["sort"] = es_sort
+
+        if doc_from:
+            es_query["from"] = doc_from
+
+        if exclude_fields:
+            es_query["_source"] = {"excludes": exclude_fields}
+
+        if highlight:
+            es_query["highlight"] = highlight.build_query_highlight()
+
+        if (hasattr(query, "embedding_vector") and query.embedding_vector) and (
+            hasattr(query, "embedding_name") and query.embedding_name
+        ):
+            self._build_knn_configuration(
+                es_query=es_query,
+                vector_field=query.embedding_name,
+                vector_value=query.embedding_vector,
+            )
 
         return es_query
 
@@ -260,18 +334,42 @@ class EsQueryBuilder:
             for key, definition in mappings["properties"].items()
         }
 
-    def map_2_knn_query(
+    def _build_knn_configuration(
         self,
         *,
-        embedding_name: str,
-        embedding_vector: List[float],
-    ) -> Optional[Dict[str, Any]]:
-
-        if embedding_name is None or embedding_vector is None:
-            return None
-        return {
-            "field": embedding_name,
-            "query_vector": embedding_vector,
-            "k": 3,
-            "num_candidates": 50,
+        es_query: Dict[str, Any],
+        vector_field: str,
+        vector_value: List[float],
+    ):
+        es_query["knn"] = {
+            "field": vector_field,
+            "query_vector": vector_value,
+            "k": 3,  # TODO: parameterize
+            "num_candidates": 50,  # TODO: parameterize
         }
+        es_query.pop("sort")
+
+
+class OpenSearchQueryBuilder(EsQueryBuilder):
+    @overrides
+    def _build_knn_configuration(
+        self,
+        *,
+        es_query: Dict[str, Any],
+        vector_field: str,
+        vector_value: List[float],
+    ):
+        knn = {
+            vector_field: {
+                "vector": vector_value,
+                "k": 3,  # TODO: Input from query
+            }
+        }
+        es_query.pop("sort")
+        filter = es_query.pop("query")
+        es_query.update(
+            {
+                "query": {"knn": knn},
+                "post_filter": filter,
+            }
+        )
