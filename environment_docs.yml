@@ -1,7 +1,6 @@
 name: argilla-docs
 channels:
   - defaults
-  - conda-forge
 dependencies:
   - python=3.9.13
   - _libgcc_mutex=0.1
