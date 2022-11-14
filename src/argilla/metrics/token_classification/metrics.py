@@ -424,8 +424,8 @@ def top_k_mentions(
             entities = [
                 entity for entity in entities if entity["label"] in post_label_filter
             ]
-
         if entities:
+            mention["entities"] = entities
             filtered_mentions.append(mention)
             mention_values.append(mention["mention"])
 
