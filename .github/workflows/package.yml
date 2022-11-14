@@ -24,14 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        setup-action: [ankane/setup-elasticsearch@v1]
-        version: [7.14, 7.17, 8.0]
-        include:
-          - setup-action: ankane/setup-opensearch@v1
-            version: 1.2
-          - setup-action: ankane/setup-opensearch@v1
-            version: 2.2
-        elasticsearch:
+        version: [8.0, 8.2]
     defaults:
       run:
         shell: bash -l {0}
@@ -51,7 +44,7 @@ jobs:
 
       - name: Setup ElasticSearch 🔎
         if: steps.filter.outputs.python_code == 'true'
-        uses: ${{ setup-action }}
+        uses: ankane/setup-elasticsearch@v1
         with:
           elasticsearch-version: ${{ matrix.version }}
 
