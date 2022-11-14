@@ -1,22 +1,39 @@
 import { Model } from "@vuex-orm/core";
-import { TokenClassificationDataset } from "../TokenClassification";
+// import { TokenAnnotation } from "./TokenAnnotation.modelTokenClassification";
+
+// import { TokenGlobalEntity } from "./TokenGlobalEntity.modelTokenClassification";
 
 class TokenEntity extends Model {
   static entity = "tokenEntities";
-  static primaryKey = ["text", "color_id"];
+  static primaryKey = ["label", "record_id", "start"]; // NOTE : carefull with the primary key unique for annotation & prediction
 
   static fields() {
     return {
       id: this.uid(),
-      color_id: this.attr(null),
-      text: this.string(null),
-      dataset_id: this.attr(null),
-      is_activate: this.attr(false),
-      // // relationships
-      dataset: this.belongsTo(TokenClassificationDataset, "dataset_id"),
+      record_id: this.string(null),
+      label: this.attr(null),
+      start: this.attr(null),
+      end: this.attr(null),
+      score: this.attr(null),
+      token_entitable_id: this.attr(null),
+      token_entitable_type: this.attr(null),
+
+      // relationship
+      token_entitable: this.morphTo(
+        "token_entitable_id",
+        "token_entitable_type"
+      ),
+
+      //   token_global_entity_id: this.string(""),
+      // relationships
+      //   token_global_entity: this.hasOne(
+      //     TokenGlobalEntity,
+      //     "token_global_entity_id"
+      //   ),
     };
   }
 }
+const getTokenEntitableIdPrimaryKey = ({ label, record_id, start, end }) =>
+  `${label}.${record_id}.${start}.${end}`;
 
-const formatDatasetIdForTokenEntityModel = (dataset_id) => dataset_id.join(".");
-export { TokenEntity, formatDatasetIdForTokenEntityModel };
+export { TokenEntity, getTokenEntitableIdPrimaryKey };

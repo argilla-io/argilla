@@ -21,7 +21,7 @@ import {
   getDatasetModelPrimaryKey,
 } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
-import { TokenEntity } from "./token-classification/TokenEntity.modelTokenClassification";
+import { TokenGlobalEntity } from "./token-classification/TokenGlobalEntity.modelTokenClassification";
 import { TokenRecord } from "./token-classification/TokenRecord.modelTokenClassification";
 
 class TokenClassificationRecord extends BaseRecord {
@@ -102,7 +102,7 @@ class TokenClassificationDataset extends ObservationDataset {
       lastSelectedEntity: this.attr({}),
 
       //relationships
-      token_entities: this.hasMany(TokenEntity, "dataset_id"),
+      token_global_entities: this.hasMany(TokenGlobalEntity, "dataset_id"),
       token_records: this.hasMany(TokenRecord, "dataset_id"),
     };
   }
