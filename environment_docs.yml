@@ -5,7 +5,7 @@ dependencies:
   - _openmp_mutex=5.1
   - asttokens=2.0.5
   - backcall=0.2.0
-  - ca-certificates=2022.9.24
+  - ca-certificates=2022.10.11
   - certifi=2022.9.24
   - decorator=5.1.1
   - executing=0.8.3
