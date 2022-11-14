@@ -19,7 +19,7 @@
   <div
     v-click-outside="{
       events: ['mousedown'],
-      handler: onClickOutside,
+      handler: close,
     }"
     class="filters"
   >
@@ -249,7 +249,7 @@ export default {
     },
   },
   methods: {
-    onClickOutside() {
+    close() {
       this.initialVisibleGroup = null;
     },
     itemsAppliedOnGroup(group) {
