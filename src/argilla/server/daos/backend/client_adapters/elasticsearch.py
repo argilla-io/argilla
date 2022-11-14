@@ -136,7 +136,7 @@ class ElasticsearchClient(IClientAdapter):
             results = {}
             for aggregation in aggregations:
                 es_query["aggs"] = aggregation
-                results = self.__client__.search(
+                search = self.__client__.search(
                     index=index,
                     body=es_query,
                     track_total_hits=True,
@@ -144,7 +144,7 @@ class ElasticsearchClient(IClientAdapter):
                     size=0,
                 )
 
-                search_aggregations = results.get("aggregations", {})
+                search_aggregations = search.get("aggregations", {})
                 if search_aggregations:
                     parsed_aggregations = query_helpers.parse_aggregations(
                         search_aggregations
