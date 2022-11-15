@@ -16,7 +16,13 @@
   -->
 
 <template>
-  <div v-click-outside="close" class="filters">
+  <div
+    v-click-outside="{
+      events: ['mousedown'],
+      handler: close,
+    }"
+    class="filters"
+  >
     <div class="filters__list">
       <div v-for="group in groups" :key="group" class="filters__list__item">
         <p
@@ -244,7 +250,7 @@ export default {
   },
   methods: {
     close() {
-      this.initialVisibleGroup = undefined;
+      this.initialVisibleGroup = null;
     },
     itemsAppliedOnGroup(group) {
       if (group === "Sort") {
@@ -258,7 +264,7 @@ export default {
     },
     selectGroup(group) {
       if (this.initialVisibleGroup === group) {
-        this.initialVisibleGroup = undefined;
+        this.initialVisibleGroup =  null;
       } else {
         this.initialVisibleGroup = group;
       }
