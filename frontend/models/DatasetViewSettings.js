@@ -52,17 +52,7 @@ export default class DatasetViewSettings extends Model {
       headerHeight: this.number(140),
       visibleMetrics: this.boolean(false),
       visibleRulesList: this.boolean(false),
-      visibleViewInfo: this.boolean(false),
     };
-  }
-
-  async openViewInfo(value) {
-    return await DatasetViewSettings.update({
-      where: this.$id,
-      data: {
-        visibleViewInfo: value,
-      },
-    });
   }
 
   async enableRulesSummary() {
