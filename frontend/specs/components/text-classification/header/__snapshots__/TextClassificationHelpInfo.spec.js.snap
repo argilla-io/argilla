@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TextClassificationhelpInfo renders properly 1`] = `
+exports[`TextClassificationHelpInfo renders properly 1`] = `
 <lazy-base-modal modal-class="modal-secondary" modal-position="modal-top-right" modal-title="Info" modal-icon="info" modal-custom="true" modal-visible="true">
   <div class="help-info__content">
     <p class="help-info__title">Highlight colors in token attributions</p>

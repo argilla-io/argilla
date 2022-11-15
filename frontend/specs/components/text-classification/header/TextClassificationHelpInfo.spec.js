@@ -1,5 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
-import ComponentTextClassifierHelpInfo from "@/components/text-classifier/header/TextClassificationhelpInfo";
+import ComponentTextClassifierHelpInfo from "@/components/text-classifier/header/TextClassificationHelpInfo";
 
 const props = {
   visible: true,
@@ -14,7 +14,7 @@ beforeEach(() => {
 afterEach(() => {
   wrapper.destroy();
 });
-describe("TextClassificationhelpInfo", () => {
+describe("TextClassificationHelpInfo", () => {
   let spy = jest.spyOn(console, "error");
   afterEach(() => spy.mockReset());
 
