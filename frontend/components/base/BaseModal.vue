@@ -16,8 +16,8 @@
   -->
 
 <template>
-  <div v-if="modalVisible" v-click-outside="onClickOutside" class="modal-mask">
-    <transition name="fade" appear>
+  <transition name="fade" v-if="modalVisible" appear>
+    <div v-click-outside="onClickOutside" class="modal-mask">
       <div class="modal-wrapper" :class="modalPosition">
         <div :class="['modal-container', modalClass]">
           <p v-if="modalTitle" class="modal__title">
@@ -33,8 +33,8 @@
           <slot />
         </div>
       </div>
-    </transition>
-  </div>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -130,9 +130,9 @@ export default {
   }
   &.modal-top-right {
     align-items: flex-start;
-    padding-bottom: 1em;
+    padding-top: 10em;
     .modal-container {
-      margin-right: 1em;
+      margin-right: 6em;
     }
   }
   &.modal-center {
