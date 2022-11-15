@@ -122,8 +122,8 @@ def configure_app_logging(app: FastAPI):
 
 
 app = FastAPI(
-    title="argilla",
-    description="argilla API",
+    title="Argilla",
+    description="Argilla API",
     # Disable default openapi configuration
     openapi_url="/api/docs/spec.json",
     docs_url="/api/docs" if settings.docs_enabled else None,
