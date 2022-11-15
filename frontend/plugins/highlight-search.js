@@ -16,62 +16,16 @@
  */
 
 export default (context, inject) => {
-  const htmlText = function (text) {
-    return text
-      .toString()
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  };
-
-  function htmlHighlightText(text) {
-    return `<span class="highlight-text">${htmlText(text)}</span>`;
-  }
-
-  const regexFromTerm = function (term) {
-    let q = term.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, "");
-    return new RegExp(q, "gi");
-  };
-
-  const escapeRegExp = function (text) {
-    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-  };
-
-  const highlightSearch = function (query, text) {
-    const escapedText = htmlText(text);
-    if (!query) {
-      return text;
-    }
-
-    return escapedText.replace(
-      regexFromTerm(query),
-      (match) => `<span class="highlight-text">${match}</span>`
-    );
-  };
-
   const highlightKeywords = function (text, keywords) {
-    const sortedKeywords = ([...keywords] || []).sort(
-      (a, b) => b.length - a.length
-    );
-    text = htmlText(text);
-    sortedKeywords.forEach((keyword) => {
-      const regex = new RegExp(
-        `([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${escapeRegExp(keyword)}`,
-        "gmi"
-      );
-      text = text.replace(regex, (match) => htmlHighlightText(match));
-    });
-
-    return text;
+    const sortedKeywords = sortByLength([...keywords]);
+    const pattern = sortedKeywords.map((keyword) => createPattern(keyword));
+    const regExp = createRegExp(pattern.join("|"));
+    return replaceText(regExp, text);
   };
 
   const keywordsSpans = function (text, keywords) {
     return (keywords || []).flatMap((keyword) => {
-      const regex = new RegExp(
-        `([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${escapeRegExp(keyword)}`,
-        "gmi"
-      );
+      const regex = createRegExp(createPattern(keyword));
       return [...text.matchAll(regex)].map((match) => {
         return {
           start: match.index,
@@ -81,7 +35,41 @@ export default (context, inject) => {
     });
   };
 
-  inject("highlightSearch", highlightSearch);
+  function sortByLength(keywords) {
+    return (keywords || []).sort((a, b) => b.length - a.length);
+  }
+
+  function createPattern(value) {
+    return `([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${escapeRegExp(value)}`;
+  }
+
+  const escapeRegExp = function (text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+  };
+
+  function createRegExp(pattern) {
+    return new RegExp(pattern, "gmi");
+  }
+
+  function replaceText(regex, text) {
+    return htmlText(text).replace(regex, (matched) =>
+      htmlHighlightText(matched)
+    );
+  }
+
+  function htmlHighlightText(text) {
+    return `<span class="highlight-text">${htmlText(text)}</span>`;
+  }
+
+  const htmlText = function (text) {
+    return text
+      .toString()
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  };
+
   inject("highlightKeywords", highlightKeywords);
   inject("keywordsSpans", keywordsSpans);
   inject("htmlText", htmlText);
