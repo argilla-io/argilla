@@ -17,7 +17,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend.base import IndexNotFoundError, InvalidSearchError
-from argilla.server.daos.backend.client_adapters.elasticsearch import IClientAdapter
+from argilla.server.daos.backend.client_adapters.base import IClientAdapter
 from argilla.server.daos.backend.client_adapters.factory import ClientAdapterFactory
 from argilla.server.daos.backend.mappings.datasets import (
     DATASETS_INDEX_NAME,
