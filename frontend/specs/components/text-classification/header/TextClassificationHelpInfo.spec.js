@@ -2,7 +2,7 @@ import { shallowMount } from "@vue/test-utils";
 import ComponentTextClassifierHelpInfo from "@/components/text-classifier/header/TextClassificationhelpInfo";
 
 const props = {
-  visible: true
+  visible: true,
 };
 
 let wrapper = null;
