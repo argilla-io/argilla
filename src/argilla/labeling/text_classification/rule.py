@@ -162,6 +162,32 @@ def add_rules(dataset: str, rules: List[Rule]):
     return api.active_api().add_dataset_labeling_rules(dataset, rules)
 
 
+def delete_rules(dataset: str, rules: List[Rule]):
+    """Deletes the rules from the given dataset
+
+    Args:
+        dataset: Name of the dataset
+
+    Returns:
+        api response
+
+    """
+    return api.active_api().delete_dataset_labeling_rules(dataset, rules)
+
+
+def update_rules(dataset: str, rules: List[Rule]):
+    """Updates the rules of the given dataset
+
+    Args:
+        dataset: Name of the dataset
+
+    Returns:
+        api response
+
+    """
+    return api.active_api().update_dataset_labeling_rules(dataset, rules)
+
+
 def load_rules(dataset: str) -> List[Rule]:
     """load the rules defined in a given dataset.
 

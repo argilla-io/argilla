@@ -617,6 +617,20 @@ class Api:
                 rule=rule,
             )
 
+    def update_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
+        """Updates the dataset labeling rules"""
+        for rule in rules:
+            text_classification_api.update_dataset_labeling_rule(
+                self._client, name=dataset, rule=rule
+            )
+
+    def delete_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
+        """Deletes the dataset labeling rules"""
+        for rule in rules:
+            text_classification_api.delete_dataset_labeling_rule(
+                self._client, name=dataset, rule=rule
+            )
+
     def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
         response = text_classification_api.fetch_dataset_labeling_rules(
             self._client, name=dataset

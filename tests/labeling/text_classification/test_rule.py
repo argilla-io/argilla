@@ -21,7 +21,13 @@ from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from argilla.labeling.text_classification import Rule, load_rules
+from argilla.labeling.text_classification import (
+    Rule,
+    add_rules,
+    delete_rules,
+    load_rules,
+    update_rules,
+)
 from argilla.labeling.text_classification.rule import RuleNotAppliedError
 from argilla.server.errors import EntityNotFoundError
 
@@ -137,6 +143,78 @@ def test_load_rules(mocked_client, log_dataset):
     assert len(rules) == 1
     assert rules[0].query == "a query"
     assert rules[0].label == "LALA"
+
+
+def test_add_rules(mocked_client, log_dataset):
+
+    expected_rules = [
+        Rule(query="a query", label="La La"),
+        Rule(query="another query", label="La La"),
+        Rule(query="the other query", label="La La La"),
+    ]
+
+    add_rules(log_dataset, expected_rules)
+
+    actual_rules = load_rules(log_dataset)
+
+    assert len(actual_rules) == 3
+    for actual_rule, expected_rule in zip(actual_rules, expected_rules):
+        assert actual_rule.query == expected_rule.query
+        assert actual_rule.label == expected_rule.label
+
+
+def test_delete_rules(mocked_client, log_dataset):
+
+    rules = [
+        Rule(query="a query", label="La La"),
+        Rule(query="another query", label="La La"),
+        Rule(query="the other query", label="La La La"),
+    ]
+
+    add_rules(log_dataset, rules)
+
+    delete_rules(
+        log_dataset,
+        [
+            Rule(query="a query", label="La La"),
+        ],
+    )
+
+    actual_rules = load_rules(log_dataset)
+
+    assert len(rules) == 2
+
+    for actual_rule, expected_rule in zip(actual_rules, rules[1:]):
+        assert actual_rule.label == expected_rule.label
+        assert actual_rule.query == expected_rule.query
+
+
+def test_update_rules(mocked_client, log_dataset):
+
+    rules = [
+        Rule(query="a query", label="La La"),
+        Rule(query="another query", label="La La"),
+        Rule(query="the other query", label="La La La"),
+    ]
+
+    add_rules(log_dataset, rules)
+
+    update_rules(
+        log_dataset,
+        [
+            Rule(query="a query", label="La La La"),
+        ],
+    )
+
+    actual_rules = load_rules(log_dataset)
+
+    assert len(rules) == 3
+
+    rules[0] = (Rule(query="a query", label="La La La"),)
+
+    for actual_rule, expected_rule in zip(actual_rules, rules):
+        assert actual_rule.label == expected_rule.label
+        assert actual_rule.query == expected_rule.query
 
 
 def test_copy_dataset_with_rules(mocked_client, log_dataset):
