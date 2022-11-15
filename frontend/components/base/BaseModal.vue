@@ -18,11 +18,11 @@
 <template>
   <div v-if="modalVisible" :class="modalMaskClass">
     <transition name="fade" appear>
-      <div
-        class="modal-wrapper"
-        :class="modalPosition"
-      >
-        <div :class="['modal-container', modalClass]" v-click-outside="onClickOutside">
+      <div class="modal-wrapper" :class="modalPosition">
+        <div
+          :class="['modal-container', modalClass]"
+          v-click-outside="onClickOutside"
+        >
           <p v-if="!modalCustom" class="modal__title">
             <span
               class="state"
