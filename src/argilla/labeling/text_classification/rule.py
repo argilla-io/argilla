@@ -76,7 +76,9 @@ class Rule:
 
     def add_to_dataset(self, dataset: str):
         """Add to rule to the given dataset"""
-        labeling_rule = {"query": self.query, "label": self.label}
+        labeling_rule = LabelingRule(
+            query=self.query, label=self.label, author=self.author or "None"
+        )
         api.active_api().add_dataset_labeling_rules(dataset, rules=[labeling_rule])
 
     def apply(self, dataset: str):

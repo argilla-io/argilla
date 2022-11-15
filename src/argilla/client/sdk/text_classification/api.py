@@ -69,12 +69,12 @@ def add_dataset_labeling_rule(
 
     response = httpx.post(
         url=url,
-        json=rule,
+        json={"query": rule.query, "label": rule.label},
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
     )
-    assert response.status_code == 200
+    return build_typed_response(response, LabelingRule)
 
 
 def update_dataset_labeling_rule(
