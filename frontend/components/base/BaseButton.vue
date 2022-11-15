@@ -92,12 +92,12 @@ export default {
 // buttons
 %button {
   position: relative;
-  min-width: auto;
   display: flex;
-  position: relative;
+  align-items: center;
+  gap: $base-space;
+  min-width: auto;
   overflow: hidden;
   user-select: none;
-  cursor: pointer;
   outline: 0;
   background: none;
   border: 0;
@@ -108,13 +108,12 @@ export default {
   font-weight: 500;
   text-align: center;
   text-decoration: none;
-  vertical-align: middle;
   white-space: nowrap;
-  align-items: center;
   @include font-size(14px);
   line-height: 14px;
   padding: 12px 24px;
   transition: all 0.4s $cb-normal;
+  cursor: pointer;
   &:focus {
     outline: 0;
   }
@@ -129,19 +128,11 @@ export default {
 }
 .button {
   @extend %button;
-  :deep(.svg-icon) {
-    margin-right: $base-space * 2;
-    margin-left: -$base-space * 2;
-  }
 }
 .small {
   @include font-size(13px);
   line-height: 13px;
   padding: 9px 18px;
-  :deep(.svg-icon) {
-    margin-right: $base-space;
-    margin-left: -$base-space;
-  }
 }
 .primary {
   background-color: $primary-color;
