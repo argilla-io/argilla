@@ -20,7 +20,7 @@ on:
 
 jobs:
   test:
-    name: Check tests
+    name: Check tests (ElasticSearch)
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -112,7 +112,7 @@ jobs:
           fail_ci_if_error: false
 
   test-opensearch:
-    name: Check tests
+    name: Check tests (OpenSearch)
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -133,14 +133,6 @@ jobs:
               - 'tests/**'
             frontend:
               - 'frontend/**'
-
-      - name: Setup OpenSearch 🔎
-        if: steps.filter.outputs.python_code == 'true'
-        uses: ankane/setup-opensearch@v1
-        with:
-          opensearch-version: ${{ matrix.version }}
-          config: |
-            http.port: 9200
 
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
@@ -182,10 +174,17 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
 
+      - name: Setup OpenSearch 🔎
+        if: steps.filter.outputs.python_code == 'true'
+        uses: ankane/setup-opensearch@v1
+        with:
+          opensearch-version: ${{ matrix.version }}
+          config: |
+            http.port: 9200
+
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
-        run: |
-          pytest tests
+        run: pytest tests
 
 
   build:
