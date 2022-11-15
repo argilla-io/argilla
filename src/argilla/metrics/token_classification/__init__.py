@@ -26,4 +26,5 @@ from .metrics import (
     token_frequency,
     token_length,
     tokens_length,
+    top_k_mentions,
 )
