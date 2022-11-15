@@ -53,7 +53,7 @@ export default (context, inject) => {
 
   function replaceText(regex, text) {
     return htmlText(text).replace(regex, (matched) =>
-      htmlHighlightText(matched)
+      matched ? htmlHighlightText(matched) : matched
     );
   }
 
