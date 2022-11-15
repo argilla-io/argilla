@@ -21,7 +21,7 @@
       v-if="!dataset.viewSettings.visibleRulesList"
       :dataset="dataset"
     >
-      <records-counter :total="dataset.results.total"></records-counter>
+      <dataset-options :dataset="dataset" />
     </filters-area>
     <global-actions :dataset="dataset">
       <validate-discard-action
