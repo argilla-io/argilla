@@ -86,16 +86,20 @@ def test_name(name, expected):
     assert rule.name == expected
 
 
-def test_add_dataset_rule(monkeypatch, mocked_client, log_dataset):
+def test_add_to_dataset(monkeypatch, mocked_client, log_dataset):
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     with pytest.raises(RuleNotAppliedError):
         rule(TextClassificationRecord(text="test"))
 
-    monkeypatch.setattr(httpx, "post", mocked_client.get)
+    monkeypatch.setattr(httpx, "post", mocked_client.post)
     monkeypatch.setattr(httpx, "stream", mocked_client.stream)
 
-    rule.apply(log_dataset)
-    assert rule._matching_ids == {1: None}
+    rule.add_to_dataset(log_dataset)
+
+    rules = load_rules(log_dataset)
+    assert len(rules) == 1
+    assert rules[0].query == "inputs.text:(NOT positive)"
+    assert rules[0].label == "negative"
 
 
 def test_apply(monkeypatch, mocked_client, log_dataset):

@@ -64,18 +64,17 @@ def add_dataset_labeling_rule(
     rule: LabelingRule,
 ) -> Response[Union[LabelingRule, HTTPValidationError, ErrorMessage]]:
     url = "{}/api/datasets/{name}/TextClassification/labeling/rules".format(
-        client.base_url,
-        name=name,
-        json=rule.dict(),
+        client.base_url, name=name
     )
 
     response = httpx.post(
         url=url,
+        json=rule,
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
     )
-    return build_typed_response(response, rule.__class__)
+    assert response.status_code == 200
 
 
 def update_dataset_labeling_rule(
