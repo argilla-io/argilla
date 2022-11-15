@@ -63,6 +63,7 @@ export default {
     visible: {
       type: Boolean,
       default: false,
+      required: true,
     },
   },
   methods: {
