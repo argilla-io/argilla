@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import atexit
 import datetime
 import json
 import logging
@@ -101,7 +101,7 @@ class CachedJsonRequest(Request):
         return self._receive
 
 
-class argillaLogHTTPMiddleware(BaseHTTPMiddleware):
+class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
     """An standard starlette middleware that enables argilla logs for http prediction requests"""
 
     def __init__(
@@ -113,18 +113,36 @@ class argillaLogHTTPMiddleware(BaseHTTPMiddleware):
         **kwargs
     ):
         super().__init__(*args, **kwargs)
+
         self._endpoint = api_endpoint
         self._dataset = dataset
         self._records_mapper = records_mapper or text_classification_mapper
+        self._queue = None
+        self._worker_task = None
+        self._initialized = False
+
+    def init(self):
+        if self._initialized:
+            return
+
         self._queue = Queue()
         self._worker_task = threading.Thread(
-            target=self.__worker__, name=argillaLogHTTPMiddleware.__name__, daemon=True
+            target=self.__worker__,
+            name=ArgillaLogHTTPMiddleware.__name__,
+            daemon=True,
         )
         self._worker_task.start()
+        atexit.register(self._worker_task.join)
+        self._initialized = True
 
     async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
+        self,
+        request: Request,
+        call_next: RequestResponseEndpoint,
     ) -> Response:
+        if not self._initialized:
+            self.init()
+
         if self._endpoint != request.url.path:  # Filtering endpoint path
             return await call_next(request)
 
@@ -133,7 +151,9 @@ class argillaLogHTTPMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         cached_request = CachedJsonRequest(
-            scope=request.scope, receive=request.receive, send=request._send
+            scope=request.scope,
+            receive=request.receive,
+            send=request._send,
         )
         # Must read body before call_next
         inputs = await cached_request.json()
@@ -200,4 +220,8 @@ class argillaLogHTTPMiddleware(BaseHTTPMiddleware):
         if records:
             for r in records:
                 r.prediction_agent = url
-            argilla.log(records=records, name=self._dataset, tags=tags)
+            argilla.log(
+                records=records,
+                name=self._dataset,
+                tags=tags,
+            )

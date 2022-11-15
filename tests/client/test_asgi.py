@@ -23,7 +23,7 @@ from starlette.testclient import TestClient
 
 import argilla
 from argilla.monitoring.asgi import (
-    argillaLogHTTPMiddleware,
+    ArgillaLogHTTPMiddleware,
     token_classification_mapper,
 )
 
@@ -35,7 +35,7 @@ def test_argilla_middleware_for_text_classification(monkeypatch):
 
     app = FastAPI()
     app.add_middleware(
-        argillaLogHTTPMiddleware,
+        ArgillaLogHTTPMiddleware,
         api_endpoint=expected_endpoint,
         dataset=expected_dataset_name,
     )
@@ -92,7 +92,7 @@ def test_argilla_middleware_for_token_classification(monkeypatch):
 
     app = Starlette()
     app.add_middleware(
-        argillaLogHTTPMiddleware,
+        ArgillaLogHTTPMiddleware,
         api_endpoint=expected_endpoint,
         dataset=expected_dataset_name,
         records_mapper=token_classification_mapper,
