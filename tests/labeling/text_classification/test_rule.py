@@ -182,7 +182,7 @@ def test_delete_rules(mocked_client, log_dataset):
 
     actual_rules = load_rules(log_dataset)
 
-    assert len(rules) == 2
+    assert len(actual_rules) == 2
 
     for actual_rule, expected_rule in zip(actual_rules, rules[1:]):
         assert actual_rule.label == expected_rule.label
@@ -210,7 +210,7 @@ def test_update_rules(mocked_client, log_dataset):
 
     assert len(rules) == 3
 
-    rules[0] = (Rule(query="a query", label="La La La"),)
+    rules[0] = Rule(query="a query", label="La La La")
 
     for actual_rule, expected_rule in zip(actual_rules, rules):
         assert actual_rule.label == expected_rule.label

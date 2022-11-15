@@ -83,19 +83,19 @@ def update_dataset_labeling_rule(
     name: str,
     rule: LabelingRule,
 ) -> Response[Union[HTTPValidationError, ErrorMessage]]:
-    url = "{}/api/datasets/TextClassification/{name}/labeling/rules/".format(
-        client.base_url, name=name
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}".format(
+        client.base_url, name=name, query=rule.query
     )
 
     response = httpx.patch(
         url,
-        json={"query": rule.query, "label": rule.label},
+        json={"label": rule.label},
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
     )
 
-    return build_typed_response(response, rule.__class__)
+    return build_typed_response(response, LabelingRule)
 
 
 def delete_dataset_labeling_rule(
@@ -103,10 +103,8 @@ def delete_dataset_labeling_rule(
     name: str,
     rule: LabelingRule,
 ) -> Response[Union[LabelingRule, HTTPValidationError, ErrorMessage]]:
-    url = "{}/api/datasets/TextClassification/{name}/labeling/rules?{rule}".format(
-        client.base_url,
-        name=name,
-        rule="&".join([rule.query, rule.label]),
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}".format(
+        client.base_url, name=name, query=rule.query
     )
 
     httpx.delete(
