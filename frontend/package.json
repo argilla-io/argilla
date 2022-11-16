@@ -21,6 +21,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@nuxt/telemetry": "^2.1.8",
     "@nuxtjs/auth-next": "5.0.0-1613647907.37b1156",
     "@nuxtjs/axios": "^5.12.5",
     "@nuxtjs/dotenv": "1.4.1",
