@@ -23,7 +23,10 @@
     >
       <records-counter :total="dataset.results.total"></records-counter>
     </filters-area>
-    <explain-help-info v-if="isExplainedRecord" :dataset="dataset" />
+    <explain-help-info
+      v-if="isExplainedRecord && !isRuleListView"
+      :dataset="dataset"
+    />
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"
@@ -58,6 +61,9 @@ export default {
     },
     isMultiLabel() {
       return this.dataset.isMultiLabel;
+    },
+    isRuleListView() {
+      return this.dataset.viewSettings?.visibleRulesList || false;
     },
     availableLabels() {
       const record = this.dataset.results.records[0];
