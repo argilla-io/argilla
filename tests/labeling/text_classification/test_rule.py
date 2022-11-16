@@ -162,11 +162,11 @@ def test_load_rules(mocked_client, log_dataset):
 
 
 def test_add_rules(mocked_client, log_dataset):
-
+    author = "None"
     expected_rules = [
-        LabelingRule(query="a query", label="La La"),
-        LabelingRule(query="another query", label="La La"),
-        LabelingRule(query="the other query", label="La La La"),
+        LabelingRule(query="a query", label="La La", author=author),
+        LabelingRule(query="another query", label="La La", author=author),
+        LabelingRule(query="the other query", label="La La La", author=author),
     ]
 
     add_rules(log_dataset, expected_rules)
@@ -180,11 +180,11 @@ def test_add_rules(mocked_client, log_dataset):
 
 
 def test_delete_rules(mocked_client, log_dataset):
-
+    author = "None"
     rules = [
-        LabelingRule(query="a query", label="La La"),
-        LabelingRule(query="another query", label="La La"),
-        LabelingRule(query="the other query", label="La La La"),
+        LabelingRule(query="a query", label="La La", author=author),
+        LabelingRule(query="another query", label="La La", author=author),
+        LabelingRule(query="the other query", label="La La La", author=author),
     ]
 
     add_rules(log_dataset, rules)
@@ -192,7 +192,7 @@ def test_delete_rules(mocked_client, log_dataset):
     delete_rules(
         log_dataset,
         [
-            LabelingRule(query="a query", label="La La"),
+            LabelingRule(query="a query", label="La La", author=author),
         ],
     )
 
