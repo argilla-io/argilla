@@ -69,7 +69,7 @@ def add_dataset_labeling_rule(
 
     response = httpx.post(
         url=url,
-        json={"query": rule.query, "label": rule.label},
+        json={"query": rule.query, "label": rule.label, "labels": rule.labels},
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
@@ -89,7 +89,7 @@ def update_dataset_labeling_rule(
 
     response = httpx.patch(
         url,
-        json={"label": rule.label},
+        json={"label": rule.label, "labels": rule.labels},
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
@@ -113,8 +113,6 @@ def delete_dataset_labeling_rule(
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
     )
-
-    # return build_typed_response(response, LabelingRule)
 
 
 def fetch_dataset_labeling_rules(
