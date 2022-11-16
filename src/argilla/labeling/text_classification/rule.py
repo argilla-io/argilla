@@ -81,6 +81,20 @@ class Rule:
         )
         api.active_api().add_dataset_labeling_rules(dataset, rules=[labeling_rule])
 
+    def remove_from_dataset(self, dataset: str):
+        """Removes the rule from the given dataset"""
+        labeling_rule = LabelingRule(
+            query=self.query, label=self.label, author=self.author or "None"
+        )
+        api.active_api().delete_dataset_labeling_rules(dataset, rules=[labeling_rule])
+
+    def update_at_dataset(self, dataset: str):
+        """Updates the rule at the given dataset"""
+        labeling_rule = LabelingRule(
+            query=self.query, label=self.label, author=self.author or "None"
+        )
+        api.active_api().update_dataset_labeling_rules(dataset, rules=[labeling_rule])
+
     def apply(self, dataset: str):
         """Apply the rule to a dataset and save matching ids of the records.
 

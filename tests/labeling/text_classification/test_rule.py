@@ -92,7 +92,7 @@ def test_name(name, expected):
     assert rule.name == expected
 
 
-def test_add_to_dataset(monkeypatch, mocked_client, log_dataset):
+def test_atomic_crud_operations(monkeypatch, mocked_client, log_dataset):
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     with pytest.raises(RuleNotAppliedError):
         rule(TextClassificationRecord(text="test"))
@@ -106,6 +106,21 @@ def test_add_to_dataset(monkeypatch, mocked_client, log_dataset):
     assert len(rules) == 1
     assert rules[0].query == "inputs.text:(NOT positive)"
     assert rules[0].label == "negative"
+
+    rule.remove_from_dataset(log_dataset)
+
+    rules = load_rules(log_dataset)
+    assert len(rules) == 0
+
+    rule = Rule(query="inputs.text:(NOT positive)", label="negative")
+    rule.add_to_dataset(log_dataset)
+    updated_rule = Rule(query="inputs.text:(NOT positive)", label="positive")
+    updated_rule.update_at_dataset(log_dataset)
+
+    rules = load_rules(log_dataset)
+    assert len(rules) == 1
+    assert rules[0].query == "inputs.text:(NOT positive)"
+    assert rules[0].label == "positive"
 
 
 def test_apply(monkeypatch, mocked_client, log_dataset):
