@@ -1,13 +1,22 @@
 version: "3"
 
 services:
+  argilla:
+    image: argilla/argilla-server:latest
+    restart: unless-stopped
+    ports:
+      - "6900:80"
+    environment:
+      ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
+      # ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
+      # volumes:
+      #- ${PWD}/.users.yaml:/config/.users.yaml
+    networks:
+      - argilla
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
     container_name: elasticsearch
-    ports:
-      - "9200:9200"
-      - "9300:9300"
     environment:
       - node.name=elasticsearch
       - cluster.name=es-local
