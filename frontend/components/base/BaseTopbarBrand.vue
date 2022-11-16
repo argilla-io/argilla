@@ -33,7 +33,7 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
-  min-height: 56px;
+  min-height: $topbarHeight;
   position: relative;
   background: palette(grey, 100);
   color: palette(white);
