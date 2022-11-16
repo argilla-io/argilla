@@ -24,6 +24,9 @@ import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 import { TokenClassificationDataset } from "../../models/TokenClassification";
+import { formatEntityIdForAnnotation } from "../../models/token-classification/TokenAnnotation.modelTokenClassification";
+import { formatEntityIdForPrediction } from "../../models/token-classification/TokenPrediction.modelTokenClassification";
+import { formatAnnotationPredictionid } from "../../models/token-classification/TokenRecord.modelTokenClassification";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -423,13 +426,16 @@ async function _updateTaskDataset({ dataset, data }) {
       datasetResults.aggregations || {}
     );
   }
+
+  const formatedDataset = {
+    ...dataset,
+    ...data,
+    results: mergeObjectsDeep(datasetResults, dataResults),
+  };
+
   await entity.insertOrUpdate({
     where: dataset.id,
-    data: {
-      ...dataset,
-      ...data,
-      results: mergeObjectsDeep(datasetResults, dataResults),
-    },
+    data: formatedDataset,
   });
 
   if (dataset.task === "TokenClassification") {
@@ -443,23 +449,13 @@ async function _updateTaskDataset({ dataset, data }) {
 }
 
 const updateTokenRecordsByDatasetId = (datasetPrimaryKey, records) => {
-  const tokenRecords = records.map(
-    ({ id, search_keywords, status, tokens, text, annotation, prediction }) => {
-      return {
-        dataset_id: datasetPrimaryKey.join("."),
-        id,
-        search_keywords,
-        status,
-        tokens,
-        text,
-        annotation,
-        prediction,
-      };
-    }
+  const tokenRecords = initTokenRecordsObjectForRecordsModel(
+    datasetPrimaryKey,
+    records
   );
 
   TokenClassificationDataset.insertOrUpdate({
-    were: datasetPrimaryKey,
+    where: datasetPrimaryKey,
     data: {
       token_records: tokenRecords,
     },
@@ -474,6 +470,93 @@ async function _updatePagination({ id, size, page }) {
 
   return pagination;
 }
+
+const initTokenRecordsObjectForRecordsModel = (datasetPrimaryKey, records) => {
+  const tokenRecords = records.map(
+    (
+      { id, search_keywords, status, tokens, text, annotation, prediction },
+      recordIndex
+    ) => {
+      const formattedAnnotationPredictionid = formatAnnotationPredictionid(
+        recordIndex,
+        datasetPrimaryKey
+      );
+
+      const formatted_token_annotation = annotation
+        ? getFormattedAnnotationOrPrediction(
+            "ANNOTATION",
+            id,
+            formattedAnnotationPredictionid,
+            annotation
+          )
+        : null;
+
+      const formatted_token_prediction = prediction
+        ? getFormattedAnnotationOrPrediction(
+            "PREDICTION",
+            id,
+            formattedAnnotationPredictionid,
+            prediction
+          )
+        : null;
+
+      return {
+        id,
+        dataset_id: datasetPrimaryKey.join("."),
+        search_keywords,
+        status,
+        tokens,
+        text,
+        prediction,
+        token_annotation: formatted_token_annotation,
+        token_prediction: formatted_token_prediction,
+      };
+    }
+  );
+
+  return tokenRecords;
+};
+
+const getFormattedAnnotationOrPrediction = (
+  entityType,
+  record_id,
+  recordIndex,
+  { agent, entities }
+) => {
+  const FUNCTION_TO_FIRE = functionToFireToFormatTokenEntityId(entityType);
+
+  return {
+    id: recordIndex,
+    agent: agent,
+    record_id,
+    token_entities: entities.map(({ label, start, end, score }, index) => {
+      return {
+        id: FUNCTION_TO_FIRE ? FUNCTION_TO_FIRE(index) : index,
+        record_id,
+        agent,
+        label: label,
+        start: start,
+        end: end,
+        score: score,
+      };
+    }),
+  };
+};
+
+const functionToFireToFormatTokenEntityId = (entityType) => {
+  let FUNCTION_TO_FIRE = null;
+  switch (entityType.toUpperCase()) {
+    case "ANNOTATION":
+      FUNCTION_TO_FIRE = formatEntityIdForAnnotation;
+      break;
+    case "PREDICTION":
+      FUNCTION_TO_FIRE = formatEntityIdForPrediction;
+      break;
+    default:
+      console.log("WARNING : The type from the entities are UNKNOWN");
+  }
+  return FUNCTION_TO_FIRE;
+};
 
 const getters = {
   findByName: () => (name) => {

@@ -30,6 +30,7 @@ import RulesMetric from "@/models/token-classification/RulesMetric.modelTokenCla
 import { TokenGlobalEntity } from "@/models/token-classification/TokenGlobalEntity.modelTokenClassification";
 import { TokenRecord } from "@/models/token-classification/TokenRecord.modelTokenClassification";
 import { TokenAnnotation } from "@/models/token-classification/TokenAnnotation.modelTokenClassification";
+import { TokenPrediction } from "@/models/token-classification/TokenPrediction.modelTokenClassification";
 import { TokenEntity } from "@/models/token-classification/TokenEntity.modelTokenClassification";
 
 import info from "@/database/modules/info";
@@ -56,6 +57,7 @@ database.register(RulesMetric);
 database.register(TokenGlobalEntity);
 database.register(TokenRecord);
 database.register(TokenAnnotation);
+database.register(TokenPrediction);
 database.register(TokenEntity);
 
 export default database;

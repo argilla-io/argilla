@@ -1,6 +1,7 @@
 import { Model } from "@vuex-orm/core";
 import { TokenClassificationDataset } from "../TokenClassification";
 import { TokenAnnotation } from "./TokenAnnotation.modelTokenClassification";
+import { TokenPrediction } from "./TokenPrediction.modelTokenClassification";
 
 class TokenRecord extends Model {
   static entity = "tokenRecords";
@@ -13,24 +14,16 @@ class TokenRecord extends Model {
       tokens: this.attr([]),
       text: this.attr([]),
       dataset_id: this.attr(null),
-      // annotation: this.attr({}), // FIXME need to be removed and used only annotationS
-      prediction: this.attr({}),
 
       // relationship
       dataset: this.belongsTo(TokenClassificationDataset, "dataset_id"),
       token_annotation: this.hasOne(TokenAnnotation, "record_id"),
+      token_prediction: this.hasOne(TokenPrediction, "record_id"),
     };
-  }
-
-  get annotatedEntities() {
-    const numberOfAnnotation = Object.keys(this.annotation).length;
-
-    if (numberOfAnnotation) {
-      return this.annotation.entities;
-    }
-
-    return [];
   }
 }
 
-export { TokenRecord };
+const formatAnnotationPredictionid = (prefix, datasetPrimaryKey) =>
+  `${prefix}__${datasetPrimaryKey}`;
+
+export { TokenRecord, formatAnnotationPredictionid };

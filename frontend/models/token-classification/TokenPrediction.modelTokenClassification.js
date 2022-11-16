@@ -2,8 +2,8 @@ import { Model } from "@vuex-orm/core";
 import { TokenEntity } from "./TokenEntity.modelTokenClassification";
 import { TokenRecord } from "./TokenRecord.modelTokenClassification";
 
-class TokenAnnotation extends Model {
-  static entity = "tokenAnnotations";
+class TokenPrediction extends Model {
+  static entity = "tokenPredictions";
 
   static fields() {
     return {
@@ -22,7 +22,5 @@ class TokenAnnotation extends Model {
     };
   }
 }
-
-const formatEntityIdForAnnotation = (id) => `${id}_ANNOTATION`;
-
-export { TokenAnnotation, formatEntityIdForAnnotation };
+const formatEntityIdForPrediction = (id) => `${id}_PREDICTION`;
+export { TokenPrediction, formatEntityIdForPrediction };
