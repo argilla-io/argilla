@@ -62,7 +62,9 @@ export default {
           /* eslint-disable no-mixed-operators */
           const colorSensitivity = 1; // color sensitivity (values from 1 to 4)
           const logNumber = 100 / Math.log10(100) ** colorSensitivity;
-          percent = Math.round(Math.log10(percent) ** colorSensitivity * logNumber);
+          percent = Math.round(
+            Math.log10(percent) ** colorSensitivity * logNumber
+          );
         }
         return {
           text: this.record.search_keywords
