@@ -63,7 +63,7 @@ export default {
       return this.dataset.isMultiLabel;
     },
     isRuleListView() {
-      return this.dataset.viewSettings.visibleRulesList;
+      return this.dataset.viewSettings?.visibleRulesList || false;
     },
     availableLabels() {
       const record = this.dataset.results.records[0];
