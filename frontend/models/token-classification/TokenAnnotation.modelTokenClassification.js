@@ -3,7 +3,7 @@ import { TokenEntity } from "./TokenEntity.modelTokenClassification";
 import { TokenRecord } from "./TokenRecord.modelTokenClassification";
 
 class TokenAnnotation extends Model {
-  static entity = "tokenAnnotations";
+  static entity = "annotations";
 
   static fields() {
     return {

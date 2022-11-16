@@ -2,7 +2,7 @@ import { Model } from "@vuex-orm/core";
 import { TokenClassificationDataset } from "../TokenClassification";
 
 class TokenGlobalEntity extends Model {
-  static entity = "tokenGlobalEntities";
+  static entity = "globalEntities";
   static primaryKey = ["text", "color_id"];
 
   static fields() {
@@ -16,10 +16,6 @@ class TokenGlobalEntity extends Model {
       dataset: this.belongsTo(TokenClassificationDataset, "dataset_id"),
     };
   }
-
-  // get token_global_entity_id() {
-  //   return `${this.text}.${this.color_id}`;
-  // }
 }
 
 const formatDatasetIdForTokenGlobalEntityModel = (dataset_id) =>

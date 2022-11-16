@@ -4,7 +4,7 @@ import { TokenAnnotation } from "./TokenAnnotation.modelTokenClassification";
 import { TokenPrediction } from "./TokenPrediction.modelTokenClassification";
 
 class TokenRecord extends Model {
-  static entity = "tokenRecords";
+  static entity = "records";
 
   static fields() {
     return {
