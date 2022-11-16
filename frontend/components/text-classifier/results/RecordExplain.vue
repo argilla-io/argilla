@@ -41,6 +41,11 @@ export default {
       type: Array,
     },
   },
+  data() {
+    return {
+      colorSensitivity: 1 // color sensitivity (values from 1 to 4)
+    }
+  },
   computed: {
     predicted() {
       return this.record.predicted;
@@ -60,10 +65,8 @@ export default {
         let percent = Math.round(Math.abs(grad) * 100);
         if (percent !== 0) {
           /* eslint-disable no-mixed-operators */
-          const colorSensitivity = 1; // color sensitivity (values from 1 to 4)
-          const logNumber = 100 / Math.log10(100) ** colorSensitivity;
           percent = Math.round(
-            Math.log10(percent) ** colorSensitivity * logNumber
+            Math.log10(percent) ** this.colorSensitivity * this.logNumber
           );
         }
         return {
@@ -75,6 +78,9 @@ export default {
         };
       });
     },
+    logNumber() {
+      return 100 / Math.log10(100) ** this.colorSensitivity;
+    }
   },
   methods: {
     customClass(tokenItem) {
