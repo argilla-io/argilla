@@ -19,6 +19,7 @@ from argilla import load
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
+    LabelingRule,
     TextClassificationBulkData,
 )
 from argilla.labeling.text_classification import (
@@ -163,9 +164,9 @@ def test_load_rules(mocked_client, log_dataset):
 def test_add_rules(mocked_client, log_dataset):
 
     expected_rules = [
-        Rule(query="a query", label="La La"),
-        Rule(query="another query", label="La La"),
-        Rule(query="the other query", label="La La La"),
+        LabelingRule(query="a query", label="La La"),
+        LabelingRule(query="another query", label="La La"),
+        LabelingRule(query="the other query", label="La La La"),
     ]
 
     add_rules(log_dataset, expected_rules)
@@ -181,9 +182,9 @@ def test_add_rules(mocked_client, log_dataset):
 def test_delete_rules(mocked_client, log_dataset):
 
     rules = [
-        Rule(query="a query", label="La La"),
-        Rule(query="another query", label="La La"),
-        Rule(query="the other query", label="La La La"),
+        LabelingRule(query="a query", label="La La"),
+        LabelingRule(query="another query", label="La La"),
+        LabelingRule(query="the other query", label="La La La"),
     ]
 
     add_rules(log_dataset, rules)
@@ -191,7 +192,7 @@ def test_delete_rules(mocked_client, log_dataset):
     delete_rules(
         log_dataset,
         [
-            Rule(query="a query", label="La La"),
+            LabelingRule(query="a query", label="La La"),
         ],
     )
 
@@ -205,11 +206,11 @@ def test_delete_rules(mocked_client, log_dataset):
 
 
 def test_update_rules(mocked_client, log_dataset):
-
+    author = "None"
     rules = [
-        Rule(query="a query", label="La La"),
-        Rule(query="another query", label="La La"),
-        Rule(query="the other query", label="La La La"),
+        LabelingRule(query="a query", label="La La", author=author),
+        LabelingRule(query="another query", label="La La", author=author),
+        LabelingRule(query="the other query", label="La La La", author=author),
     ]
 
     add_rules(log_dataset, rules)
@@ -217,7 +218,7 @@ def test_update_rules(mocked_client, log_dataset):
     update_rules(
         log_dataset,
         [
-            Rule(query="a query", label="La La La"),
+            LabelingRule(query="a query", label="La La La", author=author),
         ],
     )
 
@@ -225,9 +226,10 @@ def test_update_rules(mocked_client, log_dataset):
 
     assert len(rules) == 3
 
-    rules[0] = Rule(query="a query", label="La La La")
+    assert actual_rules[0].query == "a query"
+    assert actual_rules[0].label == "La La La"
 
-    for actual_rule, expected_rule in zip(actual_rules, rules):
+    for actual_rule, expected_rule in zip(actual_rules[1:], rules[1:]):
         assert actual_rule.label == expected_rule.label
         assert actual_rule.query == expected_rule.query
 
