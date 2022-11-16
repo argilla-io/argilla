@@ -16,11 +16,11 @@
   -->
 
 <template>
-  <div v-if="modalVisible" :class="modalMaskClass">
+  <div v-if="modalVisible" :class="`modal-mask ${modalMaskClass}`">
     <transition name="fade" appear>
       <div class="modal-wrapper" :class="modalPosition">
         <div
-          :class="['modal-container', modalClass]"
+          :class="`modal-container ${modalClass}`"
           v-click-outside="onClickOutside"
         >
           <p v-if="!modalCustom" class="modal__title">
@@ -81,7 +81,7 @@ export default {
   },
   computed: {
     modalMaskClass() {
-      return [this.preventBodyScroll ? "prevent-scroll" : null, "modal-mask"];
+      return this.preventBodyScroll ? "prevent-scroll" : null;
     },
   },
   methods: {
