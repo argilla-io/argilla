@@ -22,11 +22,15 @@
         <RuleDefinitionToken
           :rule="rule"
           :queryText="queryText"
-          :entities="entities"
+          :entities="globalEntities"
           :numberOfRecords="numberOfRecords"
           @on-search-entity="(value) => (searchQuery = value)"
         />
       </transition>
+      <div class="entities" v-for="entity in entities" :key="entity.id">
+        {{ entity.label }} {{ entity.start }} {{ entity.end }}
+        <strong>{{ entity.token_entitable.constructor.entity }} </strong>
+      </div>
     </template>
     <template slot="record" slot-scope="results">
       <record-token-classification
@@ -46,13 +50,10 @@ import { TokenClassificationDataset as TokenClassificationDatasetModel } from ".
 import RuleDefinitionToken from "../labelling-rules/RuleDefinitionToken.component.vue";
 import { getDatasetModelPrimaryKey } from "../../../models/Dataset";
 import {
-  formatDatasetIdForTokenEntityModel,
-  TokenEntity,
-} from "../../../models/token-classification/TokenEntity.modelTokenClassification";
-import {
-  getTokenAnnotationModelPrimaryKey,
-  TokenAnnotation as TokenAnnotationModel,
-} from "../../../models/token-classification/TokenAnnotation.modelTokenClassification";
+  formatDatasetIdForTokenGlobalEntityModel,
+  TokenGlobalEntity,
+} from "../../../models/token-classification/TokenGlobalEntity.modelTokenClassification";
+import { TokenEntity } from "../../../models/token-classification/TokenEntity.modelTokenClassification";
 
 export default {
   props: {
@@ -70,26 +71,7 @@ export default {
   components: {
     RuleDefinitionToken,
   },
-  async beforeMount() {
-    this.rulesHaveBeenFetched = false;
-    const { name } = this.dataset;
-
-    const rulesMetrics = await this.getRulesMetricsByQueryText(
-      name,
-      this.queryText
-    );
-
-    const rules = await this.fetchTokenClassificationRules(name);
-
-    rules?.forEach((rule) => {
-      this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
-    });
-
-    await this.addAnnotationsToRecordsByQuery(name, this.queryText);
-
-    this.insertOrUpdateEntityInTokenEntityModel();
-    this.rulesHaveBeenFetched = true;
-  },
+  async beforeMount() {},
   computed: {
     owner() {
       return this.dataset.owner;
@@ -117,12 +99,7 @@ export default {
       );
     },
     rulePrimaryKey() {
-      const paramsToGetRulePrimaryKey = {
-        query: this.queryText,
-        name: this.name,
-        owner: this.owner,
-      };
-      return getRuleModelPrimaryKey(paramsToGetRulePrimaryKey);
+      return this.getRulePrimaryKey(this.queryText);
     },
     rule() {
       return (
@@ -132,11 +109,11 @@ export default {
           .first() || {}
       );
     },
-    entities() {
-      return TokenEntity.query()
+    globalEntities() {
+      return TokenGlobalEntity.query()
         .where(
           "dataset_id",
-          formatDatasetIdForTokenEntityModel(this.datasetPrimaryKey)
+          formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
         )
         .where("text", (value) =>
           this.isStringIncludeSubstring(value, this.searchQuery)
@@ -147,8 +124,11 @@ export default {
     records() {
       return TokenClassificationDatasetModel.query()
         .whereId(this.datasetPrimaryKey)
-        .with("token_records")
+        .with("token_records.token_annotation")
         .first().token_records;
+    },
+    entities() {
+      return TokenEntity.query().with("token_entitable").get();
     },
     recordsIds() {
       return this.records.map((record) => record.id);
@@ -158,6 +138,33 @@ export default {
         this.rule.rule_metrics?.coverage *
           this.rule.rule_metrics?.total_records || null
       );
+    },
+  },
+  watch: {
+    async queryText(newValue, oldValue) {
+      if (newValue) {
+        this.rulesHaveBeenFetched = false;
+        const { name } = this.dataset;
+
+        const rulesMetrics = await this.getRulesMetricsByQueryText(
+          name,
+          this.queryText
+        );
+
+        const rules = await this.fetchTokenClassificationRules(name);
+
+        rules?.forEach((rule) => {
+          this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
+        });
+
+        await this.addAnnotationsToRecordsByQuery(name, this.queryText);
+
+        this.insertOrUpdateEntityInTokenGlobalEntityModel();
+        this.rulesHaveBeenFetched = true;
+      } else {
+        //TODO the table delete function if user clean the query search
+        this.cleanTables();
+      }
     },
   },
   methods: {
@@ -234,12 +241,12 @@ export default {
         },
       });
     },
-    insertOrUpdateEntityInTokenEntityModel() {
+    insertOrUpdateEntityInTokenGlobalEntityModel() {
       const entities = [];
 
       this.dataset.entities.forEach(({ text, colorId }) => {
         const entity = {
-          dataset_id: formatDatasetIdForTokenEntityModel(
+          dataset_id: formatDatasetIdForTokenGlobalEntityModel(
             this.datasetPrimaryKey
           ),
           text: text,
@@ -253,40 +260,29 @@ export default {
       TokenClassificationDatasetModel.insertOrUpdate({
         where: this.datasetPrimaryKey,
         data: {
-          token_entities: entities,
+          token_global_entities: entities,
         },
       });
     },
-    insertOrUpdateAnnotationsInTokenAnnotation({ agent, records }, query) {
-      const { owner, name } = this.dataset;
-
-      records.forEach(({ id: record_id, entities }) => {
-        const objToInitPrimaryKeys = {
-          record_id,
-          agent,
-          owner,
-          name,
-        };
-
-        const primaryKey =
-          getTokenAnnotationModelPrimaryKey(objToInitPrimaryKeys);
-
-        TokenAnnotationModel.insertOrUpdate({
-          where: primaryKey,
-          data: {
-            record_id,
-            entities,
-            agent,
-            query,
-            owner,
-            name,
-          },
-        });
-      });
-    },
+    insertOrUpdateAnnotationsInTokenAnnotation({ agent, records }, query) {},
     isStringIncludeSubstring(refString, substring) {
       return refString.toLowerCase().includes(substring.toLowerCase());
     },
+    getRulePrimaryKey(query) {
+      const paramsToGetRulePrimaryKey = {
+        query,
+        name: this.name,
+        owner: this.owner,
+      };
+      const rulePrimaryKey = getRuleModelPrimaryKey(paramsToGetRulePrimaryKey);
+      return rulePrimaryKey;
+    },
+    cleanTables() {},
+    // addKeyValueToEntitiesItem(key, value, entities) {
+    //   return entities.map((entity) => {
+    //     return { ...entity, [key]: value };
+    //   });
+    // },
   },
 };
 </script>

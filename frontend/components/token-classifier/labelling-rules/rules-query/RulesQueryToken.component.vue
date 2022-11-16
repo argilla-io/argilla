@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { TokenEntity } from "../../../../models/token-classification/TokenEntity.modelTokenClassification";
+import { TokenGlobalEntity } from "../../../../models/token-classification/TokenGlobalEntity.modelTokenClassification";
 import ChipsComponent from "./Chips.component.vue";
 export default {
   name: "RulesQueryToken",
@@ -86,7 +86,8 @@ export default {
     },
   },
   methods: {
-    onChipsSelection({ id }) {
+    onChipsSelection({ id, dataset_id }) {
+      console.log(id, dataset_id);
       this.updateTokenEntities(id);
       this.disableSaveRulesButton();
     },
@@ -94,7 +95,7 @@ export default {
       console.log("newEntities", this.selectedEntity);
     },
     updateTokenEntities(id) {
-      let entities = TokenEntity.all();
+      let entities = TokenGlobalEntity.all();
       entities = entities.map((entity) => {
         if (entity.id !== id) {
           return { ...entity, is_activate: false };
@@ -102,10 +103,10 @@ export default {
           return { ...entity, is_activate: !entity.is_activate };
         }
       });
-      TokenEntity.insertOrUpdate({ data: entities });
+      TokenGlobalEntity.insertOrUpdate({ data: entities });
     },
     disableSaveRulesButton() {
-      const entities = TokenEntity.all();
+      const entities = TokenGlobalEntity.all();
       const isSelectedEntities = entities.some((entity) => entity.is_activate);
       isSelectedEntities
         ? (this.isSaveRulesDisable = false)
