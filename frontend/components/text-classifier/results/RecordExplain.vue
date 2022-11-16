@@ -43,8 +43,8 @@ export default {
   },
   data() {
     return {
-      colorSensitivity: 1 // color sensitivity (values from 1 to 4)
-    }
+      colorSensitivity: 1, // color sensitivity (values from 1 to 4)
+    };
   },
   computed: {
     predicted() {
@@ -80,7 +80,7 @@ export default {
     },
     logNumber() {
       return 100 / Math.log10(100) ** this.colorSensitivity;
-    }
+    },
   },
   methods: {
     customClass(tokenItem) {
