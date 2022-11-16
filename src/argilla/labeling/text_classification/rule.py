@@ -74,6 +74,10 @@ class Rule:
         """Who authored the rule."""
         return self._author
 
+    def update_label(self, label):
+        """Updates the label"""
+        self._label = label
+
     def add_to_dataset(self, dataset: str):
         """Add to rule to the given dataset"""
         labeling_rule = LabelingRule(
