@@ -16,11 +16,12 @@
   -->
 
 <template>
-  <div v-if="modalVisible" :class="`modal-mask ${modalMaskClass}`">
+  <div v-if="modalVisible" class="modal-mask" :class="modalMaskClass">
     <transition name="fade" appear>
       <div class="modal-wrapper" :class="modalPosition">
         <div
-          :class="`modal-container ${modalClass}`"
+          class="modal-container"
+          :class="modalClass"
           v-click-outside="onClickOutside"
         >
           <p v-if="!modalCustom" class="modal__title">
