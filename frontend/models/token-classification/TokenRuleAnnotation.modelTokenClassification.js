@@ -24,4 +24,5 @@ class TokenRuleAnnotation extends Model {
 
 const formatEntityIdForRuleAnnotation = (prefix) =>
   `${prefix}__RULE_ANNOTATION`;
+
 export { TokenRuleAnnotation, formatEntityIdForRuleAnnotation };
