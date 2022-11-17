@@ -13,9 +13,9 @@
 #  limitations under the License.
 
 import random
+from time import sleep
 
 import argilla as ar
-from tests.monitoring.helpers import mock_monitor
 
 
 def test_spacy_ner_monitor(monkeypatch, mocked_client):
@@ -25,14 +25,19 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
     import spacy
 
     nlp = spacy.load("en_core_web_sm")
-    nlp = ar.monitor(nlp, dataset=dataset, sample_rate=0.5)
-    mock_monitor(nlp, monkeypatch)
+    nlp = ar.monitor(
+        nlp,
+        dataset=dataset,
+        sample_rate=0.5,
+        log_interval=0.5,
+    )
 
     random.seed(42)
 
     for _ in range(0, 20):
         nlp("Paris is my favourite city")
 
+    sleep(1)  # wait for the consumer time
     df = ar.load(dataset)
     df = df.to_pandas()
     assert len(df) == 11
@@ -42,6 +47,7 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
     ar.delete(dataset)
     list(nlp.pipe(["This is a text"] * 20))
 
+    sleep(1)  # wait for the consumer time
     df = ar.load(dataset)
     df = df.to_pandas()
     assert len(df) == 6
@@ -50,6 +56,7 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
     ar.delete(dataset)
     list(nlp.pipe([("This is a text", {"meta": "data"})] * 20, as_tuples=True))
 
+    sleep(1)  # wait for the consumer time
     df = ar.load(dataset)
     df = df.to_pandas()
     assert len(df) == 14

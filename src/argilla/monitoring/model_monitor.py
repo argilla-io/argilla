@@ -16,6 +16,7 @@ import logging
 import warnings
 from typing import Any, Optional
 
+from ..client.api import active_api
 from ._flair import SequenceTagger, flair_monitor
 from ._spacy import Language, ner_monitor
 from ._transformers import Pipeline, huggingface_monitor
@@ -24,20 +25,37 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def monitor(
-    task_model: Any, dataset: str, sample_rate: float = 0.3, agent: Optional[str] = None
+    task_model: Any,
+    dataset: str,
+    sample_rate: float = 0.3,
+    agent: Optional[str] = None,
+    log_interval: float = 5,
 ):
     model_monitor = None
+    api = active_api()
     if isinstance(task_model, Language):
         model_monitor = ner_monitor(
-            task_model, dataset=dataset, sample_rate=sample_rate
+            task_model,
+            api=api,
+            dataset=dataset,
+            sample_rate=sample_rate,
+            log_interval=log_interval,
         )
     elif isinstance(task_model, Pipeline):
         model_monitor = huggingface_monitor(
-            task_model, dataset=dataset, sample_rate=sample_rate
+            task_model,
+            api=api,
+            dataset=dataset,
+            sample_rate=sample_rate,
+            log_interval=log_interval,
         )
     elif isinstance(task_model, SequenceTagger):
         model_monitor = flair_monitor(
-            task_model, dataset=dataset, sample_rate=sample_rate
+            task_model,
+            api=api,
+            dataset=dataset,
+            sample_rate=sample_rate,
+            log_interval=log_interval,
         )
     if model_monitor:
         model_monitor.agent = agent
