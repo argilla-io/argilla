@@ -9,7 +9,6 @@ class TokenAnnotation extends Model {
     return {
       id: this.uid(),
       agent: this.string(null),
-      entities: this.attr([]),
       record_id: this.attr(null),
 
       // relationships
@@ -23,6 +22,6 @@ class TokenAnnotation extends Model {
   }
 }
 
-const formatEntityIdForAnnotation = (id) => `${id}_ANNOTATION`;
+const formatEntityIdForAnnotation = (prefix) => `${prefix}__ANNOTATION`;
 
 export { TokenAnnotation, formatEntityIdForAnnotation };
