@@ -9,7 +9,6 @@ class TokenPrediction extends Model {
     return {
       id: this.uid(),
       agent: this.string(null),
-      entities: this.attr([]),
       record_id: this.attr(null),
 
       // relationships
@@ -22,5 +21,5 @@ class TokenPrediction extends Model {
     };
   }
 }
-const formatEntityIdForPrediction = (id) => `${id}_PREDICTION`;
+const formatEntityIdForPrediction = (prefix) => `${prefix}__PREDICTION`;
 export { TokenPrediction, formatEntityIdForPrediction };
