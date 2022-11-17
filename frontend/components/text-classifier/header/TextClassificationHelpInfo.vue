@@ -19,14 +19,12 @@
   <lazy-base-modal
     modal-class="modal-secondary"
     modal-position="modal-top-right"
-    modal-title="Help"
-    modal-icon="support"
+    modal-title="Highlight colors in token attributions"
     :modal-custom="true"
     :modal-visible="visible"
     @close-modal="closeModal"
   >
     <div class="help-info__content">
-      <p class="help-info__title">Highlight colors in token attributions</p>
       <p>
         Argilla enables you to register token attributions as part of the
         dataset records. For getting token attributions, you can use methods
@@ -45,13 +43,13 @@
       </p>
     </div>
     <div class="modal-buttons">
-      <base-button class="primary" @click="closeModal">Ok, got it!</base-button>
       <base-button
         class="primary link"
         href="https://docs.rubrix.ml/en/stable/tutorials/nlp_model_explainability.html"
         target="_blank"
         >More in docs</base-button
       >
+      <base-button class="primary" @click="closeModal">Ok, got it!</base-button>
     </div>
   </lazy-base-modal>
 </template>
