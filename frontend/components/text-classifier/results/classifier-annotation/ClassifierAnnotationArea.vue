@@ -56,7 +56,7 @@
   </div>
 </template>
 <script>
-import { Pagination, DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { IdState } from "vue-virtual-scroller";
 import ClassifierAnnotationButton from "../ClassifierAnnotationButton.vue";
 
@@ -125,7 +125,7 @@ export default {
       },
     },
     allowToShowAllLabels() {
-      return this.pagination.size === 1;
+      return this.dataset.viewSettings.pagination.size === 1 || false;
     },
     maxVisibleLabels() {
       return this.allowToShowAllLabels
@@ -205,9 +205,6 @@ export default {
     },
     predictedAs() {
       return this.record.predicted_as;
-    },
-    pagination() {
-      return Pagination.find(this.dataset.name);
     },
   },
   mounted() {
