@@ -83,8 +83,8 @@ def update_dataset_labeling_rule(
     name: str,
     rule: LabelingRule,
 ) -> Response[Union[HTTPValidationError, ErrorMessage]]:
-    url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}".format(
-        client.base_url, name=name, query=rule.query
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules".format(
+        client.base_url, name=name
     )
 
     response = httpx.patch(
