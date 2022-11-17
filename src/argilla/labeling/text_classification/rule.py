@@ -74,10 +74,6 @@ class Rule:
         """Who authored the rule."""
         return self._author
 
-    def update_label(self, label):
-        """Updates the label"""
-        self._label = label
-
     def convert_to_labeling_rule(self):
         """Converts the rule to a LabelingRule"""
         if isinstance(self._label, str):
@@ -88,6 +84,10 @@ class Rule:
         return LabelingRule(
             query=self.query, labels=labels, author=self.author or "None"
         )
+
+    def update_label(self, label):
+        """Updates the label"""
+        self._label = label
 
     def add_to_dataset(self, dataset: str):
         """Add to rule to the given dataset"""
