@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import atexit
+import dataclasses
 import logging
 import random
 import threading
@@ -221,7 +222,6 @@ class BaseMonitor(wrapt.ObjectProxy):
 
     def _get_consumer_by_dataset(self, dataset: str):
         if dataset not in self._consumers:
-            print(f"NOT FOUND {dataset}")
             self._consumers[dataset] = self._create_consumer(dataset)
         return self._consumers[dataset]
 

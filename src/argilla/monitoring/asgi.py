@@ -12,14 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import atexit
 import datetime
 import json
 import logging
 import re
-import threading
-from queue import Queue
 from typing import Any, Callable, Dict, List, Optional, Tuple
+
+from argilla.monitoring.base import BaseMonitor
 
 try:
     import starlette
@@ -34,7 +33,6 @@ else:
     from starlette.responses import JSONResponse, Response, StreamingResponse
     from starlette.types import Message, Receive
 
-import argilla
 from argilla.client.models import (
     Record,
     TextClassificationRecord,
@@ -108,31 +106,43 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
         self,
         api_endpoint: str,
         dataset: str,
+        sample_rate: float = 1.0,
+        log_interval: float = 1.0,
+        agent: Optional[str] = None,
+        tags: Dict[str, str] = None,
         records_mapper: Optional[Callable[[dict, dict], Record]] = None,
         *args,
         **kwargs
     ):
-        super().__init__(*args, **kwargs)
+        BaseHTTPMiddleware.__init__(self, *args, **kwargs)
 
         self._endpoint = api_endpoint
         self._dataset = dataset
         self._records_mapper = records_mapper or text_classification_mapper
-        self._queue = None
+        self._consumer = None
         self._worker_task = None
         self._initialized = False
+
+        self._monitor_cfg = dict(
+            name=dataset,
+            sample_rate=sample_rate,
+            log_interval=log_interval,
+            agent=agent,
+            tags=tags,
+        )
+        self._monitor: Optional[BaseMonitor] = None
 
     def init(self):
         if self._initialized:
             return
+        from argilla.client.api import active_api
 
-        self._queue = Queue()
-        self._worker_task = threading.Thread(
-            target=self.__worker__,
-            name=ArgillaLogHTTPMiddleware.__name__,
-            daemon=True,
+        self._monitor = BaseMonitor(
+            self._endpoint,
+            api=active_api(),
+            **self._monitor_cfg,
         )
-        self._worker_task.start()
-        atexit.register(self._worker_task.join)
+        self._monitor._prepare_log_data = self._prepare_argilla_data
         self._initialized = True
 
     async def dispatch(
@@ -166,22 +176,15 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
                 return response
 
             new_response, outputs = await self._extract_response_content(response)
-            self._queue.put_nowait((inputs, outputs, str(request.url)))
+            self._monitor.send_records(
+                inputs=inputs,
+                outputs=outputs,
+                url=str(request.url),
+            )
             return new_response
         except Exception as ex:
             _logger.error("Cannot log to argilla", exc_info=ex)
             return response
-
-    def __worker__(self):
-        while True:
-            try:
-                inputs, outputs, url = self._queue.get()
-                self._log_to_argilla(inputs, outputs, url)
-            except Exception as ex:
-                # Run thread FOREVER!!!
-                _logger.error("Error sending records to argilla", exc_info=ex)
-            finally:
-                self._queue.task_done()
 
     async def _extract_response_content(
         self, response: Response
@@ -203,13 +206,15 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
             body = response.body
         return new_response, json.loads(body)
 
-    def _log_to_argilla(
+    def _prepare_argilla_data(
         self,
         inputs: List[Dict[str, Any]],
         outputs: List[Dict[str, Any]],
         url: str,
         **tags
     ):
+        # using the base monitor, we only need to provide the input data to the rg.log function
+        # and the monitor will handle the sample rate, queue and argilla interaction
         records = [
             record
             for _inputs, _outputs in zip(inputs, outputs)
@@ -219,9 +224,10 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
 
         if records:
             for r in records:
-                r.prediction_agent = url
-            argilla.log(
-                records=records,
-                name=self._dataset,
-                tags=tags,
-            )
+                r.metadata["url"] = url  # maybe this is not really useful.
+
+        return dict(
+            records=records or [],
+            name=self._dataset,
+            tags=tags,
+        )
