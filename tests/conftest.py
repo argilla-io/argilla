@@ -59,6 +59,7 @@ def mocked_client(monkeypatch, telemetry_track_data) -> SecuredClient:
         monkeypatch.setattr(users_api, "whoami", whoami_mocked)
 
         monkeypatch.setattr(httpx, "post", client_.post)
+        monkeypatch.setattr(httpx, "patch", client_.patch)
         monkeypatch.setattr(httpx.AsyncClient, "post", client_.post_async)
         monkeypatch.setattr(httpx, "get", client_.get)
         monkeypatch.setattr(httpx, "delete", client_.delete)
