@@ -56,7 +56,7 @@
   </div>
 </template>
 <script>
-import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { Pagination, DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { IdState } from "vue-virtual-scroller";
 import ClassifierAnnotationButton from "../ClassifierAnnotationButton.vue";
 
@@ -84,13 +84,18 @@ export default {
     return {
       searchText: "",
       selectedLabels: [],
-      shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+      shownLabels: this.maxVisibleLabels,
     };
   },
   watch: {
     annotationLabels(n, o) {
       if (n !== o) {
         this.selectedLabels = this.appliedLabels;
+      }
+    },
+    allowToShowAllLabels(n, o) {
+      if (n !== o) {
+        this.shownLabels = this.maxVisibleLabels;
       }
     },
   },
@@ -119,8 +124,13 @@ export default {
         this.idState.shownLabels = newValue;
       },
     },
+    allowToShowAllLabels() {
+      return this.pagination.size === 1;
+    },
     maxVisibleLabels() {
-      return DatasetViewSettings.MAX_VISIBLE_LABELS;
+      return this.allowToShowAllLabels
+        ? this.sortedLabels.length
+        : DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
     isMultiLabel() {
       return this.dataset.isMultiLabel;
@@ -195,6 +205,9 @@ export default {
     },
     predictedAs() {
       return this.record.predicted_as;
+    },
+    pagination() {
+      return Pagination.find(this.dataset.name);
     },
   },
   mounted() {
