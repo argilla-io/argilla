@@ -531,7 +531,7 @@ const formatAnnotationOrPredictionOrRuleAnnotation = (
     agent: agent,
     record_id,
     token_entities: entities.map(({ label, start, end, score }, index) => {
-      const idPrefix = `${record_id}_${label}_${start}_${end}`;
+      const idPrefix = `${record_id}_${start}_${end}`;
       return {
         id: FUNCTION_TO_FIRE ? FUNCTION_TO_FIRE(idPrefix) : index,
         record_id,
