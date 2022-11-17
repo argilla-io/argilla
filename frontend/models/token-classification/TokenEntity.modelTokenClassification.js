@@ -27,7 +27,5 @@ class TokenEntity extends Model {
       .first();
   }
 }
-const getTokenEntitableIdPrimaryKey = ({ label, record_id, start, end }) =>
-  `${label}.${record_id}.${start}.${end}`;
 
-export { TokenEntity, getTokenEntitableIdPrimaryKey };
+export { TokenEntity };
