@@ -264,7 +264,7 @@ export default {
     },
     selectGroup(group) {
       if (this.initialVisibleGroup === group) {
-        this.initialVisibleGroup =  null;
+        this.initialVisibleGroup = null;
       } else {
         this.initialVisibleGroup = group;
       }
