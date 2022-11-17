@@ -31,6 +31,7 @@ import { TokenGlobalEntity } from "@/models/token-classification/TokenGlobalEnti
 import { TokenRecord } from "@/models/token-classification/TokenRecord.modelTokenClassification";
 import { TokenAnnotation } from "@/models/token-classification/TokenAnnotation.modelTokenClassification";
 import { TokenPrediction } from "@/models/token-classification/TokenPrediction.modelTokenClassification";
+import { TokenRuleAnnotation } from "@/models/token-classification/TokenRuleAnnotation.modelTokenClassification";
 import { TokenEntity } from "@/models/token-classification/TokenEntity.modelTokenClassification";
 
 import info from "@/database/modules/info";
@@ -58,6 +59,7 @@ database.register(TokenGlobalEntity);
 database.register(TokenRecord);
 database.register(TokenAnnotation);
 database.register(TokenPrediction);
+database.register(TokenRuleAnnotation);
 database.register(TokenEntity);
 
 export default database;
