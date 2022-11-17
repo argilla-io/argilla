@@ -8,6 +8,7 @@
         @on-search-entity="
           (searchQuery) => $emit('on-search-entity', searchQuery)
         "
+        @on-click-save-rule="saveRule"
       />
     </div>
     <RulesMetricsToken
@@ -61,6 +62,9 @@ export default {
   methods: {
     goToManageRules() {
       console.log("goToManageRules");
+    },
+    saveRule() {
+      this.$emit("on-saving-rule");
     },
   },
   computed: {

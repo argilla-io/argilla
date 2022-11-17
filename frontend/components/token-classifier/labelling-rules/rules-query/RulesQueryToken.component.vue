@@ -28,7 +28,7 @@
       <ChipsComponent :chips="entities" @on-chips-select="onChipsSelection" />
     </div>
     <div class="rule-query-token__save-rules-button">
-      <button @click="onSaveRules" :disabled="isSaveRulesDisable">
+      <button @click="onClickSaveRule" :disabled="isSaveRulesDisable">
         Save Rules
       </button>
     </div>
@@ -71,7 +71,6 @@ export default {
   },
   data() {
     return {
-      selectedEntity: [],
       isSaveRulesDisable: true,
       searchEntity: "",
     };
@@ -86,13 +85,12 @@ export default {
     },
   },
   methods: {
-    onChipsSelection({ id, dataset_id }) {
-      console.log(id, dataset_id);
+    onChipsSelection({ id }) {
       this.updateTokenGlobalEntities(id);
       this.disableSaveRulesButton();
     },
-    onSaveRules() {
-      console.log("newEntities", this.selectedEntity);
+    onClickSaveRule() {
+      this.$emit("on-click-save-rule");
     },
     updateTokenGlobalEntities(id) {
       let entities = TokenGlobalEntity.all();

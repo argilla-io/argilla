@@ -25,6 +25,7 @@
           :entities="globalEntities"
           :numberOfRecords="numberOfRecords"
           @on-search-entity="(value) => (searchQuery = value)"
+          @on-saving-rule="savingRule"
         />
       </transition>
     </template>
@@ -312,6 +313,30 @@ export default {
       };
       const rulePrimaryKey = getRuleModelPrimaryKey(paramsToGetRulePrimaryKey);
       return rulePrimaryKey;
+    },
+    async savingRule() {
+      const ruleToPost = {
+        query: this.queryText,
+        label: this.selectedEntityLabel,
+      };
+      await this.postRule(ruleToPost);
+    },
+    async postRule(ruleToPost) {
+      try {
+        const { data, status } = await this.$axios.post(
+          `/datasets/${this.name}/TokenClassification/labeling/rules`,
+          ruleToPost
+        );
+        if (status === 200) {
+          return data;
+        } else if (status === 409) {
+          throw new Error("Error posting API rule because it already exist");
+        } else {
+          throw new Error("Error posting API rule");
+        }
+      } catch (error) {
+        console.log("Error: ", error);
+      }
     },
     cleanTables(queryToRemove) {
       RuleAnnotationModel.deleteAll();
