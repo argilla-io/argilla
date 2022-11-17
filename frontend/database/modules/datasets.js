@@ -27,6 +27,7 @@ import { TokenClassificationDataset } from "../../models/TokenClassification";
 import { formatEntityIdForAnnotation } from "../../models/token-classification/TokenAnnotation.modelTokenClassification";
 import { formatEntityIdForPrediction } from "../../models/token-classification/TokenPrediction.modelTokenClassification";
 import { formatAnnotationPredictionid } from "../../models/token-classification/TokenRecord.modelTokenClassification";
+import { formatEntityIdForRuleAnnotation } from "../../models/token-classification/TokenRuleAnnotation.modelTokenClassification";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -483,7 +484,7 @@ const initTokenRecordsObjectForRecordsModel = (datasetPrimaryKey, records) => {
       );
 
       const formatted_token_annotation = annotation
-        ? getFormattedAnnotationOrPrediction(
+        ? formatAnnotationOrPredictionOrRuleAnnotation(
             "ANNOTATION",
             id,
             formattedAnnotationPredictionid,
@@ -492,7 +493,7 @@ const initTokenRecordsObjectForRecordsModel = (datasetPrimaryKey, records) => {
         : null;
 
       const formatted_token_prediction = prediction
-        ? getFormattedAnnotationOrPrediction(
+        ? formatAnnotationOrPredictionOrRuleAnnotation(
             "PREDICTION",
             id,
             formattedAnnotationPredictionid,
@@ -517,7 +518,7 @@ const initTokenRecordsObjectForRecordsModel = (datasetPrimaryKey, records) => {
   return tokenRecords;
 };
 
-const getFormattedAnnotationOrPrediction = (
+const formatAnnotationOrPredictionOrRuleAnnotation = (
   entityType,
   record_id,
   recordIndex,
@@ -530,14 +531,15 @@ const getFormattedAnnotationOrPrediction = (
     agent: agent,
     record_id,
     token_entities: entities.map(({ label, start, end, score }, index) => {
+      const idPrefix = `${record_id}_${label}_${start}_${end}`;
       return {
-        id: FUNCTION_TO_FIRE ? FUNCTION_TO_FIRE(index) : index,
+        id: FUNCTION_TO_FIRE ? FUNCTION_TO_FIRE(idPrefix) : index,
         record_id,
         agent,
-        label: label,
-        start: start,
-        end: end,
-        score: score,
+        label,
+        start,
+        end,
+        score,
       };
     }),
   };
@@ -551,6 +553,9 @@ const functionToFireToFormatTokenEntityId = (entityType) => {
       break;
     case "PREDICTION":
       FUNCTION_TO_FIRE = formatEntityIdForPrediction;
+      break;
+    case "RULEANNOTATION":
+      FUNCTION_TO_FIRE = formatEntityIdForRuleAnnotation;
       break;
     default:
       console.log("WARNING : The type from the entities are UNKNOWN");
