@@ -89,7 +89,7 @@ def update_dataset_labeling_rule(
 
     response = httpx.patch(
         url,
-        json={"labels": rule.labels},
+        json={"query": rule.query, "labels": rule.labels},
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
