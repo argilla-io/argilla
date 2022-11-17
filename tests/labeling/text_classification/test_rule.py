@@ -98,9 +98,9 @@ def test_atomic_crud_operations(monkeypatch, mocked_client, log_dataset):
     with pytest.raises(RuleNotAppliedError):
         rule(TextClassificationRecord(text="test"))
 
-    monkeypatch.setattr(httpx, "get", mocked_client.stream)
-    monkeypatch.setattr(httpx, "patch", mocked_client.post)
-    monkeypatch.setattr(httpx, "delete", mocked_client.stream)
+    monkeypatch.setattr(httpx, "get", mocked_client.get)
+    monkeypatch.setattr(httpx, "patch", mocked_client.patch)
+    monkeypatch.setattr(httpx, "delete", mocked_client.delete)
     monkeypatch.setattr(httpx, "post", mocked_client.post)
     monkeypatch.setattr(httpx, "stream", mocked_client.stream)
 
