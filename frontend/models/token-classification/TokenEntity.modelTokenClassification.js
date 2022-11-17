@@ -1,8 +1,5 @@
 import { Model } from "@vuex-orm/core";
 import { TokenGlobalEntity } from "./TokenGlobalEntity.modelTokenClassification";
-// import { TokenAnnotation } from "./TokenAnnotation.modelTokenClassification";
-
-// import { TokenGlobalEntity } from "./TokenGlobalEntity.modelTokenClassification";
 
 class TokenEntity extends Model {
   static entity = "tokenEntities";
