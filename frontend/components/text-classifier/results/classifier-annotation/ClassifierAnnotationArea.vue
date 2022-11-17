@@ -125,7 +125,7 @@ export default {
       },
     },
     allowToShowAllLabels() {
-      return this.dataset.viewSettings.pagination.size === 1 || false;
+      return this.dataset?.viewSettings?.pagination?.size === 1 || false;
     },
     maxVisibleLabels() {
       return this.allowToShowAllLabels
