@@ -88,13 +88,13 @@ export default {
   methods: {
     onChipsSelection({ id, dataset_id }) {
       console.log(id, dataset_id);
-      this.updateTokenEntities(id);
+      this.updateTokenGlobalEntities(id);
       this.disableSaveRulesButton();
     },
     onSaveRules() {
       console.log("newEntities", this.selectedEntity);
     },
-    updateTokenEntities(id) {
+    updateTokenGlobalEntities(id) {
       let entities = TokenGlobalEntity.all();
       entities = entities.map((entity) => {
         if (entity.id !== id) {
