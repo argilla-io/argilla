@@ -78,11 +78,21 @@ class Rule:
         """Updates the label"""
         self._label = label
 
+    def convert_to_labeling_rule(self):
+        """Converts the rule to a LabelingRule"""
+        if isinstance(self._label, str):
+            labels = [self._label]
+        else:
+            labels = self._label
+
+        return LabelingRule(
+            query=self.query, labels=labels, author=self.author or "None"
+        )
+
     def add_to_dataset(self, dataset: str):
         """Add to rule to the given dataset"""
-        labeling_rule = LabelingRule(
-            query=self.query, label=self.label, labels=[], author=self.author or "None"
-        )
+
+        labeling_rule = self.convert_to_labeling_rule()
         api.active_api().add_dataset_labeling_rules(dataset, rules=[labeling_rule])
 
     def remove_from_dataset(self, dataset: str):
