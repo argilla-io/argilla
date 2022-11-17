@@ -216,13 +216,10 @@ def test_update_rules(mocked_client, log_dataset):
     ]
 
     add_rules(log_dataset, rules)
-
-    update_rules(
-        log_dataset,
-        [
-            Rule(query="a query", label="La La La"),
-        ],
-    )
+    rules_to_update = [
+        Rule(query="a query", label="La La La"),
+    ]
+    update_rules(log_dataset, rules=rules_to_update)
 
     actual_rules = load_rules(log_dataset)
 
