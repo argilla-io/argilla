@@ -187,6 +187,7 @@ def add_rules(dataset: str, rules: List[Rule]):
     Returns:
         api response
     """
+    rules = [rule.convert_to_labeling_rule() for rule in rules]
     return api.active_api().add_dataset_labeling_rules(dataset, rules)
 
 
@@ -200,6 +201,7 @@ def delete_rules(dataset: str, rules: List[Rule]):
         api response
 
     """
+    rules = [rule.convert_to_labeling_rule() for rule in rules]
     return api.active_api().delete_dataset_labeling_rules(dataset, rules)
 
 
@@ -213,6 +215,7 @@ def update_rules(dataset: str, rules: List[Rule]):
         api response
 
     """
+    rules = [rule.convert_to_labeling_rule() for rule in rules]
     return api.active_api().update_dataset_labeling_rules(dataset, rules)
 
 
