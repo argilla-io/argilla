@@ -16,9 +16,10 @@
   -->
 
 <template>
-  <results-list :dataset="dataset">
+  <results-list :dataset="dataset" v-if="!dataset.viewSettings.visibleRulesList">
     <template slot="results-header" v-if="isLabellingRules">
       <transition name="fade" mode="out-in" appear>
+        {{rules}}
         <RuleDefinitionToken
           :rule="rule"
           :queryText="queryText"
@@ -36,6 +37,7 @@
       />
     </template>
   </results-list>
+  <RulesManagementToken v-else class="content" :rules="rules" :dataset="dataset" />
 </template>
 
 <script>
@@ -69,6 +71,7 @@ export default {
     return {
       rulesHaveBeenFetched: false,
       searchQuery: "",
+      ruleList: [],
     };
   },
   components: {
@@ -103,6 +106,12 @@ export default {
     },
     rulePrimaryKey() {
       return this.getRulePrimaryKey(this.queryText);
+    },
+    rules() {
+      return TokenClassificationDatasetModel.query()
+        .whereId(this.datasetPrimaryKey)
+        .with("rules")
+        .first().rules
     },
     rule() {
       return (
@@ -353,3 +362,9 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.content {
+  @extend %collapsable-if-metrics !optional;
+}
+</style>

@@ -27,9 +27,11 @@
 </template>
 
 <script>
+import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import RulesMetricsToken from "./rules-metric/RulesMetricToken.component.vue";
 import RulesQueryToken from "./rules-query/RulesQueryToken.component.vue";
 import OptionsForRuleMetrics from "./OptionsForRuleMetrics.class";
+import { getDatasetModelPrimaryKey } from "@/models/Dataset";
 
 export default {
   name: "RuleDefinitionToken",
@@ -61,7 +63,12 @@ export default {
   },
   methods: {
     goToManageRules() {
-      console.log("goToManageRules");
+      DatasetViewSettings.update({
+        where: getDatasetModelPrimaryKey,
+        data: {
+          visibleRulesList: true,
+        },
+      });
     },
     saveRule() {
       this.$emit("on-saving-rule");
