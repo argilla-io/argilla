@@ -23,4 +23,4 @@ DEFAULT_API_KEY = "rubrix.apikey"  # Keep the same api key for now
 _OLD_API_KEY_HEADER_NAME = "X-Rubrix-Api-Key"
 _OLD_WORKSPACE_HEADER_NAME = "X-Rubrix-Workspace"
 
-DATASET_NAME_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
+DATASET_NAME_REGEX_PATTERN = r"^(?!-|_)[a-zA-Z0-9-_]+$"
