@@ -8,7 +8,7 @@
       <p class="user__mail">{{ user.email }}</p>
       <a
         class="user__link"
-        href="https://docs.rubrix.ml/en/stable/"
+        href="https://docs.argilla.io/en/latest/"
         target="_blank"
       >
         <svgicon width="16" height="16" name="external"></svgicon> View docs
