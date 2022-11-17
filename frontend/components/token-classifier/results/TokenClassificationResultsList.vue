@@ -27,10 +27,6 @@
           @on-search-entity="(value) => (searchQuery = value)"
         />
       </transition>
-      <div class="entities" v-for="entity in entities" :key="entity.id">
-        {{ entity.label }} {{ entity.start }} {{ entity.end }}
-        <strong>{{ entity.token_entitable.constructor.entity }} </strong>
-      </div>
     </template>
     <template slot="record" slot-scope="results">
       <record-token-classification
@@ -51,9 +47,15 @@ import RuleDefinitionToken from "../labelling-rules/RuleDefinitionToken.componen
 import { getDatasetModelPrimaryKey } from "../../../models/Dataset";
 import {
   formatDatasetIdForTokenGlobalEntityModel,
-  TokenGlobalEntity,
+  TokenGlobalEntity as GlobalEntityModel,
 } from "../../../models/token-classification/TokenGlobalEntity.modelTokenClassification";
-import { TokenEntity } from "../../../models/token-classification/TokenEntity.modelTokenClassification";
+import { TokenEntity as EntityModel } from "../../../models/token-classification/TokenEntity.modelTokenClassification";
+import { formatAnnotationPredictionid } from "../../../models/token-classification/TokenRecord.modelTokenClassification";
+import {
+  formatEntityIdForRuleAnnotation,
+  TokenRuleAnnotation as RuleAnnotationModel,
+} from "../../../models/token-classification/TokenRuleAnnotation.modelTokenClassification";
+import RulesMetricModel from "../../../models/token-classification/RulesMetric.modelTokenClassification";
 
 export default {
   props: {
@@ -110,7 +112,7 @@ export default {
       );
     },
     globalEntities() {
-      return TokenGlobalEntity.query()
+      return GlobalEntityModel.query()
         .where(
           "dataset_id",
           formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
@@ -121,6 +123,9 @@ export default {
         .orderBy("text")
         .get();
     },
+    selectedEntityLabel() {
+      return GlobalEntityModel.query().where("is_activate", true).first()?.text;
+    },
     records() {
       return TokenClassificationDatasetModel.query()
         .whereId(this.datasetPrimaryKey)
@@ -128,7 +133,7 @@ export default {
         .first().token_records;
     },
     entities() {
-      return TokenEntity.query().with("token_entitable").get();
+      return EntityModel.query().with("token_entitable").get();
     },
     recordsIds() {
       return this.records.map((record) => record.id);
@@ -144,27 +149,25 @@ export default {
     async queryText(newValue, oldValue) {
       if (newValue) {
         this.rulesHaveBeenFetched = false;
-        const { name } = this.dataset;
-
         const rulesMetrics = await this.getRulesMetricsByQueryText(
-          name,
+          this.name,
           this.queryText
         );
 
-        const rules = await this.fetchTokenClassificationRules(name);
-
+        const rules = await this.fetchTokenClassificationRules(this.name);
         rules?.forEach((rule) => {
           this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
         });
 
-        await this.addAnnotationsToRecordsByQuery(name, this.queryText);
-
         this.insertOrUpdateEntityInTokenGlobalEntityModel();
         this.rulesHaveBeenFetched = true;
       } else {
-        //TODO the table delete function if user clean the query search
-        this.cleanTables();
+        this.cleanTables(oldValue);
       }
+    },
+    async selectedEntityLabel(newValue) {
+      if (newValue)
+        await this.addAnnotationsToRecordsByQuery(this.name, this.queryText);
     },
   },
   methods: {
@@ -210,13 +213,13 @@ export default {
         : null;
 
       if (data) {
-        this.insertOrUpdateAnnotationsInTokenAnnotation(data, query);
+        this.insertOrUpdateRuleAnnotations(data);
       }
     },
     async fetchRecordsAnnotationByQueryText(name, query) {
       try {
         const { data, status } = await this.$axios.post(
-          `/datasets/${name}/TokenClassification/labeling/rules/${query}/search`,
+          `/datasets/${name}/TokenClassification/labeling/rules/${query}/search?label=${this.selectedEntityLabel}`,
           {
             record_ids: this.recordsIds,
           }
@@ -235,9 +238,11 @@ export default {
         data: {
           ...rule,
           rule_metrics: rulesMetrics,
-          dataset_id: this.dataset.id,
-          name: this.dataset.name,
-          owner: this.dataset.owner,
+          dataset_id: formatDatasetIdForTokenGlobalEntityModel(
+            this.datasetPrimaryKey
+          ),
+          name: this.name,
+          owner: this.owner,
         },
       });
     },
@@ -249,7 +254,7 @@ export default {
           dataset_id: formatDatasetIdForTokenGlobalEntityModel(
             this.datasetPrimaryKey
           ),
-          text: text,
+          text,
           color_id: colorId,
           is_activate: false,
         };
@@ -264,7 +269,38 @@ export default {
         },
       });
     },
-    insertOrUpdateAnnotationsInTokenAnnotation({ agent, records }, query) {},
+    insertOrUpdateRuleAnnotations({ agent, records }) {
+      records.forEach(({ id: record_id, entities }, index) => {
+        const tokenRuleAnnotation = this.initRuleAnnotationObj(
+          record_id,
+          entities,
+          agent,
+          index
+        );
+        RuleAnnotationModel.insertOrUpdate({ data: tokenRuleAnnotation });
+      });
+    },
+    initRuleAnnotationObj(record_id, entities, agent, prefix) {
+      const tokenEntities = entities.map(({ label, start, end }) => {
+        const idPrefix = `${record_id}_${start}_${end}`;
+        return {
+          id: formatEntityIdForRuleAnnotation(idPrefix),
+          record_id,
+          agent,
+          label,
+          start,
+          end,
+        };
+      });
+
+      const tokenRuleAnnotation = {
+        id: formatAnnotationPredictionid(prefix, this.datasetPrimaryKey),
+        query_search: agent,
+        record_id,
+        token_entities: tokenEntities,
+      };
+      return tokenRuleAnnotation;
+    },
     isStringIncludeSubstring(refString, substring) {
       return refString.toLowerCase().includes(substring.toLowerCase());
     },
@@ -277,12 +313,18 @@ export default {
       const rulePrimaryKey = getRuleModelPrimaryKey(paramsToGetRulePrimaryKey);
       return rulePrimaryKey;
     },
-    cleanTables() {},
-    // addKeyValueToEntitiesItem(key, value, entities) {
-    //   return entities.map((entity) => {
-    //     return { ...entity, [key]: value };
-    //   });
-    // },
+    cleanTables(queryToRemove) {
+      RuleAnnotationModel.deleteAll();
+      EntityModel.delete(
+        (entity) => entity.entitable_type === "ruleAnnotations"
+      );
+
+      const oldRulePrimaryKey = queryToRemove
+        .concat(this.rulePrimaryKey)
+        .split(",");
+      RuleModel.delete(oldRulePrimaryKey);
+      RulesMetricModel.deleteAll();
+    },
   },
 };
 </script>
