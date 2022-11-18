@@ -930,7 +930,8 @@ class ElasticsearchBackend(LoggingMixin):
         def check_metadata_length(metadata_length: int = 0):
             if metadata_length > settings.metadata_fields_limit:
                 raise MetadataLimitExceededError(
-                    length=metadata_length, limit=settings.metadata_fields_limit
+                    length=metadata_length,
+                    limit=settings.metadata_fields_limit,
                 )
 
         def detect_nested_type(v: Any) -> bool:

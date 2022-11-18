@@ -26,8 +26,7 @@ import pandas as pd
 from deprecated import deprecated
 from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
-from argilla._constants import MAX_KEYWORD_LENGTH
-from argilla.utils import limit_value_length
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
@@ -39,14 +38,15 @@ class _Validators(BaseModel):
     @validator("metadata", check_fields=False)
     def _check_value_length(cls, v):
         """Checks metadata values length and apply value truncation for large values"""
-        new_metadata = limit_value_length(v, max_length=MAX_KEYWORD_LENGTH)
-        if new_metadata != v:
+        if len(v) > DEFAULT_MAX_KEYWORD_LENGTH:
             warnings.warn(
-                "Some metadata values exceed the max length. Those values will be"
-                f" truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
+                "Some metadata values could exceed the max length. For those cases, values will be"
+                f" truncated by keeping only the last {DEFAULT_MAX_KEYWORD_LENGTH} characters. "
+                "You can configure setup this length in the server with the ARGILLA_METADATA_FIELD_LENGTH"
+                " environment variable."
             )
 
-        return new_metadata
+        return v
 
     @validator("metadata", check_fields=False)
     def _none_to_empty_dict(cls, v):

@@ -21,7 +21,7 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from argilla._constants import MAX_KEYWORD_LENGTH
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
@@ -210,12 +210,12 @@ def test_metadata_values_length():
     metadata = {"too_long": "a" * 200}
 
     record = TextClassificationRecord(inputs={"text": text}, metadata=metadata)
-    assert len(record.metadata["too_long"]) == MAX_KEYWORD_LENGTH
+    assert len(record.metadata["too_long"]) == DEFAULT_MAX_KEYWORD_LENGTH
 
     record = TokenClassificationRecord(
         text=text, tokens=text.split(), metadata=metadata
     )
-    assert len(record.metadata["too_long"]) == MAX_KEYWORD_LENGTH
+    assert len(record.metadata["too_long"]) == DEFAULT_MAX_KEYWORD_LENGTH
 
 
 def test_model_serialization_with_numpy_nan():
