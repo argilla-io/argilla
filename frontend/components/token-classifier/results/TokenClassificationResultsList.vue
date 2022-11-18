@@ -208,7 +208,7 @@ export default {
         }
         this.insertOrUpdateEntityInTokenGlobalEntityModel();
       } else {
-        // this.cleanTables(oldValue);
+        this.cleanTables(oldValue);
       }
     },
     async selectedEntityLabel(newValue) {
@@ -224,6 +224,7 @@ export default {
           this.name,
           rule.query
         );
+        console.log(rule);
         this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
       });
     },
@@ -290,12 +291,17 @@ export default {
       }
     },
     insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
+      const datasetId = formatDatasetIdForTokenGlobalEntityModel(
+        this.datasetPrimaryKey
+      );
       const newRule = {
         ...rule,
-        rule_metrics: rulesMetrics,
-        dataset_id: formatDatasetIdForTokenGlobalEntityModel(
-          this.datasetPrimaryKey
-        ),
+        rule_metrics: {
+          ...rulesMetrics,
+          query: rule.query,
+          dataset_id: datasetId,
+        },
+        dataset_id: datasetId,
         name: this.name,
         owner: this.owner,
       };
@@ -413,7 +419,11 @@ export default {
         name: this.name,
         owner: this.owner,
         query: paramsToGetRulePrimaryKey.query,
-        rule_metrics: rulesMetrics,
+        rule_metrics: {
+          ...rulesMetrics,
+          query: paramsToGetRulePrimaryKey.query,
+          dataset_id: this.joinedDatasetPrimaryKey,
+        },
       };
 
       RuleModel.insertOrUpdate({ where: rulePrimaryKey, data: newRule });
@@ -423,11 +433,15 @@ export default {
       EntityModel.delete(
         (entity) => entity.entitable_type === "ruleAnnotations"
       );
-      const oldRulePrimaryKey = queryToRemove
-        .concat(this.rulePrimaryKey)
-        .split(",");
-      RuleModel.delete(oldRulePrimaryKey);
-      RulesMetricModel.deleteAll();
+
+      RuleModel.delete((rule) => {
+        return !rule.is_saved_in_dataset;
+      });
+      // this.rules.forEach((rule) => {
+      //   RulesMetricModel.delete((metric) => {
+      //     return metric.query === rule.query;
+      //   });
+      // });
     },
   },
 };
