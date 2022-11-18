@@ -264,7 +264,7 @@ export default {
       return [
         ...filters,
         ...dateFields,
-        ...sortedMetadataFilters,,
+        ...sortedMetadataFilters,
         uncoveredByRules,
       ];
     },
