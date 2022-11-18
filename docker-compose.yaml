@@ -16,6 +16,9 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch
@@ -30,7 +33,7 @@ services:
     networks:
       - argilla
     volumes:
-      - elasticdata:/usr/share/elasticsearch/data
+      - elasticdata711:/usr/share/elasticsearch/data
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.11.1
@@ -48,4 +51,4 @@ networks:
     driver: bridge
 
 volumes:
-  elasticdata:
+  elasticdata711:
