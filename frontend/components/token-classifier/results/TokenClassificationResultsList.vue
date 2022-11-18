@@ -224,7 +224,6 @@ export default {
           this.name,
           rule.query
         );
-        console.log(rule);
         this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
       });
     },
@@ -313,13 +312,15 @@ export default {
       const entities = [];
 
       this.dataset.entities.forEach(({ text, colorId }) => {
+        const isActivate = text === this.rule.label || false;
+
         const entity = {
           dataset_id: formatDatasetIdForTokenGlobalEntityModel(
             this.datasetPrimaryKey
           ),
           text,
           color_id: colorId,
-          is_activate: false,
+          is_activate: isActivate,
         };
 
         entities.push(entity);
