@@ -312,9 +312,7 @@ export default {
       const entities = [];
 
       this.dataset.entities.forEach(({ text, colorId }) => {
-        const isActivate =
-          text.toUpperCase() === this.selectedEntityLabel || false;
-
+        const isActivate = text === this.rule.label || false;
         const entity = {
           dataset_id: formatDatasetIdForTokenGlobalEntityModel(
             this.datasetPrimaryKey
@@ -403,7 +401,6 @@ export default {
       }
     },
     async updateRule(query, label) {
-      console.log(this.name, query, label);
       try {
         const { data, status } = await this.$axios.patch(
           `/datasets/${this.name}/TokenClassification/labeling/rules/${query}`,
