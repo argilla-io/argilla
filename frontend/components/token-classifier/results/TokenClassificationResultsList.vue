@@ -39,7 +39,7 @@
   <RulesManagementToken
     v-else
     class="content"
-    :rules="rules"
+    :rules="rulesSavedInDataset"
     :dataset="dataset"
   />
 </template>
@@ -80,7 +80,6 @@ export default {
   components: {
     RuleDefinitionToken,
   },
-  async beforeMount() {},
   computed: {
     owner() {
       return this.dataset.owner;
@@ -107,6 +106,9 @@ export default {
       };
       return getDatasetModelPrimaryKey(paramsToGetDatasetPrimaryKey);
     },
+    joinedDatasetPrimaryKey() {
+      return this.datasetPrimaryKey.join(".");
+    },
     isViewRuleDefinitionOrRecords() {
       // NOTE: IF true => the view is rule_management ELSE the view is rule_definition or record_view
       return !this.viewSettings.visibleRulesList;
@@ -117,8 +119,25 @@ export default {
           .text || ""
       );
     },
+    isRuleForCurrentQuery() {
+      const ruleModelPrimaryKeyWithCurrentQuery = getRuleModelPrimaryKey({
+        query: this.queryText,
+        name: this.name,
+        owner: this.owner,
+      });
+      return RuleModel.query()
+        .whereId(ruleModelPrimaryKeyWithCurrentQuery)
+        .exists();
+    },
     rulePrimaryKey() {
       return this.getRulePrimaryKey(this.queryText);
+    },
+    rulesSavedInDataset() {
+      return RuleModel.query()
+        .with("rule_metrics")
+        .where("dataset_id", this.joinedDatasetPrimaryKey)
+        .where("is_saved_in_dataset", true)
+        .get();
     },
     rules() {
       return TokenClassificationDatasetModel.query()
@@ -177,19 +196,16 @@ export default {
   watch: {
     async isViewWeakLabelling() {
       if (this.isViewIsWeakLabellingANDDatasetHaveNoRules) {
-        const rules = await this.fetchTokenClassificationRules(this.name);
-        const rulesMetrics = await this.getRulesMetricsByQueryText(
-          this.name,
-          this.queryText
-        );
-
-        rules?.forEach((rule) => {
-          this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
-        });
+        this.initRuleModelAndRulesMetricsModel();
       }
     },
     async queryText(newValue, oldValue) {
       if (newValue) {
+        if (!this.isRuleForCurrentQuery) {
+          this.createACustomRuleAndLoadRuleMetrics();
+        } else {
+          // NOTE: we do nothing because we already have the rules and it rule_metrics
+        }
         this.insertOrUpdateEntityInTokenGlobalEntityModel();
       } else {
         // this.cleanTables(oldValue);
@@ -201,6 +217,16 @@ export default {
     },
   },
   methods: {
+    async initRuleModelAndRulesMetricsModel() {
+      const rules = await this.fetchTokenClassificationRules(this.name);
+      rules?.forEach(async (rule) => {
+        const rulesMetrics = await this.getRulesMetricsByQueryText(
+          this.name,
+          rule.query
+        );
+        this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
+      });
+    },
     async getRulesMetricsByQueryText(name, query) {
       let rulesMetrics = null;
 
@@ -264,16 +290,17 @@ export default {
       }
     },
     insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
+      const newRule = {
+        ...rule,
+        rule_metrics: rulesMetrics,
+        dataset_id: formatDatasetIdForTokenGlobalEntityModel(
+          this.datasetPrimaryKey
+        ),
+        name: this.name,
+        owner: this.owner,
+      };
       RuleModel.insertOrUpdate({
-        data: {
-          ...rule,
-          rule_metrics: rulesMetrics,
-          dataset_id: formatDatasetIdForTokenGlobalEntityModel(
-            this.datasetPrimaryKey
-          ),
-          name: this.name,
-          owner: this.owner,
-        },
+        data: newRule,
       });
     },
     insertOrUpdateEntityInTokenGlobalEntityModel() {
@@ -335,11 +362,7 @@ export default {
       return refString.toLowerCase().includes(substring.toLowerCase());
     },
     getRulePrimaryKey(query) {
-      const paramsToGetRulePrimaryKey = {
-        query,
-        name: this.name,
-        owner: this.owner,
-      };
+      const paramsToGetRulePrimaryKey = this.initRulePrimaryKey(query);
       const rulePrimaryKey = getRuleModelPrimaryKey(paramsToGetRulePrimaryKey);
       return rulePrimaryKey;
     },
@@ -367,12 +390,39 @@ export default {
         console.log("Error: ", error);
       }
     },
+    initRulePrimaryKey(query) {
+      return {
+        query,
+        name: this.name,
+        owner: this.owner,
+      };
+    },
+    async createACustomRuleAndLoadRuleMetrics() {
+      const rulesMetrics = await this.getRulesMetricsByQueryText(
+        this.name,
+        this.queryText
+      );
+
+      const paramsToGetRulePrimaryKey = this.initRulePrimaryKey(this.queryText);
+      const rulePrimaryKey = getRuleModelPrimaryKey(paramsToGetRulePrimaryKey);
+      const newRule = {
+        is_saved_in_dataset: false,
+        dataset_id: this.joinedDatasetPrimaryKey,
+        label: null,
+        labeling_function: null,
+        name: this.name,
+        owner: this.owner,
+        query: paramsToGetRulePrimaryKey.query,
+        rule_metrics: rulesMetrics,
+      };
+
+      RuleModel.insertOrUpdate({ where: rulePrimaryKey, data: newRule });
+    },
     cleanTables(queryToRemove) {
       RuleAnnotationModel.deleteAll();
       EntityModel.delete(
         (entity) => entity.entitable_type === "ruleAnnotations"
       );
-
       const oldRulePrimaryKey = queryToRemove
         .concat(this.rulePrimaryKey)
         .split(",");
