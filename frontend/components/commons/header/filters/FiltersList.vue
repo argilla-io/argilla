@@ -235,6 +235,22 @@ export default {
             a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
           )) ||
         [];
+      const dateFields = [
+        {
+          id: "last_updated",
+          key: "last_updated",
+          group: "Sort",
+          name: "Last updated",
+          disabled: this.recordPropertyHasValue("last_updated"),
+        },
+        {
+          id: "event_timestamp",
+          key: "event_timestamp",
+          group: "Sort",
+          name: "Event timestamp",
+          disabled: this.recordPropertyHasValue("event_timestamp"),
+        },
+      ].filter(({ disabled }) => !disabled);
       const uncoveredByRules = {
         id: "uncovered_by_rules",
         key: "uncovered_by_rules",
@@ -243,9 +259,14 @@ export default {
         options: [true, false],
         selected:
           this.dataset.query.uncovered_by_rules &&
-          this.dataset.query.uncovered_by_rules.length > 0,
+          this.dataset.query.uncovered_by_rules?.length > 0,
       };
-      return [...filters, ...sortedMetadataFilters, uncoveredByRules];
+      return [
+        ...filters,
+        ...dateFields,
+        ...sortedMetadataFilters,,
+        uncoveredByRules,
+      ];
     },
   },
   methods: {
@@ -264,7 +285,7 @@ export default {
     },
     selectGroup(group) {
       if (this.initialVisibleGroup === group) {
-        this.initialVisibleGroup =  null;
+        this.initialVisibleGroup = null;
       } else {
         this.initialVisibleGroup = group;
       }
@@ -289,6 +310,11 @@ export default {
     onSortBy(sortList) {
       this.$emit("applySortBy", sortList);
       this.close();
+    },
+    recordPropertyHasValue(prop) {
+      return (
+        !this.dataset.results.records.some((record) => record[prop]) || false
+      );
     },
   },
 };
