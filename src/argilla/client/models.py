@@ -36,17 +36,27 @@ class _Validators(BaseModel):
     """Base class for our record models that takes care of general validations"""
 
     @validator("metadata", check_fields=False)
-    def _check_value_length(cls, v):
-        """Checks metadata values length and apply value truncation for large values"""
-        if len(v) > DEFAULT_MAX_KEYWORD_LENGTH:
+    def _check_value_length(cls, metadata):
+        """Checks metadata values length and warn message for large values"""
+        if not metadata:
+            return metadata
+
+        default_length_exceeded = False
+        for v in metadata.values():
+            if v and len(v) > DEFAULT_MAX_KEYWORD_LENGTH:
+                default_length_exceeded = True
+                break
+
+        if default_length_exceeded:
             warnings.warn(
                 "Some metadata values could exceed the max length. For those cases, values will be"
                 f" truncated by keeping only the last {DEFAULT_MAX_KEYWORD_LENGTH} characters. "
                 "You can configure setup this length in the server with the ARGILLA_METADATA_FIELD_LENGTH"
-                " environment variable."
+                " environment variable.",
+                UserWarning,
             )
 
-        return v
+        return metadata
 
     @validator("metadata", check_fields=False)
     def _none_to_empty_dict(cls, v):
