@@ -39,7 +39,6 @@
         @change="updateLabels"
       >
       </classifier-annotation-button>
-
       <base-button
         v-if="visibleLabels.length < filteredLabels.length"
         class="feedback-interactions__more secondary light"
@@ -58,7 +57,7 @@
 <script>
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { IdState } from "vue-virtual-scroller";
-import ClassifierAnnotationButton from "../ClassifierAnnotationButton.vue";
+import ClassifierAnnotationButton from "./ClassifierAnnotationButton.vue";
 
 export default {
   components: {
@@ -93,11 +92,6 @@ export default {
         this.selectedLabels = this.appliedLabels;
       }
     },
-    allowToShowAllLabels(n, o) {
-      if (n !== o) {
-        this.shownLabels = this.maxVisibleLabels;
-      }
-    },
   },
   computed: {
     searchText: {
@@ -118,22 +112,50 @@ export default {
     },
     shownLabels: {
       get: function () {
-        return this.idState.shownLabels;
+        return this.allowToShowAllLabels
+          ? this.sortedLabels.length
+          : this.idState.shownLabels;
       },
       set: function (newValue) {
         this.idState.shownLabels = newValue;
       },
     },
-    allowToShowAllLabels() {
-      return this.dataset?.viewSettings?.pagination?.size === 1 || false;
-    },
     maxVisibleLabels() {
-      return this.allowToShowAllLabels
-        ? this.sortedLabels.length
-        : DatasetViewSettings.MAX_VISIBLE_LABELS;
+      return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
     isMultiLabel() {
       return this.dataset.isMultiLabel;
+    },
+    visibleLabels() {
+      const selectedLabels = this.filteredLabels.filter(
+        (l) => l.selected
+      ).length;
+      const availableNonSelected =
+        this.shownLabels < this.filteredLabels.length
+          ? this.shownLabels - selectedLabels
+          : this.shownLabels;
+      let nonSelected = 0;
+      return this.filteredLabels.filter((l) => {
+        if (l.selected) {
+          return l;
+        } else {
+          if (nonSelected < availableNonSelected) {
+            nonSelected++;
+            return l;
+          }
+        }
+      });
+    },
+    filteredLabels() {
+      return this.sortedLabels.filter((label) =>
+        label.class.toLowerCase().match(this.searchText.toLowerCase())
+      );
+    },
+    sortedLabels() {
+      return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
+    },
+    appliedLabels() {
+      return this.labels.filter((l) => l.selected).map((label) => label.class);
     },
     labels() {
       // Setup all record labels
@@ -166,42 +188,17 @@ export default {
         };
       });
     },
-    sortedLabels() {
-      return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
-    },
-    filteredLabels() {
-      return this.sortedLabels.filter((label) =>
-        label.class.toLowerCase().match(this.searchText.toLowerCase())
-      );
-    },
-    visibleLabels() {
-      const selectedLabels = this.filteredLabels.filter(
-        (l) => l.selected
-      ).length;
-      const availableNonSelected =
-        this.shownLabels < this.filteredLabels.length
-          ? this.shownLabels - selectedLabels
-          : this.shownLabels;
-      let nonSelected = 0;
-      return this.filteredLabels.filter((l) => {
-        if (l.selected) {
-          return l;
-        } else {
-          if (nonSelected < availableNonSelected) {
-            nonSelected++;
-            return l;
-          }
-        }
-      });
-    },
     annotationLabels() {
       return this.record.annotation ? this.record.annotation.labels : [];
     },
     predictionLabels() {
       return this.record.prediction ? this.record.prediction.labels : [];
     },
-    appliedLabels() {
-      return this.labels.filter((l) => l.selected).map((label) => label.class);
+    allowToShowAllLabels() {
+      return this.paginationSize === 1 || false;
+    },
+    paginationSize() {
+      return this.dataset.viewSettings?.pagination?.size;
     },
     predictedAs() {
       return this.record.predicted_as;
