@@ -16,10 +16,9 @@
   -->
 
 <template>
-  <results-list :dataset="dataset" v-if="!dataset.viewSettings.visibleRulesList">
-    <template slot="results-header" v-if="isLabellingRules">
+  <results-list :dataset="dataset" v-if="isViewRuleDefinitionOrRecords">
+    <template slot="results-header" v-if="isViewWeakLabelling">
       <transition name="fade" mode="out-in" appear>
-        {{rules}}
         <RuleDefinitionToken
           :rule="rule"
           :queryText="queryText"
@@ -37,7 +36,12 @@
       />
     </template>
   </results-list>
-  <RulesManagementToken v-else class="content" :rules="rules" :dataset="dataset" />
+  <RulesManagementToken
+    v-else
+    class="content"
+    :rules="rules"
+    :dataset="dataset"
+  />
 </template>
 
 <script>
@@ -69,7 +73,6 @@ export default {
   },
   data() {
     return {
-      rulesHaveBeenFetched: false,
       searchQuery: "",
       ruleList: [],
     };
@@ -85,10 +88,16 @@ export default {
     name() {
       return this.dataset.name;
     },
-    viewMode() {
-      return this.dataset.viewSettings.viewMode;
+    viewSettings() {
+      return TokenClassificationDatasetModel.query()
+        .whereId(this.datasetPrimaryKey)
+        .with("viewSettings")
+        .first().viewSettings;
     },
-    isLabellingRules() {
+    viewMode() {
+      return this.viewSettings.viewMode;
+    },
+    isViewWeakLabelling() {
       return this.viewMode === "labelling-rules";
     },
     datasetPrimaryKey() {
@@ -97,6 +106,10 @@ export default {
         owner: this.owner,
       };
       return getDatasetModelPrimaryKey(paramsToGetDatasetPrimaryKey);
+    },
+    isViewRuleDefinitionOrRecords() {
+      // NOTE: IF true => the view is rule_management ELSE the view is rule_definition or record_view
+      return !this.viewSettings.visibleRulesList;
     },
     queryText() {
       return (
@@ -111,7 +124,13 @@ export default {
       return TokenClassificationDatasetModel.query()
         .whereId(this.datasetPrimaryKey)
         .with("rules")
-        .first().rules
+        .first().rules;
+    },
+    isRulesInDataset() {
+      return this.rules.length;
+    },
+    isViewIsWeakLabellingANDDatasetHaveNoRules() {
+      return this.isViewWeakLabelling && !this.isRulesInDataset;
     },
     rule() {
       return (
@@ -156,23 +175,24 @@ export default {
     },
   },
   watch: {
-    async queryText(newValue, oldValue) {
-      if (newValue) {
-        this.rulesHaveBeenFetched = false;
+    async isViewWeakLabelling() {
+      if (this.isViewIsWeakLabellingANDDatasetHaveNoRules) {
+        const rules = await this.fetchTokenClassificationRules(this.name);
         const rulesMetrics = await this.getRulesMetricsByQueryText(
           this.name,
           this.queryText
         );
 
-        const rules = await this.fetchTokenClassificationRules(this.name);
         rules?.forEach((rule) => {
           this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
         });
-
+      }
+    },
+    async queryText(newValue, oldValue) {
+      if (newValue) {
         this.insertOrUpdateEntityInTokenGlobalEntityModel();
-        this.rulesHaveBeenFetched = true;
       } else {
-        this.cleanTables(oldValue);
+        // this.cleanTables(oldValue);
       }
     },
     async selectedEntityLabel(newValue) {
