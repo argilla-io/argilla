@@ -20,7 +20,9 @@ import logging
 from typing import List, Optional
 from urllib.parse import urlparse
 
-from pydantic import BaseSettings, Field, validator
+from pydantic import BaseSettings, Field
+
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 
 
 class ApiSettings(BaseSettings):
@@ -82,7 +84,15 @@ class ApiSettings(BaseSettings):
     es_records_index_replicas: int = 0
 
     metadata_fields_limit: int = Field(
-        default=50, gt=0, le=100, description="Max number of fields in metadata"
+        default=50,
+        gt=0,
+        le=100,
+        description="Max number of fields in metadata",
+    )
+    metadata_field_length: int = Field(
+        default=DEFAULT_MAX_KEYWORD_LENGTH,
+        description="Max length supported for the string metadata fields."
+        " Values containing higher than this will be truncated",
     )
 
     enable_telemetry: bool = True
