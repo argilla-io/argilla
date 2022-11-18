@@ -119,12 +119,8 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
         self._endpoint = api_endpoint
         self._dataset = dataset
         self._records_mapper = records_mapper or text_classification_mapper
-        self._consumer = None
-        self._worker_task = None
-        self._initialized = False
-
         self._monitor_cfg = dict(
-            name=dataset,
+            dataset=dataset,
             sample_rate=sample_rate,
             log_interval=log_interval,
             agent=agent,
@@ -133,25 +129,23 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
         self._monitor: Optional[BaseMonitor] = None
 
     def init(self):
-        if self._initialized:
+        if self._monitor:
             return
         from argilla.client.api import active_api
 
         self._monitor = BaseMonitor(
-            self._endpoint,
+            self,
             api=active_api(),
             **self._monitor_cfg,
         )
         self._monitor._prepare_log_data = self._prepare_argilla_data
-        self._initialized = True
 
     async def dispatch(
         self,
         request: Request,
         call_next: RequestResponseEndpoint,
     ) -> Response:
-        if not self._initialized:
-            self.init()
+        self.init()
 
         if self._endpoint != request.url.path:  # Filtering endpoint path
             return await call_next(request)
