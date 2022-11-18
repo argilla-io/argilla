@@ -177,6 +177,8 @@ jobs:
       - name: Setup OpenSearch 🔎
         if: steps.filter.outputs.python_code == 'true'
         uses: ankane/setup-opensearch@v1
+        env:
+          ES_JAVA_OPTS: "-Xms2g -Xmx2g"
         with:
           opensearch-version: ${{ matrix.version }}
           config: |
