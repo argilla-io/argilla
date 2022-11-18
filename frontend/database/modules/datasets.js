@@ -373,8 +373,9 @@ async function _updateDatasetRecords({
   }
   let aggregations = {};
   const entity = dataset.getTaskDatasetClass();
+
   const updatedDataset = await entity.update({
-    where: dataset.id,
+    where: dataset.id.split("."),
     data: {
       results: {
         ...dataset.results,
