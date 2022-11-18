@@ -1,7 +1,7 @@
 <template>
   <div class="rule-query-token" :style="cssVars">
     <div class="rule-query-token__title-area">
-      <h2 class="title" v-text="title">{{ title }}</h2>
+      <h2 class="title">{{ title }}</h2>
       <span>
         Records: <b>{{ recordLength }}</b>
       </span>
@@ -44,7 +44,7 @@ export default {
     ChipsComponent,
   },
   props: {
-    title: {
+    query: {
       type: String,
       required: true,
     },
@@ -83,6 +83,9 @@ export default {
         "--background-label-color": this.backgroundLabelColor,
       };
     },
+    title() {
+      return `Query: ${this.query}`;
+    },
   },
   methods: {
     onChipsSelection({ id }) {
@@ -94,6 +97,7 @@ export default {
     },
     updateTokenGlobalEntities(id) {
       let entities = TokenGlobalEntity.all();
+
       entities = entities.map((entity) => {
         if (entity.id !== id) {
           return { ...entity, is_activate: false };

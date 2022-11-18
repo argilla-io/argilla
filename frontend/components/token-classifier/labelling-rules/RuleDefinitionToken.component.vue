@@ -2,7 +2,7 @@
   <div class="rule__area">
     <div class="left-item" v-if="queryText.length">
       <RulesQueryToken
-        :title="`Query: ${queryText}`"
+        :query="queryText"
         :entities="entities"
         :recordLength="this.numberOfRecords"
         @on-search-entity="
