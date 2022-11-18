@@ -312,7 +312,8 @@ export default {
       const entities = [];
 
       this.dataset.entities.forEach(({ text, colorId }) => {
-        const isActivate = text === this.rule.label || false;
+        const isActivate =
+          text.toUpperCase() === this.selectedEntityLabel || false;
 
         const entity = {
           dataset_id: formatDatasetIdForTokenGlobalEntityModel(
@@ -374,11 +375,15 @@ export default {
       return rulePrimaryKey;
     },
     async savingRule() {
-      const ruleToPost = {
-        query: this.queryText,
-        label: this.selectedEntityLabel,
-      };
-      await this.postRule(ruleToPost);
+      if (this.rule.is_saved_in_dataset) {
+        await this.updateRule(this.queryText, this.selectedEntityLabel);
+      } else {
+        const ruleToPost = {
+          query: this.queryText,
+          label: this.selectedEntityLabel,
+        };
+        await this.postRule(ruleToPost);
+      }
     },
     async postRule(ruleToPost) {
       try {
@@ -392,6 +397,22 @@ export default {
           throw new Error("Error posting API rule because it already exist");
         } else {
           throw new Error("Error posting API rule");
+        }
+      } catch (error) {
+        console.log("Error: ", error);
+      }
+    },
+    async updateRule(query, label) {
+      console.log(this.name, query, label);
+      try {
+        const { data, status } = await this.$axios.patch(
+          `/datasets/${this.name}/TokenClassification/labeling/rules/${query}`,
+          { label }
+        );
+        if (status === 200) {
+          return data;
+        } else {
+          throw new Error("Error update API rule");
         }
       } catch (error) {
         console.log("Error: ", error);

@@ -16,6 +16,14 @@ class TokenGlobalEntity extends Model {
       dataset: this.belongsTo(TokenClassificationDataset, "dataset_id"),
     };
   }
+
+  static mutators() {
+    return {
+      text(value) {
+        return value.toUpperCase();
+      },
+    };
+  }
 }
 
 const formatDatasetIdForTokenGlobalEntityModel = (dataset_id) =>
