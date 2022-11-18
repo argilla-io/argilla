@@ -21,6 +21,7 @@ from argilla.client.sdk.commons.errors import (
     ValidationApiError,
 )
 from argilla.server.settings import settings
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH, supported_vector_search
 from tests.helpers import SecuredClient
 
 
@@ -69,6 +70,10 @@ def test_delete_and_create_for_different_task(mocked_client):
     ar.load(dataset)
 
 
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
 def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
     dataset = "test_log_data_with_embeddings_and_update_ok"
     text = "This is a text"
@@ -100,6 +105,10 @@ def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
     ]  # will be corrected after I fix the returned list type issue @frascuchon
 
 
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
 def test_log_data_with_embeddings_and_update_ko(mocked_client: SecuredClient):
     dataset = "test_log_data_with_embeddings_and_update_ko"
     text = "This is a text"

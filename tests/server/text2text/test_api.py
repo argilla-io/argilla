@@ -13,6 +13,8 @@
 #  limitations under the License.
 from typing import List, Optional
 
+import pytest
+
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
@@ -20,6 +22,7 @@ from argilla.server.apis.v0.models.text2text import (
     Text2TextRecordInputs,
     Text2TextSearchResults,
 )
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 
 def test_search_records(mocked_client):
@@ -104,6 +107,10 @@ def search_data(
             assert embedding_name in record.embeddings
 
 
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
 def test_search_with_embeddings(mocked_client):
     dataset = "test_search_with_embeddings"
 

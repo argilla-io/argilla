@@ -264,7 +264,7 @@ class GenericElasticEngineBackend(LoggingMixin):
         if metadata_values:
             self._configure_metadata_fields(id, metadata_values)
 
-        if embeddings_cfg and self.client.vector_search_supported:
+        if embeddings_cfg:
             self.client.configure_index_vectors(
                 index=index,
                 vectors=embeddings_cfg,
