@@ -194,10 +194,12 @@ export default {
       this.showOptions = false;
     },
     keyDown(event) {
+      const arrowRight = event.keyCode === 39;
+      const arrowLeft = event.keyCode === 37;
       if (!this.paginationSettings.disabledShortCutPagination) {
-        if (event.keyCode === 39) {
+        if (arrowRight) {
           this.nextPage();
-        } else if (event.keyCode === 37) {
+        } else if (arrowLeft) {
           this.prevPage();
         }
       }
