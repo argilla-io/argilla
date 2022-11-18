@@ -10,7 +10,7 @@ class Rule extends Model {
     return {
       id: this.uid(),
       dataset_id: this.attr(null),
-      label: this.string(null),
+      label: this.attr(null),
       labeling_function: this.attr(null),
       description: this.string(null),
       query: this.string(null),
