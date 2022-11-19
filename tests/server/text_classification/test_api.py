@@ -15,6 +15,8 @@
 
 from datetime import datetime
 
+import pytest
+
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.apis.v0.models.text_classification import (
@@ -26,6 +28,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
 from argilla.server.commons.models import PredictionStatus
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 
 def test_create_records_for_text_classification_with_multi_label(mocked_client):
@@ -181,6 +184,10 @@ def test_create_records_for_text_classification(mocked_client, telemetry_track_d
     telemetry_track_data.assert_called_once()
 
 
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
 def test_create_records_for_text_classification_vector_search(
     mocked_client, telemetry_track_data
 ):

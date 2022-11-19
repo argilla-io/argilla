@@ -53,7 +53,7 @@ class BaseQuery(BaseModel):
 
 
 class BaseDatasetsQuery(BaseQuery):
-    Tasks: Optional[List[str]] = None
+    tasks: Optional[List[str]] = None
     owners: Optional[List[str]] = None
     include_no_owner: bool = None
     name: Optional[str] = None

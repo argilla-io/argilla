@@ -17,8 +17,7 @@ from typing import Any, Dict, List, Optional, Type
 
 from fastapi import Depends
 
-from argilla.server.daos.backend.elasticsearch import ElasticsearchBackend
-from argilla.server.daos.backend.search.model import BaseDatasetsQuery
+from argilla.server.daos.backend import BaseDatasetsQuery, GenericElasticEngineBackend
 from argilla.server.daos.models.datasets import (
     BaseDatasetDB,
     BaseDatasetSettingsDB,
@@ -40,7 +39,9 @@ class DatasetsDAO:
     @classmethod
     def get_instance(
         cls,
-        es: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
+        es: GenericElasticEngineBackend = Depends(
+            GenericElasticEngineBackend.get_instance
+        ),
         records_dao: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance),
     ) -> "DatasetsDAO":
         """
@@ -65,7 +66,7 @@ class DatasetsDAO:
 
     def __init__(
         self,
-        es: ElasticsearchBackend,
+        es: GenericElasticEngineBackend,
         records_dao: DatasetRecordsDAO,
     ):
         self._es = es
@@ -94,10 +95,10 @@ class DatasetsDAO:
         task2dataset_map = task2dataset_map or {}
         return [
             self._es_doc_to_instance(
-                doc, ds_class=task2dataset_map.get(task, BaseDatasetDB)
+                doc=doc,
+                ds_class=task2dataset_map.get(doc["task"], BaseDatasetDB),
             )
             for doc in docs
-            for task in [self.__get_doc_field__(doc, "task")]
         ]
 
     def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
@@ -105,7 +106,7 @@ class DatasetsDAO:
             id=dataset.id,
             document=self._dataset_to_es_doc(dataset),
         )
-        self._es.create_dataset_index(
+        self._es.create_dataset(
             id=dataset.id,
             task=dataset.task,
             force_recreate=True,
@@ -150,30 +151,30 @@ class DatasetsDAO:
 
     @staticmethod
     def _es_doc_to_instance(
-        doc: Dict[str, Any], ds_class: Type[DatasetDB] = BaseDatasetDB
+        doc: Dict[str, Any],
+        ds_class: Type[DatasetDB] = BaseDatasetDB,
     ) -> DatasetDB:
         """Transforms a stored elasticsearch document into a `BaseDatasetDB`"""
 
-        def __key_value_list_to_dict__(
+        def key_value_list_to_dict(
             key_value_list: List[Dict[str, Any]]
         ) -> Dict[str, Any]:
             return {data["key"]: json.loads(data["value"]) for data in key_value_list}
 
-        source = doc["_source"]
-        tags = source.get("tags", [])
-        metadata = source.get("metadata", [])
+        tags = doc.get("tags", [])
+        metadata = doc.get("metadata", [])
 
         data = {
-            **source,
-            "tags": __key_value_list_to_dict__(tags),
-            "metadata": __key_value_list_to_dict__(metadata),
+            **doc,
+            "tags": key_value_list_to_dict(tags),
+            "metadata": key_value_list_to_dict(metadata),
         }
 
         return ds_class.parse_obj(data)
 
     @staticmethod
     def _dataset_to_es_doc(dataset: DatasetDB) -> Dict[str, Any]:
-        def __dict_to_key_value_list__(data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        def dict_to_key_value_list(data: Dict[str, Any]) -> List[Dict[str, Any]]:
             return [
                 {"key": key, "value": json.dumps(value)} for key, value in data.items()
             ]
@@ -184,16 +185,16 @@ class DatasetsDAO:
 
         return {
             **data,
-            "tags": __dict_to_key_value_list__(tags),
-            "metadata": __dict_to_key_value_list__(metadata),
+            "tags": dict_to_key_value_list(tags),
+            "metadata": dict_to_key_value_list(metadata),
         }
 
     def copy(self, source: DatasetDB, target: DatasetDB):
-        source_doc = self._es.find_dataset(id=source.id)
+        document = self._es.find_dataset(id=source.id)
         self._es.add_dataset_document(
             id=target.id,
             document={
-                **source_doc["_source"],  # we copy extended fields from source document
+                **document,  # we copy extended fields from source document
                 **self._dataset_to_es_doc(target),
             },
         )
@@ -234,21 +235,22 @@ class DatasetsDAO:
             k: v.dim if isinstance(v, EmbeddingsConfig) else int(v)
             for k, v in settings.embeddings.items()
         }
-        self._es.configure_embeddings(
+        self._es.create_dataset(
             id=dataset.id,
-            embeddings=embeddings_cfg,
+            task=dataset.task,
+            embeddings_cfg=embeddings_cfg,
         )
 
     def load_settings(
         self, dataset: DatasetDB, as_class: Type[DatasetSettingsDB]
     ) -> Optional[DatasetSettingsDB]:
         doc = self._es.find_dataset(id=dataset.id)
-        if doc:
-            settings = self.__get_doc_field__(doc, field="settings")
+        if doc and "settings" in doc:
+            settings = doc["settings"]
             return as_class.parse_obj(settings) if settings else None
 
     def delete_settings(self, dataset: DatasetDB):
-        self._es.remove_dataset_field(dataset.id, field="settings")
-
-    def __get_doc_field__(self, doc: Dict[str, Any], field: str) -> Optional[Any]:
-        return doc["_source"].get(field)
+        self._es.remove_dataset_field(
+            id=dataset.id,
+            field="settings",
+        )

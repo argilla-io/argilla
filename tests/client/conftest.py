@@ -31,6 +31,22 @@ from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
+from argilla.server.daos.backend.client_adapters.factory import ClientAdapterFactory
+from argilla.server.settings import settings
+
+client = ClientAdapterFactory.get(
+    hosts=settings.elasticsearch,
+    index_shards=settings.es_records_index_shards,
+    ssl_verify=settings.elasticsearch_ssl_verify,
+    ca_path=settings.elasticsearch_ca_path,
+)
+
+SUPPORTED_VECTOR_SEARCH = client.vector_search_supported
+
+
+@pytest.fixture(scope="session")
+def supported_vector_search() -> bool:
+    return SUPPORTED_VECTOR_SEARCH
 
 
 @pytest.fixture(scope="session")

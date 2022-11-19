@@ -12,4 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .generic_elastic import BaseDatasetsQuery, BaseQuery, GenericElasticEngineBackend
+from .base import IClientAdapter
+from .elasticsearch import ElasticsearchClient
+from .opensearch import OpenSearchClient

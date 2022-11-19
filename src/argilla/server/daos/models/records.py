@@ -21,14 +21,14 @@ from pydantic.generics import GenericModel
 
 from argilla._constants import MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
-from argilla.server.daos.backend.search.model import BackendRecordsQuery, SortConfig
+from argilla.server.daos.backend.search.model import BaseRecordsQuery, SortConfig
 from argilla.server.helpers import flatten_dict
 from argilla.utils import limit_value_length
 
 
 class DaoRecordsSearch(BaseModel):
 
-    query: Optional[BackendRecordsQuery] = None
+    query: Optional[BaseRecordsQuery] = None
     sort: SortConfig = Field(default_factory=SortConfig)
 
 

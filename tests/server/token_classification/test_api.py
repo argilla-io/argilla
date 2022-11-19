@@ -24,6 +24,7 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationSearchRequest,
     TokenClassificationSearchResults,
 )
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 
 def test_load_as_different_task(mocked_client):
@@ -224,6 +225,10 @@ def test_create_records_for_token_classification(
         assert metrics_validator(record)
 
 
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
 @pytest.mark.parametrize(
     ("include_metrics", "metrics_validator"),
     [
@@ -233,7 +238,9 @@ def test_create_records_for_token_classification(
     ],
 )
 def test_create_records_for_token_classification_vector_search(
-    mocked_client, include_metrics: bool, metrics_validator: Callable
+    mocked_client,
+    include_metrics: bool,
+    metrics_validator: Callable,
 ):
     dataset = "test_create_records_for_token_classification_vector_search"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200

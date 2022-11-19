@@ -18,12 +18,9 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 from fastapi import Depends
 
-from argilla.server.daos.backend.elasticsearch import (
-    ClosedIndexError,
-    ElasticsearchBackend,
-    IndexNotFoundError,
-)
-from argilla.server.daos.backend.search.model import BackendRecordsQuery
+from argilla.server.daos.backend import GenericElasticEngineBackend
+from argilla.server.daos.backend.base import ClosedIndexError, IndexNotFoundError
+from argilla.server.daos.backend.search.model import BaseRecordsQuery
 from argilla.server.daos.models.datasets import DatasetDB
 from argilla.server.daos.models.records import (
     DaoRecordsSearch,
@@ -41,7 +38,9 @@ class DatasetRecordsDAO:
     @classmethod
     def get_instance(
         cls,
-        es: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
+        es: GenericElasticEngineBackend = Depends(
+            GenericElasticEngineBackend.get_instance
+        ),
     ) -> "DatasetRecordsDAO":
         """
         Creates a dataset records dao instance
@@ -56,7 +55,7 @@ class DatasetRecordsDAO:
             cls._INSTANCE = cls(es)
         return cls._INSTANCE
 
-    def __init__(self, es: ElasticsearchBackend):
+    def __init__(self, es: GenericElasticEngineBackend):
         self._es = es
 
     def init(self):
@@ -118,34 +117,27 @@ class DatasetRecordsDAO:
                         dimension = len(embedding_vector_data_mapping.vector)
                         embeddings_configuration[embedding_name] = dimension
                     record_dict[embedding_name] = embedding_vector_data_mapping.vector
-            print(record_dict)
             documents.append(record_dict)
 
-        self._es.create_dataset_index(
+        self._es.create_dataset(
             id=dataset.id,
             task=dataset.task,
             metadata_values=metadata_values,
-            embeddings_cfg=embeddings_configuration,  # TODO(@ufuk): this field should be computed from the provided info in records
+            embeddings_cfg=embeddings_configuration,
         )
 
-        return self._es.add_documents(
+        return self._es.add_dataset_documents(
             id=dataset.id,
             documents=documents,
         )
-
-    def get_metadata_schema(self, dataset: DatasetDB) -> Dict[str, str]:
-        """Get metadata fields schema for provided dataset"""
-
-        return self._es.get_metadata_mappings(id=dataset.id)
 
     def compute_metric(
         self,
         dataset: DatasetDB,
         metric_id: str,
         metric_params: Dict[str, Any] = None,
-        query: Optional[BackendRecordsQuery] = None,
+        query: Optional[BaseRecordsQuery] = None,
     ):
-
         return self._es.compute_metric(
             id=dataset.id,
             metric_id=metric_id,
@@ -175,14 +167,8 @@ class DatasetRecordsDAO:
                 exclude_fields=exclude_fields,
                 enable_highlight=highligth_results,
             )
-            print("-------------------------!!!!")
-            print(total)
-            print(records)
-            # if "value" in total:
-            #    total = total["value"]
             if isinstance(total, dict):
                 total = total["value"]
-            print("--------------------------!!!!")
             return DaoRecordsSearchResults(total=total, records=records)
         except ClosedIndexError:
             raise ClosedDatasetError(dataset.name)
@@ -218,28 +204,27 @@ class DatasetRecordsDAO:
         """
         search = search or DaoRecordsSearch()
         return self._es.scan_records(
-            id=dataset.id, query=search.query, limit=limit, id_from=id_from
+            id=dataset.id,
+            query=search.query,
+            limit=limit,
+            id_from=id_from,
         )
-
-    def get_dataset_schema(self, dataset: DatasetDB) -> Dict[str, Any]:
-        """Return inner elasticsearch index configuration"""
-        schema = self._es.get_schema(id=dataset.id)
-        return schema
 
     async def delete_records_by_query(
         self,
         dataset: DatasetDB,
-        query: Optional[BackendRecordsQuery] = None,
+        query: Optional[BaseRecordsQuery] = None,
     ) -> Tuple[int, int]:
         total, deleted = await self._es.delete_records_by_query(
-            id=dataset.id, query=query
+            id=dataset.id,
+            query=query,
         )
         return total, deleted
 
     async def update_records_by_query(
         self,
         dataset: DatasetDB,
-        query: Optional[BackendRecordsQuery] = None,
+        query: Optional[BaseRecordsQuery] = None,
         **content,
     ) -> Tuple[int, int]:
         total, updated = await self._es.update_records_content(

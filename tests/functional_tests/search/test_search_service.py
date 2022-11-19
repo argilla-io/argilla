@@ -23,7 +23,8 @@ from argilla.server.apis.v0.models.text_classification import (
 )
 from argilla.server.apis.v0.models.token_classification import TokenClassificationQuery
 from argilla.server.commons.models import TaskType
-from argilla.server.daos.backend.elasticsearch import ElasticsearchBackend
+from argilla.server.daos.backend import GenericElasticEngineBackend
+from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.services.metrics import MetricsService, ServicePythonMetric
 from argilla.server.services.search.model import ServiceSortConfig
@@ -32,11 +33,11 @@ from argilla.server.services.search.service import SearchRecordsService
 
 @pytest.fixture
 def backend():
-    return ElasticsearchBackend.get_instance()
+    return GenericElasticEngineBackend.get_instance()
 
 
 @pytest.fixture
-def dao(backend: ElasticsearchBackend):
+def dao(backend: GenericElasticEngineBackend):
     return DatasetRecordsDAO.get_instance(es=backend)
 
 
@@ -50,8 +51,8 @@ def service(dao: DatasetRecordsDAO, metrics: MetricsService):
     return SearchRecordsService.get_instance(dao=dao, metrics=metrics)
 
 
-def test_query_builder_with_query_range(backend: ElasticsearchBackend):
-    es_query = backend.query_builder.map_2_es_query(
+def test_query_builder_with_query_range(backend: GenericElasticEngineBackend):
+    es_query = EsQueryBuilder().map_2_es_query(
         schema=None,
         query=TextClassificationQuery(score=ScoreRange(range_from=10)),
     )
@@ -70,7 +71,9 @@ def test_query_builder_with_query_range(backend: ElasticsearchBackend):
     }
 
 
-def test_query_builder_with_nested(mocked_client, dao, backend: ElasticsearchBackend):
+def test_query_builder_with_nested(
+    mocked_client, dao, backend: GenericElasticEngineBackend
+):
     dataset = Dataset(
         name="test_query_builder_with_nested",
         owner=argilla.get_workspace(),
@@ -86,8 +89,8 @@ def test_query_builder_with_nested(mocked_client, dao, backend: ElasticsearchBac
         ),
     )
 
-    es_query = backend.query_builder.map_2_es_query(
-        schema=dao.get_dataset_schema(dataset),
+    es_query = EsQueryBuilder().map_2_es_query(
+        schema=dao._es.get_schema(dataset.id),
         query=TokenClassificationQuery(
             advanced_query_dsl=True,
             query_text="metrics.predicted.mentions:(label:NAME AND score:[* TO 0.1])",
