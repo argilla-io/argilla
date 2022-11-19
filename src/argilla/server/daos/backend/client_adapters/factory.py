@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Tuple, Type
+from typing import Tuple, Type
 
 import httpx
 from packaging.version import parse
@@ -58,9 +58,12 @@ class ClientAdapterFactory:
         version, distribution = cls._fetch_cluster_version_info(hosts)
 
         support_vector_search = True
+
         if distribution == "opensearch":
             client_class = OpenSearchClient
-        elif distribution == "elasticsearch" and parse(version) >= parse("8.0"):
+        elif distribution == "elasticsearch" and parse("8.2") <= parse(
+            version
+        ) <= parse("8.4"):
             client_class = ElasticsearchClient
         else:
             client_class = OpenSearchClient
