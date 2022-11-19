@@ -80,7 +80,11 @@ class TextClassificationService:
             records=records,
             record_type=ServiceTextClassificationRecord,
         )
-        return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
+        return BulkResponse(
+            dataset=dataset.name,
+            processed=len(records),
+            failed=failed,
+        )
 
     def search(
         self,

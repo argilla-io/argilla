@@ -238,7 +238,9 @@ def test_create_records_for_token_classification(
     ],
 )
 def test_create_records_for_token_classification_vector_search(
-    mocked_client, include_metrics: bool, metrics_validator: Callable
+    mocked_client,
+    include_metrics: bool,
+    metrics_validator: Callable,
 ):
     dataset = "test_create_records_for_token_classification_vector_search"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
