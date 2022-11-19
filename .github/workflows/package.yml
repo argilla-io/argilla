@@ -113,10 +113,10 @@ jobs:
 
   test-opensearch:
     name: Check tests (OpenSearch)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
-        version: [ 1.3, 2.3 ]
+        version: [ 1.1, 2.1 ]
     defaults:
       run:
         shell: bash -l {0}
