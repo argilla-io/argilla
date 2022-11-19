@@ -43,7 +43,7 @@ class _Validators(BaseModel):
 
         default_length_exceeded = False
         for v in metadata.values():
-            if v and len(v) > DEFAULT_MAX_KEYWORD_LENGTH:
+            if isinstance(v, str) and len(v) > DEFAULT_MAX_KEYWORD_LENGTH:
                 default_length_exceeded = True
                 break
 
