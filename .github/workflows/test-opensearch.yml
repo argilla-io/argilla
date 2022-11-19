@@ -1,0 +1,98 @@
+name: Test OpenSearch
+
+on:
+  release:
+    types:
+      - "published"
+
+  push:
+    branches:
+      - "main"
+      - "develop"
+      - "releases/**"
+  pull_request:
+    branches:
+      - "main"
+      - "develop"
+      - "releases/**"
+      - "feature/**"
+      - "feat/**"
+
+jobs:
+
+  test-opensearch:
+    name: Check tests (OpenSearch)
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        version: [ 1.3, 2.3 ]
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+      - name: Check affected files
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            python_code:
+              - 'src/**'
+              - 'tests/**'
+            frontend:
+              - 'frontend/**'
+
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        if: steps.filter.outputs.python_code == 'true'
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
+          activate-environment: argilla
+
+      - name: Get date for conda cache
+        if: steps.filter.outputs.python_code == 'true'
+        id: get-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
+
+      - name: Cache Conda env
+        if: steps.filter.outputs.python_code == 'true'
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 2
+
+      - name: Update environment
+        if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
+        run: mamba env update -n argilla -f environment_dev.yml
+
+      - name: Cache pip 👜
+        uses: actions/cache@v2
+        if: steps.filter.outputs.python_code == 'true'
+        env:
+          # Increase this value to reset cache if pyproject.toml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
+
+      - name: Setup OpenSearch 🔎
+        if: steps.filter.outputs.python_code == 'true'
+        uses: ankane/setup-opensearch@v1
+        env:
+          ES_JAVA_OPTS: "-Xms2g -Xmx2g"
+        with:
+          opensearch-version: ${{ matrix.version }}
+          config: |
+            http.port: 9200
+
+      - name: Run tests 📈
+        if: steps.filter.outputs.python_code == 'true'
+        run: pytest tests
