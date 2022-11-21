@@ -57,10 +57,4 @@ describe("RulesMetricToken", () => {
       "--text-subcard-color": "black",
     });
   });
-  it("emit an event on click on the button (there is a button IF there is a btnLabel props)", async () => {
-    await wrapper.setProps({ btnLabel: "Click me" });
-    expect(wrapper.find(".rule-metrics__bottom").exists()).toBe(true);
-    await wrapper.find("button").trigger("click");
-    expect(wrapper.emitted()).toHaveProperty("onClickBottomBtn");
-  });
 });
