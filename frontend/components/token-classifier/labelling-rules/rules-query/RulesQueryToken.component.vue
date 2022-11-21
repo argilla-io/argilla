@@ -1,5 +1,9 @@
 <template>
-  <CardComponent class="rule-query-token" :style="cssVars" v-if="query">
+  <CardComponent
+    class="rule-query-token"
+    :style="cssVars"
+    v-if="componentToShow === 'SelectAnEntityComponent'"
+  >
     <div class="rule-query-token__title-area">
       <h2 class="title">{{ title }}</h2>
       <span v-if="recordLength">
@@ -34,15 +38,48 @@
     </div>
   </CardComponent>
 
-  <CardComponent class="if-there-is-no-query" v-else>
+  <CardComponent
+    class="if-there-is-no-global-entities"
+    v-else-if="componentToShow === 'NoGlobalEntitiesComponent'"
+  >
+    <div class="if-there-is-no-global-entities__content">
+      <div class="text-wrapper">
+        <p class="title"><strong>This doesn't have any labels yet.</strong></p>
+        <div class="show-what-to-do-text">
+          <p class="item">
+            To create a new rules you need at least two labels. It's highly
+            recommended to also annotate some records with these lavels.
+          </p>
+          <p class="item">
+            Go to the annotation mode to
+            <a href="#" @click.prevent="onClickGoToAnnotationMode">
+              create the labels and annotate some records
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="if-there-is-no-query__footer">
+      <div class="manage-rules-btn">
+        <button @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
+          {{ viewRulesBtnLabel }}
+        </button>
+      </div>
+    </div>
+  </CardComponent>
+
+  <CardComponent
+    class="if-there-is-no-query"
+    v-else-if="componentToShow === 'NoQueryComponent'"
+  >
     <div class="if-there-is-no-query__item">
       <div class="text-wrapper">
         <div class="label-icon">
           <svgicon name="weak-labeling" width="30" height="30" />
         </div>
-        <span class="show-what-to-do-text">
+        <p class="show-what-to-do-text">
           Create a new rule writting your query in the search box
-        </span>
+        </p>
       </div>
     </div>
     <div class="if-there-is-no-query__footer">
@@ -122,6 +159,17 @@ export default {
         ? `View Rules (${this.rulesLength})`
         : `View Rules`;
     },
+    componentToShow() {
+      if (!this.query) {
+        return "NoQueryComponent";
+      }
+
+      if (this.entities.length === 0) {
+        return "NoGlobalEntitiesComponent";
+      }
+
+      return "SelectAnEntityComponent";
+    },
   },
   methods: {
     onChipsSelection({ id }) {
@@ -153,6 +201,9 @@ export default {
     onClickViewRules() {
       this.$emit("on-click-view-rules");
     },
+    onClickGoToAnnotationMode() {
+      this.$emit("on-click-go-to-annotation-mode");
+    },
   },
   watch: {
     searchEntity(newValue) {
@@ -167,6 +218,30 @@ export default {
   margin: inherit;
   font-size: 1rem;
 }
+
+.if-there-is-no-global-entities {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  min-height: 344px;
+  &__content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .text-wrapper {
+      flex: 0.7;
+      display: flex;
+      flex-direction: column;
+      gap: 2em;
+      .show-what-to-do-text {
+        display: flex;
+        flex-direction: column;
+      }
+    }
+  }
+}
+
 .if-there-is-no-query {
   display: flex;
   flex-direction: column;
@@ -194,6 +269,7 @@ export default {
     justify-content: flex-end;
   }
 }
+
 .rule-query-token {
   display: flex;
   flex-direction: column;

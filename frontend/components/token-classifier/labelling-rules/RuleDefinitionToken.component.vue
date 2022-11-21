@@ -12,6 +12,7 @@
         "
         @on-click-save-rule="saveRule"
         @on-click-view-rules="onClickViewRules"
+        @on-click-go-to-annotation-mode="onClickGoToAnnotationMode"
       />
     </div>
     <RulesMetricsToken
@@ -71,6 +72,9 @@ export default {
     },
     saveRule() {
       this.$emit("on-saving-rule");
+    },
+    onClickGoToAnnotationMode() {
+      this.$emit("on-click-go-to-annotation-mode");
     },
   },
   computed: {

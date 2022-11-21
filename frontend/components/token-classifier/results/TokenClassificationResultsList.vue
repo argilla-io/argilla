@@ -28,6 +28,7 @@
           @on-search-entity="(value) => (searchQuery = value)"
           @on-saving-rule="savingRule"
           @on-click-view-rules="goToManageRules"
+          @on-click-go-to-annotation-mode="goToAnnotationMode"
         />
       </transition>
     </template>
@@ -47,6 +48,7 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 import {
   Rule as RuleModel,
   getRuleModelPrimaryKey,
@@ -224,6 +226,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      changeViewMode: "entities/datasets/changeViewMode",
+    }),
     async initRuleModelAndRulesMetricsModel() {
       const rules = await this.fetchTokenClassificationRules(this.name);
       rules?.forEach(async (rule) => {
@@ -460,6 +465,12 @@ export default {
         data: {
           visibleRulesList: true,
         },
+      });
+    },
+    goToAnnotationMode() {
+      this.changeViewMode({
+        dataset: this.dataset,
+        value: "annotate",
       });
     },
     cleanTables() {
