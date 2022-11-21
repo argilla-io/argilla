@@ -1,37 +1,37 @@
 <template>
   <div class="rule__area">
-    <div class="left-item" v-if="queryText.length">
+    <div class="left-item">
       <RulesQueryToken
         :query="queryText"
         :entities="entities"
         :recordLength="this.numberOfRecords"
+        :rulesLength="numberOfRulesInDataset"
+        :isManagedRulesBtnDisabled="isNoRuleInDataset"
         @on-search-entity="
           (searchQuery) => $emit('on-search-entity', searchQuery)
         "
         @on-click-save-rule="saveRule"
+        @on-click-view-rules="onClickViewRules"
       />
     </div>
     <RulesMetricsToken
+      v-if="queryText"
       title="Rules Metrics"
       :subcardInputs="options"
       btnLabel="Manage rules"
-      @onClickBottomBtn="goToManageRules()"
       backgroundColor="rgba(0,0,0,.04)"
       backgroundSubcardColor="rgba(0,0,0,.04)"
       textColor="#141414"
       textSubcardColor="#141414"
       borderColor="rgba(0,0,0,.04)"
-      :isBtnDisabled="isManageRulesButtonDisabled"
     />
   </div>
 </template>
 
 <script>
-import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import RulesMetricsToken from "./rules-metric/RulesMetricToken.component.vue";
 import RulesQueryToken from "./rules-query/RulesQueryToken.component.vue";
 import OptionsForRuleMetrics from "./OptionsForRuleMetrics.class";
-import { getDatasetModelPrimaryKey } from "@/models/Dataset";
 
 export default {
   name: "RuleDefinitionToken",
@@ -51,6 +51,10 @@ export default {
     numberOfRecords: {
       type: Number,
     },
+    numberOfRulesInDataset: {
+      type: Number,
+      required: false,
+    },
   },
   data() {
     return {
@@ -62,13 +66,8 @@ export default {
     RulesQueryToken,
   },
   methods: {
-    goToManageRules() {
-      DatasetViewSettings.update({
-        where: getDatasetModelPrimaryKey,
-        data: {
-          visibleRulesList: true,
-        },
-      });
+    onClickViewRules() {
+      this.$emit("on-click-view-rules");
     },
     saveRule() {
       this.$emit("on-saving-rule");
@@ -78,8 +77,8 @@ export default {
     ruleMetrics() {
       if (this.rule) return this.rule.rule_metrics;
     },
-    isManageRulesButtonDisabled() {
-      return this.rule.length === 0;
+    isNoRuleInDataset() {
+      return this.numberOfRulesInDataset === 0;
     },
   },
   watch: {

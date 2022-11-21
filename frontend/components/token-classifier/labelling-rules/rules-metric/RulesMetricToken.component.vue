@@ -20,11 +20,6 @@
         <span class="subcard__items"> {{ subValue }}</span>
       </div>
     </div>
-    <div class="rule-metrics__bottom" v-if="btnLabel">
-      <button @click="onClickBtnBottom" :disabled="isBtnDisabled">
-        {{ btnLabel }}
-      </button>
-    </div>
   </div>
 </template>
 
@@ -73,10 +68,6 @@ export default {
     btnLabel: {
       type: String,
     },
-    isBtnDisabled: {
-      type: Boolean,
-      required: true,
-    },
   },
   computed: {
     numberOfSubcard() {
@@ -94,11 +85,6 @@ export default {
         "--text-subcard-color": this.textSubcardColor,
         "--border-color": this.borderColor,
       };
-    },
-  },
-  methods: {
-    onClickBtnBottom() {
-      this.$emit("onClickBottomBtn");
     },
   },
 };

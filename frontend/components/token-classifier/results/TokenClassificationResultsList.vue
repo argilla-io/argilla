@@ -24,8 +24,10 @@
           :queryText="queryText"
           :entities="globalEntities"
           :numberOfRecords="numberOfRecords"
+          :numberOfRulesInDataset="numberOfRulesInDataset"
           @on-search-entity="(value) => (searchQuery = value)"
           @on-saving-rule="savingRule"
+          @on-click-view-rules="goToManageRules"
         />
       </transition>
     </template>
@@ -62,6 +64,7 @@ import {
   formatEntityIdForRuleAnnotation,
   TokenRuleAnnotation as RuleAnnotationModel,
 } from "../../../models/token-classification/TokenRuleAnnotation.modelTokenClassification";
+import DatasetViewSettings from "../../../models/DatasetViewSettings";
 
 export default {
   props: {
@@ -132,11 +135,16 @@ export default {
       return this.getRulePrimaryKey(this.queryText);
     },
     rulesSavedInDataset() {
-      return RuleModel.query()
-        .with("rule_metrics")
-        .where("dataset_id", this.joinedDatasetPrimaryKey)
-        .where("is_saved_in_dataset", true)
-        .get();
+      return (
+        RuleModel.query()
+          .with("rule_metrics")
+          .where("dataset_id", this.joinedDatasetPrimaryKey)
+          .where("is_saved_in_dataset", true)
+          .get() || []
+      );
+    },
+    numberOfRulesInDataset() {
+      return this.rulesSavedInDataset.length;
     },
     rules() {
       return TokenClassificationDatasetModel.query()
@@ -445,6 +453,14 @@ export default {
       };
 
       RuleModel.insertOrUpdate({ where: rulePrimaryKey, data: newRule });
+    },
+    goToManageRules() {
+      DatasetViewSettings.update({
+        where: getDatasetModelPrimaryKey,
+        data: {
+          visibleRulesList: true,
+        },
+      });
     },
     cleanTables() {
       RuleAnnotationModel.deleteAll();

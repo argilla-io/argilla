@@ -1,8 +1,8 @@
 <template>
-  <div class="rule-query-token" :style="cssVars">
+  <CardComponent class="rule-query-token" :style="cssVars" v-if="query">
     <div class="rule-query-token__title-area">
       <h2 class="title">{{ title }}</h2>
-      <span>
+      <span v-if="recordLength">
         Records: <b>{{ recordLength }}</b>
       </span>
     </div>
@@ -32,16 +32,39 @@
         Save Rules
       </button>
     </div>
-  </div>
+  </CardComponent>
+
+  <CardComponent class="if-there-is-no-query" v-else>
+    <div class="if-there-is-no-query__item">
+      <div class="text-wrapper">
+        <div class="label-icon">
+          <svgicon name="weak-labeling" width="30" height="30" />
+        </div>
+        <span class="show-what-to-do-text">
+          Create a new rule writting your query in the search box
+        </span>
+      </div>
+    </div>
+    <div class="if-there-is-no-query__footer">
+      <div class="manage-rules-btn">
+        <button @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
+          {{ viewRulesBtnLabel }}
+        </button>
+      </div>
+    </div>
+  </CardComponent>
 </template>
 
 <script>
 import { TokenGlobalEntity } from "../../../../models/token-classification/TokenGlobalEntity.modelTokenClassification";
 import ChipsComponent from "./Chips.component.vue";
+import CardComponent from "@/components/base/card/Card.component.vue";
+
 export default {
   name: "RulesQueryToken",
   components: {
     ChipsComponent,
+    CardComponent,
   },
   props: {
     query: {
@@ -55,6 +78,14 @@ export default {
     recordLength: {
       type: Number | null,
       default: () => null,
+    },
+    rulesLength: {
+      type: Number,
+      default: () => 0,
+    },
+    isManagedRulesBtnDisabled: {
+      type: Boolean,
+      default: false,
     },
     textColor: {
       type: String,
@@ -84,7 +115,12 @@ export default {
       };
     },
     title() {
-      return `Query: ${this.query}`;
+      return `${this.query}`;
+    },
+    viewRulesBtnLabel() {
+      return this.rulesLength
+        ? `View Rules (${this.rulesLength})`
+        : `View Rules`;
     },
   },
   methods: {
@@ -114,6 +150,9 @@ export default {
         ? (this.isSaveRulesDisable = false)
         : (this.isSaveRulesDisable = true);
     },
+    onClickViewRules() {
+      this.$emit("on-click-view-rules");
+    },
   },
   watch: {
     searchEntity(newValue) {
@@ -126,17 +165,40 @@ export default {
 <style lang="scss" scoped>
 * {
   margin: inherit;
+  font-size: 1rem;
+}
+.if-there-is-no-query {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  min-height: 344px;
+  min-width: 15em;
+  &__item {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .text-wrapper {
+      display: flex;
+      align-items: center;
+      .label-icon {
+        flex-basis: 50px;
+      }
+      .show-what-to-do-text {
+        flex: 1;
+      }
+    }
+  }
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+  }
 }
 .rule-query-token {
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: 2em;
   gap: 2em;
-  color: var(--text-color);
-  background-color: var(--background-color);
-  border: 1px solid #e9eaed;
-  border-radius: 10px;
   &__title-area {
     display: flex;
     flex-direction: row;
