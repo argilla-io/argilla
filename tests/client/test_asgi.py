@@ -24,6 +24,7 @@ from starlette.testclient import TestClient
 import argilla
 from argilla.monitoring.asgi import (
     ArgillaLogHTTPMiddleware,
+    text_classification_mapper,
     token_classification_mapper,
 )
 
@@ -32,7 +33,6 @@ def test_argilla_middleware_for_text_classification(
     monkeypatch,
     mocked_client,
 ):
-
     expected_endpoint = "/predict"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
 
@@ -43,6 +43,7 @@ def test_argilla_middleware_for_text_classification(
         ArgillaLogHTTPMiddleware,
         api_endpoint=expected_endpoint,
         dataset=expected_dataset_name,
+        records_mapper=text_classification_mapper,
         log_interval=0.1,
     )
 
@@ -85,7 +86,6 @@ def test_argilla_middleware_for_token_classification(
     monkeypatch,
     mocked_client,
 ):
-
     expected_endpoint = "/predict"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
     argilla.delete(expected_dataset_name)
