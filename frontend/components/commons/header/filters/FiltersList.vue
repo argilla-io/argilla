@@ -303,8 +303,8 @@ export default {
       return {
         id,
         key: id,
-        group: group,
-        name: name,
+        group,
+        name,
         disabled: this.recordPropertyHasValue(id),
       };
     },
