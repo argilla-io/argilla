@@ -45,7 +45,7 @@
     <div class="modal-buttons">
       <base-button
         class="primary link"
-        href="https://docs.rubrix.ml/en/stable/tutorials/nlp_model_explainability.html"
+        href="https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability.html"
         target="_blank"
         >More in docs</base-button
       >
