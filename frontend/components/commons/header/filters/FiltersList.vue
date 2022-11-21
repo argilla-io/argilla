@@ -236,20 +236,8 @@ export default {
           )) ||
         [];
       const dateFields = [
-        {
-          id: "last_updated",
-          key: "last_updated",
-          group: "Sort",
-          name: "Last updated",
-          disabled: this.recordPropertyHasValue("last_updated"),
-        },
-        {
-          id: "event_timestamp",
-          key: "event_timestamp",
-          group: "Sort",
-          name: "Event timestamp",
-          disabled: this.recordPropertyHasValue("event_timestamp"),
-        },
+        this.sortByDateFilter("last_updated", "Last Updated"),
+        this.sortByDateFilter("event_timestamp", "Event Timestamp"),
       ].filter(({ disabled }) => !disabled);
       const uncoveredByRules = {
         id: "uncovered_by_rules",
@@ -310,6 +298,15 @@ export default {
     onSortBy(sortList) {
       this.$emit("applySortBy", sortList);
       this.close();
+    },
+    sortByDateFilter(id, name) {
+      return {
+        id: id,
+        key: id,
+        group: "Sort",
+        name: name,
+        disabled: this.recordPropertyHasValue(id),
+      };
     },
     recordPropertyHasValue(prop) {
       return (
