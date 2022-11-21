@@ -62,7 +62,6 @@ import {
   formatEntityIdForRuleAnnotation,
   TokenRuleAnnotation as RuleAnnotationModel,
 } from "../../../models/token-classification/TokenRuleAnnotation.modelTokenClassification";
-import RulesMetricModel from "../../../models/token-classification/RulesMetric.modelTokenClassification";
 
 export default {
   props: {
@@ -208,7 +207,7 @@ export default {
         }
         this.insertOrUpdateEntityInTokenGlobalEntityModel();
       } else {
-        this.cleanTables(oldValue);
+        this.cleanTables();
       }
     },
     async selectedEntityLabel(newValue) {
@@ -447,7 +446,7 @@ export default {
 
       RuleModel.insertOrUpdate({ where: rulePrimaryKey, data: newRule });
     },
-    cleanTables(queryToRemove) {
+    cleanTables() {
       RuleAnnotationModel.deleteAll();
       EntityModel.delete(
         (entity) => entity.entitable_type === "ruleAnnotations"
