@@ -32,11 +32,8 @@
         </h2>
         <div class="error__buttons">
           <nuxt-link class="error__button" :to="`/`"
-            >Back to home page<svgicon
-              name="chevron-right"
-              width="20"
-              height="20"
-            ></svgicon>
+            >Back to home page
+            <svgicon name="chevron-right" width="20" height="20"></svgicon>
           </nuxt-link>
         </div>
       </div>
