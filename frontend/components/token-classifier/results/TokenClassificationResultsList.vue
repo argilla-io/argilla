@@ -206,7 +206,7 @@ export default {
         this.initRuleModelAndRulesMetricsModel();
       }
     },
-    async queryText(newValue, oldValue) {
+    async queryText(newValue) {
       if (newValue) {
         if (!this.isRuleForCurrentQuery) {
           this.createACustomRuleAndLoadRuleMetrics();
