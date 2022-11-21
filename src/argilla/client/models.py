@@ -26,6 +26,7 @@ import pandas as pd
 from deprecated import deprecated
 from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
+from argilla import _messages
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.utils.span_utils import SpanUtils
 
@@ -48,13 +49,12 @@ class _Validators(BaseModel):
                 break
 
         if default_length_exceeded:
-            warnings.warn(
+            message = (
                 "Some metadata values could exceed the max length. For those cases, values will be"
                 f" truncated by keeping only the last {DEFAULT_MAX_KEYWORD_LENGTH} characters. "
-                "You can configure setup this length in the server with the ARGILLA_METADATA_FIELD_LENGTH"
-                " environment variable.",
-                UserWarning,
+                + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
             )
+            warnings.warn(message, UserWarning)
 
         return metadata
 

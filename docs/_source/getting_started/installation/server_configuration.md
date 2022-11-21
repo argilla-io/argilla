@@ -37,7 +37,7 @@ You can set following environment variables to further configure your server and
 
 - `ARGILLA_METADATA_FIELDS_LIMIT`: Max number of fields in the metadata (Default: 50, max: 100).
 
-- `ARGILLA_METADATA_FIELD_LENGTH`: Max length supported for the string metadata fields. Values containing higher than this will be truncated (Default: 128).
+- `ARGILLA_METADATA_FIELD_LENGTH`: Max length supported for the string metadata fields. Higher values will be truncated. Abusing this may lead to Elastic performance issues (Default: 128).
 
 - `CORS_ORIGINS`: List of host patterns for CORS origin access.
 

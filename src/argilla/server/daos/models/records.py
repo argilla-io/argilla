@@ -20,6 +20,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field, root_validator, validator
 from pydantic.generics import GenericModel
 
+from argilla import _messages
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
 from argilla.server.daos.backend.search.model import BackendRecordsQuery, SortConfig
 from argilla.server.helpers import flatten_dict
@@ -143,14 +144,12 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
                 data=metadata,
                 max_length=settings.metadata_field_length,
             )
-            warnings.warn(
-                "Some metadata values exceed the max length. Those values will be"
-                f" truncated by keeping only the last {settings.metadata_field_length} characters."
+            message = (
                 "Some metadata values exceed the max length. Those values will be"
                 f" truncated by keeping only the last {settings.metadata_field_length} characters. "
-                "You can configure setup this length in the server with the ARGILLA_METADATA_FIELD_LENGTH"
-                " environment variable."
+                + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
             )
+            warnings.warn(message, UserWarning)
             metadata = new_metadata
         return metadata
 
