@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import datetime
 import json
 import logging
 import re
@@ -32,9 +33,48 @@ else:
     from starlette.responses import JSONResponse, Response, StreamingResponse
     from starlette.types import Message, Receive
 
-from argilla.client.models import Record
+from argilla.client.models import (
+    Record,
+    TextClassificationRecord,
+    TokenClassificationRecord,
+)
 
 _logger = logging.getLogger(__name__)
+_spaces_regex = re.compile(r"\s+")
+
+
+def token_classification_mapper(inputs, outputs):
+    if isinstance(inputs, str):
+        text = inputs
+    elif isinstance(inputs, dict):
+        text = inputs.get("text", "")
+    else:
+        text = ""
+    tokens = outputs.get("tokens") if isinstance(outputs, dict) else None
+    return TokenClassificationRecord(
+        text=text,
+        tokens=tokens or _spaces_regex.split(text),
+        prediction=[
+            (entity["label"], entity["start"], entity["end"])
+            for entity in (
+                outputs.get("entities") if isinstance(outputs, dict) else outputs
+            )
+        ],
+        event_timestamp=datetime.datetime.now(),
+    )
+
+
+def text_classification_mapper(inputs, outputs):
+    return TextClassificationRecord(
+        inputs=inputs,
+        prediction=[
+            (label, score)
+            for label, score in zip(
+                outputs.get("labels", []), outputs.get("scores", [])
+            )
+        ],
+        event_timestamp=datetime.datetime.now(),
+    )
 
 
 class CachedJsonRequest(Request):
