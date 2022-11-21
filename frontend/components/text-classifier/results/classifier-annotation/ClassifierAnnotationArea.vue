@@ -127,12 +127,12 @@ export default {
       return this.dataset.isMultiLabel;
     },
     visibleLabels() {
-      const selectedLabels = this.filteredLabels.filter(
+      const numberOfSelectedLabels = this.filteredLabels.filter(
         (l) => l.selected
       ).length;
       const availableNonSelected =
         this.shownLabels < this.filteredLabels.length
-          ? this.shownLabels - selectedLabels
+          ? this.shownLabels - numberOfSelectedLabels
           : this.shownLabels;
       let nonSelected = 0;
       return this.filteredLabels.filter((l) => {
