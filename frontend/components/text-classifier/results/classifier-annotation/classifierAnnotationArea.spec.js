@@ -1,6 +1,6 @@
 import { shallowMount } from "@vue/test-utils";
 import ClassifierAnnotationArea from "./ClassifierAnnotationArea";
-import ClassifierAnnotationButton from "../ClassifierAnnotationButton";
+import ClassifierAnnotationButton from "./ClassifierAnnotationButton";
 import { TextClassificationRecord } from "@/models/TextClassification";
 
 let wrapper = null;

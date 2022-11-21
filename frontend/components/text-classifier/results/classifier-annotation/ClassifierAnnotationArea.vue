@@ -39,26 +39,29 @@
         @change="updateLabels"
       >
       </classifier-annotation-button>
-
-      <base-button
-        v-if="visibleLabels.length < filteredLabels.length"
-        class="feedback-interactions__more secondary light"
-        @click="expandLabels()"
-        >+{{ filteredLabels.length - visibleLabels.length }}</base-button
-      >
-      <base-button
-        v-else-if="visibleLabels.length > maxVisibleLabels"
-        class="feedback-interactions__more secondary light"
-        @click="collapseLabels()"
-        >Show less</base-button
-      >
+      <template v-if="!allowToShowAllLabels">
+        <base-button
+          v-if="visibleLabels.length < filteredLabels.length"
+          class="feedback-interactions__more secondary light"
+          @click="expandLabels()"
+          >+{{ filteredLabels.length - visibleLabels.length }}</base-button
+        >
+        <base-button
+          v-else-if="
+            visibleLabels.length > maxVisibleLabels && !allowToShowAllLabels
+          "
+          class="feedback-interactions__more secondary light"
+          @click="collapseLabels()"
+          >Show less</base-button
+        >
+      </template>
     </div>
   </div>
 </template>
 <script>
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { IdState } from "vue-virtual-scroller";
-import ClassifierAnnotationButton from "../ClassifierAnnotationButton.vue";
+import ClassifierAnnotationButton from "./ClassifierAnnotationButton.vue";
 
 export default {
   components: {
@@ -84,7 +87,7 @@ export default {
     return {
       searchText: "",
       selectedLabels: [],
-      shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+      shownLabels: this.maxVisibleLabels,
     };
   },
   watch: {
@@ -113,7 +116,9 @@ export default {
     },
     shownLabels: {
       get: function () {
-        return this.idState.shownLabels;
+        return this.allowToShowAllLabels
+          ? this.sortedLabels.length
+          : this.idState.shownLabels;
       },
       set: function (newValue) {
         this.idState.shownLabels = newValue;
@@ -124,6 +129,37 @@ export default {
     },
     isMultiLabel() {
       return this.dataset.isMultiLabel;
+    },
+    visibleLabels() {
+      const numberOfSelectedLabels = this.filteredLabels.filter(
+        (l) => l.selected
+      ).length;
+      const availableNonSelected =
+        this.shownLabels < this.filteredLabels.length
+          ? this.shownLabels - numberOfSelectedLabels
+          : this.shownLabels;
+      let nonSelected = 0;
+      return this.filteredLabels.filter((l) => {
+        if (l.selected) {
+          return l;
+        } else {
+          if (nonSelected < availableNonSelected) {
+            nonSelected++;
+            return l;
+          }
+        }
+      });
+    },
+    filteredLabels() {
+      return this.sortedLabels.filter((label) =>
+        label.class.toLowerCase().match(this.searchText.toLowerCase())
+      );
+    },
+    sortedLabels() {
+      return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
+    },
+    appliedLabels() {
+      return this.labels.filter((l) => l.selected).map((label) => label.class);
     },
     labels() {
       // Setup all record labels
@@ -156,42 +192,17 @@ export default {
         };
       });
     },
-    sortedLabels() {
-      return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
-    },
-    filteredLabels() {
-      return this.sortedLabels.filter((label) =>
-        label.class.toLowerCase().match(this.searchText.toLowerCase())
-      );
-    },
-    visibleLabels() {
-      const selectedLabels = this.filteredLabels.filter(
-        (l) => l.selected
-      ).length;
-      const availableNonSelected =
-        this.shownLabels < this.filteredLabels.length
-          ? this.shownLabels - selectedLabels
-          : this.shownLabels;
-      let nonSelected = 0;
-      return this.filteredLabels.filter((l) => {
-        if (l.selected) {
-          return l;
-        } else {
-          if (nonSelected < availableNonSelected) {
-            nonSelected++;
-            return l;
-          }
-        }
-      });
-    },
     annotationLabels() {
       return this.record.annotation ? this.record.annotation.labels : [];
     },
     predictionLabels() {
       return this.record.prediction ? this.record.prediction.labels : [];
     },
-    appliedLabels() {
-      return this.labels.filter((l) => l.selected).map((label) => label.class);
+    allowToShowAllLabels() {
+      return this.paginationSize === 1 || false;
+    },
+    paginationSize() {
+      return this.dataset.viewSettings?.pagination?.size;
     },
     predictedAs() {
       return this.record.predicted_as;
