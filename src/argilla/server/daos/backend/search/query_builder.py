@@ -65,7 +65,7 @@ class EsQueryBuilder:
             else:
                 query_filters.append(owners_filter)
 
-        if query.Tasks:
+        if query.tasks:
             query_filters.append(
                 filters.terms_filter(field="task.keyword", values=query.tasks)
             )
