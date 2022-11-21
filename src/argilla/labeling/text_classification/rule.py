@@ -62,6 +62,10 @@ class Rule:
         """The rule label"""
         return self._label
 
+    @label.setter
+    def update_label(self, value):
+        self._label = value
+
     @property
     def name(self):
         """The name of the rule."""
@@ -84,10 +88,6 @@ class Rule:
         return LabelingRule(
             query=self.query, labels=labels, author=self.author or "None"
         )
-
-    def update_label(self, label):
-        """Updates the label"""
-        self._label = label
 
     def add_to_dataset(self, dataset: str):
         """Add to rule to the given dataset"""
