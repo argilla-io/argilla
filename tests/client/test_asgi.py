@@ -49,12 +49,7 @@ def test_argilla_middleware_for_text_classification(
 
     @app.route(expected_endpoint, methods=["POST"])
     def mock_predict(data: Dict[str, Any]):
-        return JSONResponse(
-            content=[
-                {"labels": ["A", "B"], "scores": [0.9, 0.1]},
-                {"labels": ["A", "B"], "scores": [0.9, 0.1]},
-            ]
-        )
+        return JSONResponse(content={"labels": ["A", "B"], "scores": [0.9, 0.1]})
 
     @app.route("/another/predict/route")
     def another_mock(request):
@@ -63,23 +58,20 @@ def test_argilla_middleware_for_text_classification(
     mock = TestClient(app)
     mock.post(
         expected_endpoint,
-        json=[
-            {"a": "The data input for A", "b": "The data input for B"},
-            {"a": "The data input for A", "b": "The data input for B"},
-        ],
+        json={"a": "The data input for A", "b": "The data input for B"},
     )
 
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
     df = df.to_pandas()
-    assert len(df) == 2
+    assert len(df) == 1
 
     mock.get("/another/predict/route")
 
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
     df = df.to_pandas()
-    assert len(df) == 2
+    assert len(df) == 1
 
 
 def test_argilla_middleware_for_token_classification(
@@ -103,11 +95,8 @@ def test_argilla_middleware_for_token_classification(
     def mock_predict(request):
         return JSONResponse(
             content=[
-                [
-                    {"label": "fawn", "start": 0, "end": 3},
-                    {"label": "fobis", "start": 4, "end": 8},
-                ],
-                [],
+                {"label": "fawn", "start": 0, "end": 3},
+                {"label": "fobis", "start": 4, "end": 8},
             ]
         )
 
@@ -115,15 +104,15 @@ def test_argilla_middleware_for_token_classification(
 
     mock.post(
         expected_endpoint,
-        json=[{"text": "The main text data"}, "The main text data"],
+        json={"text": "The main text data"},
     )
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
     df = df.to_pandas()
-    assert len(df) == 2
+    assert len(df) == 1
 
     mock.get("/another/predict/route")
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
     df = df.to_pandas()
-    assert len(df) == 2
+    assert len(df) == 1
