@@ -21,7 +21,7 @@ exports[`TextClassificationHelpInfo renders properly 1`] = `
     </p>
   </div>
   <div class="modal-buttons">
-    <base-button href="https://docs.rubrix.ml/en/stable/tutorials/nlp_model_explainability.html" target="_blank" class="primary link">More in docs</base-button>
+    <base-button href="https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability.html" target="_blank" class="primary link">More in docs</base-button>
     <base-button class="primary">Ok, got it!</base-button>
   </div>
 </lazy-base-modal>
