@@ -145,7 +145,7 @@ export default {
         .first().rules;
     },
     isRulesInDataset() {
-      return this.rules.length;
+      return this.rulesSavedInDataset.length;
     },
     isViewIsWeakLabellingANDDatasetHaveNoRules() {
       return this.isViewWeakLabelling && !this.isRulesInDataset;
