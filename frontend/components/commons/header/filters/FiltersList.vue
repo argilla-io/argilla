@@ -299,11 +299,11 @@ export default {
       this.$emit("applySortBy", sortList);
       this.close();
     },
-    sortByDateFilter(id, name) {
+    sortByDateFilter(id, name, group = "Sort") {
       return {
-        id: id,
+        id,
         key: id,
-        group: "Sort",
+        group: group,
         name: name,
         disabled: this.recordPropertyHasValue(id),
       };
