@@ -50,6 +50,12 @@ class _Client:
         self.base_url = self.base_url.strip()
         if self.base_url.endswith("/"):
             self.base_url = self.base_url[:-1]
+        if "_" in self.base_url:
+            self.__httpx__ = None
+            raise ValueError(
+                'Avoid using hostnames with underscores "_". For reference see:'
+                " https://stackoverflow.com/questions/10959757/the-use-of-the-underscore-in-host-names"
+            )
 
 
 @dataclasses.dataclass
@@ -81,7 +87,10 @@ class Client(_ClientCommonDefaults, _Client):
                 result = func(self, *args, **kwargs)
                 return result
             except httpx.ConnectError as err:
-                err_str = f"Your Api endpoint at {self.base_url} is not available or not responding."
+                err_str = (
+                    f"Your Api endpoint at {self.base_url} is not available or not"
+                    " responding."
+                )
                 raise BaseClientError(err_str) from None
 
         return inner
