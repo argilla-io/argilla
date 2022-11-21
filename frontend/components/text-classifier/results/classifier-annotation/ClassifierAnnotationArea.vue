@@ -39,18 +39,22 @@
         @change="updateLabels"
       >
       </classifier-annotation-button>
-      <base-button
-        v-if="visibleLabels.length < filteredLabels.length"
-        class="feedback-interactions__more secondary light"
-        @click="expandLabels()"
-        >+{{ filteredLabels.length - visibleLabels.length }}</base-button
-      >
-      <base-button
-        v-else-if="visibleLabels.length > maxVisibleLabels"
-        class="feedback-interactions__more secondary light"
-        @click="collapseLabels()"
-        >Show less</base-button
-      >
+      <template v-if="!allowToShowAllLabels">
+        <base-button
+          v-if="visibleLabels.length < filteredLabels.length"
+          class="feedback-interactions__more secondary light"
+          @click="expandLabels()"
+          >+{{ filteredLabels.length - visibleLabels.length }}</base-button
+        >
+        <base-button
+          v-else-if="
+            visibleLabels.length > maxVisibleLabels && !allowToShowAllLabels
+          "
+          class="feedback-interactions__more secondary light"
+          @click="collapseLabels()"
+          >Show less</base-button
+        >
+      </template>
     </div>
   </div>
 </template>

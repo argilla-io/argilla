@@ -30,19 +30,20 @@
           :show-score="true"
         />
       </span>
-
-      <base-button
-        v-if="visibleLabels.length < filteredLabels.length"
-        class="predictions__more secondary light small"
-        @click="expandLabels()"
-        >+{{ filteredLabels.length - visibleLabels.length }}</base-button
-      >
-      <base-button
-        v-else-if="visibleLabels.length > maxVisibleLabels"
-        class="predictions__more secondary light small"
-        @click="collapseLabels()"
-        >Show less</base-button
-      >
+      <template v-if="!allowToShowAllLabels">
+        <base-button
+          v-if="visibleLabels.length < filteredLabels.length"
+          class="predictions__more secondary light small"
+          @click="expandLabels()"
+          >+{{ filteredLabels.length - visibleLabels.length }}</base-button
+        >
+        <base-button
+          v-else-if="visibleLabels.length > maxVisibleLabels"
+          class="predictions__more secondary light small"
+          @click="collapseLabels()"
+          >Show less</base-button
+        >
+      </template>
     </div>
   </div>
 </template>
