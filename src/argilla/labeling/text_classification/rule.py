@@ -63,7 +63,7 @@ class Rule:
         return self._label
 
     @label.setter
-    def update_label(self, value):
+    def label(self, value):
         self._label = value
 
     @property
@@ -85,9 +85,7 @@ class Rule:
         else:
             labels = self._label
 
-        return LabelingRule(
-            query=self.query, labels=labels, author=self.author or "None"
-        )
+        return LabelingRule(query=self.query, labels=labels)
 
     def add_to_dataset(self, dataset: str):
         """Add to rule to the given dataset"""
@@ -135,9 +133,7 @@ class Rule:
         """
         metrics = api.active_api().rule_metrics_for_dataset(
             dataset=dataset,
-            rule=LabelingRule(
-                query=self.query, label=self.label, author=self.author or "None"
-            ),
+            rule=LabelingRule(query=self.query, label=self.label),
         )
 
         return {

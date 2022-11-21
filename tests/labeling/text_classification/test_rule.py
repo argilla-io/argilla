@@ -117,7 +117,7 @@ def test_atomic_crud_operations(monkeypatch, mocked_client, log_dataset):
 
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     rule.add_to_dataset(log_dataset)
-    rule.update_label(label="positive")
+    rule.label = "positive"
     rule.update_at_dataset(log_dataset)
 
     rules = load_rules(log_dataset)
