@@ -100,8 +100,7 @@ class CachedJsonRequest(Request):
 
 
 class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
-    """An standard starlette middleware that enables argilla logs for http prediction requests
-    """
+    """An standard starlette middleware that enables argilla logs for http prediction requests"""
 
     def __init__(
         self,
@@ -191,8 +190,7 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
     async def _extract_response_content(
         self, response: Response
     ) -> Tuple[Response, List[Dict[str, Any]]]:
-        """Extracts response body content from response and returns a new processable response
-        """
+        """Extracts response body content from response and returns a new processable response"""
         body = b""
         new_response = response
         if isinstance(response, StreamingResponse):
