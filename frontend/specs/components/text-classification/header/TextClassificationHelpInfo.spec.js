@@ -18,10 +18,6 @@ describe("TextClassificationHelpInfo", () => {
   let spy = jest.spyOn(console, "error");
   afterEach(() => spy.mockReset());
 
-  test("Required property", () => {
-    expect(ComponentTextClassifierHelpInfo.props.visible.required).toBe(true);
-  });
-
   test("renders properly", () => {
     expect(wrapper).toMatchSnapshot();
   });

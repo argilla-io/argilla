@@ -20,16 +20,16 @@
     <div v-for="group in sidebarGroups" :key="group" class="sidebar__info">
       <p>{{ group }}</p>
       <sidebar-button
-        v-for="button in filteredSidebarItems.filter(
-          (button) => button.group === group
+        v-for="{ id, icon, tooltip, action } in filteredSidebarItemsByGroup(
+          group
         )"
-        :id="button.id"
-        :key="button.id"
+        :id="id"
+        :key="id"
         :active-view="[viewMode, currentMetric]"
-        :icon="button.icon"
-        :tooltip="button.tooltip"
+        :icon="icon"
+        :tooltip="tooltip"
         :button-type="group"
-        @button-action="action(button.action, button.id)"
+        @button-action="onAction(action, id)"
       />
     </div>
     <slot />
@@ -80,7 +80,12 @@ export default {
     },
   },
   methods: {
-    action(action, id) {
+    filteredSidebarItemsByGroup(group) {
+      return this.filteredSidebarItems.filter(
+        (button) => button.group === group
+      );
+    },
+    onAction(action, id) {
       this.$emit(action, id);
     },
   },

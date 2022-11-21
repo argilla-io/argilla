@@ -59,7 +59,6 @@ export default {
     },
     modalIcon: {
       type: String,
-      default: undefined,
     },
     modalTitle: {
       type: String,

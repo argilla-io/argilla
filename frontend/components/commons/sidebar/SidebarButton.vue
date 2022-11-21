@@ -46,7 +46,13 @@ export default {
       return this.activeView.includes(this.id);
     },
     sidebarButtonClass() {
-      return [this.buttonType?.toLowerCase(), this.isActive ? "active" : null];
+      return [this.buttonTypeClass, this.buttonStateClass];
+    },
+    buttonTypeClass() {
+      return this.buttonType?.toLowerCase();
+    },
+    buttonStateClass() {
+      return this.isActive ? "active" : null;
     },
   },
 };
