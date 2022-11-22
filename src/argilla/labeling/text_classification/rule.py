@@ -211,7 +211,7 @@ def update_rules(dataset: str, rules: List[Rule]):
 
     """
     rules = [rule.__convert_to_labeling_rule() for rule in rules]
-    return api.active_api().update_dataset_labeling_rules(dataset, rules)
+    api.active_api().update_dataset_labeling_rules(dataset, rules)
 
 
 def load_rules(dataset: str) -> List[Rule]:
