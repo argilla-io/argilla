@@ -23,29 +23,127 @@ from starlette.testclient import TestClient
 
 import argilla
 from argilla.monitoring.asgi import (
-    argillaLogHTTPMiddleware,
+    ArgillaLogHTTPMiddleware,
+    text_classification_mapper,
     token_classification_mapper,
 )
 
 
-def test_argilla_middleware_for_text_classification(monkeypatch):
-
+def test_argilla_middleware_for_text_classification(
+    monkeypatch,
+    mocked_client,
+):
     expected_endpoint = "/predict"
+    expected_endpoint_get = "/predict_get"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
+
+    argilla.delete(expected_dataset_name)
 
     app = FastAPI()
     app.add_middleware(
-        argillaLogHTTPMiddleware,
+        ArgillaLogHTTPMiddleware,
         api_endpoint=expected_endpoint,
         dataset=expected_dataset_name,
+        records_mapper=text_classification_mapper,
+        log_interval=0.1,
+    )
+    app.add_middleware(
+        ArgillaLogHTTPMiddleware,
+        api_endpoint=expected_endpoint_get,
+        dataset=expected_dataset_name,
+        records_mapper=text_classification_mapper,
+        log_interval=0.1,
     )
 
-    @app.route(expected_endpoint, methods=["POST"])
-    def mock_predict(data: Dict[str, Any]):
+    @app.route(expected_endpoint, methods=["POST", "PUT"])
+    def mock_predict_post(data: Dict[str, Any]):
+        return JSONResponse(content={"labels": ["A", "B"], "scores": [0.9, 0.1]})
+
+    @app.route(expected_endpoint_get, methods=["GET"])
+    def mock_predict_get(data: Dict[str, Any]):
+        return JSONResponse(content={"labels": ["A", "B"], "scores": [0.9, 0.1]})
+
+    @app.route("/another/predict/route")
+    def another_mock(request):
+        return PlainTextResponse("Hello")
+
+    mock = TestClient(app)
+    mock.post(
+        expected_endpoint,
+        json={"a": "The data input for A", "b": "The data input for B"},
+    )
+
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 1
+
+    mock.put(
+        expected_endpoint,
+        json={"a": "The data input for A", "b": "The data input for B"},
+    )
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 2
+
+    mock.get(
+        expected_endpoint_get,
+        params={"a": "The data input for A", "b": "The data input for B"},
+    )
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 3
+
+    mock.get("/another/predict/route")
+
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 3
+
+
+def test_argilla_middleware_for_token_classification(
+    monkeypatch,
+    mocked_client,
+):
+    expected_endpoint = "/predict"
+    expected_endpoint_get = "/predict_get"
+    expected_dataset_name = "mlmodel_v3_monitor_ds"
+    argilla.delete(expected_dataset_name)
+
+    app = Starlette()
+    app.add_middleware(
+        ArgillaLogHTTPMiddleware,
+        api_endpoint=expected_endpoint,
+        dataset=expected_dataset_name,
+        records_mapper=token_classification_mapper,
+        log_interval=0.1,
+    )
+    app.add_middleware(
+        ArgillaLogHTTPMiddleware,
+        api_endpoint=expected_endpoint_get,
+        dataset=expected_dataset_name,
+        records_mapper=token_classification_mapper,
+        log_interval=0.1,
+    )
+
+    @app.route(expected_endpoint, methods=["POST", "PUT"])
+    def mock_predict_post(request):
         return JSONResponse(
             content=[
-                {"labels": ["A", "B"], "scores": [0.9, 0.1]},
-                {"labels": ["A", "B"], "scores": [0.9, 0.1]},
+                {"label": "fawn", "start": 0, "end": 3},
+                {"label": "fobis", "start": 4, "end": 8},
+            ]
+        )
+
+    @app.route(expected_endpoint_get, methods=["GET"])
+    def mock_predict_get(request):
+        return JSONResponse(
+            content=[
+                {"label": "fawn", "start": 0, "end": 3},
+                {"label": "fobis", "start": 4, "end": 8},
             ]
         )
 
@@ -53,86 +151,37 @@ def test_argilla_middleware_for_text_classification(monkeypatch):
     def another_mock(request):
         return PlainTextResponse("Hello")
 
-    class MockLog:
-        def __init__(self):
-            self.was_called = False
-
-        def __call__(self, records, name: str, **kwargs):
-            self.was_called = True
-            assert name == expected_dataset_name
-            assert len(records) == 2
-            assert isinstance(records[0], argilla.TextClassificationRecord)
-
-    mock_log = MockLog()
-    monkeypatch.setattr(argilla, "log", mock_log)
     mock = TestClient(app)
 
     mock.post(
         expected_endpoint,
-        json=[
-            {"a": "The data input for A", "b": "The data input for B"},
-            {"a": "The data input for A", "b": "The data input for B"},
-        ],
+        json={"text": "The main text data"},
     )
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 1
 
-    time.sleep(0.2)
-    assert mock_log.was_called
-
-    mock_log.was_called = False
-    mock.get("/another/predict/route")
-
-    time.sleep(0.2)
-    assert not mock_log.was_called
-
-
-def test_argilla_middleware_for_token_classification(monkeypatch):
-
-    expected_endpoint = "/predict"
-    expected_dataset_name = "mlmodel_v3_monitor_ds"
-
-    app = Starlette()
-    app.add_middleware(
-        argillaLogHTTPMiddleware,
-        api_endpoint=expected_endpoint,
-        dataset=expected_dataset_name,
-        records_mapper=token_classification_mapper,
-    )
-
-    @app.route(expected_endpoint, methods=["POST"])
-    def mock_predict(request):
-        return JSONResponse(
-            content=[
-                [
-                    {"label": "fawn", "start": 0, "end": 3},
-                    {"label": "fobis", "start": 4, "end": 8},
-                ],
-                [],
-            ]
-        )
-
-    class MockLog:
-        def __init__(self):
-            self.was_called = False
-
-        def __call__(self, records, name: str, **kwargs):
-            self.was_called = True
-            assert name == expected_dataset_name
-            assert len(records) == 2
-            assert isinstance(records[0], argilla.TokenClassificationRecord)
-
-    mock_log = MockLog()
-    monkeypatch.setattr(argilla, "log", mock_log)
-    mock = TestClient(app)
-
-    mock.post(
+    mock.put(
         expected_endpoint,
-        json=[{"text": "The main text data"}, "The main text data"],
+        json={"text": "The main text data 3"},
     )
-    time.sleep(0.2)
-    assert mock_log.was_called
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 2
 
-    mock_log.was_called = False
+    mock.get(
+        expected_endpoint_get,
+        params={"text": "The main text data 2"},
+    )
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 3
+
     mock.get("/another/predict/route")
-
-    time.sleep(0.2)
-    assert not mock_log.was_called
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 3

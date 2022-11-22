@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-DEFAULT_MAX_KEYWORD_LENGTH = 128
-
-
-API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
-WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
-DEFAULT_API_KEY = "rubrix.apikey"  # Keep the same api key for now
-
-_OLD_API_KEY_HEADER_NAME = "X-Rubrix-Api-Key"
-_OLD_WORKSPACE_HEADER_NAME = "X-Rubrix-Workspace"
-
-DATASET_NAME_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
+ARGILLA_METADATA_FIELD_WARNING_MESSAGE = (
+    "You can configure this length in the server with the ARGILLA_METADATA_FIELD_LENGTH "
+    "environment variable. Note that, setting this too high may lead to Elastic performance issues."
+)

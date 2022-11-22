@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import warnings
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 from uuid import uuid4
@@ -19,10 +20,11 @@ from uuid import uuid4
 from pydantic import BaseModel, Field, root_validator, validator
 from pydantic.generics import GenericModel
 
-from argilla._constants import MAX_KEYWORD_LENGTH
+from argilla import _messages
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
 from argilla.server.daos.backend.search.model import BackendRecordsQuery, SortConfig
 from argilla.server.helpers import flatten_dict
+from argilla.server.settings import settings
 from argilla.utils import limit_value_length
 
 
@@ -138,7 +140,17 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         """
         if metadata:
             metadata = flatten_dict(metadata, drop_empty=True)
-            metadata = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
+            new_metadata = limit_value_length(
+                data=metadata,
+                max_length=settings.metadata_field_length,
+            )
+            message = (
+                "Some metadata values exceed the max length. Those values will be"
+                f" truncated by keeping only the last {settings.metadata_field_length} characters. "
+                + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
+            )
+            warnings.warn(message, UserWarning)
+            metadata = new_metadata
         return metadata
 
     @classmethod

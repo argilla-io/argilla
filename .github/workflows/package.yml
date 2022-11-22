@@ -10,11 +10,15 @@ on:
       - "main"
       - "develop"
       - "releases/**"
+      - "feat/**"
+      - "feature/**"
   pull_request:
     branches:
       - "main"
       - "develop"
       - "releases/**"
+      - "feat/**"
+      - "feature/**"
 
 jobs:
   src-test:
