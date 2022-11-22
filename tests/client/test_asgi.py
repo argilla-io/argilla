@@ -66,12 +66,32 @@ def test_argilla_middleware_for_text_classification(
     df = df.to_pandas()
     assert len(df) == 1
 
+    mock.get(
+        expected_endpoint,
+        params={"a": "The data input for A", "b": "The data input for B"},
+    )
+
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 2
+
+    mock.put(
+        expected_endpoint,
+        json={"a": "The data input for A", "b": "The data input for B"},
+    )
+
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 3
+
     mock.get("/another/predict/route")
 
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
     df = df.to_pandas()
-    assert len(df) == 1
+    assert len(df) == 3
 
 
 def test_argilla_middleware_for_token_classification(
@@ -111,8 +131,26 @@ def test_argilla_middleware_for_token_classification(
     df = df.to_pandas()
     assert len(df) == 1
 
+    mock.get(
+        expected_endpoint,
+        params={"text": "The main text data"},
+    )
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 2
+
+    mock.put(
+        expected_endpoint,
+        json={"text": "The main text data"},
+    )
+    time.sleep(0.5)
+    df = argilla.load(expected_dataset_name)
+    df = df.to_pandas()
+    assert len(df) == 3
+
     mock.get("/another/predict/route")
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
     df = df.to_pandas()
-    assert len(df) == 1
+    assert len(df) == 3
