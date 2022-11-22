@@ -178,6 +178,7 @@ def add_rules(dataset: str, rules: List[Rule]):
 
     Args:
         dataset: Name of the dataset.
+        rules: Rules to add to the dataset
 
     Returns:
         api response
@@ -191,6 +192,7 @@ def delete_rules(dataset: str, rules: List[Rule]):
 
     Args:
         dataset: Name of the dataset
+        rules: Rules to delete from the dataset
 
     Returns:
         api response
@@ -205,6 +207,7 @@ def update_rules(dataset: str, rules: List[Rule]):
 
     Args:
         dataset: Name of the dataset
+        rules: Rules to update at the dataset
 
     Returns:
         api response
