@@ -226,7 +226,7 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
             )
 
         for record in records:
-            if self._monitor.agent is not None:
+            if self._monitor.agent is not None and not record.prediction_agent:
                 record.prediction_agent = self._monitor.agent
 
         return dict(
