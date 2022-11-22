@@ -50,7 +50,7 @@ class _Client:
         self.base_url = self.base_url.strip()
         if self.base_url.endswith("/"):
             self.base_url = self.base_url[:-1]
-        if "_" in self.base_url:
+        if "_" in self.base_url and self.base_url.startswith("https://"):
             self.__httpx__ = None
             raise ValueError(
                 'Avoid using hostnames with underscores "_". For reference see:'
