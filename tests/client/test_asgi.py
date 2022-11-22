@@ -48,7 +48,7 @@ def test_argilla_middleware_for_text_classification(
         log_interval=0.1,
     )
 
-    @app.route(expected_endpoint, methods=["POST"])
+    @app.route(expected_endpoint, methods=["POST", "PUT"])
     def mock_predict_post(data: Dict[str, Any]):
         return JSONResponse(content={"labels": ["A", "B"], "scores": [0.9, 0.1]})
 
@@ -115,7 +115,7 @@ def test_argilla_middleware_for_token_classification(
         log_interval=0.1,
     )
 
-    @app.route(expected_endpoint, methods=["POST"])
+    @app.route(expected_endpoint, methods=["POST", "PUT"])
     def mock_predict(request):
         return JSONResponse(
             content=[
