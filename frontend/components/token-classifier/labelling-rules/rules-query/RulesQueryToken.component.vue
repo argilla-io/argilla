@@ -31,10 +31,17 @@
     <div class="rule-query-token__chips">
       <ChipsComponent :chips="entities" @on-chips-select="onChipsSelection" />
     </div>
-    <div class="rule-query-token__save-rules-button">
-      <button @click="onClickSaveRule" :disabled="isSaveRulesDisable">
-        Save Rules
-      </button>
+    <div class="rule-query-token__footer">
+      <div class="save-rule-or-cancel-btns">
+        <button @click="onClickSaveRule" :disabled="isSaveRulesDisable">
+          Save Rules
+        </button>
+      </div>
+      <div class="manage-rules-btn">
+        <button @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
+          {{ viewRulesBtnLabel }}
+        </button>
+      </div>
     </div>
   </CardComponent>
 
@@ -108,6 +115,10 @@ export default {
       type: String,
       required: true,
     },
+    isGlobalEntities: {
+      type: Boolean,
+      required: true,
+    },
     entities: {
       type: Array,
       required: true,
@@ -164,7 +175,7 @@ export default {
         return "NoQueryComponent";
       }
 
-      if (this.entities.length === 0) {
+      if (!this.isGlobalEntities) {
         return "NoGlobalEntitiesComponent";
       }
 
@@ -299,6 +310,12 @@ export default {
     display: flex;
     flex-direction: row;
     gap: 10px;
+  }
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2em;
   }
 }
 

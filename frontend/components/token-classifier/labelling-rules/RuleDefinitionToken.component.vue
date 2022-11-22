@@ -3,7 +3,8 @@
     <div class="left-item">
       <RulesQueryToken
         :query="queryText"
-        :entities="entities"
+        :isGlobalEntities="isGlobalEntities"
+        :entities="filteredEntities"
         :recordLength="this.numberOfRecords"
         :rulesLength="numberOfRulesInDataset"
         :isManagedRulesBtnDisabled="isNoRuleInDataset"
@@ -45,7 +46,11 @@ export default {
       type: Object,
       required: true,
     },
-    entities: {
+    isGlobalEntities: {
+      type: Boolean,
+      required: true,
+    },
+    filteredEntities: {
       type: Array,
       required: true,
     },

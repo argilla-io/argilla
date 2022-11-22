@@ -22,7 +22,8 @@
         <RuleDefinitionToken
           :rule="rule"
           :queryText="queryText"
-          :entities="globalEntities"
+          :isGlobalEntities="isGlobalEntities"
+          :filteredEntities="filteredGlobalEntities"
           :numberOfRecords="numberOfRecords"
           :numberOfRulesInDataset="numberOfRulesInDataset"
           @on-search-entity="(value) => (searchQuery = value)"
@@ -168,7 +169,17 @@ export default {
           .first() || {}
       );
     },
-    globalEntities() {
+    isGlobalEntities() {
+      return (
+        GlobalEntityModel.query()
+          .where(
+            "dataset_id",
+            formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
+          )
+          .get().length > 0
+      );
+    },
+    filteredGlobalEntities() {
       return GlobalEntityModel.query()
         .where(
           "dataset_id",
