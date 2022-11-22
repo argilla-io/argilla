@@ -34,6 +34,7 @@ def test_argilla_middleware_for_text_classification(
     mocked_client,
 ):
     expected_endpoint = "/predict"
+    expected_endpoint_get = "/predict_get"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
 
     argilla.delete(expected_dataset_name)
@@ -48,7 +49,11 @@ def test_argilla_middleware_for_text_classification(
     )
 
     @app.route(expected_endpoint, methods=["POST"])
-    def mock_predict(data: Dict[str, Any]):
+    def mock_predict_post(data: Dict[str, Any]):
+        return JSONResponse(content={"labels": ["A", "B"], "scores": [0.9, 0.1]})
+
+    @app.route(expected_endpoint_get, methods=["GET"])
+    def mock_predict_get(a: str, b: str):
         return JSONResponse(content={"labels": ["A", "B"], "scores": [0.9, 0.1]})
 
     @app.route("/another/predict/route")
@@ -66,21 +71,19 @@ def test_argilla_middleware_for_text_classification(
     df = df.to_pandas()
     assert len(df) == 1
 
-    mock.get(
+    mock.put(
         expected_endpoint,
-        params={"a": "The data input for A", "b": "The data input for B"},
+        json={"a": "The data input for A", "b": "The data input for B"},
     )
-
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 2
 
-    mock.put(
+    mock.get(
         expected_endpoint,
-        json={"a": "The data input for A", "b": "The data input for B"},
+        params={"a": "The data input for A", "b": "The data input for B"},
     )
-
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
     df = df.to_pandas()
@@ -99,6 +102,7 @@ def test_argilla_middleware_for_token_classification(
     mocked_client,
 ):
     expected_endpoint = "/predict"
+    expected_endpoint_get = "/predict_get"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
     argilla.delete(expected_dataset_name)
 
@@ -120,6 +124,19 @@ def test_argilla_middleware_for_token_classification(
             ]
         )
 
+    @app.route(expected_endpoint_get, methods=["GET"])
+    def mock_predict_get(text: str):
+        return JSONResponse(
+            content=[
+                {"label": "fawn", "start": 0, "end": 3},
+                {"label": "fobis", "start": 4, "end": 8},
+            ]
+        )
+
+    @app.route("/another/predict/route")
+    def another_mock(request):
+        return PlainTextResponse("Hello")
+
     mock = TestClient(app)
 
     mock.post(
@@ -131,18 +148,18 @@ def test_argilla_middleware_for_token_classification(
     df = df.to_pandas()
     assert len(df) == 1
 
-    mock.get(
+    mock.put(
         expected_endpoint,
-        params={"text": "The main text data"},
+        json={"text": "The main text data 3"},
     )
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 2
 
-    mock.put(
+    mock.get(
         expected_endpoint,
-        json={"text": "The main text data"},
+        params={"text": "The main text data 2"},
     )
     time.sleep(0.5)
     df = argilla.load(expected_dataset_name)
