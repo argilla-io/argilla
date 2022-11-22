@@ -195,8 +195,6 @@ def delete_rules(dataset: str, rules: List[Rule]):
         rules: Rules to delete from the dataset
 
     Returns:
-        api response
-
     """
     rules = [rule.__convert_to_labeling_rule() for rule in rules]
     api.active_api().delete_dataset_labeling_rules(dataset, rules)
