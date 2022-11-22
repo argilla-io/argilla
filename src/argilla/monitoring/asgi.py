@@ -166,7 +166,6 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
                 inputs = await cached_request.json()
             elif cached_request.method == "GET":
                 inputs = cached_request.query_params._dict
-                request.url.include_query_params()
             else:
                 raise NotImplementedError(
                     "Only request methods POST, PUT and GET are implemented."
