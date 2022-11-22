@@ -81,7 +81,7 @@ def test_argilla_middleware_for_text_classification(
     assert len(df) == 2
 
     mock.get(
-        expected_endpoint,
+        expected_endpoint_get,
         params={"a": "The data input for A", "b": "The data input for B"},
     )
     time.sleep(0.5)
@@ -158,7 +158,7 @@ def test_argilla_middleware_for_token_classification(
     assert len(df) == 2
 
     mock.get(
-        expected_endpoint,
+        expected_endpoint_get,
         params={"text": "The main text data 2"},
     )
     time.sleep(0.5)
