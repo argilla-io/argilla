@@ -21,7 +21,7 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from argilla._constants import MAX_KEYWORD_LENGTH
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
@@ -202,20 +202,28 @@ def test_token_classification_prediction_validator(prediction, expected):
 def test_text_classification_record_none_inputs():
     """Test validation error for None in inputs"""
     with pytest.raises(ValidationError):
-        TextClassificationRecord(inputs={"text": None})
+        TextClassificationRecord.parse_obj(dict(inputs={"text": None}))
 
 
 def test_metadata_values_length():
     text = "oh yeah!"
-    metadata = {"too_long": "a" * 200}
+    expected_length = 200
+    metadata = {"too_long": "a" * expected_length}
 
-    record = TextClassificationRecord(inputs={"text": text}, metadata=metadata)
-    assert len(record.metadata["too_long"]) == MAX_KEYWORD_LENGTH
+    with pytest.warns(expected_warning=UserWarning):
+        record = TextClassificationRecord(
+            inputs={"text": text},
+            metadata=metadata,
+        )
+    assert len(record.metadata["too_long"]) == expected_length
 
-    record = TokenClassificationRecord(
-        text=text, tokens=text.split(), metadata=metadata
-    )
-    assert len(record.metadata["too_long"]) == MAX_KEYWORD_LENGTH
+    with pytest.warns(expected_warning=UserWarning):
+        record = TokenClassificationRecord(
+            text=text,
+            tokens=text.split(),
+            metadata=metadata,
+        )
+    assert len(record.metadata["too_long"]) == expected_length
 
 
 def test_model_serialization_with_numpy_nan():

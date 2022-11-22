@@ -100,7 +100,9 @@ def test_delete_records_with_unmatched_records(mocked_client):
         name=dataset,
         records=[
             ar.TextClassificationRecord(
-                id=i, text="This is the text", metadata=dict(idx=i)
+                id=i,
+                text="This is the text",
+                metadata=dict(idx=i),
             )
             for i in range(0, 50)
         ],

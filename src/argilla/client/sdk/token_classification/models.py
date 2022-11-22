@@ -17,7 +17,7 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
-from argilla._constants import MAX_KEYWORD_LENGTH
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.client.models import (
     TokenClassificationRecord as ClientTokenClassificationRecord,
 )
@@ -35,7 +35,7 @@ from argilla.client.sdk.commons.models import (
 class EntitySpan(BaseModel):
     start: int
     end: int
-    label: str = Field(min_length=1, max_length=MAX_KEYWORD_LENGTH)
+    label: str = Field(min_length=1, max_length=DEFAULT_MAX_KEYWORD_LENGTH)
     score: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
