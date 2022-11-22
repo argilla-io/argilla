@@ -47,13 +47,20 @@ def test_argilla_middleware_for_text_classification(
         records_mapper=text_classification_mapper,
         log_interval=0.1,
     )
+    app.add_middleware(
+        ArgillaLogHTTPMiddleware,
+        api_endpoint=expected_endpoint_get,
+        dataset=expected_dataset_name,
+        records_mapper=text_classification_mapper,
+        log_interval=0.1,
+    )
 
     @app.route(expected_endpoint, methods=["POST", "PUT"])
     def mock_predict_post(data: Dict[str, Any]):
         return JSONResponse(content={"labels": ["A", "B"], "scores": [0.9, 0.1]})
 
     @app.route(expected_endpoint_get, methods=["GET"])
-    def mock_predict_get(a: str, b: str):
+    def mock_predict_get(data: Dict[str, Any]):
         return JSONResponse(content={"labels": ["A", "B"], "scores": [0.9, 0.1]})
 
     @app.route("/another/predict/route")
@@ -114,9 +121,16 @@ def test_argilla_middleware_for_token_classification(
         records_mapper=token_classification_mapper,
         log_interval=0.1,
     )
+    app.add_middleware(
+        ArgillaLogHTTPMiddleware,
+        api_endpoint=expected_endpoint_get,
+        dataset=expected_dataset_name,
+        records_mapper=token_classification_mapper,
+        log_interval=0.1,
+    )
 
     @app.route(expected_endpoint, methods=["POST", "PUT"])
-    def mock_predict(request):
+    def mock_predict_post(request):
         return JSONResponse(
             content=[
                 {"label": "fawn", "start": 0, "end": 3},
@@ -125,7 +139,7 @@ def test_argilla_middleware_for_token_classification(
         )
 
     @app.route(expected_endpoint_get, methods=["GET"])
-    def mock_predict_get(text: str):
+    def mock_predict_get(request):
         return JSONResponse(
             content=[
                 {"label": "fawn", "start": 0, "end": 3},
