@@ -181,7 +181,6 @@ def add_rules(dataset: str, rules: List[Rule]):
         rules: Rules to add to the dataset
 
     Returns:
-        api response
     """
     rules = [rule.__convert_to_labeling_rule() for rule in rules]
     return api.active_api().add_dataset_labeling_rules(dataset, rules)
