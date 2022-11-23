@@ -1,5 +1,5 @@
 import { Model } from "@vuex-orm/core";
-import { ObservationDataset } from "../Dataset";
+// import { ObservationDataset } from "../Dataset";
 import RulesMetric from "./RulesMetric.modelTokenClassification";
 
 class Rule extends Model {
@@ -21,7 +21,7 @@ class Rule extends Model {
       owner: this.string(null),
       name: this.string(null),
       // relationships
-      dataset: this.belongsTo(ObservationDataset, "dataset_id"),
+      // dataset: this.belongsTo(ObservationDataset, "dataset_id"),
       rule_metrics: this.hasOne(RulesMetric, "rule_id"),
     };
   }

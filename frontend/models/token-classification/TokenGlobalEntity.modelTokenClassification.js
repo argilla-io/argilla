@@ -1,5 +1,5 @@
 import { Model } from "@vuex-orm/core";
-import { TokenClassificationDataset } from "../TokenClassification";
+// import { TokenClassificationDataset } from "../TokenClassification";
 
 class TokenGlobalEntity extends Model {
   static entity = "globalEntities";
@@ -13,7 +13,7 @@ class TokenGlobalEntity extends Model {
       dataset_id: this.attr(null),
       is_activate: this.attr(false),
       // relationships
-      dataset: this.belongsTo(TokenClassificationDataset, "dataset_id"),
+      // dataset: this.belongsTo(TokenClassificationDataset, "dataset_id"),
     };
   }
 

@@ -1,6 +1,6 @@
 import { Model } from "@vuex-orm/core";
 import { TokenEntity } from "./TokenEntity.modelTokenClassification";
-import { TokenRecord } from "./TokenRecord.modelTokenClassification";
+// import { TokenRecord } from "./TokenRecord.modelTokenClassification";
 
 class TokenAnnotation extends Model {
   static entity = "annotations";
@@ -12,7 +12,7 @@ class TokenAnnotation extends Model {
       record_id: this.attr(null),
 
       // relationships
-      token_record: this.belongsTo(TokenRecord, "record_id"),
+      // token_record: this.belongsTo(TokenRecord, "record_id"),
       token_entities: this.morphMany(
         TokenEntity,
         "entitable_id",
