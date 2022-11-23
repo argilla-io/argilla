@@ -144,13 +144,15 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
                 data=metadata,
                 max_length=settings.metadata_field_length,
             )
-            message = (
-                "Some metadata values exceed the max length. Those values will be"
-                f" truncated by keeping only the last {settings.metadata_field_length} characters. "
-                + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
-            )
-            warnings.warn(message, UserWarning)
-            metadata = new_metadata
+
+            if metadata != new_metadata:
+                message = (
+                    "Some metadata values exceed the max length. Those values will be"
+                    f" truncated by keeping only the last {settings.metadata_field_length} characters. "
+                    + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
+                )
+                warnings.warn(message, UserWarning)
+                metadata = new_metadata
         return metadata
 
     @classmethod
