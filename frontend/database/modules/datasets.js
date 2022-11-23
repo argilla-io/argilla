@@ -28,6 +28,7 @@ import { formatEntityIdForAnnotation } from "../../models/token-classification/T
 import { formatEntityIdForPrediction } from "../../models/token-classification/TokenPrediction.modelTokenClassification";
 import { formatAnnotationPredictionid } from "../../models/token-classification/TokenRecord.modelTokenClassification";
 import { formatEntityIdForRuleAnnotation } from "../../models/token-classification/TokenRuleAnnotation.modelTokenClassification";
+import { formatDatasetIdForTokenGlobalEntityModel } from "../../models/token-classification/TokenGlobalEntity.modelTokenClassification";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -444,6 +445,7 @@ async function _updateTaskDataset({ dataset, data }) {
     const records = data.results ? data.results.records : null;
     if (records) {
       updateTokenRecordsByDatasetId(datasetPrimaryKey, records);
+      initTokenGlobalEntitiesByDatasetId(datasetPrimaryKey);
     }
   }
 
@@ -460,6 +462,33 @@ const updateTokenRecordsByDatasetId = (datasetPrimaryKey, records) => {
     where: datasetPrimaryKey,
     data: {
       token_records: tokenRecords,
+    },
+  });
+};
+
+const initTokenGlobalEntitiesByDatasetId = (datasetPrimaryKey) => {
+  const datasetId = formatDatasetIdForTokenGlobalEntityModel(datasetPrimaryKey);
+  const formattedGlobalEntities = [];
+  const { annotated_as, predicted_as } = TokenClassificationDataset.find(
+    datasetPrimaryKey
+  )?.results?.aggregations || { annotated_as: {}, predicted_as: {} };
+
+  const concatPredictionsAndAnnotations = { ...annotated_as, ...predicted_as };
+
+  Object.keys(concatPredictionsAndAnnotations).forEach((text, index) => {
+    const entity = {
+      dataset_id: datasetId,
+      text,
+      color_id: index,
+      is_activate: false,
+    };
+    formattedGlobalEntities.push(entity);
+  });
+
+  TokenClassificationDataset.insertOrUpdate({
+    where: datasetPrimaryKey,
+    data: {
+      token_global_entities: formattedGlobalEntities,
     },
   });
 };
@@ -716,9 +745,10 @@ const actions = {
     return dataset;
   },
 
-  async load(_, dataset) {
-    return await _loadTaskDataset(dataset);
-  },
+  // async load(_, dataset) {
+  //   console.log("daboudi", _loadTaskDataset(dataset));
+  //   return await _loadTaskDataset(dataset);
+  // },
 
   async search(_, { dataset, query, sort, size }) {
     return await _search({ dataset, query, sort, size });
