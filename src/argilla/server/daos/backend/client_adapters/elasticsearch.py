@@ -61,7 +61,7 @@ class ElasticsearchClient(OpenSearchClient):
                 "index": True,
                 # can similarity property also be part of config @frascuchon ?
                 # relates vector search similarity metric
-                "similarity": "l2_norm",
+                "similarity": "dot_product",  ## default value regarding the knn best practices es documentation
             }
             embedding_mappings[embedding_name] = index_mapping
 

@@ -338,14 +338,16 @@ class EsQueryBuilder:
         self,
         *,
         es_query: Dict[str, Any],
+        num_candidates: int,
+        top_k: int,
         vector_field: str,
         vector_value: List[float],
     ):
         es_query["knn"] = {
             "field": vector_field,
             "query_vector": vector_value,
-            "k": 3,  # TODO: parameterize
-            "num_candidates": 50,  # TODO: parameterize
+            "k": top_k,  # TODO: parameterize
+            "num_candidates": num_candidates,  # TODO: parameterize
         }
         es_query.pop("sort")
 
@@ -356,13 +358,14 @@ class OpenSearchQueryBuilder(EsQueryBuilder):
         self,
         *,
         es_query: Dict[str, Any],
+        top_k: int,
         vector_field: str,
         vector_value: List[float],
     ):
         knn = {
             vector_field: {
                 "vector": vector_value,
-                "k": 3,  # TODO: Input from query
+                "k": top_k,  # TODO: Input from query
             }
         }
         es_query.pop("sort")
