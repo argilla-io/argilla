@@ -26,10 +26,13 @@
           :filteredEntities="filteredGlobalEntities"
           :numberOfRecords="numberOfRecords"
           :numberOfRulesInDataset="numberOfRulesInDataset"
-          @on-search-entity="(value) => (searchQuery = value)"
+          :isSaveRulesBtnDisabled="isSaveRulesBtnDisabled"
+          @on-search-entity="(value) => (searchEntity = value)"
+          @on-select-global-entity="updateSelectedEntity"
           @on-saving-rule="savingRule"
           @on-click-view-rules="goToManageRules"
           @on-click-go-to-annotation-mode="goToAnnotationMode"
+          @on-click-cancel="clickOnCancel"
         />
       </transition>
     </template>
@@ -78,14 +81,35 @@ export default {
   },
   data() {
     return {
-      searchQuery: "",
-      ruleList: [],
+      searchEntity: "",
+      initialGlobalEntities: [],
+      initialSelectedEntity: null,
+      selectedGlobalEntity: null,
+      isSaveRulesBtnDisabled: true,
     };
+  },
+  async mounted() {
+    await this.initRuleModelAndRulesMetricsModel();
+    this.initialGlobalEntities = this.initGlobalEntities();
+
+    // this.initialSelectedEntity =
+    //   this.initialGlobalEntities.find(
+    //     (globalEntity) => globalEntity.is_activate
+    //   ) || null;
   },
   components: {
     RuleDefinitionToken,
   },
   computed: {
+    filteredGlobalEntities() {
+      return structuredClone(
+        this.initialGlobalEntities.filter((globalEntity) => {
+          return globalEntity.text
+            .toUpperCase()
+            .includes(this.searchEntity.toUpperCase());
+        })
+      );
+    },
     owner() {
       return this.dataset.owner;
     },
@@ -97,6 +121,10 @@ export default {
         .whereId(this.datasetPrimaryKey)
         .with("viewSettings")
         .first().viewSettings;
+    },
+    isViewRuleDefinitionOrRecords() {
+      // NOTE: IF true => the view is rule_management ELSE the view is rule_definition or record_view
+      return !this.viewSettings.visibleRulesList;
     },
     viewMode() {
       return this.viewSettings.viewMode;
@@ -113,10 +141,6 @@ export default {
     },
     joinedDatasetPrimaryKey() {
       return this.datasetPrimaryKey.join(".");
-    },
-    isViewRuleDefinitionOrRecords() {
-      // NOTE: IF true => the view is rule_management ELSE the view is rule_definition or record_view
-      return !this.viewSettings.visibleRulesList;
     },
     queryText() {
       return (
@@ -158,9 +182,9 @@ export default {
     isRulesInDataset() {
       return this.rulesSavedInDataset.length;
     },
-    isViewIsWeakLabellingANDDatasetHaveNoRules() {
-      return this.isViewWeakLabelling && !this.isRulesInDataset;
-    },
+    // isViewIsWeakLabellingANDDatasetHaveNoRules() {
+    //   return this.isViewWeakLabelling && !this.isRulesInDataset;
+    // },
     rule() {
       return (
         RuleModel.query()
@@ -170,29 +194,7 @@ export default {
       );
     },
     isGlobalEntities() {
-      return (
-        GlobalEntityModel.query()
-          .where(
-            "dataset_id",
-            formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
-          )
-          .get().length > 0
-      );
-    },
-    filteredGlobalEntities() {
-      return GlobalEntityModel.query()
-        .where(
-          "dataset_id",
-          formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
-        )
-        .where("text", (value) =>
-          this.isStringIncludeSubstring(value, this.searchQuery)
-        )
-        .orderBy("text")
-        .get();
-    },
-    selectedEntityLabel() {
-      return GlobalEntityModel.query().where("is_activate", true).first()?.text;
+      return this.initialGlobalEntities.length > 0;
     },
     records() {
       return TokenClassificationDatasetModel.query()
@@ -214,26 +216,33 @@ export default {
     },
   },
   watch: {
-    async isViewWeakLabelling() {
-      if (this.isViewIsWeakLabellingANDDatasetHaveNoRules) {
-        this.initRuleModelAndRulesMetricsModel();
-      }
-    },
+    // async isViewWeakLabelling() {
+    //   if (this.isViewIsWeakLabellingANDDatasetHaveNoRules) {
+    //     this.initRuleModelAndRulesMetricsModel();
+    //   }
+    // },
     async queryText(newValue) {
       if (newValue) {
         if (!this.isRuleForCurrentQuery) {
+          this.initialGlobalEntities = GlobalEntityModel.query()
+            .where(
+              "dataset_id",
+              formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
+            )
+            .orderBy("text")
+            .get();
           this.createACustomRuleAndLoadRuleMetrics();
         } else {
-          // NOTE: we do nothing because we already have the rules and it rule_metrics
+          this.updateGlobalEntitiesByRule(this.rule.label);
         }
-        this.insertOrUpdateEntityInTokenGlobalEntityModel();
       } else {
-        this.cleanTables();
+        // this.cleanTables();
       }
     },
     async selectedEntityLabel(newValue) {
-      if (newValue)
+      if (newValue) {
         await this.addAnnotationsToRecordsByQuery(this.name, this.queryText);
+      }
     },
   },
   methods: {
@@ -290,7 +299,6 @@ export default {
       const data = query
         ? await this.fetchRecordsAnnotationByQueryText(name, query)
         : null;
-
       if (data) {
         this.insertOrUpdateRuleAnnotations(data);
       }
@@ -331,29 +339,20 @@ export default {
         data: newRule,
       });
     },
-    insertOrUpdateEntityInTokenGlobalEntityModel() {
-      const entities = [];
-
-      this.dataset.entities.forEach(({ text, colorId }) => {
-        const isActivate = text === this.rule.label || false;
-        const entity = {
-          dataset_id: formatDatasetIdForTokenGlobalEntityModel(
-            this.datasetPrimaryKey
-          ),
-          text,
-          color_id: colorId,
-          is_activate: isActivate,
-        };
-
-        entities.push(entity);
-      });
-
-      TokenClassificationDatasetModel.insertOrUpdate({
-        where: this.datasetPrimaryKey,
-        data: {
-          token_global_entities: entities,
-        },
-      });
+    updateGlobalEntitiesByRule(label) {
+      this.initialGlobalEntities = this.initialGlobalEntities.map(
+        (globalEntity) => {
+          if (globalEntity.text === label) {
+            return { ...globalEntity, is_activate: true };
+          } else {
+            return { ...globalEntity, is_activate: false };
+          }
+        }
+      );
+      this.initialSelectedEntity =
+        this.initialGlobalEntities.find(
+          (globalEntity) => globalEntity.is_activate
+        ) || null;
     },
     insertOrUpdateRuleAnnotations({ agent, records }) {
       records.forEach(({ id: record_id, entities }, index) => {
@@ -397,11 +396,11 @@ export default {
     },
     async savingRule() {
       if (this.rule.is_saved_in_dataset) {
-        await this.updateRule(this.queryText, this.selectedEntityLabel);
+        await this.updateRule(this.queryText, this.selectedGlobalEntity.text);
       } else {
         const ruleToPost = {
           query: this.queryText,
-          label: this.selectedEntityLabel,
+          label: this.selectedGlobalEntity.text,
         };
         await this.postRule(ruleToPost);
       }
@@ -484,6 +483,22 @@ export default {
         value: "annotate",
       });
     },
+    updateSelectedEntity(id) {
+      this.initialGlobalEntities = this.initialGlobalEntities.map(
+        (globalEntity) => {
+          if (globalEntity.id === id) {
+            const selectedGlobalEntity = {
+              ...globalEntity,
+              is_activate: true,
+            };
+            this.selectedGlobalEntity = selectedGlobalEntity;
+            return selectedGlobalEntity;
+          }
+          return { ...globalEntity, is_activate: false };
+        }
+      );
+      this.disableEnableSaveRule();
+    },
     cleanTables() {
       RuleAnnotationModel.deleteAll();
       EntityModel.delete(
@@ -498,6 +513,41 @@ export default {
       //     return metric.query === rule.query;
       //   });
       // });
+    },
+    clickOnCancel() {
+      this.initialGlobalEntities = this.initGlobalEntities();
+      this.selectedEntityLabel = this.initialSelectedEntity;
+      this.disableEnableSaveRule();
+    },
+    initGlobalEntities() {
+      let initialGlobalEntities = GlobalEntityModel.query()
+        .where(
+          "dataset_id",
+          formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
+        )
+        .orderBy("text")
+        .get();
+      initialGlobalEntities = initialGlobalEntities.map((globalEntity) => {
+        if (globalEntity.id === this.initialSelectedEntity?.id) {
+          return {
+            ...globalEntity,
+            is_activate: true,
+          };
+        }
+        return {
+          ...globalEntity,
+          is_activate: false,
+        };
+      });
+      return initialGlobalEntities;
+    },
+    disableEnableSaveRule() {
+      if (this.rule?.label) {
+        this.isSaveRulesBtnDisabled =
+          this.initialSelectedEntity.text === this.selectedGlobalEntity.text;
+      } else {
+        this.isSaveRulesBtnDisabled = !!this.selectedGlobalEntity?.label;
+      }
     },
   },
 };
