@@ -9,6 +9,7 @@
         :rulesLength="numberOfRulesInDataset"
         :isManagedRulesBtnDisabled="isNoRuleInDataset"
         :isSaveRulesBtnDisabled="isSaveRulesBtnDisabled"
+        :isRuleAlreadySaved="isRuleAlreadySaved"
         @on-search-entity="
           (searchQuery) => $emit('on-search-entity', searchQuery)
         "
@@ -53,6 +54,10 @@ export default {
       required: true,
     },
     isSaveRulesBtnDisabled: {
+      type: Boolean,
+      required: true,
+    },
+    isRuleAlreadySaved: {
       type: Boolean,
       required: true,
     },

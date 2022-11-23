@@ -32,7 +32,10 @@
       <ChipsComponent :chips="entities" @on-chips-select="onChipsSelection" />
     </div>
     <div class="rule-query-token__footer">
-      <div class="save-rule-or-cancel-btns">
+      <p class="rule-is-already-saved" v-if="isRuleAlreadySaved">
+        This query with this label is already saved as rule
+      </p>
+      <div class="save-rule-or-cancel-btns" >
         <button @click="onClickCancel" :disabled="isCancelBtnDisable">
           Cancel
         </button>
@@ -123,6 +126,10 @@ export default {
     },
     entities: {
       type: Array,
+      required: true,
+    },
+    isRuleAlreadySaved: {
+      type: Boolean,
       required: true,
     },
     recordLength: {

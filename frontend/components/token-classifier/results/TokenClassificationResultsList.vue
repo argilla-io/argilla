@@ -27,6 +27,7 @@
           :numberOfRecords="numberOfRecords"
           :numberOfRulesInDataset="numberOfRulesInDataset"
           :isSaveRulesBtnDisabled="isSaveRulesBtnDisabled"
+          :isRuleAlreadySaved="isRuleAlreadySaved"
           @on-search-entity="(value) => (searchEntity = value)"
           @on-select-global-entity="updateSelectedEntity"
           @on-saving-rule="savingRule"
@@ -86,17 +87,12 @@ export default {
       initialGlobalEntities: [],
       initialSelectedEntity: null,
       selectedGlobalEntity: null,
-      isSaveRulesBtnDisabled: true,
+      isRuleAlreadySaved: true,
     };
   },
   async mounted() {
     await this.initRuleModelAndRulesMetricsModel();
     this.initialGlobalEntities = this.initGlobalEntities();
-
-    // this.initialSelectedEntity =
-    //   this.initialGlobalEntities.find(
-    //     (globalEntity) => globalEntity.is_activate
-    //   ) || null;
   },
   components: {
     RuleDefinitionToken,
@@ -194,6 +190,38 @@ export default {
           .first() || {}
       );
     },
+    isNoInitialSelectedEntityAndNoSelectedGlobalEntity() {
+      return !this.initialSelectedEntity && !this.selectedGlobalEntity;
+    },
+    isNoInitialSelectedEntityAndIsSelectedGlobalEntity() {
+      return !this.initialSelectedEntity && !!this.selectedGlobalEntity;
+    },
+    isInitialSelectedEntityAndIsNoSelectedGlobalEntity() {
+      return !!this.initialSelectedEntity && !this.selectedGlobalEntity;
+    },
+    isInitialSelectedEntityAndIsSelectedGlobalEntity() {
+      return !!this.initialSelectedEntity && !!this.selectedGlobalEntity;
+    },
+
+    isSaveRulesBtnDisabled() {
+      if (this.isNoInitialSelectedEntityAndNoSelectedGlobalEntity) {
+        return true;
+      }
+      if (this.isNoInitialSelectedEntityAndIsSelectedGlobalEntity) {
+        return false;
+      }
+      if (this.isInitialSelectedEntityAndIsNoSelectedGlobalEntity) {
+        return true;
+      }
+      if (this.isInitialSelectedEntityAndIsSelectedGlobalEntity) {
+        if (
+          this.initialSelectedEntity.text === this.selectedGlobalEntity.text
+        ) {
+          return true;
+        }
+      }
+      return false;
+    },
     isGlobalEntities() {
       return this.initialGlobalEntities.length > 0;
     },
@@ -223,7 +251,8 @@ export default {
     //   }
     // },
     async queryText(newValue) {
-      if (newValue) {
+      this.initSelectedEntitiesVariables();
+      if (newValue.length > 0) {
         if (!this.isRuleForCurrentQuery) {
           this.initialGlobalEntities = GlobalEntityModel.query()
             .where(
@@ -235,6 +264,7 @@ export default {
           this.createACustomRuleAndLoadRuleMetrics();
         } else {
           this.updateGlobalEntitiesByRule(this.rule.label);
+          // this.initialGlobalEntities = null;
         }
       } else {
         // this.cleanTables();
@@ -501,7 +531,6 @@ export default {
           return { ...globalEntity, is_activate: false };
         }
       );
-      this.disableEnableSaveRule();
     },
     cleanTables() {
       RuleAnnotationModel.deleteAll();
@@ -520,8 +549,7 @@ export default {
     },
     clickOnCancel() {
       this.initialGlobalEntities = this.initGlobalEntities();
-      this.selectedEntityLabel = this.initialSelectedEntity;
-      this.disableEnableSaveRule();
+      this.selectedGlobalEntity = this.initialSelectedEntity;
     },
     initGlobalEntities() {
       let initialGlobalEntities = GlobalEntityModel.query()
@@ -545,13 +573,9 @@ export default {
       });
       return initialGlobalEntities;
     },
-    disableEnableSaveRule() {
-      if (this.rule?.label) {
-        this.isSaveRulesBtnDisabled =
-          this.initialSelectedEntity.text === this.selectedGlobalEntity.text;
-      } else {
-        this.isSaveRulesBtnDisabled = !!this.selectedGlobalEntity?.label;
-      }
+    initSelectedEntitiesVariables() {
+      this.initialSelectedEntity = null;
+      this.selectedGlobalEntity = null;
     },
   },
 };
