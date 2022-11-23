@@ -148,19 +148,18 @@ export default {
       };
     },
 
-    async hideList() {
-      await this.dataset.viewSettings.disableRulesSummary();
+    hideList() {
+      this.dataset.viewSettings.disableRulesSummary();
     },
 
-    async onSelectQuery(rule) {
-      await this.dataset.setCurrentLabelingRule(rule);
+    async onSelectRule(rule) {
       if (rule.query !== this.dataset.query.text) {
         await this.search({
           dataset: this.dataset,
           query: { text: rule.query },
         });
       }
-      await this.hideList();
+      this.hideList();
     },
     onActionClicked(action, rule) {
       switch (action) {
@@ -171,7 +170,7 @@ export default {
           this.onDeleteRule(rule);
           break;
         case "select":
-          this.onSelectQuery(rule);
+          this.onSelectRule(rule);
           break;
         default:
           console.warn(action);
