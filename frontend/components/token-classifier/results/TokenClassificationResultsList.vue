@@ -277,7 +277,7 @@ export default {
         // this.cleanTables();
       }
     },
-    async selectedEntityLabel(newValue) {
+    async selectedGlobalEntity(newValue) {
       if (newValue) {
         await this.addAnnotationsToRecordsByQuery(this.name, this.queryText);
       }
@@ -344,7 +344,7 @@ export default {
     async fetchRecordsAnnotationByQueryText(name, query) {
       try {
         const { data, status } = await this.$axios.post(
-          `/datasets/${name}/TokenClassification/labeling/rules/${query}/search?label=${this.selectedEntityLabel}`,
+          `/datasets/${name}/TokenClassification/labeling/rules/${query}/search?label=${this.selectedGlobalEntity.text}`,
           {
             record_ids: this.recordsIds,
           }
