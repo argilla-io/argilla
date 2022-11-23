@@ -178,9 +178,7 @@ export default {
     isRulesInDataset() {
       return this.rulesSavedInDataset.length;
     },
-    // isViewIsWeakLabellingANDDatasetHaveNoRules() {
-    //   return this.isViewWeakLabelling && !this.isRulesInDataset;
-    // },
+
     rule() {
       return (
         RuleModel.query()
@@ -253,11 +251,6 @@ export default {
     },
   },
   watch: {
-    // async isViewWeakLabelling() {
-    //   if (this.isViewIsWeakLabellingANDDatasetHaveNoRules) {
-    //     this.initRuleModelAndRulesMetricsModel();
-    //   }
-    // },
     async queryText(newValue) {
       this.initSelectedEntitiesVariables();
       if (newValue.length > 0) {
