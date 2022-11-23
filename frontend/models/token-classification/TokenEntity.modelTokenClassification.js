@@ -1,6 +1,4 @@
 import { Model } from "@vuex-orm/core";
-import { TokenGlobalEntity } from "./TokenGlobalEntity.modelTokenClassification";
-
 class TokenEntity extends Model {
   static entity = "tokenEntities";
 
@@ -19,12 +17,6 @@ class TokenEntity extends Model {
       // relationship
       token_entitable: this.morphTo("entitable_id", "entitable_type"),
     };
-  }
-
-  get token_global_entity() {
-    return TokenGlobalEntity.query()
-      .where("text", this.label.toUpperCase())
-      .first();
   }
 }
 
