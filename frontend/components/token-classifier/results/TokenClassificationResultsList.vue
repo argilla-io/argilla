@@ -87,7 +87,6 @@ export default {
       initialGlobalEntities: [],
       initialSelectedEntity: null,
       selectedGlobalEntity: null,
-      isRuleAlreadySaved: true,
     };
   },
   async mounted() {
@@ -243,6 +242,15 @@ export default {
           this.rule.rule_metrics?.total_records || null
       );
     },
+    isRuleAlreadySaved() {
+      if (!!this.initialSelectedEntity) {
+        return (
+          this.initialSelectedEntity.text ===
+          (this.selectedGlobalEntity?.text || this.initialSelectedEntity.text)
+        );
+      }
+      return false;
+    },
   },
   watch: {
     // async isViewWeakLabelling() {
@@ -264,7 +272,6 @@ export default {
           this.createACustomRuleAndLoadRuleMetrics();
         } else {
           this.updateGlobalEntitiesByRule(this.rule.label);
-          // this.initialGlobalEntities = null;
         }
       } else {
         // this.cleanTables();

@@ -35,7 +35,7 @@
       <p class="rule-is-already-saved" v-if="isRuleAlreadySaved">
         This query with this label is already saved as rule
       </p>
-      <div class="save-rule-or-cancel-btns" >
+      <div class="save-rule-or-cancel-btns" v-else>
         <button @click="onClickCancel" :disabled="isCancelBtnDisable">
           Cancel
         </button>
@@ -316,8 +316,11 @@ export default {
   &__footer {
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap;
+    align-items: center;
     gap: 2em;
+    .manage-rules-btn {
+      min-width: 8em;
+    }
   }
 }
 
