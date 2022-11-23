@@ -78,7 +78,7 @@ class Rule:
         """Who authored the rule."""
         return self._author
 
-    def __convert_to_labeling_rule(self):
+    def _convert_to_labeling_rule(self):
         """Converts the rule to a LabelingRule"""
         if isinstance(self._label, str):
             labels = [self._label]
@@ -90,20 +90,20 @@ class Rule:
     def add_to_dataset(self, dataset: str):
         """Add to rule to the given dataset"""
         api.active_api().add_dataset_labeling_rules(
-            dataset, rules=[self.__convert_to_labeling_rule()]
+            dataset, rules=[self._convert_to_labeling_rule()]
         )
 
     def remove_from_dataset(self, dataset: str):
         """Removes the rule from the given dataset"""
 
         api.active_api().delete_dataset_labeling_rules(
-            dataset, rules=[self.__convert_to_labeling_rule()]
+            dataset, rules=[self._convert_to_labeling_rule()]
         )
 
     def update_at_dataset(self, dataset: str):
         """Updates the rule at the given dataset"""
         api.active_api().update_dataset_labeling_rules(
-            dataset, rules=[self.__convert_to_labeling_rule()]
+            dataset, rules=[self._convert_to_labeling_rule()]
         )
 
     def apply(self, dataset: str):
@@ -182,7 +182,7 @@ def add_rules(dataset: str, rules: List[Rule]):
 
     Returns:
     """
-    rules = [rule.__convert_to_labeling_rule() for rule in rules]
+    rules = [rule._convert_to_labeling_rule() for rule in rules]
     return api.active_api().add_dataset_labeling_rules(dataset, rules)
 
 
@@ -195,7 +195,7 @@ def delete_rules(dataset: str, rules: List[Rule]):
 
     Returns:
     """
-    rules = [rule.__convert_to_labeling_rule() for rule in rules]
+    rules = [rule._convert_to_labeling_rule() for rule in rules]
     api.active_api().delete_dataset_labeling_rules(dataset, rules)
 
 
@@ -208,7 +208,7 @@ def update_rules(dataset: str, rules: List[Rule]):
 
     Returns:
     """
-    rules = [rule.__convert_to_labeling_rule() for rule in rules]
+    rules = [rule._convert_to_labeling_rule() for rule in rules]
     api.active_api().update_dataset_labeling_rules(dataset, rules)
 
 
