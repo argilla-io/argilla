@@ -33,7 +33,10 @@
     </div>
     <div class="rule-query-token__footer">
       <div class="save-rule-or-cancel-btns">
-        <button @click="onClickSaveRule" :disabled="isSaveRulesDisable">
+        <button @click="onClickCancel" :disabled="isCancelBtnDisable">
+          Cancel
+        </button>
+        <button @click="onClickSaveRule" :disabled="isSaveRulesBtnDisabled">
           Save Rules
         </button>
       </div>
@@ -100,7 +103,6 @@
 </template>
 
 <script>
-import { TokenGlobalEntity } from "../../../../models/token-classification/TokenGlobalEntity.modelTokenClassification";
 import ChipsComponent from "./Chips.component.vue";
 import CardComponent from "@/components/base/card/Card.component.vue";
 
@@ -135,6 +137,14 @@ export default {
       type: Boolean,
       default: false,
     },
+    isCancelBtnDisable: {
+      type: Boolean,
+      default: false,
+    },
+    isSaveRulesBtnDisabled: {
+      type: Boolean,
+      required: true,
+    },
     textColor: {
       type: String,
       default: () => "#000",
@@ -150,7 +160,6 @@ export default {
   },
   data() {
     return {
-      isSaveRulesDisable: true,
       searchEntity: "",
     };
   },
@@ -185,29 +194,15 @@ export default {
   methods: {
     onChipsSelection({ id }) {
       this.updateTokenGlobalEntities(id);
-      this.disableSaveRulesButton();
     },
     onClickSaveRule() {
       this.$emit("on-click-save-rule");
     },
-    updateTokenGlobalEntities(id) {
-      let entities = TokenGlobalEntity.all();
-
-      entities = entities.map((entity) => {
-        if (entity.id !== id) {
-          return { ...entity, is_activate: false };
-        } else {
-          return { ...entity, is_activate: !entity.is_activate };
-        }
-      });
-      TokenGlobalEntity.insertOrUpdate({ data: entities });
+    onClickCancel() {
+      this.$emit("on-click-cancel");
     },
-    disableSaveRulesButton() {
-      const entities = TokenGlobalEntity.all();
-      const isSelectedEntities = entities.some((entity) => entity.is_activate);
-      isSelectedEntities
-        ? (this.isSaveRulesDisable = false)
-        : (this.isSaveRulesDisable = true);
+    updateTokenGlobalEntities(id) {
+      this.$emit("on-select-global-entity", id);
     },
     onClickViewRules() {
       this.$emit("on-click-view-rules");
