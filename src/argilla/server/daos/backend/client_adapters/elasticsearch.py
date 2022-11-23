@@ -50,6 +50,7 @@ class ElasticsearchClient(OpenSearchClient):
         *,
         index: str,
         vectors: Dict[str, int],
+        similarity_metric: str = "dot_product",
     ):
         self._check_vector_supported()
 
@@ -61,7 +62,7 @@ class ElasticsearchClient(OpenSearchClient):
                 "index": True,
                 # can similarity property also be part of config @frascuchon ?
                 # relates vector search similarity metric
-                "similarity": "dot_product",  ## default value regarding the knn best practices es documentation
+                "similarity": similarity_metric,  ## default value regarding the knn best practices es documentation
             }
             embedding_mappings[embedding_name] = index_mapping
 
@@ -127,22 +128,16 @@ class ElasticsearchClient(OpenSearchClient):
             knn = es_query.pop("knn", None)
             if knn:
                 self._check_vector_supported()
-                results = self.__client__.knn_search(
-                    index=index,
-                    knn=knn,
-                    filter=es_query["query"],  # filter=query??
-                    routing=routing,
-                    source=es_query.get("_source"),
-                )
-            else:
-                results = self.__client__.search(
-                    index=index,
-                    routing=routing,
-                    body=es_query,
-                    track_total_hits=True,
-                    rest_total_hits_as_int=True,
-                    size=size,
-                )
+
+            results = self.__client__.search(
+                index=index,
+                knn=knn,
+                routing=routing,
+                body=es_query,
+                track_total_hits=True,
+                rest_total_hits_as_int=True,
+                size=size,
+            )
 
             return self._process_search_results(
                 search_results=results,
