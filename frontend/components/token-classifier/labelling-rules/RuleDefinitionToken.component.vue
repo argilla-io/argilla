@@ -8,16 +8,18 @@
         :recordLength="this.numberOfRecords"
         :rulesLength="numberOfRulesInDataset"
         :isManagedRulesBtnDisabled="isNoRuleInDataset"
+        :isSaveRulesBtnDisabled="isSaveRulesBtnDisabled"
         @on-search-entity="
           (searchQuery) => $emit('on-search-entity', searchQuery)
         "
+        @on-select-global-entity="onSelectGlobalEntity"
         @on-click-save-rule="saveRule"
         @on-click-view-rules="onClickViewRules"
         @on-click-go-to-annotation-mode="onClickGoToAnnotationMode"
+        @on-click-cancel="onClickCancel"
       />
     </div>
     <RulesMetricsToken
-      v-if="queryText"
       title="Rules Metrics"
       :subcardInputs="options"
       btnLabel="Manage rules"
@@ -50,6 +52,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    isSaveRulesBtnDisabled: {
+      type: Boolean,
+      required: true,
+    },
     filteredEntities: {
       type: Array,
       required: true,
@@ -75,11 +81,17 @@ export default {
     onClickViewRules() {
       this.$emit("on-click-view-rules");
     },
+    onClickCancel() {
+      this.$emit("on-click-cancel");
+    },
     saveRule() {
       this.$emit("on-saving-rule");
     },
     onClickGoToAnnotationMode() {
       this.$emit("on-click-go-to-annotation-mode");
+    },
+    onSelectGlobalEntity(id) {
+      this.$emit("on-select-global-entity", id);
     },
   },
   computed: {
