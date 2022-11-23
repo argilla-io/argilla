@@ -14,7 +14,10 @@ on:
     branches:
       - "main"
       - "develop"
+      - "releases/**"
       - "feature/**"
+
+
 
 
 jobs:
