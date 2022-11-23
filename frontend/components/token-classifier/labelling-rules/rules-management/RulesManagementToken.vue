@@ -74,11 +74,6 @@ export default {
       },
     };
   },
-  // async fetch() {
-  //   if (!this.rules) {
-  //     await this.dataset.refreshRules();
-  //   }
-  // },
   computed: {
     tableColumns() {
       return [
@@ -88,7 +83,7 @@ export default {
           class: "table-info__title",
           type: "action",
         },
-        { name: "Labels", field: "labels", class: "array", type: "array" },
+        { name: "Label", field: "label", class: "array", type: "text" },
         {
           name: "Coverage",
           field: "coverage",
@@ -97,33 +92,11 @@ export default {
           tooltip: "Percentage of records labeled by the rule",
         },
         {
-          name: this.$mq >= "sm" ? "An. Cover." : "Annot. Cover.",
+          name: "Annot. Cover.",
           field: "coverage_annotated",
           class: "text",
           type: "percentage",
           tooltip: "Percentage of annotated records labeled by the rule",
-        },
-        {
-          name: "Correct",
-          field: "correct",
-          class: "text",
-          tooltip:
-            "Number of labels the rule predicted correctly with respect to the annotations",
-        },
-        {
-          name: "Incorrect",
-          field: "incorrect",
-          class: "text",
-          tooltip:
-            "Number of labels the rule predicted incorrectly with respect to the annotations",
-        },
-        {
-          name: "Precision",
-          field: "precision",
-          class: "text",
-          type: "percentage",
-          tooltip:
-            "Percentage of correct labels given by the rule with respect to the annotations",
         },
         {
           name: "Created at",
@@ -132,9 +105,6 @@ export default {
           type: "date",
         },
       ];
-    },
-    perRuleMetrics() {
-      return this.dataset.labelingRulesMetrics;
     },
     isVisible() {
       return this.dataset.viewSettings.visibleRulesList;
@@ -147,8 +117,8 @@ export default {
             name: r.description,
             query: r.query,
             kind: "select",
-            labels: r.labels,
-            // ...this.metricsForRule(r),
+            label: r.label,
+            ...this.metricsForRule(r),
             created_at: r.created_at,
           };
         });
@@ -167,19 +137,16 @@ export default {
     ...mapActions({
       search: "entities/datasets/search",
     }),
-    // metricsForRule(rule) {
-    //   const metrics = this.perRuleMetrics[rule.query];
-    //   if (!metrics) {
-    //     return {};
-    //   }
-    //   return {
-    //     coverage: metrics.coverage,
-    //     coverage_annotated: metrics.coverage_annotated,
-    //     correct: metrics.correct,
-    //     incorrect: metrics.incorrect,
-    //     precision: !isNaN(metrics.precision) ? metrics.precision : "-",
-    //   };
-    // },
+    metricsForRule(rule) {
+      const metrics = rule.rule_metrics;
+      if (!metrics) {
+        return {};
+      }
+      return {
+        coverage: metrics.coverage,
+        coverage_annotated: metrics.coverage_annotated,
+      };
+    },
 
     async hideList() {
       await this.dataset.viewSettings.disableRulesSummary();
@@ -220,8 +187,9 @@ export default {
     onShowConfirmRuleDeletion(id) {
       this.visibleModalId = id.query;
     },
-    async onDeleteRule(rule) {
-      await this.dataset.deleteLabelingRule(rule);
+    onDeleteRule(rule) {
+      this.$emit('on-click-delete-rule', rule);
+      this.closeModal();
     },
     closeModal() {
       this.visibleModalId = undefined;
@@ -233,7 +201,7 @@ export default {
 .rules-management {
   padding-left: 4em;
   padding-top: 2em;
-  margin-bottom: 2em;
+  padding-bottom: 4em;
   overflow: auto;
   height: 100vh;
   @extend %hide-scrollbar;

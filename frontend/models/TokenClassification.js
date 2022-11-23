@@ -23,6 +23,7 @@ import {
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 import { TokenGlobalEntity } from "./token-classification/TokenGlobalEntity.modelTokenClassification";
 import { TokenRecord } from "./token-classification/TokenRecord.modelTokenClassification";
+import { Rule } from "./token-classification/Rule.modelTokenClassification";
 
 class TokenClassificationRecord extends BaseRecord {
   // tokens;
@@ -124,6 +125,26 @@ class TokenClassificationDataset extends ObservationDataset {
     return entity.find(getDatasetModelPrimaryKey(this));
   }
 
+  async deleteLabelingRule({ query }) {
+    await this._deleteRule({ query });
+    Rule.delete((rule) => {
+      return rule.query === query
+    })
+  }
+
+  async _deleteRule({ query }) {
+    try {
+      const { response } = await TokenClassificationDataset.api().delete(
+        `/datasets/${this.name}/${this.task}/labeling/rules/${encodeURIComponent(
+          query
+        )}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  }
+
   get entities() {
     const formatEntities = (entities = []) =>
       entities.map((name, index) => {
@@ -152,6 +173,8 @@ class TokenClassificationDataset extends ObservationDataset {
     return formatEntities(names);
   }
 }
+
+
 
 ObservationDataset.registerTaskDataset(
   "TokenClassification",

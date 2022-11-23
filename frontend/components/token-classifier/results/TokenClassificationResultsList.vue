@@ -43,11 +43,12 @@
       />
     </template>
   </results-list>
-  <RulesManagementToken
+  <rules-management-token
     v-else
     class="content"
     :rules="rulesSavedInDataset"
     :dataset="dataset"
+    @on-click-delete-rule="deleteRule"
   />
 </template>
 
@@ -436,6 +437,9 @@ export default {
       } catch (error) {
         console.log("Error: ", error);
       }
+    },
+    async deleteRule(query) {
+      await this.dataset.deleteLabelingRule(query);
     },
     initRulePrimaryKey(query) {
       return {
