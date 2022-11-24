@@ -6,6 +6,6 @@ SentenceTransformers is a Python framework for state-of-the-art sentence, text a
 ````{grid} 1 1 2 2
 :class-container: tuto-section-2
 
-```{include} /_static/tutorials/monitoring-textclassification-transformers-explainability/modal.md
+```{include} /_static/tutorials/labelling-textclassification-sentencetransformers-weaksupervision/modal.md
 ```
 ````
