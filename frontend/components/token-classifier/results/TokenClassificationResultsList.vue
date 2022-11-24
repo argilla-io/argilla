@@ -54,6 +54,7 @@
 </template>
 
 <script>
+import _ from "lodash";
 import { mapActions } from "vuex";
 import {
   Rule as RuleModel,
@@ -241,7 +242,7 @@ export default {
       );
     },
     isRuleAlreadySaved() {
-      if (!!this.initialSelectedEntity) {
+      if (!_.isNil(this.initialSelectedEntity)) {
         return (
           this.initialSelectedEntity.text ===
           (this.selectedGlobalEntity?.text || this.initialSelectedEntity.text)
