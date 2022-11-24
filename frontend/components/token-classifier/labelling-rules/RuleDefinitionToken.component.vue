@@ -24,12 +24,7 @@
     <RulesMetricsToken
       title="Rules Metrics"
       :subcardInputs="options"
-      btnLabel="Manage rules"
-      backgroundColor="rgba(0,0,0,.04)"
-      backgroundSubcardColor="rgba(0,0,0,.04)"
-      textColor="#141414"
-      textSubcardColor="#141414"
-      borderColor="rgba(0,0,0,.04)"
+      rulesMetricType="info"
     />
   </div>
 </template>
@@ -138,6 +133,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
+  margin-bottom: 2em;
 }
 .left-item {
   display: flex;

@@ -243,10 +243,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-* {
-  margin: inherit;
-  font-size: 1rem;
-}
 
 .if-there-is-no-global-entities {
   display: flex;
