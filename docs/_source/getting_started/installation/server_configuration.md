@@ -43,6 +43,9 @@ You can set following environment variables to further configure your server and
 
 - `DOCS_ENABLED`: If False, disables openapi docs endpoint at */api/docs*.
 
+- `ARGILLA_ENABLE_TELEMETRY`: If False, disables telemetry for usage metrics.
+
+
 ### Client
 
 - `ARGILLA_API_URL`: The default API URL when calling {meth}`argilla.init`.
