@@ -50,9 +50,12 @@ You can find more information about how to use the search bar in our detailed [s
 ### Filters
 
 
-The _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters.
+The _filters_ provide a quick and intuitive way to filter and sort your records with respect to various parameters.
 You can find more information about how to use the filters in our detailed [filter guide](./features.md).
 
+#### Info button
+
+On the right side of the filters, the info button can be used to open a small overlay window. The aim is to provide the user with a shortcut to related information specific to the current view. This button appears when extra help is considered useful. (e.g. model explanation, weal labeling...).
 
 ### Record cards
 
