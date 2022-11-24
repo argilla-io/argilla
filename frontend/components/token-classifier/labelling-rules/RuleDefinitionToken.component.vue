@@ -75,8 +75,22 @@ export default {
   },
   data() {
     return {
+      OptionsForRuleMetrics: null,
       options: [],
+      initialParamsForInstance: {
+        coverage: null,
+        coverageAnnotated: null,
+        totalRecords: null,
+        annotatedRecords: null,
+      },
     };
+  },
+  mounted() {
+    this.OptionsForRuleMetrics = new OptionsForRuleMetrics(
+      this.initialParamsForInstance,
+      "TOKEN_ANNOTATION"
+    );
+    this.options = this.OptionsForRuleMetrics.getOptions();
   },
   components: {
     RulesMetricsToken,
@@ -98,6 +112,10 @@ export default {
     onSelectGlobalEntity(id) {
       this.$emit("on-select-global-entity", id);
     },
+    setOptions(params = this.initialParamsForInstance) {
+      this.OptionsForRuleMetrics.setMetrics(params);
+      this.options = this.OptionsForRuleMetrics.getOptions();
+    },
   },
   computed: {
     ruleMetrics() {
@@ -110,18 +128,16 @@ export default {
   watch: {
     ruleMetrics(newValue) {
       if (newValue) {
-        const optionsForInstance = {
+        const paramsForInstance = {
           coverage: newValue.coverage,
           coverageAnnotated: newValue.coverage_annotated,
           totalRecords: newValue.total_records,
           annotatedRecords: newValue.annotated_records,
         };
-        this.options = new OptionsForRuleMetrics(
-          optionsForInstance,
-          "TOKEN_ANNOTATION"
-        ).getOptions();
+
+        this.setOptions(paramsForInstance);
       } else {
-        this.options = [];
+        this.setOptions();
       }
     },
   },
