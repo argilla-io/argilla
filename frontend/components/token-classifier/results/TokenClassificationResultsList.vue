@@ -439,14 +439,27 @@ export default {
       return rulePrimaryKey;
     },
     async savingRule() {
+      let response = null;
       if (this.rule.is_saved_in_dataset) {
-        await this.updateRule(this.queryText, this.selectedGlobalEntity.text);
+        response = await this.updateRule(
+          this.queryText,
+          this.selectedGlobalEntity.text
+        );
       } else {
         const ruleToPost = {
           query: this.queryText,
           label: this.selectedGlobalEntity.text,
         };
-        await this.postRule(ruleToPost);
+        response = await this.postRule(ruleToPost);
+      }
+      
+      if (response) {
+        const { author, created_at } = response;
+        this.updateRuleModel(
+          this.selectedGlobalEntity.text,
+          author,
+          created_at
+        );
       }
     },
     async postRule(ruleToPost) {
@@ -544,6 +557,17 @@ export default {
           return { ...globalEntity, is_activate: false };
         }
       );
+    },
+    updateRuleModel(label, author, created_at) {
+      RuleModel.update({
+        where: this.rulePrimaryKey,
+        data: {
+          is_saved_in_dataset: true,
+          created_at,
+          author,
+          label,
+        },
+      });
     },
     cleanTables() {
       RuleAnnotationModel.deleteAll();
