@@ -19,7 +19,6 @@ keywords = [
     "human-in-the-loop",
     "mlops"
 ]
-
 authors = [
     {name = "recognai", email = "contact@recogn.ai"}
 ]
