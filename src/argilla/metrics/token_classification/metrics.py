@@ -11,9 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import warnings
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Set, Union
+
+import deprecated
 
 from argilla.client import api
 from argilla.metrics import helpers
@@ -359,14 +361,28 @@ def entity_capitalness(
     )
 
 
-def entity_consistency(
+@deprecated.deprecated(reason="Use `top_k_mentions` instead")
+def entity_consistency(*args, **kwargs):
+    message = "This function is not used anymore.\nYou should use the top_k_mentions function instead"
+    warnings.warn(
+        message=message,
+        category=DeprecationWarning,
+    )
+    return MetricSummary.new_summary(
+        data={},
+        visualization=lambda: helpers.empty_visualization(),
+    )
+
+
+def top_k_mentions(
     name: str,
     query: Optional[str] = None,
     compute_for: Union[str, ComputeFor] = Predictions,
-    mentions: int = 100,
+    k: int = 100,
     threshold: int = 2,
+    post_label_filter: Optional[Set[str]] = None,
 ):
-    """Computes the consistency for top entity mentions in the dataset.
+    """Computes the consistency for top k mentions in the dataset.
 
     Entity consistency defines the label variability for a given mention. For example, a mention `first` identified
     in the whole dataset as `Cardinal`, `Person` and `Time` is less consistent than a mention `Peter` identified as
@@ -378,41 +394,57 @@ def entity_consistency(
             `query string syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``
-        mentions: The number of top mentions to retrieve.
-        threshold: The entity variability threshold (must be greater or equal to 2).
+        k: The number of mentions to retrieve.
+        threshold: The entity variability threshold (must be greater or equal to 1).
+        post_label_filter: A set of labels used for filtering the results. This filter may affect to the expected
+        number of mentions
 
     Returns:
-        The summary entity capitalness distribution
+        The summary top k mentions distribution
 
     Examples:
         >>> from argilla.metrics.token_classification import entity_consistency
-        >>> summary = entity_consistency(name="example-dataset")
+        >>> summary = top_k_mentions(name="example-dataset")
         >>> summary.visualize()
     """
-    if threshold < 2:
-        # TODO: Warning???
-        threshold = 2
 
+    threshold = max(1, threshold)
     metric = api.active_api().compute_metric(
         name,
-        metric=f"{_check_compute_for(compute_for)}_entity_consistency",
+        metric=f"{_check_compute_for(compute_for)}_top_k_mentions_consistency",
         query=query,
-        size=mentions,
+        size=k,
         interval=threshold,
     )
-    mentions = [mention["mention"] for mention in metric.results["mentions"]]
-    entities = {}
 
+    filtered_mentions, mention_values = [], []
     for mention in metric.results["mentions"]:
+        entities = mention["entities"]
+        if post_label_filter:
+            entities = [
+                entity for entity in entities if entity["label"] in post_label_filter
+            ]
+        if entities:
+            mention["entities"] = entities
+            filtered_mentions.append(mention)
+            mention_values.append(mention["mention"])
+
+    entities = {}
+    for mention in filtered_mentions:
         for entity in mention["entities"]:
-            mentions_for_label = entities.get(entity["label"], [0] * len(mentions))
-            mentions_for_label[mentions.index(mention["mention"])] = entity["count"]
-            entities[entity["label"]] = mentions_for_label
+            label = entity["label"]
+            mentions_for_label = entities.get(label, [0] * len(filtered_mentions))
+            mentions_for_label[mention_values.index(mention["mention"])] = entity[
+                "count"
+            ]
+            entities[label] = mentions_for_label
 
     return MetricSummary.new_summary(
-        data=metric.results,
+        data={"mentions": filtered_mentions},
         visualization=lambda: helpers.stacked_bar(
-            x=mentions, y_s=entities, title=metric.description
+            x=mention_values,
+            y_s=entities,
+            title=metric.description,
         ),
     )
 

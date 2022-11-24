@@ -908,7 +908,7 @@ class DatasetForTokenClassification(DatasetBase):
             if record.annotation is None:
                 continue
 
-            doc = nlp(record.text)
+            doc = nlp.make_doc(record.text)
             entities = []
 
             for anno in record.annotation:

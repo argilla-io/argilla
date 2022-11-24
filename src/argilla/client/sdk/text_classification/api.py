@@ -58,6 +58,63 @@ def data(
         )
 
 
+def add_dataset_labeling_rule(
+    client: AuthenticatedClient,
+    name: str,
+    rule: LabelingRule,
+) -> Response[Union[LabelingRule, HTTPValidationError, ErrorMessage]]:
+    url = "{}/api/datasets/{name}/TextClassification/labeling/rules".format(
+        client.base_url, name=name
+    )
+
+    response = httpx.post(
+        url=url,
+        json={"query": rule.query, "labels": rule.labels},
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    return build_typed_response(response, LabelingRule)
+
+
+def update_dataset_labeling_rule(
+    client: AuthenticatedClient,
+    name: str,
+    rule: LabelingRule,
+) -> Response[Union[HTTPValidationError, ErrorMessage]]:
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}".format(
+        client.base_url, name=name, query=rule.query
+    )
+
+    response = httpx.patch(
+        url,
+        json={"labels": rule.labels},
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    return build_typed_response(response, LabelingRule)
+
+
+def delete_dataset_labeling_rule(
+    client: AuthenticatedClient,
+    name: str,
+    rule: LabelingRule,
+) -> Response[Union[LabelingRule, HTTPValidationError, ErrorMessage]]:
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}".format(
+        client.base_url, name=name, query=rule.query
+    )
+
+    httpx.delete(
+        url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+
 def fetch_dataset_labeling_rules(
     client: AuthenticatedClient,
     name: str,

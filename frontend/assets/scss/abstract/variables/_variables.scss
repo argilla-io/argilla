@@ -94,6 +94,7 @@ $info: palette(grey, 600);
 // Fonts
 //-----------
 $primary-font-family: "Inter", "Helvetica", "Arial", sans-serif;
+$secondary-font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
 $base-font-size: 14px;
 $base-line-height: 1.4em;
 
@@ -156,6 +157,9 @@ $swift-ease-in-out: all $swift-ease-in-out-duration;
 $swift-linear-duration: 0.15s !default;
 $swift-linear-timing-function: linear !default;
 $swift-linear: all $swift-linear-duration $swift-linear-timing-function !default;
+
+// topbar
+$topbarHeight: 56px;
 
 // sidebar
 $sidebarPanelWidth: 280px;

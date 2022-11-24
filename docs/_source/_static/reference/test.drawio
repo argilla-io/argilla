@@ -1,0 +1,65 @@
+<mxfile host="65bd71144e">
+    <diagram id="qSDN_Jdxk1-9vS5839MN" name="Page-1">
+        <mxGraphModel dx="1008" dy="993" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="583" pageHeight="413" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="6" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;fontFamily=inter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dinter;fontSize=18;strokeColor=#F8C0A7;" parent="1" source="6g5qlOxeHb8Cri41P2cF-1" target="5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="&lt;font face=&quot;inter&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=inter&quot; style=&quot;font-size: 18px&quot; color=&quot;#b83b32&quot;&gt;Predict&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="6">
+                    <mxGeometry x="-0.0667" y="-2" relative="1" as="geometry">
+                        <mxPoint y="-2" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="6g5qlOxeHb8Cri41P2cF-1" value="&lt;span style=&quot;background-color: rgb(255 , 103 , 95)&quot;&gt;&lt;font style=&quot;font-size: 18px&quot; color=&quot;#ffffff&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=inter&quot; face=&quot;inter&quot;&gt;ML Model&lt;/font&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF675F;fontColor=#333333;strokeColor=#B83B32;strokeWidth=1;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="80" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=inter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dinter;fontSize=18;strokeColor=#F8C0A7;curved=1;" parent="1" source="3" target="6g5qlOxeHb8Cri41P2cF-1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="&lt;font face=&quot;inter&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=inter&quot; style=&quot;font-size: 18px&quot; color=&quot;#b83b32&quot;&gt;Learn&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="4">
+                    <mxGeometry x="0.1059" y="-9" relative="1" as="geometry">
+                        <mxPoint x="16" y="-9" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="3" value="&lt;font face=&quot;inter&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=inter&quot; style=&quot;font-size: 18px&quot; color=&quot;#ffffff&quot;&gt;Labelled&lt;br&gt;Data&lt;/font&gt;" style="shape=datastore;whiteSpace=wrap;html=1;fillColor=#FF675F;strokeColor=#B83B32;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="160" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;fontFamily=inter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dinter;fontSize=18;strokeColor=#F8C0A7;" parent="1" source="5" target="7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="&lt;font face=&quot;inter&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=inter&quot; style=&quot;font-size: 18px&quot; color=&quot;#b83b32&quot;&gt;Filter&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="8">
+                    <mxGeometry x="-0.0545" y="-2" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="5" value="&lt;font style=&quot;font-size: 18px&quot; face=&quot;inter&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=inter&quot; color=&quot;#ffffff&quot;&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=inter&quot; style=&quot;font-size: 18px&quot;&gt;Prediction&lt;br&gt;&lt;/font&gt;Data&lt;/font&gt;" style="shape=datastore;whiteSpace=wrap;html=1;fillColor=#FF675F;strokeColor=#B83B32;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="70" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;fontFamily=inter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dinter;fontSize=18;strokeColor=#F8C0A7;" parent="1" source="7" target="9" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="&lt;font style=&quot;font-size: 18px&quot; color=&quot;#b83b32&quot; face=&quot;inter&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=inter&quot;&gt;Query&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="10">
+                    <mxGeometry x="-0.0286" y="2" relative="1" as="geometry">
+                        <mxPoint x="-2" y="-2" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="7" value="&lt;font face=&quot;inter&quot; color=&quot;#ffffff&quot;&gt;&lt;span style=&quot;font-size: 18px&quot;&gt;Uncertain Data&lt;/span&gt;&lt;/font&gt;" style="shape=datastore;whiteSpace=wrap;html=1;fillColor=#FF675F;strokeColor=#B83B32;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="260" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=inter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dinter;fontSize=18;strokeColor=#F8C0A7;" parent="1" source="9" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="&lt;font face=&quot;inter&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=inter&quot; style=&quot;font-size: 18px&quot; color=&quot;#b83b32&quot;&gt;Label&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FFFFFF;" parent="11" vertex="1" connectable="0">
+                    <mxGeometry x="-0.285" y="-3" relative="1" as="geometry">
+                        <mxPoint x="-8" y="-7" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="9" value="&lt;font color=&quot;#b83b32&quot;&gt;Oracles&lt;/font&gt;" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=#B83B32;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.users.users;fillColor=#FF675F;fontFamily=inter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dinter;fontSize=18;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="260" width="80" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

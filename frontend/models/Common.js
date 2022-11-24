@@ -31,6 +31,7 @@ class BaseRecord {
     status,
     selected,
     event_timestamp,
+    last_updated,
     search_keywords,
   }) {
     this.id = id;
@@ -40,6 +41,7 @@ class BaseRecord {
     this.status = status;
     this.selected = selected || false;
     this.event_timestamp = event_timestamp;
+    this.last_updated = last_updated;
     this.search_keywords = search_keywords || [];
   }
 

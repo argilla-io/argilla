@@ -17,7 +17,7 @@ from typing import Any, ClassVar, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 
-from argilla._constants import MAX_KEYWORD_LENGTH
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import (
     BaseLabelingRule,
     BaseRulesSummary,
@@ -88,9 +88,9 @@ class ClassPrediction(BaseModel):
     @validator("class_label")
     def check_label_length(cls, class_label):
         if isinstance(class_label, str):
-            assert 1 <= len(class_label) <= MAX_KEYWORD_LENGTH, (
-                f"Class name '{class_label}' exceeds max length of {MAX_KEYWORD_LENGTH}"
-                if len(class_label) > MAX_KEYWORD_LENGTH
+            assert 1 <= len(class_label) <= DEFAULT_MAX_KEYWORD_LENGTH, (
+                f"Class name '{class_label}' exceeds max length of {DEFAULT_MAX_KEYWORD_LENGTH}"
+                if len(class_label) > DEFAULT_MAX_KEYWORD_LENGTH
                 else f"Class name must not be empty"
             )
         return class_label

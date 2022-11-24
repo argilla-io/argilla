@@ -1,4 +1,16 @@
-- [NLP Tasks](./tasks/tasks): The tasks that Argilla can handle.
-    - [📕📗 TextClassification](./tasks/text_classification)
-    - [🈴🈯️ TokenClassification](./tasks/token_classification)
-    - [👨🏽💬 TextGeneration](./tasks/text_generation)
+## NLP Tasks
+````{grid}  1 1 3 3
+:class-container: tuto-section-2
+```{grid-item-card} 📕📗 TextClassification
+:link: ./tasks//text_classification.html
+
+```
+```{grid-item-card} 🈴🈯️ TokenClassification
+:link: ./tasks//token_classification.html
+
+```
+```{grid-item-card} 👨🏽💬 TextGeneration
+:link: ./tasks//text_generation.html
+
+```
+````

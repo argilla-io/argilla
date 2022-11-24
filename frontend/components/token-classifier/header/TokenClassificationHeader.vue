@@ -17,9 +17,7 @@
 
 <template>
   <div class="header__filters">
-    <filters-area :dataset="dataset" v-if="!dataset.viewSettings.visibleRulesList">
-      <records-counter :total="dataset.results.total"></records-counter>
-    </filters-area>
+    <filters-area :dataset="dataset" v-if="!dataset.viewSettings.visibleRulesList" />
     <entities-header :dataset="dataset" v-if="isWeakLabelingViewMode" />
     <global-actions :dataset="dataset">
       <validate-discard-action

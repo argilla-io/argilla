@@ -217,7 +217,8 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
 
     @staticmethod
     def mentions_metrics(
-        record: ServiceTokenClassificationRecord, mentions: List[Tuple[str, EntitySpan]]
+        record: ServiceTokenClassificationRecord,
+        mentions: List[Tuple[str, EntitySpan]],
     ):
         def mention_tokens_length(entity: EntitySpan) -> int:
             """Compute mention tokens length"""
@@ -252,7 +253,9 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
 
     @classmethod
     def build_tokens_metrics(
-        cls, record: ServiceTokenClassificationRecord, tags: Optional[List[str]] = None
+        cls,
+        record: ServiceTokenClassificationRecord,
+        tags: Optional[List[str]] = None,
     ) -> List[TokenMetrics]:
 
         return [
@@ -393,7 +396,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 description="Computes predicted mentions distribution against its labels",
             ),
             ServiceBaseMetric(
-                id="predicted_entity_consistency",
+                id="predicted_top_k_mentions_consistency",
                 name="Entity label consistency for predictions",
                 description="Computes entity label variability for top-k predicted entity mentions",
             ),
@@ -433,7 +436,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 description="Computes annotated mentions distribution against its labels",
             ),
             ServiceBaseMetric(
-                id="annotated_entity_consistency",
+                id="annotated_top_k_mentions_consistency",
                 name="Entity label consistency for annotations",
                 description="Computes entity label variability for top-k annotated entity mentions",
             ),

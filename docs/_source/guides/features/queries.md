@@ -48,7 +48,7 @@ You can see how the `text.exact` field can be used to search in a more fine-grai
 
 ### TextClassificationRecord's `inputs`
 
-For [text classification records](../python/python_client.rst#argilla.client.models.TextClassificationRecord) you can take advantage of the multiple `inputs` when performing a search.
+For [text classification records](../../reference/python/python_client.rst) you can take advantage of the multiple `inputs` when performing a search.
 For example, if we uploaded records with `inputs={"subject": ..., "body": ...}`, you can direct your searches to only one of those inputs by specifying the `inputs.subject` or `inputs.body` field in your query.
 So to look for records in which the *subject* contains the word *news*, you would search for
 
@@ -150,8 +150,8 @@ For instance, to search for *"(1+1)=2"* you need to write:
 
 This is a table with available fields that you can use in your query string:
 
-| Field name                               | Description                           | TextClass.                                 | TokenClass.                                 | Text2Text                                   |
-|------------------------------------------|---------------------------------------|--------------------------------------------|---------------------------------------------|---------------------------------------------|
+| Field name                               | Description                           | TextClass.                                  | TokenClass.                                 | TextGen.                                    |
+| ---------------------------------------- | ------------------------------------- | ------------------------------------------- | ------------------------------------------- | ------------------------------------------- |
 | annotated_as                             | annotation                            | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
 | annotated_by                             | annotation agent                      | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
 | event_timestamp                          | timestamp                             | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
@@ -165,29 +165,29 @@ This is a table with available fields that you can use in your query string:
 | status                                   | status                                | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
 | text                                     | text, standard analyzer               | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
 | text.exact                               | text, whitespace analyzer             | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
-| tokens                                   | tokens                                |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| -                                        | -                                     | -                                          | -                                           | -                                           |
+| tokens                                   | tokens                                |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| -                                        | -                                     | -                                           | -                                           | -                                           |
 | metrics.text_lengt                       | Input text length                     | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
-| metrics.tokens.idx                       | Token idx in record                   |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.tokens.value                     | Text of the token                     |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.tokens.char_start                | Start char idx of token               |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.tokens.char_end                  | End char idx of token                 |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.annotated.mentions.value         | Text of the mention (annotation)      |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.annotated.mentions.label         | Label of the mention (annotation)     |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.annotated.mentions.score         | Score of the mention (annotation)     |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.annotated.mentions.capitalness   | Mention capitalness (annotation)      |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.annotated.mentions.density       | Local mention density (annotation)    |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.annotated.mentions.tokens_length | Mention length in tokens (annotation) |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.annotated.mentions.chars_length  | Mention length in chars (annotation)  |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.annotated.tags.value             | Text of the token (annotation)        |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.annotated.tags.tag               | IOB tag (annotation)                  |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.predicted.mentions.value         | Text of the mention (prediction)      |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.predicted.mentions.label         | Label of the mention (prediction)     |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.predicted.mentions.score         | Score of the mention (prediction)     |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.predicted.mentions.capitalness   | Mention capitalness (prediction)      |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.predicted.mentions.density       | Local mention density (prediction)    |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.predicted.mentions.tokens_length | Mention length in tokens (prediction) |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.predicted.mentions.chars_length  | Mention length in chars (prediction)  |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.predicted.tags.value             | Text of the token (prediction)        |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
-| metrics.predicted.tags.tag               | IOB tag (prediction)                  |                                            | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.tokens.idx                       | Token idx in record                   |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.tokens.value                     | Text of the token                     |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.tokens.char_start                | Start char idx of token               |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.tokens.char_end                  | End char idx of token                 |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.annotated.mentions.value         | Text of the mention (annotation)      |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.annotated.mentions.label         | Label of the mention (annotation)     |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.annotated.mentions.score         | Score of the mention (annotation)     |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.annotated.mentions.capitalness   | Mention capitalness (annotation)      |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.annotated.mentions.density       | Local mention density (annotation)    |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.annotated.mentions.tokens_length | Mention length in tokens (annotation) |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.annotated.mentions.chars_length  | Mention length in chars (annotation)  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.annotated.tags.value             | Text of the token (annotation)        |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.annotated.tags.tag               | IOB tag (annotation)                  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.predicted.mentions.value         | Text of the mention (prediction)      |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.predicted.mentions.label         | Label of the mention (prediction)     |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.predicted.mentions.score         | Score of the mention (prediction)     |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.predicted.mentions.capitalness   | Mention capitalness (prediction)      |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.predicted.mentions.density       | Local mention density (prediction)    |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.predicted.mentions.tokens_length | Mention length in tokens (prediction) |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.predicted.mentions.chars_length  | Mention length in chars (prediction)  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.predicted.tags.value             | Text of the token (prediction)        |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
+| metrics.predicted.tags.tag               | IOB tag (prediction)                  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
 

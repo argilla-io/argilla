@@ -9,7 +9,7 @@ Development setup
 -----------------
 
 To set up your system for *Argilla* development, you first of all have to
-`fork <https://guides.github.com/activities/forking/>`_ our `repository <https://github.com/recognai/rubrix>`_
+`fork <https://guides.github.com/activities/forking/>`_ our `repository <https://github.com/argilla-io/argilla>`_
 and clone the fork to your computer:
 
 .. code-block:: bash
@@ -76,3 +76,9 @@ Then go to the `docs` folder in your cloned repo and execute the ``make`` comman
     make html
 
 This will create a ``_build/html`` folder in which you can find the ``index.html`` file of the documentation.
+
+Alternatively, you can use install and `sphinx-autobuild` to continuously deploy the webpage using the following command:
+
+.. code-block:: bash
+
+    sphinx-autobuild docs/_source docs/_build/html

@@ -3,7 +3,7 @@
 This guide explains how to launch the Elasticsearch backend and Argilla Server using `docker`. Please check the setup and installation section to understand other options.
 
 (setting-up-elasticsearch-via-docker)=
-## Setting up Elasticsearch
+## Elasticsearch
 
 Setting up Elasticsearch (ES) via docker is straightforward.
 Simply run the following command:
@@ -39,7 +39,7 @@ For more details about the ES installation with docker, see their [official docu
 For MacOS and Windows, Elasticsearch also provides [homebrew formulae](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/brew.html) and a [msi package](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/windows.html), respectively.
 We recommend ES version 7.10 to work with Argilla.
 
-## Launching Argilla Server and UI
+## Argilla Server and UI
 
 You can use vanilla docker to run our image of Argilla Server.
 First, pull the image from the [Docker Hub](https://hub.docker.com/):

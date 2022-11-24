@@ -2,14 +2,14 @@ version: "3"
 
 services:
   argilla:
-    image: argilla-io/argilla-server:latest
+    image: argilla/argilla-server:latest
     restart: unless-stopped
     ports:
       - "6900:80"
     environment:
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
       # ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
-    # volumes:
+      # volumes:
       #- ${PWD}/.users.yaml:/config/.users.yaml
     networks:
       - argilla

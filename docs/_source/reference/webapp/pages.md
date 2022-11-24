@@ -51,7 +51,7 @@ You can find more information about how to use the search bar in our detailed [s
 
 
 The _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters.
-You can find more information about how to use the filters in our detailed [filter guide](filter_records.md).
+You can find more information about how to use the filters in our detailed [filter guide](./features.md).
 
 
 ### Record cards
@@ -83,12 +83,12 @@ At the top of the record list you will find a legend that connects the colors to
 When in [Annotate mode](#modes) you can remove annotations or add new ones by simply selecting the desired text.
 
 ```{hint}
-When using the [score filter](filter_records.md#predictions-filter), the predictions that do **not** fall in the selected range will be missing the solid thin line.
+When using the [score filter](./features.md), the predictions that do **not** fall in the selected range will be missing the solid thin line.
 ```
 
-#### Text2Text
+#### TextGeneration
 
-![Text2Text view](../../_static/reference/webapp/explore-text2text.png)
+![TextGeneration view](../../_static/reference/webapp/explore-textgeneration.png)
 
 In this task predictions and the annotation are given in a text field below the input text.
 You can switch between prediction and annotation via the "_View annotation_"/"_View predictions_" buttons.
@@ -120,11 +120,11 @@ There are three different kind of _metrics_:
 
 - **Progress**: see metrics of your annotation process, like its progress and the label distribution (only visible in the _Explore_ and _Annotate_ mode)
 - **Overall rule metrics**: see aggregated metrics about your defined rules (only visible in the _Define rules_ mode)
-- **Stats**: check the keywords of your dataset (text classification, text2text) or the mentions of your annotations and predictions (token classification)
+- **Stats**: check the keywords of your dataset (text classification, text generation) or the mentions of your annotations and predictions (token classification)
 
 You can find more information about each metric in our dedicated [metrics guide](view_dataset_metrics.md).
 
 #### Refresh
 
 This button allows you to refresh the list of the record cards with respect to the activated filters.
-For example, if you are annotating and use the [Status filter](filter_records.md#status-filter) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.
+For example, if you are annotating and use the [Status filter](./features.md) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.

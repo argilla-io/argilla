@@ -260,7 +260,10 @@ class TestDatasetForTextClassification:
             "metrics",
         ]
         assert dataset_ds.features["prediction"] == [
-            {"label": datasets.Value("string"), "score": datasets.Value("float64")}
+            {
+                "label": datasets.Value("string"),
+                "score": datasets.Value("float64"),
+            }
         ]
 
         dataset = ar.DatasetForTextClassification.from_datasets(dataset_ds)

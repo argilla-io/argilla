@@ -15,7 +15,7 @@
 import pytest
 from pydantic import ValidationError
 
-from argilla._constants import MAX_KEYWORD_LENGTH
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationAnnotation,
     TextClassificationQuery,
@@ -161,7 +161,7 @@ def test_too_long_metadata():
         }
     )
 
-    assert len(record.metadata["too_long"]) == MAX_KEYWORD_LENGTH
+    assert len(record.metadata["too_long"]) == DEFAULT_MAX_KEYWORD_LENGTH
 
 
 def test_too_long_label():

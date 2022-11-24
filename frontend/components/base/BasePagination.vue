@@ -95,7 +95,7 @@
             : paginationSize * currentPage
         }}
       </strong>
-      of {{ paginableTotalItems | formatNumber }}
+      of {{ paginableTotalItems | formatNumber }} records
     </div>
   </div>
 </template>
@@ -194,14 +194,13 @@ export default {
       this.showOptions = false;
     },
     keyDown(event) {
+      const arrowRight = event.keyCode === 39;
+      const arrowLeft = event.keyCode === 37;
       if (!this.paginationSettings.disabledShortCutPagination) {
-        const elem = document.querySelector("body");
-        if (elem === document.activeElement) {
-          if (event.keyCode === 39) {
-            this.nextPage();
-          } else if (event.keyCode === 37) {
-            this.prevPage();
-          }
+        if (arrowRight) {
+          this.nextPage();
+        } else if (arrowLeft) {
+          this.prevPage();
         }
       }
     },
