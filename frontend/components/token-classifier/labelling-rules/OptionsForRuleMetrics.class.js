@@ -30,8 +30,8 @@ export default class OptionsForRuleMetrics {
         mainValue: this.#formatToPercent(this.#coverage),
         subValue: this.#formatToFraction(this.#coverage, this.#totalRecords),
         tooltip: {
-          tooltipMessage: "tooltip 1",
-          tooltipDirection: "right",
+          tooltipMessage: "Percentage of records labeled by the rule",
+          tooltipDirection: "top",
         },
       },
       {
@@ -43,8 +43,8 @@ export default class OptionsForRuleMetrics {
           this.#annotatedRecords
         ),
         tooltip: {
-          tooltipMessage: "tooltip 2",
-          tooltipDirection: "left",
+          tooltipMessage: "Percentage of annotated records labeled by the rule",
+          tooltipDirection: "top",
         },
       },
     ];
