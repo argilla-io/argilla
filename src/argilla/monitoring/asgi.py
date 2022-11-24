@@ -40,7 +40,7 @@ from argilla.client.models import (
 )
 
 _logger = logging.getLogger(__name__)
-_spaces_regex = re.compile(r"\s+")
+_default_tokenization_pattern = re.compile(r"\W+")
 
 
 def token_classification_mapper(inputs, outputs):
@@ -53,7 +53,7 @@ def token_classification_mapper(inputs, outputs):
     tokens = outputs.get("tokens") if isinstance(outputs, dict) else None
     return TokenClassificationRecord(
         text=text,
-        tokens=tokens or _spaces_regex.split(text),
+        tokens=tokens or _default_tokenization_pattern.split(text),
         prediction=[
             (entity["label"], entity["start"], entity["end"])
             for entity in (
