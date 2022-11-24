@@ -29,6 +29,10 @@ For multi-label classification tasks, you can also annotate a record with no lab
 
 Once a record is annotated, it will be marked as _Validated_ in the upper right corner of the record card.
 
+```{note}
+When the dataset contains a large list of labels (10 +) we encourage viewing the record one by one (from the footer) and using the arrow keys to move quickly to the next record.
+```
+
 #### Token Classification
 
 
@@ -198,10 +202,6 @@ The way they are presented in the Argilla UI depends on the [task](../../guides/
 In this task the predictions are given as tags below the input text.
 They contain the label as well as a percentage score.
 Annotations are shown as tags on the right together with a symbol indicating if the predictions match the annotations or not.
-
-```{note}
-When the dataset contains a large list of labels (10 +) we encourage viewing the record one by one (from the footer) and using the arrow keys to move quickly to the next record.
-```
 
 #### Token classification
 
