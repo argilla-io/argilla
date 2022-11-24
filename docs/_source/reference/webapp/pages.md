@@ -55,7 +55,7 @@ You can find more information about how to use the filters in our detailed [filt
 
 #### Info button
 
-On the right side of the filters, the info button can be used to open a small overlay window. The aim is to provide the user with a shortcut to related information specific to the current view. This button appears when extra help is considered useful. (e.g. model explanation, weal labeling...).
+On the right side of the filters, the info button can be used to open a small overlay window. The aim is to provide the user with a shortcut to related information specific to the current view. This button appears when extra help is considered useful. (e.g. model explanation, weak labeling...).
 
 ### Record cards
 
