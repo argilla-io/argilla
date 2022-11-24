@@ -199,6 +199,10 @@ In this task the predictions are given as tags below the input text.
 They contain the label as well as a percentage score.
 Annotations are shown as tags on the right together with a symbol indicating if the predictions match the annotations or not.
 
+```{note}
+When the dataset contains a large list of labels (10 +) we encourage viewing the record one by one (from the footer) and using the arrow keys to move quickly to the next record.
+```
+
 #### Token classification
 
 
