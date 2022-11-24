@@ -5,7 +5,7 @@
         class="chip"
         :for="chip.id"
         v-text="chip.text"
-        :class="[chip.is_activate ? 'activate' : 'not-activate']"
+        :class="[colorClass(chip.color_id), chip.is_activate ? 'activate' : 'not-activate']"
         @click="onChipsSelect(chip)"
       />
       <input :id="chip.id" type="checkbox" v-model="chip.is_activate" />
@@ -35,6 +35,9 @@ export default {
     onChipsSelect({ id, dataset_id }) {
       this.$emit("on-chips-select", { id, dataset_id });
     },
+    colorClass(color) {
+      return `color_${color}`
+    }
   },
 };
 </script>
@@ -44,7 +47,7 @@ export default {
   flex: 1;
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: $base-space;
   &__items {
     display: inline-flex;
   }
@@ -55,26 +58,18 @@ export default {
   align-items: center;
   padding-inline: 1em;
   border: none;
-  min-height: 50px;
+  min-height: 40px;
   min-width: 100px;
-  border-radius: 8px;
+  border-radius: $border-radius-m;
   cursor: pointer;
   user-select: none;
+  @include font-size(13px);
+  font-weight: 600;
 }
 
 input[type="checkbox"] {
   display: none;
 }
-.activate {
-  color: white;
-  background-color: #4c4ea3;
-}
-
-.not-activate {
-  color: black;
-  background-color: #e0e1ff;
-}
-
 .chips__items {
   transition: all 1s;
 }
@@ -84,5 +79,26 @@ input[type="checkbox"] {
 }
 .chips-leave-active {
   position: absolute;
+}
+
+// ner colors
+
+$colors: 50;
+$hue: 360;
+@for $i from 1 through $colors {
+  $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
+  .color_#{$i - 1} {
+    color: darken($rcolor, 60%);
+    border: $rcolor 3px solid;
+    transition: background 0.3s ease-in-out;
+    &:hover {
+      background: mix(white, $rcolor, 80%);
+      transition: background 0.3s ease-in;
+    }
+    &.activate {
+      background: $rcolor;
+      border: darken($rcolor, 15%) 3px solid;
+    }
+  }
 }
 </style>
