@@ -27,6 +27,7 @@
           :numberOfRecords="numberOfRecords"
           :numberOfRulesInDataset="numberOfRulesInDataset"
           :isSaveRulesBtnDisabled="isSaveRulesBtnDisabled"
+          :isCancelBtnDisabled="isCancelBtnDisabled"
           :isRuleAlreadySaved="isRuleAlreadySaved"
           @on-search-entity="(value) => (searchEntity = value)"
           @on-select-global-entity="updateSelectedEntity"
@@ -188,17 +189,25 @@ export default {
           .first() || {}
       );
     },
+    isSelectedGlobalEntity() {
+      return !_.isNil(this.selectedGlobalEntity);
+    },
+    isinitialSelectedGlobalEntity() {
+      return !_.isNil(this.initialSelectedEntity);
+    },
     isNoInitialSelectedEntityAndNoSelectedGlobalEntity() {
-      return !this.initialSelectedEntity && !this.selectedGlobalEntity;
+      return (
+        !this.isinitialSelectedGlobalEntity && !this.isSelectedGlobalEntity
+      );
     },
     isNoInitialSelectedEntityAndIsSelectedGlobalEntity() {
-      return !this.initialSelectedEntity && !!this.selectedGlobalEntity;
+      return !this.isinitialSelectedGlobalEntity && this.isSelectedGlobalEntity;
     },
     isInitialSelectedEntityAndIsNoSelectedGlobalEntity() {
-      return !!this.initialSelectedEntity && !this.selectedGlobalEntity;
+      return this.isinitialSelectedGlobalEntity && !this.isSelectedGlobalEntity;
     },
     isInitialSelectedEntityAndIsSelectedGlobalEntity() {
-      return !!this.initialSelectedEntity && !!this.selectedGlobalEntity;
+      return this.isinitialSelectedGlobalEntity && this.isSelectedGlobalEntity;
     },
 
     isSaveRulesBtnDisabled() {
@@ -219,6 +228,9 @@ export default {
         }
       }
       return false;
+    },
+    isCancelBtnDisabled() {
+      return !this.isSelectedGlobalEntity;
     },
     isGlobalEntities() {
       return this.initialGlobalEntities.length > 0;
@@ -242,7 +254,7 @@ export default {
       );
     },
     isRuleAlreadySaved() {
-      if (!_.isNil(this.initialSelectedEntity)) {
+      if (this.isinitialSelectedGlobalEntity) {
         return (
           this.initialSelectedEntity.text ===
           (this.selectedGlobalEntity?.text || this.initialSelectedEntity.text)

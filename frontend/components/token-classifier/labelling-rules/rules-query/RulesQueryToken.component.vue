@@ -36,15 +36,27 @@
         This query with this label is already saved as rule
       </p>
       <div class="rule-query-token__buttons" v-else>
-        <base-button class="primary" @click="onClickSaveRule" :disabled="isSaveRulesBtnDisabled">
+        <base-button
+          class="primary"
+          @click="onClickSaveRule"
+          :disabled="isSaveRulesBtnDisabled"
+        >
           Save Rule
         </base-button>
-        <base-button class="primary outline" @click="onClickCancel" :disabled="isCancelBtnDisable">
+        <base-button
+          class="primary outline"
+          @click="onClickCancel"
+          :disabled="isCancelBtnDisabled"
+        >
           Cancel
         </base-button>
       </div>
       <div class="manage-rules-btn">
-        <base-button class="primary light" @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
+        <base-button
+          class="primary light"
+          @click="onClickViewRules"
+          :disabled="isManagedRulesBtnDisabled"
+        >
           {{ viewRulesBtnLabel }}
         </base-button>
       </div>
@@ -97,7 +109,11 @@
     </div>
     <div class="if-there-is-no-query__footer">
       <div class="manage-rules-btn">
-        <base-button class="primary light" @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
+        <base-button
+          class="primary light"
+          @click="onClickViewRules"
+          :disabled="isManagedRulesBtnDisabled"
+        >
           {{ viewRulesBtnLabel }}
         </base-button>
       </div>
@@ -144,11 +160,11 @@ export default {
       type: Boolean,
       default: false,
     },
-    isCancelBtnDisable: {
-      type: Boolean,
-      default: false,
-    },
     isSaveRulesBtnDisabled: {
+      type: Boolean,
+      required: true,
+    },
+    isCancelBtnDisabled: {
       type: Boolean,
       required: true,
     },
@@ -317,7 +333,6 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 2em;
     .manage-rules-btn {
       min-width: 8em;
     }
