@@ -35,18 +35,18 @@
       <p class="rule-is-already-saved" v-if="isRuleAlreadySaved">
         This query with this label is already saved as rule
       </p>
-      <div class="save-rule-or-cancel-btns" v-else>
-        <button @click="onClickCancel" :disabled="isCancelBtnDisable">
+      <div class="rule-query-token__buttons" v-else>
+        <base-button class="primary" @click="onClickSaveRule" :disabled="isSaveRulesBtnDisabled">
+          Save Rule
+        </base-button>
+        <base-button class="primary outline" @click="onClickCancel" :disabled="isCancelBtnDisable">
           Cancel
-        </button>
-        <button @click="onClickSaveRule" :disabled="isSaveRulesBtnDisabled">
-          Save Rules
-        </button>
+        </base-button>
       </div>
       <div class="manage-rules-btn">
-        <button @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
+        <base-button class="primary light" @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
           {{ viewRulesBtnLabel }}
-        </button>
+        </base-button>
       </div>
     </div>
   </CardComponent>
@@ -97,9 +97,9 @@
     </div>
     <div class="if-there-is-no-query__footer">
       <div class="manage-rules-btn">
-        <button @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
+        <base-button class="primary light" @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
           {{ viewRulesBtnLabel }}
-        </button>
+        </base-button>
       </div>
     </div>
   </CardComponent>
@@ -321,6 +321,11 @@ export default {
     .manage-rules-btn {
       min-width: 8em;
     }
+  }
+  &__buttons {
+    display: flex;
+    align-items: center;
+    gap: $base-space;
   }
 }
 
