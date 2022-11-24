@@ -1,6 +1,10 @@
 <template>
-  <div class="rules-metric-token" :style="cssVars">
-    <h2 class="rule-metrics__title">{{ title }}</h2>
+  <div
+    class="rules-metric-token"
+    :class="`rules-metric-token--${rulesMetricType}`"
+    :style="cssVars"
+  >
+    <h2 class="rules-metric-token__title">{{ title }}</h2>
     <div class="rules-metric-token__metrics" v-if="subcardInputs">
       <div
         class="subcard"
@@ -8,11 +12,10 @@
         :key="id"
       >
         <TooltipComponent
-          class="title"
           :message="tooltip.tooltipMessage"
           :direction="tooltip.tooltipDirection"
         >
-          <h3 class="subcard__items">
+          <h3 class="rules-metric-token__subtitle">
             {{ label }}
           </h3>
         </TooltipComponent>
@@ -43,27 +46,10 @@ export default {
       type: Number,
       default: () => 2,
     },
-    backgroundColor: {
+    rulesMetricType: {
       type: String,
-      default: () => "#0508D9",
-    },
-    backgroundSubcardColor: {
-      type: String,
-      default: function () {
-        return this.backgroundColor;
-      },
-    },
-    textColor: {
-      type: String,
-      default: () => "white",
-    },
-    textSubcardColor: {
-      type: String,
-      default: () => "black",
-    },
-    borderColor: {
-      type: String,
-      default: () => "black",
+      default: "info",
+      validator: (value) => ["info", "warning", "error"].includes(value),
     },
     btnLabel: {
       type: String,
@@ -80,10 +66,6 @@ export default {
       return {
         "--number-of-rows": this.numberOfRows,
         "--number-of-columns": this.numberOfColumns,
-        "--text-color": this.textColor,
-        "--background-color": this.backgroundColor,
-        "--text-subcard-color": this.textSubcardColor,
-        "--border-color": this.borderColor,
       };
     },
   },
@@ -91,26 +73,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-* {
-  margin: inherit;
-}
-
 .rules-metric-token {
+  $this: &;
   display: flex;
   flex-direction: column;
   flex-basis: 30em;
   padding: 2em;
-  gap: 3em;
-  color: var(--text-color);
-  background-color: var(--background-color);
+  gap: 1em;
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border-width: 1px;
+  border-style: solid;
   &__title {
     padding-bottom: 0;
     margin-top: 0;
     @include font-size(22px);
     line-height: 22px;
-    font-weight: bold;
+    font-weight: 600;
+  }
+  &__subtitle {
+    font-weight: 400;
+    margin-bottom: 0.2em;
+    display: inline-flex;
   }
   &__metrics {
     display: grid;
@@ -123,19 +106,37 @@ export default {
       border-radius: 10px;
       gap: 5px;
       color: var(--text-subcard-color);
-      .title {
-        flex: 1;
-      }
       .subcard__items {
-        &:first-child {
-          font-weight: bold;
+        &:nth-child(1) {
+          font-weight: lighter;
           margin-bottom: 0;
-          margin: inherit;
         }
         &:nth-child(2) {
+          @include font-size(20px);
           font-weight: bold;
           font-weight: 600;
         }
+      }
+    }
+  }
+  // info type of card
+  &--info {
+    background: $black-4;
+    color: $black-54;
+    border-color: $black-4;
+    border-radius: $border-radius-m;
+    #{$this}__title {
+      padding-bottom: 0;
+      @include font-size(18px);
+      margin-top: 0;
+    }
+    #{$this}__subtitle {
+      @include font-size(14px);
+      color: $black-37;
+    }
+    .subcard__items {
+      &:nth-child(1) {
+        color: $black-37;
       }
     }
   }
