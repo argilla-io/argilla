@@ -7,7 +7,7 @@
     <div class="rule-query-token__title-area">
       <h2 class="title">{{ title }}</h2>
       <span class="rule-query-token__records-number" v-if="recordLength">
-        Records ({{ recordLength }})
+        {{ RECORDS }} ({{ recordLength }})
       </span>
     </div>
     <div class="rule-query-token__search">
@@ -38,14 +38,14 @@
           @click="onClickSaveRule"
           :disabled="isSaveRulesBtnDisabled"
         >
-          Save Rule
+          {{ SAVE_RULE }}
         </base-button>
         <base-button
           class="primary outline"
           @click="onClickCancel"
           :disabled="isCancelBtnDisabled"
         >
-          Cancel
+          {{ CANCEL }}
         </base-button>
       </div>
       <div class="" v-else>
@@ -71,16 +71,15 @@
   >
     <div class="if-there-is-no-global-entities__content">
       <div class="text-wrapper">
-        <p class="title">This doesn't have any labels yet.</p>
+        <p class="title">{{ NO_LABEL_YET }}</p>
         <div class="show-what-to-do-text">
           <p class="item">
-            To create a new rules you need at least two labels. It's highly
-            recommended to also annotate some records with these lavels.
+            {{ CREATE_NEW_RULE_DESC }}
           </p>
           <p class="item">
-            Go to the annotation mode to
+            {{ GO_TO_ANNOTATION_MODE }}
             <a href="#" @click.prevent="onClickGoToAnnotationMode">
-              create the labels and annotate some records
+              {{ CREATE_LABELS_AND_ANNOTATE_SOME_RECORDS }}
             </a>
           </p>
         </div>
@@ -114,7 +113,7 @@
           />
         </div>
         <p class="show-what-to-do-text">
-          Create a new rule writting your query in the search box
+          {{ CREATE_A_NEW_RULE_IN_SEARCH_BOX }}
         </p>
       </div>
     </div>
@@ -135,6 +134,7 @@
 <script>
 import ChipsComponent from "./Chips.component.vue";
 import CardComponent from "@/components/base/card/Card.component.vue";
+import { PROPERTIES } from "../labellingRules.properties";
 
 export default {
   name: "RulesQueryToken",
@@ -199,6 +199,16 @@ export default {
   data() {
     return {
       searchEntity: "",
+      RECORDS: PROPERTIES.RECORDS,
+      SAVE_RULE: PROPERTIES.SAVE_RULE,
+      CANCEL: PROPERTIES.CANCEL,
+      NO_LABEL_YET: PROPERTIES.NO_LABEL_YET,
+      CREATE_NEW_RULE_DESC: PROPERTIES.CREATE_NEW_RULE_DESC,
+      GO_TO_ANNOTATION_MODE: PROPERTIES.GO_TO_ANNOTATION_MODE,
+      CREATE_LABELS_AND_ANNOTATE_SOME_RECORDS:
+        PROPERTIES.CREATE_LABELS_AND_ANNOTATE_SOME_RECORDS,
+      CREATE_A_NEW_RULE_IN_SEARCH_BOX:
+        PROPERTIES.CREATE_A_NEW_RULE_IN_SEARCH_BOX,
     };
   },
   computed: {

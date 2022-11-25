@@ -34,6 +34,7 @@
 import RulesMetricsToken from "./rules-metric/RulesMetricToken.component.vue";
 import RulesQueryToken from "./rules-query/RulesQueryToken.component.vue";
 import OptionsForRuleMetrics from "./OptionsForRuleMetrics.class";
+import { PROPERTIES } from "./labellingRules.properties";
 
 export default {
   name: "RuleDefinitionToken",
@@ -60,6 +61,7 @@ export default {
     },
     ruleStatus: {
       type: String || null,
+      default: () => null,
     },
     filteredEntities: {
       type: Array,
@@ -77,13 +79,9 @@ export default {
     return {
       OptionsForRuleMetrics: null,
       options: [],
-      RULE_STATUS: {
-        ALREADY_SAVED: "ALREADY_SAVED",
-        IS_SAVED: "IS_SAVED",
-      },
-      RULE_IS_ALREADY_SAVED:
-        "This query with this label is already saved as rule",
-      RULE_IS_SAVED: "The rule was saved",
+      RULE_STATUS: PROPERTIES.RULE_STATUS,
+      RULE_IS_ALREADY_SAVED: PROPERTIES.RULE_IS_ALREADY_SAVED,
+      RULE_IS_SAVED: PROPERTIES.RULE_IS_SAVED,
       initialParamsForInstance: {
         coverage: null,
         coverageAnnotated: null,

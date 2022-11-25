@@ -75,6 +75,7 @@ import {
   TokenRuleAnnotation as RuleAnnotationModel,
 } from "../../../models/token-classification/TokenRuleAnnotation.modelTokenClassification";
 import DatasetViewSettings from "../../../models/DatasetViewSettings";
+import { PROPERTIES } from "../labelling-rules/labellingRules.properties";
 
 export default {
   props: {
@@ -90,10 +91,7 @@ export default {
       initialSelectedEntity: null,
       selectedGlobalEntity: null,
       ruleIsSaved: false,
-      RULE_STATUS: {
-        ALREADY_SAVED: "ALREADY_SAVED",
-        IS_SAVED: "IS_SAVED",
-      },
+      RULE_STATUS: PROPERTIES.RULE_STATUS,
     };
   },
   async mounted() {
