@@ -8,7 +8,7 @@ export default {
   props: {
     textColor: {
       type: String,
-      default: () => "#000",
+      default: () => "#4D4D4D",
     },
     backgroundColor: {
       type: String,

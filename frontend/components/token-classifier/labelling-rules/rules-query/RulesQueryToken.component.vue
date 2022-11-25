@@ -6,8 +6,8 @@
   >
     <div class="rule-query-token__title-area">
       <h2 class="title">{{ title }}</h2>
-      <span v-if="recordLength">
-        Records: <b>{{ recordLength }}</b>
+      <span class="rule-query-token__records-number" v-if="recordLength">
+        Records ({{ recordLength }})
       </span>
     </div>
     <div class="rule-query-token__search">
@@ -185,7 +185,7 @@ export default {
     },
     textColor: {
       type: String,
-      default: () => "#000",
+      default: () => "#4D4D4D",
     },
     backgroundColor: {
       type: String,
@@ -360,6 +360,9 @@ export default {
     .manage-rules-btn {
       min-width: 8em;
     }
+  }
+  &__records-number {
+    color: $black-37;
   }
   &__buttons {
     display: flex;
