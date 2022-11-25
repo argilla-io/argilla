@@ -367,6 +367,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
     .manage-rules-btn {
       min-width: 8em;
     }
