@@ -32,10 +32,7 @@
       <ChipsComponent :chips="entities" @on-chips-select="onChipsSelection" />
     </div>
     <div class="rule-query-token__footer">
-      <p class="rule-is-already-saved" v-if="isRuleAlreadySaved">
-        This query with this label is already saved as rule
-      </p>
-      <div class="rule-query-token__buttons" v-else>
+      <div class="rule-query-token__buttons" v-if="showButtons">
         <base-button
           class="primary"
           @click="onClickSaveRule"
@@ -50,6 +47,11 @@
         >
           Cancel
         </base-button>
+      </div>
+      <div class="" v-else>
+        <p class="rule-is-already-saved">
+          {{ message }}
+        </p>
       </div>
       <div class="manage-rules-btn">
         <base-button
@@ -86,7 +88,11 @@
     </div>
     <div class="if-there-is-no-query__footer">
       <div class="manage-rules-btn">
-        <base-button class="primary light" @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
+        <base-button
+          class="primary light"
+          @click="onClickViewRules"
+          :disabled="isManagedRulesBtnDisabled"
+        >
           {{ viewRulesBtnLabel }}
         </base-button>
       </div>
@@ -100,7 +106,12 @@
     <div class="if-there-is-no-query__item">
       <div class="text-wrapper">
         <div class="label-icon">
-          <svgicon name="weak-labeling" color="#666666" width="30" height="30" />
+          <svgicon
+            name="weak-labeling"
+            color="#666666"
+            width="30"
+            height="30"
+          />
         </div>
         <p class="show-what-to-do-text">
           Create a new rule writting your query in the search box
@@ -144,8 +155,12 @@ export default {
       type: Array,
       required: true,
     },
-    isRuleAlreadySaved: {
+    showButtons: {
       type: Boolean,
+      required: true,
+    },
+    message: {
+      type: String,
       required: true,
     },
     recordLength: {
@@ -243,7 +258,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .if-there-is-no-global-entities {
   display: flex;
   flex-direction: column;
@@ -261,7 +275,7 @@ export default {
       flex-direction: column;
       .title {
         @include font-size(18px);
-        color: $black-54
+        color: $black-54;
       }
       .item {
         margin-bottom: 0;
@@ -299,7 +313,7 @@ export default {
       }
       .show-what-to-do-text {
         @include font-size(18px);
-        color: $black-54
+        color: $black-54;
       }
     }
   }

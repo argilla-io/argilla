@@ -28,7 +28,7 @@
           :numberOfRulesInDataset="numberOfRulesInDataset"
           :isSaveRulesBtnDisabled="isSaveRulesBtnDisabled"
           :isCancelBtnDisabled="isCancelBtnDisabled"
-          :isRuleAlreadySaved="isRuleAlreadySaved"
+          :ruleStatus="ruleStatus"
           @on-search-entity="(value) => (searchEntity = value)"
           @on-select-global-entity="updateSelectedEntity"
           @on-saving-rule="savingRule"
@@ -89,6 +89,11 @@ export default {
       initialGlobalEntities: [],
       initialSelectedEntity: null,
       selectedGlobalEntity: null,
+      ruleIsSaved: false,
+      RULE_STATUS: {
+        ALREADY_SAVED: "ALREADY_SAVED",
+        IS_SAVED: "IS_SAVED",
+      },
     };
   },
   async mounted() {
@@ -253,14 +258,18 @@ export default {
           this.rule.rule_metrics?.total_records || null
       );
     },
-    isRuleAlreadySaved() {
-      if (this.isinitialSelectedGlobalEntity) {
-        return (
-          this.initialSelectedEntity.text ===
+    ruleStatus() {
+      if (
+        this.isinitialSelectedGlobalEntity &&
+        this.initialSelectedEntity.text ===
           (this.selectedGlobalEntity?.text || this.initialSelectedEntity.text)
-        );
+      ) {
+        if (this.ruleIsSaved) {
+          return this.RULE_STATUS.IS_SAVED;
+        }
+        return this.RULE_STATUS.ALREADY_SAVED;
       }
-      return false;
+      return null;
     },
   },
   watch: {
@@ -452,8 +461,10 @@ export default {
         };
         response = await this.postRule(ruleToPost);
       }
-      
+
       if (response) {
+        this.ruleIsSaved = true;
+        this.updateGlobalEntitiesByRule(this.selectedGlobalEntity.text);
         const { author, created_at } = response;
         this.updateRuleModel(
           this.selectedGlobalEntity.text,
@@ -611,6 +622,7 @@ export default {
       return initialGlobalEntities;
     },
     initSelectedEntitiesVariables() {
+      this.ruleIsSaved = false;
       this.initialSelectedEntity = null;
       this.selectedGlobalEntity = null;
     },

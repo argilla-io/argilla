@@ -10,7 +10,8 @@
         :isManagedRulesBtnDisabled="isNoRuleInDataset"
         :isSaveRulesBtnDisabled="isSaveRulesBtnDisabled"
         :isCancelBtnDisabled="isCancelBtnDisabled"
-        :isRuleAlreadySaved="isRuleAlreadySaved"
+        :showButtons="showButtons"
+        :message="message"
         @on-search-entity="
           (searchQuery) => $emit('on-search-entity', searchQuery)
         "
@@ -57,9 +58,8 @@ export default {
       type: Boolean,
       required: true,
     },
-    isRuleAlreadySaved: {
-      type: Boolean,
-      required: true,
+    ruleStatus: {
+      type: String || null,
     },
     filteredEntities: {
       type: Array,
@@ -77,6 +77,13 @@ export default {
     return {
       OptionsForRuleMetrics: null,
       options: [],
+      RULE_STATUS: {
+        ALREADY_SAVED: "ALREADY_SAVED",
+        IS_SAVED: "IS_SAVED",
+      },
+      RULE_IS_ALREADY_SAVED:
+        "This query with this label is already saved as rule",
+      RULE_IS_SAVED: "The rule was saved",
       initialParamsForInstance: {
         coverage: null,
         coverageAnnotated: null,
@@ -123,6 +130,23 @@ export default {
     },
     isNoRuleInDataset() {
       return this.numberOfRulesInDataset === 0;
+    },
+    showButtons() {
+      if (
+        this.ruleStatus === this.RULE_STATUS.ALREADY_SAVED ||
+        this.ruleStatus === this.RULE_STATUS.IS_SAVED
+      ) {
+        return false;
+      }
+      return true;
+    },
+    message() {
+      if (this.ruleStatus === this.RULE_STATUS.ALREADY_SAVED) {
+        return this.RULE_IS_ALREADY_SAVED;
+      } else if (this.ruleStatus === this.RULE_STATUS.IS_SAVED) {
+        return this.RULE_IS_SAVED;
+      }
+      return "";
     },
   },
   watch: {
