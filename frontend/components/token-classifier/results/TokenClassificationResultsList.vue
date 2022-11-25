@@ -180,10 +180,6 @@ export default {
         .with("rules")
         .first().rules;
     },
-    isRulesInDataset() {
-      return this.rulesSavedInDataset.length;
-    },
-
     rule() {
       return (
         RuleModel.query()
