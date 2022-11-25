@@ -69,7 +69,7 @@
   >
     <div class="if-there-is-no-global-entities__content">
       <div class="text-wrapper">
-        <p class="title"><strong>This doesn't have any labels yet.</strong></p>
+        <p class="title">This doesn't have any labels yet.</p>
         <div class="show-what-to-do-text">
           <p class="item">
             To create a new rules you need at least two labels. It's highly
@@ -86,9 +86,9 @@
     </div>
     <div class="if-there-is-no-query__footer">
       <div class="manage-rules-btn">
-        <button @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
+        <base-button class="primary light" @click="onClickViewRules" :disabled="isManagedRulesBtnDisabled">
           {{ viewRulesBtnLabel }}
-        </button>
+        </base-button>
       </div>
     </div>
   </CardComponent>
@@ -100,7 +100,7 @@
     <div class="if-there-is-no-query__item">
       <div class="text-wrapper">
         <div class="label-icon">
-          <svgicon name="weak-labeling" width="30" height="30" />
+          <svgicon name="weak-labeling" color="#666666" width="30" height="30" />
         </div>
         <p class="show-what-to-do-text">
           Create a new rule writting your query in the search box
@@ -254,11 +254,22 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
     .text-wrapper {
       flex: 0.7;
       display: flex;
       flex-direction: column;
-      gap: 2em;
+      .title {
+        @include font-size(18px);
+        color: $black-54
+      }
+      .item {
+        margin-bottom: 0;
+        color: $black-54;
+        a {
+          color: $primary-color;
+        }
+      }
       .show-what-to-do-text {
         display: flex;
         flex-direction: column;
@@ -281,11 +292,14 @@ export default {
     .text-wrapper {
       display: flex;
       align-items: center;
+      flex: 1;
+      justify-content: center;
       .label-icon {
         flex-basis: 50px;
       }
       .show-what-to-do-text {
-        flex: 1;
+        @include font-size(18px);
+        color: $black-54
       }
     }
   }
