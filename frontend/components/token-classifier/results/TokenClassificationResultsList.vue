@@ -271,13 +271,7 @@ export default {
       this.initSelectedEntitiesVariables();
       if (newValue.length > 0) {
         if (!this.isRuleForCurrentQuery) {
-          this.initialGlobalEntities = GlobalEntityModel.query()
-            .where(
-              "dataset_id",
-              formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
-            )
-            .orderBy("text")
-            .get();
+          this.initialGlobalEntities = this.getTokenDatasetGlobalEntities();
           this.createACustomRuleAndLoadRuleMetrics();
         } else {
           this.updateGlobalEntitiesByRule(this.rule.label);
@@ -589,18 +583,21 @@ export default {
       //   });
       // });
     },
+    getTokenDatasetGlobalEntities(orderBy = "text") {
+      return GlobalEntityModel.query()
+        .where(
+          "dataset_id",
+          formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
+        )
+        .orderBy(orderBy)
+        .get();
+    },
     clickOnCancel() {
       this.initialGlobalEntities = this.initGlobalEntities();
       this.selectedGlobalEntity = this.initialSelectedEntity;
     },
     initGlobalEntities() {
-      let initialGlobalEntities = GlobalEntityModel.query()
-        .where(
-          "dataset_id",
-          formatDatasetIdForTokenGlobalEntityModel(this.datasetPrimaryKey)
-        )
-        .orderBy("text")
-        .get();
+      let initialGlobalEntities = this.getTokenDatasetGlobalEntities();
       initialGlobalEntities = initialGlobalEntities.map((globalEntity) => {
         if (globalEntity.id === this.initialSelectedEntity?.id) {
           return {
