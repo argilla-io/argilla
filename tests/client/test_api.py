@@ -231,11 +231,6 @@ def test_log_background(mocked_client):
         background=True,
     )
     assert isinstance(future, concurrent.futures.Future)
-
-    # The dataset does not exist yet
-    with pytest.raises(NotFoundApiError):
-        api.load(dataset_name)
-
     # Log the record to argilla
     try:
         future.result()
