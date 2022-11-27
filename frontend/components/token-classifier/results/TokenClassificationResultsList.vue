@@ -274,7 +274,7 @@ export default {
           this.initialGlobalEntities = this.getTokenDatasetGlobalEntities();
           this.createACustomRuleAndLoadRuleMetrics();
         } else {
-          this.updateGlobalEntitiesByRule(this.rule.label);
+          this.updateGlobalEntitiesByRuleLabel(this.rule.label);
         }
       } else {
         // this.cleanTables();
@@ -380,7 +380,7 @@ export default {
         data: newRule,
       });
     },
-    updateGlobalEntitiesByRule(label) {
+    updateGlobalEntitiesByRuleLabel(label) {
       this.initialGlobalEntities = this.initialGlobalEntities.map(
         (globalEntity) => {
           if (globalEntity.text === label) {
@@ -452,7 +452,7 @@ export default {
 
       if (response) {
         this.ruleIsSaved = true;
-        this.updateGlobalEntitiesByRule(this.selectedGlobalEntity.text);
+        this.updateGlobalEntitiesByRuleLabel(this.selectedGlobalEntity.text);
         const { author, created_at } = response;
         this.updateRuleModel(
           this.selectedGlobalEntity.text,
