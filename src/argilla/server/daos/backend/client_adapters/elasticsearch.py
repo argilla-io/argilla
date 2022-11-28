@@ -129,16 +129,25 @@ class ElasticsearchClient(OpenSearchClient):
             knn = es_query.pop("knn", None)
             if knn:
                 self._check_vector_supported()
-
-            results = self.__client__.search(
-                index=index,
-                knn=knn,
-                routing=routing,
-                body=es_query,
-                track_total_hits=True,
-                rest_total_hits_as_int=True,
-                size=size,
-            )
+                source = es_query["_source"]
+                results = self.__client__.search(
+                    index=index,
+                    knn=knn,
+                    routing=routing,
+                    source=source,
+                    track_total_hits=True,
+                    rest_total_hits_as_int=True,
+                    size=size,
+                )
+            else:
+                results = self.__client__.search(
+                    index=index,
+                    routing=routing,
+                    body=es_query,
+                    track_total_hits=True,
+                    rest_total_hits_as_int=True,
+                    size=size,
+                )
 
             return self._process_search_results(
                 search_results=results,

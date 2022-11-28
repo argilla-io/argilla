@@ -357,13 +357,17 @@ class EsQueryBuilder:
         top_k = top_k or 5
         num_candidates = compute_num_candidates(top_k)
 
+        es_query_filter = es_query["query"]
+
         es_query["knn"] = {
             "field": vector_field,
             "query_vector": vector_value,
             "k": top_k,  # TODO: parameterize
-            "num_candidates": 50,  # TODO: parameterize
+            "num_candidates": num_candidates,  # TODO: parameterize
+            "filter": es_query_filter,
         }
         es_query.pop("sort")
+        del es_query["query"]
 
 
 class OpenSearchQueryBuilder(EsQueryBuilder):
