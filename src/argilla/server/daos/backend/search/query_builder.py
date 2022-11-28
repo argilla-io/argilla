@@ -340,14 +340,13 @@ class EsQueryBuilder:
         es_query: Dict[str, Any],
         vector_field: str,
         vector_value: List[float],
-        num_candidates: int = 50,
-        top_k: int = 5,
+        top_k: Optional[int] = None,
     ):
         es_query["knn"] = {
             "field": vector_field,
             "query_vector": vector_value,
             "k": top_k,  # TODO: parameterize
-            "num_candidates": num_candidates,  # TODO: parameterize
+            "num_candidates": 50,  # TODO: parameterize
         }
         es_query.pop("sort")
 
