@@ -344,8 +344,18 @@ class EsQueryBuilder:
         vector_value: List[float],
         top_k: Optional[int] = None,
     ):
+        def compute_num_candidates(k: int):
+            if k < 50:
+                return 500
+            if 50 <= k < 200:
+                return 100
+            if 200 <= k < 500:
+                return 2000
+            # > 500
+            return 2500
+
         top_k = top_k or 5
-        num_candidates = top_k * 10  # simplest way to compute it
+        num_candidates = compute_num_candidates(top_k)
 
         es_query["knn"] = {
             "field": vector_field,
