@@ -125,6 +125,7 @@ class OpenSearchClient(IClientAdapter):
                 exclude_fields=exclude_fields,
                 doc_from=doc_from,
                 highlight=highlight,
+                size=size,
             )
 
             if "knn" in es_query["query"]:

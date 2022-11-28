@@ -187,6 +187,7 @@ class EsQueryBuilder:
         exclude_fields: Optional[List[str]] = None,
         doc_from: Optional[int] = None,
         highlight: Optional[HighlightParser] = None,
+        size: Optional[int] = None,
     ) -> Dict[str, Any]:
 
         es_query: Dict[str, Any] = (
@@ -215,6 +216,7 @@ class EsQueryBuilder:
                 es_query=es_query,
                 vector_field=query.embedding_name,
                 vector_value=query.embedding_vector,
+                top_k=size,
             )
 
         return es_query
@@ -342,6 +344,19 @@ class EsQueryBuilder:
         vector_value: List[float],
         top_k: Optional[int] = None,
     ):
+        def compute_num_candidates(k: int):
+            if k < 50:
+                return 500
+            if 50 <= k < 200:
+                return 100
+            if 200 <= k < 500:
+                return 2000
+            # > 500
+            return 2500
+
+        top_k = top_k or 5
+        num_candidates = compute_num_candidates(top_k)
+
         es_query["knn"] = {
             "field": vector_field,
             "query_vector": vector_value,
@@ -357,10 +372,11 @@ class OpenSearchQueryBuilder(EsQueryBuilder):
         self,
         *,
         es_query: Dict[str, Any],
-        top_k: int,
         vector_field: str,
         vector_value: List[float],
+        top_k: Optional[int] = None,
     ):
+        top_k = top_k or 5
         knn = {
             vector_field: {
                 "vector": vector_value,

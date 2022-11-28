@@ -123,6 +123,7 @@ class ElasticsearchClient(OpenSearchClient):
                 exclude_fields=exclude_fields,
                 doc_from=doc_from,
                 highlight=highlight,
+                size=size,
             )
 
             knn = es_query.pop("knn", None)
