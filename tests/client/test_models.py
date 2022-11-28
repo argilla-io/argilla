@@ -53,13 +53,18 @@ def test_text_classification_record(annotation, status, expected_status):
 
 
 def test_text_classification_input_string():
-    assert TextClassificationRecord(text="A text") == TextClassificationRecord(
-        inputs=dict(text="A text")
+    event_timestamp = datetime.datetime.now()
+    assert TextClassificationRecord(
+        text="A text", event_timestamp=event_timestamp
+    ) == TextClassificationRecord(
+        inputs=dict(text="A text"), event_timestamp=event_timestamp
     )
 
     assert TextClassificationRecord(
-        inputs=["A text", "another text"]
-    ) == TextClassificationRecord(inputs=dict(text=["A text", "another text"]))
+        inputs=["A text", "another text"], event_timestamp=event_timestamp
+    ) == TextClassificationRecord(
+        inputs=dict(text=["A text", "another text"]), event_timestamp=event_timestamp
+    )
 
 
 def test_text_classification_text_inputs():
@@ -71,21 +76,31 @@ def test_text_classification_text_inputs():
 
     with pytest.warns(
         FutureWarning,
-        match="the `inputs` argument of the `TextClassificationRecord` will not accept strings.",
+        match=(
+            "the `inputs` argument of the `TextClassificationRecord` will not accept"
+            " strings."
+        ),
     ):
         TextClassificationRecord(inputs="mock")
 
-    assert TextClassificationRecord(text="mock") == TextClassificationRecord(
-        inputs={"text": "mock"}
-    )
-
-    assert TextClassificationRecord(inputs=["mock"]) == TextClassificationRecord(
-        inputs={"text": ["mock"]}
+    event_timestamp = datetime.datetime.now()
+    assert TextClassificationRecord(
+        text="mock", event_timestamp=event_timestamp
+    ) == TextClassificationRecord(
+        inputs={"text": "mock"}, event_timestamp=event_timestamp
     )
 
     assert TextClassificationRecord(
-        text="mock", inputs={"text": "mock"}
-    ) == TextClassificationRecord(inputs={"text": "mock"})
+        inputs=["mock"], event_timestamp=event_timestamp
+    ) == TextClassificationRecord(
+        inputs={"text": ["mock"]}, event_timestamp=event_timestamp
+    )
+
+    assert TextClassificationRecord(
+        text="mock", inputs={"text": "mock"}, event_timestamp=event_timestamp
+    ) == TextClassificationRecord(
+        inputs={"text": "mock"}, event_timestamp=event_timestamp
+    )
 
     rec = TextClassificationRecord(text="mock")
     with pytest.raises(AttributeError, match="You cannot assign a new value to `text`"):
@@ -133,8 +148,10 @@ def test_token_classification_with_tokens_and_tags(tokens, tags, annotation):
 def test_token_classification_validations():
     with pytest.raises(
         AssertionError,
-        match="Missing fields: "
-        "At least one of `text` or `tokens` argument must be provided!",
+        match=(
+            "Missing fields: "
+            "At least one of `text` or `tokens` argument must be provided!"
+        ),
     ):
         TokenClassificationRecord()
 
@@ -142,15 +159,19 @@ def test_token_classification_validations():
     annotation = [("test", 0, 4)]
     with pytest.raises(
         AssertionError,
-        match="Missing field `text`: "
-        "char level spans must be provided with a raw text sentence",
+        match=(
+            "Missing field `text`: "
+            "char level spans must be provided with a raw text sentence"
+        ),
     ):
         TokenClassificationRecord(tokens=tokens, annotation=annotation)
 
     with pytest.raises(
         AssertionError,
-        match="Missing field `text`: "
-        "char level spans must be provided with a raw text sentence",
+        match=(
+            "Missing field `text`: "
+            "char level spans must be provided with a raw text sentence"
+        ),
     ):
         TokenClassificationRecord(tokens=tokens, prediction=annotation)
 
@@ -259,12 +280,14 @@ def test_forbid_extra():
         MockRecord(mock="mock", extra_argument="mock")
 
 
-def test_nat_to_none():
-    class MockRecord(_Validators):
-        event_timestamp: Optional[datetime.datetime] = None
+def test_none_to_datetime():
+    record = _Validators()
+    assert isinstance(record.event_timestamp, datetime.datetime)
 
-    record = MockRecord(event_timestamp=pd.NaT)
-    assert record.event_timestamp is None
+
+def test_nat_to_none_to_datetime():
+    record = _Validators(event_timestamp=pd.NaT)
+    assert isinstance(record.event_timestamp, datetime.datetime)
 
 
 @pytest.mark.parametrize(
