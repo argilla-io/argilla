@@ -338,10 +338,10 @@ class EsQueryBuilder:
         self,
         *,
         es_query: Dict[str, Any],
-        num_candidates: int,
-        top_k: int,
         vector_field: str,
         vector_value: List[float],
+        num_candidates: int = 50,
+        top_k: int = 5,
     ):
         es_query["knn"] = {
             "field": vector_field,
