@@ -281,12 +281,18 @@ def test_forbid_extra():
 
 
 def test_none_to_datetime():
-    record = _Validators()
+    class MockRecord(_Validators):
+        event_timestamp: Optional[datetime.datetime] = None
+
+    record = MockRecord()
     assert isinstance(record.event_timestamp, datetime.datetime)
 
 
 def test_nat_to_none_to_datetime():
-    record = _Validators(event_timestamp=pd.NaT)
+    class MockRecord(_Validators):
+        event_timestamp: Optional[datetime.datetime] = None
+
+    record = MockRecord(event_timestamp=pd.NaT)
     assert isinstance(record.event_timestamp, datetime.datetime)
 
 
