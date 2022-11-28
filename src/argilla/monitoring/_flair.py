@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from argilla import TokenClassificationRecord
-from argilla.client.models import BulkResponse
+from argilla.client.api import Api
 from argilla.monitoring.base import BaseMonitor
 from argilla.monitoring.types import MissingType
 
@@ -32,7 +32,8 @@ except ModuleNotFoundError:
 
 class FlairMonitor(BaseMonitor):
     def _prepare_log_data(
-        self, data: List[Tuple[Sentence, Dict[str, Any]]]
+        self,
+        data: List[Tuple[Sentence, Dict[str, Any]]],
     ) -> Dict[str, Any]:
         return dict(
             records=[
@@ -74,15 +75,23 @@ class FlairMonitor(BaseMonitor):
             if self.is_record_accepted()
         ]
         if filtered_data:
-            self._log_future = self.log_async(filtered_data)
+            self._log_future = self.send_records(filtered_data)
 
         return result
 
 
 def flair_monitor(
     pl: SequenceTagger,
+    api: Api,
     dataset: str,
     sample_rate: float,
+    log_interval: float,
 ) -> Optional[SequenceTagger]:
 
-    return FlairMonitor(pl, dataset=dataset, sample_rate=sample_rate)
+    return FlairMonitor(
+        pl,
+        api=api,
+        dataset=dataset,
+        sample_rate=sample_rate,
+        log_interval=log_interval,
+    )

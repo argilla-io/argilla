@@ -29,6 +29,10 @@ For multi-label classification tasks, you can also annotate a record with no lab
 
 Once a record is annotated, it will be marked as _Validated_ in the upper right corner of the record card.
 
+```{note}
+When the dataset contains a large list of labels (10 +) we encourage viewing the record one by one (from the footer) and using the arrow keys to move quickly to the next record.
+```
+
 #### Token Classification
 
 
@@ -39,10 +43,10 @@ You can also remove annotations by hovering over the highlights and pressing the
 After modifying a record, either by adding or removing annotations, its status will change to _Pending_ and a _Save_ button will appear.
 Once a record is saved, its status will change to _Validated_.
 
-#### Text2Text
+#### TextGeneration
 
 
-For text2text datasets, you have a text box available, in which you can draft or edit an annotation.
+For TextGeneration datasets, you have a text box available, in which you can draft or edit an annotation.
 After editing or drafting your annotation, don't forget to save your changes.
 
 ### Bulk annotate
@@ -74,7 +78,7 @@ You can also validate the predictions (or the absence of them) by pressing the _
 
 Once the record is saved or validated, its status will change to _Validated_.
 
-#### Text2Text
+#### TextGeneration
 
 You can validate or edit a prediction, by first clicking on the _view predictions_ button, and then the _Edit_ or _Validate_ button.
 After editing or drafting your annotation, don't forget to save your changes.
@@ -206,7 +210,7 @@ In this task, predictions and annotations are displayed as highlights in the inp
 
 For datasets with available score, the solid line for **predictions** disappears when the **score filter** (in **Predictions filter** section) is applied.
 
-#### Text2Text
+#### TextGeneration
 
 
 In this task predictions and the annotation are given in a text field below the input text.
@@ -217,7 +221,7 @@ If you have multiple predictions you can toggle between them using the arrows on
 ### Metrics
 
 
-From the side bar you can access the [_Stats_ metrics](view_dataset_metrics.md#stats) that provide support for your analysis of the dataset.
+From the side bar you can access the [_Stats_ metrics](pages.md) that provide support for your analysis of the dataset.
 
 
 ## Search Records
@@ -332,7 +336,7 @@ In this mode, **progress** is related to the coverage of the rules. It shows the
 
 In the **total rules** section, users can find the number of rules related to the different categories.
 
-![Progress menu 2](../../_static/reference/webapp/progress_definerules.png)
+![Progress menu 2](../../_static/reference/webapp/features-weak-labelling.png)
 
 #### Stats
 

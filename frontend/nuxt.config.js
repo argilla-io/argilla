@@ -24,7 +24,7 @@ const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 export default {
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
-
+  telemetry: false,
   generate: {
     dir: DIST_FOLDER,
   },

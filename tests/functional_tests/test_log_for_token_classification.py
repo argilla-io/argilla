@@ -19,6 +19,7 @@ from argilla import TokenClassificationRecord
 from argilla.client import api
 from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.metrics import __all__ as ALL_METRICS
+from argilla.metrics import entity_consistency
 
 
 def test_log_with_empty_text(mocked_client):
@@ -53,9 +54,10 @@ def test_log_with_empty_tokens_list(mocked_client):
 def test_call_metrics_with_no_api_client_initialized(mocked_client):
 
     for metric in ALL_METRICS:
+        if metric == entity_consistency:
+            continue
 
         api.__ACTIVE_API__ = None
-
         with pytest.raises(NotFoundApiError):
             metric("not_found")
 

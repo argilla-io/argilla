@@ -27,18 +27,12 @@
           :color="`color_${entity.colorId % $entitiesMaxColors}`"
         />
         <base-button
-          v-if="!showEntitySelector && dataset.entities.length > entitiesNumber"
+          v-if="isCollapsable"
           class="entities__container__button secondary light small"
           @click="toggleEntitiesNumber"
-          >{{ `+ ${dataset.entities.length - entitiesNumber}` }}</base-button
+          >{{ buttonText }}</base-button
         >
       </div>
-      <base-button
-        v-if="showEntitySelector && dataset.entities.length > entitiesNumber"
-        class="entities__container__button secondary light small fixed"
-        @click="toggleEntitiesNumber"
-        >{{ "Show less" }}</base-button
-      >
     </div>
   </div>
 </template>
@@ -54,8 +48,8 @@ export default {
     },
   },
   data: () => ({
-    showEntitySelector: false,
-    entitiesNumber: MAX_ENTITIES_SHOWN,
+    showExpandedList: false,
+    maxEntitiesNumber: MAX_ENTITIES_SHOWN,
   }),
   computed: {
     visibleEntities() {
@@ -67,14 +61,26 @@ export default {
           ...ent,
         }));
 
-      return this.showEntitySelector
-        ? entities
-        : entities.slice(0, this.entitiesNumber);
+      return this.showExpandedList ? entities : this.showMaxEntities(entities);
+    },
+    entitiesNumber() {
+      return this.dataset.entities?.length || null;
+    },
+    isCollapsable() {
+      return this.entitiesNumber > this.maxEntitiesNumber;
+    },
+    buttonText() {
+      return this.showExpandedList
+        ? `Show less`
+        : `+ ${this.entitiesNumber - this.maxEntitiesNumber}`;
     },
   },
   methods: {
     toggleEntitiesNumber() {
-      this.showEntitySelector = !this.showEntitySelector;
+      this.showExpandedList = !this.showExpandedList;
+    },
+    showMaxEntities(entities) {
+      return entities.slice(0, this.maxEntitiesNumber);
     },
   },
 };
@@ -104,15 +110,6 @@ export default {
     @extend %hide-scrollbar;
     &__button {
       display: inline-block;
-      &.fixed {
-        position: absolute;
-        right: $base-space;
-        bottom: $base-space;
-        background: palette(grey, 800);
-        &:hover {
-          background: palette(grey, 700);
-        }
-      }
     }
   }
 }

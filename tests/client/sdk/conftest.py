@@ -74,15 +74,16 @@ class Helpers:
 
         client_props = self._expands_schema(
             client_schema["properties"],
-            client_schema["definitions"],
+            client_schema.get("definitions", {}),
         )
         server_props = self._expands_schema(
             server_schema["properties"],
-            server_schema["definitions"],
+            server_schema.get("definitions", {}),
         )
 
         if client_props == server_props:
             return True
+
         return check_schema_props(client_props, server_props)
 
     def _expands_schema(

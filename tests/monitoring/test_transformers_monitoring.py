@@ -11,24 +11,26 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from time import sleep
 from typing import List, Union
 
 import pytest
 
 import argilla
 from argilla import TextClassificationRecord
-from tests.monitoring.helpers import mock_monitor
 
 
 def test_classifier_monitoring_with_all_scores(
-    mocked_client, classifier_monitor_all_scores, classifier_dataset
+    mocked_client,
+    classifier_monitor_all_scores,
+    classifier_dataset,
 ):
     argilla.delete(classifier_dataset)
 
     expected_text = "This is a text, yeah"
     classifier_monitor_all_scores(expected_text)
 
+    sleep(1)  # wait for the consumer time
     ds = argilla.load(classifier_dataset)
     df = ds.to_pandas()
     assert len(df) == 1
@@ -43,6 +45,7 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
     expected_text = "This is a text, yeah"
     classifier_monitor(expected_text)
 
+    sleep(1)  # wait for the consumer time
     ds = argilla.load(classifier_dataset)
     df = ds.to_pandas()
     assert len(df) == 1
@@ -53,6 +56,8 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
     argilla.delete(classifier_dataset)
     texts = ["This is a text", "And another text here"]
     classifier_monitor(texts)
+
+    sleep(1)  # wait for the consumer time
     ds = argilla.load(classifier_dataset)
     df = ds.to_pandas()
     assert len(df) == 2
@@ -60,6 +65,8 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
 
     argilla.delete(classifier_dataset)
     classifier_monitor(expected_text, metadata={"some": "metadata"})
+
+    sleep(1)  # wait for the consumer time
     ds = argilla.load(classifier_dataset)
     df = ds.to_pandas()
     assert len(df) == 1
@@ -73,21 +80,32 @@ def classifier_dataset():
 
 @pytest.fixture
 def classifier_monitor_all_scores(
-    sentiment_classifier_all_scores, classifier_dataset, monkeypatch
+    sentiment_classifier_all_scores,
+    classifier_dataset,
+    monkeypatch,
 ):
     monitor = argilla.monitor(
-        sentiment_classifier_all_scores, dataset=classifier_dataset, sample_rate=1.0
+        sentiment_classifier_all_scores,
+        dataset=classifier_dataset,
+        sample_rate=1.0,
+        log_interval=0.5,
     )
-    mock_monitor(monitor, monkeypatch)
+
     return monitor
 
 
 @pytest.fixture
-def classifier_monitor(sentiment_classifier, classifier_dataset, monkeypatch):
+def classifier_monitor(
+    sentiment_classifier,
+    classifier_dataset,
+    monkeypatch,
+):
     monitor = argilla.monitor(
-        sentiment_classifier, dataset=classifier_dataset, sample_rate=1.0
+        sentiment_classifier,
+        dataset=classifier_dataset,
+        sample_rate=1.0,
+        log_interval=0.5,
     )
-    mock_monitor(monitor, monkeypatch)
     return monitor
 
 
@@ -118,7 +136,8 @@ def zero_shot_classifier():
     from transformers import pipeline
 
     return pipeline(
-        "zero-shot-classification", model="Recognai/bert-base-spanish-wwm-cased-xnli"
+        "zero-shot-classification",
+        model="Recognai/bert-base-spanish-wwm-cased-xnli",
     )
 
 
@@ -139,8 +158,12 @@ def dataset():
 
 @pytest.fixture
 def mocked_monitor(dataset, monkeypatch, zero_shot_classifier):
-    monitor = argilla.monitor(zero_shot_classifier, dataset=dataset, sample_rate=1.0)
-    mock_monitor(monitor, monkeypatch)
+    monitor = argilla.monitor(
+        zero_shot_classifier,
+        dataset=dataset,
+        sample_rate=1.0,
+        log_interval=0.5,
+    )
 
     return monitor
 
@@ -168,6 +191,7 @@ def check_zero_shot_results(
     except KeyError:
         pass
 
+    sleep(1)  # wait for the consumer time
     ds = argilla.load(dataset)
     df = ds.to_pandas()
     assert len(df) == 1
@@ -186,7 +210,12 @@ def check_zero_shot_results(
     zero_shot_inputs(),
 )
 def test_monitor_zero_short_passing_labels_as_args(
-    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
+    text,
+    labels,
+    hypothesis,
+    mocked_client,
+    mocked_monitor,
+    dataset,
 ):
     argilla.delete(dataset)
     predictions = mocked_monitor(text, labels, hypothesis_template=hypothesis)
@@ -206,12 +235,19 @@ def test_monitor_zero_short_passing_labels_as_args(
     zero_shot_inputs(),
 )
 def test_monitor_zero_short_passing_labels_keyword_arg(
-    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
+    text,
+    labels,
+    hypothesis,
+    mocked_client,
+    mocked_monitor,
+    dataset,
 ):
 
     argilla.delete(dataset)
     predictions = mocked_monitor(
-        text, candidate_labels=labels, hypothesis_template=hypothesis
+        text,
+        candidate_labels=labels,
+        hypothesis_template=hypothesis,
     )
 
     check_zero_shot_results(
@@ -229,12 +265,20 @@ def test_monitor_zero_short_passing_labels_keyword_arg(
     zero_shot_inputs(),
 )
 def test_monitor_zero_shot_with_multilabel(
-    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
+    text,
+    labels,
+    hypothesis,
+    mocked_client,
+    mocked_monitor,
+    dataset,
 ):
     argilla.delete(dataset)
     argilla.delete(dataset + "_multi")
     predictions = mocked_monitor(
-        text, candidate_labels=labels, hypothesis_template=hypothesis, multi_label=True
+        text,
+        candidate_labels=labels,
+        hypothesis_template=hypothesis,
+        multi_label=True,
     )
 
     with pytest.raises(Exception):
@@ -256,7 +300,12 @@ def test_monitor_zero_shot_with_multilabel(
     zero_shot_inputs(),
 )
 def test_monitor_zero_shot_with_text_array(
-    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
+    text,
+    labels,
+    hypothesis,
+    mocked_client,
+    mocked_monitor,
+    dataset,
 ):
 
     argilla.delete(dataset)
@@ -279,7 +328,12 @@ def test_monitor_zero_shot_with_text_array(
     zero_shot_inputs(),
 )
 def test_monitor_zero_shot_passing_metadata(
-    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
+    text,
+    labels,
+    hypothesis,
+    mocked_client,
+    mocked_monitor,
+    dataset,
 ):
     argilla.delete(dataset)
     expected_metadata = {"type": "test"}
@@ -290,6 +344,7 @@ def test_monitor_zero_shot_passing_metadata(
         metadata=expected_metadata,
     )
 
+    sleep(1)  # wait for the consumer time
     ds = argilla.load(dataset)
     df = ds.to_pandas()
     assert len(df) == 1

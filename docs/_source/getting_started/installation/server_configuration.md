@@ -4,7 +4,7 @@ This section explains advanced operations and settings for running the Argilla S
 
 By default, the Argilla Server will look for your Elasticsearch (ES) endpoint at `http://localhost:9200`. You can customize this by setting the `ELASTICSEARCH` environment variable. Have a look at the list of available [environment variables](#environment-variables) to further configure the Argilla server.
 
-## Running Argilla Server with `uvicorn`
+## Argilla Server with `uvicorn`
 
 Since the Argilla Server is built on FastAPI, you can launch it using `uvicorn`:
 
@@ -23,7 +23,7 @@ You can set following environment variables to further configure your server and
 
 ### Server
 
-- `ELASTICSEARCH`: URL of the connection endpoint of the Elasticsearch instance (Default: `http://localhost:9200`).
+- `ARGILLA_ELASTICSEARCH`: URL of the connection endpoint of the Elasticsearch instance (Default: `http://localhost:9200`).
 
 - `ARGILLA_ELASTICSEARCH_SSL_VERIFY`: If "False", disables SSL certificate verification when connection to the Elasticsearch backend.
 
@@ -35,7 +35,9 @@ You can set following environment variables to further configure your server and
 
 - `ARGILLA_EXACT_ES_SEARCH_ANALYZER`: Default analyzer for `*.exact` fields in textual information (Default: "whitespace").
 
-- `METADATA_FIELDS_LIMIT`: Max number of fields in the metadata (Default: 50, max: 100).
+- `ARGILLA_METADATA_FIELDS_LIMIT`: Max number of fields in the metadata (Default: 50, max: 100).
+
+- `ARGILLA_METADATA_FIELD_LENGTH`: Max length supported for the string metadata fields. Higher values will be truncated. Abusing this may lead to Elastic performance issues (Default: 128).
 
 - `CORS_ORIGINS`: List of host patterns for CORS origin access.
 

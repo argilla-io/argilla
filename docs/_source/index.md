@@ -3,11 +3,11 @@
    :parser: myst_parser.sphinx_
 
 .. toctree::
-   :maxdepth: 3
    :caption: Getting Started
+   :maxdepth: 3
    :hidden:
 
-   getting_started/argilla
+   self
    getting_started/quickstart
    getting_started/installation/installation.md
    getting_started/terminology
@@ -53,8 +53,8 @@
    :hidden:
 
    Slack <https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>
-   Github <https://github.com/recognai/rubrix>
-   Discussion forum <https://github.com/recognai/rubrix/discussions>
+   Github <https://github.com/argilla-io/argilla>
+   Discussion forum <https://github.com/argilla-io/argilla/discussions>
    community/developer_docs
    community/migration-rubrix.md
 

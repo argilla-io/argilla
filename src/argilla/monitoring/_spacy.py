@@ -16,6 +16,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional, Tuple
 
 from argilla import TokenClassificationRecord
+from argilla.client.api import Api
 from argilla.monitoring.base import BaseMonitor
 from argilla.monitoring.types import MissingType
 
@@ -33,7 +34,9 @@ class SpacyNERMonitor(BaseMonitor):
 
     @staticmethod
     def doc2token_classification(
-        doc: Doc, agent: str, metadata: Optional[Dict[str, Any]]
+        doc: Doc,
+        agent: str,
+        metadata: Optional[Dict[str, Any]],
     ) -> TokenClassificationRecord:
         """
         Converts a spaCy `Doc` into a token classification record
@@ -89,17 +92,29 @@ class SpacyNERMonitor(BaseMonitor):
                 log_info.append((doc, metadata))
             yield r
 
-        self.log_async(log_info)
+        self.send_records(log_info)
 
     def __call__(self, *args, **kwargs):
         metadata = kwargs.pop("metadata", None)
         doc = self.__wrapped__(*args, **kwargs)
         try:
             if self.is_record_accepted():
-                self.log_async([(doc, metadata)])
+                self.send_records([(doc, metadata)])
         finally:
             return doc
 
 
-def ner_monitor(nlp: Language, dataset: str, sample_rate: float) -> Language:
-    return SpacyNERMonitor(nlp, dataset=dataset, sample_rate=sample_rate)
+def ner_monitor(
+    nlp: Language,
+    api: Api,
+    dataset: str,
+    sample_rate: float,
+    log_interval: float,
+) -> Language:
+    return SpacyNERMonitor(
+        nlp,
+        api=api,
+        dataset=dataset,
+        sample_rate=sample_rate,
+        log_interval=log_interval,
+    )

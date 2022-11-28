@@ -15,5 +15,5 @@
 
 from .label_errors import find_label_errors
 from .label_models import FlyingSquid, MajorityVoter, Snorkel
-from .rule import Rule, load_rules
+from .rule import Rule, add_rules, delete_rules, load_rules, update_rules
 from .weak_labels import WeakLabels, WeakMultiLabels

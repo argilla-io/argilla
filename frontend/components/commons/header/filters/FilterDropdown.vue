@@ -18,7 +18,10 @@
 <template>
   <div
     ref="dropdownMenu"
-    v-click-outside="onClickOutside"
+    v-click-outside="{
+      events: ['mousedown'],
+      handler: onClickOutside,
+    }"
     :class="[
       'dropdown',
       colorType === 'grey' ? '--grey' : '',

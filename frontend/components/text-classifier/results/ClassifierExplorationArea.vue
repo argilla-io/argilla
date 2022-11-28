@@ -30,19 +30,20 @@
           :show-score="true"
         />
       </span>
-
-      <base-button
-        v-if="visibleLabels.length < filteredLabels.length"
-        class="predictions__more secondary light small"
-        @click="expandLabels()"
-        >+{{ filteredLabels.length - visibleLabels.length }}</base-button
-      >
-      <base-button
-        v-else-if="visibleLabels.length > maxVisibleLabels"
-        class="predictions__more secondary light small"
-        @click="collapseLabels()"
-        >Show less</base-button
-      >
+      <template v-if="!allowToShowAllLabels">
+        <base-button
+          v-if="visibleLabels.length < filteredLabels.length"
+          class="predictions__more secondary light small"
+          @click="expandLabels()"
+          >+{{ filteredLabels.length - visibleLabels.length }}</base-button
+        >
+        <base-button
+          v-else-if="visibleLabels.length > maxVisibleLabels"
+          class="predictions__more secondary light small"
+          @click="collapseLabels()"
+          >Show less</base-button
+        >
+      </template>
     </div>
   </div>
 </template>
@@ -69,7 +70,7 @@ export default {
   idState() {
     return {
       searchText: "",
-      shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+      shownLabels: this.maxVisibleLabels,
     };
   },
   computed: {
@@ -83,25 +84,33 @@ export default {
     },
     shownLabels: {
       get: function () {
-        return this.idState.shownLabels;
+        return this.allowToShowAllLabels
+          ? this.labels.length
+          : this.idState.shownLabels;
       },
       set: function (newValue) {
         this.idState.shownLabels = newValue;
       },
     },
-    labels() {
-      return this.record.prediction ? this.record.prediction.labels : [];
-    },
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
+    },
+    visibleLabels() {
+      return this.filteredLabels.slice(0, this.shownLabels);
     },
     filteredLabels() {
       return this.labels.filter((label) =>
         label.class.toLowerCase().match(this.searchText.toLowerCase())
       );
     },
-    visibleLabels() {
-      return this.filteredLabels.slice(0, this.shownLabels);
+    labels() {
+      return this.record.prediction ? this.record.prediction.labels : [];
+    },
+    allowToShowAllLabels() {
+      return this.paginationSize === 1 || false;
+    },
+    paginationSize() {
+      return this.dataset.viewSettings?.pagination?.size;
     },
     predictedAs() {
       return this.record.predicted_as;

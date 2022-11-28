@@ -16,7 +16,13 @@
   -->
 
 <template>
-  <div v-click-outside="close" class="filters">
+  <div
+    v-click-outside="{
+      events: ['mousedown'],
+      handler: close,
+    }"
+    class="filters"
+  >
     <div class="filters__list">
       <div v-for="group in groups" :key="group" class="filters__list__item">
         <p
@@ -229,6 +235,10 @@ export default {
             a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
           )) ||
         [];
+      const dateFields = [
+        this.sortByDateFilter("last_updated", "Last Updated"),
+        this.sortByDateFilter("event_timestamp", "Event Timestamp"),
+      ].filter(({ disabled }) => !disabled);
       const uncoveredByRules = {
         id: "uncovered_by_rules",
         key: "uncovered_by_rules",
@@ -237,14 +247,19 @@ export default {
         options: [true, false],
         selected:
           this.dataset.query.uncovered_by_rules &&
-          this.dataset.query.uncovered_by_rules.length > 0,
+          this.dataset.query.uncovered_by_rules?.length > 0,
       };
-      return [...filters, ...sortedMetadataFilters, uncoveredByRules];
+      return [
+        ...filters,
+        ...dateFields,
+        ...sortedMetadataFilters,
+        uncoveredByRules,
+      ];
     },
   },
   methods: {
     close() {
-      this.initialVisibleGroup = undefined;
+      this.initialVisibleGroup = null;
     },
     itemsAppliedOnGroup(group) {
       if (group === "Sort") {
@@ -258,7 +273,7 @@ export default {
     },
     selectGroup(group) {
       if (this.initialVisibleGroup === group) {
-        this.initialVisibleGroup = undefined;
+        this.initialVisibleGroup = null;
       } else {
         this.initialVisibleGroup = group;
       }
@@ -283,6 +298,20 @@ export default {
     onSortBy(sortList) {
       this.$emit("applySortBy", sortList);
       this.close();
+    },
+    sortByDateFilter(id, name, group = "Sort") {
+      return {
+        id,
+        key: id,
+        group,
+        name,
+        disabled: this.recordPropertyHasValue(id),
+      };
+    },
+    recordPropertyHasValue(prop) {
+      return (
+        !this.dataset.results.records.some((record) => record[prop]) || false
+      );
     },
   },
 };

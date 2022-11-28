@@ -16,23 +16,25 @@
   -->
 
 <template>
-  <div v-if="modalVisible" v-click-outside="onClickOutside" class="modal-mask">
-    <transition name="fade" appear>
+  <transition name="fade" v-if="modalVisible" appear>
+    <div v-click-outside="onClickOutside" class="modal-mask">
       <div class="modal-wrapper" :class="modalPosition">
         <div :class="['modal-container', modalClass]">
-          <p v-if="!modalCustom" class="modal__title">
-            <span
-              class="state"
-              :class="modalClass === 'modal-info' ? 'succeeded' : 'failed'"
-            />
+          <p v-if="modalTitle" class="modal__title">
+            <svgicon
+              v-if="modalIcon"
+              width="24"
+              height="24"
+              :name="modalIcon"
+              color="#000000"
+            ></svgicon>
             {{ modalTitle }}
           </p>
-          <div v-if="!modalCustom" />
           <slot />
         </div>
       </div>
-    </transition>
-  </div>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -51,13 +53,12 @@ export default {
       type: Boolean,
       default: true,
     },
-    modalCustom: {
-      type: Boolean,
-      default: false,
-    },
     modalClass: {
       type: String,
       default: "modal-info",
+    },
+    modalIcon: {
+      type: String,
     },
     modalTitle: {
       type: String,
@@ -73,7 +74,7 @@ export default {
     },
     modalPosition: {
       type: String,
-      default: "modal-bottom",
+      default: "modal-center",
     },
   },
   data: () => ({}),
@@ -117,27 +118,37 @@ export default {
 }
 
 .modal-wrapper {
-  display: table-cell;
-  vertical-align: middle;
-  &.modal-bottom {
-    vertical-align: bottom;
-    padding-bottom: 3em;
-    padding-left: 30%;
+  display: flex;
+  height: 100vh;
+  &.modal-bottom-right {
+    align-items: flex-end;
+    padding-bottom: 3.5em;
+    .modal-container {
+      margin-right: 1.5em;
+    }
+  }
+  &.modal-top-right {
+    align-items: flex-start;
+    padding-top: 10em;
+    .modal-container {
+      margin-right: 6em;
+    }
   }
   &.modal-center {
-    vertical-align: middle;
+    align-items: center;
   }
 }
 
 .modal-container {
+  position: relative;
   max-width: 460px;
   margin: 0px auto;
   padding: $base-space * 4;
   background-color: palette(white);
+  color: $black-87;
   border-radius: $border-radius;
   box-shadow: $shadow;
   transition: $swift-ease-in-out;
-  position: relative;
   text-align: left;
   pointer-events: all;
 }
@@ -145,10 +156,6 @@ export default {
   box-shadow: $shadow;
   border-radius: $border-radius;
   max-width: 520px;
-  :deep(.modal__title) {
-    font-weight: normal;
-    @include font-size(16px);
-  }
   :deep(.modal__text) {
     margin-bottom: 2em;
   }
@@ -173,36 +180,12 @@ export default {
   }
 }
 :deep(.modal__title) {
+  display: flex;
+  align-items: center;
+  gap: $base-space;
   @include font-size(16px);
-  color: $black-54;
   font-weight: 600;
   margin-top: 0;
-  margin-right: 2em;
-}
-
-.modal__message {
-  margin-bottom: 1em;
-  display: block;
-  &:last-of-type {
-    margin-bottom: 0;
-  }
-  .modal-text {
-    margin-top: 0;
-    margin-bottom: 0.3em;
-    font-weight: 600;
-    &--info {
-      margin-top: 0;
-      margin-bottom: 0.3em;
-      display: block;
-      font-weight: lighter;
-    }
-  }
-  .failed {
-    color: $error;
-    font-weight: lighter;
-    margin-bottom: 0;
-    margin-top: 0;
-  }
 }
 
 .modal-enter {
@@ -212,17 +195,6 @@ export default {
 .modal-leave-active {
   opacity: 0;
 }
-
-// .modal-close {
-//   border: 0;
-//   background: palette(white);
-//   color: $black-54;
-//   position: absolute;
-//   top: 0.5em;
-//   right: 0.5em;
-//   outline: none;
-//   cursor: pointer;
-// }
 
 .modal-enter .modal-container,
 .modal-leave-active .modal-container {

@@ -72,7 +72,6 @@
     </div>
     <lazy-base-modal
       modal-class="modal-secondary"
-      modal-position="modal-center"
       :modal-custom="true"
       :prevent-body-scroll="true"
       :modal-visible="selectedRecord !== undefined"

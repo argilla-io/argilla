@@ -11,8 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from tests.monitoring.helpers import mock_monitor
+from time import sleep
 
 
 def test_flair_monitoring(mocked_client, monkeypatch):
@@ -34,15 +33,16 @@ def test_flair_monitoring(mocked_client, monkeypatch):
         dataset=dataset,
         sample_rate=1.0,
         agent=model,
+        log_interval=0.5,
     )
 
-    mock_monitor(tagger, monkeypatch)
     # make example sentence
     expected_text = "George Washington went to Washington"
     sentence = Sentence(expected_text)
     # predict NER tags
     tagger.predict(sentence)
 
+    sleep(1)  # wait for the consumer time
     detected_labels = sentence.get_labels("ner")
     records = ar.load(dataset)
     assert len(records) == 1

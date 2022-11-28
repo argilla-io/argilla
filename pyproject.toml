@@ -38,7 +38,10 @@ dependencies = [
     "wrapt ~= 1.13.0",
     # weaksupervision
     "numpy",
-    "tqdm >= 4.27.0"
+    "tqdm >= 4.27.0",
+    # monitor background consumers
+    "backoff",
+    "monotonic"
 
 ]
 dynamic = ["version"]

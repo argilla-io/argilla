@@ -8,4 +8,6 @@ spaCy is a free open-source library for Natural Language Processing in Python.
 
 ```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
 ```
+```{include} /_static/tutorials/labelling-tokenclassification-spacy-pretrained/modal.md
+```
 ````

@@ -190,7 +190,7 @@ class LabelingRule(BaseModel):
     labels: List[str] = Field(default_factory=list)
     query: str
     description: Optional[str] = None
-    author: str
+    author: Optional[str] = None
     created_at: datetime = None
 
 
