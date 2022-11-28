@@ -187,6 +187,7 @@ class EsQueryBuilder:
         exclude_fields: Optional[List[str]] = None,
         doc_from: Optional[int] = None,
         highlight: Optional[HighlightParser] = None,
+        size: Optional[int] = None,
     ) -> Dict[str, Any]:
 
         es_query: Dict[str, Any] = (
@@ -215,6 +216,7 @@ class EsQueryBuilder:
                 es_query=es_query,
                 vector_field=query.embedding_name,
                 vector_value=query.embedding_vector,
+                top_k=size,
             )
 
         return es_query
@@ -338,11 +340,13 @@ class EsQueryBuilder:
         self,
         *,
         es_query: Dict[str, Any],
-        num_candidates: int,
-        top_k: int,
         vector_field: str,
         vector_value: List[float],
+        top_k: Optional[int] = None,
     ):
+        top_k = top_k or 5
+        num_candidates = top_k * 10  # simplest way to compute it
+
         es_query["knn"] = {
             "field": vector_field,
             "query_vector": vector_value,
@@ -358,10 +362,11 @@ class OpenSearchQueryBuilder(EsQueryBuilder):
         self,
         *,
         es_query: Dict[str, Any],
-        top_k: int,
         vector_field: str,
         vector_value: List[float],
+        top_k: Optional[int] = None,
     ):
+        top_k = top_k or 5
         knn = {
             vector_field: {
                 "vector": vector_value,
