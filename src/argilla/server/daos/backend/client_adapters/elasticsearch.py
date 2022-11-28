@@ -50,7 +50,7 @@ class ElasticsearchClient(OpenSearchClient):
         *,
         index: str,
         vectors: Dict[str, int],
-        similarity_metric: str = "dot_product",
+        similarity_metric: str = "l2_norm",
     ):
         self._check_vector_supported()
 
