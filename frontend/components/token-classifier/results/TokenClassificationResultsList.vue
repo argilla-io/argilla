@@ -280,6 +280,13 @@ export default {
         // this.cleanTables();
       }
     },
+    async rule(newValue, oldValue) {
+      // FIXME : remove this watch and insert the Rules in vuexorm in the parent
+      if (newValue.label !== oldValue.label) {
+        console.log(newValue);
+        this.updateGlobalEntitiesByRuleLabel(this.rule.label);
+      }
+    },
     async selectedGlobalEntity(newValue) {
       if (newValue) {
         await this.addAnnotationsToRecordsByQuery(this.name, this.queryText);
@@ -297,7 +304,7 @@ export default {
           this.name,
           rule.query
         );
-        this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
+        await this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
       });
     },
     async getRulesMetricsByQueryText(name, query) {
@@ -361,7 +368,7 @@ export default {
         console.log("Error: ", error);
       }
     },
-    insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
+    async insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
       const datasetId = formatDatasetIdForTokenGlobalEntityModel(
         this.datasetPrimaryKey
       );
@@ -376,7 +383,7 @@ export default {
         name: this.name,
         owner: this.owner,
       };
-      RuleModel.insertOrUpdate({
+      await RuleModel.insertOrUpdate({
         data: newRule,
       });
     },
