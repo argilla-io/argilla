@@ -25,13 +25,13 @@
     <RulesMetricsToken
       title="Rules Metrics"
       :subcardInputs="options"
-      rulesMetricType="info"
+      ruleMetricsType="info"
     />
   </div>
 </template>
 
 <script>
-import RulesMetricsToken from "./rules-metric/RulesMetricToken.component.vue";
+import RulesMetricsToken from "./rules-metric/RuleMetricsToken.component.vue";
 import RulesQueryToken from "./rules-query/RulesQueryToken.component.vue";
 import OptionsForRuleMetrics from "./OptionsForRuleMetrics.class";
 import { PROPERTIES } from "./labellingRules.properties";

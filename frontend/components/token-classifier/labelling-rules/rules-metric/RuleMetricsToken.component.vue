@@ -1,11 +1,11 @@
 <template>
   <div
-    class="rules-metric-token"
-    :class="`rules-metric-token--${rulesMetricType}`"
+    class="rule-metrics-token"
+    :class="`rule-metrics-token--${ruleMetricsType}`"
     :style="cssVars"
   >
-    <h2 class="rules-metric-token__title">{{ title }}</h2>
-    <div class="rules-metric-token__metrics" v-if="subcardInputs">
+    <h2 class="rule-metrics-token__title">{{ title }}</h2>
+    <div class="rule-metrics-token__metrics" v-if="subcardInputs">
       <div
         class="subcard"
         v-for="{ id, label, mainValue, subValue, tooltip } in subcardInputs"
@@ -15,7 +15,7 @@
           :message="tooltip.tooltipMessage"
           :direction="tooltip.tooltipDirection"
         >
-          <h3 class="rules-metric-token__subtitle">
+          <h3 class="rule-metrics-token__subtitle">
             {{ label }}
           </h3>
         </TooltipComponent>
@@ -29,7 +29,7 @@
 <script>
 import TooltipComponent from "@/components/base/tooltip/Tooltip.component.vue";
 export default {
-  name: "RulesMetricsToken",
+  name: "RuleMetricsToken",
   components: {
     TooltipComponent,
   },
@@ -46,13 +46,10 @@ export default {
       type: Number,
       default: () => 2,
     },
-    rulesMetricType: {
+    ruleMetricsType: {
       type: String,
       default: "info",
       validator: (value) => ["info", "warning", "error"].includes(value),
-    },
-    btnLabel: {
-      type: String,
     },
   },
   computed: {
@@ -73,7 +70,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.rules-metric-token {
+.rule-metrics-token {
   $this: &;
   display: flex;
   flex-direction: column;

@@ -1,10 +1,11 @@
 import { shallowMount } from "@vue/test-utils";
-import RulesMetricToken from "./RulesMetricToken.component";
+import RuleMetricsToken from "./RuleMetricsToken.component";
 
 let wrapper = null;
 const options = {
   propsData: {
-    title: "Title of Rules Metric",
+    title: "Title of Rule Metrics",
+    ruleMetricsType: "info",
     subcardInputs: [
       {
         id: "subCard1",
@@ -30,7 +31,7 @@ const options = {
   },
 };
 beforeEach(() => {
-  wrapper = shallowMount(RulesMetricToken, options);
+  wrapper = shallowMount(RuleMetricsToken, options);
 });
 
 afterEach(() => {
@@ -38,10 +39,11 @@ afterEach(() => {
 });
 describe("RulesMetricToken", () => {
   it("render the component", () => {
-    expect(wrapper.is(RulesMetricToken)).toBe(true);
-    expect(wrapper.find(".rule-metrics__title").text()).toContain(
+    expect(wrapper.is(RuleMetricsToken)).toBe(true);
+    expect(wrapper.find(".rule-metrics-token__title").text()).toContain(
       options.propsData.title
     );
+    expect(wrapper.find(".rule-metrics-token--info").exists()).toBe(true);
     expect(wrapper.find(".subcard").exists()).toBe(true);
     expect(wrapper.find(".rule-metrics__bottom").exists()).toBe(false);
     expect(wrapper.findAll(".subcard").length).toBe(
@@ -49,12 +51,8 @@ describe("RulesMetricToken", () => {
     );
     //value by default
     expect(wrapper.vm.cssVars).toStrictEqual({
-      "--background-color": "#0508D9",
-      "--border-color": "black",
       "--number-of-rows": 1,
       "--number-of-columns": 2,
-      "--text-color": "white",
-      "--text-subcard-color": "black",
     });
   });
 });
