@@ -203,11 +203,11 @@ class TextClassificationRecord(_Validators):
 
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
+
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
-    creation_time: Optional[datetime.datetime] = None
 
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
@@ -303,11 +303,11 @@ class TokenClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
     annotation_agent: Optional[str] = None
+
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
-    creation_time: Optional[datetime.datetime] = None
 
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
@@ -516,11 +516,11 @@ class TextGenerationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[str] = None
     annotation_agent: Optional[str] = None
+
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
-    creation_time: Optional[datetime.datetime] = None
 
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
