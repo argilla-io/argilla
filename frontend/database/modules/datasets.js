@@ -110,6 +110,7 @@ async function _loadTaskDataset(dataset) {
   /**
    * Loads a specific dataset for records observation
    */
+
   if (dataset.task === null) {
     throw Error("Wrong dataset task initialization");
   }
@@ -445,7 +446,6 @@ async function _updateTaskDataset({ dataset, data }) {
     const records = data.results ? data.results.records : null;
     if (records) {
       updateTokenRecordsByDatasetId(datasetPrimaryKey, records);
-      initTokenGlobalEntitiesByDatasetId(datasetPrimaryKey);
     }
   }
 
@@ -472,7 +472,6 @@ const initTokenGlobalEntitiesByDatasetId = (datasetPrimaryKey) => {
   const { annotated_as, predicted_as } = TokenClassificationDataset.find(
     datasetPrimaryKey
   )?.results?.aggregations || { annotated_as: {}, predicted_as: {} };
-
   const concatPredictionsAndAnnotations = { ...annotated_as, ...predicted_as };
 
   Object.keys(concatPredictionsAndAnnotations).forEach((text, index) => {
@@ -731,24 +730,24 @@ const actions = {
      * Fetch a observation dataset by name
      */
     const workspace = currentWorkspace($nuxt.$route);
-
     const ds = await _getOrFetchDataset({ workspace, name });
     const { viewMode } = _configuredRouteParams();
     await _configureDatasetViewSettings(ds.name, viewMode);
     const dataset = await _loadTaskDataset(ds);
+    console.log(ds, dataset);
     await dataset.initialize();
     await _updateAnnotationProgress({
       id: name,
       total: dataset.globalResults.total,
       aggregations: dataset.globalResults.aggregations,
     });
+
+    if (dataset.task === "TokenClassification") {
+      const datasetPrimaryKey = getDatasetModelPrimaryKey(dataset);
+      initTokenGlobalEntitiesByDatasetId(datasetPrimaryKey);
+    }
     return dataset;
   },
-
-  // async load(_, dataset) {
-  //   console.log("daboudi", _loadTaskDataset(dataset));
-  //   return await _loadTaskDataset(dataset);
-  // },
 
   async search(_, { dataset, query, sort, size }) {
     return await _search({ dataset, query, sort, size });
