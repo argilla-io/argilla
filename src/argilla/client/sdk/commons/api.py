@@ -85,19 +85,17 @@ async def async_bulk(
     client: AuthenticatedClient,
     name: str,
     json_body: Union[
-        TextClassificationBulkData, TokenClassificationBulkData, Text2TextBulkData
+        TextClassificationBulkData,
+        TokenClassificationBulkData,
+        Text2TextBulkData,
     ],
 ) -> Response[BulkResponse]:
-    url = f"{client.base_url}/api/datasets/{name}/{_TASK_TO_ENDPOINT[type(json_body)]}:bulk"
+    path = f"/api/datasets/{name}/{_TASK_TO_ENDPOINT[type(json_body)]}:bulk"
 
-    async with httpx.AsyncClient() as async_client:
-        response = await async_client.post(
-            url=url,
-            headers=client.get_headers(),
-            cookies=client.get_cookies(),
-            timeout=client.get_timeout(),
-            json=json_body.dict(by_alias=True),
-        )
+    response = await client.post_async(
+        path=path,
+        json=json_body.dict(by_alias=True),
+    )
 
     return build_bulk_response(response, name=name, body=json_body)
 
