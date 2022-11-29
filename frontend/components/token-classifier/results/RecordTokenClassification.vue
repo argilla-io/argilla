@@ -220,4 +220,7 @@ export default {
     opacity: 1;
   }
 }
+:deep(.highlight-text) {
+  text-decoration: underline;
+}
 </style>
