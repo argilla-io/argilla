@@ -71,7 +71,7 @@ server = [
     # Info status
     "psutil ~= 5.8.0",
     # Telemetry
-    "segment-analytics-python != 2.2.1"
+    "segment-analytics-python == 2.2.0"
 ]
 listeners = [
     "schedule ~= 1.1.0",

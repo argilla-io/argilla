@@ -20,6 +20,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 
 from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
 from argilla.server.services.metrics.models import CommonTasksMetrics
+from argilla.server.services.search.model import ServiceRecordsQuery
 from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationRecord,
 )
@@ -107,14 +108,27 @@ class F1Metric(ServicePythonMetric):
 class DatasetLabels(ServicePythonMetric):
     id: str = Field("dataset_labels", const=True)
     name: str = Field("The dataset labels", const=True)
-    max_processed_records: int = 10000
+
+    records_to_fetch: int = 1000
+
+    shuffle_records: bool = Field(default=True)
+
+    def prepare_query(self, query: ServiceRecordsQuery):
+        text = query.query_text or ""
+        if text:
+            text += " AND "
+        text += "(_exists_:annotated_by OR _exists_:predicted_by)"
+
+        query.query_text = text
+        return query
 
     def apply(
-        self, records: Iterable[ServiceTextClassificationRecord]
+        self,
+        records: Iterable[ServiceTextClassificationRecord],
     ) -> Dict[str, Any]:
         ds_labels = set()
         for _ in range(
-            0, self.max_processed_records
+            0, self.records_to_fetch
         ):  # Only a few of records will be parsed
             record = next(records, None)
             if record is None:
