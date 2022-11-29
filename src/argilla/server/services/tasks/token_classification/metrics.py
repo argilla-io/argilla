@@ -14,7 +14,6 @@
 
 from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
 
-from overrides import overrides
 from pydantic import BaseModel, Field
 
 from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
@@ -130,7 +129,6 @@ class DatasetLabels(ServicePythonMetric):
 
     shuffle_records: bool = Field(default=True)
 
-    @overrides
     def prepare_query(self, query: ServiceRecordsQuery):
         text = query.query_text or ""
         if text:

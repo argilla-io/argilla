@@ -14,7 +14,6 @@
 
 from typing import Any, ClassVar, Dict, Iterable, List
 
-from overrides import overrides
 from pydantic import Field
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.preprocessing import MultiLabelBinarizer
@@ -114,7 +113,6 @@ class DatasetLabels(ServicePythonMetric):
 
     shuffle_records: bool = Field(default=True)
 
-    @overrides
     def prepare_query(self, query: ServiceRecordsQuery):
         text = query.query_text or ""
         if text:
