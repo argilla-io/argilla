@@ -92,8 +92,12 @@ class MetricsService:
         """
 
         if isinstance(metric, ServicePythonMetric):
+            query = metric.prepare_query(query)
             records = self.__dao__.scan_dataset(
-                dataset, search=DaoRecordsSearch(query=query)
+                dataset,
+                search=DaoRecordsSearch(query=query),
+                shuffle=metric.shuffle_records,
+                limit=metric.records_to_fetch,
             )
             return metric.apply(map(record_class.parse_obj, records))
 

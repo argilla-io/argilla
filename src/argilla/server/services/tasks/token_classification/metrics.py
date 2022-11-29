@@ -14,10 +14,12 @@
 
 from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
 
+from overrides import overrides
 from pydantic import BaseModel, Field
 
 from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
 from argilla.server.services.metrics.models import CommonTasksMetrics
+from argilla.server.services.search.model import ServiceRecordsQuery
 from argilla.server.services.tasks.token_classification.model import (
     EntitySpan,
     ServiceTokenClassificationAnnotation,
@@ -124,15 +126,27 @@ class F1Metric(ServicePythonMetric[ServiceTokenClassificationRecord]):
 class DatasetLabels(ServicePythonMetric):
     id: str = Field("dataset_labels", const=True)
     name: str = Field("The dataset entity labels", const=True)
-    max_processed_records: int = 10000
+    records_to_fetch: int = 1500
+
+    shuffle_records: bool = Field(default=True)
+
+    @overrides
+    def prepare_query(self, query: ServiceRecordsQuery):
+        text = query.query_text or ""
+
+        text += " AND (_exists_:annotated_by OR _exists_:predicted_by)"
+        query.query_text = text
+
+        return query
 
     def apply(
-        self, records: Iterable[ServiceTokenClassificationRecord]
+        self,
+        records: Iterable[ServiceTokenClassificationRecord],
     ) -> Dict[str, Any]:
         ds_labels = set()
 
         for _ in range(
-            0, self.max_processed_records
+            0, self.records_to_fetch
         ):  # Only a few of records will be parsed
             record: ServiceTokenClassificationRecord = next(records, None)
             if record is None:
