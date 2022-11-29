@@ -95,7 +95,6 @@ export default {
     };
   },
   async mounted() {
-    await this.initRuleModelAndRulesMetricsModel();
     this.initialGlobalEntities = this.initGlobalEntities();
   },
   components: {
@@ -277,13 +276,12 @@ export default {
           this.updateGlobalEntitiesByRuleLabel(this.rule.label);
         }
       } else {
-        // this.cleanTables();
+        // TODO: clear tables
       }
     },
     async rule(newValue, oldValue) {
       // FIXME : remove this watch and insert the Rules in vuexorm in the parent
       if (newValue.label !== oldValue.label) {
-        console.log(newValue);
         this.updateGlobalEntitiesByRuleLabel(this.rule.label);
       }
     },
@@ -297,16 +295,6 @@ export default {
     ...mapActions({
       changeViewMode: "entities/datasets/changeViewMode",
     }),
-    async initRuleModelAndRulesMetricsModel() {
-      const rules = await this.fetchTokenClassificationRules(this.name);
-      rules?.forEach(async (rule) => {
-        const rulesMetrics = await this.getRulesMetricsByQueryText(
-          this.name,
-          rule.query
-        );
-        await this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
-      });
-    },
     async getRulesMetricsByQueryText(name, query) {
       let rulesMetrics = null;
 
@@ -314,20 +302,6 @@ export default {
         rulesMetrics = await this.fetchRuleMetricsByQueryText(name, query);
       }
       return rulesMetrics;
-    },
-    async fetchTokenClassificationRules(name) {
-      try {
-        const { data, status } = await this.$axios.get(
-          `/datasets/${name}/TokenClassification/labeling/rules`
-        );
-        if (status === 200) {
-          return data;
-        } else {
-          throw new Error("Error fetching API rules");
-        }
-      } catch (error) {
-        console.log("Error: ", error);
-      }
     },
     async fetchRuleMetricsByQueryText(name, query) {
       try {
@@ -367,25 +341,6 @@ export default {
       } catch (error) {
         console.log("Error: ", error);
       }
-    },
-    async insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
-      const datasetId = formatDatasetIdForTokenGlobalEntityModel(
-        this.datasetPrimaryKey
-      );
-      const newRule = {
-        ...rule,
-        rule_metrics: {
-          ...rulesMetrics,
-          query: rule.query,
-          dataset_id: datasetId,
-        },
-        dataset_id: datasetId,
-        name: this.name,
-        owner: this.owner,
-      };
-      await RuleModel.insertOrUpdate({
-        data: newRule,
-      });
     },
     updateGlobalEntitiesByRuleLabel(label) {
       this.initialGlobalEntities = this.initialGlobalEntities.map(
