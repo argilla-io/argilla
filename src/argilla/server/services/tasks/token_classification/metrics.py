@@ -133,10 +133,11 @@ class DatasetLabels(ServicePythonMetric):
     @overrides
     def prepare_query(self, query: ServiceRecordsQuery):
         text = query.query_text or ""
+        if text:
+            text += " AND "
+        text += " (_exists_:annotated_by OR _exists_:predicted_by)"
 
-        text += " AND (_exists_:annotated_by OR _exists_:predicted_by)"
         query.query_text = text
-
         return query
 
     def apply(
