@@ -734,7 +734,6 @@ const actions = {
     const { viewMode } = _configuredRouteParams();
     await _configureDatasetViewSettings(ds.name, viewMode);
     const dataset = await _loadTaskDataset(ds);
-    console.log(ds, dataset);
     await dataset.initialize();
     await _updateAnnotationProgress({
       id: name,
