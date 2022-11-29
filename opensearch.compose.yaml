@@ -17,7 +17,7 @@ services:
         soft: -1
         hard: -1
     ports:
-      - 19200:9200
+      - 9200:9200
     networks:
       - argilla
 networks:
