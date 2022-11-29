@@ -471,7 +471,7 @@ class TokenClassificationRecord(_Validators):
         return self._span_utils.to_tags(spans)
 
 
-class TextGenerationRecord(_Validators):
+class Text2TextRecord(_Validators):
     """Record for a text to text task
 
     Args:
@@ -535,8 +535,8 @@ class TextGenerationRecord(_Validators):
         return [(pred, 1.0) if isinstance(pred, str) else pred for pred in prediction]
 
 
-@deprecated("Use TextGenerationRecord instead.")
-class Text2TextRecord(TextGenerationRecord):
+@deprecated("Use Text2TextRecord instead.")
+class TextGenerationRecord(Text2TextRecord):  # TODO Remove TextGenerationRecord
     pass
 
 
