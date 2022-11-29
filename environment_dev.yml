@@ -33,7 +33,7 @@ dependencies:
       # code formatting
       - pre-commit==2.15.0
       # extra test dependencies
-      - cleanlab!=2.1.0 # With this version, tests are failing
+      - cleanlab~=2.0.0 # With this version, tests are failing
       - datasets>1.17.0,<2.3.0 # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
       - huggingface_hub != 0.5.0 # some backward comp. problems introduced in 0.5.0
       - flair==0.10
