@@ -296,6 +296,7 @@ export default {
       changeViewMode: "entities/datasets/changeViewMode",
     }),
     async getRulesMetricsByQueryText(name, query) {
+      // FIXME: duplication of code with TokenClassificationResultsList => function needs to be externalized
       let rulesMetrics = null;
 
       if (query) {
