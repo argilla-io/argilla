@@ -403,7 +403,7 @@ def top_k_mentions(
         The summary top k mentions distribution
 
     Examples:
-        >>> from argilla.metrics.token_classification import entity_consistency
+        >>> from argilla.metrics.token_classification import top_k_mentions
         >>> summary = top_k_mentions(name="example-dataset")
         >>> summary.visualize()
     """

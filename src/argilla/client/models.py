@@ -50,8 +50,9 @@ class _Validators(BaseModel):
 
         if default_length_exceeded:
             message = (
-                "Some metadata values could exceed the max length. For those cases, values will be"
-                f" truncated by keeping only the last {DEFAULT_MAX_KEYWORD_LENGTH} characters. "
+                "Some metadata values could exceed the max length. For those cases,"
+                " values will be truncated by keeping only the last"
+                f" {DEFAULT_MAX_KEYWORD_LENGTH} characters. "
                 + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
             )
             warnings.warn(message, UserWarning)
@@ -84,11 +85,14 @@ class _Validators(BaseModel):
             )
         return v
 
-    @validator("event_timestamp", check_fields=False)
-    def _nat_to_none(cls, v):
-        """Converts pandas `NaT`s to `None`s"""
+    @validator("event_timestamp", check_fields=False, always=True)
+    def _nat_to_none_and_one_to_now(cls, v):
+        """Converts pandas `NaT`s to `None`s and None´s to datetime.now()"""
         if v is pd.NaT:
-            return None
+            v = None
+
+        v = v or datetime.datetime.now()
+
         return v
 
     @root_validator
@@ -163,7 +167,7 @@ class TextClassificationRecord(_Validators):
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
-            The timestamp of the record.
+            The timestamp for the creation of the record. Defaults to `datetime.datetime.now()`.
         metrics:
             READ ONLY! Metrics at record level provided by the server when using `rg.load`.
             This attribute will be ignored when using `rg.log`.
@@ -274,7 +278,7 @@ class TokenClassificationRecord(_Validators):
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
-            The timestamp of the record.
+            The timestamp for the creation of the record. Defaults to `datetime.datetime.now()`.
         metrics:
             READ ONLY! Metrics at record level provided by the server when using `rg.load`.
             This attribute will be ignored when using `rg.log`.
@@ -307,7 +311,6 @@ class TokenClassificationRecord(_Validators):
 
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
-
     _span_utils: SpanUtils = PrivateAttr()
 
     def __init__(
@@ -491,7 +494,7 @@ class TextGenerationRecord(_Validators):
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
-            The timestamp of the record.
+            The timestamp for the creation of the record. Defaults to `datetime.datetime.now()`.
         metrics:
             READ ONLY! Metrics at record level provided by the server when using `rg.load`.
             This attribute will be ignored when using `rg.log`.
