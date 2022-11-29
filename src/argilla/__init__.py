@@ -48,9 +48,11 @@ if _TYPE_CHECKING:
         read_pandas,
     )
     from argilla.client.models import (
+        TextGenerationRecord,  # TODO Remove TextGenerationRecord
+    )
+    from argilla.client.models import (
         Text2TextRecord,
         TextClassificationRecord,
-        TextGenerationRecord,
         TokenAttributions,
         TokenClassificationRecord,
     )
@@ -78,7 +80,7 @@ _import_structure = {
     ],
     "client.models": [
         "Text2TextRecord",
-        "TextGenerationRecord",
+        "TextGenerationRecord",  # TODO Remove TextGenerationRecord
         "TextClassificationRecord",
         "TokenClassificationRecord",
         "TokenAttributions",

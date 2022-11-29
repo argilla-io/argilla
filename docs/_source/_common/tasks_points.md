@@ -11,7 +11,7 @@ Are you unsure about what these NLP Tasks entail, take a look at our [terminolog
 :link: ./token_classification.html
 
 ```
-```{grid-item-card} 👨🏽💬 TextGeneration
+```{grid-item-card} 👨🏽💬 Text2Text
 :link: ./text_generation.html
 
 ```
