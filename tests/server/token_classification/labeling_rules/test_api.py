@@ -20,7 +20,7 @@ from argilla.server.apis.v0.handlers.token_classification_labeling_rules import 
     DatasetLabelingRulesMetricsSummary,
     LabelingRule,
     LabelingRuleSearchResults,
-    SearchRecordsByRuleResponse,
+    RecordRuleAnnotations,
 )
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
@@ -187,13 +187,13 @@ def test_search_records_by_rule(
         rules=0,
     )
 
-    search_by_rule(
+    fetch_rule_annotations(
         client=mocked_client,
         base_url=base_api_url,
         query=query,
     )
 
-    results = search_by_rule(
+    results = fetch_rule_annotations(
         client=mocked_client,
         base_url=base_api_url,
         query=query,
@@ -207,7 +207,7 @@ def test_search_records_by_rule(
         label=label,
     )
 
-    search_by_rule(
+    fetch_rule_annotations(
         client=mocked_client,
         base_url=base_api_url,
         query=rule.query,
@@ -215,7 +215,7 @@ def test_search_records_by_rule(
         send_label=False,
         ids=[results.records[0].id],
     )
-    search_by_rule(
+    fetch_rule_annotations(
         client=mocked_client,
         base_url=base_api_url,
         query=rule.query,
@@ -242,7 +242,6 @@ def test_rule_summary(
         client=mocked_client,
         base_url=base_api_url,
         label="BB",
-        fetch_records=True,
     )
 
     rule = create_rule(
@@ -255,7 +254,6 @@ def test_rule_summary(
         client=mocked_client,
         base_url=base_api_url,
         label=rule.label,
-        fetch_records=True,
         send_label=False,
     )
 
@@ -327,7 +325,6 @@ def get_rule_summary(
     client,
     base_url: str,
     label: Optional[str] = None,
-    fetch_records: bool = False,
     send_label: bool = True,
 ):
     query = "a*"
@@ -335,8 +332,6 @@ def get_rule_summary(
     params = {}
     if label and send_label:
         params["label"] = label
-    if fetch_records:
-        params["with_annotations"] = True
     if params:
         query_params = "&".join([f"{k}={v}" for k, v in params.items()])
         url += f"?{query_params}"
@@ -354,18 +349,10 @@ def get_rule_summary(
         "total_records": 6,
     }
 
-    if fetch_records:
-        assert results.agent == "a"
-        _validate_matched_records(
-            records=results.records,
-            query=query,
-            label=label,
-        )
-
     return query, results
 
 
-def search_by_rule(
+def fetch_rule_annotations(
     *,
     client,
     base_url: str,
@@ -374,14 +361,14 @@ def search_by_rule(
     send_label: bool = True,
     ids: List[str] = None,
 ):
-    url = f"{base_url}/labeling/rules/{query}/search"
+    url = f"{base_url}/labeling/rules/{query}/annotations"
     if label and send_label:
         url += f"?label={label}"
     response = client.post(url, json={"record_ids": ids or []})
     data = response.json()
     assert response.status_code == 200, data
 
-    results = SearchRecordsByRuleResponse.parse_obj(data)
+    results = RecordRuleAnnotations.parse_obj(data)
     assert results.total == len(ids) if ids else 4, results
 
     _validate_matched_records(
