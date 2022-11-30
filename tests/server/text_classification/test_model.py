@@ -86,6 +86,7 @@ def test_model_dict():
         "id": 1,
         "inputs": {"text": "This is a text"},
         "metrics": {},
+        "predictions": {},
         "multi_label": True,
         "status": "Default",
     }
@@ -128,6 +129,7 @@ def test_model_with_annotations():
         "id": 1,
         "inputs": {"text": "This is a text"},
         "metrics": {},
+        "predictions": {},
         "multi_label": True,
         "status": "Default",
     }

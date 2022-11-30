@@ -91,6 +91,7 @@
 <script>
 import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
+
 export default {
   props: {
     dataset: {

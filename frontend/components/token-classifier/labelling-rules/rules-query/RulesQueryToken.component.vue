@@ -1,0 +1,388 @@
+<template>
+  <CardComponent
+    class="rule-query-token"
+    :style="cssVars"
+    v-if="componentToShow === 'SelectAnEntityComponent'"
+  >
+    <div class="rule-query-token__title-area">
+      <h2 class="title">{{ title }}</h2>
+      <span class="rule-query-token__records-number" v-if="recordLength">
+        {{ RECORDS }} ({{ recordLength }})
+      </span>
+    </div>
+    <div class="rule-query-token__search">
+      <BaseInputContainer class="searchbar">
+        <svgicon v-if="!searchEntity" name="search" width="20" height="40" />
+        <svgicon
+          class="searchbar__button"
+          v-else
+          name="close"
+          width="20"
+          height="20"
+          @click="searchEntity = ''"
+        />
+        <BaseInput
+          v-model="searchEntity"
+          class="searchbar__input"
+          placeholder="Search an entity"
+        />
+      </BaseInputContainer>
+    </div>
+    <div class="rule-query-token__chips">
+      <ChipsComponent :chips="entities" @on-chips-select="onChipsSelection" />
+    </div>
+    <div class="rule-query-token__footer">
+      <div class="rule-query-token__buttons" v-if="showButtons">
+        <base-button
+          class="primary"
+          @click="onClickSaveRule"
+          :disabled="isSaveRulesBtnDisabled"
+        >
+          {{ SAVE_RULE }}
+        </base-button>
+        <base-button
+          class="primary outline"
+          @click="onClickCancel"
+          :disabled="isCancelBtnDisabled"
+        >
+          {{ CANCEL }}
+        </base-button>
+      </div>
+      <div class="" v-else>
+        <p class="rule-is-already-saved">
+          {{ message }}
+        </p>
+      </div>
+      <div class="manage-rules-btn">
+        <base-button
+          class="primary light"
+          @click="onClickViewRules"
+          :disabled="isManagedRulesBtnDisabled"
+        >
+          {{ viewRulesBtnLabel }}
+        </base-button>
+      </div>
+    </div>
+  </CardComponent>
+
+  <CardComponent
+    class="if-there-is-no-global-entities"
+    v-else-if="componentToShow === 'NoGlobalEntitiesComponent'"
+  >
+    <div class="if-there-is-no-global-entities__content">
+      <div class="text-wrapper">
+        <p class="title">{{ NO_LABEL_YET }}</p>
+        <div class="show-what-to-do-text">
+          <p class="item">
+            {{ CREATE_NEW_RULE_DESC }}
+          </p>
+          <p class="item">
+            {{ GO_TO_ANNOTATION_MODE }}
+            <a href="#" @click.prevent="onClickGoToAnnotationMode">
+              {{ CREATE_LABELS_AND_ANNOTATE_SOME_RECORDS }}
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="if-there-is-no-query__footer">
+      <div class="manage-rules-btn">
+        <base-button
+          class="primary light"
+          @click="onClickViewRules"
+          :disabled="isManagedRulesBtnDisabled"
+        >
+          {{ viewRulesBtnLabel }}
+        </base-button>
+      </div>
+    </div>
+  </CardComponent>
+
+  <CardComponent
+    class="if-there-is-no-query"
+    v-else-if="componentToShow === 'NoQueryComponent'"
+  >
+    <div class="if-there-is-no-query__item">
+      <div class="text-wrapper">
+        <div class="label-icon">
+          <svgicon
+            name="weak-labeling"
+            color="#666666"
+            width="30"
+            height="30"
+          />
+        </div>
+        <p class="show-what-to-do-text">
+          {{ CREATE_A_NEW_RULE_IN_SEARCH_BOX }}
+        </p>
+      </div>
+    </div>
+    <div class="if-there-is-no-query__footer">
+      <div class="manage-rules-btn">
+        <base-button
+          class="primary light"
+          @click="onClickViewRules"
+          :disabled="isManagedRulesBtnDisabled"
+        >
+          {{ viewRulesBtnLabel }}
+        </base-button>
+      </div>
+    </div>
+  </CardComponent>
+</template>
+
+<script>
+import ChipsComponent from "./Chips.component.vue";
+import CardComponent from "@/components/base/card/Card.component.vue";
+import { PROPERTIES } from "../labellingRules.properties";
+
+export default {
+  name: "RulesQueryToken",
+  components: {
+    ChipsComponent,
+    CardComponent,
+  },
+  props: {
+    query: {
+      type: String,
+      required: true,
+    },
+    isGlobalEntities: {
+      type: Boolean,
+      required: true,
+    },
+    entities: {
+      type: Array,
+      required: true,
+    },
+    showButtons: {
+      type: Boolean,
+      required: true,
+    },
+    message: {
+      type: String,
+      required: true,
+    },
+    recordLength: {
+      type: Number | null,
+      default: () => null,
+    },
+    rulesLength: {
+      type: Number,
+      default: () => 0,
+    },
+    isManagedRulesBtnDisabled: {
+      type: Boolean,
+      default: false,
+    },
+    isSaveRulesBtnDisabled: {
+      type: Boolean,
+      required: true,
+    },
+    isCancelBtnDisabled: {
+      type: Boolean,
+      required: true,
+    },
+    textColor: {
+      type: String,
+      default: () => "#4D4D4D",
+    },
+    backgroundColor: {
+      type: String,
+      default: () => "#fff",
+    },
+    backgroundLabelColor: {
+      type: String,
+      default: () => "#fff",
+    },
+  },
+  data() {
+    return {
+      searchEntity: "",
+      RECORDS: PROPERTIES.RECORDS,
+      SAVE_RULE: PROPERTIES.SAVE_RULE,
+      CANCEL: PROPERTIES.CANCEL,
+      NO_LABEL_YET: PROPERTIES.NO_LABEL_YET,
+      CREATE_NEW_RULE_DESC: PROPERTIES.CREATE_NEW_RULE_DESC,
+      GO_TO_ANNOTATION_MODE: PROPERTIES.GO_TO_ANNOTATION_MODE,
+      CREATE_LABELS_AND_ANNOTATE_SOME_RECORDS:
+        PROPERTIES.CREATE_LABELS_AND_ANNOTATE_SOME_RECORDS,
+      CREATE_A_NEW_RULE_IN_SEARCH_BOX:
+        PROPERTIES.CREATE_A_NEW_RULE_IN_SEARCH_BOX,
+    };
+  },
+  computed: {
+    cssVars() {
+      return {
+        "--text-color": this.textColor,
+        "--background-color": this.backgroundColor,
+        "--background-label-color": this.backgroundLabelColor,
+      };
+    },
+    title() {
+      return `${this.query}`;
+    },
+    viewRulesBtnLabel() {
+      return this.rulesLength
+        ? `View Rules (${this.rulesLength})`
+        : `View Rules`;
+    },
+    componentToShow() {
+      if (!this.query) {
+        return "NoQueryComponent";
+      }
+
+      if (!this.isGlobalEntities) {
+        return "NoGlobalEntitiesComponent";
+      }
+
+      return "SelectAnEntityComponent";
+    },
+  },
+  methods: {
+    onChipsSelection({ id }) {
+      this.updateTokenGlobalEntities(id);
+    },
+    onClickSaveRule() {
+      this.$emit("on-click-save-rule");
+    },
+    onClickCancel() {
+      this.$emit("on-click-cancel");
+    },
+    updateTokenGlobalEntities(id) {
+      this.$emit("on-select-global-entity", id);
+    },
+    onClickViewRules() {
+      this.$emit("on-click-view-rules");
+    },
+    onClickGoToAnnotationMode() {
+      this.$emit("on-click-go-to-annotation-mode");
+    },
+  },
+  watch: {
+    searchEntity(newValue) {
+      this.$emit("on-search-entity", newValue);
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+.if-there-is-no-global-entities {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  min-height: 344px;
+  &__content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    .text-wrapper {
+      flex: 0.7;
+      display: flex;
+      flex-direction: column;
+      .title {
+        @include font-size(18px);
+        color: $black-54;
+      }
+      .item {
+        margin-bottom: 0;
+        color: $black-54;
+        a {
+          color: $primary-color;
+        }
+      }
+      .show-what-to-do-text {
+        display: flex;
+        flex-direction: column;
+      }
+    }
+  }
+}
+
+.if-there-is-no-query {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  min-height: 344px;
+  min-width: 15em;
+  &__item {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .text-wrapper {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      justify-content: center;
+      .label-icon {
+        flex-basis: 50px;
+      }
+      .show-what-to-do-text {
+        @include font-size(18px);
+        color: $black-54;
+      }
+    }
+  }
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.rule-query-token {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 2em;
+  &__title-area {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    .title {
+      padding-bottom: 0;
+      margin-top: 0;
+      @include font-size(22px);
+      line-height: 22px;
+      font-weight: bold;
+    }
+  }
+  &__search {
+    .searchbar {
+      display: flex;
+      gap: 1em;
+      align-items: center;
+    }
+  }
+  &__chips {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    .manage-rules-btn {
+      min-width: 8em;
+    }
+  }
+  &__records-number {
+    color: $black-37;
+  }
+  &__buttons {
+    display: flex;
+    align-items: center;
+    gap: $base-space;
+  }
+}
+
+.searchbar__button {
+  cursor: pointer;
+}
+</style>

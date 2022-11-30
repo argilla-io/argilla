@@ -25,6 +25,14 @@ import { ObservationDataset } from "@/models/Dataset";
 import { Text2TextDataset } from "@/models/Text2Text";
 import { TextClassificationDataset } from "@/models/TextClassification";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
+import { Rule } from "@/models/token-classification/Rule.modelTokenClassification";
+import RulesMetric from "@/models/token-classification/RulesMetric.modelTokenClassification";
+import { TokenGlobalEntity } from "@/models/token-classification/TokenGlobalEntity.modelTokenClassification";
+import { TokenRecord } from "@/models/token-classification/TokenRecord.modelTokenClassification";
+import { TokenAnnotation } from "@/models/token-classification/TokenAnnotation.modelTokenClassification";
+import { TokenPrediction } from "@/models/token-classification/TokenPrediction.modelTokenClassification";
+import { TokenRuleAnnotation } from "@/models/token-classification/TokenRuleAnnotation.modelTokenClassification";
+import { TokenEntity } from "@/models/token-classification/TokenEntity.modelTokenClassification";
 
 import info from "@/database/modules/info";
 import datasets from "@/database/modules/datasets";
@@ -45,5 +53,13 @@ database.register(ObservationDataset, datasets);
 database.register(Text2TextDataset);
 database.register(TextClassificationDataset, text_classification);
 database.register(TokenClassificationDataset, token_classification);
+database.register(Rule);
+database.register(RulesMetric);
+database.register(TokenGlobalEntity);
+database.register(TokenRecord);
+database.register(TokenAnnotation);
+database.register(TokenPrediction);
+database.register(TokenRuleAnnotation);
+database.register(TokenEntity);
 
 export default database;

@@ -13,25 +13,31 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Iterable, List, Optional, Type
+from typing import Iterable, List, Optional, Tuple
 
 from fastapi import Depends
 
 from argilla.server.commons.config import TasksFactory
 from argilla.server.daos.backend.search.model import SortableField
-from argilla.server.services.metrics.models import ServiceBaseTaskMetrics
+from argilla.server.errors import EntityNotFoundError
+from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.search.model import ServiceSearchResults, ServiceSortConfig
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
+from argilla.server.services.tasks.token_classification.labeling_rules.service import (
+    NERLabelingRulesMixin,
+    RuleRecordInfo,
+)
 from argilla.server.services.tasks.token_classification.model import (
+    ServiceLabelingRule,
     ServiceTokenClassificationDataset,
     ServiceTokenClassificationQuery,
     ServiceTokenClassificationRecord,
 )
 
 
-class TokenClassificationService:
+class TokenClassificationService(NERLabelingRulesMixin):
     """
     Token classification service
 
@@ -42,18 +48,22 @@ class TokenClassificationService:
     @classmethod
     def get_instance(
         cls,
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
         storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
         search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
     ):
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(storage, search)
+            cls._INSTANCE = cls(storage=storage, search=search, datasets=datasets)
         return cls._INSTANCE
 
     def __init__(
         self,
+        datasets: DatasetsService,
         storage: RecordsStorageService,
         search: SearchRecordsService,
     ):
+        super().__init__(datasets, records=search.__dao__)
+
         self.__storage__ = storage
         self.__search__ = search
 
@@ -141,6 +151,49 @@ class TokenClassificationService:
             ]
 
         return results
+
+    def search_by_rule(
+        self,
+        dataset: ServiceTokenClassificationDataset,
+        query: str,
+        record_ids: List[str] = None,
+        label: Optional[str] = None,
+        span_selector: Optional[str] = None,
+        record_from: int = 0,
+        size: int = 20,
+    ) -> Tuple[int, str, List[RuleRecordInfo]]:
+        results = self.__search__.search(
+            dataset=dataset,
+            record_type=ServiceTokenClassificationRecord,
+            query=ServiceTokenClassificationQuery(
+                query_text=query,
+                ids=record_ids,
+            ),
+            only_fields=["text", "tokens"],
+            size=size,
+            record_from=record_from,
+        )
+        rule = None
+        if not label:
+            try:
+                rule = self.find_labeling_rule(dataset=dataset, query_or_name=query)
+                label = rule.label
+                span_selector = span_selector or rule.span_selector
+            except EntityNotFoundError:
+                return results.total, query, []
+
+        if not rule:
+            rule = ServiceLabelingRule(
+                query=query,
+                label=label,
+                span_selector=span_selector,
+            )
+
+        records = self.apply_rule(
+            rule=rule,
+            records=results.records,
+        )
+        return results.total, rule.name, records
 
     def read_dataset(
         self,

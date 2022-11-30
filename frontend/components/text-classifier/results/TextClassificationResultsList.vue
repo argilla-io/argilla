@@ -43,9 +43,11 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    selectedMetadataItem: undefined,
-  }),
+  data() {
+    return {
+      selectedMetadataItem: undefined,
+    };
+  },
   computed: {
     showRulesArea() {
       return this.dataset.viewSettings.viewMode === "labelling-rules";

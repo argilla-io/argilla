@@ -17,7 +17,7 @@
 Common model for task definitions
 """
 
-from typing import Any, Dict, Generic, List, TypeVar
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
@@ -73,3 +73,15 @@ class BaseSearchResults(
     total: int = 0
     records: List[_Record] = Field(default_factory=list)
     aggregations: ServiceSearchResultsAggregations = None
+
+
+class BaseUpdateLabelingRule(BaseModel):
+    name: Optional[str] = Field(
+        default=None,
+        description="The rule name",
+        regex=r"^(\w|[0-9]|_|-|\.)+$",
+    )
+    description: Optional[str] = Field(
+        default=None,
+        description="A brief description of the rule",
+    )

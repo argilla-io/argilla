@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
+import {
+  ObservationDataset,
+  USER_DATA_METADATA_KEY,
+  getDatasetModelPrimaryKey,
+} from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 import _ from "lodash";
 
@@ -163,7 +167,7 @@ class TextClassificationDataset extends ObservationDataset {
     if (!this.labelingRules) {
       await this.refreshRules();
     }
-    return entity.find(this.id);
+    return entity.find(getDatasetModelPrimaryKey(this));
   }
 
   async _getRule({ query }) {

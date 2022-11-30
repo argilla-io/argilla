@@ -151,9 +151,11 @@ class EntityAlreadyExistsError(ServerError):
 
     HTTP_STATUS = status.HTTP_409_CONFLICT
 
-    def __init__(self, name: str, type: Type, workspace: Optional[str] = None):
+    def __init__(
+        self, name: str, type: Union[Type, str], workspace: Optional[str] = None
+    ):
         self.name = name
-        self.type = type.__name__
+        self.type = type.__name__ if hasattr(type, "__name__") else str(type)
         self.workspace = workspace
 
 
@@ -164,7 +166,7 @@ class EntityNotFoundError(ServerError):
 
     def __init__(self, name: str, type: Union[Type, str]):
         self.name = name
-        self.type = type if isinstance(type, str) else type.__name__
+        self.type = type.__name__ if hasattr(type, "__name__") else str(type)
 
 
 class ClosedDatasetError(BadRequestError):

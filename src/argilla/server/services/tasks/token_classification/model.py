@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from pydantic import BaseModel, Field, validator
 
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
-from argilla.server.commons.models import PredictionStatus, TaskType
+from argilla.server.commons.models import BaseLabelingRule, PredictionStatus, TaskType
 from argilla.server.services.datasets import ServiceBaseDataset
 from argilla.server.services.search.model import (
     ServiceBaseRecordsQuery,
@@ -213,6 +213,11 @@ class ServiceTokenClassificationRecord(
         underscore_attrs_are_private = True
 
 
+class ServiceLabelingRule(BaseLabelingRule):
+    label: str
+    span_selector: Optional[str] = None
+
+
 class ServiceTokenClassificationQuery(ServiceBaseRecordsQuery):
 
     predicted_as: List[str] = Field(default_factory=list)
@@ -223,4 +228,4 @@ class ServiceTokenClassificationQuery(ServiceBaseRecordsQuery):
 
 class ServiceTokenClassificationDataset(ServiceBaseDataset):
     task: TaskType = Field(default=TaskType.token_classification, const=True)
-    pass
+    rules: List[ServiceLabelingRule] = Field(default_factory=list)

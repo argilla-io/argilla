@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
+import {
+  ObservationDataset,
+  USER_DATA_METADATA_KEY,
+  getDatasetModelPrimaryKey,
+} from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
+import { TokenClassificationDataset } from "../../models/TokenClassification";
+import { formatEntityIdForAnnotation } from "../../models/token-classification/TokenAnnotation.modelTokenClassification";
+import { formatEntityIdForPrediction } from "../../models/token-classification/TokenPrediction.modelTokenClassification";
+import { formatAnnotationPredictionid } from "../../models/token-classification/TokenRecord.modelTokenClassification";
+import { formatEntityIdForRuleAnnotation } from "../../models/token-classification/TokenRuleAnnotation.modelTokenClassification";
+import { formatDatasetIdForTokenGlobalEntityModel } from "../../models/token-classification/TokenGlobalEntity.modelTokenClassification";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -61,7 +71,12 @@ async function _getOrFetchDataset({ workspace, name }) {
    * Find locally a dataset by its name and fetch from backend if not found
    */
 
-  let ds = ObservationDataset.find([workspace, name]);
+  const inputForPrimaryKey = {
+    owner: workspace,
+    name,
+  };
+  const datasetPrimaryKey = getDatasetModelPrimaryKey(inputForPrimaryKey);
+  let ds = ObservationDataset.find(datasetPrimaryKey);
   if (ds !== null) {
     return ds;
   }
@@ -71,7 +86,10 @@ async function _getOrFetchDataset({ workspace, name }) {
       return data;
     },
   });
-  return await _getOrFetchDataset({ workspace, name });
+
+  ds = ObservationDataset.find(datasetPrimaryKey);
+
+  return ds;
 }
 
 async function _fetchAnnotationProgress(dataset) {
@@ -92,6 +110,7 @@ async function _loadTaskDataset(dataset) {
   /**
    * Loads a specific dataset for records observation
    */
+
   if (dataset.task === null) {
     throw Error("Wrong dataset task initialization");
   }
@@ -103,7 +122,6 @@ async function _loadTaskDataset(dataset) {
     sort,
     size: pagination.size,
   });
-
   const { total, aggregations } = _dataset.globalResults;
   if (total === undefined || aggregations === undefined) {
     const globalResults = await _querySearch({
@@ -117,7 +135,6 @@ async function _loadTaskDataset(dataset) {
     });
     await _refreshDatasetAggregations({ dataset: _dataset });
   }
-
   if (pagination && pagination.page > 1) {
     return await _paginate({
       dataset: _dataset,
@@ -317,7 +334,11 @@ async function _search({ dataset, query, sort, size }) {
   });
 
   const entity = dataset.getTaskDatasetClass();
-  return entity.query().withAllRecursive().whereId(dataset.id).first();
+  return entity
+    .query()
+    .withAllRecursive()
+    .whereId(getDatasetModelPrimaryKey(dataset))
+    .first();
 }
 
 async function _updateAnnotationProgress({ id, total, aggregations }) {
@@ -354,8 +375,9 @@ async function _updateDatasetRecords({
   }
   let aggregations = {};
   const entity = dataset.getTaskDatasetClass();
+
   const updatedDataset = await entity.update({
-    where: dataset.id,
+    where: dataset.id.split("."),
     data: {
       results: {
         ...dataset.results,
@@ -390,7 +412,10 @@ async function _updateDatasetRecords({
 }
 
 async function _updateTaskDataset({ dataset, data }) {
+  const datasetPrimaryKey = getDatasetModelPrimaryKey(dataset);
+
   const entity = dataset.getTaskDatasetClass();
+
   const { globalResults, results } = data;
 
   let datasetResults = dataset.$toJson().results || {};
@@ -406,16 +431,66 @@ async function _updateTaskDataset({ dataset, data }) {
     );
   }
 
+  const formatedDataset = {
+    ...dataset,
+    ...data,
+    results: mergeObjectsDeep(datasetResults, dataResults),
+  };
+
   await entity.insertOrUpdate({
     where: dataset.id,
+    data: formatedDataset,
+  });
+
+  if (dataset.task === "TokenClassification") {
+    const records = data.results ? data.results.records : null;
+    if (records) {
+      updateTokenRecordsByDatasetId(datasetPrimaryKey, records);
+    }
+  }
+
+  return entity.find(datasetPrimaryKey);
+}
+
+const updateTokenRecordsByDatasetId = (datasetPrimaryKey, records) => {
+  const tokenRecords = initTokenRecordsObjectForRecordsModel(
+    datasetPrimaryKey,
+    records
+  );
+
+  TokenClassificationDataset.insertOrUpdate({
+    where: datasetPrimaryKey,
     data: {
-      ...dataset,
-      ...data,
-      results: mergeObjectsDeep(datasetResults, dataResults),
+      token_records: tokenRecords,
     },
   });
-  return entity.find(dataset.id);
-}
+};
+
+const initTokenGlobalEntitiesByDatasetId = (datasetPrimaryKey) => {
+  const datasetId = formatDatasetIdForTokenGlobalEntityModel(datasetPrimaryKey);
+  const formattedGlobalEntities = [];
+  const { annotated_as, predicted_as } = TokenClassificationDataset.find(
+    datasetPrimaryKey
+  )?.results?.aggregations || { annotated_as: {}, predicted_as: {} };
+  const concatPredictionsAndAnnotations = { ...annotated_as, ...predicted_as };
+
+  Object.keys(concatPredictionsAndAnnotations).forEach((text, index) => {
+    const entity = {
+      dataset_id: datasetId,
+      text,
+      color_id: index,
+      is_activate: false,
+    };
+    formattedGlobalEntities.push(entity);
+  });
+
+  TokenClassificationDataset.insertOrUpdate({
+    where: datasetPrimaryKey,
+    data: {
+      token_global_entities: formattedGlobalEntities,
+    },
+  });
+};
 
 async function _updatePagination({ id, size, page }) {
   const pagination = await Pagination.update({
@@ -426,10 +501,106 @@ async function _updatePagination({ id, size, page }) {
   return pagination;
 }
 
+const initTokenRecordsObjectForRecordsModel = (datasetPrimaryKey, records) => {
+  const tokenRecords = records.map(
+    (
+      { id, search_keywords, status, tokens, text, annotation, prediction },
+      recordIndex
+    ) => {
+      const formattedAnnotationPredictionid = formatAnnotationPredictionid(
+        recordIndex,
+        datasetPrimaryKey
+      );
+
+      const formatted_token_annotation = annotation
+        ? formatAnnotationOrPredictionOrRuleAnnotation(
+            "ANNOTATION",
+            id,
+            formattedAnnotationPredictionid,
+            annotation
+          )
+        : null;
+
+      const formatted_token_prediction = prediction
+        ? formatAnnotationOrPredictionOrRuleAnnotation(
+            "PREDICTION",
+            id,
+            formattedAnnotationPredictionid,
+            prediction
+          )
+        : null;
+
+      return {
+        id,
+        dataset_id: datasetPrimaryKey.join("."),
+        search_keywords,
+        status,
+        tokens,
+        text,
+        prediction,
+        token_annotation: formatted_token_annotation,
+        token_prediction: formatted_token_prediction,
+      };
+    }
+  );
+
+  return tokenRecords;
+};
+
+const formatAnnotationOrPredictionOrRuleAnnotation = (
+  entityType,
+  record_id,
+  recordIndex,
+  { agent, entities }
+) => {
+  const FUNCTION_TO_FIRE = functionToFireToFormatTokenEntityId(entityType);
+
+  return {
+    id: recordIndex,
+    agent: agent,
+    record_id,
+    token_entities: entities.map(({ label, start, end, score }, index) => {
+      const idPrefix = `${record_id}_${start}_${end}`;
+      return {
+        id: FUNCTION_TO_FIRE ? FUNCTION_TO_FIRE(idPrefix) : index,
+        record_id,
+        agent,
+        label,
+        start,
+        end,
+        score,
+      };
+    }),
+  };
+};
+
+const functionToFireToFormatTokenEntityId = (entityType) => {
+  let FUNCTION_TO_FIRE = null;
+  switch (entityType.toUpperCase()) {
+    case "ANNOTATION":
+      FUNCTION_TO_FIRE = formatEntityIdForAnnotation;
+      break;
+    case "PREDICTION":
+      FUNCTION_TO_FIRE = formatEntityIdForPrediction;
+      break;
+    case "RULEANNOTATION":
+      FUNCTION_TO_FIRE = formatEntityIdForRuleAnnotation;
+      break;
+    default:
+      console.log("WARNING : The type from the entities are UNKNOWN");
+  }
+  return FUNCTION_TO_FIRE;
+};
+
 const getters = {
   findByName: () => (name) => {
     const workspace = currentWorkspace($nuxt.$route);
-    const ds = ObservationDataset.find([workspace, name]);
+    const inputForPrimaryKey = {
+      owner: workspace,
+      name,
+    };
+    const datasetPrimaryKey = getDatasetModelPrimaryKey(inputForPrimaryKey);
+    const ds = ObservationDataset.find(datasetPrimaryKey);
     if (ds === null) {
       throw Error("Not found dataset named " + name);
     }
@@ -438,7 +609,7 @@ const getters = {
       .getTaskDatasetClass()
       .query()
       .withAllRecursive()
-      .whereId(ds.id)
+      .whereId(datasetPrimaryKey)
       .first();
   },
 };
@@ -559,7 +730,6 @@ const actions = {
      * Fetch a observation dataset by name
      */
     const workspace = currentWorkspace($nuxt.$route);
-
     const ds = await _getOrFetchDataset({ workspace, name });
     const { viewMode } = _configuredRouteParams();
     await _configureDatasetViewSettings(ds.name, viewMode);
@@ -571,11 +741,11 @@ const actions = {
       aggregations: dataset.globalResults.aggregations,
     });
 
+    if (dataset.task === "TokenClassification") {
+      const datasetPrimaryKey = getDatasetModelPrimaryKey(dataset);
+      initTokenGlobalEntitiesByDatasetId(datasetPrimaryKey);
+    }
     return dataset;
-  },
-
-  async load(_, dataset) {
-    return await _loadTaskDataset(dataset);
   },
 
   async search(_, { dataset, query, sort, size }) {

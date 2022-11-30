@@ -57,6 +57,14 @@ export default {
           relatedMetrics: ["progress", "stats"],
         },
         {
+          id: "labelling-rules",
+          tooltip: "Weak labeling",
+          icon: "weak-labeling",
+          group: "Mode",
+          action: "change-view-mode",
+          relatedMetrics: ["stats", "rules"],
+        },
+        {
           id: "progress",
           tooltip: "Progress",
           icon: "progress",

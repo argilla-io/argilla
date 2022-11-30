@@ -16,8 +16,8 @@
  */
 
 import { Model } from "@vuex-orm/core";
-
 import DatasetViewSettings from "./DatasetViewSettings";
+import { Rule } from "./token-classification/Rule.modelTokenClassification";
 
 const USER_DATA_METADATA_KEY = "rubrix.recogn.ai/ui/custom/userData.v1";
 
@@ -74,16 +74,13 @@ class ObservationDataset extends Model {
     }
   }
 
-  get id() {
-    return [this.owner, this.name];
-  }
-
   get visibleRecords() {
     return this.results.records.slice(0, this.viewSettings.pagination.size);
   }
 
   static fields() {
     return {
+      id: this.uid(),
       name: this.string(null),
       owner: this.string(null),
       metadata: this.attr(null),
@@ -93,8 +90,17 @@ class ObservationDataset extends Model {
       last_updated: this.string(null),
       // This will be normalized in a future PR using also owner for relational ids
       viewSettings: this.hasOne(DatasetViewSettings, "id", "name"),
+
+      // relationships
+      rules: this.hasMany(Rule, "dataset_id"),
     };
   }
 }
 
-export { ObservationDataset, USER_DATA_METADATA_KEY };
+const getDatasetModelPrimaryKey = ({ owner, name }) => [owner, name];
+
+export {
+  ObservationDataset,
+  USER_DATA_METADATA_KEY,
+  getDatasetModelPrimaryKey,
+};

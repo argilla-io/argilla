@@ -17,7 +17,7 @@
 
 <template>
   <div class="results">
-    <component :is="currentTaskResultsList" :dataset="dataset" />
+    <component :is="currentTaskResultsList" :dataset="dataset" v-if="dataset" />
   </div>
 </template>
 
@@ -26,7 +26,7 @@ export default {
   props: {
     dataset: {
       type: Object,
-      default: () => ({}),
+      default: () => null,
     },
   },
   computed: {

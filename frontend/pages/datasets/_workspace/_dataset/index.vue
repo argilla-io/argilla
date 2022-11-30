@@ -41,11 +41,17 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
+import { formatDatasetIdForTokenGlobalEntityModel } from "../../../../models/token-classification/TokenGlobalEntity.modelTokenClassification";
+import { Rule as RuleModel } from "../../../../models/token-classification/Rule.modelTokenClassification";
+import { getDatasetModelPrimaryKey } from "../../../../models/Dataset";
 
 export default {
   layout: "app",
   async fetch() {
     await this.fetchByName(this.datasetName);
+    if (this.datasetTask === "TokenClassification") {
+      await this.initRuleModelAndRulesMetricsModel();
+    }
   },
   computed: {
     ...mapGetters({
@@ -78,6 +84,21 @@ export default {
     workspace() {
       return currentWorkspace(this.$route);
     },
+    datasetPrimaryKey() {
+      const paramsToGetDatasetPrimaryKey = {
+        name: this.datasetName,
+        owner: this.workspace,
+      };
+      return getDatasetModelPrimaryKey(paramsToGetDatasetPrimaryKey);
+    },
+    datasetTask() {
+      switch (this.dataset.task.toLowerCase()) {
+        case "tokenclassification":
+          return "TokenClassification";
+        default:
+          return null;
+      }
+    },
     areMetricsVisible() {
       return this.dataset && this.dataset.viewSettings.visibleMetrics;
     },
@@ -89,6 +110,72 @@ export default {
     ...mapActions({
       fetchByName: "entities/datasets/fetchByName",
     }),
+    async initRuleModelAndRulesMetricsModel() {
+      const rules = await this.fetchTokenClassificationRules(this.datasetName);
+      rules?.forEach(async (rule) => {
+        const rulesMetrics = await this.getRulesMetricsByQueryText(
+          this.datasetName,
+          rule.query
+        );
+        await this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
+      });
+    },
+    async fetchTokenClassificationRules(name) {
+      try {
+        const { data, status } = await this.$axios.get(
+          `/datasets/${name}/${this.datasetTask}/labeling/rules`
+        );
+        if (status === 200) {
+          return data;
+        } else {
+          throw new Error("Error fetching API rules");
+        }
+      } catch (error) {
+        console.log("Error: ", error);
+      }
+    },
+    async getRulesMetricsByQueryText(name, query) {
+      // FIXME: duplication of code with TokenClassificationResultsList => function needs to be externalized
+      let rulesMetrics = null;
+
+      if (query) {
+        rulesMetrics = await this.fetchRuleMetricsByQueryText(name, query);
+      }
+      return rulesMetrics;
+    },
+    async fetchRuleMetricsByQueryText(name, query) {
+      try {
+        const { data, status } = await this.$axios.get(
+          `/datasets/${name}/${this.datasetTask}/labeling/rules/${query}/summary`
+        );
+        if (status === 200) {
+          return data;
+        } else {
+          throw new Error("Error fetching API rule metrics");
+        }
+      } catch (error) {
+        console.log("Error: ", error);
+      }
+    },
+    async insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
+      const datasetId = formatDatasetIdForTokenGlobalEntityModel(
+        this.datasetPrimaryKey
+      );
+      const newRule = {
+        ...rule,
+        rule_metrics: {
+          ...rulesMetrics,
+          query: rule.query,
+          dataset_id: datasetId,
+        },
+        dataset_id: datasetId,
+        name: this.datasetName,
+        owner: this.workspace,
+      };
+      await RuleModel.insertOrUpdate({
+        data: newRule,
+      });
+    },
   },
 };
 </script>

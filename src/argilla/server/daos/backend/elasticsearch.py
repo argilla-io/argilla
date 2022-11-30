@@ -796,6 +796,7 @@ class ElasticsearchBackend(LoggingMixin):
         record_from: int = 0,
         size: int = 100,
         exclude_fields: List[str] = None,
+        include_fields: List[str] = None,
         enable_highlight: bool = True,
     ) -> Tuple[int, List[Dict[str, Any]]]:
 
@@ -809,7 +810,10 @@ class ElasticsearchBackend(LoggingMixin):
                     query=query,
                     sort=sort,
                 ),
-                "_source": {"excludes": exclude_fields or []},
+                "_source": {
+                    "includes": include_fields or ["*"],
+                    "excludes": exclude_fields or [],
+                },
                 "from": record_from,
             }
             if enable_highlight:

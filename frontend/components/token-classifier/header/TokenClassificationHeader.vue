@@ -17,8 +17,8 @@
 
 <template>
   <div class="header__filters">
-    <filters-area :dataset="dataset" />
-    <entities-header :dataset="dataset" />
+    <filters-area :dataset="dataset" v-if="!dataset.viewSettings.visibleRulesList" />
+    <entities-header :dataset="dataset" v-if="!isWeakLabelingViewMode" />
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"
@@ -44,6 +44,9 @@ export default {
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
     },
+    isWeakLabelingViewMode() {
+      return this.dataset.viewSettings?.viewMode === "labelling-rules" || false;
+    }
   },
   methods: {
     ...mapActions({
