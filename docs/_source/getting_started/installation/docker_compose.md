@@ -44,6 +44,10 @@ docker compose stop
 ```
 :::
 
+:::{note}
+By default, telemetry is enabled. This helps us to improve our product. For more info about the metrics and disabling them check [telemetry](../../reference/telemetry.md).
+
+:::
 
 ## Persisting ElasticSearch data
 To avoid losing all the data when the docker-compose/server goes down, you can add some persistence by mounting a

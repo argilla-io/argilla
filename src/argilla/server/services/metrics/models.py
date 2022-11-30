@@ -24,8 +24,9 @@ from typing import (
     Union,
 )
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from argilla.server.services.search.model import ServiceRecordsQuery
 from argilla.server.services.tasks.commons import ServiceRecord
 
 
@@ -44,6 +45,10 @@ class ServicePythonMetric(ServiceBaseMetric, Generic[ServiceRecord]):
     A metric definition which will be calculated using raw queried data
     """
 
+    records_to_fetch: Optional[int] = None
+
+    shuffle_records: bool = Field(default=False)
+
     def apply(self, records: Iterable[ServiceRecord]) -> Dict[str, Any]:
         """
         ServiceBaseMetric calculation method.
@@ -58,6 +63,10 @@ class ServicePythonMetric(ServiceBaseMetric, Generic[ServiceRecord]):
             The metric result
         """
         raise NotImplementedError()
+
+    def prepare_query(self, query: ServiceRecordsQuery):
+        """Add an extra filter required for the metric"""
+        return query
 
 
 ServiceMetric = TypeVar("ServiceMetric", bound=ServiceBaseMetric)

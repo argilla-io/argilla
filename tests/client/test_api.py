@@ -15,7 +15,7 @@
 import concurrent.futures
 import datetime
 from time import sleep
-from typing import Iterable, List
+from typing import Any, Iterable, List
 
 import datasets
 import httpx
@@ -33,6 +33,7 @@ from argilla.client.api import InputValueError
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
+    BaseClientError,
     ForbiddenApiError,
     GenericApiError,
     NotFoundApiError,
@@ -44,6 +45,7 @@ from argilla.client.sdk.users.models import User
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
+from tests.helpers import SecuredClient
 from tests.server.test_api import create_some_data_for_text_classification
 
 
@@ -246,6 +248,38 @@ def test_log_background(mocked_client):
     dataset = api.load(dataset_name)
     assert len(dataset) == 1
     assert dataset[0].text == sample_text
+
+
+def test_log_background_with_error(
+    mocked_client: SecuredClient,
+    monkeypatch: Any,
+):
+    dataset_name = "test_log_background_with_error"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+
+    # Log in the background, and extract the future
+    sample_text = "Sample text for testing"
+
+    def raise_http_error(*args, **kwargs):
+        raise httpx.ConnectError(
+            "Mock error",
+            request=None,
+        )
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", raise_http_error)
+
+    future = api.log(
+        ar.TextClassificationRecord(text=sample_text),
+        name=dataset_name,
+        background=True,
+    )
+
+    with pytest.raises(BaseClientError):
+
+        try:
+            future.result()
+        finally:
+            future.cancel()
 
 
 @pytest.mark.parametrize(

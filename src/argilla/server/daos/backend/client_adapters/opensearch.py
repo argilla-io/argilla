@@ -336,6 +336,7 @@ class OpenSearchClient(IClientAdapter):
         id_from: Optional[str] = None,
         enable_highlight: bool = False,
         sort: Optional[SortConfig] = None,
+        shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         size = size or 1000
 
@@ -346,6 +347,7 @@ class OpenSearchClient(IClientAdapter):
             schema=self.get_index_schema(index=index),
             sort=sort,
             highlight=highlight,
+            shuffle=shuffle,
         )
         es_query = es_query.copy() or {}
         response = self.__client__.search(

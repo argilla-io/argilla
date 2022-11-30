@@ -188,6 +188,8 @@ class EsQueryBuilder:
         doc_from: Optional[int] = None,
         highlight: Optional[HighlightParser] = None,
         size: Optional[int] = None,
+        id_from: Optional[str] = None,
+        shuffle: bool = False,
     ) -> Dict[str, Any]:
 
         es_query: Dict[str, Any] = (
@@ -196,8 +198,15 @@ class EsQueryBuilder:
             else {"query": self._search_to_es_query(schema, query)}
         )
 
+        if id_from:
+            es_query["search_after"] = [id_from]
+            sort = SortConfig()  # sort by id as default
+
+        if shuffle:
+            self._setup_random_score(es_query)
+
         es_sort = self.map_2_es_sort_configuration(schema=schema, sort=sort)
-        if es_sort:
+        if es_sort and not shuffle:
             es_query["sort"] = es_sort
 
         if doc_from:
@@ -368,6 +377,16 @@ class EsQueryBuilder:
         }
         es_query.pop("sort")
         del es_query["query"]
+
+    def _setup_random_score(self, es_query: Dict[str, Any]):
+        query = es_query["query"]
+        es_query["query"] = {
+            "function_score": {
+                "query": query,
+                "random_score": {},
+            }
+        }
+        return es_query
 
 
 class OpenSearchQueryBuilder(EsQueryBuilder):

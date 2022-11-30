@@ -217,6 +217,7 @@ class GenericElasticEngineBackend(LoggingMixin):
         query: Optional[BackendRecordsQuery] = None,
         id_from: Optional[str] = None,
         limit: Optional[int] = None,
+        shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         index = dataset_records_index(id)
 
@@ -225,7 +226,9 @@ class GenericElasticEngineBackend(LoggingMixin):
             query=query,
             size=limit,
             id_from=id_from,
+            fetch_once=shuffle,
             enable_highlight=True,
+            shuffle=shuffle,
         )
 
     def open(self, id: str):

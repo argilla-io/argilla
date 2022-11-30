@@ -34,6 +34,8 @@ docker run -d --name elasticsearch-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_
 
 :::{note}
 For more details about setting up ES via docker, check our [advanced setup guide](setting-up-elasticsearch-via-docker).
+By default, telemetry is enabled. This helps us to improve our product. For more info about the metrics and disabling them check [telemetry](../../reference/telemetry.md).
+
 :::
 
 You can start the Argilla web app via Python.
