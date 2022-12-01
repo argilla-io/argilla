@@ -182,7 +182,11 @@ class TextClassificationRecord(_Validators):
         >>> record = rg.TextClassificationRecord(
         ...     text="My first argilla example",
         ...     prediction=[('eng', 0.9), ('esp', 0.1)],
-        ...     embeddings = [("text", 4, [ 1.2, 2.3, 3.1, 3.3])
+        ...     embeddings = {
+        ...         "english_bert_embedding": {
+        ...             "vector": [1.2, 2.3, 3.1, 3.3]
+        ...         }
+        ...     }
         ... )
         >>>
         >>> # Various inputs
@@ -193,48 +197,15 @@ class TextClassificationRecord(_Validators):
         ...     },
         ...     prediction=[('spam', 0.99), ('ham', 0.01)],
         ...     annotation="spam",
-        ...     embeddings = [
-        ...            {
-        ...                 "recordPropertyName":"inputs",
-        ...                 "embeddings": [
-        ...                     {
-        ...                         "propertyName": "subject",
-        ...                         "embeddingVectors": [
-        ...                             {
-        ...                                 "vectorizerName": "distilbert_uncased",
-        ...                                 "embeddingVector": [1.13, 4.1, 6.3, 4.2, 9.1]
-        ...                             }
-        ...                         ]
+        ...     embeddings = {
+        ...                     "distilbert_uncased": {
+        ...                         "vector": [1.13, 4.1, 6.3, 4.2, 9.1]
         ...                     },
-        ...                     {
-        ...                         "propertyNames": ["subject", "body"],
-        ...                         "embeddingVectors":[
-        ...                             {
-        ...                                 "vectorizerName": "distilbert_uncased",
-        ...                                 "embeddingVector": [1.1, 2.1, 3.3, 4.2, 2.1]
-        ...                             },
-        ...                             {
-        ...                                  "vectorizerName": "xlm_roberta_cased",
-        ...                                  "embeddingVector": [2.1, 3.1, 4.3, 5.6, 8.9]
-        ...                              }
-        ...                     }
-        ...                 ]
-        ...             },
-        ...             {
-        ...                 "recordPropertyName": "annotation",
-        ...                 "embeddings": [
-        ...                      {
-        ...                         "embeddingVectors": [
-        ...                                {
-        ...                                     "vectorizerName": "bert_base_uncased"
-        ...                                     "embeddingVector": [1.3, 2.1, 3.4, 5.1]
-        ...                                 }
-        ...                          ]
-        ...                      }
-        ...                  ]
+        ...                     "xlm_roberta_cased": {
+        ...                         "vector": [1.1, 2.1, 3.3, 4.2, 2.1]
+        ...                     },
         ...             }
-        ...         ]
-        ... )
+        ...     )
     """
 
     text: Optional[str] = None
