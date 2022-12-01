@@ -520,7 +520,7 @@ class Text2TextRecord(_Validators):
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:
-            Meta data for the record. Defaults to `{}`.
+            Metadata for the record. Defaults to `{}`.
         status:
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
@@ -538,25 +538,14 @@ class Text2TextRecord(_Validators):
         >>> record = rg.Text2TextRecord(
         ...     text="My name is Sarah and I love my dog.",
         ...     prediction=["Je m'appelle Sarah et j'aime mon chien."],
-        ...     embeddings = [
-        ...           {
-        ...                 "recordPropertyName":"text",
-        ...                  "embeddings": [
-        ...                        {
-        ...                            "embeddingVectors": [
-        ...                                {
-        ...                                   "vectorizerName": "bert_base_uncased",
-        ...                                   "embeddingVector": [1.2, 2.3, 3.4, 5.2, 6.5]
-        ...                                },
-        ...                                {
-        ...                                    "vectorizerName": "xlm_multilingual_uncased",
-        ...                                    "embeddingName": [2.2, 5.3, 5.4, 3.2, 2.5]
-        ...                                }
-        ...                            ]
-        ...                        }
-        ...                    ]
-        ...            }
-        ...     ]
+        ...     embeddings = {
+        ...               "bert_base_uncased": {
+        ...                      "vector": [1.2, 2.3, 3.4, 5.2, 6.5]
+        ...                },
+        ...                "xlm_multilingual_uncased":{
+        ...                      "vector": [2.2, 5.3, 5.4, 3.2, 2.5]
+        ...                }
+        ...     }
         ... )
     """
 
