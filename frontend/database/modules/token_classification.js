@@ -20,7 +20,7 @@ import { TokenClassificationDataset } from "@/models/TokenClassification";
 
 async function _updateLastSelectedEntity({ id, lastSelectedEntity }) {
   return await TokenClassificationDataset.update({
-    where: id,
+    where: id.split("."),
     data: { lastSelectedEntity },
   });
 }
