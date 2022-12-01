@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from typing import Iterable, List, Optional, Tuple
+import dataclasses
+from typing import Iterable, List, Optional
 
 from fastapi import Depends
 
@@ -27,7 +27,6 @@ from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
 from argilla.server.services.tasks.token_classification.labeling_rules.service import (
     NERLabelingRulesMixin,
-    RuleRecordInfo,
 )
 from argilla.server.services.tasks.token_classification.model import (
     ServiceLabelingRule,
@@ -35,6 +34,15 @@ from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationQuery,
     ServiceTokenClassificationRecord,
 )
+
+
+@dataclasses.dataclass
+class SearchByRuleResults:
+
+    total: int
+    records: list
+    rule: ServiceLabelingRule
+    next_id: Optional[int] = None
 
 
 class TokenClassificationService(NERLabelingRulesMixin):
@@ -161,7 +169,19 @@ class TokenClassificationService(NERLabelingRulesMixin):
         span_selector: Optional[str] = None,
         record_from: int = 0,
         size: int = 20,
-    ) -> Tuple[int, str, List[RuleRecordInfo]]:
+    ) -> SearchByRuleResults:
+
+        rule = None
+        if not label:
+            try:
+                rule = self.find_labeling_rule(dataset=dataset, query_or_name=query)
+                label = rule.label
+                span_selector = span_selector or rule.span_selector
+            except EntityNotFoundError:
+                raise ValueError(
+                    f"No label provided an no rule was defined for query {query}",
+                )
+
         results = self.__search__.search(
             dataset=dataset,
             record_type=ServiceTokenClassificationRecord,
@@ -173,14 +193,6 @@ class TokenClassificationService(NERLabelingRulesMixin):
             size=size,
             record_from=record_from,
         )
-        rule = None
-        if not label:
-            try:
-                rule = self.find_labeling_rule(dataset=dataset, query_or_name=query)
-                label = rule.label
-                span_selector = span_selector or rule.span_selector
-            except EntityNotFoundError:
-                return results.total, query, []
 
         if not rule:
             rule = ServiceLabelingRule(
@@ -193,7 +205,14 @@ class TokenClassificationService(NERLabelingRulesMixin):
             rule=rule,
             records=results.records,
         )
-        return results.total, rule.name, records
+        # TODO: use scan records and id from as next id
+        next_id = record_from + size if len(records) == size else None
+        return SearchByRuleResults(
+            total=results.total,
+            rule=rule,
+            records=records,
+            next_id=next_id,
+        )
 
     def read_dataset(
         self,

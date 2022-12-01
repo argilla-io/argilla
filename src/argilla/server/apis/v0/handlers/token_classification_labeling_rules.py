@@ -74,7 +74,7 @@ class RecordRuleAnnotations(BaseModel):
     total: int
     agent: str
     records: List[RuleRecordInfo] = Field(default_factory=list)
-    next: Optional[str] = Field(
+    next_value: Optional[int] = Field(
         None,
         description="User to paginate results. "
         "Provide this value in a search request to fetch next chunk of annotations",
@@ -175,6 +175,15 @@ def configure_router(router: APIRouter):
             None,
             description="Label related to query rule",
         ),
+        next_value: int = Query(
+            default=0,
+            description="Next value to use for fetching data. "
+            "Must be sent the previous request value, if any",
+        ),
+        size: Optional[int] = Query(
+            default=100,
+            description="Size of records annotations to retrieve",
+        ),
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -191,17 +200,20 @@ def configure_router(router: APIRouter):
             as_dataset_class=TasksFactory.get_task_dataset(task),
         )
 
-        total, rule_name, records = service.search_by_rule(
+        results = service.search_by_rule(
             dataset=dataset,
             query=query_or_name,
             record_ids=request.record_ids if request else None,
             label=label,
+            size=size,
+            record_from=next_value,
         )
 
         return RecordRuleAnnotations(
-            records=records,
-            agent=rule_name,
-            total=total,
+            records=results.records,
+            agent=results.rule.name,
+            total=results.total,
+            next_value=results.next_id,
         )
 
     @router.get(
