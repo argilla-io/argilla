@@ -136,6 +136,7 @@ class ElasticsearchClient(OpenSearchClient):
                     track_total_hits=True,
                     rest_total_hits_as_int=True,
                     size=size,
+                    source=es_query.get("_source"),
                 )
             else:
                 results = self.__client__.search(
