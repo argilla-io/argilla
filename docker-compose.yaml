@@ -9,6 +9,10 @@ services:
       - "6900:80"
     environment:
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
+      # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
+      # ARGILLA_ENABLE_TELEMETRY: 0
+
+      # Set user configuration https://docs.argilla.io/en/latest/getting_started/installation/user_management.html
       # ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
       # volumes:
       #- ${PWD}/.users.yaml:/config/.users.yaml

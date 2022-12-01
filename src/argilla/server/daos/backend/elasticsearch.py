@@ -312,12 +312,18 @@ class ElasticsearchBackend(LoggingMixin):
             if not self._index_exists(index):
                 self.__client__.indices.create(
                     index=index,
-                    body={"settings": settings or {}, "mappings": mappings or {}},
+                    body={
+                        "settings": settings or {},
+                        "mappings": mappings or {},
+                    },
                     ignore=400,
                 )
 
     def _create_index_template(
-        self, name: str, template: Dict[str, Any], force_recreate: bool = False
+        self,
+        name: str,
+        template: Dict[str, Any],
+        force_recreate: bool = False,
     ):
         """
         Applies a index template creation with provided template definition.
@@ -878,6 +884,7 @@ class ElasticsearchBackend(LoggingMixin):
         query: Optional[BackendRecordsQuery] = None,
         id_from: Optional[str] = None,
         limit: Optional[int] = None,
+        shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         index = dataset_records_index(id)
         with backend_error_handler(index):
@@ -886,11 +893,18 @@ class ElasticsearchBackend(LoggingMixin):
                     schema=self.get_schema(id),
                     query=query,
                     id_from=id_from,
+                    shuffle=shuffle,
                     sort=SortConfig(),  # sort by id as default for proper index scan using search after
                 ),
                 "highlight": self.__configure_query_highlight__(),
             }
-            docs = self._list_documents(index, query=es_query, size=limit)
+
+            docs = self._list_documents(
+                index,
+                query=es_query,
+                size=limit,
+                fetch_once=shuffle,  # with shuffle enabled, we cannot apply the search_after approach
+            )
             for doc in docs:
                 yield self.__esdoc2record__(doc)
 
@@ -913,9 +927,15 @@ class ElasticsearchBackend(LoggingMixin):
         task_mappings = self.get_task_mapping(task).copy()
         for k in task_mappings:
             if isinstance(task_mappings[k], list):
-                _mappings[k] = [*_mappings.get(k, []), *task_mappings[k]]
+                _mappings[k] = [
+                    *task_mappings[k],
+                    *_mappings.get(k, []),
+                ]
             else:
-                _mappings[k] = {**_mappings.get(k, {}), **task_mappings[k]}
+                _mappings[k] = {
+                    **_mappings.get(k, {}),
+                    **task_mappings[k],
+                }
         index = dataset_records_index(id)
         self._create_index(
             index=index,

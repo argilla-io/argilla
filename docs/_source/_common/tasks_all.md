@@ -9,7 +9,7 @@
 :link: ./tasks//token_classification.html
 
 ```
-```{grid-item-card} 👨🏽💬 TextGeneration
+```{grid-item-card} 👨🏽💬 Text2Text
 :link: ./tasks//text_generation.html
 
 ```
