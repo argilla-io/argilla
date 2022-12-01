@@ -32,4 +32,4 @@ Datasets
 --------
 
 .. automodule:: argilla.client.datasets
-   :members: DatasetForTextClassification, DatasetForTokenClassification, DatasetForTextGeneration, read_datasets, read_pandas
+   :members: DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text, read_datasets, read_pandas

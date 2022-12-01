@@ -23,7 +23,9 @@
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
 
-https://user-images.githubusercontent.com/25269220/200496945-7efb11b8-19f3-4793-bb1d-d42132009cbb.mp4
+![imagen](https://user-images.githubusercontent.com/1107111/204772677-facee627-9b3b-43ca-8533-bbc9b4e2d0aa.png)
+
+<!-- https://user-images.githubusercontent.com/25269220/200496945-7efb11b8-19f3-4793-bb1d-d42132009cbb.mp4 -->
 
 <br>
 

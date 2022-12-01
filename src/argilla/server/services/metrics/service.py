@@ -20,7 +20,10 @@ from argilla.server.daos.models.records import DaoRecordsSearch
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.services.datasets import ServiceDataset
 from argilla.server.services.metrics.models import ServiceMetric, ServicePythonMetric
-from argilla.server.services.search.model import ServiceRecordsQuery
+from argilla.server.services.search.model import (
+    ServiceBaseRecordsQuery,
+    ServiceRecordsQuery,
+)
 from argilla.server.services.tasks.commons import ServiceRecord
 
 
@@ -92,8 +95,13 @@ class MetricsService:
         """
 
         if isinstance(metric, ServicePythonMetric):
+            query = query or ServiceBaseRecordsQuery()
+            query = metric.prepare_query(query)
             records = self.__dao__.scan_dataset(
-                dataset, search=DaoRecordsSearch(query=query)
+                dataset,
+                search=DaoRecordsSearch(query=query),
+                shuffle=metric.shuffle_records,
+                limit=metric.records_to_fetch,
             )
             return metric.apply(map(record_class.parse_obj, records))
 
