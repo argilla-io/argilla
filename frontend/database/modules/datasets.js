@@ -682,9 +682,8 @@ const actions = {
     await ObservationDataset.api().patch(`/datasets/${dataset.name}`, {
       metadata,
     });
-
     return await dataset.$update({
-      where: dataset.id,
+      where: dataset.id.split("."),
       data: {
         ...dataset,
         metadata: {
