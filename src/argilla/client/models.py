@@ -311,19 +311,10 @@ class TokenClassificationRecord(_Validators):
         ...     text = "Michael is a professor at Harvard",
         ...     tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
         ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)],
-        ...     embeddings = [
-        ...         {
-        ...                "recordPropertyName":"text",
-        ...                "embeddings": [
-        ...                  {
-        ...                     "embeddingVectors": [
-        ...                            {
-        ...                                 "vectorizerName": "bert_base_uncased"
-        ...                                 "embeddingVector": [3.2, 4.5, 5.6, 8.9])
-        ...                            }
-        ...                     ]
-        ...                  }
-        ...               ]
+        ...     embeddings = {
+        ...            "bert_base_uncased": {
+        ...                 "vector": [3.2, 4.5, 5.6, 8.9])
+        ...             }
         ...          }
         ...       ]
         ... )
