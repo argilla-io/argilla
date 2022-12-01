@@ -172,8 +172,9 @@ class DatasetRecordsDAO:
         self,
         dataset: DatasetDB,
         search: Optional[DaoRecordsSearch] = None,
-        limit: int = 1000,
+        limit: Optional[int] = 1000,
         id_from: Optional[str] = None,
+        shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         """
         Iterates over a dataset records
@@ -195,7 +196,11 @@ class DatasetRecordsDAO:
         """
         search = search or DaoRecordsSearch()
         return self._es.scan_records(
-            id=dataset.id, query=search.query, limit=limit, id_from=id_from
+            id=dataset.id,
+            query=search.query,
+            limit=limit,
+            id_from=id_from,
+            shuffle=shuffle,
         )
 
     def get_dataset_schema(self, dataset: DatasetDB) -> Dict[str, Any]:

@@ -88,12 +88,12 @@ record = rg.TokenClassificationRecord(
     )
 ```
 
-#### TextGeneration record
+#### Text2Text record
 
-TextGeneration tasks, like text generation, are tasks where the model receives and outputs a sequence of tokens. Examples of such tasks are machine translation, text summarization, paraphrase generation, etc.
+Text2Text tasks, like text generation, are tasks where the model receives and outputs a sequence of tokens. Examples of such tasks are machine translation, text summarization, paraphrase generation, etc.
 
 ```python
-record = rg.TextGenerationRecord(
+record = rg.Text2TextRecord(
     text = "Michael is a professor at Harvard",
 
     # The prediction is a list of texts or tuples if you want to add a score to a prediction

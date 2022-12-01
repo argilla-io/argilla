@@ -89,9 +89,9 @@ When in [Annotate mode](#modes) you can remove annotations or add new ones by si
 When using the [score filter](./features.md), the predictions that do **not** fall in the selected range will be missing the solid thin line.
 ```
 
-#### TextGeneration
+#### Text2Text
 
-![TextGeneration view](../../_static/reference/webapp/explore-textgeneration.png)
+![Text2Text view](../../_static/reference/webapp/explore-text2text.png)
 
 In this task predictions and the annotation are given in a text field below the input text.
 You can switch between prediction and annotation via the "_View annotation_"/"_View predictions_" buttons.

@@ -115,6 +115,7 @@ class EsQueryBuilder:
         query: Optional[BackendQuery] = None,
         sort: Optional[SortConfig] = None,
         id_from: Optional[str] = None,
+        shuffle: bool = False,
     ) -> Dict[str, Any]:
         es_query: Dict[str, Any] = (
             {"query": self._datasets_to_es_query(query)}
@@ -126,8 +127,11 @@ class EsQueryBuilder:
             es_query["search_after"] = [id_from]
             sort = SortConfig()  # sort by id as default
 
+        if shuffle:
+            self._setup_random_score(es_query)
+
         es_sort = self.map_2_es_sort_configuration(schema=schema, sort=sort)
-        if es_sort:
+        if es_sort and not shuffle:
             es_query["sort"] = es_sort
 
         return es_query
@@ -242,3 +246,13 @@ class EsQueryBuilder:
             key: definition.get("type") or self._clean_mappings(definition)
             for key, definition in mappings["properties"].items()
         }
+
+    def _setup_random_score(self, es_query: Dict[str, Any]):
+        query = es_query["query"]
+        es_query["query"] = {
+            "function_score": {
+                "query": query,
+                "random_score": {},
+            }
+        }
+        return es_query

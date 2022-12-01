@@ -14,6 +14,7 @@
 #  limitations under the License.
 import dataclasses
 import functools
+import inspect
 from typing import Dict, TypeVar
 
 import httpx
@@ -73,27 +74,46 @@ class Client(_ClientCommonDefaults, _Client):
             cookies=self.get_cookies(),
             timeout=self.get_timeout(),
         )
+        self.__http_async__ = httpx.AsyncClient(
+            base_url=self.base_url,
+            headers=self.get_headers(),
+            cookies=self.get_cookies(),
+            timeout=self.get_timeout(),
+        )
 
     def __del__(self):
         del self.__httpx__
+        del self.__http_async__
 
     def __hash__(self):
         return hash(self.base_url)
 
     def with_httpx_error_handler(func):
+        def wrap_error(base_url: str):
+            err_str = (
+                f"Your Api endpoint at {base_url} is not available or not"
+                " responding."
+            )
+            raise BaseClientError(err_str) from None
+
+        @functools.wraps(func)
+        async def inner_async(self, *args, **kwargs):
+            try:
+                result = await func(self, *args, **kwargs)
+                return result
+            except httpx.ConnectError as err:
+                return wrap_error(self.base_url)
+
         @functools.wraps(func)
         def inner(self, *args, **kwargs):
             try:
                 result = func(self, *args, **kwargs)
                 return result
             except httpx.ConnectError as err:
-                err_str = (
-                    f"Your Api endpoint at {self.base_url} is not available or not"
-                    " responding."
-                )
-                raise BaseClientError(err_str) from None
+                return wrap_error(self.base_url)
 
-        return inner
+        is_coroutine = inspect.iscoroutinefunction(func)
+        return inner_async if is_coroutine else inner
 
     @with_httpx_error_handler
     def get(self, path: str, *args, **kwargs):
@@ -117,6 +137,16 @@ class Client(_ClientCommonDefaults, _Client):
             **kwargs,
         )
         return build_raw_response(response).parsed
+
+    @with_httpx_error_handler
+    async def post_async(self, path: str, *args, **kwargs):
+        path = self._normalize_path(path)
+        return await self.__http_async__.post(
+            url=path,
+            headers=self.get_headers(),
+            *args,
+            **kwargs,
+        )
 
     @with_httpx_error_handler
     def put(self, path: str, *args, **kwargs):
@@ -143,6 +173,7 @@ class Client(_ClientCommonDefaults, _Client):
 
     @with_httpx_error_handler
     def stream(self, path: str, *args, **kwargs):
+        path = self._normalize_path(path)
         return self.__httpx__.stream(
             url=path,
             headers=self.get_headers(),

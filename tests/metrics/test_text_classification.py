@@ -13,6 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import argilla as ar
+from argilla import TextClassificationRecord
+from argilla.client import api
 from argilla.metrics.text_classification import f1, f1_multilabel
 
 
@@ -97,3 +99,47 @@ def test_f1_without_results(mocked_client):
     assert results
     assert results.data == {}
     results.visualize()
+
+
+def test_dataset_labels_metric(mocked_client):
+    dataset = "test_dataset_labels_metric"
+    records = [
+        TextClassificationRecord(
+            id=i,
+            text="aa" * i,
+            prediction=[("A", 0.3)],
+        )
+        for i in range(0, 1000)
+    ]
+
+    records.extend(
+        [
+            TextClassificationRecord(
+                id=i,
+                text="aa" * i,
+                annotation="B",
+            )
+            for i in range(1000, 2000)
+        ]
+    )
+    records.extend(
+        [
+            TextClassificationRecord(
+                id=i,
+                text="aa" * i,
+                prediction=[("C", 0.3)],
+                annotation=["D"],
+            )
+            for i in range(2000, 3000)
+        ]
+    )
+    ar.log(
+        name=dataset,
+        records=records,
+    )
+
+    metric = api.active_api().compute_metric(
+        dataset,
+        metric="dataset_labels",
+    )
+    assert set(metric.results["labels"]) == {"C", "A", "B", "D"}
