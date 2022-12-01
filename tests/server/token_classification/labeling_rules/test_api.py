@@ -191,6 +191,7 @@ def test_search_records_by_rule(
         client=mocked_client,
         base_url=base_api_url,
         query=query,
+        rule_exists=False,
     )
 
     results = fetch_rule_annotations(
@@ -360,12 +361,19 @@ def fetch_rule_annotations(
     label: Optional[str] = None,
     send_label: bool = True,
     ids: List[str] = None,
+    rule_exists: bool = True,
 ):
     url = f"{base_url}/labeling/rules/{query}/annotations"
     if label and send_label:
         url += f"?label={label}"
+
     response = client.post(url, json={"record_ids": ids or []})
     data = response.json()
+
+    if label is None and not rule_exists:
+        assert data["detail"]["code"] == "argilla.api.errors::GenericServerError"
+        return
+
     assert response.status_code == 200, data
 
     results = RecordRuleAnnotations.parse_obj(data)
