@@ -45,14 +45,14 @@ class TokenClassificationLabelingRules(AbstractApi):
         self,
         dataset: str,
         rule: Rule,
-        ids: Optional[List[str]],
+        ids: Optional[List[str]] = None,
         chunk_size: int = 500,
-    ) -> Iterable[str, List[Tuple[str, int, int]]]:
+    ) -> Iterable[Tuple[str, List[Tuple[str, int, int]]]]:
         """Computes span annotations for a given rule"""
         pass
 
         url = self._API_URL_PATTERN.format(name=dataset)
-        url += f"/{rule.query}/search?{rule.label}&size={chunk_size}"
+        url += f"/{rule.query}/annotations?label={rule.label}&size={chunk_size}"
         body = {"record_ids": ids} if ids else None
 
         next_record = yield from self._fetch_annotations_chunk(url=url, body=body)
@@ -73,7 +73,7 @@ class TokenClassificationLabelingRules(AbstractApi):
 
         url_copy = url
         if next_record:
-            url_copy += f"&next{next_record}"
+            url_copy += f"&next_value={next_record}"
 
         response = self.__client__.post(
             path=url_copy,
@@ -88,7 +88,7 @@ class TokenClassificationLabelingRules(AbstractApi):
                 )
                 for entity in data["entities"]
             ]
-        return response.get("next")
+        return response.get("next_value")
 
     def _normalize_annotations(self, response):
         pass

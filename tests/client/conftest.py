@@ -267,6 +267,31 @@ def tokenclassification_records(request) -> List[ar.TokenClassificationRecord]:
 
 
 @pytest.fixture
+def log_a_lot_of_token_classification_records(
+    mocked_client,
+    tokenclassification_records,
+) -> str:
+    dataset_name = "a_lot_of_token_classification_records"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.post(
+        f"/api/datasets/{dataset_name}/{TaskType.token_classification}:bulk",
+        json=TokenClassificationBulkData(
+            tags={
+                "env": "test",
+                "task": TaskType.token_classification,
+            },
+            records=[
+                CreationTokenClassificationRecord.from_client(rec).dict(exclude={"id"})
+                for rec in tokenclassification_records
+            ]
+            * 10,
+        ).dict(by_alias=True),
+    )
+
+    return dataset_name
+
+
+@pytest.fixture
 def log_tokenclassification_records(
     mocked_client,
     tokenclassification_records,
