@@ -53,7 +53,7 @@ class BaseVectorDB(BaseModel):
 
 
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
-EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseVectorDB)
+VectorDB = TypeVar("VectorDB", bound=BaseVectorDB)
 
 
 class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
@@ -68,9 +68,9 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
     vectors: Optional[Dict[str, BaseVectorDB]] = Field(
         None,
-        description="Provide the embedding info as a list of key - value dictionary."
-        "The dictionary contains the dimension and dimension sized embedding float list"
-        "Using this way you can skip passing the agent inside of the embedding",
+        description="Provide the vector information as a list of key - value dictionary."
+        "The dictionary contains the dimension and dimension sized float list"
+        "Using this way you can skip passing the agent inside of the vector",
     )
 
     predictions: Optional[Dict[str, AnnotationDB]] = Field(
