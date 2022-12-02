@@ -65,18 +65,20 @@ class LabelingRuleSearchResults(BaseModel):
     total_records: int
     annotated_records: int
 
-    agent: Optional[str] = None
-    records: Optional[List[RuleRecordInfo]] = None
-
 
 class SearchRecordsByRuleRequest(BaseModel):
     record_ids: List[str]
 
 
-class SearchRecordsByRuleResponse(BaseModel):
+class RecordRuleAnnotations(BaseModel):
     total: int
     agent: str
     records: List[RuleRecordInfo] = Field(default_factory=list)
+    next_value: Optional[int] = Field(
+        None,
+        description="User to paginate results. "
+        "Provide this value in a search request to fetch next chunk of annotations",
+    )
 
 
 class DatasetLabelingRulesMetricsSummary(BaseModel):
@@ -159,13 +161,13 @@ def configure_router(router: APIRouter):
         return LabelingRule.parse_obj(rule)
 
     @router.post(
-        path=f"{base_endpoint}/{{query_or_name:path}}/search",
+        path=f"{base_endpoint}/{{query_or_name:path}}/annotations",
         operation_id="search_rule_records",
-        description="Fetch matched records by the provided rule",
-        response_model=SearchRecordsByRuleResponse,
+        description="Fetch matched record annotations by the provided rule",
+        response_model=RecordRuleAnnotations,
         response_model_exclude_none=True,
     )
-    async def search_records_by_rule(
+    async def fetch_rule_annotations(
         name: str,
         query_or_name: str,
         request: Optional[SearchRecordsByRuleRequest] = None,
@@ -173,13 +175,22 @@ def configure_router(router: APIRouter):
             None,
             description="Label related to query rule",
         ),
+        next_value: int = Query(
+            default=0,
+            description="Next value to use for fetching data. "
+            "Must be sent the previous request value, if any",
+        ),
+        size: Optional[int] = Query(
+            default=100,
+            description="Size of records annotations to retrieve",
+        ),
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         service: TokenClassificationService = Depends(
             TokenClassificationService.get_instance
         ),
-    ) -> SearchRecordsByRuleResponse:
+    ) -> RecordRuleAnnotations:
 
         dataset = datasets.find_by_name(
             user=current_user,
@@ -189,17 +200,20 @@ def configure_router(router: APIRouter):
             as_dataset_class=TasksFactory.get_task_dataset(task),
         )
 
-        total, rule_name, records = service.search_by_rule(
+        results = service.search_by_rule(
             dataset=dataset,
             query=query_or_name,
             record_ids=request.record_ids if request else None,
             label=label,
+            size=size,
+            record_from=next_value,
         )
 
-        return SearchRecordsByRuleResponse(
-            records=records,
-            agent=rule_name,
-            total=total,
+        return RecordRuleAnnotations(
+            records=results.records,
+            agent=results.rule.name,
+            total=results.total,
+            next_value=results.next_id,
         )
 
     @router.get(
@@ -251,10 +265,6 @@ def configure_router(router: APIRouter):
             None,
             description="Label related to query rule",
         ),
-        with_annotations: Optional[bool] = Query(
-            default=False,
-            description="If true, will return also matched records annotations the rule",
-        ),
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -284,14 +294,6 @@ def configure_router(router: APIRouter):
             annotated_records=annotated_records,
         )
 
-        if with_annotations:
-            total, rule_name, records = service.search_by_rule(
-                dataset,
-                query=query_or_name,
-                label=label,
-            )
-            response.records = records
-            response.agent = rule_name
         return response
 
     @router.delete(

@@ -136,6 +136,9 @@ class TokenAttributions(BaseModel):
     attributions: Dict[str, float] = Field(default_factory=dict)
 
 
+RecordId = Union[str, int]
+
+
 class TextClassificationRecord(_Validators):
     """Record for text classification
 
@@ -304,7 +307,7 @@ class TokenClassificationRecord(_Validators):
     annotation: Optional[List[Tuple[str, int, int]]] = None
     annotation_agent: Optional[str] = None
 
-    id: Optional[Union[int, str]] = None
+    id: Optional[RecordId] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
