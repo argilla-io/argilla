@@ -69,24 +69,15 @@ def create_some_data_for_text_classification(
             },
         ]
     ]
-    embeddgins = [
+    vectors_collection = [
         {
-            "bert_cased": {
-                "record_properties": ["data"],
-                "vector": [1.2, 2.3, 3.4, 4.5],
-            },
-        },
-        {
-            "bert_cased": {
-                "record_properties": ["data"],
-                "vector": [1.2, 2.3, 3.4, 4.5],
-            },
+            "bert_cased": [1.2, 2.3, 3.4, 4.5],
         },
     ] * n
 
     if with_vectors:
-        for record, record_embeddings in zip(records, embeddgins):
-            record.embeddings = record_embeddings
+        for record, vectors in zip(records, vectors_collection):
+            record.vectors = vectors
 
     client.post(
         f"/api/datasets/{name}/{TaskType.text_classification}:bulk",

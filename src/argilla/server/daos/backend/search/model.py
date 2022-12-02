@@ -75,7 +75,7 @@ class BaseRecordsQuery(BaseQuery):
     has_annotation: Optional[bool] = None
     has_prediction: Optional[bool] = None
     # TODO(@ufukhurriyetoglu): In order to allow vector searches, we can include here
-    #  (the base records query data model class) an embeddings related query params that
+    #  (the base records query data model class) a vectors related query params that
     #  we can use later for the records search.
     # The input vector:
     query: Optional[VectorQuery]

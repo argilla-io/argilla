@@ -90,7 +90,7 @@ def search_data(
     base_url: str,
     expected_total: int,
     query: Optional[dict] = None,
-    embedding_name: Optional[str] = None,
+    vector_name: Optional[str] = None,
 ):
     response = client.post(
         url=f"{base_url}:search",
@@ -102,9 +102,9 @@ def search_data(
     for record in results.records:
         print("\n Record info: \n")
         print(record.dict())
-        if embedding_name:
-            assert record.embeddings is not None
-            assert embedding_name in record.embeddings
+        if vector_name:
+            assert record.vectors is not None
+            assert vector_name in record.vectors
 
 
 @pytest.mark.skipif(

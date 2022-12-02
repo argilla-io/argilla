@@ -59,7 +59,7 @@ class BaseDatasetDB(BaseModel):
 
 class VectorsConfig(BaseModel):
     dim: int = Field(
-        description="The number of dimensions for the named embeddings",
+        description="The number of dimensions for the named vectors",
     )
 
 
