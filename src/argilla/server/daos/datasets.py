@@ -221,24 +221,24 @@ class DatasetsDAO:
         settings: DatasetSettingsDB,
     ) -> BaseDatasetSettingsDB:
 
-        self._configure_embeddings(dataset, settings)
+        self._configure_vectors(dataset, settings)
         self._es.update_dataset_document(
             id=dataset.id,
             document={"settings": settings.dict(exclude_none=True)},
         )
         return settings
 
-    def _configure_embeddings(self, dataset, settings):
-        if not settings.embeddings:
+    def _configure_vectors(self, dataset, settings):
+        if not settings.vectors:
             return
-        embeddings_cfg = {
+        vectors_cfg = {
             k: v.dim if isinstance(v, EmbeddingsConfig) else int(v)
-            for k, v in settings.embeddings.items()
+            for k, v in settings.vectors.items()
         }
         self._es.create_dataset(
             id=dataset.id,
             task=dataset.task,
-            embeddings_cfg=embeddings_cfg,
+            vectors_cfg=vectors_cfg,
         )
 
     def load_settings(
