@@ -46,14 +46,14 @@ class BaseAnnotationDB(BaseModel):
     )
 
 
-class BaseEmbeddingVectorDB(BaseModel):
-    vector: List[float]
+class BaseVectorDB(BaseModel):
+    value: List[float]
     record_properties: Optional[List[Union[str, Dict[str, Any]]]]
     model: Optional[str]
 
 
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
-EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseEmbeddingVectorDB)
+EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseVectorDB)
 
 
 class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
@@ -66,7 +66,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     )
     annotation: Optional[AnnotationDB] = None
 
-    embeddings: Optional[Dict[str, BaseEmbeddingVectorDB]] = Field(
+    embeddings: Optional[Dict[str, BaseVectorDB]] = Field(
         None,
         description="Provide the embedding info as a list of key - value dictionary."
         "The dictionary contains the dimension and dimension sized embedding float list"
