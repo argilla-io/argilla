@@ -66,7 +66,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     )
     annotation: Optional[AnnotationDB] = None
 
-    embeddings: Optional[Dict[str, BaseVectorDB]] = Field(
+    vectors: Optional[Dict[str, BaseVectorDB]] = Field(
         None,
         description="Provide the embedding info as a list of key - value dictionary."
         "The dictionary contains the dimension and dimension sized embedding float list"
