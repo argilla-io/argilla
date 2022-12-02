@@ -631,10 +631,10 @@ def test_token_classification_spans(span, valid):
 
 def test_load_text2text(mocked_client, supported_vector_search):
 
-    embeddings = {
+    vectors = {
         "bert_uncased": {
             "property_names": ["text"],
-            "vector": [1.2, 3.4, 6.4, 6.4],
+            "value": [1.2, 3.4, 6.4, 6.4],
         },
     }
 
@@ -652,7 +652,7 @@ def test_load_text2text(mocked_client, supported_vector_search):
             event_timestamp=datetime.datetime(2000, 1, 1),
         )
         if supported_vector_search:
-            record.embeddings = embeddings
+            record.vectors = vectors
         records.append(record)
 
     dataset = "test_load_text2text"
@@ -664,7 +664,7 @@ def test_load_text2text(mocked_client, supported_vector_search):
     if supported_vector_search:
         expected_embedding_vector = [1.2, 3.4, 6.4, 6.4]
         for record in records:
-            vector = [float(v) for v in record.embeddings["bert_uncased"]["vector"]]
+            vector = [float(v) for v in record.vectors["bert_uncased"]["vector"]]
             assert vector == expected_embedding_vector
 
 
