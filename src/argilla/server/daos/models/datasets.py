@@ -66,7 +66,7 @@ class VectorsConfig(BaseModel):
 class BaseDatasetSettingsDB(BaseModel):
     vectors: Optional[Dict[str, Union[int, VectorsConfig]]] = Field(
         default=None,
-        description="The embeddings configuration",
+        description="The vector search configuration",
     )
 
 
