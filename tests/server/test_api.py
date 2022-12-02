@@ -26,7 +26,7 @@ def create_some_data_for_text_classification(
     client,
     name: str,
     n: int,
-    with_embeddings: bool = True,
+    with_vectors: bool = True,
 ):
     n = n or 10
 
@@ -84,7 +84,7 @@ def create_some_data_for_text_classification(
         },
     ] * n
 
-    if with_embeddings:
+    if with_vectors:
         for record, record_embeddings in zip(records, embeddgins):
             record.embeddings = record_embeddings
 

@@ -74,8 +74,8 @@ def test_delete_and_create_for_different_task(mocked_client):
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
-    dataset = "test_log_data_with_embeddings_and_update_ok"
+def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient):
+    dataset = "test_log_data_with_vectors_and_update_ok"
     text = "This is a text"
     embeddings = {"my_bert": {"vector": [1, 2, 3, 4]}}
 
@@ -109,8 +109,8 @@ def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_embeddings_and_update_ko(mocked_client: SecuredClient):
-    dataset = "test_log_data_with_embeddings_and_update_ko"
+def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
+    dataset = "test_log_data_with_vectors_and_update_ko"
     text = "This is a text"
     embeddings = {"my_bert": {"vector": [1, 2, 3, 4]}}
 

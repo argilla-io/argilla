@@ -111,12 +111,12 @@ def search_data(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_search_with_embeddings(mocked_client):
-    dataset = "test_search_with_embeddings"
+def test_search_with_vectors(mocked_client):
+    dataset = "test_search_with_vectors"
 
     delete_dataset(dataset, mocked_client)
 
-    records_for_text2text_with_embeddings = [
+    records_for_text2text_with_vectors = [
         Text2TextRecordInputs.parse_obj(data)
         for data in [
             {
@@ -150,7 +150,7 @@ def test_search_with_embeddings(mocked_client):
     base_url = prepare_data(
         client=mocked_client,
         dataset=dataset,
-        records=records_for_text2text_with_embeddings,
+        records=records_for_text2text_with_vectors,
     )
 
     search_data(

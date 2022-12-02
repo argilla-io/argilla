@@ -178,7 +178,7 @@ def test_load_limits(mocked_client, supported_vector_search):
         mocked_client,
         dataset,
         50,
-        with_embeddings=supported_vector_search,
+        with_vectors=supported_vector_search,
     )
 
     limit_data_to = 10
@@ -550,7 +550,7 @@ def test_load_with_ids_list(mocked_client, supported_vector_search):
         mocked_client,
         dataset,
         n=expected_data,
-        with_embeddings=supported_vector_search,
+        with_vectors=supported_vector_search,
     )
     ds = api.load(name=dataset, ids=[3, 5])
     assert len(ds) == 2
@@ -566,7 +566,7 @@ def test_load_with_query(mocked_client, supported_vector_search):
         mocked_client,
         dataset,
         n=expected_data,
-        with_embeddings=supported_vector_search,
+        with_vectors=supported_vector_search,
     )
     ds = api.load(name=dataset, query="id:1")
     ds = ds.to_pandas()
@@ -584,7 +584,7 @@ def test_load_as_pandas(mocked_client, supported_vector_search):
         mocked_client,
         dataset,
         n=expected_data,
-        with_embeddings=supported_vector_search,
+        with_vectors=supported_vector_search,
     )
 
     records = api.load(name=dataset)
