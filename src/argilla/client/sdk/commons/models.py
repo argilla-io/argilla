@@ -31,6 +31,11 @@ class TaskStatus(str, Enum):
     validated = "Validated"
 
 
+class VectorQuery(BaseModel):
+    name: str = Field(default=None)
+    value: List[float] = Field(default_factory=list)
+
+
 class BaseAnnotation(BaseModel):
     agent: str = Field(max_length=64)
 

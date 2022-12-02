@@ -29,6 +29,7 @@ from argilla.client.sdk.commons.models import (
     ScoreRange,
     TaskStatus,
     UpdateDatasetRequest,
+    VectorQuery,
 )
 
 
@@ -137,11 +138,6 @@ class TextClassificationRecord(CreationTextClassificationRecord):
 
 class TextClassificationBulkData(UpdateDatasetRequest):
     records: List[CreationTextClassificationRecord]
-
-
-class VectorQuery(BaseModel):
-    name: str = Field(default=None)
-    value: List[float] = Field(default_factory=list)
 
 
 class TextClassificationQuery(BaseModel):
