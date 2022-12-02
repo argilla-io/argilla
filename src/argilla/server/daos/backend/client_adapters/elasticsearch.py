@@ -54,21 +54,21 @@ class ElasticsearchClient(OpenSearchClient):
     ):
         self._check_vector_supported()
 
-        embedding_mappings = {}
-        for embedding_name, embedding_dimension in vectors.items():
+        vector_mappings = {}
+        for name, dimension in vectors.items():
             index_mapping = {
                 "type": "dense_vector",
-                "dims": embedding_dimension,
+                "dims": dimension,
                 "index": True,
                 # can similarity property also be part of config @frascuchon ?
                 # relates vector search similarity metric
                 "similarity": similarity_metric,  ## default value regarding the knn best practices es documentation
             }
-            embedding_mappings[embedding_name] = index_mapping
+            vector_mappings[name] = index_mapping
 
         self.set_index_mappings(
             index=index,
-            mappings=embedding_mappings,
+            mappings=vector_mappings,
         )
 
     def reindex(
