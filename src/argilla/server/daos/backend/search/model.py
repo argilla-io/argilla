@@ -78,7 +78,7 @@ class BaseRecordsQuery(BaseQuery):
     #  (the base records query data model class) a vectors related query params that
     #  we can use later for the records search.
     # The input vector:
-    query: Optional[VectorQuery]
+    # query: Optional[VectorQuery]
 
 
 BackendQuery = TypeVar("BackendQuery", bound=BaseQuery)
