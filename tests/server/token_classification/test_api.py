@@ -319,8 +319,10 @@ def test_create_records_for_token_classification_vector_search(
         search_url,
         json={
             "query": {
-                "embedding_name": "my_bert",
-                "embedding_value": [5, 6, 7, 8, 9, 10],
+                "query": {
+                    "name": "my_bert",
+                    "value": [5, 6, 7, 8, 9, 10],
+                }
             }
         },
     )
