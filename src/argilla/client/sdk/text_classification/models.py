@@ -139,6 +139,11 @@ class TextClassificationBulkData(UpdateDatasetRequest):
     records: List[CreationTextClassificationRecord]
 
 
+class VectorQuery(BaseModel):
+    name: str = Field(default=None)
+    value: List[float] = Field(default_factory=list)
+
+
 class TextClassificationQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
 
@@ -154,8 +159,7 @@ class TextClassificationQuery(BaseModel):
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
-    embedding_name: str = Field(default=None)
-    embedding_vector: List[float] = Field(default_factory=list)
+    query: VectorQuery
     uncovered_by_rules: List[str] = Field(
         default_factory=list,
         description="List of rule queries that WILL NOT cover the resulting records",
