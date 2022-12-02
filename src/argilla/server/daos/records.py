@@ -110,8 +110,8 @@ class DatasetRecordsDAO:
                     name,
                     value,
                 ) in record.vectors.items():
-                    embedding_dimension = vectors_configuration.get(name, None)
-                    if embedding_dimension is None:
+                    vector_dimension = vectors_configuration.get(name, None)
+                    if vector_dimension is None:
                         dimension = len(value)
                         vectors_configuration[name] = dimension
                     record_dict[name] = value
