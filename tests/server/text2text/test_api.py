@@ -129,12 +129,12 @@ def test_search_with_vectors(mocked_client):
                     "agent": "test",
                     "sentences": [{"text": "This is a test data", "score": 0.6}],
                 },
-                "embeddings": {"my_bert": {"vector": [1, 2, 3, 4]}},
+                "vectors": {"my_bert": {"value": [1, 2, 3, 4]}},
             },
             {
                 "id": 1,
                 "text": "Ånother data",
-                "embeddings": {"my_bert": {"vector": [4, 5, 6, 7]}},
+                "vectors": {"my_bert": {"value": [4, 5, 6, 7]}},
             },
             {
                 "id": 3,
@@ -157,7 +157,7 @@ def test_search_with_vectors(mocked_client):
         client=mocked_client,
         base_url=base_url,
         expected_total=2,
-        embedding_name="my_bert",
+        vector_name="my_bert",
         query={
             "query": {
                 "embedding_name": "my_bert",

@@ -74,11 +74,11 @@ class OpenSearchClient(IClientAdapter):
                 }
             },
         )
-        embedding_mappings = {}
-        for embedding_name, embedding_dimension in vectors.items():
+        vector_mappings = {}
+        for name, dimension in vectors.items():
             index_mapping = {
                 "type": "knn_vector",
-                "dimension": embedding_dimension,
+                "dimension": dimension,
                 "method": {
                     "name": "hnsw",
                     "space_type": "l2",
@@ -89,11 +89,11 @@ class OpenSearchClient(IClientAdapter):
                     },
                 },
             }
-            embedding_mappings[embedding_name] = index_mapping
+            vector_mappings[name] = index_mapping
 
         self.set_index_mappings(
             index=index,
-            mappings=embedding_mappings,
+            mappings=vector_mappings,
         )
 
     def _check_vector_supported(self):
