@@ -12,9 +12,7 @@
         :isCancelBtnDisabled="isCancelBtnDisabled"
         :showButtons="showButtons"
         :message="message"
-        @on-search-entity="
-          (searchQuery) => $emit('on-search-entity', searchQuery)
-        "
+        @on-search-entity="(searchQuery) => onEmitSearchEntity(searchQuery)"
         @on-select-global-entity="onSelectGlobalEntity"
         @on-click-save-rule="saveRule"
         @on-click-view-rules="onClickViewRules"
@@ -91,6 +89,7 @@ export default {
     };
   },
   mounted() {
+    this.onEmitSearchEntity();
     this.OptionsForRuleMetrics = new OptionsForRuleMetrics(
       this.initialParamsForInstance,
       "TOKEN_ANNOTATION"
@@ -120,6 +119,9 @@ export default {
     setOptions(params = this.initialParamsForInstance) {
       this.OptionsForRuleMetrics.setMetrics(params);
       this.options = this.OptionsForRuleMetrics.getOptions();
+    },
+    onEmitSearchEntity(searchEntity = "") {
+      this.$emit("on-search-entity", searchEntity);
     },
   },
   computed: {
