@@ -66,6 +66,7 @@ class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
             text=record.text,
             prediction=prediction,
             annotation=annotation,
+            embeddings=record.embeddings,
             status=record.status,
             metadata=record.metadata,
             id=record.id,
@@ -89,6 +90,7 @@ class Text2TextRecord(CreationText2TextRecord):
             prediction_agent=self.prediction.agent if self.prediction else None,
             annotation=self.annotation.sentences[0].text if self.annotation else None,
             annotation_agent=self.annotation.agent if self.annotation else None,
+            embeddings=self.embeddings if self.embeddings else None,
             status=self.status,
             metadata=self.metadata or {},
             id=self.id,
@@ -110,6 +112,9 @@ class Text2TextQuery(BaseModel):
 
     annotated_by: List[str] = Field(default_factory=list)
     predicted_by: List[str] = Field(default_factory=list)
+
+    embedding_name: str = Field(default=None)
+    embedding_vector: List[float] = Field(default_factory=list)
 
     score: Optional[ScoreRange] = Field(default=None)
 

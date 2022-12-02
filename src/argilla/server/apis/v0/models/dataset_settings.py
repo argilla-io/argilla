@@ -12,13 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
+from argilla.server.daos.models.datasets import EmbeddingsConfig
+
 
 class AbstractDatasetSettings(BaseModel):
-    pass
+    embeddings: Optional[Dict[str, Union[int, EmbeddingsConfig]]] = Field(
+        default=None,
+        description="The embeddings configuration",
+    )
 
 
 class LabelsSchema(BaseModel):
@@ -44,7 +49,8 @@ class LabelsSchema(BaseModel):
 
 class WithLabelsSchemaSettings(AbstractDatasetSettings):
     label_schema: Optional[LabelsSchema] = Field(
-        None, description="The dataset labels schema"
+        None,
+        description="The dataset labels schema",
     )
 
 

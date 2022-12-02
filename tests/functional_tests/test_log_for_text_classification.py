@@ -15,8 +15,13 @@
 import pytest
 
 import argilla as ar
-from argilla.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
+from argilla.client.sdk.commons.errors import (
+    BadRequestApiError,
+    GenericApiError,
+    ValidationApiError,
+)
 from argilla.server.settings import settings
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH, supported_vector_search
 from tests.helpers import SecuredClient
 
 
@@ -63,6 +68,65 @@ def test_delete_and_create_for_different_task(mocked_client):
         name=dataset,
     )
     ar.load(dataset)
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
+    dataset = "test_log_data_with_embeddings_and_update_ok"
+    text = "This is a text"
+    embeddings = {"my_bert": {"vector": [1, 2, 3, 4]}}
+
+    ar.delete(dataset)
+    ar.log(
+        ar.TextClassificationRecord(id=0, inputs=text, embeddings=embeddings),
+        name=dataset,
+    )
+    ar.load(dataset)
+
+    updated_embeddings = {"my_bert": {"vector": [2, 3, 5, 5]}}
+
+    ar.log(
+        ar.TextClassificationRecord(id=0, text=text, embeddings=updated_embeddings),
+        name=dataset,
+    )
+    ar.load(dataset)
+
+    dataset_rg = ar.load(dataset)
+    print(dataset_rg._records[0])
+    assert dataset_rg._records[0].id == 0
+    assert dataset_rg._records[0].embeddings["my_bert"]["vector"] == [
+        "2.0",
+        "3.0",
+        "5.0",
+        "5.0",
+    ]  # will be corrected after I fix the returned list type issue @frascuchon
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_log_data_with_embeddings_and_update_ko(mocked_client: SecuredClient):
+    dataset = "test_log_data_with_embeddings_and_update_ko"
+    text = "This is a text"
+    embeddings = {"my_bert": {"vector": [1, 2, 3, 4]}}
+
+    ar.delete(dataset)
+    ar.log(
+        ar.TextClassificationRecord(id=0, inputs=text, embeddings=embeddings),
+        name=dataset,
+    )
+    ar.load(dataset)
+
+    updated_embeddings = {"my_bert": {"vector": [2, 3, 5]}}
+    with pytest.raises(GenericApiError):
+        ar.log(
+            ar.TextClassificationRecord(id=0, text=text, embeddings=updated_embeddings),
+            name=dataset,
+        )
 
 
 def test_log_data_in_several_workspaces(mocked_client: SecuredClient):

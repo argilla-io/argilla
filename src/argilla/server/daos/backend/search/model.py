@@ -74,6 +74,13 @@ class BaseRecordsQuery(BaseQuery):
 
     has_annotation: Optional[bool] = None
     has_prediction: Optional[bool] = None
+    # TODO(@ufukhurriyetogl): In order to allow embedding-based searches, we can include here
+    #  (the base records query data model class) an embeddings related query params that
+    #  we can use later for the records search.
+    # The input vector:
+    embedding_vector: Optional[List[float]] = None
+    # The name of the embedding to uses (if several):
+    embedding_name: Optional[str] = None
 
 
 BackendQuery = TypeVar("BackendQuery", bound=BaseQuery)

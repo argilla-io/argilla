@@ -215,11 +215,20 @@ class MetadataAggregations(ElasticsearchMetric):
 
     def aggregation_request(
         self,
-        schema: Dict[str, Any],
+        client: "IClientAdapter",
+        index: str,
         size: int = None,
     ) -> List[Dict[str, Any]]:
 
-        metadata_aggs = aggregations.custom_fields(fields_definitions=schema, size=size)
+        schema = client.get_property_type(
+            index=index,
+            property_name="metadata",
+        )
+
+        metadata_aggs = aggregations.custom_fields(
+            fields_definitions=schema,
+            size=size,
+        )
         return [{key: value} for key, value in metadata_aggs.items()]
 
     def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:

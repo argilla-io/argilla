@@ -13,11 +13,13 @@
 #  limitations under the License.
 
 import logging
+import re
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
+from overrides import overrides
 
 from argilla.server.daos.backend.query_helpers import filters
 from argilla.server.daos.backend.search.model import (
@@ -29,6 +31,62 @@ from argilla.server.daos.backend.search.model import (
     SortableField,
     SortConfig,
 )
+
+
+class HighlightParser:
+
+    __HIGHLIGHT_PRE_TAG__ = "<@@-ar-key>"
+    __HIGHLIGHT_POST_TAG__ = "</@@-ar-key>"
+    __HIGHLIGHT_VALUES_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}"
+    )
+
+    __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
+    )
+
+    @classmethod
+    def build_query_highlight(cls):
+        return {
+            "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
+            "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
+            "require_field_match": True,
+            "fields": {
+                "text": {},
+                "text.*": {},
+                "inputs.*": {},
+            },
+        }
+
+    @classmethod
+    def parse_highligth_results(
+        cls,
+        doc: Dict[str, Any],
+        is_phrase_query: bool = False,
+    ) -> Optional[List[str]]:
+        highlight_info = doc.get("highlight")
+        if not highlight_info:
+            return None
+
+        search_keywords = []
+        for content in highlight_info.values():
+            if not isinstance(content, list):
+                content = [content]
+            text = " ".join(content)
+
+            if is_phrase_query:
+                text = re.sub(
+                    pattern=cls.__HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__,
+                    repl=" ",
+                    string=text,
+                )
+            search_keywords.extend(
+                re.findall(
+                    pattern=cls.__HIGHLIGHT_VALUES_REGEX__,
+                    string=text,
+                )
+            )
+        return list(set(search_keywords))
 
 
 class EsQueryBuilder:
@@ -49,7 +107,10 @@ class EsQueryBuilder:
 
         query_filters = []
         if query.owners:
-            owners_filter = filters.terms_filter("owner.keyword", query.owners)
+            owners_filter = filters.terms_filter(
+                "owner.keyword",
+                query.owners,
+            )
             if query.include_no_owner:
                 query_filters.append(
                     filters.boolean_filter(
@@ -67,16 +128,24 @@ class EsQueryBuilder:
 
         if query.tasks:
             query_filters.append(
-                filters.terms_filter(field="task.keyword", values=query.tasks)
+                filters.terms_filter(
+                    field="task.keyword",
+                    values=query.tasks,
+                )
             )
         if query.name:
             query_filters.append(
-                filters.term_filter(field="name.keyword", value=query.name)
+                filters.term_filter(
+                    field="name.keyword",
+                    value=query.name,
+                )
             )
         if not query_filters:
             return filters.match_all()
+
         return filters.boolean_filter(
-            should_filters=query_filters, minimum_should_match=len(query_filters)
+            should_filters=query_filters,
+            minimum_should_match=len(query_filters),
         )
 
     def _search_to_es_query(
@@ -104,9 +173,10 @@ class EsQueryBuilder:
 
         query_tree = parser.parse(text_search)
         query_text = es_query_builder(query_tree)
-
+        boolean_filter_query = self._to_es_query(new_query)
         return filters.boolean_filter(
-            filter_query=self._to_es_query(new_query), must_query=query_text
+            filter_query=boolean_filter_query,
+            must_query=query_text,
         )
 
     def map_2_es_query(
@@ -114,9 +184,14 @@ class EsQueryBuilder:
         schema: Optional[Dict[str, Any]] = None,
         query: Optional[BackendQuery] = None,
         sort: Optional[SortConfig] = None,
+        exclude_fields: Optional[List[str]] = None,
+        doc_from: Optional[int] = None,
+        highlight: Optional[HighlightParser] = None,
+        size: Optional[int] = None,
         id_from: Optional[str] = None,
         shuffle: bool = False,
     ) -> Dict[str, Any]:
+
         es_query: Dict[str, Any] = (
             {"query": self._datasets_to_es_query(query)}
             if isinstance(query, BaseDatasetsQuery)
@@ -134,10 +209,31 @@ class EsQueryBuilder:
         if es_sort and not shuffle:
             es_query["sort"] = es_sort
 
+        if doc_from:
+            es_query["from"] = doc_from
+
+        if exclude_fields:
+            es_query["_source"] = {"excludes": exclude_fields}
+
+        if highlight:
+            es_query["highlight"] = highlight.build_query_highlight()
+
+        if (hasattr(query, "embedding_vector") and query.embedding_vector) and (
+            hasattr(query, "embedding_name") and query.embedding_name
+        ):
+            self._build_knn_configuration(
+                es_query=es_query,
+                vector_field=query.embedding_name,
+                vector_value=query.embedding_vector,
+                top_k=size,
+            )
+
         return es_query
 
     def map_2_es_sort_configuration(
-        self, schema: Optional[Dict[str, Any]] = None, sort: Optional[SortConfig] = None
+        self,
+        schema: Optional[Dict[str, Any]] = None,
+        sort: Optional[SortConfig] = None,
     ) -> Optional[List[Dict[str, Any]]]:
 
         if not sort:
@@ -194,6 +290,8 @@ class EsQueryBuilder:
         query_data = query.dict(
             exclude={
                 "advanced_query_dsl",
+                "embedding_name",
+                "embedding_vector",
                 "query_text",
                 "metadata",
                 "uncovered_by_rules",
@@ -221,10 +319,11 @@ class EsQueryBuilder:
             if key_filter:
                 all_filters.append(key_filter)
 
-        return filters.boolean_filter(
+        boolean_filter_query = filters.boolean_filter(
             must_query=query_text or filters.match_all(),
             filter_query=filters.boolean_filter(
-                should_filters=all_filters, minimum_should_match=len(all_filters)
+                should_filters=all_filters,
+                minimum_should_match=len(all_filters),
             )
             if all_filters
             else None,
@@ -235,6 +334,8 @@ class EsQueryBuilder:
             else None,
         )
 
+        return boolean_filter_query
+
     def _clean_mappings(self, mappings: Dict[str, Any]):
         if not mappings:
             return {}
@@ -243,6 +344,39 @@ class EsQueryBuilder:
             key: definition.get("type") or self._clean_mappings(definition)
             for key, definition in mappings["properties"].items()
         }
+
+    def _build_knn_configuration(
+        self,
+        *,
+        es_query: Dict[str, Any],
+        vector_field: str,
+        vector_value: List[float],
+        top_k: Optional[int] = None,
+    ):
+        def compute_num_candidates(k: int):
+            if k < 50:
+                return 500
+            if 50 <= k < 200:
+                return 100
+            if 200 <= k < 500:
+                return 2000
+            # > 500
+            return 2500
+
+        top_k = top_k or 5
+        num_candidates = compute_num_candidates(top_k)
+
+        es_query_filter = es_query["query"]
+
+        es_query["knn"] = {
+            "field": vector_field,
+            "query_vector": vector_value,
+            "k": top_k,  # TODO: parameterize
+            "num_candidates": num_candidates,  # TODO: parameterize
+            "filter": es_query_filter,
+        }
+        es_query.pop("sort")
+        del es_query["query"]
 
     def _setup_random_score(self, es_query: Dict[str, Any]):
         query = es_query["query"]
@@ -253,3 +387,30 @@ class EsQueryBuilder:
             }
         }
         return es_query
+
+
+class OpenSearchQueryBuilder(EsQueryBuilder):
+    @overrides
+    def _build_knn_configuration(
+        self,
+        *,
+        es_query: Dict[str, Any],
+        vector_field: str,
+        vector_value: List[float],
+        top_k: Optional[int] = None,
+    ):
+        top_k = top_k or 5
+        knn = {
+            vector_field: {
+                "vector": vector_value,
+                "k": top_k,  # TODO: Input from query
+            }
+        }
+        es_query.pop("sort")
+        filter = es_query.pop("query")
+        es_query.update(
+            {
+                "query": {"knn": knn},
+                "post_filter": filter,
+            }
+        )

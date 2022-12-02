@@ -20,7 +20,7 @@ def text_classification_mappings():
     return {
         "_source": mappings.source(
             excludes=[
-                # "words", # Cannot be exclude since comment text_length metric  is computed using this source fields
+                # "words", # Cannot be excluded since comment text_length metric  is computed using this source fields
                 "predicted",
                 "predicted_as",
                 "predicted_by",
@@ -46,6 +46,11 @@ def text_classification_mappings():
             "score": mappings.decimal_field(),
         },
         "dynamic_templates": [
-            {"inputs.*": {"path_match": "inputs.*", "mapping": mappings.text_field()}}
+            {
+                "inputs.*": {
+                    "path_match": "inputs.*",
+                    "mapping": mappings.text_field(),
+                }
+            }
         ],
     }

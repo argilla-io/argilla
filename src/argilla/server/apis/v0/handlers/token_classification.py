@@ -143,7 +143,8 @@ def configure_router():
         search: TokenClassificationSearchRequest = None,
         common_params: CommonTaskHandlerDependencies = Depends(),
         include_metrics: bool = Query(
-            False, description="If enabled, return related record metrics"
+            default=False,
+            description="If enabled, return related record metrics",
         ),
         pagination: RequestPagination = Depends(),
         service: TokenClassificationService = Depends(

@@ -22,7 +22,7 @@ from pydantic.generics import GenericModel
 
 from argilla import _messages
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
-from argilla.server.daos.backend.search.model import BackendRecordsQuery, SortConfig
+from argilla.server.daos.backend.search.model import BaseRecordsQuery, SortConfig
 from argilla.server.helpers import flatten_dict
 from argilla.server.settings import settings
 from argilla.utils import limit_value_length
@@ -30,7 +30,7 @@ from argilla.utils import limit_value_length
 
 class DaoRecordsSearch(BaseModel):
 
-    query: Optional[BackendRecordsQuery] = None
+    query: Optional[BaseRecordsQuery] = None
     sort: SortConfig = Field(default_factory=SortConfig)
 
 
@@ -46,7 +46,14 @@ class BaseAnnotationDB(BaseModel):
     )
 
 
+class BaseEmbeddingVectorDB(BaseModel):
+    vector: List[float]
+    record_properties: Optional[List[Union[str, Dict[str, Any]]]]
+    model: Optional[str]
+
+
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
+EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseEmbeddingVectorDB)
 
 
 class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
@@ -58,6 +65,13 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         None, description="Deprecated. Use `predictions` instead"
     )
     annotation: Optional[AnnotationDB] = None
+
+    embeddings: Optional[Dict[str, BaseEmbeddingVectorDB]] = Field(
+        None,
+        description="Provide the embedding info as a list of key - value dictionary."
+        "The dictionary contains the dimension and dimension sized embedding float list"
+        "Using this way you can skip passing the agent inside of the embedding",
+    )
 
     predictions: Optional[Dict[str, AnnotationDB]] = Field(
         None,
@@ -109,6 +123,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
         values = cls.update_annotation(values, "prediction")
         values = cls.update_annotation(values, "annotation")
+
         return values
 
     @validator("id", always=True, pre=True)

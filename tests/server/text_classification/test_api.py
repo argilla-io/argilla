@@ -15,6 +15,8 @@
 
 from datetime import datetime
 
+import pytest
+
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.apis.v0.models.text_classification import (
@@ -26,6 +28,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
 from argilla.server.commons.models import PredictionStatus
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 
 def test_create_records_for_text_classification_with_multi_label(mocked_client):
@@ -179,6 +182,115 @@ def test_create_records_for_text_classification(mocked_client, telemetry_track_d
     }
 
     telemetry_track_data.assert_called_once()
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_create_records_for_text_classification_vector_search(
+    mocked_client, telemetry_track_data
+):
+    dataset = "test_create_records_for_text_classification_vector_search"
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    tags = {"env": "test", "class": "text classification"}
+    metadata = {"config": {"the": "config"}}
+    classification_bulk = TextClassificationBulkRequest(
+        tags=tags,
+        metadata=metadata,
+        records=[
+            TextClassificationRecord(**a)
+            for a in [
+                {
+                    "id": 0,
+                    "inputs": {"data": "my data"},
+                    "prediction": {
+                        "agent": "test",
+                        "labels": [
+                            {"class": "Test", "score": 0.3},
+                            {"class": "Mocking", "score": 0.7},
+                        ],
+                    },
+                    "embeddings": {"my_bert": {"vector": [10, 11, 12, 13]}},
+                },
+                {
+                    "id": 1,
+                    "inputs": {"data": "your data"},
+                    "prediction": {
+                        "agent": "test",
+                        "labels": [
+                            {"class": "Test", "score": 0.35},
+                            {"class": "Mocking", "score": 0.65},
+                        ],
+                    },
+                    "embeddings": {"my_bert": {"vector": [14, 15, 16, 17]}},
+                },
+                {
+                    "id": 2,
+                    "inputs": {"data": "their data"},
+                    "prediction": {
+                        "agent": "test",
+                        "labels": [
+                            {"class": "Test", "score": 0.4},
+                            {"class": "Mocking", "score": 0.6},
+                        ],
+                    },
+                    "embeddings": {"my_bert": {"vector": [14, 15, 16, 18]}},
+                },
+            ]
+        ],
+    )
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        json=classification_bulk.dict(by_alias=True),
+    )
+
+    assert response.status_code == 200
+    bulk_response = BulkResponse.parse_obj(response.json())
+    assert bulk_response.dataset == dataset
+    assert bulk_response.failed == 0
+    assert bulk_response.processed == 3
+
+    response = mocked_client.get(f"/api/datasets/{dataset}")
+    assert response.status_code == 200
+    created_dataset = Dataset.parse_obj(response.json())
+    assert created_dataset.tags == tags
+    assert created_dataset.metadata == metadata
+
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/TextClassification:search", json={}
+    )
+
+    assert response.status_code == 200
+    results = TextClassificationSearchResults.parse_obj(response.json())
+    assert results.total == 3
+    assert all(hasattr(record, "embeddings") for record in results.records)
+    assert results.aggregations.dict(exclude={"score"}) == {
+        "annotated_as": {},
+        "annotated_by": {},
+        "metadata": {},
+        "predicted": {},
+        "predicted_as": {"Mocking": 3},
+        "predicted_by": {"test": 3},
+        "status": {"Default": 3},
+        "words": {"data": 3},
+    }
+
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json={
+            "query": {"embedding_name": "my_bert", "embedding_vector": [14, 15, 16, 17]}
+        },
+    )
+    assert response.status_code == 200
+    results = TextClassificationSearchResults.parse_obj(response.json())
+    assert results.total == 3
+    assert all(hasattr(record, "embeddings") for record in results.records)
+    assert [record.id for record in results.records] == [
+        1,
+        2,
+        0,
+    ]  ## similarity ordered records
 
 
 def test_partial_record_update(mocked_client):
@@ -364,7 +476,7 @@ def test_some_sort_by(mocked_client):
     )
 
     assert response.status_code == 400
-    assert response.json() == {
+    expected_response_property_name_2_value = {
         "detail": {
             "code": "argilla.api.errors::BadRequestError",
             "params": {
@@ -377,7 +489,14 @@ def test_some_sort_by(mocked_client):
             },
         }
     }
-
+    assert (
+        response.json()["detail"]["code"]
+        == expected_response_property_name_2_value["detail"]["code"]
+    )
+    assert (
+        response.json()["detail"]["params"]["message"]
+        == expected_response_property_name_2_value["detail"]["params"]["message"]
+    )
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
         json={

@@ -1,6 +1,7 @@
-version: "3"
+version: "3.9"
 
 services:
+
   argilla:
     image: argilla/argilla-server:latest
     restart: unless-stopped
@@ -19,14 +20,17 @@ services:
       - argilla
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
-    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
     environment:
       - node.name=elasticsearch
-      - cluster.name=es-local
+      - cluster.name=es-argilla-local
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - “ES_JAVA_OPTS=-Xms512m -Xmx512m”
       - cluster.routing.allocation.disk.threshold_enabled=false
+      - xpack.security.enabled=false
     ulimits:
       memlock:
         soft: -1
@@ -34,22 +38,18 @@ services:
     networks:
       - argilla
     volumes:
-      - elasticdata:/usr/share/elasticsearch/data
-
+      - elasticdata85:/usr/share/elasticsearch/data/
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.11.1
-    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:8.5.0
     ports:
-      - 5601:5601
+      - "5601:5601"
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
     networks:
       - argilla
-
 networks:
   argilla:
     driver: bridge
-
 volumes:
-  elasticdata:
+  elasticdata85:

@@ -85,6 +85,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             text=record.text,
             prediction=prediction,
             annotation=annotation,
+            embeddings=record.embeddings,
             status=record.status,
             id=record.id,
             metadata=record.metadata,
@@ -113,6 +114,7 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
             if self.annotation
             else None,
             annotation_agent=self.annotation.agent if self.annotation else None,
+            embeddings=self.embeddings if self.embeddings else None,
             id=self.id,
             event_timestamp=self.event_timestamp,
             status=self.status,
@@ -140,3 +142,5 @@ class TokenClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+    embedding_name: str = Field(default=None)
+    embedding_vector: List[float] = Field(default_factory=list)

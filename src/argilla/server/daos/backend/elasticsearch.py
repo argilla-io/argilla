@@ -326,7 +326,7 @@ class ElasticsearchBackend(LoggingMixin):
         force_recreate: bool = False,
     ):
         """
-        Applies a index template creation with provided template definition.
+        Applies an index template creation with provided template definition.
 
         Parameters
         ----------

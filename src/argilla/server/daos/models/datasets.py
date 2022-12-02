@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, Optional, TypeVar
+from typing import Any, Dict, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
@@ -29,7 +29,8 @@ class BaseDatasetDB(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = None
     created_by: str = Field(
-        None, description="The argilla user that created the dataset"
+        None,
+        description="The argilla user that created the dataset",
     )
     last_updated: datetime = None
 
@@ -56,8 +57,17 @@ class BaseDatasetDB(BaseModel):
         }
 
 
+class EmbeddingsConfig(BaseModel):
+    dim: int = Field(
+        description="The number of dimensions for the named embeddings",
+    )
+
+
 class BaseDatasetSettingsDB(BaseModel):
-    pass
+    embeddings: Optional[Dict[str, Union[int, EmbeddingsConfig]]] = Field(
+        default=None,
+        description="The embeddings configuration",
+    )
 
 
 DatasetDB = TypeVar("DatasetDB", bound=BaseDatasetDB)

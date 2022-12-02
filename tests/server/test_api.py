@@ -22,10 +22,17 @@ from argilla.server.apis.v0.models.text_classification import (
 from argilla.server.commons.models import TaskStatus, TaskType
 
 
-def create_some_data_for_text_classification(client, name: str, n: int):
+def create_some_data_for_text_classification(
+    client,
+    name: str,
+    n: int,
+    with_embeddings: bool = True,
+):
+    n = n or 10
+
     records = [
         TextClassificationRecord(**data)
-        for idx in range(0, n or 10, 2)
+        for idx in range(0, n, 2)
         for data in [
             {
                 "id": idx,
@@ -62,6 +69,25 @@ def create_some_data_for_text_classification(client, name: str, n: int):
             },
         ]
     ]
+    embeddgins = [
+        {
+            "bert_cased": {
+                "record_properties": ["data"],
+                "vector": [1.2, 2.3, 3.4, 4.5],
+            },
+        },
+        {
+            "bert_cased": {
+                "record_properties": ["data"],
+                "vector": [1.2, 2.3, 3.4, 4.5],
+            },
+        },
+    ] * n
+
+    if with_embeddings:
+        for record, record_embeddings in zip(records, embeddgins):
+            record.embeddings = record_embeddings
+
     client.post(
         f"/api/datasets/{name}/{TaskType.text_classification}:bulk",
         json=TextClassificationBulkRequest(

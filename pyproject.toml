@@ -50,7 +50,8 @@ dynamic = ["version"]
 server = [
     # Basic dependencies
     "fastapi ~= 0.75.0",
-    "opensearch-py ~= 1.0.0",
+    "opensearch-py ~=1.0.0",
+    "elasticsearch ~=8.5.0",
     "uvicorn[standard] >= 0.15.0,<0.18.0",
     "smart-open",
     "brotli-asgi ~= 1.1.0",

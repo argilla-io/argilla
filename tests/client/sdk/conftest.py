@@ -58,6 +58,8 @@ class Helpers:
         def check_schema_props(client_props, server_props):
             different_props = []
             for name, definition in client_props.items():
+                if name == "type":
+                    continue
                 if name not in server_props:
                     LOGGER.warning(
                         f"Client property {name} not found in server properties. "
