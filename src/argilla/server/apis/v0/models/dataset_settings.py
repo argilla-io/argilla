@@ -16,11 +16,11 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
-from argilla.server.daos.models.datasets import EmbeddingsConfig
+from argilla.server.daos.models.datasets import VectorsConfig
 
 
 class AbstractDatasetSettings(BaseModel):
-    embeddings: Optional[Dict[str, Union[int, EmbeddingsConfig]]] = Field(
+    embeddings: Optional[Dict[str, Union[int, VectorsConfig]]] = Field(
         default=None,
         description="The embeddings configuration",
     )

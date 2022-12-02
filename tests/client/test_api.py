@@ -595,7 +595,7 @@ def test_load_as_pandas(mocked_client, supported_vector_search):
         assert [record.id for record in records] == [0, 1, 2, 3]
         expected_record_embedding_vector = [1.2, 2.3, 3.4, 4.5]
         for record in records:
-            vector = [float(e) for e in record.embeddings["bert_cased"]["vector"]]
+            vector = [float(e) for e in record.vectors["bert_cased"]["vector"]]
             assert vector == expected_record_embedding_vector
 
 

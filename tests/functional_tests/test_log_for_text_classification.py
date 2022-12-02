@@ -97,7 +97,7 @@ def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient):
     dataset_rg = ar.load(dataset)
     print(dataset_rg._records[0])
     assert dataset_rg._records[0].id == 0
-    assert dataset_rg._records[0].embeddings["my_bert"]["vector"] == [
+    assert dataset_rg._records[0].vectors["my_bert"]["vector"] == [
         "2.0",
         "3.0",
         "5.0",

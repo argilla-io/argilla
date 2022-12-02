@@ -23,7 +23,7 @@ from argilla.server.daos.models.datasets import (
     BaseDatasetSettingsDB,
     DatasetDB,
     DatasetSettingsDB,
-    EmbeddingsConfig,
+    VectorsConfig,
 )
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.errors import WrongTaskError
@@ -232,7 +232,7 @@ class DatasetsDAO:
         if not settings.vectors:
             return
         vectors_cfg = {
-            k: v.dim if isinstance(v, EmbeddingsConfig) else int(v)
+            k: v.dim if isinstance(v, VectorsConfig) else int(v)
             for k, v in settings.vectors.items()
         }
         self._es.create_dataset(
