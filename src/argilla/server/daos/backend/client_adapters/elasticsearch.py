@@ -62,7 +62,7 @@ class ElasticsearchClient(OpenSearchClient):
                 "index": True,
                 # can similarity property also be part of config @frascuchon ?
                 # relates vector search similarity metric
-                "similarity": similarity_metric,  ## default value regarding the knn best practices es documentation
+                "similarity": similarity_metric,
             }
             vector_mappings[name] = index_mapping
 
