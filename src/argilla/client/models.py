@@ -183,8 +183,7 @@ class TextClassificationRecord(_Validators):
         ...     text="My first argilla example",
         ...     prediction=[('eng', 0.9), ('esp', 0.1)],
         ...     vectors = {
-        ...         "english_bert_embedding": {
-        ...             "value": [1.2, 2.3, 3.1, 3.3]
+        ...             "english_bert_lm": [1.2, 2.3, 3.1, 3.3]
         ...         }
         ...     }
         ... )
