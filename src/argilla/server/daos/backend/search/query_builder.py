@@ -218,11 +218,11 @@ class EsQueryBuilder:
         if highlight:
             es_query["highlight"] = highlight.build_query_highlight()
 
-        if hasattr(query, "query"):
+        if hasattr(query, "vector"):
             self._build_knn_configuration(
                 es_query=es_query,
-                vector_field=query.query.name,
-                vector_value=query.query.value,
+                vector_field=query.vector.name,
+                vector_value=query.vector.value,
                 top_k=size,
             )
 
