@@ -288,7 +288,7 @@ class EsQueryBuilder:
         query_data = query.dict(
             exclude={
                 "advanced_query_dsl",
-                "query",
+                "vector",
                 "query_text",
                 "metadata",
                 "uncovered_by_rules",
