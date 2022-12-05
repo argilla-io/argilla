@@ -211,7 +211,7 @@ def test_create_records_for_text_classification_vector_search(
                             {"class": "Mocking", "score": 0.7},
                         ],
                     },
-                    "vectors": {"my_bert": {"value": [10, 11, 12, 13]}},
+                    "vectors": {"my_bert": [10, 11, 12, 13]},
                 },
                 {
                     "id": 1,
@@ -223,7 +223,7 @@ def test_create_records_for_text_classification_vector_search(
                             {"class": "Mocking", "score": 0.65},
                         ],
                     },
-                    "vectors": {"my_bert": {"value": [14, 15, 16, 17]}},
+                    "vectors": {"my_bert": [14, 15, 16, 17]},
                 },
                 {
                     "id": 2,
@@ -235,7 +235,7 @@ def test_create_records_for_text_classification_vector_search(
                             {"class": "Mocking", "score": 0.6},
                         ],
                     },
-                    "vectors": {"my_bert": {"value": [14, 15, 16, 18]}},
+                    "vectors": {"my_bert": [14, 15, 16, 18]},
                 },
             ]
         ],
@@ -278,9 +278,7 @@ def test_create_records_for_text_classification_vector_search(
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
-        json={
-            "query": {"embedding_name": "my_bert", "embedding_vector": [14, 15, 16, 17]}
-        },
+        json={"query": {"vector": {"name": "my_bert", "value": [14, 15, 16, 17]}}},
     )
     assert response.status_code == 200
     results = TextClassificationSearchResults.parse_obj(response.json())
