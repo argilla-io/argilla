@@ -664,7 +664,7 @@ def test_load_text2text(mocked_client, supported_vector_search):
     if supported_vector_search:
         expected_embedding_vector = [1.2, 3.4, 6.4, 6.4]
         for record in records:
-            vector = [float(v) for v in record.vectors["bert_uncased"]["vector"]]
+            vector = [float(v) for v in record.vectors["bert_uncased"]["value"]]
             assert vector == expected_embedding_vector
 
 
