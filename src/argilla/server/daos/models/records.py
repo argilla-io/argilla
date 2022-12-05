@@ -48,8 +48,6 @@ class BaseAnnotationDB(BaseModel):
 
 class BaseVectorDB(BaseModel):
     value: List[float]
-    record_properties: Optional[List[Union[str, Dict[str, Any]]]]
-    model: Optional[str]
 
 
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
@@ -66,7 +64,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     )
     annotation: Optional[AnnotationDB] = None
 
-    vectors: Optional[Dict[str, BaseVectorDB]] = Field(
+    vectors: Optional[Dict[str, List[float]]] = Field(
         None,
         description="Provide the vector information as a list of key - value dictionary."
         "The dictionary contains the dimension and dimension sized float list"

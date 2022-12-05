@@ -260,7 +260,7 @@ def test_create_records_for_token_classification_vector_search(
                 "agent": "test",
                 "entities": [{"start": 0, "end": 4, "label": entity_label}],
             },
-            "vectors": {"my_bert": {"value": [1, 2, 3, 4, 5, 6]}},
+            "vectors": {"my_bert": [1, 2, 3, 4, 5, 6]},
         },
         {
             "id": 1,
@@ -275,7 +275,7 @@ def test_create_records_for_token_classification_vector_search(
                 "agent": "test",
                 "entities": [{"start": 0, "end": 4, "label": entity_label}],
             },
-            "vectors": {"my_bert": {"value": [5, 6, 7, 8, 9, 10]}},
+            "vectors": {"my_bert": [5, 6, 7, 8, 9, 10]},
         },
         {
             "id": 2,
@@ -290,7 +290,7 @@ def test_create_records_for_token_classification_vector_search(
                 "agent": "test",
                 "entities": [{"start": 0, "end": 4, "label": entity_label}],
             },
-            "vectors": {"my_bert": {"value": [7, 8, 9, 10, 11, 12]}},
+            "vectors": {"my_bert": [7, 8, 9, 10, 11, 12]},
         },
     ]
 
@@ -319,7 +319,7 @@ def test_create_records_for_token_classification_vector_search(
         search_url,
         json={
             "query": {
-                "query": {
+                "vector": {
                     "name": "my_bert",
                     "value": [5, 6, 7, 8, 9, 10],
                 }
