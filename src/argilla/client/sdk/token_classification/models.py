@@ -143,4 +143,4 @@ class TokenClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-    query: Optional[VectorQuery]
+    vector: Optional[VectorQuery]

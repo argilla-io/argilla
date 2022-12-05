@@ -155,7 +155,7 @@ class TextClassificationQuery(BaseModel):
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
-    query: VectorQuery
+    vector: Optional[VectorQuery]
     uncovered_by_rules: List[str] = Field(
         default_factory=list,
         description="List of rule queries that WILL NOT cover the resulting records",

@@ -120,4 +120,4 @@ class Text2TextQuery(BaseModel):
 
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-    query: Optional[VectorQuery]
+    vector: Optional[VectorQuery]
