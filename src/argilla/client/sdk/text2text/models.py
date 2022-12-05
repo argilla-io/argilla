@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
@@ -40,6 +40,10 @@ class Text2TextAnnotation(BaseAnnotation):
     sentences: List[Text2TextPrediction]
 
 
+class BaseVectorDB(BaseModel):
+    value: List[float]
+
+
 class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
     text: str
 
@@ -63,11 +67,17 @@ class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
                 agent=record.annotation_agent or MACHINE_NAME,
             )
 
+        vectors = None
+        if record.vectors is not None:
+            vectors = {}
+            for name, value in record.vectors.items():
+                vectors[name] = BaseVectorDB(value=value)
+
         return cls(
             text=record.text,
             prediction=prediction,
             annotation=annotation,
-            vectors=record.vectors,
+            vectors=vectors,
             status=record.status,
             metadata=record.metadata,
             id=record.id,
@@ -91,7 +101,9 @@ class Text2TextRecord(CreationText2TextRecord):
             prediction_agent=self.prediction.agent if self.prediction else None,
             annotation=self.annotation.sentences[0].text if self.annotation else None,
             annotation_agent=self.annotation.agent if self.annotation else None,
-            vectors=self.vectors if self.vectors else None,
+            vectors={name: vector.value for name, vector in self.vectors}
+            if self.vectors
+            else None,
             status=self.status,
             metadata=self.metadata or {},
             id=self.id,
