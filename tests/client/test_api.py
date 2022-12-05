@@ -595,7 +595,7 @@ def test_load_as_pandas(mocked_client, supported_vector_search):
         assert [record.id for record in records] == [0, 1, 2, 3]
         expected_record_embedding_vector = [1.2, 2.3, 3.4, 4.5]
         for record in records:
-            vector = [float(e) for e in record.vectors["bert_cased"]["value"]]
+            vector = [float(e) for e in record.vectors["bert_cased"]]
             assert vector == expected_record_embedding_vector
 
 
@@ -632,10 +632,7 @@ def test_token_classification_spans(span, valid):
 def test_load_text2text(mocked_client, supported_vector_search):
 
     vectors = {
-        "bert_uncased": {
-            "property_names": ["text"],
-            "value": [1.2, 3.4, 6.4, 6.4],
-        },
+        "bert_uncased": [1.2, 3.4, 6.4, 6.4],
     }
 
     records = []
@@ -664,7 +661,7 @@ def test_load_text2text(mocked_client, supported_vector_search):
     if supported_vector_search:
         expected_embedding_vector = [1.2, 3.4, 6.4, 6.4]
         for record in records:
-            vector = [float(v) for v in record.vectors["bert_uncased"]["value"]]
+            vector = [float(v) for v in record.vectors["bert_uncased"]]
             assert vector == expected_embedding_vector
 
 
