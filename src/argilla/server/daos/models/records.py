@@ -64,7 +64,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     )
     annotation: Optional[AnnotationDB] = None
 
-    vectors: Optional[Dict[str, List[float]]] = Field(
+    vectors: Optional[Dict[str, VectorDB]] = Field(
         None,
         description="Provide the vector information as a list of key - value dictionary."
         "The dictionary contains the dimension and dimension sized float list"
