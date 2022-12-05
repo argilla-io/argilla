@@ -127,12 +127,12 @@ def test_search_with_vectors(mocked_client):
                     "agent": "test",
                     "sentences": [{"text": "This is a test data", "score": 0.6}],
                 },
-                "vectors": {"my_bert": [1, 2, 3, 4]},
+                "vectors": {"my_bert": {"value": [1, 2, 3, 4]}},
             },
             {
                 "id": 1,
                 "text": "Ånother data",
-                "vectors": {"my_bert": [4, 5, 6, 7]},
+                "vectors": {"my_bert": {"value": [4, 5, 6, 7]}},
             },
             {
                 "id": 3,
