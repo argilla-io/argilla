@@ -100,8 +100,6 @@ def search_data(
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == expected_total
     for record in results.records:
-        print("\n Record info: \n")
-        print(record.dict())
         if vector_name:
             assert record.vectors is not None
             assert vector_name in record.vectors
@@ -129,12 +127,12 @@ def test_search_with_vectors(mocked_client):
                     "agent": "test",
                     "sentences": [{"text": "This is a test data", "score": 0.6}],
                 },
-                "vectors": {"my_bert": {"value": [1, 2, 3, 4]}},
+                "vectors": {"my_bert": [1, 2, 3, 4]},
             },
             {
                 "id": 1,
                 "text": "Ånother data",
-                "vectors": {"my_bert": {"value": [4, 5, 6, 7]}},
+                "vectors": {"my_bert": [4, 5, 6, 7]},
             },
             {
                 "id": 3,
@@ -160,8 +158,10 @@ def test_search_with_vectors(mocked_client):
         vector_name="my_bert",
         query={
             "query": {
-                "embedding_name": "my_bert",
-                "embedding_vector": [1.2, 2.3, 4.1, 6.1],
+                "vector": {
+                    "name": "my_bert",
+                    "value": [1.2, 2.3, 4.1, 6.1],
+                }
             }
         },
     )
