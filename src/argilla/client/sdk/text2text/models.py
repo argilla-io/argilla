@@ -25,6 +25,7 @@ from argilla.client.sdk.commons.models import (
     BaseRecord,
     PredictionStatus,
     ScoreRange,
+    SdkVectorSearch,
     TaskStatus,
     UpdateDatasetRequest,
 )
@@ -113,8 +114,7 @@ class Text2TextQuery(BaseModel):
     annotated_by: List[str] = Field(default_factory=list)
     predicted_by: List[str] = Field(default_factory=list)
 
-    vector_name: str = Field(default=None)
-    vector_value: List[float] = Field(default_factory=list)
+    vector: Optional[SdkVectorSearch] = Field(default=None)
 
     score: Optional[ScoreRange] = Field(default=None)
 

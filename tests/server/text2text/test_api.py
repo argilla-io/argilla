@@ -160,8 +160,10 @@ def test_search_with_vectors(mocked_client):
         vector_name="my_bert",
         body={
             "query": {
-                "vector_name": "my_bert",
-                "vector_value": [1.2, 2.3, 4.1, 6.1],
+                "vector": {
+                    "name": "my_bert",
+                    "value": [1.2, 2.3, 4.1, 6.1],
+                }
             }
         },
     )

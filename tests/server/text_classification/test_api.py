@@ -278,7 +278,14 @@ def test_create_records_for_text_classification_vector_search(
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
-        json={"query": {"vector_name": "my_bert", "vector_value": [14, 15, 16, 17]}},
+        json={
+            "query": {
+                "vector": {
+                    "name": "my_bert",
+                    "value": [14, 15, 16, 17],
+                },
+            }
+        },
     )
     assert response.status_code == 200
     results = TextClassificationSearchResults.parse_obj(response.json())

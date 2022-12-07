@@ -49,6 +49,13 @@ class VectorInfo(BaseModel):
 SdkVectors = Dict[str, VectorInfo]
 
 
+class SdkVectorSearch(BaseModel):
+    """The sdk vector search parameters"""
+
+    name: str
+    value: List[float]
+
+
 class BaseRecord(GenericModel, Generic[T]):
     id: Optional[Union[int, str]] = Field(default_factory=lambda: str(uuid4()))
     metadata: Dict[str, Any] = Field(default=None)

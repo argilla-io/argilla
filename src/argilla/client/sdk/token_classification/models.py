@@ -27,6 +27,7 @@ from argilla.client.sdk.commons.models import (
     BaseRecord,
     PredictionStatus,
     ScoreRange,
+    SdkVectorSearch,
     TaskStatus,
     UpdateDatasetRequest,
 )
@@ -142,5 +143,5 @@ class TokenClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-    vector_name: str = Field(default=None)
-    vector_value: List[float] = Field(default_factory=list)
+
+    vector: Optional[SdkVectorSearch] = Field(default=None)

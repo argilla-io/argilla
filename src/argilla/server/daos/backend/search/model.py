@@ -59,6 +59,11 @@ class BaseDatasetsQuery(BaseQuery):
     name: Optional[str] = None
 
 
+class VectorSearch(BaseModel):
+    name: str
+    value: List[float]
+
+
 class BaseRecordsQuery(BaseQuery):
 
     query_text: Optional[str] = None
@@ -74,9 +79,8 @@ class BaseRecordsQuery(BaseQuery):
 
     has_annotation: Optional[bool] = None
     has_prediction: Optional[bool] = None
-    # TODO(@frascuchon): group into a vector object
-    vector_value: Optional[List[float]] = None
-    vector_name: Optional[str] = None
+
+    vector: Optional[VectorSearch] = Field(default=None)
 
 
 BackendQuery = TypeVar("BackendQuery", bound=BaseQuery)
