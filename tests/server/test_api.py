@@ -97,6 +97,12 @@ def create_some_data_for_text_classification(
         ).dict(by_alias=True),
     )
 
+    data = {}
+    for embedding_cfg in embeddgins:
+        data.update(embedding_cfg)
+
+    return data
+
 
 def uri_2_path(uri: str):
     from urllib.parse import urlparse
