@@ -47,7 +47,7 @@ class BaseAnnotationDB(BaseModel):
 
 
 class BaseEmbeddingVectorDB(BaseModel):
-    vector: List[float]
+    value: List[float]
     record_properties: Optional[List[Union[str, Dict[str, Any]]]]
     model: Optional[str]
 
@@ -66,11 +66,10 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     )
     annotation: Optional[AnnotationDB] = None
 
-    embeddings: Optional[Dict[str, BaseEmbeddingVectorDB]] = Field(
+    vectors: Optional[Dict[str, BaseEmbeddingVectorDB]] = Field(
         None,
-        description="Provide the embedding info as a list of key - value dictionary."
-        "The dictionary contains the dimension and dimension sized embedding float list"
-        "Using this way you can skip passing the agent inside of the embedding",
+        description="Provide the vector info as a list of key - value dictionary."
+        "The dictionary contains the dimension and dimension sized vector float list",
     )
 
     predictions: Optional[Dict[str, AnnotationDB]] = Field(

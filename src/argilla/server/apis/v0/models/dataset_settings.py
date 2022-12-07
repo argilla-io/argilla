@@ -20,9 +20,9 @@ from argilla.server.daos.models.datasets import EmbeddingsConfig
 
 
 class AbstractDatasetSettings(BaseModel):
-    embeddings: Optional[Dict[str, Union[int, EmbeddingsConfig]]] = Field(
+    vectors: Optional[Dict[str, Union[int, EmbeddingsConfig]]] = Field(
         default=None,
-        description="The embeddings configuration",
+        description="The vectors configuration",
     )
 
 

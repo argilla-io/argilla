@@ -246,7 +246,7 @@ class GenericElasticEngineBackend(LoggingMixin):
         id: str,
         task: TaskType,
         metadata_values: Optional[Dict[str, Any]] = None,
-        embeddings_cfg: Optional[Dict[str, Any]] = None,
+        vectors_cfg: Optional[Dict[str, Any]] = None,
         force_recreate: bool = False,
     ) -> None:
 
@@ -267,10 +267,10 @@ class GenericElasticEngineBackend(LoggingMixin):
         if metadata_values:
             self._configure_metadata_fields(id, metadata_values)
 
-        if embeddings_cfg:
+        if vectors_cfg:
             self.client.configure_index_vectors(
                 index=index,
-                vectors=embeddings_cfg,
+                vectors=vectors_cfg,
             )
 
     def _configure_metadata_fields(

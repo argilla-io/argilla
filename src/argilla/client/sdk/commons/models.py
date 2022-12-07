@@ -21,7 +21,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
-from argilla.client.models import Embeddings as ClientEmbeddings
+from argilla.client.models import Vectors as ClientVectors
 
 MACHINE_NAME = socket.gethostname()
 
@@ -40,13 +40,13 @@ class BaseAnnotation(BaseModel):
 T = TypeVar("T", bound=BaseAnnotation)
 
 
-class EmbeddingInfo(BaseModel):
-    """Record embedding info for api layer data model"""
+class VectorInfo(BaseModel):
+    """Record vector info for api layer data model"""
 
-    vector: List[float]
+    value: List[float]
 
 
-SdkEmbeddings = Dict[str, EmbeddingInfo]
+SdkVectors = Dict[str, VectorInfo]
 
 
 class BaseRecord(GenericModel, Generic[T]):
@@ -56,7 +56,7 @@ class BaseRecord(GenericModel, Generic[T]):
     status: Optional[TaskStatus] = None
     prediction: Optional[T] = None
     annotation: Optional[T] = None
-    embeddings: Optional[SdkEmbeddings] = None
+    vectors: Optional[SdkVectors] = None
     metrics: Dict[str, Any] = Field(default_factory=dict)
     search_keywords: Optional[List[str]] = None
 
@@ -68,23 +68,20 @@ class BaseRecord(GenericModel, Generic[T]):
             return v.isoformat()
 
     @staticmethod
-    def _from_client_embeddings(embeddings: ClientEmbeddings) -> SdkEmbeddings:
-        sdk_embeddings = None
-        if embeddings:
-            sdk_embeddings = {
-                name: EmbeddingInfo(vector=vector)
-                for name, vector in embeddings.items()
+    def _from_client_vectors(vectors: ClientVectors) -> SdkVectors:
+        sdk_vectors = None
+        if vectors:
+            sdk_vectors = {
+                name: VectorInfo(value=vector) for name, vector in vectors.items()
             }
-        return sdk_embeddings
+        return sdk_vectors
 
     @staticmethod
-    def _to_client_embeddings(embeddings: SdkEmbeddings) -> ClientEmbeddings:
-        client_embeddings = None
-        if embeddings:
-            client_embeddings = {
-                name: embedding.vector for name, embedding in embeddings.items()
-            }
-        return client_embeddings
+    def _to_client_vectors(vectors: SdkVectors) -> ClientVectors:
+        client_vectors = None
+        if vectors:
+            client_vectors = {name: vector.value for name, vector in vectors.items()}
+        return client_vectors
 
 
 class UpdateDatasetRequest(BaseModel):

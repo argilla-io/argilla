@@ -89,12 +89,12 @@ def search_data(
     client,
     base_url: str,
     expected_total: int,
-    query: Optional[dict] = None,
-    embedding_name: Optional[str] = None,
+    body: Optional[dict] = None,
+    vector_name: Optional[str] = None,
 ):
     response = client.post(
         url=f"{base_url}:search",
-        json=query or {},
+        json=body or {},
     )
     assert response.status_code == 200, response.json()
     results = Text2TextSearchResults.parse_obj(response.json())
@@ -102,21 +102,21 @@ def search_data(
     for record in results.records:
         print("\n Record info: \n")
         print(record.dict())
-        if embedding_name:
-            assert record.embeddings is not None
-            assert embedding_name in record.embeddings
+        if vector_name:
+            assert record.vectors is not None
+            assert vector_name in record.vectors
 
 
 @pytest.mark.skipif(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_search_with_embeddings(mocked_client):
-    dataset = "test_search_with_embeddings"
+def test_search_with_vectors(mocked_client):
+    dataset = "test_search_with_vectors"
 
     delete_dataset(dataset, mocked_client)
 
-    records_for_text2text_with_embeddings = [
+    records_for_text2text_with_vectors = [
         Text2TextRecordInputs.parse_obj(data)
         for data in [
             {
@@ -129,12 +129,12 @@ def test_search_with_embeddings(mocked_client):
                     "agent": "test",
                     "sentences": [{"text": "This is a test data", "score": 0.6}],
                 },
-                "embeddings": {"my_bert": {"vector": [1, 2, 3, 4]}},
+                "vectors": {"my_bert": {"value": [1, 2, 3, 4]}},
             },
             {
                 "id": 1,
                 "text": "Ånother data",
-                "embeddings": {"my_bert": {"vector": [4, 5, 6, 7]}},
+                "vectors": {"my_bert": {"value": [4, 5, 6, 7]}},
             },
             {
                 "id": 3,
@@ -150,18 +150,18 @@ def test_search_with_embeddings(mocked_client):
     base_url = prepare_data(
         client=mocked_client,
         dataset=dataset,
-        records=records_for_text2text_with_embeddings,
+        records=records_for_text2text_with_vectors,
     )
 
     search_data(
         client=mocked_client,
         base_url=base_url,
         expected_total=2,
-        embedding_name="my_bert",
-        query={
+        vector_name="my_bert",
+        body={
             "query": {
-                "embedding_name": "my_bert",
-                "embedding_vector": [1.2, 2.3, 4.1, 6.1],
+                "vector_name": "my_bert",
+                "vector_value": [1.2, 2.3, 4.1, 6.1],
             }
         },
     )

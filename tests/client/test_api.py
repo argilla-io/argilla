@@ -178,7 +178,7 @@ def test_load_limits(mocked_client, supported_vector_search):
         mocked_client,
         dataset,
         50,
-        with_embeddings=supported_vector_search,
+        with_vectors=supported_vector_search,
     )
 
     limit_data_to = 10
@@ -550,7 +550,7 @@ def test_load_with_ids_list(mocked_client, supported_vector_search):
         mocked_client,
         dataset,
         n=expected_data,
-        with_embeddings=supported_vector_search,
+        with_vectors=supported_vector_search,
     )
     ds = api.load(name=dataset, ids=[3, 5])
     assert len(ds) == 2
@@ -566,7 +566,7 @@ def test_load_with_query(mocked_client, supported_vector_search):
         mocked_client,
         dataset,
         n=expected_data,
-        with_embeddings=supported_vector_search,
+        with_vectors=supported_vector_search,
     )
     ds = api.load(name=dataset, query="id:1")
     ds = ds.to_pandas()
@@ -580,11 +580,11 @@ def test_load_as_pandas(mocked_client, supported_vector_search):
     sleep(1)
 
     expected_data = 4
-    server_embeddings_cfg = create_some_data_for_text_classification(
+    server_vectors_cfg = create_some_data_for_text_classification(
         mocked_client,
         dataset,
         n=expected_data,
-        with_embeddings=supported_vector_search,
+        with_vectors=supported_vector_search,
     )
 
     records = api.load(name=dataset)
@@ -593,10 +593,8 @@ def test_load_as_pandas(mocked_client, supported_vector_search):
 
     if supported_vector_search:
         for record in records:
-            for vector in record.embeddings:
-                assert (
-                    server_embeddings_cfg[vector]["vector"] == record.embeddings[vector]
-                )
+            for vector in record.vectors:
+                assert server_vectors_cfg[vector]["value"] == record.vectors[vector]
 
 
 @pytest.mark.parametrize(
@@ -631,7 +629,7 @@ def test_token_classification_spans(span, valid):
 
 def test_load_text2text(mocked_client, supported_vector_search):
 
-    embeddings = {"bert_uncased": [1.2, 3.4, 6.4, 6.4]}
+    vectors = {"bert_uncased": [1.2, 3.4, 6.4, 6.4]}
 
     records = []
     for i in range(0, 2):
@@ -647,7 +645,7 @@ def test_load_text2text(mocked_client, supported_vector_search):
             event_timestamp=datetime.datetime(2000, 1, 1),
         )
         if supported_vector_search:
-            record.embeddings = embeddings
+            record.vectors = vectors
         records.append(record)
 
     dataset = "test_load_text2text"
@@ -658,7 +656,7 @@ def test_load_text2text(mocked_client, supported_vector_search):
     assert len(df) == 2
     if supported_vector_search:
         for record in df:
-            assert record.embeddings["bert_uncased"] == embeddings["bert_uncased"]
+            assert record.vectors["bert_uncased"] == vectors["bert_uncased"]
 
 
 def test_client_workspace(mocked_client):

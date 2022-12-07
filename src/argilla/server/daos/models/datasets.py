@@ -59,14 +59,14 @@ class BaseDatasetDB(BaseModel):
 
 class EmbeddingsConfig(BaseModel):
     dim: int = Field(
-        description="The number of dimensions for the named embeddings",
+        description="The number of dimensions for the named vectors",
     )
 
 
 class BaseDatasetSettingsDB(BaseModel):
-    embeddings: Optional[Dict[str, Union[int, EmbeddingsConfig]]] = Field(
+    vectors: Optional[Dict[str, Union[int, EmbeddingsConfig]]] = Field(
         default=None,
-        description="The embeddings configuration",
+        description="The vectors configuration",
     )
 
 
