@@ -575,12 +575,12 @@ def test_load_with_query(mocked_client, supported_vector_search):
 
 
 def test_load_as_pandas(mocked_client, supported_vector_search):
-    dataset = "test_sorted_load"
+    dataset = "test_load_as_pandas"
     mocked_client.delete(f"/api/datasets/{dataset}")
     sleep(1)
 
     expected_data = 4
-    create_some_data_for_text_classification(
+    server_embeddings_cfg = create_some_data_for_text_classification(
         mocked_client,
         dataset,
         n=expected_data,
@@ -592,11 +592,11 @@ def test_load_as_pandas(mocked_client, supported_vector_search):
     assert isinstance(records[0], ar.TextClassificationRecord)
 
     if supported_vector_search:
-        assert [record.id for record in records] == [0, 1, 2, 3]
-        expected_record_embedding_vector = [1.2, 2.3, 3.4, 4.5]
         for record in records:
-            vector = [float(e) for e in record.embeddings["bert_cased"]["vector"]]
-            assert vector == expected_record_embedding_vector
+            for vector in record.embeddings:
+                assert (
+                    server_embeddings_cfg[vector]["vector"] == record.embeddings[vector]
+                )
 
 
 @pytest.mark.parametrize(
@@ -631,12 +631,7 @@ def test_token_classification_spans(span, valid):
 
 def test_load_text2text(mocked_client, supported_vector_search):
 
-    embeddings = {
-        "bert_uncased": {
-            "property_names": ["text"],
-            "vector": [1.2, 3.4, 6.4, 6.4],
-        },
-    }
+    embeddings = {"bert_uncased": [1.2, 3.4, 6.4, 6.4]}
 
     records = []
     for i in range(0, 2):
@@ -662,10 +657,8 @@ def test_load_text2text(mocked_client, supported_vector_search):
     df = api.load(name=dataset)
     assert len(df) == 2
     if supported_vector_search:
-        expected_embedding_vector = [1.2, 3.4, 6.4, 6.4]
-        for record in records:
-            vector = [float(v) for v in record.embeddings["bert_uncased"]["vector"]]
-            assert vector == expected_embedding_vector
+        for record in df:
+            assert record.embeddings["bert_uncased"] == embeddings["bert_uncased"]
 
 
 def test_client_workspace(mocked_client):
