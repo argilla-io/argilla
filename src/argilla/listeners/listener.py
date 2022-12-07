@@ -191,7 +191,7 @@ class RBDatasetListener:
             self._LOGGER.debug("No condition found! Running action...")
             return self.__run_action__(ctx, *args, **kwargs)
 
-        search_results = current_api.searches.search_records(
+        search_results = current_api.search.search_records(
             name=self.dataset, task=dataset.task, query=self.formatted_query, size=0
         )
 
