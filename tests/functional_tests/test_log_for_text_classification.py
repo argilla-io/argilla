@@ -74,8 +74,10 @@ def test_delete_and_create_for_different_task(mocked_client):
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient):
-    dataset = "test_log_data_with_vectors_and_update_ok"
+def test_similarity_search_in_python_client(
+    mocked_client: SecuredClient,
+):
+    dataset = "test_similarity_search_in_python_client"
     text = "This is a text"
     vectors = {"my_bert": [1, 2, 3, 4]}
 
@@ -86,23 +88,42 @@ def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient):
     )
     ar.load(dataset)
 
-    updated_vectors = {"my_bert": [2, 3, 5, 5]}
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_log_data_with_vectors_and_update_ok(
+    mocked_client: SecuredClient,
+):
+    dataset = "test_log_data_with_vectors_and_update_ok"
+    text = "This is a text"
+    ar.delete(dataset)
+
+    records = [
+        ar.TextClassificationRecord(
+            id=i,
+            inputs=text,
+            vectors={"test-vector": [i] * 5},
+        )
+        for i in range(1, 10)
+    ]
 
     ar.log(
-        ar.TextClassificationRecord(id=0, text=text, vectors=updated_vectors),
+        records=records,
         name=dataset,
     )
-    ar.load(dataset)
+    ds = ar.load(
+        dataset,
+        vector=(
+            "test-vector",
+            [3, 3, 2, 3, 3],  # the first expected records should be the id=3
+        ),
+        limit=5,
+    )
 
-    dataset_rg = ar.load(dataset)
-    print(dataset_rg._records[0])
-    assert dataset_rg._records[0].id == 0
-    assert dataset_rg._records[0].vectors["my_bert"] == [
-        2.0,
-        3.0,
-        5.0,
-        5.0,
-    ]
+    assert len(ds) == 5
+    assert ds[0].id == 3
 
 
 @pytest.mark.skipif(
