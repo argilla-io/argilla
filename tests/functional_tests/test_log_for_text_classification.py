@@ -77,7 +77,7 @@ def test_delete_and_create_for_different_task(mocked_client):
 def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
     dataset = "test_log_data_with_embeddings_and_update_ok"
     text = "This is a text"
-    embeddings = {"my_bert": {"vector": [1, 2, 3, 4]}}
+    embeddings = {"my_bert": [1, 2, 3, 4]}
 
     ar.delete(dataset)
     ar.log(
@@ -86,7 +86,7 @@ def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
     )
     ar.load(dataset)
 
-    updated_embeddings = {"my_bert": {"vector": [2, 3, 5, 5]}}
+    updated_embeddings = {"my_bert": [2, 3, 5, 5]}
 
     ar.log(
         ar.TextClassificationRecord(id=0, text=text, embeddings=updated_embeddings),
@@ -97,12 +97,12 @@ def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
     dataset_rg = ar.load(dataset)
     print(dataset_rg._records[0])
     assert dataset_rg._records[0].id == 0
-    assert dataset_rg._records[0].embeddings["my_bert"]["vector"] == [
-        "2.0",
-        "3.0",
-        "5.0",
-        "5.0",
-    ]  # will be corrected after I fix the returned list type issue @frascuchon
+    assert dataset_rg._records[0].embeddings["my_bert"] == [
+        2.0,
+        3.0,
+        5.0,
+        5.0,
+    ]
 
 
 @pytest.mark.skipif(
@@ -112,7 +112,7 @@ def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
 def test_log_data_with_embeddings_and_update_ko(mocked_client: SecuredClient):
     dataset = "test_log_data_with_embeddings_and_update_ko"
     text = "This is a text"
-    embeddings = {"my_bert": {"vector": [1, 2, 3, 4]}}
+    embeddings = {"my_bert": [1, 2, 3, 4]}
 
     ar.delete(dataset)
     ar.log(
@@ -121,7 +121,7 @@ def test_log_data_with_embeddings_and_update_ko(mocked_client: SecuredClient):
     )
     ar.load(dataset)
 
-    updated_embeddings = {"my_bert": {"vector": [2, 3, 5]}}
+    updated_embeddings = {"my_bert": [2, 3, 5]}
     with pytest.raises(GenericApiError):
         ar.log(
             ar.TextClassificationRecord(id=0, text=text, embeddings=updated_embeddings),
