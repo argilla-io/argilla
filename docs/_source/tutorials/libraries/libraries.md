@@ -9,6 +9,11 @@ These tutorials show you can use your favorite packages with Argilla.
 
 FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints.
 ```
+```{grid-item-card} OpenAI
+:link: openai.md
+
+OpenAI is a suite of APIs powered by large language and vision models which perform a variety of natural language and visual tasks.
+```
 ```{grid-item-card} BentoML
 :link: bentoml.md
 
@@ -24,10 +29,10 @@ spaCy is a free open-source library for Natural Language Processing in Python.
 
 Stanza is a collection of accurate and efficient tools for the linguistic analysis of many human languages.
 ```
-```{grid-item-card} Hugging Face
+```{grid-item-card} Hugging Face Transformers
 :link: huggingface.md
 
-We're on a journey to advance and democratize artificial intelligence through open source and open science.
+Transformers provides APIs and tools to easily download and train state-of-the-art pretrained models.
 ```
 ```{grid-item-card} Sentence Transformers
 :link: sentencetransformers.md
