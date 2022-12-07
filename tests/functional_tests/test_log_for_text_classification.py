@@ -74,22 +74,22 @@ def test_delete_and_create_for_different_task(mocked_client):
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
-    dataset = "test_log_data_with_embeddings_and_update_ok"
+def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient):
+    dataset = "test_log_data_with_vectors_and_update_ok"
     text = "This is a text"
-    embeddings = {"my_bert": [1, 2, 3, 4]}
+    vectors = {"my_bert": [1, 2, 3, 4]}
 
     ar.delete(dataset)
     ar.log(
-        ar.TextClassificationRecord(id=0, inputs=text, embeddings=embeddings),
+        ar.TextClassificationRecord(id=0, inputs=text, vectors=vectors),
         name=dataset,
     )
     ar.load(dataset)
 
-    updated_embeddings = {"my_bert": [2, 3, 5, 5]}
+    updated_vectors = {"my_bert": [2, 3, 5, 5]}
 
     ar.log(
-        ar.TextClassificationRecord(id=0, text=text, embeddings=updated_embeddings),
+        ar.TextClassificationRecord(id=0, text=text, vectors=updated_vectors),
         name=dataset,
     )
     ar.load(dataset)
@@ -97,7 +97,7 @@ def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
     dataset_rg = ar.load(dataset)
     print(dataset_rg._records[0])
     assert dataset_rg._records[0].id == 0
-    assert dataset_rg._records[0].embeddings["my_bert"] == [
+    assert dataset_rg._records[0].vectors["my_bert"] == [
         2.0,
         3.0,
         5.0,
@@ -109,22 +109,22 @@ def test_log_data_with_embeddings_and_update_ok(mocked_client: SecuredClient):
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_embeddings_and_update_ko(mocked_client: SecuredClient):
-    dataset = "test_log_data_with_embeddings_and_update_ko"
+def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
+    dataset = "test_log_data_with_vectors_and_update_ko"
     text = "This is a text"
-    embeddings = {"my_bert": [1, 2, 3, 4]}
+    vectors = {"my_bert": [1, 2, 3, 4]}
 
     ar.delete(dataset)
     ar.log(
-        ar.TextClassificationRecord(id=0, inputs=text, embeddings=embeddings),
+        ar.TextClassificationRecord(id=0, inputs=text, vectors=vectors),
         name=dataset,
     )
     ar.load(dataset)
 
-    updated_embeddings = {"my_bert": [2, 3, 5]}
+    updated_vectors = {"my_bert": [2, 3, 5]}
     with pytest.raises(GenericApiError):
         ar.log(
-            ar.TextClassificationRecord(id=0, text=text, embeddings=updated_embeddings),
+            ar.TextClassificationRecord(id=0, text=text, vectors=updated_vectors),
             name=dataset,
         )
 

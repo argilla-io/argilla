@@ -218,13 +218,12 @@ class EsQueryBuilder:
         if highlight:
             es_query["highlight"] = highlight.build_query_highlight()
 
-        if (hasattr(query, "embedding_vector") and query.embedding_vector) and (
-            hasattr(query, "embedding_name") and query.embedding_name
-        ):
+        if hasattr(query, "vector") and query.vector is not None:
             self._build_knn_configuration(
                 es_query=es_query,
-                vector_field=query.embedding_name,
-                vector_value=query.embedding_vector,
+                # TODO(@frascuchon): Better es naming mapping
+                vector_field=query.vector.name,
+                vector_value=query.vector.value,
                 top_k=size,
             )
 
@@ -290,8 +289,7 @@ class EsQueryBuilder:
         query_data = query.dict(
             exclude={
                 "advanced_query_dsl",
-                "embedding_name",
-                "embedding_vector",
+                "vector",
                 "query_text",
                 "metadata",
                 "uncovered_by_rules",

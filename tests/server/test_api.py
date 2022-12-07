@@ -26,7 +26,7 @@ def create_some_data_for_text_classification(
     client,
     name: str,
     n: int,
-    with_embeddings: bool = True,
+    with_vectors: bool = True,
 ):
     n = n or 10
 
@@ -69,24 +69,24 @@ def create_some_data_for_text_classification(
             },
         ]
     ]
-    embeddgins = [
+    vectors = [
         {
             "bert_cased": {
                 "record_properties": ["data"],
-                "vector": [1.2, 2.3, 3.4, 4.5],
+                "value": [1.2, 2.3, 3.4, 4.5],
             },
         },
         {
             "bert_cased": {
                 "record_properties": ["data"],
-                "vector": [1.2, 2.3, 3.4, 4.5],
+                "value": [1.2, 2.3, 3.4, 4.5],
             },
         },
     ] * n
 
-    if with_embeddings:
-        for record, record_embeddings in zip(records, embeddgins):
-            record.embeddings = record_embeddings
+    if with_vectors:
+        for record, record_vectors in zip(records, vectors):
+            record.vectors = record_vectors
 
     client.post(
         f"/api/datasets/{name}/{TaskType.text_classification}:bulk",
@@ -98,8 +98,8 @@ def create_some_data_for_text_classification(
     )
 
     data = {}
-    for embedding_cfg in embeddgins:
-        data.update(embedding_cfg)
+    for vector_cfg in vectors:
+        data.update(vector_cfg)
 
     return data
 

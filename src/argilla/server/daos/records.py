@@ -96,7 +96,7 @@ class DatasetRecordsDAO:
             if name not in mapping["mappings"]["properties"]
         ]
 
-        embeddings_configuration = {}
+        vectors_configuration = {}
         for record in records:
             metadata_values.update(record.metadata or {})
             db_record = record_class.parse_obj(record)
@@ -105,25 +105,23 @@ class DatasetRecordsDAO:
                 exclude_none=False,
                 exclude=set(exclude_fields),
             )
-            if record.embeddings is not None:
+            if record.vectors is not None:
                 for (
-                    embedding_name,
-                    embedding_vector_data_mapping,
-                ) in record.embeddings.items():
-                    embedding_dimension = embeddings_configuration.get(
-                        embedding_name, None
-                    )
-                    if embedding_dimension is None:
-                        dimension = len(embedding_vector_data_mapping.vector)
-                        embeddings_configuration[embedding_name] = dimension
-                    record_dict[embedding_name] = embedding_vector_data_mapping.vector
+                    vector_name,
+                    vector_data_mapping,
+                ) in record.vectors.items():
+                    vector_dimension = vectors_configuration.get(vector_name, None)
+                    if vector_dimension is None:
+                        dimension = len(vector_data_mapping.value)
+                        vectors_configuration[vector_name] = dimension
+                    record_dict[vector_name] = vector_data_mapping.value
             documents.append(record_dict)
 
         self._es.create_dataset(
             id=dataset.id,
             task=dataset.task,
             metadata_values=metadata_values,
-            embeddings_cfg=embeddings_configuration,
+            vectors_cfg=vectors_configuration,
         )
 
         return self._es.add_dataset_documents(
