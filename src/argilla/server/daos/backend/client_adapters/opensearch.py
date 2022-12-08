@@ -70,7 +70,7 @@ class OpenSearchClient(IClientAdapter):
             settings={
                 "index": {
                     "knn": True,
-                    "knn.algo_param.ef_search": 8,  # Ignored when engine=lucene
+                    "knn.algo_param.ef_search": 128,  # Ignored when engine=lucene
                 }
             },
         )
@@ -84,8 +84,8 @@ class OpenSearchClient(IClientAdapter):
                     "space_type": "l2",
                     "engine": "nmslib",
                     "parameters": {
-                        "m": 2,
-                        "ef_construction": 8,
+                        "m": 16,
+                        "ef_construction": 128,
                     },
                 },
             }
