@@ -104,7 +104,7 @@ def test_log_data_with_vectors_and_update_ok(
         ar.TextClassificationRecord(
             id=i,
             inputs=text,
-            vectors={"test-vector": [i] * 5},
+            vectors={"text": [i] * 5},
         )
         for i in range(1, 10)
     ]
@@ -116,7 +116,7 @@ def test_log_data_with_vectors_and_update_ok(
     ds = ar.load(
         dataset,
         vector=(
-            "test-vector",
+            "text",
             [3, 3, 2, 3, 3],  # the first expected records should be the id=3
         ),
         limit=5,

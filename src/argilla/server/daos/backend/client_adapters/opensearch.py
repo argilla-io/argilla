@@ -89,7 +89,8 @@ class OpenSearchClient(IClientAdapter):
                     },
                 },
             }
-            vector_mappings[vector_name] = index_mapping
+            vector_field = self.query_builder.get_vector_field_name(vector_name)
+            vector_mappings[vector_field] = index_mapping
 
         self.set_index_mappings(
             index=index,
