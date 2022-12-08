@@ -70,7 +70,7 @@ class OpenSearchClient(IClientAdapter):
             settings={
                 "index": {
                     "knn": True,
-                    "knn.algo_param.ef_search": 100,
+                    "knn.algo_param.ef_search": 50,
                 }
             },
         )
@@ -83,10 +83,7 @@ class OpenSearchClient(IClientAdapter):
                     "name": "hnsw",
                     "space_type": "l2",
                     "engine": "nmslib",
-                    "parameters": {
-                        "ef_construction": 128,
-                        "m": 24,
-                    },
+                    "parameters": {"ef_construction": 128, "m": 24},
                 },
             }
             vector_field = self.query_builder.get_vector_field_name(vector_name)
