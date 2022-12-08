@@ -221,8 +221,7 @@ class EsQueryBuilder:
         if hasattr(query, "vector") and query.vector is not None:
             self._build_knn_configuration(
                 es_query=es_query,
-                # TODO(@frascuchon): Better es naming mapping
-                vector_field=query.vector.name,
+                vector_field=self.get_vector_field_name(query.vector.name),
                 vector_value=query.vector.value,
                 top_k=size,
             )
@@ -385,6 +384,9 @@ class EsQueryBuilder:
             }
         }
         return es_query
+
+    def get_vector_field_name(self, vector_name: str) -> str:
+        return f"vectors.{vector_name}.value"
 
 
 class OpenSearchQueryBuilder(EsQueryBuilder):

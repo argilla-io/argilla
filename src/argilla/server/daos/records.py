@@ -106,6 +106,7 @@ class DatasetRecordsDAO:
                 exclude=set(exclude_fields),
             )
             if record.vectors is not None:
+                # TODO: Create embeddings config by settings
                 for (
                     vector_name,
                     vector_data_mapping,
@@ -114,7 +115,6 @@ class DatasetRecordsDAO:
                     if vector_dimension is None:
                         dimension = len(vector_data_mapping.value)
                         vectors_configuration[vector_name] = dimension
-                    record_dict[vector_name] = vector_data_mapping.value
             documents.append(record_dict)
 
         self._es.create_dataset(
