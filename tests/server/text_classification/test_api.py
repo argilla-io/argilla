@@ -164,7 +164,8 @@ def test_create_records_for_text_classification(mocked_client, telemetry_track_d
     assert created_dataset.metadata == metadata
 
     response = mocked_client.post(
-        f"/api/datasets/{dataset}/TextClassification:search", json={}
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json={},
     )
 
     assert response.status_code == 200
@@ -178,7 +179,7 @@ def test_create_records_for_text_classification(mocked_client, telemetry_track_d
         "predicted_as": {"Mocking": 1},
         "predicted_by": {"test": 1},
         "status": {"Default": 1},
-        "words": {"data": 1},
+        "words": {},
     }
 
     telemetry_track_data.assert_called_once()

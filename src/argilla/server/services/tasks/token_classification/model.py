@@ -99,7 +99,7 @@ class ServiceTokenClassificationRecord(
                 {"mention": mention, "entity": entity.label}
                 for mention, entity in self.annotated_mentions()
             ],
-            "words": self.all_text(),
+            # "words": self.all_text(),
         }
 
     def __init__(self, **data):

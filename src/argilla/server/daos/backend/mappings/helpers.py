@@ -12,15 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List
+from typing import List
 
 from argilla.server.settings import settings
-
-EXTENDED_ANALYZER_REF = "extended_analyzer"
-
-MULTILINGUAL_STOP_ANALYZER_REF = "multilingual_stop_analyzer"
-
-DEFAULT_SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]  # TODO: env var configuration
 
 
 class mappings:
@@ -53,31 +47,6 @@ class mappings:
         }
 
     @staticmethod
-    def words_text_field():
-        """Mappings config for old `word` field. Deprecated"""
-
-        default_analyzer = settings.default_es_search_analyzer
-        exact_analyzer = settings.exact_es_search_analyzer
-
-        if default_analyzer == "standard":
-            default_analyzer = MULTILINGUAL_STOP_ANALYZER_REF
-
-        if exact_analyzer == "whitespace":
-            exact_analyzer = EXTENDED_ANALYZER_REF
-
-        return {
-            "type": "text",
-            "fielddata": True,
-            "analyzer": default_analyzer,
-            "fields": {
-                "extended": {
-                    "type": "text",
-                    "analyzer": exact_analyzer,
-                }
-            },
-        }
-
-    @staticmethod
     def text_field():
         """Mappings config for textual field"""
         default_analyzer = settings.default_es_search_analyzer
@@ -87,14 +56,16 @@ class mappings:
             "type": "text",
             "analyzer": default_analyzer,
             "fields": {
-                "exact": {"type": "text", "analyzer": exact_analyzer},
-                "wordcloud": {
+                "exact": {
                     "type": "text",
-                    "analyzer": MULTILINGUAL_STOP_ANALYZER_REF,
-                    "fielddata": True,
+                    "analyzer": exact_analyzer,
                 },
+                # "wordcloud": {
+                #     "type": "text",
+                #     "analyzer": MULTILINGUAL_STOP_ANALYZER_REF,
+                #     "fielddata": True,
+                # },
             },
-            # TODO(@frascuchon): verify min es version that support meta fields
             # "meta": {"experimental": "true"},
         }
 
@@ -122,44 +93,19 @@ class mappings:
         return {"dynamic": True, "type": "object"}
 
 
-def multilingual_stop_analyzer(supported_langs: List[str] = None) -> Dict[str, Any]:
-    """Multilingual stop analyzer"""
-    from stopwordsiso import stopwords
-
-    supported_langs = supported_langs or DEFAULT_SUPPORTED_LANGUAGES
-    return {
-        "type": "stop",
-        "stopwords": [w for w in stopwords(supported_langs)],
-    }
-
-
-def extended_analyzer():
-    """Extended analyzer (used only in `word` field). Deprecated"""
-    return {
-        "type": "custom",
-        "tokenizer": "whitespace",
-        "filter": ["lowercase", "asciifolding"],
-    }
-
-
 def tasks_common_settings():
     """Common index settings"""
     return {
         "number_of_shards": settings.es_records_index_shards,
         "number_of_replicas": settings.es_records_index_replicas,
-        "analysis": {
-            "analyzer": {
-                MULTILINGUAL_STOP_ANALYZER_REF: multilingual_stop_analyzer(),
-                EXTENDED_ANALYZER_REF: extended_analyzer(),
-            }
-        },
     }
 
 
 def dynamic_metrics_text():
     return {
         "metrics.*": mappings.path_match_keyword_template(
-            path="metrics.*", enable_text_search_in_keywords=False
+            path="metrics.*",
+            enable_text_search_in_keywords=False,
         )
     }
 
@@ -190,7 +136,6 @@ def tasks_common_mappings():
         "dynamic": "strict",
         "properties": {
             "id": mappings.keyword_field(),
-            "words": mappings.words_text_field(),
             "text": mappings.text_field(),
             # TODO(@frascuchon): Enable prediction and annotation
             #  so we can build extra metrics based on these fields
