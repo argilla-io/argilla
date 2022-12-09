@@ -46,8 +46,7 @@
           </div>
         </slot>
       </div>
-      <results-empty v-if="noResults" :title="emptySearchInfo.title" />
-      <template v-else>
+      <template v-if="dataAvailable && filteredResultsAvailable">
         <div v-for="group in groups" :key="group" class="table-info__body">
           <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
             <p class="table-info__group__title">
@@ -189,6 +188,7 @@
           </ul>
         </div>
       </template>
+      <results-empty v-else :title="emptySearchInfo.title" />
     </div>
   </transition>
 </template>
@@ -276,8 +276,11 @@ export default {
     });
   },
   computed: {
-    noResults() {
-      return this.filteredResults?.length === 0;
+    dataAvailable() {
+      return this.data?.length;
+    },
+    filteredResultsAvailable() {
+      return this.filteredResults.length !== 0;
     },
     filterActions() {
       return this.actions.filter((a) => a.hide !== this.hideButton);
