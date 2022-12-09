@@ -28,7 +28,7 @@ services:
       - node.name=elasticsearch
       - cluster.name=es-argilla-local
       - discovery.type=single-node
-      - “ES_JAVA_OPTS=-Xms512m -Xmx512m”
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - cluster.routing.allocation.disk.threshold_enabled=false
       - xpack.security.enabled=false
     ulimits:
