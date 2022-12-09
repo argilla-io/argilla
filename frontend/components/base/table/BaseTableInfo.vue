@@ -46,7 +46,7 @@
           </div>
         </slot>
       </div>
-      <results-empty v-if="showEmptyText" :title="emptySearchInfo.title" />
+      <results-empty v-if="!dataAvailable" :title="emptySearchInfo.title" />
       <template v-else>
         <div v-for="group in groups" :key="group" class="table-info__body">
           <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
