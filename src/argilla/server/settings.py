@@ -66,7 +66,7 @@ class ApiSettings(BaseSettings):
     cors_origins: List[str] = ["*"]
 
     # TODO: Document this variable
-    opensearch_enable_knn: bool = False
+    opensearch_enable_knn: bool = True
 
     docs_enabled: bool = True
 
