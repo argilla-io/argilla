@@ -46,7 +46,7 @@
           </div>
         </slot>
       </div>
-      <results-empty v-if="!dataAvailable" :title="emptySearchInfo.title" />
+      <results-empty v-if="showEmptyText" :title="emptySearchInfo.title" />
       <template v-else>
         <div v-for="group in groups" :key="group" class="table-info__body">
           <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
@@ -279,11 +279,11 @@ export default {
     dataAvailable() {
       return this.data?.length;
     },
-    filteredResultsAvailable() {
-      return this.filteredResults.length !== 0;
+    noResults() {
+      return this.filteredResults?.length === 0;
     },
     showEmptyText() {
-      return (!this.dataAvailable || (this.dataAvailable && !this.filteredResultsAvailable));
+      return (!this.dataAvailable || (this.dataAvailable && this.noResults));
     },
     filterActions() {
       return this.actions.filter((a) => a.hide !== this.hideButton);
