@@ -267,11 +267,8 @@ export default {
     });
   },
   computed: {
-    resultsAvailable() {
-      return this.filteredResults.length > 0;
-    },
     tableIsEmpty() {
-      return !this.data || (this.querySearch && this.filteredResults.length === 0)
+      return this.filteredResults && this.filteredResults.length === 0;
     },
     filterActions() {
       return this.actions.filter((a) => a.hide !== this.hideButton);
