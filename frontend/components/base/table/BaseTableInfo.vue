@@ -279,11 +279,8 @@ export default {
     dataAvailable() {
       return this.data?.length;
     },
-    noResults() {
-      return this.filteredResults?.length === 0;
-    },
     showEmptyText() {
-      return (!this.dataAvailable || (this.dataAvailable && this.noResults));
+      return !this.dataAvailable || (this.dataAvailable && this.filteredResults.length === 0);
     },
     filterActions() {
       return this.actions.filter((a) => a.hide !== this.hideButton);
