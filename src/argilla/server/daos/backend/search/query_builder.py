@@ -19,7 +19,6 @@ from typing import Any, Dict, List, Optional
 
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
-from overrides import overrides
 
 from argilla.server.daos.backend.query_helpers import filters
 from argilla.server.daos.backend.search.model import (
@@ -390,7 +389,6 @@ class EsQueryBuilder:
 
 
 class OpenSearchQueryBuilder(EsQueryBuilder):
-    @overrides
     def _build_knn_configuration(
         self,
         *,

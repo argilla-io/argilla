@@ -23,7 +23,6 @@ from elasticsearch import (
     RequestError,
     helpers,
 )
-from overrides import overrides
 
 from argilla.server.daos.backend.base import BackendErrorHandler
 from argilla.server.daos.backend.client_adapters.opensearch import OpenSearchClient
@@ -44,7 +43,6 @@ class ElasticsearchClient(OpenSearchClient):
             GenericApiError=ApiError,
         )
 
-    @overrides
     def configure_index_vectors(
         self,
         *,
@@ -85,7 +83,6 @@ class ElasticsearchClient(OpenSearchClient):
                 target_index=target_index,
             )
 
-    @overrides
     def bulk(
         self,
         *,
@@ -101,7 +98,6 @@ class ElasticsearchClient(OpenSearchClient):
                 refresh="wait_for",
             )
 
-    @overrides
     def search_docs(
         self,
         *,
