@@ -280,7 +280,7 @@ export default {
       return this.data?.length;
     },
     showEmptyText() {
-      return !this.dataAvailable || (this.dataAvailable && this.filteredResults.length === 0);
+      return this.dataAvailable && this.filteredResults.length === 0;
     },
     filterActions() {
       return this.actions.filter((a) => a.hide !== this.hideButton);
