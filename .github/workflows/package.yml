@@ -19,8 +19,8 @@ on:
       - "feat/**"
 
 jobs:
-  test:
-    name: Check tests (ElasticSearch)
+  test-elastic:
+    name: Tests ElasticSearch
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -103,12 +103,101 @@ jobs:
 
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
-        if: steps.filter.outputs.python_code == 'true' && matrix.elasticsearch == '8.0'
+        if: steps.filter.outputs.python_code == 'true' && matrix.version == '8.5'
         with:
           files: ./coverage.xml
           flags: pytest
           fail_ci_if_error: false
 
+  test-opensearch:
+    name: Test OpenSearch
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [ 1.3, 2.3 ]
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+      - name: Check affected files
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            python_code:
+              - 'src/**'
+              - 'tests/**'
+
+      - name: Setup OpenSearch 🔎
+        if: steps.filter.outputs.python_code == 'true'
+        uses: ankane/setup-opensearch@v1
+        with:
+          opensearch-version: ${{ matrix.version }}
+
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        if: steps.filter.outputs.python_code == 'true'
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
+          activate-environment: argilla
+
+      - name: Get date for conda cache
+        if: steps.filter.outputs.python_code == 'true'
+        id: get-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
+
+      - name: Cache Conda env
+        if: steps.filter.outputs.python_code == 'true'
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 2
+
+      - name: Update environment
+        if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
+        run: mamba env update -n argilla -f environment_dev.yml
+
+      - name: Cache pip 👜
+        uses: actions/cache@v2
+        if: steps.filter.outputs.python_code == 'true'
+        env:
+          # Increase this value to reset cache if pyproject.toml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
+
+      - name: Set hugginface hub credentials
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
+        env:
+          HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
+        run: echo "Enable HF access token"
+
+      - name: Run tests 📈
+        if: steps.filter.outputs.python_code == 'true'
+        run: |
+          pytest --cov=argilla --cov-report=xml
+          pip install "spacy<3.0" && python -m spacy download en_core_web_sm
+          pytest tests/monitoring/test_spacy_monitoring.py
+          pip install "cleanlab<2.0"
+          pytest tests/labeling/text_classification/test_label_errors.py
+
+      - name: Upload Coverage to Codecov 📦
+        uses: codecov/codecov-action@v1
+        if: steps.filter.outputs.python_code == 'true' && matrix.version == '2.3'
+        with:
+          files: ./coverage.xml
+          flags: pytest
+          fail_ci_if_error: false
 
   build:
     name: Build the python package
@@ -163,8 +252,9 @@ jobs:
     name: Build latest docker image
     runs-on: ubuntu-latest
     needs:
-      - test
       - build
+      - test-elastic
+      - test-opensearch
     defaults:
       run:
         shell: bash -l {0}
