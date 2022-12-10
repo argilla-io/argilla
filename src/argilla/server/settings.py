@@ -98,7 +98,7 @@ class ApiSettings(BaseSettings):
         " Values containing higher than this will be truncated",
     )
 
-    enable_telemetry: bool = True
+    enable_telemetry: bool = False
 
     telemetry_key: Optional[str] = None
 
