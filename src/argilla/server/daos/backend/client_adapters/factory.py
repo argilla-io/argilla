@@ -34,13 +34,12 @@ class ClientAdapterFactory:
         ca_path: str,
         retry_on_timeout: bool = True,
         max_retries: int = 5,
-        opensearch_enable_knn: bool = False,
     ) -> IClientAdapter:
 
         (
             client_class,
             support_vector_search,
-        ) = cls._resolve_client_class_with_vector_support(hosts, opensearch_enable_knn)
+        ) = cls._resolve_client_class_with_vector_support(hosts)
 
         return client_class(
             index_shards=index_shards,
@@ -58,7 +57,6 @@ class ClientAdapterFactory:
     def _resolve_client_class_with_vector_support(
         cls,
         hosts: str,
-        enable_for_opensearch: bool = False,
     ) -> Tuple[Type, bool]:
         version, distribution = cls._fetch_cluster_version_info(hosts)
 
@@ -66,7 +64,7 @@ class ClientAdapterFactory:
 
         if distribution == "elasticsearch" and parse("8.5") <= parse(version):
             client_class = ElasticsearchClient
-        elif distribution == "opensearch" and enable_for_opensearch:
+        elif distribution == "opensearch" and parse("2.2") <= parse(version):
             client_class = OpenSearchClient
         else:
             client_class = OpenSearchClient
