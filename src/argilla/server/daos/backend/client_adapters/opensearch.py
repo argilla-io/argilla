@@ -67,13 +67,19 @@ class OpenSearchClient(IClientAdapter):
 
         self.set_index_settings(
             index=index,
-            settings={"index.knn": True},
+            settings={"index.knn": False},
         )
         vector_mappings = {}
         for vector_name, vector_dimension in vectors.items():
             index_mapping = {
                 "type": "knn_vector",
                 "dimension": vector_dimension,
+                "method": {
+                    "name": "hnsw",
+                    "engine": "lucene",
+                    "space_type": "l2",
+                    "parameters": {"m": 2, "ef_construction": 4},
+                },
             }
             vector_field = self.query_builder.get_vector_field_name(vector_name)
             vector_mappings[vector_field] = index_mapping
