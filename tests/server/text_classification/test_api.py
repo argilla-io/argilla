@@ -274,7 +274,7 @@ def test_create_records_for_text_classification_vector_search(
         "predicted_as": {"Mocking": 3},
         "predicted_by": {"test": 3},
         "status": {"Default": 3},
-        "words": {"data": 3},
+        "words": {},
     }
 
     response = mocked_client.post(
