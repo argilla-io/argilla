@@ -20,9 +20,11 @@
     <div class="dropdown__header" @click="onClick">
       <slot name="dropdown-header" />
     </div>
-    <div v-show="visible" class="dropdown__content">
-      <slot name="dropdown-content" />
-    </div>
+    <transition appear name="fade">
+      <div v-show="visible" class="dropdown__content">
+        <slot name="dropdown-content" />
+      </div>
+    </transition>
   </div>
 </template>
 <script>
