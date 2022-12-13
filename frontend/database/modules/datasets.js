@@ -19,6 +19,7 @@ import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
+import { Vector as VectorModel } from "@/models/Vector";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -571,6 +572,8 @@ const actions = {
       aggregations: dataset.globalResults.aggregations,
     });
 
+    initVectorModel(dataset);
+
     return dataset;
   },
 
@@ -632,6 +635,54 @@ const actions = {
     await _refreshDatasetAggregations({ dataset: paginatedDataset });
     await _fetchAnnotationProgress(paginatedDataset);
   },
+};
+
+const initVectorModel = (dataset) => {
+  deleteAllVectorData();
+  const records = dataset.results?.records;
+  const isDatasetContainsAnyVectors = isAnyKeyInArrayItem(records, "vectors");
+  if (isDatasetContainsAnyVectors) {
+    records.forEach(({ id: recordId, vectors }) => {
+      insertVectorModel(dataset.id, recordId, vectors);
+    });
+  }
+};
+
+const insertVectorModel = (datasetId, recordId, vectors) => {
+  const datasetJoinedId = datasetId.join(".");
+  Object.entries(vectors).forEach(([vectorName, { value: vectorValues }]) => {
+    insertDataInVectorModel(
+      datasetJoinedId,
+      recordId,
+      vectorName,
+      vectorValues
+    );
+  });
+};
+
+const insertDataInVectorModel = (
+  datasetId,
+  recordId,
+  vectorName,
+  vectorValues
+) => {
+  VectorModel.insert({
+    data: {
+      dataset_id: datasetId,
+      record_id: recordId,
+      vector_name: vectorName,
+      vector_values: vectorValues,
+    },
+  });
+};
+
+const deleteAllVectorData = () => {
+  VectorModel.deleteAll();
+};
+
+const isAnyKeyInArrayItem = (arrayWithObjItem, key) => {
+  const isKeyInItem = (item) => item[key] && Object.keys(item[key]).length;
+  return arrayWithObjItem.some(isKeyInItem);
 };
 
 export default {
