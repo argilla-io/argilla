@@ -606,6 +606,7 @@ const actions = {
 
   async paginate(_, { dataset, size, page }) {
     await _paginate({ dataset, size, page });
+    initVectorModel(dataset);
   },
 
   async resetSearch(_, { dataset, size }) {
@@ -634,6 +635,7 @@ const actions = {
     });
     await _refreshDatasetAggregations({ dataset: paginatedDataset });
     await _fetchAnnotationProgress(paginatedDataset);
+    initVectorModel(dataset);
   },
 };
 
