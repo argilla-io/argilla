@@ -33,15 +33,13 @@ export default {
 
 <style scoped lang="scss">
 .status-tag {
-  position: absolute;
-  top: 1em;
-  right: 3.6em;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  background: palette(purple, 200);
+  margin-left: 1em;
+  background: palette(green);
   color: palette(white);
   border-radius: 50px;
-  padding: 0.7em 1em;
+  padding: 0.4em 1em;
   @include font-size(12px);
   font-weight: 600;
   z-index: 0;

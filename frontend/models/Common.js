@@ -45,7 +45,7 @@ class BaseRecord {
     this.event_timestamp = event_timestamp;
     this.last_updated = last_updated;
     this.search_keywords = search_keywords || [];
-    this.vectors = vectors;
+    this.vectors = vectors || {};
   }
 
   recordTitle() {

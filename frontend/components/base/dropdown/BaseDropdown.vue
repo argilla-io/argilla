@@ -55,13 +55,8 @@ export default {
   position: relative;
   color: $black-54;
   &__header {
-    height: 100%;
-    width: auto;
-    height: 45px;
-    border: 1px solid palette(grey, 600);
     display: flex;
     align-items: center;
-    padding: 0 20px;
     transition: all 0.2s ease;
     border-radius: $border-radius;
     &:hover,

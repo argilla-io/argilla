@@ -23,26 +23,36 @@
         item.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
-      <base-checkbox
-        v-if="annotationEnabled"
-        class="list__checkbox"
-        :value="item.selected"
-        @change="onCheckboxChanged($event, item.id)"
-      ></base-checkbox>
+      <div class="record__header">
+        <template v-if="annotationEnabled">
+          <div class="record__header--left">
+            <base-checkbox
+              class="list__checkbox"
+              :value="item.selected"
+              @change="onCheckboxChanged($event, item.id)"
+            ></base-checkbox>
+            <status-tag
+              v-if="item.status !== 'Default'"
+              :title="item.status"
+            ></status-tag>
+          </div>
+          <similarity-search-component
+            class="record__similarity-search"
+            v-if="formattedVectors.length"
+            :vectors="formattedVectors"
+          />
+        </template>
+        <record-extra-actions
+          :key="item.id"
+          :allow-change-status="annotationEnabled"
+          :record="item"
+          :dataset="dataset"
+          :task="dataset.task"
+          @onChangeRecordStatus="onChangeRecordStatus"
+          @onShowMetadata="onShowMetadata(item)"
+        />
+      </div>
       <slot :record="item" />
-      <record-extra-actions
-        :key="item.id"
-        :allow-change-status="annotationEnabled"
-        :record="item"
-        :dataset="dataset"
-        :task="dataset.task"
-        @onChangeRecordStatus="onChangeRecordStatus"
-        @onShowMetadata="onShowMetadata(item)"
-      />
-      <status-tag
-        v-if="annotationEnabled && item.status !== 'Default'"
-        :title="item.status"
-      ></status-tag>
     </div>
   </div>
 </template>
@@ -66,6 +76,16 @@ export default {
     },
     visibleRecords() {
       return this.dataset.visibleRecords;
+    },
+    formattedVectors() {
+      // TODO get vectors correctly
+      return (
+        Object.keys(this.item.vectors)?.map((vector) => ({
+          id: vector,
+          name: vector,
+          value: this.item.vectors[vector].value,
+        })) || []
+      );
     },
   },
   methods: {
@@ -108,13 +128,30 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.record {
+  &__header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 30px;
+    margin-top: 0.8em;
+    &--left {
+      display: flex;
+      align-items: center;
+      margin-right: auto;
+    }
+  }
+  &__extra-actions {
+    margin-right: $base-space;
+  }
+  &__similarity-search {
+    margin-left: auto;
+  }
+}
 .list {
   &__checkbox.re-checkbox {
-    position: absolute;
-    left: $base-space * 2;
-    top: $base-space * 2;
-    margin: 0;
-    width: auto;
+    margin: auto $base-space;
   }
   &__item {
     position: relative;

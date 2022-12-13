@@ -117,14 +117,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.record {
-  &__extra-actions {
-    position: absolute;
-    top: 1.5em;
-    right: 0.9em;
-  }
-}
-
 .extra-actions {
   position: relative;
   &__button {
@@ -135,7 +127,7 @@ export default {
   &__content {
     position: absolute;
     right: 0.7em;
-    top: 2em;
+    top: calc(100% + $base-space);
     background: white;
     border-radius: $border-radius;
     box-shadow: $shadow;
