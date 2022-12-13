@@ -23,6 +23,7 @@ class BaseRecord {
   status;
   selected;
   event_timestamp;
+  vectors;
   constructor({
     id,
     metadata,
@@ -33,6 +34,7 @@ class BaseRecord {
     event_timestamp,
     last_updated,
     search_keywords,
+    vectors,
   }) {
     this.id = id;
     this.metadata = metadata;
@@ -43,6 +45,7 @@ class BaseRecord {
     this.event_timestamp = event_timestamp;
     this.last_updated = last_updated;
     this.search_keywords = search_keywords || [];
+    this.vectors = vectors || {};
   }
 
   recordTitle() {
