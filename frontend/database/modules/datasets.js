@@ -582,6 +582,7 @@ const actions = {
   },
 
   async search(_, { dataset, query, sort, size }) {
+    initVectorModel(dataset);
     return await _search({ dataset, query, sort, size });
   },
 
