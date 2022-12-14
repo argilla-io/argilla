@@ -45,6 +45,7 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
+import { getDatasetModelPrimaryKey } from "../../../../models/Dataset";
 
 export default {
   layout: "app",
@@ -81,6 +82,14 @@ export default {
     },
     workspace() {
       return currentWorkspace(this.$route);
+    },
+    datasetPrimaryKey() {
+      const paramsToGetDatasetPrimaryKey = {
+        name: this.datasetName,
+        owner: this.workspace,
+      };
+
+      return getDatasetModelPrimaryKey(paramsToGetDatasetPrimaryKey);
     },
     areMetricsVisible() {
       return this.dataset && this.dataset.viewSettings.visibleMetrics;
