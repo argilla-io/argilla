@@ -1,6 +1,6 @@
 # Contributor Documentation <!-- omit in toc -->
 
-Thank you for investing your time in contributing to our project! Any contribution you make will be reflected within our most recent version of  [Argilla](https://github.com/argilla-io/argilla) 🤩.
+Thank you for investing your time in contributing to our project! Any contribution you make will be reflected in our most recent version of [Argilla](https://github.com/argilla-io/argilla) 🤩.
 
 Read our [Code of Conduct](https://github.com/argilla-io/argilla/blob/develop/CODE_OF_CONDUCT.md) to keep our community approachable and respectable.
 
@@ -11,8 +11,8 @@ In this guide you will get an overview of the contribution workflow from opening
 To get an overview of the project, read our [README](https://github.com/argilla-io/argilla/blob/develop/README.md). Here are some resources to help you get started with open source contributions:
 
 - [Finding good first issue](https://github.com/argilla-io/argilla/labels/good%20first%20issue)
-- [Find and review a good first pull request](https://github.com/argilla-io/argilla/pulls?q=is%3Aopen+is%3Apr+label%3A%22good+first+issue%22)
-- [Setting up the Argilla developer environment](./developer_docs.html)
+- [Find and review pull requests](https://github.com/argilla-io/argilla/pulls)
+- [Setting up the Argilla developer environment](./developer_docs.rst)
 - [Write a tutorial](https://github.com/argilla-io/argilla/issues/2030)
 - [Schedule a meeting with our developer advocate](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m)
 
@@ -29,7 +29,7 @@ We accept three kinds of contributions.
 
 #### Create a new issue
 
-If you spot a problem with the docs or our code, [search if an issue already exists](https://github.com/argilla-io/argilla/issues?q=is%3Aissue). If a related issue doesn't exist, you can open a new issue using a relevant [issue form](https://github.com/argilla-io/argilla/issues/new?assignees=&labels=bug&template=bug_report.md&title=). Try to fill out the entire template to ensure it is clear what the issue entails an it is reproducible for other users.
+If you spot a problem with the docs or our code, [search if an issue already exists](https://github.com/argilla-io/argilla/issues?q=is%3Aissue). If a related issue doesn't exist, you can open a new issue using a relevant [issue form](https://github.com/argilla-io/argilla/issues/new?assignees=&labels=bug&template=bug_report.md&title=). Try to fill out the entire template to ensure it is clear what the issue entails and it is reproducible for other users.
 
 #### Solve an issue
 
@@ -37,9 +37,11 @@ Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?
 
 ### Features and documentation
 
+We are always looking for [new tutorials](https://github.com/argilla-io/argilla/issues/2030)!
+
 #### Create a new feature
 
-If you feel something can be enhanced, [search if the feature already exists](https://github.com/argilla-io/argilla/issues?q=is%3Aissue+label%3Aenhancement).  If a related feature doesn't exist, you can open a new feature using a relevant [feature form](https://github.com/argilla-io/argilla/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=). Try to fill out the entire template to ensure it is clear what the issue entails and it is reproducible for other users.
+If you feel something can be enhanced, [search if the feature already exists](https://github.com/argilla-io/argilla/issues?q=is%3Aissue+label%3Aenhancement).  If a related feature doesn't exist, you can open a new feature using a relevant [feature form](https://github.com/argilla-io/argilla/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=). Try to fill out the entire template to ensure it is clear what the issue entails and it is reproducible for other users. For documentation, assign the label `documentation` too.
 
 #### Solve an existing feature
 
@@ -49,7 +51,7 @@ Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?
 
 - Create [a fork](https://github.com/argilla-io/argilla/fork) of our `development` branch.
   - Note, for updates solely to the documentation, you are allowed to work in the `main` branch.
-- To start working on code changes, we suggest, you take a look at our tutorial on setting up the [development environment](./developer_docs.html).
+- To start working on code changes, we suggest, you take a look at our tutorial on setting up the [development environment](./developer_docs.rst).
 - Work on your awesome contribution and adhere to our formatting guidelines.
   - Don´t forget to also check if:
     - Your update requires updates to our docs.
