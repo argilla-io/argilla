@@ -11,60 +11,124 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import pytest
 
+from argilla.server.apis.v0.models.text2text import (
+    Text2TextBulkRequest,
+    Text2TextRecord,
+)
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
     TextClassificationRecord,
 )
+from argilla.server.apis.v0.models.token_classification import (
+    TokenClassificationBulkRequest,
+    TokenClassificationRecord,
+)
+from argilla.server.commons.models import TaskType
 
 
-def create_dataset(mocked_client):
+def create_dataset(
+    mocked_client,
+    task: TaskType,
+):
     dataset = "test-dataset"
+    record_text = "This is my text"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
-    tags = {"env": "test", "class": "text classification"}
-    metadata = {"config": {"the": "config"}}
+    tags = {
+        "env": "test",
+        "type": task,
+    }
 
-    classification_bulk = TextClassificationBulkRequest(
-        tags=tags,
-        metadata=metadata,
-        records=[
-            TextClassificationRecord(
-                **{
-                    "id": 0,
-                    "inputs": {"data": "my data"},
-                    "prediction": {
-                        "agent": "test",
-                        "labels": [
-                            {"class": "Test", "score": 0.3},
-                            {"class": "Mocking", "score": 0.7},
-                        ],
-                    },
-                }
-            )
-        ],
-    )
+    if task == TaskType.text_classification:
+        bulk_data = TextClassificationBulkRequest(
+            tags=tags,
+            records=[
+                TextClassificationRecord(
+                    **{
+                        "id": 0,
+                        "inputs": {"data": "my data"},
+                        "prediction": {
+                            "agent": "test",
+                            "labels": [
+                                {"class": "Test", "score": 0.3},
+                                {"class": "Mocking", "score": 0.7},
+                            ],
+                        },
+                    }
+                )
+            ],
+        )
+    elif task == TaskType.token_classification:
+        bulk_data = TokenClassificationBulkRequest(
+            tags=tags,
+            records=[
+                TokenClassificationRecord.parse_obj(
+                    {
+                        "id": 0,
+                        "text": record_text,
+                        "tokens": record_text.split(),
+                    }
+                )
+            ],
+        )
+    else:
+        bulk_data = Text2TextBulkRequest(
+            tags=tags,
+            records=[
+                Text2TextRecord.parse_obj(
+                    {
+                        "id": 0,
+                        "text": record_text,
+                    }
+                )
+            ],
+        )
+
     response = mocked_client.post(
-        f"/api/datasets/{dataset}/TextClassification:bulk",
-        json=classification_bulk.dict(by_alias=True),
+        f"/api/datasets/{dataset}/{task}:bulk",
+        json=bulk_data.dict(by_alias=True),
     )
 
     assert response.status_code == 200
     return dataset
 
 
-def test_get_record_by_id(mocked_client):
-    dataset = create_dataset(mocked_client)
+@pytest.mark.parametrize(
+    ("task", "expected_record_class"),
+    [
+        (TaskType.token_classification, TokenClassificationRecord),
+        (TaskType.text_classification, TextClassificationRecord),
+        (TaskType.text2text, Text2TextRecord),
+    ],
+)
+def test_get_record_by_id(mocked_client, task, expected_record_class):
+    dataset = create_dataset(
+        mocked_client,
+        task=task,
+    )
 
     record_id = 0
     response = mocked_client.get(f"/api/datasets/{dataset}/records/{record_id}")
 
     assert response.status_code == 200
-    record = TextClassificationRecord.parse_obj(response.json())
+    record = expected_record_class.parse_obj(response.json())
     assert record.id == record_id
 
 
-def test_get_record_by_id_not_found(mocked_client):
-    dataset = create_dataset(mocked_client)
+@pytest.mark.parametrize(
+    "task",
+    [
+        TaskType.token_classification,
+        TaskType.text_classification,
+        TaskType.text2text,
+    ],
+)
+def test_get_record_by_id_not_found(mocked_client, task):
+    dataset = create_dataset(
+        mocked_client,
+        task=task,
+    )
 
     record_id = "not-found"
     response = mocked_client.get(f"/api/datasets/{dataset}/records/{record_id}")
