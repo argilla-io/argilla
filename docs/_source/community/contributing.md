@@ -12,7 +12,7 @@ To get an overview of the project, read our [README](https://github.com/argilla-
 
 - [Finding good first issue](https://github.com/argilla-io/argilla/labels/good%20first%20issue)
 - [Find and review a good first pull request](https://github.com/argilla-io/argilla/pulls?q=is%3Aopen+is%3Apr+label%3A%22good+first+issue%22)
-- [Setting up the Argilla developer environment](https://docs.argilla.io/en/latest/community/developer_docs.html)
+- [Setting up the Argilla developer environment](./developer_docs.html)
 - [Write a tutorial](https://github.com/argilla-io/argilla/issues/2030)
 - [Schedule a meeting with our developer advocate](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m)
 
@@ -49,7 +49,7 @@ Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?
 
 - Create [a fork](https://github.com/argilla-io/argilla/fork) of our `development` branch.
   - Note, for updates solely to the documentation, you are allowed to work in the `main` branch.
-- To start working on code changes, we suggest, you take a look at our tutorial on setting up the [development environment](https://docs.argilla.io/en/latest/community/developer_docs.html).
+- To start working on code changes, we suggest, you take a look at our tutorial on setting up the [development environment](./developer_docs.html).
 - Work on your awesome contribution and adhere to our formatting guidelines.
   - Don´t forget to also check if:
     - Your update requires updates to our docs.
@@ -59,17 +59,18 @@ Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?
 ### Pull Request
 
 When you're finished with the changes, create a pull request, also known as a PR.
-- Fill the "Ready for review" template so that we can review your PR. This template helps reviewers understand your changes as well as the purpose of your pull request.
-- Don't forget to [link PR to issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) if you are solving one.
-- Enable the checkbox to [allow maintainer edits](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork) so the branch can be updated for a merge.
-Once you submit your PR, a Docs team member will review your proposal. We may ask questions or request additional information.
+- Open a [PR](https://github.com/argilla-io/argilla/compare).
+- Fill the PR template so that we can review your PR. This template helps reviewers understand your changes as well as the purpose of your pull request.
+- Don't forget to link PR to issue within the template next to the "Closes #" in the template.
+- Enable the checkbox to allow maintainer edits so the branch can be updated for a merge.
+Once you submit your PR, a team member will review your proposal. We may ask questions or request additional information.
 - We may ask for changes to be made before a PR can be merged, either using [suggested changes](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request) or pull request comments. You can apply suggested changes directly through the UI. You can make any other changes in your fork, then commit them to your branch.
 - As you update your PR and apply changes, mark each conversation as [resolved](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/commenting-on-a-pull-request#resolving-conversations).
 - If you run into any merge issues, checkout this [git tutorial](https://github.com/skills/resolve-merge-conflicts) to help you resolve merge conflicts and other issues.
 
 ### Your PR is merged!
 
-Congratulations :tada::tada: We thank you :sparkles:.
+Congratulations 🎉🎊 We thank you 🫡
 
 Once your PR is merged, your contributions will be publicly visible on the [Argilla GitHub](https://github.com/argilla-io/argilla#contributors).
 
