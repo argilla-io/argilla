@@ -62,7 +62,7 @@ server = [
     # Words cloud
     "stopwordsiso ~= 0.6.1",
     # Statics server
-    "aiofiles~=0.6.0",
+    "aiofiles>=0.6,<22.2",
     "PyYAML~=5.4.1",
     # security dependencies
     "python-multipart~=0.0.5",
