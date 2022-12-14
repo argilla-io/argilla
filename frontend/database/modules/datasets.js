@@ -645,37 +645,37 @@ const initVectorModel = (dataset) => {
   const records = dataset.results?.records;
   const isDatasetContainsAnyVectors = isAnyKeyInArrayItem(records, "vectors");
   if (isDatasetContainsAnyVectors) {
-    records.forEach(({ id: recordId, vectors }) => {
-      insertVectorModel(dataset.id, recordId, vectors);
-    });
+    const datasetJoinedId = dataset.id.join(".");
+    const vectorsData = formatVectorsToInsertInModel(datasetJoinedId, records);
+    insertDataInVectorModel(vectorsData);
   }
 };
 
-const insertVectorModel = (datasetId, recordId, vectors) => {
-  const datasetJoinedId = datasetId.join(".");
-  Object.entries(vectors).forEach(([vectorName, { value: vectorValues }]) => {
-    insertDataInVectorModel(
-      datasetJoinedId,
-      recordId,
-      vectorName,
-      vectorValues
-    );
+const formatVectorsToInsertInModel = (datasetId, records) => {
+  const vectorsData = [];
+  records.forEach(({ id: recordId, vectors }) => {
+    const vectorsByRecord = getVectorsByRecord(datasetId, recordId, vectors);
+    vectorsData.push(...vectorsByRecord);
   });
+  return vectorsData;
 };
 
-const insertDataInVectorModel = (
-  datasetId,
-  recordId,
-  vectorName,
-  vectorValues
-) => {
-  VectorModel.insert({
-    data: {
+const getVectorsByRecord = (datasetId, recordId, vectors) => {
+  const vectorsByToInsertInModel = [];
+  Object.entries(vectors).forEach(([vectorName, { value: vectorValues }]) => {
+    vectorsByToInsertInModel.push({
       dataset_id: datasetId,
       record_id: recordId,
       vector_name: vectorName,
       vector_values: vectorValues,
-    },
+    });
+  });
+  return vectorsByToInsertInModel;
+};
+
+const insertDataInVectorModel = (vectors) => {
+  VectorModel.insert({
+    data: vectors,
   });
 };
 
