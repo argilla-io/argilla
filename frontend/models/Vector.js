@@ -9,7 +9,6 @@ class Vector extends Model {
       id: this.uid(),
       vector_name: this.attr(null),
       vector_values: this.attr([]),
-      is_reference: this.boolean(false),
 
       // relationship
       //TODO : link the vector Model to the record model
