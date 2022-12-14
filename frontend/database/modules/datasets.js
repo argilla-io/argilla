@@ -572,7 +572,8 @@ const actions = {
       aggregations: dataset.globalResults.aggregations,
     });
 
-    initVectorModel(dataset);
+    const records = dataset.results?.records;
+    initVectorModel(dataset.id, records);
 
     return dataset;
   },
@@ -582,8 +583,10 @@ const actions = {
   },
 
   async search(_, { dataset, query, sort, size }) {
-    initVectorModel(dataset);
-    return await _search({ dataset, query, sort, size });
+    const searchResponse = await _search({ dataset, query, sort, size });
+    const records = searchResponse.results?.records;
+    initVectorModel(dataset.id, records);
+    return searchResponse;
   },
 
   async changeViewMode(_, { dataset, value }) {
@@ -607,7 +610,9 @@ const actions = {
 
   async paginate(_, { dataset, size, page }) {
     await _paginate({ dataset, size, page });
-    initVectorModel(dataset);
+
+    const records = dataset.results?.records;
+    initVectorModel(dataset.id, records);
   },
 
   async resetSearch(_, { dataset, size }) {
@@ -636,16 +641,17 @@ const actions = {
     });
     await _refreshDatasetAggregations({ dataset: paginatedDataset });
     await _fetchAnnotationProgress(paginatedDataset);
-    initVectorModel(dataset);
+
+    const records = dataset.results?.records;
+    initVectorModel(dataset.id, records);
   },
 };
 
-const initVectorModel = (dataset) => {
+const initVectorModel = (datasetId, records) => {
   deleteAllVectorData();
-  const records = dataset.results?.records;
   const isDatasetContainsAnyVectors = isAnyKeyInArrayItem(records, "vectors");
   if (isDatasetContainsAnyVectors) {
-    const datasetJoinedId = dataset.id.join(".");
+    const datasetJoinedId = datasetId.join(".");
     const vectorsData = formatVectorsToInsertInModel(datasetJoinedId, records);
     insertDataInVectorModel(vectorsData);
   }
