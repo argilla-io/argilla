@@ -61,7 +61,7 @@ Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?
 ### Pull Request
 
 When you're finished with the changes, create a pull request, also known as a PR.
-- Open a [PR](https://github.com/argilla-io/argilla/compare).
+- [Open a PR in the Argilla repo](https://github.com/argilla-io/argilla/compare).
 - Fill the PR template so that we can review your PR. This template helps reviewers understand your changes as well as the purpose of your pull request.
 - Don't forget to link PR to issue within the template next to the "Closes #" in the template.
 - Enable the checkbox to allow maintainer edits so the branch can be updated for a merge.
