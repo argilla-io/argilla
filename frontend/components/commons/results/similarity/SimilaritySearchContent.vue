@@ -20,6 +20,7 @@ export default {
     },
     selectedVector: {
       type: Object,
+      required: true,
     },
   },
   model: {
