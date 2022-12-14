@@ -380,6 +380,13 @@ class GenericElasticEngineBackend(LoggingMixin):
             size=self.__MAX_NUMBER_OF_LISTED_DATASETS__,
         )
 
+    def find_record_by_id(self, dataset_id: str, record_id: str):
+        index = dataset_records_index(dataset_id)
+        return self.client.get_index_document_by_id(
+            index=index,
+            id=record_id,
+        )
+
     def add_dataset_document(
         self,
         id: str,

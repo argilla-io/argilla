@@ -13,12 +13,13 @@
 #  limitations under the License.
 
 import logging
-from typing import Iterable, List, Optional, Type
+from typing import Iterable, List, Optional, Type, Union
 
 from fastapi import Depends
 
 from argilla.server.daos.models.records import DaoRecordsSearch
 from argilla.server.daos.records import DatasetRecordsDAO
+from argilla.server.errors import RecordNotFound
 from argilla.server.services.datasets import ServiceDataset
 from argilla.server.services.metrics import MetricsService
 from argilla.server.services.metrics.models import ServiceMetric
@@ -103,6 +104,22 @@ class SearchRecordsService:
             records=[record_type.parse_obj(r) for r in results.records],
             metrics=metrics_results if metrics_results else {},
         )
+
+    async def find_record_by_id(
+        self,
+        dataset: ServiceDataset,
+        id: Union[str, int],
+        record_type: Type[ServiceRecord],
+    ) -> ServiceRecord:
+        found = await self.__dao__.get_record_by_id(dataset, id)
+        if not found:
+            raise RecordNotFound(
+                dataset=dataset.id,
+                id=id,
+                type="Record",
+            )
+
+        return record_type.parse_obj(found)
 
     def scan_records(
         self,
