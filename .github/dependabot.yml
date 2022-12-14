@@ -9,7 +9,7 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
-  - package-ecosystem: "frontend" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/frontend" # Location of package manifests
     schedule:
       interval: "weekly"
