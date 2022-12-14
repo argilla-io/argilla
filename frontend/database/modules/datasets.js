@@ -609,9 +609,9 @@ const actions = {
   },
 
   async paginate(_, { dataset, size, page }) {
-    await _paginate({ dataset, size, page });
+    const datasetPaginate = await _paginate({ dataset, size, page });
 
-    const records = dataset.results?.records;
+    const records = datasetPaginate.results?.records;
     initVectorModel(dataset.id, records);
   },
 
@@ -642,7 +642,7 @@ const actions = {
     await _refreshDatasetAggregations({ dataset: paginatedDataset });
     await _fetchAnnotationProgress(paginatedDataset);
 
-    const records = dataset.results?.records;
+    const records = paginatedDataset.results?.records;
     initVectorModel(dataset.id, records);
   },
 };
