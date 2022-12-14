@@ -17,7 +17,7 @@
 
 <template>
   <div class="header__filters">
-    <filters-area :dataset="dataset" />
+    <filters-area :dataset="dataset" @search-records="searchRecords" />
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"
@@ -75,6 +75,9 @@ export default {
           };
         }),
       });
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

@@ -20,6 +20,7 @@
     <filters-area
       v-if="!dataset.viewSettings.visibleRulesList"
       :dataset="dataset"
+      @search-records="searchRecords"
     >
       <dataset-options :dataset="dataset" />
     </filters-area>
@@ -134,6 +135,9 @@ export default {
         dataset: this.dataset,
         labels: [...new Set([...this.dataset.labels, newLabel])],
       });
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

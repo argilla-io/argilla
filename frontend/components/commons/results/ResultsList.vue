@@ -47,10 +47,11 @@
               :data-index="index"
             >
               <results-record
-                @show-metadata="onShowMetadata"
                 :key="`${dataset.name}-${item.id}`"
                 :dataset="dataset"
                 :item="item"
+                @search-records="searchRecords"
+                @show-metadata="onShowMetadata"
               >
                 <slot name="record" :record="item" />
               </results-record>
@@ -150,6 +151,9 @@ export default {
         page: page,
         size: size,
       });
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

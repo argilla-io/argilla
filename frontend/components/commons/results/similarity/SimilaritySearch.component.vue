@@ -65,8 +65,16 @@ export default {
     },
     findSimilar() {
       if (this.selectedVector) {
-        this.$emit("find-similar", this.selectedVector);
-        console.log("find-similar", this.selectedVector);
+        const query = {
+          vector: {
+            name: this.selectedVector.name,
+            value: this.selectedVector.value,
+          },
+        };
+        this.$emit("search-records", {
+          query,
+          size: 50,
+        });
       }
       this.onVisibility(false);
     },

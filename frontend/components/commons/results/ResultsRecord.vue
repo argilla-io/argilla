@@ -19,6 +19,9 @@
   <div>
     <div
       :class="[
+        isRecordReferenceForSimilarity
+          ? 'list__item--similarity-record-reference'
+          : null,
         annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
         item.status === 'Discarded' ? 'discarded' : null,
       ]"
@@ -40,6 +43,7 @@
             class="record__similarity-search"
             v-if="formattedVectors.length"
             :vectors="formattedVectors"
+            @search-records="searchRecords"
           />
         </template>
         <record-extra-actions
@@ -87,6 +91,10 @@ export default {
         })) || []
       );
     },
+    isRecordReferenceForSimilarity() {
+      // TODO compare record reference id and current id
+      return false;
+    },
   },
   methods: {
     ...mapActions({
@@ -123,6 +131,9 @@ export default {
     },
     onShowMetadata(record) {
       this.$emit("show-metadata", record);
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };
@@ -172,6 +183,10 @@ export default {
           transition: 0.3s ease-in-out;
         }
       }
+    }
+    &--similarity-record-reference {
+      border: 1px solid $record-reference-border-color;
+      background: $record-reference-background-color;
     }
   }
 }

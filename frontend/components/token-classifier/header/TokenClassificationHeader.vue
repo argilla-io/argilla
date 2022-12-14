@@ -17,7 +17,7 @@
 
 <template>
   <div class="header__filters">
-    <filters-area :dataset="dataset" />
+    <filters-area :dataset="dataset" @search-records="searchRecords" />
     <entities-header :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
@@ -79,6 +79,9 @@ export default {
           ...new Set([...this.dataset.entities.map((ent) => ent.text), label]),
         ],
       });
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

@@ -31,7 +31,12 @@
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
     <slot />
-    <component v-if="dataset" :is="currentTaskHeader" :dataset="dataset" />
+    <component
+      v-if="dataset"
+      :is="currentTaskHeader"
+      :dataset="dataset"
+      @search-records="searchRecords"
+    />
   </section>
 </template>
 
@@ -103,6 +108,9 @@ export default {
           headerHeight: this.headerHeight,
         },
       });
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

@@ -21,6 +21,7 @@
     :dataset="dataset"
     :metadata-item="selectedMetadataItem"
     @closeMetadata="resetMetadataItem"
+    @search-records="searchRecords"
   >
     <template slot="results-header">
       <rule-definition :dataset="dataset" v-if="showRulesArea" />
@@ -57,6 +58,9 @@ export default {
     },
     resetMetadataItem() {
       this.selectedMetadataItem = undefined;
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

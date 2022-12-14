@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
 export default {
   props: {
     dataset: {
@@ -68,9 +67,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions({
-      search: "entities/datasets/search",
-    }),
     onTextQuerySearch(text) {
       if (text === "") {
         text = undefined;
@@ -81,29 +77,27 @@ export default {
       if (Array.isArray(values) && !values.length) {
         values = undefined;
       }
-      this.search({ dataset: this.dataset, query: { [filter]: values } });
+      this.$emit("search-records", { query: { [filter]: values } });
     },
     onApplyMetaFilter({ filter, values }) {
-      this.search({
-        dataset: this.dataset,
+      this.$emit("search-records", {
         query: { metadata: { [filter]: values } },
       });
     },
     async onRemoveAllMetadataFilters(filters) {
       let query = {};
       filters.forEach((f) => (query[f.key] = []));
-      await this.search({ dataset: this.dataset, query: { metadata: query } });
+      this.$emit("search-records", { query: { metadata: query } });
     },
     async onRemoveFiltersByGroup(filters) {
       let query = {};
       filters.forEach(
         (f) => (query[f.key] = f.key === "score" ? undefined : [])
       );
-      await this.search({ dataset: this.dataset, query: query });
+      this.$emit("search-records", { query });
     },
     async onApplySortBy(sortList) {
-      await this.search({
-        dataset: this.dataset,
+      this.$emit("search-records", {
         query: this.dataset.query,
         sort: sortList,
       });

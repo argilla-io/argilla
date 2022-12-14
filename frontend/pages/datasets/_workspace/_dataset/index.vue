@@ -25,7 +25,11 @@
     ]"
     v-else
   >
-    <app-header :dataset="dataset" :breadcrumbs="breadcrumbs">
+    <app-header
+      :dataset="dataset"
+      :breadcrumbs="breadcrumbs"
+      @search-records="searchRecords"
+    >
       <task-sidebar v-if="dataset" :dataset="dataset" />
     </app-header>
     <error
@@ -34,7 +38,7 @@
       :where="datasetName"
       :error="$fetchState.error"
     ></error>
-    <task-search v-else :dataset="dataset" />
+    <task-search v-else :dataset="dataset" @search-records="searchRecords" />
   </div>
 </template>
 
@@ -88,7 +92,11 @@ export default {
   methods: {
     ...mapActions({
       fetchByName: "entities/datasets/fetchByName",
+      search: "entities/datasets/search",
     }),
+    async searchRecords(query) {
+      await this.search({ dataset: this.dataset, ...query });
+    },
   },
 };
 </script>
