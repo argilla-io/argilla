@@ -163,8 +163,19 @@ class EntityNotFoundError(ServerError):
     HTTP_STATUS = status.HTTP_404_NOT_FOUND
 
     def __init__(self, name: str, type: Union[Type, str]):
-        self.name = name
+        self.name = name  # TODO: rename to id
         self.type = type if isinstance(type, str) else type.__name__
+
+
+class RecordNotFound(EntityNotFoundError):
+    def __init__(self, dataset: str, id: str, type: Union[Type, str]):
+        self.dataset = dataset
+        self.id = id
+
+        super().__init__(
+            name=f"{self.dataset}.{self.id}",
+            type=type,
+        )
 
 
 class ClosedDatasetError(BadRequestError):

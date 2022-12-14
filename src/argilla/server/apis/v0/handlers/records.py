@@ -19,11 +19,17 @@ from pydantic import BaseModel
 
 from argilla.client.sdk.token_classification.models import TokenClassificationQuery
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
-from argilla.server.apis.v0.models.text2text import Text2TextQuery
-from argilla.server.apis.v0.models.text_classification import TextClassificationQuery
+from argilla.server.apis.v0.models.text2text import Text2TextQuery, Text2TextRecord
+from argilla.server.apis.v0.models.text_classification import (
+    TextClassificationQuery,
+    TextClassificationRecord,
+)
+from argilla.server.apis.v0.models.token_classification import TokenClassificationRecord
+from argilla.server.commons.config import TasksFactory
 from argilla.server.security import auth
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
+from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
 
 
@@ -33,6 +39,35 @@ def configure_router(router: APIRouter):
     class DeleteRecordsResponse(BaseModel):
         matched: int
         processed: int
+
+    RecordType = Union[
+        TextClassificationRecord,
+        TokenClassificationRecord,
+        Text2TextRecord,
+    ]
+
+    @router.get("/{name}/records/{id}", response_model=RecordType)
+    async def get_dataset_record(
+        name: str,
+        id: str,
+        request_deps: CommonTaskHandlerDependencies = Depends(),
+        service: DatasetsService = Depends(DatasetsService.get_instance),
+        search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
+        current_user: User = Security(auth.get_user, scopes=[]),
+    ) -> RecordType:
+        found = service.find_by_name(
+            user=current_user,
+            name=name,
+            workspace=request_deps.workspace,
+        )
+
+        record_class = TasksFactory.get_task_record(found.task)
+
+        return await search.find_record_by_id(
+            dataset=found,
+            id=id,
+            record_type=record_class,
+        )
 
     @router.delete(
         "/{name}/data",

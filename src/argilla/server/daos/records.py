@@ -228,6 +228,19 @@ class DatasetRecordsDAO:
         **content,
     ) -> Tuple[int, int]:
         total, updated = await self._es.update_records_content(
-            id=dataset.id, content=content, query=query
+            id=dataset.id,
+            content=content,
+            query=query,
         )
         return total, updated
+
+    async def get_record_by_id(
+        self,
+        dataset: DatasetDB,
+        id: str,
+    ) -> Optional[Dict[str, Any]]:
+
+        return self._es.find_record_by_id(
+            dataset_id=dataset.id,
+            record_id=id,
+        )
