@@ -38,6 +38,8 @@ jobs:
             python_code:
               - 'src/**'
               - 'tests/**'
+              - 'pyproject.toml'
+              - 'setup.py'
 
       - name: Setup ElasticSearch 🔎
         if: steps.filter.outputs.python_code == 'true'
