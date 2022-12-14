@@ -19,6 +19,7 @@ import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
+import { Vector as VectorModel } from "@/models/Vector";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -571,6 +572,9 @@ const actions = {
       aggregations: dataset.globalResults.aggregations,
     });
 
+    const records = dataset.results?.records;
+    initVectorModel(dataset.id, records);
+
     return dataset;
   },
 
@@ -579,7 +583,10 @@ const actions = {
   },
 
   async search(_, { dataset, query, sort, size }) {
-    return await _search({ dataset, query, sort, size });
+    const searchResponse = await _search({ dataset, query, sort, size });
+    const records = searchResponse.results?.records;
+    initVectorModel(dataset.id, records);
+    return searchResponse;
   },
 
   async changeViewMode(_, { dataset, value }) {
@@ -602,7 +609,10 @@ const actions = {
   },
 
   async paginate(_, { dataset, size, page }) {
-    await _paginate({ dataset, size, page });
+    const datasetPaginate = await _paginate({ dataset, size, page });
+
+    const records = datasetPaginate.results?.records;
+    initVectorModel(dataset.id, records);
   },
 
   async resetSearch(_, { dataset, size }) {
@@ -631,7 +641,57 @@ const actions = {
     });
     await _refreshDatasetAggregations({ dataset: paginatedDataset });
     await _fetchAnnotationProgress(paginatedDataset);
+
+    const records = paginatedDataset.results?.records;
+    initVectorModel(dataset.id, records);
   },
+};
+
+const initVectorModel = (datasetId, records) => {
+  deleteAllVectorData();
+  const isDatasetContainsAnyVectors = isAnyKeyInArrayItem(records, "vectors");
+  if (isDatasetContainsAnyVectors) {
+    const datasetJoinedId = datasetId.join(".");
+    const vectorsData = formatVectorsToInsertInModel(datasetJoinedId, records);
+    insertDataInVectorModel(vectorsData);
+  }
+};
+
+const formatVectorsToInsertInModel = (datasetId, records) => {
+  const vectorsData = [];
+  records.forEach(({ id: recordId, vectors }) => {
+    const vectorsByRecord = getVectorsByRecord(datasetId, recordId, vectors);
+    vectorsData.push(...vectorsByRecord);
+  });
+  return vectorsData;
+};
+
+const getVectorsByRecord = (datasetId, recordId, vectors) => {
+  const vectorsByToInsertInModel = [];
+  Object.entries(vectors).forEach(([vectorName, { value: vectorValues }]) => {
+    vectorsByToInsertInModel.push({
+      dataset_id: datasetId,
+      record_id: recordId,
+      vector_name: vectorName,
+      vector_values: vectorValues,
+    });
+  });
+  return vectorsByToInsertInModel;
+};
+
+const insertDataInVectorModel = (vectors) => {
+  VectorModel.insert({
+    data: vectors,
+  });
+};
+
+const deleteAllVectorData = () => {
+  VectorModel.deleteAll();
+};
+
+const isAnyKeyInArrayItem = (arrayWithObjItem, key) => {
+  const isKeyInItem = (item) => item[key] && Object.keys(item[key]).length;
+  return arrayWithObjItem.some(isKeyInItem);
 };
 
 export default {

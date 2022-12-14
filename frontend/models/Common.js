@@ -23,7 +23,7 @@ class BaseRecord {
   status;
   selected;
   event_timestamp;
-  vectors;
+  vectors = null;
   constructor({
     id,
     metadata,
