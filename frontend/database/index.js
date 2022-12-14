@@ -25,7 +25,7 @@ import { ObservationDataset } from "@/models/Dataset";
 import { Text2TextDataset } from "@/models/Text2Text";
 import { TextClassificationDataset } from "@/models/TextClassification";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
-import { Vector } from "@/models//Vector";
+import { Vector } from "@/models/Vector";
 
 import info from "@/database/modules/info";
 import datasets from "@/database/modules/datasets";
