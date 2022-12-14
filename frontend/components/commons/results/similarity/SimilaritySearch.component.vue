@@ -7,25 +7,14 @@
         >
       </span>
       <span slot="dropdown-content">
-        <div class="similarity-search__options">
-          <p class="similarity-search__title">Select vector:</p>
-          <base-radio-button
-            v-for="vector in vectors"
-            :key="vector.id"
-            v-model="selectedVector"
-            :id="vector.id"
-            :value="vector"
-            >{{ vector.name }}</base-radio-button
-          >
-        </div>
-        <div class="similarity-search__buttons">
-          <base-button class="primary outline small" @click="cancel">
-            Cancel
-          </base-button>
-          <base-button class="primary small" @click="findSimilar">
-            Find
-          </base-button>
-        </div>
+        <similarity-search-content
+          :vectors="vectors"
+          v-model="selectedVector"
+        />
+        <similarity-search-footer
+          @cancel="cancel"
+          @find-similar="findSimilar"
+        />
       </span>
     </base-dropdown>
   </div>
@@ -82,9 +71,7 @@ export default {
       this.onVisibility(false);
     },
     cancel() {
-      if (this.selectedVector === this.defaultVector) {
-        this.applyFirstVectorByDefault();
-      }
+      this.applyFirstVectorByDefault();
       this.onVisibility(false);
     },
   },
