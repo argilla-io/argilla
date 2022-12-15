@@ -17,7 +17,7 @@
         width="28"
         height="28"
         name="similarity"
-      ></svgicon>
+      />
     </div>
     <div v-else class="filter__similarity__content">
       <div

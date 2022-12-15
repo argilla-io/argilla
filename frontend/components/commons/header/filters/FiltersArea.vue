@@ -35,6 +35,7 @@
           ></filters-list>
           <filter-similarity
             v-if="annotationEnabled"
+            :filterIsActive="enableSimilaritySearch"
             @search-records="searchRecords"
           />
         </div>
@@ -50,6 +51,10 @@ export default {
     dataset: {
       type: Object,
       default: () => ({}),
+    },
+    enableSimilaritySearch: {
+      type: Boolean,
+      required: true,
     },
   },
   data: () => ({

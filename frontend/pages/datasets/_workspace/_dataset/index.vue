@@ -28,6 +28,7 @@
     <app-header
       :dataset="dataset"
       :breadcrumbs="breadcrumbs"
+      :enableSimilaritySearch="isReferenceRecord"
       @search-records="searchRecords"
     >
       <task-sidebar v-if="dataset" :dataset="dataset" />
@@ -59,6 +60,7 @@ export default {
     return {
       referenceRecord: null,
       numberOfRecords: 50,
+      isReferenceRecord: false,
     };
   },
   computed: {
@@ -114,9 +116,6 @@ export default {
     annotationEnabled() {
       return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
     },
-    isReferenceRecord() {
-      return !!this.referenceRecord?.referenceRecord;
-    },
   },
   mounted() {
     this.referenceRecord = new ReferenceRecord();
@@ -139,8 +138,10 @@ export default {
     },
     formatQueryForSearch(query) {
       let queryCloned = null;
+      this.isReferenceRecord = false;
       if ("vector" in query) {
         queryCloned = this.queryFactoryOnSimilaritySearchActivation(query);
+        this.isReferenceRecord = true;
       } else {
         queryCloned = this.queryFactoryOnFilterActivation(query);
       }

@@ -35,6 +35,7 @@
       v-if="dataset"
       :is="currentTaskHeader"
       :dataset="dataset"
+      :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
     />
   </section>
@@ -62,6 +63,10 @@ export default {
     copyButton: {
       type: Boolean,
       default: true,
+    },
+    enableSimilaritySearch: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
