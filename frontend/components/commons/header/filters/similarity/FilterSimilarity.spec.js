@@ -32,7 +32,7 @@ describe("FilterSimilarityComponent", () => {
   });
   it("expect to emit 'search-records'", async () => {
     await wrapper.setProps({ filterIsActive: true });
-    const query = { query: { vector: undefined } };
+    const query = { query: { vector: null } };
     const removeButton = wrapper.find(".filter__similarity__button");
     removeButton.trigger("click");
     wrapper.vm.$nextTick();
