@@ -8,7 +8,7 @@ In this guide, you will get an overview of the contribution workflow from openin
 
 ## New contributor guide
 
-To get an overview of the project, read our [README](https://github.com/argilla-io/argilla/blob/develop/README.md). Here are some resources to help you get started with open source contributions:
+To get an overview of the project, read the [README](https://github.com/argilla-io/argilla/blob/develop/README.md). Here are some resources to help you get started with open-source contributions:
 
 - [Finding good first issue](https://github.com/argilla-io/argilla/labels/good%20first%20issue)
 - [Find and review pull requests](https://github.com/argilla-io/argilla/pulls)
