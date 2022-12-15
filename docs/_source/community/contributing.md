@@ -23,7 +23,7 @@ To navigate the codebase with confidence, see [our Python client code](https://d
 We accept three kinds of contributions.
 - [documentation](#features-and-documentation): better explanations, writing style, and help using Argilla's features. Best to get started.
 - [issues](#issues): bug reports that directly fix something that is broken. Generally smaller in nature.
-- [features](#features-and-documentation): new functionalities. Generally larger in nature.
+- [features](#features-and-documentation): new functionalities and enhancements of existing features. Generally larger in nature.
 
 ### Issues
 
