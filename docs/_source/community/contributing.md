@@ -37,7 +37,15 @@ Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?
 
 ### Features and documentation
 
-We are always looking for [new tutorials](https://github.com/argilla-io/argilla/issues/2030)!
+#### Contribution to the docs
+You can contribute to the docs by
+- Writing a tutorial about a specific topic. We are always looking for [new tutorials](https://github.com/argilla-io/argilla/issues/2030) and we would love to support you!
+- Including missing parts, examples, improving the writing, fixing typos, etc.
+
+For contributing to the docs, here are two references:
+1. How to locally build the docs
+2. A template for tutorials
+
 
 #### Create a new feature
 
