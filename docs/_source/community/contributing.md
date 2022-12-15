@@ -43,8 +43,8 @@ You can contribute to the docs by
 - Including missing parts, examples, improving the writing, fixing typos, etc.
 
 For contributing to the docs, here are two references:
-1. How to locally build the docs
-2. A template for tutorials
+1. [How to locally build the docs](./developer_docs.rst)
+2. [A template for tutorials](https://github.com/argilla-io/argilla/blob/develop/docs/_source/tutorials/notebooks/template.ipynb)
 
 
 #### Create a new feature
