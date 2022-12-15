@@ -4,7 +4,7 @@ Thank you for investing your time in contributing to the project! Any contributi
 
 Read our [Code of Conduct](https://github.com/argilla-io/argilla/blob/develop/CODE_OF_CONDUCT.md) to keep our community approachable and respectable.
 
-In this guide you will get an overview of the contribution workflow from opening an issue, creating a PR, reviewing, and merging the PR.
+In this guide, you will get an overview of the contribution workflow from opening an issue, creating a PR, reviewing, and merging the PR.
 
 ## New contributor guide
 
