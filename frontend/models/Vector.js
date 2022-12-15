@@ -18,4 +18,10 @@ class Vector extends Model {
   }
 }
 
-export { Vector };
+const getVectorModelPrimaryKey = ({ vector_name, dataset_id, record_id }) => [
+  vector_name,
+  dataset_id,
+  record_id,
+];
+
+export { Vector, getVectorModelPrimaryKey };
