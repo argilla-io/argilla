@@ -2,7 +2,7 @@
 
 Thank you for investing your time in contributing to the project! Any contribution you make will be reflected in the most recent version of [Argilla](https://github.com/argilla-io/argilla) 🤩.
 
-Read our [Code of Conduct](https://github.com/argilla-io/argilla/blob/develop/CODE_OF_CONDUCT.md) to keep our community approachable and respectable.
+Read the [Code of Conduct](https://github.com/argilla-io/argilla/blob/develop/CODE_OF_CONDUCT.md) to keep the community approachable and respectable.
 
 In this guide, you will get an overview of the contribution workflow from opening an issue, creating a PR, reviewing, and merging the PR.
 
