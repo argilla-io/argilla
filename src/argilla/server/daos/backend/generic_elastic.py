@@ -91,7 +91,6 @@ class GenericElasticEngineBackend(LoggingMixin):
                     index_shards=settings.es_records_index_shards,
                     ssl_verify=settings.elasticsearch_ssl_verify,
                     ca_path=settings.elasticsearch_ca_path,
-                    opensearch_enable_knn=settings.opensearch_enable_knn,
                 ),
                 metrics={**ALL_METRICS},
                 mappings={

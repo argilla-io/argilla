@@ -65,9 +65,6 @@ class ApiSettings(BaseSettings):
     elasticsearch_ca_path: Optional[str] = None
     cors_origins: List[str] = ["*"]
 
-    # TODO: Document this variable
-    opensearch_enable_knn: bool = False
-
     docs_enabled: bool = True
 
     namespace: str = Field(default=None, regex=r"^[a-z]+$")

@@ -329,7 +329,7 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
         words = self.all_text()
         return {
             **super().extended_fields(),
-            "words": words,
+            # "words": words,
             "text": words,
         }
 

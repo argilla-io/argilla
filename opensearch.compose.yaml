@@ -17,11 +17,14 @@ services:
         soft: -1
         hard: -1
     ports:
-      - 9200:9200
+      - "9200:9200"
     networks:
       - argilla
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+
 networks:
   argilla:
     driver: bridge
 volumes:
-  opensearchdata:
+  opensearch-data:
