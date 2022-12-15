@@ -18,7 +18,7 @@ To get an overview of the project, read the [README](https://github.com/argilla-
 
 ## Getting started
 
-To navigate our codebase with confidence, see [our Python client code](https://docs.argilla.io/en/latest/reference/python/index.html) 🐍. For more information on how to use our UI, see [our web app reference](https://docs.argilla.io/en/latest/reference/webapp/index.html) 💻.
+To navigate the codebase with confidence, see [our Python client code](https://docs.argilla.io/en/latest/reference/python/index.html) 🐍. For more information on how to use our UI, see [our web app reference](https://docs.argilla.io/en/latest/reference/webapp/index.html) 💻.
 
 We accept three kinds of contributions.
 - [documentation](#features-and-documentation): better textual support for features. Best to get started.
