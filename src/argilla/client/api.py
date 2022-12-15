@@ -494,7 +494,8 @@ class Api:
             A argilla dataset.
 
         Examples:
-            **Basic Loading**: load the samples sorted by their ID
+            **Basic Loading: load the samples sorted by their ID**
+
             >>> import argilla as rg
             >>> dataset = rg.load(name="example-dataset")
 
