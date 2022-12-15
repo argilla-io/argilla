@@ -114,6 +114,9 @@ export default {
     annotationEnabled() {
       return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
     },
+    isReferenceRecord() {
+      return !!this.referenceRecord?.referenceRecord;
+    },
   },
   mounted() {
     this.referenceRecord = new ReferenceRecord();
@@ -162,7 +165,7 @@ export default {
     },
     queryFactoryOnFilterActivation(query) {
       let queryForSimilaritySearch = {};
-      if (this.referenceRecord.referenceRecord) {
+      if (this.isReferenceRecord) {
         const refVector = this.referenceRecord.referenceVector;
         const { vector_name: refVectorName, vector_values: refVectorValues } =
           refVector;
