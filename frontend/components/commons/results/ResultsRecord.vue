@@ -42,7 +42,7 @@
           <similarity-search-component
             class="record__similarity-search"
             v-if="formattedVectors.length"
-            :vectors="formattedVectors"
+            :formattedVectors="formattedVectors"
             @search-records="searchRecords"
           />
         </template>
@@ -62,6 +62,10 @@
 </template>
 <script>
 import { mapActions } from "vuex";
+import {
+  Vector as VectorModel,
+  getVectorModelPrimaryKey,
+} from "@/models/Vector";
 
 export default {
   props: {
@@ -81,15 +85,23 @@ export default {
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
+    vectors() {
+      return VectorModel.query().where("record_id", this.item.id).get() || [];
+    },
     formattedVectors() {
-      // TODO get vectors correctly
-      return (
-        Object.keys(this.item.vectors)?.map((vector) => ({
-          id: vector,
-          name: vector,
-          value: this.item.vectors[vector].value,
-        })) || []
+      const formattedVectors = this.vectors.map(
+        ({ vector_name, dataset_id, record_id }) => {
+          return {
+            vectorId: getVectorModelPrimaryKey({
+              vector_name,
+              dataset_id,
+              record_id,
+            }),
+            vectorName: vector_name,
+          };
+        }
       );
+      return formattedVectors;
     },
     isRecordReferenceForSimilarity() {
       // TODO compare record reference id and current id
@@ -132,8 +144,12 @@ export default {
     onShowMetadata(record) {
       this.$emit("show-metadata", record);
     },
-    searchRecords(query) {
-      this.$emit("search-records", query);
+    searchRecords(vectorName) {
+      const formattedObj = this.formatSelectedVectorObj(vectorName);
+      this.$emit("search-records", formattedObj);
+    },
+    formatSelectedVectorObj(vector) {
+      return { recordId: this.item.id, vector };
     },
   },
 };

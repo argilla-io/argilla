@@ -2,19 +2,20 @@
   <div class="similarity-search__options">
     <p class="similarity-search__title">Select vector:</p>
     <base-radio-button
-      v-for="vector in vectors"
+      v-for="vector in formattedVectors"
       :key="vector.id"
       :id="vector.id"
       :value="vector"
-      v-model="similaritySelectedVector"
-      >{{ vector.name }}</base-radio-button
+      v-model="selectedName"
     >
+      {{ vector.name }}
+    </base-radio-button>
   </div>
 </template>
 <script>
 export default {
   props: {
-    vectors: {
+    formattedVectors: {
       type: Array,
       required: true,
     },
@@ -28,7 +29,7 @@ export default {
     event: "vector-change",
   },
   computed: {
-    similaritySelectedVector: {
+    selectedName: {
       get() {
         return this.selectedVector;
       },
