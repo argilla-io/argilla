@@ -152,7 +152,7 @@ export default {
   display: flex;
   &--left {
     width: 100%;
-    padding: 50px 20px 50px 50px;
+    padding: 20px 20px 50px 50px;
     .list__item--annotation-mode & {
       padding-right: 240px;
     }
@@ -165,7 +165,7 @@ export default {
     height: 100%;
     overflow: auto;
     text-align: right;
-    padding: 4em 1.4em 1em 1em;
+    padding: 1em 1.4em 1em 1em;
     @extend %hide-scrollbar;
   }
 }
