@@ -78,7 +78,7 @@ export default {
       if (text === "") {
         text = undefined;
       }
-      this.search({ dataset: this.dataset, query: { text } });
+      this.$emit("search-records", { query: { text } });
     },
     onApplyFilter({ filter, values }) {
       if (Array.isArray(values) && !values.length) {
