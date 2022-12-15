@@ -33,6 +33,10 @@
             @removeAllMetadataFilters="onRemoveAllMetadataFilters"
             @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></filters-list>
+          <filter-similarity
+            v-if="annotationEnabled"
+            @search-records="searchRecords"
+          />
         </div>
         <slot />
       </div>
@@ -64,6 +68,9 @@ export default {
   computed: {
     viewMode() {
       return this.dataset.viewSettings.viewMode;
+    },
+    annotationEnabled() {
+      return this.viewMode === "annotate";
     },
   },
   methods: {
@@ -101,6 +108,9 @@ export default {
         query: this.dataset.query,
         sort: sortList,
       });
+    },
+    searchRecords(query) {
+      this.$emit("search-records", { query });
     },
   },
 };
