@@ -137,26 +137,43 @@ export default {
     formatQueryForSearch(query) {
       let queryCloned = null;
       if ("vector" in query) {
-        const { vectorId, vectorName } = query.vector;
-        const vector = this.getVector(vectorId);
-        const { vector_values: vectorValues } = vector;
-
-        const queryForSimilaritySearch =
-          this.getQueryFactoryForSimilaritySearch(vectorName, vectorValues);
-
-        this.updateReferenceRecordInstance(query.recordId, vector);
-
-        queryCloned = {
-          query: queryForSimilaritySearch,
-          size: this.numberOfRecords,
-        };
+        queryCloned = this.queryFactoryOnSimilaritySearchActivation(query);
       } else {
-        queryCloned = structuredClone(query);
+        queryCloned = this.queryFactoryOnFilterActivation(query);
       }
       return queryCloned;
     },
-    getVector(vectorId) {
-      return VectorModel.query().whereId(vectorId).first();
+    queryFactoryOnSimilaritySearchActivation(query) {
+      const { vectorId, vectorName } = query.vector;
+      const vector = this.getVector(vectorId);
+      const { vector_values: vectorValues } = vector;
+      this.updateReferenceRecordInstance(query.recordId, vector);
+
+      const queryForSimilaritySearch = this.createQueryWithSimilaritySearch(
+        vectorName,
+        vectorValues
+      );
+
+      const queryForSearch = {
+        ...queryForSimilaritySearch,
+        size: this.numberOfRecords,
+      };
+      return queryForSearch;
+    },
+    queryFactoryOnFilterActivation(query) {
+      let queryForSimilaritySearch = {};
+      if (this.referenceRecord.referenceRecord) {
+        const refVector = this.referenceRecord.referenceVector;
+        const { vector_name: refVectorName, vector_values: refVectorValues } =
+          refVector;
+        queryForSimilaritySearch = this.createQueryWithSimilaritySearch(
+          refVectorName,
+          refVectorValues
+        );
+      }
+
+      const newQuery = { ...query.query, ...queryForSimilaritySearch.query };
+      return { query: newQuery, size: this.numberOfRecords };
     },
     updateReferenceRecordInstance(recordId, vector) {
       this.updateReferenceRecord(recordId);
@@ -169,6 +186,17 @@ export default {
     updateReferenceVector(vector) {
       this.referenceRecord.setReferenceVector = vector;
     },
+    createQueryWithSimilaritySearch(vectorName, vectorValues) {
+      const queryForSimilaritySearch = this.getQueryFactoryForSimilaritySearch(
+        vectorName,
+        vectorValues
+      );
+
+      const formattedQuery = {
+        query: queryForSimilaritySearch,
+      };
+      return formattedQuery;
+    },
     getQueryFactoryForSimilaritySearch(vectorName, vectorValues) {
       const queryForSimilaritySearch = {
         vector: {
@@ -177,6 +205,9 @@ export default {
         },
       };
       return queryForSimilaritySearch;
+    },
+    getVector(vectorId) {
+      return VectorModel.query().whereId(vectorId).first();
     },
   },
 };
