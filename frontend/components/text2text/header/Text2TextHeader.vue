@@ -17,7 +17,11 @@
 
 <template>
   <div class="header__filters">
-    <filters-area :dataset="dataset" :enableSimilaritySearch="enableSimilaritySearch" @search-records="searchRecords" />
+    <filters-area
+      :dataset="dataset"
+      :enableSimilaritySearch="enableSimilaritySearch"
+      @search-records="searchRecords"
+    />
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"
