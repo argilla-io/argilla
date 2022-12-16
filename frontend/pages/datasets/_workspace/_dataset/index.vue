@@ -146,7 +146,8 @@ export default {
       }
 
       queryCloned = this.initQueryWhenUserActivateRemoveSimilaritySearch(query);
-      return { query: queryCloned };
+
+      return queryCloned;
     },
     initQueryWhenUserClickOnFilter(query) {
       const vectorName = this.referenceRecord?.referenceVector?.vector_name;
