@@ -4,7 +4,7 @@ import SimilaritySearch from "./SimilaritySearch.component";
 let wrapper = null;
 const options = {
   propsData: {
-    vectors: [
+    formattedVectors: [
       {
         id: "text_vector",
         name: "text_vector",
@@ -28,11 +28,11 @@ describe("SimilaritySearchComponent", () => {
     expect(wrapper.is(SimilaritySearch)).toBe(true);
   });
   it("expect to exist vectors", async () => {
-    expect(wrapper.props().vectors).toBeTruthy();
+    expect(wrapper.props().formattedVectors).toBeTruthy();
   });
   it("expect visible dropdown if multiple vectors and hidden direct button", async () => {
     await wrapper.setProps({
-      vectors: [
+      formattedVectors: [
         {
           id: "text_vector",
           name: "text_vector",
