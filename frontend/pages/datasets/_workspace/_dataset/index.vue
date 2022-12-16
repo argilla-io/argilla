@@ -50,6 +50,7 @@ import { currentWorkspace } from "@/models/Workspace";
 import { getDatasetModelPrimaryKey } from "../../../../models/Dataset";
 import { Vector as VectorModel } from "@/models/Vector";
 import { ReferenceRecord } from "./ReferenceRecord.class";
+import { Base64 } from "js-base64";
 
 export default {
   layout: "app",
@@ -139,13 +140,41 @@ export default {
     formatQueryForSearch(query) {
       let queryCloned = null;
       this.isReferenceRecord = false;
-      if ("vector" in query) {
-        queryCloned = this.queryFactoryOnSimilaritySearchActivation(query);
-        this.isReferenceRecord = true;
-      } else {
-        queryCloned = this.queryFactoryOnFilterActivation(query);
+      const isClickOnFilter = !("vector" in query);
+      if (isClickOnFilter) {
+        return this.initQueryWhenUserClickOnFilter(query);
       }
-      return queryCloned;
+
+      queryCloned = this.initQueryWhenUserActivateRemoveSimilaritySearch(query);
+      return { query: queryCloned };
+    },
+    initQueryWhenUserClickOnFilter(query) {
+      const vectorName = this.referenceRecord?.referenceVector?.vector_name;
+
+      let queryForSimilaritySearch = null;
+      if (!_.isNil(vectorName)) {
+        this.isReferenceRecord = true;
+        const vectorValues =
+          this.referenceRecord?.referenceVector?.vector_values;
+
+        queryForSimilaritySearch = this.createQueryWithSimilaritySearch(
+          vectorName,
+          vectorValues
+        );
+      }
+      const newQuery = {
+        query: { ...queryForSimilaritySearch?.query, ...query.query },
+      };
+
+      return this.queryFactoryOnFilterActivation(newQuery);
+    },
+    initQueryWhenUserActivateRemoveSimilaritySearch(query) {
+      if (!!query.vector) {
+        this.isReferenceRecord = true;
+        return this.queryFactoryOnSimilaritySearchActivation(query);
+      }
+      this.removeReferenceRecordInstance();
+      return this.queryFactoryOnFilterActivation(query);
     },
     queryFactoryOnSimilaritySearchActivation(query) {
       const { vectorId, vectorName } = query.vector;
@@ -182,12 +211,20 @@ export default {
     updateReferenceRecordInstance(recordId, vector) {
       this.updateReferenceRecord(recordId);
       this.updateReferenceVector(vector);
+      this.pushVectorIdInRouteParams(vector);
+    },
+    removeReferenceRecordInstance() {
+      this.updateReferenceRecordInstance();
     },
     updateReferenceRecord(recordId) {
-      const refRecord = this.records.find((record) => record.id === recordId);
-      this.referenceRecord.setReferenceRecord = refRecord;
+      if (recordId) {
+        const refRecord = this.records.find((record) => record.id === recordId);
+        this.referenceRecord.setReferenceRecord = refRecord;
+      } else {
+        this.referenceRecord.setReferenceRecord = null;
+      }
     },
-    updateReferenceVector(vector) {
+    updateReferenceVector(vector = null) {
       this.referenceRecord.setReferenceVector = vector;
     },
     createQueryWithSimilaritySearch(vectorName, vectorValues) {
@@ -209,6 +246,22 @@ export default {
         },
       };
       return queryForSimilaritySearch;
+    },
+    pushVectorIdInRouteParams(vector) {
+      this.$router.push({
+        query: {
+          ...this.$route.query,
+          vectorId: vector
+            ? Base64.encode(
+                JSON.stringify({
+                  vector_name: vector.vector_name,
+                  dataset_id: vector.dataset_id,
+                  record_id: vector.record_id,
+                })
+              )
+            : "",
+        },
+      });
     },
     getVector(vectorId) {
       return VectorModel.query().whereId(vectorId).first();
