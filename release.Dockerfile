@@ -1,5 +1,8 @@
 FROM python:3.7
 
+# Exposing ports
+EXPOSE 6900
+
 # Copying argilla distribution files
 COPY dist/*.whl /packages/
 
