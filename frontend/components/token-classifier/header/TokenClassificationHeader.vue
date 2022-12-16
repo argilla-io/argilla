@@ -17,7 +17,7 @@
 
 <template>
   <div class="header__filters">
-    <filters-area :dataset="dataset" @search-records="searchRecords" />
+    <filters-area :dataset="dataset" :enableSimilaritySearch="enableSimilaritySearch" @search-records="searchRecords" />
     <entities-header :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
@@ -38,6 +38,10 @@ export default {
     dataset: {
       required: true,
       type: Object,
+    },
+    enableSimilaritySearch: {
+      type: Boolean,
+      required: true,
     },
   },
   computed: {
