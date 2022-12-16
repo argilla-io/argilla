@@ -34,6 +34,15 @@
               :size="dataset.viewSettings.pagination.size"
             />
             <results-empty v-else-if="dataset.results.total === 0" />
+            <similarity-record-reference-component
+              v-if="fakeRecordReference && !showLoader"
+              :dataset="dataset"
+              :referenceRecord="fakeRecordReference"
+              @search-records="searchRecords"
+              @show-metadata="onShowMetadata"
+            >
+              <slot name="record" :record="fakeRecordReference" />
+            </similarity-record-reference-component>
           </template>
           <template v-slot="{ item, index, active }">
             <DynamicScrollerItem
@@ -66,6 +75,7 @@
         </DynamicScroller>
       </div>
       <base-pagination
+        v-if="!fakeRecordReference"
         :total-items="dataset.results.total"
         :pagination-settings="dataset.viewSettings.pagination"
         @changePage="onPagination"
@@ -98,14 +108,21 @@ export default {
       type: Object,
       required: true,
     },
+    referenceRecord: {
+      type: Object,
+    },
   },
   data() {
     return {
       scrollComponent: undefined,
       selectedRecord: undefined,
+      test: null,
     };
   },
   computed: {
+    fakeRecordReference() {
+      return this.dataset.results.records[0];
+    },
     showLoader() {
       return this.dataset.viewSettings.loading;
     },

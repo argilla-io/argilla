@@ -21,7 +21,7 @@
   <base-button
     id="find-similar-button"
     class="small similarity-search__button"
-    :disabled="vectorIsApplied"
+    :disabled="isDisabled"
     v-else
     @click="findSimilar"
     >Find similar</base-button
@@ -40,6 +40,10 @@ export default {
       type: Array,
       required: true,
     },
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
+    },
   },
   beforeMount() {
     this.applyFirstVectorByDefault();
@@ -51,9 +55,9 @@ export default {
     defaultVector() {
       return this.formattedVectors[0];
     },
-    vectorIsApplied() {
+    isDisabled() {
       // TODO check if vector is applied in the current query (only for single vector)
-      return false;
+      return (this.isReferenceRecord && !this.multipleVectors) || false;
     },
   },
   methods: {
