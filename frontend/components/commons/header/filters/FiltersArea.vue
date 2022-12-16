@@ -115,7 +115,7 @@ export default {
       });
     },
     searchRecords(query) {
-      this.$emit("search-records", { query });
+      this.$emit("search-records", query);
     },
   },
 };
