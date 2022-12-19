@@ -261,11 +261,6 @@ export default {
       filters: {},
     };
   },
-  mounted() {
-    (this.activeFilters || []).forEach(({ column, values }) => {
-      this.$set(this.filters, column, values);
-    });
-  },
   computed: {
     tableIsEmpty() {
       return this.filteredResults && this.filteredResults.length === 0;
@@ -288,7 +283,7 @@ export default {
         return false;
       };
       const matchFilters = (item) => {
-        if (Object.values(this.filters).length) {
+        if (this.areFiltersApplied) {
           return Object.keys(this.filters).every((key) => {
             if (this.isObject(item[key])) {
               return this.filters[key].find(
@@ -312,8 +307,14 @@ export default {
       return results.sort(itemComparator);
     },
   },
+  areFiltersApplied() {
+    return !!Object.values(this.filters).some(value => value.length);
+  },
   beforeMount() {
     this.sortedBy = this.sortedByField;
+    (this.activeFilters || []).forEach(({ column, values }) => {
+      this.$set(this.filters, column, values);
+    });
   },
   methods: {
     isObject(obj) {
