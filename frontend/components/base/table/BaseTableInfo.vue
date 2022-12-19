@@ -306,9 +306,9 @@ export default {
       const results = this.data.filter(matchSearch).filter(matchFilters);
       return results.sort(itemComparator);
     },
-  },
-  areFiltersApplied() {
-    return !!Object.values(this.filters).some(value => value.length);
+    areFiltersApplied() {
+      return !!Object.values(this.filters).some(value => value.length);
+    },
   },
   beforeMount() {
     this.sortedBy = this.sortedByField;
