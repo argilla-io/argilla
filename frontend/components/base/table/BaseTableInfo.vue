@@ -50,10 +50,7 @@
       <template v-else>
         <div class="table-info__body">
           <ul>
-            <li
-              v-for="item in filteredResults"
-              :key="String(item.id)"
-            >
+            <li v-for="item in filteredResults" :key="String(item.id)">
               <div class="table-info__item">
                 <base-checkbox
                   v-if="globalActions"
@@ -283,7 +280,7 @@ export default {
         return false;
       };
       const matchFilters = (item) => {
-        if (this.areFiltersApplied) {
+        if (this.filters) {
           return Object.keys(this.filters).every((key) => {
             if (this.isObject(item[key])) {
               return this.filters[key].find(
@@ -306,13 +303,13 @@ export default {
       const results = this.data.filter(matchSearch).filter(matchFilters);
       return results.sort(itemComparator);
     },
-    areFiltersApplied() {
-      return !!Object.values(this.filters).some(value => value.length);
-    },
   },
   beforeMount() {
     this.sortedBy = this.sortedByField;
-    (this.activeFilters || []).forEach(({ column, values }) => {
+    const appliedFilters = this.activeFilters.filter(
+      (filter) => filter.values.length
+    );
+    (appliedFilters || []).forEach(({ column, values }) => {
       this.$set(this.filters, column, values);
     });
   },
