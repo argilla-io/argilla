@@ -16,19 +16,15 @@
   -->
 
 <template>
-  <div v-if="modalVisible" class="modal-mask" :class="modalMaskClass">
-    <transition name="fade" appear>
+  <transition v-if="modalVisible" name="fade" appear>
+    <div class="modal-mask" :class="modalMaskClass">
       <div class="modal-wrapper" :class="modalPosition">
         <div
           class="modal-container"
           :class="modalClass"
           v-click-outside="onClickOutside"
         >
-          <p v-if="!modalCustom" class="modal__title">
-            <span
-              class="state"
-              :class="modalClass === 'modal-info' ? 'succeeded' : 'failed'"
-            />
+          <p class="modal__title">
             {{ modalTitle }}
           </p>
           <slot />
