@@ -62,6 +62,10 @@ class Rule:
         """The rule label"""
         return self._label
 
+    @label.setter
+    def label(self, value):
+        self._label = value
+
     @property
     def name(self):
         """The name of the rule."""
@@ -73,6 +77,34 @@ class Rule:
     def author(self):
         """Who authored the rule."""
         return self._author
+
+    def _convert_to_labeling_rule(self):
+        """Converts the rule to a LabelingRule"""
+        if isinstance(self._label, str):
+            labels = [self._label]
+        else:
+            labels = self._label
+
+        return LabelingRule(query=self.query, labels=labels)
+
+    def add_to_dataset(self, dataset: str):
+        """Add to rule to the given dataset"""
+        api.active_api().add_dataset_labeling_rules(
+            dataset, rules=[self._convert_to_labeling_rule()]
+        )
+
+    def remove_from_dataset(self, dataset: str):
+        """Removes the rule from the given dataset"""
+
+        api.active_api().delete_dataset_labeling_rules(
+            dataset, rules=[self._convert_to_labeling_rule()]
+        )
+
+    def update_at_dataset(self, dataset: str):
+        """Updates the rule at the given dataset"""
+        api.active_api().update_dataset_labeling_rules(
+            dataset, rules=[self._convert_to_labeling_rule()]
+        )
 
     def apply(self, dataset: str):
         """Apply the rule to a dataset and save matching ids of the records.
@@ -101,9 +133,7 @@ class Rule:
         """
         metrics = api.active_api().rule_metrics_for_dataset(
             dataset=dataset,
-            rule=LabelingRule(
-                query=self.query, label=self.label, author=self.author or "None"
-            ),
+            rule=LabelingRule(query=self.query, label=self.label),
         )
 
         return {
@@ -141,6 +171,45 @@ class Rule:
             return None
         else:
             return self._label
+
+
+def add_rules(dataset: str, rules: List[Rule]):
+    """Adds the rules to a given dataset
+
+    Args:
+        dataset: Name of the dataset.
+        rules: Rules to add to the dataset
+
+    Returns:
+    """
+    rules = [rule._convert_to_labeling_rule() for rule in rules]
+    return api.active_api().add_dataset_labeling_rules(dataset, rules)
+
+
+def delete_rules(dataset: str, rules: List[Rule]):
+    """Deletes the rules from the given dataset
+
+    Args:
+        dataset: Name of the dataset
+        rules: Rules to delete from the dataset
+
+    Returns:
+    """
+    rules = [rule._convert_to_labeling_rule() for rule in rules]
+    api.active_api().delete_dataset_labeling_rules(dataset, rules)
+
+
+def update_rules(dataset: str, rules: List[Rule]):
+    """Updates the rules of the given dataset
+
+    Args:
+        dataset: Name of the dataset
+        rules: Rules to update at the dataset
+
+    Returns:
+    """
+    rules = [rule._convert_to_labeling_rule() for rule in rules]
+    api.active_api().update_dataset_labeling_rules(dataset, rules)
 
 
 def load_rules(dataset: str) -> List[Rule]:

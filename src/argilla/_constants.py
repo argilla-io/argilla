@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-MAX_KEYWORD_LENGTH = 128
+DEFAULT_MAX_KEYWORD_LENGTH = 128
 
 
 API_KEY_HEADER_NAME = "X-Argilla-Api-Key"

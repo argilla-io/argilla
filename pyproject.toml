@@ -38,7 +38,10 @@ dependencies = [
     "wrapt ~= 1.13.0",
     # weaksupervision
     "numpy",
-    "tqdm >= 4.27.0"
+    "tqdm >= 4.27.0",
+    # monitor background consumers
+    "backoff",
+    "monotonic"
 
 ]
 dynamic = ["version"]
@@ -68,7 +71,7 @@ server = [
     # Info status
     "psutil ~= 5.8.0",
     # Telemetry
-    "segment-analytics-python != 2.2.1"
+    "segment-analytics-python == 2.2.0"
 ]
 listeners = [
     "schedule ~= 1.1.0",

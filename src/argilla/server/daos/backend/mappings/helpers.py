@@ -14,7 +14,6 @@
 
 from typing import Any, Dict, List
 
-from argilla._constants import MAX_KEYWORD_LENGTH
 from argilla.server.settings import settings
 
 EXTENDED_ANALYZER_REF = "extended_analyzer"
@@ -26,12 +25,12 @@ DEFAULT_SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]  # TODO: env var configur
 
 class mappings:
     @staticmethod
-    def keyword_field(enable_text_search: bool = False):
+    def keyword_field(
+        enable_text_search: bool = False,
+    ):
         """Mappings config for keyword field"""
         mapping = {
             "type": "keyword",
-            # TODO: Use environment var and align with fields validators
-            "ignore_above": MAX_KEYWORD_LENGTH,
         }
         if enable_text_search:
             text_field = mappings.text_field()
@@ -41,14 +40,15 @@ class mappings:
 
     @staticmethod
     def path_match_keyword_template(
-        path: str, enable_text_search_in_keywords: bool = False
+        path: str,
+        enable_text_search_in_keywords: bool = False,
     ):
         """Dynamic template mappings config for keyword field based on path match"""
         return {
             "path_match": path,
             "match_mapping_type": "string",
             "mapping": mappings.keyword_field(
-                enable_text_search=enable_text_search_in_keywords
+                enable_text_search=enable_text_search_in_keywords,
             ),
         }
 
@@ -167,7 +167,8 @@ def dynamic_metrics_text():
 def dynamic_metadata_text():
     return {
         "metadata.*": mappings.path_match_keyword_template(
-            path="metadata.*", enable_text_search_in_keywords=True
+            path="metadata.*",
+            enable_text_search_in_keywords=True,
         )
     }
 

@@ -16,10 +16,10 @@ import pytest
 
 import argilla
 import argilla as ar
+from argilla.metrics import entity_consistency
 from argilla.metrics.token_classification import (
     Annotations,
     entity_capitalness,
-    entity_consistency,
     entity_density,
     entity_labels,
     f1,
@@ -28,6 +28,7 @@ from argilla.metrics.token_classification import (
     token_frequency,
     token_length,
     tokens_length,
+    top_k_mentions,
 )
 
 
@@ -215,14 +216,12 @@ def test_entity_capitalness(mocked_client):
     results.visualize()
 
 
-def test_entity_consistency(mocked_client):
-    dataset = "test_entity_consistency"
+def test_top_k_mentions_consistency(mocked_client):
+    dataset = "test_top_k_mentions_consistency"
     argilla.delete(dataset)
     log_some_data(dataset)
 
-    results = entity_consistency(dataset, threshold=2)
-    assert results
-    assert results.data == {
+    mentions = {
         "mentions": [
             {
                 "mention": "first",
@@ -234,29 +233,52 @@ def test_entity_consistency(mocked_client):
             }
         ]
     }
-    results.visualize()
+    filtered_mentions = {
+        "mentions": [
+            {
+                "mention": "first",
+                "entities": [
+                    {"count": 1, "label": "NUMBER"},
+                ],
+            }
+        ]
+    }
+    validate_mentions(
+        dataset=dataset,
+        expected_mentions=mentions,
+    )
 
-    results = entity_consistency(dataset, compute_for=Annotations, threshold=2)
+    validate_mentions(
+        dataset=dataset,
+        compute_for=Annotations,
+        threshold=2,
+        expected_mentions=mentions,
+    )
+
+    validate_mentions(
+        dataset=dataset,
+        post_label_filter={"NUMBER"},
+        expected_mentions=filtered_mentions,
+    )
+
+
+def validate_mentions(
+    *,
+    dataset: str,
+    expected_mentions: dict,
+    **metric_args,
+):
+    results = top_k_mentions(dataset, **metric_args)
     assert results
-    assert results.data == {
-        "mentions": [
-            {
-                "mention": "first",
-                "entities": [
-                    {"count": 2, "label": "CARDINAL"},
-                    {"count": 1, "label": "NUMBER"},
-                    {"count": 1, "label": "PERSON"},
-                ],
-            }
-        ]
-    }
+    assert results.data == expected_mentions
     results.visualize()
 
 
 @pytest.mark.parametrize(
     ("metric", "expected_results"),
     [
-        (entity_consistency, {"mentions": []}),
+        (top_k_mentions, {"mentions": []}),
+        (entity_consistency, {}),
         (mention_length, {}),
         (entity_density, {}),
         (entity_capitalness, {}),

@@ -50,9 +50,12 @@ You can find more information about how to use the search bar in our detailed [s
 ### Filters
 
 
-The _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters.
-You can find more information about how to use the filters in our detailed [filter guide](filter_records.md).
+The _filters_ provide a quick and intuitive way to filter and sort your records with respect to various parameters.
+You can find more information about how to use the filters in our detailed [filter guide](./features.md).
 
+#### Info button
+
+On the right side of the filters, the info button can be used to open a small overlay window. The aim is to provide the user with a shortcut to related information specific to the current view. This button appears when extra help is considered useful. (e.g. model explanation, weak labeling...).
 
 ### Record cards
 
@@ -83,7 +86,7 @@ At the top of the record list you will find a legend that connects the colors to
 When in [Annotate mode](#modes) you can remove annotations or add new ones by simply selecting the desired text.
 
 ```{hint}
-When using the [score filter](filter_records.md#predictions-filter), the predictions that do **not** fall in the selected range will be missing the solid thin line.
+When using the [score filter](./features.md), the predictions that do **not** fall in the selected range will be missing the solid thin line.
 ```
 
 #### TextGeneration
@@ -127,4 +130,4 @@ You can find more information about each metric in our dedicated [metrics guide]
 #### Refresh
 
 This button allows you to refresh the list of the record cards with respect to the activated filters.
-For example, if you are annotating and use the [Status filter](filter_records.md#status-filter) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.
+For example, if you are annotating and use the [Status filter](./features.md) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.

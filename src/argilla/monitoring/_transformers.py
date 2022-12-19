@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pydantic import BaseModel
 
 from argilla import TextClassificationRecord
+from argilla.client.api import Api
 from argilla.monitoring.base import BaseMonitor
 from argilla.monitoring.types import MissingType
 
@@ -138,7 +139,7 @@ class ZeroShotMonitor(HuggingFaceMonitor):
                 if self.is_record_accepted()
             ]
             if filtered_data:
-                self.log_async(filtered_data, multi_label=multi_label)
+                self.send_records(filtered_data, multi_label=multi_label)
 
         finally:
             return batch_predictions
@@ -170,17 +171,33 @@ class TextClassificationMonitor(HuggingFaceMonitor):
                 if self.is_record_accepted()
             ]
             if filtered_data:
-                self.log_async(filtered_data)
+                self.send_records(filtered_data)
 
         finally:
             return batch_predictions
 
 
 def huggingface_monitor(
-    pl: Pipeline, dataset: str, sample_rate: float
+    pl: Pipeline,
+    api: Api,
+    dataset: str,
+    sample_rate: float,
+    log_interval: float,
 ) -> Optional[Pipeline]:
     if isinstance(pl, TextClassificationPipeline):
-        return TextClassificationMonitor(pl, dataset=dataset, sample_rate=sample_rate)
+        return TextClassificationMonitor(
+            pl,
+            api=api,
+            dataset=dataset,
+            sample_rate=sample_rate,
+            log_interval=log_interval,
+        )
     if isinstance(pl, ZeroShotClassificationPipeline):
-        return ZeroShotMonitor(pl, dataset=dataset, sample_rate=sample_rate)
+        return ZeroShotMonitor(
+            pl,
+            api=api,
+            dataset=dataset,
+            sample_rate=sample_rate,
+            log_interval=log_interval,
+        )
     return None

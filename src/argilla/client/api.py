@@ -342,7 +342,9 @@ class Api:
             raise InputValueError(
                 f"Provided dataset name {name} does not match the pattern"
                 f" {DATASET_NAME_REGEX_PATTERN}. Please, use a valid name for your"
-                " dataset"
+                " dataset. This limitation is caused by naming conventions for indexes"
+                " in Elasticsearch."
+                " https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
             )
 
         if chunk_size > self._MAX_CHUNK_SIZE:
@@ -492,7 +494,8 @@ class Api:
             A argilla dataset.
 
         Examples:
-            **Basic Loading**: load the samples sorted by their ID
+            **Basic Loading: load the samples sorted by their ID**
+
             >>> import argilla as rg
             >>> dataset = rg.load(name="example-dataset")
 
@@ -605,6 +608,29 @@ class Api:
         )
 
         return MetricResults(**metric_.dict(), results=response.parsed)
+
+    def add_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
+        """Adds the dataset labeling rules"""
+        for rule in rules:
+            text_classification_api.add_dataset_labeling_rule(
+                self._client,
+                name=dataset,
+                rule=rule,
+            )
+
+    def update_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
+        """Updates the dataset labeling rules"""
+        for rule in rules:
+            text_classification_api.update_dataset_labeling_rule(
+                self._client, name=dataset, rule=rule
+            )
+
+    def delete_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
+        """Deletes the dataset labeling rules"""
+        for rule in rules:
+            text_classification_api.delete_dataset_labeling_rule(
+                self._client, name=dataset, rule=rule
+            )
 
     def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
         response = text_classification_api.fetch_dataset_labeling_rules(

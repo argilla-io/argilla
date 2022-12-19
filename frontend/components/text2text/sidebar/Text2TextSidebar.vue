@@ -80,6 +80,9 @@ export default {
       ],
     };
   },
+  beforeMount() {
+    this.$emit("set-sidebar-items", this.sidebarItems);
+  },
   methods: {
     onChangeViewMode(value) {
       this.$emit("change-view-mode", value);

@@ -23,12 +23,7 @@
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
 
-
-https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9a92-48e529713a15.mp4
-
-
-<!--https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4-->
-
+https://user-images.githubusercontent.com/25269220/200496945-7efb11b8-19f3-4793-bb1d-d42132009cbb.mp4
 
 <br>
 
@@ -36,8 +31,12 @@ https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9
 <a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
 <img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" />
 </a>
+<a href="https://linkedin.com/company/argilla-io">
 <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
+</a>
+<a  href="https://twitter.com/argilla_io">
 <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />
+</a>
 </p>
 
 <br>
@@ -57,25 +56,25 @@ https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9
 
 ### Advanced NLP labeling
 
-- Programmatic labeling using Weak Supervision. Built-in label models (Snorkel, Flyingsquid)
-- Bulk-labeling and search-driven annotation
-- Iterate on training data with any pre-trained model or library
+- Programmatic labeling using [weak supervision](https://docs.argilla.io/en/latest/guides/techniques/weak_supervision.html). Built-in label models (Snorkel, Flyingsquid)
+- [Bulk-labeling](https://docs.argilla.io/en/latest/reference/webapp/features.html#bulk-annotate) and [search-driven annotation](https://docs.argilla.io/en/latest/guides/features/queries.html)
+- Iterate on training data with any [pre-trained model](https://docs.argilla.io/en/latest/tutorials/libraries/huggingface.html) or [library](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html)
 - Efficiently review and refine annotations in the UI and with Python
-- Use Argilla built-in metrics and methods for finding label and data errors (e.g., cleanlab)
-- Simple integration with active learning workflows
+- Use Argilla built-in metrics and methods for [finding label and data errors (e.g., cleanlab)](https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-cleanlab-explainability.html)
+- Simple integration with [active learning workflows](https://docs.argilla.io/en/latest/tutorials/techniques/active_learning.html)
 
 ### Monitoring
 
 - Close the gap between production data and data collection activities
-- Auto-monitoring for major NLP libraries and pipelines (spaCy, Hugging Face, FlairNLP)
-- ASGI middleware for HTTP endpoints
-- Argilla Metrics to understand data and model issues, like entity consistency for NER models
+- [Auto-monitoring](https://docs.argilla.io/en/latest/guides/steps/3_deploying.html) for [major NLP libraries and pipelines](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html) (spaCy, Hugging Face, FlairNLP)
+- [ASGI middleware](https://docs.argilla.io/en/latest/tutorials/notebooks/deploying-texttokenclassification-fastapi.html) for HTTP endpoints
+- Argilla Metrics to understand data and model issues, [like entity consistency for NER models](https://docs.argilla.io/en/latest/guides/steps/4_monitoring.html)
 - Integrated with Kibana for custom dashboards
 
 ### Team workspaces
 
 - Bring different users and roles into the NLP data and model lifecycles
-- Organize data collection, review and monitoring into different workspaces
+- Organize data collection, review and monitoring into different [workspaces](https://docs.argilla.io/en/latest/getting_started/installation/user_management.html#workspace)
 - Manage workspace access for different users
 
 ## Quickstart
@@ -97,7 +96,7 @@ The simplest way is to use`Docker` by running:
 docker run -d --name es-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
 ```
-> :information_source: **Check [the docs](https://rubrix.readthedocs.io/en/stable/getting_started/setup%26installation.html) for further options and configurations for Elasticsearch.**
+> :information_source: **Check [the docs](https://docs.argilla.io/en/latest/getting_started/quickstart.html) for further options and configurations for Elasticsearch.**
 
 Finally you can **launch the server**:
 
@@ -169,6 +168,10 @@ For getting started with your own use cases, [go to the docs](https://docs.argil
 
 -  **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
+## Contribute
+
+We love contributors and have launched a collaboration with JustDiggit to hand out our very own bunds, to help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m) with our Developer Advocacy team so they can get you up to speed.
+
 ## FAQ
 
 ### What is Argilla?
@@ -186,7 +189,6 @@ Argilla is useful if you want to:
 ### What do I need to start using Argilla?
 You need to have a running instance of Elasticsearch and install the Argilla Python library.
 The library is used to read and write data into Argilla.
-To get started we highly recommend using Jupyter Notebooks so you might want to install Jupyter Lab or use Jupiter support for VS Code for example.
 
 ### How can I "upload" data into Argilla?
 Currently, the only way to upload data into Argilla is by using the Python library.
@@ -218,10 +220,10 @@ The training datasets created with Argilla are model agnostic.
 
 You can choose one of many amazing frameworks to train your model, like [transformers](https://huggingface.co/docs/transformers/), [spaCy](https://spacy.io/), [flair](https://github.com/flairNLP/flair) or [sklearn](https://scikit-learn.org).
 
-Check out our [cookbook](https://rubrix.readthedocs.io/en/stable/guides/cookbook.html) and our [tutorials](https://rubrix.readthedocs.io/en/stable) on how Argilla integrates with these frameworks.
+Check out our [deep dives](https://docs.argilla.io/en/latest/guides/guides.html) and our [tutorials](https://docs.argilla.io/en/latest/tutorials/tutorials.html) on how Argilla integrates with these frameworks.
 
 
-If you want to train a Hugging Face transformer or spaCy NER model, we provide a neat shortcut to [prepare your dataset for training](https://rubrix.readthedocs.io/en/stable/reference/python/python_client.html#rubrix.client.datasets.DatasetForTextClassification.prepare_for_training).
+If you want to train a Hugging Face transformer or spaCy NER model, we provide a neat shortcut to [prepare your dataset for training](https://docs.argilla.io/en/latest/guides/features/datasets.html#Prepare-dataset-for-training).
 ### Can Argilla share the Elasticsearch Instance/cluster?
 Yes, you can use the same Elasticsearch instance/cluster for Argilla and other applications.
 You only need to perform some configuration, check the Advanced installation guide in the docs.
@@ -238,8 +240,8 @@ curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: applicat
 
 ```
 ## Contributors
-<a  href="https://github.com/recognai/rubrix/graphs/contributors">
+<a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 
-<img  src="https://contrib.rocks/image?repo=recognai/rubrix" />
+<img  src="https://contrib.rocks/image?repo=argilla-io/argilla" />
 
 </a>

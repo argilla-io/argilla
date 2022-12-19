@@ -29,6 +29,10 @@ For multi-label classification tasks, you can also annotate a record with no lab
 
 Once a record is annotated, it will be marked as _Validated_ in the upper right corner of the record card.
 
+```{note}
+When the dataset contains a large list of labels (10 +) we encourage viewing the record one by one (from the footer) and using the arrow keys to move quickly to the next record.
+```
+
 #### Token Classification
 
 
@@ -217,7 +221,7 @@ If you have multiple predictions you can toggle between them using the arrows on
 ### Metrics
 
 
-From the side bar you can access the [_Stats_ metrics](view_dataset_metrics.md#stats) that provide support for your analysis of the dataset.
+From the side bar you can access the [_Stats_ metrics](pages.md) that provide support for your analysis of the dataset.
 
 
 ## Search Records
@@ -332,7 +336,7 @@ In this mode, **progress** is related to the coverage of the rules. It shows the
 
 In the **total rules** section, users can find the number of rules related to the different categories.
 
-![Progress menu 2](../../_static/reference/webapp/progress_definerules.png)
+![Progress menu 2](../../_static/reference/webapp/features-weak-labelling.png)
 
 #### Stats
 

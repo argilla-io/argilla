@@ -30,28 +30,32 @@ _DEFAULT_MAX_ENTITY_BUCKET = 1000
 
 
 @dataclasses.dataclass
-class EntityConsistency(NestedPathElasticsearchMetric):
+class TopKMentionsConsistency(NestedPathElasticsearchMetric):
     """Computes the entity consistency distribution"""
 
     mention_field: str
     labels_field: str
+    chars_length_field: str
+    tokens_length_field: str
 
     def _inner_aggregation(
         self,
         size: int,
-        interval: int = 2,
+        interval: int = 1,
         entity_size: int = _DEFAULT_MAX_ENTITY_BUCKET,
     ) -> Dict[str, Any]:
         size = size or 50
-        interval = int(max(interval or 2, 2))
+        interval = interval or 1
         return {
             "consistency": {
                 **aggregations.terms_aggregation(
-                    self.compound_nested_field(self.mention_field), size=size
+                    self.compound_nested_field(self.mention_field),
+                    size=size,
                 ),
                 "aggs": {
                     "entities": aggregations.terms_aggregation(
-                        self.compound_nested_field(self.labels_field), size=entity_size
+                        self.compound_nested_field(self.labels_field),
+                        size=entity_size,
                     ),
                     "count": {
                         "cardinality": {
@@ -201,28 +205,36 @@ METRICS = {
             id="bi-dimensional", field_x="label", field_y="value"
         ),
     ),
-    "predicted_entity_consistency": EntityConsistency(
-        id="predicted_entity_consistency",
+    "predicted_top_k_mentions_consistency": TopKMentionsConsistency(
+        id="predicted_top_k_mentions_consistency",
         nested_path="metrics.predicted.mentions",
         mention_field="value",
         labels_field="label",
+        chars_length_field="chars_length",
+        tokens_length_field="tokens_length",
     ),
-    "annotated_entity_consistency": EntityConsistency(
-        id="annotated_entity_consistency",
+    "annotated_top_k_mentions_consistency": TopKMentionsConsistency(
+        id="annotated_top_k_mentions_consistency",
         nested_path="metrics.annotated.mentions",
         mention_field="value",
         labels_field="label",
+        chars_length_field="chars_length",
+        tokens_length_field="tokens_length",
     ),
-    "predicted_tag_consistency": EntityConsistency(
+    "predicted_tag_consistency": TopKMentionsConsistency(
         id="predicted_tag_consistency",
         nested_path="metrics.predicted.tags",
         mention_field="value",
         labels_field="tag",
+        chars_length_field="chars_length",
+        tokens_length_field="tokens_length",
     ),
-    "annotated_tag_consistency": EntityConsistency(
+    "annotated_tag_consistency": TopKMentionsConsistency(
         id="annotated_tag_consistency",
         nested_path="metrics.annotated.tags",
         mention_field="value",
         labels_field="tag",
+        chars_length_field="chars_length",
+        tokens_length_field="tokens_length",
     ),
 }

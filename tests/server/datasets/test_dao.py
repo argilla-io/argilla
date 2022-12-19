@@ -37,6 +37,42 @@ def test_retrieve_ownered_dataset_for_no_owner_user():
     assert dao.find_by_name(created.name, owner="me") is None
 
 
+def test_list_datasets_by_task():
+    dataset = "test_list_datasets_by_task"
+
+    all_datasets = dao.list_datasets()
+    for ds in all_datasets:
+        dao.delete_dataset(ds)
+
+    created_text = dao.create_dataset(
+        BaseDatasetDB(
+            name=dataset + "_text",
+            owner="other",
+            task=TaskType.text_classification,
+        ),
+    )
+
+    created_token = dao.create_dataset(
+        BaseDatasetDB(
+            name=dataset + "_token",
+            owner="other",
+            task=TaskType.token_classification,
+        ),
+    )
+
+    datasets = dao.list_datasets(
+        task2dataset_map={created_text.task: BaseDatasetDB},
+    )
+
+    assert len(datasets) == 1
+    assert datasets[0].name == created_text.name
+
+    datasets = dao.list_datasets(task2dataset_map={created_token.task: BaseDatasetDB})
+
+    assert len(datasets) == 1
+    assert datasets[0].name == created_token.name
+
+
 def test_close_dataset():
     dataset = "test_close_dataset"
 

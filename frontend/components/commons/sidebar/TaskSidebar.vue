@@ -25,6 +25,7 @@
       @refresh="onRefresh"
       @show-metrics="onShowSidebarInfo"
       @change-view-mode="onChangeViewMode"
+      @set-sidebar-items="onSetSidebarItems"
     />
   </div>
 </template>
@@ -43,22 +44,20 @@ export default {
     },
   },
   data: () => ({
+    sidebarItems: [],
     currentMetric: undefined,
   }),
   computed: {
-    currentTaskSidebar() {
-      return this.currentTask + "Sidebar";
-    },
     currentTask() {
       return this.dataset.task;
+    },
+    currentTaskSidebar() {
+      return `${this.currentTask}Sidebar`;
     },
     metricsByViewMode() {
       return this.sidebarItems.find(
         (item) => item.id === this.dataset.viewSettings.viewMode
       ).relatedMetrics;
-    },
-    sidebarItems() {
-      return this.$refs.menu.sidebarItems;
     },
   },
   methods: {
@@ -66,6 +65,9 @@ export default {
       changeViewMode: "entities/datasets/changeViewMode",
       refresh: "entities/datasets/refresh",
     }),
+    onSetSidebarItems(items) {
+      this.sidebarItems = items;
+    },
     onRefresh() {
       this.refresh({
         dataset: this.dataset,

@@ -9,12 +9,13 @@ on:
     branches:
       - "main"
       - "develop"
-      - "releases/**"
+
   pull_request:
     branches:
       - "main"
       - "develop"
       - "releases/**"
+      - "feature/**"
 
 jobs:
   src-test:
@@ -37,8 +38,6 @@ jobs:
             python_code:
               - 'src/**'
               - 'tests/**'
-            frontend:
-              - 'frontend/**'
 
       - name: Setup ElasticSearch 🔎
         if: steps.filter.outputs.python_code == 'true'
@@ -119,9 +118,19 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
-
+      - name: Check affected files
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            code_changes:
+              - 'src/**'
+              - 'frontend/**'
+              - 'pyproject.toml'
+              - 'setup.py'
       - name: Cache pip 👜
         uses: actions/cache@v2
+        if: steps.filter.outputs.code_changes == 'true'
         env:
           # Increase this value to reset cache if pyproject.toml has not changed
           CACHE_NUMBER: 0
@@ -131,15 +140,18 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
+        if: steps.filter.outputs.code_changes == 'true'
         with:
           node-version: "14"
 
       - name: Build Package 🍟
+        if: steps.filter.outputs.code_changes == 'true'
         run: |
           pip install -U build
           scripts/build_distribution.sh
 
       - name: Upload package artifact
+        if: steps.filter.outputs.code_changes == 'true'
         uses: actions/upload-artifact@v2
         with:
           name: python-package
@@ -157,21 +169,25 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
+
       - name: Download python package
         uses: actions/download-artifact@v2
         with:
           name: python-package
           path: dist
+
       - name: Docker meta
         id: meta
         uses: crazy-max/ghaction-docker-meta@v2
         with:
           images: argilla/argilla-server
+
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
+
       - name: Build & push Docker image
         uses: docker/build-push-action@v2
         with:

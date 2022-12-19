@@ -21,7 +21,13 @@ from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from argilla.labeling.text_classification import Rule, load_rules
+from argilla.labeling.text_classification import (
+    Rule,
+    add_rules,
+    delete_rules,
+    load_rules,
+    update_rules,
+)
 from argilla.labeling.text_classification.rule import RuleNotAppliedError
 from argilla.server.errors import EntityNotFoundError
 
@@ -86,6 +92,40 @@ def test_name(name, expected):
     assert rule.name == expected
 
 
+def test_atomic_crud_operations(monkeypatch, mocked_client, log_dataset):
+    rule = Rule(query="inputs.text:(NOT positive)", label="negative")
+    with pytest.raises(RuleNotAppliedError):
+        rule(TextClassificationRecord(text="test"))
+
+    monkeypatch.setattr(httpx, "get", mocked_client.get)
+    monkeypatch.setattr(httpx, "patch", mocked_client.patch)
+    monkeypatch.setattr(httpx, "delete", mocked_client.delete)
+    monkeypatch.setattr(httpx, "post", mocked_client.post)
+    monkeypatch.setattr(httpx, "stream", mocked_client.stream)
+
+    rule.add_to_dataset(log_dataset)
+
+    rules = load_rules(log_dataset)
+    assert len(rules) == 1
+    assert rules[0].query == "inputs.text:(NOT positive)"
+    assert rules[0].label == "negative"
+
+    rule.remove_from_dataset(log_dataset)
+
+    rules = load_rules(log_dataset)
+    assert len(rules) == 0
+
+    rule = Rule(query="inputs.text:(NOT positive)", label="negative")
+    rule.add_to_dataset(log_dataset)
+    rule.label = "positive"
+    rule.update_at_dataset(log_dataset)
+
+    rules = load_rules(log_dataset)
+    assert len(rules) == 1
+    assert rules[0].query == "inputs.text:(NOT positive)"
+    assert rules[0].label == "positive"
+
+
 def test_apply(monkeypatch, mocked_client, log_dataset):
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     with pytest.raises(RuleNotAppliedError):
@@ -121,6 +161,76 @@ def test_load_rules(mocked_client, log_dataset):
     assert len(rules) == 1
     assert rules[0].query == "a query"
     assert rules[0].label == "LALA"
+
+
+def test_add_rules(mocked_client, log_dataset):
+
+    expected_rules = [
+        Rule(query="a query", label="La La"),
+        Rule(query="another query", label="La La"),
+        Rule(query="the other query", label="La La La"),
+    ]
+
+    add_rules(log_dataset, expected_rules)
+
+    actual_rules = load_rules(log_dataset)
+
+    assert len(actual_rules) == 3
+    for actual_rule, expected_rule in zip(actual_rules, expected_rules):
+        assert actual_rule.query == expected_rule.query
+        assert actual_rule.label == expected_rule.label
+
+
+def test_delete_rules(mocked_client, log_dataset):
+
+    rules = [
+        Rule(query="a query", label="La La"),
+        Rule(query="another query", label="La La"),
+        Rule(query="the other query", label="La La La"),
+    ]
+
+    add_rules(log_dataset, rules)
+
+    delete_rules(
+        log_dataset,
+        [
+            Rule(query="a query", label="La La"),
+        ],
+    )
+
+    actual_rules = load_rules(log_dataset)
+
+    assert len(actual_rules) == 2
+
+    for actual_rule, expected_rule in zip(actual_rules, rules[1:]):
+        assert actual_rule.label == expected_rule.label
+        assert actual_rule.query == expected_rule.query
+
+
+def test_update_rules(mocked_client, log_dataset):
+
+    rules = [
+        Rule(query="a query", label="La La"),
+        Rule(query="another query", label="La La"),
+        Rule(query="the other query", label="La La La"),
+    ]
+
+    add_rules(log_dataset, rules)
+    rules_to_update = [
+        Rule(query="a query", label="La La La"),
+    ]
+    update_rules(log_dataset, rules=rules_to_update)
+
+    actual_rules = load_rules(log_dataset)
+
+    assert len(rules) == 3
+
+    assert actual_rules[0].query == "a query"
+    assert actual_rules[0].label == "La La La"
+
+    for actual_rule, expected_rule in zip(actual_rules[1:], rules[1:]):
+        assert actual_rule.label == expected_rule.label
+        assert actual_rule.query == expected_rule.query
 
 
 def test_copy_dataset_with_rules(mocked_client, log_dataset):

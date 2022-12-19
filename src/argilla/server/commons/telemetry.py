@@ -26,8 +26,8 @@ from argilla.server.errors.base_errors import ServerError
 from argilla.server.settings import settings
 
 try:
-    from analytics import Client
-except ModuleNotFoundError:
+    from analytics import Client  # This import works only for version 2.2.0
+except (ImportError, ModuleNotFoundError):
     # TODO: show some warning info
     settings.enable_telemetry = False
     Client = None

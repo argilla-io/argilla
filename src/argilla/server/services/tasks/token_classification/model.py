@@ -12,14 +12,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import typing
-from collections import defaultdict
-from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field, validator
 
-from argilla._constants import MAX_KEYWORD_LENGTH
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.services.datasets import ServiceBaseDataset
 from argilla.server.services.search.model import (
@@ -57,7 +54,7 @@ class EntitySpan(BaseModel):
 
     start: int
     end: int
-    label: str = Field(min_length=1, max_length=MAX_KEYWORD_LENGTH)
+    label: str = Field(min_length=1, max_length=DEFAULT_MAX_KEYWORD_LENGTH)
     score: float = Field(default=1.0, ge=0.0, le=1.0)
 
     @validator("end")
