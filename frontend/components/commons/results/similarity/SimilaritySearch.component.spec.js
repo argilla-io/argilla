@@ -27,10 +27,10 @@ describe("SimilaritySearchComponent", () => {
   it("render the component", () => {
     expect(wrapper.is(SimilaritySearch)).toBe(true);
   });
-  it("expect to exist vectors", async () => {
+  it("expect to exist formattedVectors", async () => {
     expect(wrapper.props().formattedVectors).toBeTruthy();
   });
-  it("expect visible dropdown if multiple vectors and hidden direct button", async () => {
+  it("expect visible dropdown if multiple formattedVectors and hidden direct button", async () => {
     await wrapper.setProps({
       formattedVectors: [
         {
@@ -54,7 +54,7 @@ describe("SimilaritySearchComponent", () => {
     expect(dropdown.exists()).toBe(true);
     expect(directButton.exists()).toBe(false);
   });
-  it("expect hidden dropdown if single vectors and visible direct button", async () => {
+  it("expect hidden dropdown if single formattedVectors and visible direct button", async () => {
     const dropdown = wrapper.find("#dropdown");
     const directButton = wrapper.find("#find-similar-button");
     expect(dropdown.exists()).toBe(false);
