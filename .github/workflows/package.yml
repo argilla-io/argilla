@@ -39,6 +39,8 @@ jobs:
             python_code:
               - 'src/**'
               - 'tests/**'
+              - 'pyproject.toml'
+              - 'setup.py'
 
       - name: Setup ElasticSearch 🔎
         if: steps.filter.outputs.python_code == 'true'
@@ -219,6 +221,9 @@ jobs:
               - 'frontend/**'
               - 'pyproject.toml'
               - 'setup.py'
+              - 'scripts/start_argilla_server.sh'
+              - 'release.Dockerfile'
+              - '.dockerignore'
       - name: Cache pip 👜
         uses: actions/cache@v2
         if: steps.filter.outputs.code_changes == 'true'
