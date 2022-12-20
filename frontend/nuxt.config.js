@@ -162,5 +162,6 @@ export default {
 
   router: {
     middleware: ["auth-guard"],
+    base: process.env.API_URL_CUSTOM ? `/${process.env.API_URL_CUSTOM}` : "/",
   },
 };
