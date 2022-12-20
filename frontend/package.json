@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "dev": "nuxt",
-    "dev:argilla": "cross-env API_URL_CUSTOM=$npm_config_base_url nuxt",
+    "yarn-dev:argilla": "cross-env API_URL_CUSTOM=$base_router nuxt",
+    "npm-dev:argilla": "cross-env API_URL_CUSTOM=$npm_config_base_router nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate && cypress install --force && npm run test:e2e:run",
