@@ -49,6 +49,7 @@ import { mapActions, mapGetters } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
 import { getDatasetModelPrimaryKey } from "../../../../models/Dataset";
 import { Vector as VectorModel } from "@/models/Vector";
+import { RefRecord as RefRecordModel } from "@/models/RefRecord";
 import { ReferenceRecord } from "./ReferenceRecord.class";
 import { Base64 } from "js-base64";
 
@@ -91,6 +92,12 @@ export default {
     },
     isDataset() {
       return !_.isNil(this.dataset);
+    },
+    isAnyReferenceRecord() {
+      return RefRecordModel.all().length;
+    },
+    referenceRecordId() {
+      return RefRecordModel.query().first();
     },
     records() {
       if (this.isDataset) {
@@ -212,10 +219,15 @@ export default {
     updateReferenceRecordInstance(recordId, vector) {
       this.updateReferenceRecord(recordId);
       this.updateReferenceVector(vector);
+      this.deleteAllRefRecord();
+      if (vector) {
+        this.insertRefRecordInRefRecordModel(vector);
+      }
       this.pushVectorIdInRouteParams(vector);
     },
     removeReferenceRecordInstance() {
       this.updateReferenceRecordInstance();
+      this.deleteAllRefRecord();
     },
     updateReferenceRecord(recordId) {
       if (recordId) {
@@ -248,6 +260,14 @@ export default {
       };
       return queryForSimilaritySearch;
     },
+    insertRefRecordInRefRecordModel(refRecord) {
+      RefRecordModel.insert({
+        data: refRecord,
+      });
+    },
+    deleteAllRefRecord() {
+      RefRecordModel.deleteAll();
+    },
     pushVectorIdInRouteParams(vector) {
       this.$router.push({
         query: {
@@ -260,7 +280,7 @@ export default {
                   record_id: vector.record_id,
                 })
               )
-            : "",
+            : null,
         },
       });
     },
