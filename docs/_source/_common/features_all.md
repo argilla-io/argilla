@@ -5,12 +5,16 @@
 :link: ./features/datasets.html
 
 ```
-```{grid-item-card} Metrics
-:link: ./features/metrics.html
+```{grid-item-card} Similarity search
+:link: ./features/similarity-search.html
 
 ```
 ```{grid-item-card} Queries
 :link: ./features/queries.html
+
+```
+```{grid-item-card} Metrics
+:link: ./features/metrics.html
 
 ```
 ````
