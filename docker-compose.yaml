@@ -6,7 +6,7 @@ services:
     image: argilla/argilla-server:latest
     restart: unless-stopped
     ports:
-      - "6900:80"
+      - "6900:6900"
     environment:
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
       # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
