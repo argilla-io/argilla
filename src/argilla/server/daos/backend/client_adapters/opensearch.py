@@ -240,6 +240,7 @@ class OpenSearchClient(IClientAdapter):
         with self.error_handling(index=index):
             es_query = self.query_builder.map_2_es_query(
                 schema=self.get_index_schema(index=index),
+                query=query,
             )
 
             results = {}
