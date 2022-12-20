@@ -2,14 +2,7 @@
 set -e
 
 # Check elasticsearch response status
-status_code=$(curl -s -o /dev/null -w "%{http_code}" "$ARGILLA_ELASTICSEARCH")
-
-if [[ "$status_code" -ne 200 ]]; then
-  echo "ElasticSearch connection error. Returned status code: $status_code"
-  exit 1
-else
-  echo "ElasticSearch connected"
-fi
+/wait-for-it.sh -t 60 -s `echo "${ARGILLA_ELASTICSEARCH}" | awk -F'^http[s]?://' '{print $2}'` -- echo "ElasticSearch connected"
 
 # Run argilla-server
-uvicorn argilla:app --host "0.0.0.0" --port 6900
+uvicorn argilla:app --host "0.0.0.0"
