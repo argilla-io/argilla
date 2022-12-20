@@ -18,14 +18,11 @@
 <template>
   <results-list
     :dataset="dataset"
-    :metadata-item="selectedMetadataRecord"
-    @show-record-info="showRecordInfo"
   >
     <template slot="record" slot-scope="results">
       <record-token-classification
         :dataset="dataset"
         :record="results.record"
-        @show-record-info="showRecordInfo"
       />
     </template>
   </results-list>
@@ -37,16 +34,6 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  data() {
-    return {
-      selectedMetadataRecord: undefined,
-    };
-  },
-  methods: {
-    onShowRecordInfo() {
-      this.selectedMetadataRecord = undefined;
-    },
-  },
+  }
 };
 </script>

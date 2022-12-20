@@ -18,14 +18,11 @@
 <template>
   <results-list
     :dataset="dataset"
-    :metadata-item="selectedMetadataItem"
-    @closeMetadata="resetMetadataItem"
   >
     <template v-slot:record="{ record }">
       <record-text-2-text
         :dataset="dataset"
         :record="record"
-        @show-record-info="showRecordInfo"
       />
     </template>
   </results-list>
@@ -37,17 +34,6 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  data: () => ({
-    selectedMetadataItem: undefined,
-  }),
-  methods: {
-    showRecordInfo(id) {
-      this.selectedMetadataItem = id;
-    },
-    resetMetadataItem() {
-      this.selectedMetadataItem = undefined;
-    },
-  },
+  }
 };
 </script>
