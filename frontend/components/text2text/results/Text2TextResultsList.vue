@@ -25,7 +25,7 @@
       <record-text-2-text
         :dataset="dataset"
         :record="record"
-        @onShowMetadata="onShowMetadata"
+        @show-record-info="showRecordInfo"
       />
     </template>
   </results-list>
@@ -42,7 +42,7 @@ export default {
     selectedMetadataItem: undefined,
   }),
   methods: {
-    onShowMetadata(id) {
+    showRecordInfo(id) {
       this.selectedMetadataItem = id;
     },
     resetMetadataItem() {

@@ -169,6 +169,15 @@ export default {
   }
 }
 
+.modal-table {
+  box-shadow: $shadow;
+  border-radius: $border-radius;
+  max-width: none;
+  :deep(.modal__text) {
+    margin-bottom: 2em;
+  }
+}
+
 :deep(.modal-buttons) {
   display: flex;
   .button {

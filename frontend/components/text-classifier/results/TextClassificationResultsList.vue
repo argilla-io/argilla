@@ -20,7 +20,7 @@
     v-if="!dataset.viewSettings.visibleRulesList"
     :dataset="dataset"
     :metadata-item="selectedMetadataItem"
-    @closeMetadata="resetMetadataItem"
+    @close-record-info="resetRecordInfo"
   >
     <template slot="results-header">
       <rule-definition :dataset="dataset" v-if="showRulesArea" />
@@ -29,7 +29,7 @@
       <record-text-classification
         :dataset="dataset"
         :record="results.record"
-        @onShowMetadata="onShowMetadata"
+        @show-record-info="showRecordInfo"
       />
     </template>
   </results-list>
@@ -52,10 +52,10 @@ export default {
     },
   },
   methods: {
-    onShowMetadata(id) {
+    showRecordInfo(id) {
       this.selectedMetadataItem = id;
     },
-    resetMetadataItem() {
+    resetRecordInfo() {
       this.selectedMetadataItem = undefined;
     },
   },

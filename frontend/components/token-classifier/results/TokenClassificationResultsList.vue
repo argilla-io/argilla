@@ -19,12 +19,13 @@
   <results-list
     :dataset="dataset"
     :metadata-item="selectedMetadataRecord"
-    @onCloseMetadata="onCloseMetadata"
+    @show-record-info="showRecordInfo"
   >
     <template slot="record" slot-scope="results">
       <record-token-classification
         :dataset="dataset"
         :record="results.record"
+        @show-record-info="showRecordInfo"
       />
     </template>
   </results-list>
@@ -43,7 +44,7 @@ export default {
     };
   },
   methods: {
-    onCloseMetadata() {
+    onShowRecordInfo() {
       this.selectedMetadataRecord = undefined;
     },
   },
