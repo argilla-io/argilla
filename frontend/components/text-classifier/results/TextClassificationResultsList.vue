@@ -24,10 +24,7 @@
       <rule-definition :dataset="dataset" v-if="showRulesArea" />
     </template>
     <template slot="record" slot-scope="results">
-      <record-text-classification
-        :dataset="dataset"
-        :record="results.record"
-      />
+      <record-text-classification :dataset="dataset" :record="results.record" />
     </template>
   </results-list>
   <rules-management class="content" v-else :dataset="dataset" />

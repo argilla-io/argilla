@@ -16,9 +16,7 @@
   -->
 
 <template>
-  <results-list
-    :dataset="dataset"
-  >
+  <results-list :dataset="dataset">
     <template slot="record" slot-scope="results">
       <record-token-classification
         :dataset="dataset"
@@ -34,6 +32,6 @@ export default {
       type: Object,
       required: true,
     },
-  }
+  },
 };
 </script>

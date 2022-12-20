@@ -16,14 +16,9 @@
   -->
 
 <template>
-  <results-list
-    :dataset="dataset"
-  >
+  <results-list :dataset="dataset">
     <template v-slot:record="{ record }">
-      <record-text-2-text
-        :dataset="dataset"
-        :record="record"
-      />
+      <record-text-2-text :dataset="dataset" :record="record" />
     </template>
   </results-list>
 </template>
@@ -34,6 +29,6 @@ export default {
       type: Object,
       required: true,
     },
-  }
+  },
 };
 </script>
