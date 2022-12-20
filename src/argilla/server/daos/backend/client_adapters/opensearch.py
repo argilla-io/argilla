@@ -121,16 +121,11 @@ class OpenSearchClient(IClientAdapter):
                 size=size,
             )
 
-            if "knn" in es_query["query"]:
-                self._check_vector_supported()
-
-            results = self.__client__.search(
+            results = self._es_search(
                 index=index,
-                body=es_query,
-                routing=routing,
-                track_total_hits=True,
-                rest_total_hits_as_int=True,
+                es_query=es_query,
                 size=size,
+                routing=routing,
             )
 
             return self._process_search_results(
@@ -246,11 +241,10 @@ class OpenSearchClient(IClientAdapter):
             results = {}
             for aggregation in aggregations:
                 es_query["aggs"] = aggregation
-                search = self.__client__.search(
+
+                search = self._es_search(
                     index=index,
-                    body=es_query,
-                    track_total_hits=True,
-                    rest_total_hits_as_int=True,
+                    es_query=es_query,
                     size=0,
                 )
 
@@ -782,3 +776,23 @@ class OpenSearchClient(IClientAdapter):
             data["search_keywords"] = keywords
 
         return data
+
+    def _es_search(
+        self,
+        index: str,
+        es_query: Dict[str, Any],
+        size: int,
+        routing: Optional[str] = None,
+    ):
+        if "knn" in es_query["query"]:
+            self._check_vector_supported()
+
+        results = self.__client__.search(
+            index=index,
+            body=es_query,
+            routing=routing,
+            track_total_hits=True,
+            rest_total_hits_as_int=True,
+            size=size,
+        )
+        return results
