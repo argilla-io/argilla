@@ -42,10 +42,7 @@
                 <svgicon width="18" height="18" color="#4D4D4D" name="sort" />
                 <span>{{ column.name }}</span>
               </button>
-              <button
-                v-else
-                :data-title="column.tooltip"
-              >
+              <button v-else :data-title="column.tooltip">
                 <span>{{ column.name }}</span>
               </button>
             </div>
