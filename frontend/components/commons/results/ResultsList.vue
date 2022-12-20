@@ -47,7 +47,7 @@
               :data-index="index"
             >
               <results-record
-                @show-record-info="onShowRecordInfo"
+                @show-record-info-modal="onShowRecordInfoModal"
                 :key="`${dataset.name}-${item.id}`"
                 :dataset="dataset"
                 :item="item"
@@ -128,7 +128,7 @@ export default {
       paginate: "entities/datasets/paginate",
       search: "entities/datasets/search",
     }),
-    onShowRecordInfo(record) {
+    onShowRecordInfoModal(record) {
       this.selectedRecord = record;
     },
     onCloseRecordInfo() {

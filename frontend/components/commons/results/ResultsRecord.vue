@@ -37,7 +37,7 @@
         :dataset="dataset"
         :task="dataset.task"
         @onChangeRecordStatus="onChangeRecordStatus"
-        @show-record-info="onShowRecordInfo(item)"
+        @show-record-info-modal="onShowRecordInfoModal(item)"
       />
       <status-tag
         v-if="annotationEnabled && item.status !== 'Default'"
@@ -101,8 +101,8 @@ export default {
           console.warn("waT?", status);
       }
     },
-    onShowRecordInfo(record) {
-      this.$emit("show-record-info", record);
+    onShowRecordInfoModal(record) {
+      this.$emit("show-record-info-modal", record);
     },
   },
 };
