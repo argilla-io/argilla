@@ -249,12 +249,16 @@ export default {
           this.dataset.query.uncovered_by_rules &&
           this.dataset.query.uncovered_by_rules?.length > 0,
       };
-      return [
-        ...filters,
-        ...dateFields,
-        ...sortedMetadataFilters,
-        this.showUncoveredByRulesFilter && uncoveredByRules,
-      ];
+
+      const formattedFilters = this.showUncoveredByRulesFilter
+        ? [
+            ...filters,
+            ...dateFields,
+            ...sortedMetadataFilters,
+            uncoveredByRules,
+          ]
+        : [...filters, ...dateFields, ...sortedMetadataFilters];
+      return formattedFilters;
     },
   },
   methods: {
