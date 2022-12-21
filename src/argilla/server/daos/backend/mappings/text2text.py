@@ -20,7 +20,7 @@ def text2text_mappings():
     return {
         "_source": mappings.source(
             excludes=[
-                # "words", # Cannot be excluded since comment text_length metric  is computed using this source fields
+                "words",  # Cannot be excluded since comment text_length metric  is computed using this source fields
                 "predicted",
                 "predicted_as",
                 "predicted_by",
@@ -32,7 +32,6 @@ def text2text_mappings():
         "properties": {
             "annotated_as": mappings.keyword_field(),
             "predicted_as": mappings.keyword_field(),
-            "text_predicted": mappings.words_text_field(),
             "score": {"type": "float"},
         },
     }

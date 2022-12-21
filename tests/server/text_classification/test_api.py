@@ -48,7 +48,7 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
                     "one_more": [{"a": 1, "b": 2}],
                 },
                 "prediction": {
-                    "agent": "test",
+                    "agent": "testA",
                     "labels": [
                         {"class": "Test", "score": 0.6},
                         {"class": "Mocking", "score": 0.7},
@@ -60,9 +60,12 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
                 "id": 1,
                 "inputs": {"data": "my data"},
                 "multi_label": True,
-                "metadata": {"field_one": "another value one", "field_two": "value 2"},
+                "metadata": {
+                    "field_one": "another value one",
+                    "field_two": "value 2",
+                },
                 "prediction": {
-                    "agent": "test",
+                    "agent": "testB",
                     "labels": [
                         {"class": "Test", "score": 0.6},
                         {"class": "Mocking", "score": 0.7},
@@ -112,7 +115,8 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
     assert response.status_code == 200, response.json()
 
     response = mocked_client.post(
-        f"/api/datasets/{dataset}/TextClassification:search", json={}
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json={},
     )
 
     assert response.status_code == 200
@@ -120,6 +124,15 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
     assert results.total == 2
     assert results.aggregations.predicted_as == {"Mocking": 2, "Test": 2}
     assert results.records[0].predicted is None
+
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json={"query": {"predicted_by": ["testA"]}},
+    )
+    assert response.status_code == 200, response.json()
+    results = TextClassificationSearchResults.parse_obj(response.json())
+    assert results.total == len(results.records) == 1
+    assert results.aggregations.predicted_by == {"testA": 1}
 
 
 def test_create_records_for_text_classification(mocked_client, telemetry_track_data):
@@ -164,7 +177,8 @@ def test_create_records_for_text_classification(mocked_client, telemetry_track_d
     assert created_dataset.metadata == metadata
 
     response = mocked_client.post(
-        f"/api/datasets/{dataset}/TextClassification:search", json={}
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json={},
     )
 
     assert response.status_code == 200
@@ -178,7 +192,7 @@ def test_create_records_for_text_classification(mocked_client, telemetry_track_d
         "predicted_as": {"Mocking": 1},
         "predicted_by": {"test": 1},
         "status": {"Default": 1},
-        "words": {"data": 1},
+        "words": {},
     }
 
     telemetry_track_data.assert_called_once()
@@ -273,7 +287,7 @@ def test_create_records_for_text_classification_vector_search(
         "predicted_as": {"Mocking": 3},
         "predicted_by": {"test": 3},
         "status": {"Default": 3},
-        "words": {"data": 3},
+        "words": {},
     }
 
     response = mocked_client.post(

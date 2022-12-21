@@ -3,4 +3,4 @@
 
 # Distribution packages
 !dist/*.whl
-
+!scripts/start_argilla_server.sh

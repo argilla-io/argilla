@@ -183,7 +183,7 @@ html_favicon = "_static/images/favicon.ico"
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
 html_css_files = ["css/custom.css"]
-html_js_files = ["js/githubStargazers.js"]
+html_js_files = ["js/githubStargazers.js", "js/sidebarScrollPosition.js"]
 html_theme_options = {
     "top_of_page_button": None,
     "sidebar_hide_name": True,
@@ -266,7 +266,7 @@ pygments_dark_style = "material"
 
 
 # Open graph meta
-ogp_image = "https://www.argilla.io/og.png"
+ogp_image = "_static/images/og-doc.png"
 
 ogp_custom_meta_tags = [
     '<meta name="twitter:card" content="summary_large_image" />',

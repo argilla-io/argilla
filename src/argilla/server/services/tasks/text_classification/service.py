@@ -119,7 +119,7 @@ class TextClassificationService:
         metrics = TasksFactory.find_task_metrics(
             dataset.task,
             metric_ids={
-                "words_cloud",
+                # "words_cloud",
                 "predicted_by",
                 "predicted_as",
                 "annotated_by",
@@ -145,7 +145,7 @@ class TextClassificationService:
         )
 
         if results.metrics:
-            results.metrics["words"] = results.metrics["words_cloud"]
+            results.metrics["words"] = results.metrics.get("words_cloud", {})
             results.metrics["status"] = results.metrics["status_distribution"]
             results.metrics["predicted"] = results.metrics["error_distribution"]
             results.metrics["predicted"].pop("unknown", None)
