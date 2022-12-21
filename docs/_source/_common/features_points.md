@@ -11,7 +11,7 @@ Are you unsure about what these features entail, take a look at our [terminology
 
 ```
 ```{grid-item-card} Semantic Search
-:link: ./semantic-search.html
+:link: ./features/semantic-search.html
 
 ```
 ```{grid-item-card} Metrics
