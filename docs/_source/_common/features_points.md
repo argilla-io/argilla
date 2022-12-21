@@ -6,16 +6,16 @@ Are you unsure about what these features entail, take a look at our [terminology
 :link: ./datasets.html
 
 ```
-```{grid-item-card} Metrics
-:link: ./metrics.html
-
-```
 ```{grid-item-card} Queries
 :link: ./queries.html
 
 ```
-```{grid-item-card} Similarity Search
-:link: ./features/similarity-search.html
+```{grid-item-card} Semantic Search
+:link: ./features/semantic-search.html
+
+```
+```{grid-item-card} Metrics
+:link: ./metrics.html
 
 ```
 ````
