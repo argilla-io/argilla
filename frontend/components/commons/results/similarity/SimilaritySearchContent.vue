@@ -3,12 +3,12 @@
     <p class="similarity-search__title">Select vector:</p>
     <base-radio-button
       v-for="vector in formattedVectors"
-      :key="vector.id"
-      :id="vector.id"
+      :key="vector.vectorName"
+      :id="vector.vectorName"
       :value="vector"
       v-model="selectedName"
     >
-      {{ vector.name }}
+      {{ vector.vectorName }}
     </base-radio-button>
   </div>
 </template>

@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { isEqual } from 'lodash';
 export default {
   name: "BaseRadioButton",
   props: {
@@ -36,7 +37,7 @@ export default {
   },
   computed: {
     isSelected() {
-      return this.model === this.value;
+      return isEqual(this.model, this.value);
     },
     radioClasses() {
       return {
