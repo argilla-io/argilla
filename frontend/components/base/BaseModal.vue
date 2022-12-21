@@ -114,7 +114,7 @@ export default {
   transition: opacity 0.3s ease;
   pointer-events: none;
   cursor: default;
-  background: $black-4;
+  background: $black-10;
 }
 
 .modal-wrapper {
