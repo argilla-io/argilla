@@ -15,8 +15,8 @@ sphinx:
   configuration: docs/_source/conf.py
 
 # Optionally build your docs in additional formats such as PDF
-formats:
-  - pdf
+#formats:
+#  - pdf
 
 conda:
   environment: environment_docs.yml
