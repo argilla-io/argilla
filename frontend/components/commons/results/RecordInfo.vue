@@ -123,7 +123,6 @@ export default {
   margin: auto;
   pointer-events: all;
   &__container {
-    max-height: 50vh;
     overflow-y: auto;
     margin-right: -1em;
     padding-right: 1em;
@@ -141,7 +140,7 @@ export default {
       max-width: none;
     }
     :deep(.table-info__body) {
-      height: auto;
+      max-height: 40vh;
     }
   }
   &__buttons {
