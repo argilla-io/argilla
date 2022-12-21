@@ -50,7 +50,7 @@ import { currentWorkspace } from "@/models/Workspace";
 import { getDatasetModelPrimaryKey } from "../../../../models/Dataset";
 import { Vector as VectorModel } from "@/models/Vector";
 import { RefRecord as RefRecordModel } from "@/models/RefRecord";
-import { ReferenceRecord } from "./ReferenceRecord.class";
+import { ReferenceRecord } from "@/classes/ReferenceRecord.class";
 import { Base64 } from "js-base64";
 
 export default {
@@ -62,7 +62,7 @@ export default {
     return {
       referenceRecord: null,
       numberOfRecords: 50,
-      isReferenceRecord: false,
+      // isReferenceRecord: false,
     };
   },
   computed: {
@@ -124,12 +124,15 @@ export default {
     annotationEnabled() {
       return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
     },
+    isReferenceRecord() {
+      return !!RefRecordModel.all().length;
+    },
   },
   mounted() {
-    this.referenceRecord = new ReferenceRecord();
+    this.referenceRecord = ReferenceRecord;
   },
   destroyed() {
-    this.referenceRecord = null;
+    this.referenceRecord.cleanInstance();
   },
   methods: {
     ...mapActions({
@@ -137,8 +140,9 @@ export default {
       search: "entities/datasets/search",
     }),
     async searchRecords(query) {
-      const formattedQuery = this.formatQueryForSearch(query);
-
+      console.log(query);
+      const formattedQuery = this.formatQueryForSearch({ query });
+      console.log("in index", query, formattedQuery);
       await this.search({
         dataset: this.dataset,
         ...formattedQuery,
@@ -146,7 +150,7 @@ export default {
     },
     formatQueryForSearch(query) {
       let queryCloned = null;
-      this.isReferenceRecord = false;
+      // this.isReferenceRecord = false;
       const isClickOnFilter = !("vector" in query);
       if (isClickOnFilter) {
         return this.initQueryWhenUserClickOnFilter(query);
@@ -161,7 +165,7 @@ export default {
 
       let queryForSimilaritySearch = null;
       if (!_.isNil(vectorName)) {
-        this.isReferenceRecord = true;
+        // this.isReferenceRecord = true;
         const vectorValues =
           this.referenceRecord?.referenceVector?.vector_values;
 
@@ -178,7 +182,7 @@ export default {
     },
     initQueryWhenUserActivateRemoveSimilaritySearch(query) {
       if (!!query.vector) {
-        this.isReferenceRecord = true;
+        // this.isReferenceRecord = true;
         return this.queryFactoryOnSimilaritySearchActivation(query);
       }
       this.removeReferenceRecordInstance();
@@ -220,6 +224,7 @@ export default {
       this.updateReferenceRecord(recordId);
       this.updateReferenceVector(vector);
       this.deleteAllRefRecord();
+      console.log(vector);
       if (vector) {
         this.insertRefRecordInRefRecordModel(vector);
       }
@@ -232,13 +237,13 @@ export default {
     updateReferenceRecord(recordId) {
       if (recordId) {
         const refRecord = this.records.find((record) => record.id === recordId);
-        this.referenceRecord.setReferenceRecord = refRecord;
+        this.referenceRecord.setReferenceRecord(refRecord);
       } else {
-        this.referenceRecord.setReferenceRecord = null;
+        this.referenceRecord.setReferenceRecord(null);
       }
     },
     updateReferenceVector(vector = null) {
-      this.referenceRecord.setReferenceVector = vector;
+      this.referenceRecord.setReferenceVector(vector);
     },
     createQueryWithSimilaritySearch(vectorName, vectorValues) {
       const queryForSimilaritySearch = this.getQueryFactoryForSimilaritySearch(
@@ -285,6 +290,7 @@ export default {
       });
     },
     getVector(vectorId) {
+      console.log(vectorId);
       return VectorModel.query().whereId(vectorId).first();
     },
   },

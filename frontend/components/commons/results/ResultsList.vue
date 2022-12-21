@@ -35,13 +35,13 @@
             />
             <results-empty v-else-if="dataset.results.total === 0" />
             <similarity-record-reference-component
-              v-if="fakeRecordReference && !showLoader"
+              v-if="referenceRecordObj && !showLoader"
               :dataset="dataset"
-              :referenceRecord="fakeRecordReference"
+              :referenceRecord="referenceRecordObj"
               @search-records="searchRecords"
               @show-metadata="onShowMetadata"
             >
-              <slot name="record" :record="fakeRecordReference" />
+              <slot name="record" :record="referenceRecordObj" />
             </similarity-record-reference-component>
           </template>
           <template v-slot="{ item, index, active }">
@@ -75,7 +75,7 @@
         </DynamicScroller>
       </div>
       <base-pagination
-        v-if="!fakeRecordReference"
+        v-if="!referenceRecordObj"
         :total-items="dataset.results.total"
         :pagination-settings="dataset.viewSettings.pagination"
         @changePage="onPagination"
@@ -102,6 +102,10 @@
 <script>
 import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
+import { RefRecord as RefRecordModel } from "@/models/RefRecord";
+import { TokenClassificationRecord } from "@/models/TokenClassification";
+import { TextClassificationRecord } from "@/models/TextClassification";
+import { Text2TextRecord } from "@/models/Text2Text";
 export default {
   props: {
     dataset: {
@@ -117,9 +121,13 @@ export default {
       scrollComponent: undefined,
       selectedRecord: undefined,
       test: null,
+      referenceRecordObj: null,
     };
   },
   computed: {
+    refRecordId() {
+      return RefRecordModel.query().first();
+    },
     fakeRecordReference() {
       return this.dataset.results.records[0];
     },
@@ -171,6 +179,38 @@ export default {
     },
     searchRecords(query) {
       this.$emit("search-records", query);
+    },
+    getFactoryRecordTaskType() {
+      let recordClass = null;
+      switch (this.dataset.task) {
+        case "TextClassification":
+          recordClass = TextClassificationRecord;
+          break;
+        case "TokenClassification":
+          recordClass = TokenClassificationRecord;
+          break;
+        case "Text2Text":
+          recordClass = Text2TextRecord;
+          break;
+        default:
+          throw Error("unknown dataset task");
+      }
+      return recordClass;
+    },
+  },
+  watch: {
+    async refRecordId(newValue, oldValue) {
+      this.referenceRecordObj = null;
+      if (newValue) {
+        const { data: responseRecord, status } = await this.$axios.get(
+          `/datasets/${this.dataset.name}/records/${this.refRecordId.record_id}`
+        );
+
+        if (status === 200) {
+          const RecordClass = this.getFactoryRecordTaskType();
+          this.referenceRecordObj = new RecordClass(responseRecord);
+        }
+      }
     },
   },
 };

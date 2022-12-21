@@ -53,7 +53,7 @@ export default {
   methods: {
     removeSimilarityFilter() {
       const query = { vector: null };
-      this.$emit("search-records", query);
+      this.$emit("search-records", { query: query });
     },
   },
 };

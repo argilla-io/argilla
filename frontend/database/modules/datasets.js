@@ -20,6 +20,8 @@ import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 import { Vector as VectorModel } from "@/models/Vector";
+import { RefRecord as RefRecordModel } from "@/models/RefRecord";
+import { ReferenceRecord } from "@/classes/ReferenceRecord.class";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -149,6 +151,7 @@ function _configuredRouteParams() {
    * Read the route query params: query, sort, viewMode and pagination
    */
   const { query, sort, viewMode, pagination } = $nuxt.$route.query;
+
   return {
     query: JSON.parse(query ? Base64.decode(query) : "{}"),
     sort: JSON.parse(sort ? Base64.decode(sort) : "[]"),
@@ -215,13 +218,32 @@ async function _updateViewSettings({ id, data }) {
 
 async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
   const { advancedQueryDsl } = $nuxt.$route.query;
+
   if (advancedQueryDsl === null || advancedQueryDsl === "true") {
     query.advanced_query_dsl = true;
   }
+
+  console.log("=>", query.text);
+  const { record_id } = RefRecordModel.query().first() || { record_id: null };
+  const newQueryText = queryFactoryForSearchCall(record_id, query.text);
+  const newQuery = {
+    ...query,
+    query_text: newQueryText,
+    vector: ReferenceRecord.referenceVector() && {
+      name: ReferenceRecord.referenceVector().vector_name,
+      value: ReferenceRecord.referenceVector().vector_values,
+    },
+  };
+
+  console.group("in search");
+  console.dir(query);
+  console.dir(newQuery);
+  console.groupEnd();
+
   const { response } = await ObservationDataset.api().post(
     `/datasets/${dataset.name}/${dataset.task}:search?limit=${size}&from=${from}`,
     {
-      query: { ...query, query_text: query.text },
+      query: { ...newQuery },
       sort,
     },
     {
@@ -231,9 +253,37 @@ async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
   return response.data;
 }
 
+const queryFactoryForSearchCall = (recordReferenceId, queryText) => {
+  console.log(queryText);
+  let newQueryText = queryText;
+  let recordIdToExcludeText = null;
+  if (recordReferenceId) {
+    recordIdToExcludeText = `NOT id:"${recordReferenceId}"`;
+    newQueryText = queryTextCurryFactory(queryText || "")(
+      recordIdToExcludeText
+    )();
+  } else {
+    // console.log("pas de vectorId");
+  }
+
+  return newQueryText;
+};
+
+const queryTextCurryFactory = (queryText1) => (queryText2) =>
+  queryText2 === undefined
+    ? queryText1
+    : queryTextCurryFactory(
+        `${queryText1} ${queryText1.length ? "AND" : ""} ${queryText2}`.trim()
+      );
+
 async function _querySearch({ dataset, query, sort, size }) {
   const save = size == 0 ? false : true;
-  const results = await _callSearchApi({ dataset, query, sort, size });
+  const results = await _callSearchApi({
+    dataset,
+    query,
+    sort,
+    size,
+  });
   if (save) {
     await _updateTaskDataset({ dataset, data: { results, query, sort } });
   }
@@ -560,10 +610,13 @@ const actions = {
      * Fetch a observation dataset by name
      */
     const workspace = currentWorkspace($nuxt.$route);
-
     const ds = await _getOrFetchDataset({ workspace, name });
     const { viewMode } = _configuredRouteParams();
     await _configureDatasetViewSettings(ds.name, viewMode);
+
+    // const isSimilaritySearch =
+    //   "vectorId" in $nuxt.$route.query && !!$nuxt.$route.query.vectorId;
+
     const dataset = await _loadTaskDataset(ds);
     await dataset.initialize();
     await _updateAnnotationProgress({
@@ -583,7 +636,12 @@ const actions = {
   },
 
   async search(_, { dataset, query, sort, size }) {
-    const searchResponse = await _search({ dataset, query, sort, size });
+    const searchResponse = await _search({
+      dataset,
+      query,
+      sort,
+      size,
+    });
     const records = searchResponse.results?.records;
     initVectorModel(dataset.id, records);
     return searchResponse;

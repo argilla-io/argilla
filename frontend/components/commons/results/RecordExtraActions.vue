@@ -58,7 +58,7 @@ export default {
       default: false,
     },
     record: {
-      type: BaseRecord,
+      type: Object,
       required: true,
     },
     dataset: {
