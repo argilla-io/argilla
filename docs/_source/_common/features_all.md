@@ -14,8 +14,8 @@
 :link: ./features/metrics.html
 
 ```
-```{grid-item-card} Similarity Search
-:link: ./features/similarity-search.html
+```{grid-item-card} Semantic Search
+:link: ./features/semantic-search.html
 
 ```
 ````
