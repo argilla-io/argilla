@@ -140,13 +140,29 @@ export default {
       search: "entities/datasets/search",
     }),
     async searchRecords(query) {
-      console.log(query);
-      const formattedQuery = this.formatQueryForSearch({ query });
-      console.log("in index", query, formattedQuery);
+      if ("vector" in query) {
+        const {vector } = query
+        this.syncVectorInfo(vector, query.recordId);
+      }
+
       await this.search({
         dataset: this.dataset,
-        ...formattedQuery,
+        query,
       });
+    },
+    syncVectorInfo(vector, recordId) {
+      console.log(vector, recordId);
+      if (vector === null) {
+        return this.clearVectorRefsInfo(recordId);
+      }
+
+      const { vectorId, vectorName } = vector;
+      const { vector_values: vectorValues } = this.getVector(vectorId);
+      this.updateReferenceRecordInstance(query.recordId, {
+        vector_name: vectorName,
+        vector_values: vectorValues,
+      });
+
     },
     formatQueryForSearch(query) {
       let queryCloned = null;

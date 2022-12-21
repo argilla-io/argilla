@@ -128,9 +128,6 @@ export default {
     refRecordId() {
       return RefRecordModel.query().first();
     },
-    fakeRecordReference() {
-      return this.dataset.results.records[0];
-    },
     showLoader() {
       return this.dataset.viewSettings.loading;
     },
@@ -158,10 +155,7 @@ export default {
     }),
     async onApplyMetadataFilter(metadata) {
       this.onCloseMetadata();
-      this.search({
-        dataset: this.dataset,
-        query: { metadata: metadata },
-      });
+      this.searchRecords({query: { metadata: metadata }});
     },
     onShowMetadata(record) {
       this.selectedRecord = record;
