@@ -98,54 +98,34 @@ class ElasticsearchClient(OpenSearchClient):
                 refresh="wait_for",
             )
 
-    def search_docs(
+    def _es_search(
         self,
-        *,
         index: str,
-        query: Optional[BaseQuery] = None,
-        sort: Optional[SortConfig] = None,
-        doc_from: int = 0,
-        size: int = 100,
-        exclude_fields: List[str] = None,
-        enable_highlight: bool = True,
-        routing: str = None,
-    ) -> Dict[str, Any]:
-
-        with self.error_handling(index=index):
-            highlight = self.highlight if enable_highlight else None
-            es_query = self.query_builder.map_2_es_query(
-                schema=self.get_index_schema(index=index),
-                query=query,
-                sort=sort,
-                exclude_fields=exclude_fields,
-                doc_from=doc_from,
-                highlight=highlight,
+        es_query: Dict[str, Any],
+        size: int,
+        routing: Optional[str] = None,
+    ):
+        knn = es_query.pop("knn", None)
+        if knn:
+            self._check_vector_supported()
+            results = self.__client__.search(
+                index=index,
+                knn=knn,
+                query=es_query.get("query"),
+                aggs=es_query.get("aggs"),
+                routing=routing,
+                track_total_hits=True,
+                rest_total_hits_as_int=True,
+                size=size,
+                source=es_query.get("_source"),
+            )
+        else:
+            results = self.__client__.search(
+                index=index,
+                routing=routing,
+                body=es_query,
+                track_total_hits=True,
+                rest_total_hits_as_int=True,
                 size=size,
             )
-
-            knn = es_query.pop("knn", None)
-            if knn:
-                self._check_vector_supported()
-                results = self.__client__.search(
-                    index=index,
-                    knn=knn,
-                    routing=routing,
-                    track_total_hits=True,
-                    rest_total_hits_as_int=True,
-                    size=size,
-                    source=es_query.get("_source"),
-                )
-            else:
-                results = self.__client__.search(
-                    index=index,
-                    routing=routing,
-                    body=es_query,
-                    track_total_hits=True,
-                    rest_total_hits_as_int=True,
-                    size=size,
-                )
-
-            return self._process_search_results(
-                search_results=results,
-                highlight_parser=highlight,
-            )
+        return results

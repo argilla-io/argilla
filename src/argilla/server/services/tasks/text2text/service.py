@@ -85,7 +85,7 @@ class Text2TextService:
         metrics = TasksFactory.find_task_metrics(
             dataset.task,
             metric_ids={
-                "words_cloud",
+                # "words_cloud",
                 "predicted_by",
                 "annotated_by",
                 "status_distribution",
@@ -108,7 +108,7 @@ class Text2TextService:
         )
 
         if results.metrics:
-            results.metrics["words"] = results.metrics["words_cloud"]
+            results.metrics["words"] = results.metrics.get("words_cloud", {})
             results.metrics["status"] = results.metrics["status_distribution"]
 
         return results

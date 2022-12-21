@@ -67,12 +67,7 @@ class OpenSearchClient(IClientAdapter):
 
         self.set_index_settings(
             index=index,
-            settings={
-                "index": {
-                    "knn": True,
-                    "knn.algo_param.ef_search": 128,  # Ignored when engine=lucene
-                }
-            },
+            settings={"index.knn": False},
         )
         vector_mappings = {}
         for vector_name, vector_dimension in vectors.items():
@@ -81,12 +76,9 @@ class OpenSearchClient(IClientAdapter):
                 "dimension": vector_dimension,
                 "method": {
                     "name": "hnsw",
+                    "engine": "lucene",
                     "space_type": "l2",
-                    "engine": "nmslib",
-                    "parameters": {
-                        "m": 16,
-                        "ef_construction": 128,
-                    },
+                    "parameters": {"m": 2, "ef_construction": 4},
                 },
             }
             vector_field = self.query_builder.get_vector_field_name(vector_name)
@@ -129,16 +121,11 @@ class OpenSearchClient(IClientAdapter):
                 size=size,
             )
 
-            if "knn" in es_query["query"]:
-                self._check_vector_supported()
-
-            results = self.__client__.search(
+            results = self._es_search(
                 index=index,
-                body=es_query,
-                routing=routing,
-                track_total_hits=True,
-                rest_total_hits_as_int=True,
+                es_query=es_query,
                 size=size,
+                routing=routing,
             )
 
             return self._process_search_results(
@@ -248,16 +235,16 @@ class OpenSearchClient(IClientAdapter):
         with self.error_handling(index=index):
             es_query = self.query_builder.map_2_es_query(
                 schema=self.get_index_schema(index=index),
+                query=query,
             )
 
             results = {}
             for aggregation in aggregations:
                 es_query["aggs"] = aggregation
-                search = self.__client__.search(
+
+                search = self._es_search(
                     index=index,
-                    body=es_query,
-                    track_total_hits=True,
-                    rest_total_hits_as_int=True,
+                    es_query=es_query,
                     size=0,
                 )
 
@@ -789,3 +776,23 @@ class OpenSearchClient(IClientAdapter):
             data["search_keywords"] = keywords
 
         return data
+
+    def _es_search(
+        self,
+        index: str,
+        es_query: Dict[str, Any],
+        size: int,
+        routing: Optional[str] = None,
+    ):
+        if "knn" in es_query["query"]:
+            self._check_vector_supported()
+
+        results = self.__client__.search(
+            index=index,
+            body=es_query,
+            routing=routing,
+            track_total_hits=True,
+            rest_total_hits_as_int=True,
+            size=size,
+        )
+        return results

@@ -177,7 +177,7 @@ def test_load_limits(mocked_client, supported_vector_search):
     create_some_data_for_text_classification(
         mocked_client,
         dataset,
-        50,
+        n=50,
         with_vectors=supported_vector_search,
     )
 

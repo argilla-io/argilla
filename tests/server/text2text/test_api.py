@@ -80,7 +80,7 @@ def test_search_records(mocked_client):
         "predicted_by": {"test": 1},
         "predicted_text": {},
         "status": {"Default": 2},
-        "words": {"data": 2, "ånother": 1},
+        "words": {},
     }
 
 

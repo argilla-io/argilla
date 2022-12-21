@@ -91,7 +91,6 @@ class GenericElasticEngineBackend(LoggingMixin):
                     index_shards=settings.es_records_index_shards,
                     ssl_verify=settings.elasticsearch_ssl_verify,
                     ca_path=settings.elasticsearch_ca_path,
-                    opensearch_enable_knn=settings.opensearch_enable_knn,
                 ),
                 metrics={**ALL_METRICS},
                 mappings={
@@ -378,6 +377,13 @@ class GenericElasticEngineBackend(LoggingMixin):
             query=query,
             fetch_once=True,
             size=self.__MAX_NUMBER_OF_LISTED_DATASETS__,
+        )
+
+    def find_record_by_id(self, dataset_id: str, record_id: str):
+        index = dataset_records_index(dataset_id)
+        return self.client.get_index_document_by_id(
+            index=index,
+            id=record_id,
         )
 
     def add_dataset_document(
