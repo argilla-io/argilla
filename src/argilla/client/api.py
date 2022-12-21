@@ -41,11 +41,13 @@ from argilla.client.datasets import (
 )
 from argilla.client.metrics.models import MetricResults
 from argilla.client.models import (
+    TextGenerationRecord,  # TODO Remove TextGenerationRecord
+)
+from argilla.client.models import (
     BulkResponse,
     Record,
     Text2TextRecord,
     TextClassificationRecord,
-    TextGenerationRecord,
     TokenClassificationRecord,
 )
 from argilla.client.sdk.client import AuthenticatedClient
@@ -369,7 +371,9 @@ class Api:
         elif record_type is TokenClassificationRecord:
             bulk_class = TokenClassificationBulkData
             creation_class = CreationTokenClassificationRecord
-        elif (record_type is Text2TextRecord) or (record_type is TextGenerationRecord):
+        elif (record_type is Text2TextRecord) or (
+            record_type is TextGenerationRecord
+        ):  # TODO Remove TextGenerationRecord
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
         else:
@@ -494,7 +498,8 @@ class Api:
             A argilla dataset.
 
         Examples:
-            **Basic Loading**: load the samples sorted by their ID
+            **Basic Loading: load the samples sorted by their ID**
+
             >>> import argilla as rg
             >>> dataset = rg.load(name="example-dataset")
 
