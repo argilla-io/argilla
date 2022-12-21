@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { isEqual } from 'lodash';
+import { isEqual } from "lodash";
 export default {
   name: "BaseRadioButton",
   props: {

@@ -44,9 +44,9 @@
         class="content__actions-buttons"
         v-if="annotationEnabled && record.status !== 'Validated'"
       >
-        <base-button class="primary" @click="onValidate(record)">{{
-          record.status === "Edited" ? "Save" : "Validate"
-        }}</base-button>
+        <base-button class="primary" @click="onValidate(record)"
+          >{{ record.status === "Edited" ? "Save" : "Validate" }}
+        </base-button>
         <base-button
           :disabled="!record.annotatedEntities.length"
           class="primary outline"
@@ -199,6 +199,7 @@ export default {
     }
   }
 }
+
 .origins > .prediction {
   position: absolute;
   top: 0;

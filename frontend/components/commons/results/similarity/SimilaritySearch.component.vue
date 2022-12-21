@@ -27,6 +27,7 @@
     >Find similar</base-button
   >
 </template>
+
 <script>
 export default {
   data() {
@@ -78,6 +79,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .similarity-search {
   position: relative;

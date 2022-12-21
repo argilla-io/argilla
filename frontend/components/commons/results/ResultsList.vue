@@ -44,6 +44,7 @@
               <slot name="record" :record="referenceRecordObj" />
             </similarity-record-reference-component>
           </template>
+
           <template v-slot="{ item, index, active }">
             <DynamicScrollerItem
               v-show="!showLoader && dataset.results.total > 0"
@@ -66,6 +67,7 @@
               </results-record>
             </DynamicScrollerItem>
           </template>
+
           <template #after>
             <pagination-end-alert
               :limit="paginationLimit"
@@ -99,21 +101,18 @@
     </lazy-base-modal>
   </span>
 </template>
+
 <script>
 import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
+import { Vector as VectorModel } from "@/models/Vector";
 import { RefRecord as RefRecordModel } from "@/models/RefRecord";
-import { TokenClassificationRecord } from "@/models/TokenClassification";
-import { TextClassificationRecord } from "@/models/TextClassification";
-import { Text2TextRecord } from "@/models/Text2Text";
+
 export default {
   props: {
     dataset: {
       type: Object,
       required: true,
-    },
-    referenceRecord: {
-      type: Object,
     },
   },
   data() {
@@ -121,12 +120,26 @@ export default {
       scrollComponent: undefined,
       selectedRecord: undefined,
       test: null,
-      referenceRecordObj: null,
     };
   },
+
   computed: {
-    refRecordId() {
-      return RefRecordModel.query().first();
+    referenceRecordId() {
+      return (
+        VectorModel.query()
+          .where("is_active", true)
+          .where("dataset_id", this.dataset.id.join("."))
+          .first()?.record_id || null
+      );
+    },
+    referenceRecordObj() {
+      const found =
+        this.referenceRecordId &&
+        RefRecordModel.query()
+          .where("record_id", this.referenceRecordId)
+          .first();
+
+      return found?.record_object;
     },
     showLoader() {
       return this.dataset.viewSettings.loading;
@@ -155,7 +168,7 @@ export default {
     }),
     async onApplyMetadataFilter(metadata) {
       this.onCloseMetadata();
-      this.searchRecords({query: { metadata: metadata }});
+      this.searchRecords({ query: { metadata: metadata } });
     },
     onShowMetadata(record) {
       this.selectedRecord = record;
@@ -174,41 +187,10 @@ export default {
     searchRecords(query) {
       this.$emit("search-records", query);
     },
-    getFactoryRecordTaskType() {
-      let recordClass = null;
-      switch (this.dataset.task) {
-        case "TextClassification":
-          recordClass = TextClassificationRecord;
-          break;
-        case "TokenClassification":
-          recordClass = TokenClassificationRecord;
-          break;
-        case "Text2Text":
-          recordClass = Text2TextRecord;
-          break;
-        default:
-          throw Error("unknown dataset task");
-      }
-      return recordClass;
-    },
-  },
-  watch: {
-    async refRecordId(newValue, oldValue) {
-      this.referenceRecordObj = null;
-      if (newValue) {
-        const { data: responseRecord, status } = await this.$axios.get(
-          `/datasets/${this.dataset.name}/records/${this.refRecordId.record_id}`
-        );
-
-        if (status === 200) {
-          const RecordClass = this.getFactoryRecordTaskType();
-          this.referenceRecordObj = new RecordClass(responseRecord);
-        }
-      }
-    },
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .content {
   $this: &;
@@ -237,9 +219,11 @@ export default {
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
 }
+
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;
 }
+
 $maxItemsperPage: 20;
 @for $i from 0 through $maxItemsperPage {
   .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {

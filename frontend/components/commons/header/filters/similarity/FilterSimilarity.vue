@@ -35,6 +35,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import "assets/icons/close";
 import "assets/icons/similarity";
@@ -52,12 +53,12 @@ export default {
   },
   methods: {
     removeSimilarityFilter() {
-      const query = { vector: null };
-      this.$emit("search-records", { query: query });
+      this.$emit("search-records", { vector: null });
     },
   },
 };
 </script>
+
 <style scoped lang="scss">
 .filter {
   &__similarity {

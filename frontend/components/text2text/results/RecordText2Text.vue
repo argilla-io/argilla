@@ -85,6 +85,9 @@ export default {
     },
   },
   mounted() {
+    if (!typeof this.records === Text2TextRecord) {
+      this.record = Text2TextRecord(this.record);
+    }
     this.initializeInitialRecord();
   },
   methods: {

@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu";
 import { IdState } from "vue-virtual-scroller";
 

@@ -36,7 +36,7 @@
           <filter-similarity
             v-if="annotationEnabled"
             :filterIsActive="enableSimilaritySearch"
-            @search-records="searchRecords"
+            @search-records="onSimilaritySearch"
           />
         </div>
         <slot />
@@ -89,11 +89,19 @@ export default {
       if (Array.isArray(values) && !values.length) {
         values = undefined;
       }
-      this.$emit("search-records", { query: { [filter]: values } });
+      this.$emit("search-records", {
+        query: {
+          [filter]: values,
+        },
+      });
     },
     onApplyMetaFilter({ filter, values }) {
       this.$emit("search-records", {
-        query: { metadata: { [filter]: values } },
+        query: {
+          metadata: {
+            [filter]: values,
+          },
+        },
       });
     },
     async onRemoveAllMetadataFilters(filters) {
@@ -114,9 +122,8 @@ export default {
         sort: sortList,
       });
     },
-    searchRecords(query) {
-      console.log("filterarea", query);
-      this.$emit("search-records", query);
+    onSimilaritySearch(query) {
+      this.$emit("search-records", { query });
     },
   },
 };

@@ -20,8 +20,6 @@ import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 import { Vector as VectorModel } from "@/models/Vector";
-import { RefRecord as RefRecordModel } from "@/models/RefRecord";
-import { ReferenceRecord } from "@/classes/ReferenceRecord.class";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -223,22 +221,20 @@ async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
     query.advanced_query_dsl = true;
   }
 
-  console.log("=>", query.text);
-  const { record_id } = RefRecordModel.query().first() || { record_id: null };
+  const vector = VectorModel.query().where("is_active", true).first();
+
+  const { record_id, vector_name, vector_values } = vector || {};
   const newQueryText = queryFactoryForSearchCall(record_id, query.text);
   const newQuery = {
     ...query,
     query_text: newQueryText,
-    vector: ReferenceRecord.referenceVector() && {
-      name: ReferenceRecord.referenceVector().vector_name,
-      value: ReferenceRecord.referenceVector().vector_values,
-    },
+    vector: vector
+      ? {
+          name: vector_name,
+          value: vector_values,
+        }
+      : null,
   };
-
-  console.group("in search");
-  console.dir(query);
-  console.dir(newQuery);
-  console.groupEnd();
 
   const { response } = await ObservationDataset.api().post(
     `/datasets/${dataset.name}/${dataset.task}:search?limit=${size}&from=${from}`,
@@ -254,7 +250,6 @@ async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
 }
 
 const queryFactoryForSearchCall = (recordReferenceId, queryText) => {
-  console.log(queryText);
   let newQueryText = queryText;
   let recordIdToExcludeText = null;
   if (recordReferenceId) {
@@ -263,7 +258,7 @@ const queryFactoryForSearchCall = (recordReferenceId, queryText) => {
       recordIdToExcludeText
     )();
   } else {
-    // console.log("pas de vectorId");
+    // nothing
   }
 
   return newQueryText;
@@ -614,9 +609,6 @@ const actions = {
     const { viewMode } = _configuredRouteParams();
     await _configureDatasetViewSettings(ds.name, viewMode);
 
-    // const isSimilaritySearch =
-    //   "vectorId" in $nuxt.$route.query && !!$nuxt.$route.query.vectorId;
-
     const dataset = await _loadTaskDataset(ds);
     await dataset.initialize();
     await _updateAnnotationProgress({
@@ -706,7 +698,6 @@ const actions = {
 };
 
 const initVectorModel = (datasetId, records) => {
-  deleteAllVectorData();
   const isDatasetContainsAnyVectors = isAnyKeyInArrayItem(records, "vectors");
   if (isDatasetContainsAnyVectors) {
     const datasetJoinedId = datasetId.join(".");
@@ -741,10 +732,6 @@ const insertDataInVectorModel = (vectors) => {
   VectorModel.insert({
     data: vectors,
   });
-};
-
-const deleteAllVectorData = () => {
-  VectorModel.deleteAll();
 };
 
 const isAnyKeyInArrayItem = (arrayWithObjItem, key) => {

@@ -40,12 +40,12 @@
     <div v-if="!annotationEnabled" class="record__labels">
       <template v-if="record.annotation">
         <!-- <svgicon
-          v-if="record.predicted && !labellingRulesView"
-          :class="['icon__predicted', record.predicted]"
-          width="40"
-          height="40"
-          :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
-        ></svgicon> -->
+                  v-if="record.predicted && !labellingRulesView"
+                  :class="['icon__predicted', record.predicted]"
+                  width="40"
+                  height="40"
+                  :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
+                ></svgicon> -->
         <base-tag
           v-for="label in record.annotation.labels"
           :key="label.class"
@@ -76,6 +76,7 @@ export default {
     },
   },
   data: () => ({}),
+
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
@@ -183,7 +184,6 @@ export default {
 //     }
 //   }
 // }
-
 .content {
   &__actions-buttons {
     margin-right: 0;
