@@ -9,11 +9,6 @@ These tutorials show you can use your favorite packages with Argilla.
 
 FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints.
 ```
-```{grid-item-card} OpenAI
-:link: openai.md
-
-OpenAI is a suite of APIs powered by large language and vision models which perform a variety of natural language and visual tasks.
-```
 ```{grid-item-card} BentoML
 :link: bentoml.md
 
@@ -84,6 +79,12 @@ The standard data-centric AI package for data quality and machine learning with 
 
 SHAP (SHapley Additive exPlanations) is a game theoretic approach to explain the output of any machine learning model.
 ```
+
+```{grid-item-card} OpenAI
+:link: openai.md
+
+OpenAI is a suite of APIs powered by large language and vision models which perform a variety of natural language and visual tasks.
+```
 ````
 
 ```{toctree}
@@ -110,4 +111,5 @@ snorkel.md
 transformersinterpret
 cleanlab
 shap
+openai
 ```
