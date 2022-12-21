@@ -11,7 +11,7 @@ Specific features that are covered by internal `Argilla` functionalities.
 | Datasets       | Internal `Dataset` classes are lightweight containers for Argilla records.        |
 | Metrics       | Argilla `Metrics` enables you to perform fine-grained analysis of your models and training datasets.        |
 | Queries       | Argilla query functionalities are based on the powerful `Elasticsearch` query string syntax.        |
-
+| Similarity Search | This built-in search uses veectors for text and enables Approximate KNN for semantic search on these vectors.    |
 
 ## MLOps Steps
 All steps that we directly or in-directly cover within the `MLOps lifecycle`.
