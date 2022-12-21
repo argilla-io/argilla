@@ -371,7 +371,7 @@ class EsQueryBuilder:
             "num_candidates": num_candidates,  # TODO: parameterize
             "filter": es_query_filter,
         }
-        es_query.pop("sort")
+        es_query.pop("sort", None)
         del es_query["query"]
 
     def _setup_random_score(self, es_query: Dict[str, Any]):
@@ -404,7 +404,7 @@ class OpenSearchQueryBuilder(EsQueryBuilder):
                 "k": top_k,  # TODO: Input from query
             }
         }
-        es_query.pop("sort")
+        es_query.pop("sort", None)
         filter = es_query.pop("query")
         es_query.update(
             {

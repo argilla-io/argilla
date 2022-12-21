@@ -167,7 +167,10 @@ class DatasetRecordsDAO:
             )
             if isinstance(total, dict):
                 total = total["value"]
-            return DaoRecordsSearchResults(total=total, records=records)
+            return DaoRecordsSearchResults(
+                total=total,
+                records=records,
+            )
         except ClosedIndexError:
             raise ClosedDatasetError(dataset.name)
         except IndexNotFoundError:

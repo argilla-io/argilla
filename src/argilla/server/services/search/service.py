@@ -75,7 +75,10 @@ class SearchRecordsService:
         exclude_fields = ["metrics.*"] if exclude_metrics else None
         results = self.__dao__.search_records(
             dataset,
-            search=DaoRecordsSearch(query=query, sort=sort_config),
+            search=DaoRecordsSearch(
+                query=query,
+                sort=sort_config,
+            ),
             size=size,
             record_from=record_from,
             exclude_fields=exclude_fields,
