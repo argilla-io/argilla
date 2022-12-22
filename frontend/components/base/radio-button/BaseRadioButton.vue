@@ -65,6 +65,7 @@ $radio-button-size: 20px;
   width: auto;
   margin: 16px 16px 16px 0;
   gap: $base-space;
+  word-break: break-word;
   &:not(.--disabled) {
     cursor: pointer;
     #{$this}__label {
