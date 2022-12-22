@@ -20,15 +20,15 @@ export default {
   computed: {
     availableHelpInfoType() {
       const types = [
-        this.availableExplanationHelpInfo,
-        this.availableSimilarityHelpInfo,
+        this.isExplanationHelpInfoAvailable,
+        this.isSimilarityHelpInfoAvailable,
       ];
       return types.filter((type) => type);
     },
-    availableExplanationHelpInfo() {
+    isExplanationHelpInfoAvailable() {
       return this.dataset.results.records.some((record) => record.explanation) && "explain";
     },
-    availableSimilarityHelpInfo() {
+    isSimilarityHelpInfoAvailable() {
       return this.dataset.viewSettings.viewMode === "annotate" && 'similarity';
     },
     task() {
