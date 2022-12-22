@@ -256,7 +256,7 @@ def listener(
         metrics: Required metrics for listener condition.
         condition: Defines condition over search and metrics that launch action when is satisfied.
         with_records: Include records as part or action arguments. If ``False``,
-            only the listener context ``RListenerContext`` will be passed. Default: ``True``.
+            only the listener context ``RGListenerContext`` will be passed. Default: ``True``.
         execution_interval_in_seconds: Define the execution interval in seconds when listener
             iteration will be executed.
         **query_params: Dynamic parameters used in the query. These parameters will be available
