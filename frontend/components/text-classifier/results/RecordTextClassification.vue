@@ -39,13 +39,6 @@
 
     <div v-if="!annotationEnabled" class="record__labels">
       <template v-if="record.annotation">
-        <!-- <svgicon
-                  v-if="record.predicted && !labellingRulesView"
-                  :class="['icon__predicted', record.predicted]"
-                  width="40"
-                  height="40"
-                  :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
-                ></svgicon> -->
         <base-tag
           v-for="label in record.annotation.labels"
           :key="label.class"
@@ -57,8 +50,6 @@
 </template>
 
 <script>
-// import "assets/icons/matching";
-// import "assets/icons/no-matching";
 import { mapActions } from "vuex";
 import {
   TextClassificationRecord,
@@ -171,19 +162,6 @@ export default {
   }
 }
 
-// .icon {
-//   &__predicted {
-//     position: absolute;
-//     right: 3em;
-//     top: 1em;
-//     &.ko {
-//       color: $error;
-//     }
-//     &.ok {
-//       color: $success;
-//     }
-//   }
-// }
 .content {
   &__actions-buttons {
     margin-right: 0;
