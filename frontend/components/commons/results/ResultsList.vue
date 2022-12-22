@@ -29,11 +29,6 @@
         >
           <template #before>
             <slot name="results-header" />
-            <results-loading
-              v-if="showLoader"
-              :size="dataset.viewSettings.pagination.size"
-            />
-            <results-empty v-else-if="dataset.results.total === 0" />
             <similarity-record-reference-component
               v-if="referenceRecordObj && !showLoader"
               :dataset="dataset"
@@ -43,6 +38,11 @@
             >
               <slot name="record" :record="referenceRecordObj" />
             </similarity-record-reference-component>
+            <results-loading
+              v-if="showLoader"
+              :size="dataset.viewSettings.pagination.size"
+            />
+            <results-empty v-else-if="dataset.results.total === 0" />
           </template>
 
           <template v-slot="{ item, index, active }">
