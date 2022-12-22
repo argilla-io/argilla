@@ -142,12 +142,12 @@ export default {
     onShowMetadata(record) {
       this.$emit("show-metadata", record);
     },
-    searchRecords(vectorName) {
-      const formattedObj = this.formatSelectedVectorObj(vectorName);
+    searchRecords(vector) {
+      const formattedObj = this.formatSelectedVectorObj(vector);
       this.$emit("search-records", formattedObj);
     },
     formatSelectedVectorObj(vector) {
-      return { recordId: this.item.id, vector };
+      return { query: {vector}, recordId: this.item.id, vector };
     },
   },
 };
