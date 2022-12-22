@@ -93,7 +93,7 @@ _import_structure = {
         "read_pandas",
     ],
     "monitoring.model_monitor": ["monitor"],
-    "listeners.listener": ["listener", "RListenerContext", "Search", "Metrics"],
+    "listeners.listener": ["listener", "RGListenerContext", "Search", "Metrics"],
     "datasets": [
         "configure_dataset",
         "TextClassificationSettings",
