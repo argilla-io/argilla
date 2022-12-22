@@ -2,8 +2,9 @@
   <div class="dataset-options">
     <dataset-option-help-info
       class="dataset-options__item"
-      v-if="availableHelpInfo"
+      v-if="availableHelpInfoType.length"
       :task="task"
+      :availableHelpInfoType="availableHelpInfoType"
     />
   </div>
 </template>
@@ -17,8 +18,18 @@ export default {
     },
   },
   computed: {
-    availableHelpInfo() {
-      return this.dataset.results.records.some((record) => record.explanation);
+    availableHelpInfoType() {
+      const types = [
+        this.isExplanationHelpInfoAvailable,
+        this.isSimilarityHelpInfoAvailable,
+      ];
+      return types.filter((type) => type);
+    },
+    isExplanationHelpInfoAvailable() {
+      return this.dataset.results.records.some((record) => record.explanation) && "explain";
+    },
+    isSimilarityHelpInfoAvailable() {
+      return this.dataset.viewSettings.viewMode === "annotate" && 'similarity';
     },
     task() {
       return this.dataset.task;
