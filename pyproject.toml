@@ -37,7 +37,7 @@ dependencies = [
     # monitoring
     "wrapt ~= 1.13.0",
     # weaksupervision
-    "numpy",
+    "numpy < 1.24.0",
     "tqdm >= 4.27.0",
     # monitor background consumers
     "backoff",
