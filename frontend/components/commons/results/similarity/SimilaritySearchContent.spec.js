@@ -9,7 +9,7 @@ const options = {
       name: "text_vector",
       value: [-0.019986379891633987, 0.05246466398239136, 0.023972749710083008],
     },
-    vectors: [
+    formattedVectors: [
       {
         id: "text_vector",
         name: "text_vector",
@@ -33,9 +33,9 @@ describe("SimilaritySearchContentComponent", () => {
     expect(wrapper.is(SimilaritySearchContent)).toBe(true);
   });
   it("expect to exist vectors", async () => {
-    expect(wrapper.props().vectors).toBeTruthy();
+    expect(wrapper.props().formattedVectors).toBeTruthy();
   });
-  it("expect to exist similaritySelectedVector", async () => {
-    expect(wrapper.vm.similaritySelectedVector).toBeTruthy();
+  it("expect to exist selectedName", async () => {
+    expect(wrapper.vm.selectedName).toBeTruthy();
   });
 });
