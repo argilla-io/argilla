@@ -18,7 +18,7 @@ from typing import List
 import pytest
 
 import argilla as ar
-from argilla import RBListenerContext, listener
+from argilla import RGListenerContext, listener
 from argilla.client.models import Record
 
 
@@ -57,7 +57,7 @@ def test_listener_with_parameters(
             execution_interval_in_seconds=1,
             **(query_params or {}),
         )
-        def action(self, records: List[Record], ctx: RBListenerContext):
+        def action(self, records: List[Record], ctx: RGListenerContext):
             try:
                 assert ctx.dataset == dataset
                 if ctx.query_params:
