@@ -22,13 +22,14 @@
     <div v-else class="filter__similarity__content">
       <div
         data-title="Click 'Find similar' at record level to filter by similarity"
-      ></div>
-      <svgicon
-        class="filter__similarity__icon"
-        width="28"
-        height="28"
-        name="similarity"
-      ></svgicon>
+      >
+        <svgicon
+          class="filter__similarity__icon"
+          width="28"
+          height="28"
+          name="similarity"
+        ></svgicon>
+      </div>
       <div>
         <span class="filter__similarity__new">NEW</span>
       </div>
@@ -71,7 +72,7 @@ export default {
       gap: calc($base-space / 2);
       border-radius: $border-radius;
       padding: 0 0.8em 0 0.4em;
-      &[data-title] {
+      div[data-title] {
         position: relative;
         @extend %has-tooltip--top;
         @extend %tooltip-large-text;
