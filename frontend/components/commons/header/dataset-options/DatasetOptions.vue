@@ -20,16 +20,16 @@ export default {
   computed: {
     availableHelpInfoType() {
       const types = [
-        this.availableExplanationHelpInfo && "explain",
-        this.availableSimilarityHelpInfo && "similarity",
+        this.availableExplanationHelpInfo,
+        this.availableSimilarityHelpInfo,
       ];
       return types.filter((type) => type);
     },
     availableExplanationHelpInfo() {
-      return this.dataset.results.records.some((record) => record.explanation);
+      return this.dataset.results.records.some((record) => record.explanation) && "explain";
     },
     availableSimilarityHelpInfo() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.dataset.viewSettings.viewMode === "annotate" && 'similarity';
     },
     task() {
       return this.dataset.task;
