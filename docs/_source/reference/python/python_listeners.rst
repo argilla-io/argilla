@@ -6,7 +6,7 @@ Listeners
 Here we describe the Argilla listeners capabilities
 
 .. automodule:: argilla.listeners
-   :members: listener, RBDatasetListener, Metrics, RBListenerContext, Search
+   :members: listener, RGDatasetListener, Metrics, RGListenerContext, Search
 
 
 
