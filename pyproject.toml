@@ -51,25 +51,25 @@ server = [
     # Basic dependencies
     "fastapi ~= 0.75.0",
     "opensearch-py ~= 1.0.0",
-    "uvicorn[standard] >= 0.15.0,<0.18.0",
+    "uvicorn[standard] >= 0.15.0,< 0.21.0",
     "smart-open",
     "brotli-asgi ~= 1.1.0",
     "Deprecated ~= 1.2.0",
     # Advanced query search dsl
-    "luqum ~= 0.11.0",
+    "luqum >= 0.11,< 0.13",
     # metrics
     "scikit-learn >= 0.24.2",
     # Words cloud
     "stopwordsiso ~= 0.6.1",
     # Statics server
-    "aiofiles~=0.6.0",
+    "aiofiles>=0.6,<22.2",
     "PyYAML~=5.4.1",
     # security dependencies
     "python-multipart~=0.0.5",
-    "python-jose[cryptography]~=3.2.0",
+    "python-jose[cryptography]>=3.2,<3.4",
     "passlib[bcrypt]~=1.7.4",
     # Info status
-    "psutil ~= 5.8.0",
+    "psutil >= 5.8,< 5.10",
     # Telemetry
     "segment-analytics-python == 2.2.0"
 ]

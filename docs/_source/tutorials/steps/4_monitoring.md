@@ -7,6 +7,8 @@ These tutorials show you how Argilla can help you to monitor your model predicti
 
 ```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
 ```
+```{include} /_static/tutorials/labelling-textclassification-gpt3-fewshot/modal.md
+```
 ```{include} /_static/tutorials/monitoring-textclassification-cleanlab-explainability/modal.md
 ```
 ```{include} /_static/tutorials/monitoring-textclassification-shaptransformersinterpret-explainability/modal.md
