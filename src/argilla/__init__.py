@@ -61,7 +61,7 @@ if _TYPE_CHECKING:
         TokenClassificationSettings,
         configure_dataset,
     )
-    from argilla.listeners import Metrics, RBListenerContext, Search, listener
+    from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
     from argilla.server.server import app
 
@@ -93,7 +93,7 @@ _import_structure = {
         "read_pandas",
     ],
     "monitoring.model_monitor": ["monitor"],
-    "listeners.listener": ["listener", "RBListenerContext", "Search", "Metrics"],
+    "listeners.listener": ["listener", "RListenerContext", "Search", "Metrics"],
     "datasets": [
         "configure_dataset",
         "TextClassificationSettings",
