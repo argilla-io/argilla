@@ -9,7 +9,7 @@
       <svgicon name="support" width="18" height="18" />Help</base-button
     >
     <dataset-global-help-info
-      v-if="availableHelpInfoType.includes('similarity')"
+      v-if="showGlobalHelpInfo"
       :visible="visible"
       @on-close="close()"
     />
@@ -45,6 +45,9 @@ export default {
     buttonClass() {
       return this.visible ? "--active" : null;
     },
+    showGlobalHelpInfo() {
+      return this.availableHelpInfoType.includes('similarity');
+    }
   },
   methods: {
     showHelpInfo() {
