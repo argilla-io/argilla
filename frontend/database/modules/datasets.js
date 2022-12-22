@@ -216,12 +216,13 @@ async function _updateViewSettings({ id, data }) {
 
 async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
   const { advancedQueryDsl } = $nuxt.$route.query;
-
   if (advancedQueryDsl === null || advancedQueryDsl === "true") {
     query.advanced_query_dsl = true;
   }
 
   const vector = VectorModel.query().where("is_active", true).first();
+
+  const numberOfRecords = vector ? 50 : size;
 
   const { record_id, vector_name, vector_values } = vector || {};
   const newQueryText = queryFactoryForSearchCall(record_id, query.text);
@@ -237,7 +238,7 @@ async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
   };
 
   const { response } = await ObservationDataset.api().post(
-    `/datasets/${dataset.name}/${dataset.task}:search?limit=${size}&from=${from}`,
+    `/datasets/${dataset.name}/${dataset.task}:search?limit=${numberOfRecords}&from=${from}`,
     {
       query: { ...newQuery },
       sort,
@@ -464,13 +465,26 @@ async function _updateTaskDataset({ dataset, data }) {
 }
 
 async function _updatePagination({ id, size, page }) {
+  const updatedSize = getSizeRecords(size);
   const pagination = await Pagination.update({
     where: id,
-    data: { size, page },
+    data: { size: updatedSize, page },
   });
 
   return pagination;
 }
+
+const getSizeRecords = (size) => {
+  const isAnnotateView = $nuxt.$route.query.viewMode === "annotate";
+  const isSimilaritySearch = $nuxt.$route.query.vectorId;
+  const sizeIfSimilaritySearchisActivate = 50;
+  const updatedSize =
+    isAnnotateView && isSimilaritySearch
+      ? sizeIfSimilaritySearchisActivate
+      : size;
+
+  return updatedSize;
+};
 
 const getters = {
   findByName: () => (name) => {

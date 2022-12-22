@@ -61,11 +61,6 @@ export default {
     // 3. Finally, fetch vector info from query param and setup the active vector if needed
     await this.activateVectorAndRecorByUrlQueryParams();
   },
-  data() {
-    return {
-      numberOfRecords: 50,
-    };
-  },
   computed: {
     ...mapGetters({
       findByName: "entities/datasets/findByName",
