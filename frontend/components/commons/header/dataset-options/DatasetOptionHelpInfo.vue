@@ -8,7 +8,13 @@
     >
       <svgicon name="support" width="18" height="18" />Help</base-button
     >
+    <dataset-global-help-info
+      v-if="availableHelpInfoType.includes('similarity')"
+      :visible="visible"
+      @on-close="close()"
+    />
     <component
+      v-else
       :visible="visible"
       @on-close="close()"
       :is="currentTaskHelpInfo"
@@ -22,6 +28,9 @@ export default {
     task: {
       type: String,
       required: true,
+    },
+    availableHelpInfoType: {
+      type: Array,
     },
   },
   data() {
