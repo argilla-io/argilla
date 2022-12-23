@@ -58,8 +58,13 @@ export default {
     await this.cleanModels();
     // 2. Fetch the record data and initialize the corresponding data models
     await this.fetchByName(this.datasetName);
-    // 3. Finally, fetch vector info from query param and setup the active vector if needed
+    // 3. Fetch vector info from query param and setup the active vector if needed
     await this.activateVectorAndRecorByUrlQueryParams();
+    // 4. If we have a vector filter, apply a search
+    if (this.referenceRecordId) {
+      await this.searchRecords({ query: this.dataset.query });
+    }
+
   },
   computed: {
     ...mapGetters({
