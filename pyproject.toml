@@ -27,7 +27,7 @@ maintainers = [
 ]
 dependencies = [
     # Client
-    "httpx ~= 0.15.0",
+    "httpx >= 0.15,< 0.24",
     "deprecated ~= 1.2.0",
     "packaging >= 20.0",
     # pandas -> For data loading
