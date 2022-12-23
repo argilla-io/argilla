@@ -46,8 +46,8 @@ export default {
       return this.visible ? "--active" : null;
     },
     showGlobalHelpInfo() {
-      return this.availableHelpInfoType.includes('similarity');
-    }
+      return this.availableHelpInfoType.includes("similarity");
+    },
   },
   methods: {
     showHelpInfo() {
