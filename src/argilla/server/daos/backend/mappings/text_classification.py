@@ -20,7 +20,6 @@ def text_classification_mappings():
     return {
         "_source": mappings.source(
             excludes=[
-                # "words", # Cannot be excluded since comment text_length metric  is computed using this source fields
                 "predicted",
                 "predicted_as",
                 "predicted_by",

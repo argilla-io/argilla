@@ -60,8 +60,6 @@ server = [
     "luqum >= 0.11,< 0.13",
     # metrics
     "scikit-learn >= 0.24.2",
-    # Words cloud
-    "stopwordsiso ~= 0.6.1",
     # Statics server
     "aiofiles>=0.6,<22.2",
     "PyYAML~=5.4.1",

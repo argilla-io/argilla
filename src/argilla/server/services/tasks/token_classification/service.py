@@ -102,7 +102,7 @@ class TokenClassificationService:
         metrics = TasksFactory.find_task_metrics(
             dataset.task,
             metric_ids={
-                # "words_cloud",
+                "words_cloud",
                 "predicted_by",
                 "predicted_as",
                 "annotated_by",
