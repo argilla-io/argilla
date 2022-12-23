@@ -475,11 +475,11 @@ async function _updatePagination({ id, size, page }) {
 }
 
 const getSizeRecords = (size) => {
-  const isAnnotateView = $nuxt.$route.query.viewMode === "annotate";
+  const isWeakLabelingView = $nuxt.$route.query.viewMode === "labelling-rules";
   const isSimilaritySearch = $nuxt.$route.query.vectorId;
   const sizeIfSimilaritySearchisActivate = 50;
   const updatedSize =
-    isAnnotateView && isSimilaritySearch
+    !isWeakLabelingView && isSimilaritySearch
       ? sizeIfSimilaritySearchisActivate
       : size;
 

@@ -34,7 +34,7 @@
             @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></filters-list>
           <filter-similarity
-            v-if="annotationEnabled"
+            v-if="!weakLabelingEnabled"
             :filterIsActive="enableSimilaritySearch"
             @search-records="onSimilaritySearch"
           />
@@ -74,8 +74,8 @@ export default {
     viewMode() {
       return this.dataset.viewSettings.viewMode;
     },
-    annotationEnabled() {
-      return this.viewMode === "annotate";
+    weakLabelingEnabled() {
+      return this.viewMode === "labelling-rules";
     },
   },
   methods: {

@@ -24,18 +24,20 @@
       ]"
     >
       <div class="record__header">
-        <template v-if="annotationEnabled">
-          <div class="record__header--left" v-if="!isReferenceRecord">
-            <base-checkbox
-              class="list__checkbox"
-              :value="item.selected"
-              @change="onCheckboxChanged($event, item.id)"
-            ></base-checkbox>
-            <status-tag
-              v-if="item.status !== 'Default'"
-              :title="item.status"
-            ></status-tag>
-          </div>
+        <template v-if="!weakLabelingEnabled">
+          <template v-if="annotationEnabled">
+            <div class="record__header--left" v-if="!isReferenceRecord">
+              <base-checkbox
+                class="list__checkbox"
+                :value="item.selected"
+                @change="onCheckboxChanged($event, item.id)"
+              ></base-checkbox>
+              <status-tag
+                v-if="item.status !== 'Default'"
+                :title="item.status"
+              ></status-tag>
+            </div>
+          </template>
           <similarity-search-component
             class="record__similarity-search"
             v-if="formattedVectors.length"
@@ -83,6 +85,9 @@ export default {
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
+    },
+    weakLabelingEnabled() {
+      return this.dataset.viewSettings.viewMode === "labelling-rules";
     },
     visibleRecords() {
       return this.dataset.visibleRecords;
