@@ -45,6 +45,13 @@
             :isReferenceRecord="isReferenceRecord"
             @search-records="searchRecords"
           />
+          <base-button
+            v-else
+            data-title="To use this function you need to have a vector associated with this record"
+            class="small similarity-search__button--disabled"
+          >
+            Find similar
+          </base-button>
         </template>
         <record-extra-actions
           :key="item.id"
@@ -177,6 +184,25 @@ export default {
   }
   &__similarity-search {
     margin-left: auto;
+  }
+}
+.similarity-search {
+  &__button {
+    &--disabled {
+      @include font-size(13px);
+      font-weight: 500;
+      color: $black-37;
+      overflow: visible;
+      cursor: default;
+      &[data-title] {
+        position: relative;
+        @extend %has-tooltip--bottom;
+        @extend %tooltip-large-text;
+        &:after {
+          min-width: 158px;
+        }
+      }
+    }
   }
 }
 .list {
