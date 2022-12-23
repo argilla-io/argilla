@@ -36,7 +36,11 @@
               @search-records="searchRecords"
               @show-metadata="onShowMetadata"
             >
-              <slot name="record" :record="referenceRecordObj" />
+              <slot
+                name="record"
+                :record="referenceRecordObj"
+                :isReferenceRecord="true"
+              />
             </similarity-record-reference-component>
             <results-loading
               v-if="showLoader"

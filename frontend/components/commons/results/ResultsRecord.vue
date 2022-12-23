@@ -25,7 +25,7 @@
     >
       <div class="record__header">
         <template v-if="annotationEnabled">
-          <div class="record__header--left">
+          <div class="record__header--left" v-if="!isReferenceRecord">
             <base-checkbox
               class="list__checkbox"
               :value="item.selected"
@@ -46,7 +46,7 @@
         </template>
         <record-extra-actions
           :key="item.id"
-          :allow-change-status="annotationEnabled"
+          :allow-change-status="annotationEnabled && !isReferenceRecord"
           :record="item"
           :dataset="dataset"
           :task="dataset.task"
@@ -54,7 +54,7 @@
           @onShowMetadata="onShowMetadata(item)"
         />
       </div>
-      <slot :record="item" />
+      <slot :record="item" :isReferenceRecord="isReferenceRecord" />
     </div>
   </div>
 </template>
@@ -147,7 +147,7 @@ export default {
       this.$emit("search-records", formattedObj);
     },
     formatSelectedVectorObj(vector) {
-      return { query: {vector}, recordId: this.item.id, vector };
+      return { query: { vector }, recordId: this.item.id, vector };
     },
   },
 };

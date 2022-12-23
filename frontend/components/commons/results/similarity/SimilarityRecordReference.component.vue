@@ -38,5 +38,8 @@ export default {
     border: 1px solid $record-reference-border-color;
     background: $record-reference-background-color;
   }
+  :deep(.origins) {
+    pointer-events: none;
+  }
 }
 </style>

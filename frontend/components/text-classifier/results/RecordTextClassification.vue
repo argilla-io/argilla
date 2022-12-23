@@ -20,14 +20,14 @@
     <div class="record--left">
       <record-inputs :record="record" />
       <classifier-annotation-area
-        v-if="annotationEnabled"
+        v-if="interactionsEnabled"
         :dataset="dataset"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
       <classifier-exploration-area v-else :dataset="dataset" :record="record" />
-      <div v-if="annotationEnabled" class="content__actions-buttons">
+      <div v-if="interactionsEnabled" class="content__actions-buttons">
         <base-button
           v-if="allowValidate"
           class="primary"
@@ -65,10 +65,17 @@ export default {
       type: TextClassificationRecord,
       required: true,
     },
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: () => ({}),
 
   computed: {
+    interactionsEnabled() {
+      return this.annotationEnabled && !this.isReferenceRecord;
+    },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
