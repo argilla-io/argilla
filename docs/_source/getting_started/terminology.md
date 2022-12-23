@@ -32,7 +32,7 @@ Main task categories that we cover within the `NLP landscape`.
 | :--- |:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 📕📗 TextClassification      | Assigning predefined category labels to `texts`. This contains sub-tasks like detecting sentiment, textual similarity, and multi-label classification.                   |
 | 🈴🈯️ TokenClassification      | Assigning predefined category labels to `words and phrases within texts` . This contains sub-tasks like Named Entity Recognition (NER) and Part-Of-Speech Tagging (POS). |
-| 👨🏽💬 TextGeneration       | Generating a `text` based on an input `text`.  This contains sub-tasks like machine translation, and paraphrase generation.                                              |
+| 👨🏽💬 Text2Text       | Generating a `text` based on an input `text`.  This contains sub-tasks like machine translation, and paraphrase generation.                                              |
 
 ## Techniques
 
