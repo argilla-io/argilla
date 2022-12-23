@@ -133,17 +133,13 @@ export default {
         VectorModel.query()
           .where("is_active", true)
           .where("dataset_id", this.dataset.id.join("."))
-          .first()?.record_id || null
+          .first()?.record_id
       );
     },
     referenceRecordObj() {
-      const found =
-        this.referenceRecordId &&
-        RefRecordModel.query()
-          .where("record_id", this.referenceRecordId)
-          .first();
-
-      return found?.record_object;
+      return RefRecordModel.query()
+        .where("record_id", this.referenceRecordId)
+        .first()?.record_object;
     },
     showLoader() {
       return this.dataset.viewSettings.loading;

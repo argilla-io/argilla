@@ -113,7 +113,8 @@ export default {
       return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
     },
     isReferenceRecord() {
-      return !!VectorModel.query().where("is_active", true).first();
+      const value = VectorModel.query().where("is_active", true).first()
+      return !!value;
     },
   },
   destroyed() {},
@@ -222,7 +223,7 @@ export default {
       });
       return responseRecord;
     },
-    async upsterRecordReferenceVectors({ vectors, id }) {
+    async upstertRecordReferenceVectors({ vectors, id }) {
       const vectorsByToInsertInModel = Object.entries(vectors).map(
         ([vectorName, { value: vectorValues }]) => {
           return {
@@ -243,9 +244,9 @@ export default {
         const recordReference = await this.fetchAndStoreReferenceRecord(
           recordId
         );
-        await this.upsterRecordReferenceVectors(recordReference);
+        await this.upstertRecordReferenceVectors(recordReference);
       } catch (err) {
-        console.log(
+        console.warn(
           "Error on fetchRecordReferenceAndInsertIntoTheRefRecordModel",
           err
         );
