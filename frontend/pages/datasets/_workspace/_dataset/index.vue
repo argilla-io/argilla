@@ -121,19 +121,9 @@ export default {
       if (vector || "vector" in query) {
         await this.syncRecordVectorInfo(vector, recordId);
       }
-      let vectorQuery = null;
-      if (this.referenceRecordId) {
-        vectorQuery = {
-          name: this.referenceRecordId?.vector_name,
-          value: this.referenceRecordId?.vector_values,
-        };
-      }
       await this.search({
         dataset: this.dataset,
-        query: {
-          ...query,
-          vector: vectorQuery,
-        },
+        query,
         sort,
       });
     },

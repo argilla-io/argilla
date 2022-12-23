@@ -148,14 +148,13 @@ function _configuredRouteParams() {
   /**
    * Read the route query params: query, sort, viewMode and pagination
    */
-  const { query, sort, viewMode, pagination, vectorId } = $nuxt.$route.query;
+  const { query, sort, viewMode, pagination } = $nuxt.$route.query;
 
   return {
     query: JSON.parse(query ? Base64.decode(query) : "{}"),
     sort: JSON.parse(sort ? Base64.decode(sort) : "[]"),
     viewMode: viewMode || "explore",
     pagination: pagination ? JSON.parse(Base64.decode(pagination)) : {},
-    vectorId: JSON.parse(vectorId ? Base64.decode(vectorId) : "{}"),
   };
 }
 
@@ -217,17 +216,25 @@ async function _updateViewSettings({ id, data }) {
 
 async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
   const { advancedQueryDsl } = $nuxt.$route.query;
-  const { vectorId } = _configuredRouteParams();
   if (advancedQueryDsl === null || advancedQueryDsl === "true") {
     query.advanced_query_dsl = true;
   }
+
   const vector = VectorModel.query().where("is_active", true).first();
-  const { record_id } = vector || vectorId || {};
-  const numberOfRecords = size;
+
+  const numberOfRecords = vector ? 50 : size;
+
+  const { record_id, vector_name, vector_values } = vector || {};
   const newQueryText = queryFactoryForSearchCall(record_id, query.text);
   const newQuery = {
     ...query,
     query_text: newQueryText,
+    vector: vector
+      ? {
+          name: vector_name,
+          value: vector_values,
+        }
+      : null,
   };
 
   const { response } = await ObservationDataset.api().post(
@@ -345,6 +352,7 @@ async function _search({ dataset, query, sort, size }) {
     size,
     page: 1,
   });
+
   _displayQueryParams({
     /**
      * Set different route query params
