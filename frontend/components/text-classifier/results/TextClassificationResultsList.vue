@@ -26,10 +26,11 @@
     <template slot="results-header">
       <rule-definition :dataset="dataset" v-if="showRulesArea" />
     </template>
-    <template slot="record" slot-scope="results">
+    <template slot="record" slot-scope="slotProps">
       <record-text-classification
         :dataset="dataset"
-        :record="results.record"
+        :record="slotProps.record"
+        :isReferenceRecord="slotProps.isReferenceRecord"
         @onShowMetadata="onShowMetadata"
       />
     </template>

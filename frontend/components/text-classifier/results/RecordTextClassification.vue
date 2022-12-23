@@ -20,14 +20,14 @@
     <div class="record--left">
       <record-inputs :record="record" />
       <classifier-annotation-area
-        v-if="annotationEnabled"
+        v-if="interactionsEnabled"
         :dataset="dataset"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
       <classifier-exploration-area v-else :dataset="dataset" :record="record" />
-      <div v-if="annotationEnabled" class="content__actions-buttons">
+      <div v-if="interactionsEnabled" class="content__actions-buttons">
         <base-button
           v-if="allowValidate"
           class="primary"
@@ -39,13 +39,6 @@
 
     <div v-if="!annotationEnabled" class="record__labels">
       <template v-if="record.annotation">
-        <!-- <svgicon
-          v-if="record.predicted && !labellingRulesView"
-          :class="['icon__predicted', record.predicted]"
-          width="40"
-          height="40"
-          :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
-        ></svgicon> -->
         <base-tag
           v-for="label in record.annotation.labels"
           :key="label.class"
@@ -57,8 +50,6 @@
 </template>
 
 <script>
-// import "assets/icons/matching";
-// import "assets/icons/no-matching";
 import { mapActions } from "vuex";
 import {
   TextClassificationRecord,
@@ -74,9 +65,17 @@ export default {
       type: TextClassificationRecord,
       required: true,
     },
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: () => ({}),
+
   computed: {
+    interactionsEnabled() {
+      return this.annotationEnabled && !this.isReferenceRecord;
+    },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
@@ -169,20 +168,6 @@ export default {
     @extend %hide-scrollbar;
   }
 }
-
-// .icon {
-//   &__predicted {
-//     position: absolute;
-//     right: 3em;
-//     top: 1em;
-//     &.ko {
-//       color: $error;
-//     }
-//     &.ok {
-//       color: $success;
-//     }
-//   }
-// }
 
 .content {
   &__actions-buttons {

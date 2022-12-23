@@ -97,4 +97,10 @@ class ObservationDataset extends Model {
   }
 }
 
-export { ObservationDataset, USER_DATA_METADATA_KEY };
+const getDatasetModelPrimaryKey = ({ owner, name }) => [owner, name];
+
+export {
+  ObservationDataset,
+  USER_DATA_METADATA_KEY,
+  getDatasetModelPrimaryKey,
+};

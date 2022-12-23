@@ -26,10 +26,15 @@ export default {
       return types.filter((type) => type);
     },
     isExplanationHelpInfoAvailable() {
-      return this.dataset.results.records.some((record) => record.explanation) && "explain";
+      return (
+        this.dataset.results.records.some((record) => record.explanation) &&
+        "explain"
+      );
     },
     isSimilarityHelpInfoAvailable() {
-      return this.dataset.viewSettings.viewMode === "annotate" && 'similarity';
+      return (
+        this.dataset.viewSettings.viewMode !== "labelling-rules" && "similarity"
+      );
     },
     task() {
       return this.dataset.task;

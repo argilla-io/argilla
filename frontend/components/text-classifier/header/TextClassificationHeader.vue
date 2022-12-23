@@ -20,6 +20,7 @@
     <filters-area
       v-if="!dataset.viewSettings.visibleRulesList"
       :dataset="dataset"
+      :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
     >
       <dataset-options :dataset="dataset" />
@@ -49,6 +50,10 @@ export default {
   props: {
     dataset: {
       type: Object,
+      required: true,
+    },
+    enableSimilaritySearch: {
+      type: Boolean,
       required: true,
     },
   },

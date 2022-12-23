@@ -5,6 +5,7 @@
       id="filter-active"
       class="filter__similarity__content"
       :class="filterIsActive ? '--active' : null"
+      data-title="Remove similar records filter"
     >
       <base-button
         class="filter__similarity__button"
@@ -21,7 +22,7 @@
     </div>
     <div v-else class="filter__similarity__content">
       <div
-        data-title="Click 'Find similar' at record level to filter by similarity"
+        data-title="If you have vectors in your records, you can find the most similar records to a given one"
       >
         <svgicon
           class="filter__similarity__icon"
@@ -36,6 +37,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import "assets/icons/close";
 import "assets/icons/similarity";
@@ -53,12 +55,12 @@ export default {
   },
   methods: {
     removeSimilarityFilter() {
-      const query = { query: { vector: null } };
-      this.$emit("search-records", query);
+      this.$emit("search-records", { vector: null });
     },
   },
 };
 </script>
+
 <style scoped lang="scss">
 .filter {
   &__similarity {
@@ -77,12 +79,23 @@ export default {
         @extend %tooltip-large-text;
         &:after {
           margin-left: 1em;
+          min-width: 300px;
         }
       }
       &.--active {
         background: darken(palette(apricot, light), 2%);
         border: 1px solid palette(apricot, dark);
         align-items: center;
+        &[data-title] {
+          position: relative;
+          @extend %has-tooltip--top;
+          &:after {
+            right: 5em !important;
+          }
+          &:before {
+            right: 3.8em !important;
+          }
+        }
         #{$this}__icon {
           fill: $brand-primary-color;
         }

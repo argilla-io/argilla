@@ -19,36 +19,43 @@
   <div>
     <div
       :class="[
-        isRecordReferenceForSimilarity
-          ? 'list__item--similarity-record-reference'
-          : null,
         annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
         item.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
       <div class="record__header">
-        <template v-if="annotationEnabled">
-          <div class="record__header--left">
-            <base-checkbox
-              class="list__checkbox"
-              :value="item.selected"
-              @change="onCheckboxChanged($event, item.id)"
-            ></base-checkbox>
-            <status-tag
-              v-if="item.status !== 'Default'"
-              :title="item.status"
-            ></status-tag>
-          </div>
+        <template v-if="!weakLabelingEnabled">
+          <template v-if="annotationEnabled">
+            <div class="record__header--left" v-if="!isReferenceRecord">
+              <base-checkbox
+                class="list__checkbox"
+                :value="item.selected"
+                @change="onCheckboxChanged($event, item.id)"
+              ></base-checkbox>
+              <status-tag
+                v-if="item.status !== 'Default'"
+                :title="item.status"
+              ></status-tag>
+            </div>
+          </template>
           <similarity-search-component
             class="record__similarity-search"
             v-if="formattedVectors.length"
-            :vectors="formattedVectors"
+            :formattedVectors="formattedVectors"
+            :isReferenceRecord="isReferenceRecord"
             @search-records="searchRecords"
           />
+          <base-button
+            v-else
+            data-title="To use this function you need to have a vector associated with this record"
+            class="small similarity-search__button--disabled"
+          >
+            Find similar
+          </base-button>
         </template>
         <record-extra-actions
           :key="item.id"
-          :allow-change-status="annotationEnabled"
+          :allow-change-status="annotationEnabled && !isReferenceRecord"
           :record="item"
           :dataset="dataset"
           :task="dataset.task"
@@ -56,12 +63,16 @@
           @onShowMetadata="onShowMetadata(item)"
         />
       </div>
-      <slot :record="item" />
+      <slot :record="item" :isReferenceRecord="isReferenceRecord" />
     </div>
   </div>
 </template>
 <script>
 import { mapActions } from "vuex";
+import {
+  Vector as VectorModel,
+  getVectorModelPrimaryKey,
+} from "@/models/Vector";
 
 export default {
   props: {
@@ -73,27 +84,38 @@ export default {
       type: Object,
       required: true,
     },
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
+    weakLabelingEnabled() {
+      return this.dataset.viewSettings.viewMode === "labelling-rules";
+    },
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
-    formattedVectors() {
-      // TODO get vectors correctly
-      return (
-        Object.keys(this.item.vectors)?.map((vector) => ({
-          id: vector,
-          name: vector,
-          value: this.item.vectors[vector].value,
-        })) || []
-      );
+    vectors() {
+      return VectorModel.query().where("record_id", this.item.id).get() || [];
     },
-    isRecordReferenceForSimilarity() {
-      // TODO compare record reference id and current id
-      return false;
+    formattedVectors() {
+      const formattedVectors = this.vectors.map(
+        ({ vector_name, dataset_id, record_id }) => {
+          return {
+            vectorId: getVectorModelPrimaryKey({
+              vector_name,
+              dataset_id,
+              record_id,
+            }),
+            vectorName: vector_name,
+          };
+        }
+      );
+      return formattedVectors;
     },
   },
   methods: {
@@ -132,8 +154,12 @@ export default {
     onShowMetadata(record) {
       this.$emit("show-metadata", record);
     },
-    searchRecords(query) {
-      this.$emit("search-records", query);
+    searchRecords(vector) {
+      const formattedObj = this.formatSelectedVectorObj(vector);
+      this.$emit("search-records", formattedObj);
+    },
+    formatSelectedVectorObj(vector) {
+      return { query: { vector }, recordId: this.item.id, vector };
     },
   },
 };
@@ -160,6 +186,25 @@ export default {
     margin-left: auto;
   }
 }
+.similarity-search {
+  &__button {
+    &--disabled {
+      @include font-size(13px);
+      font-weight: 500;
+      color: $black-37;
+      overflow: visible;
+      cursor: default;
+      &[data-title] {
+        position: relative;
+        @extend %has-tooltip--bottom;
+        @extend %tooltip-large-text;
+        &:after {
+          min-width: 158px;
+        }
+      }
+    }
+  }
+}
 .list {
   &__checkbox.re-checkbox {
     margin: auto $base-space;
@@ -183,10 +228,6 @@ export default {
           transition: 0.3s ease-in-out;
         }
       }
-    }
-    &--similarity-record-reference {
-      border: 1px solid $record-reference-border-color;
-      background: $record-reference-background-color;
     }
   }
 }

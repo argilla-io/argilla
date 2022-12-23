@@ -34,8 +34,9 @@
             @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></filters-list>
           <filter-similarity
-            v-if="annotationEnabled"
-            @search-records="searchRecords"
+            v-if="!weakLabelingEnabled"
+            :filterIsActive="enableSimilaritySearch"
+            @search-records="onSimilaritySearch"
           />
         </div>
         <slot />
@@ -50,6 +51,10 @@ export default {
     dataset: {
       type: Object,
       default: () => ({}),
+    },
+    enableSimilaritySearch: {
+      type: Boolean,
+      required: true,
     },
   },
   data: () => ({
@@ -69,8 +74,8 @@ export default {
     viewMode() {
       return this.dataset.viewSettings.viewMode;
     },
-    annotationEnabled() {
-      return this.viewMode === "annotate";
+    weakLabelingEnabled() {
+      return this.viewMode === "labelling-rules";
     },
   },
   methods: {
@@ -84,11 +89,19 @@ export default {
       if (Array.isArray(values) && !values.length) {
         values = undefined;
       }
-      this.$emit("search-records", { query: { [filter]: values } });
+      this.$emit("search-records", {
+        query: {
+          [filter]: values,
+        },
+      });
     },
     onApplyMetaFilter({ filter, values }) {
       this.$emit("search-records", {
-        query: { metadata: { [filter]: values } },
+        query: {
+          metadata: {
+            [filter]: values,
+          },
+        },
       });
     },
     async onRemoveAllMetadataFilters(filters) {
@@ -109,7 +122,7 @@ export default {
         sort: sortList,
       });
     },
-    searchRecords(query) {
+    onSimilaritySearch(query) {
       this.$emit("search-records", { query });
     },
   },

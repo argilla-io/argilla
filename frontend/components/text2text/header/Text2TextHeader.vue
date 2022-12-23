@@ -44,6 +44,10 @@ export default {
       type: Object,
       required: true,
     },
+    enableSimilaritySearch: {
+      type: Boolean,
+      required: true,
+    },
   },
   computed: {
     allowValidation() {

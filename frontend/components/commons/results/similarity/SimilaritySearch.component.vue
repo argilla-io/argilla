@@ -2,13 +2,13 @@
   <div v-if="multipleVectors" id="dropdown" class="similarity-search">
     <base-dropdown :visible="dropdownIsvisible" @visibility="onVisibility">
       <span slot="dropdown-header">
-        <base-button class="small similarity-search__button"
-          >Find similar</base-button
-        >
+        <base-button class="small similarity-search__button">
+          Find similar
+        </base-button>
       </span>
       <span slot="dropdown-content">
         <similarity-search-content
-          :vectors="vectors"
+          :formattedVectors="formattedVectors"
           v-model="selectedVector"
         />
         <similarity-search-footer
@@ -21,24 +21,29 @@
   <base-button
     id="find-similar-button"
     class="small similarity-search__button"
-    :disabled="vectorIsApplied"
+    :disabled="isDisabled"
     v-else
     @click="findSimilar"
     >Find similar</base-button
   >
 </template>
+
 <script>
 export default {
   data() {
     return {
       dropdownIsvisible: false,
-      selectedVector: {},
+      selectedVector: null,
     };
   },
   props: {
-    vectors: {
+    formattedVectors: {
       type: Array,
       required: true,
+    },
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
     },
   },
   beforeMount() {
@@ -46,14 +51,14 @@ export default {
   },
   computed: {
     multipleVectors() {
-      return this.vectors?.length > 1 || false;
+      return this.formattedVectors?.length > 1 || false;
     },
     defaultVector() {
-      return this.vectors[0];
+      return this.formattedVectors[0];
     },
-    vectorIsApplied() {
+    isDisabled() {
       // TODO check if vector is applied in the current query (only for single vector)
-      return false;
+      return (this.isReferenceRecord && !this.multipleVectors) || false;
     },
   },
   methods: {
@@ -64,18 +69,7 @@ export default {
       this.selectedVector = this.defaultVector;
     },
     findSimilar() {
-      if (this.selectedVector) {
-        const query = {
-          vector: {
-            name: this.selectedVector.name,
-            value: this.selectedVector.value,
-          },
-        };
-        this.$emit("search-records", {
-          query,
-          size: 50,
-        });
-      }
+      this.$emit("search-records", this.selectedVector);
       this.onVisibility(false);
     },
     cancel() {
@@ -85,6 +79,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .similarity-search {
   position: relative;

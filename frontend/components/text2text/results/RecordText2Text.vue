@@ -25,7 +25,7 @@
         :record="record"
         :predictions="predictionSentences"
         :annotations="initialAnnotations"
-        :annotation-enabled="annotationEnabled"
+        :annotation-enabled="interactionsEnabled"
         @update-initial-record="initializeInitialRecord"
         @reset-initial-record="onResetInitialRecord"
         @annotate="onAnnotate"
@@ -54,6 +54,10 @@ export default {
       type: Text2TextRecord,
       required: true,
     },
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
+    },
   },
   idState() {
     return {
@@ -68,6 +72,9 @@ export default {
       set: function (newValue) {
         this.idState.initialRecord = newValue;
       },
+    },
+    interactionsEnabled() {
+      return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
@@ -85,6 +92,9 @@ export default {
     },
   },
   mounted() {
+    if (!typeof this.records === Text2TextRecord) {
+      this.record = Text2TextRecord(this.record);
+    }
     this.initializeInitialRecord();
   },
   methods: {

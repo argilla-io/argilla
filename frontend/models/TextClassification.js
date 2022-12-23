@@ -34,7 +34,7 @@ class TextClassificationRecord extends BaseRecord {
   }
 
   get predicted_as() {
-    if (this.prediction === undefined) {
+    if (!this.prediction) {
       return [];
     }
     let labels = this.prediction.labels;

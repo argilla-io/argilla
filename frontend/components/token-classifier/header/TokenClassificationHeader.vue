@@ -45,6 +45,10 @@ export default {
       required: true,
       type: Object,
     },
+    enableSimilaritySearch: {
+      type: Boolean,
+      required: true,
+    },
   },
   computed: {
     allowLabelCreation() {
