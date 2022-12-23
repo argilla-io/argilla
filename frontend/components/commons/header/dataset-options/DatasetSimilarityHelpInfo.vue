@@ -41,14 +41,6 @@
         To benefit from this feature, your data team must include vectors
         associated with each record when they create the dataset.
       </p>
-      <p>
-        To learn more about this feature you can visit the
-        <a
-          href="https://docs.argilla.io/en/latest/guides/features/semantic-search.html"
-          target="_blank"
-          >documentation page</a
-        >
-      </p>
     </div>
     <div class="modal-buttons">
       <base-button

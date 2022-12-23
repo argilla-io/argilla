@@ -32,7 +32,9 @@ export default {
       );
     },
     isSimilarityHelpInfoAvailable() {
-      return this.dataset.viewSettings.viewMode === "annotate" && "similarity";
+      return (
+        this.dataset.viewSettings.viewMode !== "labelling-rules" && "similarity"
+      );
     },
     task() {
       return this.dataset.task;

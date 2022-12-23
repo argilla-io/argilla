@@ -81,7 +81,7 @@
         </DynamicScroller>
       </div>
       <base-pagination
-        v-if="!referenceRecordObj"
+        v-if="!referenceRecordObj && !showLoader"
         :total-items="dataset.results.total"
         :pagination-settings="dataset.viewSettings.pagination"
         @changePage="onPagination"
