@@ -81,7 +81,6 @@ class ServiceText2TextRecord(ServiceBaseRecord[ServiceText2TextAnnotation]):
             "annotated_by": self.annotated_by,
             "predicted_by": self.predicted_by,
             "score": self.scores,
-            "words": self.all_text(),
         }
 
 
