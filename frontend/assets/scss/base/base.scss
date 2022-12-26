@@ -45,9 +45,6 @@ body {
     max-height: 100vh;
     overflow: hidden;
     color: $black-87;
-    &.--fixed {
-        pointer-events: none;
-    }
 }
 
 a,
