@@ -78,7 +78,8 @@ class SecuredClient:
     def delete(self, *args, **kwargs):
         request_headers = kwargs.pop("headers", {})
         headers = {**self._header, **request_headers}
-        return self._client.delete(*args, headers=headers, **kwargs)
+
+        return self._client.request("DELETE", *args, headers=headers, **kwargs)
 
     def request(self, *args, **kwargs):
         request_headers = kwargs.pop("headers", {})
@@ -111,12 +112,28 @@ class SecuredClient:
     def stream(self, *args, **kwargs):
         request_headers = kwargs.pop("headers", {})
         headers = {**self._header, **request_headers}
-        method = kwargs.pop("method", None)
-        if method is None:
-            args = list(args)
-            method = args.pop(0)
-        if method == "POST":
-            return self._client.post(*args, headers=headers, stream=True, **kwargs)
-        if method == "GET":
-            return self._client.get(*args, headers=headers, stream=True, **kwargs)
-        raise NotImplementedError
+
+        if hasattr(self._client, "stream"):
+            return self._client.stream(
+                *args,
+                headers=headers,
+                **kwargs,
+            )
+        else:  # Old fashion way
+            method = kwargs.pop("method", None)
+            if method is None:
+                args = list(args)
+                method = args.pop(0)
+            if method == "POST":
+                func = self._client.post
+            elif method == "GET":
+                func = self._client.get
+            else:
+                raise NotImplementedError()
+
+            return func(
+                *args,
+                headers=headers,
+                stream=True,
+                **kwargs,
+            )

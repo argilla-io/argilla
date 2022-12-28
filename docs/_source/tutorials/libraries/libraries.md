@@ -92,7 +92,7 @@ OpenAI is a suite of APIs powered by large language and vision models which perf
 :hidden:
 
 fastapi.md
-bentoml.md
+colab.md
 
 spacy.md
 stanza.md
