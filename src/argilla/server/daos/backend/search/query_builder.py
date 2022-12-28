@@ -118,7 +118,7 @@ class EsQueryBuilder:
         shuffle: bool = False,
     ) -> Dict[str, Any]:
 
-        if query.raw_query:
+        if query and query.raw_query:
             es_query = {"query": query.raw_query}
         else:
             es_query: Dict[str, Any] = (
