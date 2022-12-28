@@ -18,3 +18,7 @@ from argilla.client.sdk.client import AuthenticatedClient
 class AbstractApi(object):
     def __init__(self, client: AuthenticatedClient):
         self.__client__ = client
+
+    @property
+    def http_client(self):
+        return self.__client__
