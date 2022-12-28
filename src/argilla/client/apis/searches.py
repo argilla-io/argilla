@@ -71,7 +71,7 @@ class Searches(AbstractApi):
         if query:
             query_request["query_text"] = query
 
-        response = self.__client__.post(
+        response = self.http_client.post(
             path=url,
             json={"query": query_request},
         )

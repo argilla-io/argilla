@@ -15,7 +15,7 @@
 import warnings
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -115,7 +115,7 @@ class Datasets(AbstractApi):
         label_schema: Dict[str, Any]
 
     def find_by_name(self, name: str) -> _DatasetApiModel:
-        dataset = get_dataset(self.__client__, name=name).parsed
+        dataset = get_dataset(self.http_client, name=name).parsed
         return self._DatasetApiModel.parse_obj(dataset)
 
     def create(self, name: str, settings: Settings):
@@ -127,7 +127,7 @@ class Datasets(AbstractApi):
 
         with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
             dataset = self._DatasetApiModel(name=name, task=task)
-            self.__client__.post(f"{self._API_PREFIX}", json=dataset.dict())
+            self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
             self.__save_settings__(dataset, settings=settings)
 
     def configure(self, name: str, settings: Settings):
@@ -175,7 +175,7 @@ class Datasets(AbstractApi):
         """
         with api_compatibility(self, min_version="0.18"):
             try:
-                response = self.__client__.delete(
+                response = self.http_client.delete(
                     path=f"{self._API_PREFIX}/{name}/data?mark_as_discarded={mark_as_discarded}",
                     json={"ids": ids} if ids else {"query_text": query},
                 )
@@ -208,7 +208,7 @@ class Datasets(AbstractApi):
         )
 
         with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-            self.__client__.put(
+            self.http_client.put(
                 f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
                 json=settings_.dict(),
             )
@@ -226,7 +226,7 @@ class Datasets(AbstractApi):
         dataset = self.find_by_name(name)
         try:
             with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-                response = self.__client__.get(
+                response = self.http_client.get(
                     f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings"
                 )
                 return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)

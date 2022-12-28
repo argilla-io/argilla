@@ -17,7 +17,7 @@ from types import TracebackType
 from typing import ContextManager, Optional, Type
 
 from packaging.version import parse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from argilla.client.apis import AbstractApi
 from argilla.client.sdk.client import AuthenticatedClient
@@ -41,13 +41,17 @@ class Status(AbstractApi):
 
         """
 
-        response = self.__client__.get("/api/_info")
+        response = self.http_client.get("/api/_info")
         api_info = self._ApiInfo.parse_obj(response)
         return ApiInfo(version=api_info.version or api_info.rubrix_version)
 
 
 class _ApiCompatibilityContextManager(ContextManager):
-    def __init__(self, client: AuthenticatedClient, min_version: str):
+    def __init__(
+        self,
+        client: AuthenticatedClient,
+        min_version: str,
+    ):
         self._min_version = parse(min_version)
         self._status_api = Status(client=client) if client else None
 
@@ -82,5 +86,5 @@ def api_compatibility(api: AbstractApi, min_version: str):
     """
     return _ApiCompatibilityContextManager(
         min_version=min_version,
-        client=api.__client__,
+        client=api.http_client,
     )
