@@ -145,6 +145,51 @@ class Datasets(AbstractApi):
             ds = self.find_by_name(name)
             self.__save_settings__(dataset=ds, settings=settings)
 
+    def scan(
+        self,
+        name: str,
+        query: Optional[str] = None,
+        projection: Optional[Set[str]] = None,
+    ) -> Iterable[dict]:
+        """
+        Search records over a dataset
+
+        Args:
+            name: the dataset
+            query: the search query
+            projection: a subset of record fields to retrieve. If not provided,
+            only id's will be returned
+
+        Returns:
+
+            A iterable of raw object containing per-record info
+
+        """
+
+        url = f"{self._API_PREFIX}/{name}/records/:search"
+
+        request = {
+            "fields": list(projection) if projection else ["id"],
+            "query": {"query_text": query},
+        }
+
+        with api_compatibility(self, min_version="1.2.0"):
+            response = self.http_client.post(
+                url,
+                json=request,
+            )
+
+            while response.get("records"):
+                for record in response["records"]:
+                    yield record
+
+                    next_idx = response.get("next_idx")
+                    if next_idx:
+                        response = self.http_client.post(
+                            path=url,
+                            json={**request, "next_idx": next_idx},
+                        )
+
     def delete_records(
         self,
         name: str,
