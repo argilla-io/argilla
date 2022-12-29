@@ -31,7 +31,11 @@
       :enableSimilaritySearch="isReferenceRecord"
       @search-records="searchRecords"
     >
-      <task-sidebar v-if="dataset" :dataset="dataset" />
+      <task-sidebar
+        v-if="dataset"
+        :dataset="dataset"
+        @search-records="searchRecords"
+      />
     </app-header>
     <error
       v-if="$fetchState.error"
@@ -64,7 +68,6 @@ export default {
     if (this.referenceRecordId) {
       await this.searchRecords({ query: this.dataset.query });
     }
-
   },
   computed: {
     ...mapGetters({
@@ -94,9 +97,6 @@ export default {
     isDataset() {
       return !_.isNil(this.dataset);
     },
-    isAnyReferenceRecord() {
-      return VectorModel.all().length;
-    },
     referenceRecordId() {
       return VectorModel.query().where("is_active", true).first();
     },
@@ -113,7 +113,7 @@ export default {
       return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
     },
     isReferenceRecord() {
-      const value = VectorModel.query().where("is_active", true).first()
+      const value = VectorModel.query().where("is_active", true).first();
       return !!value;
     },
   },
