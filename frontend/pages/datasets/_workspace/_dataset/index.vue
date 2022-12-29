@@ -34,7 +34,7 @@
       <task-sidebar
         v-if="dataset"
         :dataset="dataset"
-        @search-records="searchRecords"
+        @view-mode-changed="onViewModeChanged"
       />
     </app-header>
     <error
@@ -239,6 +239,11 @@ export default {
         data: vectorsByToInsertInModel,
       });
     },
+    onViewModeChanged(value) {
+      if (value === "labelling-rules" && this.isReferenceRecord) {
+        this.removeSimilarityFilter(value);
+      }
+    },
     async fetchRecordReferenceAndInsertIntoTheRefRecordModel(recordId) {
       try {
         const recordReference = await this.fetchAndStoreReferenceRecord(
@@ -251,6 +256,9 @@ export default {
           err
         );
       }
+    },
+    removeSimilarityFilter() {
+      this.searchRecords({ query: { vector: null } });
     },
   },
 };

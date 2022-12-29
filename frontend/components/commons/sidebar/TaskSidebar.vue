@@ -33,7 +33,6 @@
 <script>
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
-import { Vector as VectorModel } from "@/models/Vector";
 import SidebarMenu from "./SidebarMenu";
 import SidebarPanel from "./SidebarPanel";
 export default {
@@ -60,10 +59,6 @@ export default {
         (item) => item.id === this.dataset.viewSettings.viewMode
       ).relatedMetrics;
     },
-    isReferenceRecord() {
-      const value = VectorModel.query().where("is_active", true).first();
-      return !!value;
-    },
   },
   methods: {
     ...mapActions({
@@ -86,9 +81,7 @@ export default {
       this.currentMetric = this.metricsByViewMode.includes(this.currentMetric)
         ? this.currentMetric
         : this.onShowSidebarInfo(false);
-      if (value === "labelling-rules" && this.isReferenceRecord) {
-        this.removeSimilarityFilter(value);
-      }
+      this.$emit("view-mode-changed", value);
     },
     onShowSidebarInfo(info) {
       if (this.currentMetric !== info) {
@@ -111,9 +104,6 @@ export default {
           visibleMetrics: false,
         },
       });
-    },
-    removeSimilarityFilter() {
-      this.$emit("search-records", { query: { vector: null } });
     },
     componentName(metric) {
       return `${this.currentTask}${this.$options.filters.capitalize(metric)}`;
