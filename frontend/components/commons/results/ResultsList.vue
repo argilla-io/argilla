@@ -129,12 +129,10 @@ export default {
 
   computed: {
     referenceRecordId() {
-      return (
-        VectorModel.query()
-          .where("is_active", true)
-          .where("dataset_id", this.dataset.id.join("."))
-          .first()?.record_id
-      );
+      return VectorModel.query()
+        .where("is_active", true)
+        .where("dataset_id", this.dataset.id.join("."))
+        .first()?.record_id;
     },
     referenceRecordObj() {
       return RefRecordModel.query()

@@ -232,9 +232,9 @@ async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
     query_text: newQueryText,
     vector: vector
       ? {
-        name: vector_name,
-        value: vector_values,
-      }
+          name: vector_name,
+          value: vector_values,
+        }
       : null,
   };
 
@@ -270,8 +270,8 @@ const queryTextCurryFactory = (queryText1) => (queryText2) =>
   queryText2 === undefined
     ? queryText1
     : queryTextCurryFactory(
-      `${queryText1} ${queryText1.length ? "AND" : ""} ${queryText2}`.trim()
-    );
+        `${queryText1} ${queryText1.length ? "AND" : ""} ${queryText2}`.trim()
+      );
 
 async function _querySearch({ dataset, query, sort, size }) {
   const save = size == 0 ? false : true;
