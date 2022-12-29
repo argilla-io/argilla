@@ -63,7 +63,6 @@ export default {
     // 4. If we have a vector filter, apply a search
     if (this.referenceRecordId) {
       await this.searchRecords({ query: this.dataset.query });
-      await this.disablePagination(true);
     }
   },
   computed: {
@@ -160,7 +159,6 @@ export default {
       if (!vector) {
         // Update url query params
         this.updateUrlParamsWithVectorInfo(null);
-        await this.disablePagination(false);
       } else {
         const { vectorId } = vector;
         // 1. Fetch record reference data
@@ -172,8 +170,6 @@ export default {
         });
         // 3. Update url query params
         this.updateUrlParamsWithVectorInfo(vectorData);
-        // 4. Disable pagination
-        await this.disablePagination(true);
       }
     },
     async activateVectorAndRecorByUrlQueryParams() {
@@ -255,9 +251,6 @@ export default {
         );
       }
     },
-    async disablePagination(value) {
-      await this.dataset.viewSettings.disablePagination(value);
-    }
   },
 };
 </script>
