@@ -232,9 +232,9 @@ async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
     query_text: newQueryText,
     vector: vector
       ? {
-        name: vector_name,
-        value: vector_values,
-      }
+          name: vector_name,
+          value: vector_values,
+        }
       : null,
   };
 
@@ -270,8 +270,8 @@ const queryTextCurryFactory = (queryText1) => (queryText2) =>
   queryText2 === undefined
     ? queryText1
     : queryTextCurryFactory(
-      `${queryText1} ${queryText1.length ? "AND" : ""} ${queryText2}`.trim()
-    );
+        `${queryText1} ${queryText1.length ? "AND" : ""} ${queryText2}`.trim()
+      );
 
 async function _querySearch({ dataset, query, sort, size }) {
   const save = size == 0 ? false : true;
@@ -466,26 +466,26 @@ async function _updateTaskDataset({ dataset, data }) {
 }
 
 async function _updatePagination({ id, size, page }) {
-  const updatedSize = getSizeRecords(size);
+  //const updatedSize = getSizeRecords(size);
   const pagination = await Pagination.update({
     where: id,
-    data: { size: updatedSize, page },
+    data: { size, page },
   });
 
   return pagination;
 }
 
-const getSizeRecords = (size) => {
-  const isWeakLabelingView = $nuxt.$route.query.viewMode === "labelling-rules";
-  const isSimilaritySearch = $nuxt.$route.query.vectorId;
-  const sizeIfSimilaritySearchisActivate = 50;
-  const updatedSize =
-    !isWeakLabelingView && isSimilaritySearch
-      ? sizeIfSimilaritySearchisActivate
-      : size;
+// const getSizeRecords = (size) => {
+//   const isWeakLabelingView = $nuxt.$route.query.viewMode === "labelling-rules";
+//   const isSimilaritySearch = $nuxt.$route.query.vectorId;
+//   const sizeIfSimilaritySearchisActivate = 50;
+//   const updatedSize =
+//     !isWeakLabelingView && isSimilaritySearch
+//       ? sizeIfSimilaritySearchisActivate
+//       : size;
 
-  return updatedSize;
-};
+//   return updatedSize;
+// };
 
 const getters = {
   findByName: () => (name) => {

@@ -63,8 +63,8 @@ export default {
     // 4. If we have a vector filter, apply a search
     if (this.referenceRecordId) {
       await this.searchRecords({ query: this.dataset.query });
+      await this.disablePagination(true);
     }
-
   },
   computed: {
     ...mapGetters({
@@ -113,7 +113,7 @@ export default {
       return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
     },
     isReferenceRecord() {
-      const value = VectorModel.query().where("is_active", true).first()
+      const value = VectorModel.query().where("is_active", true).first();
       return !!value;
     },
   },
@@ -160,6 +160,7 @@ export default {
       if (!vector) {
         // Update url query params
         this.updateUrlParamsWithVectorInfo(null);
+        await this.disablePagination(false);
       } else {
         const { vectorId } = vector;
         // 1. Fetch record reference data
@@ -169,8 +170,10 @@ export default {
           where: vectorId,
           data: { is_active: true },
         });
-        // 4. Update url query params
+        // 3. Update url query params
         this.updateUrlParamsWithVectorInfo(vectorData);
+        // 4. Disable pagination
+        await this.disablePagination(true);
       }
     },
     async activateVectorAndRecorByUrlQueryParams() {
@@ -252,6 +255,9 @@ export default {
         );
       }
     },
+    async disablePagination(value) {
+      await this.dataset.viewSettings.disablePagination(value);
+    }
   },
 };
 </script>

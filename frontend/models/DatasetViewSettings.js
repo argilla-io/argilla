@@ -28,6 +28,7 @@ class Pagination extends Model {
       pageSizeOptions: this.attr([1, 10, 20, 50, 100]),
       maxRecordsLimit: this.number(10000),
       disabledShortCutPagination: this.boolean(false),
+      disabledPagination: this.boolean(false),
     };
   }
 
@@ -72,7 +73,14 @@ export default class DatasetViewSettings extends Model {
       },
     });
   }
-
+  async disablePagination(value) {
+    return await Pagination.update({
+      where: this.$id,
+      data: {
+        disabledPagination: value,
+      },
+    });
+  }
   async disableShortCutPagination(value) {
     return await Pagination.update({
       where: this.$id,
