@@ -127,6 +127,18 @@ class Client(_ClientCommonDefaults, _Client):
         return build_raw_response(response).parsed
 
     @with_httpx_error_handler
+    def patch(self, path: str, *args, **kwargs):
+        path = self._normalize_path(path)
+
+        response = self.__httpx__.patch(
+            url=path,
+            headers=self.get_headers(),
+            *args,
+            **kwargs,
+        )
+        return build_raw_response(response).parsed
+
+    @with_httpx_error_handler
     def post(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
 

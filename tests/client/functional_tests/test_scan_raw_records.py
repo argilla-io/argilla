@@ -19,21 +19,6 @@ from argilla.client.api import active_api
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord
 
 
-@pytest.fixture
-def gutenberg_spacy_ner(mocked_client):
-    from datasets import load_dataset
-
-    dataset = "gutenberg_spacy_ner"
-    # TODO(@frascuchon): Move dataset to new organization
-    dataset_ds = load_dataset("argilla/gutenberg_spacy-ner", split="train")
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
-
-    argilla.delete(dataset)
-    argilla.log(name=dataset, records=dataset_rb)
-
-    return dataset
-
-
 @pytest.mark.parametrize(
     argnames="fields",
     argvalues=(set(), {"text"}, {"tokens"}),
