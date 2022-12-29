@@ -31,7 +31,11 @@
       :enableSimilaritySearch="isReferenceRecord"
       @search-records="searchRecords"
     >
-      <task-sidebar v-if="dataset" :dataset="dataset" />
+      <task-sidebar
+        v-if="dataset"
+        :dataset="dataset"
+        @view-mode-changed="onViewModeChanged"
+      />
     </app-header>
     <error
       v-if="$fetchState.error"
@@ -92,9 +96,6 @@ export default {
     },
     isDataset() {
       return !_.isNil(this.dataset);
-    },
-    isAnyReferenceRecord() {
-      return VectorModel.all().length;
     },
     referenceRecordId() {
       return VectorModel.query().where("is_active", true).first();
@@ -238,6 +239,11 @@ export default {
         data: vectorsByToInsertInModel,
       });
     },
+    onViewModeChanged(value) {
+      if (value === "labelling-rules" && this.isReferenceRecord) {
+        this.removeSimilarityFilter(value);
+      }
+    },
     async fetchRecordReferenceAndInsertIntoTheRefRecordModel(recordId) {
       try {
         const recordReference = await this.fetchAndStoreReferenceRecord(
@@ -250,6 +256,9 @@ export default {
           err
         );
       }
+    },
+    removeSimilarityFilter() {
+      this.searchRecords({ query: { vector: null } });
     },
   },
 };
