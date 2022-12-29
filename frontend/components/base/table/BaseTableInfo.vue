@@ -49,18 +49,11 @@
           </div>
         </slot>
       </div>
-      <template v-if="resultsAvailable">
-        <div v-for="group in groups" :key="group" class="table-info__body">
-          <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
-            <p class="table-info__group__title">
-              {{ group }}
-            </p>
-          </span>
+      <results-empty v-if="tableIsEmpty" :title="emptySearchInfo.title" />
+      <template v-else>
+        <div class="table-info__body">
           <ul>
-            <li
-              v-for="item in filteredResultsByGroup(group)"
-              :key="String(item.id)"
-            >
+            <li v-for="item in filteredResults" :key="String(item.id)">
               <div class="table-info__item">
                 <base-checkbox
                   v-if="globalActions"
@@ -201,7 +194,6 @@
           </ul>
         </div>
       </template>
-      <results-empty v-else :title="emptySearchInfo.title" />
     </div>
   </transition>
 </template>
@@ -258,10 +250,6 @@ export default {
       type: Boolean,
       default: true,
     },
-    groupBy: {
-      type: String,
-      default: undefined,
-    },
     querySearch: {
       type: String,
       default: undefined,
@@ -283,14 +271,9 @@ export default {
       filters: {},
     };
   },
-  mounted() {
-    (this.activeFilters || []).forEach(({ column, values }) => {
-      this.$set(this.filters, column, values);
-    });
-  },
   computed: {
-    resultsAvailable() {
-      return this.filteredResults.length !== 0;
+    tableIsEmpty() {
+      return this.filteredResults && this.filteredResults.length === 0;
     },
     filterActions() {
       return this.actions.filter((a) => a.hide !== this.hideButton);
@@ -310,7 +293,7 @@ export default {
         return false;
       };
       const matchFilters = (item) => {
-        if (Object.values(this.filters).length) {
+        if (this.filters) {
           return Object.keys(this.filters).every((key) => {
             if (this.isObject(item[key])) {
               return this.filters[key].find(
@@ -333,20 +316,15 @@ export default {
       const results = this.data.filter(matchSearch).filter(matchFilters);
       return results.sort(itemComparator);
     },
-    groups() {
-      if (this.groupBy) {
-        let filtergroups = [];
-        this.filteredResults.forEach((result) => {
-          filtergroups.push(result[this.groupBy]);
-        });
-        filtergroups = [...new Set(filtergroups)];
-        return filtergroups;
-      }
-      return 1;
-    },
   },
   beforeMount() {
     this.sortedBy = this.sortedByField;
+    const appliedFilters = this.activeFilters.filter(
+      (filter) => filter.values.length
+    );
+    (appliedFilters || []).forEach(({ column, values }) => {
+      this.$set(this.filters, column, values);
+    });
   },
   methods: {
     isObject(obj) {
@@ -378,14 +356,6 @@ export default {
         column: column.field,
         values: selectedOptions,
       });
-    },
-    filteredResultsByGroup(group) {
-      if (this.groupBy) {
-        return this.filteredResults.filter(
-          (item) => item[this.groupBy] === group
-        );
-      }
-      return this.filteredResults;
     },
     selectAll(value) {
       this.onAllCheckboxChanged(value);
@@ -571,18 +541,6 @@ export default {
       text-decoration: none;
       &:hover {
         color: palette(black);
-      }
-    }
-  }
-  &__group {
-    padding-bottom: 2em;
-    border-bottom: 1px solid palette(grey, 600);
-    display: block;
-    &__title {
-      margin: 3em 0 0 0;
-      font-weight: 600;
-      .svg-icon {
-        margin-right: 1em;
       }
     }
   }

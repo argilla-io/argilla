@@ -16,18 +16,15 @@
   -->
 
 <template>
-  <transition name="fade" v-if="modalVisible" appear>
-    <div v-click-outside="onClickOutside" class="modal-mask">
+  <transition v-if="modalVisible" name="fade" appear>
+    <div class="modal-mask" :class="modalMaskClass">
       <div class="modal-wrapper" :class="modalPosition">
-        <div :class="['modal-container', modalClass]">
-          <p v-if="modalTitle" class="modal__title">
-            <svgicon
-              v-if="modalIcon"
-              width="24"
-              height="24"
-              :name="modalIcon"
-              color="#000000"
-            ></svgicon>
+        <div
+          class="modal-container"
+          :class="modalClass"
+          v-click-outside="onClickOutside"
+        >
+          <p class="modal__title">
             {{ modalTitle }}
           </p>
           <slot />
@@ -77,22 +74,10 @@ export default {
       default: "modal-center",
     },
   },
-  data: () => ({}),
-  watch: {
-    modalVisible() {
-      if (this.preventBodyScroll) {
-        if (this.modalVisible) {
-          document.body.classList.add("--fixed");
-        } else {
-          document.body.classList.remove("--fixed");
-        }
-      }
+  computed: {
+    modalMaskClass() {
+      return this.preventBodyScroll ? "prevent-scroll" : null;
     },
-  },
-  beforeDestroy() {
-    if (this.preventBodyScroll) {
-      document.body.classList.remove("--fixed");
-    }
   },
   methods: {
     onClickOutside() {
@@ -112,9 +97,11 @@ export default {
   height: 100vh;
   display: table;
   transition: opacity 0.3s ease;
-  pointer-events: none;
   cursor: default;
   background: $black-10;
+  &:not(.prevent-scroll) {
+    pointer-events: none;
+  }
 }
 
 .modal-wrapper {

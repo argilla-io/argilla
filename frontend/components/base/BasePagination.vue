@@ -196,7 +196,10 @@ export default {
     keyDown(event) {
       const arrowRight = event.keyCode === 39;
       const arrowLeft = event.keyCode === 37;
-      if (!this.paginationSettings.disabledShortCutPagination) {
+      const focusInInput = event.target.tagName?.toLowerCase() === "input";
+      const allowPagination =
+        !this.paginationSettings.disabledShortCutPagination && !focusInInput;
+      if (allowPagination) {
         if (arrowRight) {
           this.nextPage();
         } else if (arrowLeft) {

@@ -47,7 +47,7 @@ class Metrics(Prodict):
 
 
 @dataclasses.dataclass
-class RBListenerContext:
+class RGListenerContext:
     """
     The argilla listener execution context. This class keeps the context components related to a listener
 
@@ -59,7 +59,7 @@ class RBListenerContext:
         query_params: Dynamic parameters used in the listener query
     """
 
-    listener: "RBDatasetListener" = dataclasses.field(repr=False, hash=False)
+    listener: "RGDatasetListener" = dataclasses.field(repr=False, hash=False)
     search: Optional[Search] = None
     metrics: Optional[Metrics] = None
     query_params: Optional[Dict[str, Any]] = None
@@ -79,8 +79,8 @@ class RBListenerContext:
         return self.__listener__.formatted_query
 
 
-ListenerCondition = Callable[[Search, Optional[RBListenerContext]], bool]
+ListenerCondition = Callable[[Search, Optional[RGListenerContext]], bool]
 ListenerAction = Union[
-    Callable[[List[Record], RBListenerContext], bool],
-    Callable[[RBListenerContext], bool],
+    Callable[[List[Record], RGListenerContext], bool],
+    Callable[[RGListenerContext], bool],
 ]

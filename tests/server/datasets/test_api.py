@@ -247,7 +247,8 @@ def test_delete_records(mocked_client):
         ],
     )
     response = mocked_client.delete(
-        f"/api/datasets/{dataset_name}/data", json={"ids": [1]}
+        f"/api/datasets/{dataset_name}/data",
+        json={"ids": [1]},
     )
     assert response.status_code == 200
     assert response.json() == {"matched": 1, "processed": 1}

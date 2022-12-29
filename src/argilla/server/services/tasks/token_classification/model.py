@@ -99,7 +99,6 @@ class ServiceTokenClassificationRecord(
                 {"mention": mention, "entity": entity.label}
                 for mention, entity in self.annotated_mentions()
             ],
-            "words": self.all_text(),
         }
 
     def __init__(self, **data):
@@ -145,11 +144,21 @@ class ServiceTokenClassificationRecord(
     @property
     def predicted(self) -> Optional[PredictionStatus]:
         if self.annotation and self.prediction:
-            return (
-                PredictionStatus.OK
-                if self.annotation.entities == self.prediction.entities
-                else PredictionStatus.KO
-            )
+
+            annotated_entities = self.annotation.entities
+            predicted_entities = self.prediction.entities
+            if len(annotated_entities) != len(predicted_entities):
+                return PredictionStatus.KO
+
+            for ann, pred in zip(annotated_entities, predicted_entities):
+                if (
+                    ann.start != pred.start
+                    or ann.end != pred.end
+                    or ann.label != pred.label
+                ):
+                    return PredictionStatus.KO
+
+            return PredictionStatus.OK
         return None
 
     @property

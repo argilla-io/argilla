@@ -14,4 +14,8 @@ Are you unsure about what these features entail, take a look at our [terminology
 :link: ./queries.html
 
 ```
+```{grid-item-card} Listeners
+:link: ./listeners.html
+
+```
 ````
