@@ -466,7 +466,6 @@ async function _updateTaskDataset({ dataset, data }) {
 }
 
 async function _updatePagination({ id, size, page }) {
-  //const updatedSize = getSizeRecords(size);
   const pagination = await Pagination.update({
     where: id,
     data: { size, page },
@@ -474,18 +473,6 @@ async function _updatePagination({ id, size, page }) {
 
   return pagination;
 }
-
-// const getSizeRecords = (size) => {
-//   const isWeakLabelingView = $nuxt.$route.query.viewMode === "labelling-rules";
-//   const isSimilaritySearch = $nuxt.$route.query.vectorId;
-//   const sizeIfSimilaritySearchisActivate = 50;
-//   const updatedSize =
-//     !isWeakLabelingView && isSimilaritySearch
-//       ? sizeIfSimilaritySearchisActivate
-//       : size;
-
-//   return updatedSize;
-// };
 
 const getters = {
   findByName: () => (name) => {
