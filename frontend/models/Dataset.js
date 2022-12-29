@@ -79,11 +79,7 @@ class ObservationDataset extends Model {
   }
 
   get visibleRecords() {
-    if (this.viewSettings.pagination.disabledPagination) {
-      return this.results.records;
-    } else {
-      return this.results.records.slice(0, this.viewSettings.pagination.size);
-    }
+    return this.results.records;
   }
 
   static fields() {
