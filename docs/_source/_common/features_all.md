@@ -13,5 +13,9 @@
 :link: ./features/queries.html
 
 ```
+```{grid-item-card} Listeners
+:link: ./features/listeners.html
+
+```
 ````
 

@@ -2,14 +2,13 @@
 set -e
 
 # Check elasticsearch response status
-status_code=$(curl -s -o /dev/null -w "%{http_code}" "$ARGILLA_ELASTICSEARCH")
+/wait-for-it.sh -t 60 -s `echo "${ARGILLA_ELASTICSEARCH}" | awk -F'^http[s]?://' '{print $2}'` -- echo "ElasticSearch connected"
 
-if [[ "$status_code" -ne 200 ]]; then
-  echo "ElasticSearch connection error. Returned status code: $status_code"
-  exit 1
-else
-  echo "ElasticSearch connected"
-fi
-
-# Run argilla-server
-uvicorn argilla:app --host "0.0.0.0" --port 6900
+# Run argilla-server (See https://www.uvicorn.org/settings/#settings)
+#
+# From uvicorn docs:
+#   You can also configure Uvicorn using environment variables
+#   with the prefix UVICORN_. For example, in case you want to
+#   run the app on port 5000, just set the environment variable
+#   UVICORN_PORT to 5000.
+uvicorn argilla:app --host "0.0.0.0"

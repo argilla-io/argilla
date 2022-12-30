@@ -56,6 +56,7 @@
    Github <https://github.com/argilla-io/argilla>
    Discussion forum <https://github.com/argilla-io/argilla/discussions>
    community/developer_docs
+   community/contributing
    community/migration-rubrix.md
 
 :::

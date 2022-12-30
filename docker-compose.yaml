@@ -33,6 +33,9 @@ services:
         hard: -1
     networks:
       - argilla
+    ports:
+      - "9200:9200"
+      - "9300:9300"
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
 
@@ -40,7 +43,7 @@ services:
     image: docker.elastic.co/kibana/kibana:7.11.1
     container_name: kibana
     ports:
-      - 5601:5601
+      - "5601:5601"
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'

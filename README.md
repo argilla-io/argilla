@@ -22,12 +22,12 @@
 <p align="center">Data Labeling + Data Curation + Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
+#### 🆕 Play with [Argilla live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces. (username and password: `huggingface`/ `1234` ) </h3>
 
 ![imagen](https://user-images.githubusercontent.com/1107111/204772677-facee627-9b3b-43ca-8533-bbc9b4e2d0aa.png)
 
 <!-- https://user-images.githubusercontent.com/25269220/200496945-7efb11b8-19f3-4793-bb1d-d42132009cbb.mp4 -->
 
-<br>
 
 <p align="center">
 <a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
@@ -169,6 +169,10 @@ For getting started with your own use cases, [go to the docs](https://docs.argil
 
 
 -  **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
+
+## Contribute
+
+We love contributors and have launched a collaboration with JustDiggit to hand out our very own bunds, to help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m) with our Developer Advocacy team so they can get you up to speed.
 
 ## FAQ
 

@@ -9,4 +9,6 @@ These tutorials show you how to create Active Learning workflows with Argilla.
 ```
 ```{include} /_static/tutorials/training-textclassification-smalltext-activelearning/modal.md
 ```
+```{include} /_static/tutorials/deploying-textclassification-colab-activelearning/modal.md
+```
 ````

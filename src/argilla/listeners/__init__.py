@@ -12,5 +12,5 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .listener import RBDatasetListener, listener
-from .models import Metrics, RBListenerContext, Search
+from .listener import RGDatasetListener, listener
+from .models import Metrics, RGListenerContext, Search

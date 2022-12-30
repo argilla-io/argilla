@@ -12,15 +12,15 @@ Basically, you need to:
 
 First, make sure you have Python 3.7 or above installed.
 
-Then you can install Argilla with `pip` or `conda`.
+Then you can install Argilla with `pip`.
 
 **with pip**
 
 {{ '```bash\npip install "argilla[server]{}"\n```'.format(pipversion) }}
 
-**with conda**
+<!-- **with conda**
 
-{{ '```bash\nconda install -c conda-forge "argilla-server{}"\n```'.format(pipversion) }}
+{{ '```bash\nconda install -c conda-forge "argilla-server{}"\n```'.format(pipversion) }} -->
 
 (launch-the-web-app)=
 ## 2. Launch the web app
