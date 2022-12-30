@@ -4,10 +4,9 @@ Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers
 
 In this guide, you'll learn to deploy your own Argilla app and use it for data labelling workflows right from the Hub.
 
-
 If you want to play with the Argilla UI without installing anything, check this [live demo](https://huggingface.co/spaces/argilla/live-demo). The demo is powered by Hugging Face Docker Spaces, the same technology you'll learn in this guide. To login into the UI use: username: `huggingface`, password: `1234`.
 
-![Argilla Demo](getting_started/installation/argilla-demo.png)
+![Argilla Demo](../../_static/getting_started/installation/argilla-demo.png)
 
 
 ## Your first Argilla Docker Space
@@ -36,10 +35,12 @@ In order to set up these secrets, you need to go to the Settings tab on your new
 
 Once your Argilla Space is running, you can start interacting with the it using the Direct URL you'll find in the "Embed this Space" option (top right). Let's say it's https://dvilasuero-argilla-setfit.hf.space. This URL will give you access to a full-screen, stable Argilla app, but will also serve as an endpoint for interacting with Argilla Python library. Let's see how to create our first dataset for labelling.
 
-![Argilla Demo](getting_started/installation/embed-space.png)
+![Embed Space](../../_static/getting_started/installation/embed-space.png)
 
+Another option is to embed the app directly using the provided iframe, which can be handy for quick experimentation using Google Colab for example.
 
 You also can access the app directly using the main URL of the Space, for example: https://huggingface.co/spaces/dvilasuero/argilla-setfit.
+
 
 First we need to pip install `datasets` and `argilla` on Colab or your local machine:
 
