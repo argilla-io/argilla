@@ -139,7 +139,7 @@ This script launches Elasticsearch, uses the `waitforit.sh` utility to make sure
 If you are looking for a more advanced configuration of Argilla, which involves setting up several users and workspaces, can check out the [Argilla Demo Docker Space codebase](https://huggingface.co/spaces/argilla/live-demo/tree/main).
 
 ## Feedback and support
-If you have improvement suggestions or need specific support, please join our [Slack community]() or reach out on [Argilla's GitHub repository](https://github.com/argilla-io/argilla).
+If you have improvement suggestions or need specific support, please join [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) or reach out on [Argilla's GitHub repository](https://github.com/argilla-io/argilla).
 
 
 
