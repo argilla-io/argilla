@@ -17,7 +17,13 @@ You can find the final app at [this example Space](https://huggingface.co/spaces
 
 ### Duplicate the Argilla Docker Template and create your Space
 
-The easiest way to get started is by [duplicating the Argilla Docker Template](https://huggingface.co/spaces/argilla/template-space-docker?duplicate=true). You need to define the **Owner** (your personal account or an organization you are part of), a **Space name**, and the **Visibility**, which we recommend to set up to Public if you want to interact with the Argilla app from the outside. Once you are all set, click "Duplicate Space".
+The easiest way to get started is by duplicating the Argilla Docker Template. Before starting, we recommend you to login or signup into Hugging Face. After login in, you can use [duplicate the Argilla Docker Template with this link](https://huggingface.co/spaces/argilla/template-space-docker?duplicate=true).
+
+If a modal box does not appear, see the screenshot below to find the "Duplicate Space" action:
+
+![Argilla Demo](../../_static/getting_started/installation/duplicate-space.png)
+
+In the modal box, you need to define the **Owner** (your personal account or an organization you are part of), a **Space name**, and the **Visibility**, which we recommend to set up to Public if you want to interact with the Argilla app from the outside. Once you are all set, click "Duplicate Space".
 
 Note: You'll see a mention to the need of setting up environment variables (`API_KEY`) by adding a secret to your Space but will see this in a second.
 

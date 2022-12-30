@@ -1,1 +1,1 @@
-# Configuring Argilla for Google Colab
+# Using Argilla inside Google Colab
