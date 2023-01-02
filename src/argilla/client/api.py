@@ -457,10 +457,10 @@ class Api:
         """
         return self.datasets.delete_records(
             name=name,
-            query=query,
-            ids=ids,
             mark_as_discarded=discard_only,
             discard_when_forbidden=discard_when_forbidden,
+            query_text=query,
+            ids=ids,
         )
 
     def load(

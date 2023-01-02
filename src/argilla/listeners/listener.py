@@ -192,11 +192,15 @@ class RGDatasetListener:
             return self.__run_action__(ctx, *args, **kwargs)
 
         search_results = current_api.searches.search_records(
-            name=self.dataset, task=dataset.task, query=self.formatted_query, size=0
+            name=self.dataset,
+            task=dataset.task,
+            size=0,
+            query_text=self.formatted_query,
         )
 
         ctx.search = Search(
-            total=search_results.total, query_params=copy.deepcopy(ctx.query_params)
+            total=search_results.total,
+            query_params=copy.deepcopy(ctx.query_params),
         )
         condition_args = [ctx.search]
         if self.metrics:

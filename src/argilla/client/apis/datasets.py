@@ -148,10 +148,9 @@ class Datasets(AbstractApi):
     def delete_records(
         self,
         name: str,
-        query: Optional[str] = None,
-        ids: Optional[List[Union[str, int]]] = None,
         mark_as_discarded: bool = False,
         discard_when_forbidden: bool = True,
+        **query: Optional[dict],
     ) -> Tuple[int, int]:
         """
         Tries to delete records in a dataset for a given query/ids list.
@@ -175,9 +174,10 @@ class Datasets(AbstractApi):
         """
         with api_compatibility(self, min_version="0.18"):
             try:
+                query = self._parse_query(query=query)
                 response = self.http_client.delete(
                     path=f"{self._API_PREFIX}/{name}/data?mark_as_discarded={mark_as_discarded}",
-                    json={"ids": ids} if ids else {"query_text": query},
+                    json=query,
                 )
                 return response["matched"], response["processed"]
             except ForbiddenApiError as faer:
@@ -189,7 +189,6 @@ class Datasets(AbstractApi):
                     return self.delete_records(
                         name=name,
                         query=query,
-                        ids=ids,
                         mark_as_discarded=True,
                         discard_when_forbidden=False,  # Next time will raise the error
                     )
