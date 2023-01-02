@@ -35,11 +35,7 @@ def test_update_record_ok(
     task,
     expected_record_class,
 ):
-    dataset = helpers.create_dataset(
-        mocked_client,
-        task=task,
-    )
-
+    dataset = helpers.create_dataset(task=task)
     expected_id = 0
 
     text = "A new value for record 0"
@@ -55,9 +51,17 @@ def test_update_record_ok(
     updated_record = expected_record_class.parse_obj(response.json())
     assert updated_record.metadata["new_value"] == text
 
-    response = mocked_client.get(f"/api/datasets/{dataset}/records/{expected_id}")
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/{task}:search",
+        json={"query": {"ids": [expected_id]}},
+    )
     assert response.status_code == 200
-    assert updated_record == expected_record_class.parse_obj(response.json())
+    data = response.json()
+    assert data["total"] == 1
+    record = data["records"][0]
+
+    updated_record.metrics = {}
+    assert updated_record == expected_record_class.parse_obj(record)
 
 
 @pytest.mark.parametrize(
@@ -69,10 +73,7 @@ def test_update_record_ok(
     ],
 )
 def test_update_with_not_found(mocked_client, task):
-    dataset = helpers.create_dataset(
-        mocked_client,
-        task=task,
-    )
+    dataset = helpers.create_dataset(task=task)
 
     response = mocked_client.patch(
         f"/api/datasets/{dataset}/records/not-found",
@@ -93,10 +94,7 @@ def test_update_with_not_found(mocked_client, task):
 
 
 def test_with_wrong_values(mocked_client):
-    dataset = helpers.create_dataset(
-        mocked_client,
-        task=TaskType.text_classification,
-    )
+    dataset = helpers.create_dataset(task=TaskType.text_classification)
 
     response = mocked_client.patch(
         f"/api/datasets/{dataset}/records/not-found",
