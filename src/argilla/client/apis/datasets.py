@@ -148,8 +148,8 @@ class Datasets(AbstractApi):
     def scan(
         self,
         name: str,
-        query: Optional[str] = None,
         projection: Optional[Set[str]] = None,
+        **query,
     ) -> Iterable[dict]:
         """
         Search records over a dataset
@@ -162,15 +162,16 @@ class Datasets(AbstractApi):
 
         Returns:
 
-            A iterable of raw object containing per-record info
+            An iterable of raw object containing per-record info
 
         """
 
         url = f"{self._API_PREFIX}/{name}/records/:search"
+        query = self._parse_query(query=query)
 
         request = {
             "fields": list(projection) if projection else ["id"],
-            "query": {"query_text": query},
+            "query": query,
         }
 
         with api_compatibility(self, min_version="1.2.0"):

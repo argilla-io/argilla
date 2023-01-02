@@ -67,8 +67,8 @@ def test_scan_records_with_filter(
     expected_id = "00c27206-da48-4fc3-aab7-4b730628f8ac"
     data = active_api().datasets.scan(
         name=gutenberg_spacy_ner,
-        query=f"id: {expected_id}",
         projection={"*"},
+        query_text=f"id: {expected_id}",
     )
     data = list(data)
     assert len(data) == 1
@@ -82,7 +82,7 @@ def test_scan_records_without_results(
 ):
     data = active_api().datasets.scan(
         name=gutenberg_spacy_ner,
-        query="status: NO_DATA",
+        query_text="status: NO_DATA",
     )
     data = list(data)
     assert len(data) == 0
