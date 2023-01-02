@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from argilla.client.apis import AbstractApi
 from argilla.client.models import Record
@@ -38,8 +38,8 @@ class Searches(AbstractApi):
         self,
         name: str,
         task: TaskType,
-        query: Optional[str],
         size: Optional[int] = None,
+        **query: Optional[dict],
     ):
         """
         Searches records over a dataset
@@ -47,8 +47,8 @@ class Searches(AbstractApi):
         Args:
             name: The dataset name
             task: The dataset task type
-            query: The query string
             size: If provided, only the provided number of records will be fetched
+            query: The search query
 
         Returns:
             An instance of ``SearchResults`` class containing the search results
@@ -67,13 +67,10 @@ class Searches(AbstractApi):
         if size:
             url += f"{url}?size={size}"
 
-        query_request = {}
-        if query:
-            query_request["query_text"] = query
-
+        query = self._parse_query(query=query)
         response = self.http_client.post(
             path=url,
-            json={"query": query_request},
+            json={"query": query} if query else None,
         )
 
         return SearchResults(
