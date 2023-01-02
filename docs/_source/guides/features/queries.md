@@ -138,6 +138,14 @@ Inclusive ranges are specified with square brackets and exclusive ranges with cu
 - `score:[0.5 TO 0.6]`
 - `score:{0.9 TO *}`
 
+#### Datetime Ranges
+
+Datetime ranges are a special kind of range queries that can be defined for the `event_timestamp` and `last_updated` fields.
+The formatting is similar to normal range queries, but they require an iso-formatted datetime, which can be ontained via `datetime.now().isoformat()`, resulting in `1984-01-01T01:01:01.000000`. Note that the `*` can be used inter-changebly for the end of time or beginning of time.
+
+- `event_timestamp:[1984-01-01T01:01:01.000000 TO *]`
+- `last_updated:{* TO 1984-01-01T01:01:01.000000}`
+
 ### Escaping special characters
 
 The query string syntax has some reserved characters that you need to escape if you want to search for them.
