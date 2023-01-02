@@ -191,6 +191,20 @@ class Datasets(AbstractApi):
                             json={**request, "next_idx": next_idx},
                         )
 
+    def update_record(
+        self,
+        name: str,
+        record_id: str,
+        **content,
+    ):
+        with api_compatibility(self, min_version="1.2.0"):
+            url = f"{self._API_PREFIX}/{name}/records/{record_id}"
+            response = self.http_client.patch(
+                path=url,
+                json=content,
+            )
+            return response
+
     def delete_records(
         self,
         name: str,

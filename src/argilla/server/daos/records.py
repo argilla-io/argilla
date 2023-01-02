@@ -230,3 +230,25 @@ class DatasetRecordsDAO:
             id=dataset.id, content=content, query=query
         )
         return total, updated
+
+    async def update_record(
+        self,
+        dataset: DatasetDB,
+        record: RecordDB,
+    ):
+        await self._es.update_record(
+            dataset_id=dataset.id,
+            record_id=record.id,
+            content=record.dict(exclude_none=True),
+        )
+
+    async def get_record_by_id(
+        self,
+        dataset: DatasetDB,
+        id: str,
+    ) -> Optional[Dict[str, Any]]:
+
+        return self._es.find_record_by_id(
+            dataset_id=dataset.id,
+            record_id=id,
+        )
