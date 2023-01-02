@@ -353,6 +353,38 @@ class ElasticsearchBackend(LoggingMixin):
             if force_recreate or not self.__client__.indices.exists_template(name):
                 self.__client__.indices.put_template(name=name, body=template)
 
+    async def update_record(
+        self,
+        dataset_id,
+        record_id,
+        content: Dict[str, Any],
+    ):
+        if content.get("metadata"):
+            self._configure_metadata_fields(
+                id=dataset_id,
+                metadata_values=content["metadata"],
+            )
+
+        index = dataset_records_index(dataset_id)
+        self._update_document(
+            index=index,
+            doc_id=record_id,
+            document=content,
+        )
+
+    def find_record_by_id(
+        self,
+        dataset_id: str,
+        record_id: str,
+    ) -> Optional[dict]:
+        index = dataset_records_index(dataset_id)
+        doc = self._get_document_by_id(
+            index=index,
+            doc_id=record_id,
+        )
+        if doc:
+            return self.__esdoc2record__(doc)
+
     def delete_index_template(self, index_template: str):
         """Deletes an index template"""
         with backend_error_handler(index=""):
