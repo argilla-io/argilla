@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 import datetime
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type
 
 from fastapi import Depends
 
@@ -173,6 +173,7 @@ class DatasetRecordsDAO:
         limit: Optional[int] = 1000,
         id_from: Optional[str] = None,
         shuffle: bool = False,
+        include_fields: Optional[Set[str]] = None,
     ) -> Iterable[Dict[str, Any]]:
         """
         Iterates over a dataset records
@@ -187,6 +188,8 @@ class DatasetRecordsDAO:
             Batch size to extract, only works if an `id_from` is provided
         id_from:
             From which ID should we start iterating
+        include_fields:
+            A set of record fields to retrieve. Wildcard are allowed
 
         Returns
         -------
@@ -199,6 +202,7 @@ class DatasetRecordsDAO:
             limit=limit,
             id_from=id_from,
             shuffle=shuffle,
+            include_fields=list(include_fields) if include_fields else None,
         )
 
     def get_dataset_schema(self, dataset: DatasetDB) -> Dict[str, Any]:
