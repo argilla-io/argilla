@@ -3,5 +3,5 @@
 
 ### Oops! Something is missing.
 
-```{include} /_common/general.md
+```{include} /_static/tutorials/labelling-text2text-disaggregators-explainability/modal.md
 ```

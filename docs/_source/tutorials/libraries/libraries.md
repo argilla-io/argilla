@@ -29,6 +29,11 @@ Stanza is a collection of accurate and efficient tools for the linguistic analys
 
 We're on a journey to advance and democratize artificial intelligence through open source and open science.
 ```
+```{grid-item-card} Disaggregators
+:link: disaggregators.md
+
+Addressing fairness and bias in machine learning models is more important than ever!
+```
 ```{grid-item-card} Sentence Transformers
 :link: sentencetransformers.md
 
@@ -103,6 +108,8 @@ spacy.md
 stanza.md
 
 huggingface.md
+disaggregators.md
+
 sentencetransformers.md
 flair.md
 setfit.md
