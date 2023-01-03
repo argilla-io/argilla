@@ -77,13 +77,47 @@ docker-compose up -d
 
 In our case http://52.213.178.33
 
-## Google Cloud Platform (GCP)
-
-Coming soon!
-
-> 🚒 **If you'd like support with this and/or want to contribute this gude, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
-
 ## Azure
+
+The easiest way to deploy Argilla on Azure is using the Azure Container Instances (ACI) service. This service allows you to run containers in a serverless way, without the need to manage the underlying infrastructure. ACI integrates with Docker compose files, so you can easily deploy your application using the same file you use for local development. 
+
+### 1. Install Docker with compose
+
+Install th latest Docker with the compose method described as described in the [official documentation](https://docs.docker.com/compose/install/). Note that this is not the independent `docker-compose` application.
+
+### 2. Login to Azure
+
+Using `docker` and `az` CLI, login to Azure:
+
+```bash
+docker login azure
+```
+You can install the `az` CLI using the [official documentation](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
+
+### 3. Create an Azure context
+
+Create a separate context with Azure credentials and the subscription where you want to deploy the Argilla Server:
+
+```bash
+docker context create aci azurecontext --subscription-id <subscription-id> --resource-group <resource-group> --location <location>
+```
+You can also switch back to the default context with:
+
+```bash
+docker context use default
+```
+
+### 4. Deploy the Argilla Server
+
+To deploy the Argilla Server, you can use the Docker Compose file provided in the [Argilla repository](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml) and the `docker compose up` command:
+
+```bash
+wget -O docker-compose.yml https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml && docker-compose up -d
+```
+
+This guide is adapted from this [blog post by Ben Burtenshaw](https://medium.com/@ben.burtenshaw/zero-to-demo-on-azure-with-docker-compose-and-container-instances-4e83b78003b). There's also an official [tutorial](https://learn.microsoft.com/en-us/azure/container-instances/tutorial-docker-compose) on Microsoft Learn. 
+
+## Google Cloud Platform (GCP)
 
 Coming soon!
 
