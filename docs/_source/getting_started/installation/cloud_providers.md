@@ -79,7 +79,7 @@ In our case http://52.213.178.33
 
 ## Azure
 
-The easiest way to deploy Argilla on Azure is using the Azure Container Instances (ACI) service. This service allows you to run containers in a serverless way, without the need to manage the underlying infrastructure. ACI integrates with Docker compose files, so you can easily deploy your application using the same file you use for local development. 
+The easiest way to deploy Argilla on Azure is using the Azure Container Instances (ACI) service. This service allows you to run containers in a serverless way, without the need to manage the underlying infrastructure. ACI integrates with Docker compose files, so you can easily deploy your application using the same file you use for local development.
 
 ### 1. Install Docker with compose
 
@@ -115,7 +115,7 @@ To deploy the Argilla Server, you can use the Docker Compose file provided in th
 wget -O docker-compose.yml https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml && docker-compose up -d
 ```
 
-This guide is adapted from this [blog post by Ben Burtenshaw](https://medium.com/@ben.burtenshaw/zero-to-demo-on-azure-with-docker-compose-and-container-instances-4e83b78003b). There's also an official [tutorial](https://learn.microsoft.com/en-us/azure/container-instances/tutorial-docker-compose) on Microsoft Learn. 
+This guide is adapted from this [blog post by Ben Burtenshaw](https://medium.com/@ben.burtenshaw/zero-to-demo-on-azure-with-docker-compose-and-container-instances-4e83b78003b). There's also an official [tutorial](https://learn.microsoft.com/en-us/azure/container-instances/tutorial-docker-compose) on Microsoft Learn.
 
 ## Google Cloud Platform (GCP)
 
