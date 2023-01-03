@@ -7,6 +7,8 @@
 ```
 ```{include} /_static/tutorials/training-textclassification-smalltext-activelearning/modal.md
 ```
+```{include} /_static/tutorials/training-textclassification-classyclassification-activelearning/modal.md
+```
 ```{include} /_static/tutorials/labelling-tokenclassification-skweak-weaksupervision/modal.md
 ```
 ```{include} /_static/tutorials/training-textclassification-setfit-fewshot/modal.md
