@@ -98,6 +98,7 @@ setfit.md
 
 smalltext.md
 modal.md
+classyclassification.md
 
 skweak.md
 snorkel.md
