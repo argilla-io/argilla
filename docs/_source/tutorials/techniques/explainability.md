@@ -13,4 +13,6 @@ These tutorials show you how to explain you data using Argilla.
 ```
 ```{include} /_static/tutorials/labelling-tokenclassification-spacy-pretrained/modal.md
 ```
+```{include} /_static/tutorials/labelling-textclassification-gpt3-fewshot/modal.md
+```
 ````

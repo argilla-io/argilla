@@ -5,6 +5,8 @@
 
 ```{include} /_static/tutorials/training-textclassification-transformers-pretrained/modal.md
 ```
+```{include} /_static/tutorials/training-textclassification-setfit-sentiment/modal.md
+```
 ```{include} /_static/tutorials/training-textclassification-smalltext-activelearning/modal.md
 ```
 ```{include} /_static/tutorials/training-textclassification-classyclassification-activelearning/modal.md

@@ -54,6 +54,17 @@ Small-Text provides state-of-the-art Active Learning for Text Classification.
 
 modAL is an active learning framework for Python3, designed with modularity, flexibility and extensibility in mind.
 ```
+```{grid-item-card} Classy Classification
+:link: classyclassification.md
+
+An intuitive approach to few-shot classification using sentence-transformers or spaCy models, or zero-shot classification with Huggingface.
+```
+```{grid-item-card} OpenAI
+:link: openai.md
+
+OpenAI is a suite of APIs powered by large language and vision models which perform a variety of natural language and visual tasks.
+```
+
 ```{grid-item-card} Skweak
 :link: skweak.md
 
@@ -99,6 +110,7 @@ setfit.md
 smalltext.md
 modal.md
 classyclassification.md
+openai.md
 
 skweak.md
 snorkel.md
