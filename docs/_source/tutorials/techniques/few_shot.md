@@ -8,4 +8,6 @@ These tutorials show how to use few and zero-shot classification with Argilla.
 ```
 ```{include} /_static/tutorials/labelling-tokenclassification-flair-fewshot/modal.md
 ```
+```{include} /_static/tutorials/training-textclassification-classyclassification-activelearning/modal.md
+```
 ````
