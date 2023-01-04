@@ -33,7 +33,7 @@
     "core-js": "^3.6.5",
     "js-base64": "^3.7.2",
     "moment-timezone": "^0.5.33",
-    "nuxt": "^2.14.6",
+    "nuxt": "^2.15.8",
     "nuxt-highlightjs": "^1.0.2",
     "nuxt-mq": "^2.0.2",
     "sass": "^1.49.9",
