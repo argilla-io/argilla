@@ -85,7 +85,7 @@ class Search(AbstractApi):
                 "value": vector.value,
             }
 
-        response = self.__client__.post(
+        response = self.http_client.post(
             path=url,
             json={"query": query_request},
         )

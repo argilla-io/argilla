@@ -36,5 +36,5 @@ class MetricsAPI(AbstractApi):
         if query_params:
             url += "?" + "&".join([f"{k}={v}" for k, v in query_params.items()])
 
-        metric_summary = self.__client__.post(url, json={"query_text": query})
+        metric_summary = self.http_client.post(url, json={"query_text": query})
         return metric_summary

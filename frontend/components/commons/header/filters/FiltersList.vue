@@ -33,9 +33,9 @@
         >
           <svgicon v-if="group === 'Sort'" name="sort" width="18" height="18" />
           {{ group }}
-          <span v-if="itemsAppliedOnGroup(group)"
-            >({{ itemsAppliedOnGroup(group) }})</span
-          >
+          <span v-if="itemsAppliedOnGroup(group)">
+            ({{ itemsAppliedOnGroup(group) }})
+          </span>
         </p>
         <div
           v-if="initialVisibleGroup === group"
@@ -249,12 +249,16 @@ export default {
           this.dataset.query.uncovered_by_rules &&
           this.dataset.query.uncovered_by_rules?.length > 0,
       };
-      return [
-        ...filters,
-        ...dateFields,
-        ...sortedMetadataFilters,
-        uncoveredByRules,
-      ];
+
+      const formattedFilters = this.showUncoveredByRulesFilter
+        ? [
+            ...filters,
+            ...dateFields,
+            ...sortedMetadataFilters,
+            uncoveredByRules,
+          ]
+        : [...filters, ...dateFields, ...sortedMetadataFilters];
+      return formattedFilters;
     },
   },
   methods: {

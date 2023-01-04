@@ -37,3 +37,7 @@ don't fit your use case, you can change them using the following environment var
 Note that provided analyzers names should be defined as built-in ones. If you want to use a
 customized analyzer, you should create it inside an index_template matching Argilla index names (`.argilla*.records-v0),
 and then provide the analyzer name using the specific environment variable.
+
+## Reindex data
+
+Sometimes updates require reindexing our dataset metrics and Elasticsearch, therefore we devised some [short documentation](../../guides/features/datasets) to show you how to do this from our Python client.
