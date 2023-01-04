@@ -12,9 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
+from typing import Any, Dict, List
 
+from argilla.server.daos.backend.mappings.stopwords import english
 from argilla.server.settings import settings
+
+MULTILINGUAL_STOP_ANALYZER_REF = "multilingual_stop_analyzer"
 
 
 class mappings:
@@ -27,7 +30,7 @@ class mappings:
             "type": "keyword",
         }
         if enable_text_search:
-            text_field = mappings.text_field()
+            text_field = mappings.text_field(with_wordcloud=False)
             text_field_fields = text_field.pop("fields", {})
             mapping["fields"] = {"text": text_field, **text_field_fields}
         return mapping
@@ -47,12 +50,12 @@ class mappings:
         }
 
     @staticmethod
-    def text_field():
+    def text_field(with_wordcloud: bool = True):
         """Mappings config for textual field"""
         default_analyzer = settings.default_es_search_analyzer
         exact_analyzer = settings.exact_es_search_analyzer
 
-        return {
+        mappings = {
             "type": "text",
             "analyzer": default_analyzer,
             "fields": {
@@ -60,14 +63,22 @@ class mappings:
                     "type": "text",
                     "analyzer": exact_analyzer,
                 },
-                # "wordcloud": {
-                #     "type": "text",
-                #     "analyzer": MULTILINGUAL_STOP_ANALYZER_REF,
-                #     "fielddata": True,
-                # },
             },
-            # "meta": {"experimental": "true"},
         }
+
+        if with_wordcloud:
+            mappings["fields"]["wordcloud"] = {
+                "type": "text",
+                "fielddata": True,
+                "fielddata_frequency_filter": {
+                    "min": 0.001,
+                    "max": 0.1,
+                    "min_segment_size": 500,
+                },
+                "analyzer": MULTILINGUAL_STOP_ANALYZER_REF,
+            }
+
+        return mappings
 
     @staticmethod
     def source(includes: List[str] = None, excludes: List[str] = None):
@@ -93,12 +104,65 @@ class mappings:
         return {"dynamic": True, "type": "object"}
 
 
+def configure_multilingual_stop_analyzer(
+    settings: Dict[str, Any],
+    supported_langs: List[str] = None,
+):
+    lang2elastic_stop = {
+        "en": english.STOPWORDS,
+        "es": "_spanish_",
+        "fr": "_french_",
+        "de": "_german_",
+    }
+
+    supported_langs = supported_langs or [lang for lang in lang2elastic_stop]
+
+    def get_value_with_defaults(data: dict, key: str, default):
+        prop = data.get(key)
+        if prop is None:
+            data[key] = default
+        return data[key]
+
+    analysis = get_value_with_defaults(settings, "analysis", {})
+    filter = get_value_with_defaults(analysis, "filter", {})
+    analyzer = get_value_with_defaults(analysis, "analyzer", {})
+
+    filters = []
+    for lang in supported_langs:
+        stopwords = lang2elastic_stop.get(lang)
+        if stopwords:
+            filter[lang] = {
+                "type": "stop",
+                "stopwords": stopwords,
+            }
+            filters.append(lang)
+
+    analyzer[MULTILINGUAL_STOP_ANALYZER_REF] = {
+        "tokenizer": "lowercase",
+        "filter": filters,
+    }
+
+    return settings
+
+
+def extended_analyzer():
+    """Extended analyzer (used only in `word` field). Deprecated"""
+    return {
+        "type": "custom",
+        "tokenizer": "whitespace",
+        "filter": ["lowercase", "asciifolding"],
+    }
+
+
 def tasks_common_settings():
     """Common index settings"""
-    return {
+    es_settings = {
         "number_of_shards": settings.es_records_index_shards,
         "number_of_replicas": settings.es_records_index_replicas,
     }
+
+    configure_multilingual_stop_analyzer(settings=es_settings)
+    return es_settings
 
 
 def dynamic_metrics_text():

@@ -18,4 +18,8 @@ Are you unsure about what these features entail, take a look at our [terminology
 :link: ./metrics.html
 
 ```
+```{grid-item-card} Listeners
+:link: ./listeners.html
+
+```
 ````

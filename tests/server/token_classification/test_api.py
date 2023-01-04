@@ -216,7 +216,7 @@ def test_create_records_for_token_classification(
         "predicted_by": {"test": 1},
         "predicted_mentions": {"TEST": {"This": 1}},
         "status": {"Default": 1},
-        "words": {},
+        "words": {"text": 1},
     }
 
     assert "This" in results.aggregations.predicted_mentions[entity_label]

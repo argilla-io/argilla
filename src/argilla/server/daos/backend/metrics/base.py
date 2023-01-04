@@ -197,13 +197,17 @@ class NestedHistogramAggregation(NestedPathElasticsearchMetric):
 class WordCloudAggregation(ElasticsearchMetric):
     default_field: str
 
+    DEFAULT_WORDCOUNT_SIZE = 80
+
     def _build_aggregation(
-        self, text_field: str = None, size: int = None
+        self,
+        text_field: str = None,
+        size: int = None,
     ) -> Dict[str, Any]:
         field = text_field or self.default_field
         terms_id = f"{self.id}_{field}" if text_field else self.id
         return TermsAggregation(id=terms_id, field=field,).aggregation_request(
-            size=size
+            size=size or self.DEFAULT_WORDCOUNT_SIZE
         )[terms_id]
 
 

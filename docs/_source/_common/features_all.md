@@ -17,5 +17,9 @@
 :link: ./features/metrics.html
 
 ```
+```{grid-item-card} Listeners
+:link: ./features/listeners.html
+
+```
 ````
 

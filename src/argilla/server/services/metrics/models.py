@@ -158,11 +158,11 @@ class CommonTasksMetrics(ServiceBaseTaskMetrics, Generic[ServiceRecord]):
             name="Record status distribution",
             description="The dataset record status distribution",
         ),
-        # ServiceBaseMetric(
-        #     id="words_cloud",
-        #     name="Inputs words cloud",
-        #     description="The words cloud for dataset inputs",
-        # ),
+        ServiceBaseMetric(
+            id="words_cloud",
+            name="Inputs words cloud",
+            description="The words cloud for dataset inputs",
+        ),
         ServiceBaseMetric(id="metadata", name="Metadata fields stats"),
         ServiceBaseMetric(
             id="predicted_by",
