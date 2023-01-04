@@ -83,6 +83,11 @@ class ApiSettings(BaseSettings):
     es_records_index_shards: int = 1
     es_records_index_replicas: int = 0
 
+    vectors_fields_limit: int = Field(
+        default=5,
+        description="Max number of supported vectors per record",
+    )
+
     metadata_fields_limit: int = Field(
         default=50,
         gt=0,

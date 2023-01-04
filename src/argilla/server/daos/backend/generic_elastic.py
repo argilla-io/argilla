@@ -44,7 +44,7 @@ from argilla.server.daos.backend.search.model import (
     SortableField,
     SortConfig,
 )
-from argilla.server.errors import EntityNotFoundError
+from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.errors.task_errors import MetadataLimitExceededError
 from argilla.server.settings import settings
 
@@ -268,10 +268,35 @@ class GenericElasticEngineBackend(LoggingMixin):
             self._configure_metadata_fields(id, metadata_values)
 
         if vectors_cfg:
-            self.client.configure_index_vectors(
+            self._configure_vectors_fields(index, vectors_cfg)
+
+    def _configure_vectors_fields(
+        self,
+        index: str,
+        vectors_cfg: dict,
+    ):
+        def _check_max_number_of_vectors():
+            vectors = self.client.get_property_type(
                 index=index,
-                vectors=vectors_cfg,
+                property_name="vectors",
+                drop_extra_props=True,
             )
+            vector_names = {key for key in vectors.keys() if "vector" in vectors[key]}
+            for key in vectors_cfg.keys():
+                vector_names.add(f"vectors.{key}.value")
+
+            if len(vector_names) > settings.vectors_fields_limit:
+                raise BadRequestError(
+                    detail=f"Cannot create more than {settings.vectors_fields_limit} "
+                    "kind of vectors per dataset"
+                )
+
+        _check_max_number_of_vectors()
+
+        self.client.configure_index_vectors(
+            index=index,
+            vectors=vectors_cfg,
+        )
 
     def _configure_metadata_fields(
         self,
