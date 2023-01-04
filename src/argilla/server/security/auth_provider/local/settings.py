@@ -16,7 +16,7 @@
 from pydantic import BaseSettings
 
 from argilla._constants import DEFAULT_API_KEY
-from argilla.server.settings import settings
+from argilla.server.settings import settings as server_settings
 
 
 class Settings(BaseSettings):
@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     @property
     def public_oauth_token_url(self):
         """The final public token url used for openapi doc setup"""
-        return f"{settings.base_url}{self.token_api_url.removeprefix('/')}"
+        return f"{server_settings.base_url}{self.token_api_url.removeprefix('/')}"
 
     class Config:
         env_prefix = "ARGILLA_LOCAL_AUTH_"
