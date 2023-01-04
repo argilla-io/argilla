@@ -61,7 +61,7 @@ server = [
     "scikit-learn >= 0.24.2",
     # Statics server
     "aiofiles>=0.6,<22.2",
-    "PyYAML~=5.4.1",
+    "PyYAML>=5.4.1,<6.1.0",
     # security dependencies
     "python-multipart~=0.0.5",
     "python-jose[cryptography]>=3.2,<3.4",
