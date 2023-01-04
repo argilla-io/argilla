@@ -105,7 +105,7 @@ export default {
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {
     proxy: true,
-    browserBaseURL: "/api",
+    browserBaseURL: "api",
   },
 
   proxy: {
@@ -162,6 +162,6 @@ export default {
 
   router: {
     middleware: ["auth-guard"],
-    base: process.env.API_URL_CUSTOM ? `/${process.env.API_URL_CUSTOM}` : "/",
+    base: process.env.BASE_URL ? process.env.BASE_URL : "/",
   },
 };
