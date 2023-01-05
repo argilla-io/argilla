@@ -21,8 +21,8 @@
       ><svgicon name="kebab-menu" width="20" height="20" color="#4A4A4A"
     /></a>
     <div v-if="open" class="extra-actions__content">
-      <div v-if="hasMetadata" @click="showMetadata()">
-        <span>View metadata</span>
+      <div @click="showRecordInfoModal()">
+        <span>View record info</span>
       </div>
       <base-action-tooltip tooltip="Copied">
         <div @click="$copyToClipboard(record.clipboardText)">
@@ -105,8 +105,8 @@ export default {
       }
       this.close();
     },
-    showMetadata() {
-      this.$emit("onShowMetadata");
+    showRecordInfoModal() {
+      this.$emit("show-record-info-modal");
       this.close();
     },
     close() {
