@@ -1,13 +1,12 @@
 <template>
-  <a
+  <button
     class="sidebar-button"
     :class="sidebarButtonClass"
-    href="#"
     :data-title="tooltip"
     @click="$emit('button-action', id)"
   >
     <svgicon :name="icon"></svgicon>
-  </a>
+  </button>
 </template>
 
 <script>
@@ -60,6 +59,11 @@ export default {
 
 <style lang="scss" scoped>
 .sidebar-button {
+  display: flex;
+  outline: none;
+  border: none;
+  background: none;
+  margin: auto;
   &.mode {
     &:hover {
       .svg-icon {
