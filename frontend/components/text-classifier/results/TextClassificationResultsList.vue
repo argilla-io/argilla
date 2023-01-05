@@ -19,12 +19,17 @@
   <results-list
     v-if="!dataset.viewSettings.visibleRulesList"
     :dataset="dataset"
+    @search-records="searchRecords"
   >
     <template slot="results-header">
       <rule-definition :dataset="dataset" v-if="showRulesArea" />
     </template>
-    <template slot="record" slot-scope="results">
-      <record-text-classification :dataset="dataset" :record="results.record" />
+    <template slot="record" slot-scope="slotProps">
+      <record-text-classification
+        :dataset="dataset"
+        :record="slotProps.record"
+        :isReferenceRecord="slotProps.isReferenceRecord"
+      />
     </template>
   </results-list>
   <rules-management class="content" v-else :dataset="dataset" />
@@ -40,6 +45,11 @@ export default {
   computed: {
     showRulesArea() {
       return this.dataset.viewSettings.viewMode === "labelling-rules";
+    },
+  },
+  methods: {
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };
