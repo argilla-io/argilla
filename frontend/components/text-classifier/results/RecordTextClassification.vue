@@ -39,13 +39,6 @@
 
     <div v-if="!annotationEnabled" class="record__labels">
       <template v-if="record.annotation">
-        <!-- <svgicon
-          v-if="record.predicted && !labellingRulesView"
-          :class="['icon__predicted', record.predicted]"
-          width="40"
-          height="40"
-          :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
-        ></svgicon> -->
         <base-tag
           v-for="label in record.annotation.labels"
           :key="label.class"
@@ -57,15 +50,22 @@
 </template>
 
 <script>
-// import "assets/icons/matching";
-// import "assets/icons/no-matching";
 import { mapActions } from "vuex";
+import { DatasetViewSettings as ViewSettingsModel } from "@/models/DatasetViewSettings";
 import {
   TextClassificationRecord,
   TextClassificationDataset,
 } from "@/models/TextClassification";
 export default {
   props: {
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
     dataset: {
       type: TextClassificationDataset,
       required: true,
@@ -77,19 +77,30 @@ export default {
   },
   data: () => ({}),
   computed: {
+    viewSettings() {
+      return ViewSettingsModel.query().whereId(this.datasetName).first();
+    },
+    isMultiLabel() {
+      return this.getDataset().isMultiLabel;
+    },
+    viewMode() {
+      return this.viewSettings.viewMode;
+    },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewMode === "annotate";
     },
     labellingRulesView() {
-      return this.dataset.viewSettings.viewMode === "labelling-rules";
+      return this.viewMode === "labelling-rules";
     },
     allowValidate() {
+      console.log(this.isMultiLabel);
       return (
         this.record.status !== "Validated" &&
-        (this.record.annotation ||
-          this.record.prediction ||
-          this.dataset.isMultiLabel)
+        (this.record.annotation || this.record.prediction || this.isMultiLabel)
       );
+    },
+    paginationSize() {
+      return this.viewSettings?.pagination?.size;
     },
   },
   methods: {
@@ -99,7 +110,7 @@ export default {
     }),
     async resetLabels() {
       await this.resetAnnotations({
-        dataset: this.dataset,
+        dataset: this.getDataset(),
         records: [this.record],
       });
     },
@@ -113,7 +124,7 @@ export default {
       };
 
       await this.validateAnnotations({
-        dataset: this.dataset,
+        dataset: this.getDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -131,7 +142,7 @@ export default {
       }));
       // TODO: do not validate records without labels
       await this.validateAnnotations({
-        dataset: this.dataset,
+        dataset: this.getDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -142,6 +153,9 @@ export default {
           },
         ],
       });
+    },
+    getDataset() {
+      return TextClassificationDataset.query().whereId(this.datasetId).first();
     },
   },
 };
@@ -169,21 +183,6 @@ export default {
     @extend %hide-scrollbar;
   }
 }
-
-// .icon {
-//   &__predicted {
-//     position: absolute;
-//     right: 3em;
-//     top: 1em;
-//     &.ko {
-//       color: $error;
-//     }
-//     &.ok {
-//       color: $success;
-//     }
-//   }
-// }
-
 .content {
   &__actions-buttons {
     margin-right: 0;
