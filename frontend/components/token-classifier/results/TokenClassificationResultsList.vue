@@ -16,11 +16,7 @@
   -->
 
 <template>
-  <results-list
-    :dataset="dataset"
-    :metadata-item="selectedMetadataRecord"
-    @onCloseMetadata="onCloseMetadata"
-  >
+  <results-list :dataset="dataset">
     <template slot="record" slot-scope="results">
       <record-token-classification
         :dataset="dataset"
@@ -35,16 +31,6 @@ export default {
     dataset: {
       type: Object,
       required: true,
-    },
-  },
-  data() {
-    return {
-      selectedMetadataRecord: undefined,
-    };
-  },
-  methods: {
-    onCloseMetadata() {
-      this.selectedMetadataRecord = undefined;
     },
   },
 };
