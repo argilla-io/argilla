@@ -127,7 +127,7 @@ class Api:
             api_url: Address of the REST API. If `None` (default) and the env variable ``ARGILLA_API_URL`` is not set,
                 it will default to `http://localhost:6900`.
             api_key: Authentification key for the REST API. If `None` (default) and the env variable ``ARGILLA_API_KEY``
-                is not set, it will default to `argilla.apikey`.
+                is not set, it will default to `rubrix.apikey`.
             workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
                 env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
             timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.

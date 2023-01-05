@@ -24,6 +24,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
+import backoff
 from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -119,9 +120,20 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def configure_app_storage(app: FastAPI):
-    @app.on_event("startup")
-    async def configure_elasticsearch():
+def configure_storage(app: FastAPI):
+    def _on_backoff(event):
+        print(
+            f"Cannot connect to {settings.obfuscated_elasticsearch()}."
+            f" Tried {event['tries']} times. Retrying..."
+        )
+
+    @backoff.on_exception(
+        lambda: backoff.constant(interval=15),
+        ConfigError,
+        max_time=60,
+        on_backoff=_on_backoff,
+    )
+    def _setup_elasticsearch():
         try:
             es_wrapper = ElasticsearchBackend.get_instance()
             dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
@@ -138,6 +150,10 @@ def configure_app_storage(app: FastAPI):
                 "you have the necessary access permissions. "
                 "Once you have verified this, restart the argilla server.\n"
             ) from error
+
+    @app.on_event("startup")
+    async def setup_elasticsearch():
+        _setup_elasticsearch()
 
 
 def configure_app_security(app: FastAPI):
@@ -193,6 +209,7 @@ app = FastAPI()
 app.mount(settings.base_url, argilla_app)
 
 configure_app_logging(app)
+configure_storage(app)
 
 for app_configure in [
     configure_app_logging,
@@ -201,7 +218,6 @@ for app_configure in [
     configure_app_security,
     configure_api_router,
     configure_app_statics,
-    configure_app_storage,
     configure_telemetry,
 ]:
     app_configure(argilla_app)

@@ -53,7 +53,7 @@ By default, if you don't configure a `users.yml` file, your Argilla instance is 
 
 - username: `argilla`
 - password: `1234`
-- api_key: `argilla.apikey`
+- api_key: `rubrix.apikey`
 
 for security reasons we recommend changing at least the password and API key.
 
