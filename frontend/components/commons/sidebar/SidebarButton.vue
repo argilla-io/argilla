@@ -60,6 +60,7 @@ export default {
 <style lang="scss" scoped>
 .sidebar-button {
   @include resetButtonStyles();
+  display: flex;
   &.mode {
     &:hover {
       .svg-icon {
