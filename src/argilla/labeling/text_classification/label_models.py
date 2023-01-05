@@ -140,6 +140,10 @@ class MajorityVoter(LabelModel):
             has_annotation=None if include_annotated_records else False
         )
 
+        assert records, ValueError(
+            "No records are being passed. Use `include_annotated_records` to include also include annotated records."
+        )
+
         if isinstance(self._weak_labels, WeakMultiLabels):
             records = self._make_multi_label_records(
                 probabilities=self._compute_multi_label_probs(wl_matrix),
