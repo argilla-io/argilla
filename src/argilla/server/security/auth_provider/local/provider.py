@@ -33,9 +33,13 @@ from argilla.server.security.auth_provider.base import (
 from argilla.server.security.auth_provider.local.users.service import UsersService
 from argilla.server.security.model import Token, User
 
-from .settings import Settings, settings
+from .settings import Settings
+from .settings import settings as local_security
 
-_oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.token_api_url, auto_error=False)
+_oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl=local_security.public_oauth_token_url,
+    auto_error=False,
+)
 
 
 class LocalAuthProvider(AuthProvider):
