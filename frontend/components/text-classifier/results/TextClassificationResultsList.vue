@@ -19,18 +19,12 @@
   <results-list
     v-if="!dataset.viewSettings.visibleRulesList"
     :dataset="dataset"
-    :metadata-item="selectedMetadataItem"
-    @closeMetadata="resetMetadataItem"
   >
     <template slot="results-header">
       <rule-definition :dataset="dataset" v-if="showRulesArea" />
     </template>
     <template slot="record" slot-scope="results">
-      <record-text-classification
-        :dataset="dataset"
-        :record="results.record"
-        @onShowMetadata="onShowMetadata"
-      />
+      <record-text-classification :dataset="dataset" :record="results.record" />
     </template>
   </results-list>
   <rules-management class="content" v-else :dataset="dataset" />
@@ -43,20 +37,9 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    selectedMetadataItem: undefined,
-  }),
   computed: {
     showRulesArea() {
       return this.dataset.viewSettings.viewMode === "labelling-rules";
-    },
-  },
-  methods: {
-    onShowMetadata(id) {
-      this.selectedMetadataItem = id;
-    },
-    resetMetadataItem() {
-      this.selectedMetadataItem = undefined;
     },
   },
 };

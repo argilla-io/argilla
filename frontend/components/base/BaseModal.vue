@@ -98,7 +98,7 @@ export default {
   display: table;
   transition: opacity 0.3s ease;
   cursor: default;
-  background: $black-4;
+  background: $black-10;
   &:not(.prevent-scroll) {
     pointer-events: none;
   }
@@ -151,6 +151,15 @@ export default {
   box-shadow: $shadow;
   border-radius: $border-radius;
   max-width: 400px;
+  :deep(.modal__text) {
+    margin-bottom: 2em;
+  }
+}
+
+.modal-table {
+  box-shadow: $shadow;
+  border-radius: $border-radius;
+  max-width: none;
   :deep(.modal__text) {
     margin-bottom: 2em;
   }

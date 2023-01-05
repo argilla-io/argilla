@@ -34,12 +34,15 @@
                 @applyFilters="onApplyFilters"
               />
               <button
-                v-else
+                v-else-if="column.sortable"
                 :data-title="column.tooltip"
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
               >
                 <svgicon width="18" height="18" color="#4D4D4D" name="sort" />
+                <span>{{ column.name }}</span>
+              </button>
+              <button v-else :data-title="column.tooltip">
                 <span>{{ column.name }}</span>
               </button>
             </div>
@@ -81,6 +84,15 @@
                           title="Copy to clipboard"
                           class="table-info__actions__button button-icon"
                           @click.prevent="onActionClicked('copy-name', item)"
+                        >
+                          <svgicon name="copy" width="16" height="16" />
+                        </base-button>
+                      </base-action-tooltip>
+                      <base-action-tooltip tooltip="Copied">
+                        <base-button
+                          title="Copy info"
+                          class="table-info__actions__button button-icon"
+                          @click.prevent="onActionClicked('copy-text', item)"
                         >
                           <svgicon name="copy" width="16" height="16" />
                         </base-button>
@@ -151,6 +163,7 @@
                   </base-action-tooltip>
                 </div>
                 <base-modal
+                  v-if="!!deleteModalContent"
                   :modal-custom="true"
                   :prevent-body-scroll="true"
                   modal-class="modal-secondary"
