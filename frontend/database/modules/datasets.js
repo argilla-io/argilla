@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import _ from "lodash";
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
+import { Vector as VectorModel } from "@/models/Vector";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -148,6 +150,7 @@ function _configuredRouteParams() {
    * Read the route query params: query, sort, viewMode and pagination
    */
   const { query, sort, viewMode, pagination } = $nuxt.$route.query;
+
   return {
     query: JSON.parse(query ? Base64.decode(query) : "{}"),
     sort: JSON.parse(sort ? Base64.decode(sort) : "[]"),
@@ -217,10 +220,28 @@ async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
   if (advancedQueryDsl === null || advancedQueryDsl === "true") {
     query.advanced_query_dsl = true;
   }
+
+  const vector = VectorModel.query().where("is_active", true).first();
+
+  const numberOfRecords = vector ? 50 : size;
+
+  const { record_id, vector_name, vector_values } = vector || {};
+  const newQueryText = queryFactoryForSearchCall(record_id, query.text);
+  const newQuery = {
+    ...query,
+    query_text: newQueryText,
+    vector: vector
+      ? {
+          name: vector_name,
+          value: vector_values,
+        }
+      : null,
+  };
+
   const { response } = await ObservationDataset.api().post(
-    `/datasets/${dataset.name}/${dataset.task}:search?limit=${size}&from=${from}`,
+    `/datasets/${dataset.name}/${dataset.task}:search?limit=${numberOfRecords}&from=${from}`,
     {
-      query: { ...query, query_text: query.text },
+      query: { ...newQuery },
       sort,
     },
     {
@@ -230,9 +251,36 @@ async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
   return response.data;
 }
 
+const queryFactoryForSearchCall = (recordReferenceId, queryText) => {
+  let newQueryText = queryText;
+  let recordIdToExcludeText = null;
+  if (!_.isNil(recordReferenceId)) {
+    recordIdToExcludeText = `NOT id:"${recordReferenceId}"`;
+    newQueryText = queryTextCurryFactory(queryText || "")(
+      recordIdToExcludeText
+    )();
+  } else {
+    // nothing
+  }
+
+  return newQueryText;
+};
+
+const queryTextCurryFactory = (queryText1) => (queryText2) =>
+  queryText2 === undefined
+    ? queryText1
+    : queryTextCurryFactory(
+        `${queryText1} ${queryText1.length ? "AND" : ""} ${queryText2}`.trim()
+      );
+
 async function _querySearch({ dataset, query, sort, size }) {
   const save = size == 0 ? false : true;
-  const results = await _callSearchApi({ dataset, query, sort, size });
+  const results = await _callSearchApi({
+    dataset,
+    query,
+    sort,
+    size,
+  });
   if (save) {
     await _updateTaskDataset({ dataset, data: { results, query, sort } });
   }
@@ -559,10 +607,10 @@ const actions = {
      * Fetch a observation dataset by name
      */
     const workspace = currentWorkspace($nuxt.$route);
-
     const ds = await _getOrFetchDataset({ workspace, name });
     const { viewMode } = _configuredRouteParams();
     await _configureDatasetViewSettings(ds.name, viewMode);
+
     const dataset = await _loadTaskDataset(ds);
     await dataset.initialize();
     await _updateAnnotationProgress({
@@ -570,6 +618,9 @@ const actions = {
       total: dataset.globalResults.total,
       aggregations: dataset.globalResults.aggregations,
     });
+
+    const records = dataset.results?.records;
+    initVectorModel(dataset.id, records);
 
     return dataset;
   },
@@ -579,7 +630,15 @@ const actions = {
   },
 
   async search(_, { dataset, query, sort, size }) {
-    return await _search({ dataset, query, sort, size });
+    const searchResponse = await _search({
+      dataset,
+      query,
+      sort,
+      size,
+    });
+    const records = searchResponse.results?.records;
+    initVectorModel(dataset.id, records);
+    return searchResponse;
   },
 
   async changeViewMode(_, { dataset, value }) {
@@ -602,7 +661,10 @@ const actions = {
   },
 
   async paginate(_, { dataset, size, page }) {
-    await _paginate({ dataset, size, page });
+    const datasetPaginate = await _paginate({ dataset, size, page });
+
+    const records = datasetPaginate.results?.records;
+    initVectorModel(dataset.id, records);
   },
 
   async resetSearch(_, { dataset, size }) {
@@ -631,7 +693,52 @@ const actions = {
     });
     await _refreshDatasetAggregations({ dataset: paginatedDataset });
     await _fetchAnnotationProgress(paginatedDataset);
+
+    const records = paginatedDataset.results?.records;
+    initVectorModel(dataset.id, records);
   },
+};
+
+const initVectorModel = (datasetId, records) => {
+  const isDatasetContainsAnyVectors = isAnyKeyInArrayItem(records, "vectors");
+  if (isDatasetContainsAnyVectors) {
+    const datasetJoinedId = datasetId.join(".");
+    const vectorsData = formatVectorsToInsertInModel(datasetJoinedId, records);
+    insertDataInVectorModel(vectorsData);
+  }
+};
+
+const formatVectorsToInsertInModel = (datasetId, records) => {
+  const vectorsData = [];
+  records.forEach(({ id: recordId, vectors }) => {
+    const vectorsByRecord = getVectorsByRecord(datasetId, recordId, vectors);
+    vectorsData.push(...vectorsByRecord);
+  });
+  return vectorsData;
+};
+
+const getVectorsByRecord = (datasetId, recordId, vectors) => {
+  const vectorsByToInsertInModel = [];
+  Object.entries(vectors).forEach(([vectorName, { value: vectorValues }]) => {
+    vectorsByToInsertInModel.push({
+      dataset_id: datasetId,
+      record_id: recordId,
+      vector_name: vectorName,
+      vector_values: vectorValues,
+    });
+  });
+  return vectorsByToInsertInModel;
+};
+
+const insertDataInVectorModel = (vectors) => {
+  VectorModel.insertOrUpdate({
+    data: vectors,
+  });
+};
+
+const isAnyKeyInArrayItem = (arrayWithObjItem, key) => {
+  const isKeyInItem = (item) => item[key] && Object.keys(item[key]).length;
+  return arrayWithObjItem.some(isKeyInItem);
 };
 
 export default {

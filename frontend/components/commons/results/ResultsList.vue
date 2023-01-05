@@ -29,12 +29,26 @@
         >
           <template #before>
             <slot name="results-header" />
+            <similarity-record-reference-component
+              v-if="referenceRecordObj && !showLoader"
+              :dataset="dataset"
+              :referenceRecord="referenceRecordObj"
+              @search-records="searchRecords"
+              @show-metadata="onShowMetadata"
+            >
+              <slot
+                name="record"
+                :record="referenceRecordObj"
+                :isReferenceRecord="true"
+              />
+            </similarity-record-reference-component>
             <results-loading
               v-if="showLoader"
               :size="dataset.viewSettings.pagination.size"
             />
             <results-empty v-else-if="dataset.results.total === 0" />
           </template>
+
           <template v-slot="{ item, index, active }">
             <DynamicScrollerItem
               v-show="!showLoader && dataset.results.total > 0"
@@ -47,15 +61,17 @@
               :data-index="index"
             >
               <results-record
-                @show-metadata="onShowMetadata"
                 :key="`${dataset.name}-${item.id}`"
                 :dataset="dataset"
                 :item="item"
+                @search-records="searchRecords"
+                @show-metadata="onShowMetadata"
               >
                 <slot name="record" :record="item" />
               </results-record>
             </DynamicScrollerItem>
           </template>
+
           <template #after>
             <pagination-end-alert
               :limit="paginationLimit"
@@ -65,6 +81,7 @@
         </DynamicScroller>
       </div>
       <base-pagination
+        v-if="!referenceRecordObj && !showLoader"
         :total-items="dataset.results.total"
         :pagination-settings="dataset.viewSettings.pagination"
         @changePage="onPagination"
@@ -88,9 +105,13 @@
     </lazy-base-modal>
   </span>
 </template>
+
 <script>
 import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
+import { Vector as VectorModel } from "@/models/Vector";
+import { RefRecord as RefRecordModel } from "@/models/RefRecord";
+
 export default {
   props: {
     dataset: {
@@ -102,9 +123,22 @@ export default {
     return {
       scrollComponent: undefined,
       selectedRecord: undefined,
+      test: null,
     };
   },
+
   computed: {
+    referenceRecordId() {
+      return VectorModel.query()
+        .where("is_active", true)
+        .where("dataset_id", this.dataset.id.join("."))
+        .first()?.record_id;
+    },
+    referenceRecordObj() {
+      return RefRecordModel.query()
+        .where("record_id", this.referenceRecordId)
+        .first()?.record_object;
+    },
     showLoader() {
       return this.dataset.viewSettings.loading;
     },
@@ -132,10 +166,7 @@ export default {
     }),
     async onApplyMetadataFilter(metadata) {
       this.onCloseMetadata();
-      this.search({
-        dataset: this.dataset,
-        query: { metadata: metadata },
-      });
+      this.searchRecords({ query: { metadata: metadata } });
     },
     onShowMetadata(record) {
       this.selectedRecord = record;
@@ -151,9 +182,13 @@ export default {
         size: size,
       });
     },
+    searchRecords(query) {
+      this.$emit("search-records", query);
+    },
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .content {
   $this: &;
@@ -182,9 +217,11 @@ export default {
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
 }
+
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;
 }
+
 $maxItemsperPage: 20;
 @for $i from 0 through $maxItemsperPage {
   .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {

@@ -23,31 +23,56 @@
         item.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
-      <base-checkbox
-        v-if="annotationEnabled"
-        class="list__checkbox"
-        :value="item.selected"
-        @change="onCheckboxChanged($event, item.id)"
-      ></base-checkbox>
-      <slot :record="item" />
-      <record-extra-actions
-        :key="item.id"
-        :allow-change-status="annotationEnabled"
-        :record="item"
-        :dataset="dataset"
-        :task="dataset.task"
-        @onChangeRecordStatus="onChangeRecordStatus"
-        @onShowMetadata="onShowMetadata(item)"
-      />
-      <status-tag
-        v-if="annotationEnabled && item.status !== 'Default'"
-        :title="item.status"
-      ></status-tag>
+      <div class="record__header">
+        <template v-if="!weakLabelingEnabled">
+          <template v-if="annotationEnabled">
+            <div class="record__header--left" v-if="!isReferenceRecord">
+              <base-checkbox
+                class="list__checkbox"
+                :value="item.selected"
+                @change="onCheckboxChanged($event, item.id)"
+              ></base-checkbox>
+              <status-tag
+                v-if="item.status !== 'Default'"
+                :title="item.status"
+              ></status-tag>
+            </div>
+          </template>
+          <similarity-search-component
+            class="record__similarity-search"
+            v-if="formattedVectors.length"
+            :formattedVectors="formattedVectors"
+            :isReferenceRecord="isReferenceRecord"
+            @search-records="searchRecords"
+          />
+          <base-button
+            v-else
+            data-title="To use this function you need to have a vector associated with this record"
+            class="small similarity-search__button--disabled"
+          >
+            Find similar
+          </base-button>
+        </template>
+        <record-extra-actions
+          :key="item.id"
+          :allow-change-status="annotationEnabled && !isReferenceRecord"
+          :record="item"
+          :dataset="dataset"
+          :task="dataset.task"
+          @onChangeRecordStatus="onChangeRecordStatus"
+          @onShowMetadata="onShowMetadata(item)"
+        />
+      </div>
+      <slot :record="item" :isReferenceRecord="isReferenceRecord" />
     </div>
   </div>
 </template>
 <script>
 import { mapActions } from "vuex";
+import {
+  Vector as VectorModel,
+  getVectorModelPrimaryKey,
+} from "@/models/Vector";
 
 export default {
   props: {
@@ -59,13 +84,38 @@ export default {
       type: Object,
       required: true,
     },
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
+    weakLabelingEnabled() {
+      return this.dataset.viewSettings.viewMode === "labelling-rules";
+    },
     visibleRecords() {
       return this.dataset.visibleRecords;
+    },
+    vectors() {
+      return VectorModel.query().where("record_id", this.item.id).get() || [];
+    },
+    formattedVectors() {
+      const formattedVectors = this.vectors.map(
+        ({ vector_name, dataset_id, record_id }) => {
+          return {
+            vectorId: getVectorModelPrimaryKey({
+              vector_name,
+              dataset_id,
+              record_id,
+            }),
+            vectorName: vector_name,
+          };
+        }
+      );
+      return formattedVectors;
     },
   },
   methods: {
@@ -104,17 +154,60 @@ export default {
     onShowMetadata(record) {
       this.$emit("show-metadata", record);
     },
+    searchRecords(vector) {
+      const formattedObj = this.formatSelectedVectorObj(vector);
+      this.$emit("search-records", formattedObj);
+    },
+    formatSelectedVectorObj(vector) {
+      return { query: { vector }, recordId: this.item.id, vector };
+    },
   },
 };
 </script>
 <style lang="scss" scoped>
+.record {
+  &__header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 30px;
+    margin-top: 0.8em;
+    &--left {
+      display: flex;
+      align-items: center;
+      margin-right: auto;
+    }
+  }
+  &__extra-actions {
+    margin-right: $base-space;
+  }
+  &__similarity-search {
+    margin-left: auto;
+  }
+}
+.similarity-search {
+  &__button {
+    &--disabled {
+      @include font-size(13px);
+      font-weight: 500;
+      color: $black-37;
+      overflow: visible;
+      cursor: default;
+      &[data-title] {
+        position: relative;
+        @extend %has-tooltip--bottom;
+        @extend %tooltip-large-text;
+        &:after {
+          min-width: 158px;
+        }
+      }
+    }
+  }
+}
 .list {
   &__checkbox.re-checkbox {
-    position: absolute;
-    left: $base-space * 2;
-    top: $base-space * 2;
-    margin: 0;
-    width: auto;
+    margin: auto $base-space;
   }
   &__item {
     position: relative;

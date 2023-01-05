@@ -79,7 +79,7 @@ class ObservationDataset extends Model {
   }
 
   get visibleRecords() {
-    return this.results.records.slice(0, this.viewSettings.pagination.size);
+    return this.results.records;
   }
 
   static fields() {
@@ -97,4 +97,10 @@ class ObservationDataset extends Model {
   }
 }
 
-export { ObservationDataset, USER_DATA_METADATA_KEY };
+const getDatasetModelPrimaryKey = ({ owner, name }) => [owner, name];
+
+export {
+  ObservationDataset,
+  USER_DATA_METADATA_KEY,
+  getDatasetModelPrimaryKey,
+};

@@ -20,11 +20,13 @@
     :dataset="dataset"
     :metadata-item="selectedMetadataItem"
     @closeMetadata="resetMetadataItem"
+    @search-records="searchRecords"
   >
-    <template v-slot:record="{ record }">
+    <template slot="record" slot-scope="slotProps">
       <record-text-2-text
         :dataset="dataset"
-        :record="record"
+        :record="slotProps.record"
+        :isReferenceRecord="slotProps.isReferenceRecord"
         @onShowMetadata="onShowMetadata"
       />
     </template>
@@ -47,6 +49,9 @@ export default {
     },
     resetMetadataItem() {
       this.selectedMetadataItem = undefined;
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

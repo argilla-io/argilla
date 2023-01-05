@@ -18,7 +18,7 @@
 <template>
   <div class="app__content">
     <div class="grid">
-      <results :dataset="dataset" />
+      <results :dataset="dataset" @search-records="searchRecords" />
     </div>
   </div>
 </template>
@@ -42,6 +42,9 @@ export default {
     ...mapActions({
       fetchDataset: "entities/datasets/fetchByName",
     }),
+    searchRecords(query) {
+      this.$emit("search-records", query);
+    },
   },
 };
 </script>

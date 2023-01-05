@@ -17,7 +17,11 @@
 
 <template>
   <div class="results">
-    <component :is="currentTaskResultsList" :dataset="dataset" />
+    <component
+      :is="currentTaskResultsList"
+      :dataset="dataset"
+      @search-records="searchRecords"
+    />
   </div>
 </template>
 
@@ -32,6 +36,11 @@ export default {
   computed: {
     currentTaskResultsList() {
       return this.dataset.task + "ResultsList";
+    },
+  },
+  methods: {
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };
