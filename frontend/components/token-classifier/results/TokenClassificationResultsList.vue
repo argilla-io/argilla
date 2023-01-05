@@ -16,12 +16,7 @@
   -->
 
 <template>
-  <results-list
-    :dataset="dataset"
-    :metadata-item="selectedMetadataRecord"
-    @onCloseMetadata="onCloseMetadata"
-    @search-records="searchRecords"
-  >
+  <results-list :dataset="dataset" @search-records="searchRecords">
     <template slot="record" slot-scope="slotProps">
       <record-token-classification
         :dataset="dataset"
@@ -39,15 +34,7 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      selectedMetadataRecord: undefined,
-    };
-  },
   methods: {
-    onCloseMetadata() {
-      this.selectedMetadataRecord = undefined;
-    },
     searchRecords(query) {
       this.$emit("search-records", query);
     },

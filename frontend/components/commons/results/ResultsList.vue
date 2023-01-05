@@ -34,7 +34,7 @@
               :dataset="dataset"
               :referenceRecord="referenceRecordObj"
               @search-records="searchRecords"
-              @show-metadata="onShowMetadata"
+              @show-record-info-modal="onShowRecordInfoModal"
             >
               <slot
                 name="record"
@@ -64,8 +64,8 @@
                 :key="`${dataset.name}-${item.id}`"
                 :dataset="dataset"
                 :item="item"
+                @show-record-info-modal="onShowRecordInfoModal"
                 @search-records="searchRecords"
-                @show-metadata="onShowMetadata"
               >
                 <slot name="record" :record="item" />
               </results-record>
@@ -88,19 +88,17 @@
       />
     </div>
     <lazy-base-modal
-      modal-class="modal-secondary"
+      modal-class="modal-table"
       :modal-custom="true"
       :prevent-body-scroll="true"
+      modal-title="Record info"
       :modal-visible="selectedRecord !== undefined"
-      @close-modal="onCloseMetadata"
+      @close-modal="onCloseRecordInfo"
     >
-      <metadata
+      <record-info
         v-if="selectedRecord"
-        :applied-filters="dataset.query.metadata"
-        :metadata-items="selectedRecord.metadata"
-        :title="selectedRecord.recordTitle()"
-        @metafilterApply="onApplyMetadataFilter"
-        @cancel="onCloseMetadata"
+        :record="selectedRecord"
+        @close-modal="onCloseRecordInfo"
       />
     </lazy-base-modal>
   </span>
@@ -164,14 +162,10 @@ export default {
       paginate: "entities/datasets/paginate",
       search: "entities/datasets/search",
     }),
-    async onApplyMetadataFilter(metadata) {
-      this.onCloseMetadata();
-      this.searchRecords({ query: { metadata: metadata } });
-    },
-    onShowMetadata(record) {
+    onShowRecordInfoModal(record) {
       this.selectedRecord = record;
     },
-    onCloseMetadata() {
+    onCloseRecordInfo() {
       this.selectedRecord = undefined;
     },
     async onPagination(page, size) {

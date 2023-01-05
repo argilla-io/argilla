@@ -60,7 +60,7 @@
           :dataset="dataset"
           :task="dataset.task"
           @onChangeRecordStatus="onChangeRecordStatus"
-          @onShowMetadata="onShowMetadata(item)"
+          @show-record-info-modal="onShowRecordInfoModal(item)"
         />
       </div>
       <slot :record="item" :isReferenceRecord="isReferenceRecord" />
@@ -151,8 +151,8 @@ export default {
           console.warn("waT?", status);
       }
     },
-    onShowMetadata(record) {
-      this.$emit("show-metadata", record);
+    onShowRecordInfoModal(record) {
+      this.$emit("show-record-info-modal", record);
     },
     searchRecords(vector) {
       const formattedObj = this.formatSelectedVectorObj(vector);

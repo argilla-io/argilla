@@ -5,7 +5,7 @@
     :item="referenceRecord"
     :isReferenceRecord="!!referenceRecord"
     @search-records="searchRecords"
-    @show-metadata="onShowMetadata"
+    @show-record-info-modal="onShowRecordInfoModal"
   >
     <slot :record="referenceRecord" />
   </results-record>
@@ -22,11 +22,11 @@ export default {
     },
   },
   methods: {
-    onShowMetadata(query) {
-      this.$emit("show-metadata", query);
-    },
     searchRecords(query) {
       this.$emit("search-records", query);
+    },
+    onShowRecordInfoModal(record) {
+      this.$emit("show-record-info-modal", record);
     },
   },
 };

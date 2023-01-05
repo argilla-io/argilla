@@ -19,8 +19,6 @@
   <results-list
     v-if="!dataset.viewSettings.visibleRulesList"
     :dataset="dataset"
-    :metadata-item="selectedMetadataItem"
-    @closeMetadata="resetMetadataItem"
     @search-records="searchRecords"
   >
     <template slot="results-header">
@@ -31,7 +29,6 @@
         :dataset="dataset"
         :record="slotProps.record"
         :isReferenceRecord="slotProps.isReferenceRecord"
-        @onShowMetadata="onShowMetadata"
       />
     </template>
   </results-list>
@@ -45,21 +42,12 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    selectedMetadataItem: undefined,
-  }),
   computed: {
     showRulesArea() {
       return this.dataset.viewSettings.viewMode === "labelling-rules";
     },
   },
   methods: {
-    onShowMetadata(id) {
-      this.selectedMetadataItem = id;
-    },
-    resetMetadataItem() {
-      this.selectedMetadataItem = undefined;
-    },
     searchRecords(query) {
       this.$emit("search-records", query);
     },
