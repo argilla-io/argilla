@@ -20,7 +20,7 @@ import logging
 from typing import List, Optional
 from urllib.parse import urlparse
 
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, validator
 
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 
@@ -59,6 +59,24 @@ class ApiSettings(BaseSettings):
 
     __DATASETS_INDEX_NAME__ = "ar.datasets"
     __DATASETS_RECORDS_INDEX_NAME__ = "ar.dataset.{}"
+
+    base_url: str = Field(
+        default="/",
+        description="The default base url where server will be deployed",
+    )
+
+    @validator("base_url")
+    @classmethod
+    def normalize_base_url(cls, value: str):
+        if not value:
+            value = "/"
+        if not value.startswith("/"):
+            value = "/" + value
+
+        if not value.endswith("/"):
+            value += "/"
+
+        return value
 
     elasticsearch: str = "http://localhost:9200"
     elasticsearch_ssl_verify: bool = True
