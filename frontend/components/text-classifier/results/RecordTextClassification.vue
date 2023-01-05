@@ -81,7 +81,7 @@ export default {
       return ViewSettingsModel.query().whereId(this.datasetName).first();
     },
     isMultiLabel() {
-      return this.getDataset().isMultiLabel;
+      return this.getTextClassificationDataset().isMultiLabel;
     },
     viewMode() {
       return this.viewSettings.viewMode;
@@ -93,7 +93,6 @@ export default {
       return this.viewMode === "labelling-rules";
     },
     allowValidate() {
-      console.log(this.isMultiLabel);
       return (
         this.record.status !== "Validated" &&
         (this.record.annotation || this.record.prediction || this.isMultiLabel)
@@ -110,7 +109,7 @@ export default {
     }),
     async resetLabels() {
       await this.resetAnnotations({
-        dataset: this.getDataset(),
+        dataset: this.getTextClassificationDataset(),
         records: [this.record],
       });
     },
@@ -124,7 +123,7 @@ export default {
       };
 
       await this.validateAnnotations({
-        dataset: this.getDataset(),
+        dataset: this.getTextClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -142,7 +141,7 @@ export default {
       }));
       // TODO: do not validate records without labels
       await this.validateAnnotations({
-        dataset: this.getDataset(),
+        dataset: this.getTextClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -154,7 +153,7 @@ export default {
         ],
       });
     },
-    getDataset() {
+    getTextClassificationDataset() {
       return TextClassificationDataset.query().whereId(this.datasetId).first();
     },
   },
