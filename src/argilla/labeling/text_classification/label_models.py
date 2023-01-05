@@ -36,7 +36,8 @@ class TieBreakPolicy(Enum):
     @classmethod
     def _missing_(cls, value):
         raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+            f"{value} is not a valid {cls.__name__}, please select one of"
+            f" {list(cls._value2member_map_.keys())}"
         )
 
 
@@ -141,7 +142,8 @@ class MajorityVoter(LabelModel):
         )
 
         assert records, ValueError(
-            "No records are being passed. Use `include_annotated_records` to include also include annotated records."
+            "No records are being passed. Use `include_annotated_records` to include"
+            " also include annotated records or us `rg.log` to add records."
         )
 
         if isinstance(self._weak_labels, WeakMultiLabels):
@@ -257,7 +259,8 @@ class MajorityVoter(LabelModel):
                 ]
             else:
                 raise NotImplementedError(
-                    f"The tie break policy '{tie_break_policy.value}' is not implemented for {self.__class__.__name__}!"
+                    f"The tie break policy '{tie_break_policy.value}' is not"
+                    f" implemented for {self.__class__.__name__}!"
                 )
 
             records_with_prediction.append(rec.copy(deep=True))
@@ -446,7 +449,8 @@ class MajorityVoter(LabelModel):
                 prediction[i] = equal_prob_idx[random_idx]
         else:
             raise NotImplementedError(
-                f"The tie break policy '{tie_break_policy.value}' is not implemented for MajorityVoter!"
+                f"The tie break policy '{tie_break_policy.value}' is not implemented"
+                " for MajorityVoter!"
             )
 
         return annotation, prediction
@@ -710,7 +714,8 @@ class Snorkel(LabelModel):
 
         if self._weak_labels.annotation().size == 0:
             raise MissingAnnotationError(
-                "You need annotated records to compute scores/metrics for your label model."
+                "You need annotated records to compute scores/metrics for your label"
+                " model."
             )
 
         l_pred = self._weak_labels.matrix(has_annotation=True)
@@ -763,8 +768,9 @@ class FlyingSquid(LabelModel):
             import pgmpy
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
-                "'flyingsquid' must be installed to use the `FlyingSquid` label model! "
-                "You can install 'flyingsquid' with the command: `pip install pgmpy flyingsquid`"
+                "'flyingsquid' must be installed to use the `FlyingSquid` label model!"
+                " You can install 'flyingsquid' with the command: `pip install pgmpy"
+                " flyingsquid`"
             )
         else:
             from flyingsquid.label_model import LabelModel as FlyingSquidLabelModel
@@ -930,7 +936,8 @@ class FlyingSquid(LabelModel):
                 ]
             else:
                 raise NotImplementedError(
-                    f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
+                    f"The tie break policy '{tie_break_policy.value}' is not"
+                    " implemented for FlyingSquid!"
                 )
 
             records_with_prediction.append(rec.copy(deep=True))
@@ -957,7 +964,8 @@ class FlyingSquid(LabelModel):
         """
         if not self._models:
             raise NotFittedError(
-                "This FlyingSquid instance is not fitted yet. Call `fit` before using this model."
+                "This FlyingSquid instance is not fitted yet. Call `fit` before using"
+                " this model."
             )
         # create predictions for each label
         if self._weak_labels.cardinality > 2:
@@ -1060,7 +1068,8 @@ class FlyingSquid(LabelModel):
                 prediction[i] = equal_prob_idx[random_idx]
         else:
             raise NotImplementedError(
-                f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
+                f"The tie break policy '{tie_break_policy.value}' is not implemented"
+                " for FlyingSquid!"
             )
 
         return classification_report(
