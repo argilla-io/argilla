@@ -19,6 +19,7 @@ This module configures the global fastapi application
 import fileinput
 import glob
 import inspect
+import logging
 import os
 import shutil
 import tempfile
@@ -44,6 +45,8 @@ from argilla.server.routes import api_router
 from argilla.server.security import auth
 from argilla.server.settings import settings
 from argilla.server.static_rewrite import RewriteStaticFiles
+
+_LOGGER = logging.getLogger("argilla")
 
 
 def configure_middleware(app: FastAPI):
@@ -122,9 +125,9 @@ def configure_app_statics(app: FastAPI):
 
 def configure_storage(app: FastAPI):
     def _on_backoff(event):
-        print(
-            f"Cannot connect to {settings.obfuscated_elasticsearch()}."
-            f" Tried {event['tries']} times. Retrying..."
+        _LOGGER.warning(
+            f"Connection to {settings.obfuscated_elasticsearch()} is not ready. "
+            f"Tried {event['tries']} times. Retrying..."
         )
 
     @backoff.on_exception(
