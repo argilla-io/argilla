@@ -59,11 +59,7 @@ export default {
 
 <style lang="scss" scoped>
 .sidebar-button {
-  display: flex;
-  outline: none;
-  border: none;
-  background: none;
-  margin: auto;
+  @include resetButtonStyles();
   &.mode {
     &:hover {
       .svg-icon {
