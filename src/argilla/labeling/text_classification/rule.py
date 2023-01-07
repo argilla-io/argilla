@@ -180,6 +180,7 @@ class Rule:
         """The rule string representation."""
         return repr(self)
 
+
 def add_rules(dataset: str, rules: List[Rule]):
     """Adds the rules to a given dataset
 
