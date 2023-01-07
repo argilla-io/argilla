@@ -172,6 +172,13 @@ class Rule:
         else:
             return self._label
 
+    def __repr__(self):
+        """The rule representation."""
+        return f"Rule(query='{self.query}', label='{self.label}', name='{self.name}')"
+
+    def __str__(self):
+        """The rule string representation."""
+        return repr(self)
 
 def add_rules(dataset: str, rules: List[Rule]):
     """Adds the rules to a given dataset
