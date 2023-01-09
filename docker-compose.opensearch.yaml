@@ -22,6 +22,18 @@ services:
       - argilla
     volumes:
       - opensearch-data:/usr/share/opensearch/data
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.3.0
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601 # Map host port 5601 to container port 5601
+    expose:
+      - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
+    environment:
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+      OPENSEARCH_HOSTS: '["http://opensearch-node1:9200"]'
+    networks:
+      - argilla
 
 networks:
   argilla:
