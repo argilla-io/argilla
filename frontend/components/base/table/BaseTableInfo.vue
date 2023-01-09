@@ -88,15 +88,6 @@
                           <svgicon name="copy" width="16" height="16" />
                         </base-button>
                       </base-action-tooltip>
-                      <base-action-tooltip tooltip="Copied">
-                        <base-button
-                          title="Copy info"
-                          class="table-info__actions__button button-icon"
-                          @click.prevent="onActionClicked('copy-text', item)"
-                        >
-                          <svgicon name="copy" width="16" height="16" />
-                        </base-button>
-                      </base-action-tooltip>
                     </span>
                     <base-date
                       v-else-if="column.type === 'date'"

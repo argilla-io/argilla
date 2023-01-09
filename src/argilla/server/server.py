@@ -16,8 +16,13 @@
 """
 This module configures the global fastapi application
 """
+import fileinput
+import glob
 import inspect
+import logging
 import os
+import shutil
+import tempfile
 from pathlib import Path
 
 import backoff
@@ -40,6 +45,8 @@ from argilla.server.routes import api_router
 from argilla.server.security import auth
 from argilla.server.settings import settings
 from argilla.server.static_rewrite import RewriteStaticFiles
+
+_LOGGER = logging.getLogger("argilla")
 
 
 def configure_middleware(app: FastAPI):
@@ -72,15 +79,43 @@ def configure_api_router(app: FastAPI):
 
 def configure_app_statics(app: FastAPI):
     """Configure static folder for app"""
+
     parent_path = Path(__file__).parent.absolute()
     statics_folder = Path(os.path.join(parent_path, "static"))
     if not (statics_folder.exists() and statics_folder.is_dir()):
         return
 
+    def _create_statics_folder(path_from):
+        """
+        Application statics will be created with a parameterized baseUrl variable.
+
+        This function will replace the variable by the real runtime value found in settings.base_url
+
+        This allow us to deploy the argilla server under a custom base url, even when webapp does not
+        support it.
+
+        """
+        BASE_URL_VAR_NAME = "@@baseUrl@@"
+        temp_dir = tempfile.mkdtemp()
+        new_folder = shutil.copytree(path_from, temp_dir + "/statics")
+        for extension in ["*.js", "*.html"]:
+            for file in glob.glob(
+                f"{new_folder}/**/{extension}",
+                recursive=True,
+            ):
+                with fileinput.FileInput(file, inplace=True, backup=".bak") as file:
+                    for line in file:
+                        base_url = settings.base_url.removesuffix("/")
+                        print(line.replace(BASE_URL_VAR_NAME, base_url), end="")
+
+        return new_folder
+
+    temp_statics = _create_statics_folder(statics_folder)
+
     app.mount(
         "/",
         RewriteStaticFiles(
-            directory=statics_folder,
+            directory=temp_statics,
             html=True,
             check_dir=False,
         ),
@@ -90,9 +125,9 @@ def configure_app_statics(app: FastAPI):
 
 def configure_storage(app: FastAPI):
     def _on_backoff(event):
-        print(
-            f"Cannot connect to {settings.obfuscated_elasticsearch()}."
-            f" Tried {event['tries']} times. Retrying..."
+        _LOGGER.warning(
+            f"Connection to {settings.obfuscated_elasticsearch()} is not ready. "
+            f"Tried {event['tries']} times. Retrying..."
         )
 
     @backoff.on_exception(
@@ -163,15 +198,22 @@ def configure_telemetry(app):
             print(message, flush=True)
 
 
-app = FastAPI(
-    title="argilla",
-    description="argilla API",
+argilla_app = FastAPI(
+    title="Argilla",
+    description="Argilla API",
     # Disable default openapi configuration
     openapi_url="/api/docs/spec.json",
     docs_url="/api/docs" if settings.docs_enabled else None,
     redoc_url=None,
     version=str(argilla_version),
 )
+
+app = FastAPI()
+app.mount(settings.base_url, argilla_app)
+
+configure_app_logging(app)
+configure_storage(app)
+configure_telemetry(app)
 
 for app_configure in [
     configure_app_logging,
@@ -180,7 +222,5 @@ for app_configure in [
     configure_app_security,
     configure_api_router,
     configure_app_statics,
-    configure_storage,
-    configure_telemetry,
 ]:
-    app_configure(app)
+    app_configure(argilla_app)
