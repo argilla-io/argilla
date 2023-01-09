@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="record">
+  <div class="record" v-if="record">
     <div class="record--left">
       <record-inputs :record="record" />
       <classifier-annotation-area
@@ -59,7 +59,6 @@
 
 <script>
 import { mapActions } from "vuex";
-import { TextClassificationRecord } from "@/models/TextClassification";
 import { getTextClassificationDatasetById } from "@/models/TextClassification.queries";
 import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
@@ -77,14 +76,21 @@ export default {
       type: Array,
       required: true,
     },
-    record: {
-      type: TextClassificationRecord,
+    recordId: {
+      type: String,
       required: true,
     },
   },
   computed: {
     viewSettings() {
       return getViewSettingsWithPaginationByDatasetName(this.datasetName);
+    },
+    record() {
+      //TODO when there will be a table for records in the ORM => replace by the record query here
+      const records = this.getTextClassificationDataset().results?.records;
+      const record =
+        records.find((record) => record.id === this.recordId) || null;
+      return record;
     },
     isMultiLabel() {
       return this.getTextClassificationDataset().isMultiLabel;

@@ -25,11 +25,10 @@
     </template>
     <template slot="record" slot-scope="results">
       <record-text-classification
-        :dataset="dataset"
         :datasetLabels="datasetLabels"
         :datasetId="dataset.id"
         :datasetName="dataset.name"
-        :record="results.record"
+        :recordId="results.record.id"
       />
     </template>
   </results-list>
