@@ -1,6 +1,6 @@
 Are you unsure about what these features entail, take a look at our [terminology](/getting_started/terminology) section.
 
-````{grid}  1 1 4 4
+````{grid}  1 1 3 3
 :class-container: tuto-section-2
 ```{grid-item-card} Datasets
 :link: ./datasets.html
