@@ -20,7 +20,7 @@
     <div v-click-outside="closePageSizeSelector" class="pagination__selector">
       <span class="pagination__selector__title">Records per page:</span>
       <div class="pagination__selector__content">
-        <a href="#" @click="showOptions = !showOptions">
+        <a href="#" @click.prevent="showOptions = !showOptions">
           {{ paginationSize }}
           <svgicon name="chevron-up" width="12" height="12" />
         </a>
