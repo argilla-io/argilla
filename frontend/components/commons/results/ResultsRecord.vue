@@ -38,6 +38,9 @@
               ></status-tag>
             </div>
           </template>
+          <span class="record__date" v-if="item.event_timestamp">{{
+            recordEventTimestamp
+          }}</span>
           <similarity-search-component
             class="record__similarity-search"
             v-if="formattedVectors.length"
@@ -117,6 +120,9 @@ export default {
       );
       return formattedVectors;
     },
+    recordEventTimestamp() {
+      return this.$moment(this.item.event_timestamp).format("YYYY-MM-DD HH:mm");
+    },
   },
   methods: {
     ...mapActions({
@@ -182,8 +188,11 @@ export default {
   &__extra-actions {
     margin-right: $base-space;
   }
-  &__similarity-search {
-    margin-left: auto;
+  &__date {
+    @include font-size(12px);
+    color: $black-37;
+    font-weight: 500;
+    margin-right: $base-space;
   }
 }
 .similarity-search {
