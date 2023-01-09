@@ -492,7 +492,7 @@ class Api:
                 An ElasticSearch query with the
                 `query string syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
             vector:
-                Vector configuration for a similarity search
+                Vector configuration for a semantic search
             ids:
                 If provided, load dataset records with given ids.
             limit:

@@ -4,7 +4,7 @@
 This guide explains how to run the Argilla server with Elasticsearch using `docker-compose`.
 
 (launching-the-web-app-via-docker-compose)=
-## Web app via docker-compose
+## Launching Argilla and Elasticsearch with `docker-compose`
 
 For this method you first need to install [Docker Compose](https://docs.docker.com/compose/install/).
 
