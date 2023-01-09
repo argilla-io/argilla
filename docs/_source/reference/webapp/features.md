@@ -171,6 +171,9 @@ You can edit a rule by clicking on its name, or delete it by clicking on the tra
 ## Similarity search
 This feature enables you to find similar records when exploring or annotating records. This leverages semantic search to find "semantically" similar records. In order to use this feature, your dataset records should contain vectors which can be associated when logging the dataset into Argilla. Check the Deep Dive Feature guide about Similarity Search to understand how to benefit from this feature.
 
+![Similarity Search](../../_static/reference/webapp/features-similaritysearch.png)
+
+
 ## Explore records
 
 ![Explore records](../../_static/reference/webapp/features-explore.png)
