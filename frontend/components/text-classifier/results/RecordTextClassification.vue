@@ -21,12 +21,21 @@
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="annotationEnabled"
-        :dataset="dataset"
+        :inputLabels="dataset.labels"
+        :datasetName="dataset.name"
+        :isMultiLabel="dataset.isMultiLabel"
+        :paginationSize="paginationSize"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
-      <classifier-exploration-area v-else :dataset="dataset" :record="record" />
+      <classifier-exploration-area
+        v-else
+        :dataset="dataset"
+        :datasetName="dataset.name"
+        :paginationSize="paginationSize"
+        :record="record"
+      />
       <div v-if="annotationEnabled" class="content__actions-buttons">
         <base-button
           v-if="allowValidate"
@@ -78,7 +87,7 @@ export default {
   data: () => ({}),
   computed: {
     viewSettings() {
-      return ViewSettingsModel.query().whereId(this.datasetName).first();
+      return ViewSettingsModel.query().with("pagination").whereId(this.datasetName).first();
     },
     isMultiLabel() {
       return this.getTextClassificationDataset().isMultiLabel;
@@ -99,7 +108,7 @@ export default {
       );
     },
     paginationSize() {
-      return this.viewSettings?.pagination?.size;
+      return this.viewSettings?.pagination.size;
     },
   },
   methods: {
