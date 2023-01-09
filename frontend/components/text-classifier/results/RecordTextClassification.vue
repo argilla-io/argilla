@@ -59,8 +59,8 @@
 
 <script>
 import { mapActions } from "vuex";
-import { getTextClassificationDatasetById } from "@/models/TextClassificationQueries";
 import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
+import { getTextClassificationDatasetById } from "@/models/TextClassification.queries";
 
 export default {
   props: {
