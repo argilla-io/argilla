@@ -29,7 +29,13 @@
         @validate="validateLabels"
         @reset="resetLabels"
       />
-      <classifier-exploration-area v-else :dataset="dataset" :record="record" />
+      <classifier-exploration-area
+        v-else
+        :dataset="dataset"
+        :datasetName="dataset.name"
+        :paginationSize="paginationSize"
+        :record="record"
+      />
       <div v-if="annotationEnabled" class="content__actions-buttons">
         <base-button
           v-if="allowValidate"
