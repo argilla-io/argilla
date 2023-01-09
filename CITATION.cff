@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Daniel"
+  given-names: "Vila-Suero"
+- family-names: "Francisco"
+  given-names: "Aranda"
+title: "Argilla - Open-source framework for data-centric NLP"
+version: 1.2.0
+date-released: 2023-01-12
+url: "https://github.com/argilla-io/argilla"

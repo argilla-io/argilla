@@ -27,7 +27,7 @@ maintainers = [
 ]
 dependencies = [
     # Client
-    "httpx ~= 0.15.0",
+    "httpx >= 0.15,< 0.24",
     "deprecated ~= 1.2.0",
     "packaging >= 20.0",
     # pandas -> For data loading
@@ -35,7 +35,7 @@ dependencies = [
     # Aligned pydantic version with server fastAPI
     "pydantic >= 1.7.1",
     # monitoring
-    "wrapt ~= 1.13.0",
+    "wrapt >= 1.13,< 1.15",
     # weaksupervision
     "numpy < 1.24.0",
     "tqdm >= 4.27.0",
@@ -49,12 +49,12 @@ dynamic = ["version"]
 [project.optional-dependencies]
 server = [
     # Basic dependencies
-    "fastapi ~= 0.75.0",
-    "opensearch-py ~=1.0.0",
+    "fastapi >= 0.75,< 0.89",
+    "opensearch-py >= 1.0,< 2.1",
     "elasticsearch ~=8.5.0",
     "uvicorn[standard] >= 0.15.0,< 0.21.0",
     "smart-open",
-    "brotli-asgi ~= 1.1.0",
+    "brotli-asgi >= 1.1,< 1.3",
     "Deprecated ~= 1.2.0",
     # Advanced query search dsl
     "luqum >= 0.11,< 0.13",
@@ -62,7 +62,7 @@ server = [
     "scikit-learn >= 0.24.2",
     # Statics server
     "aiofiles>=0.6,<22.2",
-    "PyYAML~=5.4.1",
+    "PyYAML>=5.4.1,<6.1.0",
     # security dependencies
     "python-multipart~=0.0.5",
     "python-jose[cryptography]>=3.2,<3.4",

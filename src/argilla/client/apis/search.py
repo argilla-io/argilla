@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from argilla.client.apis import AbstractApi
 from argilla.client.models import Record
@@ -44,9 +44,8 @@ class Search(AbstractApi):
         self,
         name: str,
         task: TaskType,
-        query: Optional[str],
-        vector: Optional[VectorSearch] = None,
         size: Optional[int] = None,
+        **query,
     ):
         """
         Searches records over a dataset
@@ -54,9 +53,8 @@ class Search(AbstractApi):
         Args:
             name: The dataset name
             task: The dataset task type
-            vector: The vector search configuration
-            query: The query string
             size: If provided, only the provided number of records will be fetched
+            query: The search query
 
         Returns:
             An instance of ``SearchResults`` class containing the search results
@@ -75,19 +73,10 @@ class Search(AbstractApi):
         if size:
             url += f"?limit={size}"
 
-        query_request = {}
-        if query:
-            query_request["query_text"] = query
-
-        if vector:
-            query_request["vector"] = {
-                "name": vector.name,
-                "value": vector.value,
-            }
-
-        response = self.__client__.post(
+        query = self._parse_query(query=query)
+        response = self.http_client.post(
             path=url,
-            json={"query": query_request},
+            json={"query": query} if query else None,
         )
 
         return SearchResults(

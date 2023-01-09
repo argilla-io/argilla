@@ -83,10 +83,44 @@ def test_similarity_search_in_python_client(
 
     ar.delete(dataset)
     ar.log(
-        ar.TextClassificationRecord(id=0, inputs=text, vectors=vectors),
+        ar.TextClassificationRecord(
+            id=0,
+            inputs=text,
+            vectors=vectors,
+        ),
         name=dataset,
     )
-    ar.load(dataset)
+    ds = ar.load(dataset, vector=("my_bert", [1, 1, 1, 1]))
+    assert len(ds) == 1
+
+    ar.log(
+        ar.TextClassificationRecord(
+            id=1,
+            inputs=text,
+            vectors={"my_bert_2": [1, 2, 3, 4]},
+        ),
+        name=dataset,
+    )
+    ds = ar.load(dataset, vector=("my_bert_2", [1, 1, 1, 1]))
+    assert len(ds) == 1
+    with pytest.raises(
+        BadRequestApiError,
+        match="Cannot create more than 5 kind of vectors per dataset",
+    ):
+        ar.log(
+            ar.TextClassificationRecord(
+                id=3,
+                inputs=text,
+                vectors={
+                    "a": [1.0],
+                    "b": [1.0],
+                    "c": [1.0],
+                    "d": [1.0],
+                    "e": [1.0],
+                },
+            ),
+            name=dataset,
+        )
 
 
 @pytest.mark.skipif(

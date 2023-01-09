@@ -208,7 +208,7 @@ class ElasticsearchBackend(LoggingMixin):
         sort_cfg:
             Customized configuration for sort-by id
         size:
-            Amount of samples to retrieve per iteration, 1000 by default
+            If provided, amount of samples to retrieve.
         fetch_once:
             If enabled, will return only the `size` first records found. Default to: ``False``
 
@@ -217,21 +217,32 @@ class ElasticsearchBackend(LoggingMixin):
         A sequence of documents resulting from applying the query on the index
 
         """
-        size = size or 1000
+        batch_size = size or 500
         query = query.copy() or {}
         if sort_cfg:
             query["sort"] = sort_cfg
         query["track_total_hits"] = False  # Speedup pagination
-        response = self.__client__.search(index=index, body=query, size=size)
+        response = self.__client__.search(
+            index=index,
+            body=query,
+            size=batch_size,
+        )
+        records_yield = 0
         while response["hits"]["hits"]:
             for hit in response["hits"]["hits"]:
                 yield hit
-            if fetch_once:
+                records_yield += 1
+
+            if fetch_once or (size and size >= records_yield):
                 break
 
             last_id = hit["_id"]
             query["search_after"] = [last_id]
-            response = self.__client__.search(index=index, body=query, size=size)
+            response = self.__client__.search(
+                index=index,
+                body=query,
+                size=size,
+            )
 
     def _index_exists(self, index: str) -> bool:
         """
@@ -341,6 +352,38 @@ class ElasticsearchBackend(LoggingMixin):
         with backend_error_handler(index=""):
             if force_recreate or not self.__client__.indices.exists_template(name):
                 self.__client__.indices.put_template(name=name, body=template)
+
+    async def update_record(
+        self,
+        dataset_id,
+        record_id,
+        content: Dict[str, Any],
+    ):
+        if content.get("metadata"):
+            self._configure_metadata_fields(
+                id=dataset_id,
+                metadata_values=content["metadata"],
+            )
+
+        index = dataset_records_index(dataset_id)
+        self._update_document(
+            index=index,
+            doc_id=record_id,
+            document=content,
+        )
+
+    def find_record_by_id(
+        self,
+        dataset_id: str,
+        record_id: str,
+    ) -> Optional[dict]:
+        index = dataset_records_index(dataset_id)
+        doc = self._get_document_by_id(
+            index=index,
+            doc_id=record_id,
+        )
+        if doc:
+            return self.__esdoc2record__(doc)
 
     def delete_index_template(self, index_template: str):
         """Deletes an index template"""
@@ -815,13 +858,19 @@ class ElasticsearchBackend(LoggingMixin):
                     query=query,
                     sort=sort,
                 ),
-                "_source": {"excludes": exclude_fields or []},
+                "_source": {
+                    "excludes": exclude_fields or [],
+                },
                 "from": record_from,
             }
             if enable_highlight:
                 es_query["highlight"] = self.__configure_query_highlight__()
 
-            results = self._search(index=index, query=es_query, size=size)
+            results = self._search(
+                index=index,
+                query=es_query,
+                size=size,
+            )
             hits = results["hits"]
             total = hits["total"]
             docs = hits["hits"]
@@ -833,13 +882,20 @@ class ElasticsearchBackend(LoggingMixin):
         doc: Dict[str, Any],
         is_phrase_query: bool = True,
     ):
-        return {
+        data = {
             **doc["_source"],
             "id": doc["_id"],
-            "search_keywords": self.__parse_highlight_results__(
-                doc, is_phrase_query=is_phrase_query
-            ),
         }
+
+        highlight_results = self.__parse_highlight_results__(
+            doc=doc,
+            is_phrase_query=is_phrase_query,
+        )
+
+        if highlight_results:
+            data["search_keywords"] = highlight_results
+
+        return data
 
     @classmethod
     def __parse_highlight_results__(
@@ -882,10 +938,13 @@ class ElasticsearchBackend(LoggingMixin):
         self,
         id: str,
         query: Optional[BackendRecordsQuery] = None,
+        exclude_fields: List[str] = None,
+        include_fields: List[str] = None,
         id_from: Optional[str] = None,
         limit: Optional[int] = None,
         shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
+
         index = dataset_records_index(id)
         with backend_error_handler(index):
             es_query = {
@@ -894,9 +953,10 @@ class ElasticsearchBackend(LoggingMixin):
                     query=query,
                     id_from=id_from,
                     shuffle=shuffle,
+                    exclude_fields=exclude_fields,
+                    include_fields=include_fields,
                     sort=SortConfig(),  # sort by id as default for proper index scan using search after
-                ),
-                "highlight": self.__configure_query_highlight__(),
+                )
             }
 
             docs = self._list_documents(

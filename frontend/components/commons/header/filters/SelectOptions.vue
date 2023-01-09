@@ -109,11 +109,10 @@ export default {
   hyphens: auto;
 }
 ul {
-  max-height: 188px;
+  max-height: 205px;
   overflow-y: auto;
   margin: 0 -1em 0 -1em;
   padding: 0 1em 1em 1em;
-  @extend %hide-scrollbar;
   &.--single {
     padding-bottom: 0;
     margin-bottom: -0.5em;

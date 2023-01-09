@@ -261,3 +261,10 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+@mixin resetButtonStyles() {
+  outline: none;
+  border: none;
+  background: none;
+  margin: auto;
+}

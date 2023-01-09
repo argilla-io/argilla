@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import logging
-from typing import Iterable, List, Optional, Type, Union
+from typing import Iterable, List, Optional, Set, Type, Union
 
 from fastapi import Depends
 
@@ -127,14 +127,24 @@ class SearchRecordsService:
     def scan_records(
         self,
         dataset: ServiceDataset,
-        record_type: Type[ServiceRecord],
+        record_type: Optional[Type[ServiceRecord]] = None,
         query: Optional[ServiceRecordsQuery] = None,
+        projection: Set[str] = None,
         id_from: Optional[str] = None,
         limit: int = 1000,
     ) -> Iterable[ServiceRecord]:
         """Scan records for a queried"""
         search = DaoRecordsSearch(query=query)
+
+        transform_doc = lambda doc: doc
+        if record_type:
+            transform_doc = record_type.parse_obj
+
         for doc in self.__dao__.scan_dataset(
-            dataset, id_from=id_from, limit=limit, search=search
+            dataset,
+            id_from=id_from,
+            limit=limit,
+            search=search,
+            include_fields=projection,
         ):
-            yield record_type.parse_obj(doc)
+            yield transform_doc(doc)

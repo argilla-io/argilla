@@ -16,16 +16,12 @@
   -->
 
 <template>
-  <results-list
-    :dataset="dataset"
-    :metadata-item="selectedMetadataItem"
-    @closeMetadata="resetMetadataItem"
-  >
-    <template v-slot:record="{ record }">
+  <results-list :dataset="dataset" @search-records="searchRecords">
+    <template slot="record" slot-scope="slotProps">
       <record-text-2-text
         :dataset="dataset"
-        :record="record"
-        @onShowMetadata="onShowMetadata"
+        :record="slotProps.record"
+        :isReferenceRecord="slotProps.isReferenceRecord"
       />
     </template>
   </results-list>
@@ -38,15 +34,9 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    selectedMetadataItem: undefined,
-  }),
   methods: {
-    onShowMetadata(id) {
-      this.selectedMetadataItem = id;
-    },
-    resetMetadataItem() {
-      this.selectedMetadataItem = undefined;
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

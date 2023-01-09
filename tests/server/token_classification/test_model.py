@@ -335,3 +335,48 @@ def test_whitespace_in_tokens():
     record = ServiceTokenClassificationRecord.parse_obj(record)
     assert record
     assert record.tokens == ["every", "four", "(", "4", ")", " "]
+
+
+def test_predicted_ok_ko_computation():
+
+    text = "A text with some empty spaces that could bring not cleanly annotated spans"
+    record = ServiceTokenClassificationRecord(
+        text=text,
+        tokens=text.split(),
+        prediction=TokenClassificationAnnotation(
+            agent="pred.test",
+            entities=[
+                EntitySpan(
+                    start=0,
+                    end=6,
+                    label="VERB",
+                ),
+                EntitySpan(
+                    start=47,
+                    end=68,
+                    label="VERB",
+                    score=0.5,
+                ),
+            ],
+        ),
+        annotation=TokenClassificationAnnotation(
+            agent="test",
+            entities=[
+                EntitySpan(
+                    start=0,
+                    end=6,
+                    label="VERB",
+                ),
+                EntitySpan(
+                    start=47,
+                    end=68,
+                    label="VERB",
+                ),
+            ],
+        ),
+    )
+
+    assert record.predicted == PredictionStatus.OK
+
+    record.annotation.entities = record.annotation.entities[1:]
+    assert record.predicted == PredictionStatus.KO

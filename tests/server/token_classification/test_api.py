@@ -339,7 +339,7 @@ def test_create_records_for_token_classification_vector_search(
         "predicted_by": {"test": 3},
         "predicted_mentions": {"TEST": {"This": 3}},
         "status": {"Default": 3},
-        "words": {},
+        "words": {"text": 3},
     }
 
     assert "This" in results.aggregations.predicted_mentions[entity_label]
@@ -459,3 +459,71 @@ def test_show_not_aggregable_metadata_fields(mocked_client):
     assert len(results.aggregations.metadata) == 2
     assert "field_one" in results.aggregations.metadata
     assert "argilla:stats" in results.aggregations.metadata["field_one"]
+
+
+def test_search_with_raw_query(mocked_client):
+    dataset = log_some_data_for_token_classification(mocked_client)
+
+    raw_es_query_matching_all = {
+        "bool": {
+            "filter": {
+                "bool": {
+                    "must": {
+                        "script": {
+                            "script": {
+                                "source": "doc['tokens'].value.length() == 4",
+                                "lang": "painless",
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/TokenClassification:search",
+        json={"query": {"raw_query": raw_es_query_matching_all}},
+    )
+
+    assert response.status_code == 200
+    results = TokenClassificationSearchResults.parse_obj(response.json())
+    assert len(results.records) == 3
+
+
+def log_some_data_for_token_classification(mocked_client):
+    dataset = "log_some_data_for_token_classification"
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/TokenClassification:bulk",
+        json=TokenClassificationBulkRequest(
+            records=[
+                TokenClassificationRecord.parse_obj(
+                    {
+                        "tokens": "This is a text".split(" "),
+                        "raw_text": "This is a text",
+                        "metadata": {"field_one": 1.3, "field_two": 2},
+                    },
+                ),
+                TokenClassificationRecord.parse_obj(
+                    {
+                        "tokens": "This is a text".split(" "),
+                        "raw_text": "This is a text",
+                        "metadata": {"field_one": 2.3, "field_two": 300},
+                    },
+                ),
+                TokenClassificationRecord.parse_obj(
+                    {
+                        "tokens": "This is a text".split(" "),
+                        "raw_text": "This is a text",
+                        "metadata": {"field_one": 11.333, "field_two": -10},
+                    },
+                ),
+            ],
+        ).dict(by_alias=True),
+    )
+
+    assert response.status_code == 200, response.json()
+
+    return dataset

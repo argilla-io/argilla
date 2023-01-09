@@ -7,6 +7,8 @@
 ```
 ```{include} /_static/tutorials/labelling-textclassification-gpt3-fewshot/modal.md
 ```
+```{include} /_static/tutorials/deploying-textclassification-colab-activelearning/modal.md
+```
 ```{include} /_static/tutorials/training-textclassification-setfit-fewshot/modal.md
 ```
 ```{include} /_static/tutorials/labelling-textclassification-snorkel-weaksupervision/modal.md

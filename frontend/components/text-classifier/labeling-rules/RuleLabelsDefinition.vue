@@ -341,6 +341,7 @@ export default {
     &__tooltip {
       position: absolute;
       right: 7px;
+      height: $base-space * 2;
       @extend %has-tooltip--bottom;
       @extend %tooltip-large-text;
     }

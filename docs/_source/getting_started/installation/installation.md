@@ -14,7 +14,6 @@ First, make sure you have Python 3.7 or above installed.
 
 Then you can install Argilla with `pip`:
 
-
 {{ '```bash\npip install "argilla[server]{}"\n```'.format(pipversion) }}
 
 ## 2. Install Elasticsearch or Opensearch
@@ -109,9 +108,11 @@ If you now go to your Argilla app at [http://localhost:6900/](http://localhost:6
 
 docker.md
 docker_compose.md
+huggingface-spaces.md
 elasticsearch.md
 server_configuration.md
 user_management.md
+google-colab.md
 cloud_providers.md
 from_development.md
 
