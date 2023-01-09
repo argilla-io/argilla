@@ -21,9 +21,9 @@
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="annotationEnabled"
-        :inputLabels="dataset.labels"
-        :datasetName="dataset.name"
-        :isMultiLabel="dataset.isMultiLabel"
+        :inputLabels="datasetLabels"
+        :datasetName="datasetName"
+        :isMultiLabel="isMultiLabel"
         :paginationSize="paginationSize"
         :record="record"
         @validate="validateLabels"
@@ -31,8 +31,7 @@
       />
       <classifier-exploration-area
         v-else
-        :dataset="dataset"
-        :datasetName="dataset.name"
+        :datasetName="datasetName"
         :paginationSize="paginationSize"
         :record="record"
       />
@@ -60,11 +59,10 @@
 
 <script>
 import { mapActions } from "vuex";
-import { DatasetViewSettings as ViewSettingsModel } from "@/models/DatasetViewSettings";
-import {
-  TextClassificationRecord,
-  TextClassificationDataset,
-} from "@/models/TextClassification";
+import { TextClassificationRecord } from "@/models/TextClassification";
+import { getTextClassificationDatasetById } from "@/models/TextClassification.queries";
+import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
+
 export default {
   props: {
     datasetId: {
@@ -75,8 +73,8 @@ export default {
       type: String,
       required: true,
     },
-    dataset: {
-      type: TextClassificationDataset,
+    datasetLabels: {
+      type: Array,
       required: true,
     },
     record: {
@@ -84,10 +82,9 @@ export default {
       required: true,
     },
   },
-  data: () => ({}),
   computed: {
     viewSettings() {
-      return ViewSettingsModel.query().with("pagination").whereId(this.datasetName).first();
+      return getViewSettingsWithPaginationByDatasetName(this.datasetName);
     },
     isMultiLabel() {
       return this.getTextClassificationDataset().isMultiLabel;
@@ -163,7 +160,7 @@ export default {
       });
     },
     getTextClassificationDataset() {
-      return TextClassificationDataset.query().whereId(this.datasetId).first();
+      return getTextClassificationDatasetById(this.datasetId);
     },
   },
 };

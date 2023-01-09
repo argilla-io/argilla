@@ -26,6 +26,7 @@
     <template slot="record" slot-scope="results">
       <record-text-classification
         :dataset="dataset"
+        :datasetLabels="datasetLabels"
         :datasetId="dataset.id"
         :datasetName="dataset.name"
         :record="results.record"
@@ -43,6 +44,9 @@ export default {
     },
   },
   computed: {
+    datasetLabels() {
+      return this.dataset.labels || [];
+    },
     showRulesArea() {
       return this.dataset.viewSettings.viewMode === "labelling-rules";
     },
