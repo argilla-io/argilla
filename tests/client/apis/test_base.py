@@ -21,7 +21,7 @@ from argilla.client.sdk.commons.errors import ApiCompatibilityError
 
 
 def test_api_compatibility(mocked_client):
-    client = api.active_api().client
+    client = api.active_api().http_client
     dummy_api = AbstractApi(client)
     with pytest.raises(ApiCompatibilityError):
         with api_compatibility(api=dummy_api, min_version="999.1.0"):

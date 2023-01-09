@@ -117,11 +117,15 @@ class EsQueryBuilder:
         id_from: Optional[str] = None,
         shuffle: bool = False,
     ) -> Dict[str, Any]:
-        es_query: Dict[str, Any] = (
-            {"query": self._datasets_to_es_query(query)}
-            if isinstance(query, BaseDatasetsQuery)
-            else {"query": self._search_to_es_query(schema, query)}
-        )
+
+        if query and query.raw_query:
+            es_query = {"query": query.raw_query}
+        else:
+            es_query: Dict[str, Any] = (
+                {"query": self._datasets_to_es_query(query)}
+                if isinstance(query, BaseDatasetsQuery)
+                else {"query": self._search_to_es_query(schema, query)}
+            )
 
         if id_from:
             es_query["search_after"] = [id_from]

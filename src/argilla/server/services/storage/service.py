@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
 from fastapi import Depends
 
@@ -101,3 +101,23 @@ class RecordsStorageService:
             discarded=discarded or 0,
             deleted=deleted or 0,
         )
+
+    async def update_record(
+        self,
+        dataset: ServiceDataset,
+        record: ServiceRecord,
+        **data,
+    ) -> ServiceRecord:
+
+        if data.get("metadata"):
+            record.metadata = {
+                **(record.metadata or {}),
+                **data.pop("metadata"),
+            }
+
+        new_record = record.copy(update=data)  # Data validation
+        await self.__dao__.update_record(
+            dataset=dataset,
+            record=record,
+        )
+        return new_record

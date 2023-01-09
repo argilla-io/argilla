@@ -68,7 +68,9 @@ def test_delete_records_without_permission(mocked_client):
     try:
         mocked_client.change_current_user("mock-user")
         matched, processed = ar.delete_records(
-            name=dataset, ids=[10], discard_only=True
+            name=dataset,
+            ids=[10],
+            discard_only=True,
         )
         assert matched, processed == (1, 1)
 

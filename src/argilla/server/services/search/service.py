@@ -13,12 +13,13 @@
 #  limitations under the License.
 
 import logging
-from typing import Iterable, List, Optional, Type
+from typing import Iterable, List, Optional, Set, Type, Union
 
 from fastapi import Depends
 
 from argilla.server.daos.models.records import DaoRecordsSearch
 from argilla.server.daos.records import DatasetRecordsDAO
+from argilla.server.errors import RecordNotFound
 from argilla.server.services.datasets import ServiceDataset
 from argilla.server.services.metrics import MetricsService
 from argilla.server.services.metrics.models import ServiceMetric
@@ -107,14 +108,40 @@ class SearchRecordsService:
     def scan_records(
         self,
         dataset: ServiceDataset,
-        record_type: Type[ServiceRecord],
+        record_type: Optional[Type[ServiceRecord]] = None,
         query: Optional[ServiceRecordsQuery] = None,
+        projection: Set[str] = None,
         id_from: Optional[str] = None,
         limit: int = 1000,
     ) -> Iterable[ServiceRecord]:
         """Scan records for a queried"""
         search = DaoRecordsSearch(query=query)
+
+        transform_doc = lambda doc: doc
+        if record_type:
+            transform_doc = record_type.parse_obj
+
         for doc in self.__dao__.scan_dataset(
-            dataset, id_from=id_from, limit=limit, search=search
+            dataset,
+            id_from=id_from,
+            limit=limit,
+            search=search,
+            include_fields=projection,
         ):
-            yield record_type.parse_obj(doc)
+            yield transform_doc(doc)
+
+    async def find_record_by_id(
+        self,
+        dataset: ServiceDataset,
+        id: Union[str, int],
+        record_type: Type[ServiceRecord],
+    ) -> ServiceRecord:
+        found = await self.__dao__.get_record_by_id(dataset, id)
+        if not found:
+            raise RecordNotFound(
+                dataset=dataset.id,
+                id=id,
+                type="Record",
+            )
+
+        return record_type.parse_obj(found)
