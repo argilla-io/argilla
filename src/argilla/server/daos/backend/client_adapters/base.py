@@ -71,6 +71,7 @@ class IClientAdapter(metaclass=ABCMeta):
         id_from: Optional[str] = None,
         enable_highlight: bool = False,
         sort: Optional[SortConfig] = None,
+        include_fields: Optional[List[str]] = None,
         shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         pass

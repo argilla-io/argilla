@@ -170,7 +170,16 @@ class Api:
 
     @property
     def client(self):
-        """The underlying authenticated client"""
+        warnings.warn(
+            message="This prop will be removed in next release. "
+            "Please use the http_client prop instead.",
+            category=UserWarning,
+        )
+        return self._client
+
+    @property
+    def http_client(self):
+        """The underlying authenticated HTTP client"""
         return self._client
 
     @property
@@ -183,7 +192,7 @@ class Api:
 
     @property
     def metrics(self):
-        return MetricsAPI(client=self.client)
+        return MetricsAPI(client=self.http_client)
 
     def set_workspace(self, workspace: str):
         """Sets the active workspace.
@@ -457,10 +466,10 @@ class Api:
         """
         return self.datasets.delete_records(
             name=name,
-            query=query,
-            ids=ids,
             mark_as_discarded=discard_only,
             discard_when_forbidden=discard_when_forbidden,
+            query_text=query,
+            ids=ids,
         )
 
     def load(
@@ -569,9 +578,10 @@ class Api:
             results = self.search.search_records(
                 name=name,
                 task=task,
-                query=query,
-                vector=vector_search,
                 size=limit or 100,
+                # query args
+                query_text=query,
+                vector=vector_search,
             )
 
             return dataset_class(results.records)

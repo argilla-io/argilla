@@ -42,5 +42,5 @@ def test_init_with_extra_headers(mocked_client):
 
     for key, value in expected_headers.items():
         assert (
-            active_api.client.headers[key] == value
+            active_api.http_client.headers[key] == value
         ), f"{key}:{value} not in client headers"

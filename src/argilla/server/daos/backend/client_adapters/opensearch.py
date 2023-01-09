@@ -324,6 +324,7 @@ class OpenSearchClient(IClientAdapter):
         id_from: Optional[str] = None,
         enable_highlight: bool = False,
         sort: Optional[SortConfig] = None,
+        include_fields: Optional[List[str]] = None,
         shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         size = size or 1000
@@ -334,6 +335,8 @@ class OpenSearchClient(IClientAdapter):
             query=query,
             schema=self.get_index_schema(index=index),
             sort=sort,
+            id_from=id_from,
+            include_fields=include_fields,
             highlight=highlight,
             shuffle=shuffle,
         )
@@ -773,7 +776,8 @@ class OpenSearchClient(IClientAdapter):
                 doc=document,
                 is_phrase_query=is_phrase_query,
             )
-            data["search_keywords"] = keywords
+            if keywords:
+                data["search_keywords"] = keywords
 
         return data
 

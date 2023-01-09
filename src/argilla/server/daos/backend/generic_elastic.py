@@ -218,6 +218,7 @@ class GenericElasticEngineBackend(LoggingMixin):
         id_from: Optional[str] = None,
         limit: Optional[int] = None,
         shuffle: bool = False,
+        include_fields: Optional[List[str]] = None,
     ) -> Iterable[Dict[str, Any]]:
         index = dataset_records_index(id)
 
@@ -227,6 +228,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             size=limit,
             id_from=id_from,
             fetch_once=shuffle,
+            include_fields=include_fields,
             enable_highlight=True,
             shuffle=shuffle,
         )
@@ -434,6 +436,19 @@ class GenericElasticEngineBackend(LoggingMixin):
             partial_update=True,
         )
 
+    def update_record(
+        self,
+        dataset_id: str,
+        record_id: str,
+        content: dict,
+    ):
+        index = dataset_records_index(dataset_id)
+        self.client.upsert_index_document(
+            index=index,
+            id=record_id,
+            document=content,
+        )
+
     def find_dataset(
         self,
         id: str,
@@ -493,7 +508,11 @@ class GenericElasticEngineBackend(LoggingMixin):
             property=field,
         )
 
-    def add_dataset_documents(self, id: str, documents: List[dict]) -> int:
+    def add_dataset_documents(
+        self,
+        id: str,
+        documents: List[dict],
+    ) -> int:
         index = dataset_records_index(id)
         return self.client.index_documents(
             index=index,

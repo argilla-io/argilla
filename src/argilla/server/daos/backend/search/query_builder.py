@@ -184,6 +184,7 @@ class EsQueryBuilder:
         query: Optional[BackendQuery] = None,
         sort: Optional[SortConfig] = None,
         exclude_fields: Optional[List[str]] = None,
+        include_fields: List[str] = None,
         doc_from: Optional[int] = None,
         highlight: Optional[HighlightParser] = None,
         size: Optional[int] = None,
@@ -191,11 +192,14 @@ class EsQueryBuilder:
         shuffle: bool = False,
     ) -> Dict[str, Any]:
 
-        es_query: Dict[str, Any] = (
-            {"query": self._datasets_to_es_query(query)}
-            if isinstance(query, BaseDatasetsQuery)
-            else {"query": self._search_to_es_query(schema, query)}
-        )
+        if query and query.raw_query:
+            es_query = {"query": query.raw_query}
+        else:
+            es_query: Dict[str, Any] = (
+                {"query": self._datasets_to_es_query(query)}
+                if isinstance(query, BaseDatasetsQuery)
+                else {"query": self._search_to_es_query(schema, query)}
+            )
 
         if id_from:
             es_query["search_after"] = [id_from]
@@ -211,10 +215,15 @@ class EsQueryBuilder:
         if doc_from:
             es_query["from"] = doc_from
 
+        source = {}
         if exclude_fields:
-            es_query["_source"] = {"excludes": exclude_fields}
+            source.update({"excludes": exclude_fields})
+        if include_fields:
+            source.update({"includes": include_fields})
+        if source:
+            es_query["_source"] = source
 
-        if highlight:
+        if highlight and not include_fields:
             es_query["highlight"] = highlight.build_query_highlight()
 
         if hasattr(query, "vector") and query.vector is not None:

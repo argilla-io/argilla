@@ -145,13 +145,72 @@ class Datasets(AbstractApi):
             ds = self.find_by_name(name)
             self.__save_settings__(dataset=ds, settings=settings)
 
+    def scan(
+        self,
+        name: str,
+        projection: Optional[Set[str]] = None,
+        **query,
+    ) -> Iterable[dict]:
+        """
+        Search records over a dataset
+
+        Args:
+            name: the dataset
+            query: the search query
+            projection: a subset of record fields to retrieve. If not provided,
+            only id's will be returned
+
+        Returns:
+
+            An iterable of raw object containing per-record info
+
+        """
+
+        url = f"{self._API_PREFIX}/{name}/records/:search"
+        query = self._parse_query(query=query)
+
+        request = {
+            "fields": list(projection) if projection else ["id"],
+            "query": query,
+        }
+
+        with api_compatibility(self, min_version="1.2.0"):
+            response = self.http_client.post(
+                url,
+                json=request,
+            )
+
+            while response.get("records"):
+                for record in response["records"]:
+                    yield record
+
+                    next_idx = response.get("next_idx")
+                    if next_idx:
+                        response = self.http_client.post(
+                            path=url,
+                            json={**request, "next_idx": next_idx},
+                        )
+
+    def update_record(
+        self,
+        name: str,
+        record_id: str,
+        **content,
+    ):
+        with api_compatibility(self, min_version="1.2.0"):
+            url = f"{self._API_PREFIX}/{name}/records/{record_id}"
+            response = self.http_client.patch(
+                path=url,
+                json=content,
+            )
+            return response
+
     def delete_records(
         self,
         name: str,
-        query: Optional[str] = None,
-        ids: Optional[List[Union[str, int]]] = None,
         mark_as_discarded: bool = False,
         discard_when_forbidden: bool = True,
+        **query: Optional[dict],
     ) -> Tuple[int, int]:
         """
         Tries to delete records in a dataset for a given query/ids list.
@@ -175,9 +234,10 @@ class Datasets(AbstractApi):
         """
         with api_compatibility(self, min_version="0.18"):
             try:
+                query = self._parse_query(query=query)
                 response = self.http_client.delete(
                     path=f"{self._API_PREFIX}/{name}/data?mark_as_discarded={mark_as_discarded}",
-                    json={"ids": ids} if ids else {"query_text": query},
+                    json=query,
                 )
                 return response["matched"], response["processed"]
             except ForbiddenApiError as faer:
@@ -189,7 +249,6 @@ class Datasets(AbstractApi):
                     return self.delete_records(
                         name=name,
                         query=query,
-                        ids=ids,
                         mark_as_discarded=True,
                         discard_when_forbidden=False,  # Next time will raise the error
                     )
