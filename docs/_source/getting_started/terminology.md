@@ -11,7 +11,7 @@ Specific features that are covered by internal `Argilla` functionalities.
 | Datasets       | Internal `Dataset` classes are lightweight containers for Argilla records.        |
 | Metrics       | Argilla `Metrics` enables you to perform fine-grained analysis of your models and training datasets.        |
 | Queries       | Argilla query functionalities are based on the powerful `Elasticsearch` query string syntax.        |
-
+| Semantic Search | This built-in search uses vectors for text and enables Approximate KNN for semantic search on these vectors.    |
 
 ## MLOps Steps
 All steps that we directly or in-directly cover within the `MLOps lifecycle`.
@@ -30,7 +30,7 @@ Main task categories that we cover within the `NLP landscape`.
 
 | Terminology | Description                                                                                                                                                              |
 | :--- |:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 📕📗 TextClassification      | Assigning predefined category labels to `texts`. This contains sub-tasks like detecting sentiment, textual similarity, and multi-label classification.                   |
+| 📕📗 TextClassification      | Assigning predefined category labels to `texts`. This contains sub-tasks like detecting sentiment, semantic similarity, and multi-label classification.                   |
 | 🈴🈯️ TokenClassification      | Assigning predefined category labels to `words and phrases within texts` . This contains sub-tasks like Named Entity Recognition (NER) and Part-Of-Speech Tagging (POS). |
 | 👨🏽💬 Text2Text       | Generating a `text` based on an input `text`.  This contains sub-tasks like machine translation, and paraphrase generation.                                              |
 
