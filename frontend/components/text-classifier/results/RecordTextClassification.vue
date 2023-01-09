@@ -21,7 +21,10 @@
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="annotationEnabled"
-        :dataset="dataset"
+        :inputLabels="dataset.labels"
+        :datasetName="dataset.name"
+        :isMultiLabel="dataset.isMultiLabel"
+        :paginationSize="paginationSize"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"

@@ -213,6 +213,7 @@ app.mount(settings.base_url, argilla_app)
 
 configure_app_logging(app)
 configure_storage(app)
+configure_telemetry(app)
 
 for app_configure in [
     configure_app_logging,
@@ -221,6 +222,5 @@ for app_configure in [
     configure_app_security,
     configure_api_router,
     configure_app_statics,
-    configure_telemetry,
 ]:
     app_configure(argilla_app)
