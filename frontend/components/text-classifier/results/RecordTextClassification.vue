@@ -21,7 +21,10 @@
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="annotationEnabled"
-        :dataset="dataset"
+        :inputLabels="dataset.labels"
+        :datasetName="dataset.name"
+        :isMultiLabel="dataset.isMultiLabel"
+        :paginationSize="paginationSize"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
@@ -39,13 +42,6 @@
 
     <div v-if="!annotationEnabled" class="record__labels">
       <template v-if="record.annotation">
-        <!-- <svgicon
-          v-if="record.predicted && !labellingRulesView"
-          :class="['icon__predicted', record.predicted]"
-          width="40"
-          height="40"
-          :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
-        ></svgicon> -->
         <base-tag
           v-for="label in record.annotation.labels"
           :key="label.class"
@@ -57,8 +53,6 @@
 </template>
 
 <script>
-// import "assets/icons/matching";
-// import "assets/icons/no-matching";
 import { mapActions } from "vuex";
 import {
   TextClassificationRecord,
@@ -90,6 +84,9 @@ export default {
           this.record.prediction ||
           this.dataset.isMultiLabel)
       );
+    },
+    paginationSize() {
+      return this.dataset.viewSettings?.pagination?.size;
     },
   },
   methods: {
