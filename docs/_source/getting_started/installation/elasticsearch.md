@@ -1,5 +1,5 @@
 
-# Elasticsearch Configuration
+# Elasticsearch
 
 This section explains advanced configurations to use Argilla with Elasticsearch instances or clusters.
 (configure-elasticsearch-role-users)=
@@ -41,3 +41,7 @@ and then provide the analyzer name using the specific environment variable.
 ## Reindex data
 
 Sometimes updates require reindexing our dataset metrics and Elasticsearch, therefore we devised some [short documentation](../../guides/features/datasets) to show you how to do this from our Python client.
+
+## Back-up data using snapshots
+
+Within Elastic, it is possible to create snapshots of a running cluster. We highly recommend doing this to ensure experiment reproducibility and to not risk losing your valuable annotated data. Elastic offers an overview of how to do this within [their docs](https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshots-take-snapshot.html).

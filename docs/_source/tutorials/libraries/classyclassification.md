@@ -1,4 +1,4 @@
-## classy-classification
+# classy-classification
 
 These tutorials show you how Argilla can be used in combination with `classy-classification`.\
 An intuitive approach to few-shot classification using sentence-transformers or spaCy models, or zero-shot classification with Huggingface.

@@ -14,6 +14,11 @@ FastAPI is a modern, fast (high-performance), web framework for building APIs wi
 
 BentoML is an open platform that simplifies ML model deployment and enables you to serve your models at production scale in minutes.
 ```
+```{grid-item-card} DVC
+:link: dvc.md
+
+DVC is built to make ML models shareable and reproducible. It is designed to handle large files, data sets, machine learning models, and metrics as well as code.
+```
 ```{grid-item-card} spaCy
 :link: spacy.md
 
@@ -103,6 +108,7 @@ SHAP (SHapley Additive exPlanations) is a game theoretic approach to explain the
 
 fastapi.md
 bentoml.md
+dvc.md
 
 spacy.md
 stanza.md
