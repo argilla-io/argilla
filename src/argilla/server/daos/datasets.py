@@ -65,7 +65,6 @@ class DatasetsDAO:
     def __init__(self, es: ElasticsearchBackend, records_dao: DatasetRecordsDAO):
         self._es = es
         self.__records_dao__ = records_dao
-        self.init()
 
     def init(self):
         """Initializes dataset dao. Used on app startup"""
