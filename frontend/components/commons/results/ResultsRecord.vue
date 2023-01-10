@@ -19,38 +19,44 @@
   <div>
     <div
       :class="[
-        annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
-        item.status === 'Discarded' ? 'discarded' : null,
+        isAnnotatedView ? 'list__item--annotation-mode' : 'list__item',
+        recordStatus === 'Discarded' ? 'discarded' : null,
       ]"
     >
       <base-checkbox
-        v-if="annotationEnabled"
+        v-if="isAnnotatedView"
         class="list__checkbox"
-        :value="item.selected"
-        @change="onCheckboxChanged($event, item.id)"
-      ></base-checkbox>
-      <slot :record="item" />
+        :value="recordSelected"
+        @change="onCheckboxChanged($event)"
+      >
+      </base-checkbox>
+      <slot v-if="datasetTask !== 'TextClassification'" />
+      <record-text-classification
+        v-if="datasetTask === 'TextClassification'"
+        :datasetLabels="datasetLabels"
+        :datasetId="datasetId"
+        :datasetName="datasetName"
+        :recordId="recordId"
+      />
       <record-extra-actions
-        :key="item.id"
-        :allow-change-status="annotationEnabled"
-        :recordId="item.id"
-        :recordStatus="item.status"
-        :recordClipboardText="item.clipboardText"
-        :metadata="item.metadata"
-        :datasetName="dataset.name"
-        :task="dataset.task"
+        :key="recordId"
+        :allow-change-status="isAnnotatedView"
+        :recordId="recordId"
+        :recordStatus="recordStatus"
+        :recordClipboardText="recordClipboardText"
+        :metadata="recordMetadata"
+        :datasetName="datasetName"
+        :task="datasetTask"
         @on-change-record-status="onChangeRecordStatus"
         @show-record-info-modal="onShowRecordInfoModal()"
       />
-      <status-tag
-        v-if="annotationEnabled && item.status !== 'Default'"
-        :title="item.status"
-      ></status-tag>
+      <status-tag v-if="showStatusTag" :title="recordStatus"></status-tag>
     </div>
   </div>
 </template>
 <script>
 import { mapActions } from "vuex";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
   props: {
@@ -58,17 +64,60 @@ export default {
       type: Object,
       required: true,
     },
-    item: {
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
+      required: true,
+    },
+    datasetLabels: {
+      type: Array,
+      default: () => [],
+    },
+    record: {
       type: Object,
+      required: true,
+    },
+    recordId: {
+      type: String | Number,
+      required: true,
+    },
+    recordStatus: {
+      type: String,
+      required: true,
+    },
+    recordSelected: {
+      type: Boolean,
+      required: true,
+    },
+    recordClipboardText: {
+      type: Array | String,
+      required: true,
+    },
+    recordMetadata: {
+      type: Object,
+      required: true,
+    },
+    records: {
+      type: Array,
       required: true,
     },
   },
   computed: {
-    annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.datasetName);
     },
-    visibleRecords() {
-      return this.dataset.visibleRecords;
+    isAnnotatedView() {
+      return this.viewSettings.viewMode === "annotate";
+    },
+    showStatusTag() {
+      return this.isAnnotatedView && this.recordStatus !== "Default";
     },
   },
   methods: {
@@ -77,8 +126,8 @@ export default {
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
-    async onCheckboxChanged(checkboxStatus, id) {
-      const record = this.visibleRecords.find((r) => r.id === id);
+    async onCheckboxChanged(checkboxStatus) {
+      const record = this.records.find((r) => r.id === this.recordId);
       await this.updateRecords({
         dataset: this.dataset,
         records: [{ ...record, selected: checkboxStatus }],
@@ -91,13 +140,13 @@ export default {
         case "Validated":
           await this.validate({
             dataset: this.dataset,
-            records: [this.item],
+            records: [this.record],
           });
           break;
         case "Discarded":
           await this.discard({
             dataset: this.dataset,
-            records: [this.item],
+            records: [this.record],
           });
           break;
         default:
@@ -105,7 +154,7 @@ export default {
       }
     },
     onShowRecordInfoModal() {
-      this.$emit("show-record-info-modal", this.item);
+      this.$emit("show-record-info-modal", this.record);
     },
   },
 };

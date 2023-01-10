@@ -23,14 +23,6 @@
     <template slot="results-header">
       <rule-definition :dataset="dataset" v-if="showRulesArea" />
     </template>
-    <template slot="record" slot-scope="results">
-      <record-text-classification
-        :datasetLabels="datasetLabels"
-        :datasetId="dataset.id"
-        :datasetName="dataset.name"
-        :recordId="results.record.id"
-      />
-    </template>
   </results-list>
   <rules-management class="content" v-else :dataset="dataset" />
 </template>
@@ -43,9 +35,6 @@ export default {
     },
   },
   computed: {
-    datasetLabels() {
-      return this.dataset.labels || [];
-    },
     showRulesArea() {
       return this.dataset.viewSettings.viewMode === "labelling-rules";
     },

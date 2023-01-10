@@ -50,7 +50,17 @@
                 @show-record-info-modal="onShowRecordInfoModal"
                 :key="`${dataset.name}-${item.id}`"
                 :dataset="dataset"
-                :item="item"
+                :datasetId="dataset.id"
+                :datasetName="dataset.name"
+                :datasetTask="dataset.task"
+                :datasetLabels="dataset.labels"
+                :record="item"
+                :recordId="item.id"
+                :recordStatus="item.status"
+                :recordSelected="item.selected"
+                :recordClipboardText="item.clipboardText"
+                :recordMetadata="item.metadata"
+                :records="dataset.visibleRecords"
               >
                 <slot name="record" :record="item" />
               </results-record>
