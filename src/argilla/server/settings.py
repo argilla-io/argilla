@@ -92,6 +92,11 @@ class ApiSettings(BaseSettings):
         description="If enabled, try to migrate data from old rubrix installation",
     )
 
+    enable_migration_with_dataset_recreation: bool = Field(
+        default=False,
+        description="If enabled, enable migration from rubrix with dataset recreation instead of creating alias",
+    )
+
     # Analyzer configuration
     default_es_search_analyzer: str = "standard"
     exact_es_search_analyzer: str = "whitespace"
@@ -116,6 +121,10 @@ class ApiSettings(BaseSettings):
     enable_telemetry: bool = True
 
     telemetry_key: Optional[str] = None
+
+    @property
+    def migrate_from_rubrix(self) -> bool:
+        return self.enable_migration or self.enable_migration_with_dataset_recreation
 
     @property
     def dataset_index_name(self) -> str:

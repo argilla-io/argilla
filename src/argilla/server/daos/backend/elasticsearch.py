@@ -1067,16 +1067,30 @@ class ElasticsearchBackend(LoggingMixin):
         return self._close_index(dataset_records_index(id))
 
     def create_datasets_index(self, force_recreate: bool = False):
-        self._create_index(
-            DATASETS_INDEX_NAME,
-            force_recreate=force_recreate,
-            mappings=datasets_index_mappings(),
-        )
-        if not settings.enable_migration:
-            return
+        with backend_error_handler(index=DATASETS_INDEX_NAME):
+            self._create_index(
+                DATASETS_INDEX_NAME,
+                force_recreate=force_recreate,
+                mappings=datasets_index_mappings(),
+            )
 
+            if settings.migrate_from_rubrix:
+                self._migrate_from_rubrix()
+
+    def _reindex_current_indices(self):
+        for doc in scan(self.__client__, index=DATASETS_INDEX_NAME):
+            dataset_id = doc["_id"]
+            task_type = TaskType(doc["_source"]["task"])
+
+            self.create_dataset_index(
+                id=dataset_id,
+                task=task_type,
+            )
+
+    def _migrate_from_rubrix(self):
         source_index = settings.old_dataset_index_name
         target_index = DATASETS_INDEX_NAME
+
         try:
             with backend_error_handler(index=source_index):
                 reindex(
@@ -1084,11 +1098,37 @@ class ElasticsearchBackend(LoggingMixin):
                     source_index=source_index,
                     target_index=target_index,
                 )
-                for doc in scan(self.__client__, index=source_index):
+                for doc in scan(
+                    self.__client__,
+                    index=source_index,
+                ):
                     dataset_id = doc["_id"]
                     index = settings.old_dataset_records_index_name.format(dataset_id)
                     alias = dataset_records_index(dataset_id)
-                    self._create_index_alias(index, alias=alias)
+                    if settings.enable_migration_with_dataset_recreation:
+                        if self._index_exists(alias):
+                            self.logger.warning(
+                                f"Index {alias} already exists. Skipping..."
+                            )
+                            continue
+                        self.logger.warning(f"Creating index dataset {alias}...")
+                        task = doc["_source"]["task"]
+                        self.create_dataset_index(
+                            id=dataset_id,
+                            task=task,
+                        )
+
+                        self.logger.warning(
+                            f"Reindexing data from {index} into {alias}..."
+                        )
+                        reindex(
+                            self.__client__,
+                            source_index=index,
+                            target_index=alias,
+                        )
+                        self.logger.warning("Done")
+                    else:
+                        self._create_index_alias(index, alias=alias)
         except IndexNotFoundError:
             pass  # Nothing to migrate
 
