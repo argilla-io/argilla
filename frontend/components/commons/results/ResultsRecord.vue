@@ -39,7 +39,7 @@
         :metadata="item.metadata"
         :datasetName="dataset.name"
         :task="dataset.task"
-        @onChangeRecordStatus="onChangeRecordStatus"
+        @on-change-record-status="onChangeRecordStatus"
         @show-record-info-modal="onShowRecordInfoModal()"
       />
       <status-tag

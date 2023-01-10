@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu";
 import { IdState } from "vue-virtual-scroller";
 
@@ -96,7 +95,7 @@ export default {
     // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
       if (this.recordStatus !== status) {
-        this.$emit("onChangeRecordStatus", status);
+        this.$emit("on-change-record-status", status);
       }
       this.close();
     },
