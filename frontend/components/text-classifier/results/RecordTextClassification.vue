@@ -16,14 +16,14 @@
   -->
 
 <template>
-  <div class="record">
+  <div class="record" v-if="record">
     <div class="record--left">
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="annotationEnabled"
-        :inputLabels="dataset.labels"
-        :datasetName="dataset.name"
-        :isMultiLabel="dataset.isMultiLabel"
+        :inputLabels="datasetLabels"
+        :datasetName="datasetName"
+        :isMultiLabel="isMultiLabel"
         :paginationSize="paginationSize"
         :record="record"
         @validate="validateLabels"
@@ -31,8 +31,7 @@
       />
       <classifier-exploration-area
         v-else
-        :dataset="dataset"
-        :datasetName="dataset.name"
+        :datasetName="datasetName"
         :paginationSize="paginationSize"
         :record="record"
       />
@@ -60,39 +59,59 @@
 
 <script>
 import { mapActions } from "vuex";
-import {
-  TextClassificationRecord,
-  TextClassificationDataset,
-} from "@/models/TextClassification";
+import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
+import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
+
 export default {
   props: {
-    dataset: {
-      type: TextClassificationDataset,
+    datasetId: {
+      type: Array,
       required: true,
     },
-    record: {
-      type: TextClassificationRecord,
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetLabels: {
+      type: Array,
+      required: true,
+    },
+    recordId: {
+      type: String,
       required: true,
     },
   },
-  data: () => ({}),
   computed: {
+    viewSettings() {
+      return getViewSettingsWithPaginationByDatasetName(this.datasetName);
+    },
+    record() {
+      //TODO when there will be a table for records in the ORM => replace by the record query here
+      const records = this.getTextClassificationDataset().results?.records;
+      const record =
+        records.find((record) => record.id === this.recordId) || null;
+      return record;
+    },
+    isMultiLabel() {
+      return this.getTextClassificationDataset().isMultiLabel;
+    },
+    viewMode() {
+      return this.viewSettings.viewMode;
+    },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewMode === "annotate";
     },
     labellingRulesView() {
-      return this.dataset.viewSettings.viewMode === "labelling-rules";
+      return this.viewMode === "labelling-rules";
     },
     allowValidate() {
       return (
         this.record.status !== "Validated" &&
-        (this.record.annotation ||
-          this.record.prediction ||
-          this.dataset.isMultiLabel)
+        (this.record.annotation || this.record.prediction || this.isMultiLabel)
       );
     },
     paginationSize() {
-      return this.dataset.viewSettings?.pagination?.size;
+      return this.viewSettings?.pagination.size;
     },
   },
   methods: {
@@ -102,7 +121,7 @@ export default {
     }),
     async resetLabels() {
       await this.resetAnnotations({
-        dataset: this.dataset,
+        dataset: this.getTextClassificationDataset(),
         records: [this.record],
       });
     },
@@ -116,7 +135,7 @@ export default {
       };
 
       await this.validateAnnotations({
-        dataset: this.dataset,
+        dataset: this.getTextClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -134,7 +153,7 @@ export default {
       }));
       // TODO: do not validate records without labels
       await this.validateAnnotations({
-        dataset: this.dataset,
+        dataset: this.getTextClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -145,6 +164,9 @@ export default {
           },
         ],
       });
+    },
+    getTextClassificationDataset() {
+      return getTextClassificationDatasetById(this.datasetId);
     },
   },
 };
@@ -172,21 +194,6 @@ export default {
     @extend %hide-scrollbar;
   }
 }
-
-// .icon {
-//   &__predicted {
-//     position: absolute;
-//     right: 3em;
-//     top: 1em;
-//     &.ko {
-//       color: $error;
-//     }
-//     &.ok {
-//       color: $success;
-//     }
-//   }
-// }
-
 .content {
   &__actions-buttons {
     margin-right: 0;
