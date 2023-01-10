@@ -61,6 +61,15 @@ Then, for each old rubrix index, will create an alias with new new name conventi
 
 This will allow you to work with previous Rubrix datasets from your new Argilla Server without duplicating information and still see the changes from your previous Rubrix Server.
 
+Created indices for versions older than v0.1.8.0 could not be compatible with the new argilla definition. In those cases,
+you should activate a data migration with index replication by using the env var `ARGILLA_ENABLE_MIGRATION_WITH_DATASET_RECREATION`:
+
+````bash
+ARGILLA_ENABLE_MIGRATION_WITH_DATASET_RECREATION=1 python -m argilla
+````
+
+This option may take some time to up the server since will reindex found old Rubrix indices into equivalent argilla ones.
+
 This migration switch can help you with a more gradual transition into Argilla.
 
 >:warning: New datasets created from argilla won't be visible from the old rubrix instance.
