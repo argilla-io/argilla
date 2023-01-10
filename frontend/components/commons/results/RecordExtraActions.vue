@@ -25,13 +25,13 @@
         <span>View record info</span>
       </div>
       <base-action-tooltip tooltip="Copied">
-        <div @click="$copyToClipboard(record.clipboardText)">
+        <div @click="$copyToClipboard(recordClipboardText)">
           <span>Copy text</span>
         </div>
       </base-action-tooltip>
       <div
         v-if="allowChangeStatus"
-        :class="record.status === 'Discarded' ? 'disabled' : null"
+        :class="recordStatus === 'Discarded' ? 'disabled' : null"
         @click="onChangeRecordStatus('Discarded')"
       >
         <span>Discard record</span>
@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu";
 import { IdState } from "vue-virtual-scroller";
 
@@ -49,7 +48,7 @@ export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.datasetName}-${vm.recordId}`,
     }),
   ],
   props: {
@@ -57,12 +56,20 @@ export default {
       type: Boolean,
       default: false,
     },
-    record: {
-      type: BaseRecord,
+    recordId: {
+      type: String | Number,
       required: true,
     },
-    dataset: {
-      type: Object,
+    recordStatus: {
+      type: String,
+    },
+    recordClipboardText: {
+      type: Array | String,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
     },
     task: {
       type: String,
@@ -76,32 +83,19 @@ export default {
   },
   computed: {
     open: {
-      get: function () {
+      get() {
         return this.idState.open;
       },
-      set: function (newValue) {
+      set(newValue) {
         this.idState.open = newValue;
       },
-    },
-    hasMetadata() {
-      const metadata = this.record.metadata;
-      return metadata && Object.values(metadata).length;
-    },
-    recordStatus() {
-      return this.record.status;
-    },
-    allowedStatusActions() {
-      return this.statusActions.map((status) => ({
-        ...status,
-        isActive: this.recordStatus === status.key,
-      }));
     },
   },
   methods: {
     // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
-      if (this.record.status !== status) {
-        this.$emit("onChangeRecordStatus", status, this.record);
+      if (this.recordStatus !== status) {
+        this.$emit("on-change-record-status", status);
       }
       this.close();
     },

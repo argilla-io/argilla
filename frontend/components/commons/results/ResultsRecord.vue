@@ -33,11 +33,14 @@
       <record-extra-actions
         :key="item.id"
         :allow-change-status="annotationEnabled"
-        :record="item"
-        :dataset="dataset"
+        :recordId="item.id"
+        :recordStatus="item.status"
+        :recordClipboardText="item.clipboardText"
+        :metadata="item.metadata"
+        :datasetName="dataset.name"
         :task="dataset.task"
-        @onChangeRecordStatus="onChangeRecordStatus"
-        @show-record-info-modal="onShowRecordInfoModal(item)"
+        @on-change-record-status="onChangeRecordStatus"
+        @show-record-info-modal="onShowRecordInfoModal()"
       />
       <status-tag
         v-if="annotationEnabled && item.status !== 'Default'"
@@ -83,26 +86,26 @@ export default {
       });
     },
 
-    async onChangeRecordStatus(status, record) {
+    async onChangeRecordStatus(status) {
       switch (status) {
         case "Validated":
           await this.validate({
             dataset: this.dataset,
-            records: [record],
+            records: [this.item],
           });
           break;
         case "Discarded":
           await this.discard({
             dataset: this.dataset,
-            records: [record],
+            records: [this.item],
           });
           break;
         default:
-          console.warn("waT?", status);
+          console.warn(`The status ${status} is unknown`);
       }
     },
-    onShowRecordInfoModal(record) {
-      this.$emit("show-record-info-modal", record);
+    onShowRecordInfoModal() {
+      this.$emit("show-record-info-modal", this.item);
     },
   },
 };
