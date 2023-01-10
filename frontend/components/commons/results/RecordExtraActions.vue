@@ -25,13 +25,13 @@
         <span>View record info</span>
       </div>
       <base-action-tooltip tooltip="Copied">
-        <div @click="$copyToClipboard(record.clipboardText)">
+        <div @click="$copyToClipboard(recordClipboardText)">
           <span>Copy text</span>
         </div>
       </base-action-tooltip>
       <div
         v-if="allowChangeStatus"
-        :class="record.status === 'Discarded' ? 'disabled' : null"
+        :class="recordStatus === 'Discarded' ? 'disabled' : null"
         @click="onChangeRecordStatus('Discarded')"
       >
         <span>Discard record</span>
@@ -49,7 +49,7 @@ export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.datasetName}-${vm.recordId}`,
     }),
   ],
   props: {
@@ -57,12 +57,24 @@ export default {
       type: Boolean,
       default: false,
     },
+    recordId: {
+      type: String,
+      required: true,
+    },
+    recordStatus: {
+      type: String,
+    },
+    recordClipboardText: {
+      type: Array,
+      required: true,
+    },
     record: {
       type: BaseRecord,
       required: true,
     },
-    dataset: {
-      type: Object,
+    datasetName: {
+      type: String,
+      required: true,
     },
     task: {
       type: String,
@@ -82,19 +94,6 @@ export default {
       set: function (newValue) {
         this.idState.open = newValue;
       },
-    },
-    hasMetadata() {
-      const metadata = this.record.metadata;
-      return metadata && Object.values(metadata).length;
-    },
-    recordStatus() {
-      return this.record.status;
-    },
-    allowedStatusActions() {
-      return this.statusActions.map((status) => ({
-        ...status,
-        isActive: this.recordStatus === status.key,
-      }));
     },
   },
   methods: {

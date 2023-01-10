@@ -34,10 +34,14 @@
         :key="item.id"
         :allow-change-status="annotationEnabled"
         :record="item"
-        :dataset="dataset"
+        :recordId="item.id"
+        :recordStatus="item.status"
+        :recordClipboardText="item.clipboardText"
+        :metadata="item.metadata"
+        :datasetName="dataset.name"
         :task="dataset.task"
         @onChangeRecordStatus="onChangeRecordStatus"
-        @show-record-info-modal="onShowRecordInfoModal(item)"
+        @show-record-info-modal="onShowRecordInfoModal()"
       />
       <status-tag
         v-if="annotationEnabled && item.status !== 'Default'"
@@ -101,8 +105,8 @@ export default {
           console.warn("waT?", status);
       }
     },
-    onShowRecordInfoModal(record) {
-      this.$emit("show-record-info-modal", record);
+    onShowRecordInfoModal() {
+      this.$emit("show-record-info-modal", this.item);
     },
   },
 };
