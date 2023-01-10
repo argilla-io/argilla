@@ -1077,16 +1077,6 @@ class ElasticsearchBackend(LoggingMixin):
             if settings.migrate_from_rubrix:
                 self._migrate_from_rubrix()
 
-    def _reindex_current_indices(self):
-        for doc in scan(self.__client__, index=DATASETS_INDEX_NAME):
-            dataset_id = doc["_id"]
-            task_type = TaskType(doc["_source"]["task"])
-
-            self.create_dataset_index(
-                id=dataset_id,
-                task=task_type,
-            )
-
     def _migrate_from_rubrix(self):
         source_index = settings.old_dataset_index_name
         target_index = DATASETS_INDEX_NAME
