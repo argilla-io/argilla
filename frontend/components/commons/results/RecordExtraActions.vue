@@ -68,10 +68,6 @@ export default {
       type: Array,
       required: true,
     },
-    record: {
-      type: BaseRecord,
-      required: true,
-    },
     datasetName: {
       type: String,
       required: true,
@@ -88,10 +84,10 @@ export default {
   },
   computed: {
     open: {
-      get: function () {
+      get() {
         return this.idState.open;
       },
-      set: function (newValue) {
+      set(newValue) {
         this.idState.open = newValue;
       },
     },
@@ -99,8 +95,8 @@ export default {
   methods: {
     // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
-      if (this.record.status !== status) {
-        this.$emit("onChangeRecordStatus", status, this.record);
+      if (this.recordStatus !== status) {
+        this.$emit("onChangeRecordStatus", status);
       }
       this.close();
     },

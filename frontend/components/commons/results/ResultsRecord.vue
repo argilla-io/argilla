@@ -33,7 +33,6 @@
       <record-extra-actions
         :key="item.id"
         :allow-change-status="annotationEnabled"
-        :record="item"
         :recordId="item.id"
         :recordStatus="item.status"
         :recordClipboardText="item.clipboardText"
@@ -87,22 +86,22 @@ export default {
       });
     },
 
-    async onChangeRecordStatus(status, record) {
+    async onChangeRecordStatus(status) {
       switch (status) {
         case "Validated":
           await this.validate({
             dataset: this.dataset,
-            records: [record],
+            records: [this.item],
           });
           break;
         case "Discarded":
           await this.discard({
             dataset: this.dataset,
-            records: [record],
+            records: [this.item],
           });
           break;
         default:
-          console.warn("waT?", status);
+          console.warn(`The status ${status} is unknown`);
       }
     },
     onShowRecordInfoModal() {
