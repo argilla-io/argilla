@@ -57,14 +57,14 @@ export default {
       default: false,
     },
     recordId: {
-      type: String,
+      type: String | Number,
       required: true,
     },
     recordStatus: {
       type: String,
     },
     recordClipboardText: {
-      type: Array,
+      type: Array | String,
       required: true,
     },
     datasetName: {
