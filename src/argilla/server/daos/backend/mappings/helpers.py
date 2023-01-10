@@ -203,7 +203,7 @@ def tasks_common_mappings():
     return {
         # TODO(@frascuchon): verify min es version that support meta fields
         # "_meta": {"version.min": "0.10"},
-        "dynamic": "strict",
+        "dynamic": "false",
         "properties": {
             "id": mappings.keyword_field(),
             "text": mappings.text_field(),
