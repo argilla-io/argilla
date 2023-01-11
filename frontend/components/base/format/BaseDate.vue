@@ -16,15 +16,7 @@
   -->
 
 <template>
-  <span v-if="format === 'date-relative-now'">
-    {{
-      date
-        | moment("utc")
-        | moment("subtract", `${timeDifference} minutes`)
-        | moment("from", "now")
-    }}
-  </span>
-  <span v-else> {{ date | moment("utc") | moment("YYYY-MM-DD HH:mm") }} </span>
+  <span> {{ formattedDate }} </span>
 </template>
 
 <script>
@@ -40,6 +32,16 @@ export default {
   computed: {
     timeDifference() {
       return new Date().getTimezoneOffset();
+    },
+    formattedDate() {
+      if (this.format === "date-relative-now") {
+        return this.$moment(this.date)
+          .locale("utc")
+          .subtract(this.timeDifference, "minutes")
+          .from(Date.now());
+      } else {
+        return this.$moment(this.date).locale("utc").format("YYYY-MM-DD HH:mm");
+      }
     },
   },
 };
