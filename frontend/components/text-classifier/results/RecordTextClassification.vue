@@ -131,7 +131,7 @@ export default {
       }));
       // TODO: do not validate records without labels
       await this.validateAnnotations({
-        dataset: this.getTextClassificationDataset(),
+        dataset: this.dataset,
         agent: this.$auth.user.username,
         records: [
           {
