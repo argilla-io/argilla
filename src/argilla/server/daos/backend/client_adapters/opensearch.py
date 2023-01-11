@@ -730,7 +730,7 @@ class OpenSearchClient(IClientAdapter):
         with self.error_handling(index=index):
             body = extra_cfg or {}
             if properties:
-                body.update(properties)
+                body.update({"properties": properties})
 
             self.__client__.indices.put_mapping(
                 index=index,
