@@ -14,6 +14,11 @@ FastAPI is a modern, fast (high-performance), web framework for building APIs wi
 
 BentoML is an open platform that simplifies ML model deployment and enables you to serve your models at production scale in minutes.
 ```
+```{grid-item-card} DVC
+:link: dvc.md
+
+DVC is built to make ML models shareable and reproducible. It is designed to handle large files, data sets, machine learning models, and metrics as well as code.
+```
 ```{grid-item-card} spaCy
 :link: spacy.md
 
@@ -28,6 +33,11 @@ Stanza is a collection of accurate and efficient tools for the linguistic analys
 :link: huggingface.md
 
 Transformers provides APIs and tools to easily download and train state-of-the-art pretrained models.
+```
+```{grid-item-card} Disaggregators
+:link: disaggregators.md
+
+Addressing fairness and bias in machine learning models is more important than ever!
 ```
 ```{grid-item-card} Sentence Transformers
 :link: sentencetransformers.md
@@ -54,6 +64,17 @@ Small-Text provides state-of-the-art Active Learning for Text Classification.
 
 modAL is an active learning framework for Python3, designed with modularity, flexibility and extensibility in mind.
 ```
+```{grid-item-card} Classy Classification
+:link: classyclassification.md
+
+An intuitive approach to few-shot classification using sentence-transformers or spaCy models, or zero-shot classification with Huggingface.
+```
+```{grid-item-card} OpenAI
+:link: openai.md
+
+OpenAI is a suite of APIs powered by large language and vision models which perform a variety of natural language and visual tasks.
+```
+
 ```{grid-item-card} Skweak
 :link: skweak.md
 
@@ -92,18 +113,24 @@ OpenAI is a suite of APIs powered by large language and vision models which perf
 :hidden:
 
 fastapi.md
+bentoml.md
+dvc.md
 colab.md
 
 spacy.md
 stanza.md
 
 huggingface.md
+disaggregators.md
+
 sentencetransformers.md
 flair.md
 setfit.md
 
 smalltext.md
 modal.md
+classyclassification.md
+openai.md
 
 skweak.md
 snorkel.md

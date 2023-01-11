@@ -9,7 +9,7 @@
 ```
 ```{include} /_static/tutorials/deploying-textclassification-colab-activelearning/modal.md
 ```
-```{include} /_static/tutorials/training-textclassification-setfit-fewshot/modal.md
+```{include} /_static/tutorials/training-textclassification-modal-activelearning/modal.md
 ```
 ```{include} /_static/tutorials/labelling-textclassification-snorkel-weaksupervision/modal.md
 ```
@@ -28,6 +28,8 @@
 ```{include} /_static/tutorials/training-textclassification-setfit-sentiment/modal.md
 ```
 ```{include} /_static/tutorials/training-textclassification-smalltext-activelearning/modal.md
+```
+```{include} /_static/tutorials/training-textclassification-classyclassification-activelearning/modal.md
 ```
 ```{include} /_static/tutorials/training-textclassification-transformers-pretrained/modal.md
 ```

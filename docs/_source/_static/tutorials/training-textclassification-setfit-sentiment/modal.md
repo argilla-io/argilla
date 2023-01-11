@@ -4,5 +4,5 @@
 MLOps Steps: Training \
 NLP Tasks: TextClassification (sentiment) \
 Libraries: setfit \
-Techniques: few-shot
+Techniques: Few-shot
 ```
