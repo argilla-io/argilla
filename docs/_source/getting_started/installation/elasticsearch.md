@@ -118,7 +118,7 @@ curl -X GET "localhost:9200/_snapshot/argilla-curl?pretty"
 
 ![add repo success](../../_static/images/installation/elastic_snapshots/add_repo_succes.png)
 
-### Create snapshot repo
+### Create snapshot policy
 
 Now we have defined wehere snapshot are going to be stored, we can continue with defining snapshot policies, which define the automated creation and deletion of snapshots. Once again, this can be done using the `Kibana UI`, or by `cURL`. For this example we will set our policy name to
 
