@@ -73,7 +73,7 @@ class SearchRecordsService:
 
         sort_config = sort_config or ServiceSortConfig()
         exclude_fields = ["metrics.*"] if exclude_metrics else None
-        if query.vector and not query.vector.k:
+        if query and query.vector and not query.vector.k:
             query.vector.k = size
         results = self.__dao__.search_records(
             dataset,
