@@ -54,7 +54,7 @@ When deploying Elastic, we need to define a `path.repo` via setting this as an e
 
 ```yaml
 elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.0
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch
@@ -120,7 +120,7 @@ curl -X GET "localhost:9200/_snapshot/argilla-curl?pretty"
 
 ### Create snapshot policy
 
-Now we have defined wehere snapshot are going to be stored, we can continue with defining snapshot policies, which define the automated creation and deletion of snapshots. Once again, this can be done using the `Kibana UI`, or by `cURL`. For this example we will set our policy name to
+Now we have defined wehere snapshot are going to be stored, we can continue with defining snapshot policies, which define the automated creation and deletion of snapshots. Once again, this can be done using the `Kibana UI`, or by `cURL`. Note that, the policy can also be set to argilla indices by setting `indices` to `"ar.dataset*"`.
 
 #### Kibana UI
 
