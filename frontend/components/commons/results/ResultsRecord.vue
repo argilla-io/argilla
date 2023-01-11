@@ -191,7 +191,7 @@ export default {
     &--disabled {
       @include font-size(13px);
       font-weight: 500;
-      color: $black-37;
+      color: $black-20;
       overflow: visible;
       cursor: default;
       &[data-title] {
