@@ -325,6 +325,7 @@ class OpenSearchClient(IClientAdapter):
         enable_highlight: bool = False,
         sort: Optional[SortConfig] = None,
         include_fields: Optional[List[str]] = None,
+        exclude_fields: Optional[List[str]] = None,
         shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         size = size or 1000
@@ -337,6 +338,7 @@ class OpenSearchClient(IClientAdapter):
             sort=sort,
             id_from=id_from,
             include_fields=include_fields,
+            exclude_fields=exclude_fields,
             highlight=highlight,
             shuffle=shuffle,
         )
