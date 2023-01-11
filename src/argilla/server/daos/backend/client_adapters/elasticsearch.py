@@ -67,7 +67,7 @@ class ElasticsearchClient(OpenSearchClient):
 
         self.set_index_mappings(
             index=index,
-            mappings=vector_mappings,
+            properties=vector_mappings,
         )
 
     def reindex(

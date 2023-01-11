@@ -86,7 +86,7 @@ class OpenSearchClient(IClientAdapter):
 
         self.set_index_mappings(
             index=index,
-            mappings=vector_mappings,
+            properties=vector_mappings,
         )
 
     def _check_vector_supported(self):
@@ -328,13 +328,18 @@ class OpenSearchClient(IClientAdapter):
         exclude_fields: Optional[List[str]] = None,
         shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
-        size = size or 1000
+        batch_size = size or 500
 
         highlight = self.highlight if enable_highlight else None
-        sort = SortConfig(sort_by=[SortableField(id="id")])
+        index_schema = self.get_index_schema(index=index)
+        if index_schema and "id" in index_schema["mappings"]["properties"]:
+            sort = SortConfig(sort_by=[SortableField(id="id")])
+        else:
+            fetch_once = True
+
         es_query = self.query_builder.map_2_es_query(
             query=query,
-            schema=self.get_index_schema(index=index),
+            schema=index_schema,
             sort=sort,
             id_from=id_from,
             include_fields=include_fields,
@@ -346,9 +351,10 @@ class OpenSearchClient(IClientAdapter):
         response = self.__client__.search(
             index=index,
             body=es_query,
-            size=size,
+            size=batch_size,
             track_total_hits=False,
         )
+        records_yield = 0
         while response["hits"]["hits"]:
             hit = None
             for hit in response["hits"]["hits"]:
@@ -356,7 +362,9 @@ class OpenSearchClient(IClientAdapter):
                     document=hit,
                     highlight=highlight,
                 )
-            if fetch_once:
+                records_yield += 1
+
+            if fetch_once or (size and size >= records_yield):
                 break
 
             last_id = hit["_id"]
@@ -716,12 +724,17 @@ class OpenSearchClient(IClientAdapter):
     def set_index_mappings(
         self,
         index: str,
-        mappings: Dict[str, Any],
+        properties: Optional[Dict[str, Any]] = None,
+        **extra_cfg,
     ):
         with self.error_handling(index=index):
+            body = extra_cfg or {}
+            if properties:
+                body.update(properties)
+
             self.__client__.indices.put_mapping(
                 index=index,
-                body={"properties": mappings},
+                body=body,
             )
 
     def _enable_or_disable_read_only_index(
