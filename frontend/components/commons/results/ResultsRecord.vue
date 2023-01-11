@@ -53,7 +53,7 @@
           <base-button
             v-else
             data-title="To use this function you need to have a vector associated with this record"
-            class="small similarity-search__button--disabled"
+            class="tiny similarity-search__button--disabled"
           >
             Find similar
           </base-button>
