@@ -38,9 +38,11 @@
               ></status-tag>
             </div>
           </template>
-          <span class="record__date" v-if="item.event_timestamp">{{
-            recordEventTimestamp
-          }}</span>
+          <base-date
+            class="record__date"
+            v-if="item.event_timestamp"
+            :date="item.event_timestamp"
+          />
           <similarity-search-component
             class="record__similarity-search"
             v-if="formattedVectors.length"
@@ -119,9 +121,6 @@ export default {
         }
       );
       return formattedVectors;
-    },
-    recordEventTimestamp() {
-      return this.$moment(this.item.event_timestamp).format("YYYY-MM-DD HH:mm");
     },
   },
   methods: {

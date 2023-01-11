@@ -16,17 +16,27 @@
   -->
 
 <template>
-  <span>{{
-    date
-      | moment("utc")
-      | moment("subtract", `${timeDifference} minutes`)
-      | moment("from", "now")
-  }}</span>
+  <span v-if="format === 'date-relative-now'">
+    {{
+      date
+        | moment("utc")
+        | moment("subtract", `${timeDifference} minutes`)
+        | moment("from", "now")
+    }}
+  </span>
+  <span v-else> {{ date | moment("utc") | moment("YYYY-MM-DD HH:mm") }} </span>
 </template>
 
 <script>
 export default {
-  props: ["date"],
+  props: {
+    date: {
+      type: String,
+    },
+    format: {
+      type: String,
+    },
+  },
   computed: {
     timeDifference() {
       return new Date().getTimezoneOffset();
