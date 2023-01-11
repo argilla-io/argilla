@@ -13,25 +13,28 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple
 
-from elasticsearch import (
-    ApiError,
-    Elasticsearch,
-    ElasticsearchWarning,
-    NotFoundError,
-    RequestError,
-    helpers,
-)
+import elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError, RequestError, helpers
+from packaging.version import parse
 
 from argilla.server.daos.backend.base import BackendErrorHandler
 from argilla.server.daos.backend.client_adapters.opensearch import OpenSearchClient
-from argilla.server.daos.backend.search.model import BaseQuery, SortConfig
 from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
+
+ES_CLIENT_VERSION: str = elasticsearch.__versionstr__
+
+if parse(elasticsearch.__versionstr__) >= parse("8.0"):
+    from elasticsearch import ApiError, ElasticsearchWarning
+else:
+    from elasticsearch.exceptions import ElasticsearchException as ApiError
+    from elasticsearch.exceptions import ElasticsearchWarning
 
 
 @dataclasses.dataclass
 class ElasticsearchClient(OpenSearchClient):
+    ES_CLIENT_VERSION = ES_CLIENT_VERSION
     query_builder = EsQueryBuilder()
 
     def __post_init__(self):
