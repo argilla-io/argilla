@@ -121,7 +121,7 @@ curl -X GET "localhost:9200/_snapshot/argilla-curl?pretty"
 
 ### Create snapshot policy
 
-Now we have defined wehere snapshot are going to be stored, we can continue with defining snapshot policies, which define the automated creation and deletion of snapshots. Once again, this can be done using the `Kibana UI`, or by `cURL`. For this example we will set our policy name to
+Now we have defined wehere snapshot are going to be stored, we can continue with defining snapshot policies, which define the automated creation and deletion of snapshots. Once again, this can be done using the `Kibana UI`, or by `cURL`. Note that, the policy can also be set to argilla indices by setting `indices` to `"ar.dataset*"`.
 
 #### Kibana UI
 
