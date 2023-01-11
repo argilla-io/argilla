@@ -231,7 +231,7 @@ class EsQueryBuilder:
                 es_query=es_query,
                 vector_field=self.get_vector_field_name(query.vector.name),
                 vector_value=query.vector.value,
-                top_k=size,
+                top_k=query.vector.k or size,
             )
 
         return es_query

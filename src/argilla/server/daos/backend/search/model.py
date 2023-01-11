@@ -69,6 +69,11 @@ class BaseDatasetsQuery(BaseQuery):
 class VectorSearch(BaseModel):
     name: str
     value: List[float]
+    k: Optional[int] = Field(
+        default=None,
+        description="Number of elements to retrieve. "
+        "If not provided, the request size will be used instead",
+    )
 
 
 class BaseRecordsQuery(BaseQuery):
