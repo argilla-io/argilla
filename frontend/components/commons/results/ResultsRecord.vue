@@ -61,9 +61,9 @@
         <record-extra-actions
           :key="record.id"
           :allow-change-status="annotationEnabled && !isReferenceRecord"
-          :record="record"
           :datasetName="dataset.name"
-          :task="dataset.task"
+          :recordId="record.id"
+          :recordClipboardText="record.clipboardText"
           @on-change-record-status="onChangeRecordStatus"
           @show-record-info-modal="onShowRecordInfoModal()"
         />

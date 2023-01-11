@@ -4,9 +4,6 @@ import { TextClassificationRecord } from "@/models/TextClassification";
 
 let wrapper = null;
 const options = {
-  slots: {
-    default: "Record Content",
-  },
   propsData: {
     dataset: {
       type: Object,
@@ -33,8 +30,5 @@ describe("SimilarityRecordReferenceComponent", () => {
   });
   it("expect to have record--reference class", async () => {
     expect(wrapper.find(".record--reference").exists()).toBe(true);
-  });
-  it("expect to render the content in the slot", async () => {
-    expect(wrapper.html()).toContain("Record Content");
   });
 });

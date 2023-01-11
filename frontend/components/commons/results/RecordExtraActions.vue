@@ -25,7 +25,7 @@
         <span>View record info</span>
       </div>
       <base-action-tooltip tooltip="Copied">
-        <div @click="$copyToClipboard(record.clipboardText)">
+        <div @click="$copyToClipboard(recordClipboardText)">
           <span>Copy text</span>
         </div>
       </base-action-tooltip>
@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu";
 import { IdState } from "vue-virtual-scroller";
 
@@ -49,7 +48,7 @@ export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: (vm) => `${vm.datasetName}-${vm.record.id}`,
+      idProp: (vm) => `${vm.datasetName}-${vm.recordId}`,
     }),
   ],
   props: {
@@ -57,18 +56,18 @@ export default {
       type: Boolean,
       default: false,
     },
-    record: {
-      type: BaseRecord,
+    recordId: {
+      type: String | Number,
       required: true,
     },
-    dataset: {
-      type: Object,
+    recordStatus: {
+      type: String,
+    },
+    recordClipboardText: {
+      type: Array | String,
+      required: true,
     },
     datasetName: {
-      type: String,
-      required: true,
-    },
-    task: {
       type: String,
       required: true,
     },
@@ -86,9 +85,6 @@ export default {
       set(newValue) {
         this.idState.open = newValue;
       },
-    },
-    recordStatus() {
-      return this.record.status;
     },
   },
   methods: {
