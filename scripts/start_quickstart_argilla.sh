@@ -2,28 +2,43 @@
 
 set -e
 
-# Generating hashed password
-hashed_password=$(htpasswd -nbB "" "$USER_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
+# Changing user
+sudo -S su user
 
-# Creating users.yml file
-cat >users.yml <<EOF
+# Generate hashed passwords
+admin_password=$(htpasswd -nbB "" "$ADMIN_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
+argilla_password=$(htpasswd -nbB "" "$ARGILLA_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
+
+# Create users.yml file
+cat >/packages/users.yml <<EOF
 - username: "admin"
-  api_key: $USER_API_KEY
+  api_key: $ADMIN_API_KEY
   full_name: Hugging Face
   email: hfdemo@argilla.io
-  hashed_password: $hashed_password
+  hashed_password: $admin_password
   workspaces: []
 
 - username: "argilla"
-  api_key: $USER_API_KEY
+  api_key: $ARGILLA_API_KEY
   full_name: Hugging Face
   email: hfdemo@argilla.io
-  hashed_password: $hashed_password
+  hashed_password: $argilla_password
   workspaces: ["admin"]
 EOF
 
-# Starting elasticsearch & argilla
-service elasticsearch start
-echo "Waiting for elasticsearch to start"
-sleep 15
+# Disable security in elasticsearch configuration
+sudo sed -i "s/xpack.security.enabled: true/xpack.security.enabled: false/g" /etc/elasticsearch/elasticsearch.yml
+sudo sed -i "s/cluster.initial_master_nodes/#cluster.initial_master_nodes/g" /etc/elasticsearch/elasticsearch.yml
+echo "cluster.routing.allocation.disk.threshold_enabled: false" | sudo tee -a /etc/elasticsearch/elasticsearch.yml
+
+# Create elasticsearch directory and change ownership
+sudo mkdir -p /var/run/elasticsearch
+sudo chown -R elasticsearch:elasticsearch /var/run/elasticsearch
+
+# Starting elasticsearch
+sudo systemctl daemon-reload
+sudo systemctl enable elasticsearch
+sudo systemctl start elasticsearch
+
+# Starting argilla
 uvicorn argilla:app --host "0.0.0.0"

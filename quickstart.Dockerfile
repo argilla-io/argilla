@@ -1,30 +1,37 @@
-FROM ubuntu:20.04
+FROM python:3.9-slim
 
 # Exposing ports
 EXPOSE 6900
+EXPOSE 9200
 
 # Environment variables
-ENV ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/users.yml
+ENV ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/packages/users.yml
 ENV UVICORN_PORT=6900
 
-# Install Python
+# Copying argilla distribution files
+COPY dist/*.whl /packages/
+
+# Copy execution script
+COPY scripts/start_quickstart_argilla.sh /
+RUN chmod +x /start_quickstart_argilla.sh
+
+# Install packages
 RUN apt update
-RUN apt -y install curl python3.9 python3.9-dev python3.9-distutils gcc gnupg apache2-utils
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-RUN python3.9 get-pip.py
+RUN apt -y install python3.9-dev gcc gnupg apache2-utils systemctl curl sudo vim
+
+# Create new user for starting elasticsearch
+RUN useradd -ms /bin/bash user -p "$(openssl passwd -1 ubuntu)"
+RUN echo 'user ALL=(ALL)   ALL' >> /etc/sudoers
 
 # Install argilla
-RUN pip install argilla[server]
+RUN chmod +x /start_quickstart_argilla.sh \
+ && for wheel in /packages/*.whl; do pip install "$wheel"[server]; done
 
 # Install Elasticsearch
 RUN curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
-RUN echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-7.x.list
+RUN echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-8.x.list
 RUN apt update
-RUN apt -y install elasticsearch
-
-# Copy users db file along with execution script
-COPY scripts/start_quickstart_argilla.sh /
-RUN chmod +x /start_quickstart_argilla.sh
+RUN apt -y install elasticsearch=8.5.3
 
 # Executing argilla along with elasticsearch
 CMD /bin/bash /start_quickstart_argilla.sh
