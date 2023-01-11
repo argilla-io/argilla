@@ -219,6 +219,7 @@ class GenericElasticEngineBackend(LoggingMixin):
         limit: Optional[int] = None,
         shuffle: bool = False,
         include_fields: Optional[List[str]] = None,
+        exclude_fields: Optional[List[str]] = None,
     ) -> Iterable[Dict[str, Any]]:
         index = dataset_records_index(id)
 
@@ -229,6 +230,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             id_from=id_from,
             fetch_once=shuffle,
             include_fields=include_fields,
+            exclude_fields=exclude_fields,
             enable_highlight=True,
             shuffle=shuffle,
         )
