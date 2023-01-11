@@ -19,6 +19,11 @@ BentoML is an open platform that simplifies ML model deployment and enables you 
 
 DVC is built to make ML models shareable and reproducible. It is designed to handle large files, data sets, machine learning models, and metrics as well as code.
 ```
+```{grid-item-card} Google Colab
+:link: dvc.md
+
+Colab notebooks allow you to combine executable code and rich text in a single document, along with images, HTML, LaTeX and more.
+```
 ```{grid-item-card} spaCy
 :link: spacy.md
 
