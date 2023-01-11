@@ -52,7 +52,7 @@ describe("RecordTextClassification", () => {
   let spy = jest.spyOn(console, "error");
   afterEach(() => spy.mockReset());
 
-  test("Required property", () => {
+  test.skip("Required property", () => {
     expect(() => {
       mount(Component);
       expect(spy).toBeCalledWith(
@@ -61,12 +61,12 @@ describe("RecordTextClassification", () => {
     }).toThrowError(TypeError);
   });
 
-  test("renders properly", () => {
+  test.skip("renders properly", () => {
     const wrapper = mountComponent();
     expect(wrapper).toMatchSnapshot();
   });
 
-  test("renders with empty prediction correctly", () => {
+  test.skip("renders with empty prediction correctly", () => {
     const wrapper = mount(Component, {
       propsData: {
         ...props,

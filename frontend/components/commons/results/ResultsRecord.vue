@@ -148,7 +148,7 @@ export default {
           });
           break;
         default:
-          console.warn("waT?", status);
+          console.warn(`The status ${status} is unknown`);
       }
     },
     onShowRecordInfoModal(record) {

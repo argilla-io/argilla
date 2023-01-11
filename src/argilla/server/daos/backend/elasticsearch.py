@@ -1062,30 +1062,46 @@ class ElasticsearchBackend(LoggingMixin):
         return self._close_index(dataset_records_index(id))
 
     def create_datasets_index(self, force_recreate: bool = False):
-        self._create_index(
-            DATASETS_INDEX_NAME,
-            force_recreate=force_recreate,
-            mappings=datasets_index_mappings(),
-        )
-        if not settings.enable_migration:
-            return
+        with backend_error_handler(index=DATASETS_INDEX_NAME):
+            self._create_index(
+                DATASETS_INDEX_NAME,
+                force_recreate=force_recreate,
+                mappings=datasets_index_mappings(),
+            )
 
+            if settings.enable_migration:
+                try:
+                    self._migrate_from_rubrix()
+                except IndexNotFoundError:
+                    pass  # Nothing to migrate
+
+    def _migrate_from_rubrix(self):
         source_index = settings.old_dataset_index_name
         target_index = DATASETS_INDEX_NAME
-        try:
-            with backend_error_handler(index=source_index):
-                reindex(
-                    self.__client__,
-                    source_index=source_index,
-                    target_index=target_index,
-                )
-                for doc in scan(self.__client__, index=source_index):
-                    dataset_id = doc["_id"]
-                    index = settings.old_dataset_records_index_name.format(dataset_id)
-                    alias = dataset_records_index(dataset_id)
-                    self._create_index_alias(index, alias=alias)
-        except IndexNotFoundError:
-            pass  # Nothing to migrate
+
+        with backend_error_handler(index=source_index):
+            reindex(
+                self.__client__,
+                source_index=source_index,
+                target_index=target_index,
+            )
+            for doc in scan(
+                self.__client__,
+                index=source_index,
+            ):
+                dataset_id = doc["_id"]
+                index = settings.old_dataset_records_index_name.format(dataset_id)
+                alias = dataset_records_index(dataset_id)
+                self._update_dynamic_mapping(index)
+                self._create_index_alias(index, alias=alias)
+
+    def _update_dynamic_mapping(self, index):
+        self.__client__.indices.put_mapping(
+            index=index,
+            body={
+                "dynamic": False,
+            },
+        )
 
     def list_datasets(self, query: BaseDatasetsQuery):
         with backend_error_handler(index=DATASETS_INDEX_NAME):

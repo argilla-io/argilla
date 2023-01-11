@@ -16,26 +16,17 @@
   -->
 
 <template>
-  <div class="record">
+  <div class="record" v-if="record">
     <div class="record--left">
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="interactionsEnabled"
-        :inputLabels="dataset.labels"
-        :datasetName="dataset.name"
-        :isMultiLabel="dataset.isMultiLabel"
-        :paginationSize="paginationSize"
+        :dataset="dataset"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
-      <classifier-exploration-area
-        v-else
-        :dataset="dataset"
-        :datasetName="dataset.name"
-        :paginationSize="paginationSize"
-        :record="record"
-      />
+      <classifier-exploration-area v-else :dataset="dataset" :record="record" />
       <div v-if="interactionsEnabled" class="content__actions-buttons">
         <base-button
           v-if="allowValidate"
@@ -79,8 +70,6 @@ export default {
       default: false,
     },
   },
-  data: () => ({}),
-
   computed: {
     interactionsEnabled() {
       return this.annotationEnabled && !this.isReferenceRecord;
@@ -100,7 +89,7 @@ export default {
       );
     },
     paginationSize() {
-      return this.dataset.viewSettings?.pagination?.size;
+      return this.dataset.viewSettings?.pagination.size;
     },
   },
   methods: {
@@ -142,7 +131,7 @@ export default {
       }));
       // TODO: do not validate records without labels
       await this.validateAnnotations({
-        dataset: this.dataset,
+        dataset: this.getTextClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -180,7 +169,6 @@ export default {
     @extend %hide-scrollbar;
   }
 }
-
 .content {
   &__actions-buttons {
     margin-right: 0;

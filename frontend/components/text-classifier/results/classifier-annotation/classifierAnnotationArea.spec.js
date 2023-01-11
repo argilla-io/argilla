@@ -9,8 +9,14 @@ const options = {
     record: new TextClassificationRecord({
       inputs: { text: "My text", multi_label: false },
     }),
-    isMultiLabel: true,
-    inputLabels: ["label1"], // WARNING, if labels is empty then the ClassifierAnnotationButton will no be render => test 2/3/4/5 will failed
+    dataset: {
+      task: "TextClassification",
+      isMultiLabel: true,
+      viewSettings: {
+        annotationEnabled: false,
+      },
+      labels: ["label1"], // WARNING, if labels is empty then the ClassifierAnnotationButton will no be render => test 2/3/4/5 will failed
+    },
   },
 };
 const spyUpdateLabelsMethod = jest.spyOn(

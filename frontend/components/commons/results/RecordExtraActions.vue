@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu";
 import { IdState } from "vue-virtual-scroller";
 
@@ -57,7 +58,7 @@ export default {
       default: false,
     },
     record: {
-      type: Object,
+      type: BaseRecord,
       required: true,
     },
     dataset: {
@@ -75,31 +76,21 @@ export default {
   },
   computed: {
     open: {
-      get: function () {
+      get() {
         return this.idState.open;
       },
-      set: function (newValue) {
+      set(newValue) {
         this.idState.open = newValue;
       },
     },
-    hasMetadata() {
-      const metadata = this.record.metadata;
-      return metadata && Object.values(metadata).length;
-    },
     recordStatus() {
       return this.record.status;
-    },
-    allowedStatusActions() {
-      return this.statusActions.map((status) => ({
-        ...status,
-        isActive: this.recordStatus === status.key,
-      }));
     },
   },
   methods: {
     // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
-      if (this.record.status !== status) {
+      if (this.recordStatus !== status) {
         this.$emit("onChangeRecordStatus", status, this.record);
       }
       this.close();
