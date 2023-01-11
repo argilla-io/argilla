@@ -186,6 +186,7 @@ class DatasetRecordsDAO:
         id_from: Optional[str] = None,
         shuffle: bool = False,
         include_fields: Optional[Set[str]] = None,
+        exclude_fields: Optional[Set[str]] = None,
     ) -> Iterable[Dict[str, Any]]:
         """
         Iterates over a dataset records
@@ -202,6 +203,8 @@ class DatasetRecordsDAO:
             From which ID should we start iterating
         include_fields:
             A set of record fields to retrieve. Wildcard are allowed
+        exclude_fields:
+            A set of record fields to exclude. Wildcard are allowed
 
         Returns
         -------
@@ -215,6 +218,7 @@ class DatasetRecordsDAO:
             id_from=id_from,
             shuffle=shuffle,
             include_fields=list(include_fields) if include_fields else None,
+            exclude_fields=list(exclude_fields) if exclude_fields else None,
         )
 
     async def delete_records_by_query(
