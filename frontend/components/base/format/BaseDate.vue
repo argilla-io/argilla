@@ -39,9 +39,8 @@ export default {
           .locale("utc")
           .subtract(this.timeDifference, "minutes")
           .from(Date.now());
-      } else {
-        return this.$moment(this.date).locale("utc").format("YYYY-MM-DD HH:mm");
       }
+      return this.$moment(this.date).locale("utc").format("YYYY-MM-DD HH:mm");
     },
   },
 };
