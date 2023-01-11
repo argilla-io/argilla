@@ -16,20 +16,31 @@
   -->
 
 <template>
-  <span>{{
-    date
-      | moment("utc")
-      | moment("subtract", `${timeDifference} minutes`)
-      | moment("from", "now")
-  }}</span>
+  <span> {{ formattedDate }} </span>
 </template>
 
 <script>
 export default {
-  props: ["date"],
+  props: {
+    date: {
+      type: String,
+    },
+    format: {
+      type: String,
+    },
+  },
   computed: {
     timeDifference() {
       return new Date().getTimezoneOffset();
+    },
+    formattedDate() {
+      if (this.format === "date-relative-now") {
+        return this.$moment(this.date)
+          .locale("utc")
+          .subtract(this.timeDifference, "minutes")
+          .from(Date.now());
+      }
+      return this.$moment(this.date).locale("utc").format("YYYY-MM-DD HH:mm");
     },
   },
 };
