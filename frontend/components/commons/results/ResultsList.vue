@@ -35,13 +35,7 @@
               :referenceRecord="referenceRecordObj"
               @search-records="searchRecords"
               @show-record-info-modal="onShowRecordInfoModal"
-            >
-              <slot
-                name="record"
-                :record="referenceRecordObj"
-                :isReferenceRecord="true"
-              />
-            </similarity-record-reference-component>
+            />
             <results-loading
               v-if="showLoader"
               :size="dataset.viewSettings.pagination.size"
@@ -63,12 +57,10 @@
               <results-record
                 :key="`${dataset.name}-${item.id}`"
                 :dataset="dataset"
-                :item="item"
+                :record="item"
                 @show-record-info-modal="onShowRecordInfoModal"
                 @search-records="searchRecords"
-              >
-                <slot name="record" :record="item" />
-              </results-record>
+              />
             </DynamicScrollerItem>
           </template>
 

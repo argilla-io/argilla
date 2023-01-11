@@ -20,7 +20,7 @@
     <div
       :class="[
         annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
-        item.status === 'Discarded' ? 'discarded' : null,
+        record.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
       <div class="record__header">
@@ -29,19 +29,19 @@
             <div class="record__header--left" v-if="!isReferenceRecord">
               <base-checkbox
                 class="list__checkbox"
-                :value="item.selected"
-                @change="onCheckboxChanged($event, item.id)"
+                :value="record.selected"
+                @change="onCheckboxChanged($event, record.id)"
               ></base-checkbox>
               <status-tag
-                v-if="item.status !== 'Default'"
-                :title="item.status"
+                v-if="record.status !== 'Default'"
+                :title="record.status"
               ></status-tag>
             </div>
           </template>
           <base-date
             class="record__date"
-            v-if="item.event_timestamp"
-            :date="item.event_timestamp"
+            v-if="record.event_timestamp"
+            :date="record.event_timestamp"
           />
           <similarity-search-component
             class="record__similarity-search"
@@ -59,16 +59,33 @@
           </base-button>
         </template>
         <record-extra-actions
-          :key="item.id"
+          :key="record.id"
           :allow-change-status="annotationEnabled && !isReferenceRecord"
-          :record="item"
-          :dataset="dataset"
+          :record="record"
+          :datasetName="dataset.name"
           :task="dataset.task"
-          @onChangeRecordStatus="onChangeRecordStatus"
-          @show-record-info-modal="onShowRecordInfoModal(item)"
+          @on-change-record-status="onChangeRecordStatus"
+          @show-record-info-modal="onShowRecordInfoModal()"
         />
       </div>
-      <slot :record="item" :isReferenceRecord="isReferenceRecord" />
+      <RecordTextClassification
+        v-if="dataset.task === 'TextClassification'"
+        :dataset="dataset"
+        :record="record"
+        :isReferenceRecord="isReferenceRecord"
+      />
+      <RecordText2Text
+        v-if="dataset.task === 'Text2Text'"
+        :dataset="dataset"
+        :record="record"
+        :isReferenceRecord="isReferenceRecord"
+      />
+      <RecordTokenClassification
+        v-if="dataset.task === 'TokenClassification'"
+        :dataset="dataset"
+        :record="record"
+        :isReferenceRecord="isReferenceRecord"
+      />
     </div>
   </div>
 </template>
@@ -85,7 +102,7 @@ export default {
       type: Object,
       required: true,
     },
-    item: {
+    record: {
       type: Object,
       required: true,
     },
@@ -105,7 +122,7 @@ export default {
       return this.dataset.visibleRecords;
     },
     vectors() {
-      return VectorModel.query().where("record_id", this.item.id).get() || [];
+      return VectorModel.query().where("record_id", this.record.id).get() || [];
     },
     formattedVectors() {
       const formattedVectors = this.vectors.map(
@@ -138,33 +155,33 @@ export default {
       });
     },
 
-    async onChangeRecordStatus(status, record) {
+    async onChangeRecordStatus(status) {
       switch (status) {
         case "Validated":
           await this.validate({
             dataset: this.dataset,
-            records: [record],
+            records: [this.record],
           });
           break;
         case "Discarded":
           await this.discard({
             dataset: this.dataset,
-            records: [record],
+            records: [this.record],
           });
           break;
         default:
           console.warn(`The status ${status} is unknown`);
       }
     },
-    onShowRecordInfoModal(record) {
-      this.$emit("show-record-info-modal", record);
+    onShowRecordInfoModal() {
+      this.$emit("show-record-info-modal", this.record);
     },
     searchRecords(vector) {
       const formattedObj = this.formatSelectedVectorObj(vector);
       this.$emit("search-records", formattedObj);
     },
     formatSelectedVectorObj(vector) {
-      return { query: { vector }, recordId: this.item.id, vector };
+      return { query: { vector }, recordId: this.record.id, vector };
     },
   },
 };

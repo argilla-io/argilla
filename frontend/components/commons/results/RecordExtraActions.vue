@@ -31,7 +31,7 @@
       </base-action-tooltip>
       <div
         v-if="allowChangeStatus"
-        :class="record.status === 'Discarded' ? 'disabled' : null"
+        :class="recordStatus === 'Discarded' ? 'disabled' : null"
         @click="onChangeRecordStatus('Discarded')"
       >
         <span>Discard record</span>
@@ -49,7 +49,7 @@ export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.datasetName}-${vm.record.id}`,
     }),
   ],
   props: {
@@ -63,6 +63,10 @@ export default {
     },
     dataset: {
       type: Object,
+    },
+    datasetName: {
+      type: String,
+      required: true,
     },
     task: {
       type: String,
@@ -91,7 +95,7 @@ export default {
     // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
       if (this.recordStatus !== status) {
-        this.$emit("onChangeRecordStatus", status, this.record);
+        this.$emit("on-change-record-status", status);
       }
       this.close();
     },
