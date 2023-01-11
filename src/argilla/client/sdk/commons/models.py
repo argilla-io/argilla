@@ -21,6 +21,8 @@ from uuid import uuid4
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
+from argilla.client.models import Vectors as ClientVectors
+
 MACHINE_NAME = socket.gethostname()
 
 
@@ -38,6 +40,22 @@ class BaseAnnotation(BaseModel):
 T = TypeVar("T", bound=BaseAnnotation)
 
 
+class VectorInfo(BaseModel):
+    """Record vector info for api layer data model"""
+
+    value: List[float]
+
+
+SdkVectors = Dict[str, VectorInfo]
+
+
+class SdkVectorSearch(BaseModel):
+    """The sdk vector search parameters"""
+
+    name: str
+    value: List[float]
+
+
 class BaseRecord(GenericModel, Generic[T]):
     id: Optional[Union[int, str]] = Field(default_factory=lambda: str(uuid4()))
     metadata: Dict[str, Any] = Field(default=None)
@@ -45,6 +63,7 @@ class BaseRecord(GenericModel, Generic[T]):
     status: Optional[TaskStatus] = None
     prediction: Optional[T] = None
     annotation: Optional[T] = None
+    vectors: Optional[SdkVectors] = None
     metrics: Dict[str, Any] = Field(default_factory=dict)
     search_keywords: Optional[List[str]] = None
 
@@ -54,6 +73,22 @@ class BaseRecord(GenericModel, Generic[T]):
     def datetime_to_isoformat(cls, v: Optional[datetime]):
         if v is not None:
             return v.isoformat()
+
+    @staticmethod
+    def _from_client_vectors(vectors: ClientVectors) -> SdkVectors:
+        sdk_vectors = None
+        if vectors:
+            sdk_vectors = {
+                name: VectorInfo(value=vector) for name, vector in vectors.items()
+            }
+        return sdk_vectors
+
+    @staticmethod
+    def _to_client_vectors(vectors: SdkVectors) -> ClientVectors:
+        client_vectors = None
+        if vectors:
+            client_vectors = {name: vector.value for name, vector in vectors.items()}
+        return client_vectors
 
 
 class UpdateDatasetRequest(BaseModel):

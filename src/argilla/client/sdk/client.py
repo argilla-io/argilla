@@ -18,6 +18,8 @@ import functools
 import inspect
 import uuid
 
+from pydantic import BaseModel
+
 try:
     import ujson as json
 except ModuleNotFoundError:

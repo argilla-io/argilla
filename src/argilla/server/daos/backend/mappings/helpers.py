@@ -17,8 +17,6 @@ from typing import Any, Dict, List
 from argilla.server.daos.backend.mappings.stopwords import english
 from argilla.server.settings import settings
 
-EXTENDED_ANALYZER_REF = "extended_analyzer"
-
 MULTILINGUAL_STOP_ANALYZER_REF = "multilingual_stop_analyzer"
 
 
@@ -161,11 +159,6 @@ def tasks_common_settings():
     es_settings = {
         "number_of_shards": settings.es_records_index_shards,
         "number_of_replicas": settings.es_records_index_replicas,
-        "analysis": {
-            "analyzer": {
-                EXTENDED_ANALYZER_REF: extended_analyzer(),
-            }
-        },
     }
 
     configure_multilingual_stop_analyzer(settings=es_settings)
@@ -175,7 +168,8 @@ def tasks_common_settings():
 def dynamic_metrics_text():
     return {
         "metrics.*": mappings.path_match_keyword_template(
-            path="metrics.*", enable_text_search_in_keywords=False
+            path="metrics.*",
+            enable_text_search_in_keywords=False,
         )
     }
 
@@ -220,6 +214,7 @@ def tasks_common_mappings():
             "predicted_by": mappings.keyword_field(enable_text_search=True),
             "metrics": mappings.dynamic_field(),
             "metadata": mappings.dynamic_field(),
+            "vectors": mappings.dynamic_field(),
         },
         "dynamic_templates": [
             dynamic_metadata_text(),

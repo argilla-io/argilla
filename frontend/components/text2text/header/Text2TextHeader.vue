@@ -17,7 +17,13 @@
 
 <template>
   <div class="header__filters">
-    <filters-area :dataset="dataset" />
+    <filters-area
+      :dataset="dataset"
+      :enableSimilaritySearch="enableSimilaritySearch"
+      @search-records="searchRecords"
+    >
+      <dataset-options :dataset="dataset" />
+    </filters-area>
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"
@@ -36,6 +42,10 @@ export default {
   props: {
     dataset: {
       type: Object,
+      required: true,
+    },
+    enableSimilaritySearch: {
+      type: Boolean,
       required: true,
     },
   },
@@ -75,6 +85,9 @@ export default {
           };
         }),
       });
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

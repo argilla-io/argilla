@@ -32,7 +32,7 @@ from argilla._constants import (
 )
 from argilla.client.apis.datasets import Datasets
 from argilla.client.apis.metrics import MetricsAPI
-from argilla.client.apis.searches import Searches
+from argilla.client.apis.search import Search, VectorSearch
 from argilla.client.datasets import (
     Dataset,
     DatasetForText2Text,
@@ -187,8 +187,8 @@ class Api:
         return Datasets(client=self._client)
 
     @property
-    def searches(self):
-        return Searches(client=self.http_client)
+    def search(self):
+        return Search(client=self._client)
 
     @property
     def metrics(self):
@@ -476,6 +476,7 @@ class Api:
         self,
         name: str,
         query: Optional[str] = None,
+        vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
@@ -490,6 +491,8 @@ class Api:
             query:
                 An ElasticSearch query with the
                 `query string syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
+            vector:
+                Vector configuration for a semantic search
             ids:
                 If provided, load dataset records with given ids.
             limit:
@@ -538,8 +541,8 @@ class Api:
                 " `rg.load('my_dataset').to_pandas()`.",
             )
 
-        response = datasets_api.get_dataset(client=self._client, name=name)
-        task = response.parsed.task
+        dataset = self.datasets.find_by_name(name=name)
+        task = dataset.task
 
         task_config = {
             TaskType.text_classification: (
@@ -566,6 +569,23 @@ class Api:
                 f"Load method not supported for the '{task}' task. Supported Tasks: "
                 f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
             )
+
+        if vector:
+            vector_search = VectorSearch(
+                name=vector[0],
+                value=vector[1],
+            )
+            results = self.search.search_records(
+                name=name,
+                task=task,
+                size=limit or 100,
+                # query args
+                query_text=query,
+                vector=vector_search,
+            )
+
+            return dataset_class(results.records)
+
         response = get_dataset_data(
             client=self._client,
             name=name,

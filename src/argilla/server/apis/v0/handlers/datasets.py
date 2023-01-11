@@ -136,9 +136,14 @@ def delete_dataset(
 ):
     try:
         found_ds = service.find_by_name(
-            user=current_user, name=name, workspace=ds_params.workspace
+            user=current_user,
+            name=name,
+            workspace=ds_params.workspace,
         )
-        service.delete(user=current_user, dataset=found_ds)
+        service.delete(
+            user=current_user,
+            dataset=found_ds,
+        )
     except EntityNotFoundError:
         pass
 

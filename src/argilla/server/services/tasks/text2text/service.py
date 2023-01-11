@@ -108,7 +108,7 @@ class Text2TextService:
         )
 
         if results.metrics:
-            results.metrics["words"] = results.metrics["words_cloud"]
+            results.metrics["words"] = results.metrics.get("words_cloud", {})
             results.metrics["status"] = results.metrics["status_distribution"]
 
         return results

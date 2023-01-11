@@ -24,6 +24,7 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationSearchRequest,
     TokenClassificationSearchResults,
 )
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 
 def test_load_as_different_task(mocked_client):
@@ -222,6 +223,132 @@ def test_create_records_for_token_classification(
     assert "This" in results.aggregations.mentions[entity_label]
     for record in results.records:
         assert metrics_validator(record)
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+@pytest.mark.parametrize(
+    ("include_metrics", "metrics_validator"),
+    [
+        (True, lambda r: len(r.metrics) > 0),
+        (False, lambda r: len(r.metrics) == 0),
+        (None, lambda r: len(r.metrics) == 0),
+    ],
+)
+def test_create_records_for_token_classification_vector_search(
+    mocked_client,
+    include_metrics: bool,
+    metrics_validator: Callable,
+):
+    dataset = "test_create_records_for_token_classification_vector_search"
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    entity_label = "TEST"
+    expected_records = 3
+    record_dicts = [
+        {
+            "id": 0,
+            "tokens": "This is a text".split(" "),
+            "raw_text": "This is a text",
+            "metadata": {"field_one": "value one", "field_two": "value 2"},
+            "prediction": {
+                "agent": "test",
+                "entities": [{"start": 0, "end": 4, "label": entity_label}],
+            },
+            "annotation": {
+                "agent": "test",
+                "entities": [{"start": 0, "end": 4, "label": entity_label}],
+            },
+            "vectors": {"my_bert": {"value": [1, 2, 3, 4, 5, 6]}},
+        },
+        {
+            "id": 1,
+            "tokens": "This is a text".split(" "),
+            "raw_text": "This is a text",
+            "metadata": {"field_one": "value one", "field_two": "value 2"},
+            "prediction": {
+                "agent": "test",
+                "entities": [{"start": 0, "end": 4, "label": entity_label}],
+            },
+            "annotation": {
+                "agent": "test",
+                "entities": [{"start": 0, "end": 4, "label": entity_label}],
+            },
+            "vectors": {"my_bert": {"value": [5, 6, 7, 8, 9, 10]}},
+        },
+        {
+            "id": 2,
+            "tokens": "This is a text".split(" "),
+            "raw_text": "This is a text",
+            "metadata": {"field_one": "value one", "field_two": "value 2"},
+            "prediction": {
+                "agent": "test",
+                "entities": [{"start": 0, "end": 4, "label": entity_label}],
+            },
+            "annotation": {
+                "agent": "test",
+                "entities": [{"start": 0, "end": 4, "label": entity_label}],
+            },
+            "vectors": {"my_bert": {"value": [7, 8, 9, 10, 11, 12]}},
+        },
+    ]
+
+    records = [TokenClassificationRecord.parse_obj(record) for record in record_dicts]
+
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/TokenClassification:bulk",
+        json=TokenClassificationBulkRequest(
+            tags={"env": "test", "class": "text classification"},
+            metadata={"config": {"the": "config"}},
+            records=records,
+        ).dict(by_alias=True),
+    )
+
+    assert response.status_code == 200, response.json()
+    bulk_response = BulkResponse.parse_obj(response.json())
+    assert bulk_response.dataset == dataset
+    assert bulk_response.failed == 0
+    assert bulk_response.processed == expected_records
+
+    search_url = f"/api/datasets/{dataset}/TokenClassification:search"
+    if include_metrics is not None:
+        search_url += f"?include_metrics={include_metrics}"
+
+    response = mocked_client.post(
+        search_url,
+        json={
+            "query": {
+                "vector": {
+                    "name": "my_bert",
+                    "value": [5, 6, 7, 8, 9, 10],
+                }
+            }
+        },
+    )
+    assert response.status_code == 200, response.json()
+    results = TokenClassificationSearchResults.parse_obj(response.json())
+
+    assert results.aggregations.dict(exclude={"score"}) == {
+        "annotated_as": {"TEST": 3},
+        "annotated_by": {"test": 3},
+        "mentions": {"TEST": {"This": 3}},
+        "metadata": {"field_one": {"value one": 3}, "field_two": {"value 2": 3}},
+        "predicted": {"ok": 3},
+        "predicted_as": {"TEST": 3},
+        "predicted_by": {"test": 3},
+        "predicted_mentions": {"TEST": {"This": 3}},
+        "status": {"Default": 3},
+        "words": {"text": 3},
+    }
+
+    assert "This" in results.aggregations.predicted_mentions[entity_label]
+    assert "This" in results.aggregations.mentions[entity_label]
+    expected_record_ids = [1, 2, 0]
+    for index, record in enumerate(results.records):
+        assert metrics_validator(record)
+        assert expected_record_ids[index] == record.id
+        assert hasattr(record, "vectors")
 
 
 def test_multiple_mentions_in_same_record(mocked_client):

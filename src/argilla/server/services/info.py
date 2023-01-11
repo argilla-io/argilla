@@ -14,14 +14,14 @@
 #  limitations under the License.
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import psutil
 from fastapi import Depends
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel
 
 from argilla import __version__ as version
-from argilla.server.daos.backend.elasticsearch import ElasticsearchBackend
+from argilla.server.daos.backend import GenericElasticEngineBackend
 
 
 def size(bytes):
@@ -72,7 +72,9 @@ class ApiInfoService:
     @classmethod
     def get_instance(
         cls,
-        backend: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
+        backend: GenericElasticEngineBackend = Depends(
+            GenericElasticEngineBackend.get_instance
+        ),
     ) -> "ApiInfoService":
         """
         Creates an api info service
@@ -82,7 +84,7 @@ class ApiInfoService:
             cls._INSTANCE = ApiInfoService(backend)
         return cls._INSTANCE
 
-    def __init__(self, es: ElasticsearchBackend):
+    def __init__(self, es: GenericElasticEngineBackend):
         self.__es__ = es
 
     def api_status(self) -> ApiStatus:
@@ -95,7 +97,7 @@ class ApiInfoService:
 
     def _elasticsearch_info(self) -> Dict[str, Any]:
         """Returns the elasticsearch cluster info"""
-        return self.__es__.get_cluster_info()
+        return self.__es__.client.get_cluster_info()
 
     @staticmethod
     def _api_memory_info() -> Dict[str, Any]:

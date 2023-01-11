@@ -16,9 +16,13 @@
   -->
 
 <template>
-  <results-list :dataset="dataset">
-    <template v-slot:record="{ record }">
-      <record-text-2-text :dataset="dataset" :record="record" />
+  <results-list :dataset="dataset" @search-records="searchRecords">
+    <template slot="record" slot-scope="slotProps">
+      <record-text-2-text
+        :dataset="dataset"
+        :record="slotProps.record"
+        :isReferenceRecord="slotProps.isReferenceRecord"
+      />
     </template>
   </results-list>
 </template>
@@ -28,6 +32,11 @@ export default {
     dataset: {
       type: Object,
       required: true,
+    },
+  },
+  methods: {
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

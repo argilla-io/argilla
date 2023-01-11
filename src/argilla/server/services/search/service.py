@@ -73,9 +73,14 @@ class SearchRecordsService:
 
         sort_config = sort_config or ServiceSortConfig()
         exclude_fields = ["metrics.*"] if exclude_metrics else None
+        if query and query.vector and not query.vector.k:
+            query.vector.k = size
         results = self.__dao__.search_records(
             dataset,
-            search=DaoRecordsSearch(query=query, sort=sort_config),
+            search=DaoRecordsSearch(
+                query=query,
+                sort=sort_config,
+            ),
             size=size,
             record_from=record_from,
             exclude_fields=exclude_fields,
@@ -105,6 +110,22 @@ class SearchRecordsService:
             metrics=metrics_results if metrics_results else {},
         )
 
+    async def find_record_by_id(
+        self,
+        dataset: ServiceDataset,
+        id: Union[str, int],
+        record_type: Type[ServiceRecord],
+    ) -> ServiceRecord:
+        found = await self.__dao__.get_record_by_id(dataset, id)
+        if not found:
+            raise RecordNotFound(
+                dataset=dataset.id,
+                id=id,
+                type="Record",
+            )
+
+        return record_type.parse_obj(found)
+
     def scan_records(
         self,
         dataset: ServiceDataset,
@@ -129,19 +150,3 @@ class SearchRecordsService:
             include_fields=projection,
         ):
             yield transform_doc(doc)
-
-    async def find_record_by_id(
-        self,
-        dataset: ServiceDataset,
-        id: Union[str, int],
-        record_type: Type[ServiceRecord],
-    ) -> ServiceRecord:
-        found = await self.__dao__.get_record_by_id(dataset, id)
-        if not found:
-            raise RecordNotFound(
-                dataset=dataset.id,
-                id=id,
-                type="Record",
-            )
-
-        return record_type.parse_obj(found)

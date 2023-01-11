@@ -26,7 +26,6 @@ const props = {
       ],
     },
   }),
-  datasetId: ["name", "owner"],
   dataset: {
     task: "TextClassification",
     query: {

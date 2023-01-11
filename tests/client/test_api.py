@@ -15,7 +15,7 @@
 import concurrent.futures
 import datetime
 from time import sleep
-from typing import Any, Iterable
+from typing import Any, Iterable, List
 
 import datasets
 import httpx
@@ -169,12 +169,17 @@ def test_log_something(monkeypatch, mocked_client):
     assert results.records[0].inputs["text"] == "This is a test"
 
 
-def test_load_limits(mocked_client):
+def test_load_limits(mocked_client, supported_vector_search):
     dataset = "test_load_limits"
     api_ds_prefix = f"/api/datasets/{dataset}"
     mocked_client.delete(api_ds_prefix)
 
-    create_some_data_for_text_classification(mocked_client, dataset, 50)
+    create_some_data_for_text_classification(
+        mocked_client,
+        dataset,
+        n=50,
+        with_vectors=supported_vector_search,
+    )
 
     limit_data_to = 10
     ds = api.load(name=dataset, limit=limit_data_to)
@@ -536,41 +541,60 @@ def test_text_classifier_with_inputs_list(mocked_client):
     assert records[0]["inputs"]["text"] == expected_inputs
 
 
-def test_load_with_ids_list(mocked_client):
+def test_load_with_ids_list(mocked_client, supported_vector_search):
     dataset = "test_load_with_ids_list"
     mocked_client.delete(f"/api/datasets/{dataset}")
 
     expected_data = 100
-    create_some_data_for_text_classification(mocked_client, dataset, n=expected_data)
+    create_some_data_for_text_classification(
+        mocked_client,
+        dataset,
+        n=expected_data,
+        with_vectors=supported_vector_search,
+    )
     ds = api.load(name=dataset, ids=[3, 5])
     assert len(ds) == 2
 
 
-def test_load_with_query(mocked_client):
+def test_load_with_query(mocked_client, supported_vector_search):
     dataset = "test_load_with_query"
     mocked_client.delete(f"/api/datasets/{dataset}")
     sleep(1)
 
     expected_data = 4
-    create_some_data_for_text_classification(mocked_client, dataset, n=expected_data)
+    create_some_data_for_text_classification(
+        mocked_client,
+        dataset,
+        n=expected_data,
+        with_vectors=supported_vector_search,
+    )
     ds = api.load(name=dataset, query="id:1")
     ds = ds.to_pandas()
     assert len(ds) == 1
     assert ds.id.iloc[0] == 1
 
 
-def test_load_as_pandas(mocked_client):
-    dataset = "test_sorted_load"
+def test_load_as_pandas(mocked_client, supported_vector_search):
+    dataset = "test_load_as_pandas"
     mocked_client.delete(f"/api/datasets/{dataset}")
     sleep(1)
 
-    expected_data = 3
-    create_some_data_for_text_classification(mocked_client, dataset, n=expected_data)
+    expected_data = 4
+    server_vectors_cfg = create_some_data_for_text_classification(
+        mocked_client,
+        dataset,
+        n=expected_data,
+        with_vectors=supported_vector_search,
+    )
 
     records = api.load(name=dataset)
     assert isinstance(records, ar.DatasetForTextClassification)
     assert isinstance(records[0], ar.TextClassificationRecord)
-    assert [record.id for record in records] == [0, 1, 2, 3]
+
+    if supported_vector_search:
+        for record in records:
+            for vector in record.vectors:
+                assert server_vectors_cfg[vector]["value"] == record.vectors[vector]
 
 
 @pytest.mark.parametrize(
@@ -603,9 +627,13 @@ def test_token_classification_spans(span, valid):
             )
 
 
-def test_load_text2text(mocked_client):
-    records = [
-        ar.Text2TextRecord(
+def test_load_text2text(mocked_client, supported_vector_search):
+
+    vectors = {"bert_uncased": [1.2, 3.4, 6.4, 6.4]}
+
+    records = []
+    for i in range(0, 2):
+        record = ar.Text2TextRecord(
             text="test text",
             prediction=["test prediction"],
             annotation="test annotation",
@@ -616,8 +644,9 @@ def test_load_text2text(mocked_client):
             status="Default",
             event_timestamp=datetime.datetime(2000, 1, 1),
         )
-        for i in range(0, 2)
-    ]
+        if supported_vector_search:
+            record.vectors = vectors
+        records.append(record)
 
     dataset = "test_load_text2text"
     api.delete(dataset)
@@ -625,6 +654,9 @@ def test_load_text2text(mocked_client):
 
     df = api.load(name=dataset)
     assert len(df) == 2
+    if supported_vector_search:
+        for record in df:
+            assert record.vectors["bert_uncased"] == vectors["bert_uncased"]
 
 
 def test_client_workspace(mocked_client):
@@ -665,7 +697,9 @@ def test_load_sort(mocked_client):
 
     # check sorting policies
     ds = api.load(name=dataset)
+    print(ds)
     df = ds.to_pandas()
+    print(df.head())
     assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
     ds = api.load(name=dataset, ids=[1, 2, 11])
     df = ds.to_pandas()

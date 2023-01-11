@@ -38,13 +38,13 @@ $tooltip-border-radius: $border-radius-s;
 %has-tooltip--bottom {
   @extend %has-tooltip;
   &:after {
-    top: calc(100% + 20px);
+    top: calc(100% + $tooltip-triangle-size);
     right: 50%;
     transform: translateX(50%);
   }
   &:before {
     right: calc(50% - $tooltip-triangle-size/2);
-    top: $tooltip-triangle-size*2;
+    top: 100%;
     @include triangle(top, $tooltip-triangle-size, $tooltip-triangle-size, $tooltip-bg);
   }
 }

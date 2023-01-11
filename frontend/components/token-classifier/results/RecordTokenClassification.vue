@@ -42,11 +42,11 @@
       </div>
       <div
         class="content__actions-buttons"
-        v-if="annotationEnabled && record.status !== 'Validated'"
+        v-if="interactionsEnabled && record.status !== 'Validated'"
       >
-        <base-button class="primary" @click="onValidate(record)">{{
-          record.status === "Edited" ? "Save" : "Validate"
-        }}</base-button>
+        <base-button class="primary" @click="onValidate(record)"
+          >{{ record.status === "Edited" ? "Save" : "Validate" }}
+        </base-button>
         <base-button
           :disabled="!record.annotatedEntities.length"
           class="primary outline"
@@ -72,8 +72,15 @@ export default {
       type: Object,
       required: true,
     },
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
+    interactionsEnabled() {
+      return this.annotationEnabled && !this.isReferenceRecord;
+    },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
@@ -124,7 +131,7 @@ export default {
       updateRecords: "entities/datasets/updateDatasetRecords",
     }),
     getEntitiesByOrigin(origin) {
-      if (this.annotationEnabled) {
+      if (this.interactionsEnabled) {
         return origin === "annotation"
           ? this.record.annotatedEntities
           : (this.record.prediction && this.record.prediction.entities) || [];
@@ -173,7 +180,7 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: 56px 200px 50px 50px;
+  padding: 26px 200px 50px 50px;
   display: block;
   margin-bottom: 0;
   @include font-size(16px);
@@ -199,6 +206,7 @@ export default {
     }
   }
 }
+
 .origins > .prediction {
   position: absolute;
   top: 0;

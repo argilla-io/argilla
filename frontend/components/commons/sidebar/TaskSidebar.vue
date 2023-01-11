@@ -81,6 +81,7 @@ export default {
       this.currentMetric = this.metricsByViewMode.includes(this.currentMetric)
         ? this.currentMetric
         : this.onShowSidebarInfo(false);
+      this.$emit("view-mode-changed", value);
     },
     onShowSidebarInfo(info) {
       if (this.currentMetric !== info) {

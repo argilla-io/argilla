@@ -13,13 +13,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Iterable, List, Optional, Type
+from typing import Iterable, List, Optional
 
 from fastapi import Depends
 
 from argilla.server.commons.config import TasksFactory
 from argilla.server.daos.backend.search.model import SortableField
-from argilla.server.services.metrics.models import ServiceBaseTaskMetrics
 from argilla.server.services.search.model import ServiceSearchResults, ServiceSortConfig
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
@@ -129,7 +128,7 @@ class TokenClassificationService:
         )
 
         if results.metrics:
-            results.metrics["words"] = results.metrics["words_cloud"]
+            results.metrics["words"] = results.metrics.get("words_cloud", {})
             results.metrics["status"] = results.metrics["status_distribution"]
             results.metrics["predicted"] = results.metrics["error_distribution"]
             results.metrics["predicted"].pop("unknown", None)

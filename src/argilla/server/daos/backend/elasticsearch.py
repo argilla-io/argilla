@@ -337,7 +337,7 @@ class ElasticsearchBackend(LoggingMixin):
         force_recreate: bool = False,
     ):
         """
-        Applies a index template creation with provided template definition.
+        Applies an index template creation with provided template definition.
 
         Parameters
         ----------
@@ -953,16 +953,11 @@ class ElasticsearchBackend(LoggingMixin):
                     query=query,
                     id_from=id_from,
                     shuffle=shuffle,
+                    exclude_fields=exclude_fields,
+                    include_fields=include_fields,
                     sort=SortConfig(),  # sort by id as default for proper index scan using search after
-                ),
-                "_source": {
-                    "excludes": exclude_fields or [],
-                    "includes": include_fields or [],
-                },
+                )
             }
-
-            if not include_fields:
-                es_query["highlight"] = self.__configure_query_highlight__()
 
             docs = self._list_documents(
                 index,

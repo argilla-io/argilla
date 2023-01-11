@@ -71,7 +71,7 @@ export default {
     IdState({
       // You can customize this
       idProp: (vm) => {
-        return `${vm.datasetName}-${vm.record.id}`;
+        return `${vm.dataset.name}-${vm.record.id}`;
       },
     }),
   ],
@@ -80,20 +80,8 @@ export default {
       type: Object,
       required: true,
     },
-    datasetName: {
-      type: String,
-      required: true,
-    },
-    isMultiLabel: {
-      type: Boolean,
-      default: false,
-    },
-    paginationSize: {
-      type: Number,
-      required: true,
-    },
-    inputLabels: {
-      type: Array,
+    dataset: {
+      type: Object,
       required: true,
     },
   },
@@ -141,6 +129,9 @@ export default {
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
+    isMultiLabel() {
+      return this.dataset.isMultiLabel;
+    },
     visibleLabels() {
       const numberOfSelectedLabels = this.filteredLabels.filter(
         (l) => l.selected
@@ -176,7 +167,7 @@ export default {
       // Setup all record labels
       const labels = Object.assign(
         {},
-        ...this.inputLabels.map((label) => ({
+        ...this.dataset.labels.map((label) => ({
           [label]: { score: 0, selected: false },
         }))
       );
@@ -211,6 +202,9 @@ export default {
     },
     allowToShowAllLabels() {
       return this.paginationSize === 1 || false;
+    },
+    paginationSize() {
+      return this.dataset.viewSettings?.pagination?.size;
     },
     predictedAs() {
       return this.record.predicted_as;

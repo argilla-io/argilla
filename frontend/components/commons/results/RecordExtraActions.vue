@@ -25,13 +25,13 @@
         <span>View record info</span>
       </div>
       <base-action-tooltip tooltip="Copied">
-        <div @click="$copyToClipboard(recordClipboardText)">
+        <div @click="$copyToClipboard(record.clipboardText)">
           <span>Copy text</span>
         </div>
       </base-action-tooltip>
       <div
         v-if="allowChangeStatus"
-        :class="recordStatus === 'Discarded' ? 'disabled' : null"
+        :class="record.status === 'Discarded' ? 'disabled' : null"
         @click="onChangeRecordStatus('Discarded')"
       >
         <span>Discard record</span>
@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu";
 import { IdState } from "vue-virtual-scroller";
 
@@ -48,7 +49,7 @@ export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: (vm) => `${vm.datasetName}-${vm.recordId}`,
+      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
     }),
   ],
   props: {
@@ -56,20 +57,12 @@ export default {
       type: Boolean,
       default: false,
     },
-    recordId: {
-      type: String | Number,
+    record: {
+      type: BaseRecord,
       required: true,
     },
-    recordStatus: {
-      type: String,
-    },
-    recordClipboardText: {
-      type: Array | String,
-      required: true,
-    },
-    datasetName: {
-      type: String,
-      required: true,
+    dataset: {
+      type: Object,
     },
     task: {
       type: String,
@@ -90,12 +83,15 @@ export default {
         this.idState.open = newValue;
       },
     },
+    recordStatus() {
+      return this.record.status;
+    },
   },
   methods: {
     // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
       if (this.recordStatus !== status) {
-        this.$emit("on-change-record-status", status);
+        this.$emit("onChangeRecordStatus", status, this.record);
       }
       this.close();
     },
@@ -111,14 +107,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.record {
-  &__extra-actions {
-    position: absolute;
-    top: 1.5em;
-    right: 0.9em;
-  }
-}
-
 .extra-actions {
   position: relative;
   &__button {
@@ -129,7 +117,7 @@ export default {
   &__content {
     position: absolute;
     right: 0.7em;
-    top: 2em;
+    top: calc(100% + $base-space);
     background: white;
     border-radius: $border-radius;
     box-shadow: $shadow;

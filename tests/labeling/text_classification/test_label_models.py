@@ -835,7 +835,9 @@ class TestFlyingSquid:
 
         records = label_model.predict()
         assert len(records) == 1177
-        assert records[0].prediction == [
-            ("SPAM", 0.8236983486087645),
-            ("HAM", 0.17630165139123552),
-        ]
+
+        prediction = records[0].prediction
+        spam_prediction_probability = prediction[0][1]
+        ham_prediction_probability = prediction[1][1]
+        assert spam_prediction_probability == pytest.approx(0.8236983486087645)
+        assert ham_prediction_probability == pytest.approx(0.17630165139123552)

@@ -12,8 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import warnings
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, root_validator, validator
 
@@ -36,7 +35,6 @@ from argilla.server.services.tasks.token_classification.model import (
 from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationDataset,
 )
-from argilla.utils import SpanUtils
 
 
 class TokenClassificationAnnotation(_TokenClassificationAnnotation):

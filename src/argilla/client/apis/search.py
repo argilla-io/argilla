@@ -24,13 +24,19 @@ from argilla.client.sdk.token_classification.models import TokenClassificationRe
 
 
 @dataclasses.dataclass
+class VectorSearch:
+    name: str
+    value: List[float]
+
+
+@dataclasses.dataclass
 class SearchResults:
     total: int
 
     records: List[Record]
 
 
-class Searches(AbstractApi):
+class Search(AbstractApi):
 
     _API_URL_PATTERN = "/api/datasets/{name}/{task}:search"
 
@@ -39,7 +45,7 @@ class Searches(AbstractApi):
         name: str,
         task: TaskType,
         size: Optional[int] = None,
-        **query: Optional[dict],
+        **query,
     ):
         """
         Searches records over a dataset
@@ -65,7 +71,7 @@ class Searches(AbstractApi):
 
         url = self._API_URL_PATTERN.format(name=name, task=task)
         if size:
-            url += f"{url}?size={size}"
+            url += f"?limit={size}"
 
         query = self._parse_query(query=query)
         response = self.http_client.post(
