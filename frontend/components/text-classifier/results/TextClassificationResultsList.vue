@@ -24,17 +24,13 @@
     <template slot="results-header">
       <rule-definition :dataset="dataset" v-if="showRulesArea" />
     </template>
-    <template slot="record" slot-scope="slotProps">
-      <record-text-classification
-        :dataset="dataset"
-        :record="slotProps.record"
-        :isReferenceRecord="slotProps.isReferenceRecord"
-      />
-    </template>
   </results-list>
   <rules-management class="content" v-else :dataset="dataset" />
 </template>
+
 <script>
+import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
+
 export default {
   props: {
     dataset: {
@@ -43,6 +39,10 @@ export default {
     },
   },
   computed: {
+    viewSettings() {
+      console.log(this.dataset.name);
+      return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
+    },
     showRulesArea() {
       return this.dataset.viewSettings.viewMode === "labelling-rules";
     },
