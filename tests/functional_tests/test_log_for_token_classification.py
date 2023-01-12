@@ -20,6 +20,8 @@ from argilla.client import api
 from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
+from tests.helpers import SecuredClient
 
 
 def test_log_with_empty_text(mocked_client):
@@ -517,7 +519,7 @@ def test_search_keywords(mocked_client):
     from datasets import load_dataset
 
     # TODO(@frascuchon): Move dataset to new organization
-    dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
+    dataset_ds = load_dataset("argilla/gutenberg_spacy-ner", split="train")
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
     argilla.delete(dataset)
@@ -537,3 +539,41 @@ def test_search_keywords(mocked_client):
         ]
     )
     assert {"listened", "listen"} == top_keywords, top_keywords
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_log_data_with_vectors_and_update_ok(
+    mocked_client: SecuredClient,
+):
+    dataset = "test_log_data_with_vectors_and_update_ok"
+    text = "This is a text"
+    argilla.delete(dataset)
+
+    records = [
+        argilla.TokenClassificationRecord(
+            id=i,
+            text=text,
+            tokens=text.split(),
+            vectors={"test-vector": [i] * 5},
+        )
+        for i in range(1, 10)
+    ]
+
+    argilla.log(
+        records=records,
+        name=dataset,
+    )
+    ds = argilla.load(
+        dataset,
+        vector=(
+            "test-vector",
+            [3, 3, 2, 3, 3],  # the first expected records should be the id=3
+        ),
+        limit=5,
+    )
+
+    assert len(ds) == 5
+    assert ds[0].id == 3

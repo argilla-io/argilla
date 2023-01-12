@@ -6,12 +6,20 @@ Are you unsure about what these features entail, take a look at our [terminology
 :link: ./datasets.html
 
 ```
+```{grid-item-card} Queries
+:link: ./queries.html
+
+```
+```{grid-item-card} Semantic Search
+:link: ./semantic-search.html
+
+```
 ```{grid-item-card} Metrics
 :link: ./metrics.html
 
 ```
-```{grid-item-card} Queries
-:link: ./queries.html
+```{grid-item-card} Listeners
+:link: ./listeners.html
 
 ```
 ````

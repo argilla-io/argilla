@@ -16,13 +16,13 @@
 import pytest
 
 from argilla.server.commons.models import TaskType
-from argilla.server.daos.backend.elasticsearch import ElasticsearchBackend
+from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.models.datasets import BaseDatasetDB
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.errors import ClosedDatasetError
 
-es_wrapper = ElasticsearchBackend.get_instance()
+es_wrapper = GenericElasticEngineBackend.get_instance()
 records = DatasetRecordsDAO.get_instance(es_wrapper)
 dao = DatasetsDAO.get_instance(es_wrapper, records)
 

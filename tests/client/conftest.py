@@ -17,6 +17,7 @@ from typing import List
 
 import pytest
 
+import argilla
 import argilla as ar
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.text2text.models import (
@@ -31,6 +32,40 @@ from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
+from argilla.server.daos.backend.client_adapters.factory import ClientAdapterFactory
+from argilla.server.settings import settings
+
+try:
+    client = ClientAdapterFactory.get(
+        hosts=settings.elasticsearch,
+        index_shards=settings.es_records_index_shards,
+        ssl_verify=settings.elasticsearch_ssl_verify,
+        ca_path=settings.elasticsearch_ca_path,
+    )
+
+    SUPPORTED_VECTOR_SEARCH = client.vector_search_supported
+except Exception:
+    SUPPORTED_VECTOR_SEARCH = False
+
+
+@pytest.fixture(scope="session")
+def supported_vector_search() -> bool:
+    return SUPPORTED_VECTOR_SEARCH
+
+
+@pytest.fixture
+def gutenberg_spacy_ner(mocked_client):
+    from datasets import load_dataset
+
+    dataset = "gutenberg_spacy_ner"
+    # TODO(@frascuchon): Move dataset to new organization
+    dataset_ds = load_dataset("argilla/gutenberg_spacy-ner", split="train")
+    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+
+    argilla.delete(dataset)
+    argilla.log(name=dataset, records=dataset_rb)
+
+    return dataset
 
 
 @pytest.fixture(scope="session")

@@ -29,13 +29,13 @@ from argilla.listeners.models import (
     ListenerAction,
     ListenerCondition,
     Metrics,
-    RBListenerContext,
+    RGListenerContext,
     Search,
 )
 
 
 @dataclasses.dataclass
-class RBDatasetListener:
+class RGDatasetListener:
     """
     The argilla dataset listener class
 
@@ -180,7 +180,7 @@ class RBDatasetListener:
             self._LOGGER.warning(f"Not found dataset <{self.dataset}>")
             return
 
-        ctx = RBListenerContext(
+        ctx = RGListenerContext(
             listener=self,
             query_params=self.query_params,
             metrics=self.__compute_metrics__(
@@ -191,12 +191,16 @@ class RBDatasetListener:
             self._LOGGER.debug("No condition found! Running action...")
             return self.__run_action__(ctx, *args, **kwargs)
 
-        search_results = current_api.searches.search_records(
-            name=self.dataset, task=dataset.task, query=self.formatted_query, size=0
+        search_results = current_api.search.search_records(
+            name=self.dataset,
+            task=dataset.task,
+            size=0,
+            query_text=self.formatted_query,
         )
 
         ctx.search = Search(
-            total=search_results.total, query_params=copy.deepcopy(ctx.query_params)
+            total=search_results.total,
+            query_params=copy.deepcopy(ctx.query_params),
         )
         condition_args = [ctx.search]
         if self.metrics:
@@ -222,7 +226,7 @@ class RBDatasetListener:
             )
         return Metrics.from_dict(metrics)
 
-    def __run_action__(self, ctx: Optional[RBListenerContext] = None, *args, **kwargs):
+    def __run_action__(self, ctx: Optional[RGListenerContext] = None, *args, **kwargs):
         try:
             action_args = [ctx] if ctx else []
             if self.query_records:
@@ -256,7 +260,7 @@ def listener(
         metrics: Required metrics for listener condition.
         condition: Defines condition over search and metrics that launch action when is satisfied.
         with_records: Include records as part or action arguments. If ``False``,
-            only the listener context ``RBListenerContext`` will be passed. Default: ``True``.
+            only the listener context ``RGListenerContext`` will be passed. Default: ``True``.
         execution_interval_in_seconds: Define the execution interval in seconds when listener
             iteration will be executed.
         **query_params: Dynamic parameters used in the query. These parameters will be available
@@ -264,7 +268,7 @@ def listener(
     """
 
     def inner_decorator(func):
-        return RBDatasetListener(
+        return RGDatasetListener(
             dataset=dataset,
             action=func,
             condition=condition,

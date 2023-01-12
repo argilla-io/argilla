@@ -19,6 +19,11 @@ BentoML is an open platform that simplifies ML model deployment and enables you 
 
 DVC is built to make ML models shareable and reproducible. It is designed to handle large files, data sets, machine learning models, and metrics as well as code.
 ```
+```{grid-item-card} Google Colab
+:link: dvc.md
+
+Colab notebooks allow you to combine executable code and rich text in a single document, along with images, HTML, LaTeX and more.
+```
 ```{grid-item-card} spaCy
 :link: spacy.md
 
@@ -29,10 +34,10 @@ spaCy is a free open-source library for Natural Language Processing in Python.
 
 Stanza is a collection of accurate and efficient tools for the linguistic analysis of many human languages.
 ```
-```{grid-item-card} Hugging Face
+```{grid-item-card} Hugging Face Transformers
 :link: huggingface.md
 
-We're on a journey to advance and democratize artificial intelligence through open source and open science.
+Transformers provides APIs and tools to easily download and train state-of-the-art pretrained models.
 ```
 ```{grid-item-card} Disaggregators
 :link: disaggregators.md
@@ -100,6 +105,12 @@ The standard data-centric AI package for data quality and machine learning with 
 
 SHAP (SHapley Additive exPlanations) is a game theoretic approach to explain the output of any machine learning model.
 ```
+
+```{grid-item-card} OpenAI
+:link: openai.md
+
+OpenAI is a suite of APIs powered by large language and vision models which perform a variety of natural language and visual tasks.
+```
 ````
 
 ```{toctree}
@@ -109,6 +120,7 @@ SHAP (SHapley Additive exPlanations) is a game theoretic approach to explain the
 fastapi.md
 bentoml.md
 dvc.md
+colab.md
 
 spacy.md
 stanza.md
@@ -131,4 +143,5 @@ snorkel.md
 transformersinterpret
 cleanlab
 shap
+openai
 ```

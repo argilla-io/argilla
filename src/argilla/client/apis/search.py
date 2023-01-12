@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from argilla.client.apis import AbstractApi
 from argilla.client.models import Record
@@ -24,13 +24,19 @@ from argilla.client.sdk.token_classification.models import TokenClassificationRe
 
 
 @dataclasses.dataclass
+class VectorSearch:
+    name: str
+    value: List[float]
+
+
+@dataclasses.dataclass
 class SearchResults:
     total: int
 
     records: List[Record]
 
 
-class Searches(AbstractApi):
+class Search(AbstractApi):
 
     _API_URL_PATTERN = "/api/datasets/{name}/{task}:search"
 
@@ -38,8 +44,8 @@ class Searches(AbstractApi):
         self,
         name: str,
         task: TaskType,
-        query: Optional[str],
         size: Optional[int] = None,
+        **query,
     ):
         """
         Searches records over a dataset
@@ -47,8 +53,8 @@ class Searches(AbstractApi):
         Args:
             name: The dataset name
             task: The dataset task type
-            query: The query string
             size: If provided, only the provided number of records will be fetched
+            query: The search query
 
         Returns:
             An instance of ``SearchResults`` class containing the search results
@@ -65,15 +71,12 @@ class Searches(AbstractApi):
 
         url = self._API_URL_PATTERN.format(name=name, task=task)
         if size:
-            url += f"{url}?size={size}"
+            url += f"?limit={size}"
 
-        query_request = {}
-        if query:
-            query_request["query_text"] = query
-
-        response = self.__client__.post(
+        query = self._parse_query(query=query)
+        response = self.http_client.post(
             path=url,
-            json={"query": query_request},
+            json={"query": query} if query else None,
         )
 
         return SearchResults(

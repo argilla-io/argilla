@@ -1,13 +1,12 @@
 <template>
-  <a
+  <button
     class="sidebar-button"
     :class="sidebarButtonClass"
-    href="#"
     :data-title="tooltip"
     @click="$emit('button-action', id)"
   >
     <svgicon :name="icon"></svgicon>
-  </a>
+  </button>
 </template>
 
 <script>
@@ -60,6 +59,9 @@ export default {
 
 <style lang="scss" scoped>
 .sidebar-button {
+  @include resetButtonStyles();
+  display: flex;
+  margin-bottom: 0.5em;
   &.mode {
     &:hover {
       .svg-icon {
@@ -93,6 +95,9 @@ export default {
       }
     }
   }
+  &:hover {
+    cursor: pointer;
+  }
 }
 .svg-icon {
   display: block;
@@ -103,7 +108,6 @@ export default {
   fill: palette(grey, 100);
   padding: 0.5em;
   box-sizing: content-box;
-  margin-bottom: 0.5em;
 }
 
 @keyframes move-horizontal {

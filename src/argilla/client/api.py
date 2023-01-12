@@ -32,7 +32,7 @@ from argilla._constants import (
 )
 from argilla.client.apis.datasets import Datasets
 from argilla.client.apis.metrics import MetricsAPI
-from argilla.client.apis.searches import Searches
+from argilla.client.apis.search import Search, VectorSearch
 from argilla.client.datasets import (
     Dataset,
     DatasetForText2Text,
@@ -41,11 +41,13 @@ from argilla.client.datasets import (
 )
 from argilla.client.metrics.models import MetricResults
 from argilla.client.models import (
+    TextGenerationRecord,  # TODO Remove TextGenerationRecord
+)
+from argilla.client.models import (
     BulkResponse,
     Record,
     Text2TextRecord,
     TextClassificationRecord,
-    TextGenerationRecord,
     TokenClassificationRecord,
 )
 from argilla.client.sdk.client import AuthenticatedClient
@@ -125,7 +127,7 @@ class Api:
             api_url: Address of the REST API. If `None` (default) and the env variable ``ARGILLA_API_URL`` is not set,
                 it will default to `http://localhost:6900`.
             api_key: Authentification key for the REST API. If `None` (default) and the env variable ``ARGILLA_API_KEY``
-                is not set, it will default to `argilla.apikey`.
+                is not set, it will default to `rubrix.apikey`.
             workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
                 env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
             timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
@@ -168,7 +170,16 @@ class Api:
 
     @property
     def client(self):
-        """The underlying authenticated client"""
+        warnings.warn(
+            message="This prop will be removed in next release. "
+            "Please use the http_client prop instead.",
+            category=UserWarning,
+        )
+        return self._client
+
+    @property
+    def http_client(self):
+        """The underlying authenticated HTTP client"""
         return self._client
 
     @property
@@ -176,12 +187,12 @@ class Api:
         return Datasets(client=self._client)
 
     @property
-    def searches(self):
-        return Searches(client=self._client)
+    def search(self):
+        return Search(client=self._client)
 
     @property
     def metrics(self):
-        return MetricsAPI(client=self.client)
+        return MetricsAPI(client=self.http_client)
 
     def set_workspace(self, workspace: str):
         """Sets the active workspace.
@@ -369,7 +380,9 @@ class Api:
         elif record_type is TokenClassificationRecord:
             bulk_class = TokenClassificationBulkData
             creation_class = CreationTokenClassificationRecord
-        elif (record_type is Text2TextRecord) or (record_type is TextGenerationRecord):
+        elif (record_type is Text2TextRecord) or (
+            record_type is TextGenerationRecord
+        ):  # TODO Remove TextGenerationRecord
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
         else:
@@ -453,16 +466,17 @@ class Api:
         """
         return self.datasets.delete_records(
             name=name,
-            query=query,
-            ids=ids,
             mark_as_discarded=discard_only,
             discard_when_forbidden=discard_when_forbidden,
+            query_text=query,
+            ids=ids,
         )
 
     def load(
         self,
         name: str,
         query: Optional[str] = None,
+        vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
@@ -477,6 +491,8 @@ class Api:
             query:
                 An ElasticSearch query with the
                 `query string syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
+            vector:
+                Vector configuration for a semantic search
             ids:
                 If provided, load dataset records with given ids.
             limit:
@@ -525,8 +541,8 @@ class Api:
                 " `rg.load('my_dataset').to_pandas()`.",
             )
 
-        response = datasets_api.get_dataset(client=self._client, name=name)
-        task = response.parsed.task
+        dataset = self.datasets.find_by_name(name=name)
+        task = dataset.task
 
         task_config = {
             TaskType.text_classification: (
@@ -553,6 +569,23 @@ class Api:
                 f"Load method not supported for the '{task}' task. Supported Tasks: "
                 f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
             )
+
+        if vector:
+            vector_search = VectorSearch(
+                name=vector[0],
+                value=vector[1],
+            )
+            results = self.search.search_records(
+                name=name,
+                task=task,
+                size=limit or 100,
+                # query args
+                query_text=query,
+                vector=vector_search,
+            )
+
+            return dataset_class(results.records)
+
         response = get_dataset_data(
             client=self._client,
             name=name,

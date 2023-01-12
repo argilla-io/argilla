@@ -80,7 +80,11 @@ class TextClassificationService:
             records=records,
             record_type=ServiceTextClassificationRecord,
         )
-        return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
+        return BulkResponse(
+            dataset=dataset.name,
+            processed=len(records),
+            failed=failed,
+        )
 
     def search(
         self,
@@ -141,7 +145,7 @@ class TextClassificationService:
         )
 
         if results.metrics:
-            results.metrics["words"] = results.metrics["words_cloud"]
+            results.metrics["words"] = results.metrics.get("words_cloud", {})
             results.metrics["status"] = results.metrics["status_distribution"]
             results.metrics["predicted"] = results.metrics["error_distribution"]
             results.metrics["predicted"].pop("unknown", None)

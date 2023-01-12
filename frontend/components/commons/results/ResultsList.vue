@@ -26,15 +26,30 @@
           :items="visibleRecords"
           :min-item-size="550"
           :buffer="200"
+          :key="showLoader"
         >
           <template #before>
             <slot name="results-header" />
+            <similarity-record-reference-component
+              v-if="referenceRecordObj && !showLoader"
+              :dataset="dataset"
+              :referenceRecord="referenceRecordObj"
+              @search-records="searchRecords"
+              @show-record-info-modal="onShowRecordInfoModal"
+            >
+              <slot
+                name="record"
+                :record="referenceRecordObj"
+                :isReferenceRecord="true"
+              />
+            </similarity-record-reference-component>
             <results-loading
               v-if="showLoader"
               :size="dataset.viewSettings.pagination.size"
             />
             <results-empty v-else-if="dataset.results.total === 0" />
           </template>
+
           <template v-slot="{ item, index, active }">
             <DynamicScrollerItem
               v-show="!showLoader && dataset.results.total > 0"
@@ -47,15 +62,17 @@
               :data-index="index"
             >
               <results-record
-                @show-metadata="onShowMetadata"
                 :key="`${dataset.name}-${item.id}`"
                 :dataset="dataset"
                 :item="item"
+                @show-record-info-modal="onShowRecordInfoModal"
+                @search-records="searchRecords"
               >
                 <slot name="record" :record="item" />
               </results-record>
             </DynamicScrollerItem>
           </template>
+
           <template #after>
             <pagination-end-alert
               :limit="paginationLimit"
@@ -65,32 +82,35 @@
         </DynamicScroller>
       </div>
       <base-pagination
+        v-if="!referenceRecordObj && !showLoader"
         :total-items="dataset.results.total"
         :pagination-settings="dataset.viewSettings.pagination"
         @changePage="onPagination"
       />
     </div>
     <lazy-base-modal
-      modal-class="modal-secondary"
+      modal-class="modal-table"
       :modal-custom="true"
       :prevent-body-scroll="true"
+      modal-title="Record info"
       :modal-visible="selectedRecord !== undefined"
-      @close-modal="onCloseMetadata"
+      @close-modal="onCloseRecordInfo"
     >
-      <metadata
+      <record-info
         v-if="selectedRecord"
-        :applied-filters="dataset.query.metadata"
-        :metadata-items="selectedRecord.metadata"
-        :title="selectedRecord.recordTitle()"
-        @metafilterApply="onApplyMetadataFilter"
-        @cancel="onCloseMetadata"
+        :record="selectedRecord"
+        @close-modal="onCloseRecordInfo"
       />
     </lazy-base-modal>
   </span>
 </template>
+
 <script>
 import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
+import { Vector as VectorModel } from "@/models/Vector";
+import { RefRecord as RefRecordModel } from "@/models/RefRecord";
+
 export default {
   props: {
     dataset: {
@@ -102,9 +122,22 @@ export default {
     return {
       scrollComponent: undefined,
       selectedRecord: undefined,
+      test: null,
     };
   },
+
   computed: {
+    referenceRecordId() {
+      return VectorModel.query()
+        .where("is_active", true)
+        .where("dataset_id", this.dataset.id.join("."))
+        .first()?.record_id;
+    },
+    referenceRecordObj() {
+      return RefRecordModel.query()
+        .where("record_id", this.referenceRecordId)
+        .first()?.record_object;
+    },
     showLoader() {
       return this.dataset.viewSettings.loading;
     },
@@ -130,30 +163,26 @@ export default {
       paginate: "entities/datasets/paginate",
       search: "entities/datasets/search",
     }),
-    async onApplyMetadataFilter(metadata) {
-      this.onCloseMetadata();
-      this.search({
-        dataset: this.dataset,
-        query: { metadata: metadata },
-      });
-    },
-    onShowMetadata(record) {
+    onShowRecordInfoModal(record) {
       this.selectedRecord = record;
     },
-    onCloseMetadata() {
+    onCloseRecordInfo() {
       this.selectedRecord = undefined;
     },
     async onPagination(page, size) {
-      document.getElementById("scroll").scrollTop = 0;
       await this.paginate({
         dataset: this.dataset,
         page: page,
         size: size,
       });
     },
+    searchRecords(query) {
+      this.$emit("search-records", query);
+    },
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .content {
   $this: &;
@@ -181,10 +210,13 @@ export default {
 <style lang="scss">
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
+  z-index: 0;
 }
+
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;
 }
+
 $maxItemsperPage: 20;
 @for $i from 0 through $maxItemsperPage {
   .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {

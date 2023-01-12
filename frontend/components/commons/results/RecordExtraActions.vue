@@ -21,8 +21,8 @@
       ><svgicon name="kebab-menu" width="20" height="20" color="#4A4A4A"
     /></a>
     <div v-if="open" class="extra-actions__content">
-      <div v-if="hasMetadata" @click="showMetadata()">
-        <span>View metadata</span>
+      <div @click="showRecordInfoModal()">
+        <span>View record info</span>
       </div>
       <base-action-tooltip tooltip="Copied">
         <div @click="$copyToClipboard(record.clipboardText)">
@@ -76,37 +76,27 @@ export default {
   },
   computed: {
     open: {
-      get: function () {
+      get() {
         return this.idState.open;
       },
-      set: function (newValue) {
+      set(newValue) {
         this.idState.open = newValue;
       },
     },
-    hasMetadata() {
-      const metadata = this.record.metadata;
-      return metadata && Object.values(metadata).length;
-    },
     recordStatus() {
       return this.record.status;
-    },
-    allowedStatusActions() {
-      return this.statusActions.map((status) => ({
-        ...status,
-        isActive: this.recordStatus === status.key,
-      }));
     },
   },
   methods: {
     // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
-      if (this.record.status !== status) {
+      if (this.recordStatus !== status) {
         this.$emit("onChangeRecordStatus", status, this.record);
       }
       this.close();
     },
-    showMetadata() {
-      this.$emit("onShowMetadata");
+    showRecordInfoModal() {
+      this.$emit("show-record-info-modal");
       this.close();
     },
     close() {
@@ -117,14 +107,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.record {
-  &__extra-actions {
-    position: absolute;
-    top: 1.5em;
-    right: 0.9em;
-  }
-}
-
 .extra-actions {
   position: relative;
   &__button {
@@ -135,7 +117,7 @@ export default {
   &__content {
     position: absolute;
     right: 0.7em;
-    top: 2em;
+    top: calc(100% + $base-space);
     background: white;
     border-radius: $border-radius;
     box-shadow: $shadow;

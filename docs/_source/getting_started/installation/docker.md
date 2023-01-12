@@ -56,6 +56,10 @@ But you can customize this by setting the `ELASTICSEARCH` environment variable.
 ```bash
 docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla argilla/argilla-server
 ```
+:::{note}
+By default, telemetry is enabled. This helps us to improve our product. For more info about the metrics and disabling them check [telemetry](../../reference/telemetry.md).
+
+:::
 
 To find running instances of the Argilla server, you can list all the running containers on your machine:
 

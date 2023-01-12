@@ -15,8 +15,13 @@
 import pytest
 
 import argilla as ar
-from argilla.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
+from argilla.client.sdk.commons.errors import (
+    BadRequestApiError,
+    GenericApiError,
+    ValidationApiError,
+)
 from argilla.server.settings import settings
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH, supported_vector_search
 from tests.helpers import SecuredClient
 
 
@@ -63,6 +68,120 @@ def test_delete_and_create_for_different_task(mocked_client):
         name=dataset,
     )
     ar.load(dataset)
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_similarity_search_in_python_client(
+    mocked_client: SecuredClient,
+):
+    dataset = "test_similarity_search_in_python_client"
+    text = "This is a text"
+    vectors = {"my_bert": [1, 2, 3, 4]}
+
+    ar.delete(dataset)
+    ar.log(
+        ar.TextClassificationRecord(
+            id=0,
+            inputs=text,
+            vectors=vectors,
+        ),
+        name=dataset,
+    )
+    ds = ar.load(dataset, vector=("my_bert", [1, 1, 1, 1]))
+    assert len(ds) == 1
+
+    ar.log(
+        ar.TextClassificationRecord(
+            id=1,
+            inputs=text,
+            vectors={"my_bert_2": [1, 2, 3, 4]},
+        ),
+        name=dataset,
+    )
+    ds = ar.load(dataset, vector=("my_bert_2", [1, 1, 1, 1]))
+    assert len(ds) == 1
+    with pytest.raises(
+        BadRequestApiError,
+        match="Cannot create more than 5 kind of vectors per dataset",
+    ):
+        ar.log(
+            ar.TextClassificationRecord(
+                id=3,
+                inputs=text,
+                vectors={
+                    "a": [1.0],
+                    "b": [1.0],
+                    "c": [1.0],
+                    "d": [1.0],
+                    "e": [1.0],
+                },
+            ),
+            name=dataset,
+        )
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_log_data_with_vectors_and_update_ok(
+    mocked_client: SecuredClient,
+):
+    dataset = "test_log_data_with_vectors_and_update_ok"
+    text = "This is a text"
+    ar.delete(dataset)
+
+    records = [
+        ar.TextClassificationRecord(
+            id=i,
+            inputs=text,
+            vectors={"text": [i] * 5},
+        )
+        for i in range(1, 10)
+    ]
+
+    ar.log(
+        records=records,
+        name=dataset,
+    )
+    ds = ar.load(
+        dataset,
+        vector=(
+            "text",
+            [3, 3, 2, 3, 3],  # the first expected records should be the id=3
+        ),
+        limit=5,
+    )
+
+    assert len(ds) == 5
+    assert ds[0].id == 3
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
+    dataset = "test_log_data_with_vectors_and_update_ko"
+    text = "This is a text"
+    vectors = {"my_bert": [1, 2, 3, 4]}
+
+    ar.delete(dataset)
+    ar.log(
+        ar.TextClassificationRecord(id=0, inputs=text, vectors=vectors),
+        name=dataset,
+    )
+    ar.load(dataset)
+
+    updated_vectors = {"my_bert": [2, 3, 5]}
+    with pytest.raises(GenericApiError):
+        ar.log(
+            ar.TextClassificationRecord(id=0, text=text, vectors=updated_vectors),
+            name=dataset,
+        )
 
 
 def test_log_data_in_several_workspaces(mocked_client: SecuredClient):

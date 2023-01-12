@@ -48,9 +48,11 @@ if _TYPE_CHECKING:
         read_pandas,
     )
     from argilla.client.models import (
+        TextGenerationRecord,  # TODO Remove TextGenerationRecord
+    )
+    from argilla.client.models import (
         Text2TextRecord,
         TextClassificationRecord,
-        TextGenerationRecord,
         TokenAttributions,
         TokenClassificationRecord,
     )
@@ -59,7 +61,7 @@ if _TYPE_CHECKING:
         TokenClassificationSettings,
         configure_dataset,
     )
-    from argilla.listeners import Metrics, RBListenerContext, Search, listener
+    from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
     from argilla.server.server import app
 
@@ -78,7 +80,7 @@ _import_structure = {
     ],
     "client.models": [
         "Text2TextRecord",
-        "TextGenerationRecord",
+        "TextGenerationRecord",  # TODO Remove TextGenerationRecord
         "TextClassificationRecord",
         "TokenClassificationRecord",
         "TokenAttributions",
@@ -91,7 +93,7 @@ _import_structure = {
         "read_pandas",
     ],
     "monitoring.model_monitor": ["monitor"],
-    "listeners.listener": ["listener", "RBListenerContext", "Search", "Metrics"],
+    "listeners.listener": ["listener", "RGListenerContext", "Search", "Metrics"],
     "datasets": [
         "configure_dataset",
         "TextClassificationSettings",

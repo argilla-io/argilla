@@ -34,12 +34,15 @@
                 @applyFilters="onApplyFilters"
               />
               <button
-                v-else
+                v-else-if="column.sortable"
                 :data-title="column.tooltip"
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
               >
                 <svgicon width="18" height="18" color="#4D4D4D" name="sort" />
+                <span>{{ column.name }}</span>
+              </button>
+              <button v-else :data-title="column.tooltip">
                 <span>{{ column.name }}</span>
               </button>
             </div>
@@ -87,6 +90,7 @@
                       </base-action-tooltip>
                     </span>
                     <base-date
+                      format="date-relative-now"
                       v-else-if="column.type === 'date'"
                       :date="itemValue(item, column)"
                     />
@@ -151,6 +155,7 @@
                   </base-action-tooltip>
                 </div>
                 <base-modal
+                  v-if="!!deleteModalContent"
                   :modal-custom="true"
                   :prevent-body-scroll="true"
                   modal-class="modal-secondary"

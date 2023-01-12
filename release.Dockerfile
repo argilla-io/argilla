@@ -1,16 +1,20 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
+FROM python:3.9-slim
 
+# Exposing ports
+EXPOSE 6900
+
+# Copying argilla distribution files
 COPY dist/*.whl /packages/
 
+# Environment Variables
 ENV USERS_DB=/config/.users.yml
+ENV UVICORN_PORT=6900
 
+# Copying script for starting argilla server
+COPY scripts/start_argilla_server.sh /
 
-RUN wget -O /wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
- && chmod +x /wait-for-it.sh \
- && find /packages/*.whl -exec pip install {}[server] \;
+RUN chmod +x /start_argilla_server.sh \
+ && for wheel in /packages/*.whl; do pip install "$wheel"[server]; done
 
-# See <https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker#module_name>
-ENV MODULE_NAME="argilla"
-ENV VARIABLE_NAME="app"
+CMD /bin/bash /start_argilla_server.sh
 
-CMD /wait-for-it.sh ${ARGILLA_ELASTICSEARCH:-${ELASTICSEARCH:-no.elastic.found:9200}} -- /start.sh

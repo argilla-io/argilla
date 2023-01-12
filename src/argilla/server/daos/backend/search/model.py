@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from enum import Enum
-from typing import Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
@@ -49,7 +49,14 @@ class SortConfig(BaseModel):
 
 
 class BaseQuery(BaseModel):
-    pass
+    """A base query model"""
+
+    raw_query: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Low-level backend query. "
+        "An elasticsearch search query definition. "
+        "If defined, this query will be used instead of other query params.",
+    )
 
 
 class BaseDatasetsQuery(BaseQuery):
@@ -57,6 +64,16 @@ class BaseDatasetsQuery(BaseQuery):
     owners: Optional[List[str]] = None
     include_no_owner: bool = None
     name: Optional[str] = None
+
+
+class VectorSearch(BaseModel):
+    name: str
+    value: List[float]
+    k: Optional[int] = Field(
+        default=None,
+        description="Number of elements to retrieve. "
+        "If not provided, the request size will be used instead",
+    )
 
 
 class BaseRecordsQuery(BaseQuery):
@@ -74,6 +91,8 @@ class BaseRecordsQuery(BaseQuery):
 
     has_annotation: Optional[bool] = None
     has_prediction: Optional[bool] = None
+
+    vector: Optional[VectorSearch] = Field(default=None)
 
 
 BackendQuery = TypeVar("BackendQuery", bound=BaseQuery)

@@ -43,10 +43,10 @@ You can also remove annotations by hovering over the highlights and pressing the
 After modifying a record, either by adding or removing annotations, its status will change to _Pending_ and a _Save_ button will appear.
 Once a record is saved, its status will change to _Validated_.
 
-#### TextGeneration
+#### Text2Text
 
 
-For TextGeneration datasets, you have a text box available, in which you can draft or edit an annotation.
+For Text2Text datasets, you have a text box available, in which you can draft or edit an annotation.
 After editing or drafting your annotation, don't forget to save your changes.
 
 ### Bulk annotate
@@ -78,7 +78,7 @@ You can also validate the predictions (or the absence of them) by pressing the _
 
 Once the record is saved or validated, its status will change to _Validated_.
 
-#### TextGeneration
+#### Text2Text
 
 You can validate or edit a prediction, by first clicking on the _view predictions_ button, and then the _Edit_ or _Validate_ button.
 After editing or drafting your annotation, don't forget to save your changes.
@@ -168,6 +168,12 @@ If you struggle to increase the overall coverage, try to filter for the records 
 Here you will see a list of your saved rules.
 You can edit a rule by clicking on its name, or delete it by clicking on the trash icon.
 
+## Smenatic search
+This feature enables you to find similar records when exploring or annotating records. This leverages semantic search to find "semantically" similar records. In order to use this feature, your dataset records should contain vectors which can be associated when logging the dataset into Argilla. Check the Deep Dive Feature guide about [Semantic Search](../../guides/features/semantic-search.html) to understand how to benefit from this feature.
+
+![Similarity Search](../../_static/reference/webapp/features-similaritysearch.png)
+
+
 ## Explore records
 
 ![Explore records](../../_static/reference/webapp/features-explore.png)
@@ -210,7 +216,7 @@ In this task, predictions and annotations are displayed as highlights in the inp
 
 For datasets with available score, the solid line for **predictions** disappears when the **score filter** (in **Predictions filter** section) is applied.
 
-#### TextGeneration
+#### Text2Text
 
 
 In this task predictions and the annotation are given in a text field below the input text.

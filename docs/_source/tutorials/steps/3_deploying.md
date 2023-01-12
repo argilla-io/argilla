@@ -7,6 +7,8 @@ These tutorials show you how you can leverage model predictions to analyze and e
 
 ```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
 ```
+```{include} /_static/tutorials/deploying-textclassification-colab-activelearning/modal.md
+```
 ```{include} /_static/tutorials/deploying-text2text-dvc-explainability/modal.md
 ```
 ````

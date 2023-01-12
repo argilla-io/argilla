@@ -33,6 +33,11 @@
             @removeAllMetadataFilters="onRemoveAllMetadataFilters"
             @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></filters-list>
+          <filter-similarity
+            v-if="!weakLabelingEnabled"
+            :filterIsActive="enableSimilaritySearch"
+            @search-records="onSimilaritySearch"
+          />
         </div>
         <slot />
       </div>
@@ -41,12 +46,15 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
 export default {
   props: {
     dataset: {
       type: Object,
       default: () => ({}),
+    },
+    enableSimilaritySearch: {
+      type: Boolean,
+      required: true,
     },
   },
   data: () => ({
@@ -66,47 +74,56 @@ export default {
     viewMode() {
       return this.dataset.viewSettings.viewMode;
     },
+    weakLabelingEnabled() {
+      return this.viewMode === "labelling-rules";
+    },
   },
   methods: {
-    ...mapActions({
-      search: "entities/datasets/search",
-    }),
     onTextQuerySearch(text) {
       if (text === "") {
         text = undefined;
       }
-      this.search({ dataset: this.dataset, query: { text } });
+      this.$emit("search-records", { query: { text } });
     },
     onApplyFilter({ filter, values }) {
       if (Array.isArray(values) && !values.length) {
         values = undefined;
       }
-      this.search({ dataset: this.dataset, query: { [filter]: values } });
+      this.$emit("search-records", {
+        query: {
+          [filter]: values,
+        },
+      });
     },
     onApplyMetaFilter({ filter, values }) {
-      this.search({
-        dataset: this.dataset,
-        query: { metadata: { [filter]: values } },
+      this.$emit("search-records", {
+        query: {
+          metadata: {
+            [filter]: values,
+          },
+        },
       });
     },
     async onRemoveAllMetadataFilters(filters) {
       let query = {};
       filters.forEach((f) => (query[f.key] = []));
-      await this.search({ dataset: this.dataset, query: { metadata: query } });
+      this.$emit("search-records", { query: { metadata: query } });
     },
     async onRemoveFiltersByGroup(filters) {
       let query = {};
       filters.forEach(
         (f) => (query[f.key] = f.key === "score" ? undefined : [])
       );
-      await this.search({ dataset: this.dataset, query: query });
+      this.$emit("search-records", { query });
     },
     async onApplySortBy(sortList) {
-      await this.search({
-        dataset: this.dataset,
+      this.$emit("search-records", {
         query: this.dataset.query,
         sort: sortList,
       });
+    },
+    onSimilaritySearch(query) {
+      this.$emit("search-records", { query });
     },
   },
 };

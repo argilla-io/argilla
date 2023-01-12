@@ -16,18 +16,18 @@
   -->
 
 <template>
-  <div class="record">
+  <div class="record" v-if="record">
     <div class="record--left">
       <record-inputs :record="record" />
       <classifier-annotation-area
-        v-if="annotationEnabled"
+        v-if="interactionsEnabled"
         :dataset="dataset"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
       <classifier-exploration-area v-else :dataset="dataset" :record="record" />
-      <div v-if="annotationEnabled" class="content__actions-buttons">
+      <div v-if="interactionsEnabled" class="content__actions-buttons">
         <base-button
           v-if="allowValidate"
           class="primary"
@@ -39,13 +39,6 @@
 
     <div v-if="!annotationEnabled" class="record__labels">
       <template v-if="record.annotation">
-        <!-- <svgicon
-          v-if="record.predicted && !labellingRulesView"
-          :class="['icon__predicted', record.predicted]"
-          width="40"
-          height="40"
-          :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
-        ></svgicon> -->
         <base-tag
           v-for="label in record.annotation.labels"
           :key="label.class"
@@ -57,8 +50,6 @@
 </template>
 
 <script>
-// import "assets/icons/matching";
-// import "assets/icons/no-matching";
 import { mapActions } from "vuex";
 import {
   TextClassificationRecord,
@@ -74,9 +65,15 @@ export default {
       type: TextClassificationRecord,
       required: true,
     },
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
+    },
   },
-  data: () => ({}),
   computed: {
+    interactionsEnabled() {
+      return this.annotationEnabled && !this.isReferenceRecord;
+    },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
@@ -90,6 +87,9 @@ export default {
           this.record.prediction ||
           this.dataset.isMultiLabel)
       );
+    },
+    paginationSize() {
+      return this.dataset.viewSettings?.pagination.size;
     },
   },
   methods: {
@@ -152,7 +152,7 @@ export default {
   display: flex;
   &--left {
     width: 100%;
-    padding: 50px 20px 50px 50px;
+    padding: 20px 20px 50px 50px;
     .list__item--annotation-mode & {
       padding-right: 240px;
     }
@@ -165,25 +165,10 @@ export default {
     height: 100%;
     overflow: auto;
     text-align: right;
-    padding: 4em 1.4em 1em 1em;
+    padding: 1em 1.4em 1em 1em;
     @extend %hide-scrollbar;
   }
 }
-
-// .icon {
-//   &__predicted {
-//     position: absolute;
-//     right: 3em;
-//     top: 1em;
-//     &.ko {
-//       color: $error;
-//     }
-//     &.ok {
-//       color: $success;
-//     }
-//   }
-// }
-
 .content {
   &__actions-buttons {
     margin-right: 0;

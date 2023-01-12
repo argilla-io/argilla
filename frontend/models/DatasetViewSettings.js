@@ -72,7 +72,6 @@ export default class DatasetViewSettings extends Model {
       },
     });
   }
-
   async disableShortCutPagination(value) {
     return await Pagination.update({
       where: this.$id,

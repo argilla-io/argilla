@@ -13,8 +13,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import dataclasses
+import datetime
 import functools
-from typing import Dict, TypeVar
+import inspect
+import uuid
+from urllib.parse import urlparse
+
+from pydantic import BaseModel
+
+try:
+    import ujson as json
+except ModuleNotFoundError:
+    import json
+
+from typing import Dict, Optional, TypeVar
 
 import httpx
 
@@ -50,7 +62,9 @@ class _Client:
         self.base_url = self.base_url.strip()
         if self.base_url.endswith("/"):
             self.base_url = self.base_url[:-1]
-        if "_" in self.base_url and self.base_url.startswith("https://"):
+
+        url = urlparse(self.base_url)
+        if url.scheme == "https" and "_" in url.hostname:
             self.__httpx__ = None
             raise ValueError(
                 'Avoid using hostnames with underscores "_". For reference see:'
@@ -63,6 +77,17 @@ class _AuthenticatedClient(_Client):
     token: str
 
 
+class _EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        if isinstance(o, uuid.UUID):
+            return str(o)
+        if isinstance(o, datetime.datetime):
+            return o.isoformat()
+        return super().default(o)
+
+
 @dataclasses.dataclass
 class Client(_ClientCommonDefaults, _Client):
     def __post_init__(self):
@@ -73,27 +98,46 @@ class Client(_ClientCommonDefaults, _Client):
             cookies=self.get_cookies(),
             timeout=self.get_timeout(),
         )
+        self.__http_async__ = httpx.AsyncClient(
+            base_url=self.base_url,
+            headers=self.get_headers(),
+            cookies=self.get_cookies(),
+            timeout=self.get_timeout(),
+        )
 
     def __del__(self):
         del self.__httpx__
+        del self.__http_async__
 
     def __hash__(self):
         return hash(self.base_url)
 
     def with_httpx_error_handler(func):
+        def wrap_error(base_url: str):
+            err_str = (
+                f"Your Api endpoint at {base_url} is not available or not"
+                " responding."
+            )
+            raise BaseClientError(err_str) from None
+
+        @functools.wraps(func)
+        async def inner_async(self, *args, **kwargs):
+            try:
+                result = await func(self, *args, **kwargs)
+                return result
+            except httpx.ConnectError as err:
+                return wrap_error(self.base_url)
+
         @functools.wraps(func)
         def inner(self, *args, **kwargs):
             try:
                 result = func(self, *args, **kwargs)
                 return result
             except httpx.ConnectError as err:
-                err_str = (
-                    f"Your Api endpoint at {self.base_url} is not available or not"
-                    " responding."
-                )
-                raise BaseClientError(err_str) from None
+                return wrap_error(self.base_url)
 
-        return inner
+        is_coroutine = inspect.iscoroutinefunction(func)
+        return inner_async if is_coroutine else inner
 
     @with_httpx_error_handler
     def get(self, path: str, *args, **kwargs):
@@ -107,45 +151,126 @@ class Client(_ClientCommonDefaults, _Client):
         return build_raw_response(response).parsed
 
     @with_httpx_error_handler
-    def post(self, path: str, *args, **kwargs):
+    def patch(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
 
+        response = self.__httpx__.patch(
+            url=path,
+            headers=self.get_headers(),
+            *args,
+            **kwargs,
+        )
+        return build_raw_response(response).parsed
+
+    @with_httpx_error_handler
+    def patch(
+        self,
+        path: str,
+        *args,
+        json: Optional[dict] = None,
+        **kwargs,
+    ):
+        path = self._normalize_path(path)
+        body = self._normalize_body(json)
+        response = self.__httpx__.patch(
+            url=path,
+            headers=self.get_headers(),
+            json=body,
+            *args,
+            **kwargs,
+        )
+        return build_raw_response(response).parsed
+
+    @with_httpx_error_handler
+    def post(
+        self,
+        path: str,
+        *args,
+        json: Optional[dict] = None,
+        **kwargs,
+    ):
+        path = self._normalize_path(path)
+        body = self._normalize_body(json)
         response = self.__httpx__.post(
             url=path,
             headers=self.get_headers(),
+            json=body,
             *args,
             **kwargs,
         )
         return build_raw_response(response).parsed
 
     @with_httpx_error_handler
-    def put(self, path: str, *args, **kwargs):
+    async def post_async(
+        self,
+        path: str,
+        *args,
+        json: Optional[dict] = None,
+        **kwargs,
+    ):
         path = self._normalize_path(path)
+        body = self._normalize_body(json)
+        return await self.__http_async__.post(
+            url=path,
+            headers=self.get_headers(),
+            json=body,
+            *args,
+            **kwargs,
+        )
+
+    @with_httpx_error_handler
+    def put(
+        self,
+        path: str,
+        *args,
+        json: Optional[dict] = None,
+        **kwargs,
+    ):
+        path = self._normalize_path(path)
+        body = self._normalize_body(json)
         response = self.__httpx__.put(
             url=path,
             headers=self.get_headers(),
+            json=body,
             *args,
             **kwargs,
         )
         return build_raw_response(response).parsed
 
     @with_httpx_error_handler
-    def delete(self, path: str, *args, **kwargs):
+    def delete(
+        self,
+        path: str,
+        *args,
+        json: Optional[dict] = None,
+        **kwargs,
+    ):
         path = self._normalize_path(path)
+        body = self._normalize_body(json)
         response = self.__httpx__.request(
             method="DELETE",
             url=path,
             headers=self.get_headers(),
+            json=body,
             *args,
             **kwargs,
         )
         return build_raw_response(response).parsed
 
     @with_httpx_error_handler
-    def stream(self, path: str, *args, **kwargs):
+    def stream(
+        self,
+        path: str,
+        *args,
+        json: Optional[dict] = None,
+        **kwargs,
+    ):
+        path = self._normalize_path(path)
+        body = self._normalize_body(json)
         return self.__httpx__.stream(
             url=path,
             headers=self.get_headers(),
+            json=body,
             timeout=None,  # Avoid timeouts. TODO: Improve the logic
             *args,
             **kwargs,
@@ -158,12 +283,24 @@ class Client(_ClientCommonDefaults, _Client):
             return path[1:]
         return path
 
+    @classmethod
+    def _normalize_body(cls, body: dict) -> dict:
+        json_str = json.dumps(
+            body,
+            cls=_EnhancedJSONEncoder,
+        )
+        return json.loads(json_str)
+
 
 ResponseType = TypeVar("ResponseType")
 
 
 @dataclasses.dataclass
-class AuthenticatedClient(Client, _ClientCommonDefaults, _AuthenticatedClient):
+class AuthenticatedClient(
+    Client,
+    _ClientCommonDefaults,
+    _AuthenticatedClient,
+):
     """A Client which has been authenticated for use on secured endpoints"""
 
     def __hash__(self):

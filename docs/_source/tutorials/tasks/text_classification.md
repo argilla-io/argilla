@@ -7,6 +7,8 @@
 ```
 ```{include} /_static/tutorials/labelling-textclassification-gpt3-fewshot/modal.md
 ```
+```{include} /_static/tutorials/deploying-textclassification-colab-activelearning/modal.md
+```
 ```{include} /_static/tutorials/training-textclassification-modal-activelearning/modal.md
 ```
 ```{include} /_static/tutorials/labelling-textclassification-snorkel-weaksupervision/modal.md
@@ -30,5 +32,7 @@
 ```{include} /_static/tutorials/training-textclassification-classyclassification-activelearning/modal.md
 ```
 ```{include} /_static/tutorials/training-textclassification-transformers-pretrained/modal.md
+```
+```{include} /_static/tutorials/training-textclassification-modal-activelearning/modal.md
 ```
 ````

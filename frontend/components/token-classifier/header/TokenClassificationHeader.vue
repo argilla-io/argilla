@@ -17,7 +17,13 @@
 
 <template>
   <div class="header__filters">
-    <filters-area :dataset="dataset" />
+    <filters-area
+      :dataset="dataset"
+      :enableSimilaritySearch="enableSimilaritySearch"
+      @search-records="searchRecords"
+    >
+      <dataset-options :dataset="dataset" />
+    </filters-area>
     <entities-header :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
@@ -38,6 +44,10 @@ export default {
     dataset: {
       required: true,
       type: Object,
+    },
+    enableSimilaritySearch: {
+      type: Boolean,
+      required: true,
     },
   },
   computed: {
@@ -79,6 +89,9 @@ export default {
           ...new Set([...this.dataset.entities.map((ent) => ent.text), label]),
         ],
       });
+    },
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

@@ -101,12 +101,19 @@ export default {
         type: "object",
         filtrable: "true",
       },
-      { name: "Created at", field: "created_at", class: "date", type: "date" },
+      {
+        name: "Created at",
+        field: "created_at",
+        class: "date",
+        type: "date",
+        sortable: "true",
+      },
       {
         name: "Updated at",
         field: "last_updated",
         class: "date",
         type: "date",
+        sortable: "true",
       },
     ],
     actions: [

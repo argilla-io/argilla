@@ -32,6 +32,8 @@ from argilla.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
 
+Vectors = Dict[str, List[float]]
+
 
 class _Validators(BaseModel):
     """Base class for our record models that takes care of general validations"""
@@ -50,8 +52,9 @@ class _Validators(BaseModel):
 
         if default_length_exceeded:
             message = (
-                "Some metadata values could exceed the max length. For those cases, values will be"
-                f" truncated by keeping only the last {DEFAULT_MAX_KEYWORD_LENGTH} characters. "
+                "Some metadata values could exceed the max length. For those cases,"
+                " values will be truncated by keeping only the last"
+                f" {DEFAULT_MAX_KEYWORD_LENGTH} characters. "
                 + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
             )
             warnings.warn(message, UserWarning)
@@ -84,11 +87,14 @@ class _Validators(BaseModel):
             )
         return v
 
-    @validator("event_timestamp", check_fields=False)
-    def _nat_to_none(cls, v):
-        """Converts pandas `NaT`s to `None`s"""
+    @validator("event_timestamp", check_fields=False, always=True)
+    def _nat_to_none_and_one_to_now(cls, v):
+        """Converts pandas `NaT`s to `None`s and None´s to datetime.now()"""
         if v is pd.NaT:
-            return None
+            v = None
+
+        v = v or datetime.datetime.now()
+
         return v
 
     @root_validator
@@ -150,6 +156,8 @@ class TextClassificationRecord(_Validators):
             A string or a list of strings (multilabel) corresponding to the annotation (gold label) for the record.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        vectors:
+            Vectors data mappings of the natural language text containing class attributes
         multi_label:
             Is the prediction/annotation for a multi label classification task? Defaults to `False`.
         explanation:
@@ -158,12 +166,12 @@ class TextClassificationRecord(_Validators):
         id:
             The id of the record. By default (`None`), we will generate a unique ID for you.
         metadata:
-            Meta data for the record. Defaults to `{}`.
+            Metadata for the record. Defaults to `{}`.
         status:
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
-            The timestamp of the record.
+            The timestamp for the creation of the record. Defaults to `datetime.datetime.now()`.
         metrics:
             READ ONLY! Metrics at record level provided by the server when using `rg.load`.
             This attribute will be ignored when using `rg.log`.
@@ -175,7 +183,10 @@ class TextClassificationRecord(_Validators):
         >>> import argilla as rg
         >>> record = rg.TextClassificationRecord(
         ...     text="My first argilla example",
-        ...     prediction=[('eng', 0.9), ('esp', 0.1)]
+        ...     prediction=[('eng', 0.9), ('esp', 0.1)],
+        ...     vectors = {
+        ...         "english_bert_vector": [1.2, 2.3, 3.1, 3.3]
+        ...     }
         ... )
         >>>
         >>> # Various inputs
@@ -185,8 +196,12 @@ class TextClassificationRecord(_Validators):
         ...         "body": "Por usar argilla te ha tocado este premio: <link>"
         ...     },
         ...     prediction=[('spam', 0.99), ('ham', 0.01)],
-        ...     annotation="spam"
-        ... )
+        ...     annotation="spam",
+        ...     vectors = {
+        ...                     "distilbert_uncased":  [1.13, 4.1, 6.3, 4.2, 9.1],
+        ...                     "xlm_roberta_cased": [1.1, 2.1, 3.3, 4.2, 2.1],
+        ...             }
+        ...     )
     """
 
     text: Optional[str] = None
@@ -196,6 +211,7 @@ class TextClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[Union[str, List[str]]] = None
     annotation_agent: Optional[str] = None
+    vectors: Optional[Vectors] = None
 
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
@@ -266,15 +282,17 @@ class TokenClassificationRecord(_Validators):
             name of the entity, the second and third entry correspond to the start and stop char index of the entity.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        vectors:
+            Vector data mappings of the natural language text containing class attributes'
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:
-            Meta data for the record. Defaults to `{}`.
+            Metadata for the record. Defaults to `{}`.
         status:
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
-            The timestamp of the record.
+            The timestamp for the creation of the record. Defaults to `datetime.datetime.now()`.
         metrics:
             READ ONLY! Metrics at record level provided by the server when using `rg.load`.
             This attribute will be ignored when using `rg.log`.
@@ -286,7 +304,11 @@ class TokenClassificationRecord(_Validators):
         >>> record = rg.TokenClassificationRecord(
         ...     text = "Michael is a professor at Harvard",
         ...     tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
-        ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)]
+        ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)],
+        ...     vectors = {
+        ...            "bert_base_uncased": [3.2, 4.5, 5.6, 8.9]
+        ...          }
+        ...       ]
         ... )
     """
 
@@ -299,6 +321,7 @@ class TokenClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
     annotation_agent: Optional[str] = None
+    vectors: Optional[Vectors] = None
 
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -307,7 +330,6 @@ class TokenClassificationRecord(_Validators):
 
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
-
     _span_utils: SpanUtils = PrivateAttr()
 
     def __init__(
@@ -468,7 +490,7 @@ class TokenClassificationRecord(_Validators):
         return self._span_utils.to_tags(spans)
 
 
-class TextGenerationRecord(_Validators):
+class Text2TextRecord(_Validators):
     """Record for a text to text task
 
     Args:
@@ -483,15 +505,17 @@ class TextGenerationRecord(_Validators):
             A string representing the expected output text for the given input text.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        vectors:
+            Embedding data mappings of the natural language text containing class attributes'
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:
-            Meta data for the record. Defaults to `{}`.
+            Metadata for the record. Defaults to `{}`.
         status:
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
-            The timestamp of the record.
+            The timestamp for the creation of the record. Defaults to `datetime.datetime.now()`.
         metrics:
             READ ONLY! Metrics at record level provided by the server when using `rg.load`.
             This attribute will be ignored when using `rg.log`.
@@ -503,7 +527,11 @@ class TextGenerationRecord(_Validators):
         >>> import argilla as rg
         >>> record = rg.Text2TextRecord(
         ...     text="My name is Sarah and I love my dog.",
-        ...     prediction=["Je m'appelle Sarah et j'aime mon chien."]
+        ...     prediction=["Je m'appelle Sarah et j'aime mon chien."],
+        ...     vectors = {
+        ...         "bert_base_uncased": [1.2, 2.3, 3.4, 5.2, 6.5],
+        ...         "xlm_multilingual_uncased": [2.2, 5.3, 5.4, 3.2, 2.5]
+        ...     }
         ... )
     """
 
@@ -513,6 +541,7 @@ class TextGenerationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[str] = None
     annotation_agent: Optional[str] = None
+    vectors: Optional[Vectors] = None
 
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -532,8 +561,8 @@ class TextGenerationRecord(_Validators):
         return [(pred, 1.0) if isinstance(pred, str) else pred for pred in prediction]
 
 
-@deprecated("Use TextGenerationRecord instead.")
-class Text2TextRecord(TextGenerationRecord):
+@deprecated("Use Text2TextRecord instead.")
+class TextGenerationRecord(Text2TextRecord):  # TODO Remove TextGenerationRecord
     pass
 
 

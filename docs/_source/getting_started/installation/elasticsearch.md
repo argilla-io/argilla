@@ -2,6 +2,7 @@
 # Elasticsearch
 
 This section explains advanced configurations to use Argilla with Elasticsearch instances or clusters.
+
 (configure-elasticsearch-role-users)=
 ## Configure roles and users
 

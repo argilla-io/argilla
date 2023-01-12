@@ -15,17 +15,18 @@
 import pytest
 
 from argilla.server.commons.models import TaskType
-from argilla.server.daos.backend.elasticsearch import ElasticsearchBackend
+from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.models.datasets import BaseDatasetDB
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.errors import MissingDatasetRecordsError
 
 
 def test_raise_proper_error():
-    dao = DatasetRecordsDAO.get_instance(ElasticsearchBackend.get_instance())
+    dao = DatasetRecordsDAO.get_instance(GenericElasticEngineBackend.get_instance())
     with pytest.raises(MissingDatasetRecordsError):
         dao.search_records(
             dataset=BaseDatasetDB(
-                name="mock-notfound", task=TaskType.text_classification
+                name="mock-notfound",
+                task=TaskType.text_classification,
             )
         )

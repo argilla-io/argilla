@@ -14,13 +14,10 @@
 
 from typing import Any, Dict, List
 
+from argilla.server.daos.backend.mappings.stopwords import english
 from argilla.server.settings import settings
 
-EXTENDED_ANALYZER_REF = "extended_analyzer"
-
 MULTILINGUAL_STOP_ANALYZER_REF = "multilingual_stop_analyzer"
-
-DEFAULT_SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]  # TODO: env var configuration
 
 
 class mappings:
@@ -33,7 +30,7 @@ class mappings:
             "type": "keyword",
         }
         if enable_text_search:
-            text_field = mappings.text_field()
+            text_field = mappings.text_field(with_wordcloud=False)
             text_field_fields = text_field.pop("fields", {})
             mapping["fields"] = {"text": text_field, **text_field_fields}
         return mapping
@@ -53,50 +50,35 @@ class mappings:
         }
 
     @staticmethod
-    def words_text_field():
-        """Mappings config for old `word` field. Deprecated"""
-
-        default_analyzer = settings.default_es_search_analyzer
-        exact_analyzer = settings.exact_es_search_analyzer
-
-        if default_analyzer == "standard":
-            default_analyzer = MULTILINGUAL_STOP_ANALYZER_REF
-
-        if exact_analyzer == "whitespace":
-            exact_analyzer = EXTENDED_ANALYZER_REF
-
-        return {
-            "type": "text",
-            "fielddata": True,
-            "analyzer": default_analyzer,
-            "fields": {
-                "extended": {
-                    "type": "text",
-                    "analyzer": exact_analyzer,
-                }
-            },
-        }
-
-    @staticmethod
-    def text_field():
+    def text_field(with_wordcloud: bool = True):
         """Mappings config for textual field"""
         default_analyzer = settings.default_es_search_analyzer
         exact_analyzer = settings.exact_es_search_analyzer
 
-        return {
+        mappings = {
             "type": "text",
             "analyzer": default_analyzer,
             "fields": {
-                "exact": {"type": "text", "analyzer": exact_analyzer},
-                "wordcloud": {
+                "exact": {
                     "type": "text",
-                    "analyzer": MULTILINGUAL_STOP_ANALYZER_REF,
-                    "fielddata": True,
+                    "analyzer": exact_analyzer,
                 },
             },
-            # TODO(@frascuchon): verify min es version that support meta fields
-            # "meta": {"experimental": "true"},
         }
+
+        if with_wordcloud:
+            mappings["fields"]["wordcloud"] = {
+                "type": "text",
+                "fielddata": True,
+                "fielddata_frequency_filter": {
+                    "min": 0.001,
+                    "max": 0.1,
+                    "min_segment_size": 500,
+                },
+                "analyzer": MULTILINGUAL_STOP_ANALYZER_REF,
+            }
+
+        return mappings
 
     @staticmethod
     def source(includes: List[str] = None, excludes: List[str] = None):
@@ -122,15 +104,45 @@ class mappings:
         return {"dynamic": True, "type": "object"}
 
 
-def multilingual_stop_analyzer(supported_langs: List[str] = None) -> Dict[str, Any]:
-    """Multilingual stop analyzer"""
-    from stopwordsiso import stopwords
-
-    supported_langs = supported_langs or DEFAULT_SUPPORTED_LANGUAGES
-    return {
-        "type": "stop",
-        "stopwords": [w for w in stopwords(supported_langs)],
+def configure_multilingual_stop_analyzer(
+    settings: Dict[str, Any],
+    supported_langs: List[str] = None,
+):
+    lang2elastic_stop = {
+        "en": english.STOPWORDS,
+        "es": "_spanish_",
+        "fr": "_french_",
+        "de": "_german_",
     }
+
+    supported_langs = supported_langs or [lang for lang in lang2elastic_stop]
+
+    def get_value_with_defaults(data: dict, key: str, default):
+        prop = data.get(key)
+        if prop is None:
+            data[key] = default
+        return data[key]
+
+    analysis = get_value_with_defaults(settings, "analysis", {})
+    filter = get_value_with_defaults(analysis, "filter", {})
+    analyzer = get_value_with_defaults(analysis, "analyzer", {})
+
+    filters = []
+    for lang in supported_langs:
+        stopwords = lang2elastic_stop.get(lang)
+        if stopwords:
+            filter[lang] = {
+                "type": "stop",
+                "stopwords": stopwords,
+            }
+            filters.append(lang)
+
+    analyzer[MULTILINGUAL_STOP_ANALYZER_REF] = {
+        "tokenizer": "lowercase",
+        "filter": filters,
+    }
+
+    return settings
 
 
 def extended_analyzer():
@@ -144,22 +156,20 @@ def extended_analyzer():
 
 def tasks_common_settings():
     """Common index settings"""
-    return {
+    es_settings = {
         "number_of_shards": settings.es_records_index_shards,
         "number_of_replicas": settings.es_records_index_replicas,
-        "analysis": {
-            "analyzer": {
-                MULTILINGUAL_STOP_ANALYZER_REF: multilingual_stop_analyzer(),
-                EXTENDED_ANALYZER_REF: extended_analyzer(),
-            }
-        },
     }
+
+    configure_multilingual_stop_analyzer(settings=es_settings)
+    return es_settings
 
 
 def dynamic_metrics_text():
     return {
         "metrics.*": mappings.path_match_keyword_template(
-            path="metrics.*", enable_text_search_in_keywords=False
+            path="metrics.*",
+            enable_text_search_in_keywords=False,
         )
     }
 
@@ -190,7 +200,6 @@ def tasks_common_mappings():
         "dynamic": "strict",
         "properties": {
             "id": mappings.keyword_field(),
-            "words": mappings.words_text_field(),
             "text": mappings.text_field(),
             # TODO(@frascuchon): Enable prediction and annotation
             #  so we can build extra metrics based on these fields
@@ -205,6 +214,7 @@ def tasks_common_mappings():
             "predicted_by": mappings.keyword_field(enable_text_search=True),
             "metrics": mappings.dynamic_field(),
             "metadata": mappings.dynamic_field(),
+            "vectors": mappings.dynamic_field(),
         },
         "dynamic_templates": [
             dynamic_metadata_text(),
