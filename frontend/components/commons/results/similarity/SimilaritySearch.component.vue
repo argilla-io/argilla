@@ -95,6 +95,7 @@ export default {
     transition: all 0.2s ease-in;
     @include font-size(13px);
     font-weight: 500;
+    padding: $base-space;
     &:hover {
       background: $black-4;
       transition: all 0.2s ease-in;
