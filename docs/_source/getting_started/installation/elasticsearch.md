@@ -55,7 +55,7 @@ When deploying Elastic, we need to define a `path.repo` via setting this as an e
 
 ```yaml
 elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.0
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch
