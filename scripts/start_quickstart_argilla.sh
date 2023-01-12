@@ -5,12 +5,15 @@ set -e
 # Changing user
 sudo -S su user
 
-# Generate hashed passwords
-admin_password=$(htpasswd -nbB "" "$ADMIN_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
-argilla_password=$(htpasswd -nbB "" "$ARGILLA_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
+# Checks if password is passed in the env
+# if not it will run argilla with default users
+if [ -n "$ADMIN_PASSWORD" ] && [ -n "$ARGILLA_PASSWORD" ]; then
+  # Generate hashed passwords
+  admin_password=$(htpasswd -nbB "" "$ADMIN_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
+  argilla_password=$(htpasswd -nbB "" "$ARGILLA_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
 
-# Create users.yml file
-cat >/packages/users.yml <<EOF
+  # Create users.yml file
+  cat >/packages/users.yml <<EOF
 - username: "admin"
   api_key: $ADMIN_API_KEY
   full_name: Hugging Face
@@ -25,6 +28,7 @@ cat >/packages/users.yml <<EOF
   hashed_password: $argilla_password
   workspaces: ["admin"]
 EOF
+fi
 
 # Disable security in elasticsearch configuration
 sudo sed -i "s/xpack.security.enabled: true/xpack.security.enabled: false/g" /etc/elasticsearch/elasticsearch.yml
