@@ -134,11 +134,6 @@ export default {
   line-height: 13px;
   padding: 9px 18px;
 }
-.tiny {
-  @include font-size(13px);
-  line-height: 13px;
-  padding: $base-space;
-}
 .primary {
   background-color: $primary-color;
   color: palette(white);

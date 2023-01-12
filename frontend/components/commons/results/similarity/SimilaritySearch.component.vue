@@ -2,7 +2,7 @@
   <div v-if="multipleVectors" id="dropdown" class="similarity-search">
     <base-dropdown :visible="dropdownIsvisible" @visibility="onVisibility">
       <span slot="dropdown-header">
-        <base-button class="tiny similarity-search__button">
+        <base-button class="small similarity-search__button">
           Find similar
         </base-button>
       </span>
@@ -20,7 +20,7 @@
   </div>
   <base-button
     id="find-similar-button"
-    class="tiny similarity-search__button"
+    class="small similarity-search__button"
     :disabled="isDisabled"
     v-else
     @click="findSimilar"
@@ -95,6 +95,7 @@ export default {
     transition: all 0.2s ease-in;
     @include font-size(13px);
     font-weight: 500;
+    padding: $base-space;
     &:hover {
       background: $black-4;
       transition: all 0.2s ease-in;
