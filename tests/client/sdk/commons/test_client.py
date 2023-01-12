@@ -14,6 +14,7 @@
 
 import pytest
 
+from argilla.client.api import active_api
 from argilla.client.sdk.client import Client
 
 
@@ -38,3 +39,10 @@ def test_wrong_hostname_values(
     else:
         client = Client(base_url=url)
         assert client
+
+
+def test_http_calls(mocked_client):
+
+    rb_api = active_api()
+    data = rb_api.http_client.get("/api/_info")
+    assert data.get("version"), data
