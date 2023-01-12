@@ -21,7 +21,8 @@
     <div>
       <text-2-text-list
         ref="list"
-        :dataset="dataset"
+        :datasetId="datasetId"
+        :datasetName="datasetName"
         :record="record"
         :predictions="predictionSentences"
         :annotations="initialAnnotations"
@@ -35,19 +36,27 @@
 </template>
 <script>
 import { IdState } from "vue-virtual-scroller";
-
-import { Text2TextRecord, Text2TextDataset } from "@/models/Text2Text";
+import { Text2TextRecord } from "@/models/Text2Text";
+import { getText2TextDatasetById } from "@/models/text2Text.queries";
 import { mapActions } from "vuex";
 export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.datasetName}-${vm.record.id}`,
     }),
   ],
   props: {
-    dataset: {
-      type: Text2TextDataset,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    viewSettings: {
+      type: Object,
       required: true,
     },
     record: {
@@ -66,10 +75,10 @@ export default {
   },
   computed: {
     initialRecord: {
-      get: function () {
+      get() {
         return this.idState.initialRecord;
       },
-      set: function (newValue) {
+      set(newValue) {
         this.idState.initialRecord = newValue;
       },
     },
@@ -77,7 +86,7 @@ export default {
       return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewSettings.viewMode === "annotate";
     },
     annotationSentences() {
       return this.record.annotation ? this.record.annotation.sentences : [];
@@ -108,7 +117,7 @@ export default {
     },
     async onResetInitialRecord() {
       await this.updateRecords({
-        dataset: this.dataset,
+        dataset: this.getText2TextDataset(),
         records: [
           {
             ...this.initialRecord,
@@ -127,11 +136,14 @@ export default {
       };
       this.initialRecord = newRecord;
       await this.validate({
-        dataset: this.dataset,
+        dataset: this.getText2TextDataset(),
         // TODO: Move user agent to action
         agent: this.$auth.user.username,
         records: [newRecord],
       });
+    },
+    getText2TextDataset() {
+      return getText2TextDatasetById(this.datasetId);
     },
   },
 };
