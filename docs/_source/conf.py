@@ -59,6 +59,7 @@ version = ".".join(release.split(".")[0:2])
 extensions = [
     "myst_parser",
     "nbsphinx",
+    "nbsphinx-link",
     "notfound.extension",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
@@ -271,3 +272,11 @@ ogp_image = "_static/images/og-doc.png"
 ogp_custom_meta_tags = [
     '<meta name="twitter:card" content="summary_large_image" />',
 ]
+
+app.add_html_last_updated_source_date(False)
+app.add_html_sourcelink(True)
+app.add_html_context(
+    {
+        "open_in_colab_badge": f'<a href="https://colab.research.google.com/github/{app.config.html_context["nbsphinx_link_target"]}"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/> </a>'
+    }
+)
