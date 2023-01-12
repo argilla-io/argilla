@@ -58,12 +58,18 @@
 <script>
 import "assets/icons/danger";
 import { mapActions } from "vuex";
+import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
+
 export default {
   data: () => ({
     activeEntity: -1,
   }),
   props: {
-    dataset: {
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetLastSelectedEntity: {
       type: Object,
       required: true,
     },
@@ -84,7 +90,7 @@ export default {
   },
   computed: {
     lastSelectedEntity() {
-      return this.dataset.lastSelectedEntity;
+      return this.datasetLastSelectedEntity;
     },
     suggestedEntity() {
       return this.formattedEntities.find(
@@ -105,7 +111,7 @@ export default {
     }),
     async selectEntity(entityLabel) {
       await this.updateLastSelectedEntity({
-        dataset: this.dataset,
+        dataset: this.getTokenClassificationDataset(),
         lastSelectedEntity: entityLabel,
       });
       this.token.entity
@@ -156,6 +162,9 @@ export default {
           }
         }
       }
+    },
+    getTokenClassificationDataset() {
+      return getTokenClassificationDatasetById(this.datasetId);
     },
   },
 };
