@@ -1,18 +1,24 @@
 <template>
   <results-record
     class="record--reference"
-    :dataset="dataset"
+    :datasetId="datasetId"
+    :datasetTask="datasetTask"
     :record="referenceRecord"
     :isReferenceRecord="!!referenceRecord"
     @search-records="searchRecords"
     @show-record-info-modal="onShowRecordInfoModal"
   />
 </template>
+
 <script>
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
     referenceRecord: {

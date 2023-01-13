@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div v-if="dataset && viewSettings">
     <div
       :class="[
         annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
@@ -31,11 +31,12 @@
                 class="list__checkbox"
                 :value="record.selected"
                 @change="onCheckboxChanged($event, record.id)"
-              ></base-checkbox>
+              >
+              </base-checkbox>
               <status-tag
                 v-if="record.status !== 'Default'"
                 :title="record.status"
-              ></status-tag>
+              />
             </div>
           </template>
           <base-date
@@ -69,20 +70,31 @@
         />
       </div>
       <RecordTextClassification
-        v-if="dataset.task === 'TextClassification'"
-        :dataset="dataset"
+        v-if="datasetTask === 'TextClassification'"
+        :viewSettings="viewSettings"
+        :isMultiLabel="dataset.isMultiLabel"
+        :datasetId="datasetId"
+        :datasetName="dataset.name"
+        :datasetLabels="dataset.labels"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
       />
       <RecordText2Text
-        v-if="dataset.task === 'Text2Text'"
-        :dataset="dataset"
+        v-if="datasetTask === 'Text2Text'"
+        :viewSettings="viewSettings"
+        :datasetId="datasetId"
+        :datasetName="dataset.name"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
       />
       <RecordTokenClassification
-        v-if="dataset.task === 'TokenClassification'"
-        :dataset="dataset"
+        v-if="datasetTask === 'TokenClassification'"
+        :datasetId="datasetId"
+        :datasetName="dataset.name"
+        :datasetEntities="dataset.entities"
+        :datasetQuery="dataset.query"
+        :datasetLastSelectedEntity="dataset.lastSelectedEntity"
+        :viewSettings="viewSettings"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
       />
@@ -95,11 +107,19 @@ import {
   Vector as VectorModel,
   getVectorModelPrimaryKey,
 } from "@/models/Vector";
+import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
+import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
+import { getText2TextDatasetById } from "@/models/text2Text.queries";
+import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
     record: {
@@ -111,12 +131,20 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      dataset: null,
+    };
+  },
   computed: {
+    viewSettings() {
+      return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
+    },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewSettings.viewMode === "annotate";
     },
     weakLabelingEnabled() {
-      return this.dataset.viewSettings.viewMode === "labelling-rules";
+      return this.viewSettings.viewMode === "labelling-rules";
     },
     visibleRecords() {
       return this.dataset.visibleRecords;
@@ -140,6 +168,9 @@ export default {
       return formattedVectors;
     },
   },
+  mounted() {
+    this.getDatasetFromORM();
+  },
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
@@ -154,7 +185,6 @@ export default {
         // TODO: update annotation status if proceed
       });
     },
-
     async onChangeRecordStatus(status) {
       switch (status) {
         case "Validated":
@@ -182,6 +212,31 @@ export default {
     },
     formatSelectedVectorObj(vector) {
       return { query: { vector }, recordId: this.record.id, vector };
+    },
+    getDatasetFromORM() {
+      try {
+        this.dataset = this.getTaskDatasetById();
+      } catch (err) {
+        this.dataset = null;
+        console.error(err);
+      }
+    },
+    getTaskDatasetById() {
+      let datasetById = null;
+      switch (this.datasetTask.toUpperCase()) {
+        case "TEXTCLASSIFICATION":
+          datasetById = getTextClassificationDatasetById(this.datasetId);
+          break;
+        case "TOKENCLASSIFICATION":
+          datasetById = getTokenClassificationDatasetById(this.datasetId);
+          break;
+        case "TEXT2TEXT":
+          datasetById = getText2TextDatasetById(this.datasetId);
+          break;
+        default:
+          throw new Error(`ERROR Unknown task: ${this.datasetTask}`);
+      }
+      return datasetById;
     },
   },
 };

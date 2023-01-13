@@ -38,7 +38,7 @@
             />
             <results-loading
               v-if="showLoader"
-              :size="dataset.viewSettings.pagination.size"
+              :size="viewSettings.pagination.size"
             />
             <results-empty v-else-if="dataset.results.total === 0" />
           </template>
@@ -56,7 +56,8 @@
             >
               <results-record
                 :key="`${dataset.name}-${item.id}`"
-                :dataset="dataset"
+                :datasetId="dataset.id"
+                :datasetTask="dataset.task"
                 :record="item"
                 @show-record-info-modal="onShowRecordInfoModal"
                 @search-records="searchRecords"
@@ -75,7 +76,7 @@
       <base-pagination
         v-if="!referenceRecordObj && !showLoader"
         :total-items="dataset.results.total"
-        :pagination-settings="dataset.viewSettings.pagination"
+        :pagination-settings="viewSettings.pagination"
         @changePage="onPagination"
       />
     </div>
@@ -101,6 +102,7 @@ import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
 import { Vector as VectorModel } from "@/models/Vector";
 import { RefRecord as RefRecordModel } from "@/models/RefRecord";
+import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
   props: {
@@ -118,6 +120,11 @@ export default {
   },
 
   computed: {
+    viewSettings() {
+      return this.dataset.name
+        ? getViewSettingsWithPaginationByDatasetName(this.dataset.name)
+        : {};
+    },
     referenceRecordId() {
       return VectorModel.query()
         .where("is_active", true)
@@ -130,20 +137,20 @@ export default {
         .first()?.record_object;
     },
     showLoader() {
-      return this.dataset.viewSettings.loading;
+      return this.viewSettings.loading;
     },
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
     paginationLimit() {
-      return this.dataset.viewSettings.pagination.maxRecordsLimit;
+      return this.viewSettings.pagination.maxRecordsLimit;
     },
     isLastPagePaginable() {
       if (this.dataset.results.total > this.paginationLimit) {
         return (
-          this.dataset.viewSettings.pagination.page *
-            this.dataset.viewSettings.pagination.size ===
-          this.dataset.viewSettings.pagination.maxRecordsLimit
+          this.viewSettings.pagination.page *
+            this.viewSettings.pagination.size ===
+          this.viewSettings.pagination.maxRecordsLimit
         );
       }
       return false;
