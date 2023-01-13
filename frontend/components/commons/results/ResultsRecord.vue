@@ -131,12 +131,10 @@ export default {
       default: false,
     },
   },
-  data() {
-    return {
-      dataset: null,
-    };
-  },
   computed: {
+    dataset() {
+      return this.getDatasetFromORM();
+    },
     viewSettings() {
       return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
     },
@@ -167,9 +165,6 @@ export default {
       );
       return formattedVectors;
     },
-  },
-  mounted() {
-    this.getDatasetFromORM();
   },
   methods: {
     ...mapActions({
@@ -215,10 +210,10 @@ export default {
     },
     getDatasetFromORM() {
       try {
-        this.dataset = this.getTaskDatasetById();
+        return this.getTaskDatasetById();
       } catch (err) {
-        this.dataset = null;
         console.error(err);
+        return null;
       }
     },
     getTaskDatasetById() {

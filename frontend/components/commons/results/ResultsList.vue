@@ -121,13 +121,15 @@ export default {
   },
   data() {
     return {
-      dataset: null,
       scrollComponent: undefined,
       selectedRecord: undefined,
       test: null,
     };
   },
   computed: {
+    dataset() {
+      return this.getTaskDatasetById();
+    },
     viewSettings() {
       return this.dataset.name
         ? getViewSettingsWithPaginationByDatasetName(this.dataset.name)
@@ -163,9 +165,6 @@ export default {
       }
       return false;
     },
-  },
-  mounted() {
-    this.getDatasetFromORM();
   },
   methods: {
     ...mapActions({
