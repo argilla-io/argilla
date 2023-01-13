@@ -128,7 +128,7 @@ export default {
   },
   computed: {
     dataset() {
-      return this.getTaskDatasetById();
+      return this.getDatasetFromORM();
     },
     viewSettings() {
       return this.dataset.name
@@ -190,10 +190,10 @@ export default {
     },
     getDatasetFromORM() {
       try {
-        this.dataset = this.getTaskDatasetById();
+        return this.getTaskDatasetById();
       } catch (err) {
-        this.dataset = null;
         console.error(err);
+        return null;
       }
     },
     getTaskDatasetById() {
