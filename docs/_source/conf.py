@@ -142,6 +142,8 @@ nbsphinx_prolog = """
             display: none;
         }
     </style>
+
+     <a href="https://colab.research.google.com/github/argilla/blob/develop/docs/_source/{{ env.doc2path(env.docname, base=None) }}"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 """
 
 autodoc_typehints = "description"
