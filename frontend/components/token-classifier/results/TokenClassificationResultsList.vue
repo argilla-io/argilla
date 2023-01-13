@@ -16,13 +16,21 @@
   -->
 
 <template>
-  <results-list :dataset="dataset" @search-records="searchRecords" />
+  <results-list
+    :datasetId="datasetId"
+    :datasetTask="datasetTask"
+    @search-records="searchRecords"
+  />
 </template>
 <script>
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
   },

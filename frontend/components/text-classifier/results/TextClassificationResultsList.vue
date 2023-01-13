@@ -17,34 +17,52 @@
 
 <template>
   <results-list
-    v-if="!dataset.viewSettings.visibleRulesList"
-    :dataset="dataset"
+    v-if="!viewSettings.visibleRulesList"
+    :datasetId="datasetId"
+    :datasetTask="datasetTask"
     @search-records="searchRecords"
   >
     <template slot="results-header">
-      <rule-definition :dataset="dataset" v-if="showRulesArea" />
+      <rule-definition
+        v-if="showRulesArea"
+        :datasetId="datasetId"
+        :datasetTask="datasetTask"
+      />
     </template>
   </results-list>
-  <rules-management class="content" v-else :dataset="dataset" />
+  <rules-management
+    class="content"
+    v-else
+    :datasetId="datasetId"
+    :datasetTask="datasetTask"
+    :datasetName="datasetName"
+  />
 </template>
 
 <script>
-import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
   },
   computed: {
     viewSettings() {
-      console.log(this.dataset.name);
-      return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
+      return getViewSettingsByDatasetName(this.datasetName);
     },
     showRulesArea() {
-      return this.dataset.viewSettings.viewMode === "labelling-rules";
+      return this.viewSettings.viewMode === "labelling-rules";
     },
   },
   methods: {
