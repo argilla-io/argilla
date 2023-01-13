@@ -11,17 +11,20 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import logging
 from typing import Tuple, Type
 
 import httpx
 from packaging.version import parse
 
+from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.backend.client_adapters import (
     ElasticsearchClient,
     IClientAdapter,
     OpenSearchClient,
 )
+
+_LOGGER = logging.getLogger("argilla")
 
 
 class ClientAdapterFactory:
@@ -63,7 +66,16 @@ class ClientAdapterFactory:
         support_vector_search = True
 
         if distribution == "elasticsearch" and parse("8.5") <= parse(version):
-            client_class = ElasticsearchClient
+            if parse("8.5") <= parse(ElasticsearchClient.ES_CLIENT_VERSION):
+                client_class = ElasticsearchClient
+            else:
+                _LOGGER.warning(
+                    "Elasticsearch 8.5 backend found but installed\n"
+                    "client does not support vectors. Please upgrade your elasticsearch client\n"
+                    "if you want to support similarity search in argilla."
+                )
+                client_class = OpenSearchClient
+                support_vector_search = False
         elif distribution == "opensearch" and parse("2.2") <= parse(version):
             client_class = OpenSearchClient
         else:
@@ -74,11 +86,14 @@ class ClientAdapterFactory:
 
     @classmethod
     def _fetch_cluster_version_info(cls, hosts: str) -> Tuple[str, str]:
-        response = httpx.get(hosts)
-        data = response.json()
+        try:
+            response = httpx.get(hosts)
+            data = response.json()
 
-        version_info = data["version"]
-        version: str = version_info["number"]
-        distribution: str = version_info.get("distribution", "elasticsearch")
+            version_info = data["version"]
+            version: str = version_info["number"]
+            distribution: str = version_info.get("distribution", "elasticsearch")
 
-        return version, distribution
+            return version, distribution
+        except Exception as error:
+            raise GenericSearchError(error)

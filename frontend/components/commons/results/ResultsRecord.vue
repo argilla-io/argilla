@@ -269,6 +269,7 @@ export default {
       color: $black-20;
       overflow: visible;
       cursor: default;
+      padding: $base-space;
       &[data-title] {
         position: relative;
         @extend %has-tooltip--bottom;

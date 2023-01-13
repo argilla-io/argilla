@@ -26,6 +26,7 @@
           :items="visibleRecords"
           :min-item-size="550"
           :buffer="200"
+          :key="showLoader"
         >
           <template #before>
             <slot name="results-header" />
@@ -178,7 +179,6 @@ export default {
       this.selectedRecord = undefined;
     },
     async onPagination(page, size) {
-      document.getElementById("scroll").scrollTop = 0;
       await this.paginate({
         dataset: this.dataset,
         page: page,

@@ -184,12 +184,12 @@ class Datasets(AbstractApi):
                 for record in response["records"]:
                     yield record
 
-                    next_idx = response.get("next_idx")
-                    if next_idx:
-                        response = self.http_client.post(
-                            path=url,
-                            json={**request, "next_idx": next_idx},
-                        )
+                next_idx = response.get("next_idx")
+                if next_idx:
+                    response = self.http_client.post(
+                        path=url,
+                        json={**request, "next_idx": next_idx},
+                    )
 
     def update_record(
         self,

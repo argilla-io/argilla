@@ -9,6 +9,7 @@ on:
     branches:
       - "main"
       - "develop"
+      - "releases/**"
 
   pull_request:
     branches:

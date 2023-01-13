@@ -46,5 +46,11 @@ export default {
   :deep(.origins) {
     pointer-events: none;
   }
+  :deep(.highlight) {
+    pointer-events: all;
+  }
+  :deep(.remove-button) {
+    display: none;
+  }
 }
 </style>

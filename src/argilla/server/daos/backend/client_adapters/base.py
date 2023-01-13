@@ -238,7 +238,8 @@ class IClientAdapter(metaclass=ABCMeta):
     def set_index_mappings(
         self,
         index: str,
-        mappings: Dict[str, Any],
+        properties: Optional[Dict[str, Any]] = None,
+        **extra_cfg,
     ):
         pass
 

@@ -261,6 +261,7 @@ class GenericElasticEngineBackend(LoggingMixin):
                 _mappings[k] = [*_mappings.get(k, []), *task_mappings[k]]
             else:
                 _mappings[k] = {**_mappings.get(k, {}), **task_mappings[k]}
+
         index = dataset_records_index(id)
         self.client.create_index(
             index=index,
@@ -269,10 +270,16 @@ class GenericElasticEngineBackend(LoggingMixin):
             force_recreate=force_recreate,
         )
         if metadata_values:
-            self._configure_metadata_fields(id, metadata_values)
+            self._configure_metadata_fields(
+                index=index,
+                metadata_values=metadata_values,
+            )
 
         if vectors_cfg:
-            self._configure_vectors_fields(index, vectors_cfg)
+            self._configure_vectors_fields(
+                index=index,
+                vectors_cfg=vectors_cfg,
+            )
 
     def _configure_vectors_fields(
         self,
@@ -304,7 +311,7 @@ class GenericElasticEngineBackend(LoggingMixin):
 
     def _configure_metadata_fields(
         self,
-        id: str,
+        index: str,
         metadata_values: Dict[str, Any],
     ):
         def check_metadata_length(metadata_length: int = 0):
@@ -318,7 +325,6 @@ class GenericElasticEngineBackend(LoggingMixin):
             """Returns True if value match as nested value"""
             return isinstance(v, list) and isinstance(v[0], dict)
 
-        index = dataset_records_index(id)
         check_metadata_length(len(metadata_values))
         check_metadata_length(
             len(
@@ -337,7 +343,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             if detect_nested_type(value):
                 mappings_[f"metadata.{field}"] = mappings.nested_field()
 
-        self.client.set_index_mappings(index, mappings=mappings_)
+        self.client.set_index_mappings(index, properties=mappings_)
 
     def delete(self, id: str):
         index = dataset_records_index(id)
@@ -348,7 +354,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             )
         except InvalidSearchError:
             # It's an alias --> DELETE from original index
-            original_index = settings.old_dataset_records_index_name.format(id)
+            original_index = self._old_dataset_index(id)
             self.client.delete_index_alias(
                 index=original_index,
                 alias=index,
@@ -359,6 +365,9 @@ class GenericElasticEngineBackend(LoggingMixin):
                 index=DATASETS_INDEX_NAME,
                 id=id,
             )
+
+    def _old_dataset_index(self, id):
+        return settings.old_dataset_records_index_name.format(id)
 
     def copy(self, id_from: str, id_to: str):
         index_from = dataset_records_index(id_from)
@@ -378,11 +387,16 @@ class GenericElasticEngineBackend(LoggingMixin):
             force_recreate=force_recreate,
             mappings=datasets_index_mappings(),
         )
-        if not settings.enable_migration:
-            return
+        if settings.enable_migration:
+            try:
+                self._migrate_from_rubrix()
+            except IndexNotFoundError:
+                pass  # Nothing to migrate
 
+    def _migrate_from_rubrix(self):
         source_index = settings.old_dataset_index_name
         target_index = DATASETS_INDEX_NAME
+
         try:
             self.client.copy_index(
                 source_index=source_index,
@@ -391,14 +405,21 @@ class GenericElasticEngineBackend(LoggingMixin):
             )
             for doc in self.client.list_index_documents(index=source_index):
                 dataset_id = doc["id"]
-                index = settings.old_dataset_records_index_name.format(dataset_id)
+                index = self._old_dataset_index(dataset_id)
                 alias = dataset_records_index(dataset_id=dataset_id)
+                self._update_dynamic_mapping(index)
                 self.client.create_index_alias(
                     index=index,
                     alias=alias,
                 )
         except IndexNotFoundError:
             pass  # Nothing to migrate
+
+    def _update_dynamic_mapping(self, index: str):
+        self.client.set_index_mappings(
+            index=index,
+            dynamic=False,
+        )
 
     def list_datasets(self, query: BaseDatasetsQuery):
         return self.client.list_index_documents(

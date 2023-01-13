@@ -3,5 +3,6 @@
 :link: ../../tutorials/notebooks/deploying-text2text-dvc-explainability.html
 MLOps Steps: Deploying, Monitoring \
 NLP Tasks: Text2Text \
-Libraries: dvc
+Libraries: dvc \
+Techniques: Explainability
 ```
