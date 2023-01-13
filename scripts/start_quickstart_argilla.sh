@@ -5,44 +5,39 @@ set -e
 # Changing user
 sudo -S su user
 
-# Checks if password is passed in the env
-# if not it will run argilla with default users
-if [ -n "$ADMIN_PASSWORD" ] && [ -n "$ARGILLA_PASSWORD" ]; then
-  # Generate hashed passwords
-  admin_password=$(htpasswd -nbB "" "$ADMIN_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
-  argilla_password=$(htpasswd -nbB "" "$ARGILLA_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
+# Generate hashed passwords
+team_password=$(htpasswd -nbB "" "$TEAM_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
+argilla_password=$(htpasswd -nbB "" "$ARGILLA_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
 
-  # Create users.yml file
-  cat >/packages/users.yml <<EOF
-- username: "admin"
-  api_key: $ADMIN_API_KEY
-  full_name: Hugging Face
-  email: hfdemo@argilla.io
-  hashed_password: $admin_password
+# Create users.yml file
+cat >/packages/users.yml <<EOF
+- username: "team"
+  api_key: $TEAM_API_KEY
+  full_name: Team
+  email: team@argilla.io
+  hashed_password: $team_password
   workspaces: []
 
 - username: "argilla"
   api_key: $ARGILLA_API_KEY
-  full_name: Hugging Face
-  email: hfdemo@argilla.io
+  full_name: Argilla
+  email: argilla@argilla.io
   hashed_password: $argilla_password
-  workspaces: ["admin"]
+  workspaces: ["team"]
 EOF
-fi
-
-# Disable security in elasticsearch configuration
-sudo sed -i "s/xpack.security.enabled: true/xpack.security.enabled: false/g" /etc/elasticsearch/elasticsearch.yml
-sudo sed -i "s/cluster.initial_master_nodes/#cluster.initial_master_nodes/g" /etc/elasticsearch/elasticsearch.yml
-echo "cluster.routing.allocation.disk.threshold_enabled: false" | sudo tee -a /etc/elasticsearch/elasticsearch.yml
 
 # Create elasticsearch directory and change ownership
 sudo mkdir -p /var/run/elasticsearch
 sudo chown -R elasticsearch:elasticsearch /var/run/elasticsearch
 
-# Starting elasticsearch
+# Start elasticsearch
 sudo systemctl daemon-reload
 sudo systemctl enable elasticsearch
 sudo systemctl start elasticsearch
 
+# Load data
+if [ "$LOAD_DATA_ENABLE" == "true" ]; then
+  python3.9 /load_data.py "$TEAM_API_KEY" &
+fi
 # Starting argilla
 uvicorn argilla:app --host "0.0.0.0"
