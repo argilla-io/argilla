@@ -27,7 +27,7 @@ RUN pip3 install datasets
 
 # Create new user for starting elasticsearch
 RUN useradd -ms /bin/bash user -p "$(openssl passwd -1 ubuntu)"
-RUN echo 'user ALL=(ALL)   ALL' >> /etc/sudoers
+RUN echo 'user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 # Install argilla
 RUN chmod +x /start_quickstart_argilla.sh \
