@@ -2,21 +2,21 @@
 
 [Argilla](https://argilla.io) is a **production-ready framework for building and improving datasets** for NLP projects.
 
+```{admonition} Hugging Face Spaces Live Demo 🆕
+:class: important
 
-<div class="alert alert-info">
-
-🆕 NEW: Live demo
 Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces (login:`argilla`, password:`1234`)
-</div>
 
-<div class="alert alert-info">
+```
 
-🆕 NEW: Semantic search data labelling
-Since `1.2.0` Argilla supports adding vectors to Argilla records which can then be used for finding the most similar records to a given one. This feature uses vector or semantic search combined with more traditional search (keyword and filter based).
+```{admonition} Semantic Search data labelling 🆕
+:class: important
+
+🆕 Since `1.2.0` Argilla supports adding vectors to Argilla records which can then be used for finding the most similar records to a given one. This feature uses vector or semantic search combined with more traditional search (keyword and filter based).
 
 Learn more: [Semantic Search Deep-dive guide](../guides/features/semantic-search.ipynb)
 
-</div>
+```
 
 <iframe width="100%" height="450" src="https://www.youtube.com/embed/jP3anvp7Rto" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
