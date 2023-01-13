@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <span>
+  <div v-if="dataset">
     <div class="content">
       <slot name="header" />
       <div class="results-scroll" id="scroll">
@@ -31,7 +31,8 @@
             <slot name="results-header" />
             <similarity-record-reference-component
               v-if="referenceRecordObj && !showLoader"
-              :dataset="dataset"
+              :datasetId="datasetId"
+              :datasetTask="datasetTask"
               :referenceRecord="referenceRecordObj"
               @search-records="searchRecords"
               @show-record-info-modal="onShowRecordInfoModal"
@@ -56,7 +57,7 @@
             >
               <results-record
                 :key="`${dataset.name}-${item.id}`"
-                :datasetId="dataset.id"
+                :datasetId="datasetId"
                 :datasetTask="dataset.task"
                 :record="item"
                 @show-record-info-modal="onShowRecordInfoModal"
@@ -94,7 +95,7 @@
         @close-modal="onCloseRecordInfo"
       />
     </lazy-base-modal>
-  </span>
+  </div>
 </template>
 
 <script>
@@ -102,23 +103,30 @@ import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
 import { Vector as VectorModel } from "@/models/Vector";
 import { RefRecord as RefRecordModel } from "@/models/RefRecord";
+import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
+import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
+import { getText2TextDatasetById } from "@/models/text2Text.queries";
 import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
   },
   data() {
     return {
+      dataset: null,
       scrollComponent: undefined,
       selectedRecord: undefined,
       test: null,
     };
   },
-
   computed: {
     viewSettings() {
       return this.dataset.name
@@ -156,6 +164,9 @@ export default {
       return false;
     },
   },
+  mounted() {
+    this.getDatasetFromORM();
+  },
   methods: {
     ...mapActions({
       paginate: "entities/datasets/paginate",
@@ -177,6 +188,31 @@ export default {
     },
     searchRecords(query) {
       this.$emit("search-records", query);
+    },
+    getDatasetFromORM() {
+      try {
+        this.dataset = this.getTaskDatasetById();
+      } catch (err) {
+        this.dataset = null;
+        console.error(err);
+      }
+    },
+    getTaskDatasetById() {
+      let datasetById = null;
+      switch (this.datasetTask.toUpperCase()) {
+        case "TEXTCLASSIFICATION":
+          datasetById = getTextClassificationDatasetById(this.datasetId);
+          break;
+        case "TOKENCLASSIFICATION":
+          datasetById = getTokenClassificationDatasetById(this.datasetId);
+          break;
+        case "TEXT2TEXT":
+          datasetById = getText2TextDatasetById(this.datasetId);
+          break;
+        default:
+          throw new Error(`ERROR Unknown task: ${this.datasetTask}`);
+      }
+      return datasetById;
     },
   },
 };
