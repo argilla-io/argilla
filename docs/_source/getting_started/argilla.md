@@ -12,9 +12,9 @@ Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) p
 ```{admonition} Semantic Search data labelling 🆕
 :class: important
 
-🆕 Since `1.2.0` Argilla supports adding vectors to Argilla records which can then be used for finding the most similar records to a given one. This feature uses vector or semantic search combined with more traditional search (keyword and filter based).
+🆕 Since `1.2.0` You can add embedding vectors to Argilla records and use them to find the most similar records with the UI. This feature uses vector search combined with traditional search (keyword and filter based).
 
-Learn more: [Semantic Search Deep-dive guide](../guides/features/semantic-search.ipynb)
+Get started: [Semantic Search Deep-dive guide](../guides/features/semantic-search.ipynb)
 
 ```
 
