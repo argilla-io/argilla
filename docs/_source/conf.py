@@ -185,10 +185,10 @@ nbsphinx_prolog = (
     <div class="row">
     <div class="col">
     <a href="https://colab.research.google.com/github/argilla-io/argilla/tree/"""
-    + os.getenv("READTHEDOCS_VERSION", "main")
+    + os.getenv("READTHEDOCS_VERSION", "main").replace("-", "/")
     + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a></div>"""
     + """<div class="col"> <a href="https://github.com/argilla-io/argilla/tree/"""
-    + os.getenv("READTHEDOCS_VERSION", "main")
+    + os.getenv("READTHEDOCS_VERSION", "main").replace("-", "/")
     + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}"><img src="https://img.shields.io/badge/github-view%20source-black.svg" alt="View Source on GitHub"/></a></div>
      </div>
 """
