@@ -341,7 +341,7 @@ jobs:
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
-          repository: peterevans/dockerhub-description
+          repository: argilla-io/argilla
           readme-filepath: README.md
 
   # This job will upload a Python Package using Twine when a release is created
