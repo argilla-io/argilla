@@ -49,7 +49,7 @@
 import { mapActions } from "vuex";
 import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
 import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
-import { getText2TextDatasetById } from "@/models/text2Text.queries";
+import { getText2TextDatasetById } from "@/models/text2text.queries";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
 export default {

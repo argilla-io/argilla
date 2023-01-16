@@ -48,7 +48,7 @@ import "assets/icons/unavailable";
 import { mapActions } from "vuex";
 import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
 import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
-import { getText2TextDatasetById } from "@/models/text2Text.queries";
+import { getText2TextDatasetById } from "@/models/text2text.queries";
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 
 export default {

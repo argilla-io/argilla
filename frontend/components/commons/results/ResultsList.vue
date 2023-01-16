@@ -106,7 +106,7 @@ import { Vector as VectorModel } from "@/models/Vector";
 import { RefRecord as RefRecordModel } from "@/models/RefRecord";
 import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
 import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
-import { getText2TextDatasetById } from "@/models/text2Text.queries";
+import { getText2TextDatasetById } from "@/models/text2text.queries";
 import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
 export default {

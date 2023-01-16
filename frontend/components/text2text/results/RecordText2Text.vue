@@ -37,7 +37,7 @@
 <script>
 import { IdState } from "vue-virtual-scroller";
 import { Text2TextRecord } from "@/models/Text2Text";
-import { getText2TextDatasetById } from "@/models/text2Text.queries";
+import { getText2TextDatasetById } from "@/models/text2text.queries";
 import { mapActions } from "vuex";
 export default {
   mixins: [
