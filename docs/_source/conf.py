@@ -182,15 +182,12 @@ nbsphinx_prolog = (
 
 .. raw:: html
 
-    <div class="row">
-    <div class="col">
-    <a href="https://colab.research.google.com/github/argilla-io/argilla/tree/"""
+    <a href="https://colab.research.google.com/github/argilla-io/argilla/blob/"""
     + os.getenv("READTHEDOCS_VERSION", "main").replace("-", "/")
-    + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a></div>"""
-    + """<div class="col"> <a href="https://github.com/argilla-io/argilla/tree/"""
+    + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" style="display: inline; margin: 0" alt="Open In Colab"/></a> &nbsp;"""
+    + """<a href="https://github.com/argilla-io/argilla/tree/"""
     + os.getenv("READTHEDOCS_VERSION", "main").replace("-", "/")
-    + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}"><img src="https://img.shields.io/badge/github-view%20source-black.svg" alt="View Source on GitHub"/></a></div>
-     </div>
+    + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}" target="_blank"><img src="https://img.shields.io/badge/github-view%20source-black.svg" style="display: inline; margin: 0" alt="View Notebook on GitHub"/></a>
 """
 )
 
