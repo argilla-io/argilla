@@ -10,6 +10,7 @@ team_password=$(htpasswd -nbB "" "$TEAM_PASSWORD" | cut -d ":" -f 2 | tr -d "\n"
 argilla_password=$(htpasswd -nbB "" "$ARGILLA_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
 
 # Create users.yml file
+echo "Creating users schema"
 sudo bash -c 'cat >/packages/users.yml <<EOF
 - username: "team"
   api_key: TEAM_API_KEY
@@ -37,6 +38,7 @@ sudo mkdir -p /var/run/elasticsearch
 sudo chown -R elasticsearch:elasticsearch /var/run/elasticsearch
 
 # Start elasticsearch
+echo "Starting Elasticsearch"
 sudo systemctl daemon-reload
 sudo systemctl enable elasticsearch
 sudo systemctl start elasticsearch
@@ -47,4 +49,5 @@ if [ "$LOAD_DATA_ENABLE" == "true" ]; then
 fi
 
 # Starting argilla
+echo "Starting Argilla"
 uvicorn argilla:app --host "0.0.0.0"
