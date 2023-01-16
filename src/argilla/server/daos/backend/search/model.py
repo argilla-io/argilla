@@ -66,6 +66,16 @@ class BaseDatasetsQuery(BaseQuery):
     name: Optional[str] = None
 
 
+class VectorSearch(BaseModel):
+    name: str
+    value: List[float]
+    k: Optional[int] = Field(
+        default=None,
+        description="Number of elements to retrieve. "
+        "If not provided, the request size will be used instead",
+    )
+
+
 class BaseRecordsQuery(BaseQuery):
 
     query_text: Optional[str] = None
@@ -81,6 +91,8 @@ class BaseRecordsQuery(BaseQuery):
 
     has_annotation: Optional[bool] = None
     has_prediction: Optional[bool] = None
+
+    vector: Optional[VectorSearch] = Field(default=None)
 
 
 BackendQuery = TypeVar("BackendQuery", bound=BaseQuery)

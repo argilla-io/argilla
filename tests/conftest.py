@@ -18,7 +18,6 @@ from _pytest.logging import LogCaptureFixture
 
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
-from argilla.server.settings import settings
 
 try:
     from loguru import logger
@@ -45,7 +44,10 @@ def telemetry_track_data(mocker):
 
 
 @pytest.fixture
-def mocked_client(monkeypatch, telemetry_track_data) -> SecuredClient:
+def mocked_client(
+    monkeypatch,
+    telemetry_track_data,
+) -> SecuredClient:
 
     with TestClient(app, raise_server_exceptions=False) as _client:
         client_ = SecuredClient(_client)

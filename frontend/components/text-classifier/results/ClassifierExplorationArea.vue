@@ -55,7 +55,7 @@ export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: (vm) => `${vm.datasetName}-${vm.record.id}`,
+      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
     }),
   ],
   props: {
@@ -63,13 +63,8 @@ export default {
       type: Object,
       required: true,
     },
-    datasetName: {
-      type: String,
-      required: true,
-    },
-    paginationSize: {
-      type: Number,
-      required: true,
+    dataset: {
+      type: Object,
     },
   },
   idState() {
@@ -113,6 +108,9 @@ export default {
     },
     allowToShowAllLabels() {
       return this.paginationSize === 1 || false;
+    },
+    paginationSize() {
+      return this.dataset.viewSettings?.pagination?.size;
     },
     predictedAs() {
       return this.record.predicted_as;

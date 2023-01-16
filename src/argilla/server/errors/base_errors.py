@@ -163,7 +163,7 @@ class EntityNotFoundError(ServerError):
     HTTP_STATUS = status.HTTP_404_NOT_FOUND
 
     def __init__(self, name: str, type: Union[Type, str]):
-        self.name = name
+        self.name = name  # TODO: rename to id
         self.type = type if isinstance(type, str) else type.__name__
 
 

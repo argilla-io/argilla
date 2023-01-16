@@ -20,22 +20,14 @@
     <div class="record--left">
       <record-inputs :record="record" />
       <classifier-annotation-area
-        v-if="annotationEnabled"
-        :inputLabels="datasetLabels"
-        :datasetName="datasetName"
-        :isMultiLabel="isMultiLabel"
-        :paginationSize="paginationSize"
+        v-if="interactionsEnabled"
+        :dataset="dataset"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
-      <classifier-exploration-area
-        v-else
-        :datasetName="datasetName"
-        :paginationSize="paginationSize"
-        :record="record"
-      />
-      <div v-if="annotationEnabled" class="content__actions-buttons">
+      <classifier-exploration-area v-else :dataset="dataset" :record="record" />
+      <div v-if="interactionsEnabled" class="content__actions-buttons">
         <base-button
           v-if="allowValidate"
           class="primary"
@@ -59,59 +51,45 @@
 
 <script>
 import { mapActions } from "vuex";
-import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
-import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
-
+import {
+  TextClassificationRecord,
+  TextClassificationDataset,
+} from "@/models/TextClassification";
 export default {
   props: {
-    datasetId: {
-      type: Array,
+    dataset: {
+      type: TextClassificationDataset,
       required: true,
     },
-    datasetName: {
-      type: String,
+    record: {
+      type: TextClassificationRecord,
       required: true,
     },
-    datasetLabels: {
-      type: Array,
-      required: true,
-    },
-    recordId: {
-      type: String,
-      required: true,
+    isReferenceRecord: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
-    viewSettings() {
-      return getViewSettingsWithPaginationByDatasetName(this.datasetName);
-    },
-    record() {
-      //TODO when there will be a table for records in the ORM => replace by the record query here
-      const records = this.getTextClassificationDataset().results?.records;
-      const record =
-        records.find((record) => record.id === this.recordId) || null;
-      return record;
-    },
-    isMultiLabel() {
-      return this.getTextClassificationDataset().isMultiLabel;
-    },
-    viewMode() {
-      return this.viewSettings.viewMode;
+    interactionsEnabled() {
+      return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
-      return this.viewMode === "annotate";
+      return this.dataset.viewSettings.viewMode === "annotate";
     },
     labellingRulesView() {
-      return this.viewMode === "labelling-rules";
+      return this.dataset.viewSettings.viewMode === "labelling-rules";
     },
     allowValidate() {
       return (
         this.record.status !== "Validated" &&
-        (this.record.annotation || this.record.prediction || this.isMultiLabel)
+        (this.record.annotation ||
+          this.record.prediction ||
+          this.dataset.isMultiLabel)
       );
     },
     paginationSize() {
-      return this.viewSettings?.pagination.size;
+      return this.dataset.viewSettings?.pagination.size;
     },
   },
   methods: {
@@ -121,7 +99,7 @@ export default {
     }),
     async resetLabels() {
       await this.resetAnnotations({
-        dataset: this.getTextClassificationDataset(),
+        dataset: this.dataset,
         records: [this.record],
       });
     },
@@ -135,7 +113,7 @@ export default {
       };
 
       await this.validateAnnotations({
-        dataset: this.getTextClassificationDataset(),
+        dataset: this.dataset,
         agent: this.$auth.user.username,
         records: [
           {
@@ -153,7 +131,7 @@ export default {
       }));
       // TODO: do not validate records without labels
       await this.validateAnnotations({
-        dataset: this.getTextClassificationDataset(),
+        dataset: this.dataset,
         agent: this.$auth.user.username,
         records: [
           {
@@ -165,9 +143,6 @@ export default {
         ],
       });
     },
-    getTextClassificationDataset() {
-      return getTextClassificationDatasetById(this.datasetId);
-    },
   },
 };
 </script>
@@ -177,7 +152,7 @@ export default {
   display: flex;
   &--left {
     width: 100%;
-    padding: 50px 20px 50px 50px;
+    padding: 20px 20px 50px 50px;
     .list__item--annotation-mode & {
       padding-right: 240px;
     }
@@ -190,7 +165,7 @@ export default {
     height: 100%;
     overflow: auto;
     text-align: right;
-    padding: 4em 1.4em 1em 1em;
+    padding: 1em 1.4em 1em 1em;
     @extend %hide-scrollbar;
   }
 }

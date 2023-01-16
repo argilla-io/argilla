@@ -27,6 +27,7 @@ from argilla.client.sdk.commons.models import (
     BaseRecord,
     PredictionStatus,
     ScoreRange,
+    SdkVectorSearch,
     TaskStatus,
     UpdateDatasetRequest,
 )
@@ -81,6 +82,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
             inputs=record.inputs,
             prediction=prediction,
             annotation=annotation,
+            vectors=cls._from_client_vectors(record.vectors),
             multi_label=record.multi_label,
             status=record.status,
             explanation=record.explanation,
@@ -119,6 +121,7 @@ class TextClassificationRecord(CreationTextClassificationRecord):
             prediction_agent=self.prediction.agent if self.prediction else None,
             annotation=annotations,
             annotation_agent=self.annotation.agent if self.annotation else None,
+            vectors=self._to_client_vectors(self.vectors),
             explanation={
                 key: [
                     ClientTokenAttributions.parse_obj(attribution)
@@ -151,6 +154,8 @@ class TextClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+
+    vector: Optional[SdkVectorSearch] = Field(default=None)
 
     uncovered_by_rules: List[str] = Field(
         default_factory=list,

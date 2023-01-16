@@ -17,6 +17,9 @@ import datetime
 import functools
 import inspect
 import uuid
+from urllib.parse import urlparse
+
+from pydantic import BaseModel
 
 try:
     import ujson as json
@@ -59,7 +62,9 @@ class _Client:
         self.base_url = self.base_url.strip()
         if self.base_url.endswith("/"):
             self.base_url = self.base_url[:-1]
-        if "_" in self.base_url and self.base_url.startswith("https://"):
+
+        url = urlparse(self.base_url)
+        if url.scheme == "https" and "_" in url.hostname:
             self.__httpx__ = None
             raise ValueError(
                 'Avoid using hostnames with underscores "_". For reference see:'
@@ -291,7 +296,11 @@ ResponseType = TypeVar("ResponseType")
 
 
 @dataclasses.dataclass
-class AuthenticatedClient(Client, _ClientCommonDefaults, _AuthenticatedClient):
+class AuthenticatedClient(
+    Client,
+    _ClientCommonDefaults,
+    _AuthenticatedClient,
+):
     """A Client which has been authenticated for use on secured endpoints"""
 
     def __hash__(self):

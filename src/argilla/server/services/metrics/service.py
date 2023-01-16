@@ -102,6 +102,11 @@ class MetricsService:
                 search=DaoRecordsSearch(query=query),
                 shuffle=metric.shuffle_records,
                 limit=metric.records_to_fetch,
+                exclude_fields={
+                    "vectors",
+                    "metrics",
+                    "metadata",
+                },  # Load records more efficiently
             )
             return metric.apply(map(record_class.parse_obj, records))
 

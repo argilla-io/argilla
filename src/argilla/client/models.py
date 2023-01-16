@@ -32,6 +32,8 @@ from argilla.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
 
+Vectors = Dict[str, List[float]]
+
 
 class _Validators(BaseModel):
     """Base class for our record models that takes care of general validations"""
@@ -154,6 +156,8 @@ class TextClassificationRecord(_Validators):
             A string or a list of strings (multilabel) corresponding to the annotation (gold label) for the record.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        vectors:
+            Vectors data mappings of the natural language text containing class attributes
         multi_label:
             Is the prediction/annotation for a multi label classification task? Defaults to `False`.
         explanation:
@@ -162,7 +166,7 @@ class TextClassificationRecord(_Validators):
         id:
             The id of the record. By default (`None`), we will generate a unique ID for you.
         metadata:
-            Meta data for the record. Defaults to `{}`.
+            Metadata for the record. Defaults to `{}`.
         status:
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
@@ -179,7 +183,10 @@ class TextClassificationRecord(_Validators):
         >>> import argilla as rg
         >>> record = rg.TextClassificationRecord(
         ...     text="My first argilla example",
-        ...     prediction=[('eng', 0.9), ('esp', 0.1)]
+        ...     prediction=[('eng', 0.9), ('esp', 0.1)],
+        ...     vectors = {
+        ...         "english_bert_vector": [1.2, 2.3, 3.1, 3.3]
+        ...     }
         ... )
         >>>
         >>> # Various inputs
@@ -189,8 +196,12 @@ class TextClassificationRecord(_Validators):
         ...         "body": "Por usar argilla te ha tocado este premio: <link>"
         ...     },
         ...     prediction=[('spam', 0.99), ('ham', 0.01)],
-        ...     annotation="spam"
-        ... )
+        ...     annotation="spam",
+        ...     vectors = {
+        ...                     "distilbert_uncased":  [1.13, 4.1, 6.3, 4.2, 9.1],
+        ...                     "xlm_roberta_cased": [1.1, 2.1, 3.3, 4.2, 2.1],
+        ...             }
+        ...     )
     """
 
     text: Optional[str] = None
@@ -200,6 +211,7 @@ class TextClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[Union[str, List[str]]] = None
     annotation_agent: Optional[str] = None
+    vectors: Optional[Vectors] = None
 
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
@@ -270,10 +282,12 @@ class TokenClassificationRecord(_Validators):
             name of the entity, the second and third entry correspond to the start and stop char index of the entity.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        vectors:
+            Vector data mappings of the natural language text containing class attributes'
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:
-            Meta data for the record. Defaults to `{}`.
+            Metadata for the record. Defaults to `{}`.
         status:
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
@@ -290,7 +304,11 @@ class TokenClassificationRecord(_Validators):
         >>> record = rg.TokenClassificationRecord(
         ...     text = "Michael is a professor at Harvard",
         ...     tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
-        ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)]
+        ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)],
+        ...     vectors = {
+        ...            "bert_base_uncased": [3.2, 4.5, 5.6, 8.9]
+        ...          }
+        ...       ]
         ... )
     """
 
@@ -303,6 +321,7 @@ class TokenClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
     annotation_agent: Optional[str] = None
+    vectors: Optional[Vectors] = None
 
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -486,10 +505,12 @@ class Text2TextRecord(_Validators):
             A string representing the expected output text for the given input text.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        vectors:
+            Embedding data mappings of the natural language text containing class attributes'
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:
-            Meta data for the record. Defaults to `{}`.
+            Metadata for the record. Defaults to `{}`.
         status:
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
@@ -506,7 +527,11 @@ class Text2TextRecord(_Validators):
         >>> import argilla as rg
         >>> record = rg.Text2TextRecord(
         ...     text="My name is Sarah and I love my dog.",
-        ...     prediction=["Je m'appelle Sarah et j'aime mon chien."]
+        ...     prediction=["Je m'appelle Sarah et j'aime mon chien."],
+        ...     vectors = {
+        ...         "bert_base_uncased": [1.2, 2.3, 3.4, 5.2, 6.5],
+        ...         "xlm_multilingual_uncased": [2.2, 5.3, 5.4, 3.2, 2.5]
+        ...     }
         ... )
     """
 
@@ -516,6 +541,7 @@ class Text2TextRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[str] = None
     annotation_agent: Optional[str] = None
+    vectors: Optional[Vectors] = None
 
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)

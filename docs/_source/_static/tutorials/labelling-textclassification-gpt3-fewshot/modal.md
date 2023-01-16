@@ -3,6 +3,6 @@
 :link: ../../tutorials/notebooks/labelling-textclassification-gpt3-fewshot.html
 MLOps Steps: Labelling \
 NLP Tasks: TextClassification \
-Libraries: openai \
-Techniques: few-shot
+Libraries: OpenAI \
+Techniques: Few-shot, Explainability
 ```

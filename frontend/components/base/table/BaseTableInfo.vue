@@ -90,6 +90,7 @@
                       </base-action-tooltip>
                     </span>
                     <base-date
+                      format="date-relative-now"
                       v-else-if="column.type === 'date'"
                       :date="itemValue(item, column)"
                     />

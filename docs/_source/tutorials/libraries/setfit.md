@@ -9,8 +9,6 @@ SetFit is an efficient and prompt-free framework for few-shot fine-tuning of Sen
 
 ```{include} /_static/tutorials/training-textclassification-setfit-fewshot/modal.md
 ```
-
 ```{include} /_static/tutorials/training-textclassification-setfit-sentiment/modal.md
 ```
-
 ````

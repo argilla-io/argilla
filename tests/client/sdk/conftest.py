@@ -58,6 +58,8 @@ class Helpers:
         def check_schema_props(client_props, server_props):
             different_props = []
             for name, definition in client_props.items():
+                if name == "type":
+                    continue
                 if name not in server_props:
                     LOGGER.warning(
                         f"Client property {name} not found in server properties. "
@@ -85,7 +87,9 @@ class Helpers:
         return check_schema_props(client_props, server_props)
 
     def _expands_schema(
-        self, props: Dict[str, Any], definitions: List[Dict[str, Any]]
+        self,
+        props: Dict[str, Any],
+        definitions: List[Dict[str, Any]],
     ) -> Dict[str, Any]:
         new_schema = {}
         for name, definition in props.items():
@@ -102,6 +106,14 @@ class Helpers:
                 expanded_props = self._expands_schema(field_props, definitions)
                 definition["items"] = expanded_props.get("properties", expanded_props)
                 new_schema[name] = definition
+            elif "additionalProperties" in definition and "$ref" in definition.get(
+                "additionalProperties", {}
+            ):
+                additionalProperties_refs = self._expands_schema(
+                    {name: definition["additionalProperties"]},
+                    definitions=definitions,
+                )
+                new_schema.update(additionalProperties_refs)
             elif "allOf" in definition:
                 allOf_expanded = [
                     self._expands_schema(

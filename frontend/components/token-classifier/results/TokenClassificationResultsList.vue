@@ -16,11 +16,12 @@
   -->
 
 <template>
-  <results-list :dataset="dataset">
-    <template slot="record" slot-scope="results">
+  <results-list :dataset="dataset" @search-records="searchRecords">
+    <template slot="record" slot-scope="slotProps">
       <record-token-classification
         :dataset="dataset"
-        :record="results.record"
+        :record="slotProps.record"
+        :isReferenceRecord="slotProps.isReferenceRecord"
       />
     </template>
   </results-list>
@@ -31,6 +32,11 @@ export default {
     dataset: {
       type: Object,
       required: true,
+    },
+  },
+  methods: {
+    searchRecords(query) {
+      this.$emit("search-records", query);
     },
   },
 };

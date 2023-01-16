@@ -27,6 +27,7 @@ from argilla.client.sdk.commons.models import (
     BaseRecord,
     PredictionStatus,
     ScoreRange,
+    SdkVectorSearch,
     TaskStatus,
     UpdateDatasetRequest,
 )
@@ -85,6 +86,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             text=record.text,
             prediction=prediction,
             annotation=annotation,
+            vectors=cls._from_client_vectors(record.vectors),
             status=record.status,
             id=record.id,
             metadata=record.metadata,
@@ -113,6 +115,7 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
             if self.annotation
             else None,
             annotation_agent=self.annotation.agent if self.annotation else None,
+            vectors=self._to_client_vectors(self.vectors),
             id=self.id,
             event_timestamp=self.event_timestamp,
             status=self.status,
@@ -140,3 +143,5 @@ class TokenClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+
+    vector: Optional[SdkVectorSearch] = Field(default=None)

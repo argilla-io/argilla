@@ -4,6 +4,6 @@
 
 MLOps Steps: Labelling \
 NLP Tasks: TokenClassification (NER) \
-Libraries: flair  \
+Libraries: FlAIr  \
 Techniques: Zero-shot classifcation
 ```

@@ -8,4 +8,6 @@ SentenceTransformers is a Python framework for state-of-the-art sentence, text a
 
 ```{include} /_static/tutorials/labelling-textclassification-sentencetransformers-weaksupervision/modal.md
 ```
+```{include} /_static/tutorials/labelling-textclassification-sentence-transformers-semantic/modal.md
+```
 ````

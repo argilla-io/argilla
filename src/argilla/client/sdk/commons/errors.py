@@ -11,9 +11,27 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Any
 
 
 class BaseClientError(Exception):
+    pass
+
+
+class WrongResponseError(BaseClientError):
+    def __init__(self, message: str, response: Any):
+        self.message = message
+        self.response = response
+
+    def __str__(self):
+        return (
+            f"\nUnexpected response: {self.message}"
+            "\nResponse content:"
+            f"\n{self.response}"
+        )
+
+
+class InputValueError(BaseClientError):
     pass
 
 
