@@ -84,6 +84,12 @@ export default {
           : this.error;
       }
     },
+    encodeLoginData() {
+      const { username, password } = this.login;
+      return `username=${encodeURIComponent(
+        username
+      )}&password=${encodeURIComponent(password)}`;
+    },
   },
   methods: {
     nextRedirect() {
@@ -93,13 +99,10 @@ export default {
       });
     },
     async userLogin() {
-      const { username, password } = this.login;
       try {
         await this.$store.dispatch("entities/deleteAll");
         await this.$auth.loginWith("authProvider", {
-          data: `username=${encodeURIComponent(
-            username
-          )}&password=${encodeURIComponent(password)}`,
+          data: this.encodeLoginData,
         });
         this.nextRedirect();
       } catch (err) {
