@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [8.5, 8.2, 7.17, 7.14]
+        version: [ 8.5, 8.2, 7.17, 7.14 ]
     defaults:
       run:
         shell: bash -l {0}
@@ -335,6 +335,14 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.AR_DOCKER_USERNAME }}
+          password: ${{ secrets.AR_DOCKER_PASSWORD }}
+          repository: peterevans/dockerhub-description
+          readme-filepath: README.md
 
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
