@@ -4,7 +4,10 @@ import { TextClassificationRecord } from "@/models/TextClassification";
 
 let wrapper = null;
 const options = {
+  stubs: ["nuxt", "results-record"],
   propsData: {
+    datasetId: ["owner", "name"],
+    datasetTask: "TextClassification",
     dataset: {
       type: Object,
       viewSettings: {
