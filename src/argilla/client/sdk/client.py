@@ -16,17 +16,11 @@ import dataclasses
 import datetime
 import functools
 import inspect
+import json
 import uuid
-from urllib.parse import urlparse
-
-from pydantic import BaseModel
-
-try:
-    import ujson as json
-except ModuleNotFoundError:
-    import json
-
+from json import JSONEncoder
 from typing import Dict, Optional, TypeVar
+from urllib.parse import urlparse
 
 import httpx
 
@@ -77,7 +71,7 @@ class _AuthenticatedClient(_Client):
     token: str
 
 
-class _EnhancedJSONEncoder(json.JSONEncoder):
+class _EnhancedJSONEncoder(JSONEncoder):
     def default(self, o):
         if dataclasses.is_dataclass(o):
             return dataclasses.asdict(o)
