@@ -32,6 +32,7 @@ describe("FilterSimilarityComponent", () => {
     testIfActiveClassIsVisible(true);
   });
   it.skip("expect to emit 'search-records'", async () => {
+    // FIXME : the test is failing
     await wrapper.setProps({ filterIsActive: true });
     const query = { vector: null };
     const removeButton = wrapper.find(".filter__similarity__button");

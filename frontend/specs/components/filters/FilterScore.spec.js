@@ -3,6 +3,7 @@ import FilterScore from "@/components/commons/header/filters/FilterScore";
 
 function mountFilterScore() {
   return mount(FilterScore, {
+    stubs: ["filter-dropdown", "vega-lite"],
     propsData: {
       filter: {
         key: "score",

@@ -6,9 +6,9 @@ exports[`RecordExtraActions renders properly 1`] = `
     </svg></a>
   <div class="extra-actions__content">
     <div><span>View record info</span></div>
-    <base-action-tooltip tooltip="Copied">
+    <base-action-tooltip-stub tooltip="Copied">
       <div><span>Copy text</span></div>
-    </base-action-tooltip>
+    </base-action-tooltip-stub>
     <div><span>Discard record</span></div>
   </div>
 </div>

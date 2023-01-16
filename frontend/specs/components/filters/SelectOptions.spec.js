@@ -3,6 +3,7 @@ import SelectOptions from "@/components/commons/header/filters/SelectOptions";
 
 function mountSelectOptions() {
   return mount(SelectOptions, {
+    stubs: ["base-checkbox"],
     propsData: {
       options: ["NEGATIVE", "POSITIVE", "OTHER"],
     },

@@ -4,6 +4,7 @@ const $entitiesMaxColors = 50;
 
 function mountEntitiesSelector() {
   return mount(EntitiesSelector, {
+    stubs: ["entity-label"],
     propsData: {
       datasetId: ["name", "owner"],
       datasetLastSelectedEntity: {

@@ -8,6 +8,7 @@ const props = {
 let wrapper = null;
 beforeEach(() => {
   wrapper = shallowMount(ComponentTextClassifierHelpInfo, {
+    stubs: ["lazy-base-modal", "base-button"],
     propsData: props,
   });
 });

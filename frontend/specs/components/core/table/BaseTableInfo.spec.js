@@ -7,6 +7,12 @@ const $route = {
 
 function mountBaseTableInfo() {
   return mount(BaseTableInfo, {
+    stubs: [
+      "lazy-table-filtrable-column",
+      "base-modal",
+      "base-button",
+      "base-modal",
+    ],
     propsData: {
       actions: [],
       columns: [
