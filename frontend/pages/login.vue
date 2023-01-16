@@ -84,7 +84,7 @@ export default {
           : this.error;
       }
     },
-    encodeLoginData() {
+    encodedLoginData() {
       const { username, password } = this.login;
       return `username=${encodeURIComponent(
         username
@@ -102,7 +102,7 @@ export default {
       try {
         await this.$store.dispatch("entities/deleteAll");
         await this.$auth.loginWith("authProvider", {
-          data: this.encodeLoginData,
+          data: this.encodedLoginData,
         });
         this.nextRedirect();
       } catch (err) {
