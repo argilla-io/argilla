@@ -59,9 +59,7 @@
 
 <script>
 import { mapActions } from "vuex";
-import {
-  TextClassificationRecord,
-} from "@/models/TextClassification";
+import { TextClassificationRecord } from "@/models/TextClassification";
 import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
 
 export default {

@@ -46,7 +46,6 @@
 <script>
 import "assets/icons/unavailable";
 import { mapActions } from "vuex";
-import { TextClassificationDataset } from "@/models/TextClassification";
 import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
 import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
 import { getText2TextDatasetById } from "@/models/text2Text.queries";
