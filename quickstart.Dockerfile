@@ -45,4 +45,4 @@ RUN sed -i "s/cluster.initial_master_nodes/#cluster.initial_master_nodes/g" /etc
 RUN sed -i '$ a\cluster.routing.allocation.disk.threshold_enabled: false' /etc/elasticsearch/elasticsearch.yml
 
 # Executing argilla along with elasticsearch
-CMD /bin/bash /start_quickstart_argilla.sh
+CMD /start_quickstart_argilla.sh

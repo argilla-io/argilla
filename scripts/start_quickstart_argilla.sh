@@ -10,21 +10,27 @@ team_password=$(htpasswd -nbB "" "$TEAM_PASSWORD" | cut -d ":" -f 2 | tr -d "\n"
 argilla_password=$(htpasswd -nbB "" "$ARGILLA_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
 
 # Create users.yml file
-cat >/packages/users.yml <<EOF
+sudo bash -c 'cat >/packages/users.yml <<EOF
 - username: "team"
-  api_key: $TEAM_API_KEY
+  api_key: TEAM_API_KEY
   full_name: Team
   email: team@argilla.io
-  hashed_password: $team_password
+  hashed_password: TEAM_PASSWORD
   workspaces: []
 
 - username: "argilla"
-  api_key: $ARGILLA_API_KEY
+  api_key: ARGILLA_API_KEY
   full_name: Argilla
   email: argilla@argilla.io
-  hashed_password: $argilla_password
+  hashed_password: ARGILLA_PASSWORD
   workspaces: ["team"]
-EOF
+EOF'
+
+# Update API_KEY & PASSWORD in users.yml file
+sudo sed -i 's,TEAM_PASSWORD,'"$team_password"',g' /packages/users.yml
+sudo sed -i 's,ARGILLA_PASSWORD,'"$argilla_password"',g' /packages/users.yml
+sudo sed -i 's,TEAM_API_KEY,'"$TEAM_API_KEY"',g' /packages/users.yml
+sudo sed -i 's,ARGILLA_API_KEY,'"$ARGILLA_API_KEY"',g' /packages/users.yml
 
 # Create elasticsearch directory and change ownership
 sudo mkdir -p /var/run/elasticsearch
@@ -39,5 +45,6 @@ sudo systemctl start elasticsearch
 if [ "$LOAD_DATA_ENABLE" == "true" ]; then
   python3.9 /load_data.py "$TEAM_API_KEY" &
 fi
+
 # Starting argilla
 uvicorn argilla:app --host "0.0.0.0"
