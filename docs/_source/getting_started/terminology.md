@@ -45,3 +45,4 @@ Best practices and methods that can be applied during `Machine Learning` within 
 | 👮 Weak Supervision      | Use `rules and functions` to obtain initial annotations before manually correcting them.      |
 | 🔎 Explainability and bias       | `understand` and explain how a model produced a prediction and be aware of potential `systematic errors`.     |
 | 🔫 Few-shot classification      | Model and techniques that perform reasonably well using only a `few or zero training samples`.        |
+| 🪞 Semantic Search | This built-in search uses vectors for text and enables Approximate KNN for semantic search on these vectors.    |
