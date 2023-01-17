@@ -3,7 +3,7 @@
 set -e
 
 # Changing user
-#sudo -S su user
+sudo -S su user
 
 # Generate hashed passwords
 team_password=$(htpasswd -nbB "" "$TEAM_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
