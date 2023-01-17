@@ -161,9 +161,7 @@ export default {
     background: none;
   }
 }
-// .span span {
-//   display: inline;
-// }
+
 .list__item--annotation-mode span span {
   cursor: text;
 }

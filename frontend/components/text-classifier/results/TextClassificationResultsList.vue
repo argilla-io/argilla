@@ -43,6 +43,7 @@
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
+  name: "TextClassificationResultsList",
   props: {
     datasetId: {
       type: Array,

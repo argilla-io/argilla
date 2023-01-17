@@ -34,6 +34,7 @@ export default {
   props: {
     entities: {
       type: Array,
+      required: true,
     },
     datasetName: {
       type: String,

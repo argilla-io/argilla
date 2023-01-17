@@ -110,6 +110,7 @@ import { getText2TextDatasetById } from "@/models/text2text.queries";
 import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
+  name: "ResultsList",
   props: {
     datasetId: {
       type: Array,

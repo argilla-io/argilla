@@ -17,6 +17,7 @@
 
 <template>
   <results-list
+    ref="tokenClassificationResultsListComponent"
     :datasetId="datasetId"
     :datasetTask="datasetTask"
     @search-records="searchRecords"

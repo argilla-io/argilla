@@ -17,6 +17,7 @@
 
 <template>
   <results-list
+    ref="text2textResultsListComponent"
     :datasetId="datasetId"
     :datasetTask="datasetTask"
     @search-records="searchRecords"
