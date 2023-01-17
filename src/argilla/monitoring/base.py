@@ -67,6 +67,8 @@ class DatasetRecordsConsumer(threading.Thread):
         self.retries = retries
         self.timeout = timeout
 
+        atexit.register(self.shutdown)
+
     def run(self):
         """Runs the consumer."""
         while self.running:
@@ -75,6 +77,12 @@ class DatasetRecordsConsumer(threading.Thread):
     def pause(self):
         """Pause the consumer."""
         self.running = False
+
+    def shutdown(self) -> None:
+        """Shutdown the consumer."""
+        print("Shutting down consumer")
+        while self.log_next_batch():
+            continue
 
     def log_next_batch(self):
         """Upload the next batch of items, return whether successful."""
@@ -207,7 +215,10 @@ class BaseMonitor(wrapt.ObjectProxy):
         """Stop consumers"""
         for consumer in self._consumers.values():
             try:
+                while consumer.log_next_batch():
+                    continue
                 consumer.pause()
+                consumer.shutdown()
                 consumer.join()
             except RuntimeError:
                 pass
