@@ -11,7 +11,7 @@ argilla_password=$(htpasswd -nbB "" "$ARGILLA_PASSWORD" | cut -d ":" -f 2 | tr -
 
 # Create users.yml file
 echo "Creating users schema"
-sudo bash -c 'cat >/home/user/app/packages/users.yml <<EOF
+cat <<EOF | sudo tee -a "$HOME"/app/packages/users.yml
 - username: "team"
   api_key: TEAM_API_KEY
   full_name: Team
@@ -25,7 +25,7 @@ sudo bash -c 'cat >/home/user/app/packages/users.yml <<EOF
   email: argilla@argilla.io
   hashed_password: ARGILLA_PASSWORD
   workspaces: ["team"]
-EOF'
+EOF
 
 # Update API_KEY & PASSWORD in users.yml file
 sudo sed -i 's,TEAM_PASSWORD,'"$team_password"',g' "$HOME"/app/packages/users.yml
@@ -45,6 +45,7 @@ sudo systemctl start elasticsearch
 
 # Load data
 if [ "$LOAD_DATA_ENABLE" == "true" ]; then
+  echo "Starting to load data"
   python3.9 "$HOME"/app/load_data.py "$TEAM_API_KEY" &
 fi
 
