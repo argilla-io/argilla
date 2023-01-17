@@ -3,7 +3,7 @@
 set -e
 
 # Changing user
-sudo -S su user
+#sudo -S su user
 
 # Generate hashed passwords
 team_password=$(htpasswd -nbB "" "$TEAM_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
@@ -11,7 +11,7 @@ argilla_password=$(htpasswd -nbB "" "$ARGILLA_PASSWORD" | cut -d ":" -f 2 | tr -
 
 # Create users.yml file
 echo "Creating users schema"
-sudo bash -c 'cat >/packages/users.yml <<EOF
+sudo bash -c 'cat >/home/user/app/packages/users.yml <<EOF
 - username: "team"
   api_key: TEAM_API_KEY
   full_name: Team
@@ -28,10 +28,10 @@ sudo bash -c 'cat >/packages/users.yml <<EOF
 EOF'
 
 # Update API_KEY & PASSWORD in users.yml file
-sudo sed -i 's,TEAM_PASSWORD,'"$team_password"',g' /packages/users.yml
-sudo sed -i 's,ARGILLA_PASSWORD,'"$argilla_password"',g' /packages/users.yml
-sudo sed -i 's,TEAM_API_KEY,'"$TEAM_API_KEY"',g' /packages/users.yml
-sudo sed -i 's,ARGILLA_API_KEY,'"$ARGILLA_API_KEY"',g' /packages/users.yml
+sudo sed -i 's,TEAM_PASSWORD,'"$team_password"',g' "$HOME"/app/packages/users.yml
+sudo sed -i 's,ARGILLA_PASSWORD,'"$argilla_password"',g' "$HOME"/app/packages/users.yml
+sudo sed -i 's,TEAM_API_KEY,'"$TEAM_API_KEY"',g' "$HOME"/app/packages/users.yml
+sudo sed -i 's,ARGILLA_API_KEY,'"$ARGILLA_API_KEY"',g' "$HOME"/app/packages/users.yml
 
 # Create elasticsearch directory and change ownership
 sudo mkdir -p /var/run/elasticsearch
@@ -45,7 +45,7 @@ sudo systemctl start elasticsearch
 
 # Load data
 if [ "$LOAD_DATA_ENABLE" == "true" ]; then
-  python3.9 /load_data.py "$TEAM_API_KEY" &
+  python3.9 "$HOME"/app/load_data.py "$TEAM_API_KEY" &
 fi
 
 # Starting argilla
