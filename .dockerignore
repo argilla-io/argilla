@@ -9,4 +9,3 @@
 !scripts/wait-for-it.sh
 !scripts/start_quickstart_argilla.sh
 !scripts/load_data.py
-!users.yml

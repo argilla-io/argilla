@@ -25,7 +25,6 @@ from argilla.labeling.text_classification import Rule, add_rules
 
 def load_datasets():
     # This is the code that you want to execute when the endpoint is available
-    print("Argilla is available! Loading datasets")
     api_key = sys.argv[-1]
     rg.init(api_key=api_key, workspace="team")
 
