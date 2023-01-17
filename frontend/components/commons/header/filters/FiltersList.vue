@@ -223,7 +223,7 @@ export default {
             group: "Metadata",
             placeholder: "Select options",
             id: key,
-            options: Object.keys(filterContent).includes("rubrix:stats")
+            options: Object.keys(filterContent).includes("argilla:stats")
               ? undefined
               : filterContent,
             selected: (this.dataset.query.metadata || {})[key] || [],
