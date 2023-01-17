@@ -34,7 +34,7 @@ COPY dist/*.whl $HOME/app/packages/
 # Copy scripts
 COPY scripts/load_data.py $HOME/app/
 COPY scripts/start_quickstart_argilla.sh $HOME/app/
-COPY users.yml $HOME/app/packages/
+#COPY users.yml $HOME/app/packages/
 RUN sudo chmod +x $HOME/app/start_quickstart_argilla.sh
 
 

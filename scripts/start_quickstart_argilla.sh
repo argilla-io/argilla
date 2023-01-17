@@ -28,10 +28,10 @@ echo "Creating users schema"
 #EOF
 
 # Update API_KEY & PASSWORD in users.yml file
-sudo sed -i 's,TEAM_PASSWORD,'"$team_password"',g' "$HOME"/app/packages/users.yml
-sudo sed -i 's,ARGILLA_PASSWORD,'"$argilla_password"',g' "$HOME"/app/packages/users.yml
-sudo sed -i 's,TEAM_API_KEY,'"$TEAM_API_KEY"',g' "$HOME"/app/packages/users.yml
-sudo sed -i 's,ARGILLA_API_KEY,'"$ARGILLA_API_KEY"',g' "$HOME"/app/packages/users.yml
+#sudo sed -i 's,TEAM_PASSWORD,'"$team_password"',g' "$HOME"/app/packages/users.yml
+#sudo sed -i 's,ARGILLA_PASSWORD,'"$argilla_password"',g' "$HOME"/app/packages/users.yml
+#sudo sed -i 's,TEAM_API_KEY,'"$TEAM_API_KEY"',g' "$HOME"/app/packages/users.yml
+#sudo sed -i 's,ARGILLA_API_KEY,'"$ARGILLA_API_KEY"',g' "$HOME"/app/packages/users.yml
 
 # Create elasticsearch directory and change ownership
 echo "Creating ES folder"
