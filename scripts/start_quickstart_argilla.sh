@@ -34,6 +34,7 @@ sudo sed -i 's,TEAM_API_KEY,'"$TEAM_API_KEY"',g' "$HOME"/app/packages/users.yml
 sudo sed -i 's,ARGILLA_API_KEY,'"$ARGILLA_API_KEY"',g' "$HOME"/app/packages/users.yml
 
 # Create elasticsearch directory and change ownership
+echo "Creating ES folder"
 sudo mkdir -p /var/run/elasticsearch
 sudo chown -R elasticsearch:elasticsearch /var/run/elasticsearch
 
