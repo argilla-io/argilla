@@ -1,0 +1,13 @@
+- username: "team"
+  api_key: TEAM_API_KEY
+  full_name: Team
+  email: team@argilla.io
+  hashed_password: $2y$05$z676T/3vMdGovK4fgGiQhO.AyKLN39YJDZROWNDYIyrUWTAuCQcWO
+  workspaces: [ ]
+
+- username: "argilla"
+  api_key: ARGILLA_API_KEY
+  full_name: Argilla
+  email: argilla@argilla.io
+  hashed_password: $2y$05$z676T/3vMdGovK4fgGiQhO.AyKLN39YJDZROWNDYIyrUWTAuCQcWO
+  workspaces: [ "team" ]
