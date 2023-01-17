@@ -224,7 +224,7 @@ export default {
             placeholder: "Select options",
             id: key,
             options: Object.keys(filterContent).includes("argilla:stats")
-              ? undefined
+              ? null
               : filterContent,
             selected: (this.dataset.query.metadata || {})[key] || [],
           };
