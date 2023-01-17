@@ -255,12 +255,23 @@ jobs:
           path: dist
 
   deploy_docker:
-    name: Build latest docker image
+    name: Build docker image
     runs-on: ubuntu-latest
     needs:
       - build
       - test-elastic
       - test-opensearch
+    strategy:
+      matrix:
+        include:
+          - image: argilla/argilla-server
+            dockerfile: release.Dockerfile
+            readme: README.md
+
+          - image: argilla/argilla-quickstart
+            dockerfile: quickstart.Dockerfile
+            readme: quickstart.README.md
+
     defaults:
       run:
         shell: bash -l {0}
@@ -278,7 +289,7 @@ jobs:
         id: meta
         uses: crazy-max/ghaction-docker-meta@v2
         with:
-          images: argilla/argilla-server
+          images: ${{ matrix.image }}
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -290,48 +301,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: release.Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  deploy_quickstart_docker:
-    name: Build latest quickstart docker image
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - test-elastic
-      - test-opensearch
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - name: Checkout Code 🛎
-        uses: actions/checkout@v2
-
-      - name: Download python package
-        uses: actions/download-artifact@v2
-        with:
-          name: python-package
-          path: dist
-
-      - name: Docker meta
-        id: meta
-        uses: crazy-max/ghaction-docker-meta@v2
-        with:
-          images: argilla/argilla-quickstart
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.AR_DOCKER_USERNAME }}
-          password: ${{ secrets.AR_DOCKER_PASSWORD }}
-
-      - name: Build & push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: quickstart.Dockerfile
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -341,8 +311,8 @@ jobs:
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
-          repository: argilla/argilla-quickstart
-          readme-filepath: quickstart.README.md
+          repository: ${{ matrix.image }}
+          readme-filepath: ${{ matrix.readme }}
 
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
