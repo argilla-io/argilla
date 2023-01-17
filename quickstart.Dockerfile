@@ -22,8 +22,8 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3.9 get-pip.py
 RUN pip3 install datasets
 
-COPY start.sh /
-RUN chmod +x /start.sh
+COPY scripts/start_quickstart_argilla.sh /
+RUN chmod +x /start_quickstart_argilla.sh
 
 COPY scripts/load_data.py /
 COPY dist/*.whl /packages/
@@ -37,4 +37,4 @@ RUN touch "$HOME"/users.yml
 RUN chown -R elasticsearch:elasticsearch "$HOME"/users.yml
 RUN chmod 777 "$HOME"/users.yml
 
-CMD ["/start.sh"]
+CMD ["/start_quickstart_argilla.sh"]
