@@ -173,7 +173,8 @@ class DatasetBase:
         return dataset
 
     def _to_datasets_dict(self) -> Dict:
-        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`"""
+        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`
+        """
         raise NotImplementedError
 
     @classmethod
@@ -460,13 +461,31 @@ class DatasetBase:
                 "Please provide a spacy language model to prepare the dataset for"
                 " training with the spacy framework."
             )
-        return self._prepare_for_training_with_spacy(
-            nlp=lang, train_size=train_size, test_size=test_size
-        )
 
-    @_requires_datasets
-    def _prepare_for_training_with_spacy(self, **kwargs) -> "datasets.Dataset":
-        """Prepares the dataset for training using the "spacy" framework.
+        if train_size or test_size:
+            from sklearn.model_selection import train_test_split
+
+            records_train, records_test = train_test_split(
+                self._records, train_size=train_size, test_size=test_size
+            )
+            train_docbin = self._prepare_for_training_with_spacy(
+                nlp=lang, records=records_train
+            )
+            test_docbin = self._prepare_for_training_with_spacy(
+                nlp=lang, records=records_test
+            )
+
+            return train_docbin, test_docbin
+        else:
+            return self._prepare_for_training_with_spacy(
+                nlp=lang, records=self._records
+            )
+
+    @_requires_spacy
+    def _prepare_for_training_with_spacy(
+        self, **kwargs
+    ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
+        """Prepares the dataset for training using the "transformers" framework.
 
         Args:
             **kwargs: Specific to the task of the dataset.
@@ -772,46 +791,28 @@ class DatasetForTextClassification(DatasetBase):
 
     @_requires_spacy
     def _prepare_for_training_with_spacy(
-        self,
-        nlp: "spacy.Language",
-        train_size: Optional[float] = None,
-        test_size: Optional[float] = None,
+        self, nlp: "spacy.Language", records: List[Record]
     ) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
+        db = DocBin()
         all_labels = self.__all_labels__()
 
-        def __prepare_for_training_with_spacy(records):
-            db = DocBin()
+        # Creating the DocBin object as in https://spacy.io/usage/training#training-data
+        for record in records:
+            if record.annotation is None:
+                continue
 
-            # Creating the DocBin object as in https://spacy.io/usage/training#training-data
-            for record in self._records:
-                if record.annotation is None:
-                    continue
+            doc = nlp.make_doc(record.text)
 
-                doc = nlp.make_doc(record.text)
+            cats = dict.fromkeys(all_labels, 0)
+            for anno in record.annotation:
+                cats[anno] = 1
 
-                cats = dict.fromkeys(all_labels, 0)
-                for anno in record.annotation:
-                    cats[anno] = 1
+            doc.cats = cats
+            db.add(doc)
 
-                doc.cats = cats
-                db.add(doc)
-
-            return db
-
-        if train_size or test_size:
-            from sklearn.model_selection import train_test_split
-
-            records_train, records_test = train_test_split(
-                self._records, train_size=train_size, test_size=test_size
-            )
-            train_docbin = __prepare_for_training_with_spacy(records_train)
-            test_docbin = __prepare_for_training_with_spacy(records_test)
-
-            return train_docbin, test_docbin
-        else:
-            return __prepare_for_training_with_spacy(self._records)
+        return db
 
     def __all_labels__(self):
         all_labels = set()
@@ -994,54 +995,37 @@ class DatasetForTokenClassification(DatasetBase):
 
     @_requires_spacy
     def _prepare_for_training_with_spacy(
-        self,
-        nlp: "spacy.Language",
-        train_size: Optional[float] = None,
-        test_size: Optional[float] = None,
+        self, nlp: "spacy.Language", records: List[Record]
     ) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
-        def __prepare_for_training_with_spacy(records):
-            db = DocBin()
+        db = DocBin()
 
-            # Creating the DocBin object as in https://spacy.io/usage/training#training-data
-            for record in records:
-                if record.annotation is None:
-                    continue
+        # Creating the DocBin object as in https://spacy.io/usage/training#training-data
+        for record in records:
+            if record.annotation is None:
+                continue
 
-                doc = nlp.make_doc(record.text)
-                entities = []
+            doc = nlp.make_doc(record.text)
+            entities = []
 
-                for anno in record.annotation:
-                    span = doc.char_span(anno[1], anno[2], label=anno[0])
-                    # There is a misalignment between record tokenization and spaCy tokenization
-                    if span is None:
-                        # TODO(@dcfidalgo): Do we want to warn and continue or should we stop the training set generation?
-                        raise ValueError(
-                            "The following annotation does not align with the tokens"
-                            " produced by the provided spacy language model:"
-                            f" {(anno[0], record.text[anno[1]:anno[2]])}, {list(doc)}"
-                        )
-                    else:
-                        entities.append(span)
+            for anno in record.annotation:
+                span = doc.char_span(anno[1], anno[2], label=anno[0])
+                # There is a misalignment between record tokenization and spaCy tokenization
+                if span is None:
+                    # TODO(@dcfidalgo): Do we want to warn and continue or should we stop the training set generation?
+                    raise ValueError(
+                        "The following annotation does not align with the tokens"
+                        " produced by the provided spacy language model:"
+                        f" {(anno[0], record.text[anno[1]:anno[2]])}, {list(doc)}"
+                    )
+                else:
+                    entities.append(span)
 
-                doc.ents = entities
-                db.add(doc)
+            doc.ents = entities
+            db.add(doc)
 
-                return db
-
-        if train_size or test_size:
-            from sklearn.model_selection import train_test_split
-
-            records_train, records_test = train_test_split(
-                self._records, train_size=train_size, test_size=test_size
-            )
-            train_docbin = __prepare_for_training_with_spacy(records_train)
-            test_docbin = __prepare_for_training_with_spacy(records_test)
-
-            return train_docbin, test_docbin
-        else:
-            return __prepare_for_training_with_spacy(self._records)
+        return db
 
     def __all_labels__(self):
         all_labels = set()
