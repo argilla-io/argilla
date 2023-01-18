@@ -140,7 +140,7 @@ async function _configureDatasetViewSettings(datasetName, viewMode) {
     data: {
       pagination: { id: datasetName },
       id: datasetName,
-      viewMode: _getViewMode(viewMode),
+      viewMode: getViewMode(viewMode),
     },
   });
 }
@@ -154,12 +154,12 @@ function _configuredRouteParams() {
   return {
     query: JSON.parse(query ? Base64.decode(query) : "{}"),
     sort: JSON.parse(sort ? Base64.decode(sort) : "[]"),
-    viewMode: _getViewMode(viewMode),
+    viewMode: getViewMode(viewMode),
     pagination: pagination ? JSON.parse(Base64.decode(pagination)) : {},
   };
 }
 
-function _getViewMode(viewMode) {
+function getViewMode(viewMode) {
   return viewMode || "annotate";
 }
 
