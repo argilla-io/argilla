@@ -47,7 +47,7 @@ export default class DatasetViewSettings extends Model {
     return {
       id: this.string(null),
       pagination: this.hasOne(Pagination, "id"),
-      viewMode: this.string("explore"),
+      viewMode: this.string("annotate"),
       loading: this.boolean(false),
       headerHeight: this.number(140),
       visibleMetrics: this.boolean(false),
