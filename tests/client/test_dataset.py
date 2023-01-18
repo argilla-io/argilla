@@ -133,8 +133,8 @@ class TestDatasetBase:
         }
 
         assert (
-            "Following columns are not supported by the TextClassificationRecord model and are ignored: ['unsupported_column']"
-            == caplog.record_tuples[0][2]
+            "Following columns are not supported by the TextClassificationRecord model"
+            " and are ignored: ['unsupported_column']" == caplog.record_tuples[0][2]
         )
 
     def test_from_pandas(self, monkeypatch, caplog):
@@ -219,7 +219,10 @@ class TestDatasetBase:
 
         with pytest.raises(
             WrongRecordTypeError,
-            match="You are only allowed to set a record of type .*TextClassificationRecord.* but you provided .*Text2TextRecord.*",
+            match=(
+                "You are only allowed to set a record of type"
+                " .*TextClassificationRecord.* but you provided .*Text2TextRecord.*"
+            ),
         ):
             dataset[0] = ar.Text2TextRecord(text="mock")
 
@@ -365,6 +368,12 @@ class TestDatasetForTextClassification:
             assert train.features["label"] == [datasets.ClassLabel(names=["a", "b"])]
         else:
             assert train.features["label"] == datasets.ClassLabel(names=["a"])
+
+        train_test = ds.prepare_for_training(train_size=0.5)
+        assert len(train_test["train"]) == 1
+        assert len(train_test["test"]) == 1
+        for split in ["train", "test"]:
+            assert train_test[split].column_names == ["text", "context", "label"]
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,
@@ -599,6 +608,14 @@ class TestDatasetForTokenClassification:
         )
         assert isinstance(train, spacy.tokens.DocBin)
         assert len(train) == 100
+
+        train, test = rb_dataset.prepare_for_training(
+            framework="spacy", lang=spacy.blank("en"), train_size=0.8
+        )
+        assert isinstance(train, spacy.tokens.DocBin)
+        assert isinstance(test, spacy.tokens.DocBin)
+        assert len(train) == 80
+        assert len(test) == 20
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,

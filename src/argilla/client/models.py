@@ -20,6 +20,7 @@ This module contains the data models for the interface
 import datetime
 import logging
 import warnings
+from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -33,6 +34,18 @@ from argilla.utils.span_utils import SpanUtils
 _LOGGER = logging.getLogger(__name__)
 
 Vectors = Dict[str, List[float]]
+
+
+class Framework(Enum):
+    TRANSFORMERS = "transformers"
+    SPACY = "spacy"
+
+    @classmethod
+    def _missing_(cls, value):
+        raise ValueError(
+            f"{value} is not a valid {cls.__name__}, please select one of"
+            f" {list(cls._value2member_map_.keys())}"
+        )
 
 
 class _Validators(BaseModel):
