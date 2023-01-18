@@ -441,6 +441,11 @@ class DatasetBase:
         else:
             pass
 
+        # check for annotations
+        assert any([rec.annotation for rec in self._records]), ValueError(
+            "Dataset has no annotations."
+        )
+
         # turn the string into a Framework instance and trigger error if str is not valid
         if isinstance(framework, str):
             framework = Framework(framework)
