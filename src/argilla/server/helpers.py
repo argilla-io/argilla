@@ -120,3 +120,17 @@ def takeuntil(iterable, limit: int):
             count += 1
         else:
             break
+
+
+def remove_prefix(text: str, prefix: str):
+    """Give a text, removes prefix substring from it"""
+    if text.startswith(prefix):
+        return text[len(prefix) :]
+    return text
+
+
+def remove_suffix(text: str, suffix: str):
+    """Give a text, removes suffix substring from it"""
+    if text.endswith(suffix):
+        return text[: -len(suffix)]
+    return text
