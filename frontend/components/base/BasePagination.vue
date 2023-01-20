@@ -95,7 +95,9 @@
             : paginationSize * currentPage
         }}
       </strong>
-      of {{ paginableTotalItems | formatNumber }} records
+      of
+      <span class="total-records">{{ totalItems | formatNumber }} </span>
+      records
     </div>
   </div>
 </template>
@@ -128,18 +130,10 @@ export default {
   },
   computed: {
     totalPages() {
-      return Math.ceil(this.paginableTotalItems / this.paginationSettings.size);
-    },
-    paginableTotalItems() {
-      return this.totalItems >= this.maxRecordsLimit
-        ? this.maxRecordsLimit
-        : this.totalItems;
+      return Math.ceil(this.totalItems / this.paginationSettings.size);
     },
     paginationSize() {
       return this.paginationSettings.size;
-    },
-    maxRecordsLimit() {
-      return this.paginationSettings.maxRecordsLimit;
     },
     availableItemsPerPage() {
       return this.paginationSettings.pageSizeOptions.filter(
