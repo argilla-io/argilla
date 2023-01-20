@@ -1,4 +1,4 @@
-# Deploying Argilla with Hugging Face Spaces
+# Hugging Face Spaces
 
 Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers`, `hub`, and `setfit`), and now it can also be deployed using the Hub's Spaces.
 

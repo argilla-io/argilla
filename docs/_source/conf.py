@@ -117,8 +117,36 @@ services:
 # Do not execute the notebooks when building the docs
 nbsphinx_execute = "never"
 
+# open html file as python string
+getting_started_html = open("./_common/getting_started.html", "r").read()
+next_steps_html = open("./_common/next_steps.html", "r").read()
+
 # Plotly + Hide input/output prompts (cell counts)
-nbsphinx_prolog = """
+
+
+autodoc_typehints = "description"
+
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ["_templates"]
+
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+# This pattern also affects html_static_path and html_extra_path.
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+if not os.getenv("READTHEDOCS"):
+    notfound_urls_prefix = None
+else:
+    lang, docs_version = (
+        os.getenv("READTHEDOCS_LANGUAGE", "en"),
+        os.getenv("READTHEDOCS_VERSION", "latest"),
+    )
+
+    notfound_urls_prefix = f"/{lang}/{docs_version}/"
+
+
+nbsphinx_prolog = (
+    """
 .. raw:: html
 
     <script>require=requirejs;</script>
@@ -142,30 +170,32 @@ nbsphinx_prolog = """
             display: none;
         }
     </style>
-
-     <a href="https://colab.research.google.com/github/argilla/blob/develop/docs/_source/{{ env.doc2path(env.docname, base=None) }}"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 """
+    + f"""
 
-autodoc_typehints = "description"
+.. raw:: html
 
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+    {getting_started_html}
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+"""
+    + """
 
-if not os.getenv("READTHEDOCS"):
-    notfound_urls_prefix = None
-else:
-    lang, docs_version = (
-        os.getenv("READTHEDOCS_LANGUAGE", "en"),
-        os.getenv("READTHEDOCS_VERSION", "latest"),
-    )
+.. raw:: html
 
-    notfound_urls_prefix = f"/{lang}/{docs_version}/"
+    <a href="https://colab.research.google.com/github/argilla-io/argilla/blob/"""
+    + os.getenv("READTHEDOCS_VERSION", "main").replace("-", "/")
+    + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" style="display: inline; margin: 0" alt="Open In Colab"/></a> &nbsp;"""
+    + """<a href="https://github.com/argilla-io/argilla/tree/"""
+    + os.getenv("READTHEDOCS_VERSION", "main").replace("-", "/")
+    + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}" target="_blank"><img src="https://img.shields.io/badge/github-view%20source-black.svg" style="display: inline; margin: 0" alt="View Notebook on GitHub"/></a>
+"""
+)
 
+nbsphinx_epilog = f"""
+.. raw:: html
+
+    {next_steps_html}
+"""
 
 # -- Options for HTML output -------------------------------------------------
 
