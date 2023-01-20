@@ -374,7 +374,12 @@ class DatasetBase:
         lang: Optional["spacy.Language"] = None,
         train_size: Optional[float] = None,
         test_size: Optional[float] = None,
-    ) -> Union["datasets.Dataset", "spacy.tokens.DocBin"]:
+    ) -> Union[
+        "datasets.Dataset",
+        "spacy.tokens.DocBin",
+        Tuple["spacy.tokens.DocBin", "spacy.tokens.DocBin"],
+        Tuple["pandas.DataFrame", "pandas.DataFrame"],
+    ]:
         """Prepares the dataset for training.
 
         This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
@@ -430,16 +435,19 @@ class DatasetBase:
              'label': ClassLabel(num_classes=1, names=['SPAM'])}
 
         """
+        # determine split fragments
         if train_size is None and test_size is None:
             pass
-        elif train_size == 1 or test_size == 1:
-            pass
         elif train_size is None:
+            assert 0 < test_size < 1, ValueError("test_size must be between 0 and 1.")
             train_size = 1 - test_size
         elif test_size is None:
+            assert 0 < train_size < 1, ValueError("train_size must be between 0 and 1.")
             test_size = 1 - train_size
         else:
-            pass
+            assert sum([train_size, test_size]) == 1, ValueError(
+                "train_size and test_size must sum to 1."
+            )
 
         # check for annotations
         assert any([rec.annotation for rec in self._records]), ValueError(
@@ -450,34 +458,54 @@ class DatasetBase:
         if isinstance(framework, str):
             framework = Framework(framework)
 
+        # prepare for training for the right method
         if framework is Framework.TRANSFORMERS:
             return self._prepare_for_training_with_transformers(
                 train_size=train_size, test_size=test_size
             )
-        # else: must be spacy for sure
-        if lang is None:
+        elif framework is Framework.SPACY and lang is None:
             raise ValueError(
-                "Please provide a spacy language model to prepare the dataset for"
-                " training with the spacy framework."
+                "Please provide a spacy language model to prepare the"
+                " dataset for training with the spacy framework."
             )
+        elif framework is Framework.SPACY or framework is Framework.SPARK_NLP:
+            if train_size or test_size:
+                from sklearn.model_selection import train_test_split
 
-        if train_size or test_size:
-            from sklearn.model_selection import train_test_split
+                records_train, records_test = train_test_split(
+                    self._records, train_size=train_size, test_size=test_size
+                )
+                if framework is Framework.SPACY:
+                    if lang is None:
+                        raise ValueError(
+                            "Please provide a spacy language model to prepare the"
+                            " dataset for training with the spacy framework."
+                        )
+                    train_docbin = self._prepare_for_training_with_spacy(
+                        nlp=lang, records=records_train
+                    )
+                    test_docbin = self._prepare_for_training_with_spacy(
+                        nlp=lang, records=records_test
+                    )
+                    return train_docbin, test_docbin
+                else:
+                    train_df = self._prepare_for_training_with_spark_nlp(records_train)
+                    test_df = self._prepare_for_training_with_spark_nlp(records_test)
 
-            records_train, records_test = train_test_split(
-                self._records, train_size=train_size, test_size=test_size
-            )
-            train_docbin = self._prepare_for_training_with_spacy(
-                nlp=lang, records=records_train
-            )
-            test_docbin = self._prepare_for_training_with_spacy(
-                nlp=lang, records=records_test
-            )
-
-            return train_docbin, test_docbin
+                    return train_df, test_df
+            else:
+                if framework is Framework.SPACY:
+                    return self._prepare_for_training_with_spacy(
+                        nlp=lang, records=self._records
+                    )
+                else:
+                    return self._prepare_for_training_with_spark_nlp(
+                        records=self._records
+                    )
         else:
-            return self._prepare_for_training_with_spacy(
-                nlp=lang, records=self._records
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from:"
+                f" {list(Framework)}"
             )
 
     @_requires_spacy
@@ -490,7 +518,7 @@ class DatasetBase:
             **kwargs: Specific to the task of the dataset.
 
         Returns:
-            A datasets Dataset.
+            A spacy.token.DocBin.
         """
 
         raise NotImplementedError
@@ -767,7 +795,7 @@ class DatasetForTextClassification(DatasetBase):
             **{key: datasets.Value("string") for key in inputs_keys},
             "label": [class_label] if self._records[0].multi_label else class_label,
         }
-
+        print(ds_dict, feature_dict)
         ds = datasets.Dataset.from_dict(
             ds_dict, features=datasets.Features(feature_dict)
         )
@@ -812,6 +840,22 @@ class DatasetForTextClassification(DatasetBase):
             db.add(doc)
 
         return db
+
+    def _prepare_for_training_with_spark_nlp(
+        self, records: List[Record]
+    ) -> "pandas.DataFrame":
+        if records[0].multi_label:
+            label_name = "labels"
+        else:
+            label_name = "label"
+
+        spark_nlp_data = [
+            [record.id, record.text, record.annotation]
+            for record in records
+            if record.annotation is not None
+        ]
+
+        return pd.DataFrame(spark_nlp_data, columns=["id", "text", label_name])
 
     def __all_labels__(self):
         all_labels = set()
@@ -1025,6 +1069,22 @@ class DatasetForTokenClassification(DatasetBase):
             db.add(doc)
 
         return db
+
+    def _prepare_for_training_with_spark_nlp(
+        self, records: List[Record]
+    ) -> "pandas.DataFrame":
+        iob_doc_data = [
+            [
+                record.id,
+                record.text,
+                record.tokens,
+                [token["tag"] for token in record.metrics["tokens"]],
+            ]
+            for record in records
+            if record.annotation is not None
+        ]
+
+        return pd.DataFrame(iob_doc_data, columns=["id", "text", "token", "label"])
 
     def __all_labels__(self):
         all_labels = set()

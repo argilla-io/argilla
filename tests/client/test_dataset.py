@@ -534,7 +534,8 @@ class TestDatasetForTokenClassification:
         dataset = ar.DatasetForTokenClassification(
             [ar.TokenClassificationRecord(text="mock", tokens=["mock"])]
         )
-        assert len(dataset.prepare_for_training()) == 0
+        with pytest.raises(AssertionError):
+            dataset.prepare_for_training()
 
     def test_datasets_empty_metadata(self):
         dataset = ar.DatasetForTokenClassification(
@@ -614,6 +615,37 @@ class TestDatasetForTokenClassification:
         )
         assert isinstance(train, spacy.tokens.DocBin)
         assert isinstance(test, spacy.tokens.DocBin)
+        assert len(train) == 80
+        assert len(test) == 20
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_prepare_for_training_with_spark_nlp(self):
+        ner_dataset = datasets.load_dataset(
+            # TODO(@frascuchon): Move dataset to the new org
+            "rubrix/gutenberg_spacy-ner",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+        rb_dataset: DatasetForTokenClassification = ar.read_datasets(
+            ner_dataset, task="TokenClassification"
+        )
+        for r in rb_dataset:
+            r.annotation = [
+                (label, start, end) for label, start, end, _ in r.prediction
+            ]
+
+        train = rb_dataset.prepare_for_training(framework="spark-nlp")
+        assert isinstance(train, pd.DataFrame)
+        assert len(train) == 100
+
+        train, test = rb_dataset.prepare_for_training(
+            framework="spark-nlp", train_size=0.8
+        )
+        assert isinstance(train, pd.DataFrame)
+        assert isinstance(test, pd.DataFrame)
         assert len(train) == 80
         assert len(test) == 20
 
