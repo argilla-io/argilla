@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TextClassificationHelpInfo renders properly 1`] = `
-<lazy-base-modal modal-class="modal-secondary" modal-position="modal-top-right" modal-title="Highlight colors in token attributions" modal-custom="true" modal-visible="true">
+<lazy-base-modal-stub modal-class="modal-secondary" modal-position="modal-top-right" modal-title="Highlight colors in token attributions" modal-custom="true" modal-visible="true">
   <div class="help-info__content">
     <p>
       Argilla enables you to register token attributions as part of the
@@ -21,8 +21,8 @@ exports[`TextClassificationHelpInfo renders properly 1`] = `
     </p>
   </div>
   <div class="modal-buttons">
-    <base-button href="https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability.html" target="_blank" class="primary link">More in docs</base-button>
-    <base-button class="primary">Ok, got it!</base-button>
+    <base-button-stub href="https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability.html" target="_blank" class="primary link">More in docs</base-button-stub>
+    <base-button-stub class="primary">Ok, got it!</base-button-stub>
   </div>
-</lazy-base-modal>
+</lazy-base-modal-stub>
 `;

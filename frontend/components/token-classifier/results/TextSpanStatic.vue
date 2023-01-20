@@ -24,10 +24,11 @@
         matchQueryClass,
       ]"
       :span="token"
-      :dataset="dataset"
+      :datasetName="datasetName"
       :record="record"
-    /><template v-else v-for="t in token.tokens">{{ t.text }}</template
-    ><template>{{ token.charsBetweenTokens }}</template>
+    />
+    <template v-else v-for="t in token.tokens">{{ t.text }}</template>
+    <template>{{ token.charsBetweenTokens }}</template>
   </span>
 </template>
 
@@ -38,7 +39,15 @@ export default {
       type: Object,
       required: true,
     },
-    dataset: {
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetEntities: {
+      type: Array,
+      required: true,
+    },
+    datasetQuery: {
       type: Object,
       required: true,
     },
@@ -49,12 +58,12 @@ export default {
   },
   computed: {
     tag_color() {
-      return this.dataset.entities.filter(
+      return this.datasetEntities.filter(
         (entity) => entity.text === this.token.entity.label
       )[0].colorId;
     },
     queryScore() {
-      return this.dataset.query.score;
+      return this.datasetQuery.score;
     },
     matchQueryClass() {
       if (this.queryScore) {
@@ -152,9 +161,7 @@ export default {
     background: none;
   }
 }
-// .span span {
-//   display: inline;
-// }
+
 .list__item--annotation-mode span span {
   cursor: text;
 }

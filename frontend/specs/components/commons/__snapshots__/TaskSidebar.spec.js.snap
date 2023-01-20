@@ -13,7 +13,7 @@ exports[`TaskSidebar Show sidebar panel 1`] = `
       </div>
     </div>
   </aside>
-  <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
+  <textclassificationsidebar-stub dataset="[object Object]"></textclassificationsidebar-stub>
 </div>
 `;
 
@@ -30,6 +30,6 @@ exports[`TaskSidebar renders properly 1`] = `
       </div>
     </div>
   </aside>
-  <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
+  <textclassificationsidebar-stub dataset="[object Object]"></textclassificationsidebar-stub>
 </div>
 `;

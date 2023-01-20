@@ -46,11 +46,23 @@
 <script>
 import "assets/icons/unavailable";
 import { mapActions } from "vuex";
-import { TextClassificationDataset } from "@/models/TextClassification";
+import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
+import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
+import { getText2TextDatasetById } from "@/models/text2text.queries";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
+
 export default {
   props: {
-    dataset: {
-      type: TextClassificationDataset,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
+      required: true,
+    },
+    datasetName: {
+      type: String,
       required: true,
     },
   },
@@ -78,6 +90,12 @@ export default {
     }
   },
   computed: {
+    dataset() {
+      return this.getDatasetFromORM();
+    },
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.datasetName);
+    },
     tableColumns() {
       return [
         {
@@ -138,7 +156,7 @@ export default {
       return this.dataset.labelingRulesMetrics;
     },
     isVisible() {
-      return this.dataset.viewSettings.visibleRulesList;
+      return this.viewSettings.visibleRulesList;
     },
     formattedRules() {
       if (this.rules) {
@@ -184,7 +202,7 @@ export default {
     },
 
     async hideList() {
-      await this.dataset.viewSettings.disableRulesSummary();
+      await this.viewSettings.disableRulesSummary();
     },
 
     async onSelectQuery(rule) {
@@ -227,6 +245,31 @@ export default {
     },
     closeModal() {
       this.visibleModalId = undefined;
+    },
+    getDatasetFromORM() {
+      try {
+        return this.getTaskDatasetById();
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    },
+    getTaskDatasetById() {
+      let datasetById = null;
+      switch (this.datasetTask.toUpperCase()) {
+        case "TEXTCLASSIFICATION":
+          datasetById = getTextClassificationDatasetById(this.datasetId);
+          break;
+        case "TOKENCLASSIFICATION":
+          datasetById = getTokenClassificationDatasetById(this.datasetId);
+          break;
+        case "TEXT2TEXT":
+          datasetById = getText2TextDatasetById(this.datasetId);
+          break;
+        default:
+          throw new Error(`ERROR Unknown task: ${this.datasetTask}`);
+      }
+      return datasetById;
     },
   },
 };

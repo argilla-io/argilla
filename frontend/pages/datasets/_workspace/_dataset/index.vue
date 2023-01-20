@@ -42,8 +42,15 @@
       link="/datasets"
       :where="datasetName"
       :error="$fetchState.error"
-    ></error>
-    <task-search v-else :dataset="dataset" @search-records="searchRecords" />
+    >
+    </error>
+    <task-search
+      v-else
+      :datasetId="dataset.id"
+      :datasetName="dataset.name"
+      :datasetTask="dataset.task"
+      @search-records="searchRecords"
+    />
   </div>
 </template>
 
@@ -54,6 +61,7 @@ import { currentWorkspace } from "@/models/Workspace";
 import { Vector as VectorModel } from "@/models/Vector";
 import { Base64 } from "js-base64";
 import { RefRecord as RefRecordModel } from "@/models/RefRecord";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
   layout: "app",
@@ -94,6 +102,9 @@ export default {
         return null;
       }
     },
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.dataset.name);
+    },
     isDataset() {
       return !_.isNil(this.dataset);
     },
@@ -107,17 +118,19 @@ export default {
       return currentWorkspace(this.$route);
     },
     areMetricsVisible() {
-      return this.dataset && this.dataset.viewSettings.visibleMetrics;
+      return this.viewSettings.visibleMetrics;
     },
     annotationEnabled() {
-      return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewSettings.viewMode === "annotate";
     },
     isReferenceRecord() {
-      const value = VectorModel.query().where("is_active", true).first();
-      return !!value;
+      return VectorModel.query()
+        .where("dataset_id", this.dataset.id.join("."))
+        .where("is_active", true)
+        .exists();
     },
   },
-  destroyed() {},
+
   methods: {
     ...mapActions({
       fetchByName: "entities/datasets/fetchByName",
@@ -263,5 +276,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped></style>

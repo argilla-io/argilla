@@ -1,8 +1,12 @@
 <template>
-  <div>
+  <div v-if="dataset">
     <div class="rule__area">
       <div :class="[query ? 'active' : null, 'rule__container']">
-        <rule-empty-query :dataset="dataset" v-if="!query" />
+        <rule-empty-query
+          v-if="!query"
+          :datasetId="dataset.id"
+          :datasetTask="dataset.task"
+        />
         <rule-labels-definition
           v-else
           :dataset="dataset"
@@ -27,12 +31,21 @@
     </div>
   </div>
 </template>
+
 <script>
-import { TextClassificationDataset } from "@/models/TextClassification";
+import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
+import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
+import { getText2TextDatasetById } from "@/models/text2text.queries";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
+
 export default {
   props: {
-    dataset: {
-      type: TextClassificationDataset,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
   },
@@ -67,6 +80,12 @@ export default {
     },
   },
   computed: {
+    dataset() {
+      return this.getDatasetFromORM();
+    },
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.dataset.name);
+    },
     query() {
       return this.dataset.query.text;
     },
@@ -108,11 +127,36 @@ export default {
       this.saved = false;
     },
     async showRulesList() {
-      await this.dataset.viewSettings.enableRulesSummary();
+      await this.viewSettings.enableRulesSummary();
     },
     async saveRule(rule) {
       await this.dataset.storeLabelingRule(rule);
       this.saved = true;
+    },
+    getDatasetFromORM() {
+      try {
+        return this.getTaskDatasetById();
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    },
+    getTaskDatasetById() {
+      let datasetById = null;
+      switch (this.datasetTask.toUpperCase()) {
+        case "TEXTCLASSIFICATION":
+          datasetById = getTextClassificationDatasetById(this.datasetId);
+          break;
+        case "TOKENCLASSIFICATION":
+          datasetById = getTokenClassificationDatasetById(this.datasetId);
+          break;
+        case "TEXT2TEXT":
+          datasetById = getText2TextDatasetById(this.datasetId);
+          break;
+        default:
+          throw new Error(`ERROR Unknown task: ${this.datasetTask}`);
+      }
+      return datasetById;
     },
   },
 };
@@ -129,9 +173,6 @@ export default {
     box-shadow: $shadow-100;
     width: 100%;
     border-radius: $border-radius;
-    // &.active {
-    //   box-shadow: 0 1px 4px 0 rgba(185, 185, 185, 0.5);
-    // }
   }
   &__button {
     float: left;

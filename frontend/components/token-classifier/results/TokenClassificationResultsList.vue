@@ -16,21 +16,22 @@
   -->
 
 <template>
-  <results-list :dataset="dataset" @search-records="searchRecords">
-    <template slot="record" slot-scope="slotProps">
-      <record-token-classification
-        :dataset="dataset"
-        :record="slotProps.record"
-        :isReferenceRecord="slotProps.isReferenceRecord"
-      />
-    </template>
-  </results-list>
+  <results-list
+    ref="tokenClassificationResultsListComponent"
+    :datasetId="datasetId"
+    :datasetTask="datasetTask"
+    @search-records="searchRecords"
+  />
 </template>
 <script>
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
   },

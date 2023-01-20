@@ -21,12 +21,20 @@
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="interactionsEnabled"
-        :dataset="dataset"
+        :inputLabels="datasetLabels"
+        :datasetName="datasetName"
+        :isMultiLabel="isMultiLabel"
+        :paginationSize="paginationSize"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
-      <classifier-exploration-area v-else :dataset="dataset" :record="record" />
+      <classifier-exploration-area
+        v-else
+        :datasetName="datasetName"
+        :paginationSize="paginationSize"
+        :record="record"
+      />
       <div v-if="interactionsEnabled" class="content__actions-buttons">
         <base-button
           v-if="allowValidate"
@@ -51,14 +59,29 @@
 
 <script>
 import { mapActions } from "vuex";
-import {
-  TextClassificationRecord,
-  TextClassificationDataset,
-} from "@/models/TextClassification";
+import { TextClassificationRecord } from "@/models/TextClassification";
+import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
+
 export default {
   props: {
-    dataset: {
-      type: TextClassificationDataset,
+    isMultiLabel: {
+      type: Boolean,
+      default: false,
+    },
+    viewSettings: {
+      type: Object,
+      required: true,
+    },
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetLabels: {
+      type: Array,
       required: true,
     },
     record: {
@@ -72,24 +95,23 @@ export default {
   },
   computed: {
     interactionsEnabled() {
+      // console.log(this.getTextClassificationDataset());
       return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewSettings.viewMode === "annotate";
     },
     labellingRulesView() {
-      return this.dataset.viewSettings.viewMode === "labelling-rules";
+      return this.viewSettings.viewMode === "labelling-rules";
     },
     allowValidate() {
       return (
         this.record.status !== "Validated" &&
-        (this.record.annotation ||
-          this.record.prediction ||
-          this.dataset.isMultiLabel)
+        (this.record.annotation || this.record.prediction || this.isMultiLabel)
       );
     },
     paginationSize() {
-      return this.dataset.viewSettings?.pagination.size;
+      return this.viewSettings?.pagination?.size;
     },
   },
   methods: {
@@ -99,7 +121,7 @@ export default {
     }),
     async resetLabels() {
       await this.resetAnnotations({
-        dataset: this.dataset,
+        dataset: this.getTextClassificationDataset(),
         records: [this.record],
       });
     },
@@ -113,7 +135,7 @@ export default {
       };
 
       await this.validateAnnotations({
-        dataset: this.dataset,
+        dataset: this.getTextClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -131,7 +153,7 @@ export default {
       }));
       // TODO: do not validate records without labels
       await this.validateAnnotations({
-        dataset: this.dataset,
+        dataset: this.getTextClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -142,6 +164,9 @@ export default {
           },
         ],
       });
+    },
+    getTextClassificationDataset() {
+      return getTextClassificationDatasetById(this.datasetId);
     },
   },
 };

@@ -43,6 +43,7 @@
 
 <script>
 import "assets/icons/close";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
   props: {
@@ -53,8 +54,8 @@ export default {
     whiteSpace: {
       type: String,
     },
-    dataset: {
-      type: Object,
+    datasetName: {
+      type: String,
       required: true,
     },
     record: {
@@ -71,8 +72,13 @@ export default {
     };
   },
   computed: {
+    viewSettings() {
+      return this.datasetName
+        ? getViewSettingsByDatasetName(this.datasetName)
+        : {};
+    },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewSettings.viewMode === "annotate";
     },
     charsBetweenTokens() {
       return this.span.tokens[this.span.tokens.length - 1].charsBetweenTokens;

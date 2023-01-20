@@ -22,7 +22,9 @@
       :key="i"
       :record="record"
       :token="token"
-      :dataset="dataset"
+      :datasetName="datasetName"
+      :datasetEntities="datasetEntities"
+      :datasetQuery="datasetQuery"
     />
   </div>
 </template>
@@ -32,8 +34,17 @@ export default {
   props: {
     entities: {
       type: Array,
+      required: true,
     },
-    dataset: {
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetEntities: {
+      type: Array,
+      required: true,
+    },
+    datasetQuery: {
       type: Object,
       required: true,
     },

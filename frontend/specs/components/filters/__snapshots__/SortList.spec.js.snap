@@ -3,12 +3,12 @@
 exports[`SortList renders properly 1`] = `
 <div>
   <div class="filters--scrollable">
-    <sortfilter sort-options="[object Object]" class="sort"></sortfilter>
+    <sortfilter-stub sort-options="[object Object]" class="sort"></sortfilter-stub>
   </div>
   <!---->
   <div class="sort__buttons">
-    <base-button class="primary outline">Cancel</base-button>
-    <base-button class="primary">Sort</base-button>
+    <base-button-stub class="primary outline">Cancel</base-button-stub>
+    <base-button-stub class="primary">Sort</base-button-stub>
   </div>
 </div>
 `;

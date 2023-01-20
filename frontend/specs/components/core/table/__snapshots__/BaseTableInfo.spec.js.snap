@@ -6,7 +6,7 @@ exports[`BaseTableInfo renders properly 1`] = `
     <div class="table-info__header">
       <div class="table-info__item">
         <div class="table-info__item__col">
-          <lazy-table-filtrable-column column="[object Object]" data="[object Object],[object Object]" filters="[object Object]"></lazy-table-filtrable-column>
+          <lazy-table-filtrable-column-stub column="[object Object]" data="[object Object],[object Object]" filters="[object Object]"></lazy-table-filtrable-column-stub>
         </div>
       </div>
     </div>
@@ -16,38 +16,38 @@ exports[`BaseTableInfo renders properly 1`] = `
           <div class="table-info__item">
             <!----> <span class="table-info__item__col"><span class="text"><span>recognai</span></span></span>
             <div class="table-info__actions"></div>
-            <base-modal modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-title="Delete confirmation" modal-visible="true">
+            <base-modal-stub modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-title="Delete confirmation" modal-visible="true">
               <div>
                 <p>You are about to delete: <strong>undefined</strong>. This action cannot be undone</p>
                 <div class="modal-buttons">
-                  <base-button class="primary outline">
+                  <base-button-stub class="primary outline">
                     Cancel
-                  </base-button>
-                  <base-button class="primary">
+                  </base-button-stub>
+                  <base-button-stub class="primary">
                     Yes, delete
-                  </base-button>
+                  </base-button-stub>
                 </div>
               </div>
-            </base-modal>
+            </base-modal-stub>
           </div>
         </li>
         <li>
           <div class="table-info__item">
             <!----> <span class="table-info__item__col"><span class="text"><span>recognai</span></span></span>
             <div class="table-info__actions"></div>
-            <base-modal modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-title="Delete confirmation" modal-visible="true">
+            <base-modal-stub modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-title="Delete confirmation" modal-visible="true">
               <div>
                 <p>You are about to delete: <strong>undefined</strong>. This action cannot be undone</p>
                 <div class="modal-buttons">
-                  <base-button class="primary outline">
+                  <base-button-stub class="primary outline">
                     Cancel
-                  </base-button>
-                  <base-button class="primary">
+                  </base-button-stub>
+                  <base-button-stub class="primary">
                     Yes, delete
-                  </base-button>
+                  </base-button-stub>
                 </div>
               </div>
-            </base-modal>
+            </base-modal-stub>
           </div>
         </li>
       </ul>
