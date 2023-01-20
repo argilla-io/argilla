@@ -134,8 +134,7 @@ class TestDatasetBase:
 
         assert (
             "Following columns are not supported by the TextClassificationRecord model"
-            " and are ignored: ['unsupported_column']"
-            == caplog.record_tuples[0][2]
+            " and are ignored: ['unsupported_column']" == caplog.record_tuples[0][2]
         )
 
     def test_from_pandas(self, monkeypatch, caplog):
