@@ -34,10 +34,7 @@ echo "Waiting for elasticsearch to start"
 sleep 15
 
 # Load data
-if [ "$LOAD_DATA_ENABLE" == "true" ]; then
-  echo "Starting to load data"
-  python3.9 /load_data.py "$TEAM_API_KEY" &
-fi
+python3.9 /load_data.py "$TEAM_API_KEY" "$LOAD_DATASETS" &
 
 # Start Argilla
 echo "Starting Argilla"
