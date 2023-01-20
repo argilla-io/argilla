@@ -134,7 +134,8 @@ class TestDatasetBase:
 
         assert (
             "Following columns are not supported by the TextClassificationRecord model"
-            " and are ignored: ['unsupported_column']" == caplog.record_tuples[0][2]
+            " and are ignored: ['unsupported_column']"
+            == caplog.record_tuples[0][2]
         )
 
     def test_from_pandas(self, monkeypatch, caplog):
@@ -358,8 +359,13 @@ class TestDatasetForTextClassification:
         ds = ar.DatasetForTextClassification(records)
         train = ds.prepare_for_training()
 
+        if not ds[0].multi_label:
+            column_names = ["text", "context", "label"]
+        else:
+            column_names = ["text", "context", "label", "binarized_label"]
+
         assert isinstance(train, datasets.Dataset)
-        assert train.column_names == ["text", "context", "label"]
+        assert train.column_names == column_names
         assert len(train) == 2
         assert train[1]["text"] == "mock3"
         assert train[1]["context"] == "mock3"
@@ -373,7 +379,7 @@ class TestDatasetForTextClassification:
         assert len(train_test["train"]) == 1
         assert len(train_test["test"]) == 1
         for split in ["train", "test"]:
-            assert train_test[split].column_names == ["text", "context", "label"]
+            assert train_test[split].column_names == column_names
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,

@@ -173,7 +173,8 @@ class DatasetBase:
         return dataset
 
     def _to_datasets_dict(self) -> Dict:
-        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`"""
+        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`
+        """
         raise NotImplementedError
 
     @classmethod
@@ -805,12 +806,14 @@ class DatasetForTextClassification(DatasetBase):
 
             labels = [rec["label"] for rec in ds]
             mlb = MultiLabelBinarizer()
-            multi_labels = mlb.fit_transform(labels)
+            binarized_labels = mlb.fit_transform(labels)
+            feature_dict["binarized_label"] = feature_dict["label"]
             ds = datasets.Dataset.from_dict(
                 {
                     "text": ds["text"],
                     "context": ds_dict["context"],
-                    "label": multi_labels,
+                    "label": labels,
+                    "binarized_label": binarized_labels,
                 },
                 features=datasets.Features(feature_dict),
             )
