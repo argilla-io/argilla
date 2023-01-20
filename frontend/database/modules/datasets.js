@@ -227,7 +227,7 @@ async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
 
   const vector = VectorModel.query().where("is_active", true).first();
 
-  const numberOfRecords = vector ? 51 : size;
+  const numberOfRecords = vector ? 50 : size;
 
   const { record_id, vector_name, vector_values } = vector || {};
   const newQueryText = queryFactoryForSearchCall(record_id, query.text);
