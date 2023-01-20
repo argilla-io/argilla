@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <sidebar-progress :dataset="dataset">
+  <sidebar-progress :datasetName="dataset.name">
     <ul v-if="annotationsProgress" class="metrics__list">
       <li v-for="(counter, label) in getInfo" :key="label">
         <template v-if="counter > 0">
@@ -27,9 +27,9 @@
               $entitiesMaxColors
             }`"
           />
-          <span class="metrics__list__counter">{{
-            counter | formatNumber
-          }}</span>
+          <span class="metrics__list__counter">
+            {{ counter | formatNumber }}
+          </span>
         </template>
       </li>
     </ul>
@@ -58,4 +58,3 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped></style>

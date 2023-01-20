@@ -31,7 +31,7 @@
       :multiple="true"
       :progress="(totalValidated * 100) / total"
       :progress-secondary="(totalDiscarded * 100) / total"
-    ></base-progress>
+    />
     <div class="scroll">
       <ul class="metrics__list">
         <li>
@@ -59,17 +59,14 @@ import { AnnotationProgress } from "@/models/AnnotationProgress";
 export default {
   // TODO clean and typify
   props: {
-    dataset: {
-      type: Object,
+    datasetName: {
+      type: String,
       required: true,
     },
   },
   computed: {
-    annotationsSum() {
-      return this.dataset.results.aggregations.status.Validated;
-    },
     annotationsProgress() {
-      return AnnotationProgress.find(this.dataset.name);
+      return AnnotationProgress.find(this.datasetName);
     },
     totalValidated() {
       return this.annotationsProgress.validated;
@@ -82,9 +79,6 @@ export default {
     },
     total() {
       return this.annotationsProgress.total;
-    },
-    datasetName() {
-      return this.dataset.name;
     },
     progress() {
       return (

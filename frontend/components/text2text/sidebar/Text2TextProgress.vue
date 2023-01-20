@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <sidebar-progress :dataset="dataset"> </sidebar-progress>
+  <sidebar-progress :datasetName="dataset.name" />
 </template>
 
 <script>
@@ -29,4 +29,3 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped></style>
