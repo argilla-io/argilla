@@ -173,8 +173,7 @@ class DatasetBase:
         return dataset
 
     def _to_datasets_dict(self) -> Dict:
-        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`
-        """
+        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`"""
         raise NotImplementedError
 
     @classmethod
