@@ -31,7 +31,7 @@ echo "Starting Elasticsearch"
 elasticsearch 1>/dev/null 2>/dev/null &
 
 echo "Waiting for elasticsearch to start"
-sleep 15
+sleep 30
 
 # Load data
 python3.9 /load_data.py "$TEAM_API_KEY" "$LOAD_DATASETS" &
