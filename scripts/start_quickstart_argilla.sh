@@ -2,7 +2,7 @@
 
 set -e
 
-whoami
+echo "Current User: $(whoami)"
 
 # Generate hashed passwords
 team_password=$(htpasswd -nbB "" "$TEAM_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
