@@ -2,7 +2,7 @@
 
 set -e
 
-echo "Current User: $(whoami)"
+whoami
 
 # Generate hashed passwords
 team_password=$(htpasswd -nbB "" "$TEAM_PASSWORD" | cut -d ":" -f 2 | tr -d "\n")
@@ -31,7 +31,7 @@ echo "Starting Elasticsearch"
 elasticsearch 1>/dev/null 2>/dev/null &
 
 echo "Waiting for elasticsearch to start"
-sleep 20
+sleep 15
 
 # Load data
 python3.9 /load_data.py "$TEAM_API_KEY" "$LOAD_DATASETS" &
