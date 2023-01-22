@@ -65,16 +65,15 @@ if _TYPE_CHECKING:
     from argilla.monitoring.model_monitor import monitor
     from argilla.server.server import app
 
-
 # TODO: remove me
 _import_structure = {
     "client.api": [
         "copy",
         "delete",
-        "delete_records",
         "get_workspace",
         "init",
         "load",
+        "delete_records",
         "log",
         "log_async",
         "set_workspace",
@@ -94,12 +93,7 @@ _import_structure = {
         "read_pandas",
     ],
     "monitoring.model_monitor": ["monitor"],
-    "listeners.listener": [
-        "listener",
-        "RGListenerContext",
-        "Search",
-        "Metrics",
-    ],
+    "listeners.listener": ["listener", "RGListenerContext", "Search", "Metrics"],
     "datasets": [
         "configure_dataset",
         "TextClassificationSettings",
@@ -108,10 +102,18 @@ _import_structure = {
     "server.app": ["app"],
 }
 
+# can be removed in a future version
+_deprecated_import_structure = {
+    "client.models": ["Record", "BulkResponse"],
+    "client.datasets": ["Dataset"],
+    "_constants": ["DEFAULT_API_KEY"],
+}
+
 _sys.modules[__name__] = _LazyargillaModule(
     __name__,
     globals()["__file__"],
     _import_structure,
+    deprecated_import_structure=_deprecated_import_structure,
     module_spec=__spec__,
     extra_objects={"__version__": __version__},
 )

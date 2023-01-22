@@ -31,10 +31,6 @@ class WrongResponseError(BaseClientError):
         )
 
 
-class InputValueError(BaseClientError):
-    pass
-
-
 class ApiCompatibilityError(BaseClientError):
     def __init__(self, min_version: str):
         self.min_version = min_version
