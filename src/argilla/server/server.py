@@ -34,6 +34,7 @@ from pydantic import ConfigError
 
 from argilla import __version__ as argilla_version
 from argilla.logging import configure_logging
+from argilla.server import helpers
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.datasets import DatasetsDAO
@@ -103,7 +104,7 @@ def configure_app_statics(app: FastAPI):
             ):
                 with fileinput.FileInput(file, inplace=True, backup=".bak") as file:
                     for line in file:
-                        base_url = settings.base_url.removesuffix("/")
+                        base_url = helpers.remove_suffix(settings.base_url, "/")
                         print(line.replace(BASE_URL_VAR_NAME, base_url), end="")
 
         return new_folder
