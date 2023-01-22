@@ -18,6 +18,7 @@ from _pytest.logging import LogCaptureFixture
 
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
+from argilla.server.settings import settings
 
 try:
     from loguru import logger

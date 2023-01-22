@@ -48,11 +48,6 @@ from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.errors.task_errors import MetadataLimitExceededError
 from argilla.server.settings import settings
 
-try:
-    import ujson as json
-except ModuleNotFoundError:
-    import json
-
 
 def dataset_records_index(dataset_id: str) -> str:
     index_mame_template = settings.dataset_records_index_name
