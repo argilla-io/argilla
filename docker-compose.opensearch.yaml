@@ -30,7 +30,7 @@ services:
     expose:
       - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
     environment:
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: 1
       OPENSEARCH_HOSTS: '["http://opensearch-node1:9200"]'
     networks:
       - argilla
