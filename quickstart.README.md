@@ -105,16 +105,21 @@ manage datasets.
 To get started you just need to run the docker image with following command:
 
 ``` bash
-  docker run -d --name quickstart -e "TEAM_API_KEY=team" -e "ARGILLA_API_KEY=argilla" -e 'TEAM_PASSWORD=1234' -e 'ARGILLA_PASSWORD=1234'  -p 6900:6900 argilla/argilla-quickstart:latest
+  docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
 ```
 
-This will run the latest quickstart docker image with 2 users `team` and `argilla`. The password for these users is
-1234 . You can change the password if you want by changing the TEAM/ARGILLA_PASSWORD environment variables in the above
-docker run command. This will also load few datasets into argilla system to get started.
+This will run the latest quickstart docker image with 2 users `argilla` and `team`. The password for these users is
+`1234` . You can also configure these [environment variables](#environment-variables) as per you needs.
 
-If you want to go with default settings with single user `(argilla:1234)` and no pre-loading of datasets then you can
-run the following docker run command.
+### Environment Variables
 
-``` bash
-docker run -d --name quickstart -p 6900:6900 -e "LOAD_DATA_ENABLE=false" argilla/argilla-quickstart:latest
-```
+- `ARGILLA_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
+  predictions, etc.). If you don't set this variable, the library and your app will use the default API key. If you want
+  to secure your app for reading and writing data, we recommend you to set up this variable. The API key you choose
+  can be any string of your choice and you can check an online generator if you like.
+- `ARGILLA_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default
+  password is `1234`. By setting up a custom password you can use your own password to login into the app.
+- `TEAM_API_KEY`: This sets the root user's API key. The API key you choose can be any string of your choice and you can
+  check an online generator if you like.
+- `TEAM_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password
+  is `1234`. By setting up a custom password you can use your own password to login into the app.
