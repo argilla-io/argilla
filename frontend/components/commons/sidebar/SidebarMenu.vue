@@ -126,7 +126,7 @@ $sidebar-button-size: 45px;
     position: relative;
   }
 }
-button[data-title] {
+button[data-title]:not(.active) {
   position: relative;
   @extend %has-tooltip--left;
 }

@@ -60,7 +60,6 @@ export default {
 <style lang="scss" scoped>
 .sidebar-button {
   @include resetButtonStyles();
-  width: 100%;
   display: flex;
   margin-bottom: 0.5em;
   &.mode {
@@ -84,8 +83,15 @@ export default {
         animation: move-horizontal 0.2s ease-in-out 0.2s;
         animation-fill-mode: backwards;
       }
-      &.active {
-        border-left: 2px solid palette(grey, 100);
+      &.active:before {
+        content: "";
+        height: 38px;
+        width: 2px;
+        border-radius: 2px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: palette(grey, 100);
       }
     }
   }

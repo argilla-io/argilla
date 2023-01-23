@@ -160,7 +160,7 @@ function _configuredRouteParams() {
 }
 
 function getViewMode(viewMode) {
-  return viewMode || "annotate";
+  return viewMode || "explore";
 }
 
 function _displayQueryParams({ query, sort, viewMode, pagination }) {
