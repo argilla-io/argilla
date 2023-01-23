@@ -140,7 +140,7 @@ async function _configureDatasetViewSettings(datasetName, viewMode) {
     data: {
       pagination: { id: datasetName },
       id: datasetName,
-      viewMode: getViewMode(viewMode),
+      viewMode: viewMode ? viewMode : "explore",
     },
   });
 }
@@ -154,13 +154,9 @@ function _configuredRouteParams() {
   return {
     query: JSON.parse(query ? Base64.decode(query) : "{}"),
     sort: JSON.parse(sort ? Base64.decode(sort) : "[]"),
-    viewMode: getViewMode(viewMode),
+    viewMode: viewMode || "explore",
     pagination: pagination ? JSON.parse(Base64.decode(pagination)) : {},
   };
-}
-
-function getViewMode(viewMode) {
-  return viewMode || "explore";
 }
 
 function _displayQueryParams({ query, sort, viewMode, pagination }) {
