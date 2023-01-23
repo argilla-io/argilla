@@ -96,12 +96,18 @@ export default {
       try {
         await this.$store.dispatch("entities/deleteAll");
         await this.$auth.loginWith("authProvider", {
-          data: `username=${this.login.username}&password=${this.login.password}`,
+          data: this.encodedLoginData(),
         });
         this.nextRedirect();
       } catch (err) {
         this.error = err;
       }
+    },
+    encodedLoginData() {
+      const { username, password } = this.login;
+      return `username=${encodeURIComponent(
+        username
+      )}&password=${encodeURIComponent(password)}`;
     },
   },
 };
