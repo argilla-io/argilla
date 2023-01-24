@@ -182,12 +182,14 @@ nbsphinx_prolog = (
 
 .. raw:: html
 
+    <div class="open-in-colab__wrapper">
     <a href="https://colab.research.google.com/github/argilla-io/argilla/blob/"""
     + os.getenv("READTHEDOCS_VERSION", "main").replace("-", "/")
     + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" style="display: inline; margin: 0" alt="Open In Colab"/></a> &nbsp;"""
     + """<a href="https://github.com/argilla-io/argilla/tree/"""
     + os.getenv("READTHEDOCS_VERSION", "main").replace("-", "/")
     + """/docs/_source/{{ env.doc2path(env.docname, base=None) }}" target="_blank"><img src="https://img.shields.io/badge/github-view%20source-black.svg" style="display: inline; margin: 0" alt="View Notebook on GitHub"/></a>
+    </div>
 """
 )
 
