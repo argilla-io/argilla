@@ -17,7 +17,7 @@
 
 <template>
   <div v-click-outside="close" :key="open" class="record__extra-actions">
-    <base-button class="small clear" href="#" @click.prevent="open = !open"
+    <base-button class="small clear" @click.prevent="open = !open"
       ><svgicon name="meatballs" width="14" color="#4A4A4A" />
     </base-button>
     <div v-if="open" class="extra-actions__content">
