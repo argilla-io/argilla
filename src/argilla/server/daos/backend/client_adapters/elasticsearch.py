@@ -17,6 +17,7 @@ from typing import Any, Dict, Iterable, Optional, Tuple
 
 import elasticsearch
 from elasticsearch import Elasticsearch, NotFoundError, RequestError, helpers
+from elasticsearch.helpers import BulkIndexError
 from packaging.version import parse
 
 from argilla.server.daos.backend.base import BackendErrorHandler
@@ -42,6 +43,7 @@ class ElasticsearchClient(OpenSearchClient):
         self.error_handling = BackendErrorHandler(
             WarningIgnore=ElasticsearchWarning,
             RequestError=RequestError,
+            BulkError=BulkIndexError,
             NotFoundError=NotFoundError,
             GenericApiError=ApiError,
         )

@@ -22,6 +22,7 @@ from opensearchpy.exceptions import (
     OpenSearchWarning,
     RequestError,
 )
+from opensearchpy.helpers import BulkIndexError
 
 from argilla.server.daos.backend import query_helpers
 from argilla.server.daos.backend.base import BackendErrorHandler, IndexNotFoundError
@@ -53,6 +54,7 @@ class OpenSearchClient(IClientAdapter):
         self.error_handling = BackendErrorHandler(
             WarningIgnore=OpenSearchWarning,
             RequestError=RequestError,
+            BulkError=BulkIndexError,
             NotFoundError=NotFoundError,
             GenericApiError=OpenSearchException,
         )

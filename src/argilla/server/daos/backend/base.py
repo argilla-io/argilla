@@ -15,7 +15,9 @@
 import dataclasses
 import warnings
 from abc import ABC
-from typing import Optional, Type
+from typing import Any, List, Optional, Type
+
+from pydantic import BaseModel
 
 from argilla.server.errors import InvalidTextSearchError
 
@@ -33,6 +35,17 @@ class InvalidSearchError(Exception):
         self.origin_error = origin_error
 
 
+class WrongLogDataError(Exception):
+    """Error on logging data"""
+
+    class Error(BaseModel):
+        error: str
+        caused_by: Any
+
+    def __init__(self, errors: List[Error]):
+        self.errors = errors
+
+
 class GenericSearchError(Exception):
     def __init__(self, origin_error: Exception):
         self.origin_error = origin_error
@@ -46,11 +59,13 @@ class BackendErrorHandler(ABC):
     RequestError: Type[Exception]
     NotFoundError: Type[Exception]
     GenericApiError: Type[Exception]
+    BulkError: Type[Exception]
     WarningIgnore: Type[Warning]
 
     def __call__(self, index: Optional[str] = None):
         ignore_warning = self.WarningIgnore
         request_error = self.RequestError
+        bulk_error = self.BulkError
         not_found_error = self.NotFoundError
         generic_api_error = self.GenericApiError
 
@@ -73,6 +88,16 @@ class BackendErrorHandler(ABC):
                     elif ex.error == "index_closed_exception":
                         raise ClosedIndexError(index)
                     raise InvalidSearchError(ex) from exception_value
+                except bulk_error as ex:
+                    errors = [
+                        WrongLogDataError.Error(
+                            error=error_info.get("cause"),
+                            caused_by=error_info.get("caused_by"),
+                        )
+                        for error in ex.errors
+                        for error_info in [error.get("index", {}).get("error", {})]
+                    ]
+                    raise WrongLogDataError(errors=errors)
                 except not_found_error as ex:
                     raise IndexNotFoundError(ex)
                 except generic_api_error as ex:
