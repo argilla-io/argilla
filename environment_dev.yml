@@ -4,7 +4,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - python~=3.9.0
+  - python~=3.7.0
   - pip>=20.3.0
   - openjdk=11
   # pyparsing 3.0.5 seems to be buggy

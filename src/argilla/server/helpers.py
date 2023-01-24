@@ -16,7 +16,10 @@
 """
 Common helper functions
 """
+import logging
 from typing import Any, Dict, List, Optional
+
+_LOGGER = logging.getLogger("argilla.server")
 
 
 def unflatten_dict(
@@ -120,3 +123,36 @@ def takeuntil(iterable, limit: int):
             count += 1
         else:
             break
+
+
+def remove_prefix(text: str, prefix: str):
+    """Give a text, removes prefix substring from it"""
+    if text.startswith(prefix):
+        return text[len(prefix) :]
+    return text
+
+
+def remove_suffix(text: str, suffix: str):
+    """Give a text, removes suffix substring from it"""
+    if text.endswith(suffix):
+        return text[: -len(suffix)]
+    return text
+
+
+def replace_string_in_file(
+    filename: str,
+    string: str,
+    replace_by: str,
+    encoding: str = "utf-8",
+):
+    """Read a file and replace an old value in file by a new one"""
+    # Safely read the input filename using 'with'
+    with open(filename, encoding=encoding) as f:
+        data = f.read()
+        if string not in data:
+            return
+
+    # Safely write the changed content, if found in the file
+    with open(filename, mode="w", encoding=encoding) as f:
+        data = data.replace(string, replace_by)
+        f.write(data)

@@ -3,5 +3,9 @@
 
 # Distribution packages
 !dist/*.whl
+
+# Scripts
 !scripts/start_argilla_server.sh
 !scripts/wait-for-it.sh
+!scripts/start_quickstart_argilla.sh
+!scripts/load_data.py
