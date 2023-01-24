@@ -39,8 +39,8 @@ class WrongLogDataError(Exception):
     """Error on logging data"""
 
     class Error(BaseModel):
-        error: str
-        caused_by: Any
+        reason: str = None
+        caused_by: Any = None
 
     def __init__(self, errors: List[Error]):
         self.errors = errors
@@ -91,7 +91,7 @@ class BackendErrorHandler(ABC):
                 except bulk_error as ex:
                     errors = [
                         WrongLogDataError.Error(
-                            error=error_info.get("cause"),
+                            reason=error_info.get("reason"),
                             caused_by=error_info.get("caused_by"),
                         )
                         for error in ex.errors
