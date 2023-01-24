@@ -107,9 +107,7 @@ import {
   Vector as VectorModel,
   getVectorModelPrimaryKey,
 } from "@/models/Vector";
-import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
-import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
-import { getText2TextDatasetById } from "@/models/text2text.queries";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
@@ -133,7 +131,7 @@ export default {
   },
   computed: {
     dataset() {
-      return this.getDatasetFromORM();
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
     },
     viewSettings() {
       return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
@@ -207,31 +205,6 @@ export default {
     },
     formatSelectedVectorObj(vector) {
       return { query: { vector }, recordId: this.record.id, vector };
-    },
-    getDatasetFromORM() {
-      try {
-        return this.getTaskDatasetById();
-      } catch (err) {
-        console.error(err);
-        return null;
-      }
-    },
-    getTaskDatasetById() {
-      let datasetById = null;
-      switch (this.datasetTask.toUpperCase()) {
-        case "TEXTCLASSIFICATION":
-          datasetById = getTextClassificationDatasetById(this.datasetId);
-          break;
-        case "TOKENCLASSIFICATION":
-          datasetById = getTokenClassificationDatasetById(this.datasetId);
-          break;
-        case "TEXT2TEXT":
-          datasetById = getText2TextDatasetById(this.datasetId);
-          break;
-        default:
-          throw new Error(`ERROR Unknown task: ${this.datasetTask}`);
-      }
-      return datasetById;
     },
   },
 };
