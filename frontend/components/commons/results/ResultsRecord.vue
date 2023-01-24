@@ -43,6 +43,7 @@
             class="record__date"
             v-if="record.event_timestamp"
             :date="record.event_timestamp"
+            data-title="Event Timestamp"
           />
           <similarity-search-component
             class="record__similarity-search"
@@ -252,13 +253,17 @@ export default {
     }
   }
   &__extra-actions {
-    margin-right: $base-space;
+    margin-right: $base-space * 2;
   }
   &__date {
     @include font-size(12px);
     color: $black-37;
     font-weight: 500;
     margin-right: $base-space;
+    &[data-title] {
+      position: relative;
+      @extend %has-tooltip--bottom;
+    }
   }
 }
 .similarity-search {
