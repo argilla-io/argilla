@@ -18,8 +18,8 @@
 <template>
   <div v-click-outside="close" :key="open" class="record__extra-actions">
     <base-button class="small clear" href="#" @click.prevent="open = !open"
-      ><svgicon name="meatballs" width="14" color="#4A4A4A"
-    /></base-button>
+      ><svgicon name="meatballs" width="14" color="#4A4A4A" />
+    </base-button>
     <div v-if="open" class="extra-actions__content">
       <div @click="showRecordInfoModal()">
         <span>View record info</span>
