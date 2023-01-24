@@ -207,4 +207,13 @@ export default {
     }
   }
 }
+.clear {
+  background: none;
+  padding: $base-space;
+  &:hover,
+  &:active,
+  &.active {
+    background: $black-4;
+  }
+}
 </style>
