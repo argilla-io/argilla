@@ -26,12 +26,13 @@
     </filters-area>
     <global-actions :dataset="dataset">
       <validate-discard-action
-        :dataset="dataset"
-        :allow-validation="allowValidation"
+        :datasetId="dataset.id"
+        :datasetTask="dataset.task"
+        :visibleRecords="dataset.visibleRecords"
+        :allowValidation="allowValidation"
         @discard-records="onDiscard"
         @validate-records="onValidate"
-      >
-      </validate-discard-action>
+      />
     </global-actions>
   </div>
 </template>

@@ -27,11 +27,12 @@
     <entities-header :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
-        :dataset="dataset"
+        :datasetId="dataset.id"
+        :datasetTask="dataset.task"
+        :visibleRecords="dataset.visibleRecords"
         @discard-records="onDiscard"
         @validate-records="onValidate"
-      >
-      </validate-discard-action>
+      />
       <create-new-action @new-label="onNewLabel" v-if="allowLabelCreation" />
       {{ dataset.labels }}
     </global-actions>

@@ -26,19 +26,27 @@
       v-model="allSelected"
       :disabled="!visibleRecords.length"
       class="list__item__checkbox"
-    ></base-checkbox>
-    <slot name="first" :selectedRecords="selectedRecords" />
+    />
+    <annotation-label-selector
+      v-if="datasetTask === 'TextClassification'"
+      :class="'validate-discard-actions__select'"
+      :multi-label="isMultiLabel"
+      :options="availableLabels"
+      @selected="onSelectLabels($event)"
+    />
     <base-button
       :disabled="!allowValidation"
       class="primary outline small validate-discard-actions__button"
       @click="onValidate"
-      >Validate</base-button
     >
+      Validate
+    </base-button>
     <base-button
       class="primary outline small validate-discard-actions__button"
       @click="onDiscard"
-      >Discard</base-button
     >
+      Discard
+    </base-button>
     <slot name="last" :selectedRecords="selectedRecords" />
     <p v-if="selectedRecords.length" class="validate-discard-actions__text">
       Actions will apply to the
@@ -46,35 +54,51 @@
     </p>
   </div>
 </template>
+
 <script>
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { mapActions } from "vuex";
 import "assets/icons/math-plus";
 import "assets/icons/refresh";
 
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
       required: true,
     },
-    position: {
+    datasetTask: {
       type: String,
-      default: "before",
+      required: true,
+    },
+    visibleRecords: {
+      type: Array,
+      required: true,
+    },
+    isMultiLabel: {
+      type: Boolean,
+      default: () => false,
+    },
+    availableLabels: {
+      type: Array,
+      default: () => [],
     },
     allowValidation: {
       type: Boolean,
       default: true,
     },
   },
-  data: () => ({
-    allSelected: false,
-  }),
+  data() {
+    return {
+      allSelected: false,
+    };
+  },
   computed: {
-    visibleRecords() {
-      return this.dataset.visibleRecords;
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
     },
     selectedRecords() {
-      // Return selected records.
+      // TODO: when record will be in own ORM table, replace next line by query ORM
       return this.visibleRecords.filter((record) => record.selected);
     },
   },
@@ -89,6 +113,7 @@ export default {
         allSelected ||
         this.visibleRecords.every((record) => record.selected)
       ) {
+        //TODO : refactor updateRecords to pass only the datasetId instead of all dataset
         this.updateRecords({
           dataset: this.dataset,
           records: this.visibleRecords.map((record) => {
@@ -107,6 +132,10 @@ export default {
     },
     async onValidate() {
       this.$emit("validate-records", this.selectedRecords);
+    },
+    onSelectLabels(labels) {
+      const { selectedRecords } = this;
+      this.$emit("on-select-labels", { labels, selectedRecords });
     },
   },
 };

@@ -27,19 +27,14 @@
     </filters-area>
     <global-actions :dataset="dataset">
       <validate-discard-action
-        :dataset="dataset"
+        :datasetId="dataset.id"
+        :datasetTask="dataset.task"
+        :visibleRecords="dataset.visibleRecords"
+        :availableLabels="availableLabels"
         @discard-records="onDiscard"
         @validate-records="onValidate"
-      >
-        <template slot="first" slot-scope="validateDiscard">
-          <annotation-label-selector
-            :class="'validate-discard-actions__select'"
-            :multi-label="isMultiLabel"
-            :options="availableLabels"
-            @selected="onSelectLabels($event, validateDiscard.selectedRecords)"
-          />
-        </template>
-      </validate-discard-action>
+        @on-select-labels="onSelectLabels($event)"
+      />
       <create-new-action @new-label="onNewLabel" v-if="allowLabelCreation" />
     </global-actions>
   </div>
@@ -86,7 +81,7 @@ export default {
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
-    async onSelectLabels(labels, selectedRecords) {
+    async onSelectLabels({ labels, selectedRecords }) {
       const records = selectedRecords.map((record) => {
         let newLabels = labels.map((label) => ({
           class: label,
