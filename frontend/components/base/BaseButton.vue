@@ -210,7 +210,7 @@ export default {
 .clear {
   background: none;
   padding: $base-space;
-  min-height: 30px;
+  height: 30px;
   &:hover,
   &:active,
   &.active {
