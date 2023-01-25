@@ -254,12 +254,13 @@ export default {
   }
   &__extra-actions {
     margin-right: $base-space * 2;
+    margin-left: calc($base-space / 2);
   }
   &__date {
     @include font-size(12px);
     color: $black-37;
     font-weight: 500;
-    margin-right: $base-space;
+    margin-right: 12px;
     &[data-title] {
       position: relative;
       @extend %has-tooltip--bottom;
