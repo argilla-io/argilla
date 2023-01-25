@@ -47,7 +47,6 @@
     >
       Discard
     </base-button>
-    <slot name="last" :selectedRecords="selectedRecords" />
     <p v-if="selectedRecords.length" class="validate-discard-actions__text">
       Actions will apply to the
       <span>{{ selectedRecords.length }} records</span> selected
@@ -58,8 +57,6 @@
 <script>
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { mapActions } from "vuex";
-import "assets/icons/math-plus";
-import "assets/icons/refresh";
 
 export default {
   props: {
@@ -77,7 +74,7 @@ export default {
     },
     isMultiLabel: {
       type: Boolean,
-      default: () => false,
+      required: true,
     },
     availableLabels: {
       type: Array,

@@ -32,6 +32,7 @@
       :datasetVisibleRecords="dataset.visibleRecords"
       :availableLabels="availableLabels"
       :isCreationLabel="allowLabelCreation"
+      :isMultiLabel="isMultiLabel"
       @discard-records="onDiscard"
       @validate-records="onValidate"
       @on-select-labels="onSelectLabels($event)"

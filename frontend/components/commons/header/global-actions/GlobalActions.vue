@@ -23,6 +23,7 @@
         :datasetTask="datasetTask"
         :visibleRecords="datasetVisibleRecords"
         :availableLabels="availableLabels"
+        :isMultiLabel="isMultiLabel"
         @discard-records="onDiscard"
         @validate-records="onValidate"
         @on-select-labels="onSelectLabels($event)"
@@ -59,6 +60,10 @@ export default {
     availableLabels: {
       type: Array,
       default: () => [],
+    },
+    isMultiLabel: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
