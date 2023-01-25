@@ -25,22 +25,31 @@
       <dataset-options :dataset="dataset" />
     </filters-area>
     <global-actions
-      :datasetId="dataset.id"
-      :datasetName="dataset.name"
-      :datasetTask="dataset.task"
+      :datasetId="datasetId"
+      :datasetName="datasetName"
+      :datasetTask="datasetTask"
       :datasetVisibleRecords="dataset.visibleRecords"
       @discard-records="onDiscard"
       @validate-records="onValidate"
     />
   </div>
 </template>
+
 <script>
 import { mapActions } from "vuex";
-
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
     enableSimilaritySearch: {
@@ -49,6 +58,10 @@ export default {
     },
   },
   computed: {
+    dataset() {
+      //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
+      return getDatasetFromORM(this.datasetId, this.datasetTask, true);
+    },
     allowValidation() {
       const selected = this.dataset.results.records.filter((r) => r.selected);
       return this.validationFilter(selected).length > 0;

@@ -35,6 +35,9 @@
       v-if="dataset"
       :is="currentTaskHeader"
       :dataset="dataset"
+      :datasetId="dataset.id"
+      :datasetName="dataset.name"
+      :datasetTask="dataset.task"
       :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
     />

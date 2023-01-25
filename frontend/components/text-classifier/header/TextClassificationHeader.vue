@@ -26,9 +26,9 @@
       <dataset-options :dataset="dataset" />
     </filters-area>
     <global-actions
-      :datasetId="dataset.id"
-      :datasetName="dataset.name"
-      :datasetTask="dataset.task"
+      :datasetId="datasetId"
+      :datasetName="datasetName"
+      :datasetTask="datasetTask"
       :datasetVisibleRecords="dataset.visibleRecords"
       :availableLabels="availableLabels"
       :isCreationLabel="allowLabelCreation"
@@ -40,12 +40,22 @@
     />
   </div>
 </template>
+
 <script>
 import { mapActions } from "vuex";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
     enableSimilaritySearch: {
@@ -54,11 +64,12 @@ export default {
     },
   },
   computed: {
+    dataset() {
+      //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
+      return getDatasetFromORM(this.datasetId, this.datasetTask, true);
+    },
     isMultiLabel() {
       return this.dataset.isMultiLabel;
-    },
-    isRuleListView() {
-      return this.dataset.viewSettings?.visibleRulesList || false;
     },
     availableLabels() {
       const record = this.dataset.results.records[0];
@@ -68,9 +79,6 @@ export default {
           : [];
       labels = Array.from(new Set([...labels, ...this.dataset.labels]));
       return labels;
-    },
-    viewMode() {
-      return this.dataset.viewSettings.viewMode;
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
@@ -143,4 +151,3 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped></style>
