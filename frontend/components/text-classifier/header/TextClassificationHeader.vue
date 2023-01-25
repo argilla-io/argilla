@@ -25,18 +25,18 @@
     >
       <dataset-options :dataset="dataset" />
     </filters-area>
-    <global-actions :dataset="dataset">
-      <validate-discard-action
-        :datasetId="dataset.id"
-        :datasetTask="dataset.task"
-        :visibleRecords="dataset.visibleRecords"
-        :availableLabels="availableLabels"
-        @discard-records="onDiscard"
-        @validate-records="onValidate"
-        @on-select-labels="onSelectLabels($event)"
-      />
-      <create-new-action @new-label="onNewLabel" v-if="allowLabelCreation" />
-    </global-actions>
+    <global-actions
+      :datasetId="dataset.id"
+      :datasetName="dataset.name"
+      :datasetTask="dataset.task"
+      :datasetVisibleRecords="dataset.visibleRecords"
+      :availableLabels="availableLabels"
+      :isCreationLabel="allowLabelCreation"
+      @discard-records="onDiscard"
+      @validate-records="onValidate"
+      @on-select-labels="onSelectLabels($event)"
+      @new-label="onNewLabel"
+    />
   </div>
 </template>
 <script>

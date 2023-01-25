@@ -24,16 +24,14 @@
     >
       <dataset-options :dataset="dataset" />
     </filters-area>
-    <global-actions :dataset="dataset">
-      <validate-discard-action
-        :datasetId="dataset.id"
-        :datasetTask="dataset.task"
-        :visibleRecords="dataset.visibleRecords"
-        :allowValidation="allowValidation"
-        @discard-records="onDiscard"
-        @validate-records="onValidate"
-      />
-    </global-actions>
+    <global-actions
+      :datasetId="dataset.id"
+      :datasetName="dataset.name"
+      :datasetTask="dataset.task"
+      :datasetVisibleRecords="dataset.visibleRecords"
+      @discard-records="onDiscard"
+      @validate-records="onValidate"
+    />
   </div>
 </template>
 <script>

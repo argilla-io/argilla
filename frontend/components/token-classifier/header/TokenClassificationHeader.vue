@@ -25,17 +25,16 @@
       <dataset-options :dataset="dataset" />
     </filters-area>
     <entities-header :dataset="dataset" />
-    <global-actions :dataset="dataset">
-      <validate-discard-action
-        :datasetId="dataset.id"
-        :datasetTask="dataset.task"
-        :visibleRecords="dataset.visibleRecords"
-        @discard-records="onDiscard"
-        @validate-records="onValidate"
-      />
-      <create-new-action @new-label="onNewLabel" v-if="allowLabelCreation" />
-      {{ dataset.labels }}
-    </global-actions>
+    <global-actions
+      :datasetId="dataset.id"
+      :datasetName="dataset.name"
+      :datasetTask="dataset.task"
+      :datasetVisibleRecords="dataset.visibleRecords"
+      :isCreationLabel="allowLabelCreation"
+      @discard-records="onDiscard"
+      @validate-records="onValidate"
+      @new-label="onNewLabel"
+    />
   </div>
 </template>
 <script>
