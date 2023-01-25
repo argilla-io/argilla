@@ -13,7 +13,7 @@ $tooltip-border-radius: $border-radius-s;
   pointer-events: none;
   z-index: 2;
   white-space: nowrap;
-  padding: $base-space $base-space*2;
+  padding: 6px $base-space;
   transform: none;
   background: $tooltip-bg;
   color: $tooltip-color;
@@ -32,7 +32,12 @@ $tooltip-border-radius: $border-radius-s;
     right: calc(100% + $tooltip-triangle-size/2);
     top: 50%;
     transform: translateY(-50%);
-    @include triangle(right, $tooltip-triangle-size, $tooltip-triangle-size, $tooltip-bg);
+    @include triangle(
+      right,
+      $tooltip-triangle-size,
+      $tooltip-triangle-size,
+      $tooltip-bg
+    );
   }
 }
 %has-tooltip--bottom {
@@ -45,7 +50,12 @@ $tooltip-border-radius: $border-radius-s;
   &:before {
     right: calc(50% - $tooltip-triangle-size/2);
     top: 100%;
-    @include triangle(top, $tooltip-triangle-size, $tooltip-triangle-size, $tooltip-bg);
+    @include triangle(
+      top,
+      $tooltip-triangle-size,
+      $tooltip-triangle-size,
+      $tooltip-bg
+    );
   }
 }
 %has-tooltip--top {
@@ -58,7 +68,12 @@ $tooltip-border-radius: $border-radius-s;
   &:before {
     right: calc(50% - $tooltip-triangle-size);
     top: -10px;
-    @include triangle(bottom, $tooltip-triangle-size, $tooltip-triangle-size, $tooltip-bg);
+    @include triangle(
+      bottom,
+      $tooltip-triangle-size,
+      $tooltip-triangle-size,
+      $tooltip-bg
+    );
   }
 }
 %tooltip-large-text {
@@ -88,17 +103,17 @@ $tooltip-border-radius: $border-radius-s;
     opacity: 0;
     pointer-events: none;
   }
-  &:hover{
+  &:hover {
     &:after {
       width: auto;
       height: auto;
       opacity: 1;
-      transition: opacity 0.1s ease 0.2s;
+      transition: opacity 0.3s ease 0.2s;
       z-index: 2;
     }
     &:before {
       opacity: 1;
-      transition: opacity 0.1s ease 0.2s;
+      transition: opacity 0.3s ease 0.2s;
     }
   }
 }
