@@ -114,6 +114,8 @@ class BadRequestError(ServerError):
 
 
 class BulkDataError(BadRequestError):
+    """Error on bulk data"""
+
     def __init__(self, detail: str, errors: Any):
         super().__init__(detail)
         self.errors = errors
