@@ -101,6 +101,8 @@ class Datasets(AbstractApi):
 
     __SETTINGS_MIN_API_VERSION__ = "0.15"
 
+    DEFAULT_SCAN_SIZE = 250
+
     class _DatasetApiModel(BaseModel):
         name: str
         task: TaskType
@@ -172,7 +174,9 @@ class Datasets(AbstractApi):
 
         """
 
-        url = f"{self._API_PREFIX}/{name}/records/:search"
+        url = (
+            f"{self._API_PREFIX}/{name}/records/:search?limit={self.DEFAULT_SCAN_SIZE}"
+        )
         query = self._parse_query(query=query)
 
         if limit == 0:
