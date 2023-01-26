@@ -12,10 +12,10 @@
           target="_blank"
         >
           docs</a
-        >. If you want, you can configure this limit at the cost of potential
-        performance loss. For more details about this limit, see
+        >. For now, changing this limit is not possible. For more details about
+        this limit, visit the official es docs
         <a
-          href="https://docs.argilla.io/en/latest/reference/webapp/pages.html#dataset"
+          href="https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#paginate-search-results"
           target="_blank"
         >
           here
