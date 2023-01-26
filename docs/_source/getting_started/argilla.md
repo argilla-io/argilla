@@ -32,7 +32,7 @@ Learn more: [Semantic Search Deep-dive guide](../guides/features/semantic-search
 
 ## Use cases
 
-* **Data labelling and curationgiot**: collect labels to start a project from scratch or from existing live models.
+* **Data labelling and curation**: collect labels to start a project from scratch or from existing live models.
 * **Model monitoring and observability:** log and observe predictions of live models.
 * **Evaluation**: easily compute "live" metrics from models in production, and slice evaluation datasets to test your system under specific conditions.
 * **Model debugging**: log predictions during the development process to visually spot issues.
