@@ -100,7 +100,8 @@
         </strong>
         of
       </template>
-      {{ paginableTotalItems | formatNumber }} records
+      <span class="total-records">{{ totalItems | formatNumber }} </span>
+      records
     </div>
   </div>
 </template>
