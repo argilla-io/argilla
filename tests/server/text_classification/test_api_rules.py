@@ -45,11 +45,11 @@ def log_some_records(
 
     response = client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        data=TextClassificationBulkRequest(
+        json=TextClassificationBulkRequest(
             records=[
                 TextClassificationRecord(**record),
             ],
-        ).json(by_alias=True),
+        ).dict(by_alias=True),
     )
     assert response.status_code == 200
 
@@ -348,10 +348,11 @@ def test_rule_metrics_with_missing_label(mocked_client):
 def test_rule_metrics_with_missing_label_for_stored_rule(
     mocked_client, rule, expected_metrics
 ):
-    dataset = "test_rule_metrics_with_missing_label_for_stored_rule"
+    dataset = f"test_rule_metrics_with_missing_label_for_stored_rule"
     log_some_records(mocked_client, dataset, annotation="o.k.")
     mocked_client.post(
-        f"/api/datasets/TextClassification/{dataset}/labeling/rules", json=rule.dict()
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+        json=rule.dict(),
     )
 
     response = mocked_client.get(

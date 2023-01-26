@@ -60,17 +60,22 @@ def test_list_datasets_by_task():
         ),
     )
 
-    datasets = dao.list_datasets(
-        task2dataset_map={created_text.task: BaseDatasetDB},
-    )
-
-    assert len(datasets) == 1
-    assert datasets[0].name == created_text.name
+    datasets = dao.list_datasets(task2dataset_map={created_text.task: BaseDatasetDB})
+    assert datasets
+    _assert_dataset_is_found_in_dataset_list(datasets, created_text.name)
 
     datasets = dao.list_datasets(task2dataset_map={created_token.task: BaseDatasetDB})
+    assert datasets
+    _assert_dataset_is_found_in_dataset_list(datasets, created_token.name)
 
-    assert len(datasets) == 1
-    assert datasets[0].name == created_token.name
+
+def _assert_dataset_is_found_in_dataset_list(datasets: list, name: str):
+    found = False
+    for ds in datasets:
+        if ds.name == name:
+            found = True
+            break
+    assert found, f"Not Found dataset {name} in fetched datasets"
 
 
 def test_close_dataset():

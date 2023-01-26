@@ -18,8 +18,7 @@ from argilla.server.apis.v0.models.text2text import Text2TextRecord
 from argilla.server.apis.v0.models.text_classification import TextClassificationRecord
 from argilla.server.apis.v0.models.token_classification import TokenClassificationRecord
 from argilla.server.commons.models import TaskType
-
-from . import helpers
+from tests import helpers
 
 
 @pytest.mark.parametrize(

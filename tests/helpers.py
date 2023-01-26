@@ -17,8 +17,11 @@ from typing import List
 from fastapi import FastAPI
 from starlette.testclient import TestClient
 
+import argilla as ar
+from argilla import Text2TextRecord, TextClassificationRecord, TokenClassificationRecord
 from argilla._constants import API_KEY_HEADER_NAME, WORKSPACE_HEADER_NAME
 from argilla.client.api import active_api
+from argilla.server.commons.models import TaskType
 from argilla.server.security import auth
 from argilla.server.security.auth_provider.local.settings import settings
 from argilla.server.security.auth_provider.local.users.model import UserInDB
@@ -137,3 +140,43 @@ class SecuredClient:
                 stream=True,
                 **kwargs,
             )
+
+
+def create_dataset(task: TaskType):
+    def text_class(idx):
+        return TextClassificationRecord(
+            id=idx,
+            text="This is the text",
+        )
+
+    def token_class(idx):
+        return TokenClassificationRecord(
+            id=idx,
+            text="This is the text",
+            tokens="This is the text".split(),
+        )
+
+    def text2text(idx):
+        return Text2TextRecord(
+            id=idx,
+            text="This is the text",
+        )
+
+    dataset = "test_dataset"
+    ar.delete(dataset)
+
+    if task == TaskType.text_classification:
+        record_builder = text_class
+    elif task == TaskType.token_classification:
+        record_builder = token_class
+    else:
+        record_builder = text2text
+
+    records = [record_builder(i) for i in range(0, 50)]
+
+    ar.log(
+        name=dataset,
+        records=records,
+    )
+
+    return dataset

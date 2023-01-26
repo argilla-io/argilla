@@ -624,7 +624,7 @@ def test_include_event_timestamp(mocked_client):
 
 
 def test_words_cloud(mocked_client):
-    dataset = "test_language_detection"
+    dataset = "test_words_cloud"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     response = mocked_client.post(
@@ -740,7 +740,7 @@ def test_search_using_text(mocked_client):
 
     mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        data=TextClassificationBulkRequest(
+        json=TextClassificationBulkRequest(
             records=[
                 TextClassificationRecord(
                     **{
@@ -750,7 +750,7 @@ def test_search_using_text(mocked_client):
                     }
                 ),
             ],
-        ).json(by_alias=True),
+        ).dict(by_alias=True),
     )
 
     response = mocked_client.post(

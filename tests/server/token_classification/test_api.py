@@ -164,7 +164,7 @@ def test_some_sort(mocked_client):
 def test_create_records_for_token_classification(
     mocked_client, include_metrics: bool, metrics_validator: Callable
 ):
-    dataset = "test_create_records_for_token_classification"
+    dataset = f"test_create_records_for_token_classification_{include_metrics}".lower()
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     entity_label = "TEST"
     expected_records = 2
@@ -242,7 +242,7 @@ def test_create_records_for_token_classification_vector_search(
     include_metrics: bool,
     metrics_validator: Callable,
 ):
-    dataset = "test_create_records_for_token_classification_vector_search"
+    dataset = f"test_create_records_for_token_classification_vector_search_{include_metrics}".lower()
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     entity_label = "TEST"
     expected_records = 3
