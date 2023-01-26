@@ -105,7 +105,9 @@
     </div>
   </div>
 </template>
+
 <script>
+import { Notification } from "@/models/Notifications";
 import "assets/icons/chevron-left";
 import "assets/icons/chevron-right";
 import "assets/icons/chevron-up";
@@ -171,9 +173,34 @@ export default {
       }
       return pages;
     },
+    formattedLimit() {
+      return this.$options.filters.formatNumber(this.maxRecordsLimit);
+    },
+    message() {
+      return `<p>
+                You cannot go through more than  ${this.formattedLimit} records. If
+                you want to explore more records, you can combine queries, filters, and
+                sorting to fine-grain your search. For more info about queries, visit
+                the
+                <a
+                  href="https://docs.argilla.io/en/latest/guides/features/queries.html?highlight=queries#"
+                  target="_blank"
+                >
+                  docs</a
+                >. For now, changing this limit is not possible. For more details about
+                this limit, visit the official es docs
+                <a
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#paginate-search-results"
+                  target="_blank"
+                >
+                  here
+                </a>
+              </p>`;
+    },
   },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
+    this.showNotification(this.currentPage);
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
@@ -189,8 +216,9 @@ export default {
         this.$emit("changePage", this.currentPage - 1, this.paginationSize);
       }
     },
-    changePage(n) {
-      this.$emit("changePage", n, this.paginationSize);
+    changePage(pageNumber) {
+      this.showNotification(pageNumber);
+      this.$emit("changePage", pageNumber, this.paginationSize);
     },
     changePageSize(pageSize) {
       (this.showOptions = false),
@@ -216,6 +244,18 @@ export default {
           this.prevPage();
         }
       }
+    },
+    showNotification(pageNumber) {
+      this.isLastPage(pageNumber) &&
+        Notification.dispatch("notify", {
+          message: this.message,
+          type: "warning",
+        });
+    },
+    isLastPage(pageNumber) {
+      //NOTE: the computed currentPage seems to be the last page clicked, this is why I used a param pageNumber and note the computed
+      console.log(pageNumber, this.maxRecordsLimit / this.paginationSize);
+      return pageNumber === this.maxRecordsLimit / this.paginationSize;
     },
   },
 };

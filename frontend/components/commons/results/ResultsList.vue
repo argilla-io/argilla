@@ -66,13 +66,6 @@
               />
             </DynamicScrollerItem>
           </template>
-
-          <template #after>
-            <pagination-end-alert
-              :limit="paginationLimit"
-              v-if="isLastPagePaginable"
-            />
-          </template>
         </DynamicScroller>
       </div>
       <base-pagination
