@@ -17,45 +17,30 @@ const getDatasetFromORM = (
   isWithViewSettings = false
 ) => {
   try {
-    if (isWithViewSettings)
-      return getTaskDatasetWithViewSettingsById(datasetId, datasetTask);
-    return getTaskDatasetById(datasetId, datasetTask);
+    return getTaskDatasetById(datasetId, datasetTask, isWithViewSettings);
   } catch (err) {
     console.error(err);
     return null;
   }
 };
 
-const getTaskDatasetById = (datasetId, datasetTask) => {
+const getTaskDatasetById = (datasetId, datasetTask, isWithViewSettings) => {
   let datasetById = null;
   switch (datasetTask.toUpperCase()) {
     case "TEXTCLASSIFICATION":
-      datasetById = getTextClassificationDatasetById(datasetId);
+      datasetById = isWithViewSettings
+        ? getTextClassificationDatasetWithViewSettingsById(datasetId)
+        : getTextClassificationDatasetById(datasetId);
       break;
     case "TOKENCLASSIFICATION":
-      datasetById = getTokenClassificationDatasetById(datasetId);
+      datasetById = isWithViewSettings
+        ? getTokenClassificationDatasetWithViewSettingsById(datasetId)
+        : getTokenClassificationDatasetById(datasetId);
       break;
     case "TEXT2TEXT":
-      datasetById = getText2TextDatasetById(datasetId);
-      break;
-    default:
-      throw new Error(`ERROR Unknown task: ${datasetTask}`);
-  }
-  return datasetById;
-};
-
-const getTaskDatasetWithViewSettingsById = (datasetId, datasetTask) => {
-  let datasetById = null;
-  switch (datasetTask.toUpperCase()) {
-    case "TEXTCLASSIFICATION":
-      datasetById = getTextClassificationDatasetWithViewSettingsById(datasetId);
-      break;
-    case "TOKENCLASSIFICATION":
-      datasetById =
-        getTokenClassificationDatasetWithViewSettingsById(datasetId);
-      break;
-    case "TEXT2TEXT":
-      datasetById = getText2TextDatasetWithViewSettingsById(datasetId);
+      datasetById = isWithViewSettings
+        ? getText2TextDatasetWithViewSettingsById(datasetId)
+        : getText2TextDatasetById(datasetId);
       break;
     default:
       throw new Error(`ERROR Unknown task: ${datasetTask}`);
