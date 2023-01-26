@@ -26,7 +26,9 @@
     v-else
   >
     <app-header
-      :dataset="dataset"
+      :datasetId="dataset.id"
+      :datasetTask="dataset.task"
+      :datasetName="dataset.name"
       :breadcrumbs="breadcrumbs"
       @on-search-or-on-filter-records="searchRecords"
     />
