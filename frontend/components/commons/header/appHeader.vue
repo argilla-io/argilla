@@ -30,14 +30,18 @@
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
-    <slot />
+    <task-sidebar
+      v-if="dataset"
+      :dataset="dataset"
+      @view-mode-changed="onViewModeChanged"
+    />
     <component
       v-if="dataset"
       :is="currentTaskHeader"
       :datasetId="dataset.id"
       :datasetName="dataset.name"
       :datasetTask="dataset.task"
-      :enableSimilaritySearch="enableSimilaritySearch"
+      :enableSimilaritySearch="isReferenceRecord"
       @search-records="searchRecords"
     />
   </section>
@@ -45,6 +49,7 @@
 
 <script>
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { Vector as VectorModel } from "@/models/Vector";
 export default {
   data: () => {
     return {
@@ -66,10 +71,6 @@ export default {
       type: Boolean,
       default: true,
     },
-    enableSimilaritySearch: {
-      type: Boolean,
-      default: false,
-    },
   },
   computed: {
     currentTaskHeader() {
@@ -86,6 +87,12 @@ export default {
     showRecordsLoader() {
       return this.viewSettings.loading;
     },
+    isReferenceRecord() {
+      return VectorModel.query()
+        .where("dataset_id", this.dataset.id.join("."))
+        .where("is_active", true)
+        .exists();
+    },
   },
   mounted() {
     if (this.sticky && this.dataset) {
@@ -100,6 +107,14 @@ export default {
     },
   },
   methods: {
+    onViewModeChanged(viewMode) {
+      if (viewMode === "labelling-rules" && this.isReferenceRecord) {
+        this.removeSimilarityFilter();
+      }
+    },
+    removeSimilarityFilter() {
+      this.searchRecords({ query: { vector: null } });
+    },
     async setHeaderHeight() {
       const header = this.$refs.header;
       const resize_ob = new ResizeObserver(() => {
@@ -117,7 +132,7 @@ export default {
       });
     },
     searchRecords(query) {
-      this.$emit("search-records", query);
+      this.$emit("on-search-or-on-filter-records", query);
     },
   },
 };
