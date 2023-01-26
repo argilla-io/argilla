@@ -55,7 +55,7 @@ export default {
   data() {
     return {
       headerHeight: null,
-    }
+    };
   },
   props: {
     datasetId: {
