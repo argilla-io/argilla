@@ -149,6 +149,8 @@ class Datasets(AbstractApi):
         self,
         name: str,
         projection: Optional[Set[str]] = None,
+        limit: Optional[int] = None,
+        id_from: Optional[str] = None,
         **query,
     ) -> Iterable[dict]:
         """
@@ -158,6 +160,10 @@ class Datasets(AbstractApi):
             name: the dataset
             query: the search query
             projection: a subset of record fields to retrieve. If not provided,
+            limit: The number of records to retrieve
+            id_from: If provided, starts gathering the records starting from that Record.
+                As the Records returned with the load method are sorted by ID, ´id_from´
+                can be used to load using batches.
             only id's will be returned
 
         Returns:
@@ -169,11 +175,18 @@ class Datasets(AbstractApi):
         url = f"{self._API_PREFIX}/{name}/records/:search"
         query = self._parse_query(query=query)
 
+        if limit == 0:
+            limit = None
+
         request = {
             "fields": list(projection) if projection else ["id"],
             "query": query,
         }
 
+        if id_from:
+            request["next_idx"] = id_from
+
+        yield_fields = 0
         with api_compatibility(self, min_version="1.2.0"):
             response = self.http_client.post(
                 url,
@@ -183,6 +196,9 @@ class Datasets(AbstractApi):
             while response.get("records"):
                 for record in response["records"]:
                     yield record
+                    yield_fields += 1
+                    if limit and limit <= yield_fields:
+                        return
 
                 next_idx = response.get("next_idx")
                 if next_idx:
