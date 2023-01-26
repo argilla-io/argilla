@@ -17,9 +17,9 @@
 
 <template>
   <div v-click-outside="close" :key="open" class="record__extra-actions">
-    <a class="extra-actions__button" href="#" @click.prevent="open = !open"
-      ><svgicon name="kebab-menu" width="20" height="20" color="#4A4A4A"
-    /></a>
+    <base-button class="small clear" @click.prevent="open = !open"
+      ><svgicon name="meatballs" width="14" color="#4A4A4A" />
+    </base-button>
     <div v-if="open" class="extra-actions__content">
       <div @click="showRecordInfoModal()">
         <span>View record info</span>
@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import "assets/icons/kebab-menu";
+import "assets/icons/meatballs";
 import { IdState } from "vue-virtual-scroller";
 
 export default {
@@ -109,11 +109,6 @@ export default {
 <style lang="scss" scoped>
 .extra-actions {
   position: relative;
-  &__button {
-    text-align: right;
-    outline: none;
-    text-decoration: none;
-  }
   &__content {
     position: absolute;
     right: 0.7em;
