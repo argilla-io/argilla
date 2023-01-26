@@ -34,7 +34,6 @@
     <component
       v-if="dataset"
       :is="currentTaskHeader"
-      :dataset="dataset"
       :datasetId="dataset.id"
       :datasetName="dataset.name"
       :datasetTask="dataset.task"
@@ -73,19 +72,19 @@ export default {
     },
   },
   computed: {
-    currentTask() {
-      return this.dataset.task;
-    },
     currentTaskHeader() {
-      return this.currentTask + "Header";
+      return this.dataset.task + "Header";
+    },
+    viewSettings() {
+      return DatasetViewSettings.query().first();
     },
     globalHeaderHeight() {
       if (this.sticky && this.dataset) {
-        return this.dataset.viewSettings.headerHeight;
+        return this.viewSettings.headerHeight;
       }
     },
     showRecordsLoader() {
-      return this.dataset?.viewSettings.loading;
+      return this.viewSettings.loading;
     },
   },
   mounted() {
