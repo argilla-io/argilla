@@ -105,9 +105,7 @@ import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
 import { Vector as VectorModel } from "@/models/Vector";
 import { RefRecord as RefRecordModel } from "@/models/RefRecord";
-import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
-import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
-import { getText2TextDatasetById } from "@/models/text2text.queries";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
@@ -131,7 +129,7 @@ export default {
   },
   computed: {
     dataset() {
-      return this.getDatasetFromORM();
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
     },
     viewSettings() {
       return this.dataset.name
@@ -189,31 +187,6 @@ export default {
     },
     searchRecords(query) {
       this.$emit("search-records", query);
-    },
-    getDatasetFromORM() {
-      try {
-        return this.getTaskDatasetById();
-      } catch (err) {
-        console.error(err);
-        return null;
-      }
-    },
-    getTaskDatasetById() {
-      let datasetById = null;
-      switch (this.datasetTask.toUpperCase()) {
-        case "TEXTCLASSIFICATION":
-          datasetById = getTextClassificationDatasetById(this.datasetId);
-          break;
-        case "TOKENCLASSIFICATION":
-          datasetById = getTokenClassificationDatasetById(this.datasetId);
-          break;
-        case "TEXT2TEXT":
-          datasetById = getText2TextDatasetById(this.datasetId);
-          break;
-        default:
-          throw new Error(`ERROR Unknown task: ${this.datasetTask}`);
-      }
-      return datasetById;
     },
   },
 };

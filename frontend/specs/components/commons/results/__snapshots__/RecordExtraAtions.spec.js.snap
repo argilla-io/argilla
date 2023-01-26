@@ -1,9 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`RecordExtraActions renders properly 1`] = `
-<div class="record__extra-actions" record="[object Object]" dataset="[object Object]"><a href="#" class="extra-actions__button"><svg version="1.1" viewBox="0 0 41 40" class="svg-icon svg-fill" style="width: 20px; height: 20px;">
-      <path fill="#4A4A4A" stroke="none" pid="0" fill-rule="evenodd" clip-rule="evenodd" d="M20.5 5c1.114 0 1.956.297 2.527.89.57.593.855 1.457.855 2.59 0 1.095-.292 1.942-.875 2.542-.584.6-1.42.9-2.507.9-1.048 0-1.873-.304-2.477-.91-.604-.607-.905-1.45-.905-2.531 0-1.108.295-1.965.885-2.571.59-.607 1.423-.91 2.497-.91zm0 11.53c1.114 0 1.956.296 2.527.89.57.592.855 1.463.855 2.61 0 1.094-.292 1.941-.875 2.54-.584.6-1.42.9-2.507.9-1.048 0-1.873-.303-2.477-.909-.604-.607-.905-1.45-.905-2.531 0-1.121.295-1.985.885-2.591.59-.606 1.423-.91 2.497-.91zm0 11.548c1.114 0 1.956.297 2.527.89.57.594.855 1.457.855 2.591 0 1.094-.292 1.941-.875 2.541-.584.6-1.42.9-2.507.9-1.048 0-1.873-.303-2.477-.91-.604-.606-.905-1.45-.905-2.531 0-1.108.295-1.964.885-2.57.59-.607 1.423-.91 2.497-.91z" _fill="#000"></path>
-    </svg></a>
+<div class="record__extra-actions" record="[object Object]" dataset="[object Object]">
+  <base-button class="small clear"><svg version="1.1" viewBox="0 0 30 8" class="svg-icon svg-fill" style="width: 14px;">
+      <path fill="#4A4A4A" stroke="none" pid="0" d="M7.5 4A3.75 3.75 0 110 4a3.75 3.75 0 017.5 0zM18.75 4a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM26.25 7.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" _fill="#000"></path>
+    </svg></base-button>
   <div class="extra-actions__content">
     <div><span>View record info</span></div>
     <base-action-tooltip-stub tooltip="Copied">

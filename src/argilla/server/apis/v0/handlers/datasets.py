@@ -17,6 +17,7 @@ from typing import List
 
 from fastapi import APIRouter, Body, Depends, Security
 
+from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.apis.v0.models.datasets import (
     CopyDatasetRequest,
@@ -33,8 +34,10 @@ from argilla.server.services.datasets import DatasetsService
 router = APIRouter(tags=["datasets"], prefix="/datasets")
 
 
-@router.get(
+@deprecate_endpoint(
     "/",
+    new_path="",
+    router_method=router.get,
     response_model=List[Dataset],
     response_model_exclude_none=True,
     operation_id="list_datasets",

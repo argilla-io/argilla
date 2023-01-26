@@ -47,9 +47,7 @@
 </template>
 <script>
 import { mapActions } from "vuex";
-import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
-import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
-import { getText2TextDatasetById } from "@/models/text2text.queries";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
 export default {
@@ -70,7 +68,7 @@ export default {
   },
   computed: {
     dataset() {
-      return this.getDatasetFromORM();
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
     },
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
@@ -118,31 +116,6 @@ export default {
         dataset: this.dataset,
         value: "annotate",
       });
-    },
-    getDatasetFromORM() {
-      try {
-        return this.getTaskDatasetById();
-      } catch (err) {
-        console.error(err);
-        return null;
-      }
-    },
-    getTaskDatasetById() {
-      let datasetById = null;
-      switch (this.datasetTask.toUpperCase()) {
-        case "TEXTCLASSIFICATION":
-          datasetById = getTextClassificationDatasetById(this.datasetId);
-          break;
-        case "TOKENCLASSIFICATION":
-          datasetById = getTokenClassificationDatasetById(this.datasetId);
-          break;
-        case "TEXT2TEXT":
-          datasetById = getText2TextDatasetById(this.datasetId);
-          break;
-        default:
-          throw new Error(`ERROR Unknown task: ${this.datasetTask}`);
-      }
-      return datasetById;
     },
   },
 };

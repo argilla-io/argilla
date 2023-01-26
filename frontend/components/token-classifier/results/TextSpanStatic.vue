@@ -27,8 +27,8 @@
       :datasetName="datasetName"
       :record="record"
     />
-    <template v-else v-for="t in token.tokens">{{ t.text }}</template>
-    <template>{{ token.charsBetweenTokens }}</template>
+    <template v-else v-for="t in token.tokens">{{ t.text }}</template
+    ><template>{{ token.charsBetweenTokens }}</template>
   </span>
 </template>
 

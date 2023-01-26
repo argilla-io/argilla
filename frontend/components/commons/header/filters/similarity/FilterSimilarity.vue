@@ -75,11 +75,14 @@ export default {
       padding: 0 0.8em 0 0.4em;
       div[data-title] {
         position: relative;
-        @extend %has-tooltip--top;
+        @extend %has-tooltip--bottom;
         @extend %tooltip-large-text;
         &:after {
-          margin-left: 1em;
+          right: 1em;
           min-width: 300px;
+        }
+        &:before {
+          right: 0.5em !important;
         }
       }
       &.--active {
@@ -88,12 +91,12 @@ export default {
         align-items: center;
         &[data-title] {
           position: relative;
-          @extend %has-tooltip--top;
+          @extend %has-tooltip--bottom;
           &:after {
             right: 5em !important;
           }
           &:before {
-            right: 3.8em !important;
+            right: 3.7em !important;
           }
         }
         #{$this}__icon {
