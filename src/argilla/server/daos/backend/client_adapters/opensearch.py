@@ -792,7 +792,7 @@ class OpenSearchClient(IClientAdapter):
                 is_phrase_query=is_phrase_query,
             )
             if keywords:
-                data["search_keywords"] = keywords
+                data[highlight.search_keywords_field] = keywords
 
         return data
 

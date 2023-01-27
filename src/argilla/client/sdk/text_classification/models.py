@@ -37,6 +37,9 @@ class ClassPrediction(BaseModel):
     class_label: Union[str, int] = Field(alias="class")
     score: float = Field(default=1.0, ge=0.0, le=1.0)
 
+    class Config:
+        allow_population_by_field_name = True
+
 
 class TextClassificationAnnotation(BaseAnnotation):
     labels: List[ClassPrediction]

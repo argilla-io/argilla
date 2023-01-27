@@ -8,7 +8,7 @@ function mountRecordExtraActions() {
         open: true,
       };
     },
-    stubs: ["base-action-tooltip"],
+    stubs: ["base-action-tooltip", "base-button"],
     propsData: {
       recordId: "recordId",
       recordClipboardText: ["word 1", "word 2"],
