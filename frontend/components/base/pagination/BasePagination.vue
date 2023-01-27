@@ -178,23 +178,15 @@ export default {
     },
     message() {
       return `<p>
-                You cannot go through more than  ${this.formattedLimit} records. If
-                you want to explore more records, you can combine queries, filters, and
-                sorting to fine-grain your search. For more info about queries, visit
-                the
+                You cannot go through more than ${this.formattedLimit} records. 
+                To explore more records, you can combine queries, filters, and sorting to reduce your search results.
+                Visit this 
                 <a
                   href="https://docs.argilla.io/en/latest/guides/features/queries.html?highlight=queries#"
                   target="_blank"
                 >
-                  docs</a
-                >. For now, changing this limit is not possible. For more details about
-                this limit, visit the official es docs
-                <a
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#paginate-search-results"
-                  target="_blank"
-                >
-                  here
-                </a>
+                  guide</a
+                > for using advanced queries.
               </p>`;
     },
   },
