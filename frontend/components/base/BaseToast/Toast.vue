@@ -27,7 +27,7 @@
       :class="[`toast-${type}`, `is-${position}`]"
       @mouseover="toggleTimer(true)"
       @mouseleave="toggleTimer(false)"
-    >{{duration}}
+    >
       <div class="toast-icon"></div>
       <p class="toast-text" v-html="message"></p>
       <span v-if="buttonText" class="toast__button" @click="whenClicked">{{
