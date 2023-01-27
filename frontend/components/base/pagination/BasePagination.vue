@@ -246,6 +246,7 @@ export default {
     showNotification() {
       Notification.dispatch("notify", {
         message: this.message,
+        numberOfWords: 32,
         type: "warning",
       });
     },

@@ -51,6 +51,10 @@ export default {
       type: [String, Error],
       required: true,
     },
+    numberOfWords: {
+      type: Number,
+      default: 0,
+    },
     type: {
       type: String,
       default: "success",
@@ -65,10 +69,6 @@ export default {
       validator(value) {
         return Object.values(Positions).includes(value);
       },
-    },
-    duration: {
-      type: Number,
-      default: 6000,
     },
     dismissible: {
       type: Boolean,
@@ -137,6 +137,10 @@ export default {
             leave: "fadeOut",
           };
       }
+    },
+    duration() {
+      //NOTE: good practice to show toast is (6s + 1s*numberOfWords)
+      return 6000 + this.numberOfWords * 1000;
     },
   },
   beforeMount() {
@@ -289,6 +293,15 @@ $toast-colors: map-merge(
   .toast-text {
     margin: 0;
     padding: 1.5em;
+    a {
+      text-decoration: inherit;
+      background: none;
+      color: $primary-color;
+      &:hover {
+        text-decoration: underline;
+        background: none;
+      }
+    }
   }
   &__button {
     color: palette(blue, 300);
