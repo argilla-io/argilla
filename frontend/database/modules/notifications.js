@@ -19,10 +19,10 @@ import Vue from "vue";
 const getters = {};
 
 const actions = {
-  notify(_, { message, type, numberOfWords }) {
+  notify(_, { message, type, numberOfChars }) {
     return Vue.$toast.open({
       message,
-      numberOfWords,
+      numberOfChars,
       type: type || "default",
     });
   },

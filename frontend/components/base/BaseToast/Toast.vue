@@ -27,7 +27,7 @@
       :class="[`toast-${type}`, `is-${position}`]"
       @mouseover="toggleTimer(true)"
       @mouseleave="toggleTimer(false)"
-    >
+    >{{duration}}
       <div class="toast-icon"></div>
       <p class="toast-text" v-html="message"></p>
       <span v-if="buttonText" class="toast__button" @click="whenClicked">{{
@@ -51,7 +51,7 @@ export default {
       type: [String, Error],
       required: true,
     },
-    numberOfWords: {
+    numberOfChars: {
       type: Number,
       default: 0,
     },
@@ -139,8 +139,8 @@ export default {
       }
     },
     duration() {
-      //NOTE: good practice to show toast is (6s + 1s*numberOfWords)
-      return 6000 + this.numberOfWords * 1000;
+      //NOTE: good practice to show toast is (6s + 1s each 120 characters)
+      return 6000 + Math.ceil(this.numberOfChars / 120) * 1000;
     },
   },
   beforeMount() {
