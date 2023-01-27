@@ -178,9 +178,9 @@ export default {
     },
     message() {
       return `<p>
-                You cannot go through more than ${this.formattedLimit} records. 
+                You cannot go through more than ${this.formattedLimit} records.
                 To explore more records, you can combine queries, filters, and sorting to reduce your search results.
-                Visit this 
+                Visit this
                 <a
                   href="https://docs.argilla.io/en/latest/guides/features/queries.html?highlight=queries#"
                   target="_blank"
