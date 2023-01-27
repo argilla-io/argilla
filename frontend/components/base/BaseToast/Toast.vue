@@ -68,7 +68,7 @@ export default {
     },
     duration: {
       type: Number,
-      default: 10000,
+      default: 6000,
     },
     dismissible: {
       type: Boolean,
