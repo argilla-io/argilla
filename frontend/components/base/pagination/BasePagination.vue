@@ -254,7 +254,6 @@ export default {
     },
     isLastPage(pageNumber) {
       //NOTE: the computed currentPage seems to be the last page clicked, this is why I used a param pageNumber and note the computed
-      console.log(pageNumber, this.maxRecordsLimit / this.paginationSize);
       return pageNumber === this.maxRecordsLimit / this.paginationSize;
     },
   },
