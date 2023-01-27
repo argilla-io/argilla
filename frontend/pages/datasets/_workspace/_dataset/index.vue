@@ -26,24 +26,18 @@
     v-else
   >
     <app-header
-      :dataset="dataset"
+      :datasetId="dataset.id"
+      :datasetTask="dataset.task"
+      :datasetName="dataset.name"
       :breadcrumbs="breadcrumbs"
-      :enableSimilaritySearch="isReferenceRecord"
-      @search-records="searchRecords"
-    >
-      <task-sidebar
-        v-if="dataset"
-        :dataset="dataset"
-        @view-mode-changed="onViewModeChanged"
-      />
-    </app-header>
+      @on-search-or-on-filter-records="searchRecords"
+    />
     <error
       v-if="$fetchState.error"
       link="/datasets"
       :where="datasetName"
       :error="$fetchState.error"
-    >
-    </error>
+    />
     <task-search
       v-else
       :datasetId="dataset.id"
@@ -122,12 +116,6 @@ export default {
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
-    },
-    isReferenceRecord() {
-      return VectorModel.query()
-        .where("dataset_id", this.dataset.id.join("."))
-        .where("is_active", true)
-        .exists();
     },
   },
 
@@ -252,11 +240,6 @@ export default {
         data: vectorsByToInsertInModel,
       });
     },
-    onViewModeChanged(value) {
-      if (value === "labelling-rules" && this.isReferenceRecord) {
-        this.removeSimilarityFilter(value);
-      }
-    },
     async fetchRecordReferenceAndInsertIntoTheRefRecordModel(recordId) {
       try {
         const recordReference = await this.fetchAndStoreReferenceRecord(
@@ -269,9 +252,6 @@ export default {
           err
         );
       }
-    },
-    removeSimilarityFilter() {
-      this.searchRecords({ query: { vector: null } });
     },
   },
 };

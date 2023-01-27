@@ -1,5 +1,6 @@
 import { shallowMount } from "@vue/test-utils";
 import BasePagination from "./BasePagination";
+import "@/plugins/filters";
 
 let wrapper = null;
 const options = {

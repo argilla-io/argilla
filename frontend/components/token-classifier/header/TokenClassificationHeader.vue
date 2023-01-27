@@ -25,25 +25,35 @@
       <dataset-options :dataset="dataset" />
     </filters-area>
     <entities-header :dataset="dataset" />
-    <global-actions :dataset="dataset">
-      <validate-discard-action
-        :dataset="dataset"
-        @discard-records="onDiscard"
-        @validate-records="onValidate"
-      >
-      </validate-discard-action>
-      <create-new-action @new-label="onNewLabel" v-if="allowLabelCreation" />
-      {{ dataset.labels }}
-    </global-actions>
+    <global-actions
+      :datasetId="datasetId"
+      :datasetName="datasetName"
+      :datasetTask="datasetTask"
+      :datasetVisibleRecords="dataset.visibleRecords"
+      :isCreationLabel="allowLabelCreation"
+      @discard-records="onDiscard"
+      @validate-records="onValidate"
+      @new-label="onNewLabel"
+    />
   </div>
 </template>
+
 <script>
 import { mapActions } from "vuex";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 export default {
   props: {
-    dataset: {
+    datasetId: {
+      type: Array,
       required: true,
-      type: Object,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
+      required: true,
     },
     enableSimilaritySearch: {
       type: Boolean,
@@ -51,6 +61,10 @@ export default {
     },
   },
   computed: {
+    dataset() {
+      //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
+      return getDatasetFromORM(this.datasetId, this.datasetTask, true);
+    },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
     },
