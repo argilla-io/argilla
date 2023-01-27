@@ -21,9 +21,7 @@
       :dataset="dataset"
       :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
-    >
-      <dataset-options :dataset="dataset" />
-    </filters-area>
+    />
     <entities-header :dataset="dataset" />
     <global-actions
       :datasetId="datasetId"

@@ -22,9 +22,7 @@
       :dataset="dataset"
       :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
-    >
-      <dataset-options :dataset="dataset" />
-    </filters-area>
+    />
     <global-actions
       :datasetId="datasetId"
       :datasetName="datasetName"
