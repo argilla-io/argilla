@@ -24,7 +24,7 @@
           :class="modalClass"
           v-click-outside="onClickOutside"
         >
-          <p class="modal__title">
+          <p v-if="modalTitle" class="modal__title">
             {{ modalTitle }}
           </p>
           <slot />
