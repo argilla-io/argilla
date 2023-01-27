@@ -39,7 +39,7 @@
             @search-records="onSimilaritySearch"
           />
         </div>
-        <slot />
+        <help-info class="filters__help-info" :dataset="dataset" />
       </div>
     </div>
   </div>
@@ -159,6 +159,16 @@ export default {
     width: 100%;
     @include media(">desktop") {
       margin-right: $base-space * 2;
+    }
+  }
+  &__help-info {
+    display: flex;
+    align-items: center;
+    gap: $base-space;
+    margin-left: auto;
+    &__item {
+      display: flex;
+      align-items: center;
     }
   }
 }
