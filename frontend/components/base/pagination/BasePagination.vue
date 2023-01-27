@@ -198,9 +198,16 @@ export default {
               </p>`;
     },
   },
+  watch: {
+    currentPage(newValue) {
+      this.isLastPageEqualToLimitSimilaritySearch(newValue) &&
+        this.showNotification();
+    },
+  },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
-    this.showNotification(this.currentPage);
+    this.isLastPageEqualToLimitSimilaritySearch(this.currentPage) &&
+      this.showNotification();
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
@@ -217,7 +224,6 @@ export default {
       }
     },
     changePage(pageNumber) {
-      this.showNotification(pageNumber);
       this.$emit("changePage", pageNumber, this.paginationSize);
     },
     changePageSize(pageSize) {
@@ -245,15 +251,13 @@ export default {
         }
       }
     },
-    showNotification(pageNumber) {
-      this.isLastPage(pageNumber) &&
-        Notification.dispatch("notify", {
-          message: this.message,
-          type: "warning",
-        });
+    showNotification() {
+      Notification.dispatch("notify", {
+        message: this.message,
+        type: "warning",
+      });
     },
-    isLastPage(pageNumber) {
-      //NOTE: the computed currentPage seems to be the last page clicked, this is why I used a param pageNumber and note the computed
+    isLastPageEqualToLimitSimilaritySearch(pageNumber) {
       return pageNumber === this.maxRecordsLimit / this.paginationSize;
     },
   },
