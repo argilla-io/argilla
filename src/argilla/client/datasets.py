@@ -657,16 +657,7 @@ class DatasetForTextClassification(DatasetBase):
         )
 
     def __repr__(self):
-        header_string = (
-            f"{''.ljust(4)}\t{'text'.ljust(30)}\t{'annotation'}\t{'prediction'}"
-        )
-        repr_list = [
-            f"{str(i).ljust(4)}\t{rec.text[:30].ljust(30)}\t{str(rec.annotation).ljust(10)}\t{str(rec.prediction).ljust(10)}"
-            for i, rec in enumerate(self._records[:5])
-        ]
-        record_string = "\n".join(repr_list)
-        count_string = f"{len(self._records)} TextClassificationRecord records"
-        return "\n".join([header_string, record_string, "...", count_string])
+        return repr(self.to_pandas())
 
     def __str__(self):
         return repr(self)
