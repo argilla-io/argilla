@@ -1,9 +1,8 @@
 <template>
-  <div>
+  <div v-if="helpContents.length">
     <base-button
       title="Info"
       class="help-info__action-button"
-      :class="buttonClass"
       @click="showHelpModal()"
     >
       <svgicon name="support" width="18" height="18" />Help</base-button
@@ -14,7 +13,7 @@
       :modal-custom="true"
       :modal-visible="modalVisible"
     >
-      <help-info-content />
+      <help-info-content :help-contents="helpContents" />
       <div class="help-info__buttons">
         <base-button class="primary" @click="close()">Ok, got it!</base-button>
       </div>
@@ -24,18 +23,65 @@
 
 <script>
 import "assets/icons/support";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 export default {
+  props: {
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       modalVisible: false,
+      similarity: {
+        id: "similarity",
+        name: "Similarity Search",
+        component: "helpInfoSimilarity",
+      },
+      explain: {
+        id: "explain",
+        name: "Colors in token attributions",
+        component: "helpInfoExplain",
+      },
     };
   },
   computed: {
-    buttonClass() {
-      return this.modalVisible ? "--active" : null;
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
+    helpContents() {
+      return [
+        ...this.setHelpContent(this.similarity, this.availableSimilarity),
+        ...this.setHelpContent(this.explain, this.availableExplain),
+      ];
+    },
+    availableSimilarity() {
+      return this.viewSettings.viewMode !== "labelling-rules" || false;
+    },
+    availableExplain() {
+      return (
+        this.dataset?.results.records.some((record) => record.explanation) ||
+        false
+      );
+    },
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.datasetName);
     },
   },
   methods: {
+    setHelpContent(obj, condition) {
+      return condition ? [obj] : [];
+    },
     showHelpModal() {
       this.modalVisible = !this.modalVisible;
     },

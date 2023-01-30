@@ -39,7 +39,12 @@
             @search-records="onSimilaritySearch"
           />
         </div>
-        <help-info class="filters__help-info" :dataset="dataset" />
+        <help-info
+          class="filters__help-info"
+          :datasetId="datasetId"
+          :datasetName="datasetName"
+          :datasetTask="datasetTask"
+        />
       </div>
     </div>
   </div>
@@ -51,6 +56,18 @@ export default {
     dataset: {
       type: Object,
       default: () => ({}),
+    },
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
+      required: true,
     },
     enableSimilaritySearch: {
       type: Boolean,

@@ -19,6 +19,9 @@
   <div class="header__filters">
     <filters-area
       :dataset="dataset"
+      :datasetId="datasetId"
+      :datasetName="datasetName"
+      :datasetTask="datasetTask"
       :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
     />

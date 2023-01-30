@@ -20,6 +20,9 @@
     <filters-area
       v-if="!dataset.viewSettings.visibleRulesList"
       :dataset="dataset"
+      :datasetId="datasetId"
+      :datasetName="datasetName"
+      :datasetTask="datasetTask"
       :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
     />
