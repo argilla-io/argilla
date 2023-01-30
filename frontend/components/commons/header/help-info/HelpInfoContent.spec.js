@@ -9,15 +9,19 @@ beforeEach(() => {
 const options = {
   selectedComponent: undefined,
   stubs: ["helpInfoSimilarity", "helpInfoExplain"],
-  similarity: {
-    id: "similarity",
-    name: "Similarity Search",
-    component: "helpInfoSimilarity",
-  },
-  explain: {
-    id: "explain",
-    name: "Colors in token attributions",
-    component: "helpInfoExplain",
+  propsData: {
+    helpContents: [
+      {
+        id: "similarity",
+        name: "Similarity Search",
+        component: "helpInfoSimilarity",
+      },
+      {
+        id: "explain",
+        name: "Colors in token attributions",
+        component: "helpInfoExplain",
+      },
+    ],
   },
 };
 
