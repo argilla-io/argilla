@@ -53,9 +53,14 @@ By default, if you don't configure a `users.yml` file, your Argilla instance is 
 
 - username: `argilla`
 - password: `1234`
-- api_key: `rubrix.apikey`
+- api_key: `argilla.apikey`
 
 for security reasons we recommend changing at least the password and API key.
+
+:::{note}
+To connect to an old Argilla server using client `>=1.3.0`, you should specify the default user API key `rubrix.apikey`.
+Otherwise, connections will fail with an Unauthorized server error.
+:::
 
 ### Override default API key
 
