@@ -17,13 +17,13 @@
 
 <template>
   <div>
-    <img src="images/help-info/explain.png" alt="token attributions" />
     <p>
       Argilla enables you to register token attributions as part of the dataset
       records. For getting token attributions, you can use methods such as
       Integrated Gradients or SHAP. These methods try to provide a mechanism to
       interpret model predictions.
     </p>
+    <img src="images/help-info/explain.png" alt="token attributions" />
     <p>The attributions work as follows:</p>
     <p>
       [0,1] <strong>Positive attributions</strong> (in blue) reflect those
@@ -48,5 +48,8 @@
 .link {
   color: $primary-color;
   text-decoration: none;
+}
+img {
+  box-shadow: 1px 2px 3px $black-20;
 }
 </style>

@@ -17,12 +17,12 @@
 
 <template>
   <div>
-    <img src="images/help-info/similarity.png" alt="token attributions" />
     <p>
       Since <code>1.2.0</code> Argilla supports adding vectors to Argilla
       records which can then be used for finding the most similar records to a
       given one.
     </p>
+    <img src="images/help-info/similarity.png" alt="token attributions" />
     <p>
       This feature uses vector or semantic search combined with more traditional
       search (keyword and filter based). Vector search leverages machine
@@ -50,5 +50,8 @@ code {
 .link {
   color: $primary-color;
   text-decoration: none;
+}
+img {
+  box-shadow: 1px 2px 3px $black-20;
 }
 </style>
