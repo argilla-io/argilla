@@ -48,7 +48,6 @@ code {
 }
 .link {
   color: $primary-color;
-  @include font-size(14px);
   text-decoration: none;
 }
 </style>
