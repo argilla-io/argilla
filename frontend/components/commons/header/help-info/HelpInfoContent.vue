@@ -22,15 +22,6 @@
         class="help-info__component"
       />
     </transition>
-    <ul class="help-info__bullets" v-if="helpContents.length > 1">
-      <li
-        v-for="{ id, component } in helpContents"
-        :key="id"
-        class="help-info__bullet"
-        :class="isActiveTab(component)"
-        @click="getSelectedHelpComponent(id)"
-      ></li>
-    </ul>
   </div>
 </template>
 
@@ -124,24 +115,6 @@ export default {
     transition: color 0.2s ease-in-out;
     @include font-size(13px);
     padding: $base-space;
-  }
-  &__bullets {
-    display: flex;
-    gap: $base-space;
-    justify-content: center;
-    padding: 0;
-    list-style: none;
-  }
-  &__bullet {
-    height: $base-space;
-    width: $base-space;
-    background: $black-10;
-    border-radius: 50%;
-    cursor: pointer;
-    &.--active {
-      background: $black-54;
-      cursor: default;
-    }
   }
   &__component {
     height: calc(100vh - 400px);
