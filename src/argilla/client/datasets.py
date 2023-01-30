@@ -141,6 +141,12 @@ class DatasetBase:
     def __len__(self) -> int:
         return len(self._records)
 
+    def __repr__(self):
+        return repr(self.to_pandas())
+
+    def __str__(self):
+        return repr(self)
+
     @_requires_datasets
     def to_datasets(self) -> "datasets.Dataset":
         """Exports your records to a `datasets.Dataset`.
@@ -655,12 +661,6 @@ class DatasetForTextClassification(DatasetBase):
         return datasets.Dataset.from_dict(
             ds_dict, features=datasets.Features(feature_dict)
         )
-
-    def __repr__(self):
-        return repr(self.to_pandas())
-
-    def __str__(self):
-        return repr(self)
 
 
 class Framework(Enum):
