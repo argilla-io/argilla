@@ -52,6 +52,6 @@ code {
   text-decoration: none;
 }
 img {
-  box-shadow: 1px 2px 3px $black-20;
+  box-shadow: 1px 2px 3px $black-10;
 }
 </style>
