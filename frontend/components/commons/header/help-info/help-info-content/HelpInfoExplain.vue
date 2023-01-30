@@ -17,6 +17,7 @@
 
 <template>
   <div>
+    <img src="images/help-info/explain.png" alt="token attributions" />
     <p>
       Argilla enables you to register token attributions as part of the dataset
       records. For getting token attributions, you can use methods such as

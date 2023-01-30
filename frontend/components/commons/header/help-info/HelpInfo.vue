@@ -12,6 +12,7 @@
       modal-position="modal-top-right"
       :modal-custom="true"
       :modal-visible="isModalVisible"
+      @close-modal="close()"
     >
       <help-info-content :help-contents="helpContents" />
       <div class="help-info__buttons">
@@ -53,6 +54,11 @@ export default {
         name: "Colors in token attributions",
         component: "helpInfoExplain",
       },
+      explain2: {
+        id: "explain2",
+        name: "Lorem ipsum lorem",
+        component: "helpInfoExplain2",
+      },
     };
   },
   computed: {
@@ -63,6 +69,7 @@ export default {
       return [
         ...this.setHelpContent(this.similarity, this.availableSimilarity),
         ...this.setHelpContent(this.explain, this.availableExplain),
+        ...this.setHelpContent(this.explain2, this.availableExplain),
       ];
     },
     availableSimilarity() {

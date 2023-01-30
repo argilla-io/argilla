@@ -17,26 +17,26 @@
 
 <template>
   <div>
-    <img src="images/help-info/similarity.png" alt="token attributions" />
     <p>
-      Since <code>1.2.0</code> Argilla supports adding vectors to Argilla
-      records which can then be used for finding the most similar records to a
-      given one.
+      Argilla enables you to register token attributions as part of the dataset
+      records. For getting token attributions, you can use methods such as
+      Integrated Gradients or SHAP. These methods try to provide a mechanism to
+      interpret model predictions.
+    </p>
+    <p>The attributions work as follows:</p>
+    <p>
+      [0,1] <strong>Positive attributions</strong> (in blue) reflect those
+      tokens that are making the model predict the specific predicted label.
     </p>
     <p>
-      This feature uses vector or semantic search combined with more traditional
-      search (keyword and filter based). Vector search leverages machine
-      learning to capture rich semantic features by embedding items (text,
-      video, images, etc.) into a vector space, which can be then used to find
-      "semantically" similar items.
+      [-1, 0] <strong>Negative attributions</strong> (in red) reflect those
+      tokens that can influence the model to predict a label other than the
+      specific predicted label.
     </p>
-    <p>
-      To benefit from this feature, your data team must include vectors
-      associated with each record when they create the dataset.
-    </p>
+
     <a
-      class="link"
-      href="https://docs.argilla.io/en/latest/guides/features/semantic-search.html"
+      class="primary link"
+      href="https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability.html"
       target="_blank"
       >More in docs</a
     >
@@ -44,9 +44,6 @@
 </template>
 
 <style lang="scss" scoped>
-code {
-  background: $black-4;
-}
 .link {
   color: $primary-color;
   text-decoration: none;
