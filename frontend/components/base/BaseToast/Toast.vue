@@ -26,7 +26,6 @@
       class="toast"
       :class="[`toast-${type}`, `is-${position}`]"
       @mouseover="toggleTimer(true)"
-      @mouseleave="toggleTimer(false)"
     >
       <div class="toast-icon"></div>
       <p class="toast-text" v-html="message"></p>
