@@ -18,7 +18,7 @@
     <transition name="fade" mode="out-in" appear>
       <component :is="visibleComponent" :key="selectedComponent" />
     </transition>
-    <ul class="help-info__bullets">
+    <ul class="help-info__bullets" v-if="helpContents.length > 1">
       <li
         class="help-info__bullet"
         :class="isActiveTab(helpContent.component)"
@@ -32,28 +32,18 @@
 
 <script>
 export default {
+  props: {
+    helpContents: {
+      type: Array,
+      required: true,
+    },
+  },
   data() {
     return {
       selectedComponent: null,
-      similarity: {
-        id: "similarity",
-        name: "Similarity Search",
-        component: "helpInfoSimilarity",
-      },
-      explain: {
-        id: "explain",
-        name: "Colors in token attributions",
-        component: "helpInfoExplain",
-      },
     };
   },
   computed: {
-    helpContents() {
-      return [
-        ...this.setHelpContent(this.similarity, true),
-        ...this.setHelpContent(this.explain, true),
-      ];
-    },
     visibleComponent() {
       return this.selectedComponent || this.helpContents[0].component;
     },
@@ -63,9 +53,6 @@ export default {
       this.selectedComponent = this.helpContents.find(
         (help) => help.id === id
       )?.component;
-    },
-    setHelpContent(obj, condition) {
-      return condition ? [obj] : [];
     },
     isActiveTab(name) {
       return this.visibleComponent === name ? "--active" : null;
@@ -89,10 +76,11 @@ export default {
     }
   }
   &__tabs {
-    margin: 0 -2.5em;
+    margin: 0 -2.5em 2em -2.5em;
     padding: 0 2.5em;
     border-bottom: 1px solid $black-10;
     display: flex;
+    gap: $base-space * 2;
     list-style: none;
     overflow-y: auto;
     @extend %hide-scrollbar;
@@ -116,7 +104,7 @@ export default {
     color: $black-54;
     transition: color 0.2s ease-in-out;
     @include font-size(13px);
-    padding: $base-space;
+    padding: $base-space 0;
   }
   &__bullets {
     display: flex;
