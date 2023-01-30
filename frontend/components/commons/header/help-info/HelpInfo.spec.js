@@ -2,6 +2,9 @@ import { shallowMount } from "@vue/test-utils";
 import HelpInfo from "./HelpInfo";
 
 let wrapper = null;
+beforeEach(() => {
+  wrapper = shallowMount(HelpInfo, options);
+});
 
 const options = {
   stubs: ["HelpInfoContent"],
@@ -22,9 +25,6 @@ const options = {
     datasetName: "name",
   },
 };
-beforeEach(() => {
-  wrapper = shallowMount(HelpInfo, options);
-});
 afterEach(() => {
   wrapper.destroy();
 });

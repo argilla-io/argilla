@@ -11,7 +11,7 @@
       modal-class="modal-secondary"
       modal-position="modal-top-right"
       :modal-custom="true"
-      :modal-visible="modalVisible"
+      :modal-visible="isModalVisible"
     >
       <help-info-content :help-contents="helpContents" />
       <div class="help-info__buttons">
@@ -42,7 +42,7 @@ export default {
   },
   data() {
     return {
-      modalVisible: false,
+      isModalVisible: false,
       similarity: {
         id: "similarity",
         name: "Similarity Search",
@@ -66,13 +66,11 @@ export default {
       ];
     },
     availableSimilarity() {
-      return this.viewSettings.viewMode !== "labelling-rules" || false;
+      return this.viewSettings.viewMode !== "labelling-rules";
     },
     availableExplain() {
-      return (
-        this.dataset?.results.records.some((record) => record.explanation) ||
-        false
-      );
+      //TODO: to replace when record will have a corresponding table
+      return this.dataset?.results.records.some((record) => record.explanation);
     },
     viewSettings() {
       return getViewSettingsByDatasetName(this.datasetName);
@@ -83,10 +81,10 @@ export default {
       return condition ? [obj] : [];
     },
     showHelpModal() {
-      this.modalVisible = !this.modalVisible;
+      this.isModalVisible = !this.isModalVisible;
     },
     close() {
-      this.modalVisible = false;
+      this.isModalVisible = false;
     },
   },
 };

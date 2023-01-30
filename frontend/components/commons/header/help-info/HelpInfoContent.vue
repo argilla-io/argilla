@@ -3,15 +3,15 @@
     <ul class="help-info__tabs">
       <li
         class="help-info__tab"
-        :class="isActiveTab(helpContent.component)"
-        v-for="helpContent in helpContents"
-        :key="helpContent.id"
+        :class="isActiveTab(component)"
+        v-for="{ id, name, component } in helpContents"
+        :key="id"
       >
         <base-button
           class="help-info__button"
-          @click="getSelectedHelpComponent(helpContent.id)"
+          @click="getSelectedHelpComponent(id)"
         >
-          {{ helpContent.name }}
+          {{ name }}
         </base-button>
       </li>
     </ul>
@@ -21,10 +21,10 @@
     <ul class="help-info__bullets" v-if="helpContents.length > 1">
       <li
         class="help-info__bullet"
-        :class="isActiveTab(helpContent.component)"
-        @click="getSelectedHelpComponent(helpContent.id)"
-        v-for="helpContent in helpContents"
-        :key="helpContent.id"
+        :class="isActiveTab(component)"
+        @click="getSelectedHelpComponent(id)"
+        v-for="{ id, component } in helpContents"
+        :key="id"
       ></li>
     </ul>
   </div>
