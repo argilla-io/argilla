@@ -145,6 +145,7 @@ export default {
   }
   &__component {
     height: calc(100vh - 400px);
+    max-height: 500px;
     overflow-y: auto;
     @extend %hide-scrollbar;
   }
