@@ -91,9 +91,11 @@ class _ArgillaLogAgent:
         try:
             return await api.log_async(*args, **kwargs)
         except Exception as ex:
+            dataset = kwargs["name"]
             _LOGGER.error(
-                f"Cannot log data {args, kwargs}\n"
-                f"Error of type {type(ex)}\n: {ex}. ({ex.args})"
+                f"\nCannot log data in dataset '{dataset}'\n"
+                f"Error: {type(ex).__name__}\n"
+                f"Details: {ex}"
             )
             raise ex
 

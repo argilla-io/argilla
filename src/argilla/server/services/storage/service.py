@@ -20,8 +20,9 @@ from fastapi import Depends
 from argilla.server.commons import telemetry
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskStatus
+from argilla.server.daos.backend.base import WrongLogDataError
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.errors import ForbiddenOperationError
+from argilla.server.errors import BulkDataError, ForbiddenOperationError
 from argilla.server.security.model import User
 from argilla.server.services.datasets import ServiceDataset
 from argilla.server.services.search.model import ServiceBaseRecordsQuery
@@ -65,11 +66,17 @@ class RecordsStorageService:
             for record in records:
                 record.metrics = metrics.record_metrics(record)
 
-        return self.__dao__.add_records(
-            dataset=dataset,
-            records=records,
-            record_class=record_type,
-        )
+        try:
+            return self.__dao__.add_records(
+                dataset=dataset,
+                records=records,
+                record_class=record_type,
+            )
+        except WrongLogDataError as ex:
+            raise BulkDataError(
+                detail=f"Cannot log data in dataset {dataset.id}",
+                errors=ex.errors,
+            )
 
     async def delete_records(
         self,
