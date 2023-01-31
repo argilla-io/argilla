@@ -75,6 +75,8 @@ class DatasetRecordsConsumer(threading.Thread):
         last_batch = []
         while not self.queue.empty():
             last_batch.append(self.queue.get())
+        if not len(last_batch):
+            return
 
         self._log_records(last_batch)
         for _ in last_batch:
