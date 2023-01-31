@@ -34,13 +34,15 @@
       tokens that can influence the model to predict a label other than the
       specific predicted label.
     </p>
-
-    <a
-      class="primary link"
-      href="https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability.html"
-      target="_blank"
-      >More in docs</a
-    >
+    <p>
+      More in
+      <a
+        class="primary link"
+        href="https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability.html"
+        target="_blank"
+        >docs
+      </a>
+    </p>
   </div>
 </template>
 
@@ -48,6 +50,9 @@
 .link {
   color: $primary-color;
   text-decoration: none;
+  &:hover {
+    color: darken($primary-color, 15%);
+  }
 }
 img {
   border-radius: $border-radius;

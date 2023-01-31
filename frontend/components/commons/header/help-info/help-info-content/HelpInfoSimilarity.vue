@@ -32,14 +32,14 @@
     </p>
     <p>
       To benefit from this feature, your data team must include vectors
-      associated with each record when they create the dataset.
+      associated with each record when they create the dataset. More in
+      <a
+        class="link"
+        href="https://docs.argilla.io/en/latest/guides/features/semantic-search.html"
+        target="_blank"
+        >docs
+      </a>
     </p>
-    <a
-      class="link"
-      href="https://docs.argilla.io/en/latest/guides/features/semantic-search.html"
-      target="_blank"
-      >More in docs</a
-    >
   </div>
 </template>
 
@@ -50,6 +50,9 @@ code {
 .link {
   color: $primary-color;
   text-decoration: none;
+  &:hover {
+    color: darken($primary-color, 15%);
+  }
 }
 img {
   border-radius: $border-radius;
