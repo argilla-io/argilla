@@ -66,17 +66,9 @@
               />
             </DynamicScrollerItem>
           </template>
-
-          <template #after>
-            <pagination-end-alert
-              :limit="paginationLimit"
-              v-if="isLastPagePaginable"
-            />
-          </template>
         </DynamicScroller>
       </div>
       <base-pagination
-        v-if="!showLoader"
         :one-page="!!referenceRecordObj"
         :total-items="dataset.results.total"
         :pagination-settings="viewSettings.pagination"

@@ -100,11 +100,14 @@
         </strong>
         of
       </template>
-      {{ paginableTotalItems | formatNumber }} records
+      <span class="total-records">{{ totalItems | formatNumber }} </span>
+      records
     </div>
   </div>
 </template>
+
 <script>
+import { Notification } from "@/models/Notifications";
 import "assets/icons/chevron-left";
 import "assets/icons/chevron-right";
 import "assets/icons/chevron-up";
@@ -170,9 +173,33 @@ export default {
       }
       return pages;
     },
+    formattedLimit() {
+      return this.$options.filters.formatNumber(this.maxRecordsLimit);
+    },
+    message() {
+      return `<p>
+                You cannot go through more than ${this.formattedLimit} records.
+                To explore more records, you can combine queries, filters, and sorting to reduce your search results.
+                Visit this
+                <a
+                  href="https://docs.argilla.io/en/latest/guides/features/queries.html?highlight=queries#"
+                  target="_blank"
+                >
+                  guide</a
+                > for using advanced queries.
+              </p>`;
+    },
+  },
+  watch: {
+    currentPage(newValue) {
+      this.isLastPageEqualToLimitSimilaritySearch(newValue) &&
+        this.showNotification();
+    },
   },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
+    this.isLastPageEqualToLimitSimilaritySearch(this.currentPage) &&
+      this.showNotification();
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
@@ -188,8 +215,8 @@ export default {
         this.$emit("changePage", this.currentPage - 1, this.paginationSize);
       }
     },
-    changePage(n) {
-      this.$emit("changePage", n, this.paginationSize);
+    changePage(pageNumber) {
+      this.$emit("changePage", pageNumber, this.paginationSize);
     },
     changePageSize(pageSize) {
       (this.showOptions = false),
@@ -215,6 +242,16 @@ export default {
           this.prevPage();
         }
       }
+    },
+    showNotification() {
+      Notification.dispatch("notify", {
+        message: this.message,
+        numberOfChars: 194,
+        type: "warning",
+      });
+    },
+    isLastPageEqualToLimitSimilaritySearch(pageNumber) {
+      return pageNumber === this.maxRecordsLimit / this.paginationSize;
     },
   },
 };

@@ -141,6 +141,12 @@ class DatasetBase:
     def __len__(self) -> int:
         return len(self._records)
 
+    def __repr__(self):
+        return repr(self.to_pandas())
+
+    def __str__(self):
+        return repr(self)
+
     @_requires_datasets
     def to_datasets(self) -> "datasets.Dataset":
         """Exports your records to a `datasets.Dataset`.

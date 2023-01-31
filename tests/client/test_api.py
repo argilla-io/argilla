@@ -35,6 +35,7 @@ from argilla.client.sdk.commons.errors import (
     BaseClientError,
     ForbiddenApiError,
     GenericApiError,
+    HttpResponseError,
     InputValueError,
     NotFoundApiError,
     UnauthorizedApiError,
@@ -299,6 +300,7 @@ def test_log_background_with_error(
         (404, NotFoundApiError),
         (422, ValidationApiError),
         (500, GenericApiError),
+        (413, HttpResponseError),
     ],
 )
 def test_delete_with_errors(mocked_client, monkeypatch, status, error_type):

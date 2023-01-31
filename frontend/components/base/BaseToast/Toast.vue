@@ -50,6 +50,10 @@ export default {
       type: [String, Error],
       required: true,
     },
+    numberOfChars: {
+      type: Number,
+      default: 0,
+    },
     type: {
       type: String,
       default: "success",
@@ -64,10 +68,6 @@ export default {
       validator(value) {
         return Object.values(Positions).includes(value);
       },
-    },
-    duration: {
-      type: Number,
-      default: 10000,
     },
     dismissible: {
       type: Boolean,
@@ -136,6 +136,10 @@ export default {
             leave: "fadeOut",
           };
       }
+    },
+    duration() {
+      //NOTE: good practice to show toast is (6s + 1s each 120 characters)
+      return 6000 + Math.ceil(this.numberOfChars / 120) * 1000;
     },
   },
   beforeMount() {
@@ -288,6 +292,15 @@ $toast-colors: map-merge(
   .toast-text {
     margin: 0;
     padding: 1.5em;
+    a {
+      text-decoration: inherit;
+      background: none;
+      color: $primary-color;
+      &:hover {
+        text-decoration: underline;
+        background: none;
+      }
+    }
   }
   &__button {
     color: palette(blue, 300);

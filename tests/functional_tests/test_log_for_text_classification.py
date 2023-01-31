@@ -311,3 +311,42 @@ def test_dynamics_metadata(mocked_client):
         ar.TextClassificationRecord(text="Another text", metadata={"b": "value"}),
         name=dataset,
     )
+
+
+def test_log_with_bulk_error(mocked_client):
+
+    dataset = "test_log_with_bulk_error"
+    ar.delete(dataset)
+    try:
+        ar.log(
+            [
+                ar.TextClassificationRecord(
+                    id=0,
+                    text="This is an special text",
+                    metadata={"key": 1},
+                ),
+                ar.TextClassificationRecord(
+                    id=1,
+                    text="This is an special text",
+                    metadata={"key": "wrong-value"},
+                ),
+            ],
+            name=dataset,
+        )
+    except BadRequestApiError as error:
+        assert error.ctx == {
+            "code": "argilla.api.errors::BulkDataError",
+            "params": {
+                "message": "Cannot log data in dataset argilla.test_log_with_bulk_error",
+                "errors": [
+                    {
+                        "reason": "failed to parse field [metadata.key] of type [long] in document with id '1'. "
+                        "Preview of field's value: 'wrong-value'",
+                        "caused_by": {
+                            "type": "illegal_argument_exception",
+                            "reason": 'For input string: "wrong-value"',
+                        },
+                    }
+                ],
+            },
+        }
