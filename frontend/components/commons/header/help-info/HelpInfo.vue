@@ -3,6 +3,7 @@
     <base-button
       title="Info"
       class="help-info__action-button"
+      :class="buttonClass"
       @click="showHelpModal()"
     >
       <svgicon name="support" width="18" height="18" />Help</base-button
@@ -76,6 +77,9 @@ export default {
     viewSettings() {
       return getViewSettingsByDatasetName(this.datasetName);
     },
+    buttonClass() {
+      return this.isModalVisible ? "--active" : null;
+    },
   },
   methods: {
     setHelpContent(obj, condition) {
@@ -98,7 +102,7 @@ export default {
     color: $primary-color;
     &:hover,
     &.--active {
-      color: darken($primary-color, 10%);
+      color: darken($primary-color, 15%);
     }
   }
   &__buttons {
