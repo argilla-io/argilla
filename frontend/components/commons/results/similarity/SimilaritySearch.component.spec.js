@@ -3,6 +3,13 @@ import SimilaritySearch from "./SimilaritySearch.component";
 
 let wrapper = null;
 const options = {
+  stubs: [
+    "nuxt",
+    "base-button",
+    "base-dropdown",
+    "similarity-search-content",
+    "similarity-search-footer",
+  ],
   propsData: {
     formattedVectors: [
       {

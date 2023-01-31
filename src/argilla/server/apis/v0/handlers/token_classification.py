@@ -216,6 +216,7 @@ def configure_router():
 
     @router.post(
         path=f"{base_endpoint}/data",
+        deprecated=True,
         operation_id="stream_data",
     )
     async def stream_data(

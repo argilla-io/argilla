@@ -3,22 +3,22 @@
 exports[`SelectOptions renders properly 1`] = `
 <ul>
   <li>
-    <base-checkbox id="NEGATIVE" value="NEGATIVE" class="re-checkbox--dark">
+    <base-checkbox-stub id="NEGATIVE" value="" class="re-checkbox--dark">
       NEGATIVE
       <!---->
-    </base-checkbox>
+    </base-checkbox-stub>
   </li>
   <li>
-    <base-checkbox id="POSITIVE" value="POSITIVE" class="re-checkbox--dark">
+    <base-checkbox-stub id="POSITIVE" value="" class="re-checkbox--dark">
       POSITIVE
       <!---->
-    </base-checkbox>
+    </base-checkbox-stub>
   </li>
   <li>
-    <base-checkbox id="OTHER" value="OTHER" class="re-checkbox--dark">
+    <base-checkbox-stub id="OTHER" value="" class="re-checkbox--dark">
       OTHER
       <!---->
-    </base-checkbox>
+    </base-checkbox-stub>
   </li>
   <!---->
 </ul>

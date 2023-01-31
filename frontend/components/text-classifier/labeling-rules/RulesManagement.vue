@@ -46,11 +46,21 @@
 <script>
 import "assets/icons/unavailable";
 import { mapActions } from "vuex";
-import { TextClassificationDataset } from "@/models/TextClassification";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
+
 export default {
   props: {
-    dataset: {
-      type: TextClassificationDataset,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
+      required: true,
+    },
+    datasetName: {
+      type: String,
       required: true,
     },
   },
@@ -78,6 +88,12 @@ export default {
     }
   },
   computed: {
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.datasetName);
+    },
     tableColumns() {
       return [
         {
@@ -138,7 +154,7 @@ export default {
       return this.dataset.labelingRulesMetrics;
     },
     isVisible() {
-      return this.dataset.viewSettings.visibleRulesList;
+      return this.viewSettings.visibleRulesList;
     },
     formattedRules() {
       if (this.rules) {
@@ -184,7 +200,7 @@ export default {
     },
 
     async hideList() {
-      await this.dataset.viewSettings.disableRulesSummary();
+      await this.viewSettings.disableRulesSummary();
     },
 
     async onSelectQuery(rule) {

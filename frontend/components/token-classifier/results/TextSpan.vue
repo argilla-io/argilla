@@ -24,7 +24,7 @@
         { zindex3: showEntitiesSelector },
       ]"
       :span="token"
-      :dataset="dataset"
+      :datasetName="datasetName"
       :record="record"
       @openTagSelector="openTagSelector"
       @removeEntity="removeEntity"
@@ -38,7 +38,8 @@
       v-html="visualizeToken(t)"
     ></span
     ><lazy-entities-selector
-      :dataset="dataset"
+      :datasetId="datasetId"
+      :datasetLastSelectedEntity="datasetLastSelectedEntity"
       :suggestedLabel="suggestedLabel"
       :token="token"
       :formattedEntities="formattedEntities"
@@ -59,12 +60,28 @@ export default {
     clickOutside: ClickOutside.directive,
   },
   props: {
+    viewSettings: {
+      type: Object,
+      required: true,
+    },
     record: {
       type: Object,
       required: true,
     },
-    dataset: {
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetLastSelectedEntity: {
       type: Object,
+      required: true,
+    },
+    datasetEntities: {
+      type: Array,
       required: true,
     },
     suggestedLabel: {
@@ -84,12 +101,12 @@ export default {
   }),
   computed: {
     tag_color() {
-      return this.dataset.entities.filter(
+      return this.datasetEntities.filter(
         (entity) => entity.text === this.token.entity.label
       )[0].colorId;
     },
     filteredEntities() {
-      return this.dataset.entities
+      return this.datasetEntities
         .filter((entity) => entity.text)
         .sort((a, b) => a.text.localeCompare(b.text));
     },
@@ -101,13 +118,13 @@ export default {
       }));
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewSettings.viewMode === "annotate";
     },
   },
   watch: {
     async showEntitiesSelector(n, o) {
       if (n !== o) {
-        await this.dataset.viewSettings.disableShortCutPagination(n);
+        await this.viewSettings.disableShortCutPagination(n);
       }
     },
   },

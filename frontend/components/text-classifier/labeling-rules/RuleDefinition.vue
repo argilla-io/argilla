@@ -1,8 +1,12 @@
 <template>
-  <div>
+  <div v-if="dataset">
     <div class="rule__area">
       <div :class="[query ? 'active' : null, 'rule__container']">
-        <rule-empty-query :dataset="dataset" v-if="!query" />
+        <rule-empty-query
+          v-if="!query"
+          :datasetId="dataset.id"
+          :datasetTask="dataset.task"
+        />
         <rule-labels-definition
           v-else
           :dataset="dataset"
@@ -27,12 +31,19 @@
     </div>
   </div>
 </template>
+
 <script>
-import { TextClassificationDataset } from "@/models/TextClassification";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
+
 export default {
   props: {
-    dataset: {
-      type: TextClassificationDataset,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
   },
@@ -67,6 +78,12 @@ export default {
     },
   },
   computed: {
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.dataset.name);
+    },
     query() {
       return this.dataset.query.text;
     },
@@ -108,7 +125,7 @@ export default {
       this.saved = false;
     },
     async showRulesList() {
-      await this.dataset.viewSettings.enableRulesSummary();
+      await this.viewSettings.enableRulesSummary();
     },
     async saveRule(rule) {
       await this.dataset.storeLabelingRule(rule);
@@ -129,9 +146,6 @@ export default {
     box-shadow: $shadow-100;
     width: 100%;
     border-radius: $border-radius;
-    // &.active {
-    //   box-shadow: 0 1px 4px 0 rgba(185, 185, 185, 0.5);
-    // }
   }
   &__button {
     float: left;

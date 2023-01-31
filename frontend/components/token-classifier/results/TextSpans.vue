@@ -29,7 +29,11 @@
       :record="record"
       :token="token"
       :span-id="i"
-      :dataset="dataset"
+      :viewSettings="viewSettings"
+      :datasetId="datasetId"
+      :datasetName="datasetName"
+      :datasetLastSelectedEntity="datasetLastSelectedEntity"
+      :datasetEntities="datasetEntities"
       :suggestedLabel="suggestedLabel"
       :class="[
         isSelected(i, selectionStart, selectionEnd) ||
@@ -51,13 +55,30 @@
 
 <script>
 import { mapActions } from "vuex";
+import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
 
 export default {
   props: {
+    viewSettings: {
+      type: Object,
+      required: true,
+    },
     entities: {
       type: Array,
     },
-    dataset: {
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetEntities: {
+      type: Array,
+      required: true,
+    },
+    datasetLastSelectedEntity: {
       type: Object,
       required: true,
     },
@@ -65,7 +86,6 @@ export default {
       type: Object,
       required: true,
     },
-
     visualTokens: {
       type: Array,
       required: true,
@@ -149,7 +169,7 @@ export default {
 
     updateAnnotatedEntities(entities) {
       this.updateRecords({
-        dataset: this.dataset,
+        dataset: this.getTokenClassificationDataset(),
         records: [
           {
             ...this.record,
@@ -258,6 +278,9 @@ export default {
       if (matchedPrediction) {
         this.suggestedLabel = matchedPrediction.label;
       }
+    },
+    getTokenClassificationDataset() {
+      return getTokenClassificationDatasetById(this.datasetId);
     },
   },
 };

@@ -26,24 +26,25 @@
     v-else
   >
     <app-header
-      :dataset="dataset"
+      :datasetId="dataset.id"
+      :datasetTask="dataset.task"
+      :datasetName="dataset.name"
       :breadcrumbs="breadcrumbs"
-      :enableSimilaritySearch="isReferenceRecord"
-      @search-records="searchRecords"
-    >
-      <task-sidebar
-        v-if="dataset"
-        :dataset="dataset"
-        @view-mode-changed="onViewModeChanged"
-      />
-    </app-header>
+      @on-search-or-on-filter-records="searchRecords"
+    />
     <error
       v-if="$fetchState.error"
       link="/datasets"
       :where="datasetName"
       :error="$fetchState.error"
-    ></error>
-    <task-search v-else :dataset="dataset" @search-records="searchRecords" />
+    />
+    <task-search
+      v-else
+      :datasetId="dataset.id"
+      :datasetName="dataset.name"
+      :datasetTask="dataset.task"
+      @search-records="searchRecords"
+    />
   </div>
 </template>
 
@@ -54,6 +55,7 @@ import { currentWorkspace } from "@/models/Workspace";
 import { Vector as VectorModel } from "@/models/Vector";
 import { Base64 } from "js-base64";
 import { RefRecord as RefRecordModel } from "@/models/RefRecord";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
   layout: "app",
@@ -94,6 +96,9 @@ export default {
         return null;
       }
     },
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.dataset.name);
+    },
     isDataset() {
       return !_.isNil(this.dataset);
     },
@@ -107,17 +112,13 @@ export default {
       return currentWorkspace(this.$route);
     },
     areMetricsVisible() {
-      return this.dataset && this.dataset.viewSettings.visibleMetrics;
+      return this.viewSettings.visibleMetrics;
     },
     annotationEnabled() {
-      return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
-    },
-    isReferenceRecord() {
-      const value = VectorModel.query().where("is_active", true).first();
-      return !!value;
+      return this.viewSettings.viewMode === "annotate";
     },
   },
-  destroyed() {},
+
   methods: {
     ...mapActions({
       fetchByName: "entities/datasets/fetchByName",
@@ -239,11 +240,6 @@ export default {
         data: vectorsByToInsertInModel,
       });
     },
-    onViewModeChanged(value) {
-      if (value === "labelling-rules" && this.isReferenceRecord) {
-        this.removeSimilarityFilter(value);
-      }
-    },
     async fetchRecordReferenceAndInsertIntoTheRefRecordModel(recordId) {
       try {
         const recordReference = await this.fetchAndStoreReferenceRecord(
@@ -257,11 +253,6 @@ export default {
         );
       }
     },
-    removeSimilarityFilter() {
-      this.searchRecords({ query: { vector: null } });
-    },
   },
 };
 </script>
-
-<style lang="scss" scoped></style>
