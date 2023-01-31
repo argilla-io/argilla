@@ -53,7 +53,7 @@ code {
 }
 img {
   border-radius: $border-radius;
-  box-shadow: 1px 2px 4px 3px $black-20;
+  box-shadow: 0 2px 4px 3px $black-20;
   max-width: calc(100% - 16px);
   margin: 1.5em auto;
   display: flex;
