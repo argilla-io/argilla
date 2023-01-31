@@ -67,43 +67,35 @@ class DatasetRecordsConsumer(threading.Thread):
         self.retries = retries
         self.timeout = timeout
 
-        atexit.register(self.shutdown)
-
     def run(self):
         """Runs the consumer."""
         while self.running:
             self.log_next_batch()
 
+        last_batch = []
+        while not self.queue.empty():
+            last_batch.append(self.queue.get())
+
+        self._log_records(last_batch)
+        for _ in last_batch:
+            self.queue.task_done()
+
     def pause(self):
         """Pause the consumer."""
         self.running = False
 
-    def shutdown(self) -> None:
-        """Shutdown the consumer."""
-        print("Shutting down consumer")
-        while self.log_next_batch():
-            continue
-
     def log_next_batch(self):
         """Upload the next batch of items, return whether successful."""
-        success = False
+
         batch = self._next_batch()
         if len(batch) == 0:
             return False
 
-        try:
-            self._log_records(batch)
-            success = True
-        except Exception as e:
-            self.log.error("error logging data: %s", e)
-            success = False
-            if self.on_error:
-                self.on_error(e, batch)
-        finally:
-            # mark items as acknowledged from queue
-            for _ in batch:
-                self.queue.task_done()
-            return success
+        success = self._log_records(batch)
+        # mark items as acknowledged from queue
+        for _ in batch:
+            self.queue.task_done()
+        return success
 
     def _next_batch(self) -> List[Record]:
         queue = self.queue
@@ -138,17 +130,24 @@ class DatasetRecordsConsumer(threading.Thread):
             max_tries=self.retries + 1,
             giveup=fatal_exception,
         )
-        def _inner_log_records():
+        def _inner_log_records(batch_: List[Record]):
             self.api.log(
                 name=self.dataset,
-                records=batch,
+                records=batch_,
                 tags=self.tags,
                 metadata=self.metadata,
                 background=True,
                 verbose=False,
             )
 
-        _inner_log_records()
+        try:
+            _inner_log_records(batch)
+            return True
+        except Exception as e:
+            self.log.error("error logging data: %s", e)
+            if self.on_error:
+                self.on_error(e, batch)
+            return False
 
     def send(self, records: Iterable[Record]):
         """Send records to the consumer"""
@@ -215,10 +214,7 @@ class BaseMonitor(wrapt.ObjectProxy):
         """Stop consumers"""
         for consumer in self._consumers.values():
             try:
-                while consumer.log_next_batch():
-                    continue
                 consumer.pause()
-                consumer.shutdown()
                 consumer.join()
             except RuntimeError:
                 pass
