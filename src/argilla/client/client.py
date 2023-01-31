@@ -597,6 +597,8 @@ class Argilla:
                 _LOGGER.warning(
                     f"Rule {rule} already exists. Please, update the rule instead."
                 )
+            except Exception as ex:
+                _LOGGER.warning(f"Cannot create rule {rule}: {ex}")
 
     def update_dataset_labeling_rules(
         self,
@@ -616,6 +618,8 @@ class Argilla:
                 text_classification_api.add_dataset_labeling_rule(
                     self._client, name=dataset, rule=rule
                 )
+            except Exception as ex:
+                _LOGGER.warning(f"Cannot update rule {rule}: {ex}")
 
     def delete_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
         """Deletes the dataset labeling rules"""
