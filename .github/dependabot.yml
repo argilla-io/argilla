@@ -13,3 +13,4 @@ updates:
 #    directory: "/frontend" # Location of package manifests
 #    schedule:
 #      interval: "weekly"
+
