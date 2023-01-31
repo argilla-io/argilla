@@ -79,6 +79,9 @@ Metadata are indexed as keywords.
 This means you cannot search for single words in them, and capitalization and punctuations are taken into account.
 You can, however, use wild cards.
 
+## Vector fields
+
+It is also possible to query the presense of vector field. Imagine you only want to include records with `vectors={"vector_1": vector_1}`. You can then define a query `vectors.vector_1: *`.
 ## Filters as query string
 
 Just like the metadata, you can also use the filter fields in you query.
@@ -166,6 +169,7 @@ This is a table with available fields that you can use in your query string:
 | id                                       | id                                    | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
 | inputs.\*                                | inputs                                | <p style="text-align: center;">&#10004;</p> |                                             |                                             |
 | metadata.\*                              | metadata                              | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
+| vectors.\*                               | vectors                               | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
 | last_updated                             | date of the last update               | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
 | predicted_as                             | prediction                            | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
 | predicted_by                             | prediction agent                      | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> | <p style="text-align: center;">&#10004;</p> |
