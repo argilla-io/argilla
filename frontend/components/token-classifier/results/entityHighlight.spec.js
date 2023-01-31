@@ -1,9 +1,17 @@
 import { shallowMount } from "@vue/test-utils";
 import EntityHighlightComponent from "./EntityHighlight";
-import { mockViewSettingsByDatasetName } from "@/models/__mocks__/view-settings/viewSettingsUtilities.mock";
 
 jest.mock("@/models/viewSettings.queries", () => ({
-  getViewSettingsByDatasetName: () => mockViewSettingsByDatasetName,
+  getViewSettingsByDatasetName: () => ({
+    $id: "medical-keywords",
+    id: "medical-keywords",
+    pagination: null,
+    viewMode: "annotate",
+    loading: false,
+    headerHeight: 288,
+    visibleMetrics: false,
+    visibleRulesList: false,
+  }),
 }));
 
 let wrapper = null;
