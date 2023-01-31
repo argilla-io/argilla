@@ -4,49 +4,75 @@ Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers
 
 In this guide, you'll learn to deploy your own Argilla app and use it for data labelling workflows right from the Hub.
 
-If you want to play with the Argilla UI without installing anything, check this [live demo](https://huggingface.co/spaces/argilla/live-demo). The demo is powered by Hugging Face Docker Spaces, the same technology you'll learn in this guide. To login into the UI use: username: `huggingface`, password: `1234`.
+In the next sections, you'll learn to deploy your own Argilla app and use it for data labelling workflows right from the Hub.
 
-![Argilla Demo](../../_static/getting_started/installation/argilla-demo.png)
-
-
-## Your first Argilla Docker Space
+## Your first Argilla Space
 
 In this section, you'll learn to deploy an Argilla Docker Space and use it for data annotation and training a sentiment classifier with [SetFit](https://github.com/huggingface/setfit/), a few-shot learning library.
 
 You can find the final app at [this example Space](https://huggingface.co/spaces/dvilasuero/argilla-setfit) and the step-by-step tutorial in this [notebook](https://colab.research.google.com/drive/1GeBBuRw8CIZ6SYql5Vdx4Q2Vv74eFa1I?usp=sharing).
 
-### Duplicate the Argilla Docker Template and create your Space
+### Duplicate the Argilla Space Template and create your Space
 
-The easiest way to get started is by duplicating the Argilla Docker Template. Before starting, we recommend you to login or signup into Hugging Face. After login in, you can use [duplicate the Argilla Docker Template with this link](https://huggingface.co/spaces/argilla/template-space-docker?duplicate=true).
+The easiest way to get started is by [duplicating the Argilla Docker Template](https://huggingface.co/spaces/argilla/template-space-docker?duplicate=true). You need to define the **Owner** (your personal account or an organization you are part of), a **Space name**, and the **Visibility**, which we recommend to set up to Public if you want to interact with the Argilla app from the outside. Once you are all set, click "Duplicate Space".
 
-If a modal box does not appear, see the screenshot below to find the "Duplicate Space" action:
+<div class="flex justify-center">
+<img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-duplicate-space.png"/>
+</div>
 
-![Argilla Demo](../../_static/getting_started/installation/duplicate-space.png)
-
-In the modal box, you need to define the **Owner** (your personal account or an organization you are part of), a **Space name**, and the **Visibility**, which we recommend to set up to Public if you want to interact with the Argilla app from the outside. Once you are all set, click "Duplicate Space".
+<Tip>
+Although you can duplicate other existing Argilla Spaces, we recommend starting from the official [Argilla Docker Template](https://huggingface.co/spaces/argilla/template-space-docker?duplicate=true).
+</Tip>
 
 Note: You'll see a mention to the need of setting up environment variables (`API_KEY`) by adding a secret to your Space but will see this in a second.
 
 ### Setting up secret environment variables
 
-The Space template provides a way to set up two optional settings:
+The Space template provides a way to set up different **optional settings** focusing on securing your Argilla Space.
 
-- `API_KEY`: As mentioned earlier, Argilla provides a Python library to interact with the app (read and write data, log model predictions, etc.). If you don't set this variable, the library and your app will use the default API key. If you want to secure your Space for reading and writing data, we recommend you to set up this variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
+<Tip>
+For quick experiments or you want others to see what datasets you've built, you can completely skip this step. If you do this, the default values from the [basic Argilla setup](https://docs.argilla.io/en/latest/getting_started/installation/installation.html) will be kept.
+</Tip>
 
-- `PASSWORD`: This setting allows you to set up a custom password for login into the app. The default password is `1234` and the default user is `argilla`. By setting up a custom password you can use your own password to login into the app. The value of the `PASSWORD` secret must be a hashed password, you can generate one following [this guide](https://docs.argilla.io/en/latest/getting_started/installation/user_management.html#override-default-password).
+In order to set up these secrets, you need to go to the Settings tab on your newly created Space and make sure to remember these values for later use.
 
-In order to set up these secrets, you need to go to the Settings tab on your newly created Space and make sure to store the values somewhere safe on your local machine for later use. For testing purposes, you can completely skip this step, or just set one of the two variables. If you do this, the default values from the [basic Argilla setup](https://docs.argilla.io/en/latest/getting_started/installation/installation.html) will be kept.
+By default the Argilla Space has two users: `team` and `argilla`. The username `team` corresponds to the root user, who can upload datasets and access any workspace on your Argilla Space. The username `argilla` corresponds to a normal user, who has access to the `team` workspace and its own workspace called `argilla`.
+
+Currently, these user names cannot be configured, but their passwords and API keys to upload, read, update, and delete datasets can be configured. The available secrets are following:
+
+- `ARGILLA_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model predictions, etc.). If you don't set this variable, the library and your app will use the default API key. If you want to secure your Space for reading and writing data, we recommend you to set up this variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
+
+- `ARGILLA_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password is `1234`. By setting up a custom password you can use your own password to login into the app.
+
+- `TEAM_API_KEY`: This sets the root user's API key. The API key you choose can be any string of your choice and you can check an online generator if you like.
+
+- `TEAM_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password is `1234`. By setting up a custom password you can use your own password to login into the app.
+
+The combination of these secret variables gives you the following setup options:
+
+1. *I want to avoid that anyone without the API keys can add, delete, or update datasets using the Python client*: You need to setup `ARGILLA_API_KEY` and `TEAM_API_KEY`.
+2. *Additionally, I want to avoid that the `argilla` username can delete datasets from the UI*: You need to setup `TEAM_PASSWORD` and use `TEAM_API_KEY` with the Python Client. This option might be interesting if you want to control dataset management but want anyone to browse your datasets using the `argilla` user.
+3. *Additionally, I want to avoid that anyone without password can browse my datasets with the `argilla` user*: You need to setup `ARGILLA_PASSWORD`. In this case, you can use `ARGILLA_API_KEY` and/or `TEAM_API_KEY` with the Python Client depending on your needs for dataset deletion rights.
 
 ### Create your first dataset
 
-Once your Argilla Space is running, you can start interacting with the it using the Direct URL you'll find in the "Embed this Space" option (top right). Let's say it's https://dvilasuero-argilla-setfit.hf.space. This URL will give you access to a full-screen, stable Argilla app, but will also serve as an endpoint for interacting with Argilla Python library. Let's see how to create our first dataset for labelling.
+Once your Argilla Space is running, you can start interacting with the it using the Direct URL you'll find in the "Embed this Space" option (top right). Let's say it's https://dvilasuero-argilla-setfit.hf.space. This URL will give you access to a full-screen, stable Argilla app, but will also serve as an endpoint for interacting with Argilla Python library.
 
-![Embed Space](../../_static/getting_started/installation/embed-space.png)
+<Tip>
+You'll see the login screen where you need to use either `argilla` or `team` with the default passwords or the ones you've set up using secrets. If you get a `500` error when introducing the credentials, make sure you have correctly hashed the password before adding it to the secret environment variable.
+</Tip>
 
-Another option is to embed the app directly using the provided iframe, which can be handy for quick experimentation using Google Colab for example.
+If this is working, you are ready to start using the Argilla Python client from a Python IDE such as Colab, Jupyter, or VS Code, to upload your own datasets.
 
-You also can access the app directly using the main URL of the Space, for example: https://huggingface.co/spaces/dvilasuero/argilla-setfit.
+Let's see how to create our first dataset for labelling. From this point on, you can follow the tutorial using this end-to-end tutorial [Colab notebook](https://colab.research.google.com/drive/1GeBBuRw8CIZ6SYql5Vdx4Q2Vv74eFa1I?usp=sharing).
 
+<Tip>
+If you don't want to use Colab or install anything on your local machine, you can [duplicate the Jupyter Lab Space]() and run all your code there.
+</Tip>
+
+<div class="flex justify-center">
+<img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png"/>
+</div>
 
 First we need to pip install `datasets` and `argilla` on Colab or your local machine:
 
@@ -120,26 +146,6 @@ trainer.train()
 metrics = trainer.evaluate()
 ```
 
-## Advanced settings
-
-This section provides details about what's done under the hood for setting up the Template Docker Space. You can use this guide to set up your own Docker Space.
-
-### Dockerfile
-
-The [`Dockerfile`](https://huggingface.co/spaces/argilla/template-space-docker/blob/main/Dockerfile) is based on the Elasticsearch image, which is the database used by Argilla apps. The build process does the following high-level steps:
-
-1. Install Python, pip, and dependencies defined on the `requirements.txt` file.
-2. Read secrets from the Space settings and make them available. You can find out more about how to use secrets in Docker spaces on [this guide](https://huggingface.co/docs/hub/spaces-sdks-docker#secret-management).
-3. Launch Elasticsearch, setup the `API_KEY` and `PASSWORD` if available, and launch the Argilla service. This done in the `start.sh` script described below.
-
-### start.sh
-This script launches Elasticsearch, uses the `waitforit.sh` utility to make sure Elasticsearch is up and running for the Argilla service, sets up the environment variables `API_KEY` and `PASSWORD` if available, and run `python -m argilla` which serves the webapp and API endpoint for reading and writing data.
-
-### Demo Space: Setting up workspaces and users
-If you are looking for a more advanced configuration of Argilla, which involves setting up several users and workspaces, can check out the [Argilla Demo Docker Space codebase](https://huggingface.co/spaces/argilla/live-demo/tree/main).
-
 ## Feedback and support
+
 If you have improvement suggestions or need specific support, please join [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) or reach out on [Argilla's GitHub repository](https://github.com/argilla-io/argilla).
-
-
-
