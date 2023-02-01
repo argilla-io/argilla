@@ -328,6 +328,7 @@ export default {
       this.$emit("reset-initial-record");
     },
     async changeVisibleSentences() {
+      this.refresh += this.refresh;
       this.sentencesOrigin !== "Annotation"
         ? (this.sentencesOrigin = "Annotation")
         : (this.sentencesOrigin = "Prediction");
