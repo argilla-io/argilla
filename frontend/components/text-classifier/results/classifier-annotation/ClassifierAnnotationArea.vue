@@ -204,10 +204,10 @@ export default {
       });
     },
     annotationLabels() {
-      return this.record.annotation ? this.record.annotation.labels : [];
+      return this.record.currentAnnotation?.labels || [];
     },
     predictionLabels() {
-      return this.record.prediction ? this.record.prediction.labels : [];
+      return this.record.prediction?.labels || [];
     },
     allowToShowAllLabels() {
       return this.paginationSize === 1 || false;
@@ -229,7 +229,11 @@ export default {
       this.$emit("reset", this.record);
     },
     annotate() {
-      this.$emit("validate", { labels: this.selectedLabels });
+      if (this.isMultiLabel) {
+        this.$emit("update-labels", this.selectedLabels);
+      } else {
+        this.$emit("validate", this.selectedLabels);
+      }
     },
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
