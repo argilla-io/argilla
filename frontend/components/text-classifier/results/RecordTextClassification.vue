@@ -150,7 +150,7 @@ export default {
       });
     },
     async validateLabels(labels) {
-      let selectedAnnotation = {};
+      const selectedAnnotation = {};
       selectedAnnotation.labels =
         this.formatLabels(labels) ||
         this.record.currentAnnotation?.labels ||

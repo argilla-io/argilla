@@ -33,9 +33,7 @@ class TextClassificationRecord extends BaseRecord {
     this.inputs = inputs;
     this.explanation = explanation;
     this.multi_label = multi_label;
-    this.currentAnnotation = !currentAnnotation
-      ? this.annotation || null
-      : currentAnnotation;
+    this.currentAnnotation = currentAnnotation || this.annotation || null;
   }
 
   recordTitle() {

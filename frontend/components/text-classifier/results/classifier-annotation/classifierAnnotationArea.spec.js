@@ -73,14 +73,16 @@ const testIfEmittedValuesFromValidateEventIsEqualToUserSelectedAnnotations =
       emittedValuesFromAnnotationButtons.length
     );
     if (wrapper.vm.isMultiLabel) {
-      expect(wrapper.emitted("update-labels"));
-      expect(wrapper.emitted("update-labels")[0]).toEqual([
-        emittedValuesFromAnnotationButtons,
-      ]);
+      emittedValuesWithAction(
+        "update-labels",
+        emittedValuesFromAnnotationButtons
+      );
     } else {
-      expect(wrapper.emitted("validate"));
-      expect(wrapper.emitted("validate")[0]).toEqual([
-        emittedValuesFromAnnotationButtons,
-      ]);
+      emittedValuesWithAction("validate", emittedValuesFromAnnotationButtons);
     }
   };
+
+const emittedValuesWithAction = async (action, values) => {
+  expect(wrapper.emitted(action));
+  expect(wrapper.emitted(action)[0]).toEqual([values]);
+};

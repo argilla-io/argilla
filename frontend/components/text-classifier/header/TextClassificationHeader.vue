@@ -127,13 +127,15 @@ export default {
         (r) => r.currentAnnotation || r.predicted_as || r.multi_label
       );
       const validatedRecords = filteredRecord.map((record) => {
-        const annotationLabels = record.currentAnnotation?.labels;
+        const annotationLabels = record.currentAnnotation?.labels || null;
         const modelPredictionLabels = this.formatLabels(record.predicted_as);
+        const labelsForValidate =
+          annotationLabels || modelPredictionLabels || [];
         return {
           ...record,
           currentAnnotation: null,
           annotation: {
-            labels: annotationLabels || modelPredictionLabels || [],
+            labels: labelsForValidate,
           },
         };
       });
@@ -154,10 +156,12 @@ export default {
       this.$emit("search-records", query);
     },
     formatLabels(labels) {
-      return labels?.map((label) => ({
-        class: label,
-        score: 1.0,
-      }));
+      return (
+        labels?.map((label) => ({
+          class: label,
+          score: 1.0,
+        })) || null
+      );
     },
   },
 };
