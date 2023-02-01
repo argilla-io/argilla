@@ -144,10 +144,11 @@ else:
 
     notfound_urls_prefix = f"/{lang}/{docs_version}/"
 
-if doc_version == "latest":
+docs_version = os.getenv("READTHEDOCS_VERSION", "latest")
+if docs_version == "latest":
     branch = "main"
 else:
-    branch = doc_version.replace("-", "/")
+    branch = docs_version.replace("-", "/")
     
 nbsphinx_prolog = (
     """
