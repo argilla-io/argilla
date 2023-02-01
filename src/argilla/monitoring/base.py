@@ -71,7 +71,10 @@ class DatasetRecordsConsumer(threading.Thread):
         """Runs the consumer."""
         while self.running:
             self.log_next_batch()
+        self._log_remaining()
 
+    def _log_remaining(self):
+        """When the consumer is paused, send remaining data in the queue"""
         last_batch = []
         while not self.queue.empty():
             last_batch.append(self.queue.get())
