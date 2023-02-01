@@ -328,6 +328,8 @@ export default {
       this.$emit("reset-initial-record");
     },
     async changeVisibleSentences() {
+      //NOTE - we need to refresh the component <text-2-text-content-editable> or after refresh
+      //the user modification will not be kept
       this.refresh += this.refresh;
       this.sentencesOrigin !== "Annotation"
         ? (this.sentencesOrigin = "Annotation")
