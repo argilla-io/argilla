@@ -468,7 +468,7 @@ class DatasetBase:
                 "Please provide a spacy language model to prepare the"
                 " dataset for training with the spacy framework."
             )
-        elif framework is Framework.SPACY or framework is Framework.SPARK_NLP:
+        elif framework in [Framework.SPACY, Framework.SPARK_NLP]:
             if train_size or test_size:
                 from sklearn.model_selection import train_test_split
 
