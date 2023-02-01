@@ -7,17 +7,17 @@ repos:
             exclude_types: [text, jupyter]
           - id: trailing-whitespace
 
-    - repo: https://github.com/Lucas-C/pre-commit-hooks
-      rev: v1.3.1
-      hooks:
-          - id: insert-license
-            name: "Insert license header in Python source files"
-            files: \.py$
-            args:
-                - --license-filepath
-                - src/license_header.txt
-                - --fuzzy-match-generates-todo
-                # - --remove-header
+-   repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.4.2
+    hooks:
+    -   id: insert-license
+        name: "Insert license header in Python source files"
+        files: \.py$
+        args:
+            - --license-filepath
+            - src/license_header.txt
+            - --fuzzy-match-generates-todo
+            # - --remove-header
 
     - repo: https://github.com/psf/black
       rev: 22.12.0
@@ -25,10 +25,11 @@ repos:
           - id: black
             additional_dependencies: ["click==8.0.4"]
 
-    - repo: https://github.com/pycqa/isort
-      rev: 5.12.0
-      hooks:
-          - id: isort
+
+-   repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+    -   id: isort
 
     - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
       rev: v9.4.0

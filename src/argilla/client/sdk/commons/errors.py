@@ -13,6 +13,8 @@
 #  limitations under the License.
 from typing import Any
 
+import httpx
+
 
 class BaseClientError(Exception):
     pass
@@ -46,6 +48,21 @@ class ApiCompatibilityError(BaseClientError):
         )
 
 
+class HttpResponseError(BaseClientError):
+    """Used for handle http errros other than defined in Argilla server"""
+
+    def __init__(self, response: httpx.Response):
+        self.status_code = response.status_code
+        self.detail = response.text
+
+    def __str__(self):
+        return (
+            "Received an HTTP error from server\n"
+            + f"Response status: {self.status_code}\n"
+            + f"Response content: {self.detail}\n"
+        )
+
+
 class ArApiResponseError(BaseClientError):
 
     HTTP_STATUS: int
@@ -60,8 +77,28 @@ class ArApiResponseError(BaseClientError):
         )
 
 
+class BadRequestApiError(ArApiResponseError):
+    HTTP_STATUS = 400
+
+
+class UnauthorizedApiError(ArApiResponseError):
+    HTTP_STATUS = 401
+
+
+class ForbiddenApiError(ArApiResponseError):
+    HTTP_STATUS = 403
+
+
 class NotFoundApiError(ArApiResponseError):
     HTTP_STATUS = 404
+
+
+class MethodNotAllowedApiError(ArApiResponseError):
+    HTTP_STATUS = 405
+
+
+class AlreadyExistsApiError(ArApiResponseError):
+    HTTP_STATUS = 409
 
 
 class ValidationApiError(ArApiResponseError):
@@ -86,26 +123,6 @@ class ValidationApiError(ArApiResponseError):
 
         # TODO: parse error details and match with client context
         super().__init__(**ctx, params=params)
-
-
-class BadRequestApiError(ArApiResponseError):
-    HTTP_STATUS = 400
-
-
-class UnauthorizedApiError(ArApiResponseError):
-    HTTP_STATUS = 401
-
-
-class ForbiddenApiError(ArApiResponseError):
-    HTTP_STATUS = 403
-
-
-class AlreadyExistsApiError(ArApiResponseError):
-    HTTP_STATUS = 409
-
-
-class MethodNotAllowedApiError(ArApiResponseError):
-    HTTP_STATUS = 405
 
 
 class GenericApiError(ArApiResponseError):

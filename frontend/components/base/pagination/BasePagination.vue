@@ -17,89 +17,97 @@
 
 <template>
   <div class="pagination__container">
-    <div v-click-outside="closePageSizeSelector" class="pagination__selector">
-      <span class="pagination__selector__title">Records per page:</span>
-      <div class="pagination__selector__content">
-        <a href="#" @click.prevent="showOptions = !showOptions">
-          {{ paginationSize }}
-          <svgicon name="chevron-up" width="12" height="12" />
-        </a>
-        <ul v-if="showOptions">
-          <li v-for="item in availableItemsPerPage" :key="item">
-            <a href="#" @click.prevent="changePageSize(item)">{{ item }}</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div v-if="totalItems > paginationSize" class="pagination">
-      <a
-        href="#"
-        class="pagination__arrow pagination__arrow--prev"
-        :class="currentPage <= 1 ? 'is-disabled' : null"
-        @click.prevent="prevPage"
-      >
-        <svgicon name="chevron-left" width="8" height="8" /> Prev
-      </a>
-      <ul class="pagination__numbers">
-        <li v-if="totalPages > 1 && !pages.includes(1)">
-          <a
-            href="#"
-            class="pagination__number"
-            :class="currentPage === 1 ? 'is-current' : null"
-            @click.prevent="changePage(1)"
-          >
-            {{ 1 }}
+    <template v-if="!onePage">
+      <div v-click-outside="closePageSizeSelector" class="pagination__selector">
+        <span class="pagination__selector__title">Records per page:</span>
+        <div class="pagination__selector__content">
+          <a href="#" @click.prevent="showOptions = !showOptions">
+            {{ paginationSize }}
+            <svgicon name="chevron-up" width="12" height="12" />
           </a>
-        </li>
-        <li v-if="pages.length && totalPages > 1 && !pages.includes(1 + 1)">
-          ...
-        </li>
-        <template v-if="totalPages > 1">
-          <li v-for="i in pages" :key="i">
+          <ul v-if="showOptions">
+            <li v-for="item in availableItemsPerPage" :key="item">
+              <a href="#" @click.prevent="changePageSize(item)">{{ item }}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div v-if="totalItems > paginationSize" class="pagination">
+        <a
+          href="#"
+          class="pagination__arrow pagination__arrow--prev"
+          :class="currentPage <= 1 ? 'is-disabled' : null"
+          @click.prevent="prevPage"
+        >
+          <svgicon name="chevron-left" width="8" height="8" /> Prev
+        </a>
+        <ul class="pagination__numbers">
+          <li v-if="totalPages > 1 && !pages.includes(1)">
             <a
               href="#"
               class="pagination__number"
-              :class="currentPage === i ? 'is-current' : null"
-              @click.prevent="changePage(i)"
+              :class="currentPage === 1 ? 'is-current' : null"
+              @click.prevent="changePage(1)"
             >
-              {{ i }}
+              {{ 1 }}
             </a>
           </li>
-        </template>
-        <li v-if="pages.length && !pages.includes(totalPages - 1)">...</li>
-        <li v-if="!pages.includes(totalPages)">
-          <a
-            href="#"
-            class="pagination__number"
-            :class="currentPage === totalPages ? 'is-current' : null"
-            @click.prevent="changePage(totalPages)"
-          >
-            {{ totalPages }}
-          </a>
-        </li>
-      </ul>
-      <a
-        href="#"
-        class="pagination__arrow pagination__arrow--next"
-        :class="currentPage >= totalPages ? 'is-disabled' : null"
-        @click.prevent="nextPage"
-      >
-        Next <svgicon name="chevron-right" width="8" height="8" />
-      </a>
-    </div>
+          <li v-if="pages.length && totalPages > 1 && !pages.includes(1 + 1)">
+            ...
+          </li>
+          <template v-if="totalPages > 1">
+            <li v-for="i in pages" :key="i">
+              <a
+                href="#"
+                class="pagination__number"
+                :class="currentPage === i ? 'is-current' : null"
+                @click.prevent="changePage(i)"
+              >
+                {{ i }}
+              </a>
+            </li>
+          </template>
+          <li v-if="pages.length && !pages.includes(totalPages - 1)">...</li>
+          <li v-if="!pages.includes(totalPages)">
+            <a
+              href="#"
+              class="pagination__number"
+              :class="currentPage === totalPages ? 'is-current' : null"
+              @click.prevent="changePage(totalPages)"
+            >
+              {{ totalPages }}
+            </a>
+          </li>
+        </ul>
+        <a
+          href="#"
+          class="pagination__arrow pagination__arrow--next"
+          :class="currentPage >= totalPages ? 'is-disabled' : null"
+          @click.prevent="nextPage"
+        >
+          Next <svgicon name="chevron-right" width="8" height="8" />
+        </a>
+      </div>
+    </template>
     <div class="pagination__info">
-      <strong>
-        {{ paginationSize * currentPage - (paginationSize - 1) }}-{{
-          paginationSize * currentPage > totalItems
-            ? totalItems
-            : paginationSize * currentPage
-        }}
-      </strong>
-      of {{ paginableTotalItems | formatNumber }} records
+      <template v-if="!onePage">
+        <strong>
+          {{ paginationSize * currentPage - (paginationSize - 1) }}-{{
+            paginationSize * currentPage > totalItems
+              ? totalItems
+              : paginationSize * currentPage
+          }}
+        </strong>
+        of
+      </template>
+      <span class="total-records">{{ totalItems | formatNumber }} </span>
+      records
     </div>
   </div>
 </template>
+
 <script>
+import { Notification } from "@/models/Notifications";
 import "assets/icons/chevron-left";
 import "assets/icons/chevron-right";
 import "assets/icons/chevron-up";
@@ -112,6 +120,10 @@ export default {
     paginationSettings: {
       type: Object,
       required: true,
+    },
+    onePage: {
+      type: Boolean,
+      default: false,
     },
     visiblePagesRange: {
       type: Number,
@@ -161,9 +173,33 @@ export default {
       }
       return pages;
     },
+    formattedLimit() {
+      return this.$options.filters.formatNumber(this.maxRecordsLimit);
+    },
+    message() {
+      return `<p>
+                You cannot go through more than ${this.formattedLimit} records.
+                To explore more records, you can combine queries, filters, and sorting to reduce your search results.
+                Visit this
+                <a
+                  href="https://docs.argilla.io/en/latest/guides/features/queries.html?highlight=queries#"
+                  target="_blank"
+                >
+                  guide</a
+                > for using advanced queries.
+              </p>`;
+    },
+  },
+  watch: {
+    currentPage(newValue) {
+      this.isLastPageEqualToLimitSimilaritySearch(newValue) &&
+        this.showNotification();
+    },
   },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
+    this.isLastPageEqualToLimitSimilaritySearch(this.currentPage) &&
+      this.showNotification();
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
@@ -179,8 +215,8 @@ export default {
         this.$emit("changePage", this.currentPage - 1, this.paginationSize);
       }
     },
-    changePage(n) {
-      this.$emit("changePage", n, this.paginationSize);
+    changePage(pageNumber) {
+      this.$emit("changePage", pageNumber, this.paginationSize);
     },
     changePageSize(pageSize) {
       (this.showOptions = false),
@@ -206,6 +242,16 @@ export default {
           this.prevPage();
         }
       }
+    },
+    showNotification() {
+      Notification.dispatch("notify", {
+        message: this.message,
+        numberOfChars: 194,
+        type: "warning",
+      });
+    },
+    isLastPageEqualToLimitSimilaritySearch(pageNumber) {
+      return pageNumber === this.maxRecordsLimit / this.paginationSize;
     },
   },
 };

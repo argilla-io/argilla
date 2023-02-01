@@ -27,7 +27,24 @@ def deprecate_endpoint(
     def decorator(func: Callable):
         kwargs.pop("path", None)
         kwargs.pop("deprecated", None)
-        router_method(path=path, *args, deprecated=True, **kwargs)(func)
-        router_method(path=new_path, *args, deprecated=False, **kwargs)(func)
+        operation_id = kwargs.pop("operation_id", None)
+        operation_id_old = None
+        if operation_id:
+            operation_id_old = f"{operation_id}_old"
+
+        router_method(
+            path=path,
+            *args,
+            deprecated=True,
+            operation_id=operation_id_old,
+            **kwargs,
+        )(func)
+        router_method(
+            path=new_path,
+            *args,
+            deprecated=False,
+            operation_id=operation_id,
+            **kwargs,
+        )(func)
 
     return decorator

@@ -52,25 +52,27 @@ from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
-from argilla.client.sdk.text2text import api as text2text_api
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
-    Text2TextQuery,
 )
+from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
 from argilla.client.sdk.text_classification import api as text_classification_api
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     LabelingRule,
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
-    TextClassificationQuery,
 )
-from argilla.client.sdk.token_classification import api as token_classification_api
+from argilla.client.sdk.text_classification.models import (
+    TextClassificationRecord as SdkTextClassificationRecord,
+)
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
-    TokenClassificationQuery,
+)
+from argilla.client.sdk.token_classification.models import (
+    TokenClassificationRecord as SdkTokenClassificationRecord,
 )
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import User
@@ -89,9 +91,11 @@ class _ArgillaLogAgent:
         try:
             return await api.log_async(*args, **kwargs)
         except Exception as ex:
+            dataset = kwargs["name"]
             _LOGGER.error(
-                f"Cannot log data {args, kwargs}\n"
-                f"Error of type {type(ex)}\n: {ex}. ({ex.args})"
+                f"\nCannot log data in dataset '{dataset}'\n"
+                f"Error: {type(ex).__name__}\n"
+                f"Details: {ex}"
             )
             raise ex
 
@@ -484,24 +488,21 @@ class Argilla:
 
         task_config = {
             TaskType.text_classification: (
-                text_classification_api.data,
-                TextClassificationQuery,
+                SdkTextClassificationRecord,
                 DatasetForTextClassification,
             ),
             TaskType.token_classification: (
-                token_classification_api.data,
-                TokenClassificationQuery,
+                SdkTokenClassificationRecord,
                 DatasetForTokenClassification,
             ),
             TaskType.text2text: (
-                text2text_api.data,
-                Text2TextQuery,
+                SdkText2TextRecord,
                 DatasetForText2Text,
             ),
         }
 
         try:
-            get_dataset_data, request_class, dataset_class = task_config[task]
+            sdk_record_class, dataset_class = task_config[task]
         except KeyError:
             raise ValueError(
                 f"Load method not supported for the '{task}' task. Supported Tasks: "
@@ -524,21 +525,21 @@ class Argilla:
 
             return dataset_class(results.records)
 
-        response = get_dataset_data(
-            client=self._client,
+        records = self.datasets.scan(
             name=name,
-            request=request_class(ids=ids, query_text=query),
+            projection={"*"},
             limit=limit,
             id_from=id_from,
+            # Query
+            query_text=query,
+            ids=ids,
         )
-
-        records = [sdk_record.to_client() for sdk_record in response.parsed]
+        records = [sdk_record_class.parse_obj(r).to_client() for r in records]
         try:
             records_sorted_by_id = sorted(records, key=lambda x: x.id)
         # record ids can be a mix of int/str -> sort all as str type
         except TypeError:
             records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
-
         return dataset_class(records_sorted_by_id)
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:

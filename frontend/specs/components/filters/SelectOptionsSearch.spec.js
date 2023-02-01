@@ -4,7 +4,7 @@ import SelectOptionsSearch from "@/components/commons/header/filters/SelectOptio
 function mountSelectOptionsSearch() {
   return mount(SelectOptionsSearch, {
     propsData: {
-      value: ["NEGAT"],
+      value: "Search Input",
       allowClear: true,
     },
   });

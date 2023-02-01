@@ -223,8 +223,8 @@ export default {
             group: "Metadata",
             placeholder: "Select options",
             id: key,
-            options: Object.keys(filterContent).includes("rubrix:stats")
-              ? undefined
+            options: Object.keys(filterContent).includes("argilla:stats")
+              ? null
               : filterContent,
             selected: (this.dataset.query.metadata || {})[key] || [],
           };
@@ -258,6 +258,7 @@ export default {
             uncoveredByRules,
           ]
         : [...filters, ...dateFields, ...sortedMetadataFilters];
+
       return formattedFilters;
     },
   },

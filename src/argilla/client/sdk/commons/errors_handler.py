@@ -21,6 +21,7 @@ from argilla.client.sdk.commons.errors import (
     BadRequestApiError,
     ForbiddenApiError,
     GenericApiError,
+    HttpResponseError,
     MethodNotAllowedApiError,
     NotFoundApiError,
     UnauthorizedApiError,
@@ -34,8 +35,8 @@ def handle_response_error(
     try:
         response_content = response.json() if parse_response else {}
     except JSONDecodeError:
-        response_content = {}
-    error_type = GenericApiError
+        response_content = {"detail": response.text}
+
     error_detail = response_content.get("detail")
     if not isinstance(error_detail, dict):  # normalize detail if not data structure
         error_detail = {"response": error_detail}
@@ -57,5 +58,8 @@ def handle_response_error(
         error_args["client_ctx"] = client_ctx
     elif response.status_code == MethodNotAllowedApiError.HTTP_STATUS:
         error_type = MethodNotAllowedApiError
-
+    elif response.status_code == GenericApiError.HTTP_STATUS:
+        error_type = GenericApiError
+    else:
+        raise HttpResponseError(response=response)
     raise error_type(**error_args)

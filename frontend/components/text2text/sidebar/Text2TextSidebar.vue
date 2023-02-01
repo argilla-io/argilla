@@ -41,17 +41,17 @@ export default {
     return {
       sidebarItems: [
         {
-          id: "explore",
-          tooltip: "Exploration",
-          icon: "exploration",
+          id: "annotate",
+          tooltip: "Hand labeling",
+          icon: "hand-labeling",
           group: "Mode",
           action: "change-view-mode",
           relatedMetrics: ["progress", "stats"],
         },
         {
-          id: "annotate",
-          tooltip: "Hand labeling",
-          icon: "hand-labeling",
+          id: "explore",
+          tooltip: "Exploration",
+          icon: "exploration",
           group: "Mode",
           action: "change-view-mode",
           relatedMetrics: ["progress", "stats"],

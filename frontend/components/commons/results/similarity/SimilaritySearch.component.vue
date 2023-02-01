@@ -2,9 +2,7 @@
   <div v-if="multipleVectors" id="dropdown" class="similarity-search">
     <base-dropdown :visible="dropdownIsvisible" @visibility="onVisibility">
       <span slot="dropdown-header">
-        <base-button class="small similarity-search__button">
-          Find similar
-        </base-button>
+        <base-button class="small clear"> Find similar </base-button>
       </span>
       <span slot="dropdown-content">
         <similarity-search-content
@@ -20,7 +18,7 @@
   </div>
   <base-button
     id="find-similar-button"
-    class="small similarity-search__button"
+    class="small clear"
     :disabled="isDisabled"
     v-else
     @click="findSimilar"
@@ -90,16 +88,6 @@ export default {
     color: $black-87;
     font-weight: 500;
     margin-top: 0;
-  }
-  &__button {
-    transition: all 0.2s ease-in;
-    @include font-size(13px);
-    font-weight: 500;
-    padding: $base-space;
-    &:hover {
-      background: $black-4;
-      transition: all 0.2s ease-in;
-    }
   }
   &__buttons {
     display: flex;
