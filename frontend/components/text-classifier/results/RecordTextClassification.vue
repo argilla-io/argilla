@@ -26,6 +26,7 @@
         :isMultiLabel="isMultiLabel"
         :paginationSize="paginationSize"
         :record="record"
+        @update-labels="updateLabels"
         @validate="validateLabels"
         @reset="resetLabels"
       />
@@ -39,7 +40,7 @@
         <base-button
           v-if="allowValidate"
           class="primary"
-          @click="onValidate(record)"
+          @click="validateLabels()"
           >Validate</base-button
         >
       </div>
@@ -95,7 +96,6 @@ export default {
   },
   computed: {
     interactionsEnabled() {
-      // console.log(this.getTextClassificationDataset());
       return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
@@ -107,7 +107,9 @@ export default {
     allowValidate() {
       return (
         this.record.status !== "Validated" &&
-        (this.record.annotation || this.record.prediction || this.isMultiLabel)
+        (this.record.currentAnnotation ||
+          this.record.prediction ||
+          this.isMultiLabel)
       );
     },
     paginationSize() {
@@ -116,50 +118,52 @@ export default {
   },
   methods: {
     ...mapActions({
+      updateRecords: "entities/datasets/updateDatasetRecords",
       validateAnnotations: "entities/datasets/validateAnnotations",
       resetAnnotations: "entities/datasets/resetAnnotations",
     }),
     async resetLabels() {
       await this.resetAnnotations({
         dataset: this.getTextClassificationDataset(),
-        records: [this.record],
+        records: [
+          {
+            ...this.record,
+            currentAnnotation: null,
+          },
+        ],
       });
     },
-
-    async validateLabels({ labels }) {
-      const annotation = {
-        labels: labels.map((label) => ({
-          class: label,
-          score: 1.0,
-        })),
-      };
-
+    async updateLabels(labels = []) {
+      await this.updateRecords({
+        dataset: this.getTextClassificationDataset(),
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            currentAnnotation: {
+              agent: this.$auth.user.username,
+              labels: this.formatLabels(labels),
+            },
+          },
+        ],
+      });
+    },
+    async validateLabels(labels) {
+      let selectedAnnotation = {};
+      selectedAnnotation.labels =
+        this.formatLabels(labels) ||
+        this.record.currentAnnotation?.labels ||
+        this.formatLabels(this.record.predicted_as);
       await this.validateAnnotations({
         dataset: this.getTextClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
             ...this.record,
-            annotation,
-          },
-        ],
-      });
-    },
-    async onValidate(record) {
-      let modelPrediction = {};
-      modelPrediction.labels = record.predicted_as.map((pred) => ({
-        class: pred,
-        score: 1,
-      }));
-      // TODO: do not validate records without labels
-      await this.validateAnnotations({
-        dataset: this.getTextClassificationDataset(),
-        agent: this.$auth.user.username,
-        records: [
-          {
-            ...record,
+            currentAnnotation: null,
             annotation: {
-              ...(record.annotation || modelPrediction),
+              ...selectedAnnotation,
             },
           },
         ],
@@ -167,6 +171,12 @@ export default {
     },
     getTextClassificationDataset() {
       return getTextClassificationDatasetById(this.datasetId);
+    },
+    formatLabels(labels) {
+      return labels?.map((label) => ({
+        class: label,
+        score: 1.0,
+      }));
     },
   },
 };
