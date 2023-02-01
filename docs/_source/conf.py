@@ -145,7 +145,7 @@ else:
     notfound_urls_prefix = f"/{lang}/{docs_version}/"
 
 if doc_version == "latest":
-    branch = "main
+    branch = "main"
 else:
     branch = doc_version.replace("-", "/")
     
