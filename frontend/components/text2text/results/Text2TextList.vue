@@ -353,7 +353,7 @@ export default {
     async onAnnotate(sentence) {
       let newS = {
         score: 1,
-        text: sentence,
+        text: sentence || this.selectedSentence,
       };
       this.$emit("annotate", { sentences: [newS] });
       this.itemNumber = 0;
