@@ -9,7 +9,8 @@
 
    self
    getting_started/quickstart
-   getting_started/installation/installation.md
+   getting_started/installation/deployments/deployments.md
+   getting_started/installation/configurations/configurations.md
    getting_started/terminology
 
 .. toctree::
