@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import copy
 import os
 import sys
 from time import sleep
@@ -225,6 +226,31 @@ class TestDatasetBase:
             ),
         ):
             dataset[0] = ar.Text2TextRecord(text="mock")
+
+    def test_prepare_for_training_train_test_splits(
+        self, monkeypatch, singlelabel_textclassification_records
+    ):
+        monkeypatch.setattr(
+            "argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+        )
+        temp_records = copy.deepcopy(singlelabel_textclassification_records)
+        ds = DatasetBase(temp_records)
+
+        with pytest.raises(
+            AssertionError,
+            match="`train_size` and `test_size` must be larger than 0.",
+        ):
+            ds.prepare_for_training(train_size=-1)
+
+        with pytest.raises(
+            AssertionError, match="`train_size` and `test_size` must sum to 1."
+        ):
+            ds.prepare_for_training(test_size=0.1, train_size=0.6)
+
+        for rec in ds:
+            rec.annotation = None
+        with pytest.raises(AssertionError, match="Dataset has no annotations."):
+            ds.prepare_for_training()
 
 
 class TestDatasetForTextClassification:
@@ -674,7 +700,9 @@ class TestDatasetForTokenClassification:
             ]
 
         train = rb_dataset.prepare_for_training()
-        assert isinstance(train, datasets.Dataset)
+        assert isinstance(train, datasets.DatasetD.Dataset) or isinstance(
+            train, datasets.Dataset
+        )
         assert "ner_tags" in train.column_names
         assert len(train) == 100
         assert train.features["ner_tags"] == [

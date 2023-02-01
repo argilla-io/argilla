@@ -14,6 +14,7 @@
 #  limitations under the License.
 import functools
 import logging
+import random
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
@@ -372,8 +373,9 @@ class DatasetBase:
         self,
         framework: Union[Framework, str] = "transformers",
         lang: Optional["spacy.Language"] = None,
-        train_size: Optional[float] = None,
+        train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
+        seed: Optional[int] = None,
     ) -> Union[
         "datasets.Dataset",
         "spacy.tokens.DocBin",
@@ -392,6 +394,9 @@ class DatasetBase:
             framework: A string|enum specifying the framework for the training.
                 "transformers" and "spacy" are currently supported. Default: `transformers`
             lang: The spacy nlp Language pipeline used to process the dataset. (Only for spacy framework)
+            train_size: The size of the training set. If float, should be between 0.0 and 1.0 and represent the
+            test_size: The size of the test set. If float, should be between 0.0 and 1.0 and represent the
+            seed: Random state.
 
         Returns:
             A datasets Dataset with a *ner_tags* or a *label* column and and several *inputs* columns.
@@ -435,24 +440,28 @@ class DatasetBase:
              'label': ClassLabel(num_classes=1, names=['SPAM'])}
 
         """
-        # determine split fragments
-        if train_size is None and test_size is None:
-            pass
-        elif train_size is None:
-            assert 0 < test_size < 1, ValueError("test_size must be between 0 and 1.")
-            train_size = 1 - test_size
-        elif test_size is None:
-            assert 0 < train_size < 1, ValueError("train_size must be between 0 and 1.")
+        if test_size is None:
             test_size = 1 - train_size
-        else:
-            assert sum([train_size, test_size]) == 1, ValueError(
-                "train_size and test_size must sum to 1."
-            )
+
+        # check if all numbers are larger than 0
+        assert [abs(train_size), abs(test_size)] == [train_size, test_size], ValueError(
+            "`train_size` and `test_size` must be larger than 0."
+        )
+
+        # check if train sizes sum up to 1
+        assert (train_size + test_size) == 1, ValueError(
+            "`train_size` and `test_size` must sum to 1."
+        )
 
         # check for annotations
         assert any([rec.annotation for rec in self._records]), ValueError(
             "Dataset has no annotations."
         )
+
+        # shuffle records
+        shuffled_records = self._records.copy()
+        seed = seed or random.randint(42, 1984)
+        random.Random(seed).shuffle(shuffled_records)
 
         # turn the string into a Framework instance and trigger error if str is not valid
         if isinstance(framework, str):
@@ -461,7 +470,7 @@ class DatasetBase:
         # prepare for training for the right method
         if framework is Framework.TRANSFORMERS:
             return self._prepare_for_training_with_transformers(
-                train_size=train_size, test_size=test_size
+                train_size=train_size, test_size=test_size, seed=seed
             )
         elif framework is Framework.SPACY and lang is None:
             raise ValueError(
@@ -473,14 +482,13 @@ class DatasetBase:
                 from sklearn.model_selection import train_test_split
 
                 records_train, records_test = train_test_split(
-                    self._records, train_size=train_size, test_size=test_size
+                    shuffled_records,
+                    train_size=train_size,
+                    test_size=test_size,
+                    shuffle=False,
+                    random_state=seed,
                 )
                 if framework is Framework.SPACY:
-                    if lang is None:
-                        raise ValueError(
-                            "Please provide a spacy language model to prepare the"
-                            " dataset for training with the spacy framework."
-                        )
                     train_docbin = self._prepare_for_training_with_spacy(
                         nlp=lang, records=records_train
                     )
@@ -496,11 +504,11 @@ class DatasetBase:
             else:
                 if framework is Framework.SPACY:
                     return self._prepare_for_training_with_spacy(
-                        nlp=lang, records=self._records
+                        nlp=lang, records=shuffled_records
                     )
                 else:
                     return self._prepare_for_training_with_spark_nlp(
-                        records=self._records
+                        records=shuffled_records
                     )
         else:
             raise NotImplementedError(
@@ -512,7 +520,7 @@ class DatasetBase:
     def _prepare_for_training_with_spacy(
         self, **kwargs
     ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
-        """Prepares the dataset for training using the "transformers" framework.
+        """Prepares the dataset for training using the "spacy" framework.
 
         Args:
             **kwargs: Specific to the task of the dataset.
@@ -532,6 +540,19 @@ class DatasetBase:
 
         Returns:
             A datasets Dataset.
+        """
+
+        raise NotImplementedError
+
+    @_requires_datasets
+    def _prepare_for_training_with_spark_nlp(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "spark-nlp" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
         """
 
         raise NotImplementedError
@@ -761,6 +782,7 @@ class DatasetForTextClassification(DatasetBase):
         self,
         train_size: Optional[float] = None,
         test_size: Optional[float] = None,
+        seed: Optional[int] = None,
     ):
         import datasets
 
@@ -816,9 +838,10 @@ class DatasetForTextClassification(DatasetBase):
                 },
                 features=datasets.Features(feature_dict),
             )
-
-        if train_size or test_size:
-            ds = ds.train_test_split(train_size=train_size, test_size=test_size)
+        if test_size:
+            ds = ds.train_test_split(
+                train_size=train_size, test_size=test_size, seed=seed
+            )
 
         return ds
 
@@ -999,6 +1022,7 @@ class DatasetForTokenClassification(DatasetBase):
         self,
         train_size: Optional[float] = None,
         test_size: Optional[float] = None,
+        seed: Optional[int] = None,
     ):
         import datasets
 
@@ -1038,7 +1062,9 @@ class DatasetForTokenClassification(DatasetBase):
         ds = ds.cast(new_features)
 
         if train_size or test_size:
-            ds = ds.train_test_split(train_size=train_size, test_size=test_size)
+            ds = ds.train_test_split(
+                train_size=train_size, test_size=test_size, seed=seed
+            )
 
         return ds
 
