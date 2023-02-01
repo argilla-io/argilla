@@ -91,8 +91,9 @@ class WeakLabelsBase:
         counts = Counter(self._rules_index2name.values())
         if len(counts.keys()) < len(self._rules):
             raise DuplicatedRuleNameError(
-                f"Following rule names are duplicated x times: { {key: val for key, val in counts.items() if val > 1} }"
-                " Please make sure to provide unique rule names."
+                "Following rule names are duplicated x times:"
+                f" { {key: val for key, val in counts.items() if val > 1} } Please make"
+                " sure to provide unique rule names."
             )
         self._rules_name2index = {
             val: key for key, val in self._rules_index2name.items()
@@ -109,6 +110,11 @@ class WeakLabelsBase:
                 + (" and" if query and ids else "")
                 + (f" with ids {ids}." if ids else ".")
             )
+
+        # check for annotations
+        assert any([rec.annotation for rec in self._records]), ValueError(
+            "Dataset has no annotations."
+        )
 
         self._matrix = self._extended_matrix = self._extension_queries = None
 
@@ -317,8 +323,9 @@ class WeakLabelsBase:
             import faiss
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
-                "'faiss' must be installed to extend a weak label matrix! "
-                "You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`"
+                "'faiss' must be installed to extend a weak label matrix! You can"
+                " install 'faiss' with the commands: `pip install faiss-cpu` or `pip"
+                " install faiss-gpu`"
             )
         faiss.normalize_L2(embeddings)
         embeddings_length = embeddings.shape[1]
@@ -425,7 +432,8 @@ class WeakLabels(WeakLabelsBase):
 
         if self._records[0].multi_label:
             raise MultiLabelError(
-                "For multi-label text classification, use the `rg.labeling.text_classification.WeakMultiLabels` class."
+                "For multi-label text classification, use the"
+                " `rg.labeling.text_classification.WeakMultiLabels` class."
             )
 
         # apply rules -> create the weak label matrix, annotation array, final label2int mapping
@@ -460,7 +468,8 @@ class WeakLabels(WeakLabelsBase):
         _label2int = {None: -1} if label2int is None else label2int
         if None not in _label2int:
             raise MissingLabelError(
-                "Your provided `label2int` mapping does not contain the required abstention label `None`."
+                "Your provided `label2int` mapping does not contain the required"
+                " abstention label `None`."
             )
 
         for n, record in tqdm(
@@ -473,7 +482,8 @@ class WeakLabels(WeakLabelsBase):
                 # When a label2int was provided, we want to raise an error if the label is missing!
                 if label2int is not None:
                     raise MissingLabelError(
-                        f"The annotation label '{record.annotation}' is missing in the `label2int` dict {label2int}"
+                        f"The annotation label '{record.annotation}' is missing in the"
+                        f" `label2int` dict {label2int}"
                     ) from error
                 # we already have `None` -> we need to subtract 1
                 _label2int[record.annotation] = len(_label2int) - 1
@@ -487,7 +497,8 @@ class WeakLabels(WeakLabelsBase):
                 if isinstance(weak_label, list):
                     if len(weak_label) != 1:
                         raise MultiLabelError(
-                            "For rules that do not return exactly 1 label, use the `WeakMultiLabels` class."
+                            "For rules that do not return exactly 1 label, use the"
+                            " `WeakMultiLabels` class."
                         )
                     weak_label = weak_label[0]
 
@@ -563,8 +574,8 @@ class WeakLabels(WeakLabelsBase):
         """
         if exclude_missing_annotations is not None:
             warnings.warn(
-                "'exclude_missing_annotations' is deprecated and will be removed in the next major release. "
-                "Please use the 'include_missing' argument.",
+                "'exclude_missing_annotations' is deprecated and will be removed in the"
+                " next major release. Please use the 'include_missing' argument.",
                 category=FutureWarning,
             )
             include_missing = not exclude_missing_annotations
