@@ -24,7 +24,7 @@
           :class="modalClass"
           v-click-outside="onClickOutside"
         >
-          <p class="modal__title">
+          <p v-if="modalTitle" class="modal__title">
             {{ modalTitle }}
           </p>
           <slot />
@@ -150,7 +150,7 @@ export default {
 .modal-secondary {
   box-shadow: $shadow;
   border-radius: $border-radius;
-  max-width: 400px;
+  max-width: 440px;
   :deep(.modal__text) {
     margin-bottom: 2em;
   }
