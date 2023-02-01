@@ -22,11 +22,18 @@ import _ from "lodash";
 class TextClassificationRecord extends BaseRecord {
   inputs;
 
-  constructor({ inputs, explanation, multi_label, ...superData }) {
+  constructor({
+    inputs,
+    explanation,
+    multi_label,
+    currentAnnotation,
+    ...superData
+  }) {
     super(superData);
     this.inputs = inputs;
     this.explanation = explanation;
     this.multi_label = multi_label;
+    this.currentAnnotation = currentAnnotation || this.annotation || null;
   }
 
   recordTitle() {

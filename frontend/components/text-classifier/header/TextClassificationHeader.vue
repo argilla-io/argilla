@@ -86,28 +86,35 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateRecords: "entities/datasets/updateRecords",
+      updateRecords: "entities/datasets/updateDatasetRecords",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
     async onSelectLabels({ labels, selectedRecords }) {
       const records = selectedRecords.map((record) => {
-        let newLabels = labels.map((label) => ({
-          class: label,
-          score: 1.0,
-        }));
+        const pendingStatusProperties = {
+          selected: true,
+          status: "Edited",
+        };
         return {
           ...record,
-          annotation: {
-            labels: newLabels,
+          ...(this.isMultiLabel && pendingStatusProperties),
+          currentAnnotation: {
+            agent: this.$auth.user.username,
+            labels: this.formatLabels(labels),
           },
         };
       });
-      await this.validate({
+      const updatedRecords = {
         dataset: this.dataset,
         agent: this.$auth.user.username,
         records: records,
-      });
+      };
+      if (this.isMultiLabel) {
+        await this.updateRecords(updatedRecords);
+      } else {
+        await this.onValidate(records);
+      }
     },
     async onDiscard(records) {
       await this.discard({
@@ -116,27 +123,27 @@ export default {
       });
     },
     async onValidate(records) {
-      const filterdRecord = records.filter(
-        (r) => r.annotation || r.predicted_as || r.multi_label
+      const filteredRecord = records.filter(
+        (r) => r.currentAnnotation || r.predicted_as || r.multi_label
       );
+      const validatedRecords = filteredRecord.map((record) => {
+        const annotationLabels = record.currentAnnotation?.labels || null;
+        const modelPredictionLabels = this.formatLabels(record.predicted_as);
+        const labelsForValidate =
+          annotationLabels || modelPredictionLabels || [];
+        return {
+          ...record,
+          currentAnnotation: null,
+          annotation: {
+            labels: labelsForValidate,
+          },
+        };
+      });
+
       await this.validate({
         dataset: this.dataset,
         agent: this.$auth.user.username,
-        records: filterdRecord.map((record) => {
-          let modelPrediction = {};
-          modelPrediction.labels = record.predicted_as.map((pred) => ({
-            class: pred,
-            score: 1,
-          }));
-          const emptyLabels = {};
-          emptyLabels.labels = [];
-          return {
-            ...record,
-            annotation: {
-              ...(record.annotation || modelPrediction || emptyLabels),
-            },
-          };
-        }),
+        records: validatedRecords,
       });
     },
     async onNewLabel(newLabel) {
@@ -147,6 +154,14 @@ export default {
     },
     searchRecords(query) {
       this.$emit("search-records", query);
+    },
+    formatLabels(labels) {
+      return (
+        labels?.map((label) => ({
+          class: label,
+          score: 1.0,
+        })) || null
+      );
     },
   },
 };
