@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 // Color map
 //-----------
 $palettes: (
@@ -27,18 +26,20 @@ $palettes: (
   ),
   grey: (
     100: #212121,
-    200: #4D4D4D,
+    200: #4d4d4d,
     300: #686a6d,
-    600: #E6E6E6,
-    700: #F5F5F5,
-    800: #FAFAFA,
+    400: #838589,
+    600: #e6e6e6,
+    700: #f5f5f5,
+    800: #fafafa,
   ),
   blue: (
-    500: #3E5CC9,
+    100: #52a3ed,
+    500: #3e5cc9,
   ),
   purple: (
     100: #3b3269,
-    200: #4C4EA3,
+    200: #4c4ea3,
   ),
   pink: (
     base: #f2067a,
@@ -49,12 +50,12 @@ $palettes: (
     dark: #1d1d1d,
   ),
   orange-red-crayola: (
-    base: #FF675F
+    base: #ff675f,
   ),
   apricot: (
-    light: #FFFBFA,
-    base: #F8C0A7,
-    dark: #FD8F5E,
+    light: #fffbfa,
+    base: #f8c0a7,
+    dark: #fd8f5e,
   ),
   brown: (
     base: #bb720a,
@@ -80,10 +81,10 @@ $bg: palette(grey, 800);
 // Black opacity
 //-----------
 $black-87: rgba(0, 0, 0, 0.87);
-$black-54: rgba(0, 0, 0, 0.60);
+$black-54: rgba(0, 0, 0, 0.6);
 $black-37: rgba(0, 0, 0, 0.37);
-$black-20: rgba(0, 0, 0, 0.20);
-$black-10: rgba(0, 0, 0, 0.10);
+$black-20: rgba(0, 0, 0, 0.2);
+$black-10: rgba(0, 0, 0, 0.1);
 $black-4: rgba(0, 0, 0, 0.04);
 
 // States
@@ -96,7 +97,8 @@ $info: palette(grey, 600);
 // Fonts
 //-----------
 $primary-font-family: "Inter", "Helvetica", "Arial", sans-serif;
-$secondary-font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
+$secondary-font-family: "raptor_v2_premiumbold", "Helvetica", "Arial",
+  sans-serif;
 $base-font-size: 14px;
 $base-line-height: 1.4em;
 
