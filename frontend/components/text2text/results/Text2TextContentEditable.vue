@@ -12,15 +12,12 @@
       ></p>
       <span v-if="editionMode"><strong>shift Enter</strong> to save</span>
     </div>
-    <div
+    <base-button
       v-if="editionMode && annotationEnabled && editableText"
-      class="content__edit__buttons"
+      class="content__edit__button primary outline small"
+      @click="$emit('back')"
+      >Back</base-button
     >
-      <base-button class="primary small" @click="annotate">Save</base-button>
-      <base-button class="primary outline small" @click="$emit('back')"
-        >Back</base-button
-      >
-    </div>
   </span>
 </template>
 <script>
@@ -74,7 +71,7 @@ export default {
     },
     annotate() {
       if (this.defaultText && this.defaultText.trim()) {
-        this.$emit("annotate", this.defaultText);
+        this.$emit("annotate");
       }
     },
     keyUp(event) {
@@ -131,15 +128,8 @@ $marginRight: 200px;
     width: 100%;
   }
   &__edit {
-    &__buttons {
-      margin: 2.5em 200px 0 auto;
-      display: flex;
-      justify-content: flex-start;
-      .button {
-        &:last-child {
-          margin-left: $base-space;
-        }
-      }
+    &__button {
+      margin-top: 2.5em;
     }
   }
 }
