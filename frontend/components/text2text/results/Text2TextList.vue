@@ -17,13 +17,12 @@
 
 <template>
   <div
-    :class="[
-      'content',
-      'content--separator',
+    class="content content--separator"
+    :class="
       !annotationEnabled
         ? 'content--exploration-mode'
-        : 'content--annotation-mode',
-    ]"
+        : 'content--annotation-mode'
+    "
   >
     <div
       :class="[
@@ -352,7 +351,7 @@ export default {
     async onValidate() {
       let newS = {
         score: 1,
-        text: this.record.sentenceForAnnotation,
+        text: this.record.sentenceForAnnotation || null,
       };
       this.$emit("annotate", { sentences: [newS] });
       this.itemNumber = 0;
