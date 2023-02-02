@@ -141,7 +141,6 @@ class DatasetRecordsConsumer(threading.Thread):
                 records=batch_,
                 tags=self.tags,
                 metadata=self.metadata,
-                background=True,
                 verbose=False,
             )
 
