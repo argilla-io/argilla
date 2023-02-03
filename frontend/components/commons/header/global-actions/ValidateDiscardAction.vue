@@ -34,6 +34,14 @@
       :options="availableLabels"
       @selected="onSelectLabels($event)"
     />
+    <div class="bulk-annotation-wrapper">
+      <TextClassificationBulkAnnotationComponent
+        v-if="datasetTask === 'TextClassification'"
+        :datasetId="datasetId"
+        :records="selectedRecords"
+        :labels="availableLabels"
+      />
+    </div>
     <base-button
       :disabled="!allowValidation"
       class="primary outline small validate-discard-actions__button"
