@@ -75,3 +75,19 @@ def records_status(name: str, query: Optional[str] = None) -> MetricSummary:
             data=metric.results, title=metric.description
         ),
     )
+
+
+def keywords(name: str, query: Optional[str] = None) -> MetricSummary:
+    metric = api.active_api().compute_metric(
+        name,
+        metric="words_cloud",
+        query=query,
+    )
+
+    return MetricSummary.new_summary(
+        data=metric.results,
+        visualization=lambda: helpers.bar(
+            data=metric.results,
+            title=metric.description,
+        ),
+    )
