@@ -16,115 +16,97 @@
   -->
 
 <template>
-  <div>
+  <div
+    class="content content--separator"
+    :class="
+      !annotationEnabled
+        ? 'content--exploration-mode'
+        : 'content--annotation-mode'
+    "
+  >
     <div
       :class="[
-        'content',
-        'content--separator',
-        !annotationEnabled
-          ? 'content--exploration-mode'
-          : 'content--annotation-mode',
+        editionMode || !sentences.length
+          ? 'content--editable'
+          : 'content--non-editable',
+        showScore ? 'content--has-score' : null,
       ]"
     >
-      <div
-        :class="[
-          editionMode || !sentences.length
-            ? 'content--editable'
-            : 'content--non-editable',
-          showScore ? 'content--has-score' : null,
-        ]"
-      >
-        <div v-if="!sentences.length">
+      <text-2-text-content-editable
+        v-if="!sentences.length"
+        :key="refresh"
+        :annotation-enabled="annotationEnabled"
+        :edition-mode="true"
+        :default-text="visibleSentence || ''"
+        placeholder="Type your text"
+        @back="back"
+        @edit="edit"
+        @annotate="onValidate()"
+        @change-text="onTextChanged"
+      />
+
+      <span v-for="(sentence, index) in sentences" v-else :key="index">
+        <div v-if="itemNumber === index" class="content__sentences">
+          <div class="content__group">
+            <p v-if="!editionMode" class="content__sentences__title">
+              {{ sentencesOrigin
+              }}<span v-if="showScore" class="content__score"
+                >: {{ sentence.score | percent }}
+              </span>
+            </p>
+            <base-button
+              v-if="hasAnnotationAndPredictions && !editionMode"
+              class="primary light small content__group__view-annotations"
+              @click="changeVisibleSentences"
+              >{{
+                sentencesOrigin === "Annotation"
+                  ? annotationEnabled
+                    ? `View predictions (${predictionsLength})`
+                    : `Back to predictions (${predictionsLength})`
+                  : annotationEnabled
+                  ? "Back to annotation"
+                  : "View annotation"
+              }}</base-button
+            >
+          </div>
           <text-2-text-content-editable
             :key="refresh"
             :annotation-enabled="annotationEnabled"
-            :edition-mode="true"
-            :default-text="visibleSentence || ''"
-            placeholder="Type your text"
+            :edition-mode="editionMode"
+            :default-text="visibleSentence || sentence.text || ''"
+            :content-editable="annotationEnabled && editionMode"
             @back="back"
             @edit="edit"
-            @annotate="onAnnotate"
+            @annotate="onValidate()"
             @change-text="onTextChanged"
           />
-          <div class="content__footer">
-            <div class="content__actions-buttons">
-              <base-button
-                v-if="visibleSentence && annotationEnabled"
-                class="primary"
-                @click="onAnnotate(visibleSentence)"
-                >Validate</base-button
-              >
-            </div>
+          <div v-if="!editionMode" class="content__footer">
+            <template v-if="sentencesOrigin === 'Prediction'">
+              <div v-if="annotationEnabled" class="content__actions-buttons">
+                <base-button
+                  v-if="sentences.length"
+                  class="primary small outline"
+                  @click="edit"
+                  >Edit</base-button
+                >
+              </div>
+              <base-slider
+                v-if="sentences.length"
+                :slides-origin="sentences"
+                :item-number="itemNumber"
+                @go-to="showItemNumber"
+              />
+            </template>
           </div>
         </div>
-
-        <span v-for="(sentence, index) in sentences" v-else :key="index">
-          <div v-if="itemNumber === index" class="content__sentences">
-            <div class="content__group">
-              <p v-if="!editionMode" class="content__sentences__title">
-                {{ sentencesOrigin
-                }}<span v-if="showScore" class="content__score"
-                  >: {{ sentence.score | percent }}
-                </span>
-              </p>
-              <base-button
-                v-if="hasAnnotationAndPredictions && !editionMode"
-                class="primary light small content__group__view-annotations"
-                @click="changeVisibleSentences"
-                >{{
-                  sentencesOrigin === "Annotation"
-                    ? annotationEnabled
-                      ? `View predictions (${predictionsLength})`
-                      : `Back to predictions (${predictionsLength})`
-                    : annotationEnabled
-                    ? "Back to annotation"
-                    : "View annotation"
-                }}</base-button
-              >
-            </div>
-            <text-2-text-content-editable
-              :key="refresh"
-              :annotation-enabled="annotationEnabled"
-              :edition-mode="editionMode"
-              :default-text="visibleSentence || sentence.text || ''"
-              :content-editable="annotationEnabled && editionMode"
-              @back="back"
-              @edit="edit"
-              @annotate="onAnnotate"
-              @change-text="onTextChanged"
-            />
-            <div v-if="!editionMode" class="content__footer">
-              <template v-if="sentencesOrigin === 'Prediction'">
-                <div v-if="annotationEnabled" class="content__actions-buttons">
-                  <base-button
-                    v-if="allowValidation"
-                    class="primary small"
-                    @click="onAnnotate(visibleSentence)"
-                    >Validate</base-button
-                  >
-                  <base-button
-                    v-if="sentences.length"
-                    :class="[
-                      'edit',
-                      'primary',
-                      'small',
-                      { outline: allowValidation },
-                    ]"
-                    @click="edit"
-                    >Edit</base-button
-                  >
-                </div>
-                <base-slider
-                  v-if="sentences.length"
-                  :slides-origin="sentences"
-                  :item-number="itemNumber"
-                  @go-to="showItemNumber"
-                />
-              </template>
-            </div>
-          </div>
-        </span>
-      </div>
+      </span>
+      <record-action-buttons
+        v-if="annotationEnabled"
+        :actions="text2textClassifierActionButtons"
+        @validate="onValidate()"
+        @clear="onClearAnnotations()"
+        @discard="onDiscard()"
+      />
     </div>
   </div>
 </template>
@@ -252,11 +234,26 @@ export default {
     allowValidation() {
       return (
         this.sentencesOrigin === "Prediction" ||
-        this.record.status === "Discarded"
+        (this.record.status !== "Validated" &&
+          !!this.record?.sentenceForAnnotation)
       );
     },
     selected() {
       return this.record.selected;
+    },
+    text2textClassifierActionButtons() {
+      return [
+        {
+          id: "validate",
+          name: "Validate",
+          active: this.allowValidation,
+        },
+        {
+          id: "discard",
+          name: "Discard",
+          active: this.record.status !== "Discarded",
+        },
+      ];
     },
   },
   watch: {
@@ -328,6 +325,7 @@ export default {
       this.$emit("reset-initial-record");
     },
     async changeVisibleSentences() {
+      this.refresh++;
       this.sentencesOrigin !== "Annotation"
         ? (this.sentencesOrigin = "Annotation")
         : (this.sentencesOrigin = "Prediction");
@@ -350,15 +348,18 @@ export default {
         }
       }
     },
-    async onAnnotate(sentence) {
+    async onValidate() {
       let newS = {
         score: 1,
-        text: sentence,
+        text: this.record.sentenceForAnnotation || null,
       };
       this.$emit("annotate", { sentences: [newS] });
       this.itemNumber = 0;
       this.editionMode = false;
       this.sentencesOrigin = "Annotation";
+    },
+    onDiscard() {
+      this.$emit("discard");
     },
     getText2TextDataset() {
       return getText2TextDatasetById(this.datasetId);
@@ -392,9 +393,6 @@ export default {
       margin: 0;
       outline: none;
     }
-    :deep(.button) {
-      opacity: 1 !important;
-    }
   }
   &--non-editable {
     width: 100%;
@@ -409,7 +407,6 @@ export default {
     }
   }
   &__sentences {
-    height: 100%;
     display: flex;
     flex-direction: column;
     min-height: 140px;
@@ -438,21 +435,6 @@ export default {
     margin-bottom: 0.5em;
     &__view-annotations {
       margin: auto 0 auto auto;
-    }
-  }
-  &__actions-buttons {
-    margin-right: auto;
-    margin-left: 0;
-    display: flex;
-    .edit {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .button {
-      margin-left: auto;
-      & + .button {
-        margin-left: $base-space;
-      }
     }
   }
 }
