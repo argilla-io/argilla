@@ -36,14 +36,13 @@
         :paginationSize="paginationSize"
         :record="record"
       />
-      <div v-if="interactionsEnabled" class="content__actions-buttons">
-        <base-button
-          v-if="allowValidate"
-          class="primary"
-          @click="validateLabels()"
-          >Validate</base-button
-        >
-      </div>
+      <record-action-buttons
+        v-if="interactionsEnabled"
+        :actions="textClassifierActionButtons"
+        @validate="validateLabels()"
+        @clear="onClearAnnotations()"
+        @discard="onDiscard()"
+      />
     </div>
 
     <div v-if="!annotationEnabled" class="record__labels">
@@ -115,6 +114,25 @@ export default {
     paginationSize() {
       return this.viewSettings?.pagination?.size;
     },
+    textClassifierActionButtons() {
+      return [
+        {
+          id: "validate",
+          name: "Validate",
+          active: this.allowValidate || false,
+        },
+        {
+          id: "discard",
+          name: "Discard",
+          active: this.record.status !== "Discarded",
+        },
+        {
+          id: "clear",
+          name: "Clear",
+          active: this.record.currentAnnotation?.labels?.length || false,
+        },
+      ];
+    },
   },
   methods: {
     ...mapActions({
@@ -169,6 +187,24 @@ export default {
         ],
       });
     },
+    onClearAnnotations() {
+      this.updateRecords({
+        dataset: this.getTextClassificationDataset(),
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            currentAnnotation: {
+              labels: [],
+            },
+          },
+        ],
+      });
+    },
+    onDiscard() {
+      this.$emit("discard");
+    },
     getTextClassificationDataset() {
       return getTextClassificationDatasetById(this.datasetId);
     },
@@ -202,20 +238,6 @@ export default {
     text-align: right;
     padding: 1em 1.4em 1em 1em;
     @extend %hide-scrollbar;
-  }
-}
-.content {
-  &__actions-buttons {
-    margin-right: 0;
-    margin-left: auto;
-    display: flex;
-    min-width: 20%;
-    .button {
-      margin: 1.5em auto 0 0;
-      & + .button {
-        margin-left: $base-space * 2;
-      }
-    }
   }
 }
 </style>

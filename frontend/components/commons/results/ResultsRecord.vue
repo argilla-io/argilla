@@ -62,12 +62,9 @@
         </template>
         <record-extra-actions
           :key="record.id"
-          :allow-change-status="annotationEnabled && !isReferenceRecord"
           :datasetName="dataset.name"
           :recordId="record.id"
           :recordClipboardText="record.clipboardText"
-          @on-change-record-status="onChangeRecordStatus"
-          @show-record-info-modal="onShowRecordInfoModal()"
         />
       </div>
       <RecordTextClassification
@@ -79,6 +76,7 @@
         :datasetLabels="dataset.labels"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
+        @discard="onDiscard()"
       />
       <RecordText2Text
         v-if="datasetTask === 'Text2Text'"
@@ -87,6 +85,7 @@
         :datasetName="dataset.name"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
+        @discard="onDiscard()"
       />
       <RecordTokenClassification
         v-if="datasetTask === 'TokenClassification'"
@@ -98,6 +97,7 @@
         :viewSettings="viewSettings"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
+        @discard="onDiscard()"
       />
     </div>
   </div>
@@ -169,7 +169,6 @@ export default {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
       discard: "entities/datasets/discardAnnotations",
-      validate: "entities/datasets/validateAnnotations",
     }),
     async onCheckboxChanged(checkboxStatus, id) {
       const record = this.visibleRecords.find((r) => r.id === id);
@@ -179,23 +178,11 @@ export default {
         // TODO: update annotation status if proceed
       });
     },
-    async onChangeRecordStatus(status) {
-      switch (status) {
-        case "Validated":
-          await this.validate({
-            dataset: this.dataset,
-            records: [this.record],
-          });
-          break;
-        case "Discarded":
-          await this.discard({
-            dataset: this.dataset,
-            records: [this.record],
-          });
-          break;
-        default:
-          console.warn(`The status ${status} is unknown`);
-      }
+    async onDiscard() {
+      await this.discard({
+        dataset: this.dataset,
+        records: [this.record],
+      });
     },
     onShowRecordInfoModal() {
       this.$emit("show-record-info-modal", this.record);

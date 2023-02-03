@@ -46,21 +46,13 @@
           :entities="getEntitiesByOrigin('annotation')"
         />
       </div>
-      <div
-        class="content__actions-buttons"
-        v-if="interactionsEnabled && record.status !== 'Validated'"
-      >
-        <base-button class="primary" @click="onValidate(record)">
-          {{ record.status === "Edited" ? "Save" : "Validate" }}
-        </base-button>
-        <base-button
-          :disabled="!record.annotatedEntities.length"
-          class="primary outline"
-          @click="onClearAnnotations()"
-        >
-          Clear annotations
-        </base-button>
-      </div>
+      <record-action-buttons
+        v-if="interactionsEnabled"
+        :actions="tokenClassifierActionButtons"
+        @validate="onValidate(record)"
+        @clear="onClearAnnotations()"
+        @discard="onDiscard()"
+      />
     </div>
   </div>
 </template>
@@ -152,10 +144,30 @@ export default {
       );
       return visualTokens;
     },
+    tokenClassifierActionButtons() {
+      return [
+        {
+          id: "validate",
+          name: "Validate",
+          active: this.record.status !== "Validated",
+        },
+        {
+          id: "discard",
+          name: "Discard",
+          active: this.record.status !== "Discarded",
+        },
+        {
+          id: "clear",
+          name: "Clear",
+          active: this.record.annotatedEntities?.length || false,
+        },
+      ];
+    },
   },
   methods: {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
+      discard: "entities/datasets/discardAnnotations",
       updateRecords: "entities/datasets/updateDatasetRecords",
     }),
     getEntitiesByOrigin(origin) {
@@ -202,6 +214,9 @@ export default {
         ],
       });
     },
+    onDiscard() {
+      this.$emit("discard");
+    },
     getTokenClassificationDataset() {
       return getTokenClassificationDatasetById(this.datasetId);
     },
@@ -223,18 +238,6 @@ export default {
   white-space: pre-line;
   &__input {
     padding-right: 200px;
-  }
-  &__actions-buttons {
-    margin-right: 0;
-    margin-left: auto;
-    display: flex;
-    min-width: 20%;
-    .button {
-      margin: 1.5em 0 0 0;
-      & + .button {
-        margin-left: $base-space;
-      }
-    }
   }
 }
 
