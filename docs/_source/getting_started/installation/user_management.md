@@ -110,7 +110,7 @@ To configure your Argilla instance for various users, you just need to create a 
   workspaces: ['client_projects'] # access to her user workspace and the client_projects workspace
 - username: user3
   hashed_password: <generated-hashed-password> # See the previous section above
-  api_key: "ThisIsTheUser2APIKEY" # this user can access all workspaces (including
+  api_key: "ThisIsTheUser2APIKEY" # this user can access all workspaces
 - ...
 ```
 
