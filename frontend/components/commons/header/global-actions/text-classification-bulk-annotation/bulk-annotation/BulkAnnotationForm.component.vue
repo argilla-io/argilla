@@ -26,20 +26,24 @@
       </div>
     </div>
     <div class="buttons-area">
-      <div class="toggle-reset-annottation">Ici toggle reset annotation</div>
       <div class="buttons-cancel-apply">
-        <BaseButton type="reset" class="primary outline small" :disabled="false"
-          >Cancel</BaseButton
+        <BaseButton
+          type="reset"
+          class="primary outline small"
+          :disabled="hasAnnotationsChanged"
         >
-        <BaseButton type="submit" class="primary small" :disabled="false"
-          >Apply</BaseButton
-        >
+          Cancel
+        </BaseButton>
+        <BaseButton type="submit" class="primary small" :disabled="hasAnnotationsChanged">
+          Apply
+        </BaseButton>
       </div>
     </div>
   </form>
 </template>
 
 <script>
+import _ from "lodash";
 export default {
   name: "BulkAnnotationForm",
   props: {
@@ -52,6 +56,11 @@ export default {
     return {
       clonedInputs: [],
     };
+  },
+  computed: {
+    hasAnnotationsChanged() {
+      return _.isEqual(this.inputs, this.clonedInputs);
+    },
   },
   mounted() {
     this.resetCloneInputs();
@@ -74,6 +83,7 @@ export default {
 form {
   display: flex;
   flex-direction: column;
+  gap: 1em;
 }
 .form-group {
   flex: 1;
@@ -103,13 +113,10 @@ form {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
-  margin: 1em;
-  .toggle-reset-annottation {
-    background: crimson;
-  }
+  margin-top: 1em;
   .buttons-cancel-apply {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
   }
 }
 </style>
