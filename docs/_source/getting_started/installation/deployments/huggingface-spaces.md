@@ -27,8 +27,12 @@ You'll see the `Building` status and once it becomes `Running` your space is rea
 For quick experimentation, you can jump directly into the next section. If you want to add access restrictions, go to the "Setting up secret environment variables" at the end of this document. Setting up secret variables is recommended for longer-term usage.
 
 
-.. note::
+```{admonition} Tip
+:class: important
+
     If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file.
+
+```
 
 ### Create your first dataset
 
@@ -39,8 +43,12 @@ Once Argilla is running, you can use the UI with the Direct URL you'll find in t
 </div>
 
 
-.. note::
+```{admonition} Tip
+:class: important
+
     You'll see the login screen where you need to use either argilla or team with the default passwords (1234). Remember you can change the passwords using secret variables. If you get a 500 error when introducing the credentials, make sure you have correctly introduce the password.
+
+```
 
 
 If everything went well, you are ready to use the Argilla Python client from an IDE such as Colab, Jupyter, or VS Code.
