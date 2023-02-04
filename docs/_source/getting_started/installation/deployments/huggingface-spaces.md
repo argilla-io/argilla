@@ -30,7 +30,7 @@ For quick experimentation, you can jump directly into the next section. If you w
 ```{admonition} Tip
 :class: important
 
-    If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file.
+If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file.
 
 ```
 
@@ -46,7 +46,7 @@ Once Argilla is running, you can use the UI with the Direct URL you'll find in t
 ```{admonition} Tip
 :class: important
 
-    You'll see the login screen where you need to use either argilla or team with the default passwords (1234). Remember you can change the passwords using secret variables. If you get a 500 error when introducing the credentials, make sure you have correctly introduce the password.
+You'll see the login screen where you need to use either argilla or team with the default passwords (1234). Remember you can change the passwords using secret variables. If you get a 500 error when introducing the credentials, make sure you have correctly introduce the password.
 
 ```
 
