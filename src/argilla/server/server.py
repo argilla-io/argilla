@@ -34,6 +34,7 @@ from pydantic import ConfigError
 
 from argilla import __version__ as argilla_version
 from argilla.logging import configure_logging
+from argilla.server import helpers
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.datasets import DatasetsDAO
@@ -96,15 +97,17 @@ def configure_app_statics(app: FastAPI):
         BASE_URL_VAR_NAME = "@@baseUrl@@"
         temp_dir = tempfile.mkdtemp()
         new_folder = shutil.copytree(path_from, temp_dir + "/statics")
+        base_url = helpers.remove_suffix(settings.base_url, suffix="/")
         for extension in ["*.js", "*.html"]:
             for file in glob.glob(
                 f"{new_folder}/**/{extension}",
                 recursive=True,
             ):
-                with fileinput.FileInput(file, inplace=True, backup=".bak") as file:
-                    for line in file:
-                        base_url = settings.base_url.removesuffix("/")
-                        print(line.replace(BASE_URL_VAR_NAME, base_url), end="")
+                helpers.replace_string_in_file(
+                    file,
+                    string=BASE_URL_VAR_NAME,
+                    replace_by=base_url,
+                )
 
         return new_folder
 

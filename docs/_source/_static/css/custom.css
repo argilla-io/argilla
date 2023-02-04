@@ -599,6 +599,10 @@ a.back-to-top.muted-link {
   .sidebar-search-container {
     display: none;
   }
+
+  .open-in-colab__wrapper {
+    display: none;
+  }
 }
 
 @media (min-width: 67em) {
@@ -616,6 +620,20 @@ a.back-to-top.muted-link {
   .social--sidebar>* {
     margin: 3px 4px;
     vertical-align: middle;
+  }
+
+  .open-in-colab__wrapper {
+    display: inline-flex;
+    width: calc(100% - 40px);
+    gap: 2px;
+    justify-content: right;
+    margin-top: 1.4em;
+  }
+}
+
+@media (max-width: 82em) {
+  .open-in-colab__wrapper {
+    width: calc(100% - 70px);
   }
 }
 
