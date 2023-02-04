@@ -9,7 +9,7 @@
             :id="input.id"
             class="d-none"
           />
-          <label :for="input.id">
+          <label :for="input.id" class="label-icon">
             <svgicon
               name="close"
               v-if="input.selected"
@@ -34,7 +34,11 @@
         >
           Cancel
         </BaseButton>
-        <BaseButton type="submit" class="primary small" :disabled="hasAnnotationsChanged">
+        <BaseButton
+          type="submit"
+          class="primary small"
+          :disabled="hasAnnotationsChanged"
+        >
           Apply
         </BaseButton>
       </div>
@@ -91,6 +95,7 @@ form {
   flex-direction: column;
   gap: 1em;
   max-height: 220px;
+  margin-top: 1em;
   overflow: auto;
 }
 
@@ -105,15 +110,20 @@ form {
   display: none;
 }
 
+.label-icon {
+  cursor: pointer;
+}
+
 .label-text {
+  flex: 1;
   word-break: break-word;
+  cursor: pointer;
 }
 
 .buttons-area {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
-  margin-top: 1em;
   .buttons-cancel-apply {
     display: flex;
     justify-content: space-evenly;
