@@ -9,9 +9,16 @@
     </template>
     <template #dropdown-content>
       <div class="dropdown-content">
+        <SelectOptionsSearch
+          allow-clear
+          @clear="resetSearchText"
+          v-model="searchText"
+          placeholder="Search label..."
+        />
         <div class="form" v-if="isInputsNotEmpty && showDropdown">
           <BulkAnnotationFormComponent
             :inputs="filteredInputs"
+            :key="searchText"
             @on-submit="updateAnnotations"
           />
         </div>
@@ -58,11 +65,10 @@ export default {
       this.showDropdown = trueOrFalse;
     },
     isStringOfCharsContainsSubstring(stringOfChars, substring) {
-      return stringOfChars
-        .toUpperCase()
-        .includes(substring?.toUpperCase() || stringOfChars);
+      return stringOfChars.toUpperCase().includes(substring?.toUpperCase());
     },
     updateAnnotations($event) {
+      this.toggleDropdown(false);
       this.$emit("on-update-annotations", $event);
     },
     resetSearchText() {
