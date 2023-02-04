@@ -1,6 +1,7 @@
 <template>
   <div>
     <BulkAnnotationComponent
+      class="bulk-annotation-component"
       :inputs="formattedLabelsForBulkAnnotationForm"
       @on-update-annotations="updateAnnotations"
     />
