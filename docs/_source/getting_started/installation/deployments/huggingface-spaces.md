@@ -1,4 +1,4 @@
-# Argilla on Spaces
+# Hugging Face Hub Spaces
 
 Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers`, `hub`, and `setfit`), and now it can also be deployed using the Hub's Spaces.
 
@@ -10,11 +10,9 @@ In this section, you'll learn to deploy an Argilla Space and use it for data ann
 
 ### Duplicate the Argilla Space Template and create your Space
 
-<div>
-    <a  href="https://huggingface.co/spaces/argilla/argilla-template-space">
+<a  href="https://huggingface.co/spaces/argilla/argilla-template-space">
     <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-md.svg" />
-    </a>
-</div>
+</a>
 
 
 The easiest way to get started is by [duplicating the Argilla Docker Template](https://huggingface.co/spaces/argilla/argilla-template-space?duplicate=true). You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to setup the visibility to `Public`. Once you are all set, click "Duplicate Space".
@@ -26,6 +24,7 @@ The easiest way to get started is by [duplicating the Argilla Docker Template](h
 Once you have duplicated the space, you'll see the `Building` status and once it becomes `Running` your space is ready to go. If you don't see the Argilla login UI refresh the page.
 
 For quick experimentation, you can jump directly into the next section. If you want to add access restrictions, go to the "Setting up secret environment variables" at the end of this document. Setting up secret variables is recommended for longer-term usage.
+
 
 .. note::
     If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file.
