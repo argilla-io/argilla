@@ -28,7 +28,7 @@
       class="list__item__checkbox"
     />
     <annotation-label-selector
-      v-if="datasetTask === 'TextClassification'"
+      v-if="datasetTask === 'TextClassification' && !isMultiLabel"
       :class="'validate-discard-actions__select'"
       :multi-label="isMultiLabel"
       :options="availableLabels"
@@ -36,10 +36,11 @@
     />
     <div class="bulk-annotation-wrapper">
       <TextClassificationBulkAnnotationComponent
-        v-if="datasetTask === 'TextClassification'"
+        v-if="datasetTask === 'TextClassification' && isMultiLabel"
         :datasetId="datasetId"
         :records="selectedRecords"
         :labels="availableLabels"
+        @on-update-annotations="onUpdateAnnotations"
       />
     </div>
     <base-button
@@ -140,7 +141,22 @@ export default {
     },
     onSelectLabels(labels) {
       const { selectedRecords } = this;
+      console.log({ labels, selectedRecords });
       this.$emit("on-select-labels", { labels, selectedRecords });
+    },
+    onUpdateAnnotations(updatedAnnotations) {
+      const { selectedRecords } = this;
+      const labels = this.labelsfromAnnotationsFactory(updatedAnnotations);
+      this.$emit("on-select-labels", { labels, selectedRecords });
+    },
+    labelsfromAnnotationsFactory(annotations) {
+      return annotations.reduce(
+        (accumulator, currentLabelObj) =>
+          currentLabelObj.selected
+            ? [...accumulator, currentLabelObj.label]
+            : [...accumulator],
+        []
+      );
     },
   },
 };

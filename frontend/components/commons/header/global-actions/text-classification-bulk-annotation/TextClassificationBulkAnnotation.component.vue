@@ -69,8 +69,8 @@ export default {
       //        => all the records contains the same label
       return numberOfRecordsWithThisLabel === this.records.length;
     },
-    updateAnnotations() {
-      //TODO - call api with the annotations from event
+    updateAnnotations(updatedAnnotations) {
+      this.$emit("on-update-annotations", updatedAnnotations);
     },
   },
 };
