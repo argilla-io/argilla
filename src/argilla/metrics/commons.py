@@ -77,11 +77,36 @@ def records_status(name: str, query: Optional[str] = None) -> MetricSummary:
     )
 
 
-def keywords(name: str, query: Optional[str] = None) -> MetricSummary:
+def keywords(
+    name: str,
+    query: Optional[str] = None,
+    size: int = 20,
+) -> MetricSummary:
+    """Computes the keywords occurrence distribution in dataset
+
+    Args:
+        name:
+            The dataset name.
+        query:
+            An ElasticSearch query with the [query string syntax](
+            https://argilla.readthedocs.io/en/stable/guides/queries.html)
+        size:
+            The number of kewords to retrieve. Default to `20`
+
+    Returns:
+        The dataset keywords occurrence distribution
+
+    Examples:
+        >>> from argilla.metrics.commons import keywords
+        >>> summary = keywords(name="example-dataset")
+        >>> summary.visualize() # will plot an histogram with results
+        >>> summary.data # returns the raw result data
+    """
     metric = api.active_api().compute_metric(
         name,
         metric="words_cloud",
         query=query,
+        size=size,
     )
 
     return MetricSummary.new_summary(
