@@ -10,10 +10,10 @@ In this section, you'll learn to deploy an Argilla Space and use it for data ann
 
 ### Deploy Argilla on Spaces
 
-You can deploy Argilla on Spaces with just a few clicks with the button below:
+You can deploy Argilla on Spaces with just a few clicks with this button:
 
 <a  href="https://huggingface.co/spaces/argilla/argilla-template-space">
-    <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
+    <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-md.svg" />
 </a>
 
 You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to setup the visibility to `Public`.
