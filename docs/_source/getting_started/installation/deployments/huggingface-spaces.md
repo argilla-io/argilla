@@ -8,20 +8,21 @@ In this guide, you'll learn to deploy your own Argilla app and use it for data l
 
 In this section, you'll learn to deploy an Argilla Space and use it for data annotation and training a sentiment classifier with [SetFit](https://github.com/huggingface/setfit/), an amazing few-shot learning library.
 
-### Duplicate the Argilla Space Template and create your Space
+### Deploy Argilla on Spaces
+
+You can deploy Argilla on Spaces with just a few clicks with the button below:
 
 <a  href="https://huggingface.co/spaces/argilla/argilla-template-space">
-    <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-md.svg" />
+    <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
 </a>
 
-
-The easiest way to get started is by [duplicating the Argilla Docker Template](https://huggingface.co/spaces/argilla/argilla-template-space?duplicate=true). You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to setup the visibility to `Public`. Once you are all set, click "Duplicate Space".
+You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to setup the visibility to `Public`.
 
 <div class="flex justify-center">
 <img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-duplicate-space.png"/>
 </div>
 
-Once you have duplicated the space, you'll see the `Building` status and once it becomes `Running` your space is ready to go. If you don't see the Argilla login UI refresh the page.
+You'll see the `Building` status and once it becomes `Running` your space is ready to go. If you don't see the Argilla login UI refresh the page.
 
 For quick experimentation, you can jump directly into the next section. If you want to add access restrictions, go to the "Setting up secret environment variables" at the end of this document. Setting up secret variables is recommended for longer-term usage.
 
