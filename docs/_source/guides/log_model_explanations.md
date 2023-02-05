@@ -13,7 +13,26 @@ Argilla enables you to register token attributions as part of the dataset record
 * **[-1, 0] Negative attributions (in red)** reflect those tokens that can influence the model to predict a label other than the specific predicted label.
 
 ```python
-from argilla import TokenAttributions
+import argilla as rg
+from argilla import TokenAttributions, TextClassificationRecord
+
+token_attributions = [
+    TokenAttributions(
+        token="good", attributions={"label": 1}
+    ),
+    TokenAttributions(
+        token="and", attributions={"label": 0}
+    ),
+    TokenAttributions(
+        token="bad", attributions={"label": -1}
+    )
+]
+
+record = rg.TextClassificationRecord(
+    text="good and bad",
+    prediction=[("label", 0)],
+    explanation={"text": token_attributions},
+)
 ```
 
 ## Certainty filters

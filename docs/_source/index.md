@@ -18,7 +18,6 @@
    :caption: Guides
    :hidden:
 
-   guides/guides
    guides/how_to
    guides/log_load_and_prepare_data
    guides/query_datasets
