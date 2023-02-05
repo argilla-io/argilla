@@ -15,15 +15,21 @@
 
 .. toctree::
    :maxdepth: 3
-   :caption: Deep Dives
+   :caption: Guides
    :hidden:
 
-   guides/guides
-   guides/features/features.md
-   guides/steps/steps.md
-   guides/tasks/tasks.md
-   guides/libraries/libraries.md
-   guides/techniques/techniques.md
+   guides/how_to
+   guides/log_load_and_prepare_data
+   guides/query_datasets
+   guides/measure_datasets_with_metrics
+   guides/log_model_explanations
+   guides/schedule_jobs_with_listeners
+   guides/use_active_learning
+   guides/programmatic_labeling_with_rules
+   guides/preannotate_with_fewshot_learning
+   guides/label_records_with_semanticsearch
+
+
 
 .. toctree::
    :maxdepth: 4
