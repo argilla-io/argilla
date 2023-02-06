@@ -47,7 +47,11 @@ from argilla.client.models import (
 )
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import async_bulk
-from argilla.client.sdk.commons.errors import InputValueError
+from argilla.client.sdk.commons.errors import (
+    AlreadyExistsApiError,
+    InputValueError,
+    NotFoundApiError,
+)
 from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from argilla.client.sdk.metrics import api as metrics_api
@@ -584,20 +588,48 @@ class Argilla:
     def add_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
         """Adds the dataset labeling rules"""
         for rule in rules:
-            text_classification_api.add_dataset_labeling_rule(
-                self._client,
-                name=dataset,
-                rule=rule,
-            )
+            try:
+                text_classification_api.add_dataset_labeling_rule(
+                    self._client,
+                    name=dataset,
+                    rule=rule,
+                )
+            except AlreadyExistsApiError:
+                _LOGGER.warning(
+                    f"Rule {rule} already exists. Please, update the rule instead."
+                )
+            except Exception as ex:
+                _LOGGER.warning(f"Cannot create rule {rule}: {ex}")
 
-    def update_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
+    def update_dataset_labeling_rules(
+        self,
+        dataset: str,
+        rules: List[LabelingRule],
+    ):
         """Updates the dataset labeling rules"""
         for rule in rules:
-            text_classification_api.update_dataset_labeling_rule(
-                self._client, name=dataset, rule=rule
-            )
+            try:
+                text_classification_api.update_dataset_labeling_rule(
+                    self._client,
+                    name=dataset,
+                    rule=rule,
+                )
+            except NotFoundApiError:
+                _LOGGER.info(f"Rule {rule} does not exists, creating...")
+                text_classification_api.add_dataset_labeling_rule(
+                    self._client, name=dataset, rule=rule
+                )
+            except Exception as ex:
+                _LOGGER.warning(f"Cannot update rule {rule}: {ex}")
 
     def delete_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
+        for rule in rules:
+                try:
+                    text_classification_api.delete_dataset_labeling_rule(
+                        self._client, name=dataset, rule=rule
+                    )
+                except Exception as ex:
+                    _LOGGER.warning(f"Cannot delete rule {rule}: {ex}")
         """Deletes the dataset labeling rules"""
         for rule in rules:
             text_classification_api.delete_dataset_labeling_rule(
