@@ -45,7 +45,7 @@
             target="_blank"
             >this guide</a
           >
-          to know more about usage and configuration options
+          to know more about usage and configuration options.
         </p>
         <base-button type="submit" class="form__button primary"
           >Enter</base-button
@@ -69,10 +69,6 @@
 </template>
 
 <script>
-// let deploymentConfig = null;
-// try {
-//   deploymentConfig = require("~/static/deployment.json");
-// } catch (e) {}
 export default {
   layout: "app",
   data() {
@@ -92,7 +88,9 @@ export default {
         .then(({ deployment }) => {
           this.deployment = deployment;
         });
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
     if (this.$auth.loggedIn) {
       return;
     }
