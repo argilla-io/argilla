@@ -88,7 +88,9 @@ export default {
         .then(({ deployment }) => {
           this.deployment = deployment;
         });
-    } catch (e) {}
+    } catch (e) {
+      this.deployment = null;
+    }
     if (this.$auth.loggedIn) {
       return;
     }
