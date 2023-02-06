@@ -161,6 +161,7 @@ class TestWeakLabelsBase:
         )
 
         wl = WeakLabelsBase(log_dataset)
+
         assert wl.rules is mock_rules
 
     def test_norulesfounderror(self, monkeypatch):
@@ -200,7 +201,10 @@ class TestWeakLabelsBase:
             WeakLabels(rules=[lambda x: None], dataset="mock", ids=[-1])
         with pytest.raises(
             NoRecordsFoundError,
-            match=r"No records found in dataset 'mock' with query 'mock' and with ids \[-1\].",
+            match=(
+                r"No records found in dataset 'mock' with query 'mock' and with ids"
+                r" \[-1\]."
+            ),
         ):
             WeakLabels(rules=[lambda x: None], dataset="mock", query="mock", ids=[-1])
 
@@ -232,7 +236,9 @@ class TestWeakLabelsBase:
 
     def test_not_implemented_errors(self, monkeypatch):
         def mock_load(*args, **kwargs):
-            return ["mock"]
+            return [
+                TextClassificationRecord(text="test with annot", annotation="positive"),
+            ]
 
         monkeypatch.setattr(
             "argilla.labeling.text_classification.weak_labels.load", mock_load
@@ -257,7 +263,9 @@ class TestWeakLabelsBase:
 
     def test_faiss_not_installed(self, monkeypatch):
         def mock_load(*args, **kwargs):
-            return ["mock"]
+            return [
+                TextClassificationRecord(text="test with annot", annotation="positive"),
+            ]
 
         monkeypatch.setattr(
             "argilla.labeling.text_classification.weak_labels.load", mock_load
@@ -271,7 +279,11 @@ class TestWeakLabelsBase:
 class TestWeakLabels:
     def test_multi_label_error(self, monkeypatch):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(text="test", multi_label=True)]
+            return [
+                TextClassificationRecord(
+                    text="test", multi_label=True, annotation=["mock"]
+                )
+            ]
 
         monkeypatch.setattr(
             "argilla.labeling.text_classification.weak_labels.load", mock_load
@@ -384,7 +396,7 @@ class TestWeakLabels:
 
     def test_summary(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(text="test")] * 4
+            return [TextClassificationRecord(text="test", annotation="mock")] * 4
 
         monkeypatch.setattr(
             "argilla.labeling.text_classification.weak_labels.load", mock_load
@@ -464,7 +476,10 @@ class TestWeakLabels:
 
     def test_show_records(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(text="test", id=i) for i in range(5)]
+            return [
+                TextClassificationRecord(text="test", id=i, annotation="mock")
+                for i in range(5)
+            ]
 
         monkeypatch.setattr(
             "argilla.labeling.text_classification.weak_labels.load", mock_load
@@ -502,7 +517,10 @@ class TestWeakLabels:
 
     def test_change_mapping(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(text="test", id=i) for i in range(5)]
+            return [
+                TextClassificationRecord(text="test", id=i, annotation="mock")
+                for i in range(5)
+            ]
 
         monkeypatch.setattr(
             "argilla.labeling.text_classification.weak_labels.load", mock_load
@@ -558,7 +576,10 @@ class TestWeakLabels:
     @pytest.fixture
     def weak_labels(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(text="test", id=i) for i in range(3)]
+            return [
+                TextClassificationRecord(text="test", id=i, annotation="mock")
+                for i in range(3)
+            ]
 
         monkeypatch.setattr(
             "argilla.labeling.text_classification.weak_labels.load", mock_load
@@ -605,9 +626,10 @@ class TestWeakMultiLabels:
         log_multilabel_dataset,
         multilabel_rules,
     ):
-        weak_labels = WeakMultiLabels(
-            rules=multilabel_rules, dataset=log_multilabel_dataset
-        )
+        with pytest.raises(AssertionError, "Dataset has no annotations."):
+            weak_labels = WeakMultiLabels(
+                rules=multilabel_rules, dataset=log_multilabel_dataset
+            )
 
         assert weak_labels.labels == ["negative", "positive"]
 
@@ -674,7 +696,11 @@ class TestWeakMultiLabels:
 
     def test_summary(self, monkeypatch, multilabel_rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(text="test", multi_label=True)] * 4
+            return [
+                TextClassificationRecord(
+                    text="test", multi_label=True, annotation=["mock"]
+                )
+            ] * 4
 
         monkeypatch.setattr(
             "argilla.labeling.text_classification.weak_labels.load", mock_load
@@ -761,7 +787,7 @@ class TestWeakMultiLabels:
 
     def test_compute_correct_incorrect(self, monkeypatch):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(text="mock")]
+            return [TextClassificationRecord(text="mock", annotation="mock")]
 
         monkeypatch.setattr(
             "argilla.labeling.text_classification.weak_labels.load", mock_load
@@ -784,7 +810,9 @@ class TestWeakMultiLabels:
     def test_show_records(self, monkeypatch, multilabel_rules):
         def mock_load(*args, **kwargs):
             return [
-                TextClassificationRecord(text="test", id=i, multi_label=True)
+                TextClassificationRecord(
+                    text="test", id=i, multi_label=True, annotation=["mock"]
+                )
                 for i in range(5)
             ]
 
@@ -832,7 +860,9 @@ class TestWeakMultiLabels:
     def weak_multi_labels(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
             return [
-                TextClassificationRecord(text="test", id=i, multi_label=True)
+                TextClassificationRecord(
+                    text="test", id=i, multi_label=True, annotation=["mock"]
+                )
                 for i in range(3)
             ]
 
