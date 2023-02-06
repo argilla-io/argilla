@@ -39,14 +39,14 @@ describe("RecordActionButtonsComponent", () => {
   it("render the component", () => {
     expect(wrapper.is(RecordActionButtons)).toBe(true);
   });
-  it("expect to show validate button active", async () => {
-    testIfButtonIsDisabled("validate", undefined);
+  it("expect to render validate button", async () => {
+    testIfButtonRender("validate", true);
   });
-  it("expect to show discard button active", async () => {
-    testIfButtonIsDisabled("discard", undefined);
+  it("expect to render discard button", async () => {
+    testIfButtonRender("discard", true);
   });
-  it("expect to show clear button disabled", async () => {
-    testIfButtonIsDisabled("clear", "disabled");
+  it("expect to not render clear button", async () => {
+    testIfButtonRender("clear", false);
   });
   it("expect to emit validate on click validate button", async () => {
     testIfEmittedIsCorrect("validate");
@@ -54,14 +54,11 @@ describe("RecordActionButtonsComponent", () => {
   it("expect to emit discard on click discard button", async () => {
     testIfEmittedIsCorrect("discard");
   });
-  it("expect to emit clear on click clear button", async () => {
-    testIfEmittedIsCorrect("clear");
-  });
 });
 
-const testIfButtonIsDisabled = async (button, disabled) => {
+const testIfButtonRender = async (button, render) => {
   const actionButton = wrapper.find(`.record__actions-button--${button}`);
-  expect(actionButton.attributes().disabled).toBe(disabled);
+  expect(actionButton.exists()).toBe(render);
 };
 const testIfEmittedIsCorrect = async (button) => {
   wrapper.find(`.record__actions-button--${button}`).vm.$emit("click");

@@ -1,15 +1,15 @@
 <template>
   <div class="record__actions-buttons">
-    <base-button
-      v-for="{ id, name, active } in actions"
-      :key="id"
-      :class="`record__actions-button--${id}`"
-      :disabled="!active"
-      @click="onAction(id)"
+    <span v-for="{ id, name, active } in activeActions" :key="id">
+      <base-button
+        :class="[`record__actions-button--${id}`]"
+        @click="onAction(id)"
+        :disabled="!active"
+      >
+        <svgicon :name="id" width="22" height="22" />
+        {{ name }}
+      </base-button></span
     >
-      <svgicon :name="id" width="22" height="22" />
-      {{ name }}
-    </base-button>
   </div>
 </template>
 
@@ -27,6 +27,11 @@ export default {
           ["validate", "discard", "clear"].includes(action.id)
         );
       },
+    },
+  },
+  computed: {
+    activeActions() {
+      return this.actions.filter((action) => action.active);
     },
   },
   methods: {
@@ -47,6 +52,7 @@ $recordActions: (
   &__actions-buttons {
     display: flex;
     gap: $base-space * 4;
+    align-items: center;
     margin-top: 1.5em;
   }
   @each $action, $color in $recordActions {
@@ -56,14 +62,17 @@ $recordActions: (
       @include font-size(14px);
       &:hover {
         color: darken($color, 10%);
+        border-color: darken($color, 10%);
       }
       &:active .svg-icon {
         animation: zoom-in-out 0.2s linear;
       }
-      &[disabled] {
-        opacity: 30%;
-      }
     }
+  }
+  &__actions-button--validate {
+    border: 1px solid palette(green);
+    line-height: 13px;
+    padding: 9px 18px;
   }
 }
 @keyframes zoom-in-out {
