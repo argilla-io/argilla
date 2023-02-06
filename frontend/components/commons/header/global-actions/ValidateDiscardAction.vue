@@ -27,7 +27,7 @@
       :disabled="!visibleRecords.length"
       class="list__item__checkbox"
     />
-    <TextClassificationBulkAnnotationComponentSingle
+    <TextClassificationBulkAnnotationSingle
       v-if="datasetTask === 'TextClassification' && !isMultiLabel"
       :class="'validate-discard-actions__select'"
       :multi-label="isMultiLabel"

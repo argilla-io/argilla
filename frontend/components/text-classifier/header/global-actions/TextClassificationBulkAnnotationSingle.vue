@@ -34,17 +34,19 @@
           v-model="searchText"
           placeholder="Search label..."
         />
-        <div class="labels">
-          <base-button
-            v-for="option in filterSearch(options)"
-            :key="option"
-            class="clear label-text"
-            @click.prevent="selectedOption(option)"
-          >
-            {{ option }}
-          </base-button>
+        <div class="wrapper">
+          <div class="labels">
+            <base-button
+              v-for="option in filterSearch(options)"
+              :key="option"
+              class="clear label-text"
+              @click.prevent="selectedOption(option)"
+            >
+              {{ option }}
+            </base-button>
 
-          <p v-if="!filterSearch(options).length">0 results</p>
+            <p v-if="!filterSearch(options).length">0 results</p>
+          </div>
         </div>
       </template>
     </filter-dropdown>
@@ -86,6 +88,11 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.wrapper {
+  max-height: 200px;
+  overflow: auto;
+  @extend %hide-scrollbar;
+}
 .labels {
   display: flex;
   flex-flow: column;
