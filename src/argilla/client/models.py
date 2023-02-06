@@ -223,8 +223,10 @@ class TextClassificationRecord(_Validators):
 
     prediction: Optional[List[Tuple[str, float]]] = None
     prediction_agent: Optional[str] = None
+
     annotation: Optional[Union[str, List[str]]] = None
     annotation_agent: Optional[str] = None
+
     vectors: Optional[Vectors] = None
 
     multi_label: bool = False
