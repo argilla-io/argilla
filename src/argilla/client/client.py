@@ -165,8 +165,10 @@ class Argilla:
     def client(self) -> AuthenticatedClient:
         """The underlying authenticated HTTP client"""
         warnings.warn(
-            message="This prop will be removed in next release. "
-            "Please use the http_client prop instead.",
+            message=(
+                "This prop will be removed in next release. "
+                "Please use the http_client prop instead."
+            ),
             category=UserWarning,
         )
         return self._client

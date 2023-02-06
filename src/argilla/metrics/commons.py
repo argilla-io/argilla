@@ -102,6 +102,7 @@ def keywords(
         >>> summary.visualize() # will plot an histogram with results
         >>> summary.data # returns the raw result data
     """
+    assert size > 0, ValueError("size must be greater than 0")
     metric = api.active_api().compute_metric(
         name,
         metric="words_cloud",
