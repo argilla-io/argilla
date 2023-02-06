@@ -69,10 +69,6 @@
 </template>
 
 <script>
-// let deploymentConfig = null;
-// try {
-//   deploymentConfig = require("~/static/deployment.json");
-// } catch (e) {}
 export default {
   layout: "app",
   data() {
@@ -92,7 +88,9 @@ export default {
         .then(({ deployment }) => {
           this.deployment = deployment;
         });
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
     if (this.$auth.loggedIn) {
       return;
     }
