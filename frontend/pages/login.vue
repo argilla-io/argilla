@@ -38,6 +38,15 @@
             placeholder="Enter your password"
           />
         </div>
+        <p v-if="deployment === 'quickstart'">
+          You are using the Argilla Quickstart version! Check
+          <a
+            href="https://docs.argilla.io/en/latest/getting_started/quickstart.html"
+            target="_blank"
+            >this guide</a
+          >
+          to know more about usage and configuration options
+        </p>
         <base-button type="submit" class="form__button primary"
           >Enter</base-button
         >
@@ -60,6 +69,12 @@
 </template>
 
 <script>
+let deployment = null;
+try {
+  deployment = require("@/static/deployment.js").default;
+} catch (e) {
+  deployment = null;
+}
 export default {
   layout: "app",
   data() {
@@ -69,6 +84,7 @@ export default {
         username: "",
         password: "",
       },
+      deployment: deployment,
     };
   },
   async mounted() {
@@ -118,6 +134,14 @@ export default {
   min-height: 100vh;
   background: $brand-secondary-color;
   display: flex;
+  a {
+    outline: none;
+    color: $brand-primary-color;
+    text-decoration: none;
+    &:hover {
+      color: darken($brand-primary-color, 10%);
+    }
+  }
 }
 .form {
   background: palette(white);
@@ -156,14 +180,6 @@ export default {
     @include font-size(18px);
     line-height: 1.4em;
     font-weight: 400;
-    a {
-      font-weight: 700;
-      color: $brand-primary-color;
-      text-decoration: none;
-      &:hover {
-        color: darken($brand-primary-color, 10%);
-      }
-    }
   }
   &__button {
     margin: 2em auto 0 auto;
@@ -225,13 +241,6 @@ input:-webkit-autofill {
     @include font-size(16px);
     line-height: 1.4em;
     font-weight: 400;
-    a {
-      color: $brand-primary-color;
-      text-decoration: none;
-      &:hover {
-        color: darken($brand-primary-color, 10%);
-      }
-    }
   }
 }
 </style>
