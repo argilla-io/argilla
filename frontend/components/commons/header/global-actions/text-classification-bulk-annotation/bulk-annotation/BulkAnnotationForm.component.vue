@@ -11,37 +11,39 @@
           />
           <label :for="input.id" class="label-icon">
             <svgicon
-              name="close"
               v-if="input.selected"
+              name="close"
               width="15"
               height="15"
-              color="#9b9b9b"
             />
           </label>
-          <label :for="input.id" class="label-text">{{ input.label }} </label>
-          <span>
-            {{ input.record_ids.length || "" }}
-          </span>
+          <label
+            :for="input.id"
+            class="label-text"
+            :class="input.selected ? '--selected' : null"
+            >{{ input.label }}
+            <span v-if="input.record_ids.size">
+              ({{ input.record_ids.size }})
+            </span>
+          </label>
         </div>
       </div>
     </div>
     <div class="buttons-area">
-      <div class="buttons-cancel-apply">
-        <BaseButton
-          type="reset"
-          class="primary outline small"
-          :disabled="hasAnnotationsChanged"
-        >
-          Cancel
-        </BaseButton>
-        <BaseButton
-          type="submit"
-          class="primary small"
-          :disabled="hasAnnotationsChanged"
-        >
-          Apply
-        </BaseButton>
-      </div>
+      <BaseButton
+        type="reset"
+        class="primary outline small"
+        :disabled="hasAnnotationsChanged"
+      >
+        Cancel
+      </BaseButton>
+      <BaseButton
+        type="submit"
+        class="primary small"
+        :disabled="hasAnnotationsChanged"
+      >
+        Apply
+      </BaseButton>
     </div>
   </form>
 </template>
@@ -93,7 +95,7 @@ form {
   flex: 1;
   display: inline-flex;
   flex-direction: column;
-  gap: 1em;
+  gap: $base-space;
   max-height: 220px;
   margin-top: 1em;
   overflow: auto;
@@ -111,22 +113,46 @@ form {
 }
 
 .label-icon {
+  flex-shrink: 0;
   cursor: pointer;
+  border-radius: $border-radius;
+  .svg-icon {
+    &:hover {
+      color: $black-87;
+    }
+  }
 }
 
 .label-text {
-  flex: 1;
-  word-break: break-word;
   cursor: pointer;
+  background: #f0f0fe;
+  border-radius: 8px;
+  color: #4c4ea3;
+  padding: calc($base-space / 2) $base-space;
+  @include truncate;
+  width: auto;
+  @include font-size(13px);
+  padding-right: $base-space * 2;
+  font-weight: 500;
+  span {
+    @include font-size(12px);
+  }
+  &:hover {
+    background: darken(#f0f0fe, 2%);
+  }
+  &.--selected {
+    background: #4c4ea3;
+    color: palette(white);
+  }
 }
 
 .buttons-area {
   display: flex;
-  flex-direction: column;
   gap: 0.5em;
-  .buttons-cancel-apply {
-    display: flex;
-    justify-content: space-evenly;
+  flex: 1;
+  button {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

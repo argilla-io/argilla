@@ -1,11 +1,9 @@
 <template>
-  <filter-dropdown
-    class="dropdown"
-    :visible="showDropdown"
-    @visibility="toggleDropdown"
-  >
+  <filter-dropdown :visible="showDropdown" @visibility="toggleDropdown">
     <template #dropdown-header>
-      <span class="dropdown__text">Annotate as...</span>
+      <span data-title="Annotate">
+        <svgicon name="pen"></svgicon>
+      </span>
     </template>
     <template #dropdown-content>
       <div class="dropdown-content">
@@ -32,6 +30,7 @@
 </template>
 
 <script>
+import "assets/icons/pen";
 export default {
   name: "BulkAnnotation",
   props: {
@@ -79,18 +78,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dropdown {
-  cursor: pointer;
-  :deep(.dropdown__header) {
-    max-height: 33px;
-    font-weight: 500;
-    min-width: 170px;
-    @include font-size(13px);
-    border: 1px solid palette(blue, 500);
-    color: palette(blue, 500);
-    &:after {
-      border-color: palette(blue, 500);
-    }
-  }
-}
 </style>

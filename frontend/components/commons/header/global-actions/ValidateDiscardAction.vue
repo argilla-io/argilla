@@ -27,7 +27,7 @@
       :disabled="!visibleRecords.length"
       class="list__item__checkbox"
     />
-    <annotation-label-selector
+    <TextClassificationBulkAnnotationComponentSingle
       v-if="datasetTask === 'TextClassification' && !isMultiLabel"
       :class="'validate-discard-actions__select'"
       :multi-label="isMultiLabel"
@@ -37,6 +37,7 @@
     <div class="bulk-annotation-wrapper">
       <TextClassificationBulkAnnotationComponent
         v-if="datasetTask === 'TextClassification' && isMultiLabel"
+        :class="'validate-discard-actions__select'"
         :datasetId="datasetId"
         :records="selectedRecords"
         :labels="availableLabels"
@@ -175,14 +176,24 @@ export default {
   &__select {
     margin-left: 0.8em;
     :deep(.dropdown__header) {
-      max-height: 33px;
-      font-weight: 500;
-      min-width: 170px;
-      @include font-size(13px);
-      border: 1px solid palette(blue, 500);
-      color: palette(blue, 500);
-      &:after {
-        border-color: palette(blue, 500);
+      cursor: pointer;
+      display: flex;
+      gap: $base-space * 2;
+      border: none;
+      padding: $base-space;
+      height: auto;
+      .svg-icon {
+        color: $black-54;
+        height: 18px;
+        width: 18px;
+      }
+      span[data-title] {
+        position: relative;
+        overflow: visible;
+        @extend %has-tooltip--top;
+      }
+      &:hover {
+        background: $black-4;
       }
     }
   }
