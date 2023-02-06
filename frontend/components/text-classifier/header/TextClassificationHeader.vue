@@ -35,6 +35,7 @@
       :isMultiLabel="isMultiLabel"
       @discard-records="onDiscard"
       @validate-records="onValidate"
+      @clear-records="onClear"
       @on-select-labels="onSelectLabels($event)"
       @new-label="onNewLabel"
     />
@@ -144,6 +145,21 @@ export default {
         dataset: this.dataset,
         agent: this.$auth.user.username,
         records: validatedRecords,
+      });
+    },
+    async onClear(records) {
+      const clearedRecords = records.map((record) => {
+        return {
+          ...record,
+          currentAnnotation: null,
+          annotation: null,
+          selected: true,
+          status: "Edited",
+        };
+      });
+      this.updateRecords({
+        dataset: this.dataset,
+        records: clearedRecords,
       });
     },
     async onNewLabel(newLabel) {
