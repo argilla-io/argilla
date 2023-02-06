@@ -2,7 +2,7 @@
 
 [Argilla](https://argilla.io) is a **production-ready framework for building and improving datasets** for NLP projects.
 
-```{admonition} Live Demo 🆕
+```{admonition} Argilla on HF Spaces
 :class: important
 
 Deploy your own Argilla Server on Spaces with a few clicks:
@@ -22,6 +22,8 @@ Deploy your own Argilla Server on Spaces with a few clicks:
 Get started: [Semantic Search Deep-dive guide](../guides/features/semantic-search.ipynb)
 
 ```
+
+
 
 <iframe width="100%" height="450" src="https://www.youtube.com/embed/jP3anvp7Rto" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 

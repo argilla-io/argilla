@@ -10,7 +10,7 @@ In this section, you'll learn to deploy an Argilla Space and use it for data ann
 
 ### Deploy Argilla on Spaces
 
-If you have a Hugging Face account, you can deploy Argilla on Spaces with just a few clicks:
+You can deploy Argilla on Spaces with just a few clicks:
 
 <a  href="https://huggingface.co/spaces/argilla/argilla-template-space">
     <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
