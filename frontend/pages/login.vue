@@ -38,7 +38,7 @@
             placeholder="Enter your password"
           />
         </div>
-        <p v-if="deploymentConfig.deployment === 'quickstart'">
+        <p v-if="deployment === 'quickstart'">
           You are using the Argilla Quickstart version! Check
           <a
             href="https://docs.argilla.io/en/latest/getting_started/quickstart.html"
@@ -69,10 +69,10 @@
 </template>
 
 <script>
-let deploymentConfig = null;
-try {
-  deploymentConfig = require("~/static/deployment.json");
-} catch (e) {}
+// let deploymentConfig = null;
+// try {
+//   deploymentConfig = require("~/static/deployment.json");
+// } catch (e) {}
 export default {
   layout: "app",
   data() {
@@ -82,10 +82,17 @@ export default {
         username: "",
         password: "",
       },
-      deploymentConfig: deploymentConfig,
+      deployment: false,
     };
   },
   async mounted() {
+    try {
+      fetch("deployment.json")
+        .then((r) => r.json())
+        .then(({ deployment }) => {
+          this.deployment = deployment;
+        });
+    } catch (e) {}
     if (this.$auth.loggedIn) {
       return;
     }
