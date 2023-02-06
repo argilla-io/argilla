@@ -39,7 +39,7 @@
           />
         </div>
         <p v-if="deployment === 'quickstart'">
-          You are using the Argilla Quickstart version! Check
+          You are using the Quickstart version of Argilla. Check
           <a
             href="https://docs.argilla.io/en/latest/getting_started/quickstart.html"
             target="_blank"
