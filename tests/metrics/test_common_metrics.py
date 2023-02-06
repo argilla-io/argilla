@@ -114,6 +114,7 @@ def test_text_length(mocked_client):
 
 def test_keywords_metrics(mocked_client, gutenberg_spacy_ner):
     results = keywords(name=gutenberg_spacy_ner)
+
     assert results.data == {
         "clock": 46,
         "come": 20,
@@ -136,3 +137,10 @@ def test_keywords_metrics(mocked_client, gutenberg_spacy_ner):
         "time": 34,
         "two": 18,
     }
+
+    assert keywords(name=gutenberg_spacy_ner) == keywords(
+        name=gutenberg_spacy_ner, query=""
+    )
+
+    with pytest.raises(AssertionError, match="size must be greater than 0"):
+        keywords(name=gutenberg_spacy_ner, size=0)
