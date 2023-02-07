@@ -1,4 +1,4 @@
-# Argilla Docker Quickstart
+# Docker Quickstart
 Argilla is composed of a Python Server with Elasticsearch as the database layer, and a Python Client to create and
 manage datasets.
 

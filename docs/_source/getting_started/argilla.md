@@ -5,7 +5,7 @@
 ```{admonition} Hugging Face Spaces Live Demo 🆕
 :class: important
 
-Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces (login:`argilla`, password:`1234`)
+Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces (login:`argilla`, password:`1234`). Additionally is is possible to [duplicate our spaces template](https://huggingface.co/spaces/argilla/argilla-template-space?duplicate=true) and host your own version on the hub.
 
 ```
 
