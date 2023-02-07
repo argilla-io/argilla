@@ -142,7 +142,6 @@ export default {
     },
     onSelectLabels(labels) {
       const { selectedRecords } = this;
-      console.log({ labels, selectedRecords });
       this.$emit("on-select-labels", { labels, selectedRecords });
     },
     onUpdateAnnotations(updatedAnnotations) {
