@@ -20,13 +20,13 @@ repos:
           # - --remove-header
 
   - repo: https://github.com/psf/black
-    rev: 22.12.0
+    rev: 23.1.0
     hooks:
       - id: black
         additional_dependencies: ["click==8.0.4"]
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.11.5
+    rev: 5.12.0
     hooks:
       - id: isort
 
