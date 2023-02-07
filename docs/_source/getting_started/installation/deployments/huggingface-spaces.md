@@ -17,6 +17,11 @@ You can deploy Argilla on Spaces with just a few clicks:
 </a>
 
 You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to setup the visibility to `Public`.
+
+:::{tip}
+If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file. 
+:::
+
 You'll see the `Building` status and once it becomes `Running` your space is ready to go. If you don't see the Argilla login UI refresh the page.
 
 
@@ -29,20 +34,7 @@ You'll see the login screen where you need to use either argilla or team with th
 </div>
 
 :::{tip}
-If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file.
-:::
-
-
-:::{tip}
 For quick experimentation, you can jump directly into the next section. If you want to add access restrictions, go to the "Setting up secret environment variables" at the end of this document. Setting up secret variables is recommended for longer-term usage.
-:::
-
-### Setting up secret environment variables
-
-The Space template provides a way to set up different **optional settings** focusing on securing your Argilla Space.
-
-:::{tip}
-If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file.
 :::
 
 ### Create your first dataset
