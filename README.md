@@ -16,16 +16,15 @@
 <a href="https://pepy.tech/project/argilla">
 <img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
-<a  href="https://huggingface.co/spaces/argilla/argilla-template-space">
+<a  href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
 <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg" />
 </a>
 </p>
 
 <h2 align="center">Open-source framework for data-centric NLP</h2>
-<p align="center">Data Labeling, curation, and Inference Store</p>
-<p align="center">Designed for MLOps & Feedback Loops</p>
+<p align="center">Data Labeling for MLOps & Feedback Loops</p>
 
-> 🆕 🔥 Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces (login:`argilla`, password:`1234`)
+> 🆕 🔥 Deploy [Argilla on Spaces](https://huggingface.co/new-space?template=argilla/argilla-template-space)
 
 > 🆕 🔥 Since `1.2.0` Argilla supports vector search for finding the most similar records to a given one. This feature uses vector or semantic search combined with more traditional search (keyword and filter based). Learn more on this [deep-dive guide](https://docs.argilla.io/en/latest/guides/features/semantic-search.html)
 
