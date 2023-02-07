@@ -47,14 +47,12 @@ export default {
       showDropdown: false,
       searchText: null,
       lastSelectedAnnotation: { ID: null, VALUE: null },
+      clonedInputs: [],
     };
   },
   computed: {
-    cloneInputs() {
-      return structuredClone(this.inputs);
-    },
     updatedAnnotations() {
-      const updatedAnnotations = this.cloneInputs.map((input) => {
+      const updatedAnnotations = this.clonedInputs.map((input) => {
         if (input.id === this.lastSelectedAnnotation.ID) {
           input.selected = this.lastSelectedAnnotation.VALUE;
         }
@@ -77,7 +75,13 @@ export default {
       return _.isEqual(this.inputs, this.updatedAnnotations);
     },
   },
+  updated() {
+    this.resetLastSelectedAnnotation();
+  },
   methods: {
+    rerenderComponent() {
+      return !!this.inputs;
+    },
     toggleDropdown(trueOrFalse) {
       this.showDropdown = trueOrFalse;
     },
@@ -90,6 +94,7 @@ export default {
     },
     resetLastSelectedAnnotation() {
       this.updateLastSelectedAnnotation({ ID: null, VALUE: null });
+      this.clonedInputs = structuredClone(this.inputs);
     },
     updateLastSelectedAnnotation({ ID, VALUE }) {
       this.lastSelectedAnnotation = { ID, VALUE };
