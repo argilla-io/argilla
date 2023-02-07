@@ -223,7 +223,7 @@ jobs:
               - 'pyproject.toml'
               - 'setup.py'
               - 'scripts/start_argilla_server.sh'
-              - 'release.Dockerfile'
+              - '*.Dockerfile'
               - '.dockerignore'
       - name: Cache pip 👜
         uses: actions/cache@v2

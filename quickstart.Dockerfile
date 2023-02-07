@@ -5,7 +5,7 @@ ENV ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/usr/share/elasticsearch/users.yml
 ENV TEAM_PASSWORD=1234
 ENV ARGILLA_PASSWORD=1234
 ENV TEAM_API_KEY=team.apikey
-ENV ARGILLA_API_KEY=argilla.apikey
+ENV ARGILLA_API_KEY=rubrix.apikey
 ENV LOAD_DATASETS=full
 ENV UVICORN_PORT=6900
 ENV xpack.security.enabled=false
@@ -30,6 +30,11 @@ COPY dist/*.whl /packages/
 
 # Install argilla
 RUN for wheel in /packages/*.whl; do pip install "$wheel"[server]; done
+
+# This line add context to this image. This solution should be improved
+RUN echo -e "{  \"deployment\":  \"quickstart\" }" \
+  > /usr/local/lib/python3.9/dist-packages/argilla/server/static/deployment.json
+
 
 # Create Users schema file
 USER elasticsearch
