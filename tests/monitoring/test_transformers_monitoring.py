@@ -242,7 +242,6 @@ def test_monitor_zero_short_passing_labels_keyword_arg(
     mocked_monitor,
     dataset,
 ):
-
     argilla.delete(dataset)
     predictions = mocked_monitor(
         text,
@@ -307,7 +306,6 @@ def test_monitor_zero_shot_with_text_array(
     mocked_monitor,
     dataset,
 ):
-
     argilla.delete(dataset)
     predictions = mocked_monitor(
         [text], candidate_labels=labels, hypothesis_template=hypothesis

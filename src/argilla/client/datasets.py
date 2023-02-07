@@ -1137,6 +1137,7 @@ class DatasetForTokenClassification(DatasetBase):
 
     def _to_datasets_dict(self) -> Dict:
         """Helper method to put token classification records in a `datasets.Dataset`"""
+
         # create a dict first, where we make the necessary transformations
         def entities_to_dict(
             entities: Optional[

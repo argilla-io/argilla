@@ -103,7 +103,6 @@ def map_doc_2_action(
 
 
 if __name__ == "__main__":
-
     client = Elasticsearch(hosts=settings.elasticsearch)
 
     for dataset in settings.migration_datasets:

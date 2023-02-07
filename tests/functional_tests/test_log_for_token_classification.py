@@ -54,7 +54,6 @@ def test_log_with_empty_tokens_list(mocked_client):
 
 
 def test_call_metrics_with_no_api_client_initialized(mocked_client):
-
     for metric in ALL_METRICS:
         if metric == entity_consistency:
             continue

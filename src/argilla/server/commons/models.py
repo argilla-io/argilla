@@ -23,7 +23,6 @@ class TaskStatus(str, Enum):
 
 
 class TaskType(str, Enum):
-
     text_classification = "TextClassification"
     token_classification = "TokenClassification"
     text2text = "Text2Text"

@@ -41,7 +41,6 @@ from argilla.server.daos.backend.search.query_builder import (
 
 @dataclasses.dataclass
 class OpenSearchClient(IClientAdapter):
-
     index_shards: int
 
     config_backend: Dict[str, Any]
@@ -110,7 +109,6 @@ class OpenSearchClient(IClientAdapter):
         enable_highlight: bool = True,
         routing: str = None,
     ) -> Dict[str, Any]:
-
         with self.error_handling(index=index):
             highlight = self.highlight if enable_highlight else None
             es_query = self.query_builder.map_2_es_query(
@@ -782,7 +780,6 @@ class OpenSearchClient(IClientAdapter):
         highlight: Optional[HighlightParser] = None,
         is_phrase_query: bool = True,
     ):
-
         data = {
             **document["_source"],
             "id": document["_id"],

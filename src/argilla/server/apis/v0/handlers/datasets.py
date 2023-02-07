@@ -69,7 +69,6 @@ async def create_dataset(
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     user: User = Security(auth.get_user, scopes=["create:datasets"]),
 ) -> Dataset:
-
     owner = user.check_workspace(ws_params.workspace)
 
     dataset_class = TasksFactory.get_task_dataset(request.task)
@@ -114,7 +113,6 @@ def update_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
-
     found_ds = service.find_by_name(
         user=current_user, name=name, workspace=ds_params.workspace
     )

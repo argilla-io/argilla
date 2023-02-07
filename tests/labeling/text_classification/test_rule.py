@@ -178,7 +178,6 @@ def test_create_rules_with_update(
 
 
 def test_load_rules(mocked_client, log_dataset):
-
     mocked_client.post(
         f"/api/datasets/TextClassification/{log_dataset}/labeling/rules",
         json={"query": "a query", "label": "LALA"},
@@ -191,7 +190,6 @@ def test_load_rules(mocked_client, log_dataset):
 
 
 def test_add_rules(mocked_client, log_dataset):
-
     expected_rules = [
         Rule(query="a query", label="La La"),
         Rule(query="another query", label="La La"),
@@ -209,7 +207,6 @@ def test_add_rules(mocked_client, log_dataset):
 
 
 def test_delete_rules(mocked_client, log_dataset):
-
     rules = [
         Rule(query="a query", label="La La"),
         Rule(query="another query", label="La La"),
@@ -235,7 +232,6 @@ def test_delete_rules(mocked_client, log_dataset):
 
 
 def test_update_rules(mocked_client, log_dataset):
-
     rules = [
         Rule(query="a query", label="La La"),
         Rule(query="another query", label="La La"),
@@ -316,7 +312,6 @@ def test_copy_dataset_with_rules(mocked_client, log_dataset):
     ],
 )
 def test_rule_metrics(mocked_client, log_dataset, rule, expected_metrics):
-
     delete_rule_silently(mocked_client, log_dataset, rule)
 
     mocked_client.post(

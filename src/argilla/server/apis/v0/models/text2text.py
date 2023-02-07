@@ -51,7 +51,6 @@ class Text2TextAnnotation(BaseAnnotation):
 
 
 class Text2TextRecordInputs(BaseRecordInputs[Text2TextAnnotation]):
-
     text: str
 
 

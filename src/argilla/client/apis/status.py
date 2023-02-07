@@ -26,7 +26,6 @@ from argilla.client.sdk.commons.errors import ApiCompatibilityError
 
 @dataclasses.dataclass(frozen=True)
 class ApiInfo:
-
     version: Optional[str] = None
 
 

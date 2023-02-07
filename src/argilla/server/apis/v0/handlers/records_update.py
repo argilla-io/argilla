@@ -36,7 +36,6 @@ from argilla.server.services.storage.service import RecordsStorageService
 
 
 def configure_router(router: APIRouter):
-
     RecordType = Union[
         TextClassificationRecord,
         TokenClassificationRecord,
@@ -61,7 +60,6 @@ def configure_router(router: APIRouter):
         storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> RecordType:
-
         dataset = service.find_by_name(
             user=current_user,
             name=name,

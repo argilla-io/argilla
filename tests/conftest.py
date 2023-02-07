@@ -33,7 +33,6 @@ from .helpers import SecuredClient
 
 @pytest.fixture
 def telemetry_track_data(mocker):
-
     client = telemetry._TelemetryClient.get()
     if client:
         # Disable sending data for tests
@@ -48,7 +47,6 @@ def mocked_client(
     monkeypatch,
     telemetry_track_data,
 ) -> SecuredClient:
-
     with TestClient(app, raise_server_exceptions=False) as _client:
         client_ = SecuredClient(_client)
 

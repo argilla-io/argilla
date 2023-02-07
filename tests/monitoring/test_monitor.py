@@ -38,7 +38,6 @@ def test_monitor_with_non_supported_model():
 
 def test_monitor_non_supported_huggingface_model():
     with warnings.catch_warnings(record=True) as warning_list:
-
         from transformers import (
             AutoModelForTokenClassification,
             AutoTokenizer,

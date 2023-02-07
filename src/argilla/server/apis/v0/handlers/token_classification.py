@@ -91,7 +91,6 @@ def configure_router():
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> BulkResponse:
-
         task = task_type
         owner = current_user.check_workspace(common_params.workspace)
         try:
@@ -153,7 +152,6 @@ def configure_router():
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> TokenClassificationSearchResults:
-
         search = search or TokenClassificationSearchRequest()
         query = search.query or TokenClassificationQuery()
 

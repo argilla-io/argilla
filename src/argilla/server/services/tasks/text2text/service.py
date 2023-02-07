@@ -81,7 +81,6 @@ class Text2TextService:
         size: int = 100,
         exclude_metrics: bool = True,
     ) -> ServiceSearchResults:
-
         metrics = TasksFactory.find_task_metrics(
             dataset.task,
             metric_ids={

@@ -38,7 +38,6 @@ class TokenTagMetrics(BaseModel):
 
 
 class TokenMetrics(BaseModel):
-
     idx: int
     value: str
     char_start: int

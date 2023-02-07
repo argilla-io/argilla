@@ -32,7 +32,6 @@ def test_wrong_hostname_values(
     url: str,
     raises_error: bool,
 ):
-
     if raises_error:
         with pytest.raises(Exception):
             Client(base_url=url)
@@ -42,7 +41,6 @@ def test_wrong_hostname_values(
 
 
 def test_http_calls(mocked_client):
-
     rb_api = active_api()
     data = rb_api.http_client.get("/api/_info")
     assert data.get("version"), data

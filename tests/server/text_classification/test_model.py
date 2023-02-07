@@ -134,7 +134,6 @@ def test_model_with_annotations():
 
 
 def test_single_label_with_multiple_annotation():
-
     with pytest.raises(
         ValidationError,
         match="Single label record must include only one annotation label",
@@ -213,7 +212,6 @@ def test_score_integrity():
 
 
 def test_prediction_ok_cases():
-
     data = {
         "multi_label": True,
         "inputs": {"data": "My cool data"},
@@ -330,7 +328,6 @@ def test_validate_without_labels_for_single_label(annotation):
 
 
 def test_query_with_uncovered_by_rules():
-
     query = TextClassificationQuery(uncovered_by_rules=["query", "other*"])
 
     assert EsQueryBuilder._to_es_query(query) == {

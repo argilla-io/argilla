@@ -152,7 +152,6 @@ class DatasetRecordsDAO:
         exclude_fields: List[str] = None,
         highligth_results: bool = True,
     ) -> DaoRecordsSearchResults:
-
         try:
             search = search or DaoRecordsSearch()
 
@@ -261,7 +260,6 @@ class DatasetRecordsDAO:
         dataset: DatasetDB,
         id: str,
     ) -> Optional[Dict[str, Any]]:
-
         return self._es.find_record_by_id(
             dataset_id=dataset.id,
             record_id=id,

@@ -84,7 +84,6 @@ class LoguruLoggerHandler(logging.Handler):
             self.emit = lambda record: None
 
     def emit(self, record: logging.LogRecord):
-
         try:
             level = logger.level(record.levelname).name
         except AttributeError:
@@ -100,7 +99,6 @@ class LoguruLoggerHandler(logging.Handler):
 
 
 def configure_logging():
-
     """Normalizes logging configuration for argilla and its dependencies"""
     intercept_handler = LoguruLoggerHandler()
     if not intercept_handler.is_available:

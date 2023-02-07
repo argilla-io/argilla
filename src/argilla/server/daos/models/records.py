@@ -29,7 +29,6 @@ from argilla.utils import limit_value_length
 
 
 class DaoRecordsSearch(BaseModel):
-
     query: Optional[BaseRecordsQuery] = None
     sort: SortConfig = Field(default_factory=SortConfig)
 
@@ -119,7 +118,6 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
     @root_validator()
     def prepare_record_for_db(cls, values):
-
         values = cls.update_annotation(values, "prediction")
         values = cls.update_annotation(values, "annotation")
 
@@ -239,7 +237,6 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
 
 class BaseRecordDB(BaseRecordInDB, Generic[AnnotationDB]):
-
     # Read only ones
     metrics: Dict[str, Any] = Field(default_factory=dict)
     search_keywords: Optional[List[str]] = None

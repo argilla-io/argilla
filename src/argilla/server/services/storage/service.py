@@ -37,7 +37,6 @@ class DeleteRecordsOut:
 
 
 class RecordsStorageService:
-
     _INSTANCE: "RecordsStorageService" = None
 
     @classmethod
@@ -115,7 +114,6 @@ class RecordsStorageService:
         record: ServiceRecord,
         **data,
     ) -> ServiceRecord:
-
         if data.get("metadata"):
             record.metadata = {
                 **(record.metadata or {}),

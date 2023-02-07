@@ -96,7 +96,6 @@ def configure_router():
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> BulkResponse:
-
         task = task_type
         owner = current_user.check_workspace(common_params.workspace)
         try:
@@ -325,7 +324,6 @@ def configure_router():
         ),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> List[LabelingRule]:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -357,7 +355,6 @@ def configure_router():
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> LabelingRule:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -398,7 +395,6 @@ def configure_router():
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> LabelingRuleMetricsSummary:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -454,7 +450,6 @@ def configure_router():
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> None:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -484,7 +479,6 @@ def configure_router():
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> LabelingRule:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -518,7 +512,6 @@ def configure_router():
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> LabelingRule:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,

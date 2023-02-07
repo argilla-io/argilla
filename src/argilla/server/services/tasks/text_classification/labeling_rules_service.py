@@ -42,7 +42,6 @@ class LabelingRuleSummary(BaseModel):
 
 
 class LabelingService:
-
     _INSTANCE = None
 
     @classmethod

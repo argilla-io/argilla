@@ -67,7 +67,6 @@ class SearchRecordsService:
         exclude_metrics: bool = True,
         metrics: Optional[List[ServiceMetric]] = None,
     ) -> ServiceSearchResults:
-
         if record_from > 0:
             metrics = None
 

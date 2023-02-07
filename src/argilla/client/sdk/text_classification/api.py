@@ -97,7 +97,6 @@ def fetch_dataset_labeling_rules(
     client: AuthenticatedClient,
     name: str,
 ) -> Response[Union[List[LabelingRule], HTTPValidationError, ErrorMessage]]:
-
     url = "{}/api/datasets/TextClassification/{name}/labeling/rules".format(
         client.base_url, name=name
     )
@@ -118,7 +117,6 @@ def dataset_rule_metrics(
     query: str,
     label: str,
 ) -> Response[Union[LabelingRuleMetricsSummary, HTTPValidationError, ErrorMessage]]:
-
     url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}/metrics?label={label}".format(
         client.base_url, name=name, query=query, label=label
     )
