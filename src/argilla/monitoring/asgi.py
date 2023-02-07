@@ -112,7 +112,7 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
         agent: Optional[str] = None,
         tags: Dict[str, str] = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         BaseHTTPMiddleware.__init__(self, *args, **kwargs)
 

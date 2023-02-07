@@ -132,7 +132,6 @@ def test_query_builder_with_nested(
 
 
 def test_failing_metrics(service, mocked_client):
-
     dataset = Dataset(
         name="test_failing_metrics",
         owner=argilla.get_workspace(),

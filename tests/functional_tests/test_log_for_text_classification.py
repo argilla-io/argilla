@@ -185,7 +185,6 @@ def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
 
 
 def test_log_data_in_several_workspaces(mocked_client: SecuredClient):
-
     workspace = "test-ws"
     dataset = "test_log_data_in_several_workspaces"
     text = "This is a text"
@@ -314,7 +313,6 @@ def test_dynamics_metadata(mocked_client):
 
 
 def test_log_with_bulk_error(mocked_client):
-
     dataset = "test_log_with_bulk_error"
     ar.delete(dataset)
     try:

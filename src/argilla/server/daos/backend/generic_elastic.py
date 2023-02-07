@@ -184,7 +184,6 @@ class GenericElasticEngineBackend(LoggingMixin):
         exclude_fields: List[str] = None,
         enable_highlight: bool = True,
     ) -> Tuple[int, List[Dict[str, Any]]]:
-
         index = dataset_records_index(id)
 
         if not sort.sort_by and sort.shuffle is False:
@@ -248,7 +247,6 @@ class GenericElasticEngineBackend(LoggingMixin):
         vectors_cfg: Optional[Dict[str, Any]] = None,
         force_recreate: bool = False,
     ) -> None:
-
         _mappings = self._common_records_mappings
         task_mappings = self.get_task_mapping(task).copy()
         for k in task_mappings:

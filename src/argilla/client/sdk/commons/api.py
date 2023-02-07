@@ -103,7 +103,6 @@ async def async_bulk(
 def build_bulk_response(
     response: httpx.Response, name: str, body: Any
 ) -> Response[BulkResponse]:
-
     if 200 <= response.status_code < 400:
         return Response(
             status_code=response.status_code,

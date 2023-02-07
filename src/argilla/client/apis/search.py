@@ -37,7 +37,6 @@ class SearchResults:
 
 
 class Search(AbstractApi):
-
     _API_URL_PATTERN = "/api/datasets/{name}/{task}:search"
 
     def search_records(

@@ -64,7 +64,6 @@ def test_check_non_provided_workspaces():
 
 
 def test_check_user_workspaces():
-
     a_ws = "A-workspace"
     expected_workspaces = [a_ws, "B-ws"]
     user = User(username="test-user", workspaces=[a_ws, "B-ws", "C-ws"])
@@ -76,7 +75,6 @@ def test_check_user_workspaces():
 
 
 def test_default_workspace():
-
     user = User(username="admin")
     assert user.default_workspace == "admin"
 

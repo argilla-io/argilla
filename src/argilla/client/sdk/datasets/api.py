@@ -89,7 +89,6 @@ def delete_dataset(
 def _build_response(
     response: httpx.Response, name: str
 ) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
-
     if response.status_code == 200:
         parsed_response = Dataset(**response.json())
         return Response(

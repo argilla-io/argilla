@@ -56,7 +56,6 @@ class HuggingFaceMonitor(BaseMonitor):
         data: List[Tuple[str, Dict[str, Any], List[LabelPrediction]]],
         multi_label: bool = False,
     ) -> Dict[str, Any]:
-
         agent = self.model_config.name_or_path
 
         records = []
@@ -100,7 +99,7 @@ class ZeroShotMonitor(HuggingFaceMonitor):
         sequences: Union[str, List[str]],
         candidate_labels: List[str],
         *args,
-        **kwargs
+        **kwargs,
     ):
         metadata = (kwargs.pop("metadata", None) or {}).copy()
         hypothesis_template = kwargs.get("hypothesis_template", "@default")

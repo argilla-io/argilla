@@ -38,7 +38,6 @@ from argilla.server.services.tasks.text_classification.model import (
 
 # TODO(@frascuchon): Move validator and its models to the service layer
 class DatasetValidator:
-
     _INSTANCE = None
 
     def __init__(self, datasets: DatasetsService, metrics: MetricsService):

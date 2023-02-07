@@ -32,7 +32,6 @@ from argilla.server.daos.backend.search.model import (
 
 
 class HighlightParser:
-
     _SEARCH_KEYWORDS_FIELD = "search_keywords"
 
     __HIGHLIGHT_PRE_TAG__ = "<@@-ar-key>"
@@ -196,7 +195,6 @@ class EsQueryBuilder:
         id_from: Optional[str] = None,
         shuffle: bool = False,
     ) -> Dict[str, Any]:
-
         if query and query.raw_query:
             es_query = {"query": query.raw_query}
         else:
@@ -252,7 +250,6 @@ class EsQueryBuilder:
         schema: Optional[Dict[str, Any]] = None,
         sort: Optional[SortConfig] = None,
     ) -> Optional[List[Dict[str, Any]]]:
-
         if not sort:
             return None
 

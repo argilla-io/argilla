@@ -56,7 +56,6 @@ def configure_router(router: APIRouter):
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         user: User = Security(auth.get_user, scopes=["read:dataset.settings"]),
     ) -> TokenClassificationSettings:
-
         found_ds = datasets.find_by_name(
             user=user,
             name=name,
@@ -89,7 +88,6 @@ def configure_router(router: APIRouter):
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         user: User = Security(auth.get_user, scopes=["write:dataset.settings"]),
     ) -> TokenClassificationSettings:
-
         found_ds = datasets.find_by_name(
             user=user,
             name=name,

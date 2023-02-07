@@ -626,12 +626,12 @@ class Argilla:
 
     def delete_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
         for rule in rules:
-                try:
-                    text_classification_api.delete_dataset_labeling_rule(
-                        self._client, name=dataset, rule=rule
-                    )
-                except Exception as ex:
-                    _LOGGER.warning(f"Cannot delete rule {rule}: {ex}")
+            try:
+                text_classification_api.delete_dataset_labeling_rule(
+                    self._client, name=dataset, rule=rule
+                )
+            except Exception as ex:
+                _LOGGER.warning(f"Cannot delete rule {rule}: {ex}")
         """Deletes the dataset labeling rules"""
         for rule in rules:
             text_classification_api.delete_dataset_labeling_rule(

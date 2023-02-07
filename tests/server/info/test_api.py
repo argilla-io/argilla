@@ -18,7 +18,6 @@ from argilla.server.services.info import ApiInfo, ApiStatus
 
 
 def test_api_info(mocked_client):
-
     response = mocked_client.get("/api/_info")
     assert response.status_code == 200
 
@@ -28,7 +27,6 @@ def test_api_info(mocked_client):
 
 
 def test_api_status(mocked_client):
-
     response = mocked_client.get("/api/_status")
 
     assert response.status_code == 200

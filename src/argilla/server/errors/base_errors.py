@@ -19,7 +19,6 @@ from starlette import status
 
 
 class ServerError(Exception):
-
     HTTP_STATUS: int = status.HTTP_500_INTERNAL_SERVER_ERROR
 
     @classmethod

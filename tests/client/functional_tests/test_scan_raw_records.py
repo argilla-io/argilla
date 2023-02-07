@@ -28,7 +28,6 @@ def test_scan_records(
     gutenberg_spacy_ner,
     fields,
 ):
-
     import pandas as pd
 
     import argilla as rg

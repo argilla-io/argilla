@@ -77,7 +77,6 @@ class TokenClassificationService:
         size: int = 100,
         exclude_metrics: bool = True,
     ) -> ServiceSearchResults:
-
         """
         Run a search in a dataset
 

@@ -117,7 +117,6 @@ class DatasetsDAO:
         self,
         dataset: DatasetDB,
     ) -> DatasetDB:
-
         self._es.update_dataset_document(
             id=dataset.id, document=self._dataset_to_es_doc(dataset)
         )
@@ -133,7 +132,6 @@ class DatasetsDAO:
         as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
         task: Optional[str] = None,
     ) -> Optional[DatasetDB]:
-
         dataset_id = BaseDatasetDB.build_dataset_id(
             name=name,
             owner=owner,
@@ -220,7 +218,6 @@ class DatasetsDAO:
         dataset: DatasetDB,
         settings: DatasetSettingsDB,
     ) -> BaseDatasetSettingsDB:
-
         self._configure_vectors(dataset, settings)
         self._es.update_dataset_document(
             id=dataset.id,

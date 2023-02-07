@@ -21,7 +21,6 @@ from argilla.server.settings import settings
 
 
 def test_metadata_limit():
-
     long_value = "a" * (settings.metadata_field_length + 1)
     short_value = "a" * (settings.metadata_field_length - 1)
 

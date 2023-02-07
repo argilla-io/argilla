@@ -42,7 +42,6 @@ class TokenClassificationAnnotation(_TokenClassificationAnnotation):
 
 
 class TokenClassificationRecordInputs(BaseRecordInputs[TokenClassificationAnnotation]):
-
     text: str = Field()
     tokens: List[str] = Field(min_items=1)
     # TODO(@frascuchon): Delete this field and all related logic
@@ -73,7 +72,6 @@ class TokenClassificationBulkRequest(UpdateDatasetRequest):
 
 
 class TokenClassificationQuery(ServiceBaseRecordsQuery):
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)

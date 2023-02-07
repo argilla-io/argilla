@@ -78,7 +78,6 @@ def configure_router():
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> BulkResponse:
-
         task = task_type
         owner = current_user.check_workspace(common_params.workspace)
         try:
@@ -129,7 +128,6 @@ def configure_router():
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> Text2TextSearchResults:
-
         search = search or Text2TextSearchRequest()
         query = search.query or Text2TextQuery()
         dataset = datasets.find_by_name(

@@ -64,7 +64,6 @@ class SpacyNERMonitor(BaseMonitor):
     def _prepare_log_data(
         self, docs_info: Tuple[Doc, Optional[Dict[str, Any]]]
     ) -> Dict[str, Any]:
-
         return dict(
             records=[
                 self.doc2token_classification(

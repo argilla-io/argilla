@@ -51,7 +51,6 @@ def _configure_analytics(disable_send: bool = False) -> Client:
 
 @dataclasses.dataclass
 class _TelemetryClient:
-
     client: Client
 
     __INSTANCE__: "_TelemetryClient" = None
@@ -76,7 +75,6 @@ class _TelemetryClient:
             return cls.__INSTANCE__
 
     def __post_init__(self):
-
         from argilla import __version__
 
         self.__server_id__ = uuid.UUID(int=uuid.getnode())

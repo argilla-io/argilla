@@ -38,7 +38,6 @@ class ClientAdapterFactory:
         retry_on_timeout: bool = True,
         max_retries: int = 5,
     ) -> IClientAdapter:
-
         (
             client_class,
             support_vector_search,

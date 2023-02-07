@@ -36,7 +36,6 @@ __svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(
 
 
 def configure_router(router: APIRouter):
-
     task = TaskType.text_classification
     base_endpoint = f"/{task}/{{name}}/settings"
     new_base_endpoint = f"/{{name}}/{task}/settings"
@@ -57,7 +56,6 @@ def configure_router(router: APIRouter):
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         user: User = Security(auth.get_user, scopes=["read:dataset.settings"]),
     ) -> TextClassificationSettings:
-
         found_ds = datasets.find_by_name(
             user=user,
             name=name,
@@ -90,7 +88,6 @@ def configure_router(router: APIRouter):
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         user: User = Security(auth.get_user, scopes=["write:dataset.settings"]),
     ) -> TextClassificationSettings:
-
         found_ds = datasets.find_by_name(
             user=user,
             name=name,
