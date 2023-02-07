@@ -2,7 +2,7 @@
   <filter-dropdown :visible="showDropdown" @visibility="toggleDropdown">
     <template #dropdown-header>
       <span data-title="Annotate">
-        <svgicon name="pen"></svgicon>
+        <svgicon name="pen" />
       </span>
     </template>
     <template #dropdown-content>
@@ -17,10 +17,12 @@
           <BulkAnnotationFormComponent
             :inputs="filteredInputs"
             :key="searchText"
+            :hasInputsChanged="hasAnnotationsChanged"
+            @on-change="updateLastSelectedAnnotation"
             @on-submit="updateAnnotations"
+            @on-reset="resetLastSelectedAnnotation"
           />
         </div>
-
         <div class="no-inputs-text" v-else>
           <span>0 results</span>
         </div>
@@ -30,6 +32,7 @@
 </template>
 
 <script>
+import _ from "lodash";
 import "assets/icons/pen";
 export default {
   name: "BulkAnnotation",
@@ -43,20 +46,35 @@ export default {
     return {
       showDropdown: false,
       searchText: null,
+      lastSelectedAnnotation: { ID: null, VALUE: null },
     };
   },
   computed: {
+    cloneInputs() {
+      return structuredClone(this.inputs);
+    },
+    updatedAnnotations() {
+      const updatedAnnotations = this.cloneInputs.map((input) => {
+        if (input.id === this.lastSelectedAnnotation.ID) {
+          input.selected = this.lastSelectedAnnotation.VALUE;
+        }
+        return input;
+      });
+      return updatedAnnotations;
+    },
     filteredInputs() {
-      //TODO - implement searchText at this level
       if (this.searchText) {
-        return this.inputs.filter((input) =>
+        return this.updatedAnnotations.filter((input) =>
           this.isStringOfCharsContainsSubstring(input.label, this.searchText)
         );
       }
-      return this.inputs;
+      return this.updatedAnnotations;
     },
     isInputsNotEmpty() {
       return !!this.filteredInputs.length;
+    },
+    hasAnnotationsChanged() {
+      return _.isEqual(this.inputs, this.updatedAnnotations);
     },
   },
   methods: {
@@ -69,6 +87,12 @@ export default {
     updateAnnotations($event) {
       this.toggleDropdown(false);
       this.$emit("on-update-annotations", $event);
+    },
+    resetLastSelectedAnnotation() {
+      this.updateLastSelectedAnnotation({ ID: null, VALUE: null });
+    },
+    updateLastSelectedAnnotation({ ID, VALUE }) {
+      this.lastSelectedAnnotation = { ID, VALUE };
     },
     resetSearchText() {
       this.searchText = null;

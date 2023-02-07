@@ -1,13 +1,14 @@
 <template>
   <form @submit.prevent="onSubmit" @reset="onReset">
     <div class="form-group">
-      <div v-for="input in clonedInputs" :key="input.key">
+      <div v-for="input in inputs" :key="input.key">
         <div class="item">
           <input
             type="checkbox"
             v-model="input.selected"
             :id="input.id"
             class="d-none"
+            @change="onChange(input)"
           />
           <label :for="input.id" class="label-icon">
             <svgicon
@@ -33,23 +34,20 @@
       <BaseButton
         type="reset"
         class="primary outline small"
-        :disabled="hasAnnotationsChanged"
-      >
-        Cancel
-      </BaseButton>
+        :disabled="hasInputsChanged"
+        v-html="'Cancel'"
+      />
       <BaseButton
         type="submit"
         class="primary small"
-        :disabled="hasAnnotationsChanged"
-      >
-        Apply
-      </BaseButton>
+        :disabled="hasInputsChanged"
+        v-html="'Apply'"
+      />
     </div>
   </form>
 </template>
 
 <script>
-import _ from "lodash";
 export default {
   name: "BulkAnnotationForm",
   props: {
@@ -57,29 +55,20 @@ export default {
       type: Array,
       required: true,
     },
-  },
-  data() {
-    return {
-      clonedInputs: [],
-    };
-  },
-  computed: {
-    hasAnnotationsChanged() {
-      return _.isEqual(this.inputs, this.clonedInputs);
+    hasInputsChanged: {
+      type: Boolean,
+      required: true,
     },
-  },
-  mounted() {
-    this.resetCloneInputs();
   },
   methods: {
     onSubmit() {
-      this.$emit("on-submit", this.clonedInputs);
+      this.$emit("on-submit", this.inputs);
+    },
+    onChange({ id, selected }) {
+      this.$emit("on-change", { ID: id, VALUE: selected });
     },
     onReset() {
-      this.resetCloneInputs();
-    },
-    resetCloneInputs() {
-      this.clonedInputs = structuredClone(this.inputs);
+      this.$emit("on-reset");
     },
   },
 };
