@@ -149,7 +149,7 @@ if docs_version == "latest":
     branch = "main"
 else:
     branch = docs_version.replace("-", "/")
-    
+
 nbsphinx_prolog = (
     """
 .. raw:: html
