@@ -7,7 +7,7 @@
 
 Deploy your own Argilla Server on Spaces with a few clicks:
 
-<a  href="https://huggingface.co/spaces/argilla/argilla-template-space">
+<a  href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
     <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
 </a>
 

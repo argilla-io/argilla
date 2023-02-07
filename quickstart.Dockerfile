@@ -31,6 +31,11 @@ COPY dist/*.whl /packages/
 # Install argilla
 RUN for wheel in /packages/*.whl; do pip install "$wheel"[server]; done
 
+# This line add context to this image. This solution should be improved
+RUN echo -e "{  \"deployment\":  \"quickstart\" }" \
+  > /usr/local/lib/python3.9/dist-packages/argilla/server/static/deployment.json
+
+
 # Create Users schema file
 USER elasticsearch
 RUN touch "$HOME"/users.yml

@@ -35,7 +35,7 @@ record = rg.TextClassificationRecord(
 )
 ```
 
-If you want a concise example of applying token attributions, take a look [here](../tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability.html).
+If you want a concise example of applying token attributions, take a look [here](../tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability).
 
 ## Certainty filters
 
