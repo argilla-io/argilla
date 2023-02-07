@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import copy
 import os
 import sys
 from time import sleep
@@ -133,8 +134,8 @@ class TestDatasetBase:
         }
 
         assert (
-            "Following columns are not supported by the TextClassificationRecord model and are ignored: ['unsupported_column']"
-            == caplog.record_tuples[0][2]
+            "Following columns are not supported by the TextClassificationRecord model"
+            " and are ignored: ['unsupported_column']" == caplog.record_tuples[0][2]
         )
 
     def test_from_pandas(self, monkeypatch, caplog):
@@ -219,9 +220,37 @@ class TestDatasetBase:
 
         with pytest.raises(
             WrongRecordTypeError,
-            match="You are only allowed to set a record of type .*TextClassificationRecord.* but you provided .*Text2TextRecord.*",
+            match=(
+                "You are only allowed to set a record of type"
+                " .*TextClassificationRecord.* but you provided .*Text2TextRecord.*"
+            ),
         ):
             dataset[0] = ar.Text2TextRecord(text="mock")
+
+    def test_prepare_for_training_train_test_splits(
+        self, monkeypatch, singlelabel_textclassification_records
+    ):
+        monkeypatch.setattr(
+            "argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+        )
+        temp_records = copy.deepcopy(singlelabel_textclassification_records)
+        ds = DatasetBase(temp_records)
+
+        with pytest.raises(
+            AssertionError,
+            match="`train_size` and `test_size` must be larger than 0.",
+        ):
+            ds.prepare_for_training(train_size=-1)
+
+        with pytest.raises(
+            AssertionError, match="`train_size` and `test_size` must sum to 1."
+        ):
+            ds.prepare_for_training(test_size=0.1, train_size=0.6)
+
+        for rec in ds:
+            rec.annotation = None
+        with pytest.raises(AssertionError, match="Dataset has no annotations."):
+            ds.prepare_for_training()
 
 
 class TestDatasetForTextClassification:
@@ -355,8 +384,13 @@ class TestDatasetForTextClassification:
         ds = ar.DatasetForTextClassification(records)
         train = ds.prepare_for_training()
 
+        if not ds[0].multi_label:
+            column_names = ["text", "context", "label"]
+        else:
+            column_names = ["text", "context", "label", "binarized_label"]
+
         assert isinstance(train, datasets.Dataset)
-        assert train.column_names == ["text", "context", "label"]
+        assert train.column_names == column_names
         assert len(train) == 2
         assert train[1]["text"] == "mock3"
         assert train[1]["context"] == "mock3"
@@ -365,6 +399,12 @@ class TestDatasetForTextClassification:
             assert train.features["label"] == [datasets.ClassLabel(names=["a", "b"])]
         else:
             assert train.features["label"] == datasets.ClassLabel(names=["a"])
+
+        train_test = ds.prepare_for_training(train_size=0.5)
+        assert len(train_test["train"]) == 1
+        assert len(train_test["test"]) == 1
+        for split in ["train", "test"]:
+            assert train_test[split].column_names == column_names
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,
@@ -525,7 +565,8 @@ class TestDatasetForTokenClassification:
         dataset = ar.DatasetForTokenClassification(
             [ar.TokenClassificationRecord(text="mock", tokens=["mock"])]
         )
-        assert len(dataset.prepare_for_training()) == 0
+        with pytest.raises(AssertionError):
+            dataset.prepare_for_training()
 
     def test_datasets_empty_metadata(self):
         dataset = ar.DatasetForTokenClassification(
@@ -600,6 +641,45 @@ class TestDatasetForTokenClassification:
         assert isinstance(train, spacy.tokens.DocBin)
         assert len(train) == 100
 
+        train, test = rb_dataset.prepare_for_training(
+            framework="spacy", lang=spacy.blank("en"), train_size=0.8
+        )
+        assert isinstance(train, spacy.tokens.DocBin)
+        assert isinstance(test, spacy.tokens.DocBin)
+        assert len(train) == 80
+        assert len(test) == 20
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_prepare_for_training_with_spark_nlp(self):
+        ner_dataset = datasets.load_dataset(
+            # TODO(@frascuchon): Move dataset to the new org
+            "rubrix/gutenberg_spacy-ner",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+        rb_dataset: DatasetForTokenClassification = ar.read_datasets(
+            ner_dataset, task="TokenClassification"
+        )
+        for r in rb_dataset:
+            r.annotation = [
+                (label, start, end) for label, start, end, _ in r.prediction
+            ]
+
+        train = rb_dataset.prepare_for_training(framework="spark-nlp")
+        assert isinstance(train, pd.DataFrame)
+        assert len(train) == 100
+
+        train, test = rb_dataset.prepare_for_training(
+            framework="spark-nlp", train_size=0.8
+        )
+        assert isinstance(train, pd.DataFrame)
+        assert isinstance(test, pd.DataFrame)
+        assert len(train) == 80
+        assert len(test) == 20
+
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,
         reason="You need a HF Hub access token to test the push_to_hub feature",
@@ -620,7 +700,9 @@ class TestDatasetForTokenClassification:
             ]
 
         train = rb_dataset.prepare_for_training()
-        assert isinstance(train, datasets.Dataset)
+        assert isinstance(train, datasets.DatasetD.Dataset) or isinstance(
+            train, datasets.Dataset
+        )
         assert "ner_tags" in train.column_names
         assert len(train) == 100
         assert train.features["ner_tags"] == [

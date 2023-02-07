@@ -328,6 +328,9 @@ export default {
       this.$emit("reset-initial-record");
     },
     async changeVisibleSentences() {
+      //NOTE - we need to refresh the component <text-2-text-content-editable> or after refresh
+      //the user modification will not be kept
+      this.refresh += this.refresh;
       this.sentencesOrigin !== "Annotation"
         ? (this.sentencesOrigin = "Annotation")
         : (this.sentencesOrigin = "Prediction");
@@ -353,7 +356,7 @@ export default {
     async onAnnotate(sentence) {
       let newS = {
         score: 1,
-        text: sentence,
+        text: sentence || this.selectedSentence,
       };
       this.$emit("annotate", { sentences: [newS] });
       this.itemNumber = 0;

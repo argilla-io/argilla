@@ -53,9 +53,14 @@ By default, if you don't configure a `users.yml` file, your Argilla instance is 
 
 - username: `argilla`
 - password: `1234`
-- api_key: `rubrix.apikey`
+- api_key: `argilla.apikey`
 
 for security reasons we recommend changing at least the password and API key.
+
+:::{note}
+To connect to an old Argilla server using client `>=1.3.0`, you should specify the default user API key `rubrix.apikey`.
+Otherwise, connections will fail with an Unauthorized server error.
+:::
 
 ### Override default API key
 
@@ -105,7 +110,7 @@ To configure your Argilla instance for various users, you just need to create a 
   workspaces: ['client_projects'] # access to her user workspace and the client_projects workspace
 - username: user3
   hashed_password: <generated-hashed-password> # See the previous section above
-  api_key: "ThisIsTheUser2APIKEY" # this user can access all workspaces (including
+  api_key: "ThisIsTheUser2APIKEY" # this user can access all workspaces
 - ...
 ```
 
