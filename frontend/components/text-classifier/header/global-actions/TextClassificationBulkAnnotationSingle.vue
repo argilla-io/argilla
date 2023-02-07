@@ -44,7 +44,6 @@
             >
               {{ option }}
             </base-button>
-
             <p v-if="!filterSearch(options).length">0 results</p>
           </div>
         </div>
