@@ -120,7 +120,7 @@ If everything went well, the configured users can now log in and their annotatio
 
 ### Using docker-compose
 
-Make sure you create the yaml file above in the same folder as your `docker-compose.yaml`. You can download the `docker-compose` from this [URL](https://raw.githubusercontent.com/argilla-io/argilla/develop/docker-compose.yaml):
+Make sure you create the yaml file above in the same folder as your `docker-compose.yaml`. You can download the `docker-compose` from this [URL](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml):
 
 Then open the provided ``docker-compose.yaml`` and configure your Argilla instance as follows:
 
