@@ -10,19 +10,20 @@
             class="d-none"
             @change="onChange(input)"
           />
-          <label :for="input.id" class="label-icon">
+          <div @click="onRemove(input)" class="label-icon">
             <svgicon
-              v-if="input.selected"
+              v-if="input.record_ids.size"
               name="close"
               width="15"
               height="15"
             />
-          </label>
+          </div>
           <label
             :for="input.id"
             class="label-text"
             :class="input.selected ? '--selected' : null"
-            >{{ input.label }}
+          >
+            {{ input.label }}
             <span v-if="input.record_ids.size">
               ({{ input.record_ids.size }})
             </span>
@@ -62,13 +63,20 @@ export default {
   },
   methods: {
     onSubmit() {
-      this.$emit("on-submit", this.inputs);
+      this.$emit("on-submit");
     },
-    onChange({ id, selected }) {
-      this.$emit("on-change", { ID: id, VALUE: selected });
+    onChange({ id, selected, record_ids }) {
+      this.$emit("on-change", {
+        ID: id,
+        VALUE: selected,
+        RECORD_IDS: record_ids,
+      });
     },
     onReset() {
       this.$emit("on-reset");
+    },
+    onRemove({ id }) {
+      this.$emit("on-remove", { ID: id });
     },
   },
 };

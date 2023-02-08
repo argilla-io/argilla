@@ -19,6 +19,7 @@
             :key="searchText"
             :hasInputsChanged="hasAnnotationsChanged"
             @on-change="updateLastSelectedAnnotation"
+            @on-remove="removeAnnotation"
             @on-submit="updateAnnotations"
             @on-reset="resetLastSelectedAnnotation"
           />
@@ -41,13 +42,17 @@ export default {
       type: Array,
       required: true,
     },
+    selectedRecordIds: {
+      type: Set,
+      required: true,
+    },
   },
   data() {
     return {
       clonedInputs: [],
       showDropdown: false,
       searchText: null,
-      lastSelectedAnnotation: { ID: null, VALUE: null },
+      lastSelectedAnnotation: { ID: null, VALUE: null, RECORD_IDS: null },
     };
   },
   computed: {
@@ -60,6 +65,7 @@ export default {
       const updatedAnnotations = this.clonedInputs.map((input) => {
         if (input.id === this.lastSelectedAnnotation.ID) {
           input.selected = this.lastSelectedAnnotation.VALUE;
+          input.record_ids = this.lastSelectedAnnotation.RECORD_IDS;
         }
         return input;
       });
@@ -77,7 +83,10 @@ export default {
       return !!this.filteredInputs.length;
     },
     hasAnnotationsChanged() {
-      return _.isEqual(this.sortedInputsBySelectedRecords, this.updatedAnnotations);
+      return _.isEqual(
+        this.sortedInputsBySelectedRecords,
+        this.updatedAnnotations
+      );
     },
   },
   updated() {
@@ -93,16 +102,27 @@ export default {
     isStringOfCharsContainsSubstring(stringOfChars, substring) {
       return stringOfChars.toUpperCase().includes(substring?.toUpperCase());
     },
-    updateAnnotations($event) {
+    updateAnnotations() {
       this.toggleDropdown(false);
-      this.$emit("on-update-annotations", $event);
+      this.$emit("on-update-annotations", this.updatedAnnotations);
     },
     resetLastSelectedAnnotation() {
-      this.updateLastSelectedAnnotation({ ID: null, VALUE: null });
+      this.updateLastSelectedAnnotation({
+        ID: null,
+        VALUE: null,
+        RECORD_IDS: null,
+      });
       this.clonedInputs = structuredClone(this.sortedInputsBySelectedRecords);
     },
-    updateLastSelectedAnnotation({ ID, VALUE }) {
-      this.lastSelectedAnnotation = { ID, VALUE };
+    updateLastSelectedAnnotation({ ID, VALUE, RECORD_IDS }) {
+      this.lastSelectedAnnotation = {
+        ID,
+        VALUE,
+        RECORD_IDS: VALUE ? this.selectedRecordIds : RECORD_IDS,
+      };
+    },
+    removeAnnotation({ ID }) {
+      this.lastSelectedAnnotation = { ID, VALUE: false, RECORD_IDS: [] };
     },
     resetSearchText() {
       this.searchText = null;
