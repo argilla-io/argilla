@@ -44,13 +44,18 @@ export default {
   },
   data() {
     return {
+      clonedInputs: [],
       showDropdown: false,
       searchText: null,
       lastSelectedAnnotation: { ID: null, VALUE: null },
-      clonedInputs: [],
     };
   },
   computed: {
+    sortedInputsBySelectedRecords() {
+      return this.inputs.sort((a, b) =>
+        a.record_ids.size > b.record_ids.size ? -1 : 1
+      );
+    },
     updatedAnnotations() {
       const updatedAnnotations = this.clonedInputs.map((input) => {
         if (input.id === this.lastSelectedAnnotation.ID) {
@@ -60,24 +65,19 @@ export default {
       });
       return updatedAnnotations;
     },
-    sortUpdatedAnnotations() {
-      return this.updatedAnnotations.sort((a, b) =>
-        a.record_ids.size > b.record_ids.size ? -1 : 1
-      );
-    },
     filteredInputs() {
       if (this.searchText) {
-        return this.sortUpdatedAnnotations.filter((input) =>
+        return this.updatedAnnotations.filter((input) =>
           this.isStringOfCharsContainsSubstring(input.label, this.searchText)
         );
       }
-      return this.sortUpdatedAnnotations;
+      return this.updatedAnnotations;
     },
     isInputsNotEmpty() {
       return !!this.filteredInputs.length;
     },
     hasAnnotationsChanged() {
-      return _.isEqual(this.inputs, this.sortUpdatedAnnotations);
+      return _.isEqual(this.sortedInputsBySelectedRecords, this.updatedAnnotations);
     },
   },
   updated() {
@@ -99,7 +99,7 @@ export default {
     },
     resetLastSelectedAnnotation() {
       this.updateLastSelectedAnnotation({ ID: null, VALUE: null });
-      this.clonedInputs = structuredClone(this.inputs);
+      this.clonedInputs = structuredClone(this.sortedInputsBySelectedRecords);
     },
     updateLastSelectedAnnotation({ ID, VALUE }) {
       this.lastSelectedAnnotation = { ID, VALUE };
