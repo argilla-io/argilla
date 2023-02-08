@@ -270,10 +270,11 @@ class TestDatasetForTextClassification:
         records = request.getfixturevalue(records)
         expected_dataset = ar.DatasetForTextClassification(records)
 
+        expected_dataset.prepare_for_training(train_size=0.5)
         dataset_ds = expected_dataset.to_datasets()
 
         assert isinstance(dataset_ds, datasets.Dataset)
-        print(dataset_ds.column_names)
+
         assert dataset_ds.column_names == [
             "text",
             "inputs",
