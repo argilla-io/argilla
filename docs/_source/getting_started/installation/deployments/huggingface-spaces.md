@@ -16,7 +16,11 @@ You can deploy Argilla on Spaces with just a few clicks:
     <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
 </a>
 
-You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to setup the visibility to `Public`.
+You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to setup the visibility to `Public`. If you plan to use the Space frequently or handle large datasets for data labeling and feedback collection, upgrading the hardware with a more powerful CPU and increased RAM can enhance performance.
+
+<div class="flex justify-center">
+<img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-new-space.png"/>
+</div>
 
 :::{tip}
 If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file. 
