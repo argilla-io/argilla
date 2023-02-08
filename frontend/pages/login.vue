@@ -45,7 +45,7 @@
             target="_blank"
             >this guide</a
           >
-          to know more about usage and configuration options.
+          to learn more about usage and configuration options.
         </p>
         <base-button type="submit" class="form__button primary"
           >Enter</base-button
