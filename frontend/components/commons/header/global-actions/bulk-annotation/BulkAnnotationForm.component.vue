@@ -63,13 +63,14 @@ export default {
   },
   methods: {
     onSubmit() {
-      this.$emit("on-submit");
+      this.$emit("on-submit", this.inputs);
     },
-    onChange({ id, selected, record_ids }) {
+    onChange({ id, selected, record_ids, removed }) {
       this.$emit("on-change", {
         ID: id,
         VALUE: selected,
         RECORD_IDS: record_ids,
+        REMOVED: removed,
       });
     },
     onReset() {

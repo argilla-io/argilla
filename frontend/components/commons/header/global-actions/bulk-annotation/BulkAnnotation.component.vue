@@ -52,7 +52,7 @@ export default {
       clonedInputs: [],
       showDropdown: false,
       searchText: null,
-      lastSelectedAnnotation: { ID: null, VALUE: null, RECORD_IDS: null },
+      lastSelectedAnnotation: { ID: null, VALUE: null, RECORD_IDS: null, REMOVED: null },
     };
   },
   computed: {
@@ -66,6 +66,7 @@ export default {
         if (input.id === this.lastSelectedAnnotation.ID) {
           input.selected = this.lastSelectedAnnotation.VALUE;
           input.record_ids = this.lastSelectedAnnotation.RECORD_IDS;
+          input.removed = this.lastSelectedAnnotation.REMOVED;
         }
         return input;
       });
@@ -102,27 +103,34 @@ export default {
     isStringOfCharsContainsSubstring(stringOfChars, substring) {
       return stringOfChars.toUpperCase().includes(substring?.toUpperCase());
     },
-    updateAnnotations() {
+    updateAnnotations(updatedAnnotations) {
       this.toggleDropdown(false);
-      this.$emit("on-update-annotations", this.updatedAnnotations);
+      this.$emit("on-update-annotations", updatedAnnotations);
     },
     resetLastSelectedAnnotation() {
       this.updateLastSelectedAnnotation({
         ID: null,
         VALUE: null,
         RECORD_IDS: null,
+        REMOVED: false,
       });
       this.clonedInputs = structuredClone(this.sortedInputsBySelectedRecords);
     },
-    updateLastSelectedAnnotation({ ID, VALUE, RECORD_IDS }) {
+    updateLastSelectedAnnotation({ ID, VALUE, RECORD_IDS, REMOVED }) {
       this.lastSelectedAnnotation = {
         ID,
         VALUE,
         RECORD_IDS: VALUE ? this.selectedRecordIds : RECORD_IDS,
+        REMOVED,
       };
     },
     removeAnnotation({ ID }) {
-      this.lastSelectedAnnotation = { ID, VALUE: false, RECORD_IDS: [] };
+      this.lastSelectedAnnotation = {
+        ID,
+        VALUE: false,
+        RECORD_IDS: [],
+        REMOVED: true,
+      };
     },
     resetSearchText() {
       this.searchText = null;
