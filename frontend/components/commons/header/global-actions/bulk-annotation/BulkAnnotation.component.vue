@@ -60,19 +60,24 @@ export default {
       });
       return updatedAnnotations;
     },
+    sortUpdatedAnnotations() {
+      return this.updatedAnnotations.sort((a, b) =>
+        a.record_ids.size > b.record_ids.size ? -1 : 1
+      );
+    },
     filteredInputs() {
       if (this.searchText) {
-        return this.updatedAnnotations.filter((input) =>
+        return this.sortUpdatedAnnotations.filter((input) =>
           this.isStringOfCharsContainsSubstring(input.label, this.searchText)
         );
       }
-      return this.updatedAnnotations;
+      return this.sortUpdatedAnnotations;
     },
     isInputsNotEmpty() {
       return !!this.filteredInputs.length;
     },
     hasAnnotationsChanged() {
-      return _.isEqual(this.inputs, this.updatedAnnotations);
+      return _.isEqual(this.inputs, this.sortUpdatedAnnotations);
     },
   },
   updated() {
