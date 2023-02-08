@@ -26,6 +26,7 @@
         :isMultiLabel="isMultiLabel"
         @discard-records="onDiscard"
         @validate-records="onValidate"
+        @clear-records="onClear"
         @on-select-labels="onSelectLabels($event)"
       />
       <create-new-action v-if="isCreationLabel" @new-label="onNewLabel" />
@@ -80,6 +81,9 @@ export default {
     },
     onDiscard($event) {
       this.$emit("discard-records", $event);
+    },
+    onClear($event) {
+      this.$emit("clear-records", $event);
     },
     onSelectLabels($event) {
       this.$emit("on-select-labels", $event);

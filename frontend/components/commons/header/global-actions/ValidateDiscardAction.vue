@@ -35,17 +35,26 @@
       @selected="onSelectLabels($event)"
     />
     <base-button
-      :disabled="!allowValidation"
-      class="primary outline small validate-discard-actions__button"
+      class="clear validate-discard-actions__button"
       @click="onValidate"
+      data-title="Validate"
     >
-      Validate
+      <svgicon name="validate" />
     </base-button>
     <base-button
-      class="primary outline small validate-discard-actions__button"
+      class="clear validate-discard-actions__button"
       @click="onDiscard"
+      data-title="Discard"
     >
-      Discard
+      <svgicon name="discard" />
+    </base-button>
+    <base-button
+      v-if="datasetTask !== 'Text2Text'"
+      class="clear validate-discard-actions__button"
+      @click="onClear"
+      data-title="Clear"
+    >
+      <svgicon name="clear" />
     </base-button>
     <p v-if="selectedRecords.length" class="validate-discard-actions__text">
       Actions will apply to the
@@ -55,6 +64,9 @@
 </template>
 
 <script>
+import "assets/icons/validate";
+import "assets/icons/discard";
+import "assets/icons/clear";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { mapActions } from "vuex";
 
@@ -79,10 +91,6 @@ export default {
     availableLabels: {
       type: Array,
       default: () => [],
-    },
-    allowValidation: {
-      type: Boolean,
-      default: true,
     },
   },
   data() {
@@ -127,6 +135,9 @@ export default {
     onDiscard() {
       this.$emit("discard-records", this.selectedRecords);
     },
+    onClear() {
+      this.$emit("clear-records", this.selectedRecords);
+    },
     async onValidate() {
       this.$emit("validate-records", this.selectedRecords);
     },
@@ -140,6 +151,7 @@ export default {
 <style lang="scss" scoped>
 .validate-discard-actions {
   display: flex;
+  gap: $base-space;
   align-items: center;
   width: 100%;
   .re-checkbox {
@@ -162,17 +174,6 @@ export default {
       }
     }
   }
-  &__button {
-    margin-left: $base-space;
-    margin-right: $base-space;
-    cursor: pointer;
-    &:hover {
-      border-color: $primary-color;
-    }
-    &:first-of-type {
-      margin-right: 0;
-    }
-  }
   &__text {
     @include font-size(13px);
     margin: 0 $base-space;
@@ -182,11 +183,23 @@ export default {
       color: $black-54;
     }
   }
+  &__button {
+    .svg-icon {
+      color: $black-54;
+      height: 18px;
+      width: 18px;
+    }
+    &[data-title] {
+      overflow: visible;
+      position: relative;
+      @extend %has-tooltip--top;
+    }
+  }
   &--disabled {
     .validate-discard-actions__button,
     .validate-discard-actions__select {
       pointer-events: none;
-      opacity: 0.5;
+      opacity: 0.3;
     }
   }
 }

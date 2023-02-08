@@ -33,6 +33,7 @@
       :isCreationLabel="allowLabelCreation"
       @discard-records="onDiscard"
       @validate-records="onValidate"
+      @clear-records="onClear"
       @new-label="onNewLabel"
     />
   </div>
@@ -73,6 +74,7 @@ export default {
     ...mapActions({
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
+      updateRecords: "entities/datasets/updateDatasetRecords",
     }),
 
     async onDiscard(records) {
@@ -94,6 +96,21 @@ export default {
             },
           };
         }),
+      });
+    },
+    async onClear(records) {
+      const clearedRecords = records.map((record) => {
+        return {
+          ...record,
+          annotatedEntities: [],
+          annotation: null,
+          selected: true,
+          status: "Edited",
+        };
+      });
+      this.updateRecords({
+        dataset: this.dataset,
+        records: clearedRecords,
       });
     },
     async onNewLabel(label) {
