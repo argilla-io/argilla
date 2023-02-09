@@ -265,10 +265,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - image: argilla/argilla-server
-            dockerfile: release.Dockerfile
-            readme: README.md
-            platforms: linux/amd64
+          #- image: argilla/argilla-server
+          #  dockerfile: release.Dockerfile
+          #  readme: README.md
+          #  platforms: linux/amd64
 
           - image: argilla/argilla-quickstart
             dockerfile: quickstart.Dockerfile
