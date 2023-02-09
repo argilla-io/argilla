@@ -98,7 +98,7 @@ export default {
           status: "Edited",
         };
 
-        const labelsToSend = this.formatLabelsForBulkAnnotation(
+        const labelsToSend = this.labelsFactoryBySingleOrMultiLabel(
           labels,
           labelsToRemove,
           record.currentAnnotation.labels
@@ -138,6 +138,19 @@ export default {
         });
       }
     },
+    labelsFactoryBySingleOrMultiLabel(
+      labels,
+      labelsToRemove,
+      currentAnnotationLabels
+    ) {
+      return this.isMultiLabel
+        ? this.formatLabelsForBulkAnnotation(
+            labels,
+            labelsToRemove,
+            currentAnnotationLabels
+          )
+        : this.formatLabels(labels);
+    },
     formatLabelsForBulkAnnotation(
       labels,
       labelsToRemove,
@@ -148,9 +161,11 @@ export default {
       let labelsToSend = [
         ...new Set([...formattedLabels, ...currentAnnotationLabels]),
       ];
-      labelsToSend = labelsToSend.filter(
-        (labelObj) => !labelsToRemove.includes(labelObj.class)
-      );
+      labelsToSend = labelsToRemove?.length
+        ? labelsToSend?.filter(
+            (labelObj) => !labelsToRemove.includes(labelObj.class)
+          )
+        : labelsToSend;
 
       return labelsToSend;
     },
