@@ -79,6 +79,7 @@ describe("TextClassificationBulkAnnotationComponent", () => {
         id: "Alcantarillado/Pluviales",
         label: "Alcantarillado/Pluviales",
         selected: true,
+        removed: false,
         unmodified: false,
       },
       {
@@ -86,6 +87,7 @@ describe("TextClassificationBulkAnnotationComponent", () => {
         id: "Alta",
         label: "Alta",
         selected: false,
+        removed: false,
         unmodified: false,
       },
       {
@@ -93,6 +95,7 @@ describe("TextClassificationBulkAnnotationComponent", () => {
         id: "Aplazamiento de pago",
         label: "Aplazamiento de pago",
         selected: false,
+        removed: false,
         unmodified: false,
       },
       {
@@ -100,6 +103,7 @@ describe("TextClassificationBulkAnnotationComponent", () => {
         id: "Atención recibida",
         label: "Atención recibida",
         selected: true,
+        removed: false,
         unmodified: false,
       },
     ]);
@@ -115,6 +119,7 @@ describe("TextClassificationBulkAnnotationComponent", () => {
         id: "Alcantarillado/Pluviales",
         label: "Alcantarillado/Pluviales",
         selected: true,
+        removed: false,
         unmodified: false,
       },
       {
@@ -122,6 +127,7 @@ describe("TextClassificationBulkAnnotationComponent", () => {
         id: "Alta",
         label: "Alta",
         selected: false,
+        removed: false,
         unmodified: false,
       },
       {
@@ -129,6 +135,7 @@ describe("TextClassificationBulkAnnotationComponent", () => {
         id: "Aplazamiento de pago",
         label: "Aplazamiento de pago",
         selected: false,
+        removed: false,
         unmodified: false,
       },
       {
@@ -136,6 +143,7 @@ describe("TextClassificationBulkAnnotationComponent", () => {
         id: "Atención recibida",
         label: "Atención recibida",
         selected: false,
+        removed: false,
         unmodified: false,
       },
     ];
