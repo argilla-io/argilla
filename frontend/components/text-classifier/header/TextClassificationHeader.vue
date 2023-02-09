@@ -44,6 +44,7 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { Notification } from "@/models/Notifications";
 export default {
   props: {
     datasetId: {
@@ -105,15 +106,29 @@ export default {
           },
         };
       });
-      const updatedRecords = {
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: records,
-      };
-      if (this.isMultiLabel) {
-        await this.updateRecords(updatedRecords);
-      } else {
-        await this.onValidate(records);
+
+      try {
+        if (this.isMultiLabel) {
+          const updatedRecords = {
+            dataset: this.dataset,
+            agent: this.$auth.user.username,
+            records: records,
+          };
+          await this.updateRecords(updatedRecords);
+        } else {
+          await this.onValidate(records);
+        }
+
+        Notification.dispatch("notify", {
+          message: "Success : The selected records are annotated !",
+          type: "success",
+        });
+      } catch (err) {
+        console.log(err);
+        return Notification.dispatch("notify", {
+          message: "Error : There was a problem on annotate records",
+          type: "error",
+        });
       }
     },
     async onDiscard(records) {
