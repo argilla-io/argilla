@@ -40,6 +40,7 @@
         :class="'validate-discard-actions__select'"
         :datasetId="datasetId"
         :records="selectedRecords"
+        :recordsIds="selectedRecordsIds"
         :labels="availableLabels"
         @on-update-annotations="onUpdateAnnotations"
       />
@@ -107,6 +108,11 @@ export default {
     selectedRecords() {
       // TODO: when record will be in own ORM table, replace next line by query ORM
       return this.visibleRecords.filter((record) => record.selected);
+    },
+    selectedRecordsIds() {
+      return new Set(
+        this.selectedRecords.reduce((acc, curr) => [...acc, curr.id], [])
+      );
     },
   },
   watch: {

@@ -42,7 +42,7 @@ export default {
       type: Array,
       required: true,
     },
-    selectedRecordIds: {
+    recordsIds: {
       type: Set,
       required: true,
     },
@@ -120,7 +120,7 @@ export default {
       this.lastSelectedAnnotation = {
         ID,
         VALUE,
-        RECORD_IDS: VALUE ? this.selectedRecordIds : RECORD_IDS,
+        RECORD_IDS: VALUE ? this.recordsIds : RECORD_IDS,
         REMOVED,
       };
     },

@@ -3,7 +3,7 @@
     <BulkAnnotationComponent
       class="bulk-annotation-component"
       :inputs="formattedLabelsForBulkAnnotationForm"
-      :selectedRecordIds="selectedRecordIds"
+      :recordsIds="recordsIds"
       @on-update-annotations="updateAnnotations"
     />
   </div>
@@ -21,6 +21,10 @@ export default {
       type: Array,
       required: true,
     },
+    recordsIds: {
+      type: Set,
+      required: true,
+    },
     labels: {
       type: Array,
       required: true,
@@ -29,7 +33,6 @@ export default {
   data() {
     return {
       labelsByRecordId: [],
-      selectedRecordIds: new Set(),
     };
   },
   computed: {
@@ -59,7 +62,6 @@ export default {
           labelsForForm.forEach((labelObj) => {
             if (labelObj.label === currLabelObj.class) {
               labelObj.record_ids.add(record.id);
-              this.selectedRecordIds.add(record.id);
               labelObj.selected = this.updateSelectedAttribute(
                 labelObj.record_ids.size
               );
