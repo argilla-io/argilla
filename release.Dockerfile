@@ -14,7 +14,7 @@ ENV UVICORN_PORT=6900
 COPY scripts/start_argilla_server.sh /
 
 RUN chmod +x /start_argilla_server.sh \
- && for wheel in /packages/*.whl; do pip install "$wheel"[server]; done
+    && for wheel in /packages/*.whl; do pip install "$wheel"[server]; done
 
 CMD /bin/bash /start_argilla_server.sh
 
