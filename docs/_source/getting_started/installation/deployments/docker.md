@@ -7,9 +7,8 @@ This guide explains how to launch the Elasticsearch backend and Argilla Server u
 
 First, you need to create a network to make both standalone containers visibles between them.
 Just run the folowing command:
-````bash
+```bash
 docker network create argilla-net
-````
 
 Setting up Elasticsearch (ES) via docker is straightforward.
 Simply run the following command:
