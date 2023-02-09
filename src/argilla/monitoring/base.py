@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import atexit
-import dataclasses
 import logging
 import random
 import threading

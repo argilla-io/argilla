@@ -97,7 +97,7 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
     assert response.status_code == 409, response.json()
 
     response = mocked_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json=request,
     )
 

@@ -21,7 +21,7 @@ from argilla.client.sdk.commons.errors import (
     ValidationApiError,
 )
 from argilla.server.settings import settings
-from tests.client.conftest import SUPPORTED_VECTOR_SEARCH, supported_vector_search
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient
 
 

@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from argilla.client.apis import AbstractApi
 from argilla.client.models import Record

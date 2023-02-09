@@ -15,7 +15,7 @@
 import logging
 from typing import Any, Dict
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, Request
 from fastapi.exception_handlers import http_exception_handler
 from pydantic import BaseModel
 

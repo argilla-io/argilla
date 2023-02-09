@@ -64,7 +64,7 @@ async def list_datasets(
     description="Create a new dataset",
 )
 async def create_dataset(
-    request: CreateDatasetRequest = Body(..., description=f"The request dataset info"),
+    request: CreateDatasetRequest = Body(..., description="The request dataset info"),
     ws_params: CommonTaskHandlerDependencies = Depends(),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     user: User = Security(auth.get_user, scopes=["create:datasets"]),

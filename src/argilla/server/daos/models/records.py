@@ -225,7 +225,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
             "score": self.scores,
         }
 
-    def dict(self, *args, **kwargs) -> "DictStrAny":
+    def dict(self, *args, **kwargs) -> Dict[str, Any]:
         """
         Extends base component dict extending object properties
         and user defined extended fields

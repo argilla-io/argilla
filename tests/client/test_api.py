@@ -15,7 +15,7 @@
 import concurrent.futures
 import datetime
 from time import sleep
-from typing import Any, Iterable, List
+from typing import Any, Iterable
 
 import datasets
 import httpx

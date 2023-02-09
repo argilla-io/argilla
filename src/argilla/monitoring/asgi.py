@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from argilla.monitoring.base import BaseMonitor
 
 try:
-    import starlette
+    import starlette  # noqa: F401
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
         "'starlette' must be installed to use the middleware feature! "

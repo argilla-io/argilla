@@ -21,7 +21,6 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.client.models import (
     Text2TextRecord,
     TextClassificationRecord,

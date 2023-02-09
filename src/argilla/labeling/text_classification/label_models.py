@@ -20,7 +20,6 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 
 from argilla import DatasetForTextClassification, TextClassificationRecord
-from argilla.client.datasets import Dataset
 from argilla.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
 
 _LOGGER = logging.getLogger(__name__)
@@ -368,7 +367,7 @@ class MajorityVoter(LabelModel):
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
         try:
-            import sklearn
+            import sklearn  # noqa: F401
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 "'sklearn' must be installed to compute the metrics! "
@@ -501,7 +500,7 @@ class Snorkel(LabelModel):
         self, weak_labels: WeakLabels, verbose: bool = True, device: str = "cpu"
     ):
         try:
-            import snorkel
+            import snorkel  # noqa: F401
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 "'snorkel' must be installed to use the `Snorkel` label model! "
@@ -764,8 +763,8 @@ class FlyingSquid(LabelModel):
 
     def __init__(self, weak_labels: WeakLabels, **kwargs):
         try:
-            import flyingsquid
-            import pgmpy
+            import flyingsquid  # noqa: F401
+            import pgmpy  # noqa: F401
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 "'flyingsquid' must be installed to use the `FlyingSquid` label model!"
@@ -1024,7 +1023,7 @@ class FlyingSquid(LabelModel):
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
         try:
-            import sklearn
+            import sklearn  # noqa: F401
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 "'sklearn' must be installed to compute the metrics! "

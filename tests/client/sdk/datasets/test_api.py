@@ -22,14 +22,8 @@ from argilla.client.sdk.commons.errors import (
     NotFoundApiError,
     ValidationApiError,
 )
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-    ValidationError,
-)
 from argilla.client.sdk.datasets.api import _build_response, get_dataset
-from argilla.client.sdk.datasets.models import Dataset, TaskType
+from argilla.client.sdk.datasets.models import Dataset
 from argilla.client.sdk.text_classification.models import TextClassificationBulkData
 
 
