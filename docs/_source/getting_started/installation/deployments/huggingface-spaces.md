@@ -23,7 +23,7 @@ You need to define the **Owner** (your personal account or an organization), a *
 </div>
 
 :::{tip}
-If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file. 
+If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file.
 :::
 
 You'll see the `Building` status and once it becomes `Running` your space is ready to go. If you don't see the Argilla login UI refresh the page.
