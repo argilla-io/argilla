@@ -12,6 +12,7 @@ const options = {
       "Aplazamiento de pago",
       "Atención recibida",
     ],
+    recordsIds: new Set(["b5a23810-10e9-4bff-adf3-447a45667299"]),
     records: [
       {
         id: "b5a23810-10e9-4bff-adf3-447a45667299",
