@@ -34,17 +34,15 @@
       :options="availableLabels"
       @selected="onSelectLabels($event)"
     />
-    <div class="bulk-annotation-wrapper">
-      <TextClassificationBulkAnnotationComponent
-        v-if="datasetTask === 'TextClassification' && isMultiLabel"
-        :class="'validate-discard-actions__select'"
-        :datasetId="datasetId"
-        :records="selectedRecords"
-        :recordsIds="selectedRecordsIds"
-        :labels="availableLabels"
-        @on-update-annotations="onUpdateAnnotations"
-      />
-    </div>
+    <TextClassificationBulkAnnotationComponent
+      v-if="datasetTask === 'TextClassification' && isMultiLabel"
+      :class="'validate-discard-actions__select'"
+      :datasetId="datasetId"
+      :records="selectedRecords"
+      :recordsIds="selectedRecordsIds"
+      :labels="availableLabels"
+      @on-update-annotations="onUpdateAnnotations"
+    />
     <base-button
       :disabled="!allowValidation"
       class="primary outline small validate-discard-actions__button"
@@ -197,7 +195,7 @@ export default {
       display: flex;
       gap: $base-space * 2;
       border: none;
-      padding: $base-space;
+      padding: 5px $base-space;
       height: auto;
       .svg-icon {
         color: $black-54;
