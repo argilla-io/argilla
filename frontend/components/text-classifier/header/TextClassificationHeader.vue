@@ -125,7 +125,7 @@ export default {
         });
       } catch (err) {
         console.log(err);
-        return Notification.dispatch("notify", {
+        Notification.dispatch("notify", {
           message: "Error : There was a problem on annotate records",
           type: "error",
         });
