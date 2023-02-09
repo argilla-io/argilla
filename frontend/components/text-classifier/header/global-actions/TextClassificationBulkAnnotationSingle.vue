@@ -105,6 +105,7 @@ export default {
   padding: calc($base-space / 2) $base-space;
   @include truncate;
   width: auto;
+  min-width: 50px;
   margin-right: auto;
   @include font-size(13px);
   font-weight: 500;

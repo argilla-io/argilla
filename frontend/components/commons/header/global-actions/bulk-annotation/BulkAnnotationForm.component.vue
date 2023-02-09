@@ -126,17 +126,20 @@ form {
 }
 
 .label-text {
+  position: relative;
   cursor: pointer;
   background: #f0f0fe;
   border-radius: 8px;
   color: #4c4ea3;
-  padding: calc($base-space / 2) $base-space;
+  padding: calc($base-space / 2) $base-space * 3.5 calc($base-space / 2)
+    $base-space;
   @include truncate;
   width: auto;
   @include font-size(13px);
-  padding-right: $base-space * 2;
   font-weight: 500;
   span {
+    position: absolute;
+    right: calc($base-space / 2);
     @include font-size(12px);
   }
   &:hover {
