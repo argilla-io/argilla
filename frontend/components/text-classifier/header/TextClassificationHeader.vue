@@ -97,7 +97,7 @@ export default {
           selected: true,
           status: "Edited",
         };
-        console.log(record.currentAnnotation, record);
+
         const labelsToSend = this.labelsFactoryBySingleOrMultiLabel(
           labels,
           labelsToRemove,
