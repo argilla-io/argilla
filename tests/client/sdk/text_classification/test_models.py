@@ -16,7 +16,6 @@ import socket
 from datetime import datetime
 
 import pytest
-
 from argilla.client.models import TextClassificationRecord, TokenAttributions
 from argilla.client.sdk.text_classification.models import (
     ClassPrediction,

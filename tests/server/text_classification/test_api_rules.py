@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.server.apis.v0.models.text_classification import (
     CreateLabelingRule,
     LabelingRule,

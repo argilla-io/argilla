@@ -14,7 +14,6 @@
 #  limitations under the License.
 import httpx
 import pytest
-
 from argilla import load
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import (

@@ -16,7 +16,6 @@
 from datetime import datetime
 
 import pytest
-
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.apis.v0.models.text_classification import (
@@ -28,6 +27,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
 from argilla.server.commons.models import PredictionStatus
+
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 

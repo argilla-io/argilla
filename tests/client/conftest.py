@@ -15,10 +15,9 @@
 import datetime
 from typing import List
 
-import pytest
-
 import argilla
 import argilla as ar
+import pytest
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,

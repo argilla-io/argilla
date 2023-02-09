@@ -39,11 +39,11 @@ from argilla.server.services.tasks.text_classification.model import (
 )
 from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationDataset,
+    TokenAttributions,
 )
 from argilla.server.services.tasks.text_classification.model import (
     TextClassificationAnnotation as _TextClassificationAnnotation,
 )
-from argilla.server.services.tasks.text_classification.model import TokenAttributions
 
 
 class UpdateLabelingRule(BaseModel):

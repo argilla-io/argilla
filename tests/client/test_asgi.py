@@ -16,17 +16,16 @@
 import time
 from typing import Any, Dict
 
-from fastapi import FastAPI
-from starlette.applications import Starlette
-from starlette.responses import JSONResponse, PlainTextResponse
-from starlette.testclient import TestClient
-
 import argilla
 from argilla.monitoring.asgi import (
     ArgillaLogHTTPMiddleware,
     text_classification_mapper,
     token_classification_mapper,
 )
+from fastapi import FastAPI
+from starlette.applications import Starlette
+from starlette.responses import JSONResponse, PlainTextResponse
+from starlette.testclient import TestClient
 
 
 def test_argilla_middleware_for_text_classification(

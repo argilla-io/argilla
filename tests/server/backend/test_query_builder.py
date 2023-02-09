@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.server.daos.backend.search.model import (
     SortableField,
     SortConfig,

@@ -14,8 +14,6 @@
 #  limitations under the License.
 import httpx
 import pytest
-from httpx import Response as HttpxResponse
-
 from argilla.client.sdk.commons.api import (
     build_bulk_response,
     build_data_response,
@@ -29,6 +27,7 @@ from argilla.client.sdk.commons.models import (
     ValidationError,
 )
 from argilla.client.sdk.text_classification.models import TextClassificationRecord
+from httpx import Response as HttpxResponse
 
 
 def test_text2text_bulk(sdk_client, mocked_client, bulk_text2text_data, monkeypatch):

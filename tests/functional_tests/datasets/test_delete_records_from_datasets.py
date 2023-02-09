@@ -15,7 +15,6 @@
 import time
 
 import pytest
-
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 
 

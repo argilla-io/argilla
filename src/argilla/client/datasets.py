@@ -15,7 +15,7 @@
 import functools
 import logging
 import random
-from typing import Any, Dict, List, Optional, Tuple, Type, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
 from pkg_resources import parse_version
@@ -33,8 +33,8 @@ from argilla.utils.span_utils import SpanUtils
 
 if TYPE_CHECKING:
     import datasets
-    import spacy
     import pandas
+    import spacy
 
 _LOGGER = logging.getLogger(__name__)
 

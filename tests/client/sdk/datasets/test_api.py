@@ -14,7 +14,6 @@
 #  limitations under the License.
 import httpx
 import pytest
-
 from argilla._constants import DEFAULT_API_KEY
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (

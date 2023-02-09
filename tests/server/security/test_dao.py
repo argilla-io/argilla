@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla._constants import DEFAULT_API_KEY
 from argilla.server.security.auth_provider.local.users.service import create_users_dao
 

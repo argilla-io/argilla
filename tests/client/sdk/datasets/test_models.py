@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-
 from argilla.client.sdk.datasets.models import Dataset, TaskType
 from argilla.server.apis.v0.models.datasets import Dataset as ServerDataset
 

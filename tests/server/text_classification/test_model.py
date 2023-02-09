@@ -13,8 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-from pydantic import ValidationError
-
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationAnnotation,
@@ -27,6 +25,7 @@ from argilla.server.services.tasks.text_classification.model import (
     ClassPrediction,
     ServiceTextClassificationRecord,
 )
+from pydantic import ValidationError
 
 
 def test_flatten_metadata():

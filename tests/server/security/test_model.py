@@ -13,10 +13,9 @@
 #  limitations under the License.
 
 import pytest
-from pydantic import ValidationError
-
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.security.model import User
+from pydantic import ValidationError
 
 
 @pytest.mark.parametrize("email", ["my@email.com", "infra@recogn.ai"])

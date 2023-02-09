@@ -12,14 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla
+import pytest
 from argilla import TokenClassificationRecord
 from argilla.client import api
 from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
+
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient
 

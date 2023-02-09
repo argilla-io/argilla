@@ -19,6 +19,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
 )
 from argilla.server.commons.models import TaskType
+
 from tests.helpers import SecuredClient
 
 

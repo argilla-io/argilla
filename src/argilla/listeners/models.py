@@ -13,12 +13,11 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from prodict import Prodict
 
 from argilla.client.models import Record
-
 
 if TYPE_CHECKING:
     from argilla.listeners import RGDatasetListener

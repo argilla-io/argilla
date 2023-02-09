@@ -13,12 +13,11 @@
 #  limitations under the License.
 
 import pytest
-from fastapi.security import SecurityScopes
-
 from argilla._constants import DEFAULT_API_KEY
 from argilla.server.security.auth_provider.local.provider import (
     create_local_auth_provider,
 )
+from fastapi.security import SecurityScopes
 
 localAuth = create_local_auth_provider()
 security_Scopes = SecurityScopes
