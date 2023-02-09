@@ -493,7 +493,7 @@ class Argilla:
             )
 
         try:
-            records, dataset_class = self._load_records_new_fashion(
+            return self._load_records_new_fashion(
                 name=name,
                 query=query,
                 vector=vector,
@@ -514,20 +514,14 @@ class Argilla:
                 f"`pip install argilla=={err.api_version}`",
                 category=UserWarning,
             )
-            records, dataset_class = self._load_records_old_fashion(
+
+            return self._load_records_old_fashion(
                 name=name,
                 query=query,
                 ids=ids,
                 limit=limit,
                 id_from=id_from,
             )
-
-        try:
-            records_sorted_by_id = sorted(records, key=lambda x: x.id)
-        # record ids can be a mix of int/str -> sort all as str type
-        except TypeError:
-            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
-        return dataset_class(records_sorted_by_id)
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
@@ -642,7 +636,7 @@ class Argilla:
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
-    ) -> Tuple[list, Type]:
+    ) -> Dataset:
         from argilla.client.sdk.text2text import api as text2text_api
         from argilla.client.sdk.text2text.models import Text2TextQuery
         from argilla.client.sdk.text_classification import (
@@ -689,7 +683,7 @@ class Argilla:
         )
 
         records = [sdk_record.to_client() for sdk_record in response.parsed]
-        return records, dataset_class
+        return dataset_class(self.__sort_records_by_id__(records))
 
     def _load_records_new_fashion(
         self,
@@ -699,7 +693,7 @@ class Argilla:
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
-    ) -> Tuple[list, Type]:
+    ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
         task = dataset.task
 
@@ -739,8 +733,7 @@ class Argilla:
                 query_text=query,
                 vector=vector_search,
             )
-
-            return results.records, dataset_class
+            return dataset_class(results.records)
 
         records = self.datasets.scan(
             name=name,
@@ -752,4 +745,12 @@ class Argilla:
             ids=ids,
         )
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
-        return records, dataset_class
+        return dataset_class(self.__sort_records_by_id__(records))
+
+    def __sort_records_by_id__(self, records: list) -> list:
+        try:
+            records_sorted_by_id = sorted(records, key=lambda x: x.id)
+        # record ids can be a mix of int/str -> sort all as str type
+        except TypeError:
+            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
+        return records_sorted_by_id
