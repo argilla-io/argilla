@@ -38,8 +38,9 @@ class InputValueError(BaseClientError):
 
 
 class ApiCompatibilityError(BaseClientError):
-    def __init__(self, min_version: str):
+    def __init__(self, min_version: str, api_version: str):
         self.min_version = min_version
+        self.api_version = api_version
 
     def __str__(self):
         return (
