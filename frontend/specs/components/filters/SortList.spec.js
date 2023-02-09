@@ -3,6 +3,7 @@ import SortList from "@/components/commons/header/filters/SortList";
 
 function mountSortList() {
   return mount(SortList, {
+    stubs: ["SortFilter", "base-button"],
     propsData: {
       sort: [
         {

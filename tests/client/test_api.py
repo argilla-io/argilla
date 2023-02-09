@@ -29,13 +29,14 @@ from argilla._constants import (
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client import api
-from argilla.client.api import InputValueError
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     BaseClientError,
     ForbiddenApiError,
     GenericApiError,
+    HttpResponseError,
+    InputValueError,
     NotFoundApiError,
     UnauthorizedApiError,
     ValidationApiError,
@@ -98,14 +99,21 @@ def test_init_correct(mock_response_200):
     It checks if the _client created is a argillaClient object.
     """
 
-    assert api.active_api()._client == AuthenticatedClient(
-        base_url="http://localhost:6900", token=DEFAULT_API_KEY, timeout=60.0
+    assert api.active_api().http_client == AuthenticatedClient(
+        base_url="http://localhost:6900",
+        token=DEFAULT_API_KEY,
+        timeout=60.0,
     )
 
-    assert api.__ACTIVE_API__._user == api.User(username="booohh")
+    assert api.active_api().user == User(username="booohh")
 
-    api.init(api_url="mock_url", api_key="mock_key", workspace="mock_ws", timeout=42)
-    assert api.__ACTIVE_API__._client == AuthenticatedClient(
+    api.init(
+        api_url="mock_url",
+        api_key="mock_key",
+        workspace="mock_ws",
+        timeout=42,
+    )
+    assert api.active_api().http_client == AuthenticatedClient(
         base_url="mock_url",
         token="mock_key",
         timeout=42,
@@ -126,7 +134,7 @@ def test_init_environment_url(mock_response_200, monkeypatch):
     monkeypatch.setenv("ARGILLA_WORKSPACE", "mock_workspace")
     api.init()
 
-    assert api.__ACTIVE_API__._client == AuthenticatedClient(
+    assert api.active_api()._client == AuthenticatedClient(
         base_url="mock_url",
         token="mock_key",
         timeout=60,
@@ -143,7 +151,7 @@ def test_trailing_slash(mock_response_200):
     It checks the trailing slash is removed in all cases
     """
     api.init(api_url="http://mock.com/")
-    assert api.__ACTIVE_API__._client.base_url == "http://mock.com"
+    assert api.active_api()._client.base_url == "http://mock.com"
 
 
 def test_log_something(monkeypatch, mocked_client):
@@ -207,7 +215,8 @@ def test_not_found_response(mocked_client):
 
 def test_log_without_name(mocked_client):
     with pytest.raises(
-        api.InputValueError, match="Empty dataset name has been passed as argument."
+        InputValueError,
+        match="Empty dataset name has been passed as argument.",
     ):
         api.log(
             ar.TextClassificationRecord(
@@ -220,7 +229,8 @@ def test_log_without_name(mocked_client):
 def test_log_passing_empty_records_list(mocked_client):
 
     with pytest.raises(
-        api.InputValueError, match="Empty record list has been passed as argument."
+        InputValueError,
+        match="Empty record list has been passed as argument.",
     ):
         api.log(records=[], name="ds")
 
@@ -290,6 +300,7 @@ def test_log_background_with_error(
         (404, NotFoundApiError),
         (422, ValidationApiError),
         (500, GenericApiError),
+        (413, HttpResponseError),
     ],
 )
 def test_delete_with_errors(mocked_client, monkeypatch, status, error_type):
@@ -671,7 +682,7 @@ def test_client_workspace(mocked_client):
             api.set_workspace(None)
 
         # Mocking user
-        api.__ACTIVE_API__._user.workspaces = ["a", "b"]
+        api.active_api().user.workspaces = ["a", "b"]
 
         with pytest.raises(Exception, match="Wrong provided workspace c"):
             api.set_workspace("c")

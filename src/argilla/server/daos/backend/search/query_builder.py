@@ -11,7 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import logging
 import re
 from enum import Enum
@@ -34,6 +33,8 @@ from argilla.server.daos.backend.search.model import (
 
 class HighlightParser:
 
+    _SEARCH_KEYWORDS_FIELD = "search_keywords"
+
     __HIGHLIGHT_PRE_TAG__ = "<@@-ar-key>"
     __HIGHLIGHT_POST_TAG__ = "</@@-ar-key>"
     __HIGHLIGHT_VALUES_REGEX__ = re.compile(
@@ -43,6 +44,10 @@ class HighlightParser:
     __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(
         rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
     )
+
+    @property
+    def search_keywords_field(self) -> str:
+        return self._SEARCH_KEYWORDS_FIELD
 
     @classmethod
     def build_query_highlight(cls):
@@ -223,7 +228,13 @@ class EsQueryBuilder:
         if source:
             es_query["_source"] = source
 
-        if highlight and not include_fields:
+        if highlight and (
+            not include_fields
+            # Enable highlight when requesting ALL fields
+            # or specific request the search_keywords one
+            or "*" in include_fields
+            or highlight.search_keywords_field in include_fields
+        ):
             es_query["highlight"] = highlight.build_query_highlight()
 
         if hasattr(query, "vector") and query.vector is not None:

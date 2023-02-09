@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <span>
+  <div v-if="dataset">
     <div class="content">
       <slot name="header" />
       <div class="results-scroll" id="scroll">
@@ -32,20 +32,15 @@
             <slot name="results-header" />
             <similarity-record-reference-component
               v-if="referenceRecordObj && !showLoader"
-              :dataset="dataset"
+              :datasetId="datasetId"
+              :datasetTask="datasetTask"
               :referenceRecord="referenceRecordObj"
               @search-records="searchRecords"
               @show-record-info-modal="onShowRecordInfoModal"
-            >
-              <slot
-                name="record"
-                :record="referenceRecordObj"
-                :isReferenceRecord="true"
-              />
-            </similarity-record-reference-component>
+            />
             <results-loading
               v-if="showLoader"
-              :size="dataset.viewSettings.pagination.size"
+              :size="viewSettings.pagination.size"
             />
             <results-empty v-else-if="dataset.results.total === 0" />
           </template>
@@ -63,29 +58,20 @@
             >
               <results-record
                 :key="`${dataset.name}-${item.id}`"
-                :dataset="dataset"
-                :item="item"
+                :datasetId="datasetId"
+                :datasetTask="dataset.task"
+                :record="item"
                 @show-record-info-modal="onShowRecordInfoModal"
                 @search-records="searchRecords"
-              >
-                <slot name="record" :record="item" />
-              </results-record>
+              />
             </DynamicScrollerItem>
-          </template>
-
-          <template #after>
-            <pagination-end-alert
-              :limit="paginationLimit"
-              v-if="isLastPagePaginable"
-            />
           </template>
         </DynamicScroller>
       </div>
       <base-pagination
-        v-if="!showLoader"
         :one-page="!!referenceRecordObj"
         :total-items="dataset.results.total"
-        :pagination-settings="dataset.viewSettings.pagination"
+        :pagination-settings="viewSettings.pagination"
         @changePage="onPagination"
       />
     </div>
@@ -103,7 +89,7 @@
         @close-modal="onCloseRecordInfo"
       />
     </lazy-base-modal>
-  </span>
+  </div>
 </template>
 
 <script>
@@ -111,11 +97,18 @@ import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
 import { Vector as VectorModel } from "@/models/Vector";
 import { RefRecord as RefRecordModel } from "@/models/RefRecord";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
+  name: "ResultsList",
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
   },
@@ -126,8 +119,15 @@ export default {
       test: null,
     };
   },
-
   computed: {
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
+    viewSettings() {
+      return this.dataset.name
+        ? getViewSettingsWithPaginationByDatasetName(this.dataset.name)
+        : {};
+    },
     referenceRecordId() {
       return VectorModel.query()
         .where("is_active", true)
@@ -140,20 +140,20 @@ export default {
         .first()?.record_object;
     },
     showLoader() {
-      return this.dataset.viewSettings.loading;
+      return this.viewSettings.loading;
     },
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
     paginationLimit() {
-      return this.dataset.viewSettings.pagination.maxRecordsLimit;
+      return this.viewSettings.pagination.maxRecordsLimit;
     },
     isLastPagePaginable() {
       if (this.dataset.results.total > this.paginationLimit) {
         return (
-          this.dataset.viewSettings.pagination.page *
-            this.dataset.viewSettings.pagination.size ===
-          this.dataset.viewSettings.pagination.maxRecordsLimit
+          this.viewSettings.pagination.page *
+            this.viewSettings.pagination.size ===
+          this.viewSettings.pagination.maxRecordsLimit
         );
       }
       return false;

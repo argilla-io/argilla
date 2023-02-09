@@ -17,21 +17,21 @@
 
 <template>
   <div v-click-outside="close" :key="open" class="record__extra-actions">
-    <a class="extra-actions__button" href="#" @click.prevent="open = !open"
-      ><svgicon name="kebab-menu" width="20" height="20" color="#4A4A4A"
-    /></a>
+    <base-button class="small clear" @click.prevent="open = !open"
+      ><svgicon name="meatballs" width="14" color="#4A4A4A" />
+    </base-button>
     <div v-if="open" class="extra-actions__content">
       <div @click="showRecordInfoModal()">
         <span>View record info</span>
       </div>
       <base-action-tooltip tooltip="Copied">
-        <div @click="$copyToClipboard(record.clipboardText)">
+        <div @click="$copyToClipboard(recordClipboardText)">
           <span>Copy text</span>
         </div>
       </base-action-tooltip>
       <div
         v-if="allowChangeStatus"
-        :class="record.status === 'Discarded' ? 'disabled' : null"
+        :class="recordStatus === 'Discarded' ? 'disabled' : null"
         @click="onChangeRecordStatus('Discarded')"
       >
         <span>Discard record</span>
@@ -41,15 +41,14 @@
 </template>
 
 <script>
-import { BaseRecord } from "@/models/Common";
-import "assets/icons/kebab-menu";
+import "assets/icons/meatballs";
 import { IdState } from "vue-virtual-scroller";
 
 export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.datasetName}-${vm.recordId}`,
     }),
   ],
   props: {
@@ -57,14 +56,18 @@ export default {
       type: Boolean,
       default: false,
     },
-    record: {
-      type: BaseRecord,
+    recordId: {
+      type: String | Number,
       required: true,
     },
-    dataset: {
-      type: Object,
+    recordStatus: {
+      type: String,
     },
-    task: {
+    recordClipboardText: {
+      type: Array | String,
+      required: true,
+    },
+    datasetName: {
       type: String,
       required: true,
     },
@@ -83,15 +86,12 @@ export default {
         this.idState.open = newValue;
       },
     },
-    recordStatus() {
-      return this.record.status;
-    },
   },
   methods: {
     // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
       if (this.recordStatus !== status) {
-        this.$emit("onChangeRecordStatus", status, this.record);
+        this.$emit("on-change-record-status", status);
       }
       this.close();
     },
@@ -109,11 +109,6 @@ export default {
 <style lang="scss" scoped>
 .extra-actions {
   position: relative;
-  &__button {
-    text-align: right;
-    outline: none;
-    text-decoration: none;
-  }
   &__content {
     position: absolute;
     right: 0.7em;

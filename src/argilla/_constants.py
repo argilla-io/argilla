@@ -18,8 +18,11 @@ DEFAULT_MAX_KEYWORD_LENGTH = 128
 
 API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
 WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
-DEFAULT_API_KEY = "rubrix.apikey"  # Keep the same api key for now
+DEFAULT_API_KEY = "argilla.apikey"  # Keep the same api key for now
 
+# TODO: This constant will be drop out with issue
+#  https://github.com/argilla-io/argilla/issues/2251 fix
+_OLD_DEFAULT_API_KEY = "rubrix.apikey"
 _OLD_API_KEY_HEADER_NAME = "X-Rubrix-Api-Key"
 _OLD_WORKSPACE_HEADER_NAME = "X-Rubrix-Workspace"
 

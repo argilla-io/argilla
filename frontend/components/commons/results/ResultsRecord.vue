@@ -16,11 +16,11 @@
   -->
 
 <template>
-  <div>
+  <div v-if="dataset && viewSettings">
     <div
       :class="[
         annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
-        item.status === 'Discarded' ? 'discarded' : null,
+        record.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
       <div class="record__header">
@@ -29,19 +29,21 @@
             <div class="record__header--left" v-if="!isReferenceRecord">
               <base-checkbox
                 class="list__checkbox"
-                :value="item.selected"
-                @change="onCheckboxChanged($event, item.id)"
-              ></base-checkbox>
+                :value="record.selected"
+                @change="onCheckboxChanged($event, record.id)"
+              >
+              </base-checkbox>
               <status-tag
-                v-if="item.status !== 'Default'"
-                :title="item.status"
-              ></status-tag>
+                v-if="record.status !== 'Default'"
+                :title="record.status"
+              />
             </div>
           </template>
           <base-date
             class="record__date"
-            v-if="item.event_timestamp"
-            :date="item.event_timestamp"
+            v-if="record.event_timestamp"
+            :date="record.event_timestamp"
+            data-title="Event Timestamp"
           />
           <similarity-search-component
             class="record__similarity-search"
@@ -59,16 +61,44 @@
           </base-button>
         </template>
         <record-extra-actions
-          :key="item.id"
+          :key="record.id"
           :allow-change-status="annotationEnabled && !isReferenceRecord"
-          :record="item"
-          :dataset="dataset"
-          :task="dataset.task"
-          @onChangeRecordStatus="onChangeRecordStatus"
-          @show-record-info-modal="onShowRecordInfoModal(item)"
+          :datasetName="dataset.name"
+          :recordId="record.id"
+          :recordClipboardText="record.clipboardText"
+          @on-change-record-status="onChangeRecordStatus"
+          @show-record-info-modal="onShowRecordInfoModal()"
         />
       </div>
-      <slot :record="item" :isReferenceRecord="isReferenceRecord" />
+      <RecordTextClassification
+        v-if="datasetTask === 'TextClassification'"
+        :viewSettings="viewSettings"
+        :isMultiLabel="dataset.isMultiLabel"
+        :datasetId="datasetId"
+        :datasetName="dataset.name"
+        :datasetLabels="dataset.labels"
+        :record="record"
+        :isReferenceRecord="isReferenceRecord"
+      />
+      <RecordText2Text
+        v-if="datasetTask === 'Text2Text'"
+        :viewSettings="viewSettings"
+        :datasetId="datasetId"
+        :datasetName="dataset.name"
+        :record="record"
+        :isReferenceRecord="isReferenceRecord"
+      />
+      <RecordTokenClassification
+        v-if="datasetTask === 'TokenClassification'"
+        :datasetId="datasetId"
+        :datasetName="dataset.name"
+        :datasetEntities="dataset.entities"
+        :datasetQuery="dataset.query"
+        :datasetLastSelectedEntity="dataset.lastSelectedEntity"
+        :viewSettings="viewSettings"
+        :record="record"
+        :isReferenceRecord="isReferenceRecord"
+      />
     </div>
   </div>
 </template>
@@ -78,14 +108,20 @@ import {
   Vector as VectorModel,
   getVectorModelPrimaryKey,
 } from "@/models/Vector";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
       required: true,
     },
-    item: {
+    datasetTask: {
+      type: String,
+      required: true,
+    },
+    record: {
       type: Object,
       required: true,
     },
@@ -95,17 +131,23 @@ export default {
     },
   },
   computed: {
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
+    viewSettings() {
+      return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
+    },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewSettings.viewMode === "annotate";
     },
     weakLabelingEnabled() {
-      return this.dataset.viewSettings.viewMode === "labelling-rules";
+      return this.viewSettings.viewMode === "labelling-rules";
     },
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
     vectors() {
-      return VectorModel.query().where("record_id", this.item.id).get() || [];
+      return VectorModel.query().where("record_id", this.record.id).get() || [];
     },
     formattedVectors() {
       const formattedVectors = this.vectors.map(
@@ -137,34 +179,33 @@ export default {
         // TODO: update annotation status if proceed
       });
     },
-
-    async onChangeRecordStatus(status, record) {
+    async onChangeRecordStatus(status) {
       switch (status) {
         case "Validated":
           await this.validate({
             dataset: this.dataset,
-            records: [record],
+            records: [this.record],
           });
           break;
         case "Discarded":
           await this.discard({
             dataset: this.dataset,
-            records: [record],
+            records: [this.record],
           });
           break;
         default:
           console.warn(`The status ${status} is unknown`);
       }
     },
-    onShowRecordInfoModal(record) {
-      this.$emit("show-record-info-modal", record);
+    onShowRecordInfoModal() {
+      this.$emit("show-record-info-modal", this.record);
     },
     searchRecords(vector) {
       const formattedObj = this.formatSelectedVectorObj(vector);
       this.$emit("search-records", formattedObj);
     },
     formatSelectedVectorObj(vector) {
-      return { query: { vector }, recordId: this.item.id, vector };
+      return { query: { vector }, recordId: this.record.id, vector };
     },
   },
 };
@@ -185,13 +226,18 @@ export default {
     }
   }
   &__extra-actions {
-    margin-right: $base-space;
+    margin-right: $base-space * 2;
+    margin-left: calc($base-space / 2);
   }
   &__date {
     @include font-size(12px);
     color: $black-37;
     font-weight: 500;
-    margin-right: $base-space;
+    margin-right: 12px;
+    &[data-title] {
+      position: relative;
+      @extend %has-tooltip--bottom;
+    }
   }
 }
 .similarity-search {

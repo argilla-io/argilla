@@ -59,7 +59,7 @@ def test_call_metrics_with_no_api_client_initialized(mocked_client):
         if metric == entity_consistency:
             continue
 
-        api.__ACTIVE_API__ = None
+        api.ArgillaSingleton.clear()
         with pytest.raises(NotFoundApiError):
             metric("not_found")
 
@@ -519,7 +519,7 @@ def test_search_keywords(mocked_client):
     from datasets import load_dataset
 
     # TODO(@frascuchon): Move dataset to new organization
-    dataset_ds = load_dataset("argilla/gutenberg_spacy-ner", split="train")
+    dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
     argilla.delete(dataset)

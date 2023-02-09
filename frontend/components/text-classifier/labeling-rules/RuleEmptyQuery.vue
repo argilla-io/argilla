@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="rule-labels-definition">
+  <div v-if="dataset" class="rule-labels-definition">
     <div class="rule__labels" v-if="labels.length">
       <classifier-annotation-button
         v-for="label in visibleLabels"
@@ -47,12 +47,17 @@
 </template>
 <script>
 import { mapActions } from "vuex";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
   },
@@ -62,6 +67,9 @@ export default {
     };
   },
   computed: {
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
@@ -114,7 +122,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 %item {
-  // width: calc(25% - 5px);
   min-width: 80px;
   max-width: 238px;
 }

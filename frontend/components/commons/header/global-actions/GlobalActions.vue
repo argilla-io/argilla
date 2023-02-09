@@ -18,26 +18,79 @@
 <template>
   <div v-if="annotationEnabled" class="container">
     <div class="global-actions">
-      <slot />
+      <validate-discard-action
+        :datasetId="datasetId"
+        :datasetTask="datasetTask"
+        :visibleRecords="datasetVisibleRecords"
+        :availableLabels="availableLabels"
+        :isMultiLabel="isMultiLabel"
+        @discard-records="onDiscard"
+        @validate-records="onValidate"
+        @on-select-labels="onSelectLabels($event)"
+      />
+      <create-new-action v-if="isCreationLabel" @new-label="onNewLabel" />
     </div>
   </div>
 </template>
+
 <script>
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
       required: true,
     },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
+      required: true,
+    },
+    datasetVisibleRecords: {
+      type: Array,
+      required: true,
+    },
+    isCreationLabel: {
+      type: Boolean,
+      default: () => false,
+    },
+    availableLabels: {
+      type: Array,
+      default: () => [],
+    },
+    isMultiLabel: {
+      type: Boolean,
+      default: false,
+    },
   },
-  data: () => ({}),
   computed: {
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.datasetName);
+    },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewSettings.viewMode === "annotate";
+    },
+  },
+  methods: {
+    onValidate($event) {
+      this.$emit("validate-records", $event);
+    },
+    onDiscard($event) {
+      this.$emit("discard-records", $event);
+    },
+    onSelectLabels($event) {
+      this.$emit("on-select-labels", $event);
+    },
+    onNewLabel($event) {
+      this.$emit("new-label", $event);
     },
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .container {
   @extend %container;

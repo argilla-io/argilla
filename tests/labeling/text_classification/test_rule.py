@@ -150,6 +150,33 @@ def test_call(monkeypatch, mocked_client, log_dataset):
     assert rule(records[1]) is None
 
 
+def test_add_duplicated_rule(
+    mocked_client,
+    log_dataset,
+):
+    rules = [
+        Rule(query="lab", label="DD"),
+        Rule(query="lab", label="EF"),
+    ]
+    add_rules(log_dataset, rules)
+    new_rules = load_rules(log_dataset)
+    assert len(new_rules) == 1, new_rules
+    assert new_rules[0].label == "DD" and new_rules[0].query == "lab"
+
+
+def test_create_rules_with_update(
+    mocked_client,
+    log_dataset,
+):
+    rules = [Rule(query="lab", label="DD"), Rule(query="ob", label="EF")]
+    update_rules(log_dataset, rules)
+
+    new_rules = load_rules(log_dataset)
+    assert [{"query": r.query, "label": r.label} for r in rules] == [
+        {"query": r.query, "label": r.label} for r in new_rules
+    ]
+
+
 def test_load_rules(mocked_client, log_dataset):
 
     mocked_client.post(

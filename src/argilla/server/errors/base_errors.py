@@ -113,6 +113,14 @@ class BadRequestError(ServerError):
         self.message = detail
 
 
+class BulkDataError(BadRequestError):
+    """Error on bulk data"""
+
+    def __init__(self, detail: str, errors: Any):
+        super().__init__(detail)
+        self.errors = errors
+
+
 class InactiveUserError(ServerError):
     """Inactive user error"""
 

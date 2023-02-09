@@ -13,6 +13,8 @@
 #  limitations under the License.
 from typing import Any
 
+import httpx
+
 
 class BaseClientError(Exception):
     pass
@@ -31,14 +33,34 @@ class WrongResponseError(BaseClientError):
         )
 
 
+class InputValueError(BaseClientError):
+    pass
+
+
 class ApiCompatibilityError(BaseClientError):
-    def __init__(self, min_version: str):
+    def __init__(self, min_version: str, api_version: str):
         self.min_version = min_version
+        self.api_version = api_version
 
     def __str__(self):
         return (
             "\nThe argilla server does not support this functionality."
             f"\nPlease, use the client with a {self.min_version} version server instance."
+        )
+
+
+class HttpResponseError(BaseClientError):
+    """Used for handle http errros other than defined in Argilla server"""
+
+    def __init__(self, response: httpx.Response):
+        self.status_code = response.status_code
+        self.detail = response.text
+
+    def __str__(self):
+        return (
+            "Received an HTTP error from server\n"
+            + f"Response status: {self.status_code}\n"
+            + f"Response content: {self.detail}\n"
         )
 
 
@@ -56,8 +78,28 @@ class ArApiResponseError(BaseClientError):
         )
 
 
+class BadRequestApiError(ArApiResponseError):
+    HTTP_STATUS = 400
+
+
+class UnauthorizedApiError(ArApiResponseError):
+    HTTP_STATUS = 401
+
+
+class ForbiddenApiError(ArApiResponseError):
+    HTTP_STATUS = 403
+
+
 class NotFoundApiError(ArApiResponseError):
     HTTP_STATUS = 404
+
+
+class MethodNotAllowedApiError(ArApiResponseError):
+    HTTP_STATUS = 405
+
+
+class AlreadyExistsApiError(ArApiResponseError):
+    HTTP_STATUS = 409
 
 
 class ValidationApiError(ArApiResponseError):
@@ -82,26 +124,6 @@ class ValidationApiError(ArApiResponseError):
 
         # TODO: parse error details and match with client context
         super().__init__(**ctx, params=params)
-
-
-class BadRequestApiError(ArApiResponseError):
-    HTTP_STATUS = 400
-
-
-class UnauthorizedApiError(ArApiResponseError):
-    HTTP_STATUS = 401
-
-
-class ForbiddenApiError(ArApiResponseError):
-    HTTP_STATUS = 403
-
-
-class AlreadyExistsApiError(ArApiResponseError):
-    HTTP_STATUS = 409
-
-
-class MethodNotAllowedApiError(ArApiResponseError):
-    HTTP_STATUS = 405
 
 
 class GenericApiError(ArApiResponseError):

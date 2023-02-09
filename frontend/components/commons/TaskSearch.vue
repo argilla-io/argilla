@@ -18,30 +18,34 @@
 <template>
   <div class="app__content">
     <div class="grid">
-      <results :dataset="dataset" @search-records="searchRecords" />
+      <results
+        :datasetId="datasetId"
+        :datasetTask="datasetTask"
+        :datasetName="datasetName"
+        @search-records="searchRecords"
+      />
     </div>
   </div>
 </template>
 <script>
 import "assets/icons/copy";
-import { mapActions } from "vuex";
-import { currentWorkspace } from "@/models/Workspace";
+
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
+      required: true,
+    },
+    datasetName: {
+      type: String,
       required: true,
     },
   },
-  computed: {
-    workspace() {
-      return currentWorkspace(this.$route);
-    },
-  },
   methods: {
-    ...mapActions({
-      fetchDataset: "entities/datasets/fetchByName",
-    }),
     searchRecords(query) {
       this.$emit("search-records", query);
     },

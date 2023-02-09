@@ -62,6 +62,9 @@ def compute_metric(
     if query_params:
         url += "?" + "&".join([f"{k}={v}" for k, v in query_params.items()])
 
+    if query == "":
+        query = None
+
     response = httpx.post(
         url=url,
         headers=client.get_headers(),

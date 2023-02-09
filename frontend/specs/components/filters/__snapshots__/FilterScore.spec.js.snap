@@ -4,9 +4,9 @@ exports[`FilterScore Expand filter 1`] = `
 <div class="filter__row">
   <!---->
   <p class="filter__label">Score:</p>
-  <filter-dropdown color-type="grey" class=""><span slot="dropdown-header"><vega-lite data="[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]" autosize="[object Object]" config="[object Object]" mark="area" encoding="[object Object]" class="score"></vega-lite></span>
+  <filter-dropdown-stub color-type="grey" class=""><span><vega-lite-stub data="[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]" autosize="[object Object]" config="[object Object]" mark="area" encoding="[object Object]" class="score"></vega-lite-stub></span>
     <!---->
-  </filter-dropdown>
+  </filter-dropdown-stub>
 </div>
 `;
 
@@ -14,8 +14,8 @@ exports[`FilterScore renders properly 1`] = `
 <div class="filter__row">
   <!---->
   <p class="filter__label">Score:</p>
-  <filter-dropdown color-type="grey" class=""><span slot="dropdown-header"><vega-lite data="[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]" autosize="[object Object]" config="[object Object]" mark="area" encoding="[object Object]" class="score"></vega-lite></span>
+  <filter-dropdown-stub color-type="grey" class=""><span><vega-lite-stub data="[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]" autosize="[object Object]" config="[object Object]" mark="area" encoding="[object Object]" class="score"></vega-lite-stub></span>
     <!---->
-  </filter-dropdown>
+  </filter-dropdown-stub>
 </div>
 `;

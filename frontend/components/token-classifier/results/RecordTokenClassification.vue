@@ -21,20 +21,26 @@
       <div class="origins">
         <text-spans-static
           v-if="record.prediction"
-          :v-once="dataset.query.score ? false : true"
+          :v-once="datasetQuery.score ? false : true"
           key="prediction"
           origin="prediction"
           class="prediction"
-          :dataset="dataset"
+          :datasetName="datasetName"
+          :datasetEntities="datasetEntities"
+          :datasetQuery="datasetQuery"
           :record="record"
           :visualTokens="visualTokens"
           :entities="getEntitiesByOrigin('prediction')"
         />
         <text-spans
           key="annotation"
+          :viewSettings="viewSettings"
           origin="annotation"
           class="annotation"
-          :dataset="dataset"
+          :datasetId="datasetId"
+          :datasetName="datasetName"
+          :datasetEntities="datasetEntities"
+          :datasetLastSelectedEntity="datasetLastSelectedEntity"
           :record="record"
           :visualTokens="visualTokens"
           :entities="getEntitiesByOrigin('annotation')"
@@ -44,15 +50,16 @@
         class="content__actions-buttons"
         v-if="interactionsEnabled && record.status !== 'Validated'"
       >
-        <base-button class="primary" @click="onValidate(record)"
-          >{{ record.status === "Edited" ? "Save" : "Validate" }}
+        <base-button class="primary" @click="onValidate(record)">
+          {{ record.status === "Edited" ? "Save" : "Validate" }}
         </base-button>
         <base-button
           :disabled="!record.annotatedEntities.length"
           class="primary outline"
           @click="onClearAnnotations()"
-          >Clear annotations</base-button
         >
+          Clear annotations
+        </base-button>
       </div>
     </div>
   </div>
@@ -61,10 +68,31 @@
 <script>
 import { indexOf, length } from "stringz";
 import { mapActions } from "vuex";
+import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
 
 export default {
   props: {
-    dataset: {
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetEntities: {
+      type: Array,
+      required: true,
+    },
+    datasetQuery: {
+      type: Object,
+      required: true,
+    },
+    datasetLastSelectedEntity: {
+      type: Object,
+      required: true,
+    },
+    viewSettings: {
       type: Object,
       required: true,
     },
@@ -82,7 +110,7 @@ export default {
       return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
+      return this.viewSettings.viewMode === "annotate";
     },
     visualTokens() {
       // This is used for both, annotation ad exploration components
@@ -147,7 +175,7 @@ export default {
     async onValidate(record) {
       await this.validate({
         // TODO: Move this as part of token classification dataset logic
-        dataset: this.dataset,
+        dataset: this.getTokenClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
@@ -163,7 +191,7 @@ export default {
     },
     onClearAnnotations() {
       this.updateRecords({
-        dataset: this.dataset,
+        dataset: this.getTokenClassificationDataset(),
         records: [
           {
             ...this.record,
@@ -173,6 +201,9 @@ export default {
           },
         ],
       });
+    },
+    getTokenClassificationDataset() {
+      return getTokenClassificationDatasetById(this.datasetId);
     },
   },
 };

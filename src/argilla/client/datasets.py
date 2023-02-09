@@ -14,13 +14,15 @@
 #  limitations under the License.
 import functools
 import logging
-from enum import Enum
+import random
+import uuid
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
 from pkg_resources import parse_version
 
 from argilla.client.models import (
+    Framework,
     Record,
     Text2TextRecord,
     TextClassificationRecord,
@@ -40,13 +42,14 @@ def _requires_datasets(func):
             import datasets
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
-                f"'datasets' must be installed to use `{func.__name__}`! "
-                "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
+                f"'datasets' must be installed to use `{func.__name__}`! You can"
+                " install 'datasets' with the command: `pip install datasets>1.17.0`"
             )
         if not (parse_version(datasets.__version__) > parse_version("1.17.0")):
             raise ModuleNotFoundError(
-                "Version >1.17.0 of 'datasets' must be installed to use `to_datasets`! "
-                "You can update 'datasets' with the command: `pip install -U datasets>1.17.0`"
+                "Version >1.17.0 of 'datasets' must be installed to use `to_datasets`!"
+                " You can update 'datasets' with the command: `pip install -U"
+                " datasets>1.17.0`"
             )
         return func(*args, **kwargs)
 
@@ -113,13 +116,15 @@ class DatasetBase:
         record_types = {type(rec): None for rec in self._records}
         if len(record_types) > 1:
             raise WrongRecordTypeError(
-                f"A {type(self).__name__} must only contain {self._RECORD_TYPE.__name__}s, "
-                f"but you provided various types: {[rt.__name__ for rt in record_types.keys()]}"
+                f"A {type(self).__name__} must only contain"
+                f" {self._RECORD_TYPE.__name__}s, but you provided various types:"
+                f" {[rt.__name__ for rt in record_types.keys()]}"
             )
         elif next(iter(record_types)) is not self._RECORD_TYPE:
             raise WrongRecordTypeError(
-                f"A {type(self).__name__} must only contain {self._RECORD_TYPE.__name__}s, "
-                f"but you provided {list(record_types.keys())[0].__name__}s."
+                f"A {type(self).__name__} must only contain"
+                f" {self._RECORD_TYPE.__name__}s, but you provided"
+                f" {list(record_types.keys())[0].__name__}s."
             )
 
     def __iter__(self):
@@ -131,7 +136,8 @@ class DatasetBase:
     def __setitem__(self, key, value):
         if type(value) is not self._RECORD_TYPE:
             raise WrongRecordTypeError(
-                f"You are only allowed to set a record of type {self._RECORD_TYPE} in this dataset, but you provided {type(value)}"
+                f"You are only allowed to set a record of type {self._RECORD_TYPE} in"
+                f" this dataset, but you provided {type(value)}"
             )
         self._records[key] = value
 
@@ -140,6 +146,12 @@ class DatasetBase:
 
     def __len__(self) -> int:
         return len(self._records)
+
+    def __repr__(self):
+        return repr(self.to_pandas())
+
+    def __str__(self):
+        return repr(self)
 
     @_requires_datasets
     def to_datasets(self) -> "datasets.Dataset":
@@ -162,7 +174,8 @@ class DatasetBase:
             del ds_dict["metadata"]
             dataset = datasets.Dataset.from_dict(ds_dict)
             _LOGGER.warning(
-                "The 'metadata' of the records were removed, since it was incompatible with the 'datasets' format."
+                "The 'metadata' of the records were removed, since it was incompatible"
+                " with the 'datasets' format."
             )
 
         return dataset
@@ -204,7 +217,8 @@ class DatasetBase:
 
         if isinstance(dataset, datasets.DatasetDict):
             raise ValueError(
-                "`datasets.DatasetDict` are not supported. Please, select the dataset split before."
+                "`datasets.DatasetDict` are not supported. Please, select the dataset"
+                " split before."
             )
 
         # clean column mappings
@@ -251,8 +265,9 @@ class DatasetBase:
 
         if not_supported_columns:
             _LOGGER.warning(
-                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__}"
-                f" model and are ignored: {not_supported_columns}"
+                "Following columns are not supported by the"
+                f" {cls._RECORD_TYPE.__name__} model and are ignored:"
+                f" {not_supported_columns}"
             )
             dataset = dataset.remove_columns(not_supported_columns)
 
@@ -339,8 +354,9 @@ class DatasetBase:
         ]
         if not_supported_columns:
             _LOGGER.warning(
-                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__} model "
-                f"and are ignored: {not_supported_columns}"
+                "Following columns are not supported by the"
+                f" {cls._RECORD_TYPE.__name__} model and are ignored:"
+                f" {not_supported_columns}"
             )
             dataframe = dataframe.drop(columns=not_supported_columns)
 
@@ -360,9 +376,173 @@ class DatasetBase:
         """
         raise NotImplementedError
 
-    @_requires_datasets
-    def prepare_for_training(self, **kwargs) -> "datasets.Dataset":
+    def prepare_for_training(
+        self,
+        framework: Union[Framework, str] = "transformers",
+        lang: Optional["spacy.Language"] = None,
+        train_size: Optional[float] = 1,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+    ) -> Union[
+        "datasets.Dataset",
+        "spacy.tokens.DocBin",
+        Tuple["spacy.tokens.DocBin", "spacy.tokens.DocBin"],
+        Tuple["pandas.DataFrame", "pandas.DataFrame"],
+    ]:
         """Prepares the dataset for training.
+
+        This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
+        and an additional  *ner_tags* column:
+            - Records without an annotation are removed.
+            - The *ner_tags* column corresponds to the iob tags sequences for annotations of the records
+            - The iob tags are transformed to integers.
+
+        Args:
+            framework: A string|enum specifying the framework for the training.
+                "transformers" and "spacy" are currently supported. Default: `transformers`
+            lang: The spacy nlp Language pipeline used to process the dataset. (Only for spacy framework)
+            train_size: The size of the training set. If float, should be between 0.0 and 1.0 and represent the
+            test_size: The size of the test set. If float, should be between 0.0 and 1.0 and represent the
+            seed: Random state.
+
+        Returns:
+            A datasets Dataset with a *ner_tags* or a *label* column and and several *inputs* columns.
+            returned by ``to_datasets`` for "transformers" framework or a spaCy DocBin for "spacy" framework.
+
+        Examples:
+            >>> import argilla as rg
+            >>> rb_dataset = rg.DatasetForTokenClassification([
+            ...     rg.TokenClassificationRecord(
+            ...         text="The text",
+            ...         tokens=["The", "text"],
+            ...         annotation=[("TAG", 0, 2)],
+            ...     )
+            ... ])
+            >>> rb_dataset.prepare_for_training().features
+            {'text': Value(dtype='string'),
+             'tokens': Sequence(feature=Value(dtype='string'), length=-1),
+             'prediction': Value(dtype='null'),
+             'prediction_agent': Value(dtype='null'),
+             'annotation': [{'end': Value(dtype='int64'),
+               'label': Value(dtype='string'),
+               'start': Value(dtype='int64')}],
+             'annotation_agent': Value(dtype='null'),
+             'id': Value(dtype='null'),
+             'metadata': Value(dtype='null'),
+             'status': Value(dtype='string'),
+             'event_timestamp': Value(dtype='null'),
+             'metrics': Value(dtype='null'),
+             'ner_tags': [ClassLabel(num_classes=3, names=['O', 'B-TAG', 'I-TAG'])]}
+
+            >>> import argilla as rg
+            >>> rb_dataset = rg.DatasetForTextClassification([
+            ...     rg.TextClassificationRecord(
+            ...         inputs={"header": "my header", "content": "my content"},
+            ...         annotation="SPAM",
+            ...     )
+            ... ])
+            >>> rb_dataset.prepare_for_training().features
+            {'header': Value(dtype='string'),
+             'content': Value(dtype='string'),
+             'label': ClassLabel(num_classes=1, names=['SPAM'])}
+
+        """
+        if test_size is None:
+            test_size = 1 - train_size
+
+        # check if all numbers are larger than 0
+        assert [abs(train_size), abs(test_size)] == [train_size, test_size], ValueError(
+            "`train_size` and `test_size` must be larger than 0."
+        )
+
+        # check if train sizes sum up to 1
+        assert (train_size + test_size) == 1, ValueError(
+            "`train_size` and `test_size` must sum to 1."
+        )
+
+        # check for annotations
+        assert any([rec.annotation for rec in self._records]), ValueError(
+            "Dataset has no annotations."
+        )
+
+        # shuffle records
+        shuffled_records = self._records.copy()
+        seed = seed or random.randint(42, 1984)
+        random.Random(seed).shuffle(shuffled_records)
+
+        # turn the string into a Framework instance and trigger error if str is not valid
+        if isinstance(framework, str):
+            framework = Framework(framework)
+
+        if test_size == 0:
+            test_size = None
+
+        # prepare for training for the right method
+        if framework is Framework.TRANSFORMERS:
+            return self._prepare_for_training_with_transformers(
+                train_size=train_size, test_size=test_size, seed=seed
+            )
+        elif framework is Framework.SPACY and lang is None:
+            raise ValueError(
+                "Please provide a spacy language model to prepare the"
+                " dataset for training with the spacy framework."
+            )
+        elif framework in [Framework.SPACY, Framework.SPARK_NLP]:
+            if train_size and test_size:
+                from sklearn.model_selection import train_test_split
+
+                records_train, records_test = train_test_split(
+                    shuffled_records,
+                    train_size=train_size,
+                    shuffle=False,
+                    random_state=seed,
+                )
+                if framework is Framework.SPACY:
+                    train_docbin = self._prepare_for_training_with_spacy(
+                        nlp=lang, records=records_train
+                    )
+                    test_docbin = self._prepare_for_training_with_spacy(
+                        nlp=lang, records=records_test
+                    )
+                    return train_docbin, test_docbin
+                else:
+                    train_df = self._prepare_for_training_with_spark_nlp(records_train)
+                    test_df = self._prepare_for_training_with_spark_nlp(records_test)
+
+                    return train_df, test_df
+            else:
+                if framework is Framework.SPACY:
+                    return self._prepare_for_training_with_spacy(
+                        nlp=lang, records=shuffled_records
+                    )
+                else:
+                    return self._prepare_for_training_with_spark_nlp(
+                        records=shuffled_records
+                    )
+        else:
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from:"
+                f" {list(Framework)}"
+            )
+
+    @_requires_spacy
+    def _prepare_for_training_with_spacy(
+        self, **kwargs
+    ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
+        """Prepares the dataset for training using the "spacy" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A spacy.token.DocBin.
+        """
+
+        raise NotImplementedError
+
+    @_requires_datasets
+    def _prepare_for_training_with_transformers(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "transformers" framework.
 
         Args:
             **kwargs: Specific to the task of the dataset.
@@ -370,6 +550,20 @@ class DatasetBase:
         Returns:
             A datasets Dataset.
         """
+
+        raise NotImplementedError
+
+    @_requires_datasets
+    def _prepare_for_training_with_spark_nlp(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "spark-nlp" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
+        """
+
         raise NotImplementedError
 
 
@@ -593,32 +787,12 @@ class DatasetForTextClassification(DatasetBase):
         )
 
     @_requires_datasets
-    def prepare_for_training(self) -> "datasets.Dataset":
-        """Prepares the dataset for training.
-
-        This will return a ``datasets.Dataset`` with a *label* column,
-        and one column for each key in the *inputs* dictionary of the records:
-            - Records without an annotation are removed.
-            - The *label* column corresponds to the annotations of the records.
-            - Labels are transformed to integers.
-
-        Returns:
-            A datasets Dataset with a *label* column and several *inputs* columns.
-
-        Examples:
-            >>> import argilla as rg
-            >>> rb_dataset = rg.DatasetForTextClassification([
-            ...     rg.TextClassificationRecord(
-            ...         inputs={"header": "my header", "content": "my content"},
-            ...         annotation="SPAM",
-            ...     )
-            ... ])
-            >>> rb_dataset.prepare_for_training().features
-            {'header': Value(dtype='string'),
-             'content': Value(dtype='string'),
-             'label': ClassLabel(num_classes=1, names=['SPAM'])}
-
-        """
+    def _prepare_for_training_with_transformers(
+        self,
+        train_size: Optional[float] = None,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+    ):
         import datasets
 
         inputs_keys = {
@@ -647,25 +821,99 @@ class DatasetForTextClassification(DatasetBase):
             # in case we don't have any labels, ClassLabel fails with Dataset.from_dict({"labels": []})
             else datasets.Value("string")
         )
+
         feature_dict = {
             **{key: datasets.Value("string") for key in inputs_keys},
             "label": [class_label] if self._records[0].multi_label else class_label,
         }
 
-        return datasets.Dataset.from_dict(
+        ds = datasets.Dataset.from_dict(
             ds_dict, features=datasets.Features(feature_dict)
         )
 
+        if self._records[0].multi_label:
+            from sklearn.preprocessing import MultiLabelBinarizer
 
-class Framework(Enum):
-    TRANSFORMERS = "transformers"
-    SPACY = "spacy"
+            labels = [rec["label"] for rec in ds]
+            mlb = MultiLabelBinarizer()
+            binarized_labels = mlb.fit_transform(labels)
+            feature_dict["binarized_label"] = feature_dict["label"]
+            ds = datasets.Dataset.from_dict(
+                {
+                    "text": ds["text"],
+                    "context": ds_dict["context"],
+                    "label": labels,
+                    "binarized_label": binarized_labels,
+                },
+                features=datasets.Features(feature_dict),
+            )
+        if test_size:
+            ds = ds.train_test_split(
+                train_size=train_size, test_size=test_size, seed=seed
+            )
 
-    @classmethod
-    def _missing_(cls, value):
-        raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
-        )
+        return ds
+
+    @_requires_spacy
+    def _prepare_for_training_with_spacy(
+        self, nlp: "spacy.Language", records: List[Record]
+    ) -> "spacy.tokens.DocBin":
+        from spacy.tokens import DocBin
+
+        db = DocBin()
+        all_labels = self.__all_labels__()
+
+        # Creating the DocBin object as in https://spacy.io/usage/training#training-data
+
+        for record in records:
+            if record.annotation is None:
+                continue
+
+            if record.text is None:
+                text = ". ".join(record.inputs.values())
+            else:
+                text = record.text
+            doc = nlp.make_doc(text)
+
+            cats = dict.fromkeys(all_labels, 0)
+            for anno in record.annotation:
+                cats[anno] = 1
+
+            doc.cats = cats
+            db.add(doc)
+
+        return db
+
+    def _prepare_for_training_with_spark_nlp(
+        self, records: List[Record]
+    ) -> "pandas.DataFrame":
+        if records[0].multi_label:
+            label_name = "labels"
+        else:
+            label_name = "label"
+
+        spark_nlp_data = []
+        for record in records:
+            if record.annotation is None:
+                continue
+            if record.id is None:
+                record.id = str(uuid.uuid4())
+            if record.text is None:
+                text = ". ".join(record.inputs.values())
+            else:
+                text = record.text
+
+            spark_nlp_data.append([record.id, text, record.annotation])
+
+        return pd.DataFrame(spark_nlp_data, columns=["id", "text", label_name])
+
+    def __all_labels__(self):
+        all_labels = set()
+        for record in self._records:
+            if record.annotation:
+                all_labels.update(record.annotation)
+
+        return list(all_labels)
 
 
 @_prepend_docstring(TokenClassificationRecord)
@@ -790,72 +1038,13 @@ class DatasetForTokenClassification(DatasetBase):
     ) -> "DatasetForTokenClassification":
         return super().from_pandas(dataframe)
 
-    def prepare_for_training(
-        self,
-        framework: Union[Framework, str] = "transformers",
-        lang: Optional["spacy.Language"] = None,
-    ) -> Union["datasets.Dataset", "spacy.tokens.DocBin"]:
-        """Prepares the dataset for training.
-
-        This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
-        and an additional  *ner_tags* column:
-            - Records without an annotation are removed.
-            - The *ner_tags* column corresponds to the iob tags sequences for annotations of the records
-            - The iob tags are transformed to integers.
-
-        Args:
-            framework: A string|enum specifying the framework for the training.
-                "transformers" and "spacy" are currently supported. Default: `transformers`
-            lang: The spacy nlp Language pipeline used to process the dataset. (Only for spacy framework)
-
-        Returns:
-            A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets`` for "transformers"
-            framework.
-            A spacy DocBin ready to use for training a spacy NER model for "spacy" framework.
-
-        Examples:
-            >>> import argilla as rg
-            >>> rb_dataset = rg.DatasetForTokenClassification([
-            ...     rg.TokenClassificationRecord(
-            ...         text="The text",
-            ...         tokens=["The", "text"],
-            ...         annotation=[("TAG", 0, 2)],
-            ...     )
-            ... ])
-            >>> rb_dataset.prepare_for_training().features
-            {'text': Value(dtype='string'),
-             'tokens': Sequence(feature=Value(dtype='string'), length=-1),
-             'prediction': Value(dtype='null'),
-             'prediction_agent': Value(dtype='null'),
-             'annotation': [{'end': Value(dtype='int64'),
-               'label': Value(dtype='string'),
-               'start': Value(dtype='int64')}],
-             'annotation_agent': Value(dtype='null'),
-             'id': Value(dtype='null'),
-             'metadata': Value(dtype='null'),
-             'status': Value(dtype='string'),
-             'event_timestamp': Value(dtype='null'),
-             'metrics': Value(dtype='null'),
-             'ner_tags': [ClassLabel(num_classes=3, names=['O', 'B-TAG', 'I-TAG'])]}
-
-
-        """
-
-        # turn the string into a Framework instance and trigger error if str is not valid
-        if isinstance(framework, str):
-            framework = Framework(framework)
-
-        if framework is Framework.TRANSFORMERS:
-            return self._prepare_for_training_with_transformers()
-        # else: must be spacy for sure
-        if lang is None:
-            raise ValueError(
-                "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
-            )
-        return self._prepare_for_training_with_spacy(nlp=lang)
-
     @_requires_datasets
-    def _prepare_for_training_with_transformers(self):
+    def _prepare_for_training_with_transformers(
+        self,
+        train_size: Optional[float] = None,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+    ):
         import datasets
 
         has_annotations = False
@@ -891,20 +1080,25 @@ class DatasetForTokenClassification(DatasetBase):
         )
         new_features = ds.features.copy()
         new_features["ner_tags"] = [class_tags]
+        ds = ds.cast(new_features)
 
-        return ds.cast(new_features)
+        if train_size or test_size:
+            ds = ds.train_test_split(
+                train_size=train_size, test_size=test_size, seed=seed
+            )
+
+        return ds
 
     @_requires_spacy
     def _prepare_for_training_with_spacy(
-        self, nlp: "spacy.Language"
+        self, nlp: "spacy.Language", records: List[Record]
     ) -> "spacy.tokens.DocBin":
-
         from spacy.tokens import DocBin
 
         db = DocBin()
 
         # Creating the DocBin object as in https://spacy.io/usage/training#training-data
-        for record in self._records:
+        for record in records:
             if record.annotation is None:
                 continue
 
@@ -917,8 +1111,9 @@ class DatasetForTokenClassification(DatasetBase):
                 if span is None:
                     # TODO(@dcfidalgo): Do we want to warn and continue or should we stop the training set generation?
                     raise ValueError(
-                        "The following annotation does not align with the tokens produced "
-                        f"by the provided spacy language model: {(anno[0], record.text[anno[1]:anno[2]])}, {list(doc)}"
+                        "The following annotation does not align with the tokens"
+                        " produced by the provided spacy language model:"
+                        f" {(anno[0], record.text[anno[1]:anno[2]])}, {list(doc)}"
                     )
                 else:
                     entities.append(span)
@@ -927,6 +1122,25 @@ class DatasetForTokenClassification(DatasetBase):
             db.add(doc)
 
         return db
+
+    def _prepare_for_training_with_spark_nlp(
+        self, records: List[Record]
+    ) -> "pandas.DataFrame":
+        for record in records:
+            if record.id is None:
+                record.id = str(uuid.uuid4())
+        iob_doc_data = [
+            [
+                record.id,
+                record.text,
+                record.tokens,
+                [token["tag"] for token in record.metrics["tokens"]],
+            ]
+            for record in records
+            if record.annotation is not None
+        ]
+
+        return pd.DataFrame(iob_doc_data, columns=["id", "text", "token", "label"])
 
     def __all_labels__(self):
         all_labels = set()
@@ -1136,6 +1350,19 @@ class DatasetForText2Text(DatasetBase):
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
         return cls([Text2TextRecord(**row) for row in dataframe.to_dict("records")])
+
+    @_requires_datasets
+    def prepare_for_training(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A datasets Dataset.
+        """
+
+        raise NotImplementedError
 
 
 Dataset = Union[

@@ -3,6 +3,7 @@ import FilterUncoveredByRules from "@/components/commons/header/filters/FilterUn
 
 function mountFilterUncoveredByRules() {
   return mount(FilterUncoveredByRules, {
+    stubs: ["base-checkbox"],
     propsData: {
       dataset: {
         task: "TextClassification",

@@ -30,12 +30,18 @@
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
-    <slot />
+    <task-sidebar
+      v-if="dataset"
+      :dataset="dataset"
+      @view-mode-changed="onViewModeChanged"
+    />
     <component
       v-if="dataset"
       :is="currentTaskHeader"
-      :dataset="dataset"
-      :enableSimilaritySearch="enableSimilaritySearch"
+      :datasetId="dataset.id"
+      :datasetName="dataset.name"
+      :datasetTask="dataset.task"
+      :enableSimilaritySearch="isReferenceRecord"
       @search-records="searchRecords"
     />
   </section>
@@ -43,15 +49,31 @@
 
 <script>
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { Vector as VectorModel } from "@/models/Vector";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 export default {
-  data: () => {
+  data() {
     return {
-      headerHeight: undefined,
+      headerHeight: null,
     };
   },
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+    },
+    datasetName: {
+      type: String,
+    },
+    datasetTask: {
+      type: String,
+      validator(value) {
+        // The value must match one of these strings
+        return [
+          "TextClassification",
+          "TokenClassification",
+          "Text2Text",
+        ].includes(value);
+      },
     },
     breadcrumbs: {
       type: Array,
@@ -64,25 +86,33 @@ export default {
       type: Boolean,
       default: true,
     },
-    enableSimilaritySearch: {
-      type: Boolean,
-      default: false,
-    },
   },
   computed: {
-    currentTask() {
-      return this.dataset.task;
+    dataset() {
+      //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
+      return this.datasetId && this.datasetTask
+        ? getDatasetFromORM(this.datasetId, this.datasetTask, true)
+        : null;
     },
     currentTaskHeader() {
-      return this.currentTask + "Header";
+      return this.datasetTask && `${this.datasetTask}Header`;
+    },
+    viewSettings() {
+      return DatasetViewSettings.query().whereId(this.datasetName).first();
     },
     globalHeaderHeight() {
       if (this.sticky && this.dataset) {
-        return this.dataset.viewSettings.headerHeight;
+        return this.viewSettings?.headerHeight;
       }
     },
     showRecordsLoader() {
-      return this.dataset?.viewSettings.loading;
+      return this.viewSettings?.loading;
+    },
+    isReferenceRecord() {
+      return VectorModel.query()
+        .where("dataset_id", this.datasetId.join("."))
+        .where("is_active", true)
+        .exists();
     },
   },
   mounted() {
@@ -98,6 +128,14 @@ export default {
     },
   },
   methods: {
+    onViewModeChanged(viewMode) {
+      if (viewMode === "labelling-rules" && this.isReferenceRecord) {
+        this.removeSimilarityFilter();
+      }
+    },
+    removeSimilarityFilter() {
+      this.searchRecords({ query: { vector: null } });
+    },
     async setHeaderHeight() {
       const header = this.$refs.header;
       const resize_ob = new ResizeObserver(() => {
@@ -108,14 +146,14 @@ export default {
     },
     headerHeightUpdate() {
       DatasetViewSettings.update({
-        where: this.dataset.name,
+        where: this.datasetName,
         data: {
           headerHeight: this.headerHeight,
         },
       });
     },
     searchRecords(query) {
-      this.$emit("search-records", query);
+      this.$emit("on-search-or-on-filter-records", query);
     },
   },
 };

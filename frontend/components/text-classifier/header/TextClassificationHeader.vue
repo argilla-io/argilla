@@ -20,36 +20,43 @@
     <filters-area
       v-if="!dataset.viewSettings.visibleRulesList"
       :dataset="dataset"
+      :datasetId="datasetId"
+      :datasetName="datasetName"
+      :datasetTask="datasetTask"
       :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
-    >
-      <dataset-options :dataset="dataset" />
-    </filters-area>
-    <global-actions :dataset="dataset">
-      <validate-discard-action
-        :dataset="dataset"
-        @discard-records="onDiscard"
-        @validate-records="onValidate"
-      >
-        <template slot="first" slot-scope="validateDiscard">
-          <annotation-label-selector
-            :class="'validate-discard-actions__select'"
-            :multi-label="isMultiLabel"
-            :options="availableLabels"
-            @selected="onSelectLabels($event, validateDiscard.selectedRecords)"
-          />
-        </template>
-      </validate-discard-action>
-      <create-new-action @new-label="onNewLabel" v-if="allowLabelCreation" />
-    </global-actions>
+    />
+    <global-actions
+      :datasetId="datasetId"
+      :datasetName="datasetName"
+      :datasetTask="datasetTask"
+      :datasetVisibleRecords="dataset.visibleRecords"
+      :availableLabels="availableLabels"
+      :isCreationLabel="allowLabelCreation"
+      :isMultiLabel="isMultiLabel"
+      @discard-records="onDiscard"
+      @validate-records="onValidate"
+      @on-select-labels="onSelectLabels($event)"
+      @new-label="onNewLabel"
+    />
   </div>
 </template>
+
 <script>
 import { mapActions } from "vuex";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
       required: true,
     },
     enableSimilaritySearch: {
@@ -58,11 +65,12 @@ export default {
     },
   },
   computed: {
+    dataset() {
+      //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
+      return getDatasetFromORM(this.datasetId, this.datasetTask, true);
+    },
     isMultiLabel() {
       return this.dataset.isMultiLabel;
-    },
-    isRuleListView() {
-      return this.dataset.viewSettings?.visibleRulesList || false;
     },
     availableLabels() {
       const record = this.dataset.results.records[0];
@@ -72,9 +80,6 @@ export default {
           : [];
       labels = Array.from(new Set([...labels, ...this.dataset.labels]));
       return labels;
-    },
-    viewMode() {
-      return this.dataset.viewSettings.viewMode;
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
@@ -86,7 +91,7 @@ export default {
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
-    async onSelectLabels(labels, selectedRecords) {
+    async onSelectLabels({ labels, selectedRecords }) {
       const records = selectedRecords.map((record) => {
         let newLabels = labels.map((label) => ({
           class: label,
@@ -147,4 +152,3 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped></style>

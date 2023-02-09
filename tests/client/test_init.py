@@ -12,7 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from argilla import TextClassificationRecord
 from argilla.client import api
+from argilla.client.api import active_api
 
 
 def test_resource_leaking_with_several_init(mocked_client):
@@ -26,7 +28,9 @@ def test_resource_leaking_with_several_init(mocked_client):
     for i in range(0, 10):
         api.init()
         api.log(
-            api.TextClassificationRecord(text="The text"), name=dataset, verbose=False
+            TextClassificationRecord(text="The text"),
+            name=dataset,
+            verbose=False,
         )
 
     assert len(api.load(dataset)) == 10
@@ -44,3 +48,14 @@ def test_init_with_extra_headers(mocked_client):
         assert (
             active_api.http_client.headers[key] == value
         ), f"{key}:{value} not in client headers"
+
+
+def test_init(mocked_client):
+    the_api = active_api()
+    user = the_api.http_client.get("/api/me")
+    assert user["username"] == "argilla"
+
+    api.init(api_key="rubrix.apikey")
+    the_api = active_api()
+    user = the_api.http_client.get("/api/me")
+    assert user["username"] == "argilla"

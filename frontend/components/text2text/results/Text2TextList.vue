@@ -132,17 +132,22 @@
 <script>
 import { IdState } from "vue-virtual-scroller";
 import { mapActions } from "vuex";
+import { getText2TextDatasetById } from "@/models/text2text.queries";
 
 export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.datasetName}-${vm.record.id}`,
     }),
   ],
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
       required: true,
     },
     record: {
@@ -193,9 +198,8 @@ export default {
       },
       set: async function (newValue) {
         if (this.record.lastEditedSentence !== newValue) {
-          // this.record.lastEditedSentence = newValue;
           await this.updateRecords({
-            dataset: this.dataset,
+            dataset: this.getText2TextDataset(),
             records: [
               {
                 ...this.record,
@@ -301,7 +305,7 @@ export default {
 
       await (this.visibleSentence = newText);
       await this.updateRecords({
-        dataset: this.dataset,
+        dataset: this.getText2TextDataset(),
         records: [
           {
             ...this.record,
@@ -324,6 +328,9 @@ export default {
       this.$emit("reset-initial-record");
     },
     async changeVisibleSentences() {
+      //NOTE - we need to refresh the component <text-2-text-content-editable> or after refresh
+      //the user modification will not be kept
+      this.refresh += this.refresh;
       this.sentencesOrigin !== "Annotation"
         ? (this.sentencesOrigin = "Annotation")
         : (this.sentencesOrigin = "Prediction");
@@ -349,13 +356,15 @@ export default {
     async onAnnotate(sentence) {
       let newS = {
         score: 1,
-        text: sentence,
+        text: sentence || this.selectedSentence,
       };
       this.$emit("annotate", { sentences: [newS] });
       this.itemNumber = 0;
       this.editionMode = false;
       this.sentencesOrigin = "Annotation";
-      // await (this.visibleSentence = this.selectedSentence);
+    },
+    getText2TextDataset() {
+      return getText2TextDatasetById(this.datasetId);
     },
   },
 };

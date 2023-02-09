@@ -3,6 +3,7 @@ import SimilaritySearchContent from "./SimilaritySearchContent";
 
 let wrapper = null;
 const options = {
+  stubs: ["nuxt", "base-radio-button"],
   propsData: {
     selectedVector: {
       id: "text_vector",

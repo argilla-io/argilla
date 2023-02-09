@@ -19,7 +19,9 @@
   <div class="results">
     <component
       :is="currentTaskResultsList"
-      :dataset="dataset"
+      :datasetId="datasetId"
+      :datasetName="datasetName"
+      :datasetTask="datasetTask"
       @search-records="searchRecords"
     />
   </div>
@@ -28,14 +30,22 @@
 <script>
 export default {
   props: {
-    dataset: {
-      type: Object,
-      default: () => ({}),
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
+      type: String,
+      required: true,
     },
   },
   computed: {
     currentTaskResultsList() {
-      return this.dataset.task + "ResultsList";
+      return this.datasetTask + "ResultsList";
     },
   },
   methods: {

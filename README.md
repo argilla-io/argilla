@@ -19,10 +19,14 @@
 </p>
 
 <h2 align="center">Open-source framework for data-centric NLP</h2>
-<p align="center">Data Labeling + Data Curation + Inference Store</p>
+<p align="center">Data Labeling, curation, and Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
-#### 🆕 Play with [Argilla live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces. (username and password: `huggingface`/ `1234` ) </h3>
+
+> 🆕 🔥 Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces (login:`argilla`, password:`1234`)
+
+> 🆕 🔥 Since `1.2.0` Argilla supports vector search for finding the most similar records to a given one. This feature uses vector or semantic search combined with more traditional search (keyword and filter based). Learn more on this [deep-dive guide](https://docs.argilla.io/en/latest/guides/features/semantic-search.html)
+
 
 ![imagen](https://user-images.githubusercontent.com/1107111/204772677-facee627-9b3b-43ca-8533-bbc9b4e2d0aa.png)
 

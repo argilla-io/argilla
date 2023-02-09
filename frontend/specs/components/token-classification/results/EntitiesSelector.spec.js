@@ -4,18 +4,13 @@ const $entitiesMaxColors = 50;
 
 function mountEntitiesSelector() {
   return mount(EntitiesSelector, {
+    stubs: ["entity-label"],
     propsData: {
-      dataset: {
-        task: "TextClassification",
-        lastSelectedEntity: {
-          colorId: 14,
-          shortCut: "1",
-          text: "Arreglo",
-        },
-        viewSettings: {
-          annotationEnabled: false,
-        },
-        labels: ["A", "B"],
+      datasetId: ["name", "owner"],
+      datasetLastSelectedEntity: {
+        colorId: 14,
+        shortCut: "1",
+        text: "Arreglo",
       },
       formattedEntities: [
         {

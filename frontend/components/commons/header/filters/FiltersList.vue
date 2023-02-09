@@ -258,6 +258,7 @@ export default {
             uncoveredByRules,
           ]
         : [...filters, ...dateFields, ...sortedMetadataFilters];
+
       return formattedFilters;
     },
   },
