@@ -95,7 +95,7 @@ The simplest way is to use`Docker` by running:
 
 ```bash
 
-docker run -d --name es-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+docker run -d --name elasticsearch-for-argilla --network argilla-net  -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:8.5.3
 
 ```
 > :information_source: **Check [the docs](https://docs.argilla.io/en/latest/getting_started/quickstart.html) for further options and configurations for Elasticsearch.**
@@ -150,7 +150,7 @@ dataset_rg = rg.DatasetForTextClassification.from_pandas(my_dataframe)
 rg.log(dataset_rg, name="sst-sentimentclassification")
 ```
 
-This will create two datasets which you can use to do a quick tour of the core features of Argilla.
+This will create two datasets that you can use to do a quick tour of the core features of Argilla.
 
 > 🚒 **If you find issues, get direct support from the team and other community members on the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
 
