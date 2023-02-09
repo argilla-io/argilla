@@ -93,12 +93,14 @@ class SpanUtils:
                 self._start_to_token_idx.get(char_start),
                 self._end_to_token_idx.get(char_end),
             ):
-                message = f"- [{self.text[char_start:char_end]}] defined in "
+                span_str = self.text[char_start:char_end]
+                context = ""
                 if char_start - 5 > 0:
-                    message += "..."
-                message += self.text[max(char_start - 5, 0) : char_end + 5]
+                    context = "..."
+                context += self.text[max(char_start - 5, 0) : char_end + 5]
                 if char_end + 5 < len(self.text):
-                    message += "..."
+                    context += "..."
+                message = f"- [{span_str}] defined in {repr(context)}"
 
                 misaligned_spans_errors.append(message)
 
