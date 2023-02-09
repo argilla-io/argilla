@@ -146,13 +146,25 @@ export default {
     },
     onUpdateAnnotations(updatedAnnotations) {
       const { selectedRecords } = this;
-      const labels = this.labelsfromAnnotationsFactory(updatedAnnotations);
-      this.$emit("on-select-labels", { labels, selectedRecords });
+      const labelsToAdd = this.labelsfromAnnotationsFactory(
+        updatedAnnotations,
+        "selected"
+      );
+      const labelsToRemove = this.labelsfromAnnotationsFactory(
+        updatedAnnotations,
+        "removed"
+      );
+
+      this.$emit("on-select-labels", {
+        selectedRecords,
+        labels: labelsToAdd,
+        labelsToRemove: labelsToRemove,
+      });
     },
-    labelsfromAnnotationsFactory(annotations) {
+    labelsfromAnnotationsFactory(annotations, paramKey) {
       return annotations.reduce(
         (accumulator, currentLabelObj) =>
-          currentLabelObj.selected
+          currentLabelObj[paramKey]
             ? [...accumulator, currentLabelObj.label]
             : [...accumulator],
         []

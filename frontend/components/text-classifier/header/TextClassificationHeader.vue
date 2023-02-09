@@ -91,18 +91,25 @@ export default {
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
-    async onSelectLabels({ labels, selectedRecords }) {
+    async onSelectLabels({ labels, selectedRecords, labelsToRemove }) {
       const records = selectedRecords.map((record) => {
         const pendingStatusProperties = {
           selected: true,
           status: "Edited",
         };
+
+        const labelsToSend = this.formatLabelsForBulkAnnotation(
+          labels,
+          labelsToRemove,
+          record.currentAnnotation.labels
+        );
+
         return {
           ...record,
           ...(this.isMultiLabel && pendingStatusProperties),
           currentAnnotation: {
             agent: this.$auth.user.username,
-            labels: this.formatLabels(labels),
+            labels: labelsToSend,
           },
         };
       });
@@ -112,7 +119,7 @@ export default {
           const updatedRecords = {
             dataset: this.dataset,
             agent: this.$auth.user.username,
-            records: records,
+            records,
           };
           await this.updateRecords(updatedRecords);
         } else {
@@ -130,6 +137,22 @@ export default {
           type: "error",
         });
       }
+    },
+    formatLabelsForBulkAnnotation(
+      labels,
+      labelsToRemove,
+      currentAnnotationLabels
+    ) {
+      const formattedLabels = this.formatLabels(labels);
+
+      let labelsToSend = [
+        ...new Set([...formattedLabels, ...currentAnnotationLabels]),
+      ];
+      labelsToSend = labelsToSend.filter(
+        (labelObj) => !labelsToRemove.includes(labelObj.class)
+      );
+
+      return labelsToSend;
     },
     async onDiscard(records) {
       await this.discard({
