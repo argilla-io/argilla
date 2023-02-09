@@ -16,7 +16,10 @@ ENV ES_JAVA_OPTS=-'Xms512m -Xmx512m'
 USER root
 
 # Install packages
-FROM python:3.9.16
+RUN apt update
+RUN apt -y install curl python3.9 python3.9-dev pyton3.9-distutils gcc gnupg apache2-utils sudo openssl systemctl
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+RUN python3.9 get-pip.py
 RUN pip3 install datasets
 
 COPY scripts/start_quickstart_argilla.sh /
