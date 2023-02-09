@@ -114,6 +114,8 @@ export default {
         };
       });
 
+      let message = "";
+      let typeOfNotification = "";
       try {
         if (this.isMultiLabel) {
           const updatedRecords = {
@@ -122,19 +124,21 @@ export default {
             records,
           };
           await this.updateRecords(updatedRecords);
+          message = `${selectedRecords.length} records are in pending`;
+          typeOfNotification = "info";
         } else {
           await this.onValidate(records);
+          message = `The selected records are annotated !`;
+          typeOfNotification = "success";
         }
-
-        Notification.dispatch("notify", {
-          message: "Success : The selected records are annotated !",
-          type: "success",
-        });
       } catch (err) {
         console.log(err);
+        message = "There was a problem on annotate records";
+        typeOfNotification = "error";
+      } finally {
         Notification.dispatch("notify", {
-          message: "Error : There was a problem on annotate records",
-          type: "error",
+          message,
+          type: typeOfNotification,
         });
       }
     },
