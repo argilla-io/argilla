@@ -222,9 +222,10 @@ jobs:
               - 'frontend/**'
               - 'pyproject.toml'
               - 'setup.py'
-              - 'scripts/start_argilla_server.sh'
+              - 'scripts/*.sh'
               - '*.Dockerfile'
               - '.dockerignore'
+              - '.github/workflows/package.yml'
       - name: Cache pip 👜
         uses: actions/cache@v2
         if: steps.filter.outputs.code_changes == 'true'
@@ -303,6 +304,7 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
