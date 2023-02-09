@@ -28,7 +28,7 @@ token_attributions = [
     )
 ]
 
-record = rg.TextClassificationRecord(
+record = TextClassificationRecord(
     text="good and bad",
     prediction=[("label", 0)],
     explanation={"text": token_attributions},
