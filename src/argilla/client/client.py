@@ -507,10 +507,11 @@ class Argilla:
             warnings.warn(
                 message=f"Using python client argilla=={version},"
                 f" however deployed server version is {err.api_version}."
-                " This might lead to compatibility issues."
-                f" Preferably, update your server to {version} version"
+                " This might lead to compatibility issues.\n"
+                f" Preferably, update your server version to {version}"
                 " or downgrade your Python API at the loss"
-                f" of functionality and robustness via pip install argilla=={err.api_version}",
+                " of functionality and robustness via\n"
+                f"`pip install argilla=={err.api_version}`",
                 category=UserWarning,
             )
             records, dataset_class = self._load_records_old_fashion(
