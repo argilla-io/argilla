@@ -90,6 +90,7 @@ export default {
       updateRecords: "entities/datasets/updateDatasetRecords",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
+      resetAnnotations: "entities/datasets/resetAnnotations",
     }),
     async onSelectLabels({ labels, selectedRecords }) {
       const records = selectedRecords.map((record) => {
@@ -148,19 +149,36 @@ export default {
       });
     },
     async onClear(records) {
-      const clearedRecords = records.map((record) => {
-        return {
-          ...record,
-          currentAnnotation: null,
-          annotation: null,
-          selected: true,
-          status: "Edited",
-        };
-      });
-      this.updateRecords({
-        dataset: this.dataset,
-        records: clearedRecords,
-      });
+      if (this.isMultiLabel) {
+        const clearedRecords = records.map((record) => {
+          return {
+            ...record,
+            currentAnnotation: null,
+            annotation: null,
+            selected: true,
+            status: "Edited",
+          };
+        });
+        this.updateRecords({
+          dataset: this.dataset,
+          records: clearedRecords,
+          persistBackend: true,
+        });
+      } else {
+        const clearedRecords = records.map((record) => {
+          return {
+            ...record,
+            currentAnnotation: null,
+            annotation: null,
+            selected: false,
+            status: "Default",
+          };
+        });
+        await this.resetAnnotations({
+          dataset: this.dataset,
+          records: clearedRecords,
+        });
+      }
     },
     async onNewLabel(newLabel) {
       await this.dataset.$dispatch("setLabels", {

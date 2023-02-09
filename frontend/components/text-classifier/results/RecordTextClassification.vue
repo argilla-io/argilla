@@ -187,20 +187,24 @@ export default {
         ],
       });
     },
-    onClearAnnotations() {
-      this.updateRecords({
-        dataset: this.getTextClassificationDataset(),
-        records: [
-          {
-            ...this.record,
-            selected: true,
-            status: "Edited",
-            currentAnnotation: {
-              labels: [],
+    async onClearAnnotations() {
+      if (this.isMultiLabel) {
+        await this.updateRecords({
+          dataset: this.getTextClassificationDataset(),
+          records: [
+            {
+              ...this.record,
+              selected: true,
+              status: "Edited",
+              currentAnnotation: {
+                labels: [],
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
+      } else {
+        await this.resetLabels();
+      }
     },
     onDiscard() {
       this.$emit("discard");
