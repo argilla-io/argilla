@@ -501,11 +501,17 @@ class Argilla:
                 limit=limit,
                 id_from=id_from,
             )
-        except ApiCompatibilityError:  # Api backward compatibility
+        except ApiCompatibilityError as err:  # Api backward compatibility
+            from argilla import __version__ as version
+
             warnings.warn(
-                message="Detected an old server instance."
-                " Future clients may stop working with old server instances."
-                " Please, update your server instance in order to access new improvements"
+                message=f"Using python client argilla=={version},"
+                f" however deployed server version is {err.api_version}."
+                " This might lead to compatibility issues."
+                f" Preferably, update your server to {version} version"
+                " or downgrade your Python API at the loss"
+                f" of functionality and robustness via pip install argilla=={err.api_version}",
+                category=UserWarning,
             )
             records, dataset_class = self._load_records_old_fashion(
                 name=name,
