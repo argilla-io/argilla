@@ -5,7 +5,13 @@ manage datasets.
 To get started you just need to run the docker image with following command:
 
 ``` bash
-  docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
+  docker run -d --network argilla-net --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
+```
+
+```{admonition} Apple Silicon issues
+:class: important
+
+Apple Silicon M1/M2 users might have issues with this deployment. To resolve this, use the `--platform arm64` parameter. If this doesn't work, deploying separate images or via docker-compose will work.
 ```
 
 This will run the latest quickstart docker image with 2 users `argilla` and `team`. The password for these users is

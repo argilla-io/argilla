@@ -30,5 +30,5 @@ If you want to run the web app of the master branch **without** docker, we refer
 If you want to use vanilla docker (and have your own Elasticsearch instance running), you can just use our master image:
 
 ```bash
-docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla argilla/argilla-server:develop
+docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --network argilla-net --name argilla argilla/argilla-server:develop
 ```
