@@ -286,6 +286,9 @@ jobs:
           name: python-package
           path: dist
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Docker meta
         id: meta
         uses: crazy-max/ghaction-docker-meta@v2
