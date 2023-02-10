@@ -58,7 +58,7 @@ To this end, **modify the elasticsearch service and create a new volume** in the
 ```yaml
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch

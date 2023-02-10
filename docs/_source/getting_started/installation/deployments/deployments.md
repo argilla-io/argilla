@@ -7,6 +7,10 @@
 :link: docker.md
 
 ```
+```{grid-item-card} Docker Quickstart
+:link: docker.md
+
+```
 ```{grid-item-card} Docker-compose
 :link: docker_compose.md
 
@@ -34,6 +38,7 @@
 :hidden:
 
 docker.md
+docker-quickstart.md
 docker_compose.md
 cloud_providers.md
 from_development.md

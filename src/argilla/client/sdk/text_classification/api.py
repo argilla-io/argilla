@@ -30,6 +30,27 @@ from argilla.client.sdk.text_classification.models import (
 )
 
 
+def data(
+    client: AuthenticatedClient,
+    name: str,
+    request: Optional[TextClassificationQuery] = None,
+    limit: Optional[int] = None,
+    id_from: Optional[str] = None,
+) -> Response[Union[List[TextClassificationRecord], HTTPValidationError, ErrorMessage]]:
+    path = f"/api/datasets/{name}/TextClassification/data"
+    params = build_param_dict(id_from, limit)
+
+    with client.stream(
+        method="POST",
+        path=path,
+        params=params if params else None,
+        json=request.dict() if request else {},
+    ) as response:
+        return build_data_response(
+            response=response, data_type=TextClassificationRecord
+        )
+
+
 def add_dataset_labeling_rule(
     client: AuthenticatedClient,
     name: str,

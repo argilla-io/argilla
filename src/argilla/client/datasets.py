@@ -15,6 +15,7 @@
 import functools
 import logging
 import random
+import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
@@ -478,6 +479,9 @@ class DatasetBase:
         if isinstance(framework, str):
             framework = Framework(framework)
 
+        if test_size == 0:
+            test_size = None
+
         # prepare for training for the right method
         if framework is Framework.TRANSFORMERS:
             return self._prepare_for_training_with_transformers(
@@ -489,13 +493,12 @@ class DatasetBase:
                 " dataset for training with the spacy framework."
             )
         elif framework in [Framework.SPACY, Framework.SPARK_NLP]:
-            if train_size or test_size:
+            if train_size and test_size:
                 from sklearn.model_selection import train_test_split
 
                 records_train, records_test = train_test_split(
                     shuffled_records,
                     train_size=train_size,
-                    test_size=test_size,
                     shuffle=False,
                     random_state=seed,
                 )
@@ -866,11 +869,16 @@ class DatasetForTextClassification(DatasetBase):
         all_labels = self.__all_labels__()
 
         # Creating the DocBin object as in https://spacy.io/usage/training#training-data
+
         for record in records:
             if record.annotation is None:
                 continue
 
-            doc = nlp.make_doc(record.text)
+            if record.text is None:
+                text = ". ".join(record.inputs.values())
+            else:
+                text = record.text
+            doc = nlp.make_doc(text)
 
             cats = dict.fromkeys(all_labels, 0)
             for anno in record.annotation:
@@ -889,11 +897,18 @@ class DatasetForTextClassification(DatasetBase):
         else:
             label_name = "label"
 
-        spark_nlp_data = [
-            [record.id, record.text, record.annotation]
-            for record in records
-            if record.annotation is not None
-        ]
+        spark_nlp_data = []
+        for record in records:
+            if record.annotation is None:
+                continue
+            if record.id is None:
+                record.id = str(uuid.uuid4())
+            if record.text is None:
+                text = ". ".join(record.inputs.values())
+            else:
+                text = record.text
+
+            spark_nlp_data.append([record.id, text, record.annotation])
 
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", label_name])
 
@@ -1116,6 +1131,9 @@ class DatasetForTokenClassification(DatasetBase):
     def _prepare_for_training_with_spark_nlp(
         self, records: List[Record]
     ) -> "pandas.DataFrame":
+        for record in records:
+            if record.id is None:
+                record.id = str(uuid.uuid4())
         iob_doc_data = [
             [
                 record.id,
