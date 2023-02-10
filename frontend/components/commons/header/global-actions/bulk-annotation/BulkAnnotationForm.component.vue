@@ -65,11 +65,10 @@ export default {
     onSubmit() {
       this.$emit("on-submit", this.inputs);
     },
-    onChange({ id, selected, record_ids, removed }) {
+    onChange({ id, selected, removed }) {
       this.$emit("on-change", {
         ID: id,
         VALUE: selected,
-        RECORD_IDS: record_ids,
         REMOVED: removed,
       });
     },

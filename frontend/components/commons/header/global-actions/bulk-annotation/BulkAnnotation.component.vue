@@ -21,7 +21,7 @@
             @on-change="updateLastSelectedAnnotation"
             @on-remove="removeAnnotation"
             @on-submit="updateAnnotations"
-            @on-reset="resetLastSelectedAnnotation"
+            @on-reset="resetAll"
           />
         </div>
         <div class="no-inputs-text" v-else>
@@ -79,8 +79,8 @@ export default {
     },
     filteredInputs() {
       if (this.searchText) {
-        return this.updatedAnnotations.filter((input) =>
-          this.isStringOfCharsContainsSubstring(input.label, this.searchText)
+        return this.updatedAnnotations.filter(({ label }) =>
+          this.isStringOfCharsContainsSubstring(label, this.searchText)
         );
       }
       return this.updatedAnnotations;
@@ -96,7 +96,7 @@ export default {
     },
   },
   updated() {
-    this.resetLastSelectedAnnotation();
+    this.resetAll();
   },
   methods: {
     rerenderComponent() {
@@ -112,7 +112,7 @@ export default {
       this.toggleDropdown(false);
       this.$emit("on-update-annotations", updatedAnnotations);
     },
-    resetLastSelectedAnnotation() {
+    resetAll() {
       this.updateLastSelectedAnnotation({
         ID: null,
         VALUE: null,
@@ -122,17 +122,17 @@ export default {
       this.clonedInputs = structuredClone(this.sortedInputsBySelectedRecords);
     },
     updateLastSelectedAnnotation({ ID, VALUE, REMOVED }) {
-      const initRecordIds = this.inputs.find((input) => input.id === ID);
+      const initialInputObj = this.inputs.find((input) => input.id === ID);
       this.lastSelectedAnnotation = {
         ID,
         VALUE,
         RECORD_IDS:
-          VALUE && initRecordIds?.record_ids
+          VALUE && initialInputObj?.record_ids
             ? this.recordsIds
-            : initRecordIds?.record_ids,
-        REMOVED: _.isNil(initRecordIds?.removed)
+            : initialInputObj?.record_ids,
+        REMOVED: _.isNil(initialInputObj?.removed)
           ? REMOVED
-          : initRecordIds.removed,
+          : initialInputObj.removed,
       };
     },
     removeAnnotation({ ID }) {
