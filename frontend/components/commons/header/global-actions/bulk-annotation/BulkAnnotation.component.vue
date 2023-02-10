@@ -116,7 +116,6 @@ export default {
       this.updateLastSelectedAnnotation({
         ID: null,
         VALUE: null,
-        RECORD_IDS: null,
         REMOVED: false,
       });
       this.clonedInputs = structuredClone(this.sortedInputsBySelectedRecords);
