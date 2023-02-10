@@ -52,7 +52,12 @@ export default {
       clonedInputs: [],
       showDropdown: false,
       searchText: null,
-      lastSelectedAnnotation: { ID: null, VALUE: null, RECORD_IDS: null, REMOVED: null },
+      lastSelectedAnnotation: {
+        ID: null,
+        VALUE: null,
+        RECORD_IDS: null,
+        REMOVED: null,
+      },
     };
   },
   computed: {
@@ -116,12 +121,18 @@ export default {
       });
       this.clonedInputs = structuredClone(this.sortedInputsBySelectedRecords);
     },
-    updateLastSelectedAnnotation({ ID, VALUE, RECORD_IDS, REMOVED }) {
+    updateLastSelectedAnnotation({ ID, VALUE, REMOVED }) {
+      const initRecordIds = this.inputs.find((input) => input.id === ID);
       this.lastSelectedAnnotation = {
         ID,
         VALUE,
-        RECORD_IDS: VALUE ? this.recordsIds : RECORD_IDS,
-        REMOVED,
+        RECORD_IDS:
+          VALUE && initRecordIds?.record_ids
+            ? this.recordsIds
+            : initRecordIds?.record_ids,
+        REMOVED: _.isNil(initRecordIds?.removed)
+          ? REMOVED
+          : initRecordIds.removed,
       };
     },
     removeAnnotation({ ID }) {

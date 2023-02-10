@@ -66,16 +66,12 @@ export default {
       this.$emit("on-submit", this.inputs);
     },
     onChange({ id, selected, record_ids, removed }) {
-      if (selected) {
-        this.$emit("on-change", {
-          ID: id,
-          VALUE: selected,
-          RECORD_IDS: record_ids,
-          REMOVED: removed,
-        });
-      } else {
-        this.onRemove({ id });
-      }
+      this.$emit("on-change", {
+        ID: id,
+        VALUE: selected,
+        RECORD_IDS: record_ids,
+        REMOVED: removed,
+      });
     },
     onReset() {
       this.$emit("on-reset");
