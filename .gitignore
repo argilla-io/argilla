@@ -130,9 +130,11 @@ sw.*
 # Vim swap files
 *.swp
 
-
 yarn.lock
 package-lock.json
 
 # App generated files
 src/**/server/static/
+
+# SQLAlchemy database
+argilla.db
