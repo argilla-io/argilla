@@ -21,6 +21,7 @@ import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 import { Vector as VectorModel } from "@/models/Vector";
+import { Notification } from "@/models/Notifications";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -508,11 +509,36 @@ const actions = {
       selected: false,
       status: "Discarded",
     }));
-    await _updateDatasetRecords({
-      dataset,
-      records: newRecords,
-      persistBackend: true,
-    });
+
+    let message = "";
+    let numberOfChars = 0;
+    let typeOfNotification = "";
+    try {
+      await _updateDatasetRecords({
+        dataset,
+        records: newRecords,
+        persistBackend: true,
+      });
+
+      message =
+        newRecords.length > 1
+          ? `${newRecords.length} records are discarded`
+          : `1 record is discarded`;
+
+      numberOfChars = 30;
+      typeOfNotification = "success";
+    } catch (err) {
+      console.log(err);
+      message = `${newRecords.length} record(s) could not have been discarded`;
+      numberOfChars = 43;
+      typeOfNotification = "error";
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        numberOfChars,
+        type: typeOfNotification,
+      });
+    }
   },
   async resetRecord(_, { dataset, record }) {
     return await _updateDatasetRecords({
