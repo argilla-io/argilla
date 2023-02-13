@@ -115,6 +115,7 @@ export default {
       });
 
       let message = "";
+      let numberOfChars = 0;
       let typeOfNotification = "";
       try {
         if (this.isMultiLabel) {
@@ -125,21 +126,23 @@ export default {
           };
           await this.updateRecords(updatedRecords);
           message = `${selectedRecords.length} records are in pending`;
+          numberOfChars = 25;
           typeOfNotification = "info";
         } else {
           await this.onValidate(records);
-          message = `The selected records are annotated !`;
-          typeOfNotification = "success";
         }
       } catch (err) {
         console.log(err);
         message = "There was a problem on annotate records";
         typeOfNotification = "error";
       } finally {
-        Notification.dispatch("notify", {
-          message,
-          type: typeOfNotification,
-        });
+        if (this.isMultiLabel) {
+          Notification.dispatch("notify", {
+            message,
+            numberOfChars,
+            type: typeOfNotification,
+          });
+        }
       }
     },
     labelsFactoryBySingleOrMultiLabel(
@@ -197,11 +200,31 @@ export default {
         };
       });
 
-      await this.validate({
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: validatedRecords,
-      });
+      let message = "";
+      let numberOfChars = 0;
+      let typeOfNotification = "";
+      try {
+        await this.validate({
+          dataset: this.dataset,
+          agent: this.$auth.user.username,
+          records: validatedRecords,
+        });
+        message =
+          validatedRecords.length > 1
+            ? `${validatedRecords.length} records are validated`
+            : `1 record is validated`;
+        numberOfChars = 25;
+        typeOfNotification = "success";
+      } catch (err) {
+        message = `${validatedRecords.length} record(s) could not have been validated`;
+        typeOfNotification = "error";
+      } finally {
+        Notification.dispatch("notify", {
+          message,
+          numberOfChars,
+          type: typeOfNotification,
+        });
+      }
     },
     async onNewLabel(newLabel) {
       await this.dataset.$dispatch("setLabels", {
