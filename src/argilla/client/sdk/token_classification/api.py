@@ -39,7 +39,6 @@ def data(
 ) -> Response[
     Union[List[TokenClassificationRecord], HTTPValidationError, ErrorMessage]
 ]:
-
     path = f"/api/datasets/{name}/TokenClassification/data"
     params = build_param_dict(id_from, limit)
 
