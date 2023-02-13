@@ -21,7 +21,7 @@
             @on-change="updateLastSelectedAnnotation"
             @on-remove="removeAnnotation"
             @on-submit="updateAnnotations"
-            @on-reset="resetAll"
+            @on-reset="resetAllAndCloseDropdown"
           />
         </div>
         <div class="no-inputs-text" v-else>
@@ -111,6 +111,10 @@ export default {
     updateAnnotations(updatedAnnotations) {
       this.toggleDropdown(false);
       this.$emit("on-update-annotations", updatedAnnotations);
+    },
+    resetAllAndCloseDropdown() {
+      this.resetAll();
+      this.toggleDropdown(false);
     },
     resetAll() {
       this.updateLastSelectedAnnotation({
