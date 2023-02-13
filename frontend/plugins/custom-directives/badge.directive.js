@@ -9,24 +9,27 @@ import Vue from "vue";
 
 Vue.directive("badge", {
   bind: (element, binding) => {
-    if (binding.value.showBadge) {
+    const { showBadge } = binding.value;
+    if (showBadge) {
+      const { verticalPosition, horizontalPosition, backgroundColor } =
+        binding.value;
       element.style.position = "relative";
       const badge = document.createElement("div");
       badge.style.position = "absolute";
-      badge.style.backgroundColor = binding.value.backgroundColor || "#ff675f";
+      badge.style.backgroundColor = backgroundColor || "#ff675f";
       badge.style.width = "10px";
       badge.style.height = "10px";
       badge.style.borderRadius = "5em";
 
-      if (binding.value.verticalPosition === "top") {
+      if (verticalPosition === "top") {
         badge.style.top = "-7px";
-      } else if (binding.value.verticalPosition === "bottom") {
+      } else if (verticalPosition === "bottom") {
         badge.style.bottom = "-7px";
       }
 
-      if (binding.value.horizontalPosition === "right") {
+      if (horizontalPosition === "right") {
         badge.style.right = "-7px";
-      } else if (binding.value.horizontalPosition === "left") {
+      } else if (horizontalPosition === "left") {
         badge.style.left = "-7px";
       }
       element.appendChild(badge);
