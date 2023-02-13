@@ -38,6 +38,7 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { Notification } from "@/models/Notifications";
 export default {
   props: {
     datasetId: {
@@ -85,18 +86,39 @@ export default {
     },
     async onValidate(records) {
       const filteredRecords = this.validationFilter(records);
-      await this.validateAnnotations({
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: filteredRecords.map((record) => {
-          return {
-            ...record,
-            annotation: {
-              sentences: [{ text: record.sentenceForAnnotation, score: 1 }],
-            },
-          };
-        }),
-      });
+      let message = "";
+      let numberOfChars = 0;
+      let typeOfNotification = "";
+      try {
+        await this.validateAnnotations({
+          dataset: this.dataset,
+          agent: this.$auth.user.username,
+          records: filteredRecords.map((record) => {
+            return {
+              ...record,
+              annotation: {
+                sentences: [{ text: record.sentenceForAnnotation, score: 1 }],
+              },
+            };
+          }),
+        });
+        message =
+          records.length > 1
+            ? `${filteredRecords.length} records are validated`
+            : `1 record is validated`;
+        numberOfChars = 25;
+        typeOfNotification = "success";
+      } catch (err) {
+        console.log(err);
+        message = `${records.length} record(s) could not have been validated`;
+        typeOfNotification = "error";
+      } finally {
+        Notification.dispatch("notify", {
+          message,
+          numberOfChars,
+          type: typeOfNotification,
+        });
+      }
     },
     searchRecords(query) {
       this.$emit("search-records", query);
