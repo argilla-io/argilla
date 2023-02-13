@@ -41,6 +41,7 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { Notification } from "@/models/Notifications";
 export default {
   props: {
     datasetId: {
@@ -82,19 +83,39 @@ export default {
       });
     },
     async onValidate(records) {
-      await this.validate({
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: records.map((record) => {
-          return {
-            ...record,
-            annotatedEntities: undefined,
-            annotation: {
-              entities: record.annotatedEntities,
-            },
-          };
-        }),
-      });
+      let message = "";
+      let numberOfChars = 0;
+      let typeOfNotification = "";
+      try {
+        await this.validate({
+          dataset: this.dataset,
+          agent: this.$auth.user.username,
+          records: records.map((record) => {
+            return {
+              ...record,
+              annotatedEntities: undefined,
+              annotation: {
+                entities: record.annotatedEntities,
+              },
+            };
+          }),
+        });
+        message =
+          records.length > 1
+            ? `${records.length} records are validated`
+            : `1 record is validated`;
+        numberOfChars = 25;
+        typeOfNotification = "success";
+      } catch (err) {
+        message = `${records.length} record(s) could not have been validated`;
+        typeOfNotification = "error";
+      } finally {
+        Notification.dispatch("notify", {
+          message,
+          numberOfChars,
+          type: typeOfNotification,
+        });
+      }
     },
     async onNewLabel(label) {
       await this.dataset.$dispatch("setEntities", {
