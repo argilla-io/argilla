@@ -21,7 +21,7 @@
             @on-change="updateLastSelectedAnnotation"
             @on-remove="removeAnnotation"
             @on-submit="updateAnnotations"
-            @on-reset="resetAllAndCloseDropdown"
+            @on-cancel="resetAllAndCloseDropdown"
           />
         </div>
         <div class="no-inputs-text" v-else>

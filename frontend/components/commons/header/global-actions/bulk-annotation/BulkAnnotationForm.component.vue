@@ -73,7 +73,7 @@ export default {
       });
     },
     onReset() {
-      this.$emit("on-reset");
+      this.$emit("on-cancel");
     },
     onRemove({ id }) {
       this.$emit("on-remove", { ID: id });
