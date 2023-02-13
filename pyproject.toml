@@ -111,3 +111,6 @@ exclude_lines = [
 
 [tool.isort]
 profile = "black"
+
+[tool.black]
+line-lenght = 120
