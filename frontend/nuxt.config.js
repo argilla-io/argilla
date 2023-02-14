@@ -67,6 +67,7 @@ export default {
     { src: "~/plugins/copy-to-clipboard.js" },
     { src: "~/plugins/filters.js" },
     { src: "~/plugins/variables.js" },
+    { src: "~/plugins/custom-directives/badge.directive.js" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)

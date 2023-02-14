@@ -38,8 +38,17 @@
       class="clear validate-discard-actions__button"
       @click="onValidate"
       data-title="Validate"
-    >
-      <svgicon name="validate" />
+      >
+      <i
+        :key="isAnyPendingStatusRecord"
+        v-badge="{
+          showBadge: isAnyPendingStatusRecord,
+          verticalPosition: 'top',
+          horizontalPosition: 'right',
+        }"
+      >
+        <svgicon name="validate" />
+      </i>
     </base-button>
     <base-button
       class="clear validate-discard-actions__button"
@@ -114,6 +123,9 @@ export default {
     selectedRecords() {
       // TODO: when record will be in own ORM table, replace next line by query ORM
       return this.visibleRecords.filter((record) => record.selected);
+    },
+    isAnyPendingStatusRecord() {
+      return this.selectedRecords.some((record) => record.status === "Edited");
     },
     allowClearOrReset() {
       return (
