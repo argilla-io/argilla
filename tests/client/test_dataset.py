@@ -17,12 +17,11 @@ import os
 import sys
 from time import sleep
 
+import argilla as ar
 import datasets
 import pandas as pd
 import pytest
 import spacy
-
-import argilla as ar
 from argilla.client.datasets import (
     DatasetBase,
     DatasetForTokenClassification,

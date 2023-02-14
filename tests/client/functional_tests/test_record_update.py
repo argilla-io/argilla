@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.client.api import active_api
 from argilla.client.sdk.commons.errors import NotFoundApiError
 

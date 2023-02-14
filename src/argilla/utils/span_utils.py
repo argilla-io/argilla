@@ -111,7 +111,7 @@ class SpanUtils:
 
             if misaligned_spans_errors:
                 spans = "\n".join(misaligned_spans_errors)
-                message += f"Following entity spans are not aligned with provided tokenization\n"
+                message += "Following entity spans are not aligned with provided tokenization\n"
                 message += f"Spans:\n{spans}\n"
                 message += f"Tokens:\n{self.tokens}"
 

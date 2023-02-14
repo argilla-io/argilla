@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 
@@ -39,14 +39,11 @@ from argilla.server.services.tasks.text_classification.model import (
 )
 from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationDataset,
-)
-from argilla.server.services.tasks.text_classification.model import (
-    ServiceTextClassificationQuery as _TextClassificationQuery,
+    TokenAttributions,
 )
 from argilla.server.services.tasks.text_classification.model import (
     TextClassificationAnnotation as _TextClassificationAnnotation,
 )
-from argilla.server.services.tasks.text_classification.model import TokenAttributions
 
 
 class UpdateLabelingRule(BaseModel):

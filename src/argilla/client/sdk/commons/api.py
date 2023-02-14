@@ -126,7 +126,7 @@ def build_data_response(
             parsed_record = json.loads(r)
             try:
                 parsed_response = data_type(**parsed_record)
-            except Exception as err:
+            except Exception as err:  # noqa: F841
                 raise GenericApiError(**parsed_record) from None
             parsed_responses.append(parsed_response)
         return Response(

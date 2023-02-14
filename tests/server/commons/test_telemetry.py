@@ -15,11 +15,10 @@
 import uuid
 
 import pytest
-from fastapi import Request
-
 from argilla.server.commons import telemetry
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import ServerError
+from fastapi import Request
 
 mock_request = Request(scope={"type": "http", "headers": {}})
 

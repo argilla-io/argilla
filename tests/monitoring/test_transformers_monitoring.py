@@ -14,9 +14,8 @@
 from time import sleep
 from typing import List, Union
 
-import pytest
-
 import argilla
+import pytest
 from argilla import TextClassificationRecord
 
 

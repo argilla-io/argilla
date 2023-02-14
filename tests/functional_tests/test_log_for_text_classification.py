@@ -12,16 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla as ar
+import pytest
 from argilla.client.sdk.commons.errors import (
     BadRequestApiError,
     GenericApiError,
     ValidationApiError,
 )
 from argilla.server.settings import settings
-from tests.client.conftest import SUPPORTED_VECTOR_SEARCH, supported_vector_search
+
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient
 
 

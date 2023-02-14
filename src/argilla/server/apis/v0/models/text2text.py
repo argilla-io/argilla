@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
@@ -27,7 +26,7 @@ from argilla.server.apis.v0.models.commons.model import (
     SortableField,
 )
 from argilla.server.apis.v0.models.datasets import UpdateDatasetRequest
-from argilla.server.commons.models import PredictionStatus, TaskType
+from argilla.server.commons.models import PredictionStatus
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.search.model import (
     ServiceBaseRecordsQuery,

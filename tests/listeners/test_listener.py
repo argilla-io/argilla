@@ -15,9 +15,8 @@
 import time
 from typing import List
 
-import pytest
-
 import argilla as ar
+import pytest
 from argilla import RGListenerContext, listener
 from argilla.client.models import Record
 

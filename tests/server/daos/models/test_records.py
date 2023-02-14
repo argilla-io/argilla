@@ -15,7 +15,6 @@
 import warnings
 
 import pytest
-
 from argilla.server.daos.models.records import BaseRecordInDB
 from argilla.server.settings import settings
 

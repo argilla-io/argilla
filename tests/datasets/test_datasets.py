@@ -12,9 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla as ar
+import pytest
 from argilla import TextClassificationSettings, TokenClassificationSettings
 from argilla.client import api
 from argilla.client.sdk.commons.errors import ForbiddenApiError

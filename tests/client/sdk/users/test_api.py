@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import BaseClientError, UnauthorizedApiError
 from argilla.client.sdk.users.api import whoami

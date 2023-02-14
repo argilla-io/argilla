@@ -19,6 +19,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
 )
 from argilla.server.commons.models import TaskType
+
 from tests.helpers import SecuredClient
 
 
@@ -97,7 +98,7 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
     assert response.status_code == 409, response.json()
 
     response = mocked_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json=request,
     )
 

@@ -13,11 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import sys
-from types import SimpleNamespace
 
 import numpy as np
 import pytest
-
 from argilla import TextClassificationRecord
 from argilla.labeling.text_classification import (
     FlyingSquid,

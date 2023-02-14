@@ -16,7 +16,6 @@
 """
 This module configures the global fastapi application
 """
-import fileinput
 import glob
 import inspect
 import logging

@@ -16,7 +16,7 @@ import functools
 import logging
 import random
 import uuid
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
 from pkg_resources import parse_version
@@ -31,6 +31,11 @@ from argilla.client.models import (
 )
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.utils.span_utils import SpanUtils
+
+if TYPE_CHECKING:
+    import datasets
+    import pandas
+    import spacy
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,7 +65,7 @@ def _requires_spacy(func):
     @functools.wraps(func)
     def check_if_spacy_installed(*args, **kwargs):
         try:
-            import spacy
+            import spacy  # noqa: F401
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 f"'spacy' must be installed to use `{func.__name__}`"
@@ -1007,7 +1012,7 @@ class DatasetForTokenClassification(DatasetBase):
         for row in dataset:
             # TODO: fails with a KeyError if no tokens column is present and no mapping is indicated
             if not row["tokens"]:
-                _LOGGER.warning(f"Ignoring row with no tokens.")
+                _LOGGER.warning("Ignoring row with no tokens.")
                 continue
 
             if row.get("tags"):

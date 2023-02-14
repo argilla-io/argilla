@@ -16,7 +16,6 @@ import socket
 from datetime import datetime
 
 import pytest
-
 from argilla.client.models import Text2TextRecord
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,

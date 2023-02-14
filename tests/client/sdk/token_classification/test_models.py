@@ -16,7 +16,6 @@ import socket
 from datetime import datetime
 
 import pytest
-
 from argilla.client.models import TokenClassificationRecord
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,

@@ -14,8 +14,6 @@
 #  limitations under the License.
 
 import pytest
-from pydantic import ValidationError
-
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationAnnotation,
@@ -28,6 +26,7 @@ from argilla.server.services.tasks.token_classification.model import (
     EntitySpan,
     ServiceTokenClassificationRecord,
 )
+from pydantic import ValidationError
 
 
 def test_char_position():

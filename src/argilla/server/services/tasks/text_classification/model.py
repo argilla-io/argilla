@@ -99,7 +99,7 @@ class ClassPrediction(BaseModel):
             assert 1 <= len(class_label) <= DEFAULT_MAX_KEYWORD_LENGTH, (
                 f"Class name '{class_label}' exceeds max length of {DEFAULT_MAX_KEYWORD_LENGTH}"
                 if len(class_label) > DEFAULT_MAX_KEYWORD_LENGTH
-                else f"Class name must not be empty"
+                else "Class name must not be empty"
             )
         return class_label
 

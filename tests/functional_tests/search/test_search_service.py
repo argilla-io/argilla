@@ -12,9 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla
+import pytest
 from argilla.server.apis.v0.models.commons.model import ScoreRange
 from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.apis.v0.models.text_classification import (

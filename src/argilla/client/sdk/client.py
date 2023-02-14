@@ -119,7 +119,7 @@ class Client(_ClientCommonDefaults, _Client):
             try:
                 result = await func(self, *args, **kwargs)
                 return result
-            except httpx.ConnectError as err:
+            except httpx.ConnectError as err:  # noqa: F841
                 return wrap_error(self.base_url)
 
         @functools.wraps(func)
@@ -127,7 +127,7 @@ class Client(_ClientCommonDefaults, _Client):
             try:
                 result = func(self, *args, **kwargs)
                 return result
-            except httpx.ConnectError as err:
+            except httpx.ConnectError as err:  # noqa: F841
                 return wrap_error(self.base_url)
 
         is_coroutine = inspect.iscoroutinefunction(func)

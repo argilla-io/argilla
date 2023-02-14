@@ -15,14 +15,13 @@
 import concurrent.futures
 import datetime
 from time import sleep
-from typing import Any, Iterable, List
+from typing import Any, Iterable
 
+import argilla as ar
 import datasets
 import httpx
 import pandas as pd
 import pytest
-
-import argilla as ar
 from argilla._constants import (
     _OLD_WORKSPACE_HEADER_NAME,
     DEFAULT_API_KEY,
@@ -46,6 +45,7 @@ from argilla.client.sdk.users.models import User
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
+
 from tests.helpers import SecuredClient
 from tests.server.test_api import create_some_data_for_text_classification
 
