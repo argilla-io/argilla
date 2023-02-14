@@ -246,11 +246,13 @@ export default {
         {
           id: "validate",
           name: "Validate",
+          allow: true,
           active: this.allowValidation,
         },
         {
           id: "discard",
           name: "Discard",
+          allow: true,
           active: this.record.status !== "Discarded",
         },
       ];

@@ -27,6 +27,7 @@
         @discard-records="onDiscard"
         @validate-records="onValidate"
         @clear-records="onClear"
+        @reset-records="onReset"
         @on-select-labels="onSelectLabels($event)"
       />
       <create-new-action v-if="isCreationLabel" @new-label="onNewLabel" />
@@ -84,6 +85,9 @@ export default {
     },
     onClear($event) {
       this.$emit("clear-records", $event);
+    },
+    onReset($event) {
+      this.$emit("reset-records", $event);
     },
     onSelectLabels($event) {
       this.$emit("on-select-labels", $event);

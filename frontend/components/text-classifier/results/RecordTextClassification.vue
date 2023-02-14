@@ -42,6 +42,7 @@
         @validate="validateLabels()"
         @clear="onClearAnnotations()"
         @discard="onDiscard()"
+        @reset="onReset()"
       />
     </div>
 
@@ -119,17 +120,26 @@ export default {
         {
           id: "validate",
           name: "Validate",
+          allow: true,
           active: this.allowValidate || false,
         },
         {
           id: "discard",
           name: "Discard",
+          allow: true,
           active: this.record.status !== "Discarded",
         },
         {
           id: "clear",
           name: "Clear",
+          allow: this.isMultiLabel,
           active: this.record.currentAnnotation?.labels?.length || false,
+        },
+        {
+          id: "reset",
+          name: "Reset",
+          allow: this.isMultiLabel,
+          active: this.record.status === "Edited",
         },
       ];
     },
@@ -139,6 +149,7 @@ export default {
       updateRecords: "entities/datasets/updateDatasetRecords",
       validateAnnotations: "entities/datasets/validateAnnotations",
       resetAnnotations: "entities/datasets/resetAnnotations",
+      resetRecords: "entities/datasets/resetRecords",
     }),
     async resetLabels() {
       await this.resetAnnotations({
@@ -199,6 +210,14 @@ export default {
               labels: [],
             },
           },
+        ],
+      });
+    },
+    async onReset() {
+      await this.resetRecords({
+        dataset: this.getTextClassificationDataset(),
+        records: [
+          { ...this.record, currentAnnotation: this.record.annotation },
         ],
       });
     },

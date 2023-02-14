@@ -507,6 +507,7 @@ const actions = {
       ...record,
       selected: false,
       status: "Discarded",
+      originStatus: null,
     }));
     await _updateDatasetRecords({
       dataset,
@@ -514,16 +515,15 @@ const actions = {
       persistBackend: true,
     });
   },
-  async resetRecord(_, { dataset, record }) {
-    return await _updateDatasetRecords({
+  async resetRecords(_, { dataset, records }) {
+    const newRecords = records.map((record) => ({
+      ...record,
+      selected: false,
+      status: record.originStatus,
+    }));
+    return _updateDatasetRecords({
       dataset,
-      records: [
-        {
-          ...record,
-          selected: false,
-          status: "Default",
-        },
-      ],
+      records: newRecords,
       persistBackend: true,
     });
   },
@@ -549,6 +549,7 @@ const actions = {
       },
       selected: false,
       status: "Validated",
+      originStatus: null,
     }));
     return _updateDatasetRecords({
       dataset,
