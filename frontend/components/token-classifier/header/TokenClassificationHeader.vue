@@ -86,19 +86,23 @@ export default {
       });
     },
     async onValidate(records) {
-      await this.validate({
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: records.map((record) => {
-          return {
-            ...record,
-            annotatedEntities: undefined,
-            annotation: {
-              entities: record.annotatedEntities,
-            },
-          };
-        }),
-      });
+      try {
+        await this.validate({
+          dataset: this.dataset,
+          agent: this.$auth.user.username,
+          records: records.map((record) => {
+            return {
+              ...record,
+              annotatedEntities: undefined,
+              annotation: {
+                entities: record.annotatedEntities,
+              },
+            };
+          }),
+        });
+      } catch (err) {
+        console.log(err);
+      }
     },
     async onClear(records) {
       const clearedRecords = records.map((record) => {

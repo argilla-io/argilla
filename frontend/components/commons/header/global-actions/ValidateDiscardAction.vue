@@ -27,12 +27,21 @@
       :disabled="!visibleRecords.length"
       class="list__item__checkbox"
     />
-    <annotation-label-selector
-      v-if="datasetTask === 'TextClassification'"
+    <TextClassificationBulkAnnotationSingle
+      v-if="datasetTask === 'TextClassification' && !isMultiLabel"
       :class="'validate-discard-actions__select'"
       :multi-label="isMultiLabel"
       :options="availableLabels"
       @selected="onSelectLabels($event)"
+    />
+    <TextClassificationBulkAnnotationComponent
+      v-if="datasetTask === 'TextClassification' && isMultiLabel"
+      :class="'validate-discard-actions__select'"
+      :datasetId="datasetId"
+      :records="selectedRecords"
+      :recordsIds="selectedRecordsIds"
+      :labels="availableLabels"
+      @on-update-annotations="onUpdateAnnotations"
     />
     <base-button
       class="clear validate-discard-actions__button"
@@ -141,6 +150,11 @@ export default {
         this.datasetTask === "TokenClassification"
       );
     },
+    selectedRecordsIds() {
+      return new Set(
+        this.selectedRecords.reduce((acc, curr) => [...acc, curr.id], [])
+      );
+    },
   },
   watch: {
     visibleRecords(newValue) {
@@ -183,6 +197,32 @@ export default {
       const { selectedRecords } = this;
       this.$emit("on-select-labels", { labels, selectedRecords });
     },
+    onUpdateAnnotations(updatedAnnotations) {
+      const { selectedRecords } = this;
+      const labelsToAdd = this.labelsfromAnnotationsFactory(
+        updatedAnnotations,
+        "selected"
+      );
+      const labelsToRemove = this.labelsfromAnnotationsFactory(
+        updatedAnnotations,
+        "removed"
+      );
+
+      this.$emit("on-select-labels", {
+        selectedRecords,
+        labels: labelsToAdd,
+        labelsToRemove: labelsToRemove,
+      });
+    },
+    labelsfromAnnotationsFactory(annotations, paramKey) {
+      return annotations.reduce(
+        (accumulator, currentLabelObj) =>
+          currentLabelObj[paramKey]
+            ? [...accumulator, currentLabelObj.label]
+            : [...accumulator],
+        []
+      );
+    },
   },
 };
 </script>
@@ -201,14 +241,24 @@ export default {
   &__select {
     margin-left: 0.8em;
     :deep(.dropdown__header) {
-      max-height: 33px;
-      font-weight: 500;
-      min-width: 170px;
-      @include font-size(13px);
-      border: 1px solid palette(blue, 500);
-      color: palette(blue, 500);
-      &:after {
-        border-color: palette(blue, 500);
+      cursor: pointer;
+      display: flex;
+      gap: $base-space * 2;
+      border: none;
+      padding: 5px $base-space;
+      height: auto;
+      .svg-icon {
+        color: $black-54;
+        height: 18px;
+        width: 18px;
+      }
+      span[data-title] {
+        position: relative;
+        overflow: visible;
+        @extend %has-tooltip--top;
+      }
+      &:hover {
+        background: $black-4;
       }
     }
   }

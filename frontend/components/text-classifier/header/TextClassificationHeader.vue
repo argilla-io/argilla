@@ -46,6 +46,7 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { Notification } from "@/models/Notifications";
 export default {
   props: {
     datasetId: {
@@ -93,31 +94,90 @@ export default {
       validate: "entities/datasets/validateAnnotations",
       resetRecords: "entities/datasets/resetRecords",
     }),
-    async onSelectLabels({ labels, selectedRecords }) {
+    async onSelectLabels({ labels, selectedRecords, labelsToRemove }) {
       const records = selectedRecords.map((record) => {
         const pendingStatusProperties = {
           selected: true,
           status: "Edited",
         };
+
+        const labelsToSend = this.labelsFactoryBySingleOrMultiLabel(
+          labels,
+          labelsToRemove,
+          record.currentAnnotation?.labels
+        );
+
         return {
           ...record,
           ...(this.isMultiLabel && pendingStatusProperties),
           currentAnnotation: {
             agent: this.$auth.user.username,
-            labels: this.formatLabels(labels),
+            labels: labelsToSend,
           },
         };
       });
-      const updatedRecords = {
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: records,
-      };
-      if (this.isMultiLabel) {
-        await this.updateRecords(updatedRecords);
-      } else {
-        await this.onValidate(records);
+
+      let message = "";
+      let numberOfChars = 0;
+      let typeOfNotification = "";
+      try {
+        if (this.isMultiLabel) {
+          const updatedRecords = {
+            dataset: this.dataset,
+            agent: this.$auth.user.username,
+            records,
+          };
+          await this.updateRecords(updatedRecords);
+          message = `${selectedRecords.length} records are in pending`;
+          numberOfChars = 25;
+          typeOfNotification = "info";
+        } else {
+          await this.onValidate(records);
+        }
+      } catch (err) {
+        console.log(err);
+        message = "There was a problem on annotate records";
+        typeOfNotification = "error";
+      } finally {
+        if (this.isMultiLabel) {
+          Notification.dispatch("notify", {
+            message,
+            numberOfChars,
+            type: typeOfNotification,
+          });
+        }
       }
+    },
+    labelsFactoryBySingleOrMultiLabel(
+      labels,
+      labelsToRemove,
+      currentAnnotationLabels
+    ) {
+      return this.isMultiLabel
+        ? this.formatLabelsForBulkAnnotation(
+            labels,
+            labelsToRemove,
+            currentAnnotationLabels
+          )
+        : this.formatLabels(labels);
+    },
+    formatLabelsForBulkAnnotation(
+      labels,
+      labelsToRemove,
+      currentAnnotationLabels
+    ) {
+      const formattedLabels = this.formatLabels(labels);
+
+      let labelsToSend = [
+        ...new Set([...formattedLabels, ...currentAnnotationLabels]),
+      ];
+      labelsToSend = labelsToRemove?.length
+        ? labelsToSend?.filter(
+            (labelObj) => !labelsToRemove.includes(labelObj.class)
+          )
+        : labelsToSend;
+
+      return labelsToSend;
     },
     async onDiscard(records) {
       await this.discard({
@@ -143,11 +203,15 @@ export default {
         };
       });
 
-      await this.validate({
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: validatedRecords,
-      });
+      try {
+        await this.validate({
+          dataset: this.dataset,
+          agent: this.$auth.user.username,
+          records: validatedRecords,
+        });
+      } catch (err) {
+        console.log(err);
+      }
     },
     async onClear(records) {
       const clearedRecords = records.map((record) => {

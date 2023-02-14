@@ -21,6 +21,7 @@ import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 import { Vector as VectorModel } from "@/models/Vector";
+import { Notification } from "@/models/Notifications";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -509,11 +510,36 @@ const actions = {
       status: "Discarded",
       originStatus: null,
     }));
-    await _updateDatasetRecords({
-      dataset,
-      records: newRecords,
-      persistBackend: true,
-    });
+
+    let message = "";
+    let numberOfChars = 0;
+    let typeOfNotification = "";
+    try {
+      await _updateDatasetRecords({
+        dataset,
+        records: newRecords,
+        persistBackend: true,
+      });
+
+      message =
+        newRecords.length > 1
+          ? `${newRecords.length} records are discarded`
+          : `1 record is discarded`;
+
+      numberOfChars = 30;
+      typeOfNotification = "success";
+    } catch (err) {
+      console.log(err);
+      message = `${newRecords.length} record(s) could not have been discarded`;
+      numberOfChars = 43;
+      typeOfNotification = "error";
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        numberOfChars,
+        type: typeOfNotification,
+      });
+    }
   },
   async resetRecords(_, { dataset, records }) {
     const newRecords = records.map((record) => ({
@@ -541,21 +567,45 @@ const actions = {
     });
   },
   async validateAnnotations(_, { dataset, records, agent }) {
-    const newRecords = records.map((record) => ({
-      ...record,
-      annotation: {
-        ...record.annotation,
-        agent,
-      },
-      selected: false,
-      status: "Validated",
-      originStatus: null,
-    }));
-    return _updateDatasetRecords({
-      dataset,
-      records: newRecords,
-      persistBackend: true,
-    });
+    const numberOfRecords = records.length;
+    let message = "";
+    let numberOfChars = 0;
+    let typeOfNotification = "";
+    try {
+      const newRecords = records.map((record) => ({
+        ...record,
+        annotation: {
+          ...record.annotation,
+          agent,
+        },
+        selected: false,
+        status: "Validated",
+        originStatus: null,
+      }));
+
+      message =
+        numberOfRecords > 1
+          ? `${numberOfRecords} records are validated`
+          : `1 record is validated`;
+      numberOfChars = 25;
+      typeOfNotification = "success";
+      return _updateDatasetRecords({
+        dataset,
+        records: newRecords,
+        persistBackend: true,
+      });
+    } catch (err) {
+      console.log(err);
+      message = `${numberOfRecords} record(s) could not have been validated`;
+      console.log(message);
+      typeOfNotification = "error";
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        numberOfChars,
+        type: typeOfNotification,
+      });
+    }
   },
   async setUserData(_, { dataset, data }) {
     const metadata = {
