@@ -1,15 +1,28 @@
 <template>
   <div class="record__actions-buttons">
-    <span v-for="{ id, name, active } in allowedActions" :key="id">
+    <span v-for="{ id, name, active } in mainActions" :key="id">
       <base-button
-        :class="`record__actions-button--${id}`"
+        :class="[
+          !active ? `--selected` : null,
+          `record__actions-button--${id}`,
+        ]"
         @click="onAction(id)"
-        :disabled="!active"
       >
-        <svgicon :name="id" width="18" height="18" />
+        <svgicon :name="id" width="14" height="14" />
         {{ name }}
       </base-button></span
     >
+    <div class="record__actions-buttons--secondary">
+      <span v-for="{ id, name, active } in secondaryActions" :key="id">
+        <base-button
+          :disabled="!active"
+          :data-title="name"
+          :class="`record__actions-button--${id}--secondary`"
+          @click="onAction(id)"
+        >
+          <svgicon :name="id" width="18" height="18" /> </base-button
+      ></span>
+    </div>
   </div>
 </template>
 
@@ -25,7 +38,7 @@ export default {
       required: true,
       validator(actions) {
         return actions.map((action) =>
-          ["validate", "discard", "clear"].includes(action.id)
+          ["validate", "discard", "clear", "reset"].includes(action.id)
         );
       },
     },
@@ -33,6 +46,16 @@ export default {
   computed: {
     allowedActions() {
       return this.actions.filter((action) => action.allow);
+    },
+    mainActions() {
+      return this.allowedActions.filter((action) =>
+        ["validate", "discard"].includes(action.id)
+      );
+    },
+    secondaryActions() {
+      return this.allowedActions.filter((action) =>
+        ["clear", "reset"].includes(action.id)
+      );
     },
   },
   methods: {
@@ -53,19 +76,34 @@ $recordActions: (
 .record {
   &__actions-buttons {
     display: flex;
-    gap: $base-space * 2;
+    gap: $base-space;
     align-items: center;
-    margin-top: 1.5em;
+    margin-top: 3em;
+    &--secondary {
+      display: flex;
+      margin-right: 0;
+      margin-left: auto;
+      gap: $base-space;
+    }
   }
   @each $action, $color in $recordActions {
     &__actions-button--#{$action} {
-      border: 1px solid $black-20;
+      border: 1px solid $black-10;
       background: palette(grey, 700);
-      padding: 5px 8px;
+      padding: 7px 8px;
       color: $black-54;
+      &--secondary {
+        overflow: visible;
+        padding: $base-space;
+        @extend %has-tooltip--top;
+        &:hover {
+          background: $black-4;
+        }
+      }
       &:hover {
         background: darken(palette(grey, 700), 5%);
       }
+
       .svg-icon {
         color: $color;
       }
@@ -73,7 +111,7 @@ $recordActions: (
         animation: zoom-in-out 0.2s linear;
       }
       &[disabled] {
-        opacity: 0.3;
+        opacity: 0.4;
       }
     }
   }
@@ -82,6 +120,17 @@ $recordActions: (
     background: palette(green);
     color: palette(white);
     line-height: 13px;
+    &.--selected {
+      border: 1px solid palette(green);
+      background: palette(white);
+      color: palette(green);
+      .svg-icon {
+        color: palette(green);
+      }
+      &:hover {
+        background: none;
+      }
+    }
     &:hover {
       background: darken(palette(green), 5%);
     }
