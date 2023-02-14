@@ -165,7 +165,7 @@ export default {
       });
     },
     async onReset(records) {
-      const resetRecords = records.map((record) => {
+      const restartedRecords = records.map((record) => {
         return {
           ...record,
           currentAnnotation: record.annotation,
@@ -173,7 +173,7 @@ export default {
       });
       this.resetRecords({
         dataset: this.dataset,
-        records: resetRecords,
+        records: restartedRecords,
       });
     },
     async onNewLabel(newLabel) {
