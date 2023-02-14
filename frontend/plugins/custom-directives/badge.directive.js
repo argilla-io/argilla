@@ -15,6 +15,7 @@ Vue.directive("badge", {
         binding.value;
       element.style.position = "relative";
       const badge = document.createElement("div");
+      badge.setAttribute("id", `${element.id}Badge`);
       badge.style.position = "absolute";
       badge.style.backgroundColor = backgroundColor || "#ff675f";
       badge.style.width = "10px";
