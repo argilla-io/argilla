@@ -96,6 +96,9 @@ $recordActions: (
         overflow: visible;
         padding: $base-space;
         @extend %has-tooltip--top;
+        &[disabled] {
+          opacity: 0.3;
+        }
         &:hover {
           background: $black-4;
         }
