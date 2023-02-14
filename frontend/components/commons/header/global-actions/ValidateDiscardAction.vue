@@ -39,7 +39,17 @@
       @click="onValidate"
       data-title="Validate"
     >
-      <svgicon name="validate" />
+      <i
+        id="validateButton"
+        :key="isAnyPendingStatusRecord"
+        v-badge="{
+          showBadge: isAnyPendingStatusRecord,
+          verticalPosition: 'top',
+          horizontalPosition: 'right',
+        }"
+      >
+        <svgicon name="validate" />
+      </i>
     </base-button>
     <base-button
       class="clear validate-discard-actions__button"
@@ -64,9 +74,16 @@
         <svgicon name="reset" />
       </base-button>
     </template>
-    <p v-if="selectedRecords.length" class="validate-discard-actions__text">
+    <p
+      v-if="selectedRecords.length"
+      class="validate-discard-actions__text"
+      :class="{
+        'validate-discard-actions__text_pending_record':
+          isAnyPendingStatusRecord,
+      }"
+    >
       Actions will apply to the
-      <span>{{ selectedRecords.length }} records</span> selected
+      <span>{{ selectedRecords.length }} records selected</span>
     </p>
   </div>
 </template>
@@ -114,6 +131,9 @@ export default {
     selectedRecords() {
       // TODO: when record will be in own ORM table, replace next line by query ORM
       return this.visibleRecords.filter((record) => record.selected);
+    },
+    isAnyPendingStatusRecord() {
+      return this.selectedRecords.some((record) => record.status === "Edited");
     },
     allowClearOrReset() {
       return (
@@ -200,6 +220,12 @@ export default {
       font-weight: 700;
       color: $black-54;
     }
+  }
+  &__text_pending_record {
+    padding-block: 0.5em;
+    padding-inline: 1em;
+    background-color: rgb(255, 103, 95, 0.2);
+    border-radius: 5px;
   }
   &__button {
     .svg-icon {
