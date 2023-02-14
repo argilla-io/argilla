@@ -217,8 +217,9 @@ export default {
       const clearedRecords = records.map((record) => {
         return {
           ...record,
-          currentAnnotation: null,
-          annotation: null,
+          currentAnnotation: {
+            labels: [],
+          },
           selected: true,
           status: "Edited",
         };
