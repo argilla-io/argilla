@@ -42,7 +42,7 @@
         type="submit"
         class="primary small"
         :disabled="hasInputsChanged"
-        v-html="'Apply'"
+        v-html="'Select'"
       />
     </div>
   </form>
