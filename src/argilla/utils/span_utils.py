@@ -100,7 +100,7 @@ class SpanUtils:
                 context += self.text[max(char_start - 5, 0) : char_end + 5]
                 if char_end + 5 < len(self.text):
                     context += "..."
-                message = f"- [{span_str}] defined in {repr(context)}"
+                message = f"{span} - [{span_str}] defined in {repr(context)}"
 
                 misaligned_spans_errors.append(message)
 

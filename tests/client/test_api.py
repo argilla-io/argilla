@@ -625,8 +625,8 @@ def test_token_classification_spans(span, valid):
         with pytest.raises(
             ValueError,
             match="Following entity spans are not aligned with provided tokenization\n"
-            r"Spans:\n- \[s\] defined in 'Esto es...'\n"
-            r"Tokens:\n\['Esto', 'es', 'una', 'prueba'\]",
+            r"Spans:\n\('test', {}, {}\) - \[s\] defined in 'Esto es...'\n"
+            r"Tokens:\n\['Esto', 'es', 'una', 'prueba'\]".format(span[0], span[1]),
         ):
             ar.TokenClassificationRecord(
                 text=texto,
