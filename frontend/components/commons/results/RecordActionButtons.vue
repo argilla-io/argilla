@@ -64,7 +64,7 @@ $recordActions: (
       padding: 5px 8px;
       color: $black-54;
       &:hover {
-        background: palette(grey, 700);
+        background: darken(palette(grey, 700), 5%);
       }
       .svg-icon {
         color: $color;
