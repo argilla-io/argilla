@@ -44,7 +44,6 @@ ServiceDatasetSettings = TypeVar(
 
 
 class DatasetsService:
-
     _INSTANCE: "DatasetsService" = None
 
     @classmethod
@@ -147,7 +146,7 @@ class DatasetsService:
             self.__dao__.delete_dataset(dataset)
         else:
             raise ForbiddenOperationError(
-                f"You don't have the necessary permissions to delete this dataset. "
+                "You don't have the necessary permissions to delete this dataset. "
                 "Only dataset creators or administrators can delete datasets"
             )
 
@@ -197,7 +196,6 @@ class DatasetsService:
         copy_tags: Dict[str, Any] = None,
         copy_metadata: Dict[str, Any] = None,
     ) -> ServiceDataset:
-
         dataset_workspace = copy_workspace or dataset.owner
         dataset_workspace = user.check_workspace(dataset_workspace)
 
@@ -253,7 +251,6 @@ class DatasetsService:
     async def save_settings(
         self, user: User, dataset: ServiceDataset, settings: ServiceDatasetSettings
     ) -> ServiceDatasetSettings:
-
         self.__dao__.save_settings(dataset=dataset, settings=settings)
         return settings
 

@@ -98,7 +98,7 @@ class RGDatasetListener:
             def wrapper(*args, **kwargs):
                 try:
                     return job_func(*args, **kwargs)
-                except:
+                except:  # noqa: E722
                     import traceback
 
                     print(traceback.format_exc())
@@ -208,7 +208,7 @@ class RGDatasetListener:
 
         self._LOGGER.debug(f"Evaluate condition with arguments: {condition_args}")
         if self.condition(*condition_args):
-            self._LOGGER.debug(f"Condition passed! Running action...")
+            self._LOGGER.debug("Condition passed! Running action...")
             return self.__run_action__(ctx, *args, **kwargs)
 
     def __compute_metrics__(self, current_api, dataset, query: str) -> Metrics:
@@ -235,7 +235,7 @@ class RGDatasetListener:
                 )
             self._LOGGER.debug(f"Running action with arguments: {action_args}")
             return self.action(*args, *action_args, **kwargs)
-        except:
+        except:  # noqa: E722
             import traceback
 
             print(traceback.format_exc())

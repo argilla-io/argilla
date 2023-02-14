@@ -87,7 +87,6 @@ def flair_monitor(
     sample_rate: float,
     log_interval: float,
 ) -> Optional[SequenceTagger]:
-
     return FlairMonitor(
         pl,
         api=api,

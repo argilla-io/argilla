@@ -13,10 +13,13 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.server.daos.backend.query_helpers import aggregations
 from argilla.server.helpers import unflatten_dict
+
+if TYPE_CHECKING:
+    from argilla.server.daos.backend.client_adapters.base import IClientAdapter
 
 
 @dataclasses.dataclass
@@ -125,7 +128,6 @@ class HistogramAggregation(ElasticsearchMetric):
 
 @dataclasses.dataclass
 class TermsAggregation(ElasticsearchMetric):
-
     field: str = None
     script: Union[str, Dict[str, Any]] = None
     fixed_size: Optional[int] = None
@@ -206,7 +208,10 @@ class WordCloudAggregation(ElasticsearchMetric):
     ) -> Dict[str, Any]:
         field = text_field or self.default_field
         terms_id = f"{self.id}_{field}" if text_field else self.id
-        return TermsAggregation(id=terms_id, field=field,).aggregation_request(
+        return TermsAggregation(
+            id=terms_id,
+            field=field,
+        ).aggregation_request(
             size=size or self.DEFAULT_WORDCOUNT_SIZE
         )[terms_id]
 
@@ -223,7 +228,6 @@ class MetadataAggregations(ElasticsearchMetric):
         index: str,
         size: int = None,
     ) -> List[Dict[str, Any]]:
-
         schema = client.get_property_type(
             index=index,
             property_name="metadata",

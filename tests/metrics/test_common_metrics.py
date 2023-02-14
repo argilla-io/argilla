@@ -12,10 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import pytest
-
 import argilla
 import argilla as ar
+import pytest
 from argilla.metrics.commons import keywords, records_status, text_length
 
 

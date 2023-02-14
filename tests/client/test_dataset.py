@@ -17,12 +17,11 @@ import os
 import sys
 from time import sleep
 
+import argilla as ar
 import datasets
 import pandas as pd
 import pytest
 import spacy
-
-import argilla as ar
 from argilla.client.datasets import (
     DatasetBase,
     DatasetForTokenClassification,
@@ -270,10 +269,11 @@ class TestDatasetForTextClassification:
         records = request.getfixturevalue(records)
         expected_dataset = ar.DatasetForTextClassification(records)
 
+        expected_dataset.prepare_for_training(train_size=0.5)
         dataset_ds = expected_dataset.to_datasets()
 
         assert isinstance(dataset_ds, datasets.Dataset)
-        print(dataset_ds.column_names)
+
         assert dataset_ds.column_names == [
             "text",
             "inputs",

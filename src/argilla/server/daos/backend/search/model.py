@@ -26,7 +26,6 @@ class SortOrder(str, Enum):
 
 
 class QueryRange(BaseModel):
-
     range_from: float = Field(default=0.0, alias="from")
     range_to: float = Field(default=None, alias="to")
 
@@ -77,7 +76,6 @@ class VectorSearch(BaseModel):
 
 
 class BaseRecordsQuery(BaseQuery):
-
     query_text: Optional[str] = None
     advanced_query_dsl: bool = False
 

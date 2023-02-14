@@ -12,10 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla
 import argilla as ar
+import pytest
 from argilla.metrics import entity_consistency
 from argilla.metrics.token_classification import (
     Annotations,

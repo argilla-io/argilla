@@ -15,7 +15,6 @@
 import httpx
 import pytest
 from _pytest.logging import LogCaptureFixture
-
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
 
@@ -23,17 +22,15 @@ try:
     from loguru import logger
 except ModuleNotFoundError:
     logger = None
-from starlette.testclient import TestClient
-
 from argilla import app
 from argilla.client.api import active_api
+from starlette.testclient import TestClient
 
 from .helpers import SecuredClient
 
 
 @pytest.fixture
 def telemetry_track_data(mocker):
-
     client = telemetry._TelemetryClient.get()
     if client:
         # Disable sending data for tests
@@ -48,7 +45,6 @@ def mocked_client(
     monkeypatch,
     telemetry_track_data,
 ) -> SecuredClient:
-
     with TestClient(app, raise_server_exceptions=False) as _client:
         client_ = SecuredClient(_client)
 

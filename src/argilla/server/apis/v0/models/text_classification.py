@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 
@@ -39,14 +39,11 @@ from argilla.server.services.tasks.text_classification.model import (
 )
 from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationDataset,
-)
-from argilla.server.services.tasks.text_classification.model import (
-    ServiceTextClassificationQuery as _TextClassificationQuery,
+    TokenAttributions,
 )
 from argilla.server.services.tasks.text_classification.model import (
     TextClassificationAnnotation as _TextClassificationAnnotation,
 )
-from argilla.server.services.tasks.text_classification.model import TokenAttributions
 
 
 class UpdateLabelingRule(BaseModel):
@@ -76,7 +73,6 @@ class UpdateLabelingRule(BaseModel):
 
 
 class CreateLabelingRule(UpdateLabelingRule):
-
     query: str = Field(description="The es rule query")
 
     @validator("query")
@@ -109,7 +105,6 @@ class TextClassificationAnnotation(_TextClassificationAnnotation):
 
 
 class TextClassificationRecordInputs(BaseRecordInputs[TextClassificationAnnotation]):
-
     inputs: Dict[str, Union[str, List[str]]]
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
@@ -122,7 +117,6 @@ class TextClassificationRecord(
 
 
 class TextClassificationBulkRequest(UpdateDatasetRequest):
-
     records: List[TextClassificationRecordInputs]
 
     @validator("records")
@@ -138,7 +132,6 @@ class TextClassificationBulkRequest(UpdateDatasetRequest):
 
 
 class TextClassificationQuery(ServiceBaseRecordsQuery):
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)

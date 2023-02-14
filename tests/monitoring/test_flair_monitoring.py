@@ -15,11 +15,9 @@ from time import sleep
 
 
 def test_flair_monitoring(mocked_client, monkeypatch):
-
+    import argilla as ar
     from flair.data import Sentence
     from flair.models import SequenceTagger
-
-    import argilla as ar
 
     dataset = "test_flair_monitoring"
     model = "flair/ner-english"
@@ -52,7 +50,7 @@ def test_flair_monitoring(mocked_client, monkeypatch):
     assert record.tokens == [token.text for token in sentence.tokens]
 
     assert len(record.prediction) == len(detected_labels)
-    for ((label, start, end, score), span) in zip(record.prediction, detected_labels):
+    for (label, start, end, score), span in zip(record.prediction, detected_labels):
         assert label == span.value
         assert start == span.span.start_pos
         assert end == span.span.end_pos

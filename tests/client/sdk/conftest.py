@@ -16,9 +16,8 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List
 
-import pytest
-
 import argilla as ar
+import pytest
 from argilla._constants import DEFAULT_API_KEY
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.text2text.models import (

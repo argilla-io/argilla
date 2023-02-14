@@ -71,7 +71,6 @@ class ServiceLabelingRule(BaseModel):
 
 
 class ServiceTextClassificationDataset(ServiceBaseDataset):
-
     task: TaskType = Field(default=TaskType.text_classification, const=True)
     rules: List[ServiceLabelingRule] = Field(default_factory=list)
 
@@ -100,7 +99,7 @@ class ClassPrediction(BaseModel):
             assert 1 <= len(class_label) <= DEFAULT_MAX_KEYWORD_LENGTH, (
                 f"Class name '{class_label}' exceeds max length of {DEFAULT_MAX_KEYWORD_LENGTH}"
                 if len(class_label) > DEFAULT_MAX_KEYWORD_LENGTH
-                else f"Class name must not be empty"
+                else "Class name must not be empty"
             )
         return class_label
 
@@ -300,7 +299,6 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
     def _labels_from_annotation(
         cls, annotation: TextClassificationAnnotation, multi_label: bool
     ) -> Union[List[str], List[int]]:
-
         if not annotation:
             return []
 
@@ -334,7 +332,6 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
 
 
 class ServiceTextClassificationQuery(ServiceBaseRecordsQuery):
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
     score: Optional[ServiceScoreRange] = Field(default=None)

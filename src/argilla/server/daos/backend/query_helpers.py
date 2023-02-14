@@ -297,7 +297,6 @@ class aggregations:
         script: Union[str, Dict[str, Any]] = None,
         interval: float = 0.1,
     ):
-
         assert field_name or script, "Either field name or script must be provided"
 
         if script:

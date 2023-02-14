@@ -15,14 +15,13 @@
 import concurrent.futures
 import datetime
 from time import sleep
-from typing import Any, Iterable, List
+from typing import Any, Iterable
 
+import argilla as ar
 import datasets
 import httpx
 import pandas as pd
 import pytest
-
-import argilla as ar
 from argilla._constants import (
     _OLD_WORKSPACE_HEADER_NAME,
     DEFAULT_API_KEY,
@@ -46,6 +45,7 @@ from argilla.client.sdk.users.models import User
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
+
 from tests.helpers import SecuredClient
 from tests.server.test_api import create_some_data_for_text_classification
 
@@ -208,7 +208,6 @@ def test_log_records_with_too_long_text(mocked_client):
 
 
 def test_not_found_response(mocked_client):
-
     with pytest.raises(NotFoundApiError):
         api.load(name="not-found")
 
@@ -227,7 +226,6 @@ def test_log_without_name(mocked_client):
 
 
 def test_log_passing_empty_records_list(mocked_client):
-
     with pytest.raises(
         InputValueError,
         match="Empty record list has been passed as argument.",
@@ -285,7 +283,6 @@ def test_log_background_with_error(
     )
 
     with pytest.raises(BaseClientError):
-
         try:
             future.result()
         finally:
@@ -639,7 +636,6 @@ def test_token_classification_spans(span, valid):
 
 
 def test_load_text2text(mocked_client, supported_vector_search):
-
     vectors = {"bert_uncased": [1.2, 3.4, 6.4, 6.4]}
 
     records = []

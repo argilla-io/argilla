@@ -270,7 +270,6 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
         record: ServiceTokenClassificationRecord,
         tags: Optional[List[str]] = None,
     ) -> List[TokenMetrics]:
-
         return [
             TokenMetrics(
                 idx=token_idx,

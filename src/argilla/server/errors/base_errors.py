@@ -12,14 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Optional, Type, Union
 
 import pydantic
 from starlette import status
 
 
 class ServerError(Exception):
-
     HTTP_STATUS: int = status.HTTP_500_INTERNAL_SERVER_ERROR
 
     @classmethod

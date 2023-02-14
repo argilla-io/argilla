@@ -34,7 +34,6 @@ class TaskConfig(BaseModel):
 
 
 class TasksFactory:
-
     __REGISTERED_TASKS__ = dict()
 
     @classmethod
@@ -46,7 +45,6 @@ class TasksFactory:
         record_class: Type[ServiceRecord],
         metrics: Optional[Type[ServiceBaseTaskMetrics]] = None,
     ):
-
         cls.__REGISTERED_TASKS__[task_type] = TaskConfig(
             task=task_type,
             dataset=dataset_class,
@@ -99,7 +97,6 @@ class TasksFactory:
     def find_task_metrics(
         cls, task: TaskType, metric_ids: Set[str]
     ) -> List[ServiceBaseMetric]:
-
         if not metric_ids:
             return []
 

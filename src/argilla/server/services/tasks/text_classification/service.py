@@ -215,7 +215,6 @@ class TextClassificationService:
     def get_labeling_rules(
         self, dataset: ServiceTextClassificationDataset
     ) -> Iterable[ServiceLabelingRule]:
-
         return self.__labeling__.list_rules(dataset)
 
     def add_labeling_rule(

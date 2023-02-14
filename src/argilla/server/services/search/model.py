@@ -48,7 +48,6 @@ class ServiceScoreRange(ServiceQueryRange):
 
 
 class ServiceBaseSearchResultsAggregations(BaseModel):
-
     predicted_as: Dict[str, int] = Field(default_factory=dict)
     annotated_as: Dict[str, int] = Field(default_factory=dict)
     annotated_by: Dict[str, int] = Field(default_factory=dict)

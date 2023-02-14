@@ -13,10 +13,9 @@
 #  limitations under the License.
 
 import pytest
-from pydantic import ValidationError
-
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.security.model import User
+from pydantic import ValidationError
 
 
 @pytest.mark.parametrize("email", ["my@email.com", "infra@recogn.ai"])
@@ -64,7 +63,6 @@ def test_check_non_provided_workspaces():
 
 
 def test_check_user_workspaces():
-
     a_ws = "A-workspace"
     expected_workspaces = [a_ws, "B-ws"]
     user = User(username="test-user", workspaces=[a_ws, "B-ws", "C-ws"])
@@ -76,7 +74,6 @@ def test_check_user_workspaces():
 
 
 def test_default_workspace():
-
     user = User(username="admin")
     assert user.default_workspace == "admin"
 

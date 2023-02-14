@@ -77,7 +77,6 @@ class ServiceTokenClassificationAnnotation(ServiceBaseAnnotation):
 class ServiceTokenClassificationRecord(
     ServiceBaseRecord[ServiceTokenClassificationAnnotation]
 ):
-
     tokens: List[str] = Field(min_items=1)
     text: str = Field()
     _raw_text: Optional[str] = Field(alias="raw_text")
@@ -87,7 +86,6 @@ class ServiceTokenClassificationRecord(
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
     def extended_fields(self) -> Dict[str, Any]:
-
         return {
             **super().extended_fields(),
             # See ../service/service.py
@@ -144,7 +142,6 @@ class ServiceTokenClassificationRecord(
     @property
     def predicted(self) -> Optional[PredictionStatus]:
         if self.annotation and self.prediction:
-
             annotated_entities = self.annotation.entities
             predicted_entities = self.prediction.entities
             if len(annotated_entities) != len(predicted_entities):
@@ -223,7 +220,6 @@ class ServiceTokenClassificationRecord(
 
 
 class ServiceTokenClassificationQuery(ServiceBaseRecordsQuery):
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
     score: Optional[ServiceScoreRange] = Field(default=None)

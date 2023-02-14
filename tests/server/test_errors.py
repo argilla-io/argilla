@@ -16,7 +16,6 @@ from argilla.server.errors import GenericServerError
 
 
 def test_generic_error():
-
     err = GenericServerError(error=ValueError("this is an error"))
     assert (
         str(err)

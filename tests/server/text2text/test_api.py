@@ -14,14 +14,13 @@
 from typing import List, Optional
 
 import pytest
-
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
-    Text2TextRecord,
     Text2TextRecordInputs,
     Text2TextSearchResults,
 )
+
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 

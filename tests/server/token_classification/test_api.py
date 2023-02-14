@@ -15,7 +15,6 @@
 from typing import Callable
 
 import pytest
-
 from argilla.server.apis.v0.models.commons.model import BulkResponse, SortableField
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationBulkRequest,
@@ -24,6 +23,7 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationSearchRequest,
     TokenClassificationSearchResults,
 )
+
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 

@@ -16,19 +16,18 @@
 <a href="https://pepy.tech/project/argilla">
 <img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
+<a  href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
+<img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg" />
+</a>
 </p>
 
 <h2 align="center">Open-source framework for data-centric NLP</h2>
-<p align="center">Data Labeling, curation, and Inference Store</p>
-<p align="center">Designed for MLOps & Feedback Loops</p>
+<p align="center">Data Labeling for MLOps & Feedback Loops</p>
 
-
-> 🆕 🔥 Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces (login:`argilla`, password:`1234`)
+> 🆕 🔥 Deploy [Argilla on Spaces](https://huggingface.co/new-space?template=argilla/argilla-template-space)
 
 > 🆕 🔥 Since `1.2.0` Argilla supports vector search for finding the most similar records to a given one. This feature uses vector or semantic search combined with more traditional search (keyword and filter based). Learn more on this [deep-dive guide](https://docs.argilla.io/en/latest/guides/features/semantic-search.html)
 
-
-![imagen](https://user-images.githubusercontent.com/1107111/204772677-facee627-9b3b-43ca-8533-bbc9b4e2d0aa.png)
 
 <!-- https://user-images.githubusercontent.com/25269220/200496945-7efb11b8-19f3-4793-bb1d-d42132009cbb.mp4 -->
 
@@ -99,7 +98,7 @@ The simplest way is to use`Docker` by running:
 
 ```bash
 
-docker run -d --name es-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+docker run -d --name elasticsearch-for-argilla --network argilla-net  -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:8.5.3
 
 ```
 > :information_source: **Check [the docs](https://docs.argilla.io/en/latest/getting_started/quickstart.html) for further options and configurations for Elasticsearch.**
@@ -154,7 +153,7 @@ dataset_rg = rg.DatasetForTextClassification.from_pandas(my_dataframe)
 rg.log(dataset_rg, name="sst-sentimentclassification")
 ```
 
-This will create two datasets which you can use to do a quick tour of the core features of Argilla.
+This will create two datasets that you can use to do a quick tour of the core features of Argilla.
 
 > 🚒 **If you find issues, get direct support from the team and other community members on the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
 

@@ -26,7 +26,6 @@ from argilla.client.sdk.commons.errors import ApiCompatibilityError
 
 @dataclasses.dataclass(frozen=True)
 class ApiInfo:
-
     version: Optional[str] = None
 
 
@@ -64,7 +63,9 @@ class _ApiCompatibilityContextManager(ContextManager):
             if api_version.is_devrelease:
                 api_version = parse(api_version.base_version)
             if not api_version >= self._min_version:
-                raise ApiCompatibilityError(str(self._min_version))
+                raise ApiCompatibilityError(
+                    str(self._min_version), api_version=api_version
+                )
         pass
 
     def __exit__(

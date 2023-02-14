@@ -14,11 +14,9 @@
 #  limitations under the License.
 import sys
 
+import argilla as ar
 import cleanlab
 import pytest
-from pkg_resources import parse_version
-
-import argilla as ar
 from argilla.labeling.text_classification import find_label_errors
 from argilla.labeling.text_classification.label_errors import (
     MissingPredictionError,
@@ -26,6 +24,7 @@ from argilla.labeling.text_classification.label_errors import (
     SortBy,
     _construct_s_and_psx,
 )
+from pkg_resources import parse_version
 
 
 @pytest.fixture(

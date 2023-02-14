@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
@@ -21,9 +20,7 @@ from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.services.datasets import ServiceBaseDataset
 from argilla.server.services.search.model import (
     ServiceBaseRecordsQuery,
-    ServiceBaseSearchResultsAggregations,
     ServiceScoreRange,
-    ServiceSearchResults,
 )
 from argilla.server.services.tasks.commons import (
     ServiceBaseAnnotation,
@@ -91,4 +88,3 @@ class ServiceText2TextQuery(ServiceBaseRecordsQuery):
 
 class ServiceText2TextDataset(ServiceBaseDataset):
     task: TaskType = Field(default=TaskType.text2text, const=True)
-    pass

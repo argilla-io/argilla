@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.server.daos.backend.search.model import (
     SortableField,
     SortConfig,
@@ -61,7 +60,6 @@ from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
     ],
 )
 def test_build_sort_configuration(index_schema, sort_cfg, expected_sort):
-
     builder = EsQueryBuilder()
 
     es_sort = builder.map_2_es_sort_configuration(

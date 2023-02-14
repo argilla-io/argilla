@@ -18,7 +18,7 @@ import os
 import re
 import warnings
 from asyncio import Future
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from tqdm.auto import tqdm
 
@@ -49,6 +49,7 @@ from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import async_bulk
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
+    ApiCompatibilityError,
     InputValueError,
     NotFoundApiError,
 )
@@ -67,6 +68,7 @@ from argilla.client.sdk.text_classification.models import (
     LabelingRule,
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
+    TextClassificationQuery,
 )
 from argilla.client.sdk.text_classification.models import (
     TextClassificationRecord as SdkTextClassificationRecord,
@@ -74,6 +76,7 @@ from argilla.client.sdk.text_classification.models import (
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
+    TokenClassificationQuery,
 )
 from argilla.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
@@ -489,64 +492,36 @@ class Argilla:
                 " `rg.load('my_dataset').to_pandas()`.",
             )
 
-        dataset = self.datasets.find_by_name(name=name)
-        task = dataset.task
-
-        task_config = {
-            TaskType.text_classification: (
-                SdkTextClassificationRecord,
-                DatasetForTextClassification,
-            ),
-            TaskType.token_classification: (
-                SdkTokenClassificationRecord,
-                DatasetForTokenClassification,
-            ),
-            TaskType.text2text: (
-                SdkText2TextRecord,
-                DatasetForText2Text,
-            ),
-        }
-
         try:
-            sdk_record_class, dataset_class = task_config[task]
-        except KeyError:
-            raise ValueError(
-                f"Load method not supported for the '{task}' task. Supported Tasks: "
-                f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
-            )
-
-        if vector:
-            vector_search = VectorSearch(
-                name=vector[0],
-                value=vector[1],
-            )
-            results = self.search.search_records(
+            return self._load_records_new_fashion(
                 name=name,
-                task=task,
-                size=limit or 100,
-                # query args
-                query_text=query,
-                vector=vector_search,
+                query=query,
+                vector=vector,
+                ids=ids,
+                limit=limit,
+                id_from=id_from,
+            )
+        except ApiCompatibilityError as err:  # Api backward compatibility
+            from argilla import __version__ as version
+
+            warnings.warn(
+                message=f"Using python client argilla=={version},"
+                f" however deployed server version is {err.api_version}."
+                " This might lead to compatibility issues.\n"
+                f" Preferably, update your server version to {version}"
+                " or downgrade your Python API at the loss"
+                " of functionality and robustness via\n"
+                f"`pip install argilla=={err.api_version}`",
+                category=UserWarning,
             )
 
-            return dataset_class(results.records)
-
-        records = self.datasets.scan(
-            name=name,
-            projection={"*"},
-            limit=limit,
-            id_from=id_from,
-            # Query
-            query_text=query,
-            ids=ids,
-        )
-        records = [sdk_record_class.parse_obj(r).to_client() for r in records]
-        try:
-            records_sorted_by_id = sorted(records, key=lambda x: x.id)
-        # record ids can be a mix of int/str -> sort all as str type
-        except TypeError:
-            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
-        return dataset_class(records_sorted_by_id)
+            return self._load_records_old_fashion(
+                name=name,
+                query=query,
+                ids=ids,
+                limit=limit,
+                id_from=id_from,
+            )
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
@@ -653,3 +628,129 @@ class Argilla:
         )
 
         return LabelingRuleMetricsSummary.parse_obj(response.parsed)
+
+    def _load_records_old_fashion(
+        self,
+        name: str,
+        query: Optional[str] = None,
+        ids: Optional[List[Union[str, int]]] = None,
+        limit: Optional[int] = None,
+        id_from: Optional[str] = None,
+    ) -> Dataset:
+        from argilla.client.sdk.text2text import api as text2text_api
+        from argilla.client.sdk.text2text.models import Text2TextQuery
+        from argilla.client.sdk.text_classification import (
+            api as text_classification_api,
+        )
+        from argilla.client.sdk.token_classification import (
+            api as token_classification_api,
+        )
+
+        response = datasets_api.get_dataset(client=self._client, name=name)
+        task = response.parsed.task
+
+        task_config = {
+            TaskType.text_classification: (
+                text_classification_api.data,
+                TextClassificationQuery,
+                DatasetForTextClassification,
+            ),
+            TaskType.token_classification: (
+                token_classification_api.data,
+                TokenClassificationQuery,
+                DatasetForTokenClassification,
+            ),
+            TaskType.text2text: (
+                text2text_api.data,
+                Text2TextQuery,
+                DatasetForText2Text,
+            ),
+        }
+
+        try:
+            get_dataset_data, request_class, dataset_class = task_config[task]
+        except KeyError:
+            raise ValueError(
+                f"Load method not supported for the '{task}' task. Supported tasks: "
+                f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
+            )
+        response = get_dataset_data(
+            client=self._client,
+            name=name,
+            request=request_class(ids=ids, query_text=query),
+            limit=limit,
+            id_from=id_from,
+        )
+
+        records = [sdk_record.to_client() for sdk_record in response.parsed]
+        return dataset_class(self.__sort_records_by_id__(records))
+
+    def _load_records_new_fashion(
+        self,
+        name: str,
+        query: Optional[str] = None,
+        vector: Optional[Tuple[str, List[float]]] = None,
+        ids: Optional[List[Union[str, int]]] = None,
+        limit: Optional[int] = None,
+        id_from: Optional[str] = None,
+    ) -> Dataset:
+        dataset = self.datasets.find_by_name(name=name)
+        task = dataset.task
+
+        task_config = {
+            TaskType.text_classification: (
+                SdkTextClassificationRecord,
+                DatasetForTextClassification,
+            ),
+            TaskType.token_classification: (
+                SdkTokenClassificationRecord,
+                DatasetForTokenClassification,
+            ),
+            TaskType.text2text: (
+                SdkText2TextRecord,
+                DatasetForText2Text,
+            ),
+        }
+
+        try:
+            sdk_record_class, dataset_class = task_config[task]
+        except KeyError:
+            raise ValueError(
+                f"Load method not supported for the '{task}' task. Supported Tasks: "
+                f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
+            )
+
+        if vector:
+            vector_search = VectorSearch(
+                name=vector[0],
+                value=vector[1],
+            )
+            results = self.search.search_records(
+                name=name,
+                task=task,
+                size=limit or 100,
+                # query args
+                query_text=query,
+                vector=vector_search,
+            )
+            return dataset_class(results.records)
+
+        records = self.datasets.scan(
+            name=name,
+            projection={"*"},
+            limit=limit,
+            id_from=id_from,
+            # Query
+            query_text=query,
+            ids=ids,
+        )
+        records = [sdk_record_class.parse_obj(r).to_client() for r in records]
+        return dataset_class(self.__sort_records_by_id__(records))
+
+    def __sort_records_by_id__(self, records: list) -> list:
+        try:
+            records_sorted_by_id = sorted(records, key=lambda x: x.id)
+        # record ids can be a mix of int/str -> sort all as str type
+        except TypeError:
+            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
+        return records_sorted_by_id
