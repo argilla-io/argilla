@@ -38,7 +38,6 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
-import { Notification } from "@/models/Notifications";
 export default {
   props: {
     datasetId: {
@@ -86,9 +85,6 @@ export default {
     },
     async onValidate(records) {
       const filteredRecords = this.validationFilter(records);
-      let message = "";
-      let numberOfChars = 0;
-      let typeOfNotification = "";
       try {
         await this.validateAnnotations({
           dataset: this.dataset,
@@ -102,22 +98,8 @@ export default {
             };
           }),
         });
-        message =
-          records.length > 1
-            ? `${filteredRecords.length} records are validated`
-            : `1 record is validated`;
-        numberOfChars = 25;
-        typeOfNotification = "success";
       } catch (err) {
         console.log(err);
-        message = `${records.length} record(s) could not have been validated`;
-        typeOfNotification = "error";
-      } finally {
-        Notification.dispatch("notify", {
-          message,
-          numberOfChars,
-          type: typeOfNotification,
-        });
       }
     },
     searchRecords(query) {

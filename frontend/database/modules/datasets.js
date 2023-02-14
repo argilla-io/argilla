@@ -567,20 +567,44 @@ const actions = {
     });
   },
   async validateAnnotations(_, { dataset, records, agent }) {
-    const newRecords = records.map((record) => ({
-      ...record,
-      annotation: {
-        ...record.annotation,
-        agent,
-      },
-      selected: false,
-      status: "Validated",
-    }));
-    return _updateDatasetRecords({
-      dataset,
-      records: newRecords,
-      persistBackend: true,
-    });
+    const numberOfRecords = records.length;
+    let message = "";
+    let numberOfChars = 0;
+    let typeOfNotification = "";
+    try {
+      const newRecords = records.map((record) => ({
+        ...record,
+        annotation: {
+          ...record.annotation,
+          agent,
+        },
+        selected: false,
+        status: "Validated",
+      }));
+
+      message =
+        numberOfRecords > 1
+          ? `${numberOfRecords} records are validated`
+          : `1 record is validated`;
+      numberOfChars = 25;
+      typeOfNotification = "success";
+      return _updateDatasetRecords({
+        dataset,
+        records: newRecords,
+        persistBackend: true,
+      });
+    } catch (err) {
+      console.log(err);
+      message = `${numberOfRecords} record(s) could not have been validated`;
+      console.log(message);
+      typeOfNotification = "error";
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        numberOfChars,
+        type: typeOfNotification,
+      });
+    }
   },
   async setUserData(_, { dataset, data }) {
     const metadata = {
