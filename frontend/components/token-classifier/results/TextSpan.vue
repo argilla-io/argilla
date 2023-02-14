@@ -111,7 +111,7 @@ export default {
         .sort((a, b) => a.text.localeCompare(b.text));
     },
     formattedEntities() {
-      const characters = "1234567890".split("");
+      const characters = "1234567890qwertyuiopasdfghjklzxcvbnm".split("");
       return this.filteredEntities.map((ent, index) => ({
         ...ent,
         shortCut: characters[index],
