@@ -115,6 +115,7 @@ export default {
       });
 
       let message = "";
+      let numberOfChars = 0;
       let typeOfNotification = "";
       try {
         if (this.isMultiLabel) {
@@ -125,21 +126,23 @@ export default {
           };
           await this.updateRecords(updatedRecords);
           message = `${selectedRecords.length} records are in pending`;
+          numberOfChars = 25;
           typeOfNotification = "info";
         } else {
           await this.onValidate(records);
-          message = `The selected records are annotated !`;
-          typeOfNotification = "success";
         }
       } catch (err) {
         console.log(err);
         message = "There was a problem on annotate records";
         typeOfNotification = "error";
       } finally {
-        Notification.dispatch("notify", {
-          message,
-          type: typeOfNotification,
-        });
+        if (this.isMultiLabel) {
+          Notification.dispatch("notify", {
+            message,
+            numberOfChars,
+            type: typeOfNotification,
+          });
+        }
       }
     },
     labelsFactoryBySingleOrMultiLabel(
@@ -197,11 +200,15 @@ export default {
         };
       });
 
-      await this.validate({
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: validatedRecords,
-      });
+      try {
+        await this.validate({
+          dataset: this.dataset,
+          agent: this.$auth.user.username,
+          records: validatedRecords,
+        });
+      } catch (err) {
+        console.log(err);
+      }
     },
     async onNewLabel(newLabel) {
       await this.dataset.$dispatch("setLabels", {
