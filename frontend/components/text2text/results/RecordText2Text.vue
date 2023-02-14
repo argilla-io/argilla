@@ -159,7 +159,7 @@ export default {
   @include font-size(16px);
   line-height: 1.6em;
   width: 100%;
-  padding: 20px 200px 50px 50px;
+  padding: 20px 200px 20px 50px;
   &:hover {
     :deep(.edit) {
       opacity: 1 !important;
