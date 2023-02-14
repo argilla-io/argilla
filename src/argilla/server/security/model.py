@@ -33,6 +33,9 @@ class User(BaseModel):
     disabled: Optional[bool] = None
     workspaces: Optional[List[str]] = None
 
+    class Config:
+        orm_mode = True
+
     @validator("username")
     def check_username(cls, value):
         if not re.compile(DATASET_NAME_REGEX_PATTERN).match(value):

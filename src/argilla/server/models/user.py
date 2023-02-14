@@ -4,11 +4,10 @@ from typing import Optional
 from sqlalchemy import String, Text, select
 from sqlalchemy.orm import Mapped, mapped_column
 
-from argilla.server.database import Base, SessionLocal
+from argilla.server.database import Base
 
 
 class User(Base):
-
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -21,14 +20,42 @@ class User(Base):
     password_reset_token: Mapped[str] = mapped_column(Text, unique=True)
 
 
-session = SessionLocal()
+from argilla.server.database import SessionLocal
 
-result = session.scalars(
-    select(User).where(User.username == "poto")
-)
+def seed_database():
+    session = SessionLocal()
 
-print(list(result))
+    session.add_all([
+        User(
+            first_name="John",
+            last_name="Doe",
+            username="argilla",
+            email="noreply@argilla.io",
+            password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+            api_key="1234"
+        ),
+        User(
+            first_name="Luis",
+            last_name="Povedano",
+            username="pove",
+            email="pove@argilla.io",
+            password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+            api_key="123456"
+        )
+    ])
 
-user = User(username="poto")
-session.add(user)
-session.commit()
+    session.commit()
+
+
+
+
+
+# result = session.scalars(
+#     select(User).where(User.username == "poto")
+# )
+
+# print(list(result))
+
+# user = User(username="poto")
+# session.add(user)
+# session.commit()
