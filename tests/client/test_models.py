@@ -306,3 +306,24 @@ def test_nat_to_none_to_datetime():
 def test_text2text_prediction_validator(prediction, expected):
     record = Text2TextRecord(text="mock", prediction=prediction)
     assert record.prediction == expected
+
+
+@pytest.mark.parametrize(
+    "record",
+    [
+        TextClassificationRecord(text="This is a test"),
+        TokenClassificationRecord(
+            text="This is a test", tokens="This is a test".split()
+        ),
+        Text2TextRecord(text="This is a test"),
+    ],
+)
+def test_record_validation_on_assignment(record):
+    with pytest.raises(ValidationError):
+        record.prediction = "rubbish"
+
+    with pytest.raises(ValidationError):
+        record.annotation = [("rubbish",)]
+
+    with pytest.raises(ValidationError):
+        record.vectors = "rubbish"
