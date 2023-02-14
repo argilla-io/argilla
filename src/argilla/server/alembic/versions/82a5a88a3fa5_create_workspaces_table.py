@@ -32,14 +32,9 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "workspaces",
-        sa.Column("id", sa.Uuid),
+        sa.Column("id", sa.Uuid, primary_key=True),
         sa.Column("name", sa.String),
-        sa.Column(
-            "organization_id",
-            sa.Uuid,
-            sa.ForeignKey("organizations.id"),
-            nullable=False,
-        ),
+        sa.Column("organization_id", sa.Uuid, sa.ForeignKey("organizations.id"), nullable=False)
     )
 
 
