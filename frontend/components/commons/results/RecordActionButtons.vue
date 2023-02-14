@@ -1,12 +1,12 @@
 <template>
   <div class="record__actions-buttons">
-    <span v-for="{ id, name, active } in activeActions" :key="id">
+    <span v-for="{ id, name, active } in allowedActions" :key="id">
       <base-button
-        :class="[`record__actions-button--${id}`]"
+        :class="`record__actions-button--${id}`"
         @click="onAction(id)"
         :disabled="!active"
       >
-        <svgicon :name="id" width="22" height="22" />
+        <svgicon :name="id" width="18" height="18" />
         {{ name }}
       </base-button></span
     >
@@ -17,6 +17,7 @@
 import "assets/icons/validate";
 import "assets/icons/discard";
 import "assets/icons/clear";
+import "assets/icons/reset";
 export default {
   props: {
     actions: {
@@ -30,8 +31,8 @@ export default {
     },
   },
   computed: {
-    activeActions() {
-      return this.actions.filter((action) => action.active);
+    allowedActions() {
+      return this.actions.filter((action) => action.allow);
     },
   },
   methods: {
@@ -44,35 +45,46 @@ export default {
 
 <style lang="scss" scoped>
 $recordActions: (
-  validate: palette(green),
-  discard: palette(grey, 400),
+  validate: palette(white),
+  discard: $black-37,
   clear: palette(blue, 100),
+  reset: #b6b9ff,
 );
 .record {
   &__actions-buttons {
     display: flex;
-    gap: $base-space * 4;
+    gap: $base-space * 2;
     align-items: center;
     margin-top: 1.5em;
   }
   @each $action, $color in $recordActions {
     &__actions-button--#{$action} {
-      padding: 0;
-      color: $color;
-      @include font-size(14px);
+      border: 1px solid $black-20;
+      background: palette(grey, 700);
+      padding: 5px 8px;
+      color: $black-54;
       &:hover {
-        color: darken($color, 10%);
-        border-color: darken($color, 10%);
+        background: palette(grey, 700);
+      }
+      .svg-icon {
+        color: $color;
       }
       &:active .svg-icon {
         animation: zoom-in-out 0.2s linear;
+      }
+      &[disabled] {
+        opacity: 0.3;
       }
     }
   }
   &__actions-button--validate {
     border: 1px solid palette(green);
+    background: palette(green);
+    color: palette(white);
     line-height: 13px;
-    padding: 9px 18px;
+    &:hover {
+      background: darken(palette(green), 5%);
+    }
   }
 }
 @keyframes zoom-in-out {

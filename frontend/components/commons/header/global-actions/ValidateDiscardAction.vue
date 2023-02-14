@@ -48,14 +48,22 @@
     >
       <svgicon name="discard" />
     </base-button>
-    <base-button
-      v-if="datasetTask !== 'Text2Text'"
-      class="clear validate-discard-actions__button"
-      @click="onClear"
-      data-title="Clear"
-    >
-      <svgicon name="clear" />
-    </base-button>
+    <template v-if="allowClearOrReset">
+      <base-button
+        class="clear validate-discard-actions__button"
+        @click="onClear"
+        data-title="Clear"
+      >
+        <svgicon name="clear" />
+      </base-button>
+      <base-button
+        class="clear validate-discard-actions__button"
+        @click="onReset"
+        data-title="Reset"
+      >
+        <svgicon name="reset" />
+      </base-button>
+    </template>
     <p v-if="selectedRecords.length" class="validate-discard-actions__text">
       Actions will apply to the
       <span>{{ selectedRecords.length }} records</span> selected
@@ -67,6 +75,7 @@
 import "assets/icons/validate";
 import "assets/icons/discard";
 import "assets/icons/clear";
+import "assets/icons/reset";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { mapActions } from "vuex";
 
@@ -106,6 +115,12 @@ export default {
       // TODO: when record will be in own ORM table, replace next line by query ORM
       return this.visibleRecords.filter((record) => record.selected);
     },
+    allowClearOrReset() {
+      return (
+        (this.datasetTask === "TextClassification" && this.isMultiLabel) ||
+        this.datasetTask === "TokenClassification"
+      );
+    },
   },
   watch: {
     visibleRecords(newValue) {
@@ -137,6 +152,9 @@ export default {
     },
     onClear() {
       this.$emit("clear-records", this.selectedRecords);
+    },
+    onReset() {
+      this.$emit("reset-records", this.selectedRecords);
     },
     async onValidate() {
       this.$emit("validate-records", this.selectedRecords);
