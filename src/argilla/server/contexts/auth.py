@@ -5,6 +5,11 @@ from passlib.context import CryptContext
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def get_user_by_api_key(api_key:str):
+  session = SessionLocal()
+
+  return session.scalar(select(User).where(User.api_key == api_key))
+
 
 def get_user_by_username(username):
   session = SessionLocal()

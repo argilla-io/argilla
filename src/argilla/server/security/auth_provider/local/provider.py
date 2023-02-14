@@ -180,13 +180,14 @@ class LocalAuthProvider(AuthProvider):
         -------
 
         """
-        # user = await self._find_user_by_api_key(
-        #     api_key
-        # ) or await self._find_user_by_api_key(old_api_key)
-        # if user:
-        #     return user
-        if token:
+        api_key = api_key or old_api_key
+        user = None
+
+        if api_key:
+            user = auth.get_user_by_api_key(api_key)
+        elif token:
             user = self.fetch_token_user(token)
+
         if user is None:
             raise UnauthorizedError()
 
