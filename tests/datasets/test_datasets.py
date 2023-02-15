@@ -17,6 +17,7 @@ import pytest
 import argilla as ar
 from argilla import TextClassificationSettings, TokenClassificationSettings
 from argilla.client import api
+from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 
 
@@ -54,15 +55,16 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
         ar.configure_dataset(dataset, wrong_settings)
 
 
-def test_delete_dataset_by_non_creator(mocked_client):
-    try:
-        dataset = "test_delete_dataset_by_non_creator"
-        ar.delete(dataset)
-        ar.configure_dataset(
-            dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"})
-        )
-        mocked_client.change_current_user("mock-user")
-        with pytest.raises(ForbiddenApiError):
-            ar.delete(dataset)
-    finally:
-        mocked_client.reset_default_user()
+def test_delete_dataset_by_non_creator(mocked_client, mock_user):
+
+    dataset = "test_delete_dataset_by_non_creator"
+
+    ar = Argilla()
+
+    ar.delete(dataset)
+    ar.datasets.configure(dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}))
+
+    api = Argilla(api_key=mock_user.api_key, workspace="argilla")
+    with pytest.raises(ForbiddenApiError):
+        api.delete(dataset)
+

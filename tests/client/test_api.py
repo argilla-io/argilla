@@ -456,35 +456,28 @@ def test_dataset_copy_to_another_workspace(mocked_client):
     dataset_copy = "new_dataset"
     new_workspace = "my-fun-workspace"
 
-    # Overrides the users dao config
-    try:
-        mocked_client.add_workspaces_to_argilla_user([new_workspace])
+    mocked_client.delete(f"/api/datasets/{dataset}")
+    mocked_client.delete(f"/api/datasets/{dataset_copy}")
+    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
 
-        mocked_client.delete(f"/api/datasets/{dataset}")
-        mocked_client.delete(f"/api/datasets/{dataset_copy}")
-        mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
+    api.log(
+        ar.TextClassificationRecord(
+            id=0,
+            text="This is the record input",
+            annotation_agent="test",
+            annotation=["T"],
+        ),
+        name=dataset,
+    )
+    ds = api.load(dataset)
+    df = ds.to_pandas()
+    api.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
+    api.set_workspace(new_workspace)
+    df_copy = api.load(dataset_copy).to_pandas()
+    assert df.equals(df_copy)
 
-        api.log(
-            ar.TextClassificationRecord(
-                id=0,
-                text="This is the record input",
-                annotation_agent="test",
-                annotation=["T"],
-            ),
-            name=dataset,
-        )
-        ds = api.load(dataset)
-        df = ds.to_pandas()
-        api.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
-        api.set_workspace(new_workspace)
-        df_copy = api.load(dataset_copy).to_pandas()
-        assert df.equals(df_copy)
-
-        with pytest.raises(AlreadyExistsApiError):
-            api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=new_workspace)
-    finally:
-        mocked_client.reset_argilla_workspaces()
-        api.init()  # reset workspace
+    with pytest.raises(AlreadyExistsApiError):
+        api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=new_workspace)
 
 
 def test_update_record(mocked_client):
@@ -549,8 +542,9 @@ def test_text_classifier_with_inputs_list(mocked_client):
     assert records[0]["inputs"]["text"] == expected_inputs
 
 
-def test_load_with_ids_list(mocked_client, supported_vector_search):
+def test_load_with_ids_list(mocked_client, supported_vector_search, api):
     dataset = "test_load_with_ids_list"
+
     mocked_client.delete(f"/api/datasets/{dataset}")
 
     expected_data = 100
@@ -564,7 +558,7 @@ def test_load_with_ids_list(mocked_client, supported_vector_search):
     assert len(ds) == 2
 
 
-def test_load_with_query(mocked_client, supported_vector_search):
+def test_load_with_query(mocked_client, supported_vector_search, api):
     dataset = "test_load_with_query"
     mocked_client.delete(f"/api/datasets/{dataset}")
     sleep(1)
@@ -582,7 +576,7 @@ def test_load_with_query(mocked_client, supported_vector_search):
     assert ds.id.iloc[0] == 1
 
 
-def test_load_as_pandas(mocked_client, supported_vector_search):
+def test_load_as_pandas(mocked_client, supported_vector_search, api):
     dataset = "test_load_as_pandas"
     mocked_client.delete(f"/api/datasets/{dataset}")
     sleep(1)
@@ -666,27 +660,20 @@ def test_load_text2text(mocked_client, supported_vector_search):
             assert record.vectors["bert_uncased"] == vectors["bert_uncased"]
 
 
-def test_client_workspace(mocked_client):
-    try:
-        ws = api.get_workspace()
-        assert ws == "argilla"
+def test_client_workspace(mocked_client, api):
 
-        api.set_workspace("")
-        assert api.get_workspace() == ""
+    workspace = api.get_workspace()
+    assert workspace == "argilla"
 
-        with pytest.raises(Exception, match="Must provide a workspace"):
-            api.set_workspace(None)
+    with pytest.raises(Exception, match="Must provide a workspace"):
+        api.set_workspace(None)
 
-        # Mocking user
-        api.active_api().user.workspaces = ["a", "b"]
+    with pytest.raises(Exception, match="Wrong provided workspace not-found"):
+        api.set_workspace("not-found")
 
-        with pytest.raises(Exception, match="Wrong provided workspace c"):
-            api.set_workspace("c")
+    api.set_workspace("argilla")
+    assert api.get_workspace() == "argilla"
 
-        api.set_workspace("argilla")
-        assert api.get_workspace() == "argilla"
-    finally:
-        api.init()  # reset workspace
 
 
 def test_load_sort(mocked_client):
@@ -728,7 +715,6 @@ def test_load_workspace_from_different_workspace(mocked_client):
     dataset = "test_load_workspace_from_different_workspace"
     workspace = api.get_workspace()
     try:
-        api.set_workspace("")  # empty workspace
         api.delete(dataset)
         api.log(records, name=dataset)
 

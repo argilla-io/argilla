@@ -184,14 +184,12 @@ def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
         )
 
 
-def test_log_data_in_several_workspaces(mocked_client: SecuredClient):
-    workspace = "test-ws"
+def test_log_data_in_several_workspaces(mocked_client: SecuredClient, api):
+    workspace = "my-fun-workspace"
     dataset = "test_log_data_in_several_workspaces"
     text = "This is a text"
 
-    mocked_client.add_workspaces_to_argilla_user([workspace])
-
-    curr_ws = ar.get_workspace()
+    curr_ws = api.get_workspace()
     for ws in [curr_ws, workspace]:
         ar.set_workspace(ws)
         ar.delete(dataset)
