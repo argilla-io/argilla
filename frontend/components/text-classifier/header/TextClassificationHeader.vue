@@ -102,7 +102,7 @@ export default {
         const labelsToSend = this.labelsFactoryBySingleOrMultiLabel(
           labels,
           labelsToRemove,
-          record.currentAnnotation?.labels
+          record.currentAnnotation?.labels || []
         );
 
         return {
