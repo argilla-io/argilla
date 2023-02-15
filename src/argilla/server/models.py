@@ -34,6 +34,6 @@ class User(Base):
     email: Mapped[str]
     api_key: Mapped[str] = mapped_column(Text, unique=True)
     password_hash: Mapped[str] = mapped_column(Text)
-    password_reset_token: Mapped[str] = mapped_column(Text, unique=True)
+    password_reset_token: Mapped[Optional[str]] = mapped_column(Text, unique=True)
 
     workspaces: Mapped[List["Workspace"]] = relationship(secondary="users_workspaces", back_populates="users")
