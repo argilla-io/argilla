@@ -1,18 +1,18 @@
 import uuid
 from typing import Optional, List
 
-from sqlalchemy import Text, Table, Column, ForeignKey
+from sqlalchemy import Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
 
 
-users_workspaces = Table(
-    "users_workspaces",
-    Base.metadata,
-    Column("user_id", ForeignKey("users.id"), primary_key=True),
-    Column("workspace_id", ForeignKey("workspaces.id"), primary_key=True),
-)
+class UserWorkspace(Base):
+    __tablename__ = "users_workspaces"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"))
 
 
 class Workspace(Base):
@@ -21,7 +21,7 @@ class Workspace(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     name: Mapped[str]
 
-    users: Mapped[List["User"]] = relationship(secondary=users_workspaces, back_populates="workspaces")
+    users: Mapped[List["User"]] = relationship(secondary="users_workspaces", back_populates="workspaces")
 
 
 class User(Base):
@@ -36,4 +36,4 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(Text)
     password_reset_token: Mapped[str] = mapped_column(Text, unique=True)
 
-    workspaces: Mapped[List["Workspace"]] = relationship(secondary=users_workspaces, back_populates="users")
+    workspaces: Mapped[List["Workspace"]] = relationship(secondary="users_workspaces", back_populates="users")
