@@ -42,10 +42,10 @@ describe("RecordActionButtonsComponent", () => {
   it("render the component", () => {
     expect(wrapper.is(RecordActionButtons)).toBe(true);
   });
-  it.skip("expect to show validate button active", async () => {
+  it("expect to show validate button active", async () => {
     testIfButtonIsDisabled("validate", undefined);
   });
-  it.skip("expect to show discard button active", async () => {
+  it("expect to show discard button active", async () => {
     testIfButtonIsDisabled("discard", undefined);
   });
   it("expect to emit validate on click validate button", async () => {
