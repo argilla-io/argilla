@@ -65,6 +65,7 @@
           :datasetName="dataset.name"
           :recordId="record.id"
           :recordClipboardText="record.clipboardText"
+          @show-record-info-modal="onShowRecordInfoModal"
         />
       </div>
       <RecordTextClassification
