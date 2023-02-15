@@ -87,7 +87,7 @@
             isAnyPendingStatusRecord,
         }"
       >
-        <span>{{ sentenceText }}</span>
+        {{ sentenceText }}
       </p>
     </template>
   </div>
