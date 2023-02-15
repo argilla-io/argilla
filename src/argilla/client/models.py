@@ -121,7 +121,9 @@ class _Validators(BaseModel):
         return values
 
     class Config:
+        # https://docs.pydantic.dev/usage/model_config/#options
         extra = "forbid"
+        validate_assignment = True
 
 
 class BulkResponse(BaseModel):
