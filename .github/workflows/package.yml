@@ -19,6 +19,10 @@ on:
       - "feature/**"
       - "feat/**"
 
+env:
+  # Increase this value to reset cache if etc/example-environment.yml has not changed
+  CACHE_NUMBER:  10
+
 jobs:
   test-elastic:
     name: Tests ElasticSearch
@@ -71,9 +75,6 @@ jobs:
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
-        env:
-          # Increase this value to reset cache if etc/example-environment.yml has not changed
-          CACHE_NUMBER: 0
 
       - name: Update environment
         if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
@@ -82,9 +83,6 @@ jobs:
       - name: Cache pip 👜
         uses: actions/cache@v2
         if: steps.filter.outputs.python_code == 'true'
-        env:
-          # Increase this value to reset cache if pyproject.toml has not changed
-          CACHE_NUMBER: 0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
@@ -115,6 +113,7 @@ jobs:
   test-opensearch:
     name: Test OpenSearch
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         version: [ 1.3, 2.3 ]
@@ -161,9 +160,6 @@ jobs:
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
-        env:
-          # Increase this value to reset cache if etc/example-environment.yml has not changed
-          CACHE_NUMBER: 2
 
       - name: Update environment
         if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
@@ -172,9 +168,6 @@ jobs:
       - name: Cache pip 👜
         uses: actions/cache@v2
         if: steps.filter.outputs.python_code == 'true'
-        env:
-          # Increase this value to reset cache if pyproject.toml has not changed
-          CACHE_NUMBER: 0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
