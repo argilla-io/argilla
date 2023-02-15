@@ -1,8 +1,8 @@
 import uuid
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import String, Text, select
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
 
@@ -18,6 +18,8 @@ class User(Base):
     api_key: Mapped[str] = mapped_column(Text, unique=True)
     password_hash: Mapped[str] = mapped_column(Text)
     password_reset_token: Mapped[str] = mapped_column(Text, unique=True)
+
+    workspaces: Mapped[List["Workspace"]] = relationship(secondary="users_organizations", back_populates="users")
 
 
 from argilla.server.database import SessionLocal
