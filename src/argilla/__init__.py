@@ -21,6 +21,8 @@ as well as in the `_import_structure` dictionary.
 import sys as _sys
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
+from rich.traceback import install as _install_rich
+
 from argilla.logging import configure_logging as _configure_logging
 
 from . import _version
@@ -115,3 +117,6 @@ _sys.modules[__name__] = _LazyargillaModule(
 )
 
 _configure_logging()
+
+# Rely on `rich` for tracebacks
+_install_rich()

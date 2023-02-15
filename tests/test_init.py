@@ -16,7 +16,7 @@
 import logging
 import sys
 
-from argilla.logging import LoguruLoggerHandler
+from argilla.logging import RichHandler
 from argilla.utils import LazyargillaModule
 
 
@@ -25,4 +25,7 @@ def test_lazy_module():
 
 
 def test_configure_logging_call():
-    assert isinstance(logging.getLogger("argilla").handlers[0], LoguruLoggerHandler)
+    # Ensure that the root logger uses the RichHandler,
+    # whereas the other loggers do not have handlers
+    assert isinstance(logging.getLogger().handlers[0], RichHandler)
+    assert len(logging.getLogger("argilla").handlers) == 0

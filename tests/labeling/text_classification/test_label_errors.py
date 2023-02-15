@@ -17,6 +17,7 @@ import sys
 import argilla as ar
 import cleanlab
 import pytest
+from _pytest.logging import LogCaptureFixture
 from argilla.labeling.text_classification import find_label_errors
 from argilla.labeling.text_classification.label_errors import (
     MissingPredictionError,
@@ -76,7 +77,7 @@ def test_no_records():
         find_label_errors(records)
 
 
-def test_multi_label_warning(caplog):
+def test_multi_label_warning(caplog: LogCaptureFixture):
     record = ar.TextClassificationRecord(
         text="test",
         prediction=[("mock", 0.0), ("mock2", 0.0)],

@@ -14,7 +14,7 @@
 #  limitations under the License.
 import logging
 
-from argilla.logging import LoggingMixin, LoguruLoggerHandler
+from argilla.logging import LoggingMixin, RichHandler
 
 
 class LoggingForTest(LoggingMixin):
@@ -50,8 +50,8 @@ def test_logging_mixin_without_breaking_constructors():
 
 
 def test_logging_handler(mocker):
-    mocker.patch.object(LoguruLoggerHandler, "emit", autospec=True)
-    handler = LoguruLoggerHandler()
+    mocker.patch.object(RichHandler, "emit", autospec=True)
+    handler = RichHandler()
 
     logger = logging.getLogger(__name__)
     logger.handlers = [handler]
