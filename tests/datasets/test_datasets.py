@@ -56,15 +56,15 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
 
 
 def test_delete_dataset_by_non_creator(mocked_client, mock_user):
-
     dataset = "test_delete_dataset_by_non_creator"
 
     ar = Argilla()
 
     ar.delete(dataset)
-    ar.datasets.configure(dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}))
+    ar.datasets.configure(
+        dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"})
+    )
 
     api = Argilla(api_key=mock_user.api_key, workspace="argilla")
     with pytest.raises(ForbiddenApiError):
         api.delete(dataset)
-

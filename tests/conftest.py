@@ -56,7 +56,6 @@ def engine():
 
 @pytest.fixture(scope="session")
 def setup_database(engine):
-
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     seed_for_tests()
@@ -68,7 +67,6 @@ def setup_database(engine):
 
 def seed_for_tests():
     with SessionLocal() as db_session:
-
         db_session.add_all(
             [
                 User(
@@ -77,7 +75,11 @@ def seed_for_tests():
                     email="ar@argilla.io",
                     password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
                     api_key="argilla.apikey",
-                    workspaces=[Workspace(name=""), Workspace(name="argilla"), Workspace(name="my-fun-workspace")],
+                    workspaces=[
+                        Workspace(name=""),
+                        Workspace(name="argilla"),
+                        Workspace(name="my-fun-workspace"),
+                    ],
                 ),
                 User(
                     username="mock-user",

@@ -33,7 +33,6 @@ def data(
     limit: Optional[int] = None,
     id_from: Optional[str] = None,
 ) -> Response[Union[List[Text2TextRecord], HTTPValidationError, ErrorMessage]]:
-
     path = f"/api/datasets/{name}/Text2Text/data"
     params = build_param_dict(id_from, limit)
 
