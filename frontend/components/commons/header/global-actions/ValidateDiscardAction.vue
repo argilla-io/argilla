@@ -16,84 +16,80 @@
   -->
 
 <template>
-  <div
-    class="validate-discard-actions"
-    :class="[
-      selectedRecords.length ? '' : 'validate-discard-actions--disabled',
-    ]"
-  >
+  <div class="validate-discard-actions">
     <base-checkbox
       v-model="allSelected"
       :disabled="!visibleRecords.length"
       class="list__item__checkbox"
     />
-    <TextClassificationBulkAnnotationSingle
-      v-if="datasetTask === 'TextClassification' && !isMultiLabel"
-      :class="'validate-discard-actions__select'"
-      :multi-label="isMultiLabel"
-      :options="availableLabels"
-      @selected="onSelectLabels($event)"
-    />
-    <TextClassificationBulkAnnotationComponent
-      v-if="datasetTask === 'TextClassification' && isMultiLabel"
-      :class="'validate-discard-actions__select'"
-      :datasetId="datasetId"
-      :records="selectedRecords"
-      :recordsIds="selectedRecordsIds"
-      :labels="availableLabels"
-      @on-update-annotations="onUpdateAnnotations"
-    />
-    <base-button
-      class="clear validate-discard-actions__button"
-      @click="onValidate"
-      data-title="Validate"
-    >
-      <i
-        id="validateButton"
-        :key="isAnyPendingStatusRecord"
-        v-badge="{
-          showBadge: isAnyPendingStatusRecord,
-          verticalPosition: 'top',
-          horizontalPosition: 'right',
+    <template v-if="selectedRecords.length">
+      <TextClassificationBulkAnnotationSingle
+        v-if="datasetTask === 'TextClassification' && !isMultiLabel"
+        :class="'validate-discard-actions__select'"
+        :multi-label="isMultiLabel"
+        :options="availableLabels"
+        @selected="onSelectLabels($event)"
+      />
+      <TextClassificationBulkAnnotationComponent
+        v-if="datasetTask === 'TextClassification' && isMultiLabel"
+        :class="'validate-discard-actions__select'"
+        :datasetId="datasetId"
+        :records="selectedRecords"
+        :recordsIds="selectedRecordsIds"
+        :labels="availableLabels"
+        @on-update-annotations="onUpdateAnnotations"
+      />
+      <base-button
+        class="clear validate-discard-actions__button"
+        @click="onValidate"
+        data-title="Validate"
+      >
+        <i
+          id="validateButton"
+          :key="isAnyPendingStatusRecord"
+          v-badge="{
+            showBadge: isAnyPendingStatusRecord,
+            verticalPosition: 'top',
+            horizontalPosition: 'right',
+          }"
+        >
+          <svgicon name="validate" />
+        </i>
+      </base-button>
+      <base-button
+        class="clear validate-discard-actions__button"
+        @click="onDiscard"
+        data-title="Discard"
+      >
+        <svgicon name="discard" />
+      </base-button>
+      <template v-if="allowClearOrReset">
+        <base-button
+          class="clear validate-discard-actions__button"
+          @click="onClear"
+          data-title="Clear"
+        >
+          <svgicon name="clear" />
+        </base-button>
+        <base-button
+          class="clear validate-discard-actions__button"
+          @click="onReset"
+          data-title="Reset"
+        >
+          <svgicon name="reset" />
+        </base-button>
+      </template>
+      <p
+        v-if="selectedRecords.length"
+        class="validate-discard-actions__text"
+        :class="{
+          'validate-discard-actions__text_pending_record':
+            isAnyPendingStatusRecord,
         }"
       >
-        <svgicon name="validate" />
-      </i>
-    </base-button>
-    <base-button
-      class="clear validate-discard-actions__button"
-      @click="onDiscard"
-      data-title="Discard"
-    >
-      <svgicon name="discard" />
-    </base-button>
-    <template v-if="allowClearOrReset">
-      <base-button
-        class="clear validate-discard-actions__button"
-        @click="onClear"
-        data-title="Clear"
-      >
-        <svgicon name="clear" />
-      </base-button>
-      <base-button
-        class="clear validate-discard-actions__button"
-        @click="onReset"
-        data-title="Reset"
-      >
-        <svgicon name="reset" />
-      </base-button>
+        <span>{{ sentenceText }}</span>
+      </p>
     </template>
-    <p
-      v-if="selectedRecords.length"
-      class="validate-discard-actions__text"
-      :class="{
-        'validate-discard-actions__text_pending_record':
-          isAnyPendingStatusRecord,
-      }"
-    >
-      Actions will apply to the
-      <span>{{ selectedRecords.length }} records selected</span>
-    </p>
   </div>
 </template>
 
@@ -154,6 +150,15 @@ export default {
       return new Set(
         this.selectedRecords.reduce((acc, curr) => [...acc, curr.id], [])
       );
+    },
+    sentenceText() {
+      const oneRecord = this.selectedRecords.length === 1;
+      const dynamicText = `${this.selectedRecords.length} record${
+        oneRecord ? ` is` : `s are`
+      }`;
+      return `${dynamicText} ${
+        this.isAnyPendingStatusRecord ? `pending validation` : ` selected`
+      }`;
     },
   },
   watch: {
@@ -287,13 +292,6 @@ export default {
       overflow: visible;
       position: relative;
       @extend %has-tooltip--top;
-    }
-  }
-  &--disabled {
-    .validate-discard-actions__button,
-    .validate-discard-actions__select {
-      pointer-events: none;
-      opacity: 0.3;
     }
   }
 }

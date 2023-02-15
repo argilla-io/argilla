@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-if="annotationEnabled" class="container">
+  <div v-if="showGlobalActions" class="container">
     <div class="global-actions">
       <validate-discard-action
         :datasetId="datasetId"
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
+import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 export default {
   props: {
     datasetId: {
@@ -70,10 +70,16 @@ export default {
   },
   computed: {
     viewSettings() {
-      return getViewSettingsByDatasetName(this.datasetName);
+      return getViewSettingsWithPaginationByDatasetName(this.datasetName);
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
+    },
+    paginationSizeIsOne() {
+      return this.viewSettings.pagination.size === 1;
+    },
+    showGlobalActions() {
+      return this.annotationEnabled && !this.paginationSizeIsOne;
     },
   },
   methods: {

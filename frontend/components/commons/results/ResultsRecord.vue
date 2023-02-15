@@ -18,10 +18,7 @@
 <template>
   <div v-if="dataset && viewSettings">
     <div
-      :class="[
-        annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
-        record.status === 'Discarded' ? 'discarded' : null,
-      ]"
+      :class="annotationEnabled ? 'list__item--annotation-mode' : 'list__item'"
     >
       <div class="record__header">
         <template v-if="!weakLabelingEnabled">
@@ -262,14 +259,6 @@ export default {
     &--annotation-mode {
       @extend .list__item !optional;
       padding-left: $base-space;
-      &.discarded {
-        opacity: 0.5;
-        transition: 0.3s ease-in-out;
-        &:hover {
-          opacity: 1;
-          transition: 0.3s ease-in-out;
-        }
-      }
     }
   }
 }
