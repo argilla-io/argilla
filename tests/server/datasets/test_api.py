@@ -73,10 +73,8 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient, mock_user)
     mocked_client.update_api_key(mock_user.api_key)
 
     for workspace in mock_user.workspaces:
-
         for workspace in mock_user.workspaces:
             delete_dataset(mocked_client, dataset_name, workspace=workspace.name)
-
 
         request = dict(
             name=dataset_name,
@@ -268,7 +266,9 @@ def test_delete_records(mocked_client, mock_user):
 
     mocked_client.update_api_key(mock_user.api_key)
 
-    response = mocked_client.delete(f"/api/datasets/{dataset_name}/data?workspace=argilla")
+    response = mocked_client.delete(
+        f"/api/datasets/{dataset_name}/data?workspace=argilla"
+    )
     assert response.status_code == 403
     assert response.json() == {
         "detail": {

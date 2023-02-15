@@ -39,7 +39,9 @@ async def test_get_user_via_token(db_session):
 
 @pytest.mark.asyncio
 async def test_get_user_via_api_key(db_session):
-    user = await localAuth.get_user(security_scopes=security_Scopes, api_key=DEFAULT_API_KEY, token=None)
+    user = await localAuth.get_user(
+        security_scopes=security_Scopes, api_key=DEFAULT_API_KEY, token=None
+    )
     assert user.username == "argilla"
 
 

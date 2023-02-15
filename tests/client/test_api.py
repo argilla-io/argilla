@@ -661,7 +661,6 @@ def test_load_text2text(mocked_client, supported_vector_search):
 
 
 def test_client_workspace(mocked_client, api):
-
     workspace = api.get_workspace()
     assert workspace == "argilla"
 
@@ -673,7 +672,6 @@ def test_client_workspace(mocked_client, api):
 
     api.set_workspace("argilla")
     assert api.get_workspace() == "argilla"
-
 
 
 def test_load_sort(mocked_client):

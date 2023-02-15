@@ -93,7 +93,6 @@ def test_delete_records_without_permission(mocked_client, mock_user):
     assert matched, processed == (1, 1)
 
 
-
 def test_delete_records_with_unmatched_records(mocked_client, api):
     dataset = "test_delete_records_with_unmatched_records"
 
