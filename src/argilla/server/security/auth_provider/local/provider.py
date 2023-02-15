@@ -191,7 +191,12 @@ class LocalAuthProvider(AuthProvider):
         if user is None:
             raise UnauthorizedError()
 
-        return User.from_orm(user)
+        return User(
+            username=user.username,
+            email=user.email,
+            full_name=f"{user.first_name} {user.last_name}",
+            workspaces=[workspace.name for workspace in user.workspaces] if user.workspaces else None
+        )
 
     async def _find_user_by_api_key(self, api_key) -> User:
         return await self.users.find_user_by_api_key(api_key)
