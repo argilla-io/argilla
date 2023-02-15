@@ -96,6 +96,7 @@ jobs:
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
         run: |
+          pip install -e ".[server,listeners]"
           pytest --cov=argilla --cov-report=xml
           pip install "spacy<3.0" && python -m spacy download en_core_web_sm
           pytest tests/monitoring/test_spacy_monitoring.py
@@ -181,6 +182,7 @@ jobs:
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
         run: |
+          pip install -e ".[server,listeners]"
           pytest --cov=argilla --cov-report=xml
           pip install "spacy<3.0" && python -m spacy download en_core_web_sm
           pytest tests/monitoring/test_spacy_monitoring.py
