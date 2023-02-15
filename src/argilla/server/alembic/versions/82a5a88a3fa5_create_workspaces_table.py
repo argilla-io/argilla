@@ -15,7 +15,7 @@
 """create workspaces table
 
 Revision ID: 82a5a88a3fa5
-Revises: b39023f927f6
+Revises: 74694870197c
 Create Date: 2023-02-13 18:00:04.369604
 
 """
@@ -24,7 +24,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "82a5a88a3fa5"
-down_revision = "b39023f927f6"
+down_revision = "74694870197c"
 branch_labels = None
 depends_on = None
 

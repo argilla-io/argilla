@@ -1,7 +1,7 @@
 """create users_workspaces table
 
 Revision ID: 1769ee58fbb4
-Revises: 06100f82589e
+Revises: 82a5a88a3fa5
 Create Date: 2023-02-14 10:36:56.313539
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '1769ee58fbb4'
-down_revision = '06100f82589e'
+down_revision = '82a5a88a3fa5'
 branch_labels = None
 depends_on = None
 
