@@ -98,11 +98,11 @@ export default {
           selected: true,
           status: "Edited",
         };
-
+        const currentAnnotationLabels = record.currentAnnotation?.labels ?? [];
         const labelsToSend = this.labelsFactoryBySingleOrMultiLabel(
           labels,
           labelsToRemove,
-          record.currentAnnotation?.labels || []
+          currentAnnotationLabels
         );
 
         return {
