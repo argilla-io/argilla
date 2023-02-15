@@ -25,6 +25,7 @@
           <template v-if="annotationEnabled">
             <div class="record__header--left" v-if="!isReferenceRecord">
               <base-checkbox
+                :class="pageSizeisOne && '--hidden'"
                 class="list__checkbox"
                 :value="record.selected"
                 @change="onCheckboxChanged($event, record.id)"
@@ -133,6 +134,9 @@ export default {
     },
     viewSettings() {
       return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
+    },
+    pageSizeisOne() {
+      return this.viewSettings.pagination.size === 1;
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
@@ -247,6 +251,9 @@ export default {
 .list {
   &__checkbox.re-checkbox {
     margin: auto $base-space;
+    &.--hidden {
+      opacity: 0;
+    }
   }
   &__item {
     position: relative;

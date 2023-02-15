@@ -80,11 +80,14 @@ $recordActions: (
   &__actions-button--validate {
     color: palette(green);
     &[disabled] {
+      border-color: palette(green);
+      background: palette(white);
       opacity: 1;
     }
   }
   &__actions-button--discard {
     &[disabled] {
+      background: palette(white);
       opacity: 1;
     }
   }
