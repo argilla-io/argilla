@@ -1,7 +1,9 @@
 from sqlalchemy import select
-from argilla.server.database import SessionLocal
-from argilla.server.models.user import User
 from passlib.context import CryptContext
+
+from argilla.server.database import SessionLocal
+from argilla.server.models import User
+
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
