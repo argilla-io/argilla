@@ -234,7 +234,7 @@ export default {
 <style lang="scss" scoped>
 .validate-discard-actions {
   display: flex;
-  gap: $base-space;
+  gap: calc($base-space / 2);
   align-items: center;
   width: 100%;
   .re-checkbox {
