@@ -136,5 +136,5 @@ package-lock.json
 # App generated files
 src/**/server/static/
 
-# SQLAlchemy database
+# SQLite database
 argilla.db
