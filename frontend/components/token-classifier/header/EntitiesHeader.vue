@@ -53,7 +53,7 @@ export default {
   }),
   computed: {
     visibleEntities() {
-      const characters = "1234567890qwertyuiopasdfghjklzxcvbnm".split("");
+      const characters = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM".split("");
       let entities = [...this.dataset.entities]
         .sort((a, b) => a.text.localeCompare(b.text))
         .map((ent, index) => ({
