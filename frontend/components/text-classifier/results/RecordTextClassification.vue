@@ -120,7 +120,7 @@ export default {
         {
           id: "validate",
           name: "Validate",
-          allow: true,
+          allow: this.isMultiLabel,
           active: this.allowValidate || false,
         },
         {
