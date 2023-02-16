@@ -33,9 +33,7 @@ def upgrade() -> None:
     op.create_table(
         "users_workspaces",
         sa.Column("id", sa.Uuid, primary_key=True),
-        sa.Column(
-            "user_id", sa.Uuid, sa.ForeignKey("users.id"), nullable=False, index=True
-        ),
+        sa.Column("user_id", sa.Uuid, sa.ForeignKey("users.id"), nullable=False, index=True),
         sa.Column(
             "workspace_id",
             sa.Uuid,

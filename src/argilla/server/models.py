@@ -35,9 +35,7 @@ class Workspace(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     name: Mapped[str]
 
-    users: Mapped[List["User"]] = relationship(
-        secondary="users_workspaces", back_populates="workspaces"
-    )
+    users: Mapped[List["User"]] = relationship(secondary="users_workspaces", back_populates="workspaces")
 
 
 class User(Base):
@@ -52,6 +50,4 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(Text)
     password_reset_token: Mapped[Optional[str]] = mapped_column(Text, unique=True)
 
-    workspaces: Mapped[List["Workspace"]] = relationship(
-        secondary="users_workspaces", back_populates="users"
-    )
+    workspaces: Mapped[List["Workspace"]] = relationship(secondary="users_workspaces", back_populates="users")
