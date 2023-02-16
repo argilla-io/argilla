@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import re
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, Field, validator
 from pydantic.utils import GetterDict
@@ -33,7 +33,6 @@ class UserGetter(GetterDict):
             return [workspace.name for workspace in self._obj.workspaces]
         else:
             return super().get(key, default)
-
 
 
 class User(BaseModel):
