@@ -36,9 +36,7 @@ class BulkResponse(BaseModel):
 ServiceAnnotation = TypeVar("ServiceAnnotation", bound=ServiceBaseAnnotation)
 
 
-class ServiceBaseRecordInputs(
-    BaseRecordInDB[ServiceAnnotation], Generic[ServiceAnnotation]
-):
+class ServiceBaseRecordInputs(BaseRecordInDB[ServiceAnnotation], Generic[ServiceAnnotation]):
     pass
 
 

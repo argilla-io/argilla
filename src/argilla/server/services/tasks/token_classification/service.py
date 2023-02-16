@@ -131,12 +131,8 @@ class TokenClassificationService:
             results.metrics["status"] = results.metrics["status_distribution"]
             results.metrics["predicted"] = results.metrics["error_distribution"]
             results.metrics["predicted"].pop("unknown", None)
-            results.metrics["mentions"] = results.metrics[
-                "annotated_mentions_distribution"
-            ]
-            results.metrics["predicted_mentions"] = results.metrics[
-                "predicted_mentions_distribution"
-            ]
+            results.metrics["mentions"] = results.metrics["annotated_mentions_distribution"]
+            results.metrics["predicted_mentions"] = results.metrics["predicted_mentions_distribution"]
 
         return results
 

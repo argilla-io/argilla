@@ -98,9 +98,7 @@ class RecordsStorageService:
                     "Only dataset creators or administrators can delete datasets"
                 )
 
-            processed, deleted = await self.__dao__.delete_records_by_query(
-                dataset, query=query
-            )
+            processed, deleted = await self.__dao__.delete_records_by_query(dataset, query=query)
 
         return DeleteRecordsOut(
             processed=processed or 0,

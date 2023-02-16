@@ -37,8 +37,7 @@ class User(BaseModel):
     def check_username(cls, value):
         if not re.compile(DATASET_NAME_REGEX_PATTERN).match(value):
             raise ValueError(
-                "Wrong username. "
-                f"The username {value} does not match the pattern {DATASET_NAME_REGEX_PATTERN}"
+                "Wrong username. " f"The username {value} does not match the pattern {DATASET_NAME_REGEX_PATTERN}"
             )
         return value
 
@@ -48,8 +47,7 @@ class User(BaseModel):
         if not workspace:
             return workspace
         assert WORKSPACE_NAME_PATTERN.match(workspace), (
-            "Wrong workspace format. "
-            f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
+            "Wrong workspace format. " f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
         )
         return workspace
 

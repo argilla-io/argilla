@@ -23,9 +23,7 @@ class StreamingResponseWithErrorHandling(StreamingResponse):
         try:
             return await super().stream_response(send)
         except Exception as ex:
-            json_response: JSONResponse = (
-                await APIErrorHandler.common_exception_handler(send, error=ex)
-            )
+            json_response: JSONResponse = await APIErrorHandler.common_exception_handler(send, error=ex)
             await send(
                 {
                     "type": "http.response.body",

@@ -61,9 +61,7 @@ def test_wrong_dataset_metrics(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "argilla.api.errors::WrongTaskError",
-            "params": {
-                "message": "Provided task TokenClassification cannot be applied to dataset"
-            },
+            "params": {"message": "Provided task TokenClassification cannot be applied to dataset"},
         }
     }
 
@@ -76,9 +74,7 @@ def test_wrong_dataset_metrics(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "argilla.api.errors::WrongTaskError",
-            "params": {
-                "message": "Provided task TokenClassification cannot be applied to dataset"
-            },
+            "params": {"message": "Provided task TokenClassification cannot be applied to dataset"},
         }
     }
 
@@ -136,9 +132,7 @@ def test_dataset_for_token_classification(mocked_client):
         ).status_code
         == 200
     )
-    metrics = mocked_client.get(
-        f"/api/datasets/TokenClassification/{dataset}/metrics"
-    ).json()
+    metrics = mocked_client.get(f"/api/datasets/TokenClassification/{dataset}/metrics").json()
     assert len(metrics) == len(TokenClassificationMetrics.metrics)
 
     for metric in metrics:
@@ -187,9 +181,7 @@ def test_dataset_metrics(mocked_client):
         == 200
     )
 
-    metrics = mocked_client.get(
-        f"/api/datasets/TextClassification/{dataset}/metrics"
-    ).json()
+    metrics = mocked_client.get(f"/api/datasets/TextClassification/{dataset}/metrics").json()
 
     assert len(metrics) == COMMON_METRICS_LENGTH + 5
 

@@ -81,13 +81,9 @@ def test_build_bulk_response(status_code, expected):
     elif status_code == 500:
         server_response = ErrorMessage(detail="test")
     elif status_code == 422:
-        server_response = HTTPValidationError(
-            detail=[ValidationError(loc=["test"], msg="test", type="test")]
-        )
+        server_response = HTTPValidationError(detail=[ValidationError(loc=["test"], msg="test", type="test")])
 
-    httpx_response = HttpxResponse(
-        status_code=status_code, content=server_response.json()
-    )
+    httpx_response = HttpxResponse(status_code=status_code, content=server_response.json())
     response = build_bulk_response(httpx_response, name="mock-dataset", body={})
 
     assert isinstance(response, Response)
@@ -112,9 +108,7 @@ def test_build_data_response(status_code, expected):
     elif status_code == 500:
         server_response = ErrorMessage(detail="test")
     elif status_code == 422:
-        server_response = HTTPValidationError(
-            detail=[ValidationError(loc=["test"], msg="test", type="test")]
-        )
+        server_response = HTTPValidationError(detail=[ValidationError(loc=["test"], msg="test", type="test")])
 
     httpx_response = HttpxResponse(
         status_code=status_code,

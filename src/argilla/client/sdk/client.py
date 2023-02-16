@@ -108,10 +108,7 @@ class Client(_ClientCommonDefaults, _Client):
 
     def with_httpx_error_handler(func):
         def wrap_error(base_url: str):
-            err_str = (
-                f"Your Api endpoint at {base_url} is not available or not"
-                " responding."
-            )
+            err_str = f"Your Api endpoint at {base_url} is not available or not" " responding."
             raise BaseClientError(err_str) from None
 
         @functools.wraps(func)

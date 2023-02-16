@@ -34,9 +34,7 @@ from argilla.server.apis.v0.handlers import (
 )
 from argilla.server.errors.base_errors import __ALL__
 
-api_router = APIRouter(
-    responses={error.HTTP_STATUS: error.api_documentation() for error in __ALL__}
-)
+api_router = APIRouter(responses={error.HTTP_STATUS: error.api_documentation() for error in __ALL__})
 
 
 dependencies = []

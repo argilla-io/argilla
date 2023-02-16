@@ -181,9 +181,7 @@ def test_api_with_new_predictions_data_model(mocked_client):
             {
                 "text": "This is a text data",
                 "predictions": {
-                    "test": {
-                        "sentences": [{"text": "This is a test data", "score": 0.6}]
-                    },
+                    "test": {"sentences": [{"text": "This is a test data", "score": 0.6}]},
                 },
             }
         ),

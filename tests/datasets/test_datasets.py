@@ -57,9 +57,7 @@ def test_delete_dataset_by_non_creator(mocked_client):
     try:
         dataset = "test_delete_dataset_by_non_creator"
         ar.delete(dataset)
-        ar.configure_dataset(
-            dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"})
-        )
+        ar.configure_dataset(dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}))
         mocked_client.change_current_user("mock-user")
         with pytest.raises(ForbiddenApiError):
             ar.delete(dataset)
