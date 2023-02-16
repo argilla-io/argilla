@@ -1,3 +1,17 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 """create users table
 
 Revision ID: 74694870197c
@@ -5,9 +19,8 @@ Revises:
 Create Date: 2023-02-13 17:08:05.445314
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "74694870197c"
@@ -26,7 +39,7 @@ def upgrade() -> None:
         sa.Column("email", sa.String, nullable=False, unique=True, index=True),
         sa.Column("password_hash", sa.Text, nullable=False),
         sa.Column("password_reset_token", sa.Text, unique=True, index=True),
-        sa.Column("api_key", sa.Text, unique=True, index=True)
+        sa.Column("api_key", sa.Text, unique=True, index=True),
     )
 
 

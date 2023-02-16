@@ -24,6 +24,7 @@ from fastapi.security import (
 )
 from jose import JWTError, jwt
 
+from argilla.server.contexts import auth
 from argilla.server.errors import InactiveUserError, UnauthorizedError
 from argilla.server.security.auth_provider.base import (
     AuthProvider,
@@ -32,8 +33,6 @@ from argilla.server.security.auth_provider.base import (
 )
 from argilla.server.security.auth_provider.local.users.service import UsersService
 from argilla.server.security.model import Token, User
-
-from argilla.server.contexts import auth
 
 from .settings import Settings
 from .settings import settings as local_security
@@ -172,16 +171,23 @@ class LocalAuthProvider(AuthProvider):
         -------
 
         """
-        user = await self._find_user_by_api_key(api_key) or await self._find_user_by_api_key(old_api_key)
-        if user:
-            return user
-        if token:
+        api_key = api_key or old_api_key
+        user = None
+
+        if api_key:
+            user = auth.get_user_by_api_key(api_key)
+        elif token:
             user = self.fetch_token_user(token)
 
         if user is None:
             raise UnauthorizedError()
 
-        return User.from_orm(user)
+        return User(
+            username=user.username,
+            email=user.email,
+            full_name=f"{user.first_name} {user.last_name}",
+            workspaces=[workspace.name for workspace in user.workspaces] if user.workspaces else None,
+        )
 
     async def _find_user_by_api_key(self, api_key) -> User:
         return await self.users.find_user_by_api_key(api_key)

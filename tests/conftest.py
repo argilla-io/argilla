@@ -15,8 +15,13 @@
 import httpx
 import pytest
 from _pytest.logging import LogCaptureFixture
+from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
+from argilla.server.database import Base, SessionLocal
+from argilla.server.models import User, Workspace
+from sqlalchemy import select
+from sqlalchemy.orm import scoped_session
 
 try:
     from loguru import logger
@@ -40,8 +45,78 @@ def telemetry_track_data(mocker):
         return spy
 
 
+@pytest.fixture(scope="session")
+def engine():
+    from argilla.server.database import engine
+
+    return engine
+
+
+@pytest.fixture(scope="session")
+def setup_database(engine):
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+    seed_for_tests()
+
+    yield engine
+
+    Base.metadata.drop_all(engine)
+
+
+def seed_for_tests():
+    with SessionLocal() as db_session:
+        db_session.add_all(
+            [
+                User(
+                    first_name="Argilla",
+                    username="argilla",
+                    email="ar@argilla.io",
+                    password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+                    api_key="argilla.apikey",
+                    workspaces=[
+                        Workspace(name=""),
+                        Workspace(name="argilla"),
+                        Workspace(name="my-fun-workspace"),
+                    ],
+                ),
+                User(
+                    username="mock-user",
+                    email="mock-user@argilla.io",
+                    password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+                    api_key="mock-user.apikey",
+                    workspaces=[Workspace(name="argilla"), Workspace(name="mock-ws")],
+                ),
+            ]
+        )
+
+        db_session.commit()
+
+
+@pytest.fixture
+def db_session(setup_database, engine):
+    connection = engine.connect()
+    transaction = connection.begin()
+
+    yield scoped_session(SessionLocal)
+
+    transaction.rollback()
+
+
+@pytest.fixture
+def mock_user(db_session):
+    user = db_session.scalar(select(User).where(User.username == "mock-user"))
+
+    return user
+
+
+@pytest.fixture
+def api():
+    return Argilla()
+
+
 @pytest.fixture
 def mocked_client(
+    db_session,
     monkeypatch,
     telemetry_track_data,
 ) -> SecuredClient:

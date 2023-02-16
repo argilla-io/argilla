@@ -29,50 +29,12 @@ class SecuredClient:
         self._header = {API_KEY_HEADER_NAME: settings.default_apikey}
         self._current_user = None
 
+    def update_api_key(self, api_key):
+        self._header[API_KEY_HEADER_NAME] = api_key
+
     @property
     def fastpi_app(self) -> FastAPI:
         return self._client.app
-
-    def change_current_user(self, username):
-        default_user = auth.users.__dao__.__users__["argilla"]
-        new_user = UserInDB(
-            username=username,
-            hashed_password=username,  # Even if required, we can ignore it
-            api_key=username,
-            workspaces=["argilla"],  # The default workspace
-        )
-
-        auth.users.__dao__.__users__[username] = new_user
-        rb_api = active_api()
-        rb_api._user = new_user
-        rb_api.set_workspace(default_user.username)
-        rb_api.http_client.token = new_user.api_key
-        self._header[API_KEY_HEADER_NAME] = new_user.api_key
-        self._header[WORKSPACE_HEADER_NAME] = "argilla"
-
-    def reset_default_user(self):
-        default_user = auth.users.__dao__.__users__["argilla"]
-
-        rb_api = active_api()
-        rb_api._user = default_user
-        rb_api.http_client.token = default_user.api_key
-        rb_api.http_client.headers.pop(WORKSPACE_HEADER_NAME)
-        self._header[API_KEY_HEADER_NAME] = default_user.api_key
-
-    def add_workspaces_to_argilla_user(self, workspaces: List[str]):
-        argilla_user = auth.users.__dao__.__users__["argilla"]
-        argilla_user.workspaces.extend(workspaces or [])
-
-        rb_api = active_api()
-        rb_api._user = argilla_user
-
-    def reset_argilla_workspaces(self):
-        argilla_user = auth.users.__dao__.__users__["argilla"]
-        argilla_user.workspaces = ["", "argilla"]
-
-        rb_api = active_api()
-        rb_api._user = argilla_user
-        rb_api.set_workspace("argilla")
 
     def delete(self, *args, **kwargs):
         request_headers = kwargs.pop("headers", {})

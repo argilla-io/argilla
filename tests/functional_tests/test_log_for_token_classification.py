@@ -511,7 +511,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
     }
 
 
-def test_search_keywords(mocked_client):
+def test_search_keywords(mocked_client, api):
     dataset = "test_search_keywords"
     from datasets import load_dataset
 
@@ -519,10 +519,10 @@ def test_search_keywords(mocked_client):
     dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
-    argilla.delete(dataset)
-    argilla.log(name=dataset, records=dataset_rb)
+    api.delete(dataset)
+    api.log(name=dataset, records=dataset_rb)
 
-    df = argilla.load(dataset, query="lis*")
+    df = api.load(dataset, query="lis*")
     df = df.to_pandas()
     assert not df.empty
     assert "search_keywords" in df.columns
@@ -540,12 +540,10 @@ def test_search_keywords(mocked_client):
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_vectors_and_update_ok(
-    mocked_client: SecuredClient,
-):
+def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient, api):
     dataset = "test_log_data_with_vectors_and_update_ok"
     text = "This is a text"
-    argilla.delete(dataset)
+    api.delete(dataset)
 
     records = [
         argilla.TokenClassificationRecord(
@@ -557,11 +555,11 @@ def test_log_data_with_vectors_and_update_ok(
         for i in range(1, 10)
     ]
 
-    argilla.log(
+    api.log(
         records=records,
         name=dataset,
     )
-    ds = argilla.load(
+    ds = api.load(
         dataset,
         vector=(
             "test-vector",

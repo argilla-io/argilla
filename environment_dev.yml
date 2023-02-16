@@ -5,7 +5,7 @@ channels:
 
 dependencies:
   - python~=3.7.0
-  - pip>=20.3.0
+  - pip>=2.22.0
   - openjdk=11
   # pyparsing 3.0.5 seems to be buggy
   - pyparsing!=3.0.5
@@ -21,7 +21,6 @@ dependencies:
   # for building the frontend
   - nodejs~=14.17.0
   - pip:
-      - pip>=2.22.0
       # docs
       - sphinx==4.5.0
       - sphinx-design==0.2.0
@@ -32,7 +31,7 @@ dependencies:
       - sphinx-copybutton==0.5.0
       - sphinx-notfound-page==0.8.3
       # code formatting
-      - pre-commit==2.15.0
+      - pre-commit~=2.15.0
       # extra test dependencies
       - cleanlab~=2.0.0 # With this version, tests are failing
       - datasets>1.17.0,!= 2.3.2 # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
@@ -47,5 +46,3 @@ dependencies:
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0.tar.gz
       - transformers[torch]~=4.18.0
       - loguru
-      # install Argilla in editable mode
-      - -e .[server,listeners]

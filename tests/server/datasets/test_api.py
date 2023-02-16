@@ -68,46 +68,57 @@ def test_create_dataset(mocked_client):
     assert response.status_code == 409
 
 
-def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
-    ws = "mock-ws"
+def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient, mock_user):
     dataset_name = "test_fetch_dataset_using_workspaces"
-    mocked_client.add_workspaces_to_argilla_user([ws])
 
-    delete_dataset(mocked_client, dataset_name, workspace=ws)
-    delete_dataset(mocked_client, dataset_name)
-    request = dict(
-        name=dataset_name,
-        task=TaskType.text_classification,
-    )
-    response = mocked_client.post(
-        f"/api/datasets?workspace={ws}",
-        json=request,
-    )
+    mocked_client.update_api_key(mock_user.api_key)
 
-    assert response.status_code == 200, response.json()
-    dataset = Dataset.parse_obj(response.json())
-    assert dataset.created_by == "argilla"
-    assert dataset.name == dataset_name
-    assert dataset.owner == ws
-    assert dataset.task == TaskType.text_classification
+    for workspace in mock_user.workspaces:
+        for workspace in mock_user.workspaces:
+            delete_dataset(mocked_client, dataset_name, workspace=workspace.name)
 
-    response = mocked_client.post(
-        f"/api/datasets?workspace={ws}",
-        json=request,
-    )
-    assert response.status_code == 409, response.json()
+        request = dict(
+            name=dataset_name,
+            task=TaskType.text_classification,
+        )
 
-    response = mocked_client.post(
-        "/api/datasets",
-        json=request,
-    )
+        workspace = workspace.name
 
-    assert response.status_code == 200, response.json()
-    dataset = Dataset.parse_obj(response.json())
-    assert dataset.created_by == "argilla"
-    assert dataset.name == dataset_name
-    assert dataset.owner == "argilla"
-    assert dataset.task == TaskType.text_classification
+        response = mocked_client.post(
+            f"/api/datasets?workspace={workspace}",
+            json=request,
+        )
+
+        assert response.status_code == 200, response.json()
+        dataset = Dataset.parse_obj(response.json())
+        assert dataset.created_by == mock_user.username
+        assert dataset.name == dataset_name
+        assert dataset.owner == workspace
+        assert dataset.task == TaskType.text_classification
+
+        response = mocked_client.post(
+            f"/api/datasets?workspace={workspace}",
+            json=request,
+        )
+        assert response.status_code == 409, response.json()
+
+        another_ws = None
+        for ws in mock_user.workspaces:
+            if ws.name != workspace:
+                another_ws = ws.name
+                break
+
+        response = mocked_client.post(
+            f"/api/datasets?workspace={another_ws}",
+            json=request,
+        )
+
+        assert response.status_code == 200, response.json()
+        dataset = Dataset.parse_obj(response.json())
+        assert dataset.created_by == mock_user.username
+        assert dataset.name == dataset_name
+        assert dataset.owner == another_ws
+        assert dataset.task == TaskType.text_classification
 
 
 def test_dataset_naming_validation(mocked_client):
@@ -225,7 +236,7 @@ def create_mock_dataset(client, dataset, records=[]):
     )
 
 
-def test_delete_records(mocked_client):
+def test_delete_records(mocked_client, mock_user):
     dataset_name = "test_delete_records"
     delete_dataset(mocked_client, dataset_name)
 
@@ -247,25 +258,23 @@ def test_delete_records(mocked_client):
     assert response.status_code == 200
     assert response.json() == {"matched": 1, "processed": 1}
 
-    try:
-        mocked_client.change_current_user("mock-user")
-        response = mocked_client.delete(f"/api/datasets/{dataset_name}/data")
-        assert response.status_code == 403
-        assert response.json() == {
-            "detail": {
-                "code": "argilla.api.errors::ForbiddenOperationError",
-                "params": {
-                    "detail": "You don't have the necessary permissions to delete records on this dataset."
-                    " Only dataset creators or administrators can delete datasets"
-                },
-            }
-        }
+    mocked_client.update_api_key(mock_user.api_key)
 
-        response = mocked_client.delete(f"/api/datasets/{dataset_name}/data?mark_as_discarded=true")
-        assert response.status_code == 200
-        assert response.json() == {
-            "matched": 99,
-            "processed": 98,
-        }  # different values are caused by conflicts found
-    finally:
-        mocked_client.reset_default_user()
+    response = mocked_client.delete(f"/api/datasets/{dataset_name}/data?workspace=argilla")
+    assert response.status_code == 403
+    assert response.json() == {
+        "detail": {
+            "code": "argilla.api.errors::ForbiddenOperationError",
+            "params": {
+                "detail": "You don't have the necessary permissions to delete records on this dataset."
+                " Only dataset creators or administrators can delete datasets"
+            },
+        }
+    }
+
+    response = mocked_client.delete(f"/api/datasets/{dataset_name}/data?mark_as_discarded=true&workspace=argilla")
+    assert response.status_code == 200
+    assert response.json() == {
+        "matched": 99,
+        "processed": 98,
+    }  # different values are caused by conflicts found
