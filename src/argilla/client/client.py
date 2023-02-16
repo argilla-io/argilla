@@ -20,7 +20,8 @@ import warnings
 from asyncio import Future
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 
-from tqdm.auto import tqdm
+from rich import print as rprint
+from rich.progress import Progress
 
 from argilla._constants import (
     _OLD_WORKSPACE_HEADER_NAME,
@@ -363,25 +364,26 @@ class Argilla:
             raise InputValueError(f"Unknown record type {record_type}. Available values are" f" {Record.__args__}")
 
         processed, failed = 0, 0
-        progress_bar = tqdm(total=len(records), disable=not verbose)
-        for i in range(0, len(records), chunk_size):
-            chunk = records[i : i + chunk_size]
+        with Progress() as progress_bar:
+            task = progress_bar.add_task("Logging...", total=len(records), visible=verbose)
 
-            response = await async_bulk(
-                client=self._client,
-                name=name,
-                json_body=bulk_class(
-                    tags=tags,
-                    metadata=metadata,
-                    records=[creation_class.from_client(r) for r in chunk],
-                ),
-            )
+            for i in range(0, len(records), chunk_size):
+                chunk = records[i : i + chunk_size]
 
-            processed += response.parsed.processed
-            failed += response.parsed.failed
+                response = await async_bulk(
+                    client=self._client,
+                    name=name,
+                    json_body=bulk_class(
+                        tags=tags,
+                        metadata=metadata,
+                        records=[creation_class.from_client(r) for r in chunk],
+                    ),
+                )
 
-            progress_bar.update(len(chunk))
-        progress_bar.close()
+                processed += response.parsed.processed
+                failed += response.parsed.failed
+
+                progress_bar.update(task, advance=len(chunk))
 
         # TODO: improve logging policy in library
         if verbose:
@@ -389,7 +391,7 @@ class Argilla:
             workspace = self.get_workspace()
             if not workspace:  # Just for backward comp. with datasets with no workspaces
                 workspace = "-"
-            print(f"{processed} records logged to" f" {self._client.base_url}/datasets/{workspace}/{name}")
+            rprint(f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}")
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)

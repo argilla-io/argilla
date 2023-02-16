@@ -15,15 +15,10 @@
 import httpx
 import pytest
 from _pytest.logging import LogCaptureFixture
-from argilla.client.sdk.users import api as users_api
-from argilla.server.commons import telemetry
-
-try:
-    from loguru import logger
-except ModuleNotFoundError:
-    logger = None
 from argilla import app
 from argilla.client.api import active_api
+from argilla.client.sdk.users import api as users_api
+from argilla.server.commons import telemetry
 from starlette.testclient import TestClient
 
 from .helpers import SecuredClient
@@ -68,13 +63,3 @@ def mocked_client(
         monkeypatch.setattr(rb_api._client, "__httpx__", client_)
 
         yield client_
-
-
-@pytest.fixture
-def caplog(caplog: LogCaptureFixture):
-    if not logger:
-        yield caplog
-    else:
-        handler_id = logger.add(caplog.handler, format="{message}")
-        yield caplog
-        logger.remove(handler_id)
