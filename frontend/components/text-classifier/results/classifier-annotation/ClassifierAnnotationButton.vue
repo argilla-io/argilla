@@ -111,7 +111,7 @@ $annotation-button-size: 20px;
       outline: none;
       cursor: pointer;
       background: #f0f0fe;
-      border-radius: $base-space;
+      border-radius: 25px;
       height: 40px;
       line-height: 40px;
       padding-left: $base-space * 2;

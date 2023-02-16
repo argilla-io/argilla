@@ -248,7 +248,7 @@ $toast-colors: map-merge(
   // Colors
   @each $color, $value in $toast-colors {
     .toast-#{$color} {
-      border: 2px solid $value;
+      border: 1px solid $value;
     }
   }
 

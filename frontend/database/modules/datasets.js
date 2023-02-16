@@ -508,6 +508,7 @@ const actions = {
       ...record,
       selected: false,
       status: "Discarded",
+      originStatus: null,
     }));
 
     let message = "";
@@ -540,16 +541,15 @@ const actions = {
       });
     }
   },
-  async resetRecord(_, { dataset, record }) {
-    return await _updateDatasetRecords({
+  async resetRecords(_, { dataset, records }) {
+    const newRecords = records.map((record) => ({
+      ...record,
+      selected: false,
+      status: record.originStatus,
+    }));
+    return _updateDatasetRecords({
       dataset,
-      records: [
-        {
-          ...record,
-          selected: false,
-          status: "Default",
-        },
-      ],
+      records: newRecords,
       persistBackend: true,
     });
   },
@@ -580,6 +580,7 @@ const actions = {
         },
         selected: false,
         status: "Validated",
+        originStatus: null,
       }));
 
       message =

@@ -51,6 +51,7 @@
         :actions="tokenClassifierActionButtons"
         @validate="onValidate(record)"
         @clear="onClearAnnotations()"
+        @reset="onReset()"
         @discard="onDiscard()"
       />
     </div>
@@ -149,17 +150,26 @@ export default {
         {
           id: "validate",
           name: "Validate",
+          allow: true,
           active: this.record.status !== "Validated",
         },
         {
           id: "discard",
           name: "Discard",
+          allow: true,
           active: this.record.status !== "Discarded",
         },
         {
           id: "clear",
           name: "Clear",
+          allow: true,
           active: this.record.annotatedEntities?.length || false,
+        },
+        {
+          id: "reset",
+          name: "Reset",
+          allow: true,
+          active: this.record.status === "Edited",
         },
       ];
     },
@@ -169,6 +179,7 @@ export default {
       validate: "entities/datasets/validateAnnotations",
       discard: "entities/datasets/discardAnnotations",
       updateRecords: "entities/datasets/updateDatasetRecords",
+      resetRecords: "entities/datasets/resetRecords",
     }),
     getEntitiesByOrigin(origin) {
       if (this.interactionsEnabled) {
@@ -214,6 +225,17 @@ export default {
         ],
       });
     },
+    async onReset() {
+      await this.resetRecords({
+        dataset: this.getTokenClassificationDataset(),
+        records: [
+          {
+            ...this.record,
+            annotatedEntities: this.record.annotation?.entities,
+          },
+        ],
+      });
+    },
     onDiscard() {
       this.$emit("discard");
     },
@@ -226,7 +248,7 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: 26px 200px 50px 50px;
+  padding: 26px 200px 20px 50px;
   display: block;
   margin-bottom: 0;
   @include font-size(16px);

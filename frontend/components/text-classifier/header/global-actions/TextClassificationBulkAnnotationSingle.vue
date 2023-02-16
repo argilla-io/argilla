@@ -100,7 +100,7 @@ export default {
 .label-text {
   cursor: pointer;
   background: #f0f0fe;
-  border-radius: 8px;
+  border-radius: 25px;
   color: #4c4ea3;
   padding: calc($base-space / 2) $base-space;
   @include truncate;

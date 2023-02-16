@@ -34,6 +34,7 @@
       @discard-records="onDiscard"
       @validate-records="onValidate"
       @clear-records="onClear"
+      @reset-records="onReset"
       @new-label="onNewLabel"
     />
   </div>
@@ -75,6 +76,7 @@ export default {
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
       updateRecords: "entities/datasets/updateDatasetRecords",
+      resetRecords: "entities/datasets/resetRecords",
     }),
 
     async onDiscard(records) {
@@ -112,9 +114,21 @@ export default {
           status: "Edited",
         };
       });
-      this.updateRecords({
+      await this.updateRecords({
         dataset: this.dataset,
         records: clearedRecords,
+      });
+    },
+    async onReset(records) {
+      const restartedRecords = records.map((record) => {
+        return {
+          ...record,
+          annotatedEntities: record.annotation?.entities,
+        };
+      });
+      await this.resetRecords({
+        dataset: this.dataset,
+        records: restartedRecords,
       });
     },
     async onNewLabel(label) {

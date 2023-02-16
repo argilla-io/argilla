@@ -16,59 +16,80 @@
   -->
 
 <template>
-  <div
-    class="validate-discard-actions"
-    :class="[
-      selectedRecords.length ? '' : 'validate-discard-actions--disabled',
-    ]"
-  >
+  <div class="validate-discard-actions">
     <base-checkbox
       v-model="allSelected"
       :disabled="!visibleRecords.length"
       class="list__item__checkbox"
     />
-    <TextClassificationBulkAnnotationSingle
-      v-if="datasetTask === 'TextClassification' && !isMultiLabel"
-      :class="'validate-discard-actions__select'"
-      :multi-label="isMultiLabel"
-      :options="availableLabels"
-      @selected="onSelectLabels($event)"
-    />
-    <TextClassificationBulkAnnotationComponent
-      v-if="datasetTask === 'TextClassification' && isMultiLabel"
-      :class="'validate-discard-actions__select'"
-      :datasetId="datasetId"
-      :records="selectedRecords"
-      :recordsIds="selectedRecordsIds"
-      :labels="availableLabels"
-      @on-update-annotations="onUpdateAnnotations"
-    />
-    <base-button
-      class="clear validate-discard-actions__button"
-      @click="onValidate"
-      data-title="Validate"
-    >
-      <svgicon name="validate" />
-    </base-button>
-    <base-button
-      class="clear validate-discard-actions__button"
-      @click="onDiscard"
-      data-title="Discard"
-    >
-      <svgicon name="discard" />
-    </base-button>
-    <base-button
-      v-if="datasetTask !== 'Text2Text'"
-      class="clear validate-discard-actions__button"
-      @click="onClear"
-      data-title="Clear"
-    >
-      <svgicon name="clear" />
-    </base-button>
-    <p v-if="selectedRecords.length" class="validate-discard-actions__text">
-      Actions will apply to the
-      <span>{{ selectedRecords.length }} records</span> selected
-    </p>
+    <template v-if="selectedRecords.length">
+      <TextClassificationBulkAnnotationSingle
+        v-if="datasetTask === 'TextClassification' && !isMultiLabel"
+        :class="'validate-discard-actions__select'"
+        :multi-label="isMultiLabel"
+        :options="availableLabels"
+        @selected="onSelectLabels($event)"
+      />
+      <TextClassificationBulkAnnotationComponent
+        v-if="datasetTask === 'TextClassification' && isMultiLabel"
+        :class="'validate-discard-actions__select'"
+        :datasetId="datasetId"
+        :records="selectedRecords"
+        :recordsIds="selectedRecordsIds"
+        :labels="availableLabels"
+        @on-update-annotations="onUpdateAnnotations"
+      />
+      <base-button
+        class="clear validate-discard-actions__button"
+        @click="onValidate"
+        data-title="Validate"
+      >
+        <i
+          id="validateButton"
+          :key="isAnyPendingStatusRecord"
+          v-badge="{
+            showBadge: isAnyPendingStatusRecord,
+            verticalPosition: 'top',
+            horizontalPosition: 'right',
+          }"
+        >
+          <svgicon name="validate" />
+        </i>
+      </base-button>
+      <base-button
+        class="clear validate-discard-actions__button"
+        @click="onDiscard"
+        data-title="Discard"
+      >
+        <svgicon name="discard" />
+      </base-button>
+      <template v-if="allowClearOrReset">
+        <base-button
+          class="clear validate-discard-actions__button"
+          @click="onClear"
+          data-title="Clear"
+        >
+          <svgicon name="clear" />
+        </base-button>
+        <base-button
+          class="clear validate-discard-actions__button"
+          @click="onReset"
+          data-title="Reset"
+        >
+          <svgicon name="reset" />
+        </base-button>
+      </template>
+      <p
+        v-if="selectedRecords.length"
+        class="validate-discard-actions__text"
+        :class="{
+          'validate-discard-actions__text_pending_record':
+            isAnyPendingStatusRecord,
+        }"
+      >
+        {{ message }}
+      </p>
+    </template>
   </div>
 </template>
 
@@ -76,6 +97,7 @@
 import "assets/icons/validate";
 import "assets/icons/discard";
 import "assets/icons/clear";
+import "assets/icons/reset";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { mapActions } from "vuex";
 
@@ -115,10 +137,51 @@ export default {
       // TODO: when record will be in own ORM table, replace next line by query ORM
       return this.visibleRecords.filter((record) => record.selected);
     },
+    selectedPendingRecords() {
+      return this.selectedRecords.filter(
+        (record) => record.status === "Edited"
+      );
+    },
+    selectedNonPendingRecords() {
+      return this.selectedRecords.filter(
+        (record) => record.status !== "Edited"
+      );
+    },
+    isAnyPendingStatusRecord() {
+      return this.selectedPendingRecords.length;
+    },
+    allowClearOrReset() {
+      return (
+        (this.datasetTask === "TextClassification" && this.isMultiLabel) ||
+        this.datasetTask === "TokenClassification"
+      );
+    },
     selectedRecordsIds() {
       return new Set(
         this.selectedRecords.reduce((acc, curr) => [...acc, curr.id], [])
       );
+    },
+    message() {
+      let pendingSentence = "";
+      let nonPendingSentence = "";
+      const dynamicText = (number, text) => {
+        return `${number} record${number === 1 ? ` is` : `s are`} ${text}`;
+      };
+      if (this.isAnyPendingStatusRecord) {
+        pendingSentence = `${dynamicText(
+          this.selectedPendingRecords.length,
+          "pending validation"
+        )}`;
+      }
+      if (this.selectedNonPendingRecords.length) {
+        nonPendingSentence = `${dynamicText(
+          this.selectedRecords.length,
+          "selected"
+        )}`;
+      }
+      return `${nonPendingSentence} ${
+        nonPendingSentence && pendingSentence && "and "
+      } ${pendingSentence}`;
     },
   },
   watch: {
@@ -151,6 +214,9 @@ export default {
     },
     onClear() {
       this.$emit("clear-records", this.selectedRecords);
+    },
+    onReset() {
+      this.$emit("reset-records", this.selectedRecords);
     },
     async onValidate() {
       this.$emit("validate-records", this.selectedRecords);
@@ -191,7 +257,7 @@ export default {
 <style lang="scss" scoped>
 .validate-discard-actions {
   display: flex;
-  gap: $base-space;
+  gap: calc($base-space / 2);
   align-items: center;
   width: 100%;
   .re-checkbox {
@@ -228,10 +294,12 @@ export default {
     @include font-size(13px);
     margin: 0 $base-space;
     color: $black-54;
-    span {
-      font-weight: 700;
-      color: $black-54;
-    }
+  }
+  &__text_pending_record {
+    padding-block: 0.5em;
+    padding-inline: 1em;
+    background-color: rgb(255, 103, 95, 0.2);
+    border-radius: 5px;
   }
   &__button {
     .svg-icon {
@@ -243,13 +311,6 @@ export default {
       overflow: visible;
       position: relative;
       @extend %has-tooltip--top;
-    }
-  }
-  &--disabled {
-    .validate-discard-actions__button,
-    .validate-discard-actions__select {
-      pointer-events: none;
-      opacity: 0.3;
     }
   }
 }

@@ -36,6 +36,7 @@
       @discard-records="onDiscard"
       @validate-records="onValidate"
       @clear-records="onClear"
+      @reset-records="onReset"
       @on-select-labels="onSelectLabels($event)"
       @new-label="onNewLabel"
     />
@@ -91,6 +92,7 @@ export default {
       updateRecords: "entities/datasets/updateDatasetRecords",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
+      resetRecords: "entities/datasets/resetRecords",
     }),
     async onSelectLabels({ labels, selectedRecords, labelsToRemove }) {
       const records = selectedRecords.map((record) => {
@@ -215,8 +217,9 @@ export default {
       const clearedRecords = records.map((record) => {
         return {
           ...record,
-          currentAnnotation: null,
-          annotation: null,
+          currentAnnotation: {
+            labels: [],
+          },
           selected: true,
           status: "Edited",
         };
@@ -224,6 +227,18 @@ export default {
       this.updateRecords({
         dataset: this.dataset,
         records: clearedRecords,
+      });
+    },
+    async onReset(records) {
+      const restartedRecords = records.map((record) => {
+        return {
+          ...record,
+          currentAnnotation: record.annotation,
+        };
+      });
+      this.resetRecords({
+        dataset: this.dataset,
+        records: restartedRecords,
       });
     },
     async onNewLabel(newLabel) {

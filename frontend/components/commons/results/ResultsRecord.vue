@@ -18,16 +18,14 @@
 <template>
   <div v-if="dataset && viewSettings">
     <div
-      :class="[
-        annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
-        record.status === 'Discarded' ? 'discarded' : null,
-      ]"
+      :class="annotationEnabled ? 'list__item--annotation-mode' : 'list__item'"
     >
       <div class="record__header">
         <template v-if="!weakLabelingEnabled">
           <template v-if="annotationEnabled">
             <div class="record__header--left" v-if="!isReferenceRecord">
               <base-checkbox
+                :class="pageSizeisOne && '--hidden'"
                 class="list__checkbox"
                 :value="record.selected"
                 @change="onCheckboxChanged($event, record.id)"
@@ -137,6 +135,9 @@ export default {
     },
     viewSettings() {
       return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
+    },
+    pageSizeisOne() {
+      return this.viewSettings.pagination.size === 1;
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
@@ -251,6 +252,9 @@ export default {
 .list {
   &__checkbox.re-checkbox {
     margin: auto $base-space;
+    &.--hidden {
+      opacity: 0;
+    }
   }
   &__item {
     position: relative;
@@ -263,14 +267,6 @@ export default {
     &--annotation-mode {
       @extend .list__item !optional;
       padding-left: $base-space;
-      &.discarded {
-        opacity: 0.5;
-        transition: 0.3s ease-in-out;
-        &:hover {
-          opacity: 1;
-          transition: 0.3s ease-in-out;
-        }
-      }
     }
   }
 }

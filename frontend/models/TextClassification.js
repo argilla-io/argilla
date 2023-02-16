@@ -27,6 +27,7 @@ class TextClassificationRecord extends BaseRecord {
     explanation,
     multi_label,
     currentAnnotation,
+    originStatus,
     ...superData
   }) {
     super(superData);
@@ -34,6 +35,7 @@ class TextClassificationRecord extends BaseRecord {
     this.explanation = explanation;
     this.multi_label = multi_label;
     this.currentAnnotation = currentAnnotation || this.annotation || null;
+    this.originStatus = originStatus || this.status;
   }
 
   recordTitle() {
