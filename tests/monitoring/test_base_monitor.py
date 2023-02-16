@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from time import sleep
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from argilla import TextClassificationRecord
 from argilla.client.api import Api, active_api

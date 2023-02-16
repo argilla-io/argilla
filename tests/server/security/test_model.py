@@ -13,10 +13,9 @@
 #  limitations under the License.
 
 import pytest
-from pydantic import ValidationError
-
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.security.model import User
+from pydantic import ValidationError
 
 
 @pytest.mark.parametrize("email", ["my@email.com", "infra@recogn.ai"])
@@ -25,17 +24,13 @@ def test_valid_mail(email):
     assert user.email == email
 
 
-@pytest.mark.parametrize(
-    "wrong_email", ["non-valid-email", "wrong@mail", "@wrong" "wrong.mail"]
-)
+@pytest.mark.parametrize("wrong_email", ["non-valid-email", "wrong@mail", "@wrong" "wrong.mail"])
 def test_email_validator(wrong_email):
     with pytest.raises(ValidationError):
         User(username="user", email=wrong_email)
 
 
-@pytest.mark.parametrize(
-    "wrong_name", ["user name", "user/name", "user.name", "UserName", "userName"]
-)
+@pytest.mark.parametrize("wrong_name", ["user name", "user/name", "user.name", "UserName", "userName"])
 def test_username_validator(wrong_name):
     with pytest.raises(
         ValidationError,
@@ -44,9 +39,7 @@ def test_username_validator(wrong_name):
         User(username=wrong_name)
 
 
-@pytest.mark.parametrize(
-    "wrong_workspace", ["work space", "work/space", "work.space", "_", "-"]
-)
+@pytest.mark.parametrize("wrong_workspace", ["work space", "work/space", "work.space", "_", "-"])
 def test_workspace_validator(wrong_workspace):
     with pytest.raises(ValidationError):
         User(username="username", workspaces=[wrong_workspace])

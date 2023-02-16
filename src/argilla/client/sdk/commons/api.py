@@ -50,9 +50,7 @@ _TASK_TO_ENDPOINT = {
 }
 
 
-def build_param_dict(
-    id_from: Optional[str], limit: Optional[int]
-) -> Optional[Dict[str, Union[str, int]]]:
+def build_param_dict(id_from: Optional[str], limit: Optional[int]) -> Optional[Dict[str, Union[str, int]]]:
     params = {}
     if id_from:
         params["id_from"] = id_from
@@ -64,9 +62,7 @@ def build_param_dict(
 def bulk(
     client: AuthenticatedClient,
     name: str,
-    json_body: Union[
-        TextClassificationBulkData, TokenClassificationBulkData, Text2TextBulkData
-    ],
+    json_body: Union[TextClassificationBulkData, TokenClassificationBulkData, Text2TextBulkData],
 ) -> Response[BulkResponse]:
     url = f"{client.base_url}/api/datasets/{name}/{_TASK_TO_ENDPOINT[type(json_body)]}:bulk"
 
@@ -100,9 +96,7 @@ async def async_bulk(
     return build_bulk_response(response, name=name, body=json_body)
 
 
-def build_bulk_response(
-    response: httpx.Response, name: str, body: Any
-) -> Response[BulkResponse]:
+def build_bulk_response(response: httpx.Response, name: str, body: Any) -> Response[BulkResponse]:
     if 200 <= response.status_code < 400:
         return Response(
             status_code=response.status_code,
@@ -117,16 +111,14 @@ def build_bulk_response(
 T = TypeVar("T")
 
 
-def build_data_response(
-    response: httpx.Response, data_type: Type[T]
-) -> Response[List[T]]:
+def build_data_response(response: httpx.Response, data_type: Type[T]) -> Response[List[T]]:
     if 200 <= response.status_code < 400:
         parsed_responses = []
         for r in response.iter_lines():
             parsed_record = json.loads(r)
             try:
                 parsed_response = data_type(**parsed_record)
-            except Exception as err:
+            except Exception as err:  # noqa: F841
                 raise GenericApiError(**parsed_record) from None
             parsed_responses.append(parsed_response)
         return Response(

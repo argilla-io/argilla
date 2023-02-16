@@ -19,15 +19,13 @@ from .token_classification import (
     entity_consistency,
     entity_density,
     entity_labels,
-)
-from .token_classification import f1 as ner_f1
-from .token_classification import (
     mention_length,
     token_capitalness,
     token_frequency,
     token_length,
     tokens_length,
 )
+from .token_classification import f1 as ner_f1
 
 __all__ = [
     text_length,

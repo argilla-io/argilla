@@ -12,14 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla
+import pytest
 from argilla import TokenClassificationRecord
 from argilla.client import api
 from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
+
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient
 
@@ -29,9 +29,7 @@ def test_log_with_empty_text(mocked_client):
     text = " "
 
     argilla.delete(dataset)
-    with pytest.raises(
-        Exception, match="The provided `text` contains only whitespaces."
-    ):
+    with pytest.raises(Exception, match="The provided `text` contains only whitespaces."):
         argilla.log(
             TokenClassificationRecord(id=0, text=text, tokens=["a", "b", "c"]),
             name=dataset,
@@ -531,9 +529,7 @@ def test_search_keywords(mocked_client):
     top_keywords = set(
         [
             keyword
-            for keywords in df.search_keywords.value_counts(sort=True, ascending=False)
-            .index[:3]
-            .tolist()
+            for keywords in df.search_keywords.value_counts(sort=True, ascending=False).index[:3].tolist()
             for keyword in keywords
         ]
     )

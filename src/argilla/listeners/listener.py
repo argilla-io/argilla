@@ -69,9 +69,7 @@ class RGDatasetListener:
             return None
         return self.query.format(**(self.query_params or {}))
 
-    __listener_job__: Optional[schedule.Job] = dataclasses.field(
-        init=False, default=None
-    )
+    __listener_job__: Optional[schedule.Job] = dataclasses.field(init=False, default=None)
     __stop_schedule_event__ = None
     __current_thread__ = None
     __scheduler__ = schedule.Scheduler()
@@ -98,7 +96,7 @@ class RGDatasetListener:
             def wrapper(*args, **kwargs):
                 try:
                     return job_func(*args, **kwargs)
-                except:
+                except:  # noqa: E722
                     import traceback
 
                     print(traceback.format_exc())
@@ -120,13 +118,11 @@ class RGDatasetListener:
         if self.is_running():
             raise ValueError("Listener is already running")
 
-        job_step = self.__catch_exceptions__(cancel_on_failure=True)(
-            self.__listener_iteration_job__
-        )
+        job_step = self.__catch_exceptions__(cancel_on_failure=True)(self.__listener_iteration_job__)
 
-        self.__listener_job__ = self.__scheduler__.every(
-            self.interval_in_seconds
-        ).seconds.do(job_step, *action_args, **action_kwargs)
+        self.__listener_job__ = self.__scheduler__.every(self.interval_in_seconds).seconds.do(
+            job_step, *action_args, **action_kwargs
+        )
 
         class _ScheduleThread(threading.Thread):
             _WAIT_EVENT = threading.Event()
@@ -183,9 +179,7 @@ class RGDatasetListener:
         ctx = RGListenerContext(
             listener=self,
             query_params=self.query_params,
-            metrics=self.__compute_metrics__(
-                current_api, dataset, query=self.formatted_query
-            ),
+            metrics=self.__compute_metrics__(current_api, dataset, query=self.formatted_query),
         )
         if self.condition is None:
             self._LOGGER.debug("No condition found! Running action...")
@@ -208,7 +202,7 @@ class RGDatasetListener:
 
         self._LOGGER.debug(f"Evaluate condition with arguments: {condition_args}")
         if self.condition(*condition_args):
-            self._LOGGER.debug(f"Condition passed! Running action...")
+            self._LOGGER.debug("Condition passed! Running action...")
             return self.__run_action__(ctx, *args, **kwargs)
 
     def __compute_metrics__(self, current_api, dataset, query: str) -> Metrics:
@@ -230,12 +224,10 @@ class RGDatasetListener:
         try:
             action_args = [ctx] if ctx else []
             if self.query_records:
-                action_args.insert(
-                    0, argilla.load(name=self.dataset, query=self.formatted_query)
-                )
+                action_args.insert(0, argilla.load(name=self.dataset, query=self.formatted_query))
             self._LOGGER.debug(f"Running action with arguments: {action_args}")
             return self.action(*args, *action_args, **kwargs)
-        except:
+        except:  # noqa: E722
             import traceback
 
             print(traceback.format_exc())

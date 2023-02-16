@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import atexit
-import dataclasses
 import logging
 import random
 import threading
@@ -188,9 +187,7 @@ class BaseMonitor(wrapt.ObjectProxy):
         super().__init__(*args, **kwargs)
 
         assert dataset, "Missing dataset"
-        assert (
-            0.0 < sample_rate <= 1.0
-        ), "Wrong sample rate. Set a value in (0, 1] range."
+        assert 0.0 < sample_rate <= 1.0, "Wrong sample rate. Set a value in (0, 1] range."
 
         self.dataset = dataset
         self.sample_rate = sample_rate

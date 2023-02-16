@@ -16,7 +16,7 @@ import functools
 import logging
 import random
 import uuid
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
 from pkg_resources import parse_version
@@ -31,6 +31,11 @@ from argilla.client.models import (
 )
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.utils.span_utils import SpanUtils
+
+if TYPE_CHECKING:
+    import datasets
+    import pandas
+    import spacy
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,7 +65,7 @@ def _requires_spacy(func):
     @functools.wraps(func)
     def check_if_spacy_installed(*args, **kwargs):
         try:
-            import spacy
+            import spacy  # noqa: F401
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 f"'spacy' must be installed to use `{func.__name__}`"
@@ -98,9 +103,7 @@ class DatasetBase:
 
     def __init__(self, records: Optional[List[Record]] = None):
         if self._RECORD_TYPE is None:
-            raise NotImplementedError(
-                "A Dataset implementation has to define a `_RECORD_TYPE`!"
-            )
+            raise NotImplementedError("A Dataset implementation has to define a `_RECORD_TYPE`!")
 
         self._records = records or []
         if self._records:
@@ -174,8 +177,7 @@ class DatasetBase:
             del ds_dict["metadata"]
             dataset = datasets.Dataset.from_dict(ds_dict)
             _LOGGER.warning(
-                "The 'metadata' of the records were removed, since it was incompatible"
-                " with the 'datasets' format."
+                "The 'metadata' of the records were removed, since it was incompatible" " with the 'datasets' format."
             )
 
         return dataset
@@ -216,15 +218,10 @@ class DatasetBase:
         import datasets
 
         if isinstance(dataset, datasets.DatasetDict):
-            raise ValueError(
-                "`datasets.DatasetDict` are not supported. Please, select the dataset"
-                " split before."
-            )
+            raise ValueError("`datasets.DatasetDict` are not supported. Please, select the dataset" " split before.")
 
         # clean column mappings
-        column_mapping = {
-            key: val for key, val in column_mapping.items() if val is not None
-        }
+        column_mapping = {key: val for key, val in column_mapping.items() if val is not None}
 
         cols_to_be_renamed, cols_to_be_joined = {}, {}
         for field, col in column_mapping.items():
@@ -258,9 +255,7 @@ class DatasetBase:
             The dataset with unsupported columns removed.
         """
         not_supported_columns = [
-            col
-            for col in dataset.column_names
-            if col not in cls._record_init_args() + extra_columns
+            col for col in dataset.column_names if col not in cls._record_init_args() + extra_columns
         ]
 
         if not_supported_columns:
@@ -274,9 +269,7 @@ class DatasetBase:
         return dataset
 
     @staticmethod
-    def _join_datasets_columns_and_delete(
-        row: Dict[str, Any], columns: List[str]
-    ) -> Dict[str, Any]:
+    def _join_datasets_columns_and_delete(row: Dict[str, Any], columns: List[str]) -> Dict[str, Any]:
         """Joins columns of a `datasets.Dataset` row into a dict, and deletes the single columns.
 
         Updates the ``row`` dictionary!
@@ -349,9 +342,7 @@ class DatasetBase:
         Returns:
             The imported records in a argilla Dataset.
         """
-        not_supported_columns = [
-            col for col in dataframe.columns if col not in cls._record_init_args()
-        ]
+        not_supported_columns = [col for col in dataframe.columns if col not in cls._record_init_args()]
         if not_supported_columns:
             _LOGGER.warning(
                 "Following columns are not supported by the"
@@ -456,14 +447,10 @@ class DatasetBase:
         )
 
         # check if train sizes sum up to 1
-        assert (train_size + test_size) == 1, ValueError(
-            "`train_size` and `test_size` must sum to 1."
-        )
+        assert (train_size + test_size) == 1, ValueError("`train_size` and `test_size` must sum to 1.")
 
         # check for annotations
-        assert any([rec.annotation for rec in self._records]), ValueError(
-            "Dataset has no annotations."
-        )
+        assert any([rec.annotation for rec in self._records]), ValueError("Dataset has no annotations.")
 
         # shuffle records
         shuffled_records = self._records.copy()
@@ -479,13 +466,10 @@ class DatasetBase:
 
         # prepare for training for the right method
         if framework is Framework.TRANSFORMERS:
-            return self._prepare_for_training_with_transformers(
-                train_size=train_size, test_size=test_size, seed=seed
-            )
+            return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
         elif framework is Framework.SPACY and lang is None:
             raise ValueError(
-                "Please provide a spacy language model to prepare the"
-                " dataset for training with the spacy framework."
+                "Please provide a spacy language model to prepare the" " dataset for training with the spacy framework."
             )
         elif framework in [Framework.SPACY, Framework.SPARK_NLP]:
             if train_size and test_size:
@@ -498,12 +482,8 @@ class DatasetBase:
                     random_state=seed,
                 )
                 if framework is Framework.SPACY:
-                    train_docbin = self._prepare_for_training_with_spacy(
-                        nlp=lang, records=records_train
-                    )
-                    test_docbin = self._prepare_for_training_with_spacy(
-                        nlp=lang, records=records_test
-                    )
+                    train_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_train)
+                    test_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_test)
                     return train_docbin, test_docbin
                 else:
                     train_df = self._prepare_for_training_with_spark_nlp(records_train)
@@ -512,18 +492,11 @@ class DatasetBase:
                     return train_df, test_df
             else:
                 if framework is Framework.SPACY:
-                    return self._prepare_for_training_with_spacy(
-                        nlp=lang, records=shuffled_records
-                    )
+                    return self._prepare_for_training_with_spacy(nlp=lang, records=shuffled_records)
                 else:
-                    return self._prepare_for_training_with_spark_nlp(
-                        records=shuffled_records
-                    )
+                    return self._prepare_for_training_with_spark_nlp(records=shuffled_records)
         else:
-            raise NotImplementedError(
-                f"Framework {framework} is not supported. Choose from:"
-                f" {list(Framework)}"
-            )
+            raise NotImplementedError(f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}")
 
     @_requires_spacy
     def _prepare_for_training_with_spacy(
@@ -669,9 +642,7 @@ class DatasetForTextClassification(DatasetBase):
 
         records = []
         for row in dataset:
-            row["inputs"] = cls._parse_inputs_field(
-                row, cols_to_be_joined.get("inputs")
-            )
+            row["inputs"] = cls._parse_inputs_field(row, cols_to_be_joined.get("inputs"))
             if row.get("inputs") is not None and row.get("text") is not None:
                 del row["text"]
 
@@ -696,10 +667,7 @@ class DatasetForTextClassification(DatasetBase):
             if row.get("explanation"):
                 row["explanation"] = (
                     {
-                        key: [
-                            TokenAttributions(**tokattr_kwargs)
-                            for tokattr_kwargs in val
-                        ]
+                        key: [TokenAttributions(**tokattr_kwargs) for tokattr_kwargs in val]
                         for key, val in row["explanation"].items()
                     }
                     if row["explanation"] is not None
@@ -707,9 +675,7 @@ class DatasetForTextClassification(DatasetBase):
                 )
 
             if cols_to_be_joined.get("metadata"):
-                row["metadata"] = cls._join_datasets_columns_and_delete(
-                    row, cols_to_be_joined["metadata"]
-                )
+                row["metadata"] = cls._join_datasets_columns_and_delete(row, cols_to_be_joined["metadata"])
 
             records.append(TextClassificationRecord.parse_obj(row))
 
@@ -761,18 +727,13 @@ class DatasetForTextClassification(DatasetBase):
                 ]
             elif key == "explanation":
                 ds_dict[key] = [
-                    {
-                        key: list(map(dict, tokattrs))
-                        for key, tokattrs in rec.explanation.items()
-                    }
+                    {key: list(map(dict, tokattrs)) for key, tokattrs in rec.explanation.items()}
                     if rec.explanation is not None
                     else None
                     for rec in self._records
                 ]
             elif key == "id":
-                ds_dict[key] = [
-                    None if rec.id is None else str(rec.id) for rec in self._records
-                ]
+                ds_dict[key] = [None if rec.id is None else str(rec.id) for rec in self._records]
             elif key == "metadata":
                 ds_dict[key] = [getattr(rec, key) or None for rec in self._records]
             else:
@@ -782,9 +743,7 @@ class DatasetForTextClassification(DatasetBase):
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
-        return cls(
-            [TextClassificationRecord(**row) for row in dataframe.to_dict("records")]
-        )
+        return cls([TextClassificationRecord(**row) for row in dataframe.to_dict("records")])
 
     @_requires_datasets
     def _prepare_for_training_with_transformers(
@@ -795,12 +754,7 @@ class DatasetForTextClassification(DatasetBase):
     ):
         import datasets
 
-        inputs_keys = {
-            key: None
-            for rec in self._records
-            for key in rec.inputs
-            if rec.annotation is not None
-        }.keys()
+        inputs_keys = {key: None for rec in self._records for key in rec.inputs if rec.annotation is not None}.keys()
 
         ds_dict = {**{key: [] for key in inputs_keys}, "label": []}
         for rec in self._records:
@@ -827,9 +781,7 @@ class DatasetForTextClassification(DatasetBase):
             "label": [class_label] if self._records[0].multi_label else class_label,
         }
 
-        ds = datasets.Dataset.from_dict(
-            ds_dict, features=datasets.Features(feature_dict)
-        )
+        ds = datasets.Dataset.from_dict(ds_dict, features=datasets.Features(feature_dict))
 
         if self._records[0].multi_label:
             from sklearn.preprocessing import MultiLabelBinarizer
@@ -848,16 +800,12 @@ class DatasetForTextClassification(DatasetBase):
                 features=datasets.Features(feature_dict),
             )
         if test_size:
-            ds = ds.train_test_split(
-                train_size=train_size, test_size=test_size, seed=seed
-            )
+            ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
 
     @_requires_spacy
-    def _prepare_for_training_with_spacy(
-        self, nlp: "spacy.Language", records: List[Record]
-    ) -> "spacy.tokens.DocBin":
+    def _prepare_for_training_with_spacy(self, nlp: "spacy.Language", records: List[Record]) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
         db = DocBin()
@@ -884,9 +832,7 @@ class DatasetForTextClassification(DatasetBase):
 
         return db
 
-    def _prepare_for_training_with_spark_nlp(
-        self, records: List[Record]
-    ) -> "pandas.DataFrame":
+    def _prepare_for_training_with_spark_nlp(self, records: List[Record]) -> "pandas.DataFrame":
         if records[0].multi_label:
             label_name = "labels"
         else:
@@ -1007,13 +953,11 @@ class DatasetForTokenClassification(DatasetBase):
         for row in dataset:
             # TODO: fails with a KeyError if no tokens column is present and no mapping is indicated
             if not row["tokens"]:
-                _LOGGER.warning(f"Ignoring row with no tokens.")
+                _LOGGER.warning("Ignoring row with no tokens.")
                 continue
 
             if row.get("tags"):
-                row["tags"] = cls._parse_datasets_column_with_classlabel(
-                    row["tags"], dataset.features["tags"]
-                )
+                row["tags"] = cls._parse_datasets_column_with_classlabel(row["tags"], dataset.features["tags"])
 
             if row.get("prediction"):
                 row["prediction"] = cls.__entities_to_tuple__(row["prediction"])
@@ -1022,9 +966,7 @@ class DatasetForTokenClassification(DatasetBase):
                 row["annotation"] = cls.__entities_to_tuple__(row["annotation"])
 
             if cols_to_be_joined.get("metadata"):
-                row["metadata"] = cls._join_datasets_columns_and_delete(
-                    row, cols_to_be_joined["metadata"]
-                )
+                row["metadata"] = cls._join_datasets_columns_and_delete(row, cols_to_be_joined["metadata"])
 
             records.append(TokenClassificationRecord.parse_obj(row))
 
@@ -1057,13 +999,7 @@ class DatasetForTokenClassification(DatasetBase):
             return datasets.Dataset.from_dict({})
 
         class_tags = ["O"]
-        class_tags.extend(
-            [
-                f"{pre}-{label}"
-                for label in sorted(self.__all_labels__())
-                for pre in ["B", "I"]
-            ]
-        )
+        class_tags.extend([f"{pre}-{label}" for label in sorted(self.__all_labels__()) for pre in ["B", "I"]])
         class_tags = datasets.ClassLabel(names=class_tags)
 
         def spans2iob(example):
@@ -1073,26 +1009,18 @@ class DatasetForTokenClassification(DatasetBase):
 
             return class_tags.str2int(tags)
 
-        ds = (
-            self.to_datasets()
-            .filter(self.__only_annotations__)
-            .map(lambda example: {"ner_tags": spans2iob(example)})
-        )
+        ds = self.to_datasets().filter(self.__only_annotations__).map(lambda example: {"ner_tags": spans2iob(example)})
         new_features = ds.features.copy()
         new_features["ner_tags"] = [class_tags]
         ds = ds.cast(new_features)
 
         if train_size or test_size:
-            ds = ds.train_test_split(
-                train_size=train_size, test_size=test_size, seed=seed
-            )
+            ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
 
     @_requires_spacy
-    def _prepare_for_training_with_spacy(
-        self, nlp: "spacy.Language", records: List[Record]
-    ) -> "spacy.tokens.DocBin":
+    def _prepare_for_training_with_spacy(self, nlp: "spacy.Language", records: List[Record]) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
         db = DocBin()
@@ -1123,9 +1051,7 @@ class DatasetForTokenClassification(DatasetBase):
 
         return db
 
-    def _prepare_for_training_with_spark_nlp(
-        self, records: List[Record]
-    ) -> "pandas.DataFrame":
+    def _prepare_for_training_with_spark_nlp(self, records: List[Record]) -> "pandas.DataFrame":
         for record in records:
             if record.id is None:
                 record.id = str(uuid.uuid4())
@@ -1158,9 +1084,7 @@ class DatasetForTokenClassification(DatasetBase):
 
         # create a dict first, where we make the necessary transformations
         def entities_to_dict(
-            entities: Optional[
-                List[Union[Tuple[str, int, int, float], Tuple[str, int, int]]]
-            ]
+            entities: Optional[List[Union[Tuple[str, int, int, float], Tuple[str, int, int]]]]
         ) -> Optional[List[Dict[str, Union[str, int, float]]]]:
             if entities is None:
                 return None
@@ -1174,17 +1098,11 @@ class DatasetForTokenClassification(DatasetBase):
         ds_dict = {}
         for key in self._RECORD_TYPE.__fields__:
             if key == "prediction":
-                ds_dict[key] = [
-                    entities_to_dict(rec.prediction) for rec in self._records
-                ]
+                ds_dict[key] = [entities_to_dict(rec.prediction) for rec in self._records]
             elif key == "annotation":
-                ds_dict[key] = [
-                    entities_to_dict(rec.annotation) for rec in self._records
-                ]
+                ds_dict[key] = [entities_to_dict(rec.annotation) for rec in self._records]
             elif key == "id":
-                ds_dict[key] = [
-                    None if rec.id is None else str(rec.id) for rec in self._records
-                ]
+                ds_dict[key] = [None if rec.id is None else str(rec.id) for rec in self._records]
             elif key == "metadata":
                 ds_dict[key] = [getattr(rec, key) or None for rec in self._records]
             else:
@@ -1205,9 +1123,7 @@ class DatasetForTokenClassification(DatasetBase):
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTokenClassification":
-        return cls(
-            [TokenClassificationRecord(**row) for row in dataframe.to_dict("records")]
-        )
+        return cls([TokenClassificationRecord(**row) for row in dataframe.to_dict("records")])
 
 
 @_prepend_docstring(Text2TextRecord)
@@ -1294,9 +1210,7 @@ class DatasetForText2Text(DatasetBase):
                 row["prediction"] = cls._parse_prediction_field(row["prediction"])
 
             if cols_to_be_joined.get("metadata"):
-                row["metadata"] = cls._join_datasets_columns_and_delete(
-                    row, cols_to_be_joined["metadata"]
-                )
+                row["metadata"] = cls._join_datasets_columns_and_delete(row, cols_to_be_joined["metadata"])
 
             records.append(Text2TextRecord.parse_obj(row))
 
@@ -1332,15 +1246,11 @@ class DatasetForText2Text(DatasetBase):
         for key in self._RECORD_TYPE.__fields__:
             if key == "prediction":
                 ds_dict[key] = [
-                    [pred_to_dict(pred) for pred in rec.prediction]
-                    if rec.prediction is not None
-                    else None
+                    [pred_to_dict(pred) for pred in rec.prediction] if rec.prediction is not None else None
                     for rec in self._records
                 ]
             elif key == "id":
-                ds_dict[key] = [
-                    None if rec.id is None else str(rec.id) for rec in self._records
-                ]
+                ds_dict[key] = [None if rec.id is None else str(rec.id) for rec in self._records]
             elif key == "metadata":
                 ds_dict[key] = [getattr(rec, key) or None for rec in self._records]
             else:
@@ -1366,14 +1276,10 @@ class DatasetForText2Text(DatasetBase):
         raise NotImplementedError
 
 
-Dataset = Union[
-    DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text
-]
+Dataset = Union[DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text]
 
 
-def read_datasets(
-    dataset: "datasets.Dataset", task: Union[str, TaskType], **kwargs
-) -> Dataset:
+def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType], **kwargs) -> Dataset:
     """Reads a datasets Dataset and returns a argilla Dataset
 
     Args:
@@ -1426,9 +1332,7 @@ def read_datasets(
         return DatasetForTokenClassification.from_datasets(dataset, **kwargs)
     if task is TaskType.text2text:
         return DatasetForText2Text.from_datasets(dataset, **kwargs)
-    raise NotImplementedError(
-        "Reading a datasets Dataset is not implemented for the given task!"
-    )
+    raise NotImplementedError("Reading a datasets Dataset is not implemented for the given task!")
 
 
 def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
@@ -1483,9 +1387,7 @@ def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
         return DatasetForTokenClassification.from_pandas(dataframe)
     if task is TaskType.text2text:
         return DatasetForText2Text.from_pandas(dataframe)
-    raise NotImplementedError(
-        "Reading a pandas DataFrame is not implemented for the given task!"
-    )
+    raise NotImplementedError("Reading a pandas DataFrame is not implemented for the given task!")
 
 
 class WrongRecordTypeError(Exception):

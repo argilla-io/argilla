@@ -17,9 +17,7 @@ from argilla.server.commons.models import TaskType
 
 
 def create_dataset(client, name: str):
-    response = client.post(
-        "/api/datasets", json={"name": name, "task": TaskType.text_classification}
-    )
+    response = client.post("/api/datasets", json={"name": name, "task": TaskType.text_classification})
     assert response.status_code == 200
 
 
@@ -60,9 +58,7 @@ def test_delete_settings(mocked_client):
     create_dataset(mocked_client, name)
     assert create_settings(mocked_client, name).status_code == 200
 
-    response = mocked_client.delete(
-        f"/api/datasets/{TaskType.text_classification}/{name}/settings"
-    )
+    response = mocked_client.delete(f"/api/datasets/{TaskType.text_classification}/{name}/settings")
     assert response.status_code == 200
     assert fetch_settings(mocked_client, name).status_code == 404
 
@@ -131,6 +127,4 @@ def log_some_data(mocked_client, name):
 
 
 def fetch_settings(mocked_client, name):
-    return mocked_client.get(
-        f"/api/datasets/{TaskType.text_classification}/{name}/settings"
-    )
+    return mocked_client.get(f"/api/datasets/{TaskType.text_classification}/{name}/settings")

@@ -25,10 +25,14 @@ repos:
       - id: black
         additional_dependencies: ["click==8.0.4"]
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.244
     hooks:
-      - id: isort
+      # Simulate isort via (the much faster) ruff
+      - id: ruff
+        args:
+          - --select=I
+          - --fix
 
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
     rev: v9.4.0

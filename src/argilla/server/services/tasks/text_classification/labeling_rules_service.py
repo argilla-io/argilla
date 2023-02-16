@@ -59,9 +59,7 @@ class LabelingService:
         self.__records__ = records
 
     # TODO(@frascuchon): Move all rules management methods to the common datasets service like settings
-    def list_rules(
-        self, dataset: ServiceTextClassificationDataset
-    ) -> List[ServiceLabelingRule]:
+    def list_rules(self, dataset: ServiceTextClassificationDataset) -> List[ServiceLabelingRule]:
         """List a set of rules for a given dataset"""
         return dataset.rules
 
@@ -72,9 +70,7 @@ class LabelingService:
             dataset.rules = new_rules_set
             self.__datasets__.update_dataset(dataset)
 
-    def add_rule(
-        self, dataset: ServiceTextClassificationDataset, rule: ServiceLabelingRule
-    ) -> ServiceLabelingRule:
+    def add_rule(self, dataset: ServiceTextClassificationDataset, rule: ServiceLabelingRule) -> ServiceLabelingRule:
         """Adds a rule to a dataset"""
         for r in dataset.rules:
             if r.query == rule.query:
@@ -105,9 +101,7 @@ class LabelingService:
             LabelingRuleSummary.parse_obj(metric_data),
         )
 
-    def _count_annotated_records(
-        self, dataset: ServiceTextClassificationDataset
-    ) -> int:
+    def _count_annotated_records(self, dataset: ServiceTextClassificationDataset) -> int:
         results = self.__records__.search_records(
             dataset,
             size=0,
@@ -132,18 +126,14 @@ class LabelingService:
             DatasetLabelingRulesSummary.parse_obj(metric_data),
         )
 
-    def find_rule_by_query(
-        self, dataset: ServiceTextClassificationDataset, rule_query: str
-    ) -> ServiceLabelingRule:
+    def find_rule_by_query(self, dataset: ServiceTextClassificationDataset, rule_query: str) -> ServiceLabelingRule:
         rule_query = rule_query.strip()
         for rule in dataset.rules:
             if rule.query == rule_query:
                 return rule
         raise EntityNotFoundError(rule_query, type=ServiceLabelingRule)
 
-    def replace_rule(
-        self, dataset: ServiceTextClassificationDataset, rule: ServiceLabelingRule
-    ):
+    def replace_rule(self, dataset: ServiceTextClassificationDataset, rule: ServiceLabelingRule):
         for idx, r in enumerate(dataset.rules):
             if r.query == rule.query:
                 dataset.rules[idx] = rule

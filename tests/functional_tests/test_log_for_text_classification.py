@@ -12,16 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla as ar
+import pytest
 from argilla.client.sdk.commons.errors import (
     BadRequestApiError,
     GenericApiError,
     ValidationApiError,
 )
 from argilla.server.settings import settings
-from tests.client.conftest import SUPPORTED_VECTOR_SEARCH, supported_vector_search
+
+from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient
 
 
@@ -226,9 +226,7 @@ def test_search_keywords(mocked_client):
     top_keywords = set(
         [
             keyword
-            for keywords in df.search_keywords.value_counts(sort=True, ascending=False)
-            .index[:3]
-            .tolist()
+            for keywords in df.search_keywords.value_counts(sort=True, ascending=False).index[:3].tolist()
             for keyword in keywords
         ]
     )
@@ -262,17 +260,12 @@ def test_logging_with_metadata_limits_exceeded(mocked_client):
 
     expected_record = ar.TextClassificationRecord(
         text="The input text",
-        metadata={
-            k: f"this is a string {k}"
-            for k in range(0, settings.metadata_fields_limit + 1)
-        },
+        metadata={k: f"this is a string {k}" for k in range(0, settings.metadata_fields_limit + 1)},
     )
     with pytest.raises(BadRequestApiError):
         ar.log(expected_record, name=dataset)
 
-    expected_record.metadata = {
-        k: f"This is a string {k}" for k in range(0, settings.metadata_fields_limit)
-    }
+    expected_record.metadata = {k: f"This is a string {k}" for k in range(0, settings.metadata_fields_limit)}
     # Dataset creation with data
     ar.log(expected_record, name=dataset)
     # This call will check already included fields

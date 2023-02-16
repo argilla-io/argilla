@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, List, Optional, Type
+from typing import List, Optional, Type
 
 from fastapi import Depends
 
@@ -94,13 +94,11 @@ class RecordsStorageService:
         else:
             if not user.is_superuser() and user.username != dataset.created_by:
                 raise ForbiddenOperationError(
-                    f"You don't have the necessary permissions to delete records on this dataset. "
+                    "You don't have the necessary permissions to delete records on this dataset. "
                     "Only dataset creators or administrators can delete datasets"
                 )
 
-            processed, deleted = await self.__dao__.delete_records_by_query(
-                dataset, query=query
-            )
+            processed, deleted = await self.__dao__.delete_records_by_query(dataset, query=query)
 
         return DeleteRecordsOut(
             processed=processed or 0,

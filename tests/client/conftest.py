@@ -15,10 +15,9 @@
 import datetime
 from typing import List
 
-import pytest
-
 import argilla
 import argilla as ar
+import pytest
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
@@ -88,13 +87,7 @@ def singlelabel_textclassification_records(
             id=1,
             event_timestamp=datetime.datetime(2000, 1, 1),
             metadata={"mock_metadata": "mock"},
-            explanation={
-                "text": [
-                    ar.TokenAttributions(
-                        token="mock", attributions={"a": 0.1, "b": 0.5}
-                    )
-                ]
-            },
+            explanation={"text": [ar.TokenAttributions(token="mock", attributions={"a": 0.1, "b": 0.5})]},
             status="Validated",
         ),
         ar.TextClassificationRecord(
@@ -104,13 +97,7 @@ def singlelabel_textclassification_records(
             id=2,
             event_timestamp=datetime.datetime(2000, 2, 1),
             metadata={"mock2_metadata": "mock2"},
-            explanation={
-                "text": [
-                    ar.TokenAttributions(
-                        token="mock2", attributions={"a": 0.7, "b": 0.2}
-                    )
-                ]
-            },
+            explanation={"text": [ar.TokenAttributions(token="mock2", attributions={"a": 0.7, "b": 0.2})]},
             status="Default",
         ),
         ar.TextClassificationRecord(
@@ -153,8 +140,7 @@ def log_singlelabel_textclassification_records(
                 "multi_label": False,
             },
             records=[
-                CreationTextClassificationRecord.from_client(rec)
-                for rec in singlelabel_textclassification_records
+                CreationTextClassificationRecord.from_client(rec) for rec in singlelabel_textclassification_records
             ],
         ).dict(by_alias=True),
     )
@@ -175,13 +161,7 @@ def multilabel_textclassification_records(request) -> List[ar.TextClassification
             id=1,
             event_timestamp=datetime.datetime(2000, 1, 1),
             metadata={"mock_metadata": "mock"},
-            explanation={
-                "text": [
-                    ar.TokenAttributions(
-                        token="mock", attributions={"a": 0.1, "b": 0.5}
-                    )
-                ]
-            },
+            explanation={"text": [ar.TokenAttributions(token="mock", attributions={"a": 0.1, "b": 0.5})]},
             status="Validated",
         ),
         ar.TextClassificationRecord(
@@ -192,13 +172,7 @@ def multilabel_textclassification_records(request) -> List[ar.TextClassification
             id=2,
             event_timestamp=datetime.datetime(2000, 2, 1),
             metadata={"mock2_metadata": "mock2"},
-            explanation={
-                "text": [
-                    ar.TokenAttributions(
-                        token="mock2", attributions={"a": 0.7, "b": 0.2}
-                    )
-                ]
-            },
+            explanation={"text": [ar.TokenAttributions(token="mock2", attributions={"a": 0.7, "b": 0.2})]},
             status="Default",
         ),
         ar.TextClassificationRecord(
@@ -246,8 +220,7 @@ def log_multilabel_textclassification_records(
                 "multi_label": True,
             },
             records=[
-                CreationTextClassificationRecord.from_client(rec)
-                for rec in multilabel_textclassification_records
+                CreationTextClassificationRecord.from_client(rec) for rec in multilabel_textclassification_records
             ],
         ).dict(by_alias=True),
     )
@@ -322,10 +295,7 @@ def log_tokenclassification_records(
                 "env": "test",
                 "task": TaskType.token_classification,
             },
-            records=[
-                CreationTokenClassificationRecord.from_client(rec)
-                for rec in tokenclassification_records
-            ],
+            records=[CreationTokenClassificationRecord.from_client(rec) for rec in tokenclassification_records],
         ).dict(by_alias=True),
     )
 
@@ -396,9 +366,7 @@ def log_text2text_records(
                 "env": "test",
                 "task": TaskType.text2text,
             },
-            records=[
-                CreationText2TextRecord.from_client(rec) for rec in text2text_records
-            ],
+            records=[CreationText2TextRecord.from_client(rec) for rec in text2text_records],
         ).dict(by_alias=True),
     )
 

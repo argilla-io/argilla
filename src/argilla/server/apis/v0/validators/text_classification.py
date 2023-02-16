@@ -54,9 +54,7 @@ class DatasetValidator:
             cls._INSTANCE = cls(datasets, metrics=metrics)
         return cls._INSTANCE
 
-    async def validate_dataset_settings(
-        self, user: User, dataset: Dataset, settings: TextClassificationSettings
-    ):
+    async def validate_dataset_settings(self, user: User, dataset: Dataset, settings: TextClassificationSettings):
         if settings and settings.label_schema:
             results = self.__metrics__.summarize_metric(
                 dataset=dataset,
@@ -66,9 +64,7 @@ class DatasetValidator:
             )
             if results:
                 labels = results.get("labels", [])
-                label_schema = set(
-                    [label.name for label in settings.label_schema.labels]
-                )
+                label_schema = set([label.name for label in settings.label_schema.labels])
                 for label in labels:
                     if label not in label_schema:
                         raise BadRequestError(
@@ -87,9 +83,7 @@ class DatasetValidator:
                 user=user, dataset=dataset, class_type=__svc_settings_class__
             )
             if settings and settings.label_schema:
-                label_schema = set(
-                    [label.name for label in settings.label_schema.labels]
-                )
+                label_schema = set([label.name for label in settings.label_schema.labels])
                 for r in records:
                     if r.prediction:
                         self.__check_label_classes__(

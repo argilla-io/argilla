@@ -41,11 +41,7 @@ class F1Metric(ServicePythonMetric):
     def apply(self, records: Iterable[ServiceTextClassificationRecord]) -> Any:
         filtered_records = list(filter(lambda r: r.predicted is not None, records))
         # TODO: This must be precomputed with using a global dataset metric
-        ds_labels = {
-            label
-            for record in filtered_records
-            for label in record.annotated_as + record.predicted_as
-        }
+        ds_labels = {label for record in filtered_records for label in record.annotated_as + record.predicted_as}
 
         if not len(ds_labels):
             return {}
@@ -69,12 +65,8 @@ class F1Metric(ServicePythonMetric):
             y_true = mlb.fit_transform(y_true)
             y_pred = mlb.fit_transform(y_pred)
 
-        micro_p, micro_r, micro_f, _ = precision_recall_fscore_support(
-            y_true=y_true, y_pred=y_pred, average="micro"
-        )
-        macro_p, macro_r, macro_f, _ = precision_recall_fscore_support(
-            y_true=y_true, y_pred=y_pred, average="macro"
-        )
+        micro_p, micro_r, micro_f, _ = precision_recall_fscore_support(y_true=y_true, y_pred=y_pred, average="micro")
+        macro_p, macro_r, macro_f, _ = precision_recall_fscore_support(y_true=y_true, y_pred=y_pred, average="macro")
 
         per_label = {}
         for label, p, r, f, s in zip(
@@ -127,21 +119,15 @@ class DatasetLabels(ServicePythonMetric):
         records: Iterable[ServiceTextClassificationRecord],
     ) -> Dict[str, Any]:
         ds_labels = set()
-        for _ in range(
-            0, self.records_to_fetch
-        ):  # Only a few of records will be parsed
+        for _ in range(0, self.records_to_fetch):  # Only a few of records will be parsed
             record = next(records, None)
             if record is None:
                 break
 
             if record.annotation:
-                ds_labels.update(
-                    [label.class_label for label in record.annotation.labels]
-                )
+                ds_labels.update([label.class_label for label in record.annotation.labels])
             if record.prediction:
-                ds_labels.update(
-                    [label.class_label for label in record.prediction.labels]
-                )
+                ds_labels.update([label.class_label for label in record.prediction.labels])
         return {"labels": ds_labels or []}
 
 
