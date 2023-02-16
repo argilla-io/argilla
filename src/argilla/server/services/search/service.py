@@ -83,9 +83,7 @@ class SearchRecordsService:
             size=size,
             record_from=record_from,
             exclude_fields=exclude_fields,
-            highligth_results=query is not None
-            and query.query_text is not None
-            and len(query.query_text) > 0,
+            highligth_results=query is not None and query.query_text is not None and len(query.query_text) > 0,
         )
         metrics_results = {}
         for metric in metrics or []:
@@ -98,9 +96,7 @@ class SearchRecordsService:
                 )
                 metrics_results[metric.id] = metrics_
             except Exception as ex:
-                self.__LOGGER__.warning(
-                    "Cannot compute metric [%s]. Error: %s", metric.id, ex
-                )
+                self.__LOGGER__.warning("Cannot compute metric [%s]. Error: %s", metric.id, ex)
                 metrics_results[metric.id] = {}
 
         return ServiceSearchResults(

@@ -62,16 +62,12 @@ class WeakLabelsBase:
         query: Optional[str] = None,
     ):
         if not isinstance(dataset, str):
-            raise TypeError(
-                f"The name of the dataset must be a string, but you provided: {dataset}"
-            )
+            raise TypeError(f"The name of the dataset must be a string, but you provided: {dataset}")
         self._dataset = dataset
 
         self._rules = rules or load_rules(dataset)
         if not self._rules:
-            raise NoRulesFoundError(
-                f"No rules were found in the given dataset '{dataset}'"
-            )
+            raise NoRulesFoundError(f"No rules were found in the given dataset '{dataset}'")
 
         self._rules_index2name = {
             # covers our Rule class, snorkel's LabelingFunction class and arbitrary methods
@@ -94,14 +90,10 @@ class WeakLabelsBase:
                 f"Following rule names are duplicated x times: { {key: val for key, val in counts.items() if val > 1} }"
                 " Please make sure to provide unique rule names."
             )
-        self._rules_name2index = {
-            val: key for key, val in self._rules_index2name.items()
-        }
+        self._rules_name2index = {val: key for key, val in self._rules_index2name.items()}
 
         # load records and check compatibility
-        self._records: DatasetForTextClassification = load(
-            dataset, query=query, ids=ids
-        )
+        self._records: DatasetForTextClassification = load(dataset, query=query, ids=ids)
         if not self._records:
             raise NoRecordsFoundError(
                 f"No records found in dataset '{dataset}'"
@@ -127,9 +119,7 @@ class WeakLabelsBase:
         """The number of labels."""
         raise NotImplementedError
 
-    def records(
-        self, has_annotation: Optional[bool] = None
-    ) -> List[TextClassificationRecord]:
+    def records(self, has_annotation: Optional[bool] = None) -> List[TextClassificationRecord]:
         """Returns the records corresponding to the weak label matrix
 
         Args:
@@ -228,15 +218,10 @@ class WeakLabelsBase:
             Array of fractions of overlaps/conflicts for each rule, optionally normalized by their coverages.
         """
         overlaps_or_conflicts = (
-            has_weak_label
-            * np.repeat(has_overlaps_or_conflicts, len(self._rules)).reshape(
-                has_weak_label.shape
-            )
+            has_weak_label * np.repeat(has_overlaps_or_conflicts, len(self._rules)).reshape(has_weak_label.shape)
         ).sum(axis=0) / len(self._records)
         # total
-        overlaps_or_conflicts = np.append(
-            overlaps_or_conflicts, has_overlaps_or_conflicts.sum() / len(self._records)
-        )
+        overlaps_or_conflicts = np.append(overlaps_or_conflicts, has_overlaps_or_conflicts.sum() / len(self._records))
 
         if normalize_by_coverage:
             # ignore division by 0 warnings, as we convert the nan back to 0.0 afterwards
@@ -291,17 +276,15 @@ class WeakLabelsBase:
                 np.copy(embeddings).astype(np.float32), abstains, supports, gpu=gpu
             )
         elif self._extension_queries is None:
-            raise ValueError(
-                "Embeddings are not optional the first time a matrix is extended."
-            )
+            raise ValueError("Embeddings are not optional the first time a matrix is extended.")
         dists, nearest = self._extension_queries
 
         self._extended_matrix = np.copy(self._matrix)
         new_points = [(dists[i] > thresholds[i]) for i in range(self._matrix.shape[1])]
         for i in range(self._matrix.shape[1]):
-            self._extended_matrix[abstains[i][new_points[i]], i] = self._matrix[
-                supports[i], i
-            ][nearest[i][new_points[i]]]
+            self._extended_matrix[abstains[i][new_points[i]], i] = self._matrix[supports[i], i][
+                nearest[i][new_points[i]]
+            ]
 
         self._extend_matrix_postprocess()
 
@@ -323,15 +306,11 @@ class WeakLabelsBase:
         faiss.normalize_L2(embeddings)
         embeddings_length = embeddings.shape[1]
 
-        label_fn_indexes = [
-            faiss.IndexFlatIP(embeddings_length) for i in range(self._matrix.shape[1])
-        ]
+        label_fn_indexes = [faiss.IndexFlatIP(embeddings_length) for i in range(self._matrix.shape[1])]
 
         if gpu:
             res = faiss.StandardGpuResources()
-            label_fn_indexes = [
-                faiss.index_cpu_to_gpu(res, 0, x) for x in label_fn_indexes
-            ]
+            label_fn_indexes = [faiss.index_cpu_to_gpu(res, 0, x) for x in label_fn_indexes]
 
         for i in range(self._matrix.shape[1]):
             label_fn_indexes[i].add(embeddings[support[i]])
@@ -342,12 +321,8 @@ class WeakLabelsBase:
             faiss.normalize_L2(embs_query)
             dists_and_nearest.append(label_fn_indexes[i].search(embs_query, 1))
 
-        dists = [
-            dist_and_nearest[0].flatten() for dist_and_nearest in dists_and_nearest
-        ]
-        nearest = [
-            dist_and_nearest[1].flatten() for dist_and_nearest in dists_and_nearest
-        ]
+        dists = [dist_and_nearest[0].flatten() for dist_and_nearest in dists_and_nearest]
+        nearest = [dist_and_nearest[1].flatten() for dist_and_nearest in dists_and_nearest]
 
         return dists, nearest
 
@@ -453,9 +428,7 @@ class WeakLabels(WeakLabelsBase):
                 rule.apply(self._dataset)
 
         # create weak label matrix, annotation array, final label2int
-        weak_label_matrix = np.empty(
-            (len(self._records), len(self._rules)), dtype=np.short
-        )
+        weak_label_matrix = np.empty((len(self._records), len(self._rules)), dtype=np.short)
         annotation_array = np.empty(len(self._records), dtype=np.short)
         _label2int = {None: -1} if label2int is None else label2int
         if None not in _label2int:
@@ -463,9 +436,7 @@ class WeakLabels(WeakLabelsBase):
                 "Your provided `label2int` mapping does not contain the required abstention label `None`."
             )
 
-        for n, record in tqdm(
-            enumerate(self._records), total=len(self._records), desc="Applying rules"
-        ):
+        for n, record in tqdm(enumerate(self._records), total=len(self._records), desc="Applying rules"):
             # FIRST: fill annotation array
             try:
                 annotation = _label2int[record.annotation]
@@ -535,9 +506,7 @@ class WeakLabels(WeakLabelsBase):
         Returns:
             The weak label matrix, or optionally just a part of it.
         """
-        matrix = (
-            self._matrix if self._extended_matrix is None else self._extended_matrix
-        )
+        matrix = self._matrix if self._extended_matrix is None else self._extended_matrix
 
         if has_annotation is True:
             return matrix[self._annotation != self._label2int[None]]
@@ -606,9 +575,7 @@ class WeakLabels(WeakLabelsBase):
         polarity = [
             set(
                 self._int2label[integer]
-                for integer in np.unique(
-                    self.matrix()[:, i][self.matrix()[:, i] != self._label2int[None]]
-                )
+                for integer in np.unique(self.matrix()[:, i][self.matrix()[:, i] != self._label2int[None]])
             )
             for i in range(len(self._rules))
         ]
@@ -623,9 +590,7 @@ class WeakLabels(WeakLabelsBase):
 
         # overlaps
         has_overlaps = has_weak_label.sum(axis=1) > 1
-        overlaps = self._compute_overlaps_conflicts(
-            has_weak_label, has_overlaps, coverage, normalize_by_coverage
-        )
+        overlaps = self._compute_overlaps_conflicts(has_weak_label, has_overlaps, coverage, normalize_by_coverage)
 
         # conflicts
         # TODO: For a lot of records (~1e6), this could become slow (~10s) ... a vectorized solution would be better.
@@ -634,9 +599,7 @@ class WeakLabels(WeakLabelsBase):
             axis=1,
             arr=self.matrix(),
         )
-        conflicts = self._compute_overlaps_conflicts(
-            has_weak_label, has_conflicts, coverage, normalize_by_coverage
-        )
+        conflicts = self._compute_overlaps_conflicts(has_weak_label, has_conflicts, coverage, normalize_by_coverage)
 
         # index for the summary
         index = list(self._rules_name2index.keys()) + ["total"]
@@ -645,13 +608,10 @@ class WeakLabels(WeakLabelsBase):
         has_annotation = annotation != self._label2int[None]
         if any(has_annotation):
             # annotated coverage
-            annotated_coverage = (
-                has_weak_label[has_annotation].sum(axis=0) / has_annotation.sum()
-            )
+            annotated_coverage = has_weak_label[has_annotation].sum(axis=0) / has_annotation.sum()
             annotated_coverage = np.append(
                 annotated_coverage,
-                (has_weak_label[has_annotation].sum(axis=1) > 0).sum()
-                / has_annotation.sum(),
+                (has_weak_label[has_annotation].sum(axis=1) > 0).sum() / has_annotation.sum(),
             )
 
             # correct/incorrect
@@ -692,9 +652,7 @@ class WeakLabels(WeakLabelsBase):
         self, has_weak_label: np.ndarray, annotation: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
-        annotation_matrix = np.repeat(annotation, len(self._rules)).reshape(
-            self.matrix().shape
-        )
+        annotation_matrix = np.repeat(annotation, len(self._rules)).reshape(self.matrix().shape)
 
         # correct
         correct_with_abstain = annotation_matrix == self.matrix()
@@ -737,13 +695,8 @@ class WeakLabels(WeakLabelsBase):
 
         # get rule mask
         if rules is not None:
-            rules = [
-                self._rules_name2index[rule] if isinstance(rule, str) else rule
-                for rule in rules
-            ]
-            idx_by_rules = (self.matrix()[:, rules] != self._label2int[None]).sum(
-                axis=1
-            ) == len(rules)
+            rules = [self._rules_name2index[rule] if isinstance(rule, str) else rule for rule in rules]
+            idx_by_rules = (self.matrix()[:, rules] != self._label2int[None]).sum(axis=1) == len(rules)
         else:
             idx_by_rules = np.ones_like(self._records).astype(bool)
 
@@ -767,9 +720,7 @@ class WeakLabels(WeakLabelsBase):
         for label in self._label2int:
             # Check new label2int mapping
             if label not in label2int:
-                raise MissingLabelError(
-                    f"The label '{label}' is missing in the new mapping."
-                )
+                raise MissingLabelError(f"The label '{label}' is missing in the new mapping.")
             # compute masks
             label_masks[label] = self.matrix() == self._label2int[label]
             annotation_masks[label] = self._annotation == self._label2int[label]
@@ -794,22 +745,18 @@ class WeakLabels(WeakLabelsBase):
 
     def _extend_matrix_preprocess(self) -> Tuple[List[np.ndarray], List[np.ndarray]]:
         abstains = [
-            np.argwhere(self._matrix[:, i] == self._label2int[None]).flatten()
-            for i in range(self._matrix.shape[1])
+            np.argwhere(self._matrix[:, i] == self._label2int[None]).flatten() for i in range(self._matrix.shape[1])
         ]
 
         supports = [
-            np.argwhere(self._matrix[:, i] != self._label2int[None]).flatten()
-            for i in range(self._matrix.shape[1])
+            np.argwhere(self._matrix[:, i] != self._label2int[None]).flatten() for i in range(self._matrix.shape[1])
         ]
 
         return abstains, supports
 
     def _extend_matrix_postprocess(self):
         """Keeps the rows of the original weak label matrix, for which at least on rule did not abstain."""
-        recs_with_votes = np.argwhere(
-            (self._matrix != self._label2int[None]).sum(-1) > 0
-        ).flatten()
+        recs_with_votes = np.argwhere((self._matrix != self._label2int[None]).sum(-1) > 0).flatten()
         self._extended_matrix[recs_with_votes] = self._matrix[recs_with_votes]
 
 
@@ -866,26 +813,16 @@ class WeakMultiLabels(WeakLabelsBase):
         # we make two passes over the records:
         # FIRST: Get labels from rules and annotations
         annotations, weak_labels = [], []
-        for record in tqdm(
-            self._records, total=len(self._records), desc="Applying rules"
-        ):
-            annotations.append(
-                record.annotation
-                if isinstance(record.annotation, list)
-                else [record.annotation]
-            )
+        for record in tqdm(self._records, total=len(self._records), desc="Applying rules"):
+            annotations.append(record.annotation if isinstance(record.annotation, list) else [record.annotation])
             weak_labels.append([np.atleast_1d(rule(record)) for rule in self._rules])
 
         annotation_set = {ann for anns in annotations for ann in anns}
-        weak_label_set = {
-            wl for wl_record in weak_labels for wl_rule in wl_record for wl in wl_rule
-        }
+        weak_label_set = {wl for wl_record in weak_labels for wl_rule in wl_record for wl in wl_rule}
         labels = sorted(list(annotation_set.union(weak_label_set) - {None}))
 
         # create weak label matrix (3D), annotation matrix
-        weak_label_matrix = np.empty(
-            (len(self._records), len(self._rules), len(labels)), dtype=np.byte
-        )
+        weak_label_matrix = np.empty((len(self._records), len(self._rules), len(labels)), dtype=np.byte)
         annotation_matrix = np.empty((len(self._records), len(labels)), dtype=np.byte)
 
         # SECOND: Fill arrays with weak labels
@@ -939,9 +876,7 @@ class WeakMultiLabels(WeakLabelsBase):
         Returns:
             The 3 dimensional weak label matrix, or optionally just a part of it.
         """
-        matrix = (
-            self._matrix if self._extended_matrix is None else self._extended_matrix
-        )
+        matrix = self._matrix if self._extended_matrix is None else self._extended_matrix
 
         if has_annotation is True:
             return matrix[self._annotation.sum(1) >= 0]
@@ -1023,9 +958,7 @@ class WeakMultiLabels(WeakLabelsBase):
 
         # overlaps
         has_overlaps = has_weak_label.sum(axis=1) > 1
-        overlaps = self._compute_overlaps_conflicts(
-            has_weak_label, has_overlaps, coverage, normalize_by_coverage
-        )
+        overlaps = self._compute_overlaps_conflicts(has_weak_label, has_overlaps, coverage, normalize_by_coverage)
 
         # index for the summary
         index = list(self._rules_name2index.keys()) + ["total"]
@@ -1034,13 +967,10 @@ class WeakMultiLabels(WeakLabelsBase):
         has_annotation = annotation.sum(1) >= 0
         if any(has_annotation):
             # annotated coverage
-            annotated_coverage = (
-                has_weak_label[has_annotation].sum(axis=0) / has_annotation.sum()
-            )
+            annotated_coverage = has_weak_label[has_annotation].sum(axis=0) / has_annotation.sum()
             annotated_coverage = np.append(
                 annotated_coverage,
-                (has_weak_label[has_annotation].sum(axis=1) > 0).sum()
-                / has_annotation.sum(),
+                (has_weak_label[has_annotation].sum(axis=1) > 0).sum() / has_annotation.sum(),
             )
 
             # correct/incorrect
@@ -1072,24 +1002,16 @@ class WeakMultiLabels(WeakLabelsBase):
             index=index,
         )
 
-    def _compute_correct_incorrect(
-        self, annotation: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _compute_correct_incorrect(self, annotation: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
         # transform annotation to tensor
-        annotation = np.repeat(annotation, len(self._rules), axis=0).reshape(
-            self.matrix().shape
-        )
+        annotation = np.repeat(annotation, len(self._rules), axis=0).reshape(self.matrix().shape)
 
         # correct, we don't want to count the "correct non predictions"
         correct = ((annotation == self.matrix()) & (self.matrix() == 1)).sum(2).sum(0)
 
         # incorrect, we don't want to count the "misses", since we focus on precision, not recall
-        incorrect = (
-            ((annotation != self.matrix()) & (self.matrix() == 1) & (annotation != -1))
-            .sum(2)
-            .sum(0)
-        )
+        incorrect = ((annotation != self.matrix()) & (self.matrix() == 1) & (annotation != -1)).sum(2).sum(0)
 
         # add totals at the end
         return np.append(correct, correct.sum()), np.append(incorrect, incorrect.sum())
@@ -1120,13 +1042,8 @@ class WeakMultiLabels(WeakLabelsBase):
 
         # get rule mask
         if rules is not None:
-            rules = [
-                self._rules_name2index[rule] if isinstance(rule, str) else rule
-                for rule in rules
-            ]
-            idx_by_rules = (self.matrix()[:, rules, :].sum(axis=2) >= 0).sum(
-                axis=1
-            ) == len(rules)
+            rules = [self._rules_name2index[rule] if isinstance(rule, str) else rule for rule in rules]
+            idx_by_rules = (self.matrix()[:, rules, :].sum(axis=2) >= 0).sum(axis=1) == len(rules)
         else:
             idx_by_rules = np.ones_like(self._records).astype(bool)
 
@@ -1135,9 +1052,7 @@ class WeakMultiLabels(WeakLabelsBase):
 
         return pd.DataFrame(map(lambda x: x.dict(), filtered_records))
 
-    @_add_docstr(
-        WeakLabelsBase.extend_matrix.__doc__.format(class_name="WeakMultiLabels")
-    )
+    @_add_docstr(WeakLabelsBase.extend_matrix.__doc__.format(class_name="WeakMultiLabels"))
     def extend_matrix(
         self,
         thresholds: Union[List[float], np.ndarray],
@@ -1147,15 +1062,9 @@ class WeakMultiLabels(WeakLabelsBase):
         super().extend_matrix(thresholds=thresholds, embeddings=embeddings, gpu=gpu)
 
     def _extend_matrix_preprocess(self) -> Tuple[List[np.ndarray], List[np.ndarray]]:
-        abstains = [
-            np.argwhere(self._matrix[:, i].sum(-1) < 0).flatten()
-            for i in range(self._matrix.shape[1])
-        ]
+        abstains = [np.argwhere(self._matrix[:, i].sum(-1) < 0).flatten() for i in range(self._matrix.shape[1])]
 
-        supports = [
-            np.argwhere(self._matrix[:, i].sum(-1) >= 0).flatten()
-            for i in range(self._matrix.shape[1])
-        ]
+        supports = [np.argwhere(self._matrix[:, i].sum(-1) >= 0).flatten() for i in range(self._matrix.shape[1])]
 
         return abstains, supports
 

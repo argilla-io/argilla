@@ -220,11 +220,7 @@ class OpenSearchClient(IClientAdapter):
             }
         )
 
-        filtered_params = {
-            argument: params[argument]
-            for argument in metric.metric_arg_names
-            if argument in params
-        }
+        filtered_params = {argument: params[argument] for argument in metric.metric_arg_names if argument in params}
 
         aggregations = metric.aggregation_request(**filtered_params)
         if not aggregations:
@@ -250,9 +246,7 @@ class OpenSearchClient(IClientAdapter):
 
                 search_aggregations = search.get("aggregations", {})
                 if search_aggregations:
-                    parsed_aggregations = query_helpers.parse_aggregations(
-                        search_aggregations
-                    )
+                    parsed_aggregations = query_helpers.parse_aggregations(search_aggregations)
                     results.update(parsed_aggregations)
             return metric.aggregation_result(results.get(metric.id, results))
 
@@ -459,9 +453,7 @@ class OpenSearchClient(IClientAdapter):
                             return True
                     return False
 
-                schema = {
-                    key: value for key, value in schema.items() if not is_subfield(key)
-                }
+                schema = {key: value for key, value in schema.items() if not is_subfield(key)}
 
             return schema
         except IndexNotFoundError:
@@ -688,11 +680,7 @@ class OpenSearchClient(IClientAdapter):
                 allow_no_indices=True,
                 flat_settings=True,
             )
-            return (
-                response[index]["settings"]["index.blocks.write"] == "true"
-                if response
-                else False
-            )
+            return response[index]["settings"]["index.blocks.write"] == "true" if response else False
 
     def enable_read_only_index(self, index: str):
         return self._enable_or_disable_read_only_index(
@@ -770,8 +758,7 @@ class OpenSearchClient(IClientAdapter):
                 data = response
 
             return {
-                key: list(definition["mapping"].values())[0]["type"]
-                for key, definition in data["mappings"].items()
+                key: list(definition["mapping"].values())[0]["type"] for key, definition in data["mappings"].items()
             }
 
     def _normalize_document(

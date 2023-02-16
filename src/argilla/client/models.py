@@ -44,8 +44,7 @@ class Framework(Enum):
     @classmethod
     def _missing_(cls, value):
         raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of"
-            f" {list(cls._value2member_map_.keys())}"
+            f"{value} is not a valid {cls.__name__}, please select one of" f" {list(cls._value2member_map_.keys())}"
         )
 
 
@@ -68,8 +67,7 @@ class _Validators(BaseModel):
             message = (
                 "Some metadata values could exceed the max length. For those cases,"
                 " values will be truncated by keeping only the last"
-                f" {DEFAULT_MAX_KEYWORD_LENGTH} characters. "
-                + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
+                f" {DEFAULT_MAX_KEYWORD_LENGTH} characters. " + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
             )
             warnings.warn(message, UserWarning)
 
@@ -114,14 +112,14 @@ class _Validators(BaseModel):
     @root_validator
     def _check_and_update_status(cls, values):
         """Updates the status if an annotation is provided and no status is specified."""
-        values["status"] = values.get("status") or (
-            "Default" if values.get("annotation") is None else "Validated"
-        )
+        values["status"] = values.get("status") or ("Default" if values.get("annotation") is None else "Validated")
 
         return values
 
     class Config:
+        # https://docs.pydantic.dev/usage/model_config/#options
         extra = "forbid"
+        validate_assignment = True
 
 
 class BulkResponse(BaseModel):
@@ -259,10 +257,7 @@ class TextClassificationRecord(_Validators):
             and values.get("inputs") is not None
             and values["text"] != values["inputs"].get("text")
         ):
-            raise ValueError(
-                "For a TextClassificationRecord you must provide either 'text' or"
-                " 'inputs'"
-            )
+            raise ValueError("For a TextClassificationRecord you must provide either 'text' or" " 'inputs'")
 
         if values.get("text") is not None:
             values["inputs"] = dict(text=values["text"])
@@ -331,9 +326,7 @@ class TokenClassificationRecord(_Validators):
     text: Optional[str] = Field(None, min_length=1)
     tokens: Optional[Union[List[str], Tuple[str, ...]]] = None
 
-    prediction: Optional[
-        List[Union[Tuple[str, int, int], Tuple[str, int, int, Optional[float]]]]
-    ] = None
+    prediction: Optional[List[Union[Tuple[str, int, int], Tuple[str, int, int, Optional[float]]]]] = None
     prediction_agent: Optional[str] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
     annotation_agent: Optional[str] = None
@@ -356,16 +349,10 @@ class TokenClassificationRecord(_Validators):
         **data,
     ):
         if text is None and tokens is None:
-            raise AssertionError(
-                "Missing fields: At least one of `text` or `tokens` argument must be"
-                " provided!"
-            )
+            raise AssertionError("Missing fields: At least one of `text` or `tokens` argument must be" " provided!")
 
         if (data.get("annotation") or data.get("prediction")) and text is None:
-            raise AssertionError(
-                "Missing field `text`: "
-                "char level spans must be provided with a raw text sentence"
-            )
+            raise AssertionError("Missing field `text`: " "char level spans must be provided with a raw text sentence")
 
         if text is None:
             text = " ".join(tokens)
@@ -390,9 +377,7 @@ class TokenClassificationRecord(_Validators):
             raise AttributeError(f"You cannot assign a new value to `{name}`")
         super().__setattr__(name, value)
 
-    def _validate_spans(
-        self, spans: List[Tuple[str, int, int]]
-    ) -> List[Tuple[str, int, int]]:
+    def _validate_spans(self, spans: List[Tuple[str, int, int]]) -> List[Tuple[str, int, int]]:
         """Validates the entity spans with respect to the tokens.
 
         If necessary, also performs an automatic correction of the spans.
@@ -425,17 +410,13 @@ class TokenClassificationRecord(_Validators):
     @validator("prediction")
     def _add_default_score(
         cls,
-        prediction: Optional[
-            List[Union[Tuple[str, int, int], Tuple[str, int, int, Optional[float]]]]
-        ],
+        prediction: Optional[List[Union[Tuple[str, int, int], Tuple[str, int, int, Optional[float]]]]],
     ):
         """Adds the default score to the predictions if it is missing"""
         if prediction is None:
             return prediction
         return [
-            (pred[0], pred[1], pred[2], 0.0)
-            if len(pred) == 3
-            else (pred[0], pred[1], pred[2], pred[3] or 0.0)
+            (pred[0], pred[1], pred[2], 0.0) if len(pred) == 3 else (pred[0], pred[1], pred[2], pred[3] or 0.0)
             for pred in prediction
         ]
 
@@ -490,9 +471,7 @@ class TokenClassificationRecord(_Validators):
             raise IndexError(f"Token id {token_idx} out of bounds")
         return self._span_utils.token_to_char_idx[token_idx]
 
-    def spans2iob(
-        self, spans: Optional[List[Tuple[str, int, int]]] = None
-    ) -> Optional[List[str]]:
+    def spans2iob(self, spans: Optional[List[Tuple[str, int, int]]] = None) -> Optional[List[str]]:
         """DEPRECATED, please use the ``argilla.utils.SpanUtils.to_tags()`` method."""
         warnings.warn(
             "'spans2iob' is deprecated and will be removed in a future version. Please"
@@ -568,9 +547,7 @@ class Text2TextRecord(_Validators):
     search_keywords: Optional[List[str]] = None
 
     @validator("prediction")
-    def prediction_as_tuples(
-        cls, prediction: Optional[List[Union[str, Tuple[str, float]]]]
-    ):
+    def prediction_as_tuples(cls, prediction: Optional[List[Union[str, Tuple[str, float]]]]):
         """Preprocess the predictions and wraps them in a tuple if needed"""
         if prediction is None:
             return prediction

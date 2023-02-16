@@ -40,29 +40,21 @@ from pydantic import ValidationError
 def test_text_classification_record(annotation, status, expected_status):
     """Just testing its dynamic defaults"""
     if status:
-        record = TextClassificationRecord(
-            inputs={"text": "test"}, annotation=annotation, status=status
-        )
+        record = TextClassificationRecord(inputs={"text": "test"}, annotation=annotation, status=status)
     else:
-        record = TextClassificationRecord(
-            inputs={"text": "test"}, annotation=annotation
-        )
+        record = TextClassificationRecord(inputs={"text": "test"}, annotation=annotation)
     assert record.status == expected_status
 
 
 def test_text_classification_input_string():
     event_timestamp = datetime.datetime.now()
-    assert TextClassificationRecord(
-        text="A text", event_timestamp=event_timestamp
-    ) == TextClassificationRecord(
+    assert TextClassificationRecord(text="A text", event_timestamp=event_timestamp) == TextClassificationRecord(
         inputs=dict(text="A text"), event_timestamp=event_timestamp
     )
 
     assert TextClassificationRecord(
         inputs=["A text", "another text"], event_timestamp=event_timestamp
-    ) == TextClassificationRecord(
-        inputs=dict(text=["A text", "another text"]), event_timestamp=event_timestamp
-    )
+    ) == TextClassificationRecord(inputs=dict(text=["A text", "another text"]), event_timestamp=event_timestamp)
 
 
 def test_text_classification_text_inputs():
@@ -74,38 +66,27 @@ def test_text_classification_text_inputs():
 
     with pytest.warns(
         FutureWarning,
-        match=(
-            "the `inputs` argument of the `TextClassificationRecord` will not accept"
-            " strings."
-        ),
+        match=("the `inputs` argument of the `TextClassificationRecord` will not accept" " strings."),
     ):
         TextClassificationRecord(inputs="mock")
 
     event_timestamp = datetime.datetime.now()
-    assert TextClassificationRecord(
-        text="mock", event_timestamp=event_timestamp
-    ) == TextClassificationRecord(
+    assert TextClassificationRecord(text="mock", event_timestamp=event_timestamp) == TextClassificationRecord(
         inputs={"text": "mock"}, event_timestamp=event_timestamp
     )
 
-    assert TextClassificationRecord(
-        inputs=["mock"], event_timestamp=event_timestamp
-    ) == TextClassificationRecord(
+    assert TextClassificationRecord(inputs=["mock"], event_timestamp=event_timestamp) == TextClassificationRecord(
         inputs={"text": ["mock"]}, event_timestamp=event_timestamp
     )
 
     assert TextClassificationRecord(
         text="mock", inputs={"text": "mock"}, event_timestamp=event_timestamp
-    ) == TextClassificationRecord(
-        inputs={"text": "mock"}, event_timestamp=event_timestamp
-    )
+    ) == TextClassificationRecord(inputs={"text": "mock"}, event_timestamp=event_timestamp)
 
     rec = TextClassificationRecord(text="mock")
     with pytest.raises(AttributeError, match="You cannot assign a new value to `text`"):
         rec.text = "mock"
-    with pytest.raises(
-        AttributeError, match="You cannot assign a new value to `inputs`"
-    ):
+    with pytest.raises(AttributeError, match="You cannot assign a new value to `inputs`"):
         rec.inputs = "mock"
 
 
@@ -120,9 +101,7 @@ def test_text_classification_text_inputs():
 )
 def test_token_classification_record(annotation, status, expected_status, expected_iob):
     """Just testing its dynamic defaults"""
-    record = TokenClassificationRecord(
-        text="test text", tokens=["test", "text"], annotation=annotation, status=status
-    )
+    record = TokenClassificationRecord(text="test text", tokens=["test", "text"], annotation=annotation, status=status)
     assert record.status == expected_status
     assert record.spans2iob(record.annotation) == expected_iob
 
@@ -146,10 +125,7 @@ def test_token_classification_with_tokens_and_tags(tokens, tags, annotation):
 def test_token_classification_validations():
     with pytest.raises(
         AssertionError,
-        match=(
-            "Missing fields: "
-            "At least one of `text` or `tokens` argument must be provided!"
-        ),
+        match=("Missing fields: " "At least one of `text` or `tokens` argument must be provided!"),
     ):
         TokenClassificationRecord()
 
@@ -157,25 +133,17 @@ def test_token_classification_validations():
     annotation = [("test", 0, 4)]
     with pytest.raises(
         AssertionError,
-        match=(
-            "Missing field `text`: "
-            "char level spans must be provided with a raw text sentence"
-        ),
+        match=("Missing field `text`: " "char level spans must be provided with a raw text sentence"),
     ):
         TokenClassificationRecord(tokens=tokens, annotation=annotation)
 
     with pytest.raises(
         AssertionError,
-        match=(
-            "Missing field `text`: "
-            "char level spans must be provided with a raw text sentence"
-        ),
+        match=("Missing field `text`: " "char level spans must be provided with a raw text sentence"),
     ):
         TokenClassificationRecord(tokens=tokens, prediction=annotation)
 
-    TokenClassificationRecord(
-        text=" ".join(tokens), tokens=tokens, prediction=annotation
-    )
+    TokenClassificationRecord(text=" ".join(tokens), tokens=tokens, prediction=annotation)
 
     record = TokenClassificationRecord(tokens=tokens)
     assert record.text == "test text"
@@ -185,16 +153,12 @@ def test_token_classification_with_mutation():
     text_a = "The text"
     text_b = "Another text sample here !!!"
 
-    record = TokenClassificationRecord(
-        text=text_a, tokens=text_a.split(" "), annotation=[]
-    )
+    record = TokenClassificationRecord(text=text_a, tokens=text_a.split(" "), annotation=[])
     assert record.spans2iob(record.annotation) == ["O"] * len(text_a.split(" "))
 
     with pytest.raises(AttributeError, match="You cannot assign a new value to `text`"):
         record.text = text_b
-    with pytest.raises(
-        AttributeError, match="You cannot assign a new value to `tokens`"
-    ):
+    with pytest.raises(AttributeError, match="You cannot assign a new value to `tokens`"):
         record.tokens = text_b.split(" ")
 
 
@@ -212,9 +176,7 @@ def test_token_classification_with_mutation():
     ],
 )
 def test_token_classification_prediction_validator(prediction, expected):
-    record = TokenClassificationRecord(
-        text="this", tokens=["this"], prediction=prediction
-    )
+    record = TokenClassificationRecord(text="this", tokens=["this"], prediction=prediction)
     assert record.prediction == expected
 
 
@@ -246,9 +208,7 @@ def test_metadata_values_length():
 
 
 def test_model_serialization_with_numpy_nan():
-    record = Text2TextRecord(
-        text="My name is Sarah and I love my dog.", metadata={"nan": numpy.nan}
-    )
+    record = Text2TextRecord(text="My name is Sarah and I love my dog.", metadata={"nan": numpy.nan})
 
     json_record = json.loads(record.json())
 
@@ -260,13 +220,9 @@ def test_warning_when_only_agent():
         annotation: Optional[Any] = None
         annotation_agent: Optional[str] = None
 
-    with pytest.warns(
-        UserWarning, match="`prediction_agent` will not be logged to the server."
-    ):
+    with pytest.warns(UserWarning, match="`prediction_agent` will not be logged to the server."):
         MockRecord(prediction_agent="mock")
-    with pytest.warns(
-        UserWarning, match="`annotation_agent` will not be logged to the server."
-    ):
+    with pytest.warns(UserWarning, match="`annotation_agent` will not be logged to the server."):
         MockRecord(annotation_agent="mock")
 
 
@@ -306,3 +262,22 @@ def test_nat_to_none_to_datetime():
 def test_text2text_prediction_validator(prediction, expected):
     record = Text2TextRecord(text="mock", prediction=prediction)
     assert record.prediction == expected
+
+
+@pytest.mark.parametrize(
+    "record",
+    [
+        TextClassificationRecord(text="This is a test"),
+        TokenClassificationRecord(text="This is a test", tokens="This is a test".split()),
+        Text2TextRecord(text="This is a test"),
+    ],
+)
+def test_record_validation_on_assignment(record):
+    with pytest.raises(ValidationError):
+        record.prediction = "rubbish"
+
+    with pytest.raises(ValidationError):
+        record.annotation = [("rubbish",)]
+
+    with pytest.raises(ValidationError):
+        record.vectors = "rubbish"

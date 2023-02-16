@@ -32,9 +32,7 @@ from argilla.client.sdk.metrics.models import MetricInfo
 def get_dataset_metrics(
     client: AuthenticatedClient, name: str, task: str
 ) -> Response[Union[List[MetricInfo], ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/datasets/{task}/{name}/metrics".format(
-        client.base_url, name=name, task=task
-    )
+    url = "{}/api/datasets/{task}/{name}/metrics".format(client.base_url, name=name, task=task)
 
     response = httpx.get(
         url=url,

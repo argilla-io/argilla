@@ -22,6 +22,4 @@ class MetricInfo(BaseModel):
 
     id: str = Field(description="The metric id")
     name: str = Field(description="The metric name")
-    description: Optional[str] = Field(
-        default=None, description="The metric description"
-    )
+    description: Optional[str] = Field(default=None, description="The metric description")

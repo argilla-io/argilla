@@ -63,9 +63,7 @@ def configure_router(router: APIRouter):
             task=task,
         )
 
-        settings = await datasets.get_settings(
-            user=user, dataset=found_ds, class_type=__svc_settings_class__
-        )
+        settings = await datasets.get_settings(user=user, dataset=found_ds, class_type=__svc_settings_class__)
         return TokenClassificationSettings.parse_obj(settings)
 
     @deprecate_endpoint(
@@ -79,9 +77,7 @@ def configure_router(router: APIRouter):
         response_model=TokenClassificationSettings,
     )
     async def save_settings(
-        request: TokenClassificationSettings = Body(
-            ..., description=f"The {task} dataset settings"
-        ),
+        request: TokenClassificationSettings = Body(..., description=f"The {task} dataset settings"),
         name: str = DATASET_NAME_PATH_PARAM,
         ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -94,9 +90,7 @@ def configure_router(router: APIRouter):
             task=task,
             workspace=ws_params.workspace,
         )
-        await validator.validate_dataset_settings(
-            user=user, dataset=found_ds, settings=request
-        )
+        await validator.validate_dataset_settings(user=user, dataset=found_ds, settings=request)
         settings = await datasets.save_settings(
             user=user,
             dataset=found_ds,

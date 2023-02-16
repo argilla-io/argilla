@@ -141,3 +141,6 @@ exclude = [
 [tool.ruff.per-file-ignores]
 # Ignore imported but unused;
 "__init__.py" = ["F401"]
+
+[tool.black]
+line-length = 120

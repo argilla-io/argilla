@@ -37,9 +37,7 @@ class ElasticsearchMetric:
     def get_function_arg_names(func):
         return func.__code__.co_varnames
 
-    def aggregation_request(
-        self, *args, **kwargs
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    def aggregation_request(self, *args, **kwargs) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Configures the summary es aggregation definition
         """
@@ -121,9 +119,7 @@ class HistogramAggregation(ElasticsearchMetric):
         if self.fixed_interval:
             interval = self.fixed_interval
 
-        return aggregations.histogram_aggregation(
-            field_name=self.field, script=self.script, interval=interval
-        )
+        return aggregations.histogram_aggregation(field_name=self.field, script=self.script, interval=interval)
 
 
 @dataclasses.dataclass

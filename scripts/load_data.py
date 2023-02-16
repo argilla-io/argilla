@@ -64,9 +64,7 @@ class LoadDatasets:
         rg.log(
             dataset_rg,
             name="news-text-summarization",
-            tags={
-                "description": "A text summarization dataset with news pieces and their predicted summaries."
-            },
+            tags={"description": "A text summarization dataset with news pieces and their predicted summaries."},
         )
 
     @staticmethod
@@ -80,18 +78,14 @@ class LoadDatasets:
         )
 
         # Define labeling schema to avoid UI user modification
-        settings = rg.TextClassificationSettings(
-            label_schema={"World", "Sports", "Sci/Tech", "Business"}
-        )
+        settings = rg.TextClassificationSettings(label_schema={"World", "Sports", "Sci/Tech", "Business"})
         rg.configure_dataset(name="news-programmatic-labeling", settings=settings)
 
         # Log the dataset
         rg.log(
             dataset_rg,
             name="news-programmatic-labeling",
-            tags={
-                "description": "The AG News with programmatic labeling rules (see weak labeling mode in the UI)."
-            },
+            tags={"description": "The AG News with programmatic labeling rules (see weak labeling mode in the UI)."},
         )
 
         # Define queries and patterns for each category (using Elasticsearch DSL)
@@ -103,9 +97,7 @@ class LoadDatasets:
         ]
 
         # Define rules
-        rules = [
-            Rule(query=term, label=label) for terms, label in queries for term in terms
-        ]
+        rules = [Rule(query=term, label=label) for terms, label in queries for term in terms]
 
         # Add rules to the dataset
         add_rules(dataset="news-programmatic-labeling", rules=rules)

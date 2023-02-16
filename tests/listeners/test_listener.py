@@ -39,9 +39,7 @@ def condition_check_params(search):
         ("dataset", "val + {param}", None, condition_check_params, {"param": 100}),
     ],
 )
-def test_listener_with_parameters(
-    mocked_client, dataset, query, metrics, condition, query_params
-):
+def test_listener_with_parameters(mocked_client, dataset, query, metrics, condition, query_params):
     ar.delete(dataset)
 
     class TestListener:

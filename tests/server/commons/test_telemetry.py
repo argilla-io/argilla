@@ -45,9 +45,7 @@ async def test_track_bulk(telemetry_track_data):
     task, records = TaskType.token_classification, 100
 
     await telemetry.track_bulk(task=task, records=records)
-    telemetry_track_data.assert_called_once_with(
-        "LogRecordsRequested", {"task": task, "records": records}
-    )
+    telemetry_track_data.assert_called_once_with("LogRecordsRequested", {"task": task, "records": records})
 
 
 @pytest.mark.asyncio

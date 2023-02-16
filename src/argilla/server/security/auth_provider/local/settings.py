@@ -43,17 +43,13 @@ class Settings(BaseSettings):
     token_api_url: str = "/api/security/token"
 
     default_apikey: str = DEFAULT_API_KEY
-    default_password: str = (
-        "$2y$12$MPcRR71ByqgSI8AaqgxrMeSdrD4BcxDIdYkr.ePQoKz7wsGK7SAca"  # 1234
-    )
+    default_password: str = "$2y$12$MPcRR71ByqgSI8AaqgxrMeSdrD4BcxDIdYkr.ePQoKz7wsGK7SAca"  # 1234
     users_db_file: str = ".users.yml"
 
     @property
     def public_oauth_token_url(self):
         """The final public token url used for openapi doc setup"""
-        return (
-            f"{server_settings.base_url}{helpers.remove_prefix(self.token_api_url,'/')}"
-        )
+        return f"{server_settings.base_url}{helpers.remove_prefix(self.token_api_url,'/')}"
 
     class Config:
         env_prefix = "ARGILLA_LOCAL_AUTH_"

@@ -35,8 +35,7 @@ class TieBreakPolicy(Enum):
     @classmethod
     def _missing_(cls, value):
         raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of"
-            f" {list(cls._value2member_map_.keys())}"
+            f"{value} is not a valid {cls.__name__}, please select one of" f" {list(cls._value2member_map_.keys())}"
         )
 
 
@@ -133,12 +132,8 @@ class MajorityVoter(LabelModel):
         Returns:
             A dataset of records that include the predictions of the label model.
         """
-        wl_matrix = self._weak_labels.matrix(
-            has_annotation=None if include_annotated_records else False
-        )
-        records = self._weak_labels.records(
-            has_annotation=None if include_annotated_records else False
-        )
+        wl_matrix = self._weak_labels.matrix(has_annotation=None if include_annotated_records else False)
+        records = self._weak_labels.records(has_annotation=None if include_annotated_records else False)
 
         assert records, ValueError(
             "No records are being passed. Use `include_annotated_records` to include"
@@ -178,9 +173,7 @@ class MajorityVoter(LabelModel):
         """
         counts = np.column_stack(
             [
-                np.count_nonzero(
-                    wl_matrix == self._weak_labels.label2int[label], axis=1
-                )
+                np.count_nonzero(wl_matrix == self._weak_labels.label2int[label], axis=1)
                 for label in self._weak_labels.labels
             ]
         )
@@ -228,34 +221,22 @@ class MajorityVoter(LabelModel):
                 tie = True
 
             # maybe skip record
-            if not include_abstentions and (
-                tie and tie_break_policy is TieBreakPolicy.ABSTAIN
-            ):
+            if not include_abstentions and (tie and tie_break_policy is TieBreakPolicy.ABSTAIN):
                 continue
 
             if not tie:
-                pred_for_rec = [
-                    (self._weak_labels.labels[idx], prob[idx])
-                    for idx in np.argsort(prob)[::-1]
-                ]
+                pred_for_rec = [(self._weak_labels.labels[idx], prob[idx]) for idx in np.argsort(prob)[::-1]]
             # resolve ties following the tie break policy
             elif tie_break_policy is TieBreakPolicy.ABSTAIN:
                 pred_for_rec = None
             elif tie_break_policy is TieBreakPolicy.RANDOM:
-                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
-                    equal_prob_idx
-                )
+                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(equal_prob_idx)
                 for idx in equal_prob_idx:
                     if idx == random_idx:
                         prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
                     else:
-                        prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
-                            len(equal_prob_idx) - 1
-                        )
-                pred_for_rec = [
-                    (self._weak_labels.labels[idx], prob[idx])
-                    for idx in np.argsort(prob)[::-1]
-                ]
+                        prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (len(equal_prob_idx) - 1)
+                pred_for_rec = [(self._weak_labels.labels[idx], prob[idx]) for idx in np.argsort(prob)[::-1]]
             else:
                 raise NotImplementedError(
                     f"The tie break policy '{tie_break_policy.value}' is not"
@@ -321,10 +302,7 @@ class MajorityVoter(LabelModel):
 
             pred_for_rec = None
             if not all_abstained:
-                pred_for_rec = [
-                    (self._weak_labels.labels[i], prob[i])
-                    for i in np.argsort(prob)[::-1]
-                ]
+                pred_for_rec = [(self._weak_labels.labels[i], prob[i]) for i in np.argsort(prob)[::-1]]
 
             records_with_prediction.append(rec.copy(deep=True))
             records_with_prediction[-1].prediction = pred_for_rec
@@ -388,9 +366,7 @@ class MajorityVoter(LabelModel):
 
             probabilities = self._compute_single_label_probs(wl_matrix)
 
-            annotation, prediction = self._score_single_label(
-                probabilities, tie_break_policy
-            )
+            annotation, prediction = self._score_single_label(probabilities, tie_break_policy)
             target_names = self._weak_labels.labels[: annotation.max() + 1]
 
         return classification_report(
@@ -419,18 +395,13 @@ class MajorityVoter(LabelModel):
             A tuple of the annotation and prediction array.
         """
         # 1.e-8 is taken from the abs tolerance of np.isclose
-        is_max = (
-            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
-        )
+        is_max = np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
         is_tie = is_max.sum(axis=1) > 1
 
         prediction = np.argmax(is_max, axis=1)
         # we need to transform the indexes!
         annotation = np.array(
-            [
-                self._weak_labels.labels.index(self._weak_labels.int2label[i])
-                for i in self._weak_labels.annotation()
-            ],
+            [self._weak_labels.labels.index(self._weak_labels.int2label[i]) for i in self._weak_labels.annotation()],
             dtype=np.short,
         )
 
@@ -442,21 +413,16 @@ class MajorityVoter(LabelModel):
         elif tie_break_policy is TieBreakPolicy.RANDOM:
             for i in np.nonzero(is_tie)[0]:
                 equal_prob_idx = np.nonzero(is_max[i])[0]
-                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
-                    equal_prob_idx
-                )
+                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(equal_prob_idx)
                 prediction[i] = equal_prob_idx[random_idx]
         else:
             raise NotImplementedError(
-                f"The tie break policy '{tie_break_policy.value}' is not implemented"
-                " for MajorityVoter!"
+                f"The tie break policy '{tie_break_policy.value}' is not implemented" " for MajorityVoter!"
             )
 
         return annotation, prediction
 
-    def _score_multi_label(
-        self, probabilities: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _score_multi_label(self, probabilities: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Helper method to compute scores for multi-label classifications.
 
         Args:
@@ -496,9 +462,7 @@ class Snorkel(LabelModel):
         >>> records = label_model.predict()
     """
 
-    def __init__(
-        self, weak_labels: WeakLabels, verbose: bool = True, device: str = "cpu"
-    ):
+    def __init__(self, weak_labels: WeakLabels, verbose: bool = True, device: str = "cpu"):
         try:
             import snorkel  # noqa: F401
         except ModuleNotFoundError:
@@ -513,23 +477,18 @@ class Snorkel(LabelModel):
 
         # Check if we need to remap the weak labels to int mapping
         # Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential
-        if self._weak_labels.label2int[None] != -1 or sorted(
-            self._weak_labels.int2label
-        ) != list(range(-1, self._weak_labels.cardinality)):
+        if self._weak_labels.label2int[None] != -1 or sorted(self._weak_labels.int2label) != list(
+            range(-1, self._weak_labels.cardinality)
+        ):
             self._need_remap = True
             self._weaklabelsInt2snorkelInt = {
-                self._weak_labels.label2int[label]: i
-                for i, label in enumerate([None] + self._weak_labels.labels, -1)
+                self._weak_labels.label2int[label]: i for i, label in enumerate([None] + self._weak_labels.labels, -1)
             }
         else:
             self._need_remap = False
-            self._weaklabelsInt2snorkelInt = {
-                i: i for i in range(-1, self._weak_labels.cardinality)
-            }
+            self._weaklabelsInt2snorkelInt = {i: i for i in range(-1, self._weak_labels.cardinality)}
 
-        self._snorkelInt2weaklabelsInt = {
-            val: key for key, val in self._weaklabelsInt2snorkelInt.items()
-        }
+        self._snorkelInt2weaklabelsInt = {val: key for key, val in self._weaklabelsInt2snorkelInt.items()}
 
         # instantiate Snorkel's label model
         self._model = SnorkelLabelModel(
@@ -548,13 +507,9 @@ class Snorkel(LabelModel):
                 They must not contain ``L_train``, the label matrix is provided automatically.
         """
         if "L_train" in kwargs:
-            raise ValueError(
-                "Your kwargs must not contain 'L_train', it is provided automatically."
-            )
+            raise ValueError("Your kwargs must not contain 'L_train', it is provided automatically.")
 
-        l_train = self._weak_labels.matrix(
-            has_annotation=None if include_annotated_records else False
-        )
+        l_train = self._weak_labels.matrix(has_annotation=None if include_annotated_records else False)
         if self._need_remap:
             l_train = self._copy_and_remap(l_train)
 
@@ -614,9 +569,7 @@ class Snorkel(LabelModel):
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
-        l_pred = self._weak_labels.matrix(
-            has_annotation=None if include_annotated_records else False
-        )
+        l_pred = self._weak_labels.matrix(has_annotation=None if include_annotated_records else False)
         if self._need_remap:
             l_pred = self._copy_and_remap(l_pred)
 
@@ -630,9 +583,7 @@ class Snorkel(LabelModel):
         # add predictions to records
         records_with_prediction = []
         for rec, pred, prob in zip(
-            self._weak_labels.records(
-                has_annotation=None if include_annotated_records else False
-            ),
+            self._weak_labels.records(has_annotation=None if include_annotated_records else False),
             predictions,
             probabilities,
         ):
@@ -652,15 +603,11 @@ class Snorkel(LabelModel):
                         if idx == pred:
                             prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
                         else:
-                            prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
-                                len(equal_prob_idx) - 1
-                            )
+                            prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (len(equal_prob_idx) - 1)
 
                 pred_for_rec = [
                     (
-                        self._weak_labels.int2label[
-                            self._snorkelInt2weaklabelsInt[snorkel_idx]
-                        ],
+                        self._weak_labels.int2label[self._snorkelInt2weaklabelsInt[snorkel_idx]],
                         prob[snorkel_idx],
                     )
                     for snorkel_idx in np.argsort(prob)[::-1]
@@ -713,8 +660,7 @@ class Snorkel(LabelModel):
 
         if self._weak_labels.annotation().size == 0:
             raise MissingAnnotationError(
-                "You need annotated records to compute scores/metrics for your label"
-                " model."
+                "You need annotated records to compute scores/metrics for your label" " model."
             )
 
         l_pred = self._weak_labels.matrix(has_annotation=True)
@@ -779,14 +725,10 @@ class FlyingSquid(LabelModel):
         super().__init__(weak_labels)
 
         if len(self._weak_labels.rules) < 3:
-            raise TooFewRulesError(
-                "The FlyingSquid label model needs at least three (independent) rules!"
-            )
+            raise TooFewRulesError("The FlyingSquid label model needs at least three (independent) rules!")
 
         if "m" in kwargs:
-            raise ValueError(
-                "Your kwargs must not contain 'm', it is provided automatically."
-            )
+            raise ValueError("Your kwargs must not contain 'm', it is provided automatically.")
 
         self._init_kwargs = kwargs
         self._models: List[FlyingSquidLabelModel] = []
@@ -800,21 +742,15 @@ class FlyingSquid(LabelModel):
                 `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`__
                 method.
         """
-        wl_matrix = self._weak_labels.matrix(
-            has_annotation=None if include_annotated_records else False
-        )
+        wl_matrix = self._weak_labels.matrix(has_annotation=None if include_annotated_records else False)
 
         models = []
         # create a label model for each label (except for binary classification)
         # much of the implementation is taken from wrench:
         # https://github.com/JieyuZ2/wrench/blob/main/wrench/labelmodel/flyingsquid.py
         # If binary, we only need one model
-        for i in range(
-            1 if self._weak_labels.cardinality == 2 else self._weak_labels.cardinality
-        ):
-            model = self._FlyingSquidLabelModel(
-                m=len(self._weak_labels.rules), **self._init_kwargs
-            )
+        for i in range(1 if self._weak_labels.cardinality == 2 else self._weak_labels.cardinality):
+            model = self._FlyingSquidLabelModel(m=len(self._weak_labels.rules), **self._init_kwargs)
             wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, i)
             model.fit(L_train=wl_matrix_i, **kwargs)
             models.append(model)
@@ -839,9 +775,7 @@ class FlyingSquid(LabelModel):
         """
         wl_matrix_i = weak_label_matrix.copy()
 
-        target_mask = (
-            wl_matrix_i == self._weak_labels.label2int[self._weak_labels.labels[i]]
-        )
+        target_mask = wl_matrix_i == self._weak_labels.label2int[self._weak_labels.labels[i]]
         abstain_mask = wl_matrix_i == self._weak_labels.label2int[None]
         other_mask = (~target_mask) & (~abstain_mask)
 
@@ -883,9 +817,7 @@ class FlyingSquid(LabelModel):
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
-        wl_matrix = self._weak_labels.matrix(
-            has_annotation=None if include_annotated_records else False
-        )
+        wl_matrix = self._weak_labels.matrix(has_annotation=None if include_annotated_records else False)
         probabilities = self._predict(wl_matrix, verbose)
 
         # add predictions to records
@@ -893,9 +825,7 @@ class FlyingSquid(LabelModel):
         for i, prob, rec in zip(
             range(len(probabilities)),
             probabilities,
-            self._weak_labels.records(
-                has_annotation=None if include_annotated_records else False
-            ),
+            self._weak_labels.records(has_annotation=None if include_annotated_records else False),
         ):
             # Check if model abstains, that is if the highest probability is assigned to more than one label
             # 1.e-8 is taken from the abs tolerance of np.isclose
@@ -905,38 +835,25 @@ class FlyingSquid(LabelModel):
                 tie = True
 
             # maybe skip record
-            if not include_abstentions and (
-                tie and tie_break_policy is TieBreakPolicy.ABSTAIN
-            ):
+            if not include_abstentions and (tie and tie_break_policy is TieBreakPolicy.ABSTAIN):
                 continue
 
             if not tie:
-                pred_for_rec = [
-                    (self._weak_labels.labels[i], prob[i])
-                    for i in np.argsort(prob)[::-1]
-                ]
+                pred_for_rec = [(self._weak_labels.labels[i], prob[i]) for i in np.argsort(prob)[::-1]]
             # resolve ties following the tie break policy
             elif tie_break_policy is TieBreakPolicy.ABSTAIN:
                 pred_for_rec = None
             elif tie_break_policy is TieBreakPolicy.RANDOM:
-                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
-                    equal_prob_idx
-                )
+                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(equal_prob_idx)
                 for idx in equal_prob_idx:
                     if idx == random_idx:
                         prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
                     else:
-                        prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
-                            len(equal_prob_idx) - 1
-                        )
-                pred_for_rec = [
-                    (self._weak_labels.labels[i], prob[i])
-                    for i in np.argsort(prob)[::-1]
-                ]
+                        prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (len(equal_prob_idx) - 1)
+                pred_for_rec = [(self._weak_labels.labels[i], prob[i]) for i in np.argsort(prob)[::-1]]
             else:
                 raise NotImplementedError(
-                    f"The tie break policy '{tie_break_policy.value}' is not"
-                    " implemented for FlyingSquid!"
+                    f"The tie break policy '{tie_break_policy.value}' is not" " implemented for FlyingSquid!"
                 )
 
             records_with_prediction.append(rec.copy(deep=True))
@@ -962,26 +879,19 @@ class FlyingSquid(LabelModel):
             NotFittedError: If the label model was still not fitted.
         """
         if not self._models:
-            raise NotFittedError(
-                "This FlyingSquid instance is not fitted yet. Call `fit` before using"
-                " this model."
-            )
+            raise NotFittedError("This FlyingSquid instance is not fitted yet. Call `fit` before using" " this model.")
         # create predictions for each label
         if self._weak_labels.cardinality > 2:
             probas = np.zeros((len(weak_label_matrix), self._weak_labels.cardinality))
             for i in range(self._weak_labels.cardinality):
                 wl_matrix_i = self._copy_and_transform_wl_matrix(weak_label_matrix, i)
-                probas[:, i] = self._models[i].predict_proba(
-                    L_matrix=wl_matrix_i, verbose=verbose
-                )[:, 0]
+                probas[:, i] = self._models[i].predict_proba(L_matrix=wl_matrix_i, verbose=verbose)[:, 0]
             probas = np.nan_to_num(probas, nan=-np.inf)  # handle NaN
             probas = np.exp(probas) / np.sum(np.exp(probas), axis=1, keepdims=True)
         # if binary, we only have one model
         else:
             wl_matrix_i = self._copy_and_transform_wl_matrix(weak_label_matrix, 0)
-            probas = self._models[0].predict_proba(
-                L_matrix=wl_matrix_i, verbose=verbose
-            )
+            probas = self._models[0].predict_proba(L_matrix=wl_matrix_i, verbose=verbose)
 
         return probas
 
@@ -1038,18 +948,13 @@ class FlyingSquid(LabelModel):
         probabilities = self._predict(wl_matrix, verbose)
 
         # 1.e-8 is taken from the abs tolerance of np.isclose
-        is_max = (
-            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
-        )
+        is_max = np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
         is_tie = is_max.sum(axis=1) > 1
 
         prediction = np.argmax(is_max, axis=1)
         # we need to transform the indexes!
         annotation = np.array(
-            [
-                self._weak_labels.labels.index(self._weak_labels.int2label[i])
-                for i in self._weak_labels.annotation()
-            ],
+            [self._weak_labels.labels.index(self._weak_labels.int2label[i]) for i in self._weak_labels.annotation()],
             dtype=np.short,
         )
 
@@ -1061,14 +966,11 @@ class FlyingSquid(LabelModel):
         elif tie_break_policy is TieBreakPolicy.RANDOM:
             for i in np.nonzero(is_tie)[0]:
                 equal_prob_idx = np.nonzero(is_max[i])[0]
-                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
-                    equal_prob_idx
-                )
+                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(equal_prob_idx)
                 prediction[i] = equal_prob_idx[random_idx]
         else:
             raise NotImplementedError(
-                f"The tie break policy '{tie_break_policy.value}' is not implemented"
-                " for FlyingSquid!"
+                f"The tie break policy '{tie_break_policy.value}' is not implemented" " for FlyingSquid!"
             )
 
         return classification_report(

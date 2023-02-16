@@ -80,7 +80,5 @@ class Search(AbstractApi):
 
         return SearchResults(
             total=response["total"],
-            records=[
-                record_class.parse_obj(r).to_client() for r in response["records"]
-            ],
+            records=[record_class.parse_obj(r).to_client() for r in response["records"]],
         )
