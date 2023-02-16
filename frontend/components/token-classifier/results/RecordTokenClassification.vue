@@ -248,11 +248,14 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: $base-space * 4 200px 20px 50px;
+  padding: $base-space * 4 200px 20px 20px;
   display: block;
   margin-bottom: 0;
   @include font-size(16px);
   line-height: 34px;
+  .list__item--selectable & {
+    padding-left: 50px;
+  }
 }
 
 .content {

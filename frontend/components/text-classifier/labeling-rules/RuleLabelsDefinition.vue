@@ -257,7 +257,7 @@ export default {
   }
 }
 .feedback-interactions {
-  .list__item--annotation-mode & {
+  .list__item--selectable & {
     padding-right: 200px;
   }
   &__more {

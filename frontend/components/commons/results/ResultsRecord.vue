@@ -18,14 +18,18 @@
 <template>
   <div v-if="dataset && viewSettings">
     <div
-      :class="annotationEnabled ? 'list__item--annotation-mode' : 'list__item'"
+      :class="
+        annotationEnabled && !pageSizeisOne
+          ? 'list__item--selectable'
+          : 'list__item'
+      "
     >
       <div class="record__header">
         <template v-if="!weakLabelingEnabled">
           <template v-if="annotationEnabled">
             <div class="record__header--left" v-if="!isReferenceRecord">
               <base-checkbox
-                :class="pageSizeisOne && '--hidden'"
+                v-if="!pageSizeisOne"
                 class="list__checkbox"
                 :value="record.selected"
                 @change="onCheckboxChanged($event, record.id)"
@@ -252,9 +256,6 @@ export default {
 .list {
   &__checkbox.re-checkbox {
     margin: auto $base-space;
-    &.--hidden {
-      opacity: 0;
-    }
   }
   &__item {
     position: relative;
@@ -264,7 +265,7 @@ export default {
     width: 100%;
     border: 1px solid palette(grey, 600);
     margin-top: $base-space-between-records;
-    &--annotation-mode {
+    &--selectable {
       @extend .list__item !optional;
       padding-left: $base-space;
     }

@@ -35,7 +35,7 @@ export default {
 .status-tag {
   display: inline-flex;
   align-items: center;
-  margin-left: 1em;
+  margin-left: 1.2em;
   background: palette(green);
   color: palette(white);
   border-radius: 50px;
