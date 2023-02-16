@@ -42,12 +42,11 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    first_name: Mapped[Optional[str]]
+    first_name: Mapped[str]
     last_name: Mapped[Optional[str]]
     username: Mapped[str]
-    email: Mapped[str]
+    # TODO: Add default with an api key generator function.
     api_key: Mapped[str] = mapped_column(Text, unique=True)
     password_hash: Mapped[str] = mapped_column(Text)
-    password_reset_token: Mapped[Optional[str]] = mapped_column(Text, unique=True)
 
     workspaces: Mapped[List["Workspace"]] = relationship(secondary="users_workspaces", back_populates="users")
