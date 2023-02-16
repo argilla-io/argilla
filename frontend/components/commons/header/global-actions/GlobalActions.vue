@@ -125,6 +125,5 @@ export default {
   border-radius: $border-radius-m;
   position: relative;
   box-shadow: $shadow-300;
-  margin-bottom: $base-space;
 }
 </style>
