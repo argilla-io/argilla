@@ -21,7 +21,7 @@ on:
 
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
-  CACHE_NUMBER:  10
+  CACHE_NUMBER:  5
 
 jobs:
   test-elastic:
