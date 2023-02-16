@@ -123,7 +123,7 @@ export default {
     margin: auto 1em auto 1em;
   }
   &:hover {
-    box-shadow: $shadow;
+    box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.1);
   }
 }
 </style>
