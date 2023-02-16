@@ -91,18 +91,11 @@ class LocalAuthProvider(AuthProvider):
             user = auth.authenticate_user(form_data.username, form_data.password)
             if not user:
                 raise UnauthorizedError()
-
-            access_token_expires = timedelta(
-                minutes=self.settings.token_expiration_in_minutes
-            )
-            access_token = self._create_access_token(
-                user.username, expires_delta=access_token_expires
-            )
+            access_token_expires = timedelta(minutes=self.settings.token_expiration_in_minutes)
+            access_token = self._create_access_token(user.username, expires_delta=access_token_expires)
             return Token(access_token=access_token)
 
-    def _create_access_token(
-        self, username: str, expires_delta: Optional[timedelta] = None
-    ) -> str:
+    def _create_access_token(self, username: str, expires_delta: Optional[timedelta] = None) -> str:
         """
         Creates an access token
 
@@ -193,9 +186,7 @@ class LocalAuthProvider(AuthProvider):
             username=user.username,
             email=user.email,
             full_name=f"{user.first_name} {user.last_name}",
-            workspaces=[workspace.name for workspace in user.workspaces]
-            if user.workspaces
-            else None,
+            workspaces=[workspace.name for workspace in user.workspaces] if user.workspaces else None,
         )
 
     async def _find_user_by_api_key(self, api_key) -> User:

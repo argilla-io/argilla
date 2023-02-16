@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.client import api
 from argilla.client.apis import AbstractApi, api_compatibility
 from argilla.client.sdk._helpers import handle_response_error

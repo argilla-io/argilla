@@ -12,10 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import pytest
-
 import argilla
 import argilla as ar
+import pytest
 from argilla.metrics.commons import keywords, records_status, text_length
 
 
@@ -138,9 +137,7 @@ def test_keywords_metrics(mocked_client, gutenberg_spacy_ner):
         "two": 18,
     }
 
-    assert keywords(name=gutenberg_spacy_ner) == keywords(
-        name=gutenberg_spacy_ner, query=""
-    )
+    assert keywords(name=gutenberg_spacy_ner) == keywords(name=gutenberg_spacy_ner, query="")
 
     with pytest.raises(AssertionError, match="size must be greater than 0"):
         keywords(name=gutenberg_spacy_ner, size=0)

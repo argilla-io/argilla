@@ -82,10 +82,7 @@ class Text2TextRecord(CreationText2TextRecord):
     def to_client(self) -> ClientText2TextRecord:
         return ClientText2TextRecord(
             text=self.text,
-            prediction=[
-                (sentence.text, sentence.score)
-                for sentence in self.prediction.sentences
-            ]
+            prediction=[(sentence.text, sentence.score) for sentence in self.prediction.sentences]
             if self.prediction
             else None,
             prediction_agent=self.prediction.agent if self.prediction else None,

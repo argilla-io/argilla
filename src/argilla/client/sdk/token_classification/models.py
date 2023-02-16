@@ -63,9 +63,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                 entities=[
                     EntitySpan(label=ent[0], start=ent[1], end=ent[2])
                     if len(ent) == 3
-                    else EntitySpan(
-                        label=ent[0], start=ent[1], end=ent[2], score=ent[3]
-                    )
+                    else EntitySpan(label=ent[0], start=ent[1], end=ent[2], score=ent[3])
                     for ent in record.prediction
                 ],
                 agent=record.prediction_agent or MACHINE_NAME,
@@ -74,10 +72,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         annotation = None
         if record.annotation is not None:
             annotation = TokenClassificationAnnotation(
-                entities=[
-                    EntitySpan(label=ent[0], start=ent[1], end=ent[2])
-                    for ent in record.annotation
-                ],
+                entities=[EntitySpan(label=ent[0], start=ent[1], end=ent[2]) for ent in record.annotation],
                 agent=record.annotation_agent or MACHINE_NAME,
             )
 
@@ -102,16 +97,11 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
         return ClientTokenClassificationRecord(
             text=self.text,
             tokens=self.tokens,
-            prediction=[
-                (ent.label, ent.start, ent.end, ent.score)
-                for ent in self.prediction.entities
-            ]
+            prediction=[(ent.label, ent.start, ent.end, ent.score) for ent in self.prediction.entities]
             if self.prediction
             else None,
             prediction_agent=self.prediction.agent if self.prediction else None,
-            annotation=[
-                (ent.label, ent.start, ent.end) for ent in self.annotation.entities
-            ]
+            annotation=[(ent.label, ent.start, ent.end) for ent in self.annotation.entities]
             if self.annotation
             else None,
             annotation_agent=self.annotation.agent if self.annotation else None,

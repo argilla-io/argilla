@@ -15,23 +15,21 @@
 import httpx
 import pytest
 from _pytest.logging import LogCaptureFixture
-from sqlalchemy import select
-from sqlalchemy.orm import scoped_session
-
 from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
 from argilla.server.database import Base, SessionLocal
 from argilla.server.models import User, Workspace
+from sqlalchemy import select
+from sqlalchemy.orm import scoped_session
 
 try:
     from loguru import logger
 except ModuleNotFoundError:
     logger = None
-from starlette.testclient import TestClient
-
 from argilla import app
 from argilla.client.api import active_api
+from starlette.testclient import TestClient
 
 from .helpers import SecuredClient
 

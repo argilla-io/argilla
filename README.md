@@ -61,7 +61,7 @@
 
 ### Advanced NLP labeling
 
-- Programmatic labeling using [weak supervision](https://docs.argilla.io/en/latest/guides/techniques/weak_supervision.html). Built-in label models (Snorkel, Flyingsquid)
+- Programmatic labeling using [rules and weak supervision](https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html). Built-in label models (Snorkel, Flyingsquid)
 - [Bulk-labeling](https://docs.argilla.io/en/latest/reference/webapp/features.html#bulk-annotate) and [search-driven annotation](https://docs.argilla.io/en/latest/guides/features/queries.html)
 - Iterate on training data with any [pre-trained model](https://docs.argilla.io/en/latest/tutorials/libraries/huggingface.html) or [library](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html)
 - Efficiently review and refine annotations in the UI and with Python
@@ -71,93 +71,34 @@
 ### Monitoring
 
 - Close the gap between production data and data collection activities
-- [Auto-monitoring](https://docs.argilla.io/en/latest/guides/steps/3_deploying.html) for [major NLP libraries and pipelines](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html) (spaCy, Hugging Face, FlairNLP)
+- [Auto-monitoring](https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html) for [major NLP libraries and pipelines](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html) (spaCy, Hugging Face, FlairNLP)
 - [ASGI middleware](https://docs.argilla.io/en/latest/tutorials/notebooks/deploying-texttokenclassification-fastapi.html) for HTTP endpoints
-- Argilla Metrics to understand data and model issues, [like entity consistency for NER models](https://docs.argilla.io/en/latest/guides/steps/4_monitoring.html)
+- Argilla Metrics to understand data and model issues, [like entity consistency for NER models](https://docs.argilla.io/en/latest/guides/measure_datasets_with_metrics.html)
 - Integrated with Kibana for custom dashboards
 
 ### Team workspaces
 
 - Bring different users and roles into the NLP data and model lifecycles
-- Organize data collection, review and monitoring into different [workspaces](https://docs.argilla.io/en/latest/getting_started/installation/user_management.html#workspace)
+- Organize data collection, review and monitoring into different [workspaces](https://docs.argilla.io/en/latest/getting_started/installation/configurations/user_management.html)
 - Manage workspace access for different users
 
 ## Quickstart
-Argilla is composed of a `Python Server` with Elasticsearch as the database layer, and a `Python Client` to create and manage datasets.
+👋 Welcome! If you have just discovered Argilla this is the best place to get started. Argilla is composed of:
 
-To get started you need to **install the client and the server** with `pip`:
-```bash
+* Argilla Client: a powerful Python library for reading and writing data into Argilla, using all the libraries you love (transformers, spaCy, datasets, and any other).
 
-pip install "argilla[server]"
+* Argilla Server and UI: the API and UI for data annotation and curation.
 
-```
+To get started you need to:
 
-Then you need to **run [Elasticsearch (ES)](https://www.elastic.co/elasticsearch)**.
+1. Launch the Argilla Server and UI.
 
-The simplest way is to use`Docker` by running:
+2. Pick a tutorial and start rocking with Argilla using Jupyter Notebooks, or Google Colab.
 
-```bash
-
-docker run -d --name elasticsearch-for-argilla --network argilla-net  -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:8.5.3
-
-```
-> :information_source: **Check [the docs](https://docs.argilla.io/en/latest/getting_started/quickstart.html) for further options and configurations for Elasticsearch.**
-
-Finally you can **launch the server**:
-
-```bash
-
-python -m argilla
-
-```
-> :information_source:  The most common error message after this step is related to the Elasticsearch instance not running. Make sure your Elasticsearch instance is running on http://localhost:9200/. If you already have an Elasticsearch instance or cluster, you point the server to its URL by using [ENV variables](#)
-
-
-🎉 You can now access Argilla UI pointing your browser at http://localhost:6900/.
-
-**The default username and password are**  `argilla`  **and**  `1234`.
-
-Your workspace will contain no datasets. So let's use the `datasets` library to create our first datasets!
-
-First, you need to install `datasets`:
-```bash
-
-pip install datasets
-
-```
-
-Then go to your Python IDE of choice and run:
-```python
-
-import pandas as pd
-import argilla as rg
-from datasets import load_dataset
-
-# load dataset from the hub
-dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
-
-# read in dataset, assuming its a dataset for text classification
-dataset_rg = rg.read_datasets(dataset, task="TokenClassification")
-
-# log the dataset to the Argilla web app
-rg.log(dataset_rg, "gutenberg_spacy-ner")
-
-# load dataset from json
-my_dataframe = pd.read_json(
-    "https://raw.githubusercontent.com/recognai/datasets/main/sst-sentimentclassification.json")
-
-# convert pandas dataframe to DatasetForTextClassification
-dataset_rg = rg.DatasetForTextClassification.from_pandas(my_dataframe)
-
-# log the dataset to the Argilla web app
-rg.log(dataset_rg, name="sst-sentimentclassification")
-```
-
-This will create two datasets that you can use to do a quick tour of the core features of Argilla.
+To get started follow the steps [on the Quickstart docs page](https://docs.argilla.io/en/latest/getting_started/quickstart.html).
 
 > 🚒 **If you find issues, get direct support from the team and other community members on the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
 
-For getting started with your own use cases, [go to the docs](https://docs.argilla.io).
 ## Principles
 -  **Open**: Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 

@@ -14,14 +14,13 @@
 from typing import List, Optional
 
 import pytest
-
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
-    Text2TextRecord,
     Text2TextRecordInputs,
     Text2TextSearchResults,
 )
+
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 
@@ -182,9 +181,7 @@ def test_api_with_new_predictions_data_model(mocked_client):
             {
                 "text": "This is a text data",
                 "predictions": {
-                    "test": {
-                        "sentences": [{"text": "This is a test data", "score": 0.6}]
-                    },
+                    "test": {"sentences": [{"text": "This is a test data", "score": 0.6}]},
                 },
             }
         ),

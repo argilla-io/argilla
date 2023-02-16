@@ -16,7 +16,6 @@
 from datetime import datetime
 
 import pytest
-
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.apis.v0.models.text_classification import (
@@ -28,6 +27,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
 from argilla.server.commons.models import PredictionStatus
+
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 
@@ -99,9 +99,7 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
         ).dict(by_alias=True),
     )
 
-    get_dataset = Dataset.parse_obj(
-        mocked_client.get(f"/api/datasets/{dataset}").json()
-    )
+    get_dataset = Dataset.parse_obj(mocked_client.get(f"/api/datasets/{dataset}").json())
     assert get_dataset.tags == {
         "env": "test",
         "class": "text classification",
@@ -202,9 +200,7 @@ def test_create_records_for_text_classification(mocked_client, telemetry_track_d
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_create_records_for_text_classification_vector_search(
-    mocked_client, telemetry_track_data
-):
+def test_create_records_for_text_classification_vector_search(mocked_client, telemetry_track_data):
     dataset = "test_create_records_for_text_classification_vector_search"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     tags = {"env": "test", "class": "text classification"}
@@ -271,9 +267,7 @@ def test_create_records_for_text_classification_vector_search(
     assert created_dataset.tags == tags
     assert created_dataset.metadata == metadata
 
-    response = mocked_client.post(
-        f"/api/datasets/{dataset}/TextClassification:search", json={}
-    )
+    response = mocked_client.post(f"/api/datasets/{dataset}/TextClassification:search", json={})
 
     assert response.status_code == 200
     results = TextClassificationSearchResults.parse_obj(response.json())
@@ -362,9 +356,7 @@ def test_partial_record_update(mocked_client):
     response = mocked_client.post(
         f"/api/datasets/{name}/TextClassification:search",
         json={
-            "query": TextClassificationQuery(predicted=PredictionStatus.OK).dict(
-                by_alias=True
-            ),
+            "query": TextClassificationQuery(predicted=PredictionStatus.OK).dict(by_alias=True),
         },
     )
 
@@ -374,9 +366,7 @@ def test_partial_record_update(mocked_client):
     first_record = results.records[0]
     assert first_record.last_updated is not None
     first_record.last_updated = None
-    assert TextClassificationRecord(
-        **first_record.dict(by_alias=True, exclude_none=True)
-    ) == TextClassificationRecord(
+    assert TextClassificationRecord(**first_record.dict(by_alias=True, exclude_none=True)) == TextClassificationRecord(
         **{
             "id": 1,
             "inputs": {"text": "This is a text, oh yeah!"},
@@ -508,10 +498,7 @@ def test_some_sort_by(mocked_client):
             },
         }
     }
-    assert (
-        response.json()["detail"]["code"]
-        == expected_response_property_name_2_value["detail"]["code"]
-    )
+    assert response.json()["detail"]["code"] == expected_response_property_name_2_value["detail"]["code"]
     assert (
         response.json()["detail"]["params"]["message"]
         == expected_response_property_name_2_value["detail"]["params"]["message"]
@@ -721,9 +708,7 @@ def test_wrong_text_query(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
-        json=TextClassificationSearchRequest(
-            query=TextClassificationQuery(query_text="!")
-        ).dict(),
+        json=TextClassificationSearchRequest(query=TextClassificationQuery(query_text="!")).dict(),
     )
     assert response.status_code == 400
     assert response.json() == {
@@ -755,18 +740,14 @@ def test_search_using_text(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
-        json=TextClassificationSearchRequest(
-            query=TextClassificationQuery(query_text="text: texto")
-        ).dict(),
+        json=TextClassificationSearchRequest(query=TextClassificationQuery(query_text="text: texto")).dict(),
     )
     assert response.status_code == 200
     assert response.json()["total"] == 1
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
-        json=TextClassificationSearchRequest(
-            query=TextClassificationQuery(query_text="text.exact: texto")
-        ).dict(),
+        json=TextClassificationSearchRequest(query=TextClassificationQuery(query_text="text.exact: texto")).dict(),
     )
     assert response.status_code == 200
     assert response.json()["total"] == 0

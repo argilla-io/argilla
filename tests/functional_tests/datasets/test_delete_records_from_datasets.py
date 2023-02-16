@@ -14,9 +14,8 @@
 
 import time
 
-import pytest
-
 import argilla
+import pytest
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 
@@ -29,10 +28,7 @@ def test_delete_records_from_dataset(mocked_client):
     ar.log(
         name=dataset,
         records=[
-            ar.TextClassificationRecord(
-                id=i, text="This is the text", metadata=dict(idx=i)
-            )
-            for i in range(0, 50)
+            ar.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
         ],
     )
 
@@ -43,9 +39,7 @@ def test_delete_records_from_dataset(mocked_client):
     assert len(ds) == 50
 
     time.sleep(1)
-    matched, processed = ar.delete_records(
-        name=dataset, query="id:10", discard_only=False
-    )
+    matched, processed = ar.delete_records(name=dataset, query="id:10", discard_only=False)
     assert matched, processed == (1, 1)
 
     time.sleep(1)
@@ -62,10 +56,7 @@ def test_delete_records_without_permission(mocked_client, mock_user):
     argilla_client.log(
         name=dataset,
         records=[
-            argilla.TextClassificationRecord(
-                id=i, text="This is the text", metadata=dict(idx=i)
-            )
-            for i in range(0, 50)
+            argilla.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
         ],
     )
     matched, processed = argilla_client.delete_records(

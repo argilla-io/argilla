@@ -61,9 +61,7 @@ class TokenClassificationRecordInputs(BaseRecordInputs[TokenClassificationAnnota
         return text
 
 
-class TokenClassificationRecord(
-    TokenClassificationRecordInputs, BaseRecord[TokenClassificationAnnotation]
-):
+class TokenClassificationRecord(TokenClassificationRecordInputs, BaseRecord[TokenClassificationAnnotation]):
     pass
 
 
@@ -88,9 +86,7 @@ class TokenClassificationAggregations(ServiceBaseSearchResultsAggregations):
     mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 
-class TokenClassificationSearchResults(
-    BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]
-):
+class TokenClassificationSearchResults(BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]):
     pass
 
 

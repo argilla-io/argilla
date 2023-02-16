@@ -100,16 +100,12 @@ class _ArgillaLogAgent:
         except Exception as ex:
             dataset = kwargs["name"]
             _LOGGER.error(
-                f"\nCannot log data in dataset '{dataset}'\n"
-                f"Error: {type(ex).__name__}\n"
-                f"Details: {ex}"
+                f"\nCannot log data in dataset '{dataset}'\n" f"Error: {type(ex).__name__}\n" f"Details: {ex}"
             )
             raise ex
 
     def log(self, *args, **kwargs) -> Future:
-        return asyncio.run_coroutine_threadsafe(
-            self.__log_internal__(self.__api__, *args, **kwargs), self.__loop__
-        )
+        return asyncio.run_coroutine_threadsafe(self.__log_internal__(self.__api__, *args, **kwargs), self.__loop__)
 
 
 class Argilla:
@@ -172,10 +168,7 @@ class Argilla:
     def client(self) -> AuthenticatedClient:
         """The underlying authenticated HTTP client"""
         warnings.warn(
-            message=(
-                "This prop will be removed in next release. "
-                "Please use the http_client prop instead."
-            ),
+            message=("This prop will be removed in next release. " "Please use the http_client prop instead."),
             category=UserWarning,
         )
         return self._client
@@ -217,10 +210,7 @@ class Argilla:
         if workspace != self.get_workspace():
             if workspace == self._user.username:
                 self._client.headers.pop(WORKSPACE_HEADER_NAME, workspace)
-            elif (
-                self._user.workspaces is not None
-                and workspace not in self._user.workspaces
-            ):
+            elif self._user.workspaces is not None and workspace not in self._user.workspaces:
                 raise Exception(f"Wrong provided workspace {workspace}")
             self._client.headers[WORKSPACE_HEADER_NAME] = workspace
             self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
@@ -370,10 +360,7 @@ class Argilla:
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
         else:
-            raise InputValueError(
-                f"Unknown record type {record_type}. Available values are"
-                f" {Record.__args__}"
-            )
+            raise InputValueError(f"Unknown record type {record_type}. Available values are" f" {Record.__args__}")
 
         processed, failed = 0, 0
         progress_bar = tqdm(total=len(records), disable=not verbose)
@@ -398,18 +385,11 @@ class Argilla:
 
         # TODO: improve logging policy in library
         if verbose:
-            _LOGGER.info(
-                f"Processed {processed} records in dataset {name}. Failed: {failed}"
-            )
+            _LOGGER.info(f"Processed {processed} records in dataset {name}. Failed: {failed}")
             workspace = self.get_workspace()
-            if (
-                not workspace
-            ):  # Just for backward comp. with datasets with no workspaces
+            if not workspace:  # Just for backward comp. with datasets with no workspaces
                 workspace = "-"
-            print(
-                f"{processed} records logged to"
-                f" {self._client.base_url}/datasets/{workspace}/{name}"
-            )
+            print(f"{processed} records logged to" f" {self._client.base_url}/datasets/{workspace}/{name}")
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
@@ -488,8 +468,7 @@ class Argilla:
             raise ValueError(
                 "The argument `as_pandas` is deprecated and will be removed in a future"
                 " version. Please adapt your code accordingly. ",
-                "If you want a pandas DataFrame do"
-                " `rg.load('my_dataset').to_pandas()`.",
+                "If you want a pandas DataFrame do" " `rg.load('my_dataset').to_pandas()`.",
             )
 
         try:
@@ -525,9 +504,7 @@ class Argilla:
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
-        response = metrics_api.get_dataset_metrics(
-            self._client, name=name, task=response.parsed.task
-        )
+        response = metrics_api.get_dataset_metrics(self._client, name=name, task=response.parsed.task)
 
         return response.parsed
 
@@ -572,9 +549,7 @@ class Argilla:
                     rule=rule,
                 )
             except AlreadyExistsApiError:
-                _LOGGER.warning(
-                    f"Rule {rule} already exists. Please, update the rule instead."
-                )
+                _LOGGER.warning(f"Rule {rule} already exists. Please, update the rule instead.")
             except Exception as ex:
                 _LOGGER.warning(f"Cannot create rule {rule}: {ex}")
 
@@ -593,36 +568,26 @@ class Argilla:
                 )
             except NotFoundApiError:
                 _LOGGER.info(f"Rule {rule} does not exists, creating...")
-                text_classification_api.add_dataset_labeling_rule(
-                    self._client, name=dataset, rule=rule
-                )
+                text_classification_api.add_dataset_labeling_rule(self._client, name=dataset, rule=rule)
             except Exception as ex:
                 _LOGGER.warning(f"Cannot update rule {rule}: {ex}")
 
     def delete_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
         for rule in rules:
             try:
-                text_classification_api.delete_dataset_labeling_rule(
-                    self._client, name=dataset, rule=rule
-                )
+                text_classification_api.delete_dataset_labeling_rule(self._client, name=dataset, rule=rule)
             except Exception as ex:
                 _LOGGER.warning(f"Cannot delete rule {rule}: {ex}")
         """Deletes the dataset labeling rules"""
         for rule in rules:
-            text_classification_api.delete_dataset_labeling_rule(
-                self._client, name=dataset, rule=rule
-            )
+            text_classification_api.delete_dataset_labeling_rule(self._client, name=dataset, rule=rule)
 
     def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
-        response = text_classification_api.fetch_dataset_labeling_rules(
-            self._client, name=dataset
-        )
+        response = text_classification_api.fetch_dataset_labeling_rules(self._client, name=dataset)
 
         return [LabelingRule.parse_obj(data) for data in response.parsed]
 
-    def rule_metrics_for_dataset(
-        self, dataset: str, rule: LabelingRule
-    ) -> LabelingRuleMetricsSummary:
+    def rule_metrics_for_dataset(self, dataset: str, rule: LabelingRule) -> LabelingRuleMetricsSummary:
         response = text_classification_api.dataset_rule_metrics(
             self._client, name=dataset, query=rule.query, label=rule.label
         )

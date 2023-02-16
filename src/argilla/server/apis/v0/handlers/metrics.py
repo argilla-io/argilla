@@ -31,9 +31,7 @@ from argilla.server.services.metrics import MetricsService
 class MetricInfo(BaseModel):
     id: str = Field(description="The metric id")
     name: str = Field(description="The metric name")
-    description: Optional[str] = Field(
-        default=None, description="The metric description"
-    )
+    description: Optional[str] = Field(default=None, description="The metric description")
 
 
 @dataclass
@@ -58,7 +56,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
         path=base_metrics_endpoint,
         new_path=new_base_metrics_endpoint,
         router_method=router.get,
-        operation_id=f"get_dataset_metrics",
+        operation_id="get_dataset_metrics",
         name="get_dataset_metrics",
     )
     def get_dataset_metrics(
@@ -84,7 +82,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
         path=base_metrics_endpoint + "/{metric}:summary",
         new_path=new_base_metrics_endpoint + "/{metric}:summary",
         router_method=router.post,
-        operation_id=f"metric_summary",
+        operation_id="metric_summary",
         name="metric_summary",
     )
     def metric_summary(

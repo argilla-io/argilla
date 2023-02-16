@@ -12,9 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla
+import pytest
 from argilla.server.apis.v0.models.commons.model import ScoreRange
 from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.apis.v0.models.text_classification import (
@@ -71,9 +70,7 @@ def test_query_builder_with_query_range(backend: GenericElasticEngineBackend):
     }
 
 
-def test_query_builder_with_nested(
-    mocked_client, dao, backend: GenericElasticEngineBackend
-):
+def test_query_builder_with_nested(mocked_client, dao, backend: GenericElasticEngineBackend):
     dataset = Dataset(
         name="test_query_builder_with_nested",
         owner=argilla.get_workspace(),
@@ -107,20 +104,8 @@ def test_query_builder_with_nested(
                         "query": {
                             "bool": {
                                 "must": [
-                                    {
-                                        "term": {
-                                            "metrics.predicted.mentions.label": {
-                                                "value": "NAME"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "range": {
-                                            "metrics.predicted.mentions.score": {
-                                                "lte": "0.1"
-                                            }
-                                        }
-                                    },
+                                    {"term": {"metrics.predicted.mentions.label": {"value": "NAME"}}},
+                                    {"range": {"metrics.predicted.mentions.score": {"lte": "0.1"}}},
                                 ]
                             }
                         },

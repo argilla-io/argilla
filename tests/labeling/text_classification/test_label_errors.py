@@ -14,11 +14,9 @@
 #  limitations under the License.
 import sys
 
+import argilla as ar
 import cleanlab
 import pytest
-from pkg_resources import parse_version
-
-import argilla as ar
 from argilla.labeling.text_classification import find_label_errors
 from argilla.labeling.text_classification.label_errors import (
     MissingPredictionError,
@@ -26,17 +24,14 @@ from argilla.labeling.text_classification.label_errors import (
     SortBy,
     _construct_s_and_psx,
 )
+from pkg_resources import parse_version
 
 
-@pytest.fixture(
-    params=[False, True], ids=["single_label", "multi_label"], scope="module"
-)
+@pytest.fixture(params=[False, True], ids=["single_label", "multi_label"], scope="module")
 def records(request):
     if request.param:
         return [
-            ar.TextClassificationRecord(
-                text="test", annotation=anot, prediction=pred, multi_label=True, id=i
-            )
+            ar.TextClassificationRecord(text="test", annotation=anot, prediction=pred, multi_label=True, id=i)
             for i, anot, pred in zip(
                 range(2 * 6),
                 [["bad"], ["bad", "good"]] * 6,
@@ -71,9 +66,7 @@ def test_no_records():
         ar.TextClassificationRecord(text="test", annotation="test"),
     ]
 
-    with pytest.raises(
-        NoRecordsError, match="none of your records have a prediction AND annotation"
-    ):
+    with pytest.raises(NoRecordsError, match="none of your records have a prediction AND annotation"):
         find_label_errors(records)
 
 
@@ -85,10 +78,7 @@ def test_multi_label_warning(caplog):
         multi_label=True,
     )
     find_label_errors([record], multi_label="True")
-    assert (
-        "You provided the kwarg 'multi_label', but it is determined automatically"
-        in caplog.text
-    )
+    assert "You provided the kwarg 'multi_label', but it is determined automatically" in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -121,9 +111,7 @@ def test_sort_by(monkeypatch, sort_by, expected):
             mock_find_label_issues,
         )
 
-    record = ar.TextClassificationRecord(
-        text="mock", prediction=[("mock", 0.1)], annotation="mock"
-    )
+    record = ar.TextClassificationRecord(text="mock", prediction=[("mock", 0.1)], annotation="mock")
     find_label_errors(records=[record], sort_by=sort_by)
 
 
@@ -145,9 +133,7 @@ def test_kwargs(monkeypatch, records):
             mock_get_noise_indices,
         )
 
-        with pytest.raises(
-            ValueError, match="'sorted_index_method' kwarg is not supported"
-        ):
+        with pytest.raises(ValueError, match="'sorted_index_method' kwarg is not supported"):
             find_label_errors(records=records, sorted_index_method="mock")
 
         find_label_errors(records=records, mock="mock")
@@ -157,9 +143,7 @@ def test_kwargs(monkeypatch, records):
             assert kwargs == {
                 "mock": "mock",
                 "multi_label": is_multi_label,
-                "return_indices_ranked_by": "normalized_margin"
-                if not is_multi_label
-                else "self_confidence",
+                "return_indices_ranked_by": "normalized_margin" if not is_multi_label else "self_confidence",
             }
             return []
 
@@ -168,9 +152,7 @@ def test_kwargs(monkeypatch, records):
             mock_find_label_issues,
         )
 
-        with pytest.raises(
-            ValueError, match="'return_indices_ranked_by' kwarg is not supported"
-        ):
+        with pytest.raises(ValueError, match="'return_indices_ranked_by' kwarg is not supported"):
             find_label_errors(records=records, return_indices_ranked_by="mock")
 
         find_label_errors(records=records, mock="mock")
@@ -208,22 +190,14 @@ def test_construct_s_and_psx(records):
 
 
 def test_missing_predictions():
-    records = [
-        ar.TextClassificationRecord(
-            text="test", annotation="mock", prediction=[("mock2", 0.1)]
-        )
-    ]
+    records = [ar.TextClassificationRecord(text="test", annotation="mock", prediction=[("mock2", 0.1)])]
     with pytest.raises(
         MissingPredictionError,
         match="It seems predictions are missing for the label 'mock'",
     ):
         _construct_s_and_psx(records)
 
-    records.append(
-        ar.TextClassificationRecord(
-            text="test", annotation="mock", prediction=[("mock", 0.1)]
-        )
-    )
+    records.append(ar.TextClassificationRecord(text="test", annotation="mock", prediction=[("mock", 0.1)]))
     with pytest.raises(
         MissingPredictionError,
         match="It seems a prediction for 'mock' is missing in the following record",

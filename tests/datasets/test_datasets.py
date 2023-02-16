@@ -12,9 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla as ar
+import pytest
 from argilla import TextClassificationSettings, TokenClassificationSettings
 from argilla.client import api
 from argilla.client.client import Argilla
@@ -61,9 +60,7 @@ def test_delete_dataset_by_non_creator(mocked_client, mock_user):
     ar = Argilla()
 
     ar.delete(dataset)
-    ar.datasets.configure(
-        dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"})
-    )
+    ar.datasets.configure(dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}))
 
     api = Argilla(api_key=mock_user.api_key, workspace="argilla")
     with pytest.raises(ForbiddenApiError):

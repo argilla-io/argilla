@@ -36,9 +36,7 @@ def data(
     request: Optional[TokenClassificationQuery] = None,
     limit: Optional[int] = None,
     id_from: Optional[str] = None,
-) -> Response[
-    Union[List[TokenClassificationRecord], HTTPValidationError, ErrorMessage]
-]:
+) -> Response[Union[List[TokenClassificationRecord], HTTPValidationError, ErrorMessage]]:
     path = f"/api/datasets/{name}/TokenClassification/data"
     params = build_param_dict(id_from, limit)
 
@@ -48,6 +46,4 @@ def data(
         params=params if params else None,
         json=request.dict() if request else {},
     ) as response:
-        return build_data_response(
-            response=response, data_type=TokenClassificationRecord
-        )
+        return build_data_response(response=response, data_type=TokenClassificationRecord)

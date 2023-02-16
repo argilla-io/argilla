@@ -14,10 +14,9 @@
 #  limitations under the License.
 
 import pytest
-from pydantic import ValidationError
-
 from argilla.server.apis.v0.models.datasets import CreateDatasetRequest
 from argilla.server.commons.models import TaskType
+from pydantic import ValidationError
 
 
 @pytest.mark.parametrize(

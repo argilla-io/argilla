@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
     Text2TextRecord,

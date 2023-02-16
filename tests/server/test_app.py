@@ -16,7 +16,6 @@ import sys
 from importlib import reload
 
 import pytest
-
 from argilla.server import app
 
 

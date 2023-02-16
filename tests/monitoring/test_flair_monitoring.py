@@ -15,10 +15,9 @@ from time import sleep
 
 
 def test_flair_monitoring(mocked_client, monkeypatch):
+    import argilla as ar
     from flair.data import Sentence
     from flair.models import SequenceTagger
-
-    import argilla as ar
 
     dataset = "test_flair_monitoring"
     model = "flair/ner-english"

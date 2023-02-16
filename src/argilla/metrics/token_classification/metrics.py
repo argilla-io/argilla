@@ -22,9 +22,7 @@ from argilla.metrics import helpers
 from argilla.metrics.models import MetricSummary
 
 
-def tokens_length(
-    name: str, query: Optional[str] = None, interval: int = 1
-) -> MetricSummary:
+def tokens_length(name: str, query: Optional[str] = None, interval: int = 1) -> MetricSummary:
     """Computes the text length distribution measured in number of tokens.
 
     Args:
@@ -42,9 +40,7 @@ def tokens_length(
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # the raw histogram data with bins of size 5
     """
-    metric = api.active_api().compute_metric(
-        name, metric="tokens_length", query=query, interval=interval
-    )
+    metric = api.active_api().compute_metric(name, metric="tokens_length", query=query, interval=interval)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -56,9 +52,7 @@ def tokens_length(
     )
 
 
-def token_frequency(
-    name: str, query: Optional[str] = None, tokens: int = 1000
-) -> MetricSummary:
+def token_frequency(name: str, query: Optional[str] = None, tokens: int = 1000) -> MetricSummary:
     """Computes the token frequency distribution for a numbe of tokens.
 
     Args:
@@ -76,9 +70,7 @@ def token_frequency(
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # the top-50 tokens frequency
     """
-    metric = api.active_api().compute_metric(
-        name, metric="token_frequency", query=query, size=tokens
-    )
+    metric = api.active_api().compute_metric(name, metric="token_frequency", query=query, size=tokens)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -143,9 +135,7 @@ def token_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # The token capitalness distribution
     """
-    metric = api.active_api().compute_metric(
-        name, metric="token_capitalness", query=query
-    )
+    metric = api.active_api().compute_metric(name, metric="token_capitalness", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -214,9 +204,7 @@ def mention_length(
     """
     level = (level or "token").lower().strip()
     accepted_levels = ["token", "char"]
-    assert (
-        level in accepted_levels
-    ), f"Unexpected value for level. Accepted values are {accepted_levels}"
+    assert level in accepted_levels, f"Unexpected value for level. Accepted values are {accepted_levels}"
 
     metric = api.active_api().compute_metric(
         name,
@@ -421,9 +409,7 @@ def top_k_mentions(
     for mention in metric.results["mentions"]:
         entities = mention["entities"]
         if post_label_filter:
-            entities = [
-                entity for entity in entities if entity["label"] in post_label_filter
-            ]
+            entities = [entity for entity in entities if entity["label"] in post_label_filter]
         if entities:
             mention["entities"] = entities
             filtered_mentions.append(mention)
@@ -434,9 +420,7 @@ def top_k_mentions(
         for entity in mention["entities"]:
             label = entity["label"]
             mentions_for_label = entities.get(label, [0] * len(filtered_mentions))
-            mentions_for_label[mention_values.index(mention["mention"])] = entity[
-                "count"
-            ]
+            mentions_for_label[mention_values.index(mention["mention"])] = entity["count"]
             entities[label] = mentions_for_label
 
     return MetricSummary.new_summary(

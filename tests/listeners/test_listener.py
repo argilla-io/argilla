@@ -15,9 +15,8 @@
 import time
 from typing import List
 
-import pytest
-
 import argilla as ar
+import pytest
 from argilla import RGListenerContext, listener
 from argilla.client.models import Record
 
@@ -40,9 +39,7 @@ def condition_check_params(search):
         ("dataset", "val + {param}", None, condition_check_params, {"param": 100}),
     ],
 )
-def test_listener_with_parameters(
-    mocked_client, dataset, query, metrics, condition, query_params
-):
+def test_listener_with_parameters(mocked_client, dataset, query, metrics, condition, query_params):
     ar.delete(dataset)
 
     class TestListener:

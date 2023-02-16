@@ -14,14 +14,13 @@
 
 from typing import List
 
-from fastapi import FastAPI
-from starlette.testclient import TestClient
-
 from argilla._constants import API_KEY_HEADER_NAME, WORKSPACE_HEADER_NAME
 from argilla.client.api import active_api
 from argilla.server.security import auth
 from argilla.server.security.auth_provider.local.settings import settings
 from argilla.server.security.auth_provider.local.users.model import UserInDB
+from fastapi import FastAPI
+from starlette.testclient import TestClient
 
 
 class SecuredClient:

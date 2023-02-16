@@ -16,7 +16,6 @@
 """
 This module configures the global fastapi application
 """
-import fileinput
 import glob
 import inspect
 import logging
@@ -66,9 +65,7 @@ def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers"""
     api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(RequestValidationError)(
-        APIErrorHandler.common_exception_handler
-    )
+    api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
 
 
 def configure_api_router(app: FastAPI):
@@ -186,11 +183,7 @@ def configure_telemetry(app):
     """
     )
     message += "\n\n    "
-    message += (
-        "#set ARGILLA_ENABLE_TELEMETRY=0"
-        if os.name == "nt"
-        else "$>export ARGILLA_ENABLE_TELEMETRY=0"
-    )
+    message += "#set ARGILLA_ENABLE_TELEMETRY=0" if os.name == "nt" else "$>export ARGILLA_ENABLE_TELEMETRY=0"
     message += "\n"
 
     @app.on_event("startup")

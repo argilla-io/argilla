@@ -23,7 +23,6 @@ from argilla.server.apis.v0.handlers import (
     metrics,
     token_classification_dataset_settings,
 )
-from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.commons.params import (
     CommonTaskHandlerDependencies,
@@ -84,9 +83,7 @@ def configure_router():
         name: str,
         bulk: TokenClassificationBulkRequest,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        service: TokenClassificationService = Depends(
-            TokenClassificationService.get_instance
-        ),
+        service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
@@ -146,9 +143,7 @@ def configure_router():
             description="If enabled, return related record metrics",
         ),
         pagination: RequestPagination = Depends(),
-        service: TokenClassificationService = Depends(
-            TokenClassificationService.get_instance
-        ),
+        service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> TokenClassificationSearchResults:
@@ -174,9 +169,7 @@ def configure_router():
         return TokenClassificationSearchResults(
             total=results.total,
             records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
-            aggregations=TokenClassificationAggregations.parse_obj(results.metrics)
-            if results.metrics
-            else None,
+            aggregations=TokenClassificationAggregations.parse_obj(results.metrics) if results.metrics else None,
         )
 
     def scan_data_response(
@@ -208,9 +201,7 @@ def configure_router():
                     )
                 ) + "\n"
 
-        return StreamingResponseWithErrorHandling(
-            stream_generator(data_stream), media_type="application/json"
-        )
+        return StreamingResponseWithErrorHandling(stream_generator(data_stream), media_type="application/json")
 
     @router.post(
         path=f"{base_endpoint}/data",
@@ -222,9 +213,7 @@ def configure_router():
         query: Optional[TokenClassificationQuery] = None,
         common_params: CommonTaskHandlerDependencies = Depends(),
         limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-        service: TokenClassificationService = Depends(
-            TokenClassificationService.get_instance
-        ),
+        service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
         id_from: Optional[str] = None,
