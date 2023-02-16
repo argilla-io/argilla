@@ -87,7 +87,7 @@
             isAnyPendingStatusRecord,
         }"
       >
-        {{ sentenceText }}
+        {{ message }}
       </p>
     </template>
   </div>
@@ -137,8 +137,18 @@ export default {
       // TODO: when record will be in own ORM table, replace next line by query ORM
       return this.visibleRecords.filter((record) => record.selected);
     },
+    selectedPendingRecords() {
+      return this.selectedRecords.filter(
+        (record) => record.status === "Edited"
+      );
+    },
+    selectedNonPendingRecords() {
+      return this.selectedRecords.filter(
+        (record) => record.status !== "Edited"
+      );
+    },
     isAnyPendingStatusRecord() {
-      return this.selectedRecords.some((record) => record.status === "Edited");
+      return this.selectedPendingRecords.length;
     },
     allowClearOrReset() {
       return (
@@ -151,14 +161,27 @@ export default {
         this.selectedRecords.reduce((acc, curr) => [...acc, curr.id], [])
       );
     },
-    sentenceText() {
-      const oneRecord = this.selectedRecords.length === 1;
-      const dynamicText = `${this.selectedRecords.length} record${
-        oneRecord ? ` is` : `s are`
-      }`;
-      return `${dynamicText} ${
-        this.isAnyPendingStatusRecord ? `pending validation` : ` selected`
-      }`;
+    message() {
+      let pendingSentence = "";
+      let nonPendingSentence = "";
+      const dynamicText = (number, text) => {
+        return `${number} record${number === 1 ? ` is` : `s are`} ${text}`;
+      };
+      if (this.isAnyPendingStatusRecord) {
+        pendingSentence = `${dynamicText(
+          this.selectedPendingRecords.length,
+          "pending validation"
+        )}`;
+      }
+      if (this.selectedNonPendingRecords.length) {
+        nonPendingSentence = `${dynamicText(
+          this.selectedNonPendingRecords.length,
+          "selected"
+        )}`;
+      }
+      return `${nonPendingSentence} ${
+        nonPendingSentence && pendingSentence && "and "
+      } ${pendingSentence}`;
     },
   },
   watch: {
@@ -271,10 +294,6 @@ export default {
     @include font-size(13px);
     margin: 0 $base-space;
     color: $black-54;
-    span {
-      font-weight: 700;
-      color: $black-54;
-    }
   }
   &__text_pending_record {
     padding-block: 0.5em;
