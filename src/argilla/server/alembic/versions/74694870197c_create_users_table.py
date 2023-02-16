@@ -33,13 +33,11 @@ def upgrade() -> None:
     op.create_table(
         "users",
         sa.Column("id", sa.Uuid, primary_key=True),
-        sa.Column("first_name", sa.String),
+        sa.Column("first_name", sa.String, nullable=False),
         sa.Column("last_name", sa.String),
         sa.Column("username", sa.String, nullable=False, unique=True, index=True),
-        sa.Column("email", sa.String, nullable=False, unique=True, index=True),
+        sa.Column("api_key", sa.Text, nullable=False, unique=True, index=True),
         sa.Column("password_hash", sa.Text, nullable=False),
-        sa.Column("password_reset_token", sa.Text, unique=True, index=True),
-        sa.Column("api_key", sa.Text, unique=True, index=True),
     )
 
 

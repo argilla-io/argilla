@@ -70,7 +70,6 @@ def seed_for_tests():
                 User(
                     first_name="Argilla",
                     username="argilla",
-                    email="ar@argilla.io",
                     password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
                     api_key="argilla.apikey",
                     workspaces=[
@@ -80,8 +79,8 @@ def seed_for_tests():
                     ],
                 ),
                 User(
+                    first_name="Mock",
                     username="mock-user",
-                    email="mock-user@argilla.io",
                     password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
                     api_key="mock-user.apikey",
                     workspaces=[Workspace(name="argilla"), Workspace(name="mock-ws")],

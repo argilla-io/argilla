@@ -13,15 +13,26 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import re
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, Field, validator
+from pydantic.utils import GetterDict
 
 from argilla._constants import DATASET_NAME_REGEX_PATTERN
 from argilla.server.errors import EntityNotFoundError
 
 WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
 _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
+
+
+class UserGetter(GetterDict):
+    def get(self, key: str, default: Any) -> Any:
+        if key == "full_name":
+            return f"{self._obj.first_name} {self._obj.last_name}"
+        elif key == "workspaces":
+            return [workspace.name for workspace in self._obj.workspaces]
+        else:
+            return super().get(key, default)
 
 
 class User(BaseModel):
@@ -35,6 +46,7 @@ class User(BaseModel):
 
     class Config:
         orm_mode = True
+        getter_dict = UserGetter
 
     @validator("username")
     def check_username(cls, value):
