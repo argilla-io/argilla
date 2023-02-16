@@ -99,17 +99,22 @@ export default {
     position: relative;
   }
   &__container {
-    padding: 0.4em 0.5em;
-    margin-bottom: $base-space * 2;
-    background: palette(white);
+    margin-bottom: $base-space;
     border-radius: $border-radius-m;
-    box-shadow: $shadow-300;
-    min-height: 48px;
     max-height: 189px;
     overflow: auto;
     @extend %hide-scrollbar;
+    .--annotation & {
+      margin-bottom: $base-space * 2;
+    }
     &__button {
       display: inline-block;
+      &.button {
+        background: $black-4;
+        &:hover {
+          background: $black-10;
+        }
+      }
     }
   }
 }

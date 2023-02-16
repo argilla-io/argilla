@@ -258,12 +258,12 @@ export default {
   }
   &__item {
     position: relative;
+    display: inline-block;
     background: palette(white);
     border-radius: $border-radius-m;
-    display: inline-block;
     width: 100%;
     border: 1px solid palette(grey, 600);
-    margin-bottom: $base-space-between-records;
+    margin-top: $base-space-between-records;
     &--annotation-mode {
       @extend .list__item !optional;
       padding-left: $base-space;
