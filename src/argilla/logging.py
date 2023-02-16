@@ -18,10 +18,13 @@ This module centralizes all configuration and logging management
 """
 
 import logging
-from logging import Logger
+from logging import Logger, StreamHandler
 from typing import Type
 
-from rich.logging import RichHandler
+try:
+    from rich.logging import RichHandler as ArgillaHandler
+except ModuleNotFoundError:
+    ArgillaHandler = StreamHandler
 
 
 def full_qualified_class_name(_class: Type) -> str:
@@ -59,7 +62,7 @@ class LoggingMixin:
 
 def configure_logging():
     """Normalizes logging configuration for argilla and its dependencies"""
-    handler = RichHandler()
+    handler = ArgillaHandler()
 
     # See the note here: https://docs.python.org/3/library/logging.html#logging.Logger.propagate
     # We only attach our handler to the root logger and let propagation take care of the rest
