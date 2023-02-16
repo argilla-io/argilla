@@ -253,7 +253,7 @@ export default {
   max-width: 238px;
 }
 .annotation-area {
-  margin-top: 2em;
+  margin-top: $base-space * 4;
 }
 .feedback-interactions {
   margin: 0 auto 0 auto;

@@ -242,7 +242,7 @@ export default {
   display: flex;
   &--left {
     width: 100%;
-    padding: 20px 20px 20px 50px;
+    padding: $base-space * 4 20px 20px 50px;
     .list__item--annotation-mode & {
       padding-right: 240px;
     }

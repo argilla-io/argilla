@@ -265,6 +265,9 @@ export default {
     left: 0;
     top: 0;
     margin: 0 $base-space 0 0;
+    &:not(.checked):deep(.checkbox-container) {
+      border-color: $black-20;
+    }
   }
   &__select {
     margin-left: 0.8em;
@@ -296,10 +299,9 @@ export default {
     color: $black-54;
   }
   &__text_pending_record {
-    padding-block: 0.5em;
-    padding-inline: 1em;
+    padding: calc($base-space / 2) $base-space;
     background-color: rgb(255, 103, 95, 0.2);
-    border-radius: 5px;
+    border-radius: $border-radius;
   }
   &__button {
     .svg-icon {

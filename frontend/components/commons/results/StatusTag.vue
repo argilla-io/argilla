@@ -39,7 +39,7 @@ export default {
   background: palette(green);
   color: palette(white);
   border-radius: 50px;
-  padding: 0.4em 1em;
+  padding: 0.2em 1em;
   @include font-size(12px);
   font-weight: 600;
   z-index: 0;
