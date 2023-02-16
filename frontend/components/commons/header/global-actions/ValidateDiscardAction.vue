@@ -175,7 +175,7 @@ export default {
       }
       if (this.selectedNonPendingRecords.length) {
         nonPendingSentence = `${dynamicText(
-          this.selectedNonPendingRecords.length,
+          this.selectedRecords.length,
           "selected"
         )}`;
       }
