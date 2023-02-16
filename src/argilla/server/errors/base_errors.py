@@ -46,11 +46,7 @@ class ServerError(Exception):
 
     @property
     def arguments(self):
-        return (
-            {k: v for k, v in vars(self).items() if v is not None}
-            if vars(self)
-            else None
-        )
+        return {k: v for k, v in vars(self).items() if v is not None} if vars(self) else None
 
     def __str__(self):
         args = self.arguments or {}
@@ -77,11 +73,7 @@ class GenericServerError(ServerError):
     @classmethod
     def api_documentation(cls):
         return {
-            "content": {
-                "application/json": {
-                    "example": {"detail": {"code": "builtins.TypeError"}}
-                }
-            },
+            "content": {"application/json": {"example": {"detail": {"code": "builtins.TypeError"}}}},
         }
 
 

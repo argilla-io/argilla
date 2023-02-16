@@ -44,9 +44,7 @@ class LazyargillaModule(ModuleType):
             for value in values:
                 self._class_to_module[value] = key
         # Needed for autocompletion in an IDE
-        self.__all__ = list(import_structure.keys()) + list(
-            chain(*import_structure.values())
-        )
+        self.__all__ = list(import_structure.keys()) + list(chain(*import_structure.values()))
         self.__file__ = module_file
         self.__spec__ = module_spec
         self.__path__ = [os.path.dirname(module_file)]
@@ -83,9 +81,7 @@ class LazyargillaModule(ModuleType):
         elif name in self._deprecated_modules:
             value = self._get_module(name, deprecated=True)
         elif name in self._deprecated_class_to_module.keys():
-            module = self._get_module(
-                self._deprecated_class_to_module[name], deprecated=True, class_name=name
-            )
+            module = self._get_module(self._deprecated_class_to_module[name], deprecated=True, class_name=name)
             value = getattr(module, name)
         else:
             raise AttributeError(f"module {self.__name__} has no attribute {name}")
@@ -139,9 +135,7 @@ def limit_value_length(data: Any, max_length: int) -> Any:
     if isinstance(data, str):
         return data[-max_length:]
     if isinstance(data, dict):
-        return {
-            k: limit_value_length(v, max_length=max_length) for k, v in data.items()
-        }
+        return {k: limit_value_length(v, max_length=max_length) for k, v in data.items()}
     if isinstance(data, (list, tuple, set)):
         new_values = map(lambda x: limit_value_length(x, max_length=max_length), data)
         return type(data)(new_values)
@@ -167,9 +161,7 @@ def setup_loop_in_thread() -> Tuple[asyncio.AbstractEventLoop, threading.Thread]
 
     if not (__LOOP__ and __THREAD__):
         loop = asyncio.new_event_loop()
-        thread = threading.Thread(
-            target=start_background_loop, args=(loop,), daemon=True
-        )
+        thread = threading.Thread(target=start_background_loop, args=(loop,), daemon=True)
         thread.start()
         __LOOP__, __THREAD__ = loop, thread
     return __LOOP__, __THREAD__

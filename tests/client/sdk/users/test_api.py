@@ -26,15 +26,11 @@ def test_whoami(mocked_client, sdk_client):
 
 def test_whoami_with_auth_error(monkeypatch, mocked_client):
     with pytest.raises(UnauthorizedApiError):
-        sdk_client = AuthenticatedClient(
-            base_url="http://localhost:6900", token="wrong-apikey"
-        )
+        sdk_client = AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey")
         monkeypatch.setattr(sdk_client, "__httpx__", mocked_client)
         whoami(sdk_client)
 
 
 def test_whoami_with_connection_error():
     with pytest.raises(BaseClientError):
-        whoami(
-            AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey")
-        )
+        whoami(AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey"))

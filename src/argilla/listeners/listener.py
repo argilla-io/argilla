@@ -69,9 +69,7 @@ class RGDatasetListener:
             return None
         return self.query.format(**(self.query_params or {}))
 
-    __listener_job__: Optional[schedule.Job] = dataclasses.field(
-        init=False, default=None
-    )
+    __listener_job__: Optional[schedule.Job] = dataclasses.field(init=False, default=None)
     __stop_schedule_event__ = None
     __current_thread__ = None
     __scheduler__ = schedule.Scheduler()
@@ -120,13 +118,11 @@ class RGDatasetListener:
         if self.is_running():
             raise ValueError("Listener is already running")
 
-        job_step = self.__catch_exceptions__(cancel_on_failure=True)(
-            self.__listener_iteration_job__
-        )
+        job_step = self.__catch_exceptions__(cancel_on_failure=True)(self.__listener_iteration_job__)
 
-        self.__listener_job__ = self.__scheduler__.every(
-            self.interval_in_seconds
-        ).seconds.do(job_step, *action_args, **action_kwargs)
+        self.__listener_job__ = self.__scheduler__.every(self.interval_in_seconds).seconds.do(
+            job_step, *action_args, **action_kwargs
+        )
 
         class _ScheduleThread(threading.Thread):
             _WAIT_EVENT = threading.Event()
@@ -183,9 +179,7 @@ class RGDatasetListener:
         ctx = RGListenerContext(
             listener=self,
             query_params=self.query_params,
-            metrics=self.__compute_metrics__(
-                current_api, dataset, query=self.formatted_query
-            ),
+            metrics=self.__compute_metrics__(current_api, dataset, query=self.formatted_query),
         )
         if self.condition is None:
             self._LOGGER.debug("No condition found! Running action...")
@@ -230,9 +224,7 @@ class RGDatasetListener:
         try:
             action_args = [ctx] if ctx else []
             if self.query_records:
-                action_args.insert(
-                    0, argilla.load(name=self.dataset, query=self.formatted_query)
-                )
+                action_args.insert(0, argilla.load(name=self.dataset, query=self.formatted_query))
             self._LOGGER.debug(f"Running action with arguments: {action_args}")
             return self.action(*args, *action_args, **kwargs)
         except:  # noqa: E722

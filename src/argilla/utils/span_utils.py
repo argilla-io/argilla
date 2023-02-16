@@ -100,9 +100,7 @@ class SpanUtils:
         if not_valid_spans_errors or misaligned_spans_errors:
             message = ""
             if not_valid_spans_errors:
-                message += (
-                    f"Following entity spans are not valid: {not_valid_spans_errors}\n"
-                )
+                message += f"Following entity spans are not valid: {not_valid_spans_errors}\n"
 
             if misaligned_spans_errors:
                 spans = "\n".join(misaligned_spans_errors)
@@ -191,9 +189,7 @@ class SpanUtils:
             return splits[0], "-".join(splits[1:])
 
         if len(tags) != len(self.tokens):
-            raise ValueError(
-                "The list of tags must have the same length as the list of tokens!"
-            )
+            raise ValueError("The list of tags must have the same length as the list of tokens!")
 
         spans, start_idx = [], None
         for idx, tag in enumerate(tags):

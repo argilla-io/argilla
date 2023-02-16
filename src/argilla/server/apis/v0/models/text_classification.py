@@ -47,17 +47,12 @@ from argilla.server.services.tasks.text_classification.model import (
 
 
 class UpdateLabelingRule(BaseModel):
-    label: Optional[str] = Field(
-        default=None, description="@Deprecated::The label associated with the rule."
-    )
+    label: Optional[str] = Field(default=None, description="@Deprecated::The label associated with the rule.")
     labels: List[str] = Field(
         default_factory=list,
-        description="For multi label problems, a list of labels. "
-        "It will replace the `label` field",
+        description="For multi label problems, a list of labels. " "It will replace the `label` field",
     )
-    description: Optional[str] = Field(
-        None, description="A brief description of the rule"
-    )
+    description: Optional[str] = Field(None, description="A brief description of the rule")
 
     @root_validator
     def initialize_labels(cls, values):
@@ -83,9 +78,7 @@ class CreateLabelingRule(UpdateLabelingRule):
 
 class LabelingRule(CreateLabelingRule):
     author: str = Field(description="User who created the rule")
-    created_at: Optional[datetime] = Field(
-        default_factory=datetime.utcnow, description="Rule creation timestamp"
-    )
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow, description="Rule creation timestamp")
 
 
 class LabelingRuleMetricsSummary(_LabelingRuleMetricsSummary):
@@ -110,9 +103,7 @@ class TextClassificationRecordInputs(BaseRecordInputs[TextClassificationAnnotati
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
 
-class TextClassificationRecord(
-    TextClassificationRecordInputs, BaseRecord[TextClassificationAnnotation]
-):
+class TextClassificationRecord(TextClassificationRecordInputs, BaseRecord[TextClassificationAnnotation]):
     pass
 
 
@@ -125,9 +116,7 @@ class TextClassificationBulkRequest(UpdateDatasetRequest):
         if records:
             multi_label = records[0].multi_label
             for record in records[1:]:
-                assert (
-                    multi_label == record.multi_label
-                ), "All records must be single/multi labelled"
+                assert multi_label == record.multi_label, "All records must be single/multi labelled"
         return records
 
 

@@ -72,9 +72,7 @@ class ApiInfoService:
     @classmethod
     def get_instance(
         cls,
-        backend: GenericElasticEngineBackend = Depends(
-            GenericElasticEngineBackend.get_instance
-        ),
+        backend: GenericElasticEngineBackend = Depends(GenericElasticEngineBackend.get_instance),
     ) -> "ApiInfoService":
         """
         Creates an api info service

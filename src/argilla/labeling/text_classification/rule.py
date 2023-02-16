@@ -89,22 +89,16 @@ class Rule:
 
     def add_to_dataset(self, dataset: str):
         """Add to rule to the given dataset"""
-        api.active_api().add_dataset_labeling_rules(
-            dataset, rules=[self._convert_to_labeling_rule()]
-        )
+        api.active_api().add_dataset_labeling_rules(dataset, rules=[self._convert_to_labeling_rule()])
 
     def remove_from_dataset(self, dataset: str):
         """Removes the rule from the given dataset"""
 
-        api.active_api().delete_dataset_labeling_rules(
-            dataset, rules=[self._convert_to_labeling_rule()]
-        )
+        api.active_api().delete_dataset_labeling_rules(dataset, rules=[self._convert_to_labeling_rule()])
 
     def update_at_dataset(self, dataset: str):
         """Updates the rule at the given dataset"""
-        api.active_api().update_dataset_labeling_rules(
-            dataset, rules=[self._convert_to_labeling_rule()]
-        )
+        api.active_api().update_dataset_labeling_rules(dataset, rules=[self._convert_to_labeling_rule()])
 
     def apply(self, dataset: str):
         """Apply the rule to a dataset and save matching ids of the records.
@@ -140,15 +134,11 @@ class Rule:
             "coverage": metrics.coverage,
             "annotated_coverage": metrics.coverage_annotated,
             "correct": int(metrics.correct) if metrics.correct is not None else None,
-            "incorrect": int(metrics.incorrect)
-            if metrics.incorrect is not None
-            else None,
+            "incorrect": int(metrics.incorrect) if metrics.incorrect is not None else None,
             "precision": metrics.precision if metrics.precision is not None else None,
         }
 
-    def __call__(
-        self, record: TextClassificationRecord
-    ) -> Optional[Union[str, List[str]]]:
+    def __call__(self, record: TextClassificationRecord) -> Optional[Union[str, List[str]]]:
         """Check if the given record is among the matching ids from the ``self.apply`` call.
 
         Args:
@@ -161,9 +151,7 @@ class Rule:
             RuleNotAppliedError: If the rule was not applied to the dataset before.
         """
         if self._matching_ids is None:
-            raise RuleNotAppliedError(
-                "Rule was still not applied. Please call `self.apply(dataset)` first."
-            )
+            raise RuleNotAppliedError("Rule was still not applied. Please call `self.apply(dataset)` first.")
 
         try:
             self._matching_ids[record.id]

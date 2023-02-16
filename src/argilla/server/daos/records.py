@@ -38,9 +38,7 @@ class DatasetRecordsDAO:
     @classmethod
     def get_instance(
         cls,
-        es: GenericElasticEngineBackend = Depends(
-            GenericElasticEngineBackend.get_instance
-        ),
+        es: GenericElasticEngineBackend = Depends(GenericElasticEngineBackend.get_instance),
     ) -> "DatasetRecordsDAO":
         """
         Creates a dataset records dao instance
@@ -91,9 +89,7 @@ class DatasetRecordsDAO:
 
         mapping = self._es.get_schema(id=dataset.id)
         exclude_fields = [
-            name
-            for name in record_class.schema()["properties"]
-            if name not in mapping["mappings"]["properties"]
+            name for name in record_class.schema()["properties"] if name not in mapping["mappings"]["properties"]
         ]
 
         vectors_configuration = {}
@@ -173,9 +169,7 @@ class DatasetRecordsDAO:
         except ClosedIndexError:
             raise ClosedDatasetError(dataset.name)
         except IndexNotFoundError:
-            raise MissingDatasetRecordsError(
-                f"No records index found for dataset {dataset.name}"
-            )
+            raise MissingDatasetRecordsError(f"No records index found for dataset {dataset.name}")
 
     def scan_dataset(
         self,

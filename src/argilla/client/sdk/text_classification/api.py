@@ -52,9 +52,7 @@ def data(
         params=params if params else None,
         json=request.dict() if request else {},
     ) as response:
-        return build_data_response(
-            response=response, data_type=TextClassificationRecord
-        )
+        return build_data_response(response=response, data_type=TextClassificationRecord)
 
 
 def add_dataset_labeling_rule(
@@ -62,9 +60,7 @@ def add_dataset_labeling_rule(
     name: str,
     rule: LabelingRule,
 ) -> Response[Union[LabelingRule, HTTPValidationError, ErrorMessage]]:
-    url = "{}/api/datasets/{name}/TextClassification/labeling/rules".format(
-        client.base_url, name=name
-    )
+    url = "{}/api/datasets/{name}/TextClassification/labeling/rules".format(client.base_url, name=name)
 
     response = httpx.post(
         url=url,
@@ -118,9 +114,7 @@ def fetch_dataset_labeling_rules(
     client: AuthenticatedClient,
     name: str,
 ) -> Response[Union[List[LabelingRule], HTTPValidationError, ErrorMessage]]:
-    url = "{}/api/datasets/TextClassification/{name}/labeling/rules".format(
-        client.base_url, name=name
-    )
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules".format(client.base_url, name=name)
 
     response = httpx.get(
         url=url,
@@ -149,6 +143,4 @@ def dataset_rule_metrics(
         timeout=client.get_timeout(),
     )
 
-    return build_typed_response(
-        response, response_type_class=LabelingRuleMetricsSummary
-    )
+    return build_typed_response(response, response_type_class=LabelingRuleMetricsSummary)

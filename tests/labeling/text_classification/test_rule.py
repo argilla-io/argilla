@@ -69,9 +69,7 @@ def log_dataset(mocked_client) -> str:
                 "id": idx,
             }
         )
-        for text, label, idx in zip(
-            ["negative", "positive"], ["negative", "positive"], [1, 2]
-        )
+        for text, label, idx in zip(["negative", "positive"], ["negative", "positive"], [1, 2])
     ]
     mocked_client.post(
         f"/api/datasets/{dataset_name}/TextClassification:bulk",
@@ -83,9 +81,7 @@ def log_dataset(mocked_client) -> str:
     return dataset_name
 
 
-@pytest.mark.parametrize(
-    "name,expected", [(None, "query_string"), ("test_name", "test_name")]
-)
+@pytest.mark.parametrize("name,expected", [(None, "query_string"), ("test_name", "test_name")])
 def test_name(name, expected):
     rule = Rule(query="query_string", label="mock", name=name)
     assert rule.name == expected
@@ -357,9 +353,7 @@ def test_rule_metrics(mocked_client, log_dataset, rule, expected_metrics):
         ),
     ],
 )
-def test_rule_metrics_without_annotated(
-    mocked_client, log_dataset_without_annotations, rule, expected_metrics
-):
+def test_rule_metrics_without_annotated(mocked_client, log_dataset_without_annotations, rule, expected_metrics):
     delete_rule_silently(mocked_client, log_dataset_without_annotations, rule)
 
     mocked_client.post(
@@ -373,8 +367,6 @@ def test_rule_metrics_without_annotated(
 
 def delete_rule_silently(client, dataset: str, rule: Rule):
     try:
-        client.delete(
-            f"/api/datasets/TextClassification/{dataset}/labeling/rules/{rule.query}"
-        )
+        client.delete(f"/api/datasets/TextClassification/{dataset}/labeling/rules/{rule.query}")
     except EntityNotFoundError:
         pass

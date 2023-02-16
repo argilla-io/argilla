@@ -60,9 +60,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
-    prediction: Optional[AnnotationDB] = Field(
-        None, description="Deprecated. Use `predictions` instead"
-    )
+    prediction: Optional[AnnotationDB] = Field(None, description="Deprecated. Use `predictions` instead")
     annotation: Optional[AnnotationDB] = None
 
     vectors: Optional[Dict[str, BaseEmbeddingVectorDB]] = Field(
@@ -98,21 +96,13 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
             if not annotation.agent:
                 raise AssertionError("Agent must be defined!")
 
-            annotations.update(
-                {
-                    annotation.agent: annotation.__class__.parse_obj(
-                        annotation.dict(exclude={"agent"})
-                    )
-                }
-            )
+            annotations.update({annotation.agent: annotation.__class__.parse_obj(annotation.dict(exclude={"agent"}))})
             values[field_to_update] = annotations
 
         if annotations and not annotation:
             # set first annotation
             key, value = list(annotations.items())[0]
-            values[annotation_field] = value.__class__(
-                agent=key, **value.dict(exclude={"agent"})
-            )
+            values[annotation_field] = value.__class__(agent=key, **value.dict(exclude={"agent"}))
 
         return values
 

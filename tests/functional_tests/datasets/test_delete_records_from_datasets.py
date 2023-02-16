@@ -26,10 +26,7 @@ def test_delete_records_from_dataset(mocked_client):
     ar.log(
         name=dataset,
         records=[
-            ar.TextClassificationRecord(
-                id=i, text="This is the text", metadata=dict(idx=i)
-            )
-            for i in range(0, 50)
+            ar.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
         ],
     )
 
@@ -40,9 +37,7 @@ def test_delete_records_from_dataset(mocked_client):
     assert len(ds) == 50
 
     time.sleep(1)
-    matched, processed = ar.delete_records(
-        name=dataset, query="id:10", discard_only=False
-    )
+    matched, processed = ar.delete_records(name=dataset, query="id:10", discard_only=False)
     assert matched, processed == (1, 1)
 
     time.sleep(1)
@@ -58,10 +53,7 @@ def test_delete_records_without_permission(mocked_client):
     ar.log(
         name=dataset,
         records=[
-            ar.TextClassificationRecord(
-                id=i, text="This is the text", metadata=dict(idx=i)
-            )
-            for i in range(0, 50)
+            ar.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
         ],
     )
     try:

@@ -57,11 +57,7 @@ class TopKMentionsConsistency(NestedPathElasticsearchMetric):
                         self.compound_nested_field(self.labels_field),
                         size=entity_size,
                     ),
-                    "count": {
-                        "cardinality": {
-                            "field": self.compound_nested_field(self.labels_field)
-                        }
-                    },
+                    "count": {"cardinality": {"field": self.compound_nested_field(self.labels_field)}},
                     "entities_variability_filter": {
                         "bucket_selector": {
                             "buckets_path": {"numLabels": "count"},
@@ -83,10 +79,7 @@ class TopKMentionsConsistency(NestedPathElasticsearchMetric):
         result = [
             {
                 "mention": mention,
-                "entities": [
-                    {"label": entity, "count": count}
-                    for entity, count in mention_aggs["entities"].items()
-                ],
+                "entities": [{"label": entity, "count": count} for entity, count in mention_aggs["entities"].items()],
             }
             for mention, mention_aggs in aggregation_result.items()
         ]
@@ -194,16 +187,12 @@ METRICS = {
     "predicted_mentions_distribution": NestedBidimensionalTermsAggregation(
         id="predicted_mentions_distribution",
         nested_path="metrics.predicted.mentions",
-        biterms=BidimensionalTermsAggregation(
-            id="bi-dimensional", field_x="label", field_y="value"
-        ),
+        biterms=BidimensionalTermsAggregation(id="bi-dimensional", field_x="label", field_y="value"),
     ),
     "annotated_mentions_distribution": NestedBidimensionalTermsAggregation(
         id="predicted_mentions_distribution",
         nested_path="metrics.annotated.mentions",
-        biterms=BidimensionalTermsAggregation(
-            id="bi-dimensional", field_x="label", field_y="value"
-        ),
+        biterms=BidimensionalTermsAggregation(id="bi-dimensional", field_x="label", field_y="value"),
     ),
     "predicted_top_k_mentions_consistency": TopKMentionsConsistency(
         id="predicted_top_k_mentions_consistency",

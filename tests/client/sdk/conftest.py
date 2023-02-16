@@ -61,8 +61,7 @@ class Helpers:
                     continue
                 if name not in server_props:
                     LOGGER.warning(
-                        f"Client property {name} not found in server properties. "
-                        "Make sure your API compatibility"
+                        f"Client property {name} not found in server properties. " "Make sure your API compatibility"
                     )
                     different_props.append(name)
                     continue
@@ -105,9 +104,7 @@ class Helpers:
                 expanded_props = self._expands_schema(field_props, definitions)
                 definition["items"] = expanded_props.get("properties", expanded_props)
                 new_schema[name] = definition
-            elif "additionalProperties" in definition and "$ref" in definition.get(
-                "additionalProperties", {}
-            ):
+            elif "additionalProperties" in definition and "$ref" in definition.get("additionalProperties", {}):
                 additionalProperties_refs = self._expands_schema(
                     {name: definition["additionalProperties"]},
                     definitions=definitions,
@@ -116,9 +113,7 @@ class Helpers:
             elif "allOf" in definition:
                 allOf_expanded = [
                     self._expands_schema(
-                        definitions[def_["$ref"].replace("#/definitions/", "")].get(
-                            "properties", {}
-                        ),
+                        definitions[def_["$ref"].replace("#/definitions/", "")].get("properties", {}),
                         definitions,
                     )
                     for def_ in definition["allOf"]
@@ -140,18 +135,14 @@ def helpers():
 
 @pytest.fixture
 def sdk_client(mocked_client, monkeypatch):
-    client = AuthenticatedClient(
-        base_url="http://localhost:6900", token=DEFAULT_API_KEY
-    )
+    client = AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
     monkeypatch.setattr(client, "__httpx__", mocked_client)
     return client
 
 
 @pytest.fixture
 def bulk_textclass_data():
-    explanation = {
-        "text": [ar.TokenAttributions(token="test", attributions={"test": 0.5})]
-    }
+    explanation = {"text": [ar.TokenAttributions(token="test", attributions={"test": 0.5})]}
     records = [
         ar.TextClassificationRecord(
             text="test",

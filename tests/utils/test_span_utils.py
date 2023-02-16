@@ -43,9 +43,7 @@ def test_init():
 
 
 def test_init_value_error():
-    with pytest.raises(
-        ValueError, match="Token 'ValueError' not found in text: test error"
-    ):
+    with pytest.raises(ValueError, match="Token 'ValueError' not found in text: test error"):
         SpanUtils(text="test error", tokens=["test", "ValueError"])
 
 
@@ -56,9 +54,7 @@ def test_validate():
 
 def test_validate_not_valid_spans():
     span_utils = SpanUtils("test this.", ["test", "this", "."])
-    with pytest.raises(
-        ValueError, match="Following entity spans are not valid: \[\('mock', 2, 1\)\]\n"
-    ):
+    with pytest.raises(ValueError, match="Following entity spans are not valid: \[\('mock', 2, 1\)\]\n"):
         span_utils.validate([("mock", 2, 1)])
 
 
