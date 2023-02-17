@@ -12,11 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from passlib.context import CryptContext
-from sqlalchemy.orm import Session
-
 from argilla.server.models import User
 from argilla.server.security.model import UserCreate
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -34,7 +33,7 @@ def create_user(db: Session, user_create: UserCreate):
         first_name=user_create.first_name,
         last_name=user_create.last_name,
         username=user_create.username,
-        password_hash=_CRYPT_CONTEXT.hash(user_create.password)
+        password_hash=_CRYPT_CONTEXT.hash(user_create.password),
     )
 
     db.add(user)

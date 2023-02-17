@@ -22,10 +22,11 @@ from fastapi.security import (
     OAuth2PasswordRequestForm,
     SecurityScopes,
 )
-from sqlalchemy.orm import Session
 from jose import JWTError, jwt
+from sqlalchemy.orm import Session
 
 from argilla.server.contexts import accounts
+from argilla.server.database import get_db
 from argilla.server.errors import InactiveUserError, UnauthorizedError
 from argilla.server.security.auth_provider.base import (
     AuthProvider,
@@ -34,7 +35,6 @@ from argilla.server.security.auth_provider.base import (
 )
 from argilla.server.security.auth_provider.local.users.service import UsersService
 from argilla.server.security.model import Token, User
-from argilla.server.database import get_db
 
 from .settings import Settings
 from .settings import settings as local_security

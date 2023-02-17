@@ -13,14 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from fastapi import APIRouter, Request, Security, Depends
+from fastapi import APIRouter, Depends, Request, Security
 from sqlalchemy.orm import Session
 
 from argilla.server.commons import telemetry
 from argilla.server.contexts import accounts
+from argilla.server.database import get_db
 from argilla.server.security import auth
 from argilla.server.security.model import User, UserCreate
-from argilla.server.database import get_db
 
 router = APIRouter(tags=["users"])
 
@@ -49,10 +49,7 @@ async def whoami(request: Request, current_user: User = Security(auth.get_user, 
 
 @router.post("/users", response_model=User, response_model_exclude_none=True)
 def create_user(
-    *,
-    db: Session = Depends(get_db),
-    user_create: UserCreate,
-    current_user: User = Security(auth.get_user, scopes=[])
+    *, db: Session = Depends(get_db), user_create: UserCreate, current_user: User = Security(auth.get_user, scopes=[])
 ):
     user = accounts.create_user(db, user_create)
 
