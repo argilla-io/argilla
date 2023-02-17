@@ -45,6 +45,16 @@ class UserCreate(BaseModel):
     password: constr(min_length=_USER_PASSWORD_MIN_LENGTH)
 
 
+class UserGetter(GetterDict):
+    def get(self, key: str, default: Any) -> Any:
+        if key == "full_name":
+            return f"{self._obj.first_name} {self._obj.last_name}"
+        elif key == "workspaces":
+            return [workspace.name for workspace in self._obj.workspaces]
+        else:
+            return super().get(key, default)
+
+
 class User(BaseModel):
     """Base user model"""
 
