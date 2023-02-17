@@ -12,40 +12,39 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.database import SessionLocal
 from argilla.server.models import User
+from argilla.server.security.model import UserCreate
 from passlib.context import CryptContext
-from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def get_user_by_api_key(api_key: str):
-    session = SessionLocal()
-
-    return session.scalar(select(User).where(User.api_key == api_key))
+def get_user_by_username(db: Session, username: str):
+    return db.query(User).filter(User.username == username).first()
 
 
-def get_user_by_username(username):
-    session = SessionLocal()
-
-    return session.scalar(select(User).where(User.username == username))
+def get_user_by_api_key(db: Session, api_key: str):
+    return db.query(User).filter(User.api_key == api_key).first()
 
 
-def create_user(password, **params):
-    session = SessionLocal()
+def create_user(db: Session, user_create: UserCreate):
+    user = User(
+        first_name=user_create.first_name,
+        last_name=user_create.last_name,
+        username=user_create.username,
+        password_hash=_CRYPT_CONTEXT.hash(user_create.password),
+    )
 
-    user = User(password_hash=_CRYPT_CONTEXT.hash(password), **params)
-
-    session.add(user)
-    session.commit()
-    session.refresh(user)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
     return user
 
 
-def authenticate_user(username, password):
-    user = get_user_by_username(username)
+def authenticate_user(db: Session, username: str, password: str):
+    user = get_user_by_username(db, username)
 
     if user and _CRYPT_CONTEXT.verify(password, user.password_hash):
         return user

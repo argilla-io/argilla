@@ -64,8 +64,8 @@ def setup_database(engine):
 
 
 def seed_for_tests():
-    with SessionLocal() as db_session:
-        db_session.add_all(
+    with SessionLocal() as session, session.begin():
+        session.add_all(
             [
                 User(
                     first_name="Argilla",
@@ -87,8 +87,6 @@ def seed_for_tests():
                 ),
             ]
         )
-
-        db_session.commit()
 
 
 @pytest.fixture
