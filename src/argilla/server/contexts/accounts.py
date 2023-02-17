@@ -12,12 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.database import SessionLocal
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
 from argilla.server.models import User
 from argilla.server.security.model import UserCreate
-from passlib.context import CryptContext
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
