@@ -24,4 +24,5 @@ class User(BaseModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
+    api_key: str
     workspaces: List[str] = None

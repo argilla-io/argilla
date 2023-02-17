@@ -32,13 +32,24 @@ def get_user_by_username(username):
     return session.scalar(select(User).where(User.username == username))
 
 
+def create_user(password, **params):
+    session = SessionLocal()
+
+    user = User(password_hash=_CRYPT_CONTEXT.hash(password), **params)
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    return user
+
+
 def authenticate_user(username, password):
     user = get_user_by_username(username)
 
-    # TODO: Avoid time attacks where user is not present
-    if user and _verify_password(password, user.password_hash):
+    if user and _CRYPT_CONTEXT.verify(password, user.password_hash):
         return user
-
-
-def _verify_password(password, hashed_password):
-    return _CRYPT_CONTEXT.verify(password, hashed_password)
+    elif user:
+        return
+    else:
+        _CRYPT_CONTEXT.verify_dummy()

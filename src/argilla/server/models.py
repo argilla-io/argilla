@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import secrets
 import uuid
 from typing import List, Optional
 
@@ -19,6 +20,12 @@ from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
+
+_USER_API_KEY_BYTES_LENGTH = 80
+
+
+def generate_user_api_key():
+    return secrets.token_urlsafe(_USER_API_KEY_BYTES_LENGTH)
 
 
 class UserWorkspace(Base):
@@ -45,8 +52,7 @@ class User(Base):
     first_name: Mapped[str]
     last_name: Mapped[Optional[str]]
     username: Mapped[str]
-    # TODO: Add default with an api key generator function.
-    api_key: Mapped[str] = mapped_column(Text, unique=True)
+    api_key: Mapped[str] = mapped_column(Text, unique=True, default=generate_user_api_key)
     password_hash: Mapped[str] = mapped_column(Text)
 
     workspaces: Mapped[List["Workspace"]] = relationship(secondary="users_workspaces", back_populates="users")

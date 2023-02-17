@@ -24,7 +24,7 @@ from fastapi.security import (
 )
 from jose import JWTError, jwt
 
-from argilla.server.contexts import auth
+from argilla.server.contexts import accounts
 from argilla.server.errors import InactiveUserError, UnauthorizedError
 from argilla.server.security.auth_provider.base import (
     AuthProvider,
@@ -88,7 +88,7 @@ class LocalAuthProvider(AuthProvider):
 
             #################
 
-            user = auth.authenticate_user(form_data.username, form_data.password)
+            user = accounts.authenticate_user(form_data.username, form_data.password)
             if not user:
                 raise UnauthorizedError()
             access_token_expires = timedelta(minutes=self.settings.token_expiration_in_minutes)
@@ -144,7 +144,7 @@ class LocalAuthProvider(AuthProvider):
             username: str = payload.get("sub")
             if username:
                 # return self.users.get_user(username=username)
-                return auth.get_user_by_username(username)
+                return accounts.get_user_by_username(username)
         except JWTError:
             return None
 
@@ -175,7 +175,7 @@ class LocalAuthProvider(AuthProvider):
         user = None
 
         if api_key:
-            user = auth.get_user_by_api_key(api_key)
+            user = accounts.get_user_by_api_key(api_key)
         elif token:
             user = self.fetch_token_user(token)
 

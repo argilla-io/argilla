@@ -15,9 +15,11 @@
 
 from fastapi import APIRouter, Request, Security
 
+from argilla.server import models
 from argilla.server.commons import telemetry
+from argilla.server.contexts import accounts
 from argilla.server.security import auth
-from argilla.server.security.model import User
+from argilla.server.security.model import User, UserCreate
 
 router = APIRouter(tags=["users"])
 
@@ -42,3 +44,10 @@ async def whoami(request: Request, current_user: User = Security(auth.get_user, 
 
     await telemetry.track_login(request, username=current_user.username)
     return current_user
+
+
+@router.post("/users", response_model=User, response_model_exclude_none=True)
+def create_user(user_create: UserCreate, current_user: User = Security(auth.get_user, scopes=[])):
+    user = accounts.create_user(**dict(user_create))
+
+    return User.from_orm(user)
