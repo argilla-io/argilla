@@ -13,9 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import re
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
-from pydantic import BaseModel, Field, validator, constr
+from pydantic import BaseModel, Field, constr, validator
 from pydantic.utils import GetterDict
 
 from argilla._constants import DATASET_NAME_REGEX_PATTERN

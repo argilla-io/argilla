@@ -15,13 +15,11 @@
 
 from fastapi import APIRouter, Request, Security
 
+from argilla.server import models
 from argilla.server.commons import telemetry
+from argilla.server.contexts import accounts
 from argilla.server.security import auth
 from argilla.server.security.model import User, UserCreate
-
-from argilla.server.contexts import accounts
-from argilla.server import models
-
 
 router = APIRouter(tags=["users"])
 

@@ -12,15 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import uuid
 import secrets
+import uuid
 from typing import List, Optional
 
 from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
-
 
 USER_API_KEY_BYTES_LENGTH = 80
 
