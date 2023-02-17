@@ -22,6 +22,7 @@ from fastapi.security import (
     OAuth2PasswordRequestForm,
     SecurityScopes,
 )
+from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 
 from argilla.server.contexts import accounts
@@ -33,6 +34,7 @@ from argilla.server.security.auth_provider.base import (
 )
 from argilla.server.security.auth_provider.local.users.service import UsersService
 from argilla.server.security.model import Token, User
+from argilla.server.database import get_db
 
 from .settings import Settings
 from .settings import settings as local_security
@@ -59,6 +61,7 @@ class LocalAuthProvider(AuthProvider):
             operation_id="login_for_access_token",
         )
         async def login_for_access_token(
+            db: Session = Depends(get_db),
             form_data: OAuth2PasswordRequestForm = Depends(),
         ) -> Token:
             """
@@ -88,7 +91,7 @@ class LocalAuthProvider(AuthProvider):
 
             #################
 
-            user = accounts.authenticate_user(form_data.username, form_data.password)
+            user = accounts.authenticate_user(db, form_data.username, form_data.password)
             if not user:
                 raise UnauthorizedError()
             access_token_expires = timedelta(minutes=self.settings.token_expiration_in_minutes)
@@ -122,7 +125,7 @@ class LocalAuthProvider(AuthProvider):
             algorithm=self.settings.algorithm,
         )
 
-    def fetch_token_user(self, token: str) -> Optional[User]:
+    def fetch_token_user(self, db: Session, token: str) -> Optional[User]:
         """
         Fetch the user for a given access token
 
@@ -144,13 +147,14 @@ class LocalAuthProvider(AuthProvider):
             username: str = payload.get("sub")
             if username:
                 # return self.users.get_user(username=username)
-                return accounts.get_user_by_username(username)
+                return accounts.get_user_by_username(db, username)
         except JWTError:
             return None
 
     async def get_user(
         self,
         security_scopes: SecurityScopes,
+        db: Session = Depends(get_db),
         api_key: Optional[str] = Depends(api_key_header),
         old_api_key: Optional[str] = Depends(old_api_key_header),
         token: Optional[str] = Depends(_oauth2_scheme),
@@ -175,9 +179,9 @@ class LocalAuthProvider(AuthProvider):
         user = None
 
         if api_key:
-            user = accounts.get_user_by_api_key(api_key)
+            user = accounts.get_user_by_api_key(db, api_key)
         elif token:
-            user = self.fetch_token_user(token)
+            user = self.fetch_token_user(db, token)
 
         if user is None:
             raise UnauthorizedError()

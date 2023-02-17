@@ -22,16 +22,12 @@ from sqlalchemy.orm import Session
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def get_user_by_api_key(api_key: str):
-    session = SessionLocal()
-
-    return session.scalar(select(User).where(User.api_key == api_key))
+def get_user_by_username(db: Session, username: str):
+    return db.query(User).filter(User.username == username).first()
 
 
-def get_user_by_username(username):
-    session = SessionLocal()
-
-    return session.scalar(select(User).where(User.username == username))
+def get_user_by_api_key(db: Session, api_key: str):
+    return db.query(User).filter(User.api_key == api_key).first()
 
 
 def create_user(db: Session, user_create: UserCreate):
@@ -49,8 +45,8 @@ def create_user(db: Session, user_create: UserCreate):
     return user
 
 
-def authenticate_user(username, password):
-    user = get_user_by_username(username)
+def authenticate_user(db: Session, username: str, password: str):
+    user = get_user_by_username(db, username)
 
     if user and _CRYPT_CONTEXT.verify(password, user.password_hash):
         return user
