@@ -58,7 +58,7 @@ def mock_response_200(monkeypatch):
     """
 
     def mock_get(*args, **kwargs):
-        return User(username="booohh")
+        return User(username="booohh", api_key="api-key")
 
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
@@ -88,7 +88,7 @@ def mock_response_token_401(monkeypatch):
         if kwargs["url"] == "fake_url/api/me":
             raise UnauthorizedApiError()
         elif kwargs["url"] == "fake_url/api/docs/spec.json":
-            return User(username="booohh")
+            return User(username="booohh", api_key="api-key")
 
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
@@ -105,7 +105,7 @@ def test_init_correct(mock_response_200):
         timeout=60.0,
     )
 
-    assert api.active_api().user == User(username="booohh")
+    assert api.active_api().user == User(username="booohh", api_key="api-key")
 
     api.init(
         api_url="mock_url",
