@@ -17,19 +17,13 @@
 
 <template>
   <div v-if="dataset && viewSettings">
-    <div
-      :class="
-        annotationEnabled && !pageSizeisOne
-          ? 'list__item--selectable'
-          : 'list__item'
-      "
-    >
+    <div :class="isSelectableRecord ? 'list__item--selectable' : 'list__item'">
       <div class="record__header">
         <template v-if="!weakLabelingEnabled">
           <template v-if="annotationEnabled">
             <div class="record__header--left" v-if="!isReferenceRecord">
               <base-checkbox
-                v-if="!pageSizeisOne"
+                v-if="!isPageSizeEqualOne"
                 class="list__checkbox"
                 :value="record.selected"
                 @change="onCheckboxChanged($event, record.id)"
@@ -140,7 +134,10 @@ export default {
     viewSettings() {
       return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
     },
-    pageSizeisOne() {
+    isSelectableRecord() {
+      return this.annotationEnabled && !this.isPageSizeEqualOne;
+    },
+    isPageSizeEqualOne() {
       return this.viewSettings.pagination.size === 1;
     },
     annotationEnabled() {
