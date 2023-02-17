@@ -15,7 +15,7 @@
 import re
 from typing import List, Optional, Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, constr
 from pydantic.utils import GetterDict
 
 from argilla._constants import DATASET_NAME_REGEX_PATTERN
@@ -23,6 +23,9 @@ from argilla.server.errors import EntityNotFoundError
 
 WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
 _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
+
+_USER_PASSWORD_MIN_LENGTH = 8
+_USER_USERNAME_REGEX = DATASET_NAME_REGEX_PATTERN
 
 
 class UserGetter(GetterDict):
@@ -35,6 +38,12 @@ class UserGetter(GetterDict):
             return super().get(key, default)
 
 
+class UserCreate(BaseModel):
+    username: constr(regex=_USER_USERNAME_REGEX)
+    first_name: str
+    last_name: Optional[str]
+    password: constr(min_length=_USER_PASSWORD_MIN_LENGTH)
+
 
 class User(BaseModel):
     """Base user model"""
@@ -43,6 +52,7 @@ class User(BaseModel):
     email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
+    api_key: str
     workspaces: Optional[List[str]] = None
 
     class Config:
