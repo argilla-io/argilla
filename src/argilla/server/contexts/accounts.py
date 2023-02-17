@@ -14,8 +14,10 @@
 
 from argilla.server.database import SessionLocal
 from argilla.server.models import User
+from argilla.server.security.model import UserCreate
 from passlib.context import CryptContext
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -32,14 +34,17 @@ def get_user_by_username(username):
     return session.scalar(select(User).where(User.username == username))
 
 
-def create_user(password, **params):
-    session = SessionLocal()
+def create_user(db: Session, user_create: UserCreate):
+    user = User(
+        first_name=user_create.first_name,
+        last_name=user_create.last_name,
+        username=user_create.username,
+        password_hash=_CRYPT_CONTEXT.hash(user_create.password)
+    )
 
-    user = User(password_hash=_CRYPT_CONTEXT.hash(password), **params)
-
-    session.add(user)
-    session.commit()
-    session.refresh(user)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
     return user
 

@@ -39,9 +39,9 @@ class UserGetter(GetterDict):
 
 
 class UserCreate(BaseModel):
-    username: constr(regex=_USER_USERNAME_REGEX)
     first_name: str
     last_name: Optional[str]
+    username: constr(regex=_USER_USERNAME_REGEX)
     password: constr(min_length=_USER_PASSWORD_MIN_LENGTH)
 
 
