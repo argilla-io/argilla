@@ -17,15 +17,13 @@
 
 <template>
   <div v-if="dataset && viewSettings">
-    <div
-      :class="annotationEnabled ? 'list__item--annotation-mode' : 'list__item'"
-    >
+    <div :class="isSelectableRecord ? 'list__item--selectable' : 'list__item'">
       <div class="record__header">
         <template v-if="!weakLabelingEnabled">
           <template v-if="annotationEnabled">
             <div class="record__header--left" v-if="!isReferenceRecord">
               <base-checkbox
-                :class="pageSizeisOne && '--hidden'"
+                v-if="!isPageSizeEqualOne"
                 class="list__checkbox"
                 :value="record.selected"
                 @change="onCheckboxChanged($event, record.id)"
@@ -136,7 +134,10 @@ export default {
     viewSettings() {
       return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
     },
-    pageSizeisOne() {
+    isSelectableRecord() {
+      return this.annotationEnabled && !this.isPageSizeEqualOne;
+    },
+    isPageSizeEqualOne() {
       return this.viewSettings.pagination.size === 1;
     },
     annotationEnabled() {
@@ -252,19 +253,16 @@ export default {
 .list {
   &__checkbox.re-checkbox {
     margin: auto $base-space;
-    &.--hidden {
-      opacity: 0;
-    }
   }
   &__item {
     position: relative;
+    display: inline-block;
     background: palette(white);
     border-radius: $border-radius-m;
-    display: inline-block;
     width: 100%;
     border: 1px solid palette(grey, 600);
-    margin-bottom: $base-space-between-records;
-    &--annotation-mode {
+    margin-top: $base-space-between-records;
+    &--selectable {
       @extend .list__item !optional;
       padding-left: $base-space;
     }

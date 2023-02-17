@@ -55,7 +55,7 @@ $recordActions: (
     display: flex;
     gap: $base-space;
     align-items: center;
-    margin-top: 3em;
+    margin-top: $base-space * 4;
   }
   @each $action, $color in $recordActions {
     &__actions-button--#{$action} {

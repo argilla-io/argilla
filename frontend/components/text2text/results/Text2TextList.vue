@@ -19,9 +19,7 @@
   <div
     class="content content--separator"
     :class="
-      !annotationEnabled
-        ? 'content--exploration-mode'
-        : 'content--annotation-mode'
+      !annotationEnabled ? 'content--exploration-mode' : 'content--selectable'
     "
   >
     <div

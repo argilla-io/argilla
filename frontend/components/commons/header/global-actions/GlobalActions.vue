@@ -117,13 +117,13 @@ export default {
 .global-actions {
   display: flex;
   align-items: center;
+  min-height: $base-space * 5;
   width: 100%;
   text-align: left;
-  padding: 10px $base-space * 2;
+  padding: calc($base-space / 2) $base-space * 2;
   background: palette(white);
   border-radius: $border-radius-m;
   position: relative;
   box-shadow: $shadow-300;
-  margin-bottom: $base-space * 2;
 }
 </style>
