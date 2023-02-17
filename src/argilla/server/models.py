@@ -21,11 +21,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
 
-USER_API_KEY_BYTES_LENGTH = 80
+_USER_API_KEY_BYTES_LENGTH = 80
 
 
 def generate_user_api_key():
-    return secrets.token_urlsafe(USER_API_KEY_BYTES_LENGTH)
+    return secrets.token_urlsafe(_USER_API_KEY_BYTES_LENGTH)
 
 
 class UserWorkspace(Base):
