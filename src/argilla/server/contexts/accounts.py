@@ -20,6 +20,10 @@ from sqlalchemy.orm import Session
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+def list_users(db: Session):
+    return db.query(User).all()
+
+
 def get_user_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
