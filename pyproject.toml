@@ -20,10 +20,10 @@ keywords = [
     "mlops"
 ]
 authors = [
-    {name = "recognai", email = "contact@recogn.ai"}
+    {name = "argilla", email = "contact@argilla.io"}
 ]
 maintainers = [
-    {name = "recognai", email = "contact@recogn.ai"}
+    {name = "argilla", email = "contact@argilla.io"}
 ]
 dependencies = [
     # Client
