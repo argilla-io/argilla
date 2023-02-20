@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, Security
 from pydantic import BaseModel, Field
@@ -36,6 +36,8 @@ class MetricInfo(BaseModel):
 
 @dataclass
 class MetricSummaryParams:
+    request: Request
+
     interval: Optional[float] = Query(
         default=None,
         gt=0.0,
@@ -46,6 +48,15 @@ class MetricSummaryParams:
         ge=1,
         description="The number of terms for terminological summaries",
     )
+
+    @property
+    def parameters(self) -> Dict[str, Any]:
+        """Returns dynamic metric args found in the request query params"""
+        return {
+            "interval": self.interval,
+            "size": self.size,
+            **{k: v for k, v in self.request.query_params.items() if k not in ["interval", "size"]},
+        }
 
 
 def configure_router(router: APIRouter, cfg: TaskConfig):
@@ -89,7 +100,6 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
         name: str,
         metric: str,
         query: cfg.query,
-        request: Request,
         metric_params: MetricSummaryParams = Depends(),
         request_deps: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
@@ -113,7 +123,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
             metric=metric_,
             record_class=record_class,
             query=query,
-            **request.query_params,
+            **metric_params.parameters,
         )
 
 
