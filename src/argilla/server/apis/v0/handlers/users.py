@@ -13,7 +13,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import List
+
 from fastapi import APIRouter, Depends, Request, Security
+from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 
 from argilla.server.commons import telemetry
@@ -45,6 +48,13 @@ async def whoami(request: Request, current_user: User = Security(auth.get_user, 
 
     await telemetry.track_login(request, username=current_user.username)
     return current_user
+
+
+@router.get("/users", response_model=List[User], response_model_exclude_none=True)
+def list_users(*, db: Session = Depends(get_db), current_user: User = Security(auth.get_user, scopes=[])):
+    users = accounts.list_users(db)
+
+    return parse_obj_as(List[User], users)
 
 
 @router.post("/users", response_model=User, response_model_exclude_none=True)
