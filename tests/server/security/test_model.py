@@ -18,7 +18,7 @@ from argilla.server.security.model import User
 from pydantic import ValidationError
 
 
-@pytest.mark.parametrize("email", ["my@email.com", "infra@recogn.ai"])
+@pytest.mark.parametrize("email", ["my@email.com", "infra@argilla.io"])
 def test_valid_mail(email):
     user = User(username="user", email=email)
     assert user.email == email
