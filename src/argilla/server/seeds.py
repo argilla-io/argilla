@@ -13,13 +13,15 @@
 #  limitations under the License.
 
 from argilla.server.database import SessionLocal
-from argilla.server.models import User
+from argilla.server.models import User, Workspace
 
 
 def development_seeds():
     with SessionLocal() as session, session.begin():
         session.add_all(
             [
+                Workspace(name="workspace-1"),
+                Workspace(name="workspace-2"),
                 User(
                     first_name="John",
                     last_name="Doe",

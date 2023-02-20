@@ -35,6 +35,9 @@ class UserWorkspace(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"))
 
+    user: Mapped["User"] = relationship()
+    workspace: Mapped["Workspace"] = relationship()
+
 
 class Workspace(Base):
     __tablename__ = "workspaces"

@@ -12,12 +12,73 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.models import User
-from argilla.server.security.model import UserCreate
+from uuid import UUID
+
+from argilla.server.models import User, UserWorkspace, Workspace
+from argilla.server.security.model import (
+    UserCreate,
+    UserWorkspaceCreate,
+    WorkspaceCreate,
+)
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def get_user_workspace_by_user_id_and_workspace_id(db: Session, user_id: UUID, workspace_id: UUID):
+    return (
+        db.query(UserWorkspace)
+        .filter(
+            UserWorkspace.user_id == user_id,
+            UserWorkspace.workspace_id == workspace_id,
+        )
+        .first()
+    )
+
+
+def create_user_workspace(db: Session, user_workspace_create: UserWorkspaceCreate):
+    user_workspace = UserWorkspace(
+        user_id=user_workspace_create.user_id, workspace_id=user_workspace_create.workspace_id
+    )
+
+    db.add(user_workspace)
+    db.commit()
+    db.refresh(user_workspace)
+
+    return user_workspace
+
+
+def delete_user_workspace(db: Session, user_workspace: UserWorkspace):
+    db.delete(user_workspace)
+    db.commit()
+
+    return user_workspace
+
+
+def get_workspace_by_id(db: Session, workspace_id: UUID):
+    return db.query(Workspace).get(workspace_id)
+
+
+def list_workspaces(db: Session):
+    return db.query(Workspace).all()
+
+
+def create_workspace(db: Session, workspace_create: WorkspaceCreate):
+    workspace = Workspace(name=workspace_create.name)
+
+    db.add(workspace)
+    db.commit()
+    db.refresh(workspace)
+
+    return workspace
+
+
+def delete_workspace(db: Session, workspace: Workspace):
+    db.delete(workspace)
+    db.commit()
+
+    return workspace
 
 
 def get_user_by_username(db: Session, username: str):
