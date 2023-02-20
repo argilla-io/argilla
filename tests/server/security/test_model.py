@@ -89,6 +89,20 @@ def test_workspace_for_superuser():
     assert user.check_workspaces(["some"]) == ["some"]
 
 
+def test_is_superuser():
+    admin_user = User(username="admin")
+    assert admin_user.is_superuser()
+
+    admin_user.workspaces.append("other-workspace")
+    assert admin_user.is_superuser()
+    assert set(admin_user.available_workspaces) == {"other-workspace", "admin"}
+
+    user = User(username="test", workspaces=["bod"])
+    assert not user.is_superuser()
+    user.superuser = True
+    assert user.is_superuser()
+
+
 @pytest.mark.parametrize(
     "workspaces, expected",
     [
