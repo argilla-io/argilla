@@ -34,6 +34,10 @@ def get_user_by_api_key(db: Session, api_key: str):
     return db.query(User).filter(User.api_key == api_key).first()
 
 
+def list_users(db: Session):
+    return db.query(User).all()
+
+
 def create_user(db: Session, user_create: UserCreate):
     user = User(
         first_name=user_create.first_name,
