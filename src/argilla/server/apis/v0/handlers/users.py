@@ -13,8 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from uuid import UUID
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request, Security
 from pydantic import parse_obj_as
