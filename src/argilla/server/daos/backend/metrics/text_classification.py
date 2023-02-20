@@ -43,7 +43,7 @@ class DatasetLabelingRulesMetric(ElasticsearchMetric):
 class LabelingRulesMetric(ElasticsearchMetric):
     id: str
 
-    def _build_aggregation(self, rule_query: str, labels: Optional[List[str]]) -> Dict[str, Any]:
+    def _build_aggregation(self, rule_query: str, labels: Optional[List[str]] = None) -> Dict[str, Any]:
         annotated_records_filter = filters.exists_field("annotated_as")
         rule_query_filter = filters.text_query(rule_query)
         aggr_filters = {
