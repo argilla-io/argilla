@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request, Security
 from pydantic import parse_obj_as
@@ -22,6 +23,7 @@ from sqlalchemy.orm import Session
 from argilla.server.commons import telemetry
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
+from argilla.server.errors import EntityNotFoundError
 from argilla.server.security import auth
 from argilla.server.security.model import User, UserCreate
 
@@ -62,5 +64,22 @@ def create_user(
     *, db: Session = Depends(get_db), user_create: UserCreate, current_user: User = Security(auth.get_user, scopes=[])
 ):
     user = accounts.create_user(db, user_create)
+
+    return User.from_orm(user)
+
+
+@router.delete("/users/{user_id}", response_model=User, response_model_exclude_none=True)
+def delete_user(
+    *, db: Session = Depends(get_db), user_id: UUID, current_user: User = Security(auth.get_user, scopes=[])
+):
+    user = accounts.get_user_by_id(db, user_id)
+    if not user:
+        # TODO: Forcing here user_id to be an string.
+        # Not casting it is causing a `Object of type UUID is not JSON serializable`.
+        # Possible solution redefining JSONEncoder.default here:
+        # https://github.com/jazzband/django-push-notifications/issues/586
+        raise EntityNotFoundError(name=str(user_id), type=User)
+
+    accounts.delete_user(db, user)
 
     return User.from_orm(user)

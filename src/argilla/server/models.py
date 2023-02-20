@@ -13,8 +13,8 @@
 #  limitations under the License.
 
 import secrets
-import uuid
 from typing import List, Optional
+from uuid import UUID, uuid4
 
 from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -31,15 +31,15 @@ def generate_user_api_key():
 class UserWorkspace(Base):
     __tablename__ = "users_workspaces"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
-    workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"))
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id"))
 
 
 class Workspace(Base):
     __tablename__ = "workspaces"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str]
 
     users: Mapped[List["User"]] = relationship(secondary="users_workspaces", back_populates="workspaces")
@@ -48,7 +48,7 @@ class Workspace(Base):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     first_name: Mapped[str]
     last_name: Mapped[Optional[str]]
     username: Mapped[str]

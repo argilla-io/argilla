@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import UUID
+
 from argilla.server.models import User
 from argilla.server.security.model import UserCreate
 from passlib.context import CryptContext
@@ -20,8 +22,8 @@ from sqlalchemy.orm import Session
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def list_users(db: Session):
-    return db.query(User).all()
+def get_user_by_id(db: Session, user_id: UUID):
+    return db.query(User).get(user_id)
 
 
 def get_user_by_username(db: Session, username: str):
@@ -30,6 +32,10 @@ def get_user_by_username(db: Session, username: str):
 
 def get_user_by_api_key(db: Session, api_key: str):
     return db.query(User).filter(User.api_key == api_key).first()
+
+
+def list_users(db: Session):
+    return db.query(User).all()
 
 
 def create_user(db: Session, user_create: UserCreate):
@@ -43,6 +49,13 @@ def create_user(db: Session, user_create: UserCreate):
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    return user
+
+
+def delete_user(db: Session, user: User):
+    db.delete(user)
+    db.commit()
 
     return user
 
