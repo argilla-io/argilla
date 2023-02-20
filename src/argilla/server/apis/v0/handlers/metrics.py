@@ -16,7 +16,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Query, Security
+from fastapi import APIRouter, Depends, Query, Request, Security
 from pydantic import BaseModel, Field
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
@@ -89,6 +89,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
         name: str,
         metric: str,
         query: cfg.query,
+        request: Request,
         metric_params: MetricSummaryParams = Depends(),
         request_deps: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
@@ -112,7 +113,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
             metric=metric_,
             record_class=record_class,
             query=query,
-            **vars(metric_params),
+            **request.query_params,
         )
 
 
