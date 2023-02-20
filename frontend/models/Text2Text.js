@@ -22,10 +22,11 @@ class Text2TextRecord extends BaseRecord {
   text;
   lastEditedSentence;
 
-  constructor({ text, lastEditedSentence, ...superData }) {
+  constructor({ text, lastEditedSentence, originStatus, ...superData }) {
     super(superData);
     this.text = text;
     this.lastEditedSentence = lastEditedSentence;
+    this.originStatus = originStatus || this.status;
   }
 
   recordTitle() {

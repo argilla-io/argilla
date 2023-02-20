@@ -4,30 +4,19 @@
       <p
         ref="text"
         class="content__text"
-        :contenteditable="contentEditable"
+        :contenteditable="annotationEnabled"
         :placeholder="placeholder"
         @input="onInputText"
-        @click="$emit('edit')"
         v-html="editableText"
       ></p>
-      <span v-if="editionMode"><strong>shift Enter</strong> to save</span>
+      <span><strong>shift Enter</strong> to save</span>
     </div>
-    <base-button
-      v-if="editionMode && annotationEnabled && editableText"
-      class="content__edit__button primary outline small"
-      @click="$emit('back')"
-      >Back</base-button
-    >
   </span>
 </template>
 <script>
 export default {
   props: {
     annotationEnabled: {
-      type: Boolean,
-      required: true,
-    },
-    editionMode: {
       type: Boolean,
       required: true,
     },
@@ -46,11 +35,6 @@ export default {
       shiftPressed: false,
       shiftKey: undefined,
     };
-  },
-  computed: {
-    contentEditable() {
-      return this.annotationEnabled && this.editionMode;
-    },
   },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
@@ -95,8 +79,8 @@ export default {
 <style lang="scss" scoped>
 $marginRight: 200px;
 [contenteditable="true"] {
-  box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
-  border-radius: $border-radius-s 3px 3px 3px;
+  padding: 0.6em;
+  outline: none;
   &:focus + span {
     display: block;
   }
@@ -110,6 +94,7 @@ $marginRight: 200px;
 .content {
   &__edition-area {
     position: relative;
+    width: 100%;
     margin-right: $marginRight;
     span {
       position: absolute;
@@ -122,15 +107,12 @@ $marginRight: 200px;
     }
   }
   &__text {
-    color: black;
-    white-space: pre-wrap;
     display: inline-block;
     width: 100%;
-  }
-  &__edit {
-    &__button {
-      margin-top: 2.5em;
-    }
+    min-height: 30px;
+    color: $black-87;
+    white-space: pre-wrap;
+    margin: 0;
   }
 }
 </style>

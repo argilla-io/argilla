@@ -22,87 +22,75 @@
       !annotationEnabled ? 'content--exploration-mode' : 'content--selectable'
     "
   >
-    <div
-      :class="[
-        editionMode || !sentences.length
-          ? 'content--editable'
-          : 'content--non-editable',
-        showScore ? 'content--has-score' : null,
-      ]"
-    >
-      <text-2-text-content-editable
-        v-if="!sentences.length"
-        :key="refresh"
-        :annotation-enabled="annotationEnabled"
-        :edition-mode="true"
-        :default-text="visibleSentence || ''"
-        placeholder="Type your text"
-        @back="back"
-        @edit="edit"
-        @annotate="onValidate()"
-        @change-text="onTextChanged"
-      />
-
+    <div>
+      <div class="--editable" v-if="!sentences.length">
+        <text-2-text-content-editable
+          :key="refresh"
+          :annotation-enabled="annotationEnabled"
+          :edition-mode="true"
+          :default-text="visibleSentence || ''"
+          placeholder="Type your text"
+          @annotate="onValidate()"
+          @change-text="onTextChanged"
+        />
+      </div>
       <span v-for="(sentence, index) in sentences" v-else :key="index">
-        <div v-if="itemNumber === index" class="content__sentences">
-          <div class="content__group">
-            <p v-if="!editionMode" class="content__sentences__title">
-              {{ sentencesOrigin
-              }}<span v-if="showScore" class="content__score"
-                >: {{ sentence.score | percent }}
-              </span>
-            </p>
+        <div v-if="predictionNumber === index" class="content__sentences">
+          <div class="content__tabs">
             <base-button
-              v-if="hasAnnotationAndPredictions && !editionMode"
-              class="primary light small content__group__view-annotations"
-              @click="changeVisibleSentences"
-              >{{
-                sentencesOrigin === "Annotation"
-                  ? annotationEnabled
-                    ? `View predictions (${predictionsLength})`
-                    : `Back to predictions (${predictionsLength})`
-                  : annotationEnabled
-                  ? "Back to annotation"
-                  : "View annotation"
-              }}</base-button
+              v-if="isPreannotated"
+              :class="sentencesOrigin === 'Preannotation' ? '--active' : null"
+              @click="changeVisibleSentences('Preannotation')"
+              >PreAnnotation</base-button
+            >
+            <base-button
+              v-if="annotations.length"
+              :class="sentencesOrigin === 'Annotation' ? '--active' : null"
+              @click="changeVisibleSentences('Annotation')"
+              >Annotation</base-button
+            >
+            <base-button
+              v-if="predictions.length"
+              :class="sentencesOrigin === 'Prediction' ? '--active' : null"
+              @click="changeVisibleSentences('Prediction')"
+              >{{ `Predictions (${predictionsLength})` }}</base-button
             >
           </div>
-          <text-2-text-content-editable
-            :key="refresh"
-            :annotation-enabled="annotationEnabled"
-            :edition-mode="editionMode"
-            :default-text="visibleSentence || sentence.text || ''"
-            :content-editable="annotationEnabled && editionMode"
-            @back="back"
-            @edit="edit"
-            @annotate="onValidate()"
-            @change-text="onTextChanged"
-          />
-          <div v-if="!editionMode" class="content__footer">
-            <template v-if="sentencesOrigin === 'Prediction'">
-              <div v-if="annotationEnabled" class="content__actions-buttons">
-                <base-button
-                  v-if="sentences.length"
-                  class="primary small outline"
-                  @click="edit"
-                  >Edit</base-button
-                >
-              </div>
-              <base-slider
-                v-if="sentences.length"
-                :slides-origin="sentences"
-                :item-number="itemNumber"
-                @go-to="showItemNumber"
-              />
-            </template>
+          <div :class="sentencesOrigin !== 'Prediction' ? '--editable' : null">
+            <div
+              class="content__prediction-tabs"
+              v-if="sentencesOrigin !== 'Annotation'"
+            >
+              <base-button
+                @click="showPredictionNumber(index)"
+                :class="predictionNumber === index ? '--active' : null"
+                v-for="(sentence, index) in sentences"
+                :key="index"
+                >Prediction {{ index + 1 }} :
+                {{ sentence.score | percent }}</base-button
+              >
+            </div>
+            <text-2-text-content-editable
+              v-if="sentencesOrigin !== 'Prediction'"
+              :key="refresh"
+              :annotation-enabled="annotationEnabled"
+              :default-text="visibleSentence || sentence.text || ''"
+              :content-editable="annotationEnabled"
+              @annotate="onValidate()"
+              @change-text="onTextChanged"
+            />
+            <p class="sentence--non-editable" v-else>
+              {{ visibleSentence || sentence.text || "" }}
+            </p>
           </div>
         </div>
       </span>
       <record-action-buttons
-        v-if="annotationEnabled"
+        v-if="annotationEnabled && sentencesOrigin !== 'Prediction'"
         :actions="text2textClassifierActionButtons"
         @validate="onValidate()"
         @clear="onClearAnnotations()"
+        @reset="onReset()"
         @discard="onDiscard()"
       />
     </div>
@@ -150,8 +138,7 @@ export default {
   idState() {
     return {
       sentencesOrigin: undefined,
-      itemNumber: 0,
-      editionMode: false,
+      predictionNumber: 0,
       refresh: 1,
     };
   },
@@ -164,12 +151,12 @@ export default {
         this.idState.sentencesOrigin = newValue;
       },
     },
-    itemNumber: {
+    predictionNumber: {
       get: function () {
-        return this.idState.itemNumber;
+        return this.idState.predictionNumber;
       },
       set: function (newValue) {
-        this.idState.itemNumber = newValue;
+        this.idState.predictionNumber = newValue;
       },
     },
     visibleSentence: {
@@ -190,14 +177,6 @@ export default {
         }
       },
     },
-    editionMode: {
-      get: function () {
-        return this.idState.editionMode;
-      },
-      set: function (newValue) {
-        this.idState.editionMode = newValue;
-      },
-    },
     refresh: {
       get: function () {
         return this.idState.refresh;
@@ -208,8 +187,12 @@ export default {
     },
     selectedSentence() {
       return (
-        this.sentences[this.itemNumber] && this.sentences[this.itemNumber].text
+        this.sentences[this.predictionNumber] &&
+        this.sentences[this.predictionNumber].text
       );
+    },
+    isPreannotated() {
+      return (this.predictionsLength && !this.annotations.length) || false;
     },
     predictionsLength() {
       return this.predictions.length;
@@ -224,10 +207,10 @@ export default {
       if (this.sentencesOrigin === "Prediction") {
         return this.predictions;
       }
+      if (this.sentencesOrigin === "Preannotation") {
+        return this.predictions;
+      }
       return [];
-    },
-    hasAnnotationAndPredictions() {
-      return this.predictions.length && this.annotations.length;
     },
     allowValidation() {
       return (
@@ -236,42 +219,41 @@ export default {
           !!this.record?.sentenceForAnnotation)
       );
     },
-    selected() {
-      return this.record.selected;
-    },
     text2textClassifierActionButtons() {
       return [
         {
           id: "validate",
           name: "Validate",
-          allow: true,
+          allow: this.sentencesOrigin !== "Prediction",
           active: this.allowValidation,
         },
         {
           id: "discard",
           name: "Discard",
-          allow: true,
+          allow: this.sentencesOrigin !== "Prediction",
           active: this.record.status !== "Discarded",
+        },
+        // {
+        //   id: "clear",
+        //   name: "Clear",
+        //   allow: this.sentencesOrigin !== "Prediction",
+        //   active: this.record.annotation || false,
+        // },
+        {
+          id: "reset",
+          name: "Reset",
+          allow: this.sentencesOrigin !== "Prediction",
+          active: this.record.status === "Edited",
         },
       ];
     },
   },
   watch: {
-    selected(newValue, oldValue) {
-      if (newValue === false && oldValue === true) {
-        this.refresh++;
-        this.sentencesOrigin = "Annotation";
-        this.editionMode = false;
-        this.itemNumber = 0;
-        this.$emit("update-initial-record");
-      }
-    },
     annotationEnabled(newValue, oldValue) {
       if (newValue !== oldValue) {
         this.refresh++;
         this.initializeSentenceOrigin();
-        this.back();
-        this.itemNumber = 0;
+        this.predictionNumber = 0;
       }
     },
   },
@@ -289,8 +271,8 @@ export default {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
     }),
-    async showItemNumber(index) {
-      this.itemNumber = index;
+    async showPredictionNumber(index) {
+      this.predictionNumber = index;
       await (this.visibleSentence = this.selectedSentence);
     },
     async onTextChanged(newText) {
@@ -313,24 +295,10 @@ export default {
         ],
       });
     },
-    edit() {
-      if (this.annotationEnabled) {
-        this.editionMode = true;
-      }
-    },
-    async back() {
-      this.editionMode = false;
+    async changeVisibleSentences(tab) {
       this.refresh++;
-      await (this.visibleSentence = this.selectedSentence);
-      this.$emit("reset-initial-record");
-    },
-    async changeVisibleSentences() {
-      this.refresh++;
-      this.sentencesOrigin !== "Annotation"
-        ? (this.sentencesOrigin = "Annotation")
-        : (this.sentencesOrigin = "Prediction");
-      this.itemNumber = 0;
-      this.editionMode = false;
+      this.sentencesOrigin = tab;
+      this.predictionNumber = 0;
       await (this.visibleSentence = this.selectedSentence);
     },
     initializeSentenceOrigin() {
@@ -338,7 +306,7 @@ export default {
         if (this.annotations.length) {
           this.sentencesOrigin = "Annotation";
         } else if (this.predictions.length) {
-          this.sentencesOrigin = "Prediction";
+          this.sentencesOrigin = "Preannotation";
         }
       } else {
         if (this.predictions.length) {
@@ -354,9 +322,29 @@ export default {
         text: this.record.sentenceForAnnotation || null,
       };
       this.$emit("annotate", { sentences: [newS] });
-      this.itemNumber = 0;
-      this.editionMode = false;
+      this.predictionNumber = 0;
       this.sentencesOrigin = "Annotation";
+    },
+    async onClearAnnotations() {
+      await this.updateRecords({
+        dataset: this.getText2TextDataset(),
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            annotation: null,
+            lastEditedSentence: null,
+            sentenceForAnnotation: null,
+          },
+        ],
+      });
+      this.initializeSentenceOrigin();
+    },
+    async onReset() {
+      this.refresh++;
+      await (this.visibleSentence = this.selectedSentence);
+      this.$emit("reset-record");
     },
     onDiscard() {
       this.$emit("discard");
@@ -386,59 +374,57 @@ export default {
       top: 0;
     }
   }
-  &--editable {
-    width: 100%;
-    :deep(p) {
-      padding: 0.6em;
-      margin: 0;
-      outline: none;
+  &__tabs {
+    display: flex;
+    gap: $base-space * 2;
+    margin-bottom: $base-space * 2;
+    .button {
+      border-radius: 0;
+      padding: $base-space 0;
+      border-bottom: 2px solid transparent;
+      color: $black-54;
+      &:hover {
+        color: $black-87;
+      }
+      &.--active {
+        border-color: $primary-color;
+        color: $black-87;
+      }
     }
   }
-  &--non-editable {
-    width: 100%;
-    p {
-      margin: 0;
-      outline: none;
-    }
-  }
-  &--has-score {
-    .content__text {
-      padding-right: 4em;
+  &__prediction-tabs {
+    display: flex;
+    gap: $base-space * 2;
+    .button {
+      padding: 0;
+      margin-bottom: $base-space * 2;
+      @include font-size(13px);
+      color: $black-20;
+      &.--active,
+      &:hover {
+        color: $black-37;
+      }
     }
   }
   &__sentences {
     display: flex;
     flex-direction: column;
-    min-height: 140px;
-    &__title {
-      @include font-size(13px);
-      color: $black-54;
-      margin: 0;
-    }
   }
   &__score {
-    @include font-size(15px);
+    @include font-size(13px);
     margin-right: 0;
     min-width: 33%;
     color: $black-54;
   }
-  &__footer {
-    padding-top: 2em;
-    margin-top: auto;
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
-  }
-  &__group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5em;
-    &__view-annotations {
-      margin: auto 0 auto auto;
-    }
-  }
 }
-.button {
-  display: block;
+.--editable {
+  padding: $base-space;
+  box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
+  border-radius: $border-radius-s;
+}
+.sentence {
+  &--non-editable {
+    padding: $base-space 0;
+  }
 }
 </style>
