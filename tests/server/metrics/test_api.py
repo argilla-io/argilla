@@ -26,11 +26,15 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
 )
 from argilla.server.services.metrics.models import CommonTasksMetrics
+from argilla.server.services.tasks.text_classification.metrics import (
+    TextClassificationMetrics,
+)
 from argilla.server.services.tasks.token_classification.metrics import (
     TokenClassificationMetrics,
 )
 
 COMMON_METRICS_LENGTH = len(CommonTasksMetrics.metrics)
+CLASSIFICATION_METRICS_LENGTH = len(TextClassificationMetrics.metrics)
 
 
 def test_wrong_dataset_metrics(mocked_client):
@@ -61,9 +65,7 @@ def test_wrong_dataset_metrics(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "argilla.api.errors::WrongTaskError",
-            "params": {
-                "message": "Provided task TokenClassification cannot be applied to dataset"
-            },
+            "params": {"message": "Provided task TokenClassification cannot be applied to dataset"},
         }
     }
 
@@ -76,9 +78,7 @@ def test_wrong_dataset_metrics(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "argilla.api.errors::WrongTaskError",
-            "params": {
-                "message": "Provided task TokenClassification cannot be applied to dataset"
-            },
+            "params": {"message": "Provided task TokenClassification cannot be applied to dataset"},
         }
     }
 
@@ -136,9 +136,7 @@ def test_dataset_for_token_classification(mocked_client):
         ).status_code
         == 200
     )
-    metrics = mocked_client.get(
-        f"/api/datasets/TokenClassification/{dataset}/metrics"
-    ).json()
+    metrics = mocked_client.get(f"/api/datasets/TokenClassification/{dataset}/metrics").json()
     assert len(metrics) == len(TokenClassificationMetrics.metrics)
 
     for metric in metrics:
@@ -187,11 +185,9 @@ def test_dataset_metrics(mocked_client):
         == 200
     )
 
-    metrics = mocked_client.get(
-        f"/api/datasets/TextClassification/{dataset}/metrics"
-    ).json()
+    metrics = mocked_client.get(f"/api/datasets/TextClassification/{dataset}/metrics").json()
 
-    assert len(metrics) == COMMON_METRICS_LENGTH + 5
+    assert len(metrics) == CLASSIFICATION_METRICS_LENGTH
 
     response = mocked_client.post(
         f"/api/datasets/TextClassification/{dataset}/metrics/missing_metric:summary",
@@ -212,6 +208,38 @@ def test_dataset_metrics(mocked_client):
             json={},
         )
         assert response.status_code == 200, f"{metric}: {response.json()}"
+
+
+def create_some_classification_data(mocked_client, dataset: str, records: list):
+    request = TextClassificationBulkRequest(records=[TextClassificationRecord.parse_obj(r) for r in records])
+
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets/{dataset}/TextClassification:bulk",
+            json=request.dict(by_alias=True),
+        ).status_code
+        == 200
+    )
+
+
+def test_labeling_rule_metric(mocked_client):
+    dataset = "test_labeling_rule_metric"
+    create_some_classification_data(
+        mocked_client, dataset, records=[{"inputs": {"text": "This is classification record"}}] * 10
+    )
+
+    rule_query = "t*"
+    response = mocked_client.post(
+        f"/api/datasets/TextClassification/{dataset}/metrics/labeling_rule:summary?rule_query={rule_query}",
+        json={},
+    )
+    assert response.json() == {
+        "annotated_covered_records": 0,
+        "correct_records": 0,
+        "covered_records": 10,
+        "incorrect_records": 0,
+    }
 
 
 def test_dataset_labels_for_text_classification(mocked_client):

@@ -71,9 +71,7 @@ class Text2TextSearchAggregations(ServiceBaseSearchResultsAggregations):
     annotated_text: Dict[str, int] = Field(default_factory=dict)
 
 
-class Text2TextSearchResults(
-    BaseSearchResults[Text2TextRecord, Text2TextSearchAggregations]
-):
+class Text2TextSearchResults(BaseSearchResults[Text2TextRecord, Text2TextSearchAggregations]):
     pass
 
 

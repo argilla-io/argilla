@@ -22,12 +22,8 @@ from argilla.server.security.model import User
 router = APIRouter(tags=["users"])
 
 
-@router.get(
-    "/me", response_model=User, response_model_exclude_none=True, operation_id="whoami"
-)
-async def whoami(
-    request: Request, current_user: User = Security(auth.get_user, scopes=[])
-):
+@router.get("/me", response_model=User, response_model_exclude_none=True, operation_id="whoami")
+async def whoami(request: Request, current_user: User = Security(auth.get_user, scopes=[])):
     """
     User info endpoint
 

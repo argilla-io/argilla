@@ -26,6 +26,14 @@ from argilla.logging import configure_logging as _configure_logging
 from . import _version
 from .utils import LazyargillaModule as _LazyargillaModule
 
+try:
+    from rich.traceback import install as _install_rich
+
+    # Rely on `rich` for tracebacks
+    _install_rich()
+except ModuleNotFoundError:
+    pass
+
 __version__ = _version.version
 
 if _TYPE_CHECKING:

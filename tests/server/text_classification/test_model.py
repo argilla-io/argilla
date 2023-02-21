@@ -31,9 +31,7 @@ from pydantic import ValidationError
 def test_flatten_metadata():
     data = {
         "inputs": {"text": "bogh"},
-        "metadata": {
-            "mail": {"subject": "The mail subject", "body": "This is a large text body"}
-        },
+        "metadata": {"mail": {"subject": "The mail subject", "body": "This is a large text body"}},
     }
     record = ServiceTextClassificationRecord.parse_obj(data)
     assert list(record.metadata.keys()) == ["mail.subject", "mail.body"]
@@ -378,9 +376,7 @@ def test_empty_labels_for_no_multilabel():
     record = ServiceTextClassificationRecord(
         inputs={"text": "The input text"},
         prediction=TextClassificationAnnotation(agent="ann.", labels=[]),
-        annotation=TextClassificationAnnotation(
-            agent="ann.", labels=[ClassPrediction(class_label="B")]
-        ),
+        annotation=TextClassificationAnnotation(agent="ann.", labels=[ClassPrediction(class_label="B")]),
     )
     assert record.predicted == PredictionStatus.KO
 
@@ -400,12 +396,8 @@ def test_using_predictions_dict():
     record = ServiceTextClassificationRecord(
         inputs={"text": "this is a text"},
         predictions={
-            "carl": TextClassificationAnnotation(
-                agent="wat at", labels=[ClassPrediction(class_label="YES")]
-            ),
-            "BOB": TextClassificationAnnotation(
-                agent="wot wot", labels=[ClassPrediction(class_label="NO")]
-            ),
+            "carl": TextClassificationAnnotation(agent="wat at", labels=[ClassPrediction(class_label="YES")]),
+            "BOB": TextClassificationAnnotation(agent="wot wot", labels=[ClassPrediction(class_label="NO")]),
         },
     )
 
@@ -415,9 +407,7 @@ def test_using_predictions_dict():
     }
     assert record.predictions == {
         "BOB": TextClassificationAnnotation(labels=[ClassPrediction(class_label="NO")]),
-        "carl": TextClassificationAnnotation(
-            labels=[ClassPrediction(class_label="YES")]
-        ),
+        "carl": TextClassificationAnnotation(labels=[ClassPrediction(class_label="YES")]),
     }
 
 
@@ -425,7 +415,5 @@ def test_with_no_agent_at_all():
     with pytest.raises(ValidationError):
         ServiceTextClassificationRecord(
             inputs={"text": "this is a text"},
-            prediction=TextClassificationAnnotation(
-                labels=[ClassPrediction(class_label="YES")]
-            ),
+            prediction=TextClassificationAnnotation(labels=[ClassPrediction(class_label="YES")]),
         )

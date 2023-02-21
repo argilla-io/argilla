@@ -22,9 +22,7 @@ from typing import Any, Dict, List, Optional
 _LOGGER = logging.getLogger("argilla.server")
 
 
-def unflatten_dict(
-    data: Dict[str, Any], sep: str = ".", stop_keys: Optional[List[str]] = None
-) -> Dict[str, Any]:
+def unflatten_dict(data: Dict[str, Any], sep: str = ".", stop_keys: Optional[List[str]] = None) -> Dict[str, Any]:
     """
     Given a flat dictionary keys, build a hierarchical version by grouping keys
 
@@ -57,9 +55,7 @@ def unflatten_dict(
     return resultDict
 
 
-def flatten_dict(
-    data: Dict[str, Any], sep: str = ".", drop_empty: bool = False
-) -> Dict[str, Any]:
+def flatten_dict(data: Dict[str, Any], sep: str = ".", drop_empty: bool = False) -> Dict[str, Any]:
     """
     Flatten a data dictionary
 

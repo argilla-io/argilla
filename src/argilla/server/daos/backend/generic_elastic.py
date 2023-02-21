@@ -291,8 +291,7 @@ class GenericElasticEngineBackend(LoggingMixin):
 
             if len(vector_names) > settings.vectors_fields_limit:
                 raise BadRequestError(
-                    detail=f"Cannot create more than {settings.vectors_fields_limit} "
-                    "kind of vectors per dataset"
+                    detail=f"Cannot create more than {settings.vectors_fields_limit} " "kind of vectors per dataset"
                 )
 
         _check_max_number_of_vectors()
@@ -489,8 +488,7 @@ class GenericElasticEngineBackend(LoggingMixin):
 
             if len(docs) > 1:
                 raise ValueError(
-                    f"Ambiguous dataset info found for name {name}. "
-                    "Please provide a valid owner/workspace"
+                    f"Ambiguous dataset info found for name {name}. " "Please provide a valid owner/workspace"
                 )
             document = docs[0]
         return document

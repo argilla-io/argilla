@@ -23,9 +23,7 @@ from argilla._constants import (
 )
 from argilla.server.security.model import WORKSPACE_NAME_PATTERN
 
-DATASET_NAME_PATH_PARAM = Path(
-    ..., regex=DATASET_NAME_REGEX_PATTERN, description="The dataset name"
-)
+DATASET_NAME_PATH_PARAM = Path(..., regex=DATASET_NAME_REGEX_PATTERN, description="The dataset name")
 
 
 @dataclass
@@ -33,9 +31,7 @@ class RequestPagination:
     """Query pagination params"""
 
     limit: int = Query(50, gte=0, le=1000, description="Response records limit")
-    from_: int = Query(
-        0, ge=0, le=10000, alias="from", description="Record sequence from"
-    )
+    from_: int = Query(0, ge=0, le=10000, alias="from", description="Record sequence from")
 
 
 @dataclass
@@ -60,14 +56,9 @@ class CommonTaskHandlerDependencies:
     @property
     def workspace(self) -> str:
         """Return read workspace. Query param prior to header param"""
-        workspace = (
-            self.__workspace_param__
-            or self.__workspace_header__
-            or self.__old_workspace_header__
-        )
+        workspace = self.__workspace_param__ or self.__workspace_header__ or self.__old_workspace_header__
         if workspace:
             assert WORKSPACE_NAME_PATTERN.match(workspace), (
-                "Wrong workspace format. "
-                f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
+                "Wrong workspace format. " f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
             )
         return workspace

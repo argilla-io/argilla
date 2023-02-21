@@ -36,21 +36,14 @@ class ServiceLabelingRule(BaseModel):
     query: str = Field(description="The es rule query")
 
     author: str = Field(description="User who created the rule")
-    created_at: Optional[datetime] = Field(
-        default_factory=datetime.utcnow, description="Rule creation timestamp"
-    )
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow, description="Rule creation timestamp")
 
-    label: Optional[str] = Field(
-        default=None, description="@Deprecated::The label associated with the rule."
-    )
+    label: Optional[str] = Field(default=None, description="@Deprecated::The label associated with the rule.")
     labels: List[str] = Field(
         default_factory=list,
-        description="For multi label problems, a list of labels. "
-        "It will replace the `label` field",
+        description="For multi label problems, a list of labels. " "It will replace the `label` field",
     )
-    description: Optional[str] = Field(
-        None, description="A brief description of the rule"
-    )
+    description: Optional[str] = Field(None, description="A brief description of the rule")
 
     @root_validator
     def initialize_labels(cls, values):
@@ -198,19 +191,13 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
         status: TaskStatus,
     ):
         if status == TaskStatus.validated and not multi_label:
-            assert (
-                annotation and len(annotation.labels) > 0
-            ), "Annotation must include some label for validated records"
+            assert annotation and len(annotation.labels) > 0, "Annotation must include some label for validated records"
 
         if not multi_label and annotation:
-            assert (
-                len(annotation.labels) == 1
-            ), "Single label record must include only one annotation label"
+            assert len(annotation.labels) == 1, "Single label record must include only one annotation label"
 
     @classmethod
-    def _check_score_integrity(
-        cls, prediction: TextClassificationAnnotation, multi_label: bool
-    ):
+    def _check_score_integrity(cls, prediction: TextClassificationAnnotation, multi_label: bool):
         """
         Checks the score value integrity
 
@@ -235,24 +222,16 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
     @property
     def predicted(self) -> Optional[PredictionStatus]:
         if self.predicted_by and self.annotated_by:
-            return (
-                PredictionStatus.OK
-                if set(self.predicted_as) == set(self.annotated_as)
-                else PredictionStatus.KO
-            )
+            return PredictionStatus.OK if set(self.predicted_as) == set(self.annotated_as) else PredictionStatus.KO
         return None
 
     @property
     def predicted_as(self) -> List[str]:
-        return self._labels_from_annotation(
-            self.prediction, multi_label=self.multi_label
-        )
+        return self._labels_from_annotation(self.prediction, multi_label=self.multi_label)
 
     @property
     def annotated_as(self) -> List[str]:
-        return self._labels_from_annotation(
-            self.annotation, multi_label=self.multi_label
-        )
+        return self._labels_from_annotation(self.annotation, multi_label=self.multi_label)
 
     @property
     def scores(self) -> List[float]:
@@ -263,11 +242,7 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
             if self.multi_label
             else [
                 prediction_class.score
-                for prediction_class in [
-                    self._max_class_prediction(
-                        self.prediction, multi_label=self.multi_label
-                    )
-                ]
+                for prediction_class in [self._max_class_prediction(self.prediction, multi_label=self.multi_label)]
                 if prediction_class
             ]
         )
@@ -303,22 +278,16 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
             return []
 
         if multi_label:
-            return [
-                label.class_label for label in annotation.labels if label.score > 0.5
-            ]
+            return [label.class_label for label in annotation.labels if label.score > 0.5]
 
-        class_prediction = cls._max_class_prediction(
-            annotation, multi_label=multi_label
-        )
+        class_prediction = cls._max_class_prediction(annotation, multi_label=multi_label)
         if class_prediction is None:
             return []
 
         return [class_prediction.class_label]
 
     @staticmethod
-    def _max_class_prediction(
-        p: TextClassificationAnnotation, multi_label: bool
-    ) -> Optional[ClassPrediction]:
+    def _max_class_prediction(p: TextClassificationAnnotation, multi_label: bool) -> Optional[ClassPrediction]:
         if multi_label or p is None or not p.labels:
             return None
         return p.labels[0]
@@ -338,3 +307,16 @@ class ServiceTextClassificationQuery(ServiceBaseRecordsQuery):
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
     uncovered_by_rules: List[str] = Field(default_factory=list)
+
+
+class DatasetLabelingRulesSummary(BaseModel):
+    covered_records: int
+    annotated_covered_records: int
+
+
+class LabelingRuleSummary(BaseModel):
+    covered_records: int
+    annotated_covered_records: int
+    correct_records: int = Field(default=0)
+    incorrect_records: int = Field(default=0)
+    precision: Optional[float] = None

@@ -119,9 +119,7 @@ def test_model_with_predictions():
             "metrics": {},
             "predictions": {
                 "test": {
-                    "entities": [
-                        {"end": 24, "label": "test", "score": 1.0, "start": 9}
-                    ],
+                    "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
                 }
             },
             "status": "Default",
@@ -162,9 +160,7 @@ def test_too_long_metadata():
 
 def test_entity_label_too_long():
     text = "On one ones o no"
-    with pytest.raises(
-        ValidationError, match="ensure this value has at most 128 character"
-    ):
+    with pytest.raises(ValidationError, match="ensure this value has at most 128 character"):
         ServiceTokenClassificationRecord(
             text=text,
             tokens=text.split(),
@@ -269,9 +265,7 @@ def test_annotated_without_entities():
     record = ServiceTokenClassificationRecord(
         text=text,
         tokens=text.split(),
-        prediction=TokenClassificationAnnotation(
-            agent="pred.test", entities=[EntitySpan(start=0, end=3, label="DET")]
-        ),
+        prediction=TokenClassificationAnnotation(agent="pred.test", entities=[EntitySpan(start=0, end=3, label="DET")]),
         annotation=TokenClassificationAnnotation(agent="test", entities=[]),
     )
 

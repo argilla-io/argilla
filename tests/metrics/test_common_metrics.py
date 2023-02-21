@@ -137,9 +137,7 @@ def test_keywords_metrics(mocked_client, gutenberg_spacy_ner):
         "two": 18,
     }
 
-    assert keywords(name=gutenberg_spacy_ner) == keywords(
-        name=gutenberg_spacy_ner, query=""
-    )
+    assert keywords(name=gutenberg_spacy_ner) == keywords(name=gutenberg_spacy_ner, query="")
 
     with pytest.raises(AssertionError, match="size must be greater than 0"):
         keywords(name=gutenberg_spacy_ner, size=0)

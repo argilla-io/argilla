@@ -34,9 +34,7 @@ class UsersDAO:
         self.__users__: Dict[str, UserInDB] = {}
         try:
             with open(users_file) as file:
-                user_list = [
-                    UserInDB(**user_data) for user_data in yaml.safe_load(file)
-                ]
+                user_list = [UserInDB(**user_data) for user_data in yaml.safe_load(file)]
                 self.__users__ = {user.username: user for user in user_list}
         except FileNotFoundError:
             self.__users__ = {

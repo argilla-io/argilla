@@ -41,9 +41,7 @@ def text_length(name: str, query: Optional[str] = None) -> MetricSummary:
 
     return MetricSummary.new_summary(
         data=metric.results,
-        visualization=lambda: helpers.histogram(
-            data=metric.results, title=metric.description
-        ),
+        visualization=lambda: helpers.histogram(data=metric.results, title=metric.description),
     )
 
 
@@ -65,15 +63,11 @@ def records_status(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot an histogram with results
         >>> summary.data # returns the raw result data
     """
-    metric = api.active_api().compute_metric(
-        name, metric="status_distribution", query=query
-    )
+    metric = api.active_api().compute_metric(name, metric="status_distribution", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
-        visualization=lambda: helpers.bar(
-            data=metric.results, title=metric.description
-        ),
+        visualization=lambda: helpers.bar(data=metric.results, title=metric.description),
     )
 
 

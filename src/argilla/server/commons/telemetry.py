@@ -67,9 +67,7 @@ class _TelemetryClient:
                 try:
                     cls.__INSTANCE__ = cls(client=_configure_analytics())
                 except Exception as err:
-                    logging.getLogger(__name__).warning(
-                        f"Cannot initialize telemetry. Error: {err}. Disabling..."
-                    )
+                    logging.getLogger(__name__).warning(f"Cannot initialize telemetry. Error: {err}. Disabling...")
                     settings.enable_telemetry = False
                     return None
             return cls.__INSTANCE__
@@ -88,9 +86,7 @@ class _TelemetryClient:
             "version": __version__,
         }
 
-    def track_data(
-        self, action: str, data: Dict[str, Any], include_system_info: bool = True
-    ):
+    def track_data(self, action: str, data: Dict[str, Any], include_system_info: bool = True):
         event_data = data.copy()
         self.client.track(
             user_id=self.__server_id_str__,
@@ -101,18 +97,13 @@ class _TelemetryClient:
 
 
 def _process_request_info(request: Request):
-    return {
-        header: request.headers.get(header)
-        for header in ["user-agent", "accept-language"]
-    }
+    return {header: request.headers.get(header) for header in ["user-agent", "accept-language"]}
 
 
 async def track_error(error: ServerError, request: Request):
     client = _TelemetryClient.get()
     if client:
-        client.track_data(
-            "ServerErrorFound", {"code": error.code, **_process_request_info(request)}
-        )
+        client.track_data("ServerErrorFound", {"code": error.code, **_process_request_info(request)})
 
 
 async def track_bulk(task: TaskType, records: int):

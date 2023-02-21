@@ -15,9 +15,7 @@
 from typing import Callable
 
 
-def deprecate_endpoint(
-    path: str, new_path: str, router_method: Callable, *args, **kwargs
-):
+def deprecate_endpoint(path: str, new_path: str, router_method: Callable, *args, **kwargs):
     """
     Helper decorator to deprecate a `path` endpoint adding the `new_path` endpoint.
 

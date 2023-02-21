@@ -49,9 +49,7 @@ async def list_datasets(
 ) -> List[Dataset]:
     return service.list(
         user=current_user,
-        workspaces=[request_deps.workspace]
-        if request_deps.workspace is not None
-        else None,
+        workspaces=[request_deps.workspace] if request_deps.workspace is not None else None,
     )
 
 
@@ -113,9 +111,7 @@ def update_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
-    found_ds = service.find_by_name(
-        user=current_user, name=name, workspace=ds_params.workspace
-    )
+    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
 
     return service.update(
         user=current_user,
@@ -159,9 +155,7 @@ def close_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
-    found_ds = service.find_by_name(
-        user=current_user, name=name, workspace=ds_params.workspace
-    )
+    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
     service.close(user=current_user, dataset=found_ds)
 
 
@@ -175,9 +169,7 @@ def open_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
-    found_ds = service.find_by_name(
-        user=current_user, name=name, workspace=ds_params.workspace
-    )
+    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
     service.open(user=current_user, dataset=found_ds)
 
 
@@ -194,9 +186,7 @@ def copy_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
-    found = service.find_by_name(
-        user=current_user, name=name, workspace=ds_params.workspace
-    )
+    found = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
     return service.copy_dataset(
         user=current_user,
         dataset=found,

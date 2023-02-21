@@ -166,9 +166,7 @@ def test_log_something(monkeypatch, mocked_client):
     assert response.processed == 1
     assert response.failed == 0
 
-    response = mocked_client.post(
-        f"/api/datasets/{dataset_name}/TextClassification:search"
-    )
+    response = mocked_client.post(f"/api/datasets/{dataset_name}/TextClassification:search")
     assert response.status_code == 200, response.json()
 
     results = TextClassificationSearchResults.parse_obj(response.json())
@@ -200,9 +198,7 @@ def test_load_limits(mocked_client, supported_vector_search):
 def test_log_records_with_too_long_text(mocked_client):
     dataset_name = "test_log_records_with_too_long_text"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
-    item = ar.TextClassificationRecord(
-        inputs={"text": "This is a toooooo long text\n" * 10000}
-    )
+    item = ar.TextClassificationRecord(inputs={"text": "This is a toooooo long text\n" * 10000})
 
     api.log([item], name=dataset_name)
 
@@ -218,9 +214,7 @@ def test_log_without_name(mocked_client):
         match="Empty dataset name has been passed as argument.",
     ):
         api.log(
-            ar.TextClassificationRecord(
-                inputs={"text": "This is a single record. Only this. No more."}
-            ),
+            ar.TextClassificationRecord(inputs={"text": "This is a single record. Only this. No more."}),
             name=None,
         )
 
@@ -311,9 +305,7 @@ def test_delete_with_errors(mocked_client, monkeypatch, status, error_type):
         return inner
 
     with pytest.raises(error_type):
-        monkeypatch.setattr(
-            httpx, "delete", send_mock_response_with_http_status(status)
-        )
+        monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
         api.delete("dataset")
 
 
@@ -625,7 +617,7 @@ def test_token_classification_spans(span, valid):
         with pytest.raises(
             ValueError,
             match="Following entity spans are not aligned with provided tokenization\n"
-            r"Spans:\n- \[s\] defined in Esto es...\n"
+            r"Spans:\n\('test', 1, 2\) - 's'\n"
             r"Tokens:\n\['Esto', 'es', 'una', 'prueba'\]",
         ):
             ar.TokenClassificationRecord(

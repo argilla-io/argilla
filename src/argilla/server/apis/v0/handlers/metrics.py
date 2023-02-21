@@ -14,9 +14,9 @@
 #  limitations under the License.
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, Query, Security
+from fastapi import APIRouter, Depends, Query, Request, Security
 from pydantic import BaseModel, Field
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
@@ -31,13 +31,13 @@ from argilla.server.services.metrics import MetricsService
 class MetricInfo(BaseModel):
     id: str = Field(description="The metric id")
     name: str = Field(description="The metric name")
-    description: Optional[str] = Field(
-        default=None, description="The metric description"
-    )
+    description: Optional[str] = Field(default=None, description="The metric description")
 
 
 @dataclass
 class MetricSummaryParams:
+    request: Request
+
     interval: Optional[float] = Query(
         default=None,
         gt=0.0,
@@ -48,6 +48,15 @@ class MetricSummaryParams:
         ge=1,
         description="The number of terms for terminological summaries",
     )
+
+    @property
+    def parameters(self) -> Dict[str, Any]:
+        """Returns dynamic metric args found in the request query params"""
+        return {
+            "interval": self.interval,
+            "size": self.size,
+            **{k: v for k, v in self.request.query_params.items() if k not in ["interval", "size"]},
+        }
 
 
 def configure_router(router: APIRouter, cfg: TaskConfig):
@@ -114,7 +123,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
             metric=metric_,
             record_class=record_class,
             query=query,
-            **vars(metric_params),
+            **metric_params.parameters,
         )
 
 

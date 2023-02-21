@@ -50,19 +50,11 @@ class ServiceText2TextRecord(ServiceBaseRecord[ServiceText2TextAnnotation]):
 
     @property
     def predicted_as(self) -> Optional[List[str]]:
-        return (
-            [sentence.text for sentence in self.prediction.sentences]
-            if self.prediction
-            else None
-        )
+        return [sentence.text for sentence in self.prediction.sentences] if self.prediction else None
 
     @property
     def annotated_as(self) -> Optional[List[str]]:
-        return (
-            [sentence.text for sentence in self.annotation.sentences]
-            if self.annotation
-            else None
-        )
+        return [sentence.text for sentence in self.annotation.sentences] if self.annotation else None
 
     @property
     def scores(self) -> List[float]:

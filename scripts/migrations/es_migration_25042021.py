@@ -47,9 +47,7 @@ def batcher(iterable, n, fillvalue=None):
     return zip_longest(*args, fillvalue=fillvalue)
 
 
-def map_doc_2_action(
-    index: str, doc: Dict[str, Any], task: TaskType
-) -> Optional[Dict[str, Any]]:
+def map_doc_2_action(index: str, doc: Dict[str, Any], task: TaskType) -> Optional[Dict[str, Any]]:
     """Configures bulk action"""
     doc_data = doc["_source"]
     new_record = {
