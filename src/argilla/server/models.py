@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import secrets
+from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
 
@@ -28,12 +29,19 @@ def generate_user_api_key():
     return secrets.token_urlsafe(_USER_API_KEY_BYTES_LENGTH)
 
 
+def default_inserted_at(context):
+    return context.get_current_parameters()["inserted_at"]
+
+
 class UserWorkspace(Base):
     __tablename__ = "users_workspaces"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id"))
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     user: Mapped["User"] = relationship()
     workspace: Mapped["Workspace"] = relationship()
@@ -44,6 +52,9 @@ class Workspace(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str]
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     users: Mapped[List["User"]] = relationship(secondary="users_workspaces", back_populates="workspaces")
 
@@ -57,5 +68,8 @@ class User(Base):
     username: Mapped[str]
     api_key: Mapped[str] = mapped_column(Text, unique=True, default=generate_user_api_key)
     password_hash: Mapped[str] = mapped_column(Text)
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspaces: Mapped[List["Workspace"]] = relationship(secondary="users_workspaces", back_populates="users")
