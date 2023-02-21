@@ -33,16 +33,6 @@ class Text2TextRecord extends BaseRecord {
     return this.text;
   }
 
-  get modified() {
-    if (
-      !(this.lastEditedSentence || this.annotation || this.annotation.sentences)
-    ) {
-      return false;
-    }
-
-    return this.lastEditedSentence !== this.annotation.sentences[0].text;
-  }
-
   get sentenceForAnnotation() {
     if (this.lastEditedSentence) {
       return this.lastEditedSentence;

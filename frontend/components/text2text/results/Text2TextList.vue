@@ -41,16 +41,16 @@
               v-if="isPreannotated"
               :class="sentencesOrigin === 'Preannotation' ? '--active' : null"
               @click="changeVisibleSentences('Preannotation')"
-              >PreAnnotation</base-button
+              >Annotation</base-button
             >
             <base-button
               v-if="annotations.length"
               :class="sentencesOrigin === 'Annotation' ? '--active' : null"
               @click="changeVisibleSentences('Annotation')"
-              >Annotation</base-button
+              >{{ `Annotation (${annotations.length})` }}</base-button
             >
             <base-button
-              v-if="predictions.length"
+              v-if="showPredictionTab"
               :class="sentencesOrigin === 'Prediction' ? '--active' : null"
               @click="changeVisibleSentences('Prediction')"
               >{{ `Predictions (${predictionsLength})` }}</base-button
@@ -74,13 +74,14 @@
               v-if="sentencesOrigin !== 'Prediction'"
               :key="refresh"
               :annotation-enabled="annotationEnabled"
-              :default-text="visibleSentence || sentence.text || ''"
+              :default-text="defaultText(sentence)"
               :content-editable="annotationEnabled"
+              placeholder="Type your text"
               @annotate="onValidate()"
               @change-text="onTextChanged"
             />
-            <p class="sentence--non-editable" v-else>
-              {{ visibleSentence || sentence.text || "" }}
+            <p class="sentence--non-editable" :key="visibleSentence" v-else>
+              {{ defaultText(sentence) }}
             </p>
           </div>
         </div>
@@ -140,6 +141,7 @@ export default {
       sentencesOrigin: undefined,
       predictionNumber: 0,
       refresh: 1,
+      visibleSentence: null,
     };
   },
   computed: {
@@ -161,20 +163,10 @@ export default {
     },
     visibleSentence: {
       get: function () {
-        return this.record.lastEditedSentence;
+        return this.idState.visibleSentence;
       },
       set: async function (newValue) {
-        if (this.record.lastEditedSentence !== newValue) {
-          await this.updateRecords({
-            dataset: this.getText2TextDataset(),
-            records: [
-              {
-                ...this.record,
-                lastEditedSentence: newValue,
-              },
-            ],
-          });
-        }
+        this.idState.visibleSentence = newValue;
       },
     },
     refresh: {
@@ -200,6 +192,9 @@ export default {
     showScore() {
       return this.sentencesOrigin === "Prediction";
     },
+    showPredictionTab() {
+      return this.predictions.length && !this.isPreannotated;
+    },
     sentences() {
       if (this.sentencesOrigin === "Annotation") {
         return this.annotations;
@@ -214,8 +209,9 @@ export default {
     },
     allowValidation() {
       return (
-        this.sentencesOrigin === "Prediction" ||
+        this.sentencesOrigin === "Preannotation" ||
         (this.record.status !== "Validated" &&
+          this.visibleSentence &&
           !!this.record?.sentenceForAnnotation)
       );
     },
@@ -233,12 +229,12 @@ export default {
           allow: this.sentencesOrigin !== "Prediction",
           active: this.record.status !== "Discarded",
         },
-        // {
-        //   id: "clear",
-        //   name: "Clear",
-        //   allow: this.sentencesOrigin !== "Prediction",
-        //   active: this.record.annotation || false,
-        // },
+        {
+          id: "clear",
+          name: "Clear",
+          allow: this.sentencesOrigin !== "Prediction",
+          active: this.record.annotation || false,
+        },
         {
           id: "reset",
           name: "Reset",
@@ -271,9 +267,12 @@ export default {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
     }),
+    defaultText(sentence) {
+      return this.visibleSentence ?? (sentence.text || "");
+    },
     async showPredictionNumber(index) {
       this.predictionNumber = index;
-      await (this.visibleSentence = this.selectedSentence);
+      this.visibleSentence = this.selectedSentence;
     },
     async onTextChanged(newText) {
       let status = "Edited";
@@ -282,7 +281,7 @@ export default {
         status = "Default";
       }
 
-      await (this.visibleSentence = newText);
+      this.visibleSentence = newText;
       await this.updateRecords({
         dataset: this.getText2TextDataset(),
         records: [
@@ -299,7 +298,7 @@ export default {
       this.refresh++;
       this.sentencesOrigin = tab;
       this.predictionNumber = 0;
-      await (this.visibleSentence = this.selectedSentence);
+      this.visibleSentence = this.selectedSentence;
     },
     initializeSentenceOrigin() {
       if (this.annotationEnabled) {
@@ -333,17 +332,15 @@ export default {
             ...this.record,
             selected: true,
             status: "Edited",
-            annotation: null,
-            lastEditedSentence: null,
-            sentenceForAnnotation: null,
           },
         ],
       });
-      this.initializeSentenceOrigin();
+      this.refresh++;
+      this.visibleSentence = "";
     },
     async onReset() {
       this.refresh++;
-      await (this.visibleSentence = this.selectedSentence);
+      this.visibleSentence = this.selectedSentence;
       this.$emit("reset-record");
     },
     onDiscard() {
@@ -376,11 +373,10 @@ export default {
   }
   &__tabs {
     display: flex;
-    gap: $base-space * 2;
     margin-bottom: $base-space * 2;
     .button {
       border-radius: 0;
-      padding: $base-space 0;
+      padding: $base-space;
       border-bottom: 2px solid transparent;
       color: $black-54;
       &:hover {
@@ -419,11 +415,13 @@ export default {
 }
 .--editable {
   padding: $base-space;
-  box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
+  border: 1px solid $black-10;
   border-radius: $border-radius-s;
 }
 .sentence {
   &--non-editable {
+    font-style: italic;
+    color: $black-54;
     padding: $base-space 0;
   }
 }
