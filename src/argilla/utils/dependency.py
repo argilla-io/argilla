@@ -54,7 +54,7 @@ def _compare_versions(
     if not ops[op](version.parse(got_version), version.parse(want_version)):
         raise ImportError(
             f"{requirement} must be installed{f' to use `{func_name}`' if func_name else ''}, but found {package}=={got_version}."
-            f" You can install '{package}' with the command: `pip install -U {requirement}`"
+            f" You can install a supported version of '{package}' with this command: `pip install -U {requirement}`"
         )
 
 
@@ -112,7 +112,7 @@ def require_version(requirement: str, func_name: Optional[str] = None) -> None:
     except importlib_metadata.PackageNotFoundError:
         raise ModuleNotFoundError(
             f"'{package}' must be installed{f' to use `{func_name}`' if func_name else ''}! You can"
-            f" install '{package}' with the command: `pip install {requirement}`"
+            f" install '{package}' with this command: `pip install {requirement}`"
         )
 
     # check that the right version is installed if version number or a range was provided

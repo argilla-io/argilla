@@ -83,7 +83,7 @@ class TestDependencyRequirements:
         # This method should fail, as our dependencies require a higher version of datasets
         with pytest.raises(
             ImportError,
-            match=f"but found datasets==.*?You can install 'datasets' with the command: `pip install -U datasets<1.0.0`",
+            match=f"but found datasets==.*?You can install a supported version of 'datasets' with this command: `pip install -U datasets<1.0.0`",
         ):
             test_inner()
 
