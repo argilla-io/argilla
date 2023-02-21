@@ -616,7 +616,6 @@ const actions = {
     await _configureDatasetViewSettings(ds.name, viewMode);
 
     const dataset = await _loadTaskDataset(ds);
-    await dataset.initialize();
     await _updateAnnotationProgress({
       id: name,
       total: dataset.globalResults.total,

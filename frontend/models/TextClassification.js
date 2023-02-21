@@ -143,29 +143,6 @@ class TextClassificationDataset extends ObservationDataset {
     save: false,
   };
 
-  async initialize() {
-    const settings = await this._getDatasetSettings();
-    const { labels } = await this.fetchMetricSummary("dataset_labels");
-    const entity = this.getTaskDatasetClass();
-    const isMultiLabel = this.results.records.some((r) => r.multi_label);
-    await entity.insertOrUpdate({
-      where: this.id,
-      data: [
-        {
-          owner: this.owner,
-          name: this.name,
-          _labels: labels,
-          settings,
-          isMultiLabel,
-        },
-      ],
-    });
-    if (!this.labelingRules) {
-      await this.refreshRules();
-    }
-    return entity.find(this.id);
-  }
-
   async _getRule({ query }) {
     const { response } = await TextClassificationDataset.api().get(
       `/datasets/${this.task}/${this.name}/labeling/rules/${encodeURIComponent(
