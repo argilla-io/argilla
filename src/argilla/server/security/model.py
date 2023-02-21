@@ -68,6 +68,8 @@ class User(BaseModel):
         """This will setup the superuser flag when no workspaces are defined"""
         if value is not None:
             return value
+        # The current way to define super-users is create them with no workspaces at all
+        # (IT'S NOT THE SAME AS PASSING AN EMPTY LIST)
         return values.get("workspaces", None) is None
 
     @classmethod
