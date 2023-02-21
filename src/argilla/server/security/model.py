@@ -54,10 +54,13 @@ class User(BaseModel):
         )
         return workspace
 
-    @root_validator
+    @root_validator(pre=True)
     def check_defaults(cls, values):
-        values["superuser"] = cls._set_default_superuser(values.get("superuser"), values)
-        values["workspaces"] = cls._set_default_workspace(values.get("set_default_workspace"))
+        superuser = values.get("superuser")
+        workspaces = values.get("workspaces")
+
+        values["superuser"] = cls._set_default_superuser(superuser, values)
+        values["workspaces"] = cls._set_default_workspace(workspaces, values)
 
         return values
 
@@ -69,19 +72,11 @@ class User(BaseModel):
         return values.get("workspaces", None) is None
 
     @classmethod
-    def _set_default_workspace(cls, value):
-        if value is None:
-            return []
-        return value
+    def _set_default_workspace(cls, value, values):
+        value = (value or []).copy()
+        value.append(values["username"])
 
-    @property
-    def available_workspaces(self) -> List[str]:
-        """Return a list of available workspaces for current user.
-        Even if self.workspaces is None, this method will return the default workspace
-        corresponding to the user username.
-        """
-        workspaces = set((self.workspaces or []) + [self.default_workspace])
-        return list(workspaces)
+        return list(set(value))
 
     @property
     def default_workspace(self) -> Optional[str]:
@@ -109,7 +104,7 @@ class User(BaseModel):
                 self.check_workspace(workspace)
             return workspaces
         else:
-            return self.available_workspaces
+            return self.workspaces
 
     def check_workspace(self, workspace: str) -> str:
         """
@@ -125,11 +120,9 @@ class User(BaseModel):
             The original workspace name if user belongs to it
 
         """
-        if workspace is None or workspace == self.default_workspace:
+        if not workspace or workspace == self.default_workspace:
             return self.default_workspace
-        if not workspace and self.is_superuser():
-            return workspace
-        if workspace not in self.available_workspaces:
+        elif workspace not in self.workspaces:
             raise EntityNotFoundError(name=workspace, type="Workspace")
         return workspace
 
