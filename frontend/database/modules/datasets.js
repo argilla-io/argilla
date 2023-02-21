@@ -597,12 +597,6 @@ const actions = {
 
     return await ObservationDataset.api().get("/datasets/", {
       persistBy: "create",
-      dataTransformer: ({ data }) => {
-        return data.map((datasource) => {
-          datasource.owner = datasource.owner;
-          return datasource;
-        });
-      },
     });
   },
   async fetchByName(_, name) {
