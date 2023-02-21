@@ -32,7 +32,6 @@ class User(BaseModel):
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
 
-    # This order is important since we want execute superuser validator prior to workspace validators
     superuser: Optional[bool]
     workspaces: Optional[List[str]]
 
