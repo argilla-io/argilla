@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import re
+from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
 
@@ -40,6 +41,8 @@ class UserWorkspaceCreate(BaseModel):
 class Workspace(BaseModel):
     id: UUID
     name: str
+    inserted_at: datetime
+    updated_at: datetime
 
     class Config:
         orm_mode = True
@@ -85,6 +88,10 @@ class User(BaseModel):
     disabled: Optional[bool] = None
     api_key: str
     workspaces: Optional[List[str]] = None
+    # TODO: Adding inserted_at and updated_at is causing multiple errors so we are disabling them by now.
+    # Once that we refactor all the old code we should enable this again.
+    # inserted_at: datetime
+    # updated_at: datetime
 
     class Config:
         orm_mode = True
