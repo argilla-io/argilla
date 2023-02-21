@@ -19,7 +19,7 @@
   <div class="record">
     <record-string-text-2-text :record="record" />
     <div>
-      <text-2-text-list
+      <Text2TextList
         ref="list"
         :datasetId="datasetId"
         :datasetName="datasetName"

@@ -24,7 +24,7 @@
   >
     <div>
       <div class="--editable" v-if="!sentences.length">
-        <text-2-text-content-editable
+        <Text2TextContentEditable
           :key="refresh"
           :annotation-enabled="annotationEnabled"
           :edition-mode="true"
@@ -70,7 +70,7 @@
                 {{ sentence.score | percent }}</base-button
               >
             </div>
-            <text-2-text-content-editable
+            <Text2TextContentEditable
               v-if="sentencesOrigin !== 'Prediction'"
               :key="refresh"
               :annotation-enabled="annotationEnabled"
@@ -178,13 +178,10 @@ export default {
       },
     },
     selectedSentence() {
-      return (
-        this.sentences[this.predictionNumber] &&
-        this.sentences[this.predictionNumber].text
-      );
+      return this.sentences[this.predictionNumber]?.text;
     },
     isPreannotated() {
-      return (this.predictionsLength && !this.annotations.length) || false;
+      return this.predictionsLength && !this.annotations.length;
     },
     predictionsLength() {
       return this.predictions.length;
@@ -196,16 +193,20 @@ export default {
       return this.predictions.length && !this.isPreannotated;
     },
     sentences() {
-      if (this.sentencesOrigin === "Annotation") {
-        return this.annotations;
+      const origin = this.sentencesOrigin;
+      switch (origin) {
+        case "Annotation":
+          return this.annotations;
+          break;
+        case "Preannotation":
+          return this.predictions;
+          break;
+        case "Prediction":
+          return this.predictions;
+          break;
+        default:
+          return [];
       }
-      if (this.sentencesOrigin === "Prediction") {
-        return this.predictions;
-      }
-      if (this.sentencesOrigin === "Preannotation") {
-        return this.predictions;
-      }
-      return [];
     },
     allowValidation() {
       return (
@@ -216,30 +217,31 @@ export default {
       );
     },
     text2textClassifierActionButtons() {
+      const originIsEqualToPrediction = this.sentencesOrigin === "Prediction";
       return [
         {
           id: "validate",
           name: "Validate",
-          allow: this.sentencesOrigin !== "Prediction",
+          allow: !originIsEqualToPrediction,
           active: this.allowValidation,
         },
         {
           id: "discard",
           name: "Discard",
-          allow: this.sentencesOrigin !== "Prediction",
-          active: this.record.status !== "Discarded",
+          allow: !originIsEqualToPrediction,
+          active: !this.recordStatusIs("Discarded"),
         },
         {
           id: "clear",
           name: "Clear",
-          allow: this.sentencesOrigin !== "Prediction",
+          allow: !originIsEqualToPrediction,
           active: this.record.annotation || false,
         },
         {
           id: "reset",
           name: "Reset",
-          allow: this.sentencesOrigin !== "Prediction",
-          active: this.record.status === "Edited",
+          allow: !originIsEqualToPrediction,
+          active: this.recordStatusIs("Edited"),
         },
       ];
     },
@@ -345,6 +347,9 @@ export default {
     },
     onDiscard() {
       this.$emit("discard");
+    },
+    recordStatusIs(status) {
+      return this.record.status === status;
     },
     getText2TextDataset() {
       return getText2TextDatasetById(this.datasetId);
