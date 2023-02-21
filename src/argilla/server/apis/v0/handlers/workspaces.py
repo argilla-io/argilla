@@ -52,7 +52,10 @@ def create_workspace(
     return Workspace.from_orm(workspace)
 
 
-@router.delete("/workspaces/{workspace_id}", response_model=Workspace, response_model_exclude_none=True)
+# TODO: We can't do workspaces deletions right now. Workspaces are associated with datasets and used on
+# ElasticSearch indexes. Once that we have datasets on the database and we can check if the workspace doesn't have
+# any dataset then we can delete them.
+# @router.delete("/workspaces/{workspace_id}", response_model=Workspace, response_model_exclude_none=True)
 def delete_workspace(
     *, db: Session = Depends(get_db), workspace_id: UUID, current_user: User = Security(auth.get_user, scopes=[])
 ):
