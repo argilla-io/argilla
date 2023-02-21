@@ -422,6 +422,10 @@ export default {
   padding: $base-space;
   border: 1px solid $black-10;
   border-radius: $border-radius-s;
+  .content--exploration-mode & {
+    border: none;
+    padding: 0;
+  }
 }
 .sentence {
   &--non-editable {
