@@ -4,6 +4,7 @@
       <p
         ref="text"
         class="content__text"
+        :class="textIsEdited ? '--edited-text' : null"
         :contenteditable="annotationEnabled"
         :placeholder="placeholder"
         @input="onInputText"
@@ -38,6 +39,11 @@ export default {
       shiftKey: undefined,
       focus: false,
     };
+  },
+  computed: {
+    textIsEdited() {
+      return this.defaultText !== this.editableText;
+    },
   },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
@@ -123,6 +129,10 @@ $marginRight: 200px;
     color: $black-87;
     white-space: pre-wrap;
     margin: 0;
+    font-style: italic;
+    &.--edited-text {
+      font-style: normal;
+    }
   }
 }
 </style>
