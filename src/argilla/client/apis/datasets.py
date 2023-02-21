@@ -107,6 +107,7 @@ class Datasets(AbstractApi):
         name: str
         task: TaskType
         owner: Optional[str] = None
+        workspace: Optional[str] = None
         created_at: Optional[datetime] = None
         last_updated: Optional[datetime] = None
 
