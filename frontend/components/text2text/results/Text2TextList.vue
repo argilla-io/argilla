@@ -197,13 +197,10 @@ export default {
       switch (origin) {
         case "Annotation":
           return this.annotations;
-          break;
         case "Preannotation":
           return this.predictions;
-          break;
         case "Prediction":
           return this.predictions;
-          break;
         default:
           return [];
       }
