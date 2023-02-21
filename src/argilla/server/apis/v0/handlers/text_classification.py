@@ -316,7 +316,7 @@ def configure_router():
             as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
 
-        return [LabelingRule.parse_obj(rule) for rule in service.get_labeling_rules(dataset)]
+        return [LabelingRule.parse_obj(rule) for rule in service.list_labeling_rules(dataset)]
 
     @deprecate_endpoint(
         path=f"{new_base_endpoint}/labeling/rules",
@@ -379,7 +379,7 @@ def configure_router():
             as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
 
-        return service.compute_rule_metrics(dataset, rule_query=query, labels=labels)
+        return service.compute_labeling_rule(dataset, rule_query=query, labels=labels)
 
     @deprecate_endpoint(
         path=f"{new_base_endpoint}/labeling/rules/metrics",
@@ -404,7 +404,7 @@ def configure_router():
             workspace=common_params.workspace,
             as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
-        metrics = service.compute_overall_rules_metrics(dataset)
+        metrics = service.compute_all_labeling_rules(dataset)
         return DatasetLabelingRulesMetricsSummary.parse_obj(metrics)
 
     @deprecate_endpoint(
@@ -456,10 +456,7 @@ def configure_router():
             workspace=common_params.workspace,
             as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
-        rule = service.find_labeling_rule(
-            dataset,
-            rule_query=query,
-        )
+        rule = service.find_labeling_rule(dataset, rule_query=query)
         return LabelingRule.parse_obj(rule)
 
     @deprecate_endpoint(

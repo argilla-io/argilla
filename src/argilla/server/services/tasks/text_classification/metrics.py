@@ -159,5 +159,13 @@ class TextClassificationMetrics(CommonTasksMetrics[ServiceTextClassificationReco
                 id="annotated_as",
                 name="Annotated labels distribution",
             ),
+            ServiceBaseMetric(
+                id="labeling_rule",
+                name="Labeling rule metric based on a query rule and a set of labels",
+            ),
+            ServiceBaseMetric(
+                id="dataset_labeling_rules",
+                name="Computes the overall labeling rules stats",
+            ),
         ]
     )
