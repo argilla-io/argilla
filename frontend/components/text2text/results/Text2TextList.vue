@@ -38,12 +38,6 @@
         <div v-if="predictionNumber === index" class="content__sentences">
           <div class="content__tabs">
             <base-button
-              v-if="isPreannotated"
-              :class="sentencesOrigin === 'Preannotation' ? '--active' : null"
-              @click="changeVisibleSentences('Preannotation')"
-              >Annotation</base-button
-            >
-            <base-button
               v-if="annotations.length"
               :class="sentencesOrigin === 'Annotation' ? '--active' : null"
               @click="changeVisibleSentences('Annotation')"
@@ -59,7 +53,7 @@
           <div :class="sentencesOrigin !== 'Prediction' ? '--editable' : null">
             <div
               class="content__prediction-tabs"
-              v-if="sentencesOrigin !== 'Annotation'"
+              v-if="showPredictionInternalTabs"
             >
               <base-button
                 @click="showPredictionNumber(index)"
@@ -180,9 +174,6 @@ export default {
     selectedSentence() {
       return this.sentences[this.predictionNumber]?.text;
     },
-    isPreannotated() {
-      return this.predictionsLength && !this.annotations.length;
-    },
     predictionsLength() {
       return this.predictions.length;
     },
@@ -190,7 +181,12 @@ export default {
       return this.sentencesOrigin === "Prediction";
     },
     showPredictionTab() {
-      return this.predictions.length && !this.isPreannotated;
+      return (this.predictions.length && this.annotations.length) || false;
+    },
+    showPredictionInternalTabs() {
+      return (
+        this.sentencesOrigin !== "Annotation" && this.visibleSentence !== ""
+      );
     },
     sentences() {
       const origin = this.sentencesOrigin;
@@ -215,6 +211,10 @@ export default {
     },
     text2textClassifierActionButtons() {
       const originIsEqualToPrediction = this.sentencesOrigin === "Prediction";
+      const emptyVisibleSentence = this.visibleSentence !== "";
+      const showClean =
+        (this.annotations.length && emptyVisibleSentence) ||
+        (!this.annotations.length && emptyVisibleSentence);
       return [
         {
           id: "validate",
@@ -232,7 +232,7 @@ export default {
           id: "clear",
           name: "Clear",
           allow: !originIsEqualToPrediction,
-          active: this.record.annotation || false,
+          active: showClean,
         },
         {
           id: "reset",
@@ -249,6 +249,11 @@ export default {
         this.refresh++;
         this.initializeSentenceOrigin();
         this.predictionNumber = 0;
+      }
+    },
+    annotations(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.initializeSentenceOrigin();
       }
     },
   },
@@ -358,7 +363,6 @@ export default {
 <style lang="scss" scoped>
 .content {
   position: relative;
-  display: flex;
   margin-top: 1em;
   &--exploration-mode {
     align-items: flex-end;
