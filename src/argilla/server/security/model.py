@@ -14,6 +14,7 @@
 #  limitations under the License.
 import re
 from typing import Any, List, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field, constr, validator
 from pydantic.utils import GetterDict
@@ -21,11 +22,31 @@ from pydantic.utils import GetterDict
 from argilla._constants import DATASET_NAME_REGEX_PATTERN
 from argilla.server.errors import EntityNotFoundError
 
-WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
+_WORKSPACE_NAME_REGEX = r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$"
+
 _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
 
 _USER_PASSWORD_MIN_LENGTH = 8
 _USER_USERNAME_REGEX = DATASET_NAME_REGEX_PATTERN
+
+WORKSPACE_NAME_PATTERN = re.compile(_WORKSPACE_NAME_REGEX)
+
+
+class UserWorkspaceCreate(BaseModel):
+    user_id: UUID
+    workspace_id: UUID
+
+
+class Workspace(BaseModel):
+    id: UUID
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
+class WorkspaceCreate(BaseModel):
+    name: constr(regex=_WORKSPACE_NAME_REGEX)
 
 
 class UserGetter(GetterDict):
