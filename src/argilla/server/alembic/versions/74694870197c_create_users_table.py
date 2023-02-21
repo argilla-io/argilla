@@ -38,6 +38,8 @@ def upgrade() -> None:
         sa.Column("username", sa.String, nullable=False, unique=True, index=True),
         sa.Column("api_key", sa.Text, nullable=False, unique=True, index=True),
         sa.Column("password_hash", sa.Text, nullable=False),
+        sa.Column("inserted_at", sa.DateTime, nullable=False),
+        sa.Column("updated_at", sa.DateTime, nullable=False),
     )
 
 

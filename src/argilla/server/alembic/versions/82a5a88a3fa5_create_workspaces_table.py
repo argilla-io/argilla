@@ -34,6 +34,8 @@ def upgrade() -> None:
         "workspaces",
         sa.Column("id", sa.Uuid, primary_key=True),
         sa.Column("name", sa.String, nullable=False),
+        sa.Column("inserted_at", sa.DateTime, nullable=False),
+        sa.Column("updated_at", sa.DateTime, nullable=False),
     )
 
 
