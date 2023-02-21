@@ -8,6 +8,8 @@
         :placeholder="placeholder"
         @input="onInputText"
         v-html="editableText"
+        @focus="setFocus(true)"
+        @blur="setFocus(false)"
       ></p>
       <span><strong>shift Enter</strong> to save</span>
     </div>
@@ -34,6 +36,7 @@ export default {
       editableText: undefined,
       shiftPressed: false,
       shiftKey: undefined,
+      focus: false,
     };
   },
   mounted() {
@@ -47,7 +50,7 @@ export default {
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
-    window.addEventListener("keyup", this.keyUp);
+    window.removeEventListener("keyup", this.keyUp);
   },
   methods: {
     onInputText(event) {
@@ -59,6 +62,7 @@ export default {
       }
     },
     keyUp(event) {
+      event.preventDefault();
       if (this.shiftKey === event.key) {
         this.shiftPressed = false;
       }
@@ -69,9 +73,15 @@ export default {
         this.shiftPressed = true;
       }
       const enter = event.key === "Enter";
-      if (this.shiftPressed && this.editionMode && enter) {
+
+      if (this.focus && this.shiftPressed && enter) {
+        event.preventDefault();
+        this.shiftPressed = false;
         this.annotate();
       }
+    },
+    setFocus(status) {
+      this.focus = status;
     },
   },
 };
@@ -86,8 +96,8 @@ $marginRight: 200px;
   }
 }
 [contenteditable="true"]:empty:before {
-  color: palette(grey, verylight);
   content: attr(placeholder);
+  color: $black-37;
   pointer-events: none;
   display: block; /* For Firefox */
 }
