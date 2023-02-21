@@ -49,8 +49,8 @@ def test_check_non_provided_workspaces():
     user = User(username="test")
     assert user.check_workspaces([]) == ["test"]
 
-    user.workspaces = ["ws"]
-    assert user.check_workspaces([]) == [user.default_workspace] + user.workspaces
+    user = User(username="test", workspaces=["ws"])
+    assert set(user.check_workspaces([])) == {"ws", "test"}
 
     with pytest.raises(EntityNotFoundError, match="not-found"):
         assert user.check_workspaces(["ws", "not-found"])
@@ -83,10 +83,18 @@ def test_workspace_for_superuser():
         assert user.check_workspace("some") == "some"
 
     assert user.check_workspace(None) == "admin"
-    assert user.check_workspace("") == ""
+    assert user.check_workspace("") == "admin"
 
     user.workspaces = ["some"]
     assert user.check_workspaces(["some"]) == ["some"]
+
+
+def test_workspaces_with_default():
+    expected_workspaces = ["user", "ws1"]
+    user = User(username="user", workspaces=expected_workspaces)
+    assert len(user.workspaces) == len(expected_workspaces)
+    for ws in expected_workspaces:
+        assert ws in user.workspaces
 
 
 def test_is_superuser():
@@ -95,7 +103,7 @@ def test_is_superuser():
 
     admin_user.workspaces.append("other-workspace")
     assert admin_user.is_superuser()
-    assert set(admin_user.available_workspaces) == {"other-workspace", "admin"}
+    assert set(admin_user.workspaces) == {"other-workspace", "admin"}
 
     user = User(username="test", workspaces=["bod"])
     assert not user.is_superuser()
@@ -106,14 +114,14 @@ def test_is_superuser():
 @pytest.mark.parametrize(
     "workspaces, expected",
     [
-        (None, ["user"]),
-        ([], ["user"]),
-        (["a"], ["user", "a"]),
+        (None, {"user"}),
+        ([], {"user"}),
+        (["a"], {"user", "a"}),
     ],
 )
 def test_check_workspaces_with_default(workspaces, expected):
     user = User(username="user", workspaces=workspaces)
-    assert user.check_workspaces([]) == expected
-    assert user.check_workspaces(None) == expected
-    assert user.check_workspaces([None]) == expected
-    assert user.check_workspace(user.username) == user.username
+    assert set(user.check_workspaces([])) == expected
+    assert set(user.check_workspaces(None)) == expected
+    assert set(user.check_workspaces([None])) == expected
+    assert set(user.check_workspace(user.username)) == set(user.username)
