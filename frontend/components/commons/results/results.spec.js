@@ -9,7 +9,7 @@ const options = {
     "Text2TextResultsList",
   ],
   propsData: {
-    datasetId: ["owner", "name"],
+    datasetId: ["workspace", "name"],
     datasetTask: "TextClassification",
     datasetName: "name",
   },
