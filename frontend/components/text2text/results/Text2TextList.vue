@@ -296,14 +296,13 @@ export default {
     gap: $base-space;
     justify-content: right;
     .button {
-      padding: 0;
+      padding: calc($base-space / 2);
       margin-bottom: $base-space * 2;
       @include font-size(13px);
       color: $black-54;
       border: 1px solid $black-20;
       border-radius: $border-radius;
       background-color: $black-4;
-      padding: calc($base-space / 2);
       &.--active,
       &:hover {
         background-color: palette(white);

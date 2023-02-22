@@ -81,17 +81,20 @@ export default {
     display: flex;
     margin-bottom: $base-space * 2;
     .button {
-      border-radius: 0;
-      padding: $base-space;
-      border-bottom: 2px solid transparent;
-      color: $black-54;
+      padding: calc($base-space / 2);
       @include font-size(13px);
+      color: $black-54;
+      border: 1px solid $black-20;
+      border-radius: $border-radius;
+      background-color: $black-4;
+      &.--active,
       &:hover {
-        color: $black-87;
+        background-color: palette(white);
       }
       &.--active {
+        color: $primary-color;
         border-color: $primary-color;
-        color: $black-87;
+        background-color: palette(white);
       }
     }
   }
