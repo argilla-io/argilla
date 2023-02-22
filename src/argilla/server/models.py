@@ -51,7 +51,7 @@ class Workspace(Base):
     __tablename__ = "workspaces"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(unique=True)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
@@ -65,7 +65,7 @@ class User(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     first_name: Mapped[str]
     last_name: Mapped[Optional[str]]
-    username: Mapped[str]
+    username: Mapped[str] = mapped_column(unique=True)
     api_key: Mapped[str] = mapped_column(Text, unique=True, default=generate_user_api_key)
     password_hash: Mapped[str] = mapped_column(Text)
 
