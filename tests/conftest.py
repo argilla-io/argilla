@@ -15,13 +15,13 @@
 import httpx
 import pytest
 from _pytest.logging import LogCaptureFixture
+from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
-from argilla.server.database import Base, SessionLocal
+from argilla.server.database import SessionLocal
 from argilla.server.models import User, Workspace
-from sqlalchemy import select
-from sqlalchemy.orm import scoped_session
+from argilla.server.seeds import test_seeds
 
 try:
     from loguru import logger
@@ -32,6 +32,29 @@ from argilla.client.api import active_api
 from starlette.testclient import TestClient
 
 from .helpers import SecuredClient
+
+
+@pytest.fixture(scope="session")
+def api_key_header():
+    return {API_KEY_HEADER_NAME: DEFAULT_API_KEY}
+
+
+@pytest.fixture(scope="session")
+def client():
+    with TestClient(app) as c:
+        yield c
+
+
+@pytest.fixture(scope="function")
+def db():
+    test_seeds()
+    session = SessionLocal()
+
+    yield session
+
+    session.query(User).delete()
+    session.query(Workspace).delete()
+    session.commit()
 
 
 @pytest.fixture
@@ -45,63 +68,19 @@ def telemetry_track_data(mocker):
         return spy
 
 
-@pytest.fixture(scope="session")
-def engine():
-    from argilla.server.database import engine
-
-    return engine
-
-
-@pytest.fixture(scope="session")
-def setup_database(engine):
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
-    seed_for_tests()
-
-    yield engine
-
-    Base.metadata.drop_all(engine)
-
-
-def seed_for_tests():
-    with SessionLocal() as session, session.begin():
-        session.add_all(
-            [
-                User(
-                    first_name="Argilla",
-                    username="argilla",
-                    password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
-                    api_key="argilla.apikey",
-                    workspaces=[
-                        Workspace(name=""),
-                        Workspace(name="argilla"),
-                        Workspace(name="my-fun-workspace"),
-                    ],
-                ),
-                User(
-                    first_name="Mock",
-                    username="mock-user",
-                    password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
-                    api_key="mock-user.apikey",
-                    workspaces=[Workspace(name="argilla"), Workspace(name="mock-ws")],
-                ),
-            ]
-        )
-
-
 @pytest.fixture
-def db_session(setup_database, engine):
-    connection = engine.connect()
-    transaction = connection.begin()
+def mock_user(db):
+    user = User(
+        first_name="Mock",
+        username="mock-user",
+        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+        api_key="mock-user.apikey",
+        workspaces=[Workspace(name="argilla"), Workspace(name="mock-ws")],
+    )
 
-    yield scoped_session(SessionLocal)
-
-    transaction.rollback()
-
-
-@pytest.fixture
-def mock_user(db_session):
-    user = db_session.scalar(select(User).where(User.username == "mock-user"))
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
     return user
 
@@ -113,7 +92,7 @@ def api():
 
 @pytest.fixture
 def mocked_client(
-    db_session,
+    db,
     monkeypatch,
     telemetry_track_data,
 ) -> SecuredClient:
