@@ -16,78 +16,63 @@
   -->
 
 <template>
-  <div
-    class="content content--separator"
-    :class="
-      !annotationEnabled ? 'content--exploration-mode' : 'content--selectable'
-    "
-  >
-    <div>
-      <div class="--editable" v-if="!sentences.length">
+  <div>
+    <div
+      class="content content--separator"
+      :class="
+        !annotationEnabled ? 'content--exploration-mode' : 'content--selectable'
+      "
+    >
+      <div class="--editable" :class="isFocused ? '--focused' : null">
         <Text2TextContentEditable
-          :key="refresh"
+          v-if="!annotations && !predictions"
           :annotation-enabled="annotationEnabled"
           :edition-mode="true"
           :default-text="visibleSentence || ''"
           placeholder="Type your text"
           @annotate="onValidate()"
           @change-text="onTextChanged"
+          @on-change-focus="setFocus"
         />
-      </div>
-      <span v-for="(sentence, index) in sentences" v-else :key="index">
-        <div v-if="predictionNumber === index" class="content__sentences">
-          <div class="content__tabs">
+        <div v-else-if="annotationEnabled || annotations.length">
+          <div
+            class="content__prediction-tabs"
+            v-if="showPredictionInternalTabs"
+          >
             <base-button
-              v-if="annotations.length"
-              :class="sentencesOrigin === 'Annotation' ? '--active' : null"
-              @click="changeVisibleSentences('Annotation')"
-              >{{ `Annotation (${annotations.length})` }}</base-button
-            >
-            <base-button
-              v-if="showPredictionTab"
-              :class="sentencesOrigin === 'Prediction' ? '--active' : null"
-              @click="changeVisibleSentences('Prediction')"
-              >{{ `Predictions (${predictionsLength})` }}</base-button
+              @click="showPredictionNumber(index)"
+              :class="predictionNumber === index ? '--active' : null"
+              v-for="(prediction, index) in predictions"
+              :key="index"
+              >Score : {{ prediction.score | percent }}</base-button
             >
           </div>
-          <div :class="sentencesOrigin !== 'Prediction' ? '--editable' : null">
-            <div
-              class="content__prediction-tabs"
-              v-if="showPredictionInternalTabs"
-            >
-              <base-button
-                @click="showPredictionNumber(index)"
-                :class="predictionNumber === index ? '--active' : null"
-                v-for="(sentence, index) in sentences"
-                :key="index"
-                >Score : {{ sentence.score | percent }}</base-button
-              >
-            </div>
-            <Text2TextContentEditable
-              v-if="sentencesOrigin !== 'Prediction'"
-              :key="refresh"
-              :annotation-enabled="annotationEnabled"
-              :default-text="defaultText(sentence)"
-              :content-editable="annotationEnabled"
-              placeholder="Type your text"
-              @annotate="onValidate()"
-              @change-text="onTextChanged"
-            />
-            <p class="sentence--non-editable" :key="visibleSentence" v-else>
-              {{ defaultText(sentence) }}
-            </p>
-          </div>
+          <Text2TextContentEditable
+            :key="refresh"
+            :annotation-enabled="annotationEnabled"
+            :default-text="defaultText"
+            :content-editable="annotationEnabled"
+            :annotations="annotations"
+            placeholder="Type your text"
+            @annotate="onValidate()"
+            @change-text="onTextChanged"
+            @on-change-focus="setFocus"
+          />
         </div>
-      </span>
-      <record-action-buttons
-        v-if="annotationEnabled && sentencesOrigin !== 'Prediction'"
-        :actions="text2textClassifierActionButtons"
-        @validate="onValidate()"
-        @clear="onClearAnnotations()"
-        @reset="onReset()"
-        @discard="onDiscard()"
+      </div>
+      <Text2TextPredictions
+        v-if="predictionsLength"
+        :predictions="predictions"
       />
     </div>
+    <record-action-buttons
+      v-if="annotationEnabled"
+      :actions="text2textClassifierActionButtons"
+      @validate="onValidate()"
+      @clear="onClearAnnotations()"
+      @reset="onReset()"
+      @discard="onDiscard()"
+    />
   </div>
 </template>
 
@@ -131,35 +116,23 @@ export default {
   },
   idState() {
     return {
-      sentencesOrigin: undefined,
       predictionNumber: 0,
       refresh: 1,
       visibleSentence: null,
     };
   },
+  data: () => {
+    return {
+      isFocused: false,
+    };
+  },
   computed: {
-    sentencesOrigin: {
-      get: function () {
-        return this.idState.sentencesOrigin;
-      },
-      set: function (newValue) {
-        this.idState.sentencesOrigin = newValue;
-      },
-    },
     predictionNumber: {
       get: function () {
         return this.idState.predictionNumber;
       },
       set: function (newValue) {
         this.idState.predictionNumber = newValue;
-      },
-    },
-    visibleSentence: {
-      get: function () {
-        return this.idState.visibleSentence;
-      },
-      set: async function (newValue) {
-        this.idState.visibleSentence = newValue;
       },
     },
     refresh: {
@@ -170,46 +143,41 @@ export default {
         this.idState.refresh = newValue;
       },
     },
-    selectedSentence() {
-      return this.sentences[this.predictionNumber]?.text;
+    visibleSentence: {
+      get: function () {
+        return this.idState.visibleSentence;
+      },
+      set: async function (newValue) {
+        this.idState.visibleSentence = newValue;
+      },
+    },
+    defaultText() {
+      return (
+        this.visibleSentence ??
+        (this.currentAnnotation ||
+          this.predictions[this.predictionNumber]?.text ||
+          "")
+      );
+    },
+    currentAnnotation() {
+      return this.annotations[0]?.text;
     },
     predictionsLength() {
       return this.predictions.length;
     },
-    showScore() {
-      return this.sentencesOrigin === "Prediction";
-    },
-    showPredictionTab() {
-      return (this.predictions.length && this.annotations.length) || false;
-    },
     showPredictionInternalTabs() {
-      return (
-        this.sentencesOrigin !== "Annotation" && this.visibleSentence !== ""
-      );
-    },
-    sentences() {
-      const origin = this.sentencesOrigin;
-      switch (origin) {
-        case "Annotation":
-          return this.annotations;
-        case "Preannotation":
-          return this.predictions;
-        case "Prediction":
-          return this.predictions;
-        default:
-          return [];
-      }
+      return !this.annotations.length && this.visibleSentence !== "";
     },
     allowValidation() {
       return (
-        this.sentencesOrigin === "Preannotation" ||
+        !this.annotations.length ||
         (this.record.status !== "Validated" &&
           this.visibleSentence &&
           !!this.record?.sentenceForAnnotation)
       );
     },
     text2textClassifierActionButtons() {
-      const originIsEqualToPrediction = this.sentencesOrigin === "Prediction";
+      // const originIsEqualToPrediction = this.sentencesOrigin === "Prediction";
       const emptyVisibleSentence = this.visibleSentence !== "";
       const showClean =
         (this.annotations.length && emptyVisibleSentence) ||
@@ -218,72 +186,40 @@ export default {
         {
           id: "validate",
           name: "Validate",
-          allow: !originIsEqualToPrediction,
+          allow: true,
           active: this.allowValidation,
         },
         {
           id: "discard",
           name: "Discard",
-          allow: !originIsEqualToPrediction,
+          allow: true,
           active: !this.recordStatusIs("Discarded"),
         },
         {
           id: "clear",
           name: "Clear",
-          allow: !originIsEqualToPrediction,
+          allow: true,
           active: showClean,
         },
         {
           id: "reset",
           name: "Reset",
-          allow: !originIsEqualToPrediction,
+          allow: true,
           active: this.recordStatusIs("Edited"),
         },
       ];
     },
   },
-  watch: {
-    annotationEnabled(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.refresh++;
-        this.initializeSentenceOrigin();
-        this.predictionNumber = 0;
-      }
-    },
-    annotations(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.initializeSentenceOrigin();
-      }
-    },
-  },
-  updated() {
-    if (this.sentencesOrigin === undefined) {
-      this.initializeSentenceOrigin();
-    }
-  },
-  mounted() {
-    if (this.sentencesOrigin === undefined) {
-      this.initializeSentenceOrigin();
-    }
-  },
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
     }),
-    defaultText(sentence) {
-      return this.visibleSentence ?? (sentence.text || "");
-    },
     async showPredictionNumber(index) {
+      this.refresh++;
       this.predictionNumber = index;
-      this.visibleSentence = this.selectedSentence;
     },
     async onTextChanged(newText) {
-      let status = "Edited";
-
-      if (this.selectedSentence === newText) {
-        status = "Default";
-      }
-
+      let status = this.currentAnnotation === newText ? "Default" : "Edited";
       this.visibleSentence = newText;
       await this.updateRecords({
         dataset: this.getText2TextDataset(),
@@ -297,35 +233,12 @@ export default {
         ],
       });
     },
-    async changeVisibleSentences(tab) {
-      this.refresh++;
-      this.sentencesOrigin = tab;
-      this.predictionNumber = 0;
-      this.visibleSentence = this.selectedSentence;
-    },
-    initializeSentenceOrigin() {
-      if (this.annotationEnabled) {
-        if (this.annotations.length) {
-          this.sentencesOrigin = "Annotation";
-        } else if (this.predictions.length) {
-          this.sentencesOrigin = "Preannotation";
-        }
-      } else {
-        if (this.predictions.length) {
-          this.sentencesOrigin = "Prediction";
-        } else if (this.annotations.length) {
-          this.sentencesOrigin = "Annotation";
-        }
-      }
-    },
     async onValidate() {
       let newS = {
         score: 1,
         text: this.record.sentenceForAnnotation || null,
       };
       this.$emit("annotate", { sentences: [newS] });
-      this.predictionNumber = 0;
-      this.sentencesOrigin = "Annotation";
     },
     async onClearAnnotations() {
       await this.updateRecords({
@@ -343,7 +256,7 @@ export default {
     },
     async onReset() {
       this.refresh++;
-      this.visibleSentence = this.selectedSentence;
+      this.visibleSentence = this.currentAnnotation;
       this.$emit("reset-record");
     },
     onDiscard() {
@@ -351,6 +264,9 @@ export default {
     },
     recordStatusIs(status) {
       return this.record.status === status;
+    },
+    setFocus(status) {
+      this.isFocused = status;
     },
     getText2TextDataset() {
       return getText2TextDatasetById(this.datasetId);
@@ -362,10 +278,9 @@ export default {
 <style lang="scss" scoped>
 .content {
   position: relative;
+  display: flex;
+  gap: $base-space * 2;
   margin-top: 1em;
-  &--exploration-mode {
-    align-items: flex-end;
-  }
   &--separator {
     padding-top: 1em;
     &:before {
@@ -376,62 +291,42 @@ export default {
       top: 0;
     }
   }
-  &__tabs {
-    display: flex;
-    margin-bottom: $base-space * 2;
-    .button {
-      border-radius: 0;
-      padding: $base-space;
-      border-bottom: 2px solid transparent;
-      color: $black-54;
-      &:hover {
-        color: $black-87;
-      }
-      &.--active {
-        border-color: $primary-color;
-        color: $black-87;
-      }
-    }
-  }
   &__prediction-tabs {
     display: flex;
-    gap: $base-space * 2;
+    gap: $base-space;
+    justify-content: right;
     .button {
       padding: 0;
       margin-bottom: $base-space * 2;
       @include font-size(13px);
-      color: $black-20;
+      color: $black-54;
+      border: 1px solid $black-20;
+      border-radius: $border-radius;
+      background-color: $black-4;
+      padding: calc($base-space / 2);
       &.--active,
       &:hover {
-        color: $black-37;
+        background-color: palette(white);
+      }
+      &.--active {
+        color: $primary-color;
+        border-color: $primary-color;
+        background-color: palette(white);
       }
     }
   }
-  &__sentences {
-    display: flex;
-    flex-direction: column;
-  }
-  &__score {
-    @include font-size(13px);
-    margin-right: 0;
-    min-width: 33%;
-    color: $black-54;
-  }
 }
 .--editable {
+  width: 100%;
   padding: $base-space;
-  border: 1px solid $black-10;
+  border: 1px solid $black-20;
   border-radius: $border-radius-s;
+  &.--focused {
+    border-color: $primary-color;
+  }
   .content--exploration-mode & {
     border: none;
     padding: 0;
-  }
-}
-.sentence {
-  &--non-editable {
-    font-style: italic;
-    color: $black-54;
-    padding: $base-space 0;
   }
 }
 </style>

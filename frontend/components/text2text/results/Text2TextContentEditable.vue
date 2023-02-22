@@ -1,17 +1,19 @@
 <template>
   <span>
     <div class="content__edition-area">
-      <p
-        ref="text"
-        class="content__text"
-        :class="textIsEdited ? '--edited-text' : null"
-        :contenteditable="annotationEnabled"
-        :placeholder="placeholder"
-        @input="onInputText"
-        v-html="editableText"
-        @focus="setFocus(true)"
-        @blur="setFocus(false)"
-      ></p>
+      <transition appear name="fade">
+        <p
+          ref="text"
+          class="content__text"
+          :class="textIsEdited ? '--edited-text' : null"
+          :contenteditable="annotationEnabled"
+          :placeholder="placeholder"
+          @input="onInputText"
+          v-html="editableText"
+          @focus="setFocus(true)"
+          @blur="setFocus(false)"
+        ></p>
+      </transition>
       <span><strong>shift Enter</strong> to save</span>
     </div>
   </span>
@@ -21,6 +23,10 @@ export default {
   props: {
     annotationEnabled: {
       type: Boolean,
+      required: true,
+    },
+    annotations: {
+      type: Array,
       required: true,
     },
     defaultText: {
@@ -34,7 +40,7 @@ export default {
   },
   data: () => {
     return {
-      editableText: undefined,
+      editableText: null,
       shiftPressed: false,
       shiftKey: undefined,
       focus: false,
@@ -42,7 +48,10 @@ export default {
   },
   computed: {
     textIsEdited() {
-      return this.defaultText !== this.editableText;
+      return (
+        this.defaultText !== this.editableText ||
+        this.defaultText === this.annotations[0]?.text
+      );
     },
   },
   mounted() {
@@ -88,6 +97,7 @@ export default {
     },
     setFocus(status) {
       this.focus = status;
+      this.$emit("on-change-focus", status);
     },
   },
 };
