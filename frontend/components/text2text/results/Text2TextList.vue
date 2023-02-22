@@ -173,7 +173,8 @@ export default {
         !this.annotations.length ||
         (this.record.status !== "Validated" &&
           this.visibleSentence &&
-          !!this.record?.sentenceForAnnotation)
+          !!this.record?.sentenceForAnnotation) ||
+        false
       );
     },
     text2textClassifierActionButtons() {
@@ -186,7 +187,7 @@ export default {
         {
           id: "validate",
           name: "Validate",
-          allow: true,
+          allow: this.defaultText,
           active: this.allowValidation,
         },
         {
