@@ -269,6 +269,7 @@ jobs:
       - test-opensearch
     env:
       IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
+    if: needs.build.outputs.code_changes == 'true'
     strategy:
       matrix:
         include:
