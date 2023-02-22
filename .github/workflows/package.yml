@@ -208,6 +208,10 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    # Only build the package if we can deploy it as a docker image
+    if: secrets.AR_DOCKER_USERNAME != ""
+    outputs:
+      code_changes: ${{ steps.filter.outputs.code_changes }}
 
     steps:
       - name: Checkout Code 🛎
@@ -262,6 +266,8 @@ jobs:
       - build
       - test-elastic
       - test-opensearch
+    # Only deploy if there are code changes
+    if: needs.build.outputs.code_changes == 'true'
     strategy:
       matrix:
         include:
