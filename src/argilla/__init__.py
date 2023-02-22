@@ -38,6 +38,7 @@ __version__ = _version.version
 
 if _TYPE_CHECKING:
     from argilla.client.api import (
+        active_client,
         copy,
         delete,
         delete_records,
@@ -84,6 +85,7 @@ _import_structure = {
         "log",
         "log_async",
         "set_workspace",
+        "active_client",
     ],
     "client.models": [
         "Text2TextRecord",

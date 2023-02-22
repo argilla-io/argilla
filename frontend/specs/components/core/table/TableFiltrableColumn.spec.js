@@ -5,11 +5,11 @@ function mountTableFiltrableColumn() {
   return mount(TableFiltrableColumn, {
     propsData: {
       filters: {
-        owner: ["recognai"],
+        workspace: ["recognai"],
       },
       column: {
         class: "text",
-        field: "owner",
+        field: "workspace",
         filtrable: "true",
         name: "Workspace",
         type: "text",
@@ -17,7 +17,7 @@ function mountTableFiltrableColumn() {
       data: [
         {
           name: "dataset_1",
-          owner: "recognai",
+          workspace: "recognai",
           task: "TokenClassification",
         },
       ],

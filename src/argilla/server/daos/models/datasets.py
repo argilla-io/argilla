@@ -15,7 +15,7 @@
 from datetime import datetime
 from typing import Any, Dict, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from argilla._constants import DATASET_NAME_REGEX_PATTERN
 from argilla.server.commons.models import TaskType
@@ -24,7 +24,9 @@ from argilla.server.commons.models import TaskType
 class BaseDatasetDB(BaseModel):
     name: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
     task: TaskType
-    owner: Optional[str] = None
+    owner: Optional[str] = Field(description="Deprecated. Use `workspace` instead. Will be removed in v1.5.0")
+    workspace: Optional[str] = None
+
     tags: Dict[str, str] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = None
@@ -33,6 +35,13 @@ class BaseDatasetDB(BaseModel):
         description="The argilla user that created the dataset",
     )
     last_updated: datetime = None
+
+    @validator("workspace", pre=True, always=True)
+    def set_workspace_defaults(cls, value, values):
+        if value:
+            return value
+        else:
+            return values.get("owner")
 
     @classmethod
     def build_dataset_id(cls, name: str, owner: Optional[str] = None) -> str:

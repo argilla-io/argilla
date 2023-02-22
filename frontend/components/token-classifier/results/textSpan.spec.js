@@ -9,7 +9,7 @@ const options = {
     },
   },
   propsData: {
-    datasetId: ["owner", "name"],
+    datasetId: ["workspace", "name"],
     datasetName: "name",
     datasetLastSelectedEntity: {},
     datasetEntities: [
