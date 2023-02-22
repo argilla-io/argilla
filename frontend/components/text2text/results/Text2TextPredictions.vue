@@ -79,6 +79,7 @@ export default {
   }
   &__tabs {
     display: flex;
+    gap: $base-button;
     margin-bottom: $base-space * 2;
     .button {
       padding: calc($base-space / 2);
