@@ -18,9 +18,6 @@ import sys
 import pytest
 from argilla.utils.dependency import (
     require_version,
-    requires_datasets,
-    requires_sklearn,
-    requires_spacy,
     requires_version,
 )
 
@@ -29,9 +26,9 @@ class TestDependencyRequirements:
     @pytest.mark.parametrize(
         ("decorator", "package_name", "import_name", "version"),
         [
-            (requires_datasets, "datasets", "datasets", ">1.17.0"),
-            (requires_spacy, "spacy", "spacy", ""),
-            (requires_sklearn, "scikit-learn", "sklearn", ""),
+            (requires_version("datasets>1.17.0"), "datasets", "datasets", ">1.17.0"),
+            (requires_version("spacy"), "spacy", "spacy", ""),
+            (requires_version("scikit-learn"), "scikit-learn", "sklearn", ""),
             (requires_version("faiss"), "faiss", "faiss", ""),
         ],
     )
@@ -60,9 +57,9 @@ class TestDependencyRequirements:
     @pytest.mark.parametrize(
         ("decorator"),
         [
-            requires_datasets,
-            requires_spacy,
-            requires_sklearn,
+            requires_version("datasets>1.17.0"),
+            requires_version("spacy"),
+            requires_version("scikit-learn"),
         ],
     )
     def test_installed_dependency_decorator(self, decorator):

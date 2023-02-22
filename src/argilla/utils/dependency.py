@@ -148,22 +148,4 @@ def requires_version(requirement):
     return functools.partial(requires_decorator, requirement)
 
 
-def requires_datasets(func):
-    """Decorator requiring that `datasets` is installed with version `>1.17.0`.
-    Shorthand for `requires_version("datasets>1.17.0")`"""
-    return requires_decorator("datasets>1.17.0", func)
-
-
-def requires_spacy(func):
-    """Decorator requiring that `spacy` is installed.
-    Shorthand for `requires_version("spacy")`"""
-    return requires_decorator("spacy", func)
-
-
-def requires_sklearn(func):
-    """Decorator requiring that `scikit-learn` is installed and can be imported as `sklearn`.
-    Shorthand for `requires_version("scikit-learn")`"""
-    return requires_decorator("scikit-learn", func)
-
-
-__all__ = ["requires_datasets", "requires_spacy", "requires_sklearn", "requires_version", "require_version"]
+__all__ = ["requires_version", "require_version"]

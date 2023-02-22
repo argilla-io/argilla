@@ -28,7 +28,7 @@ from argilla.client.models import (
     TokenClassificationRecord,
 )
 from argilla.client.sdk.datasets.models import TaskType
-from argilla.utils.dependency import require_version, requires_datasets, requires_spacy
+from argilla.utils.dependency import require_version, requires_version
 from argilla.utils.span_utils import SpanUtils
 
 if TYPE_CHECKING:
@@ -119,7 +119,7 @@ class DatasetBase:
     def __str__(self):
         return repr(self)
 
-    @requires_datasets
+    @requires_version("datasets>1.17.0")
     def to_datasets(self) -> "datasets.Dataset":
         """Exports your records to a `datasets.Dataset`.
 
@@ -462,7 +462,7 @@ class DatasetBase:
         else:
             raise NotImplementedError(f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}")
 
-    @requires_spacy
+    @requires_version("spacy")
     def _prepare_for_training_with_spacy(
         self, **kwargs
     ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
@@ -477,7 +477,7 @@ class DatasetBase:
 
         raise NotImplementedError
 
-    @requires_datasets
+    @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_transformers(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training using the "transformers" framework.
 
@@ -490,7 +490,7 @@ class DatasetBase:
 
         raise NotImplementedError
 
-    @requires_datasets
+    @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_spark_nlp(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training using the "spark-nlp" framework.
 
@@ -559,7 +559,7 @@ class DatasetForTextClassification(DatasetBase):
         super().__init__(records=records)
 
     @classmethod
-    @requires_datasets
+    @requires_version("datasets>1.17.0")
     def from_datasets(
         cls,
         dataset: "datasets.Dataset",
@@ -710,7 +710,7 @@ class DatasetForTextClassification(DatasetBase):
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
         return cls([TextClassificationRecord(**row) for row in dataframe.to_dict("records")])
 
-    @requires_datasets
+    @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_transformers(
         self,
         train_size: Optional[float] = None,
@@ -770,7 +770,7 @@ class DatasetForTextClassification(DatasetBase):
 
         return ds
 
-    @requires_spacy
+    @requires_version("spacy")
     def _prepare_for_training_with_spacy(self, nlp: "spacy.Language", records: List[Record]) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
@@ -869,7 +869,7 @@ class DatasetForTokenClassification(DatasetBase):
         return parent_fields + ["tags"]  # compute annotation from tags
 
     @classmethod
-    @requires_datasets
+    @requires_version("datasets>1.17.0")
     def from_datasets(
         cls,
         dataset: "datasets.Dataset",
@@ -947,7 +947,7 @@ class DatasetForTokenClassification(DatasetBase):
     ) -> "DatasetForTokenClassification":
         return super().from_pandas(dataframe)
 
-    @requires_datasets
+    @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_transformers(
         self,
         train_size: Optional[float] = None,
@@ -986,7 +986,7 @@ class DatasetForTokenClassification(DatasetBase):
 
         return ds
 
-    @requires_spacy
+    @requires_version("spacy")
     def _prepare_for_training_with_spacy(self, nlp: "spacy.Language", records: List[Record]) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
@@ -1127,7 +1127,7 @@ class DatasetForText2Text(DatasetBase):
         super().__init__(records=records)
 
     @classmethod
-    @requires_datasets
+    @requires_version("datasets>1.17.0")
     def from_datasets(
         cls,
         dataset: "datasets.Dataset",
@@ -1230,7 +1230,7 @@ class DatasetForText2Text(DatasetBase):
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
         return cls([Text2TextRecord(**row) for row in dataframe.to_dict("records")])
 
-    @requires_datasets
+    @requires_version("datasets>1.17.0")
     def prepare_for_training(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training.
 

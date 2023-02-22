@@ -22,7 +22,7 @@ from argilla.server.services.search.model import ServiceRecordsQuery
 from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationRecord,
 )
-from argilla.utils.dependency import requires_sklearn
+from argilla.utils.dependency import requires_version
 
 
 class F1Metric(ServicePythonMetric):
@@ -37,7 +37,7 @@ class F1Metric(ServicePythonMetric):
 
     multi_label: bool = False
 
-    @requires_sklearn
+    @requires_version("scikit-learn")
     def apply(self, records: Iterable[ServiceTextClassificationRecord]) -> Any:
         from sklearn.metrics import precision_recall_fscore_support
 

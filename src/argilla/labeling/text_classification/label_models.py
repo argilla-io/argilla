@@ -21,7 +21,7 @@ import numpy as np
 
 from argilla import DatasetForTextClassification, TextClassificationRecord
 from argilla.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
-from argilla.utils.dependency import requires_sklearn, requires_version
+from argilla.utils.dependency import requires_version
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -311,7 +311,7 @@ class MajorityVoter(LabelModel):
 
         return records_with_prediction
 
-    @requires_sklearn
+    @requires_version("scikit-learn")
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -606,7 +606,7 @@ class Snorkel(LabelModel):
 
         return DatasetForTextClassification(records_with_prediction)
 
-    @requires_sklearn
+    @requires_version("scikit-learn")
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -876,7 +876,7 @@ class FlyingSquid(LabelModel):
 
         return probas
 
-    @requires_sklearn
+    @requires_version("scikit-learn")
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
