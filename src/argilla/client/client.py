@@ -205,7 +205,7 @@ class Argilla:
         Args:
             workspace: The new workspace
         """
-        if workspace is None:
+        if not workspace:
             raise Exception("Must provide a workspace")
 
         if workspace != self.get_workspace():

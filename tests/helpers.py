@@ -56,7 +56,7 @@ class SecuredClient:
         rb_api = active_api()
         rb_api._user = default_user
         rb_api.http_client.token = default_user.api_key
-        rb_api.http_client.headers.pop(WORKSPACE_HEADER_NAME)
+        rb_api.http_client.headers.pop(WORKSPACE_HEADER_NAME, None)
         self._header[API_KEY_HEADER_NAME] = default_user.api_key
 
     def add_workspaces_to_argilla_user(self, workspaces: List[str]):

@@ -28,6 +28,7 @@ from argilla._constants import (
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client import api
+from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
@@ -659,26 +660,22 @@ def test_load_text2text(mocked_client, supported_vector_search):
 
 
 def test_client_workspace(mocked_client):
-    try:
-        ws = api.get_workspace()
-        assert ws == "argilla"
+    api = Argilla()
+    ws = api.get_workspace()
+    assert ws == "argilla"
 
-        api.set_workspace("")
-        assert api.get_workspace() == ""
-
+    for ws in [None, ""]:
         with pytest.raises(Exception, match="Must provide a workspace"):
-            api.set_workspace(None)
+            api.set_workspace(ws)
 
-        # Mocking user
-        api.active_api().user.workspaces = ["a", "b"]
+    # Mocking user
+    api.user.workspaces = ["a", "b"]
 
-        with pytest.raises(Exception, match="Wrong provided workspace c"):
-            api.set_workspace("c")
+    with pytest.raises(Exception, match="Wrong provided workspace c"):
+        api.set_workspace("c")
 
-        api.set_workspace("argilla")
-        assert api.get_workspace() == "argilla"
-    finally:
-        api.init()  # reset workspace
+    api.set_workspace("argilla")
+    assert api.get_workspace() == "argilla"
 
 
 def test_load_sort(mocked_client):
@@ -706,32 +703,3 @@ def test_load_sort(mocked_client):
     ds = api.load(name=dataset, ids=["1str", "2str", "11str"])
     df = ds.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]
-
-
-def test_load_workspace_from_different_workspace(mocked_client):
-    records = [
-        ar.TextClassificationRecord(
-            text="test text",
-            id=i,
-        )
-        for i in ["1str", 1, 2, 11, "2str", "11str"]
-    ]
-
-    dataset = "test_load_workspace_from_different_workspace"
-    workspace = api.get_workspace()
-    try:
-        api.set_workspace("")  # empty workspace
-        api.delete(dataset)
-        api.log(records, name=dataset)
-
-        # check sorting policies
-        ds = api.load(name=dataset)
-        df = ds.to_pandas()
-        assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
-
-        api.set_workspace(workspace)
-        df = api.load(name=dataset)
-        df = df.to_pandas()
-        assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
-    finally:
-        api.set_workspace(workspace)

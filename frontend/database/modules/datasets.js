@@ -18,7 +18,7 @@ import _ from "lodash";
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
-import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
+import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 import { Vector as VectorModel } from "@/models/Vector";
 
@@ -578,9 +578,8 @@ const actions = {
 
   async deleteDataset(_, { workspace, name }) {
     var url = `/datasets/${name}`;
-    if (workspace !== NO_WORKSPACE) {
-      url += `?workspace=${workspace}`;
-    }
+
+    url += `?workspace=${workspace}`;
     const deleteResults = await ObservationDataset.api().delete(url, {
       delete: [workspace, name],
     });
@@ -598,12 +597,6 @@ const actions = {
 
     return await ObservationDataset.api().get("/datasets/", {
       persistBy: "create",
-      dataTransformer: ({ data }) => {
-        return data.map((datasource) => {
-          datasource.workspace = datasource.workspace || NO_WORKSPACE;
-          return datasource;
-        });
-      },
     });
   },
   async fetchByName(_, name) {
