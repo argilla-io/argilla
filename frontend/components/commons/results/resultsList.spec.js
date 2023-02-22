@@ -21,7 +21,7 @@ const options = {
   localVue,
   store,
   propsData: {
-    datasetId: ["owner", "name"],
+    datasetId: ["workspace", "name"],
     datasetTask: "TextClassification",
   },
 };

@@ -104,7 +104,7 @@ class TokenClassificationDataset extends ObservationDataset {
       where: this.id,
       data: [
         {
-          owner: this.owner,
+          workspace: this.workspace,
           name: this.name,
           settings,
         },

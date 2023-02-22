@@ -6,7 +6,7 @@ function mountEntitiesSelector() {
   return mount(EntitiesSelector, {
     stubs: ["entity-label"],
     propsData: {
-      datasetId: ["name", "owner"],
+      datasetId: ["name", "workspace"],
       datasetLastSelectedEntity: {
         colorId: 14,
         shortCut: "1",
