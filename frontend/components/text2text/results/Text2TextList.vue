@@ -60,8 +60,7 @@
                 :class="predictionNumber === index ? '--active' : null"
                 v-for="(sentence, index) in sentences"
                 :key="index"
-                >Prediction {{ index + 1 }} :
-                {{ sentence.score | percent }}</base-button
+                >Score : {{ sentence.score | percent }}</base-button
               >
             </div>
             <Text2TextContentEditable
