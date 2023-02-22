@@ -69,7 +69,7 @@ async function _getOrFetchDataset({ workspace, name }) {
   }
   await ObservationDataset.api().get(`/datasets/${name}`, {
     dataTransformer: ({ data }) => {
-      data.owner = data.owner || workspace;
+      data.workspace = data.workspace || workspace;
       return data;
     },
   });
@@ -600,7 +600,7 @@ const actions = {
       persistBy: "create",
       dataTransformer: ({ data }) => {
         return data.map((datasource) => {
-          datasource.owner = datasource.owner || NO_WORKSPACE;
+          datasource.workspace = datasource.workspace || NO_WORKSPACE;
           return datasource;
         });
       },

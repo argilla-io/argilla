@@ -5,7 +5,7 @@ let wrapper = null;
 const options = {
   stubs: ["results"],
   propsData: {
-    datasetId: ["owner", "name"],
+    datasetId: ["workspace", "name"],
     datasetTask: "TextClassification",
     datasetName: "name",
   },
