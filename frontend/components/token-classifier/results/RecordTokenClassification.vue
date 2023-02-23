@@ -26,7 +26,7 @@
           origin="prediction"
           class="prediction"
           :datasetName="datasetName"
-          :datasetEntities="datasetEntities"
+          :datasetEntities="labels"
           :datasetQuery="datasetQuery"
           :record="record"
           :visualTokens="visualTokens"
@@ -39,7 +39,7 @@
           class="annotation"
           :datasetId="datasetId"
           :datasetName="datasetName"
-          :datasetEntities="datasetEntities"
+          :datasetEntities="labels"
           :datasetLastSelectedEntity="datasetLastSelectedEntity"
           :record="record"
           :visualTokens="visualTokens"
@@ -69,6 +69,7 @@
 import { indexOf, length } from "stringz";
 import { mapActions } from "vuex";
 import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
+import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
 
 export default {
   props: {
@@ -78,10 +79,6 @@ export default {
     },
     datasetName: {
       type: String,
-      required: true,
-    },
-    datasetEntities: {
-      type: Array,
       required: true,
     },
     datasetQuery: {
@@ -111,6 +108,9 @@ export default {
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
+    },
+    labels() {
+      return getAllLabelsByDatasetId(this.datasetId);
     },
     visualTokens() {
       // This is used for both, annotation ad exploration components

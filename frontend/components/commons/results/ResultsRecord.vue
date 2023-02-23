@@ -92,7 +92,6 @@
         v-if="datasetTask === 'TokenClassification'"
         :datasetId="datasetId"
         :datasetName="dataset.name"
-        :datasetEntities="dataset.entities"
         :datasetQuery="dataset.query"
         :datasetLastSelectedEntity="dataset.lastSelectedEntity"
         :viewSettings="viewSettings"
