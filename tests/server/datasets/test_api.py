@@ -14,11 +14,11 @@
 #  limitations under the License.
 from typing import Optional
 
-from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
 )
 from argilla.server.commons.models import TaskType
+from argilla.server.schemas.datasets import Dataset
 
 from tests.helpers import SecuredClient
 
@@ -131,7 +131,7 @@ def test_dataset_naming_validation(mocked_client):
                         "type": "value_error.str.regex",
                     }
                 ],
-                "model": "TextClassificationDataset",
+                "model": "CreateDatasetRequest",
             },
         }
     }
@@ -153,7 +153,7 @@ def test_dataset_naming_validation(mocked_client):
                         "type": "value_error.str.regex",
                     }
                 ],
-                "model": "TokenClassificationDataset",
+                "model": "CreateDatasetRequest",
             },
         }
     }
