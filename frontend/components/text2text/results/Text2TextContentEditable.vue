@@ -57,6 +57,7 @@ export default {
   mounted() {
     window.addEventListener("keydown", this.keyDown);
     window.addEventListener("keyup", this.keyUp);
+    window.addEventListener("paste", this.pastePlainText);
     if (this.defaultText) {
       this.editableText = this.defaultText;
     } else {
@@ -66,6 +67,7 @@ export default {
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
     window.removeEventListener("keyup", this.keyUp);
+    window.removeEventListener("paste", this.pastePlainText);
   },
   methods: {
     onInputText(event) {
@@ -98,6 +100,13 @@ export default {
     setFocus(status) {
       this.focus = status;
       this.$emit("on-change-focus", status);
+    },
+    pastePlainText(event) {
+      if (event.target.isContentEditable) {
+        event.preventDefault();
+        var text = e.clipboardData.getData("text/plain");
+        document.execCommand("insertText", false, text);
+      }
     },
   },
 };
