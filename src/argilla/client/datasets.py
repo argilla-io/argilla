@@ -177,7 +177,7 @@ class DatasetBase:
             del ds_dict["metadata"]
             dataset = datasets.Dataset.from_dict(ds_dict)
             _LOGGER.warning(
-                "The 'metadata' of the records were removed, since it was incompatible" " with the 'datasets' format."
+                "The 'metadata' of the records were removed, since it was incompatible with the 'datasets' format."
             )
 
         return dataset
@@ -218,7 +218,7 @@ class DatasetBase:
         import datasets
 
         if isinstance(dataset, datasets.DatasetDict):
-            raise ValueError("`datasets.DatasetDict` are not supported. Please, select the dataset" " split before.")
+            raise ValueError("`datasets.DatasetDict` are not supported. Please, select the dataset split before.")
 
         # clean column mappings
         column_mapping = {key: val for key, val in column_mapping.items() if val is not None}
@@ -469,7 +469,7 @@ class DatasetBase:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
         elif framework is Framework.SPACY and lang is None:
             raise ValueError(
-                "Please provide a spacy language model to prepare the" " dataset for training with the spacy framework."
+                "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
             )
         elif framework in [Framework.SPACY, Framework.SPARK_NLP]:
             if train_size and test_size:
@@ -496,7 +496,7 @@ class DatasetBase:
                 else:
                     return self._prepare_for_training_with_spark_nlp(records=shuffled_records)
         else:
-            raise NotImplementedError(f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}")
+            raise NotImplementedError(f"Framework {framework} is not supported. Choose from: {list(Framework)}")
 
     @_requires_spacy
     def _prepare_for_training_with_spacy(
@@ -799,7 +799,7 @@ class DatasetForTextClassification(DatasetBase):
                 },
                 features=datasets.Features(feature_dict),
             )
-        if test_size:
+        if test_size is not None and test_size != 0:
             ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
@@ -1014,7 +1014,7 @@ class DatasetForTokenClassification(DatasetBase):
         new_features["ner_tags"] = [class_tags]
         ds = ds.cast(new_features)
 
-        if train_size or test_size:
+        if test_size is not None and test_size != 0:
             ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
