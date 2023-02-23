@@ -5,7 +5,16 @@ let wrapper = null;
 
 const options = {
   stubs: ["base-button"],
+  idState() {
+    return {
+      arePredictionsVisible: false,
+      selectedPredictionIndex: 0,
+    };
+  },
   propsData: {
+    record: {
+      id: 13611370,
+    },
     predictions: [
       {
         score: 0.32,
@@ -16,8 +25,6 @@ const options = {
         text: "text 2",
       },
     ],
-    arePredictionsVisible: false,
-    selectedPredictionIndex: 0,
   },
 };
 
