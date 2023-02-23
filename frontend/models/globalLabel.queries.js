@@ -1,4 +1,7 @@
-import { GlobalLabel as GlobalLabelModel } from "./GlobalLabel.model";
+import {
+  GlobalLabel as GlobalLabelModel,
+  formatDatasetIdForGlobalLabelModel,
+} from "./GlobalLabel.model";
 
 const upsertLabelsInGlobalLabelModel = (labels) => {
   GlobalLabelModel.insertOrUpdate({
@@ -9,4 +12,17 @@ const deleteAllGlobalLabelModel = () => {
   GlobalLabelModel.deleteAll();
 };
 
-export { upsertLabelsInGlobalLabelModel, deleteAllGlobalLabelModel };
+const getAllLabelsByDatasetId = (datasetId) => {
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+  const labels = GlobalLabelModel.query()
+    .where("dataset_id", joinedDatasetId)
+    .get();
+
+  return labels;
+};
+
+export {
+  getAllLabelsByDatasetId,
+  upsertLabelsInGlobalLabelModel,
+  deleteAllGlobalLabelModel,
+};
