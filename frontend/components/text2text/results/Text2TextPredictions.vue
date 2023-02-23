@@ -33,7 +33,9 @@
           >
         </div>
         <transition name="fade" appear :key="selectedPredictionIndex">
-          <div class="predictions__text">{{ selectedPrediction }}</div>
+          <div class="predictions__text">
+            {{ selectedPrediction }}
+          </div>
         </transition>
       </div>
     </div>
@@ -106,6 +108,7 @@ export default {
 .predictions {
   $this: &;
   position: relative;
+  margin-bottom: 3em;
   &__panel {
     position: absolute;
     left: 0;
@@ -114,13 +117,17 @@ export default {
     background: palette(white);
     border-radius: $border-radius;
     box-shadow: 0px 0px 4px 0px rgb(0 0 0 / 15%);
-    border: 1px solid transparent;
+    border: 1px solid $black-4;
     transition: all 0.2s ease;
+    max-height: 60px;
     &.--collapsed #{$this}__icon {
       opacity: 0;
     }
+    #{$this}__text {
+      transition: all 0.3s ease;
+      transform: rotateX(-50deg);
+    }
     &:hover {
-      border-color: $black-10;
       background: palette(grey, 800);
       transition: all 0.2s ease;
       &.--collapsed #{$this}__icon {
@@ -132,9 +139,14 @@ export default {
     }
     &.--expanded {
       background: palette(white);
-      border-color: $black-10;
+      max-height: 400px;
+      transition: all 0.2s ease-in;
       #{$this}__header {
         padding: 0;
+      }
+      #{$this}__text {
+        transition: all 1s ease;
+        transform: rotateX(0);
       }
     }
   }
@@ -146,8 +158,8 @@ export default {
   }
   &__icon {
     position: absolute;
-    top: $base-space * 2;
-    right: $base-space * 2;
+    top: 1.2em;
+    right: 1.2em;
     color: $black-37;
     cursor: pointer;
   }
