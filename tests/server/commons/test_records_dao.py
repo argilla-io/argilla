@@ -26,6 +26,7 @@ def test_raise_proper_error():
         dao.search_records(
             dataset=BaseDatasetDB(
                 name="mock-notfound",
+                workspace="ee",
                 task=TaskType.text_classification,
             )
         )
