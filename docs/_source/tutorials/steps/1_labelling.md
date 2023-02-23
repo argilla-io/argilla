@@ -5,6 +5,10 @@
 
 ```{include} /_static/tutorials/labelling-textclassification-sentence-transformers-semantic/modal.md
 ```
+```{include} /_static/tutorials/labelling_textclassification_setfit_zeroshot/modal.md
+```
+```{include} /_static/tutorials/labelling_textclassification_setfit_zeroshot/modal.md
+```
 ```{include} /_static/tutorials/labelling-text2text-disaggregators-explainability/modal.md
 ```
 ```{include} /_static/tutorials/labelling-textclassification-gpt3-fewshot/modal.md
