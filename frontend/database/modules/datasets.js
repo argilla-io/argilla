@@ -830,7 +830,7 @@ const factoryLabelsForGlobalLabelsModel = (datasetId, labels) => {
       text: name,
       dataset_id: datasetId,
       color_id: index,
-      shortcut: index < 10 ? index : null,
+      shortcut: index < 10 ? String(index + 1) : null,
     };
   });
   return formattedLabels;
