@@ -102,9 +102,9 @@ export default {
       this.$emit("on-change-focus", status);
     },
     pastePlainText(event) {
-      if (event.target.isContentEditable) {
+      if (this.focus && event.target.isContentEditable) {
         event.preventDefault();
-        var text = e.clipboardData.getData("text/plain");
+        var text = event.clipboardData.getData("text/plain");
         document.execCommand("insertText", false, text);
       }
     },
