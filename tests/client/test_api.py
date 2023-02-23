@@ -28,6 +28,7 @@ from argilla._constants import (
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client import api
+from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
@@ -45,6 +46,9 @@ from argilla.client.sdk.users.models import User
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
+from argilla.server.contexts import accounts
+from argilla.server.security.model import UserWorkspaceCreate, WorkspaceCreate
+from sqlalchemy.orm import Session
 
 from tests.helpers import SecuredClient
 from tests.server.test_api import create_some_data_for_text_classification
@@ -443,14 +447,19 @@ def test_dataset_copy(mocked_client):
         api.copy(dataset, name_of_copy=dataset_copy, workspace=other_workspace)
 
 
-def test_dataset_copy_to_another_workspace(mocked_client, api):
-    dataset = "test_dataset_copy_to_another_workspace"
+def test_dataset_copy_to_another_workspace(mocked_client, admin: User, db: Session):
+    dataset_name = "test_dataset_copy_to_another_workspace"
     dataset_copy = "new_dataset"
-    new_workspace = "my-fun-workspace"
+    new_workspace_name = "my-fun-workspace"
 
-    mocked_client.delete(f"/api/datasets/{dataset}")
+    workspace = accounts.create_workspace(db, WorkspaceCreate(name=new_workspace_name))
+    accounts.create_user_workspace(db, UserWorkspaceCreate(user_id=admin.id, workspace_id=workspace.id))
+
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
     mocked_client.delete(f"/api/datasets/{dataset_copy}")
-    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
+    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace_name}")
+
+    api = Argilla()
 
     api.log(
         ar.TextClassificationRecord(
@@ -459,17 +468,17 @@ def test_dataset_copy_to_another_workspace(mocked_client, api):
             annotation_agent="test",
             annotation=["T"],
         ),
-        name=dataset,
+        name=dataset_name,
     )
-    ds = api.load(dataset)
+    ds = api.load(dataset_name)
     df = ds.to_pandas()
-    api.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
-    api.set_workspace(new_workspace)
+    api.copy(dataset_name, name_of_copy=dataset_copy, workspace=new_workspace_name)
+    api.set_workspace(new_workspace_name)
     df_copy = api.load(dataset_copy).to_pandas()
     assert df.equals(df_copy)
 
     with pytest.raises(AlreadyExistsApiError):
-        api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=new_workspace)
+        api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=new_workspace_name)
 
 
 def test_update_record(mocked_client):

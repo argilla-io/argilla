@@ -18,6 +18,7 @@ from argilla.server.security.auth_provider.local.provider import (
     create_local_auth_provider,
 )
 from fastapi.security import SecurityScopes
+from sqlalchemy.orm import Session
 
 localAuth = create_local_auth_provider()
 security_Scopes = SecurityScopes
@@ -25,11 +26,11 @@ security_Scopes = SecurityScopes
 
 # Tests for function get_user via token and api key
 @pytest.mark.asyncio
-async def test_get_user_via_token(db_session):
+async def test_get_user_via_token(db: Session):
     access_token = localAuth._create_access_token(username="argilla")
     user = await localAuth.get_user(
         security_scopes=security_Scopes,
-        db=db_session,
+        db=db,
         token=access_token,
         api_key=None,
         old_api_key=None,
@@ -38,8 +39,8 @@ async def test_get_user_via_token(db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_user_via_api_key(db_session):
-    user = await localAuth.get_user(security_scopes=security_Scopes, db=db_session, api_key=DEFAULT_API_KEY, token=None)
+async def test_get_user_via_api_key(db: Session):
+    user = await localAuth.get_user(security_scopes=security_Scopes, db=db, api_key=DEFAULT_API_KEY, token=None)
     assert user.username == "argilla"
 
 
@@ -51,7 +52,7 @@ async def test_get_user_by_api_key():
 
 
 # Test for function fetch token
-def test_fetch_token_user(db_session):
+def test_fetch_token_user(db: Session):
     access_token = localAuth._create_access_token(username="argilla")
-    user = localAuth.fetch_token_user(db=db_session, token=access_token)
+    user = localAuth.fetch_token_user(db=db, token=access_token)
     assert user.username == "argilla"
