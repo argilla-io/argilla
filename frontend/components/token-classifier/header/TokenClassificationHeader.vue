@@ -25,7 +25,7 @@
       :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
     />
-    <entities-header :dataset="dataset" />
+    <entities-header :labels="labels" />
     <global-actions
       :datasetId="datasetId"
       :datasetName="datasetName"
@@ -42,6 +42,7 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
 export default {
   props: {
     datasetId: {
@@ -65,6 +66,9 @@ export default {
     dataset() {
       //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
       return getDatasetFromORM(this.datasetId, this.datasetTask, true);
+    },
+    labels() {
+      return getAllLabelsByDatasetId(this.datasetId);
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
