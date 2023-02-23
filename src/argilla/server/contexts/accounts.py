@@ -127,4 +127,4 @@ def authenticate_user(db: Session, username: str, password: str):
     elif user:
         return
     else:
-        _CRYPT_CONTEXT.verify_dummy()
+        _CRYPT_CONTEXT.dummy_verify()
