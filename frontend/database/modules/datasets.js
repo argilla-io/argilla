@@ -18,7 +18,7 @@ import _ from "lodash";
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
-import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
+import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 import { Vector as VectorModel } from "@/models/Vector";
 import {
@@ -73,7 +73,7 @@ async function _getOrFetchDataset({ workspace, name }) {
   }
   await ObservationDataset.api().get(`/datasets/${name}`, {
     dataTransformer: ({ data }) => {
-      data.owner = data.owner || workspace;
+      data.workspace = data.workspace || workspace;
       return data;
     },
   });
@@ -582,9 +582,8 @@ const actions = {
 
   async deleteDataset(_, { workspace, name }) {
     var url = `/datasets/${name}`;
-    if (workspace !== NO_WORKSPACE) {
-      url += `?workspace=${workspace}`;
-    }
+
+    url += `?workspace=${workspace}`;
     const deleteResults = await ObservationDataset.api().delete(url, {
       delete: [workspace, name],
     });
@@ -602,12 +601,6 @@ const actions = {
 
     return await ObservationDataset.api().get("/datasets/", {
       persistBy: "create",
-      dataTransformer: ({ data }) => {
-        return data.map((datasource) => {
-          datasource.owner = datasource.owner || NO_WORKSPACE;
-          return datasource;
-        });
-      },
     });
   },
   async fetchByName(_, name) {
@@ -725,7 +718,7 @@ const fetchByNameForTextClassification = async (dataset) => {
   await entity.insertOrUpdate({
     where: dataset.id,
     data: {
-      owner: dataset.owner,
+      workspace: dataset.workspace,
       name: dataset.name,
       _labels: labels,
       isMultiLabel,

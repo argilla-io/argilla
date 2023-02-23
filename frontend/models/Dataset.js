@@ -24,9 +24,9 @@ const USER_DATA_METADATA_KEY = "rubrix.recogn.ai/ui/custom/userData.v1";
 class ObservationDataset extends Model {
   static entity = "datasets";
 
-  // TODO: Combine name + owner for primary key.
+  // TODO: Combine name + workspace for primary key.
   //  This should fix https://github.com/recognai/rubrix/issues/736
-  static primaryKey = ["owner", "name"];
+  static primaryKey = ["workspace", "name"];
 
   static #registeredDatasetClasses = {};
 
@@ -58,7 +58,7 @@ class ObservationDataset extends Model {
   }
 
   get id() {
-    return [this.owner, this.name];
+    return [this.workspace, this.name];
   }
 
   get visibleRecords() {
@@ -68,19 +68,19 @@ class ObservationDataset extends Model {
   static fields() {
     return {
       name: this.string(null),
-      owner: this.string(null),
+      workspace: this.string(null),
       metadata: this.attr(null),
       tags: this.attr(null),
       task: this.string(null),
       created_at: this.string(null),
       last_updated: this.string(null),
-      // This will be normalized in a future PR using also owner for relational ids
+      // This will be normalized in a future PR using also workspace for relational ids
       viewSettings: this.hasOne(DatasetViewSettings, "id", "name"),
     };
   }
 }
 
-const getDatasetModelPrimaryKey = ({ owner, name }) => [owner, name];
+const getDatasetModelPrimaryKey = ({ workspace, name }) => [workspace, name];
 
 export {
   ObservationDataset,

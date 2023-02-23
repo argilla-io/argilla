@@ -20,7 +20,7 @@ const options = {
     component: "helpInfoExplain",
   },
   propsData: {
-    datasetId: ["owner", "name"],
+    datasetId: ["workspace", "name"],
     datasetTask: "TextClassification",
     datasetName: "name",
   },

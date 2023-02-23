@@ -19,7 +19,7 @@ import { Model } from "@vuex-orm/core";
 import { ExpiredAuthSessionError } from "@nuxtjs/auth-next/dist/runtime";
 import { Notification } from "@/models/Notifications";
 
-import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
+import { currentWorkspace } from "@/models/Workspace";
 
 export default ({ $axios, app }) => {
   Model.setAxios($axios);
@@ -32,9 +32,7 @@ export default ({ $axios, app }) => {
     }
 
     let ws = currentWorkspace(app.context.route);
-    if (ws === NO_WORKSPACE) {
-      config.headers["X-Argilla-Workspace"] = "";
-    } else if (ws) {
+    if (ws) {
       config.headers["X-Argilla-Workspace"] = ws;
     }
     return config;

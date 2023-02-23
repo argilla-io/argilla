@@ -58,7 +58,7 @@ def test_create_dataset(mocked_client):
     assert dataset.metadata == request["metadata"]
     assert dataset.tags == request["tags"]
     assert dataset.name == dataset_name
-    assert dataset.owner == "argilla"
+    assert dataset.workspace == "argilla"
     assert dataset.task == TaskType.text_classification
 
     response = mocked_client.post(
@@ -88,7 +88,7 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
     dataset = Dataset.parse_obj(response.json())
     assert dataset.created_by == "argilla"
     assert dataset.name == dataset_name
-    assert dataset.owner == ws
+    assert dataset.workspace == ws
     assert dataset.task == TaskType.text_classification
 
     response = mocked_client.post(
@@ -106,7 +106,7 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
     dataset = Dataset.parse_obj(response.json())
     assert dataset.created_by == "argilla"
     assert dataset.name == dataset_name
-    assert dataset.owner == "argilla"
+    assert dataset.workspace == "argilla"
     assert dataset.task == TaskType.text_classification
 
 
