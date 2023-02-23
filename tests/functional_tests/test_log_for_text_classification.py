@@ -14,12 +14,18 @@
 
 import argilla as ar
 import pytest
+from argilla.client import api
+from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import (
     BadRequestApiError,
     GenericApiError,
     ValidationApiError,
 )
+from argilla.server.contexts import accounts
+from argilla.server.models import User
+from argilla.server.security.model import UserWorkspaceCreate, WorkspaceCreate
 from argilla.server.settings import settings
+from sqlalchemy.orm import Session
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient
@@ -184,26 +190,31 @@ def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
         )
 
 
-def test_log_data_in_several_workspaces(mocked_client: SecuredClient, api):
-    workspace = "my-fun-workspace"
-    dataset = "test_log_data_in_several_workspaces"
+def test_log_data_in_several_workspaces(mocked_client: SecuredClient, admin: User, db: Session):
+    workspace_name = "my-fun-workspace"
+    dataset_name = "test_log_data_in_several_workspaces"
     text = "This is a text"
 
-    curr_ws = api.get_workspace()
-    for ws in [curr_ws, workspace]:
-        ar.set_workspace(ws)
-        ar.delete(dataset)
+    workspace = accounts.create_workspace(db, WorkspaceCreate(name=workspace_name))
+    accounts.create_user_workspace(db, UserWorkspaceCreate(user_id=admin.id, workspace_id=workspace.id))
 
-    ar.set_workspace(curr_ws)
-    ar.log(ar.TextClassificationRecord(id=0, inputs=text), name=dataset)
+    api = Argilla()
 
-    ar.set_workspace(workspace)
-    ar.log(ar.TextClassificationRecord(id=1, inputs=text), name=dataset)
-    ds = ar.load(dataset)
+    current_workspace = api.get_workspace()
+    for ws in [current_workspace, workspace_name]:
+        api.set_workspace(ws)
+        api.delete(dataset_name)
+
+    api.set_workspace(current_workspace)
+    api.log(ar.TextClassificationRecord(id=0, inputs=text), name=dataset_name)
+
+    api.set_workspace(workspace_name)
+    api.log(ar.TextClassificationRecord(id=1, inputs=text), name=dataset_name)
+    ds = api.load(dataset_name)
     assert len(ds) == 1
 
-    ar.set_workspace(curr_ws)
-    ds = ar.load(dataset)
+    api.set_workspace(current_workspace)
+    ds = api.load(dataset_name)
     assert len(ds) == 1
 
 

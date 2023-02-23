@@ -19,6 +19,7 @@ from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
+from argilla.server.contexts import accounts
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, Workspace
 from argilla.server.seeds import test_seeds
@@ -55,6 +56,11 @@ def db():
     session.query(User).delete()
     session.query(Workspace).delete()
     session.commit()
+
+
+@pytest.fixture(scope="function")
+def admin(db):
+    return accounts.get_user_by_api_key(db, DEFAULT_API_KEY)
 
 
 @pytest.fixture
