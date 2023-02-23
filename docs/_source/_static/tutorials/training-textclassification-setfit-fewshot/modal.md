@@ -1,4 +1,4 @@
-```{grid-item-card} 🔫 Embed, zero-shot, and few-shot with Sentence Transformers and SetFit
+```{grid-item-card} 🤯 Few-shot classification with SetFit and a custom dataset
 :img-top: /_static/tutorials/training-textclassification-setfit-fewshot/training-textclassification-setfit-fewshot.png
 :link: ../../tutorials/notebooks/training-textclassification-setfit-fewshot.html
 MLOps Steps: Labelling, Training \
