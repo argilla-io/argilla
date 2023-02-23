@@ -11,6 +11,7 @@ class GlobalLabel extends Model {
       text: this.string(null),
       dataset_id: this.attr(null),
       is_activate: this.attr(false),
+      shortcut: this.attr(null),
     };
   }
 
