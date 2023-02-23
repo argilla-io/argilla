@@ -61,7 +61,7 @@ def get_workspace_by_id(db: Session, workspace_id: UUID):
 
 
 def list_workspaces(db: Session):
-    return db.query(Workspace).all()
+    return db.query(Workspace).order_by(Workspace.inserted_at.asc()).all()
 
 
 def create_workspace(db: Session, workspace_create: WorkspaceCreate):
@@ -94,7 +94,7 @@ def get_user_by_api_key(db: Session, api_key: str):
 
 
 def list_users(db: Session):
-    return db.query(User).all()
+    return db.query(User).order_by(User.inserted_at.asc()).all()
 
 
 def create_user(db: Session, user_create: UserCreate):
