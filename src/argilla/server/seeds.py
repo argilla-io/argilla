@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from argilla._constants import DEFAULT_API_KEY
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, Workspace
 
@@ -35,6 +36,21 @@ def development_seeds():
                     username="tanya",
                     password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
                     api_key="123456",
+                ),
+            ]
+        )
+
+
+def test_seeds():
+    with SessionLocal() as session, session.begin():
+        session.add_all(
+            [
+                User(
+                    first_name="John",
+                    last_name="Doe",
+                    username="argilla",
+                    password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+                    api_key=DEFAULT_API_KEY,
                 ),
             ]
         )
