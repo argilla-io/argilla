@@ -95,7 +95,6 @@ export default {
   },
   computed: {
     interactionsEnabled() {
-      // console.log(this.getTextClassificationDataset());
       return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
