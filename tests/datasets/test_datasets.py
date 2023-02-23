@@ -53,6 +53,16 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
         ar.configure_dataset(dataset, wrong_settings)
 
 
+def test_list_dataset(mocked_client):
+    from argilla.client.api import active_client
+
+    client = active_client()
+    datasets = client.http_client.get("/api/datasets")
+
+    for ds in datasets:
+        assert ds["owner"] == ds["workspace"]
+
+
 def test_delete_dataset_by_non_creator(mocked_client):
     try:
         dataset = "test_delete_dataset_by_non_creator"

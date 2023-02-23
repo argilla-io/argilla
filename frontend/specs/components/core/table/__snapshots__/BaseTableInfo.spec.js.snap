@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BaseTableInfo renders properly 1`] = `
-<transition-stub name="fade" appear="true" filterfromroute="owner">
+<transition-stub name="fade" appear="true" filterfromroute="workspace">
   <div class="table-info">
     <div class="table-info__header">
       <div class="table-info__item">
