@@ -44,7 +44,8 @@
               :class="predictionNumber === index ? '--active' : null"
               v-for="(prediction, index) in predictions"
               :key="index"
-              >Score : {{ prediction.score | percent }}</base-button
+              data-title="Score"
+              >{{ prediction.score | percent }}</base-button
             >
           </div>
           <Text2TextContentEditable
@@ -61,7 +62,8 @@
         </div>
       </div>
       <Text2TextPredictions
-        v-if="predictionsLength"
+        v-if="visiblePredictions"
+        :record="record"
         :predictions="predictions"
       />
     </div>
@@ -162,11 +164,22 @@ export default {
     currentAnnotation() {
       return this.annotations[0]?.text;
     },
+    visiblePredictions() {
+      return (
+        (!!this.predictionsLength && !this.annotationEnabled) ||
+        (!!this.predictionsLength &&
+          this.predictions[this.predictionNumber]?.text !== this.defaultText)
+      );
+    },
     predictionsLength() {
       return this.predictions.length;
     },
     showPredictionInternalTabs() {
-      return !this.annotations.length && this.visibleSentence !== "";
+      return (
+        !this.annotations.length &&
+        this.visibleSentence !== "" &&
+        !this.visiblePredictions
+      );
     },
     allowValidation() {
       return (
@@ -178,7 +191,6 @@ export default {
       );
     },
     text2textClassifierActionButtons() {
-      // const originIsEqualToPrediction = this.sentencesOrigin === "Prediction";
       const emptyVisibleSentence = this.visibleSentence !== "";
       const showClean =
         (this.annotations.length && emptyVisibleSentence) ||
@@ -187,26 +199,27 @@ export default {
         {
           id: "validate",
           name: "Validate",
-          allow: this.defaultText,
-          active: this.allowValidation,
+          allow: true,
+          active: !this.allowValidation,
+          disable: !this.defaultText,
         },
         {
           id: "discard",
           name: "Discard",
           allow: true,
-          active: !this.recordStatusIs("Discarded"),
+          active: this.recordStatusIs("Discarded"),
         },
         {
           id: "clear",
           name: "Clear",
           allow: true,
-          active: showClean,
+          disable: !showClean,
         },
         {
           id: "reset",
           name: "Reset",
           allow: true,
-          active: this.recordStatusIs("Edited"),
+          disable: !this.recordStatusIs("Edited"),
         },
       ];
     },
@@ -218,6 +231,7 @@ export default {
     async showPredictionNumber(index) {
       this.refresh++;
       this.predictionNumber = index;
+      this.visibleSentence = this.predictions[this.predictionNumber]?.text;
     },
     async onTextChanged(newText) {
       let status = this.currentAnnotation === newText ? "Default" : "Edited";
@@ -273,6 +287,9 @@ export default {
       return getText2TextDatasetById(this.datasetId);
     },
   },
+  beforeDestroy() {
+    this.visibleSentence = null;
+  },
 };
 </script>
 
@@ -297,8 +314,7 @@ export default {
     gap: $base-space;
     justify-content: right;
     .button {
-      padding: calc($base-space / 2);
-      margin-bottom: $base-space * 2;
+      padding: 2px 4px;
       @include font-size(13px);
       color: $black-54;
       border: 1px solid $black-20;
@@ -313,11 +329,16 @@ export default {
         border-color: $primary-color;
         background-color: palette(white);
       }
+      &[data-title] {
+        position: relative;
+        overflow: visible;
+        @extend %has-tooltip--top;
+      }
     }
   }
 }
 .--editable {
-  width: 100%;
+  width: calc(100% - 200px);
   padding: $base-space;
   border: 1px solid $black-20;
   border-radius: $border-radius-s;
