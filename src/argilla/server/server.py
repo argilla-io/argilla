@@ -38,7 +38,11 @@ from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.errors import APIErrorHandler, EntityNotFoundError
+from argilla.server.errors import (
+    APIErrorHandler,
+    EntityNotFoundError,
+    UnauthorizedError,
+)
 from argilla.server.routes import api_router
 from argilla.server.security import auth
 from argilla.server.settings import settings
@@ -65,6 +69,7 @@ def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers"""
     api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(UnauthorizedError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
 
 
