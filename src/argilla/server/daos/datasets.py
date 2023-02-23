@@ -121,14 +121,14 @@ class DatasetsDAO:
     def find_by_name(
         self,
         name: str,
-        owner: str,
+        workspace: str,
         as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
     ) -> Optional[DatasetDB]:
         dataset_id = BaseDatasetDB.build_dataset_id(
             name=name,
-            workspace=owner,
+            workspace=workspace,
         )
-        document = self._es.find_dataset(id=dataset_id, name=name, owner=owner)
+        document = self._es.find_dataset(id=dataset_id, name=name, owner=workspace)
         if document is None:
             return None
         dataset_type = as_dataset_class or BaseDatasetDB

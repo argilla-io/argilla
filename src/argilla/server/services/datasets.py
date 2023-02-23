@@ -81,7 +81,7 @@ class DatasetsService:
         task: Optional[str] = None,
     ) -> ServiceDataset:
         workspace = user.check_workspace(workspace)
-        found_ds = self.__dao__.find_by_name(name=name, owner=workspace, as_dataset_class=as_dataset_class)
+        found_ds = self.__dao__.find_by_name(name=name, workspace=workspace, as_dataset_class=as_dataset_class)
         if found_ds is None:
             raise EntityNotFoundError(name=name, type=ServiceDataset)
         elif task and found_ds.task != task:
