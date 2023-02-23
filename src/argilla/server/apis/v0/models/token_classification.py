@@ -22,9 +22,9 @@ from argilla.server.apis.v0.models.commons.model import (
     BaseSearchResults,
     ScoreRange,
 )
-from argilla.server.apis.v0.models.datasets import UpdateDatasetRequest
 from argilla.server.commons.models import PredictionStatus
 from argilla.server.daos.backend.search.model import SortableField
+from argilla.server.schemas.datasets import UpdateDatasetRequest
 from argilla.server.services.search.model import (
     ServiceBaseRecordsQuery,
     ServiceBaseSearchResultsAggregations,
