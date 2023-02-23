@@ -121,20 +121,16 @@ class DatasetsDAO:
     def find_by_name(
         self,
         name: str,
-        owner: Optional[str],
+        owner: str,
         as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
-        task: Optional[str] = None,
     ) -> Optional[DatasetDB]:
         dataset_id = BaseDatasetDB.build_dataset_id(
             name=name,
-            owner=owner,
+            workspace=owner,
         )
         document = self._es.find_dataset(id=dataset_id, name=name, owner=owner)
         if document is None:
             return None
-        base_ds = self._es_doc_to_instance(document)
-        if task and task != base_ds.task:
-            raise WrongTaskError(detail=f"Provided task {task} cannot be applied to dataset")
         dataset_type = as_dataset_class or BaseDatasetDB
         return self._es_doc_to_instance(document, ds_class=dataset_type)
 
