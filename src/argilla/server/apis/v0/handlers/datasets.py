@@ -67,8 +67,9 @@ async def create_dataset(
     user: User = Security(auth.get_user, scopes=["create:datasets"]),
 ) -> Dataset:
     request.workspace = request.workspace or ws_params.workspace
-    response = datasets.create_dataset(user=user, dataset=request)
-    return Dataset.from_orm(response)
+    dataset = datasets.create_dataset(user=user, dataset=request)
+
+    return Dataset.from_orm(dataset)
 
 
 @router.get(
