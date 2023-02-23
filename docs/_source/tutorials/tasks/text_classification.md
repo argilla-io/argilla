@@ -3,7 +3,7 @@
 ````{grid} 1 1 2 2
 :class-container: tuto-section-2
 
-```{include} /_static/tutorials/labelling_textclassification_setfit_zeroshot/modal.md
+```{include} /_static/tutorials/labelling-textclassification_setfit_zeroshot/modal.md
 ```
 ```{include} /_static/tutorials/labelling-textclassification-sentence-transformers-semantic/modal.md
 ```
