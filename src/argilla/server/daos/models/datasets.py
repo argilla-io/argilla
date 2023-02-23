@@ -38,8 +38,7 @@ class BaseDatasetDB(BaseModel):
 
     @root_validator(pre=True)
     def set_defaults(cls, values):
-        workspace = values.get("workspace")
-        workspace = workspace or values.get("owner")
+        workspace = values.get("workspace") or values.get("owner")
 
         cls._check_workspace(workspace)
 
