@@ -19,14 +19,13 @@ from fastapi import APIRouter, Body, Depends, Security
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
-from argilla.server.apis.v0.models.datasets import (
+from argilla.server.errors import EntityNotFoundError
+from argilla.server.schemas.datasets import (
     CopyDatasetRequest,
     CreateDatasetRequest,
     Dataset,
     UpdateDatasetRequest,
 )
-from argilla.server.commons.config import TasksFactory
-from argilla.server.errors import EntityNotFoundError
 from argilla.server.security import auth
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
@@ -67,14 +66,10 @@ async def create_dataset(
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     user: User = Security(auth.get_user, scopes=["create:datasets"]),
 ) -> Dataset:
-    owner = user.check_workspace(ws_params.workspace)
+    request.workspace = request.workspace or ws_params.workspace
+    dataset = datasets.create_dataset(user=user, dataset=request)
 
-    dataset_class = TasksFactory.get_task_dataset(request.task)
-    dataset = dataset_class.parse_obj({**request.dict()})
-    dataset.owner = owner
-
-    response = datasets.create_dataset(user=user, dataset=dataset)
-    return Dataset.parse_obj(response)
+    return Dataset.from_orm(dataset)
 
 
 @router.get(

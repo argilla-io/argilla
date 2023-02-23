@@ -31,9 +31,8 @@ def test_retrieve_ownered_dataset_for_no_owner_user():
     created = dao.create_dataset(
         BaseDatasetDB(name=dataset, owner="other", task=TaskType.text_classification),
     )
-    assert dao.find_by_name(created.name, owner=created.owner) == created
-    assert dao.find_by_name(created.name, owner=None) == created
-    assert dao.find_by_name(created.name, owner="me") is None
+    assert dao.find_by_name(created.name, workspace=created.owner) == created
+    assert dao.find_by_name(created.name, workspace="me") is None
 
 
 def test_list_datasets_by_task():

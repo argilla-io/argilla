@@ -49,6 +49,7 @@ from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.helpers import takeuntil
 from argilla.server.responses import StreamingResponseWithErrorHandling
+from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
@@ -95,26 +96,24 @@ def configure_router():
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> BulkResponse:
         task = task_type
-        owner = current_user.check_workspace(common_params.workspace)
+        workspace = current_user.check_workspace(common_params.workspace)
         try:
             dataset = datasets.find_by_name(
                 current_user,
                 name=name,
                 task=task,
-                workspace=owner,
+                workspace=workspace,
                 as_dataset_class=TasksFactory.get_task_dataset(task_type),
             )
-            datasets.update(
+            dataset = datasets.update(
                 user=current_user,
                 dataset=dataset,
                 tags=bulk.tags,
                 metadata=bulk.metadata,
             )
         except EntityNotFoundError:
-            dataset_class = TasksFactory.get_task_dataset(task)
-            dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
-            dataset.owner = owner
-            datasets.create_dataset(user=current_user, dataset=dataset)
+            dataset = CreateDatasetRequest(name=name, workspace=workspace, task=task, **bulk.dict())
+            dataset = datasets.create_dataset(user=current_user, dataset=dataset)
 
         # TODO(@frascuchon): Validator should be applied in the service layer
         records = [ServiceTextClassificationRecord.parse_obj(r) for r in bulk.records]
