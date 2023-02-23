@@ -27,6 +27,7 @@
             @click="selectPrediction(index)"
             v-for="(prediction, index) in predictions"
             :key="index"
+            data-title="Score"
           >
             {{ prediction.score | percent }}</base-button
           >
@@ -89,18 +90,21 @@ export default {
   },
   methods: {
     toggleVisibility() {
-      console.log(this.arePredictionsVisible);
       return (this.arePredictionsVisible = !this.arePredictionsVisible);
     },
     selectPrediction(index) {
       this.selectedPredictionIndex = index;
     },
   },
+  beforeDestroy() {
+    this.arePredictionsVisible = false;
+  },
 };
 </script>
 
 <style scoped lang="scss">
 .predictions {
+  $this: &;
   position: relative;
   &__panel {
     position: absolute;
@@ -111,12 +115,25 @@ export default {
     border-radius: $border-radius;
     box-shadow: 0px 0px 4px 0px rgb(0 0 0 / 15%);
     border: 1px solid transparent;
-    &:hover,
-    &.--expanded {
+    transition: all 0.2s ease;
+    &.--collapsed #{$this}__icon {
+      opacity: 0;
+    }
+    &:hover {
       border-color: $black-10;
+      background: palette(grey, 800);
+      transition: all 0.2s ease;
+      &.--collapsed #{$this}__icon {
+        opacity: 1;
+      }
+      #{$this}__button {
+        color: $primary-color;
+      }
     }
     &.--expanded {
-      .predictions__header {
+      background: palette(white);
+      border-color: $black-10;
+      #{$this}__header {
         padding: 0;
       }
     }
@@ -145,13 +162,15 @@ export default {
     font-weight: 500;
   }
   &__text {
-    @include font-size(13px);
     overflow: auto;
     max-height: 200px;
+    line-height: 1.5em;
+    @include font-size(13px);
   }
   &__button {
+    min-height: 20px;
     padding: 0;
-    color: $primary-color;
+    color: $black-54;
     @include font-size(13px);
   }
   &__tabs {
