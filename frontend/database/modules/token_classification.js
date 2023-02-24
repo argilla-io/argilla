@@ -17,10 +17,6 @@
 
 import { ObservationDataset } from "@/models/Dataset";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
-import {
-  insertNewGlobalLabel,
-  getAllLabelsTextByDatasetId,
-} from "@/models/globalLabel.queries";
 
 async function _updateLastSelectedEntity({ id, lastSelectedEntity }) {
   return await TokenClassificationDataset.update({
@@ -32,36 +28,16 @@ async function _updateLastSelectedEntity({ id, lastSelectedEntity }) {
 const getters = {};
 
 const actions = {
-  async setEntities(_, { dataset, entities }) {
-    return await ObservationDataset.dispatch("setUserData", {
-      dataset,
-      data: { entities },
-    });
-  },
   async onSaveTokenDatasetSettings(context, { datasetId, newLabel }) {
     const { name: datasetName, task: datasetTask } =
       TokenClassificationDataset.query().whereId(datasetId).first();
 
-    const labelsbeforeAddNewLabel = getAllLabelsTextByDatasetId(datasetId);
-    const labels = [...new Set([...labelsbeforeAddNewLabel, newLabel])];
-
-    if (datasetName && datasetTask) {
-      try {
-        await ObservationDataset.dispatch("onSaveDatasetSettings", {
-          datasetName,
-          datasetTask,
-          labels,
-        });
-
-        insertNewGlobalLabel({ datasetId, newLabel });
-      } catch (err) {
-        throw new Error("Error on adding new labels");
-      }
-    } else {
-      console.error(
-        `Could not find dataset with name:${datasetName} and task:${datasetTask}`
-      );
-    }
+    await ObservationDataset.dispatch("onAddNewLabel", {
+      datasetId,
+      datasetName,
+      datasetTask,
+      newLabel,
+    });
   },
   async updateLastSelectedEntity(_, { dataset, lastSelectedEntity }) {
     await _updateLastSelectedEntity({

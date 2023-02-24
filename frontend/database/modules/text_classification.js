@@ -16,14 +16,19 @@
  */
 
 import { ObservationDataset } from "@/models/Dataset";
+import { TextClassificationDataset } from "@/models/TextClassification";
 
 const getters = {};
 
 const actions = {
-  async setLabels(_, { dataset, labels }) {
-    return await ObservationDataset.dispatch("setUserData", {
-      dataset,
-      data: { labels },
+  async onSaveTokenDatasetSettings(context, { datasetId, newLabel }) {
+    const { name: datasetName, task: datasetTask } =
+      TextClassificationDataset.query().whereId(datasetId).first();
+    await ObservationDataset.dispatch("onAddNewLabel", {
+      datasetId,
+      datasetName,
+      datasetTask,
+      newLabel,
     });
   },
 };

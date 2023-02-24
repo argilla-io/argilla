@@ -26,6 +26,11 @@ import {
   deleteAllGlobalLabelModel,
 } from "../../models/globalLabel.queries";
 import { Notification } from "@/models/Notifications";
+import {
+  insertNewGlobalLabel,
+  getAllLabelsTextByDatasetId,
+  isLabelTextExistInGlobalLabel,
+} from "@/models/globalLabel.queries";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -579,6 +584,41 @@ const actions = {
         },
       },
     });
+  },
+  async onAddNewLabel(
+    context,
+    { datasetId, datasetName, datasetTask, newLabel }
+  ) {
+    if (datasetName && datasetTask) {
+      const labelsbeforeAddNewLabel = getAllLabelsTextByDatasetId(datasetId);
+      const isNewLabelNotInGlobalLabels = !isLabelTextExistInGlobalLabel(
+        datasetId,
+        newLabel
+      );
+      if (isNewLabelNotInGlobalLabels) {
+        try {
+          const labels = [...new Set([...labelsbeforeAddNewLabel, newLabel])];
+          await context.dispatch("onSaveDatasetSettings", {
+            datasetName,
+            datasetTask,
+            labels,
+          });
+
+          insertNewGlobalLabel({ datasetId, newLabel });
+        } catch (err) {
+          throw new Error("Error on adding new labels");
+        }
+      } else {
+        Notification.dispatch("notify", {
+          message: `The label "${newLabel}" already exist in the list of labels`,
+          type: "warning",
+        });
+      }
+    } else {
+      console.error(
+        `Could not find dataset with name:${datasetName} and task:${datasetTask}`
+      );
+    }
   },
   async onSaveDatasetSettings(context, { datasetName, datasetTask, labels }) {
     let message = "";

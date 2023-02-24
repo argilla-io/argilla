@@ -31,7 +31,7 @@
       :datasetName="datasetName"
       :datasetTask="datasetTask"
       :datasetVisibleRecords="dataset.visibleRecords"
-      :availableLabels="formattedLabels"
+      :availableLabels="listOfTexts"
       :isCreationLabel="allowLabelCreation"
       :isMultiLabel="isMultiLabel"
       @discard-records="onDiscard"
@@ -45,7 +45,10 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
-import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
+import {
+  getAllLabelsByDatasetId,
+  getAllLabelsTextByDatasetId,
+} from "@/models/globalLabel.queries";
 
 export default {
   props: {
@@ -77,8 +80,8 @@ export default {
     labels() {
       return getAllLabelsByDatasetId(this.datasetId);
     },
-    formattedLabels() {
-      return this.labels.map((label) => label.text);
+    listOfTexts() {
+      return getAllLabelsTextByDatasetId(this.datasetId);
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
@@ -140,9 +143,9 @@ export default {
       });
     },
     async onNewLabel(newLabel) {
-      await this.dataset.$dispatch("setLabels", {
-        dataset: this.dataset,
-        labels: [...new Set([...this.dataset.labels, newLabel])],
+      await this.dataset.$dispatch("onSaveTokenDatasetSettings", {
+        datasetId: this.datasetId,
+        newLabel,
       });
     },
     searchRecords(query) {
