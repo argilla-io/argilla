@@ -25,6 +25,7 @@ import {
   upsertLabelsInGlobalLabelModel,
   deleteAllGlobalLabelModel,
 } from "../../models/globalLabel.queries";
+import { Notification } from "@/models/Notifications";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -579,7 +580,30 @@ const actions = {
       },
     });
   },
+  async onSaveDatasetSettings(context, { datasetName, datasetTask, labels }) {
+    let message = "";
+    let typeOfNotification = "";
+    try {
+      const data = { label_schema: { labels } };
+      await ObservationDataset.api().put(
+        `/datasets/${datasetName}/${datasetTask}/settings`,
+        data
+      );
 
+      message = "The Labels are updated!";
+      typeOfNotification = "success";
+    } catch (err) {
+      const { status } = err.response;
+      message = `STATUS:${status} The labels of the dataset ${datasetName} with task ${datasetTask} could not be saved`;
+      typeOfNotification = "error";
+      console.error(message);
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        type: typeOfNotification,
+      });
+    }
+  },
   async deleteDataset(_, { workspace, name }) {
     var url = `/datasets/${name}`;
 

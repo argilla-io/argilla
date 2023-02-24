@@ -21,8 +21,41 @@ const getAllLabelsByDatasetId = (datasetId) => {
   return labels;
 };
 
+const getAllLabelsTextByDatasetId = (datasetId) => {
+  return getAllLabelsByDatasetId(datasetId).reduce(
+    (acc, curr) => acc.concat(curr.text),
+    []
+  );
+};
+
+const countLabelsByDatasetId = (datasetId) => {
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+  const numberOfLabels = GlobalLabelModel.query()
+    .where("dataset_id", joinedDatasetId)
+    .count();
+
+  return numberOfLabels;
+};
+
+const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+  const numberOfLabels = countLabelsByDatasetId(datasetId);
+  GlobalLabelModel.insert({
+    data: {
+      id: newLabel,
+      text: newLabel,
+      dataset_id: joinedDatasetId,
+      color_id: numberOfLabels,
+      shortcurt: numberOfLabels < 10 ? String(numberOfLabels) : null,
+      is_activate: isActivate,
+    },
+  });
+};
+
 export {
   getAllLabelsByDatasetId,
   upsertLabelsInGlobalLabelModel,
   deleteAllGlobalLabelModel,
+  insertNewGlobalLabel,
+  getAllLabelsTextByDatasetId,
 };
