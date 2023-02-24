@@ -52,10 +52,19 @@ const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
   });
 };
 
+const isLabelTextExistInGlobalLabel = (datasetId, labelText) => {
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+  return GlobalLabelModel.query()
+    .where("dataset_id", joinedDatasetId)
+    .where("text", labelText)
+    .exists();
+};
+
 export {
   getAllLabelsByDatasetId,
   upsertLabelsInGlobalLabelModel,
   deleteAllGlobalLabelModel,
   insertNewGlobalLabel,
   getAllLabelsTextByDatasetId,
+  isLabelTextExistInGlobalLabel,
 };
