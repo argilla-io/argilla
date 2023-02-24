@@ -153,6 +153,8 @@ class DatasetsService:
         copy_dataset.name = copy_name
         copy_dataset.workspace = dataset_workspace
 
+        date_now = datetime.utcnow()
+
         copy_dataset.created_at = date_now
         copy_dataset.last_updated = date_now
         copy_dataset.tags = {**copy_dataset.tags, **(copy_tags or {})}
