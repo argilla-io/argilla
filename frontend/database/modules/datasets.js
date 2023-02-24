@@ -857,7 +857,7 @@ const initGlobalLabels = async ({ name, task, id }) => {
   deleteAllGlobalLabelModel();
   const labels = await fetchLabelsFromSettings({ name, task });
   const joinedDatasetId = id.join(".");
-  const sortedLabels = sortListOfObj(labels, "text");
+  const sortedLabels = sortListOfObj(labels, "name");
   const formattedLabels = factoryLabelsForGlobalLabelsModel(
     joinedDatasetId,
     sortedLabels
@@ -907,11 +907,11 @@ const fetchAllRulesAndInsertRulesInTextClassificationORM = async (dataset) => {
 };
 
 const sortListOfObj = (listOfObj, keyOfObj, asc = true) => {
-  const comparisonFn = asc
-    ? (a, b) => (a[keyOfObj] > b[keyOfObj] ? -1 : 1)
-    : (a, b) => (a[keyOfObj] > b[keyOfObj] ? 1 : -1);
-
-  return listOfObj.sort(comparisonFn);
+  const sortedArray = _.sortBy(listOfObj, keyOfObj);
+  if (asc) {
+    return sortedArray;
+  }
+  return _.reverse(sortedArray);
 };
 
 export default {
