@@ -103,7 +103,6 @@ def configure_router():
                 name=name,
                 task=task,
                 workspace=workspace,
-                as_dataset_class=TasksFactory.get_task_dataset(task_type),
             )
             dataset = datasets.update(
                 user=current_user,
@@ -181,7 +180,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
         result = service.search(
             dataset=dataset,
@@ -274,7 +272,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
 
         data_stream = map(
@@ -312,7 +309,7 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
+            as_dataset_class=TextClassificationDataset,
         )
 
         return [LabelingRule.parse_obj(rule) for rule in service.list_labeling_rules(dataset)]
@@ -339,7 +336,7 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
+            as_dataset_class=TextClassificationDataset,
         )
 
         rule = ServiceLabelingRule(
@@ -375,7 +372,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
 
         return service.compute_labeling_rule(dataset, rule_query=query, labels=labels)
@@ -401,7 +397,7 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
+            as_dataset_class=TextClassificationDataset,
         )
         metrics = service.compute_all_labeling_rules(dataset)
         return DatasetLabelingRulesMetricsSummary.parse_obj(metrics)
@@ -426,7 +422,7 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
+            as_dataset_class=TextClassificationDataset,
         )
 
         service.delete_labeling_rule(dataset, rule_query=query)
@@ -453,7 +449,7 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
+            as_dataset_class=TextClassificationDataset,
         )
         rule = service.find_labeling_rule(dataset, rule_query=query)
         return LabelingRule.parse_obj(rule)
@@ -481,7 +477,7 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
+            as_dataset_class=TextClassificationDataset,
         )
 
         rule = service.update_labeling_rule(
