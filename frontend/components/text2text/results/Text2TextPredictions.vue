@@ -118,8 +118,8 @@ export default {
     width: 340px;
     background: palette(white);
     border-radius: $border-radius;
-    box-shadow: 0px 0px 4px 0px rgb(0 0 0 / 15%);
-    border: 1px solid $black-4;
+    box-shadow: $shadow;
+    border: 1px solid $black-10;
     transition: all 0.2s ease;
     max-height: 60px;
     &.--collapsed #{$this}__icon {
