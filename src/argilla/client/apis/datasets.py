@@ -154,6 +154,7 @@ class Datasets(AbstractApi):
         projection: Optional[Set[str]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
+        fields: Optional[Set[str]] = None,
         **query,
     ) -> Iterable[dict]:
         """
@@ -181,8 +182,13 @@ class Datasets(AbstractApi):
         if limit == 0:
             limit = None
 
+        fields_to_load = ["id", "inputs"]
+        if fields:
+            fields_to_load.extend(fields)
+            fields_to_load = list(set(fields_to_load))
+
         request = {
-            "fields": list(projection) if projection else ["id"],
+            "fields": fields_to_load,
             "query": query,
         }
 

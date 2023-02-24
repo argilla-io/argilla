@@ -440,6 +440,7 @@ class Argilla:
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
         as_pandas=None,
+        fields: Optional[List[str]] = None,
     ) -> Dataset:
         """Loads a argilla dataset.
 
@@ -481,6 +482,7 @@ class Argilla:
                 ids=ids,
                 limit=limit,
                 id_from=id_from,
+                fields=fields,
             )
         except ApiCompatibilityError as err:  # Api backward compatibility
             from argilla import __version__ as version
@@ -502,6 +504,7 @@ class Argilla:
                 ids=ids,
                 limit=limit,
                 id_from=id_from,
+                fields=fields,
             )
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
@@ -660,6 +663,7 @@ class Argilla:
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
+        fields: Optional[List[str]] = None,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
         task = dataset.task
@@ -710,6 +714,7 @@ class Argilla:
             # Query
             query_text=query,
             ids=ids,
+            fields=fields,
         )
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
         return dataset_class(self.__sort_records_by_id__(records))

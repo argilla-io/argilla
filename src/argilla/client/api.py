@@ -207,6 +207,7 @@ def load(
     limit: Optional[int] = None,
     id_from: Optional[str] = None,
     as_pandas=None,
+    fields: Optional[List[str]] = None,
 ) -> Dataset:
     """Loads a argilla dataset.
 
@@ -252,6 +253,7 @@ def load(
         limit=limit,
         id_from=id_from,
         as_pandas=as_pandas,
+        fields=fields,
     )
 
 
