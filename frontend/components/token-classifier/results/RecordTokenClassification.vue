@@ -102,6 +102,12 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      isSortAsc: true,
+      sortBy: "text",
+    };
+  },
   computed: {
     interactionsEnabled() {
       return this.annotationEnabled && !this.isReferenceRecord;
@@ -110,7 +116,11 @@ export default {
       return this.viewSettings.viewMode === "annotate";
     },
     labels() {
-      return getAllLabelsByDatasetId(this.datasetId);
+      return getAllLabelsByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
     },
     visualTokens() {
       // This is used for both, annotation ad exploration components

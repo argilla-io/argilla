@@ -65,10 +65,12 @@ export default {
       type: Boolean,
       required: true,
     },
-  },data() {
+  },
+  data() {
     return {
-      isSortAsc: true
-    }
+      isSortAsc: true,
+      sortBy: "text",
+    };
   },
   computed: {
     dataset() {
@@ -76,10 +78,18 @@ export default {
       return getDatasetFromORM(this.datasetId, this.datasetTask, true);
     },
     labels() {
-      return getAllLabelsByDatasetId(this.datasetId, "text", this.isSortAsc);
+      return getAllLabelsByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
     },
     listOfTexts() {
-      return getAllLabelsTextByDatasetId(this.datasetId, "text", this.isSortAsc);
+      return getAllLabelsTextByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;

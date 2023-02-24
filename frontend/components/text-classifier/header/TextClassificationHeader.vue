@@ -72,6 +72,7 @@ export default {
   data() {
     return {
       isSortAsc: true,
+      sortBy: "text",
     };
   },
   computed: {
@@ -83,12 +84,16 @@ export default {
       return this.dataset.isMultiLabel;
     },
     labels() {
-      return getAllLabelsByDatasetId(this.datasetId, "text", this.isSortAsc);
+      return getAllLabelsByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
     },
     listOfTexts() {
       return getAllLabelsTextByDatasetId(
         this.datasetId,
-        "text",
+        this.sortBy,
         this.isSortAsc
       );
     },
