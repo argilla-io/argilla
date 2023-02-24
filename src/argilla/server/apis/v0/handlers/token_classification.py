@@ -31,7 +31,6 @@ from argilla.server.apis.v0.models.commons.params import (
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationAggregations,
     TokenClassificationBulkRequest,
-    TokenClassificationDataset,
     TokenClassificationQuery,
     TokenClassificationRecord,
     TokenClassificationSearchRequest,
@@ -46,7 +45,7 @@ from argilla.server.responses import StreamingResponseWithErrorHandling
 from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.security.model import User
-from argilla.server.services.datasets import DatasetsService
+from argilla.server.services.datasets import DatasetsService, ServiceBaseDataset
 from argilla.server.services.tasks.token_classification import (
     TokenClassificationService,
 )
@@ -66,7 +65,7 @@ def configure_router():
 
     TasksFactory.register_task(
         task_type=task_type,
-        dataset_class=TokenClassificationDataset,
+        dataset_class=ServiceBaseDataset,
         query_request=TokenClassificationQuery,
         record_class=ServiceTokenClassificationRecord,
         metrics=TokenClassificationMetrics,
@@ -97,7 +96,6 @@ def configure_router():
                 name=name,
                 task=task,
                 workspace=workspace,
-                as_dataset_class=TasksFactory.get_task_dataset(task_type),
             )
             datasets.update(
                 user=current_user,
@@ -154,7 +152,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
         results = service.search(
             dataset=dataset,
@@ -246,7 +243,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
         data_stream = map(
             TokenClassificationRecord.parse_obj,
