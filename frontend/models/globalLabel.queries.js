@@ -61,7 +61,6 @@ const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
 const isLabelTextExistInGlobalLabel = (datasetId, labelText) => {
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
 
-
   const compareWithCaseInsensitive = (value) =>
     value.toUpperCase() === labelText.toUpperCase();
 
