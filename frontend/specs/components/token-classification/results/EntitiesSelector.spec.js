@@ -8,18 +8,18 @@ function mountEntitiesSelector() {
     propsData: {
       datasetId: ["workspace", "name"],
       datasetLastSelectedEntity: {
-        colorId: 14,
+        color_id: 14,
         shortCut: "1",
         text: "Arreglo",
       },
       formattedEntities: [
         {
-          colorId: 14,
+          color_id: 14,
           shortCut: "1",
           text: "Arreglo",
         },
         {
-          colorId: 1,
+          color_id: 1,
           shortCut: "2",
           text: "CARDINAL",
         },

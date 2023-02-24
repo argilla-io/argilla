@@ -14,19 +14,19 @@ const options = {
     datasetLastSelectedEntity: {},
     datasetEntities: [
       {
-        colorId: 0,
+        color_id: 0,
         text: "LOC",
       },
       {
-        colorId: 1,
+        color_id: 1,
         text: "ORG",
       },
       {
-        colorId: 2,
+        color_id: 2,
         text: "PER",
       },
       {
-        colorId: 3,
+        color_id: 3,
         text: "MISC",
       },
     ],
