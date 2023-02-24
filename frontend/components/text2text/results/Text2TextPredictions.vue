@@ -22,15 +22,17 @@
       <div v-if="arePredictionsVisible" class="predictions__content">
         <div class="predictions__tabs">
           <p class="predictions__title">Prediction:</p>
-          <base-button
-            :class="selectedPredictionIndex === index ? '--active' : null"
-            @click="selectPrediction(index)"
-            v-for="(prediction, index) in predictions"
-            :key="index"
-            data-title="Score"
-          >
-            {{ prediction.score | percent }}</base-button
-          >
+          <div class="predictions__tabs__wrapper">
+            <base-button
+              :class="selectedPredictionIndex === index ? '--active' : null"
+              @click="selectPrediction(index)"
+              v-for="(prediction, index) in predictions"
+              :key="index"
+              data-title="Score"
+            >
+              {{ prediction.score | percent }}</base-button
+            >
+          </div>
         </div>
         <transition name="fade" appear :key="selectedPredictionIndex">
           <div class="predictions__text">
@@ -190,6 +192,13 @@ export default {
     gap: $base-space;
     margin-bottom: $base-space * 2;
     align-items: center;
+    &__wrapper {
+      display: flex;
+      gap: $base-space;
+      overflow: auto;
+      max-width: 200px;
+      @extend %hide-scrollbar;
+    }
     .button {
       padding: 2px 6px;
       @include font-size(12px);
