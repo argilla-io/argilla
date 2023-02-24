@@ -11,7 +11,7 @@
               'suggestion',
               activeEntity === -1 ? 'active' : null,
             ]"
-            :color="`color_${suggestedEntity.colorId % $entitiesMaxColors}`"
+            :color="`color_${suggestedEntity.color_id % $entitiesMaxColors}`"
           />
         </li>
         <li
@@ -26,7 +26,7 @@
               'suggestion',
               activeEntity === -1 ? 'active' : null,
             ]"
-            :color="`color_${lastSelectedEntity.colorId % $entitiesMaxColors}`"
+            :color="`color_${lastSelectedEntity.color_id % $entitiesMaxColors}`"
           />
         </li>
         <li
@@ -43,7 +43,7 @@
               'entities__selector__option',
               activeEntity === index ? 'active' : null,
             ]"
-            :color="`color_${entity.colorId % $entitiesMaxColors}`"
+            :color="`color_${entity.color_id % $entitiesMaxColors}`"
           />
         </li>
       </ul>
