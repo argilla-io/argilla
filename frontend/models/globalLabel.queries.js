@@ -12,17 +12,23 @@ const deleteAllGlobalLabelModel = () => {
   GlobalLabelModel.deleteAll();
 };
 
-const getAllLabelsByDatasetId = (datasetId) => {
+const getAllLabelsByDatasetId = (datasetId, sortBy = "text", asc = true) => {
+  const directionSort = asc ? "asc" : "desc";
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
   const labels = GlobalLabelModel.query()
     .where("dataset_id", joinedDatasetId)
+    .orderBy(sortBy, directionSort)
     .get();
 
   return labels;
 };
 
-const getAllLabelsTextByDatasetId = (datasetId) => {
-  return getAllLabelsByDatasetId(datasetId).reduce(
+const getAllLabelsTextByDatasetId = (
+  datasetId,
+  sortBy = "text",
+  asc = false
+) => {
+  return getAllLabelsByDatasetId(datasetId, sortBy, asc).reduce(
     (acc, curr) => acc.concat(curr.text),
     []
   );
@@ -54,9 +60,13 @@ const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
 
 const isLabelTextExistInGlobalLabel = (datasetId, labelText) => {
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+
+  const compareWithCaseInsensitive = (value) =>
+    value.toUpperCase() === labelText.toUpperCase();
+
   return GlobalLabelModel.query()
     .where("dataset_id", joinedDatasetId)
-    .where("text", labelText)
+    .where("text", compareWithCaseInsensitive)
     .exists();
 };
 
