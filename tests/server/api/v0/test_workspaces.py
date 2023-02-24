@@ -12,19 +12,188 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.contexts import accounts
-from argilla.server.security.model import WorkspaceCreate
+from uuid import UUID, uuid4
+
+import pytest
+from argilla.server.models import User, UserWorkspace, Workspace
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from tests.factories import UserFactory, UserWorkspaceFactory, WorkspaceFactory
 
-def test_list_workspaces(client: TestClient, api_key_header: dict, db: Session):
-    accounts.create_workspace(db, WorkspaceCreate(name="workspace-a"))
-    accounts.create_workspace(db, WorkspaceCreate(name="workspace-b"))
 
-    response = client.get("/api/workspaces", headers=api_key_header)
+def test_list_workspaces(client: TestClient, admin_auth_header: dict):
+    WorkspaceFactory.create(name="workspace-a")
+    WorkspaceFactory.create(name="workspace-b")
 
-    workspaces = response.json()
+    response = client.get("/api/workspaces", headers=admin_auth_header)
 
     assert response.status_code == 200
-    assert list(map(lambda ws: ws["name"], workspaces)) == ["workspace-a", "workspace-b"]
+
+    response_body = response.json()
+    assert list(map(lambda ws: ws["name"], response_body)) == ["workspace-a", "workspace-b"]
+
+
+def test_list_workspaces_without_authentication(client: TestClient):
+    response = client.get("/api/workspaces")
+
+    assert response.status_code == 401
+
+
+def test_create_workspace(client: TestClient, db: Session, admin_auth_header: dict):
+    response = client.post("/api/workspaces", headers=admin_auth_header, json={"name": "workspace"})
+
+    assert response.status_code == 200
+    assert db.query(Workspace).count() == 1
+
+    response_body = response.json()
+    assert response_body["name"] == "workspace"
+    assert db.query(Workspace).get(UUID(response_body["id"]))
+
+
+def test_create_workspace_without_authentication(client: TestClient, db: Session):
+    response = client.post("/api/workspaces", json={"name": "workspace"})
+
+    assert response.status_code == 401
+    assert db.query(Workspace).count() == 0
+
+
+def test_create_workspace_with_invalid_name(client: TestClient, db: Session, admin_auth_header: dict):
+    response = client.post("/api/workspaces", headers=admin_auth_header, json={"name": "invalid name"})
+
+    assert response.status_code == 422
+    assert db.query(Workspace).count() == 0
+
+
+@pytest.mark.skip(reason="we are not allowing deletion of workspaces right now")
+def test_delete_workspace():
+    pass
+
+
+@pytest.mark.skip(reason="we are not allowing deletion of workspaces right now")
+def test_delete_workspace_without_authentication():
+    pass
+
+
+@pytest.mark.skip(reason="we are not allowing deletion of workspaces right now")
+def test_delete_workspace_with_nonexistent_workspace_id():
+    pass
+
+
+def test_list_workspace_users(client: TestClient, db: Session, admin_auth_header: dict):
+    workspace_a = WorkspaceFactory.create()
+    UserWorkspaceFactory.create(user_id=UserFactory.create(username="username-a").id, workspace_id=workspace_a.id)
+    UserWorkspaceFactory.create(user_id=UserFactory.create(username="username-b").id, workspace_id=workspace_a.id)
+
+    workspace_b = WorkspaceFactory.create()
+    UserWorkspaceFactory.create(user_id=UserFactory.create().id, workspace_id=workspace_b.id)
+    UserWorkspaceFactory.create(user_id=UserFactory.create().id, workspace_id=workspace_b.id)
+
+    response = client.get(f"/api/workspaces/{workspace_a.id}/users", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert db.query(UserWorkspace).count() == 4
+
+    response_body = response.json()
+    assert list(map(lambda uw: uw["username"], response_body)) == ["username-a", "username-b"]
+
+
+def test_list_workspace_users_without_authentication(client: TestClient):
+    workspace = WorkspaceFactory.create()
+
+    response = client.get(f"/api/workspaces/{workspace.id}/users")
+
+    assert response.status_code == 401
+
+
+def test_create_workspace_user(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    workspace = WorkspaceFactory.create()
+
+    response = client.post(f"/api/workspaces/{workspace.id}/users/{admin.id}", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert db.query(UserWorkspace).count() == 1
+    assert db.query(UserWorkspace).filter_by(user_id=admin.id, workspace_id=workspace.id).first()
+
+    response_body = response.json()
+    assert workspace.name in response_body["workspaces"]
+
+
+def test_create_workspace_user_without_authentication(client: TestClient, db: Session, admin: User):
+    workspace = WorkspaceFactory.create()
+
+    response = client.post(f"/api/workspaces/{workspace.id}/users/{admin.id}")
+
+    assert response.status_code == 401
+    assert db.query(UserWorkspace).count() == 0
+
+
+# TODO: We need to take a decision about what to do with this.
+# For more information: https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
+@pytest.mark.skip(reason="sqlite is not enforcing foreign keys")
+def test_create_workspace_user_with_nonexistent_workspace_id(
+    client: TestClient, db: Session, admin: User, admin_auth_header: dict
+):
+    response = client.post(f"/api/workspaces/{uuid4()}/users/{admin.id}", headers=admin_auth_header)
+
+    assert response.status_code == 422
+    assert db.query(UserWorkspace).count() == 0
+
+
+# TODO: We need to take a decision about what to do with this.
+# For more information: https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
+@pytest.mark.skip(reason="sqlite is not enforcing foreign keys")
+def test_create_workspace_user_with_nonexistent_user_id(client: TestClient, db: Session, admin_auth_header: dict):
+    workspace = WorkspaceFactory.create()
+
+    response = client.post(f"/api/workspaces/{workspace.id}/users/{uuid4()}", headers=admin_auth_header)
+
+    assert response.status_code == 422
+    assert db.query(UserWorkspace).count() == 0
+
+
+def test_delete_workspace_user(client: TestClient, db: Session, admin_auth_header: dict):
+    workspace = WorkspaceFactory.create()
+    user = UserFactory.create()
+    user_workspace = UserWorkspaceFactory.create(user_id=user.id, workspace_id=workspace.id)
+
+    response = client.delete(f"/api/workspaces/{workspace.id}/users/{user.id}", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert db.query(UserWorkspace).count() == 0
+
+    response_body = response.json()
+    assert response_body["username"] == user.username
+
+
+def test_delete_workspace_user_without_authentication(client: TestClient, db: Session):
+    workspace = WorkspaceFactory.create()
+    user = UserFactory.create()
+    UserWorkspaceFactory.create(user_id=user.id, workspace_id=workspace.id)
+
+    response = client.delete(f"/api/workspaces/{workspace.id}/users/{user.id}")
+
+    assert response.status_code == 401
+    assert db.query(UserWorkspace).count() == 1
+
+
+def test_delete_workspace_user_with_nonexistent_workspace_id(client: TestClient, db: Session, admin_auth_header: dict):
+    workspace = WorkspaceFactory.create()
+    user = UserFactory.create()
+    UserWorkspaceFactory.create(user_id=user.id, workspace_id=workspace.id)
+
+    response = client.delete(f"/api/workspaces/{uuid4()}/users/{user.id}", headers=admin_auth_header)
+
+    assert response.status_code == 404
+    assert db.query(UserWorkspace).count() == 1
+
+
+def test_delete_workspace_user_with_nonexistent_user_id(client: TestClient, db: Session, admin_auth_header: dict):
+    workspace = WorkspaceFactory.create()
+    user = UserFactory.create()
+    UserWorkspaceFactory.create(user_id=user.id, workspace_id=workspace.id)
+
+    response = client.delete(f"/api/workspaces/{workspace.id}/users/{uuid4()}", headers=admin_auth_header)
+
+    assert response.status_code == 404
+    assert db.query(UserWorkspace).count() == 1
