@@ -42,7 +42,11 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
-import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
+import {
+  getAllLabelsByDatasetId,
+  getAllLabelsTextByDatasetId,
+} from "@/models/globalLabel.queries";
+
 export default {
   props: {
     datasetId: {
@@ -69,6 +73,9 @@ export default {
     },
     labels() {
       return getAllLabelsByDatasetId(this.datasetId);
+    },
+    listOfTexts() {
+      return getAllLabelsTextByDatasetId(this.datasetId);
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
@@ -102,11 +109,9 @@ export default {
       });
     },
     async onNewLabel(label) {
-      await this.dataset.$dispatch("setEntities", {
-        dataset: this.dataset,
-        entities: [
-          ...new Set([...this.dataset.entities.map((ent) => ent.text), label]),
-        ],
+      await this.dataset.$dispatch("onSaveTokenDatasetSettings", {
+        datasetId: this.datasetId,
+        newLabel: label,
       });
     },
     searchRecords(query) {
