@@ -56,7 +56,6 @@ def configure_router():
 
     TasksFactory.register_task(
         task_type=TaskType.text2text,
-        dataset_class=ServiceBaseDataset,
         query_request=Text2TextQuery,
         record_class=ServiceText2TextRecord,
         metrics=Text2TextMetrics,

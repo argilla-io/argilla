@@ -65,7 +65,6 @@ def configure_router():
 
     TasksFactory.register_task(
         task_type=task_type,
-        dataset_class=ServiceBaseDataset,
         query_request=TokenClassificationQuery,
         record_class=ServiceTokenClassificationRecord,
         metrics=TokenClassificationMetrics,
