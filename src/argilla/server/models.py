@@ -43,8 +43,8 @@ class UserWorkspace(Base):
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
-    user: Mapped["User"] = relationship()
-    workspace: Mapped["Workspace"] = relationship()
+    user: Mapped["User"] = relationship(viewonly=True)
+    workspace: Mapped["Workspace"] = relationship(viewonly=True)
 
 
 class Workspace(Base):
