@@ -456,6 +456,8 @@ class Argilla:
                 can be used to load using batches.
             as_pandas: DEPRECATED! To get a pandas DataFrame do
                 ``rg.load('my_dataset').to_pandas()``.
+            fields: If provided, only the given fields will be retrieved.
+                ``rg.load('my_dataset', fields=['text'])``
 
         Returns:
             A argilla dataset.

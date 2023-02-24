@@ -223,6 +223,8 @@ def load(
             can be used to load using batches.
         as_pandas: DEPRECATED! To get a pandas DataFrame do
             ``rg.load('my_dataset').to_pandas()``.
+        fields: A list of fields to retrieve. If not provided, all fields will be retrieved.
+            ``rg.load('my_dataset', fields=['id', 'text'])``
 
     Returns:
         A argilla dataset.
