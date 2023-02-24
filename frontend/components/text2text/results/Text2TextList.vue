@@ -165,10 +165,13 @@ export default {
       return this.annotations[0]?.text;
     },
     visiblePredictions() {
+      const isExploreMode = !this.annotationEnabled;
+      const arePredictionEdited =
+        this.predictions[this.predictionNumber]?.text !== this.defaultText;
+      const isAnnotationVisible = this.currentAnnotation === this.defaultText;
       return (
-        (!!this.predictionsLength && !this.annotationEnabled) ||
-        (!!this.predictionsLength &&
-          this.predictions[this.predictionNumber]?.text !== this.defaultText)
+        !!this.predictionsLength &&
+        (isExploreMode || arePredictionEdited || isAnnotationVisible)
       );
     },
     predictionsLength() {
@@ -185,7 +188,7 @@ export default {
       return (
         !this.annotations.length ||
         (this.record.status !== "Validated" &&
-          this.visibleSentence &&
+          this.defaultText &&
           !!this.record?.sentenceForAnnotation) ||
         false
       );
