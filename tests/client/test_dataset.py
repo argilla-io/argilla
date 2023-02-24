@@ -701,7 +701,8 @@ class TestDatasetForTokenClassification:
             ]
 
         train = rb_dataset.prepare_for_training()
-        train.column_names = ["token", "ner_tags"]
+        assert (set(train.column_names)) == set(["tokens", "ner_tags"])
+
         assert isinstance(train, datasets.DatasetD.Dataset) or isinstance(
             train, datasets.Dataset
         )
