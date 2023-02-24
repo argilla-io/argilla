@@ -76,7 +76,6 @@
         :isMultiLabel="dataset.isMultiLabel"
         :datasetId="datasetId"
         :datasetName="dataset.name"
-        :datasetLabels="dataset.labels"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
       />
