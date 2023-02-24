@@ -109,7 +109,8 @@ def test_init_correct(mock_response_200):
         timeout=60.0,
     )
 
-    assert api.active_api().user == User(username="booohh", api_key="api-key")
+    assert api.active_client().user.username == "booohh"
+    assert api.active_client().user.api_key == "api-key"
 
     api.init(
         api_url="mock_url",
