@@ -99,13 +99,6 @@ class User(BaseModel):
         orm_mode = True
         getter_dict = UserGetter
 
-    @validator("updated_at", always=True)
-    def updated_at_defaults(cls, value, values):
-        if value:
-            return value
-        else:
-            return values.get("inserted_at")
-
     @validator("username")
     def check_username(cls, value):
         if not re.compile(DATASET_NAME_REGEX_PATTERN).match(value):
