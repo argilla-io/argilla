@@ -705,7 +705,7 @@ const fetchByNameForTextClassification = async (dataset) => {
   await fetchAllRulesAndInsertRulesInTextClassificationORM(dataset);
   await initGlobalLabels(dataset);
   await _updateAnnotationProgress({
-    id: name,
+    id: dataset.name,
     total: dataset.globalResults.total,
     aggregations: dataset.globalResults.aggregations,
   });
@@ -729,7 +729,7 @@ const fetchByNameForTextClassification = async (dataset) => {
 const fetchByNameForTokenClassification = async (dataset) => {
   await initGlobalLabels(dataset);
   await _updateAnnotationProgress({
-    id: name,
+    id: dataset.name,
     total: dataset.globalResults.total,
     aggregations: dataset.globalResults.aggregations,
   });
