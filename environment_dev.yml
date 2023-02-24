@@ -14,6 +14,7 @@ dependencies:
   - pytest-cov
   - pytest-mock
   - pytest-asyncio
+  - factory_boy~=3.2.1
   # docs, pandoc needs conda ...
   - pandoc==2.12
   # we need this to ensure syntax highlighting in the notebook code cells for the docs
