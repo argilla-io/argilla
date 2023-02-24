@@ -27,7 +27,6 @@ from argilla.server.apis.v0.models.commons.params import (
 )
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
-    Text2TextDataset,
     Text2TextMetrics,
     Text2TextQuery,
     Text2TextRecord,
@@ -43,7 +42,7 @@ from argilla.server.responses import StreamingResponseWithErrorHandling
 from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.security.model import User
-from argilla.server.services.datasets import DatasetsService
+from argilla.server.services.datasets import DatasetsService, ServiceBaseDataset
 from argilla.server.services.tasks.text2text import Text2TextService
 from argilla.server.services.tasks.text2text.models import (
     ServiceText2TextQuery,
@@ -57,7 +56,7 @@ def configure_router():
 
     TasksFactory.register_task(
         task_type=TaskType.text2text,
-        dataset_class=Text2TextDataset,
+        dataset_class=ServiceBaseDataset,
         query_request=Text2TextQuery,
         record_class=ServiceText2TextRecord,
         metrics=Text2TextMetrics,
@@ -87,7 +86,6 @@ def configure_router():
                 name=name,
                 task=task,
                 workspace=workspace,
-                as_dataset_class=TasksFactory.get_task_dataset(task_type),
             )
             datasets.update(
                 user=current_user,
@@ -132,7 +130,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
         result = service.search(
             dataset=dataset,
@@ -224,7 +221,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
         data_stream = map(
             Text2TextRecord.parse_obj,

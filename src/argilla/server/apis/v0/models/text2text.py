@@ -32,7 +32,6 @@ from argilla.server.services.search.model import (
     ServiceBaseRecordsQuery,
     ServiceBaseSearchResultsAggregations,
 )
-from argilla.server.services.tasks.text2text.models import ServiceText2TextDataset
 
 
 class Text2TextPrediction(BaseModel):
@@ -72,10 +71,6 @@ class Text2TextSearchAggregations(ServiceBaseSearchResultsAggregations):
 
 
 class Text2TextSearchResults(BaseSearchResults[Text2TextRecord, Text2TextSearchAggregations]):
-    pass
-
-
-class Text2TextDataset(ServiceText2TextDataset):
     pass
 
 

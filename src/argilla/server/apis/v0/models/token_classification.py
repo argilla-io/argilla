@@ -32,9 +32,6 @@ from argilla.server.services.search.model import (
 from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationAnnotation as _TokenClassificationAnnotation,
 )
-from argilla.server.services.tasks.token_classification.model import (
-    ServiceTokenClassificationDataset,
-)
 
 
 class TokenClassificationAnnotation(_TokenClassificationAnnotation):
@@ -87,8 +84,4 @@ class TokenClassificationAggregations(ServiceBaseSearchResultsAggregations):
 
 
 class TokenClassificationSearchResults(BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]):
-    pass
-
-
-class TokenClassificationDataset(ServiceTokenClassificationDataset):
     pass
