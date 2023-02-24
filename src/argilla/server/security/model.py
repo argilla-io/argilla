@@ -83,7 +83,7 @@ class UserGetter(GetterDict):
 class User(BaseModel):
     """Base user model"""
 
-    id: UUID = Field(default_factory=uuid.uuid4)
+    id: UUID
     username: str = Field()
     email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
@@ -92,8 +92,8 @@ class User(BaseModel):
     workspaces: Optional[List[str]] = None
     # TODO: Adding inserted_at and updated_at is causing multiple errors so we are disabling them by now.
     # Once that we refactor all the old code we should enable this again.
-    inserted_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = None
+    inserted_at: datetime
+    updated_at: datetime
 
     class Config:
         orm_mode = True
