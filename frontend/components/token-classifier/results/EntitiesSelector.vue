@@ -38,7 +38,7 @@
         >
           <entity-label
             :label="entity.text"
-            :shortcut="activeEntity === index ? 'enter' : entity.shortCut"
+            :shortcut="activeEntity === index ? 'enter' : entity.shortcut"
             :class="[
               'entities__selector__option',
               activeEntity === index ? 'active' : null,
@@ -156,7 +156,7 @@ export default {
               element[0].offsetTop - element[0].offsetHeight - 8;
           }
         } else {
-          const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
+          const entity = this.formattedEntities.find((t) => t.shortcut === cmd);
           if (entity) {
             this.selectEntity(entity);
           }
