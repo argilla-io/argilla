@@ -9,18 +9,18 @@ function mountEntitiesSelector() {
       datasetId: ["workspace", "name"],
       datasetLastSelectedEntity: {
         color_id: 14,
-        shortCut: "1",
+        shortcut: "1",
         text: "Arreglo",
       },
       formattedEntities: [
         {
           color_id: 14,
-          shortCut: "1",
+          shortcut: "1",
           text: "Arreglo",
         },
         {
           color_id: 1,
-          shortCut: "2",
+          shortcut: "2",
           text: "CARDINAL",
         },
       ],
