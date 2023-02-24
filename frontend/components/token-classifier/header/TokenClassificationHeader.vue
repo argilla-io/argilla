@@ -65,6 +65,10 @@ export default {
       type: Boolean,
       required: true,
     },
+  },data() {
+    return {
+      isSortAsc: true
+    }
   },
   computed: {
     dataset() {
@@ -72,10 +76,10 @@ export default {
       return getDatasetFromORM(this.datasetId, this.datasetTask, true);
     },
     labels() {
-      return getAllLabelsByDatasetId(this.datasetId);
+      return getAllLabelsByDatasetId(this.datasetId, "text", this.isSortAsc);
     },
     listOfTexts() {
-      return getAllLabelsTextByDatasetId(this.datasetId);
+      return getAllLabelsTextByDatasetId(this.datasetId, "text", this.isSortAsc);
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;

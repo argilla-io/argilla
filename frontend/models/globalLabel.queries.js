@@ -26,7 +26,7 @@ const getAllLabelsByDatasetId = (datasetId, sortBy = "text", asc = true) => {
 const getAllLabelsTextByDatasetId = (
   datasetId,
   sortBy = "text",
-  asc = false
+  asc = true
 ) => {
   return getAllLabelsByDatasetId(datasetId, sortBy, asc).reduce(
     (acc, curr) => acc.concat(curr.text),
@@ -60,6 +60,7 @@ const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
 
 const isLabelTextExistInGlobalLabel = (datasetId, labelText) => {
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+
 
   const compareWithCaseInsensitive = (value) =>
     value.toUpperCase() === labelText.toUpperCase();
