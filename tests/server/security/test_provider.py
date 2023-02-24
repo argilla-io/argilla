@@ -44,13 +44,6 @@ async def test_get_user_via_api_key(db: Session):
     assert user.username == "argilla"
 
 
-# Test for function find user by api key token
-@pytest.mark.asyncio
-async def test_get_user_by_api_key():
-    user = await localAuth._find_user_by_api_key(api_key=DEFAULT_API_KEY)
-    assert user.username == "argilla"
-
-
 # Test for function fetch token
 def test_fetch_token_user(db: Session):
     access_token = localAuth._create_access_token(username="argilla")

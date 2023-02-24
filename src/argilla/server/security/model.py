@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import re
+import uuid
 from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
@@ -53,7 +54,7 @@ class WorkspaceCreate(BaseModel):
 
 
 class UserGetter(GetterDict):
-    def get(self, key: str, default: Any) -> Any:
+    def get(self, key: str, default: Any = None) -> Any:
         if key == "full_name":
             return f"{self._obj.first_name} {self._obj.last_name}"
         elif key == "workspaces":
@@ -82,16 +83,15 @@ class UserGetter(GetterDict):
 class User(BaseModel):
     """Base user model"""
 
+    id: UUID
     username: str = Field()
     email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
     api_key: str
     workspaces: Optional[List[str]] = None
-    # TODO: Adding inserted_at and updated_at is causing multiple errors so we are disabling them by now.
-    # Once that we refactor all the old code we should enable this again.
-    # inserted_at: datetime
-    # updated_at: datetime
+    inserted_at: datetime
+    updated_at: datetime
 
     class Config:
         orm_mode = True

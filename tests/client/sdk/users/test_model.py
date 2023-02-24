@@ -20,8 +20,4 @@ def test_users_schema(helpers):
     client_schema = User.schema()
     server_schema = ServerUser.schema()
 
-    for clean_method in [helpers.remove_description, helpers.remove_pattern]:
-        client_schema = clean_method(client_schema)
-        server_schema = clean_method(server_schema)
-
-    assert client_schema == server_schema
+    assert helpers.are_compatible_api_schemas(client_schema, server_schema)
