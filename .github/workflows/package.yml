@@ -208,6 +208,11 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    # Only build the package if we can deploy it as a docker image
+    env:
+      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
+    outputs:
+      code_changes: ${{ steps.filter.outputs.code_changes }}
 
     steps:
       - name: Checkout Code 🛎
@@ -228,7 +233,7 @@ jobs:
               - '.github/workflows/package.yml'
       - name: Cache pip 👜
         uses: actions/cache@v2
-        if: steps.filter.outputs.code_changes == 'true'
+        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
         env:
           # Increase this value to reset cache if pyproject.toml has not changed
           CACHE_NUMBER: 0
@@ -238,18 +243,18 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
-        if: steps.filter.outputs.code_changes == 'true'
+        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
         with:
           node-version: "14"
 
       - name: Build Package 🍟
-        if: steps.filter.outputs.code_changes == 'true'
+        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
         run: |
           pip install -U build
           scripts/build_distribution.sh
 
       - name: Upload package artifact
-        if: steps.filter.outputs.code_changes == 'true'
+        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
         uses: actions/upload-artifact@v2
         with:
           name: python-package
@@ -262,6 +267,9 @@ jobs:
       - build
       - test-elastic
       - test-opensearch
+    env:
+      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
+    if: needs.build.outputs.code_changes == 'true'
     strategy:
       matrix:
         include:
@@ -281,30 +289,36 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
+        if: env.IS_DEPLOYABLE == 'true'
 
       - name: Download python package
         uses: actions/download-artifact@v2
         with:
           name: python-package
           path: dist
+        if: env.IS_DEPLOYABLE == 'true'
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
+        if: env.IS_DEPLOYABLE == 'true'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+        if: env.IS_DEPLOYABLE == 'true'
 
       - name: Docker meta
         id: meta
         uses: crazy-max/ghaction-docker-meta@v2
         with:
           images: ${{ matrix.image }}
+        if: env.IS_DEPLOYABLE == 'true'
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
+        if: env.IS_DEPLOYABLE == 'true'
 
       - name: Build & push Docker image
         uses: docker/build-push-action@v2
@@ -315,6 +329,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           push: true
+        if: env.IS_DEPLOYABLE == 'true'
 
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
@@ -323,6 +338,7 @@ jobs:
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
           repository: ${{ matrix.image }}
           readme-filepath: ${{ matrix.readme }}
+        if: env.IS_DEPLOYABLE == 'true'
 
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
