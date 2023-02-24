@@ -69,6 +69,11 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      isSortAsc: true,
+    };
+  },
   computed: {
     dataset() {
       //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
@@ -78,10 +83,14 @@ export default {
       return this.dataset.isMultiLabel;
     },
     labels() {
-      return getAllLabelsByDatasetId(this.datasetId);
+      return getAllLabelsByDatasetId(this.datasetId, "text", this.isSortAsc);
     },
     listOfTexts() {
-      return getAllLabelsTextByDatasetId(this.datasetId);
+      return getAllLabelsTextByDatasetId(
+        this.datasetId,
+        "text",
+        this.isSortAsc
+      );
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
