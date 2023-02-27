@@ -252,7 +252,7 @@ export default {
 }
 .list {
   &__checkbox.re-checkbox {
-    margin: auto $base-space;
+    margin: auto 0 auto $base-space;
   }
   &__item {
     position: relative;
