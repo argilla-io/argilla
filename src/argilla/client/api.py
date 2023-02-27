@@ -205,6 +205,7 @@ def load(
     vector: Optional[Tuple[str, List[float]]] = None,
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
+    sort: Optional[Union[Dict[str, str], List[Tuple[str, str]]]] = None,
     id_from: Optional[str] = None,
     as_pandas=None,
 ) -> Dataset:
@@ -250,6 +251,7 @@ def load(
         vector=vector,
         ids=ids,
         limit=limit,
+        sort=sort,
         id_from=id_from,
         as_pandas=as_pandas,
     )

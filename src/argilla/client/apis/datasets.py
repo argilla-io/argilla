@@ -13,9 +13,10 @@
 #  limitations under the License.
 
 import warnings
+from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -153,6 +154,7 @@ class Datasets(AbstractApi):
         name: str,
         projection: Optional[Set[str]] = None,
         limit: Optional[int] = None,
+        sort: Optional[Union[Dict[str, str], List[Tuple[str, str]]]] = None,
         id_from: Optional[str] = None,
         **query,
     ) -> Iterable[dict]:
@@ -163,6 +165,7 @@ class Datasets(AbstractApi):
             name: the dataset
             query: the search query
             projection: a subset of record fields to retrieve. If not provided,
+            sort: the sort order. If not provided, the records will be returned in ID order.
             limit: The number of records to retrieve
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
@@ -175,7 +178,7 @@ class Datasets(AbstractApi):
 
         """
 
-        url = f"{self._API_PREFIX}/{name}/records/:search?limit={self.DEFAULT_SCAN_SIZE}"
+        url = f"{self._API_PREFIX}/{name}/records/:search?limit={limit or self.DEFAULT_SCAN_SIZE}"
         query = self._parse_query(query=query)
 
         if limit == 0:
@@ -185,6 +188,27 @@ class Datasets(AbstractApi):
             "fields": list(projection) if projection else ["id"],
             "query": query,
         }
+
+        if sort is not None:
+            print(sort)
+            sort_commands = []
+
+            # convert list of tuples to OrderedDict
+            if isinstance(sort, list):
+                if all(isinstance(item, tuple) for item in sort):
+                    sort = OrderedDict(sort)
+
+            # convert OrderedDict to list of dicts
+            assert isinstance(sort, dict), ValueError(
+                "sort must be a dict formatted as {'field': 'asc|desc'} OR List[Tuple['field', 'asc|desc']]"
+            )
+            for field, direction in sort.items():
+                assert direction in ["asc", "desc"], ValueError("sort direction must be 'asc' or 'desc'")
+                # sort_commands.append({field: direction})
+                sort_commands.append({"id": field, "order": direction})
+
+            request["sort"] = sort_commands
+            print(url, request)
 
         if id_from:
             request["next_idx"] = id_from

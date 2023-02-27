@@ -18,7 +18,7 @@ import os
 import re
 import warnings
 from asyncio import Future
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from rich import print as rprint
 from rich.progress import Progress
@@ -438,6 +438,7 @@ class Argilla:
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        sort: Optional[Union[Dict[str, str], List[Tuple[str, str]]]] = None,
         id_from: Optional[str] = None,
         as_pandas=None,
     ) -> Dataset:
@@ -480,6 +481,7 @@ class Argilla:
                 vector=vector,
                 ids=ids,
                 limit=limit,
+                sort=sort,
                 id_from=id_from,
             )
         except ApiCompatibilityError as err:  # Api backward compatibility
@@ -501,6 +503,7 @@ class Argilla:
                 query=query,
                 ids=ids,
                 limit=limit,
+                sort=sort,
                 id_from=id_from,
             )
 
@@ -659,6 +662,7 @@ class Argilla:
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        sort: Optional[Union[Dict[str, str], List[Tuple[str, str]]]] = None,
         id_from: Optional[str] = None,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
@@ -688,6 +692,9 @@ class Argilla:
             )
 
         if vector:
+            assert sort is None, InputValueError(
+                "Results are sorted by vector similarity, so 'sort' parameter is ignored."
+            )
             vector_search = VectorSearch(
                 name=vector[0],
                 value=vector[1],
@@ -706,6 +713,7 @@ class Argilla:
             name=name,
             projection={"*"},
             limit=limit,
+            sort=sort,
             id_from=id_from,
             # Query
             query_text=query,
