@@ -15,6 +15,7 @@
  */
 
 import _ from "lodash";
+import { Notification } from "@/models/Notifications";
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
@@ -577,13 +578,20 @@ const actions = {
   },
 
   async deleteDataset(_, { workspace, name }) {
-    var url = `/datasets/${name}`;
-
+    let url = `/datasets/${name}`;
     url += `?workspace=${workspace}`;
-    const deleteResults = await ObservationDataset.api().delete(url, {
-      delete: [workspace, name],
-    });
-    return deleteResults;
+    try {
+      await ObservationDataset.api().delete(url, {
+        delete: [workspace, name],
+      });
+      Notification.dispatch("notify", {
+        message: `${name} have been deleted`,
+        type: "success",
+      });
+      $nuxt.$router.push("/");
+    } catch (error) {
+      console.log(error);
+    }
   },
 
   async refreshAnnotationProgress(_, dataset) {
