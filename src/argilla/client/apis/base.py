@@ -26,5 +26,7 @@ class AbstractApi(object):
 
     @staticmethod
     def _parse_query(*, query: Optional[dict]):
+        if query["query_text"] == "":
+            del query["query_text"]
         query_request = query or {}
         return {k: v for k, v in query_request.items() if v is not None}
