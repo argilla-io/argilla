@@ -52,7 +52,7 @@ const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
       text: newLabel,
       dataset_id: joinedDatasetId,
       color_id: numberOfLabels,
-      shortcut: numberOfLabels < 10 ? String(numberOfLabels) : null,
+      shortcut: numberOfLabels < 9 ? String(numberOfLabels + 1) : null,
       is_activate: isActivate,
     },
   });
