@@ -372,10 +372,10 @@ def test_log_load_with_workspace(mocked_client, monkeypatch, request, records, d
     records = request.getfixturevalue(records)
 
     api.log(records[0], name=dataset_names[0], workspace="booohh")
-    api.log(records[0], name=dataset_names[0], workspace="mock_workspace")
-    _ = api.load(dataset_names[0], workspace="mock_workspace")
+    api.log(records[0], name=dataset_names[0], workspace="argilla")
+    _ = api.load(dataset_names[0], workspace="argilla")
     ds = api.load(dataset_names[0], workspace="booohh")
-    api.delete(dataset_names[0], workspace="mock_workspace")
+    api.delete(dataset_names[0], workspace="argilla")
     api.delete_records(dataset_names[0], ids=[rec.id for rec in ds], workspace="booohh")
 
 
