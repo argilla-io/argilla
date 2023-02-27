@@ -94,6 +94,11 @@ def mock_response_token_401(monkeypatch):
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
 
+def test_init_uppercase_workspace(mocked_client):
+    with pytest.raises(InputValueError):
+        api.init(workspace="UPPERCASE_WORKSPACE")
+
+
 def test_init_correct(mock_response_200):
     """Testing correct default initialization
 
