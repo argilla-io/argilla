@@ -185,6 +185,7 @@ def test_load_empty_string(monkeypatch, mocked_client):
         records=rg.TextClassificationRecord(inputs={"text": "This is a test"}),
     )
     assert len(api.load(name=dataset_name, query="")) == 1
+    assert len(api.load(name=dataset_name, query="  ")) == 1
 
 
 def test_load_limits(mocked_client, supported_vector_search):
