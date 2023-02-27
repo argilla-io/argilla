@@ -57,7 +57,7 @@ def delete_user_workspace(db: Session, user_workspace: UserWorkspace):
 
 
 def get_workspace_by_id(db: Session, workspace_id: UUID):
-    return db.query(Workspace).get(workspace_id)
+    return db.get(Workspace, workspace_id)
 
 
 def list_workspaces(db: Session):
@@ -82,7 +82,7 @@ def delete_workspace(db: Session, workspace: Workspace):
 
 
 def get_user_by_id(db: Session, user_id: UUID):
-    return db.query(User).get(user_id)
+    return db.get(User, user_id)
 
 
 def get_user_by_username(db: Session, username: str):

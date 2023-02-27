@@ -48,7 +48,7 @@ def test_create_workspace(client: TestClient, db: Session, admin_auth_header: di
 
     response_body = response.json()
     assert response_body["name"] == "workspace"
-    assert db.query(Workspace).get(UUID(response_body["id"]))
+    assert db.get(Workspace, UUID(response_body["id"]))
 
 
 def test_create_workspace_without_authentication(client: TestClient, db: Session):
