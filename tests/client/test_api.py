@@ -330,7 +330,7 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
     records = request.getfixturevalue(records)
 
     # log single records
-    api.log(records[0], name=dataset_names[0], workspace=)
+    api.log(records[0], name=dataset_names[0])
     dataset = api.load(dataset_names[0])
     records[0].metrics = dataset[0].metrics
     assert dataset[0] == records[0]
@@ -353,6 +353,7 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
     for record, expected in zip(dataset, records):
         record.metrics = expected.metrics
         assert record == expected
+
 
 @pytest.mark.parametrize(
     "records, dataset_class",
@@ -378,7 +379,6 @@ def test_log_load_with_workspace(mocked_client, monkeypatch, request, records, d
     api.delete_records(dataset_names[0], ids=[rec.id for rec in ds], workspace="booohh")
 
 
-
 def test_passing_wrong_iterable_data(mocked_client):
     dataset_name = "test_log_single_records"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
@@ -395,7 +395,6 @@ def test_log_with_generator(mocked_client, monkeypatch):
             yield rg.TextClassificationRecord(id=i, inputs={"text": "The text data"})
 
     api.log(generator(), name=dataset_name)
-
 
 
 def test_create_ds_with_wrong_name(mocked_client):
