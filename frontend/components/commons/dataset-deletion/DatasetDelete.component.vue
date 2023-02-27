@@ -1,0 +1,84 @@
+<template>
+  <div class="description">
+    <h2 class="--heading5 --semibold description__title">{{ sectionTitle }}</h2>
+    <base-card
+      card-type="danger"
+      :title="datasetDeleteTitle"
+      text="Be careful, this action is not reversible"
+      buttonText="Delete dataset"
+      @card-action="showDeleteModal(true)"
+    />
+    <base-modal
+      class="delete-modal"
+      :modal-custom="true"
+      :prevent-body-scroll="true"
+      modal-class="modal-secondary"
+      :modal-title="modalTitle"
+      :modal-visible="isDeleteModalVisible"
+      @close-modal="showDeleteModal(false)"
+    >
+      <div>
+        <p v-html="modalDescription"></p>
+        <div class="modal-buttons">
+          <base-button class="primary outline" @click="showDeleteModal(false)">
+            Cancel
+          </base-button>
+          <base-button class="primary" @click="onDeleteDataset">
+            Yes, delete
+          </base-button>
+        </div>
+      </div>
+    </base-modal>
+  </div>
+</template>
+
+<script>
+import { mapActions } from "vuex";
+import { currentWorkspace } from "@/models/Workspace";
+export default {
+  props: {
+    datasetName: {
+      type: String,
+      required: true,
+    },
+  },
+  data: () => {
+    return {
+      sectionTitle: "Danger zone",
+      isDeleteModalVisible: false,
+    };
+  },
+  computed: {
+    datasetDeleteTitle() {
+      return `Delete ${this.workspace}`;
+    },
+    modalTitle() {
+      return `Delete confirmation`;
+    },
+    modalDescription() {
+      return `You are about to delete: <strong>${this.datasetName}</strong> from workspace <strong>${this.workspace}</strong>. This action cannot be undone`;
+    },
+    workspace() {
+      return currentWorkspace(this.$route);
+    },
+  },
+  methods: {
+    ...mapActions({
+      deleteDataset: "entities/datasets/deleteDataset",
+    }),
+    async onDeleteDataset() {
+      await this.deleteDataset({
+        workspace: this.workspace,
+        name: this.datasetName,
+      });
+      this.showDeleteModal(false);
+    },
+    showDeleteModal(value) {
+      this.isDeleteModalVisible = value;
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+</style>
