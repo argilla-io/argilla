@@ -87,6 +87,14 @@ def create_workspace_user(
     user_id: UUID,
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
+    workspace = accounts.get_workspace_by_id(db, workspace_id)
+    if not workspace:
+        raise EntityNotFoundError(name=str(workspace_id), type=Workspace)
+
+    user = accounts.get_user_by_id(db, user_id)
+    if not user:
+        raise EntityNotFoundError(name=str(user_id), type=User)
+
     user_workspace = accounts.create_user_workspace(db, UserWorkspaceCreate(user_id=user_id, workspace_id=workspace_id))
 
     return User.from_orm(user_workspace.user)

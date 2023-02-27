@@ -140,7 +140,7 @@ def test_create_workspace_user_with_nonexistent_workspace_id(
 ):
     response = client.post(f"/api/workspaces/{uuid4()}/users/{admin.id}", headers=admin_auth_header)
 
-    assert response.status_code == 500
+    assert response.status_code == 404
     assert db.query(UserWorkspace).count() == 0
 
 
@@ -149,7 +149,7 @@ def test_create_workspace_user_with_nonexistent_user_id(client: TestClient, db: 
 
     response = client.post(f"/api/workspaces/{workspace.id}/users/{uuid4()}", headers=admin_auth_header)
 
-    assert response.status_code == 500
+    assert response.status_code == 404
     assert db.query(UserWorkspace).count() == 0
 
 
