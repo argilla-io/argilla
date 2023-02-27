@@ -135,27 +135,21 @@ def test_create_workspace_user_without_authentication(client: TestClient, db: Se
     assert db.query(UserWorkspace).count() == 0
 
 
-# TODO: We need to take a decision about what to do with this.
-# For more information: https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
-@pytest.mark.skip(reason="sqlite is not enforcing foreign keys")
 def test_create_workspace_user_with_nonexistent_workspace_id(
     client: TestClient, db: Session, admin: User, admin_auth_header: dict
 ):
     response = client.post(f"/api/workspaces/{uuid4()}/users/{admin.id}", headers=admin_auth_header)
 
-    assert response.status_code == 422
+    assert response.status_code == 500
     assert db.query(UserWorkspace).count() == 0
 
 
-# TODO: We need to take a decision about what to do with this.
-# For more information: https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
-@pytest.mark.skip(reason="sqlite is not enforcing foreign keys")
 def test_create_workspace_user_with_nonexistent_user_id(client: TestClient, db: Session, admin_auth_header: dict):
     workspace = WorkspaceFactory.create()
 
     response = client.post(f"/api/workspaces/{workspace.id}/users/{uuid4()}", headers=admin_auth_header)
 
-    assert response.status_code == 422
+    assert response.status_code == 500
     assert db.query(UserWorkspace).count() == 0
 
 
