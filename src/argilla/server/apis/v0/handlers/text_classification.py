@@ -372,6 +372,7 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
+            as_dataset_class=TextClassificationDataset,
         )
 
         return service.compute_labeling_rule(dataset, rule_query=query, labels=labels)
