@@ -16,7 +16,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List
 
-import argilla as ar
+import argilla as rg
 import pytest
 from argilla._constants import DEFAULT_API_KEY
 from argilla.client.sdk.client import AuthenticatedClient
@@ -142,9 +142,9 @@ def sdk_client(mocked_client, monkeypatch):
 
 @pytest.fixture
 def bulk_textclass_data():
-    explanation = {"text": [ar.TokenAttributions(token="test", attributions={"test": 0.5})]}
+    explanation = {"text": [rg.TokenAttributions(token="test", attributions={"test": 0.5})]}
     records = [
-        ar.TextClassificationRecord(
+        rg.TextClassificationRecord(
             text="test",
             prediction=[("test", 0.5)],
             prediction_agent="agent",
@@ -170,7 +170,7 @@ def bulk_textclass_data():
 @pytest.fixture
 def bulk_text2text_data():
     records = [
-        ar.Text2TextRecord(
+        rg.Text2TextRecord(
             text="test",
             prediction=[("prueba", 0.5), ("intento", 0.5)],
             prediction_agent="agent",
@@ -194,7 +194,7 @@ def bulk_text2text_data():
 @pytest.fixture
 def bulk_tokenclass_data():
     records = [
-        ar.TokenClassificationRecord(
+        rg.TokenClassificationRecord(
             text="a raw text",
             tokens=["a", "raw", "text"],
             prediction=[("test", 2, 5, 0.9)],
