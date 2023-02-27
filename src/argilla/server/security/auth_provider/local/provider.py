@@ -27,13 +27,12 @@ from sqlalchemy.orm import Session
 
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
-from argilla.server.errors import InactiveUserError, UnauthorizedError
+from argilla.server.errors import UnauthorizedError
 from argilla.server.security.auth_provider.base import (
     AuthProvider,
     api_key_header,
     old_api_key_header,
 )
-from argilla.server.security.auth_provider.local.users.service import UsersService
 from argilla.server.security.model import Token, User
 
 from .settings import Settings
@@ -48,10 +47,8 @@ _oauth2_scheme = OAuth2PasswordBearer(
 class LocalAuthProvider(AuthProvider):
     def __init__(
         self,
-        users: UsersService,
         settings: Settings,
     ):
-        self.users = users
         self.router = APIRouter(tags=["security"])
         self.settings = settings
 
@@ -188,17 +185,8 @@ class LocalAuthProvider(AuthProvider):
 
         return User.from_orm(user)
 
-    async def _find_user_by_api_key(self, api_key) -> User:
-        return await self.users.find_user_by_api_key(api_key)
-
 
 def create_local_auth_provider():
-    from .users.dao import create_users_dao
-
     settings = Settings()
 
-    users_service = UsersService.get_instance(
-        users=create_users_dao(),
-    )
-
-    return LocalAuthProvider(users=users_service, settings=settings)
+    return LocalAuthProvider(settings=settings)
