@@ -63,9 +63,12 @@ def test_create_user(client: TestClient, db: Session, admin_auth_header: dict):
     assert response.status_code == 200
     assert db.query(User).count() == 2
 
+    db_user = db.query(User).filter_by(username="username").first()
+    assert db_user
+
     response_body = response.json()
     assert response_body["username"] == "username"
-    assert db.query(User).filter_by(username="username").first()
+    assert response_body["api_key"] == db_user.api_key
 
 
 def test_create_user_without_authentication(client: TestClient, db: Session):
