@@ -371,12 +371,10 @@ def test_log_load_with_workspace(mocked_client, monkeypatch, request, records, d
 
     records = request.getfixturevalue(records)
 
-    api.log(records[0], name=dataset_names[0], workspace="booohh")
-    api.log(records[0], name=dataset_names[0], workspace="argilla")
-    _ = api.load(dataset_names[0], workspace="argilla")
-    ds = api.load(dataset_names[0], workspace="booohh")
+    api.log(records, name=dataset_names[0], workspace="argilla")
+    ds = api.load(dataset_names[0], workspace="argilla")
+    api.delete_records(dataset_names[0], ids=[rec.id for rec in ds][:1], workspace="argilla")
     api.delete(dataset_names[0], workspace="argilla")
-    api.delete_records(dataset_names[0], ids=[rec.id for rec in ds], workspace="booohh")
 
 
 def test_passing_wrong_iterable_data(mocked_client):
