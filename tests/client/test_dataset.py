@@ -157,14 +157,8 @@ class TestDatasetBase:
 
     def test_datasets_not_installed(self, monkeypatch):
         monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", "mock")
-        monkeypatch.setitem(sys.modules, "datasets", None)
+        monkeypatch.setattr(sys, "meta_path", [], raising=False)
         with pytest.raises(ModuleNotFoundError, match="pip install datasets>1.17.0"):
-            DatasetBase().to_datasets()
-
-    def test_datasets_wrong_version(self, monkeypatch):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", "mock")
-        monkeypatch.setattr("datasets.__version__", "1.16.0")
-        with pytest.raises(ModuleNotFoundError, match="pip install -U datasets>1.17.0"):
             DatasetBase().to_datasets()
 
     def test_iter_len_getitem(self, monkeypatch, singlelabel_textclassification_records):

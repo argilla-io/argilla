@@ -56,7 +56,7 @@ def test_sort_by_enum():
 
 
 def test_not_installed(monkeypatch):
-    monkeypatch.setitem(sys.modules, "cleanlab", None)
+    monkeypatch.setattr(sys, "meta_path", [], raising=False)
     with pytest.raises(ModuleNotFoundError, match="pip install cleanlab"):
         find_label_errors(None)
 
