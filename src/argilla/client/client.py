@@ -712,7 +712,7 @@ class Argilla:
 
         records = self.datasets.scan(
             name=name,
-            projection=list(set(fields)) if fields else {"*"},
+            projection=list(set(fields)) if fields else ["*"],
             limit=limit,
             id_from=id_from,
             # Query
