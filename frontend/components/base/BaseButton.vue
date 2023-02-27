@@ -207,6 +207,49 @@ export default {
     }
   }
 }
+.--danger {
+  background-color: $danger;
+  color: palette(white);
+  .svg-icon {
+    fill: palette(white);
+  }
+  &:hover,
+  &:active,
+  &.active {
+    background-color: darken($danger, 10%);
+  }
+  &.outline {
+    background: none;
+    border: 1px solid $danger;
+    color: $danger;
+    .svg-icon {
+      fill: $danger;
+    }
+    &:hover,
+    &:active,
+    &.active {
+      color: $danger;
+      border-color: $danger;
+    }
+  }
+  &.light {
+    background: lighten($black-4, 50%);
+    color: $danger;
+    &:hover,
+    &:active,
+    &.active {
+      background: $black-4;
+    }
+  }
+  &.link {
+    background: none;
+    color: $danger;
+    &:hover {
+      text-decoration: underline;
+      background: none;
+    }
+  }
+}
 .clear {
   background: none;
   padding: $base-space;
