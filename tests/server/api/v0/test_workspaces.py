@@ -122,6 +122,7 @@ def test_create_workspace_user(client: TestClient, db: Session, admin: User, adm
     assert db.query(UserWorkspace).filter_by(user_id=admin.id, workspace_id=workspace.id).first()
 
     response_body = response.json()
+    assert response_body["id"] == str(admin.id)
     assert workspace.name in response_body["workspaces"]
 
 
@@ -159,47 +160,51 @@ def test_create_workspace_user_with_nonexistent_user_id(client: TestClient, db: 
 
 
 def test_delete_workspace_user(client: TestClient, db: Session, admin_auth_header: dict):
-    workspace = WorkspaceFactory.create()
-    user = UserFactory.create()
-    user_workspace = UserWorkspaceFactory.create(user_id=user.id, workspace_id=workspace.id)
+    user_workspace = UserWorkspaceFactory.create(
+        user_id=UserFactory.create().id, workspace_id=WorkspaceFactory.create().id
+    )
 
-    response = client.delete(f"/api/workspaces/{workspace.id}/users/{user.id}", headers=admin_auth_header)
+    response = client.delete(
+        f"/api/workspaces/{user_workspace.workspace_id}/users/{user_workspace.user_id}", headers=admin_auth_header
+    )
 
     assert response.status_code == 200
     assert db.query(UserWorkspace).count() == 0
 
     response_body = response.json()
-    assert response_body["username"] == user.username
+    assert response_body["id"] == str(user_workspace.user_id)
 
 
 def test_delete_workspace_user_without_authentication(client: TestClient, db: Session):
-    workspace = WorkspaceFactory.create()
-    user = UserFactory.create()
-    UserWorkspaceFactory.create(user_id=user.id, workspace_id=workspace.id)
+    user_workspace = UserWorkspaceFactory.create(
+        user_id=UserFactory.create().id, workspace_id=WorkspaceFactory.create().id
+    )
 
-    response = client.delete(f"/api/workspaces/{workspace.id}/users/{user.id}")
+    response = client.delete(f"/api/workspaces/{user_workspace.workspace_id}/users/{user_workspace.user_id}")
 
     assert response.status_code == 401
     assert db.query(UserWorkspace).count() == 1
 
 
 def test_delete_workspace_user_with_nonexistent_workspace_id(client: TestClient, db: Session, admin_auth_header: dict):
-    workspace = WorkspaceFactory.create()
-    user = UserFactory.create()
-    UserWorkspaceFactory.create(user_id=user.id, workspace_id=workspace.id)
+    user_workspace = UserWorkspaceFactory.create(
+        user_id=UserFactory.create().id, workspace_id=WorkspaceFactory.create().id
+    )
 
-    response = client.delete(f"/api/workspaces/{uuid4()}/users/{user.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/workspaces/{uuid4()}/users/{user_workspace.user_id}", headers=admin_auth_header)
 
     assert response.status_code == 404
     assert db.query(UserWorkspace).count() == 1
 
 
 def test_delete_workspace_user_with_nonexistent_user_id(client: TestClient, db: Session, admin_auth_header: dict):
-    workspace = WorkspaceFactory.create()
-    user = UserFactory.create()
-    UserWorkspaceFactory.create(user_id=user.id, workspace_id=workspace.id)
+    user_workspace = UserWorkspaceFactory.create(
+        user_id=UserFactory.create().id, workspace_id=WorkspaceFactory.create().id
+    )
 
-    response = client.delete(f"/api/workspaces/{workspace.id}/users/{uuid4()}", headers=admin_auth_header)
+    response = client.delete(
+        f"/api/workspaces/{user_workspace.workspace_id}/users/{uuid4()}", headers=admin_auth_header
+    )
 
     assert response.status_code == 404
     assert db.query(UserWorkspace).count() == 1

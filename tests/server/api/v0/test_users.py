@@ -28,7 +28,7 @@ def test_me(client: TestClient, admin: User, admin_auth_header: dict):
     assert response.status_code == 200
 
     response_body = response.json()
-    assert response_body["username"] == admin.username
+    assert response_body["id"] == str(admin.id)
 
 
 def test_me_without_authentication(client: TestClient):
@@ -116,7 +116,7 @@ def test_delete_user(client: TestClient, db: Session, admin_auth_header: dict):
     assert db.query(User).count() == 1
 
     response_body = response.json()
-    assert response_body["username"] == user.username
+    assert response_body["id"] == str(user.id)
 
 
 def test_delete_user_without_authentication(client: TestClient, db: Session):
