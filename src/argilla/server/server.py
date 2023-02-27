@@ -29,6 +29,7 @@ from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import ConfigError
 
 from argilla import __version__ as argilla_version
@@ -218,3 +219,17 @@ for app_configure in [
     configure_app_statics,
 ]:
     app_configure(argilla_app)
+
+
+@app.get("/docs")
+async def redirect_docs():
+    url = app.url_path_for("/api/docs")
+    response = RedirectResponse(url=url)
+    return response
+
+
+@app.get("/api")
+async def redirect_api():
+    url = app.url_path_for("/api/docs")
+    response = RedirectResponse(url=url)
+    return response
