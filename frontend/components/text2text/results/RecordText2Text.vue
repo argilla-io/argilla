@@ -125,7 +125,7 @@ export default {
   width: 100%;
   padding: $base-space * 4 200px 20px 20px;
   .list__item--selectable & {
-    padding-left: 50px;
+    padding-left: $base-space * 7;
   }
   &:hover {
     :deep(.edit) {

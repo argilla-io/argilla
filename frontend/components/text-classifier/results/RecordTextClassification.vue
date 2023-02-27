@@ -245,7 +245,7 @@ export default {
     padding: $base-space * 4 20px 20px 20px;
     .list__item--selectable & {
       padding-right: 240px;
-      padding-left: 50px;
+      padding-left: $base-space * 7;
     }
   }
   &__labels {

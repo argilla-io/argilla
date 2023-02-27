@@ -254,7 +254,7 @@ export default {
   @include font-size(16px);
   line-height: 34px;
   .list__item--selectable & {
-    padding-left: 50px;
+    padding-left: $base-space * 7;
   }
 }
 

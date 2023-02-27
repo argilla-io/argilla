@@ -121,7 +121,7 @@ export default {
     box-shadow: $shadow;
     border: 1px solid $black-10;
     transition: all 0.2s ease;
-    max-height: 60px;
+    max-height: $base-space * 7;
     &.--collapsed #{$this}__icon {
       opacity: 0;
     }
