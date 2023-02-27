@@ -330,7 +330,7 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
     records = request.getfixturevalue(records)
 
     # log single records
-    api.log(records[0], name=dataset_names[0])
+    api.log(records[0], name=dataset_names[0], workspace=)
     dataset = api.load(dataset_names[0])
     records[0].metrics = dataset[0].metrics
     assert dataset[0] == records[0]
@@ -354,6 +354,30 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
         record.metrics = expected.metrics
         assert record == expected
 
+@pytest.mark.parametrize(
+    "records, dataset_class",
+    [
+        ("singlelabel_textclassification_records", rg.DatasetForTextClassification),
+    ],
+)
+def test_log_load_with_workspace(mocked_client, monkeypatch, request, records, dataset_class):
+    dataset_names = [
+        f"test_general_log_load_{dataset_class.__name__.lower()}_" + input_type
+        for input_type in ["single", "list", "dataset"]
+    ]
+    for name in dataset_names:
+        mocked_client.delete(f"/api/datasets/{name}")
+
+    records = request.getfixturevalue(records)
+
+    api.log(records[0], name=dataset_names[0], workspace="booohh")
+    api.log(records[0], name=dataset_names[0], workspace="mock_workspace")
+    _ = api.load(dataset_names[0], workspace="mock_workspace")
+    ds = api.load(dataset_names[0], workspace="booohh")
+    api.delete(dataset_names[0], workspace="mock_workspace")
+    api.delete_records(dataset_names[0], ids=[rec.id for rec in ds], workspace="booohh")
+
+
 
 def test_passing_wrong_iterable_data(mocked_client):
     dataset_name = "test_log_single_records"
@@ -371,6 +395,7 @@ def test_log_with_generator(mocked_client, monkeypatch):
             yield rg.TextClassificationRecord(id=i, inputs={"text": "The text data"})
 
     api.log(generator(), name=dataset_name)
+
 
 
 def test_create_ds_with_wrong_name(mocked_client):
