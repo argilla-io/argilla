@@ -12,7 +12,7 @@ const deleteAllGlobalLabelModel = () => {
   GlobalLabelModel.deleteAll();
 };
 
-const getAllLabelsByDatasetId = (datasetId, sortBy = "text", asc = true) => {
+const getAllLabelsByDatasetId = (datasetId, sortBy = "order", asc = true) => {
   const directionSort = asc ? "asc" : "desc";
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
   const labels = GlobalLabelModel.query()
@@ -25,7 +25,7 @@ const getAllLabelsByDatasetId = (datasetId, sortBy = "text", asc = true) => {
 
 const getAllLabelsTextByDatasetId = (
   datasetId,
-  sortBy = "text",
+  sortBy = "order",
   asc = true
 ) => {
   return getAllLabelsByDatasetId(datasetId, sortBy, asc).reduce(
@@ -51,6 +51,7 @@ const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
       id: newLabel,
       text: newLabel,
       dataset_id: joinedDatasetId,
+      order: numberOfLabels,
       color_id: numberOfLabels,
       shortcut: numberOfLabels < 9 ? String(numberOfLabels + 1) : null,
       is_activate: isActivate,
