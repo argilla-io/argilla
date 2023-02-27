@@ -707,16 +707,17 @@ class Argilla:
                 vector=vector_search,
             )
             return dataset_class(results.records)
+        if fields:
+            fields.extend(["id", "inputs"])
 
         records = self.datasets.scan(
             name=name,
-            projection={"*"},
+            projection=list(set(fields)) if fields else {"*"},
             limit=limit,
             id_from=id_from,
             # Query
             query_text=query,
             ids=ids,
-            fields=fields,
         )
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
         return dataset_class(self.__sort_records_by_id__(records))

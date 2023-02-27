@@ -154,7 +154,6 @@ class Datasets(AbstractApi):
         projection: Optional[Set[str]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
-        fields: Optional[Set[str]] = None,
         **query,
     ) -> Iterable[dict]:
         """
@@ -169,7 +168,6 @@ class Datasets(AbstractApi):
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
             only id's will be returned
-            fields: A list of fields to load. If not provided, only id and inputs will be loaded
 
         Returns:
 
@@ -183,13 +181,8 @@ class Datasets(AbstractApi):
         if limit == 0:
             limit = None
 
-        fields_to_load = ["*"]
-        if fields:
-            fields.extend(["id", "inputs"])
-            fields_to_load = list(set(fields))
-
         request = {
-            "fields": fields_to_load,
+            "fields": projection,
             "query": query,
         }
 
