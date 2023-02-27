@@ -56,7 +56,9 @@ class Workspace(Base):
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
-    users: Mapped[List["User"]] = relationship(secondary="users_workspaces", back_populates="workspaces")
+    users: Mapped[List["User"]] = relationship(
+        secondary="users_workspaces", back_populates="workspaces", order_by="asc(UserWorkspace.inserted_at)"
+    )
 
 
 class User(Base):
@@ -72,4 +74,6 @@ class User(Base):
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
-    workspaces: Mapped[List["Workspace"]] = relationship(secondary="users_workspaces", back_populates="users")
+    workspaces: Mapped[List["Workspace"]] = relationship(
+        secondary="users_workspaces", back_populates="users", order_by="asc(UserWorkspace.inserted_at)"
+    )

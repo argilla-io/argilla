@@ -58,6 +58,13 @@ def test_create_workspace_without_authentication(client: TestClient, db: Session
     assert db.query(Workspace).count() == 0
 
 
+def test_create_workspace_with_empty_name(client: TestClient, db: Session, admin_auth_header: dict):
+    response = client.post("/api/workspaces", headers=admin_auth_header, json={"name": ""})
+
+    assert response.status_code == 422
+    assert db.query(Workspace).count() == 0
+
+
 def test_create_workspace_with_invalid_name(client: TestClient, db: Session, admin_auth_header: dict):
     response = client.post("/api/workspaces", headers=admin_auth_header, json={"name": "invalid name"})
 
@@ -84,18 +91,17 @@ def test_list_workspace_users(client: TestClient, db: Session, admin_auth_header
     workspace_a = WorkspaceFactory.create()
     UserWorkspaceFactory.create(user_id=UserFactory.create(username="username-a").id, workspace_id=workspace_a.id)
     UserWorkspaceFactory.create(user_id=UserFactory.create(username="username-b").id, workspace_id=workspace_a.id)
+    UserWorkspaceFactory.create(user_id=UserFactory.create(username="username-c").id, workspace_id=workspace_a.id)
 
-    workspace_b = WorkspaceFactory.create()
-    UserWorkspaceFactory.create(user_id=UserFactory.create().id, workspace_id=workspace_b.id)
-    UserWorkspaceFactory.create(user_id=UserFactory.create().id, workspace_id=workspace_b.id)
+    WorkspaceFactory.create(users=[UserFactory.build(), UserFactory.build()])
 
     response = client.get(f"/api/workspaces/{workspace_a.id}/users", headers=admin_auth_header)
 
     assert response.status_code == 200
-    assert db.query(UserWorkspace).count() == 4
+    assert db.query(UserWorkspace).count() == 5
 
     response_body = response.json()
-    assert list(map(lambda uw: uw["username"], response_body)) == ["username-a", "username-b"]
+    assert list(map(lambda u: u["username"], response_body)) == ["username-a", "username-b", "username-c"]
 
 
 def test_list_workspace_users_without_authentication(client: TestClient):
