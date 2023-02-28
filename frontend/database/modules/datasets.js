@@ -15,13 +15,13 @@
  */
 
 import _ from "lodash";
-import { Notification } from "@/models/Notifications";
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 import { Vector as VectorModel } from "@/models/Vector";
+import { Notification } from "@/models/Notifications";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
