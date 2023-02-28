@@ -47,9 +47,9 @@ export default {
 <style lang="scss" scoped>
 $recordActions: (
   validate: palette(green),
-  discard: $black-37,
-  clear: $black-37,
-  reset: $black-37,
+  discard: $black-54,
+  clear: $black-54,
+  reset: $black-54,
 );
 .record {
   &__actions-buttons {
@@ -68,6 +68,7 @@ $recordActions: (
         background: darken(palette(grey, 700), 2%);
       }
       .svg-icon {
+        flex-shrink: 0;
         color: $color;
       }
       &:active .svg-icon {
