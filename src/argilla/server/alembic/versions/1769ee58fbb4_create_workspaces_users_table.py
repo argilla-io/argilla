@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""create users_workspaces table
+"""create workspaces_users table
 
 Revision ID: 1769ee58fbb4
 Revises: 82a5a88a3fa5
@@ -31,17 +31,17 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "users_workspaces",
+        "workspaces_users",
         sa.Column("id", sa.Uuid, primary_key=True),
-        sa.Column("user_id", sa.Uuid, sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True),
         sa.Column(
             "workspace_id", sa.Uuid, sa.ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False, index=True
         ),
+        sa.Column("user_id", sa.Uuid, sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True),
         sa.Column("inserted_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
-        sa.UniqueConstraint("user_id", "workspace_id", name="user_id_workspace_id_uq"),
+        sa.UniqueConstraint("workspace_id", "user_id", name="workspace_id_user_id_uq"),
     )
 
 
 def downgrade() -> None:
-    op.drop_table("users_workspaces")
+    op.drop_table("workspaces_users")

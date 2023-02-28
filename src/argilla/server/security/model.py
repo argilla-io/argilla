@@ -34,7 +34,7 @@ _USER_USERNAME_REGEX = DATASET_NAME_REGEX_PATTERN
 WORKSPACE_NAME_PATTERN = re.compile(_WORKSPACE_NAME_REGEX)
 
 
-class UserWorkspaceCreate(BaseModel):
+class WorkspaceUserCreate(BaseModel):
     user_id: UUID
     workspace_id: UUID
 

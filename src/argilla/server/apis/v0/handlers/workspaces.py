@@ -25,9 +25,9 @@ from argilla.server.errors import EntityNotFoundError
 from argilla.server.security import auth
 from argilla.server.security.model import (
     User,
-    UserWorkspaceCreate,
     Workspace,
     WorkspaceCreate,
+    WorkspaceUserCreate,
 )
 
 router = APIRouter(tags=["workspaces"])
@@ -95,9 +95,9 @@ def create_workspace_user(
     if not user:
         raise EntityNotFoundError(name=str(user_id), type=User)
 
-    user_workspace = accounts.create_user_workspace(db, UserWorkspaceCreate(user_id=user_id, workspace_id=workspace_id))
+    workspace_user = accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace_id, user_id=user_id))
 
-    return User.from_orm(user_workspace.user)
+    return User.from_orm(workspace_user.user)
 
 
 @router.delete("/workspaces/{workspace_id}/users/{user_id}", response_model=User, response_model_exclude_none=True)
@@ -108,11 +108,11 @@ def delete_workspace_user(
     user_id: UUID,
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
-    user_workspace = accounts.get_user_workspace_by_user_id_and_workspace_id(db, user_id, workspace_id)
-    if not user_workspace:
+    workspace_user = accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id)
+    if not workspace_user:
         raise EntityNotFoundError(name=str(user_id), type=User)
 
-    user = user_workspace.user
-    accounts.delete_user_workspace(db, user_workspace)
+    user = workspace_user.user
+    accounts.delete_workspace_user(db, workspace_user)
 
     return User.from_orm(user)
