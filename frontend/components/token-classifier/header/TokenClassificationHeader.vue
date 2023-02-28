@@ -25,7 +25,7 @@
       :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
     />
-    <entities-header :dataset="dataset" />
+    <entities-header :labels="labels" />
     <global-actions
       :datasetId="datasetId"
       :datasetName="datasetName"
@@ -42,6 +42,11 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import {
+  getAllLabelsByDatasetId,
+  getAllLabelsTextByDatasetId,
+} from "@/models/globalLabel.queries";
+
 export default {
   props: {
     datasetId: {
@@ -61,10 +66,30 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      isSortAsc: true,
+      sortBy: "order",
+    };
+  },
   computed: {
     dataset() {
       //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
       return getDatasetFromORM(this.datasetId, this.datasetTask, true);
+    },
+    labels() {
+      return getAllLabelsByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
+    },
+    listOfTexts() {
+      return getAllLabelsTextByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
@@ -98,11 +123,9 @@ export default {
       });
     },
     async onNewLabel(label) {
-      await this.dataset.$dispatch("setEntities", {
-        dataset: this.dataset,
-        entities: [
-          ...new Set([...this.dataset.entities.map((ent) => ent.text), label]),
-        ],
+      await this.dataset.$dispatch("onSaveTokenDatasetSettings", {
+        datasetId: this.datasetId,
+        newLabel: label,
       });
     },
     searchRecords(query) {

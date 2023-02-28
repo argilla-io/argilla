@@ -18,69 +18,66 @@
 <template>
   <div class="container">
     <div class="entities__wrapper">
-      <div v-if="visibleEntities.length" class="entities__container">
+      <div v-if="numberOfLabels" class="entities__container">
         <entity-label
-          v-for="(entity, index) in visibleEntities"
-          :label="entity.text"
-          :shortcut="entity.shortcut"
+          v-for="(label, index) in visibleLabels"
+          :label="label.text"
+          :shortcut="label.shortcut"
           :key="index"
-          :color="`color_${entity.colorId % $entitiesMaxColors}`"
+          :color="`color_${label.color_id % $entitiesMaxColors}`"
         />
         <base-button
           v-if="isCollapsable"
           class="entities__container__button secondary light small"
-          @click="toggleEntitiesNumber"
-          >{{ buttonText }}</base-button
+          @click="toggleLabelsArea"
         >
+          {{ buttonText }}
+        </base-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-const MAX_ENTITIES_SHOWN = 10;
+const MAX_LABELS_TO_SHOW = 10;
 
 export default {
   props: {
-    dataset: {
-      type: Object,
+    labels: {
+      type: Array,
       required: true,
     },
   },
   data: () => ({
     showExpandedList: false,
-    maxEntitiesNumber: MAX_ENTITIES_SHOWN,
+    MAX_LABELS_NUMBER: MAX_LABELS_TO_SHOW,
   }),
   computed: {
-    visibleEntities() {
-      const characters = "1234567890".split("");
-      let entities = [...this.dataset.entities]
-        .sort((a, b) => a.text.localeCompare(b.text))
-        .map((ent, index) => ({
-          shortcut: characters[index],
-          ...ent,
-        }));
+    visibleLabels() {
+      const visibleLabels = this.showExpandedList
+        ? this.labels
+        : this.showMaxLabels(this.labels);
 
-      return this.showExpandedList ? entities : this.showMaxEntities(entities);
+      return visibleLabels;
     },
-    entitiesNumber() {
-      return this.dataset.entities?.length || null;
+    numberOfLabels() {
+      return this.labels.length;
     },
     isCollapsable() {
-      return this.entitiesNumber > this.maxEntitiesNumber;
+      return this.numberOfLabels > this.MAX_LABELS_NUMBER;
     },
     buttonText() {
       return this.showExpandedList
         ? `Show less`
-        : `+ ${this.entitiesNumber - this.maxEntitiesNumber}`;
+        : `+ ${this.numberOfLabels - this.MAX_LABELS_NUMBER}`;
     },
   },
   methods: {
-    toggleEntitiesNumber() {
+    toggleLabelsArea() {
       this.showExpandedList = !this.showExpandedList;
     },
-    showMaxEntities(entities) {
-      return entities.slice(0, this.maxEntitiesNumber);
+    showMaxLabels(labels) {
+      return labels.slice(0, this.MAX_LABELS_NUMBER);
     },
   },
 };

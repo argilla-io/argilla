@@ -31,7 +31,7 @@
       :datasetName="datasetName"
       :datasetTask="datasetTask"
       :datasetVisibleRecords="dataset.visibleRecords"
-      :availableLabels="availableLabels"
+      :availableLabels="listOfTexts"
       :isCreationLabel="allowLabelCreation"
       :isMultiLabel="isMultiLabel"
       @discard-records="onDiscard"
@@ -45,6 +45,11 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import {
+  getAllLabelsByDatasetId,
+  getAllLabelsTextByDatasetId,
+} from "@/models/globalLabel.queries";
+
 export default {
   props: {
     datasetId: {
@@ -64,6 +69,12 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      isSortAsc: true,
+      sortBy: "order",
+    };
+  },
   computed: {
     dataset() {
       //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
@@ -72,14 +83,19 @@ export default {
     isMultiLabel() {
       return this.dataset.isMultiLabel;
     },
-    availableLabels() {
-      const record = this.dataset.results.records[0];
-      let labels =
-        record && record.prediction
-          ? record.prediction.labels.map((label) => label.class)
-          : [];
-      labels = Array.from(new Set([...labels, ...this.dataset.labels]));
-      return labels;
+    labels() {
+      return getAllLabelsByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
+    },
+    listOfTexts() {
+      return getAllLabelsTextByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
     },
     allowLabelCreation() {
       return !this.dataset.settings.label_schema;
@@ -141,9 +157,9 @@ export default {
       });
     },
     async onNewLabel(newLabel) {
-      await this.dataset.$dispatch("setLabels", {
-        dataset: this.dataset,
-        labels: [...new Set([...this.dataset.labels, newLabel])],
+      await this.dataset.$dispatch("onSaveTokenDatasetSettings", {
+        datasetId: this.datasetId,
+        newLabel,
       });
     },
     searchRecords(query) {

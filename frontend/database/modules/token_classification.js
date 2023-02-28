@@ -28,10 +28,15 @@ async function _updateLastSelectedEntity({ id, lastSelectedEntity }) {
 const getters = {};
 
 const actions = {
-  async setEntities(_, { dataset, entities }) {
-    return await ObservationDataset.dispatch("setUserData", {
-      dataset,
-      data: { entities },
+  async onSaveTokenDatasetSettings(context, { datasetId, newLabel }) {
+    const { name: datasetName, task: datasetTask } =
+      TokenClassificationDataset.query().whereId(datasetId).first();
+
+    await ObservationDataset.dispatch("onAddNewLabel", {
+      datasetId,
+      datasetName,
+      datasetTask,
+      newLabel,
     });
   },
   async updateLastSelectedEntity(_, { dataset, lastSelectedEntity }) {

@@ -21,6 +21,16 @@ import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 import { Vector as VectorModel } from "@/models/Vector";
+import {
+  upsertLabelsInGlobalLabelModel,
+  deleteAllGlobalLabelModel,
+} from "../../models/globalLabel.queries";
+import { Notification } from "@/models/Notifications";
+import {
+  insertNewGlobalLabel,
+  getAllLabelsTextByDatasetId,
+  isLabelTextExistInGlobalLabel,
+} from "@/models/globalLabel.queries";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -575,7 +585,65 @@ const actions = {
       },
     });
   },
+  async onAddNewLabel(
+    context,
+    { datasetId, datasetName, datasetTask, newLabel }
+  ) {
+    if (datasetName && datasetTask) {
+      const labelsbeforeAddNewLabel = getAllLabelsTextByDatasetId(datasetId);
+      const isNewLabelNotInGlobalLabels = !isLabelTextExistInGlobalLabel(
+        datasetId,
+        newLabel
+      );
+      if (isNewLabelNotInGlobalLabels) {
+        try {
+          const labels = [...new Set([...labelsbeforeAddNewLabel, newLabel])];
+          await context.dispatch("onSaveDatasetSettings", {
+            datasetName,
+            datasetTask,
+            labels,
+          });
 
+          insertNewGlobalLabel({ datasetId, newLabel });
+        } catch (err) {
+          throw new Error("Error on adding new labels");
+        }
+      } else {
+        Notification.dispatch("notify", {
+          message: `The label "${newLabel}" already exist in the list of labels`,
+          type: "warning",
+        });
+      }
+    } else {
+      console.error(
+        `Could not find dataset with name:${datasetName} and task:${datasetTask}`
+      );
+    }
+  },
+  async onSaveDatasetSettings(context, { datasetName, datasetTask, labels }) {
+    let message = "";
+    let typeOfNotification = "";
+    try {
+      const data = { label_schema: { labels } };
+      await ObservationDataset.api().put(
+        `/datasets/${datasetName}/${datasetTask}/settings`,
+        data
+      );
+
+      message = "The Labels are updated!";
+      typeOfNotification = "success";
+    } catch (err) {
+      const { status } = err.response;
+      message = `STATUS:${status} The labels of the dataset ${datasetName} with task ${datasetTask} could not be saved`;
+      typeOfNotification = "error";
+      console.error(message);
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        type: typeOfNotification,
+      });
+    }
+  },
   async deleteDataset(_, { workspace, name }) {
     var url = `/datasets/${name}`;
 
@@ -609,15 +677,15 @@ const actions = {
     await _configureDatasetViewSettings(ds.name, viewMode);
 
     const dataset = await _loadTaskDataset(ds);
-    await dataset.initialize();
-    await _updateAnnotationProgress({
-      id: name,
-      total: dataset.globalResults.total,
-      aggregations: dataset.globalResults.aggregations,
-    });
 
-    const records = dataset.results?.records;
-    initVectorModel(dataset.id, records);
+    const datasetTask = dataset.task;
+    if (datasetTask === "TextClassification") {
+      await fetchByNameForTextClassification(dataset);
+    } else if (datasetTask === "TokenClassification") {
+      await fetchByNameForTokenClassification(dataset);
+    } else if (datasetTask === "Text2Text") {
+      await fetchByNameForText2Text(dataset);
+    }
 
     return dataset;
   },
@@ -696,6 +764,53 @@ const actions = {
   },
 };
 
+const fetchByNameForTextClassification = async (dataset) => {
+  //TODO - remove this function from this file  && put rules in dedicated ORM table
+  await fetchAllRulesAndInsertRulesInTextClassificationORM(dataset);
+  await initGlobalLabels(dataset);
+  await _updateAnnotationProgress({
+    id: dataset.name,
+    total: dataset.globalResults.total,
+    aggregations: dataset.globalResults.aggregations,
+  });
+  const records = dataset.results?.records;
+
+  //TODO - next line => labels to remove when will use only initGlobalLabels(dataset) (dataset update with settings)
+  const { labels } = await dataset.fetchMetricSummary("dataset_labels");
+  const isMultiLabel = records.some((r) => r.multi_label);
+  const entity = dataset.getTaskDatasetClass();
+  await entity.insertOrUpdate({
+    where: dataset.id,
+    data: {
+      workspace: dataset.workspace,
+      name: dataset.name,
+      _labels: labels,
+      isMultiLabel,
+    },
+  });
+  initVectorModel(dataset.id, records);
+};
+const fetchByNameForTokenClassification = async (dataset) => {
+  await initGlobalLabels(dataset);
+  await _updateAnnotationProgress({
+    id: dataset.name,
+    total: dataset.globalResults.total,
+    aggregations: dataset.globalResults.aggregations,
+  });
+  const records = dataset.results?.records;
+  initVectorModel(dataset.id, records);
+};
+const fetchByNameForText2Text = async (dataset) => {
+  await _updateAnnotationProgress({
+    id: name,
+    total: dataset.globalResults.total,
+    aggregations: dataset.globalResults.aggregations,
+  });
+
+  const records = dataset.results?.records;
+  initVectorModel(dataset.id, records);
+};
+
 const initVectorModel = (datasetId, records) => {
   const isDatasetContainsAnyVectors = isAnyKeyInArrayItem(records, "vectors");
   if (isDatasetContainsAnyVectors) {
@@ -736,6 +851,59 @@ const insertDataInVectorModel = (vectors) => {
 const isAnyKeyInArrayItem = (arrayWithObjItem, key) => {
   const isKeyInItem = (item) => item[key] && Object.keys(item[key]).length;
   return arrayWithObjItem.some(isKeyInItem);
+};
+
+const initGlobalLabels = async ({ name, task, id }) => {
+  deleteAllGlobalLabelModel();
+  const labels = await fetchLabelsFromSettings({ name, task });
+  const joinedDatasetId = id.join(".");
+  const formattedLabels = factoryLabelsForGlobalLabelsModel(
+    joinedDatasetId,
+    labels
+  );
+  upsertLabelsInGlobalLabelModel(formattedLabels);
+};
+
+const fetchLabelsFromSettings = async ({ name, task }) => {
+  try {
+    let labelsResponse = null;
+    await ObservationDataset.api().get(`/datasets/${name}/${task}/settings`, {
+      dataTransformer: ({ data }) => {
+        const { label_schema } = data;
+        labelsResponse = label_schema?.labels || null;
+      },
+    });
+
+    return labelsResponse;
+  } catch (err) {
+    const { status } = err.response;
+    if (status === 404) {
+      throw new Error(
+        `STATUS: ${status}, This dataset does not contains any settings`
+      );
+    }
+    throw new Error(`STATUS: ${status}, Could not fetch settings`);
+  }
+};
+
+const factoryLabelsForGlobalLabelsModel = (datasetId, labels) => {
+  const formattedLabels = labels.map(({ id, name }, index) => {
+    return {
+      id,
+      order: index,
+      text: name,
+      dataset_id: datasetId,
+      color_id: index,
+      shortcut: index < 10 ? String(index + 1) : null,
+    };
+  });
+  return formattedLabels;
+};
+
+const fetchAllRulesAndInsertRulesInTextClassificationORM = async (dataset) => {
+  if (!dataset.labelingRules) {
+    await dataset.refreshRules();
+  }
 };
 
 export default {
