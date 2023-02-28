@@ -38,19 +38,14 @@ class ServiceBaseDatasetSettings(BaseDatasetSettingsDB):
 
 
 ServiceDataset = TypeVar("ServiceDataset", bound=ServiceBaseDataset)
-ServiceDatasetSettings = TypeVar(
-    "ServiceDatasetSettings", bound=ServiceBaseDatasetSettings
-)
+ServiceDatasetSettings = TypeVar("ServiceDatasetSettings", bound=ServiceBaseDatasetSettings)
 
 
 class DatasetsService:
-
     _INSTANCE: "DatasetsService" = None
 
     @classmethod
-    def get_instance(
-        cls, dao: DatasetsDAO = Depends(DatasetsDAO.get_instance)
-    ) -> "DatasetsService":
+    def get_instance(cls, dao: DatasetsDAO = Depends(DatasetsDAO.get_instance)) -> "DatasetsService":
         if not cls._INSTANCE:
             cls._INSTANCE = cls(dao)
         return cls._INSTANCE
@@ -62,16 +57,10 @@ class DatasetsService:
         user.check_workspace(dataset.owner)
 
         try:
-            self.find_by_name(
-                user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner
-            )
-            raise EntityAlreadyExistsError(
-                name=dataset.name, type=ServiceDataset, workspace=dataset.owner
-            )
+            self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner)
+            raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.owner)
         except WrongTaskError:  # Found a dataset with same name but different task
-            raise EntityAlreadyExistsError(
-                name=dataset.name, type=ServiceDataset, workspace=dataset.owner
-            )
+            raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.owner)
         except EntityNotFoundError:
             # The dataset does not exist -> create it !
             date_now = datetime.utcnow()
@@ -118,9 +107,7 @@ class DatasetsService:
         as_dataset_class: Optional[Type[ServiceDataset]],
         task: Optional[str] = None,
     ):
-        found_ds = self.__dao__.find_by_name(
-            name=name, owner=owner, task=task, as_dataset_class=as_dataset_class
-        )
+        found_ds = self.__dao__.find_by_name(name=name, owner=owner, task=task, as_dataset_class=as_dataset_class)
         if not found_ds and user.is_superuser():
             try:
                 found_ds = self.__dao__.find_by_name(
@@ -147,7 +134,7 @@ class DatasetsService:
             self.__dao__.delete_dataset(dataset)
         else:
             raise ForbiddenOperationError(
-                f"You don't have the necessary permissions to delete this dataset. "
+                "You don't have the necessary permissions to delete this dataset. "
                 "Only dataset creators or administrators can delete datasets"
             )
 
@@ -158,15 +145,11 @@ class DatasetsService:
         tags: Dict[str, str],
         metadata: Dict[str, Any],
     ) -> ServiceDataset:
-        found = self.find_by_name(
-            user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner
-        )
+        found = self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner)
 
         dataset.tags = {**found.tags, **(tags or {})}
         dataset.metadata = {**found.metadata, **(metadata or {})}
-        updated = found.copy(
-            update={**dataset.dict(by_alias=True), "last_updated": datetime.utcnow()}
-        )
+        updated = found.copy(update={**dataset.dict(by_alias=True), "last_updated": datetime.utcnow()})
         return self.__dao__.update_dataset(updated)
 
     def list(
@@ -176,9 +159,7 @@ class DatasetsService:
         task2dataset_map: Dict[str, Type[ServiceDataset]] = None,
     ) -> List[ServiceDataset]:
         owners = user.check_workspaces(workspaces)
-        return self.__dao__.list_datasets(
-            owner_list=owners, task2dataset_map=task2dataset_map
-        )
+        return self.__dao__.list_datasets(owner_list=owners, task2dataset_map=task2dataset_map)
 
     def close(self, user: User, dataset: ServiceDataset):
         found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.owner)
@@ -197,7 +178,6 @@ class DatasetsService:
         copy_tags: Dict[str, Any] = None,
         copy_metadata: Dict[str, Any] = None,
     ) -> ServiceDataset:
-
         dataset_workspace = copy_workspace or dataset.owner
         dataset_workspace = user.check_workspace(dataset_workspace)
 
@@ -250,10 +230,12 @@ class DatasetsService:
             raise EntityNotFoundError(name=dataset.name, type=class_type)
         return class_type.parse_obj(settings.dict())
 
+    def raw_dataset_update(self, dataset):
+        self.__dao__.update_dataset(dataset)
+
     async def save_settings(
         self, user: User, dataset: ServiceDataset, settings: ServiceDatasetSettings
     ) -> ServiceDatasetSettings:
-
         self.__dao__.save_settings(dataset=dataset, settings=settings)
         return settings
 

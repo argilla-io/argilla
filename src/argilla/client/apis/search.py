@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from argilla.client.apis import AbstractApi
 from argilla.client.models import Record
@@ -37,7 +37,6 @@ class SearchResults:
 
 
 class Search(AbstractApi):
-
     _API_URL_PATTERN = "/api/datasets/{name}/{task}:search"
 
     def search_records(
@@ -81,7 +80,5 @@ class Search(AbstractApi):
 
         return SearchResults(
             total=response["total"],
-            records=[
-                record_class.parse_obj(r).to_client() for r in response["records"]
-            ],
+            records=[record_class.parse_obj(r).to_client() for r in response["records"]],
         )

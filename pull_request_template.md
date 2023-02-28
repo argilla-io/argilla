@@ -6,7 +6,7 @@ Closes #<issue_number>
 
 **Type of change**
 
-(Please delete options that are not relevant. Remever to title the PR acording to the type of change)
+(Please delete options that are not relevant. Remember to title the PR according to the type of change)
 
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
@@ -17,7 +17,7 @@ Closes #<issue_number>
 
 **How Has This Been Tested**
 
-(Please describe the tests that you ran to verify your changes. And ideally reference `tests`)
+(Please describe the tests that you ran to verify your changes. And ideally, reference `tests`)
 
 - [ ] Test A
 - [ ] Test B
@@ -28,7 +28,6 @@ Closes #<issue_number>
 - [ ] I added relevant documentation
 - [ ] follows the style guidelines of this project
 - [ ] I did a self-review of my code
-- [ ] I added comments to my code
 - [ ] I made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works

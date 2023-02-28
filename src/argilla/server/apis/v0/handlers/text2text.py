@@ -78,7 +78,6 @@ def configure_router():
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> BulkResponse:
-
         task = task_type
         owner = current_user.check_workspace(common_params.workspace)
         try:
@@ -121,15 +120,12 @@ def configure_router():
         name: str,
         search: Text2TextSearchRequest = None,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        include_metrics: bool = Query(
-            False, description="If enabled, return related record metrics"
-        ),
+        include_metrics: bool = Query(False, description="If enabled, return related record metrics"),
         pagination: RequestPagination = Depends(),
         service: Text2TextService = Depends(Text2TextService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> Text2TextSearchResults:
-
         search = search or Text2TextSearchRequest()
         query = search.query or Text2TextQuery()
         dataset = datasets.find_by_name(
@@ -151,9 +147,7 @@ def configure_router():
         return Text2TextSearchResults(
             total=result.total,
             records=[Text2TextRecord.parse_obj(r) for r in result.records],
-            aggregations=Text2TextSearchAggregations.parse_obj(result.metrics)
-            if result.metrics
-            else None,
+            aggregations=Text2TextSearchAggregations.parse_obj(result.metrics) if result.metrics else None,
         )
 
     def scan_data_response(
@@ -185,9 +179,7 @@ def configure_router():
                     )
                 ) + "\n"
 
-        return StreamingResponseWithErrorHandling(
-            stream_generator(data_stream), media_type="application/json"
-        )
+        return StreamingResponseWithErrorHandling(stream_generator(data_stream), media_type="application/json")
 
     @router.post(
         path=f"{base_endpoint}/data",

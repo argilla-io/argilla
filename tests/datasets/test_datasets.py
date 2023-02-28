@@ -12,9 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import argilla as rg
 import pytest
-
-import argilla as ar
 from argilla import TextClassificationSettings, TokenClassificationSettings
 from argilla.client import api
 from argilla.client.sdk.commons.errors import ForbiddenApiError
@@ -35,8 +34,8 @@ from argilla.client.sdk.commons.errors import ForbiddenApiError
 )
 def test_settings_workflow(mocked_client, settings_, wrong_settings):
     dataset = "test-dataset"
-    ar.delete(dataset)
-    ar.configure_dataset(dataset, settings=settings_)
+    rg.delete(dataset)
+    rg.configure_dataset(dataset, settings=settings_)
 
     current_api = api.active_api()
     datasets_api = current_api.datasets
@@ -45,24 +44,32 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
     assert found_settings == settings_
 
     settings_.label_schema = {"LALALA"}
-    ar.configure_dataset(dataset, settings_)
+    rg.configure_dataset(dataset, settings_)
 
     found_settings = datasets_api.load_settings(dataset)
     assert found_settings == settings_
 
     with pytest.raises(ValueError, match="Task type mismatch"):
-        ar.configure_dataset(dataset, wrong_settings)
+        rg.configure_dataset(dataset, wrong_settings)
+
+
+def test_list_dataset(mocked_client):
+    from argilla.client.api import active_client
+
+    client = active_client()
+    datasets = client.http_client.get("/api/datasets")
+
+    for ds in datasets:
+        assert ds["owner"] == ds["workspace"]
 
 
 def test_delete_dataset_by_non_creator(mocked_client):
     try:
         dataset = "test_delete_dataset_by_non_creator"
-        ar.delete(dataset)
-        ar.configure_dataset(
-            dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"})
-        )
+        rg.delete(dataset)
+        rg.configure_dataset(dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}))
         mocked_client.change_current_user("mock-user")
         with pytest.raises(ForbiddenApiError):
-            ar.delete(dataset)
+            rg.delete(dataset)
     finally:
         mocked_client.reset_default_user()

@@ -15,20 +15,20 @@
 import concurrent.futures
 import datetime
 from time import sleep
-from typing import Any, Iterable, List
+from typing import Any, Iterable
 
+import argilla as rg
 import datasets
 import httpx
 import pandas as pd
 import pytest
-
-import argilla as ar
 from argilla._constants import (
     _OLD_WORKSPACE_HEADER_NAME,
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client import api
+from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
@@ -46,6 +46,7 @@ from argilla.client.sdk.users.models import User
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
+
 from tests.helpers import SecuredClient
 from tests.server.test_api import create_some_data_for_text_classification
 
@@ -160,15 +161,13 @@ def test_log_something(monkeypatch, mocked_client):
 
     response = api.log(
         name=dataset_name,
-        records=ar.TextClassificationRecord(inputs={"text": "This is a test"}),
+        records=rg.TextClassificationRecord(inputs={"text": "This is a test"}),
     )
 
     assert response.processed == 1
     assert response.failed == 0
 
-    response = mocked_client.post(
-        f"/api/datasets/{dataset_name}/TextClassification:search"
-    )
+    response = mocked_client.post(f"/api/datasets/{dataset_name}/TextClassification:search")
     assert response.status_code == 200, response.json()
 
     results = TextClassificationSearchResults.parse_obj(response.json())
@@ -200,15 +199,12 @@ def test_load_limits(mocked_client, supported_vector_search):
 def test_log_records_with_too_long_text(mocked_client):
     dataset_name = "test_log_records_with_too_long_text"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
-    item = ar.TextClassificationRecord(
-        inputs={"text": "This is a toooooo long text\n" * 10000}
-    )
+    item = rg.TextClassificationRecord(inputs={"text": "This is a toooooo long text\n" * 10000})
 
     api.log([item], name=dataset_name)
 
 
 def test_not_found_response(mocked_client):
-
     with pytest.raises(NotFoundApiError):
         api.load(name="not-found")
 
@@ -219,15 +215,12 @@ def test_log_without_name(mocked_client):
         match="Empty dataset name has been passed as argument.",
     ):
         api.log(
-            ar.TextClassificationRecord(
-                inputs={"text": "This is a single record. Only this. No more."}
-            ),
+            rg.TextClassificationRecord(inputs={"text": "This is a single record. Only this. No more."}),
             name=None,
         )
 
 
 def test_log_passing_empty_records_list(mocked_client):
-
     with pytest.raises(
         InputValueError,
         match="Empty record list has been passed as argument.",
@@ -243,7 +236,7 @@ def test_log_background(mocked_client):
     # Log in the background, and extract the future
     sample_text = "Sample text for testing"
     future = api.log(
-        ar.TextClassificationRecord(text=sample_text),
+        rg.TextClassificationRecord(text=sample_text),
         name=dataset_name,
         background=True,
     )
@@ -279,13 +272,12 @@ def test_log_background_with_error(
     monkeypatch.setattr(httpx.AsyncClient, "post", raise_http_error)
 
     future = api.log(
-        ar.TextClassificationRecord(text=sample_text),
+        rg.TextClassificationRecord(text=sample_text),
         name=dataset_name,
         background=True,
     )
 
     with pytest.raises(BaseClientError):
-
         try:
             future.result()
         finally:
@@ -314,19 +306,17 @@ def test_delete_with_errors(mocked_client, monkeypatch, status, error_type):
         return inner
 
     with pytest.raises(error_type):
-        monkeypatch.setattr(
-            httpx, "delete", send_mock_response_with_http_status(status)
-        )
+        monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
         api.delete("dataset")
 
 
 @pytest.mark.parametrize(
     "records, dataset_class",
     [
-        ("singlelabel_textclassification_records", ar.DatasetForTextClassification),
-        ("multilabel_textclassification_records", ar.DatasetForTextClassification),
-        ("tokenclassification_records", ar.DatasetForTokenClassification),
-        ("text2text_records", ar.DatasetForText2Text),
+        ("singlelabel_textclassification_records", rg.DatasetForTextClassification),
+        ("multilabel_textclassification_records", rg.DatasetForTextClassification),
+        ("tokenclassification_records", rg.DatasetForTokenClassification),
+        ("text2text_records", rg.DatasetForText2Text),
     ],
 )
 def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_class):
@@ -376,9 +366,9 @@ def test_log_with_generator(mocked_client, monkeypatch):
     dataset_name = "test_log_with_generator"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
 
-    def generator(items: int = 10) -> Iterable[ar.TextClassificationRecord]:
+    def generator(items: int = 10) -> Iterable[rg.TextClassificationRecord]:
         for i in range(0, items):
-            yield ar.TextClassificationRecord(id=i, inputs={"text": "The text data"})
+            yield rg.TextClassificationRecord(id=i, inputs={"text": "The text data"})
 
     api.log(generator(), name=dataset_name)
 
@@ -388,7 +378,7 @@ def test_create_ds_with_wrong_name(mocked_client):
 
     with pytest.raises(InputValueError):
         api.log(
-            ar.TextClassificationRecord(
+            rg.TextClassificationRecord(
                 inputs={"text": "The text data"},
             ),
             name=dataset_name,
@@ -400,7 +390,7 @@ def test_delete_dataset(mocked_client):
     mocked_client.delete(f"/api/datasets/{dataset_name}")
 
     api.log(
-        ar.TextClassificationRecord(
+        rg.TextClassificationRecord(
             id=0,
             inputs={"text": "The text data"},
             annotation_agent="test",
@@ -432,7 +422,7 @@ def test_dataset_copy(mocked_client):
     mocked_client.delete(f"/api/datasets/{dataset_copy}")
     mocked_client.delete(f"/api/datasets/{dataset}")
 
-    record = ar.TextClassificationRecord(
+    record = rg.TextClassificationRecord(
         id=0,
         text="This is the record input",
         annotation_agent="test",
@@ -468,7 +458,7 @@ def test_dataset_copy_to_another_workspace(mocked_client):
         mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
 
         api.log(
-            ar.TextClassificationRecord(
+            rg.TextClassificationRecord(
                 id=0,
                 text="This is the record input",
                 annotation_agent="test",
@@ -495,7 +485,7 @@ def test_update_record(mocked_client):
     mocked_client.delete(f"/api/datasets/{dataset}")
 
     expected_inputs = ["This is a text"]
-    record = ar.TextClassificationRecord(
+    record = rg.TextClassificationRecord(
         id=0,
         inputs=expected_inputs,
         annotation_agent="test",
@@ -512,7 +502,7 @@ def test_update_record(mocked_client):
     assert len(records) == 1
     assert records[0]["annotation"] == "T"
     # This record will replace the old one
-    record = ar.TextClassificationRecord(
+    record = rg.TextClassificationRecord(
         id=0,
         inputs=expected_inputs,
     )
@@ -536,7 +526,7 @@ def test_text_classifier_with_inputs_list(mocked_client):
 
     expected_inputs = ["A", "List", "of", "values"]
     api.log(
-        ar.TextClassificationRecord(
+        rg.TextClassificationRecord(
             id=0,
             inputs=expected_inputs,
             annotation_agent="test",
@@ -599,8 +589,8 @@ def test_load_as_pandas(mocked_client, supported_vector_search):
     )
 
     records = api.load(name=dataset)
-    assert isinstance(records, ar.DatasetForTextClassification)
-    assert isinstance(records[0], ar.TextClassificationRecord)
+    assert isinstance(records, rg.DatasetForTextClassification)
+    assert isinstance(records[0], rg.TextClassificationRecord)
 
     if supported_vector_search:
         for record in records:
@@ -619,7 +609,7 @@ def test_load_as_pandas(mocked_client, supported_vector_search):
 def test_token_classification_spans(span, valid):
     texto = "Esto es una prueba"
     if valid:
-        ar.TokenClassificationRecord(
+        rg.TokenClassificationRecord(
             text=texto,
             tokens=texto.split(),
             prediction=[("test", *span)],
@@ -628,10 +618,10 @@ def test_token_classification_spans(span, valid):
         with pytest.raises(
             ValueError,
             match="Following entity spans are not aligned with provided tokenization\n"
-            r"Spans:\n- \[s\] defined in Esto es...\n"
+            r"Spans:\n\('test', 1, 2\) - 's'\n"
             r"Tokens:\n\['Esto', 'es', 'una', 'prueba'\]",
         ):
-            ar.TokenClassificationRecord(
+            rg.TokenClassificationRecord(
                 text=texto,
                 tokens=texto.split(),
                 prediction=[("test", *span)],
@@ -639,12 +629,11 @@ def test_token_classification_spans(span, valid):
 
 
 def test_load_text2text(mocked_client, supported_vector_search):
-
     vectors = {"bert_uncased": [1.2, 3.4, 6.4, 6.4]}
 
     records = []
     for i in range(0, 2):
-        record = ar.Text2TextRecord(
+        record = rg.Text2TextRecord(
             text="test text",
             prediction=["test prediction"],
             annotation="test annotation",
@@ -671,31 +660,27 @@ def test_load_text2text(mocked_client, supported_vector_search):
 
 
 def test_client_workspace(mocked_client):
-    try:
-        ws = api.get_workspace()
-        assert ws == "argilla"
+    api = Argilla()
+    ws = api.get_workspace()
+    assert ws == "argilla"
 
-        api.set_workspace("")
-        assert api.get_workspace() == ""
-
+    for ws in [None, ""]:
         with pytest.raises(Exception, match="Must provide a workspace"):
-            api.set_workspace(None)
+            api.set_workspace(ws)
 
-        # Mocking user
-        api.active_api().user.workspaces = ["a", "b"]
+    # Mocking user
+    api.user.workspaces = ["a", "b"]
 
-        with pytest.raises(Exception, match="Wrong provided workspace c"):
-            api.set_workspace("c")
+    with pytest.raises(Exception, match="Wrong provided workspace c"):
+        api.set_workspace("c")
 
-        api.set_workspace("argilla")
-        assert api.get_workspace() == "argilla"
-    finally:
-        api.init()  # reset workspace
+    api.set_workspace("argilla")
+    assert api.get_workspace() == "argilla"
 
 
 def test_load_sort(mocked_client):
     records = [
-        ar.TextClassificationRecord(
+        rg.TextClassificationRecord(
             text="test text",
             id=i,
         )
@@ -718,32 +703,3 @@ def test_load_sort(mocked_client):
     ds = api.load(name=dataset, ids=["1str", "2str", "11str"])
     df = ds.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]
-
-
-def test_load_workspace_from_different_workspace(mocked_client):
-    records = [
-        ar.TextClassificationRecord(
-            text="test text",
-            id=i,
-        )
-        for i in ["1str", 1, 2, 11, "2str", "11str"]
-    ]
-
-    dataset = "test_load_workspace_from_different_workspace"
-    workspace = api.get_workspace()
-    try:
-        api.set_workspace("")  # empty workspace
-        api.delete(dataset)
-        api.log(records, name=dataset)
-
-        # check sorting policies
-        ds = api.load(name=dataset)
-        df = ds.to_pandas()
-        assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
-
-        api.set_workspace(workspace)
-        df = api.load(name=dataset)
-        df = df.to_pandas()
-        assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
-    finally:
-        api.set_workspace(workspace)

@@ -78,9 +78,7 @@ class BaseRecord(GenericModel, Generic[T]):
     def _from_client_vectors(vectors: ClientVectors) -> SdkVectors:
         sdk_vectors = None
         if vectors:
-            sdk_vectors = {
-                name: VectorInfo(value=vector) for name, vector in vectors.items()
-            }
+            sdk_vectors = {name: VectorInfo(value=vector) for name, vector in vectors.items()}
         return sdk_vectors
 
     @staticmethod

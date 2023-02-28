@@ -42,7 +42,6 @@ class TokenClassificationAnnotation(_TokenClassificationAnnotation):
 
 
 class TokenClassificationRecordInputs(BaseRecordInputs[TokenClassificationAnnotation]):
-
     text: str = Field()
     tokens: List[str] = Field(min_items=1)
     # TODO(@frascuchon): Delete this field and all related logic
@@ -62,9 +61,7 @@ class TokenClassificationRecordInputs(BaseRecordInputs[TokenClassificationAnnota
         return text
 
 
-class TokenClassificationRecord(
-    TokenClassificationRecordInputs, BaseRecord[TokenClassificationAnnotation]
-):
+class TokenClassificationRecord(TokenClassificationRecordInputs, BaseRecord[TokenClassificationAnnotation]):
     pass
 
 
@@ -73,7 +70,6 @@ class TokenClassificationBulkRequest(UpdateDatasetRequest):
 
 
 class TokenClassificationQuery(ServiceBaseRecordsQuery):
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)
@@ -90,9 +86,7 @@ class TokenClassificationAggregations(ServiceBaseSearchResultsAggregations):
     mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 
-class TokenClassificationSearchResults(
-    BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]
-):
+class TokenClassificationSearchResults(BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]):
     pass
 
 

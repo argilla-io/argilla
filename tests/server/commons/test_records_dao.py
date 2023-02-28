@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.models.datasets import BaseDatasetDB

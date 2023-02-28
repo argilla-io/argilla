@@ -1,50 +1,53 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-    -   id: check-yaml
-    -   id: end-of-file-fixer
+      - id: check-yaml
+      - id: end-of-file-fixer
         exclude_types: [text, jupyter]
-    -   id: trailing-whitespace
+      - id: trailing-whitespace
 
--   repo: https://github.com/Lucas-C/pre-commit-hooks
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.4.2
     hooks:
-    -   id: insert-license
+      - id: insert-license
         name: "Insert license header in Python source files"
         files: \.py$
         args:
-            - --license-filepath
-            - src/license_header.txt
-            - --fuzzy-match-generates-todo
-            # - --remove-header
+          - --license-filepath
+          - src/license_header.txt
+          - --fuzzy-match-generates-todo
+          # - --remove-header
 
--   repo: https://github.com/psf/black
-    rev: 22.12.0
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
     hooks:
-    -   id: black
-        additional_dependencies: ['click==8.0.4']
+      - id: black
+        additional_dependencies: ["click==8.0.4"]
 
--   repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.253
     hooks:
-    -   id: isort
+      # Simulate isort via (the much faster) ruff
+      - id: ruff
+        args:
+          - --select=I
+          - --fix
 
--   repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
     rev: v9.4.0
     hooks:
-    -   id: commitlint
+      - id: commitlint
         stages: [commit-msg]
-        additional_dependencies: ['@commitlint/config-conventional']
+        additional_dependencies: ["@commitlint/config-conventional"]
 
 ci:
-    autofix_commit_msg: |
-        [pre-commit.ci] auto fixes from pre-commit.com hooks
-
-        for more information, see https://pre-commit.ci
-    autofix_prs: true
-    autoupdate_branch: ''
-    autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-    autoupdate_schedule: weekly
-    skip: []
-    submodules: false
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ""
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

@@ -29,7 +29,6 @@ from argilla.utils import limit_value_length
 
 
 class DaoRecordsSearch(BaseModel):
-
     query: Optional[BaseRecordsQuery] = None
     sort: SortConfig = Field(default_factory=SortConfig)
 
@@ -61,9 +60,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
-    prediction: Optional[AnnotationDB] = Field(
-        None, description="Deprecated. Use `predictions` instead"
-    )
+    prediction: Optional[AnnotationDB] = Field(None, description="Deprecated. Use `predictions` instead")
     annotation: Optional[AnnotationDB] = None
 
     vectors: Optional[Dict[str, BaseEmbeddingVectorDB]] = Field(
@@ -99,27 +96,18 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
             if not annotation.agent:
                 raise AssertionError("Agent must be defined!")
 
-            annotations.update(
-                {
-                    annotation.agent: annotation.__class__.parse_obj(
-                        annotation.dict(exclude={"agent"})
-                    )
-                }
-            )
+            annotations.update({annotation.agent: annotation.__class__.parse_obj(annotation.dict(exclude={"agent"}))})
             values[field_to_update] = annotations
 
         if annotations and not annotation:
             # set first annotation
             key, value = list(annotations.items())[0]
-            values[annotation_field] = value.__class__(
-                agent=key, **value.dict(exclude={"agent"})
-            )
+            values[annotation_field] = value.__class__(agent=key, **value.dict(exclude={"agent"}))
 
         return values
 
     @root_validator()
     def prepare_record_for_db(cls, values):
-
         values = cls.update_annotation(values, "prediction")
         values = cls.update_annotation(values, "annotation")
 
@@ -227,7 +215,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
             "score": self.scores,
         }
 
-    def dict(self, *args, **kwargs) -> "DictStrAny":
+    def dict(self, *args, **kwargs) -> Dict[str, Any]:
         """
         Extends base component dict extending object properties
         and user defined extended fields
@@ -239,7 +227,6 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
 
 class BaseRecordDB(BaseRecordInDB, Generic[AnnotationDB]):
-
     # Read only ones
     metrics: Dict[str, Any] = Field(default_factory=dict)
     search_keywords: Optional[List[str]] = None

@@ -18,7 +18,6 @@ from argilla.server.services.info import ApiInfo, ApiStatus
 
 
 def test_api_info(mocked_client):
-
     response = mocked_client.get("/api/_info")
     assert response.status_code == 200
 
@@ -28,7 +27,6 @@ def test_api_info(mocked_client):
 
 
 def test_api_status(mocked_client):
-
     response = mocked_client.get("/api/_status")
 
     assert response.status_code == 200
@@ -38,7 +36,7 @@ def test_api_status(mocked_client):
     assert info.version == argilla_version
 
     # Checking to not get the error dictionary service.py includes whenever something goes wrong
-    assert not "error" in info.elasticsearch
+    assert "error" not in info.elasticsearch
 
     # Checking that the first key into mem_info dictionary has a nont-none value
     assert "rss" in info.mem_info is not None

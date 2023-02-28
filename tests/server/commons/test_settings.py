@@ -15,9 +15,8 @@
 import os
 
 import pytest
-from pydantic import ValidationError
-
 from argilla.server.settings import ApiSettings
+from pydantic import ValidationError
 
 
 @pytest.mark.parametrize("bad_namespace", ["Badns", "bad-ns", "12-bad-ns", "@bad"])

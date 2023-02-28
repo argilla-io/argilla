@@ -114,13 +114,13 @@ This will run the latest quickstart docker image with 2 users `argilla` and `tea
 ### Environment Variables
 
 - `ARGILLA_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
-  predictions, etc.). If you don't set this variable, the library and your app will use the default API key. If you want
-  to secure your app for reading and writing data, we recommend you to set up this variable. The API key you choose
-  can be any string of your choice and you can check an online generator if you like.
+  predictions, etc.). If you don't set this variable, the library and your app will use the default API key
+  i.e. `argilla.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
+  variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
 - `ARGILLA_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default
   password is `1234`. By setting up a custom password you can use your own password to login into the app.
 - `TEAM_API_KEY`: This sets the root user's API key. The API key you choose can be any string of your choice and you can
-  check an online generator if you like.
+  check an online generator if you like. The default api key is `team.apikey`.
 - `TEAM_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password
   is `1234`. By setting up a custom password you can use your own password to login into the app.
 - `LOAD_DATASETS`: This variables will allow you to load sample datasets. The default value will be `full`. The

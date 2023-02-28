@@ -16,7 +16,6 @@ import socket
 from datetime import datetime
 
 import pytest
-
 from argilla.client.models import TextClassificationRecord, TokenAttributions
 from argilla.client.sdk.text_classification.models import (
     ClassPrediction,
@@ -69,15 +68,11 @@ def test_labeling_rule_metrics_schema(helpers):
     client_schema = LabelingRuleMetricsSummary.schema()
     server_schema = ServerLabelingRuleMetricsSummary.schema()
 
-    assert helpers.remove_description(client_schema) == helpers.remove_description(
-        server_schema
-    )
+    assert helpers.remove_description(client_schema) == helpers.remove_description(server_schema)
 
 
 def test_from_client_explanation():
-    token_attributions = [
-        TokenAttributions(token="test", attributions={"label1": 1.0, "label2": 2.0})
-    ]
+    token_attributions = [TokenAttributions(token="test", attributions={"label1": 1.0, "label2": 2.0})]
     record = TextClassificationRecord(
         inputs={"text": "test"},
         prediction=[("label1", 0.5), ("label2", 0.5)],
@@ -91,9 +86,7 @@ def test_from_client_explanation():
     assert sdk_record.explanation["text"] == token_attributions
 
 
-@pytest.mark.parametrize(
-    "annotation,expected", [("label1", 1), (["label1", "label2"], 2)]
-)
+@pytest.mark.parametrize("annotation,expected", [("label1", 1), (["label1", "label2"], 2)])
 def test_from_client_annotation(annotation, expected):
     record = TextClassificationRecord(
         inputs={"text": "test"},
@@ -128,13 +121,9 @@ def test_from_client_agent(pred_agent, annot_agent, pred_expected, annot_expecte
     assert sdk_record.metrics == {}
 
 
-@pytest.mark.parametrize(
-    "multi_label,expected", [(False, "annot_label"), (True, ["annot_label"])]
-)
+@pytest.mark.parametrize("multi_label,expected", [(False, "annot_label"), (True, ["annot_label"])])
 def test_to_client(multi_label, expected):
-    annotation = TextClassificationAnnotation(
-        labels=[ClassPrediction(**{"class": "annot_label"})], agent="annot_agent"
-    )
+    annotation = TextClassificationAnnotation(labels=[ClassPrediction(**{"class": "annot_label"})], agent="annot_agent")
     prediction = TextClassificationAnnotation(
         labels=[
             ClassPrediction(**{"class": "label1", "score": 0.5}),

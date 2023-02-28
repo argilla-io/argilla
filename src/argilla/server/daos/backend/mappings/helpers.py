@@ -185,11 +185,7 @@ def dynamic_metadata_text():
 
 def dynamic_annotations_text(path: str):
     path = f"{path}.*"
-    return {
-        path: mappings.path_match_keyword_template(
-            path=path, enable_text_search_in_keywords=True
-        )
-    }
+    return {path: mappings.path_match_keyword_template(path=path, enable_text_search_in_keywords=True)}
 
 
 def tasks_common_mappings():

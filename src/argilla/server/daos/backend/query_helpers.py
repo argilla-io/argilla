@@ -33,16 +33,11 @@ def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, A
     return {
         "type": "nested",
         "include_in_root": True,
-        "properties": {
-            key: resolve_mapping(info)
-            for key, info in model_class.schema()["properties"].items()
-        },
+        "properties": {key: resolve_mapping(info) for key, info in model_class.schema()["properties"].items()},
     }
 
 
-def parse_aggregations(
-    es_aggregations: Dict[str, Any] = None
-) -> Optional[Dict[str, Any]]:
+def parse_aggregations(es_aggregations: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
     """Transforms elasticsearch raw aggregations into a more friendly structure"""
 
     if es_aggregations is None:
@@ -80,9 +75,7 @@ def parse_aggregations(
                 key_metrics = {}
                 for metric_key, metric in list(bucket.items()):
                     if "buckets" in metric:
-                        key_metrics.update(
-                            {metric_key: parse_buckets(metric.get("buckets", []))}
-                        )
+                        key_metrics.update({metric_key: parse_buckets(metric.get("buckets", []))})
                     else:
                         metric_values = list(metric.values())
                         value = metric_values[0] if len(metric_values) == 1 else metric
@@ -171,13 +164,7 @@ class filters:
             return []
 
         return [
-            {
-                "terms": {
-                    f"metadata.{key}": query_text
-                    if isinstance(query_text, List)
-                    else [query_text]
-                }
-            }
+            {"terms": {f"metadata.{key}": query_text if isinstance(query_text, List) else [query_text]}}
             for key, query_text in metadata.items()
         ]
 
@@ -237,9 +224,7 @@ class aggregations:
     MAX_AGGREGATION_SIZE = 5000  # TODO: improve by setting env var
 
     @staticmethod
-    def nested_aggregation(
-        nested_path: str, inner_aggregation: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def nested_aggregation(nested_path: str, inner_aggregation: Dict[str, Any]) -> Dict[str, Any]:
         inner_meta = list(inner_aggregation.values())[0].get("meta", {})
         return {
             "meta": {
@@ -250,15 +235,11 @@ class aggregations:
         }
 
     @staticmethod
-    def bidimentional_terms_aggregations(
-        field_name_x: str, field_name_y: str, size=DEFAULT_AGGREGATION_SIZE
-    ):
+    def bidimentional_terms_aggregations(field_name_x: str, field_name_y: str, size=DEFAULT_AGGREGATION_SIZE):
         return {
             **aggregations.terms_aggregation(field_name_x, size=size),
             "meta": {"kind": "2d-terms"},
-            "aggs": {
-                field_name_y: aggregations.terms_aggregation(field_name_y, size=size)
-            },
+            "aggs": {field_name_y: aggregations.terms_aggregation(field_name_y, size=size)},
         }
 
     @staticmethod
@@ -297,7 +278,6 @@ class aggregations:
         script: Union[str, Dict[str, Any]] = None,
         interval: float = 0.1,
     ):
-
         assert field_name or script, "Either field name or script must be provided"
 
         if script:
@@ -322,9 +302,7 @@ class aggregations:
     ) -> Dict[str, Dict[str, Any]]:
         """Build a set of aggregations for a given field definition (extracted from index mapping)"""
 
-        def __resolve_aggregation_for_field_type(
-            field_type: str, field_name: str
-        ) -> Optional[Dict[str, Any]]:
+        def __resolve_aggregation_for_field_type(field_type: str, field_name: str) -> Optional[Dict[str, Any]]:
             if field_type in ["keyword", "long", "integer", "boolean"]:
                 return aggregations.terms_aggregation(field_name=field_name, size=size)
             if field_type in ["float", "date"]:
@@ -338,9 +316,7 @@ class aggregations:
         return {
             key: aggregation
             for key, type_ in fields_definitions.items()
-            for aggregation in [
-                __resolve_aggregation_for_field_type(type_, field_name=key)
-            ]
+            for aggregation in [__resolve_aggregation_for_field_type(type_, field_name=key)]
             if aggregation
         }
 
@@ -349,9 +325,7 @@ class aggregations:
         return {"filters": {"filters": filters}}
 
 
-def find_nested_field_path(
-    field_name: str, mapping_definition: Dict[str, Any]
-) -> Optional[str]:
+def find_nested_field_path(field_name: str, mapping_definition: Dict[str, Any]) -> Optional[str]:
     """
     Given a field name, find the nested path if any related to field name
     definition in provided mapping definition
@@ -368,9 +342,7 @@ def find_nested_field_path(
         The found nested path if any, None otherwise
     """
 
-    def build_flatten_properties_map(
-        properties: Dict[str, Any], prefix: str = ""
-    ) -> Dict[str, Any]:
+    def build_flatten_properties_map(properties: Dict[str, Any], prefix: str = "") -> Dict[str, Any]:
         results = {}
         for prop_name, prop_value in properties.items():
             if prefix:
@@ -378,11 +350,7 @@ def find_nested_field_path(
             if "type" in prop_value:
                 results[prop_name] = prop_value["type"]
             if "properties" in prop_value:
-                results.update(
-                    build_flatten_properties_map(
-                        prop_value["properties"], prefix=prop_name
-                    )
-                )
+                results.update(build_flatten_properties_map(prop_value["properties"], prefix=prop_name))
         return results
 
     properties_map = build_flatten_properties_map(mapping_definition)

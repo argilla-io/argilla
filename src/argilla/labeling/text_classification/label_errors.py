@@ -21,6 +21,7 @@ from pkg_resources import parse_version
 
 from argilla.client.datasets import DatasetForTextClassification
 from argilla.client.models import TextClassificationRecord
+from argilla.utils.dependency import requires_version
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ class SortBy(Enum):
         )
 
 
+@requires_version("cleanlab")
 def find_label_errors(
     records: Union[List[TextClassificationRecord], DatasetForTextClassification],
     sort_by: Union[str, SortBy] = "likelihood",
@@ -76,18 +78,12 @@ def find_label_errors(
         >>> records = rg.load("my_dataset")
         >>> records_with_label_errors = find_label_errors(records)
     """
-    try:
-        import cleanlab
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            "'cleanlab' must be installed to use the `find_label_errors` method! "
-            "You can install 'cleanlab' with the command: `pip install cleanlab`"
-        )
+    import cleanlab
+
+    if parse_version(cleanlab.__version__) < parse_version("2.0"):
+        from cleanlab.pruning import get_noise_indices as find_label_issues
     else:
-        if parse_version(cleanlab.__version__) < parse_version("2.0"):
-            from cleanlab.pruning import get_noise_indices as find_label_issues
-        else:
-            from cleanlab.filter import find_label_issues
+        from cleanlab.filter import find_label_issues
 
     if isinstance(sort_by, str):
         sort_by = SortBy(sort_by)
@@ -95,9 +91,7 @@ def find_label_errors(
     # select only records with prediction and annotation
     records = [rec for rec in records if rec.prediction and rec.annotation]
     if not records:
-        raise NoRecordsError(
-            "It seems that none of your records have a prediction AND annotation!"
-        )
+        raise NoRecordsError("It seems that none of your records have a prediction AND annotation!")
 
     # check and update kwargs for get_noise_indices
     _check_and_update_kwargs(cleanlab.__version__, records[0], sort_by, kwargs)
@@ -117,9 +111,7 @@ def find_label_errors(
     return records_with_label_errors
 
 
-def _check_and_update_kwargs(
-    version: str, record: TextClassificationRecord, sort_by: SortBy, kwargs: Dict
-):
+def _check_and_update_kwargs(version: str, record: TextClassificationRecord, sort_by: SortBy, kwargs: Dict):
     """Helper function to check and update the kwargs passed on to cleanlab's `get_noise_indices`.
 
     Args:
@@ -140,9 +132,7 @@ def _check_and_update_kwargs(
 
     if parse_version(version) < parse_version("2.0"):
         if "sorted_index_method" in kwargs:
-            raise ValueError(
-                "The 'sorted_index_method' kwarg is not supported, please use 'sort_by' instead."
-            )
+            raise ValueError("The 'sorted_index_method' kwarg is not supported, please use 'sort_by' instead.")
         kwargs["sorted_index_method"] = "normalized_margin"
         if sort_by is SortBy.PREDICTION:
             kwargs["sorted_index_method"] = "prob_given_label"
@@ -150,9 +140,7 @@ def _check_and_update_kwargs(
             kwargs["sorted_index_method"] = None
     else:
         if "return_indices_ranked_by" in kwargs:
-            raise ValueError(
-                "The 'return_indices_ranked_by' kwarg is not supported, please use 'sort_by' instead."
-            )
+            raise ValueError("The 'return_indices_ranked_by' kwarg is not supported, please use 'sort_by' instead.")
         kwargs["return_indices_ranked_by"] = "normalized_margin"
         if sort_by is SortBy.PREDICTION:
             kwargs["return_indices_ranked_by"] = "self_confidence"
@@ -188,20 +176,14 @@ def _construct_s_and_psx(
         labels.update(predictions[-1].keys())
     labels_mapping = {label: i for i, label in enumerate(sorted(labels))}
 
-    s = (
-        np.empty(len(records), dtype=object)
-        if records[0].multi_label
-        else np.zeros(len(records), dtype=np.short)
-    )
+    s = np.empty(len(records), dtype=object) if records[0].multi_label else np.zeros(len(records), dtype=np.short)
     psx = np.zeros((len(records), len(labels)), dtype=np.float)
 
     for i, rec, pred in zip(range(len(records)), records, predictions):
         try:
             psx[i] = [pred[label] for label in labels_mapping]
         except KeyError as error:
-            raise MissingPredictionError(
-                f"It seems a prediction for {error} is missing in the following record: {rec}"
-            )
+            raise MissingPredictionError(f"It seems a prediction for {error} is missing in the following record: {rec}")
 
         try:
             s[i] = (
@@ -210,9 +192,7 @@ def _construct_s_and_psx(
                 else labels_mapping[rec.annotation]
             )
         except KeyError as error:
-            raise MissingPredictionError(
-                f"It seems predictions are missing for the label {error}!"
-            )
+            raise MissingPredictionError(f"It seems predictions are missing for the label {error}!")
 
     return s, psx
 

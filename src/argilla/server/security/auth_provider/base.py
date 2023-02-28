@@ -32,6 +32,6 @@ class AuthProvider:
         self,
         security_scopes: SecurityScopes,
         api_key: Optional[str] = Depends(api_key_header),
-        **kwargs
+        **kwargs,
     ) -> User:
         raise NotImplementedError()

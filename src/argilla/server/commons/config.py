@@ -34,7 +34,6 @@ class TaskConfig(BaseModel):
 
 
 class TasksFactory:
-
     __REGISTERED_TASKS__ = dict()
 
     @classmethod
@@ -46,7 +45,6 @@ class TasksFactory:
         record_class: Type[ServiceRecord],
         metrics: Optional[Type[ServiceBaseTaskMetrics]] = None,
     ):
-
         cls.__REGISTERED_TASKS__[task_type] = TaskConfig(
             task=task_type,
             dataset=dataset_class,
@@ -87,19 +85,14 @@ class TasksFactory:
         return config
 
     @classmethod
-    def find_task_metric(
-        cls, task: TaskType, metric_id: str
-    ) -> Optional[ServiceBaseMetric]:
+    def find_task_metric(cls, task: TaskType, metric_id: str) -> Optional[ServiceBaseMetric]:
         metrics = cls.find_task_metrics(task, {metric_id})
         if metrics:
             return metrics[0]
         raise EntityNotFoundError(name=metric_id, type=ServiceBaseMetric)
 
     @classmethod
-    def find_task_metrics(
-        cls, task: TaskType, metric_ids: Set[str]
-    ) -> List[ServiceBaseMetric]:
-
+    def find_task_metrics(cls, task: TaskType, metric_ids: Set[str]) -> List[ServiceBaseMetric]:
         if not metric_ids:
             return []
 

@@ -26,7 +26,6 @@ class SortOrder(str, Enum):
 
 
 class QueryRange(BaseModel):
-
     range_from: float = Field(default=0.0, alias="from")
     range_to: float = Field(default=None, alias="to")
 
@@ -62,6 +61,9 @@ class BaseQuery(BaseModel):
 class BaseDatasetsQuery(BaseQuery):
     tasks: Optional[List[str]] = None
     owners: Optional[List[str]] = None
+    # This is used to fetch workspaces without owner/workspace. But this should be moved to
+    # a default workspace
+    # TODO: Should be deprecated
     include_no_owner: bool = None
     name: Optional[str] = None
 
@@ -71,13 +73,11 @@ class VectorSearch(BaseModel):
     value: List[float]
     k: Optional[int] = Field(
         default=None,
-        description="Number of elements to retrieve. "
-        "If not provided, the request size will be used instead",
+        description="Number of elements to retrieve. " "If not provided, the request size will be used instead",
     )
 
 
 class BaseRecordsQuery(BaseQuery):
-
     query_text: Optional[str] = None
     advanced_query_dsl: bool = False
 

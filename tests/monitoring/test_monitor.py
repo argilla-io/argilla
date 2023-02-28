@@ -30,15 +30,13 @@ def test_monitor_with_non_supported_model():
         assert len(warning_list) == 1
         warn_text = warning_list[0].message.args[0]
         assert (
-            warn_text
-            == "The provided task model is not supported by monitoring module. "
+            warn_text == "The provided task model is not supported by monitoring module. "
             "Predictions won't be logged into argilla"
         )
 
 
 def test_monitor_non_supported_huggingface_model():
     with warnings.catch_warnings(record=True) as warning_list:
-
         from transformers import (
             AutoModelForTokenClassification,
             AutoTokenizer,
@@ -54,7 +52,6 @@ def test_monitor_non_supported_huggingface_model():
         assert len(warning_list) == 1
         warn_text = warning_list[0].message.args[0]
         assert (
-            warn_text
-            == "The provided task model is not supported by monitoring module. "
+            warn_text == "The provided task model is not supported by monitoring module. "
             "Predictions won't be logged into argilla"
         )

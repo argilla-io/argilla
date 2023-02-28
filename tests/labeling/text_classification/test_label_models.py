@@ -13,11 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import sys
-from types import SimpleNamespace
 
 import numpy as np
 import pytest
-
 from argilla import TextClassificationRecord
 from argilla.labeling.text_classification import (
     FlyingSquid,
@@ -45,9 +43,7 @@ def weak_labels(monkeypatch):
             TextClassificationRecord(text="test", annotation="neutral"),
         ]
 
-    monkeypatch.setattr(
-        "argilla.labeling.text_classification.weak_labels.load", mock_load
-    )
+    monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
     def mock_apply(self, *args, **kwargs):
         weak_label_matrix = np.array(
@@ -65,17 +61,13 @@ def weak_labels(monkeypatch):
 
 @pytest.fixture
 def weak_labels_from_guide(monkeypatch, resources):
-    matrix_and_annotation = np.load(
-        str(resources / "weak-supervision-guide-matrix.npy")
-    )
+    matrix_and_annotation = np.load(str(resources / "weak-supervision-guide-matrix.npy"))
     matrix, annotation = matrix_and_annotation[:, :-1], matrix_and_annotation[:, -1]
 
     def mock_load(*args, **kwargs):
         return [TextClassificationRecord(text="mock", id=i) for i in range(len(matrix))]
 
-    monkeypatch.setattr(
-        "argilla.labeling.text_classification.weak_labels.load", mock_load
-    )
+    monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
     def mock_apply(self, *args, **kwargs):
         return matrix, annotation, {None: -1, "SPAM": 0, "HAM": 1}
@@ -89,19 +81,13 @@ def weak_labels_from_guide(monkeypatch, resources):
 def weak_multi_labels(monkeypatch):
     def mock_load(*args, **kwargs):
         return [
-            TextClassificationRecord(
-                text="test", multi_label=True, annotation=["scared"]
-            ),
-            TextClassificationRecord(
-                text="test", multi_label=True, annotation=["sad", "scared"]
-            ),
+            TextClassificationRecord(text="test", multi_label=True, annotation=["scared"]),
+            TextClassificationRecord(text="test", multi_label=True, annotation=["sad", "scared"]),
             TextClassificationRecord(text="test", multi_label=True, annotation=[]),
             TextClassificationRecord(text="test", multi_label=True),
         ]
 
-    monkeypatch.setattr(
-        "argilla.labeling.text_classification.weak_labels.load", mock_load
-    )
+    monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
     def mock_apply(self, *args, **kwargs):
         weak_label_matrix = np.array(
@@ -113,9 +99,7 @@ def weak_multi_labels(monkeypatch):
             ],
             dtype=np.byte,
         )
-        annotation_array = np.array(
-            [[0, 0, 1], [1, 0, 1], [0, 0, 0], [-1, -1, -1]], dtype=np.byte
-        )
+        annotation_array = np.array([[0, 0, 1], [1, 0, 1], [0, 0, 0], [-1, -1, -1]], dtype=np.byte)
         labels = ["sad", "happy", "scared"]
         return weak_label_matrix, annotation_array, labels
 
@@ -161,9 +145,7 @@ class TestMajorityVoter:
             ("weak_multi_labels", False, 1),
         ],
     )
-    def test_predict(
-        self, monkeypatch, request, wls, include_annotated_records, expected
-    ):
+    def test_predict(self, monkeypatch, request, wls, include_annotated_records, expected):
         def compute_probs(self, wl_matrix, **kwargs):
             assert len(wl_matrix) == expected
             compute_probs.called = None
@@ -173,20 +155,13 @@ class TestMajorityVoter:
             return records
 
         single_or_multi = "multi" if wls == "weak_multi_labels" else "single"
-        monkeypatch.setattr(
-            MajorityVoter, f"_compute_{single_or_multi}_label_probs", compute_probs
-        )
-        monkeypatch.setattr(
-            MajorityVoter, f"_make_{single_or_multi}_label_records", make_records
-        )
+        monkeypatch.setattr(MajorityVoter, f"_compute_{single_or_multi}_label_probs", compute_probs)
+        monkeypatch.setattr(MajorityVoter, f"_make_{single_or_multi}_label_records", make_records)
 
         weak_labels = request.getfixturevalue(wls)
         mj = MajorityVoter(weak_labels)
 
-        assert (
-            len(mj.predict(include_annotated_records=include_annotated_records))
-            == expected
-        )
+        assert len(mj.predict(include_annotated_records=include_annotated_records)) == expected
         assert hasattr(compute_probs, "called")
 
     def test_compute_single_label_probs(self, weak_labels):
@@ -212,9 +187,7 @@ class TestMajorityVoter:
             (False, TieBreakPolicy.RANDOM, 4),
         ],
     )
-    def test_make_single_label_records(
-        self, weak_labels, include_abstentions, tie_break_policy, expected
-    ):
+    def test_make_single_label_records(self, weak_labels, include_abstentions, tie_break_policy, expected):
         mj = MajorityVoter(weak_labels)
         probs = mj._compute_single_label_probs(weak_labels.matrix())
 
@@ -275,9 +248,7 @@ class TestMajorityVoter:
             (False, 3),
         ],
     )
-    def test_make_multi_label_records(
-        self, weak_multi_labels, include_abstentions, expected
-    ):
+    def test_make_multi_label_records(self, weak_multi_labels, include_abstentions, expected):
         mj = MajorityVoter(weak_multi_labels)
         probs = mj._compute_multi_label_probs(weak_multi_labels.matrix())
 
@@ -299,7 +270,7 @@ class TestMajorityVoter:
             assert records[2].prediction is None
 
     def test_score_sklearn_not_installed(self, monkeypatch, weak_labels):
-        monkeypatch.setitem(sys.modules, "sklearn", None)
+        monkeypatch.setattr(sys, "meta_path", [], raising=False)
 
         mj = MajorityVoter(weak_labels)
         with pytest.raises(ModuleNotFoundError, match="pip install scikit-learn"):
@@ -326,9 +297,7 @@ class TestMajorityVoter:
             return np.array([[1, 1, 1], [0, 0, 0]]), np.array([[1, 1, 1], [1, 0, 0]])
 
         single_or_multi = "multi" if wls == "weak_multi_labels" else "single"
-        monkeypatch.setattr(
-            MajorityVoter, f"_compute_{single_or_multi}_label_probs", compute_probs
-        )
+        monkeypatch.setattr(MajorityVoter, f"_compute_{single_or_multi}_label_probs", compute_probs)
         monkeypatch.setattr(MajorityVoter, f"_score_{single_or_multi}_label", score)
 
         weak_labels = request.getfixturevalue(wls)
@@ -351,45 +320,31 @@ class TestMajorityVoter:
     def test_score_single_label(self, weak_labels, tie_break_policy, expected):
         mj = MajorityVoter(weak_labels)
 
-        probabilities = np.array(
-            [[0.5, 0.5, 0.0], [0.5, 0.0, 0.5], [1.0 / 3, 0.0, 2.0 / 3]]
-        )
+        probabilities = np.array([[0.5, 0.5, 0.0], [0.5, 0.0, 0.5], [1.0 / 3, 0.0, 2.0 / 3]])
 
         if tie_break_policy is TieBreakPolicy.TRUE_RANDOM:
-            with pytest.raises(
-                NotImplementedError, match="not implemented for MajorityVoter"
-            ):
+            with pytest.raises(NotImplementedError, match="not implemented for MajorityVoter"):
                 mj._score_single_label(probabilities, tie_break_policy)
             return
 
-        annotation, prediction = mj._score_single_label(
-            probabilities=probabilities, tie_break_policy=tie_break_policy
-        )
+        annotation, prediction = mj._score_single_label(probabilities=probabilities, tie_break_policy=tie_break_policy)
         assert np.allclose(annotation, expected[0])
         assert np.allclose(prediction, expected[1])
 
     def test_score_single_label_no_ties(self, weak_labels):
         mj = MajorityVoter(weak_labels)
 
-        probabilities = np.array(
-            [[0.5, 0.3, 0.0], [0.5, 0.0, 0.0], [1.0 / 3, 0.0, 2.0 / 3]]
-        )
+        probabilities = np.array([[0.5, 0.3, 0.0], [0.5, 0.0, 0.0], [1.0 / 3, 0.0, 2.0 / 3]])
 
-        _, prediction = mj._score_single_label(
-            probabilities=probabilities, tie_break_policy=TieBreakPolicy.ABSTAIN
-        )
-        _, prediction2 = mj._score_single_label(
-            probabilities=probabilities, tie_break_policy=TieBreakPolicy.RANDOM
-        )
+        _, prediction = mj._score_single_label(probabilities=probabilities, tie_break_policy=TieBreakPolicy.ABSTAIN)
+        _, prediction2 = mj._score_single_label(probabilities=probabilities, tie_break_policy=TieBreakPolicy.RANDOM)
 
         assert np.allclose(prediction, prediction2)
 
     def test_score_multi_label(self, weak_multi_labels):
         mj = MajorityVoter(weak_multi_labels)
 
-        probabilities = np.array(
-            [[0.0, 0.0, 1.0], [1.0, 1.0, 1.0], [np.nan, np.nan, np.nan]]
-        )
+        probabilities = np.array([[0.0, 0.0, 1.0], [1.0, 1.0, 1.0], [np.nan, np.nan, np.nan]])
 
         annotation, prediction = mj._score_multi_label(probabilities=probabilities)
 
@@ -399,7 +354,7 @@ class TestMajorityVoter:
 
 class TestSnorkel:
     def test_not_installed(self, monkeypatch):
-        monkeypatch.setitem(sys.modules, "snorkel", None)
+        monkeypatch.setattr(sys, "meta_path", [], raising=False)
         with pytest.raises(ModuleNotFoundError, match="pip install snorkel"):
             Snorkel(None)
 
@@ -430,9 +385,7 @@ class TestSnorkel:
         label_model = Snorkel(weak_labels)
 
         assert label_model._weaklabelsInt2snorkelInt == expected
-        assert label_model._snorkelInt2weaklabelsInt == {
-            k: v for v, k in expected.items()
-        }
+        assert label_model._snorkelInt2weaklabelsInt == {k: v for v, k in expected.items()}
 
     @pytest.mark.parametrize(
         "include_annotated_records",
@@ -452,9 +405,7 @@ class TestSnorkel:
         )
 
         label_model = Snorkel(weak_labels)
-        label_model.fit(
-            include_annotated_records=include_annotated_records, passed_on=None
-        )
+        label_model.fit(include_annotated_records=include_annotated_records, passed_on=None)
 
     def test_fit_automatically_added_kwargs(self, weak_labels):
         label_model = Snorkel(weak_labels)
@@ -527,12 +478,8 @@ class TestSnorkel:
             prediction_agent="mock_agent",
         )
         assert len(records) == expected[0]
-        assert [
-            rec.prediction[0][0] if rec.prediction else None for rec in records
-        ] == expected[1]
-        assert [
-            rec.prediction[0][1] if rec.prediction else None for rec in records
-        ] == expected[2]
+        assert [rec.prediction[0][0] if rec.prediction else None for rec in records] == expected[1]
+        assert [rec.prediction[0][1] if rec.prediction else None for rec in records] == expected[2]
         assert records[0].prediction_agent == "mock_agent"
 
     @pytest.mark.parametrize("policy,expected", [("abstain", 0.5), ("random", 2.0 / 3)])
@@ -593,8 +540,8 @@ class TestSnorkel:
 
 class TestFlyingSquid:
     def test_not_installed(self, monkeypatch):
-        monkeypatch.setitem(sys.modules, "flyingsquid", None)
-        with pytest.raises(ModuleNotFoundError, match="pip install pgmpy flyingsquid"):
+        monkeypatch.setattr(sys, "meta_path", [], raising=False)
+        with pytest.raises(ModuleNotFoundError, match="pip install flyingsquid"):
             FlyingSquid(None)
 
     def test_init(self, weak_labels):
@@ -773,22 +720,23 @@ class TestFlyingSquid:
         with pytest.raises(NotFittedError, match="not fitted yet"):
             label_model.score()
 
-    def test_score_sklearn_not_installed(self, monkeypatch, weak_labels):
-        monkeypatch.setitem(sys.modules, "sklearn", None)
-
+    def test_score_sklearn_not_installed(self, monkeypatch: pytest.MonkeyPatch, weak_labels):
         label_model = FlyingSquid(weak_labels)
+
+        monkeypatch.setattr(sys, "meta_path", [], raising=False)
         with pytest.raises(ModuleNotFoundError, match="pip install scikit-learn"):
             label_model.score()
 
     def test_score(self, monkeypatch, weak_labels):
-        def mock_predict(self, weak_label_matrix, verbose):
+        def mock_predict(weak_label_matrix, verbose):
             assert verbose is False
             assert len(weak_label_matrix) == 3
             return np.array([[0.8, 0.1, 0.1], [0.1, 0.8, 0.1], [0.1, 0.1, 0.8]])
 
-        monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
-
         label_model = FlyingSquid(weak_labels)
+        # We have to monkeypatch the instance rather than the class due to decorators
+        # on the class
+        monkeypatch.setattr(label_model, "_predict", mock_predict)
         metrics = label_model.score()
 
         assert "accuracy" in metrics
@@ -797,20 +745,17 @@ class TestFlyingSquid:
 
         assert isinstance(label_model.score(output_str=True), str)
 
-    @pytest.mark.parametrize(
-        "tbp,vrb,expected", [("abstain", False, 1.0), ("random", True, 2 / 3.0)]
-    )
+    @pytest.mark.parametrize("tbp,vrb,expected", [("abstain", False, 1.0), ("random", True, 2 / 3.0)])
     def test_score_tbp(self, monkeypatch, weak_labels, tbp, vrb, expected):
-        def mock_predict(self, weak_label_matrix, verbose):
+        def mock_predict(weak_label_matrix, verbose):
             assert verbose is vrb
             assert len(weak_label_matrix) == 3
-            return np.array(
-                [[0.8, 0.1, 0.1], [0.4, 0.4, 0.2], [1 / 3.0, 1 / 3.0, 1 / 3.0]]
-            )
-
-        monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
+            return np.array([[0.8, 0.1, 0.1], [0.4, 0.4, 0.2], [1 / 3.0, 1 / 3.0, 1 / 3.0]])
 
         label_model = FlyingSquid(weak_labels)
+
+        monkeypatch.setattr(label_model, "_predict", mock_predict)
+
         metrics = label_model.score(tie_break_policy=tbp, verbose=vrb)
 
         assert metrics["accuracy"] == pytest.approx(expected)

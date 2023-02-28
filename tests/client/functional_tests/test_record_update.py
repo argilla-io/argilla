@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.client.api import active_api
 from argilla.client.sdk.commons.errors import NotFoundApiError
 
@@ -34,7 +33,6 @@ def test_partial_record_update(
     mocked_client,
     gutenberg_spacy_ner,
 ):
-
     expected_id = "00c27206-da48-4fc3-aab7-4b730628f8ac"
 
     record = record_data_by_id(

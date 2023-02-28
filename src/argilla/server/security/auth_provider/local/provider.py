@@ -77,17 +77,11 @@ class LocalAuthProvider(AuthProvider):
             user = self.users.authenticate_user(form_data.username, form_data.password)
             if not user:
                 raise UnauthorizedError()
-            access_token_expires = timedelta(
-                minutes=self.settings.token_expiration_in_minutes
-            )
-            access_token = self._create_access_token(
-                user.username, expires_delta=access_token_expires
-            )
+            access_token_expires = timedelta(minutes=self.settings.token_expiration_in_minutes)
+            access_token = self._create_access_token(user.username, expires_delta=access_token_expires)
             return Token(access_token=access_token)
 
-    def _create_access_token(
-        self, username: str, expires_delta: Optional[timedelta] = None
-    ) -> str:
+    def _create_access_token(self, username: str, expires_delta: Optional[timedelta] = None) -> str:
         """
         Creates an access token
 
@@ -162,9 +156,7 @@ class LocalAuthProvider(AuthProvider):
         -------
 
         """
-        user = await self._find_user_by_api_key(
-            api_key
-        ) or await self._find_user_by_api_key(old_api_key)
+        user = await self._find_user_by_api_key(api_key) or await self._find_user_by_api_key(old_api_key)
         if user:
             return user
         if token:

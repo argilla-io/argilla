@@ -13,13 +13,11 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.client.sdk.commons.errors import UnauthorizedApiError
 
 
 def test_unauthorized_response_error(mocked_client):
-
     with pytest.raises(UnauthorizedApiError, match="Could not validate credentials"):
-        import argilla as ar
+        import argilla as rg
 
-        ar.init(api_key="wrong-api-key")
+        rg.init(api_key="wrong-api-key")

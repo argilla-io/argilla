@@ -32,18 +32,13 @@ from argilla.server.daos.backend.search.model import (
 
 
 class HighlightParser:
-
     _SEARCH_KEYWORDS_FIELD = "search_keywords"
 
     __HIGHLIGHT_PRE_TAG__ = "<@@-ar-key>"
     __HIGHLIGHT_POST_TAG__ = "</@@-ar-key>"
-    __HIGHLIGHT_VALUES_REGEX__ = re.compile(
-        rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}"
-    )
+    __HIGHLIGHT_VALUES_REGEX__ = re.compile(rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}")
 
-    __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(
-        rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
-    )
+    __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}")
 
     @property
     def search_keywords_field(self) -> str:
@@ -103,9 +98,7 @@ class EsQueryBuilder:
             cls._INSTANCE = cls()
         return cls._INSTANCE
 
-    def _datasets_to_es_query(
-        self, query: Optional[BackendDatasetsQuery] = None
-    ) -> Dict[str, Any]:
+    def _datasets_to_es_query(self, query: Optional[BackendDatasetsQuery] = None) -> Dict[str, Any]:
         if not query:
             return filters.match_all()
 
@@ -121,9 +114,7 @@ class EsQueryBuilder:
                         minimum_should_match=1,  # OR Condition
                         should_filters=[
                             owners_filter,
-                            filters.boolean_filter(
-                                must_not_query=filters.exists_field("owner")
-                            ),
+                            filters.boolean_filter(must_not_query=filters.exists_field("owner")),
                         ],
                     )
                 )
@@ -196,7 +187,6 @@ class EsQueryBuilder:
         id_from: Optional[str] = None,
         shuffle: bool = False,
     ) -> Dict[str, Any]:
-
         if query and query.raw_query:
             es_query = {"query": query.raw_query}
         else:
@@ -252,7 +242,6 @@ class EsQueryBuilder:
         schema: Optional[Dict[str, Any]] = None,
         sort: Optional[SortConfig] = None,
     ) -> Optional[List[Dict[str, Any]]]:
-
         if not sort:
             return None
 
@@ -280,10 +269,9 @@ class EsQueryBuilder:
         es_sort = []
         for sortable_field in sort.sort_by or [SortableField(id="id")]:
             if valid_fields:
-                if not sortable_field.id.split(".")[0] in valid_fields:
+                if sortable_field.id.split(".")[0] not in valid_fields:
                     raise AssertionError(
-                        f"Wrong sort id {sortable_field.id}. Valid values are: "
-                        f"{[str(v) for v in valid_fields]}"
+                        f"Wrong sort id {sortable_field.id}. Valid values are: " f"{[str(v) for v in valid_fields]}"
                     )
             field = sortable_field.id
             if field == id_field and use_id_keyword:
@@ -326,9 +314,7 @@ class EsQueryBuilder:
             elif isinstance(value, (str, Enum)):
                 key_filter = filters.term_filter(key, value)
             elif isinstance(value, QueryRange):
-                key_filter = filters.range_filter(
-                    field=key, value_from=value.range_from, value_to=value.range_to
-                )
+                key_filter = filters.range_filter(field=key, value_from=value.range_from, value_to=value.range_to)
 
             else:
                 cls._LOGGER.warning(f"Cannot parse query value {value} for key {key}")

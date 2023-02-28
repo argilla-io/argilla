@@ -13,12 +13,11 @@
 #  limitations under the License.
 
 import pytest
-from fastapi.security import SecurityScopes
-
 from argilla._constants import DEFAULT_API_KEY
 from argilla.server.security.auth_provider.local.provider import (
     create_local_auth_provider,
 )
+from fastapi.security import SecurityScopes
 
 localAuth = create_local_auth_provider()
 security_Scopes = SecurityScopes
@@ -34,9 +33,7 @@ async def test_get_user_via_token():
 
 @pytest.mark.asyncio
 async def test_get_user_via_api_key():
-    user = await localAuth.get_user(
-        security_scopes=security_Scopes, api_key=DEFAULT_API_KEY
-    )
+    user = await localAuth.get_user(security_scopes=security_Scopes, api_key=DEFAULT_API_KEY)
     assert user.username == "argilla"
 
 

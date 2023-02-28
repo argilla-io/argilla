@@ -1,8 +1,38 @@
 import { shallowMount } from "@vue/test-utils";
 import EntityHighlightComponent from "./EntityHighlight";
 
+jest.mock("@/models/viewSettings.queries", () => ({
+  getViewSettingsByDatasetName: () => ({
+    $id: "medical-keywords",
+    id: "medical-keywords",
+    pagination: null,
+    viewMode: "annotate",
+    loading: false,
+    headerHeight: 288,
+    visibleMetrics: false,
+    visibleRulesList: false,
+  }),
+}));
+
 let wrapper = null;
+
+const filterHtmlText = (text) => {
+  return text
+    .toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+};
+const filterhtmlHighlightText = (text) => {
+  return `<span class="highlight-text">${filterHtmlText(text)}</span>`;
+};
+
 const options = {
+  mocks: {
+    $htmlText: filterHtmlText,
+    $htmlHighlightText: filterhtmlHighlightText,
+  },
   propsData: {
     span: {
       entity: {
@@ -20,6 +50,13 @@ const options = {
           end: 36,
           highlighted: false,
           text: "CHINA",
+          charsBetweenTokens: " ",
+        },
+        {
+          start: 38,
+          end: 47,
+          highlighted: false,
+          text: "pregnancy",
           charsBetweenTokens: " ",
         },
       ],
@@ -284,7 +321,7 @@ afterEach(() => {
 });
 
 describe("EntityHighlightComponent", () => {
-  it.skip("render the component", () => {
+  it("render the component", () => {
     // FIXME: mock vuexorm viewsettings
     expect(wrapper.is(EntityHighlightComponent)).toBe(true);
   });

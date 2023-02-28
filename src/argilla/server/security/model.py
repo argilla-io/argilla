@@ -15,7 +15,7 @@
 import re
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 from argilla._constants import DATASET_NAME_REGEX_PATTERN
 from argilla.server.errors import EntityNotFoundError
@@ -31,14 +31,15 @@ class User(BaseModel):
     email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
-    workspaces: Optional[List[str]] = None
+
+    superuser: Optional[bool]
+    workspaces: Optional[List[str]]
 
     @validator("username")
     def check_username(cls, value):
         if not re.compile(DATASET_NAME_REGEX_PATTERN).match(value):
             raise ValueError(
-                "Wrong username. "
-                f"The username {value} does not match the pattern {DATASET_NAME_REGEX_PATTERN}"
+                "Wrong username. " f"The username {value} does not match the pattern {DATASET_NAME_REGEX_PATTERN}"
             )
         return value
 
@@ -48,10 +49,35 @@ class User(BaseModel):
         if not workspace:
             return workspace
         assert WORKSPACE_NAME_PATTERN.match(workspace), (
-            "Wrong workspace format. "
-            f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
+            "Wrong workspace format. " f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
         )
         return workspace
+
+    @root_validator(pre=True)
+    def check_defaults(cls, values):
+        superuser = values.get("superuser")
+        workspaces = values.get("workspaces")
+
+        values["superuser"] = cls._set_default_superuser(superuser, values)
+        values["workspaces"] = cls._set_default_workspace(workspaces, values)
+
+        return values
+
+    @classmethod
+    def _set_default_superuser(cls, value, values):
+        """This will setup the superuser flag when no workspaces are defined"""
+        if value is not None:
+            return value
+        # The current way to define super-users is create them with no workspaces at all
+        # (IT'S NOT THE SAME AS PASSING AN EMPTY LIST)
+        return values.get("workspaces", None) is None
+
+    @classmethod
+    def _set_default_workspace(cls, value, values):
+        value = (value or []).copy()
+        value.append(values["username"])
+
+        return list(set(value))
 
     @property
     def default_workspace(self) -> Optional[str]:
@@ -78,8 +104,8 @@ class User(BaseModel):
             for workspace in workspaces:
                 self.check_workspace(workspace)
             return workspaces
-
-        return [self.default_workspace] + (self.workspaces or [])
+        else:
+            return self.workspaces
 
     def check_workspace(self, workspace: str) -> str:
         """
@@ -95,17 +121,15 @@ class User(BaseModel):
             The original workspace name if user belongs to it
 
         """
-        if workspace is None or workspace == self.default_workspace:
+        if not workspace:
             return self.default_workspace
-        if not workspace and self.is_superuser():
-            return workspace
-        if workspace not in (self.workspaces or []):
+        elif workspace not in self.workspaces:
             raise EntityNotFoundError(name=workspace, type="Workspace")
         return workspace
 
     def is_superuser(self) -> bool:
         """Check if a user is superuser"""
-        return self.workspaces is None or "" in self.workspaces
+        return self.superuser
 
 
 class Token(BaseModel):

@@ -103,17 +103,9 @@ If you now go to your Argilla app at [http://localhost:6900/](http://localhost:6
 
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 2
 :hidden:
 
-docker.md
-docker_compose.md
-huggingface-spaces.md
-elasticsearch.md
-server_configuration.md
-user_management.md
-google-colab.md
-cloud_providers.md
-from_development.md
-
+deployments/deployments.md
+configurations/configurations.md
 ```

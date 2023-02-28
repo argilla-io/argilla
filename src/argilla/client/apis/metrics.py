@@ -19,7 +19,6 @@ from argilla.client.sdk.datasets.models import TaskType
 
 
 class MetricsAPI(AbstractApi):
-
     _API_URL_PATTERN = "/api/datasets/{task}/{name}/metrics/{metric}:summary"
 
     def metric_summary(

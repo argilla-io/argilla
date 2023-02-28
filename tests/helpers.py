@@ -14,14 +14,13 @@
 
 from typing import List
 
-from fastapi import FastAPI
-from starlette.testclient import TestClient
-
 from argilla._constants import API_KEY_HEADER_NAME, WORKSPACE_HEADER_NAME
 from argilla.client.api import active_api
 from argilla.server.security import auth
 from argilla.server.security.auth_provider.local.settings import settings
 from argilla.server.security.auth_provider.local.users.model import UserInDB
+from fastapi import FastAPI
+from starlette.testclient import TestClient
 
 
 class SecuredClient:
@@ -57,7 +56,7 @@ class SecuredClient:
         rb_api = active_api()
         rb_api._user = default_user
         rb_api.http_client.token = default_user.api_key
-        rb_api.http_client.headers.pop(WORKSPACE_HEADER_NAME)
+        rb_api.http_client.headers.pop(WORKSPACE_HEADER_NAME, None)
         self._header[API_KEY_HEADER_NAME] = default_user.api_key
 
     def add_workspaces_to_argilla_user(self, workspaces: List[str]):

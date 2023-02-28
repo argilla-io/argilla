@@ -17,6 +17,7 @@ from typing import Dict, Iterable, Optional
 
 import yaml
 
+from argilla._constants import _OLD_DEFAULT_API_KEY, DEFAULT_API_KEY
 from argilla.server.security.auth_provider.local.settings import settings
 
 from .model import UserInDB
@@ -33,9 +34,7 @@ class UsersDAO:
         self.__users__: Dict[str, UserInDB] = {}
         try:
             with open(users_file) as file:
-                user_list = [
-                    UserInDB(**user_data) for user_data in yaml.safe_load(file)
-                ]
+                user_list = [UserInDB(**user_data) for user_data in yaml.safe_load(file)]
                 self.__users__ = {user.username: user for user in user_list}
         except FileNotFoundError:
             self.__users__ = {
@@ -55,6 +54,12 @@ class UsersDAO:
 
     async def get_user_by_api_key(self, api_key: str) -> Optional[UserInDB]:
         """Find a user for a given api key"""
+
+        # TODO: This piece of code will be drop out with issue
+        #  https://github.com/argilla-io/argilla/issues/2251 fix
+        if api_key == _OLD_DEFAULT_API_KEY and _DEFAULT_USER.api_key == DEFAULT_API_KEY:
+            return _DEFAULT_USER
+
         for user in self.__users__.values():
             if api_key == user.api_key:
                 return user

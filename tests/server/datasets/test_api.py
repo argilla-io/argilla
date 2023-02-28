@@ -19,6 +19,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
 )
 from argilla.server.commons.models import TaskType
+
 from tests.helpers import SecuredClient
 
 
@@ -57,7 +58,7 @@ def test_create_dataset(mocked_client):
     assert dataset.metadata == request["metadata"]
     assert dataset.tags == request["tags"]
     assert dataset.name == dataset_name
-    assert dataset.owner == "argilla"
+    assert dataset.workspace == "argilla"
     assert dataset.task == TaskType.text_classification
 
     response = mocked_client.post(
@@ -87,7 +88,7 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
     dataset = Dataset.parse_obj(response.json())
     assert dataset.created_by == "argilla"
     assert dataset.name == dataset_name
-    assert dataset.owner == ws
+    assert dataset.workspace == ws
     assert dataset.task == TaskType.text_classification
 
     response = mocked_client.post(
@@ -97,7 +98,7 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
     assert response.status_code == 409, response.json()
 
     response = mocked_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json=request,
     )
 
@@ -105,7 +106,7 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
     dataset = Dataset.parse_obj(response.json())
     assert dataset.created_by == "argilla"
     assert dataset.name == dataset_name
-    assert dataset.owner == "argilla"
+    assert dataset.workspace == "argilla"
     assert dataset.task == TaskType.text_classification
 
 
@@ -177,9 +178,7 @@ def test_update_dataset(mocked_client):
     delete_dataset(mocked_client, dataset)
     create_mock_dataset(mocked_client, dataset)
 
-    response = mocked_client.patch(
-        f"/api/datasets/{dataset}", json={"metadata": {"new": "value"}}
-    )
+    response = mocked_client.patch(f"/api/datasets/{dataset}", json={"metadata": {"new": "value"}})
     assert response.status_code == 200
 
     response = mocked_client.get(f"/api/datasets/{dataset}")
@@ -205,12 +204,7 @@ def test_open_and_close_dataset(mocked_client):
     }
 
     assert mocked_client.put(f"/api/datasets/{dataset}:open").status_code == 200
-    assert (
-        mocked_client.post(
-            f"/api/datasets/{dataset}/TextClassification:search"
-        ).status_code
-        == 200
-    )
+    assert mocked_client.post(f"/api/datasets/{dataset}/TextClassification:search").status_code == 200
 
 
 def delete_dataset(client, dataset, workspace: Optional[str] = None):
@@ -267,9 +261,7 @@ def test_delete_records(mocked_client):
             }
         }
 
-        response = mocked_client.delete(
-            f"/api/datasets/{dataset_name}/data?mark_as_discarded=true"
-        )
+        response = mocked_client.delete(f"/api/datasets/{dataset_name}/data?mark_as_discarded=true")
         assert response.status_code == 200
         assert response.json() == {
             "matched": 99,

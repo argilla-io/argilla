@@ -193,27 +193,13 @@ $hue: 360;
       padding-bottom: 3px;
       border-bottom: 5px solid $rcolor;
       position: relative;
-      &:after {
-        content: "";
-        border-top: 1px solid darken($rcolor, 50%);
-        position: absolute;
-        top: 26px;
-        left: 0;
-        right: 0;
-      }
+      box-shadow: 0px 1px 0px darken($rcolor, 50%);
     }
     &.annotation :deep(.highlight__tooltip:after) {
       border-color: $rcolor transparent transparent transparent;
     }
     &.prediction :deep(.highlight__tooltip:after) {
       border-color: transparent transparent $rcolor transparent;
-    }
-    &.excluded :deep() {
-      .highlight__content {
-        &:after {
-          content: none;
-        }
-      }
     }
     &.active,
     &.tag:hover {

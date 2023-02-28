@@ -69,11 +69,7 @@ class FlairMonitor(BaseMonitor):
         if not metadata:
             metadata = [{}] * len(sentences)
 
-        filtered_data = [
-            (sentence, meta)
-            for sentence, meta in zip(sentences, metadata)
-            if self.is_record_accepted()
-        ]
+        filtered_data = [(sentence, meta) for sentence, meta in zip(sentences, metadata) if self.is_record_accepted()]
         if filtered_data:
             self._log_future = self.send_records(filtered_data)
 
@@ -87,7 +83,6 @@ def flair_monitor(
     sample_rate: float,
     log_interval: float,
 ) -> Optional[SequenceTagger]:
-
     return FlairMonitor(
         pl,
         api=api,

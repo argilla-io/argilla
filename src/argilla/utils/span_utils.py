@@ -93,25 +93,18 @@ class SpanUtils:
                 self._start_to_token_idx.get(char_start),
                 self._end_to_token_idx.get(char_end),
             ):
-                message = f"- [{self.text[char_start:char_end]}] defined in "
-                if char_start - 5 > 0:
-                    message += "..."
-                message += self.text[max(char_start - 5, 0) : char_end + 5]
-                if char_end + 5 < len(self.text):
-                    message += "..."
-
+                span_str = self.text[char_start:char_end]
+                message = f"{span} - {repr(span_str)}"
                 misaligned_spans_errors.append(message)
 
         if not_valid_spans_errors or misaligned_spans_errors:
             message = ""
             if not_valid_spans_errors:
-                message += (
-                    f"Following entity spans are not valid: {not_valid_spans_errors}\n"
-                )
+                message += f"Following entity spans are not valid: {not_valid_spans_errors}\n"
 
             if misaligned_spans_errors:
                 spans = "\n".join(misaligned_spans_errors)
-                message += f"Following entity spans are not aligned with provided tokenization\n"
+                message += "Following entity spans are not aligned with provided tokenization\n"
                 message += f"Spans:\n{spans}\n"
                 message += f"Tokens:\n{self.tokens}"
 
@@ -196,9 +189,7 @@ class SpanUtils:
             return splits[0], "-".join(splits[1:])
 
         if len(tags) != len(self.tokens):
-            raise ValueError(
-                "The list of tags must have the same length as the list of tokens!"
-            )
+            raise ValueError("The list of tags must have the same length as the list of tokens!")
 
         spans, start_idx = [], None
         for idx, tag in enumerate(tags):

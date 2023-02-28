@@ -22,7 +22,6 @@ from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 
 
 def test_sentences_sorted_by_score():
-
     record = Text2TextRecord(
         text="The inpu2 text",
         prediction=Text2TextAnnotation(

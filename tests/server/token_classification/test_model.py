@@ -14,8 +14,6 @@
 #  limitations under the License.
 
 import pytest
-from pydantic import ValidationError
-
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationAnnotation,
@@ -28,10 +26,10 @@ from argilla.server.services.tasks.token_classification.model import (
     EntitySpan,
     ServiceTokenClassificationRecord,
 )
+from pydantic import ValidationError
 
 
 def test_char_position():
-
     with pytest.raises(
         ValidationError,
         match="End character cannot be placed before the starting character,"
@@ -68,7 +66,6 @@ def test_fix_substrings():
 
 
 def test_entities_with_spaces():
-
     text = "This is  a  great  space"
     ServiceTokenClassificationRecord(
         text=text,
@@ -122,9 +119,7 @@ def test_model_with_predictions():
             "metrics": {},
             "predictions": {
                 "test": {
-                    "entities": [
-                        {"end": 24, "label": "test", "score": 1.0, "start": 9}
-                    ],
+                    "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
                 }
             },
             "status": "Default",
@@ -165,9 +160,7 @@ def test_too_long_metadata():
 
 def test_entity_label_too_long():
     text = "On one ones o no"
-    with pytest.raises(
-        ValidationError, match="ensure this value has at most 128 character"
-    ):
+    with pytest.raises(ValidationError, match="ensure this value has at most 128 character"):
         ServiceTokenClassificationRecord(
             text=text,
             tokens=text.split(),
@@ -272,9 +265,7 @@ def test_annotated_without_entities():
     record = ServiceTokenClassificationRecord(
         text=text,
         tokens=text.split(),
-        prediction=TokenClassificationAnnotation(
-            agent="pred.test", entities=[EntitySpan(start=0, end=3, label="DET")]
-        ),
+        prediction=TokenClassificationAnnotation(agent="pred.test", entities=[EntitySpan(start=0, end=3, label="DET")]),
         annotation=TokenClassificationAnnotation(agent="test", entities=[]),
     )
 
@@ -284,7 +275,6 @@ def test_annotated_without_entities():
 
 
 def test_adjust_spans():
-
     text = "A text with  some empty     spaces  that could    bring  not cleany   annotated spans"
     record = ServiceTokenClassificationRecord(
         text=text,
@@ -338,7 +328,6 @@ def test_whitespace_in_tokens():
 
 
 def test_predicted_ok_ko_computation():
-
     text = "A text with some empty spaces that could bring not cleanly annotated spans"
     record = ServiceTokenClassificationRecord(
         text=text,

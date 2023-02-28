@@ -89,14 +89,11 @@ def configure_router():
         name: str,
         bulk: TextClassificationBulkRequest,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> BulkResponse:
-
         task = task_type
         owner = current_user.check_workspace(common_params.workspace)
         try:
@@ -121,9 +118,7 @@ def configure_router():
 
         # TODO(@frascuchon): Validator should be applied in the service layer
         records = [ServiceTextClassificationRecord.parse_obj(r) for r in bulk.records]
-        await validator.validate_dataset_records(
-            user=current_user, dataset=dataset, records=records
-        )
+        await validator.validate_dataset_records(user=current_user, dataset=dataset, records=records)
 
         result = await service.add_records(
             dataset=dataset,
@@ -145,13 +140,9 @@ def configure_router():
         name: str,
         search: TextClassificationSearchRequest = None,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        include_metrics: bool = Query(
-            False, description="If enabled, return related record metrics"
-        ),
+        include_metrics: bool = Query(False, description="If enabled, return related record metrics"),
         pagination: RequestPagination = Depends(),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> TextClassificationSearchResults:
@@ -205,9 +196,7 @@ def configure_router():
         return TextClassificationSearchResults(
             total=result.total,
             records=result.records,
-            aggregations=TextClassificationSearchAggregations.parse_obj(result.metrics)
-            if result.metrics
-            else None,
+            aggregations=TextClassificationSearchAggregations.parse_obj(result.metrics) if result.metrics else None,
         )
 
     def scan_data_response(
@@ -239,9 +228,7 @@ def configure_router():
                     )
                 ) + "\n"
 
-        return StreamingResponseWithErrorHandling(
-            stream_generator(data_stream), media_type="application/json"
-        )
+        return StreamingResponseWithErrorHandling(stream_generator(data_stream), media_type="application/json")
 
     @router.post(
         f"{base_endpoint}/data",
@@ -254,9 +241,7 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         id_from: Optional[str] = None,
         limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> StreamingResponse:
@@ -320,12 +305,9 @@ def configure_router():
         name: str,
         common_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> List[LabelingRule]:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -334,9 +316,7 @@ def configure_router():
             as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
 
-        return [
-            LabelingRule.parse_obj(rule) for rule in service.get_labeling_rules(dataset)
-        ]
+        return [LabelingRule.parse_obj(rule) for rule in service.list_labeling_rules(dataset)]
 
     @deprecate_endpoint(
         path=f"{new_base_endpoint}/labeling/rules",
@@ -351,13 +331,10 @@ def configure_router():
         name: str,
         rule: CreateLabelingRule,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> LabelingRule:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -388,17 +365,12 @@ def configure_router():
     async def compute_rule_metrics(
         name: str,
         query: str,
-        labels: Optional[List[str]] = Query(
-            None, description="Label related to query rule", alias="label"
-        ),
+        labels: Optional[List[str]] = Query(None, description="Label related to query rule", alias="label"),
         common_params: CommonTaskHandlerDependencies = Depends(),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> LabelingRuleMetricsSummary:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -407,7 +379,7 @@ def configure_router():
             as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
 
-        return service.compute_rule_metrics(dataset, rule_query=query, labels=labels)
+        return service.compute_labeling_rule(dataset, rule_query=query, labels=labels)
 
     @deprecate_endpoint(
         path=f"{new_base_endpoint}/labeling/rules/metrics",
@@ -421,9 +393,7 @@ def configure_router():
     async def compute_dataset_rules_metrics(
         name: str,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> DatasetLabelingRulesMetricsSummary:
@@ -434,7 +404,7 @@ def configure_router():
             workspace=common_params.workspace,
             as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
-        metrics = service.compute_overall_rules_metrics(dataset)
+        metrics = service.compute_all_labeling_rules(dataset)
         return DatasetLabelingRulesMetricsSummary.parse_obj(metrics)
 
     @deprecate_endpoint(
@@ -448,13 +418,10 @@ def configure_router():
         name: str,
         query: str,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> None:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -478,13 +445,10 @@ def configure_router():
         name: str,
         query: str,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> LabelingRule:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
@@ -492,10 +456,7 @@ def configure_router():
             workspace=common_params.workspace,
             as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
-        rule = service.find_labeling_rule(
-            dataset,
-            rule_query=query,
-        )
+        rule = service.find_labeling_rule(dataset, rule_query=query)
         return LabelingRule.parse_obj(rule)
 
     @deprecate_endpoint(
@@ -512,13 +473,10 @@ def configure_router():
         query: str,
         update: UpdateLabelingRule,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        service: TextClassificationService = Depends(
-            TextClassificationService.get_instance
-        ),
+        service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> LabelingRule:
-
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,

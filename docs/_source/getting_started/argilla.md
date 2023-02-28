@@ -2,21 +2,28 @@
 
 [Argilla](https://argilla.io) is a **production-ready framework for building and improving datasets** for NLP projects.
 
-```{admonition} Hugging Face Spaces Live Demo 🆕
+```{admonition} Argilla on HF Spaces
 :class: important
 
-Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces (login:`argilla`, password:`1234`)
+Deploy your own Argilla Server on Spaces with a few clicks:
+
+<a  href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
+    <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
+</a>
 
 ```
+
 
 ```{admonition} Semantic Search data labelling 🆕
 :class: important
 
-🆕 Since `1.2.0` You can add embedding vectors to Argilla records and use them to find the most similar records with the UI. This feature uses vector search combined with traditional search (keyword and filter based).
+🆕 Use embeddings to find the most similar records with the UI. This feature uses vector search combined with traditional search (keyword and filter based).
 
 Get started: [Semantic Search Deep-dive guide](../guides/features/semantic-search.ipynb)
 
 ```
+
+
 
 <iframe width="100%" height="450" src="https://www.youtube.com/embed/jP3anvp7Rto" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -32,7 +39,7 @@ Get started: [Semantic Search Deep-dive guide](../guides/features/semantic-searc
 
 ## Use cases
 
-* **Data labelling and curationgiot**: collect labels to start a project from scratch or from existing live models.
+* **Data labelling and curation**: collect labels to start a project from scratch or from existing live models.
 * **Model monitoring and observability:** log and observe predictions of live models.
 * **Evaluation**: easily compute "live" metrics from models in production, and slice evaluation datasets to test your system under specific conditions.
 * **Model debugging**: log predictions during the development process to visually spot issues.

@@ -12,10 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import httpx
-
 from argilla.client.sdk.client import AuthenticatedClient
-from argilla.client.sdk.commons.errors_handler import handle_response_error
 from argilla.client.sdk.users.models import User
 
 

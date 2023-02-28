@@ -18,8 +18,6 @@ from typing import Callable, List, Optional, Union
 import numpy as np
 import pandas as pd
 import pytest
-from pandas.testing import assert_frame_equal
-
 from argilla import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
@@ -35,6 +33,7 @@ from argilla.labeling.text_classification.weak_labels import (
     NoRulesFoundError,
     WeakLabelsBase,
 )
+from pandas.testing import assert_frame_equal
 
 
 @pytest.fixture
@@ -164,9 +163,7 @@ class TestWeakLabelsBase:
         assert wl.rules is mock_rules
 
     def test_norulesfounderror(self, monkeypatch):
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load_rules", lambda x: []
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load_rules", lambda x: [])
 
         with pytest.raises(NoRulesFoundError, match="No rules were found"):
             WeakLabelsBase("mock")
@@ -180,13 +177,9 @@ class TestWeakLabelsBase:
         def mock_load(*args, **kwargs):
             return []
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
-        with pytest.raises(
-            NoRecordsFoundError, match="No records found in dataset 'mock'."
-        ):
+        with pytest.raises(NoRecordsFoundError, match="No records found in dataset 'mock'."):
             WeakLabels(rules=[lambda x: None], dataset="mock")
         with pytest.raises(
             NoRecordsFoundError,
@@ -213,9 +206,7 @@ class TestWeakLabelsBase:
         def mock_load(*args, **kwargs):
             return expected_records
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         weak_labels = WeakLabelsBase(rules=[lambda x: "mock"] * 2, dataset="mock")
 
@@ -234,9 +225,7 @@ class TestWeakLabelsBase:
         def mock_load(*args, **kwargs):
             return ["mock"]
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         weak_labels = WeakLabelsBase(rules=["mock"], dataset="mock")
 
@@ -259,9 +248,7 @@ class TestWeakLabelsBase:
         def mock_load(*args, **kwargs):
             return ["mock"]
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
         monkeypatch.setitem(sys.modules, "faiss", None)
         with pytest.raises(ModuleNotFoundError, match="pip install faiss-cpu"):
             weak_labels = WeakLabelsBase(rules=[lambda x: "mock"] * 2, dataset="mock")
@@ -273,9 +260,7 @@ class TestWeakLabels:
         def mock_load(*args, **kwargs):
             return [TextClassificationRecord(text="test", multi_label=True)]
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         with pytest.raises(MultiLabelError):
             WeakLabels(rules=[lambda x: None], dataset="mock")
@@ -292,9 +277,7 @@ class TestWeakLabels:
             (
                 {None: -10, "negative": 50, "positive": 10},
                 {None: -10, "negative": 50, "positive": 10},
-                np.array(
-                    [[50, -10, 10], [-10, 10, 10], [-10, 10, -10]], dtype=np.short
-                ),
+                np.array([[50, -10, 10], [-10, 10, 10], [-10, 10, -10]], dtype=np.short),
                 np.array([50, 10, -10], dtype=np.short),
             ),
             ({}, None, None, None),
@@ -336,9 +319,7 @@ class TestWeakLabels:
         assert (weak_labels._annotation == expected_annotation_array).all()
 
     def test_apply_MultiLabelError(self, log_dataset):
-        with pytest.raises(
-            MultiLabelError, match="For rules that do not return exactly 1 label"
-        ):
+        with pytest.raises(MultiLabelError, match="For rules that do not return exactly 1 label"):
             WeakLabels(rules=[lambda x: ["a", "b"]], dataset=log_dataset)
 
     def test_matrix_annotation_properties(self, monkeypatch):
@@ -350,9 +331,7 @@ class TestWeakLabels:
         def mock_load(*args, **kwargs):
             return expected_records
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
             weak_label_matrix = np.array([[0, 1], [-1, 0]], dtype=np.short)
@@ -364,36 +343,21 @@ class TestWeakLabels:
 
         weak_labels = WeakLabels(rules=[lambda x: "mock"] * 2, dataset="mock")
 
-        assert (
-            weak_labels.matrix(has_annotation=False)
-            == np.array([[0, 1]], dtype=np.short)
-        ).all()
-        assert (
-            weak_labels.matrix(has_annotation=True)
-            == np.array([[-1, 0]], dtype=np.short)
-        ).all()
+        assert (weak_labels.matrix(has_annotation=False) == np.array([[0, 1]], dtype=np.short)).all()
+        assert (weak_labels.matrix(has_annotation=True) == np.array([[-1, 0]], dtype=np.short)).all()
         assert (weak_labels.annotation() == np.array([[0]], dtype=np.short)).all()
-        assert (
-            weak_labels.annotation(include_missing=True)
-            == np.array([[-1, 0]], dtype=np.short)
-        ).all()
-        with pytest.warns(
-            FutureWarning, match="'exclude_missing_annotations' is deprecated"
-        ):
+        assert (weak_labels.annotation(include_missing=True) == np.array([[-1, 0]], dtype=np.short)).all()
+        with pytest.warns(FutureWarning, match="'exclude_missing_annotations' is deprecated"):
             weak_labels.annotation(exclude_missing_annotations=True)
 
     def test_summary(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
             return [TextClassificationRecord(text="test")] * 4
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
-            weak_label_matrix = np.array(
-                [[0, 1, -1], [-1, 0, -1], [-1, -1, -1], [1, 1, -1]], dtype=np.short
-            )
+            weak_label_matrix = np.array([[0, 1, -1], [-1, 0, -1], [-1, -1, -1], [1, 1, -1]], dtype=np.short)
             # weak_label_matrix = np.random.randint(-1, 30, (int(1e5), 50), dtype=np.short)
             annotation_array = np.array([-1, -1, -1, -1], dtype=np.short)
             # annotation_array = np.random.randint(-1, 30, int(1e5), dtype=np.short)
@@ -466,9 +430,7 @@ class TestWeakLabels:
         def mock_load(*args, **kwargs):
             return [TextClassificationRecord(text="test", id=i) for i in range(5)]
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
             weak_label_matrix = np.array(
@@ -496,17 +458,13 @@ class TestWeakLabels:
             1,
             4,
         ]
-        assert weak_labels.show_records(
-            labels=["positive"], rules=["argilla_rule"]
-        ).empty
+        assert weak_labels.show_records(labels=["positive"], rules=["argilla_rule"]).empty
 
     def test_change_mapping(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
             return [TextClassificationRecord(text="test", id=i) for i in range(5)]
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
             weak_label_matrix = np.array(
@@ -544,10 +502,7 @@ class TestWeakLabels:
                 dtype=np.short,
             )
         ).all()
-        assert (
-            weak_labels.annotation(include_missing=True)
-            == np.array([2, 10, -10, 1, 2], dtype=np.short)
-        ).all()
+        assert (weak_labels.annotation(include_missing=True) == np.array([2, 10, -10, 1, 2], dtype=np.short)).all()
         assert weak_labels.label2int == new_mapping
         assert weak_labels.int2label == {val: key for key, val in new_mapping.items()}
 
@@ -560,9 +515,7 @@ class TestWeakLabels:
         def mock_load(*args, **kwargs):
             return [TextClassificationRecord(text="test", id=i) for i in range(3)]
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
             weak_label_matrix = np.array(
@@ -584,19 +537,13 @@ class TestWeakLabels:
         ):
             weak_labels.extend_matrix([1.0, 0.5, 0.5])
 
-        weak_labels.extend_matrix(
-            [1.0, 0.5, 0.5], np.array([[0.1, 0.1], [0.1, 0.11], [0.11, 0.1]])
-        )
+        weak_labels.extend_matrix([1.0, 0.5, 0.5], np.array([[0.1, 0.1], [0.1, 0.11], [0.11, 0.1]]))
 
-        np.testing.assert_equal(
-            weak_labels.matrix(), np.array([[0, -1, -1], [-1, 1, -1], [-1, 1, -1]])
-        )
+        np.testing.assert_equal(weak_labels.matrix(), np.array([[0, -1, -1], [-1, 1, -1], [-1, 1, -1]]))
 
         weak_labels.extend_matrix([1.0, 1.0, 1.0])
 
-        np.testing.assert_equal(
-            weak_labels.matrix(), np.array([[0, -1, -1], [-1, 1, -1], [-1, -1, -1]])
-        )
+        np.testing.assert_equal(weak_labels.matrix(), np.array([[0, -1, -1], [-1, 1, -1], [-1, -1, -1]]))
 
 
 class TestWeakMultiLabels:
@@ -605,9 +552,7 @@ class TestWeakMultiLabels:
         log_multilabel_dataset,
         multilabel_rules,
     ):
-        weak_labels = WeakMultiLabels(
-            rules=multilabel_rules, dataset=log_multilabel_dataset
-        )
+        weak_labels = WeakMultiLabels(rules=multilabel_rules, dataset=log_multilabel_dataset)
 
         assert weak_labels.labels == ["negative", "positive"]
 
@@ -626,30 +571,21 @@ class TestWeakMultiLabels:
             )
         ).all()
 
-        assert (
-            weak_labels._annotation
-            == np.array([[1, 0], [1, 1], [-1, -1]], dtype=np.short)
-        ).all()
+        assert (weak_labels._annotation == np.array([[1, 0], [1, 1], [-1, -1]], dtype=np.short)).all()
 
     def test_matrix_annotation(self, monkeypatch):
         expected_records = [
             TextClassificationRecord(text="test without annot", multi_label=True),
-            TextClassificationRecord(
-                text="test with annot", annotation="positive", multi_label=True
-            ),
+            TextClassificationRecord(text="test with annot", annotation="positive", multi_label=True),
         ]
 
         def mock_load(*args, **kwargs):
             return expected_records
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
-            weak_label_matrix = np.array(
-                [[[1, 0], [0, 1]], [[-1, -1], [1, 0]]], dtype=np.short
-            )
+            weak_label_matrix = np.array([[[1, 0], [0, 1]], [[-1, -1], [1, 0]]], dtype=np.short)
             annotation_array = np.array([[-1, -1], [1, 0]], dtype=np.short)
             labels = ["negative", "positive"]
             return weak_label_matrix, annotation_array, labels
@@ -658,27 +594,16 @@ class TestWeakMultiLabels:
 
         weak_labels = WeakMultiLabels(rules=[lambda x: "mock"] * 2, dataset="mock")
 
-        assert (
-            weak_labels.matrix(has_annotation=False)
-            == np.array([[[1, 0], [0, 1]]], dtype=np.short)
-        ).all()
-        assert (
-            weak_labels.matrix(has_annotation=True)
-            == np.array([[[-1, -1], [1, 0]]], dtype=np.short)
-        ).all()
+        assert (weak_labels.matrix(has_annotation=False) == np.array([[[1, 0], [0, 1]]], dtype=np.short)).all()
+        assert (weak_labels.matrix(has_annotation=True) == np.array([[[-1, -1], [1, 0]]], dtype=np.short)).all()
         assert (weak_labels.annotation() == np.array([[1, 0]], dtype=np.short)).all()
-        assert (
-            weak_labels.annotation(include_missing=True)
-            == np.array([[[-1, -1], [1, 0]]], dtype=np.short)
-        ).all()
+        assert (weak_labels.annotation(include_missing=True) == np.array([[[-1, -1], [1, 0]]], dtype=np.short)).all()
 
     def test_summary(self, monkeypatch, multilabel_rules):
         def mock_load(*args, **kwargs):
             return [TextClassificationRecord(text="test", multi_label=True)] * 4
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
             weak_label_matrix = np.array(
@@ -691,9 +616,7 @@ class TestWeakMultiLabels:
                 dtype=np.short,
             )
             # weak_label_matrix = np.random.randint(-1, 30, (int(1e5), 50), dtype=np.short)
-            annotation_array = np.array(
-                [[-1, -1], [-1, -1], [-1, -1], [-1, -1]], dtype=np.short
-            )
+            annotation_array = np.array([[-1, -1], [-1, -1], [-1, -1], [-1, -1]], dtype=np.short)
             # annotation_array = np.random.randint(-1, 30, int(1e5), dtype=np.short)
             labels = ["negative", "positive"]
             # label2int = {k: v for k, v in zip(["None"]+list(range(30)), list(range(-1, 30)))}
@@ -735,9 +658,7 @@ class TestWeakMultiLabels:
         )
         assert_frame_equal(summary, expected)
 
-        summary = weak_labels.summary(
-            annotation=np.array([[0, 1], [-1, -1], [0, 1], [1, 1]])
-        )
+        summary = weak_labels.summary(annotation=np.array([[0, 1], [-1, -1], [0, 1], [1, 1]]))
         expected = pd.DataFrame(
             {
                 "label": [
@@ -763,9 +684,7 @@ class TestWeakMultiLabels:
         def mock_load(*args, **kwargs):
             return [TextClassificationRecord(text="mock")]
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
             weak_label_matrix = np.array([[[1, 0, 1, 0], [0, 1, 0, 1]]], dtype=np.short)
@@ -774,23 +693,16 @@ class TestWeakMultiLabels:
         monkeypatch.setattr(WeakMultiLabels, "_apply_rules", mock_apply)
 
         weak_labels = WeakMultiLabels(rules=[lambda x: "mock"] * 2, dataset="mock")
-        correct, incorrect = weak_labels._compute_correct_incorrect(
-            annotation=np.array([[1, 0, 1, 0]])
-        )
+        correct, incorrect = weak_labels._compute_correct_incorrect(annotation=np.array([[1, 0, 1, 0]]))
 
         assert np.allclose(correct, np.array([2, 0, 2]))
         assert np.allclose(incorrect, np.array([0, 2, 2]))
 
     def test_show_records(self, monkeypatch, multilabel_rules):
         def mock_load(*args, **kwargs):
-            return [
-                TextClassificationRecord(text="test", id=i, multi_label=True)
-                for i in range(5)
-            ]
+            return [TextClassificationRecord(text="test", id=i, multi_label=True) for i in range(5)]
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
             weak_label_matrix = np.array(
@@ -813,9 +725,7 @@ class TestWeakMultiLabels:
         assert weak_labels.show_records().id.tolist() == [0, 1, 2, 3, 4]
         assert weak_labels.show_records(labels=["positive"]).id.tolist() == [0, 1, 3]
         assert weak_labels.show_records(labels=["negative"]).id.tolist() == [0, 1, 4]
-        assert weak_labels.show_records(
-            labels=["negative", "positive"]
-        ).id.tolist() == [0, 1]
+        assert weak_labels.show_records(labels=["negative", "positive"]).id.tolist() == [0, 1]
 
         assert weak_labels.show_records(rules=[0]).id.tolist() == [0, 1, 3]
         assert weak_labels.show_records(rules=[0, "rule_1"]).id.tolist() == [0, 1, 3]
@@ -824,21 +734,14 @@ class TestWeakMultiLabels:
             1,
             4,
         ]
-        assert weak_labels.show_records(
-            labels=["positive"], rules=["argilla_rule"]
-        ).empty
+        assert weak_labels.show_records(labels=["positive"], rules=["argilla_rule"]).empty
 
     @pytest.fixture
     def weak_multi_labels(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [
-                TextClassificationRecord(text="test", id=i, multi_label=True)
-                for i in range(3)
-            ]
+            return [TextClassificationRecord(text="test", id=i, multi_label=True) for i in range(3)]
 
-        monkeypatch.setattr(
-            "argilla.labeling.text_classification.weak_labels.load", mock_load
-        )
+        monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
 
         def mock_apply(self, *args, **kwargs):
             weak_label_matrix = np.array(
@@ -863,9 +766,7 @@ class TestWeakMultiLabels:
         ):
             weak_multi_labels.extend_matrix([1.0, 0.5, 0.5])
 
-        weak_multi_labels.extend_matrix(
-            [1.0, 0.5, 0.5], np.array([[0.1, 0.1], [0.1, 0.11], [0.11, 0.1]])
-        )
+        weak_multi_labels.extend_matrix([1.0, 0.5, 0.5], np.array([[0.1, 0.1], [0.1, 0.11], [0.11, 0.1]]))
 
         np.testing.assert_equal(
             weak_multi_labels.matrix(),
@@ -892,16 +793,10 @@ class TestWeakMultiLabels:
         )
         # The "correct" and "incorrect" columns from `expected_summary` may infer a different
         # dtype than `weak_multi_labels.summary()` returns.
-        assert_frame_equal(
-            weak_multi_labels.summary(), expected_summary, check_dtype=False
-        )
+        assert_frame_equal(weak_multi_labels.summary(), expected_summary, check_dtype=False)
 
-        expected_show_records = pd.DataFrame(
-            map(lambda x: x.dict(), weak_multi_labels.records())
-        )
-        assert_frame_equal(
-            weak_multi_labels.show_records(rules=["rule_1"]), expected_show_records
-        )
+        expected_show_records = pd.DataFrame(map(lambda x: x.dict(), weak_multi_labels.records()))
+        assert_frame_equal(weak_multi_labels.show_records(rules=["rule_1"]), expected_show_records)
 
         weak_multi_labels.extend_matrix([1.0, 1.0, 1.0])
 

@@ -14,6 +14,7 @@
 
 from argilla import TextClassificationRecord
 from argilla.client import api
+from argilla.client.api import active_api
 
 
 def test_resource_leaking_with_several_init(mocked_client):
@@ -44,6 +45,15 @@ def test_init_with_extra_headers(mocked_client):
     active_api = api.active_api()
 
     for key, value in expected_headers.items():
-        assert (
-            active_api.http_client.headers[key] == value
-        ), f"{key}:{value} not in client headers"
+        assert active_api.http_client.headers[key] == value, f"{key}:{value} not in client headers"
+
+
+def test_init(mocked_client):
+    the_api = active_api()
+    user = the_api.http_client.get("/api/me")
+    assert user["username"] == "argilla"
+
+    api.init(api_key="rubrix.apikey")
+    the_api = active_api()
+    user = the_api.http_client.get("/api/me")
+    assert user["username"] == "argilla"

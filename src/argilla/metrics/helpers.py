@@ -34,10 +34,7 @@ def bar(data: dict, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
         return empty_visualization()
 
     keys, values = zip(*data.items())
-    keys = [
-        key.encode("unicode-escape").decode() if isinstance(key, str) else key
-        for key in keys
-    ]
+    keys = [key.encode("unicode-escape").decode() if isinstance(key, str) else key for key in keys]
     fig = go.Figure(data=go.Bar(y=values, x=keys))
     fig.update_layout(
         title=title,
@@ -138,11 +135,7 @@ def f1(data: Dict[str, float], title: str):
         row=1,
         col=2,
     )
-    per_label = {
-        k: v
-        for k, v in data.items()
-        if all(key not in k for key in ["macro", "micro", "support"])
-    }
+    per_label = {k: v for k, v in data.items() if all(key not in k for key in ["macro", "micro", "support"])}
 
     fig.add_bar(
         x=[k for k, v in per_label.items()],

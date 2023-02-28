@@ -15,7 +15,7 @@
 import warnings
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterable, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -107,6 +107,7 @@ class Datasets(AbstractApi):
         name: str
         task: TaskType
         owner: Optional[str] = None
+        workspace: Optional[str] = None
         created_at: Optional[datetime] = None
         last_updated: Optional[datetime] = None
 
@@ -174,9 +175,7 @@ class Datasets(AbstractApi):
 
         """
 
-        url = (
-            f"{self._API_PREFIX}/{name}/records/:search?limit={self.DEFAULT_SCAN_SIZE}"
-        )
+        url = f"{self._API_PREFIX}/{name}/records/:search?limit={self.DEFAULT_SCAN_SIZE}"
         query = self._parse_query(query=query)
 
         if limit == 0:
@@ -278,13 +277,10 @@ class Datasets(AbstractApi):
     def __save_settings__(self, dataset: _DatasetApiModel, settings: Settings):
         if __TASK_TO_SETTINGS__.get(dataset.task) != type(settings):
             raise ValueError(
-                f"The provided settings type {type(settings)} cannot be applied to dataset."
-                " Task type mismatch"
+                f"The provided settings type {type(settings)} cannot be applied to dataset." " Task type mismatch"
             )
 
-        settings_ = self._SettingsApiModel(
-            label_schema={"labels": [label for label in settings.label_schema]}
-        )
+        settings_ = self._SettingsApiModel(label_schema={"labels": [label for label in settings.label_schema]})
 
         with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
             self.http_client.put(
@@ -305,9 +301,7 @@ class Datasets(AbstractApi):
         dataset = self.find_by_name(name)
         try:
             with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-                response = self.http_client.get(
-                    f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings"
-                )
+                response = self.http_client.get(f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings")
                 return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)
         except NotFoundApiError:
             return None

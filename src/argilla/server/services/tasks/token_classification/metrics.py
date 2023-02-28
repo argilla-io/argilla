@@ -36,9 +36,7 @@ class F1Metric(ServicePythonMetric[ServiceTokenClassificationRecord]):
     A named entity is correct only if it is an exact match (...).”`
     """
 
-    def apply(
-        self, records: Iterable[ServiceTokenClassificationRecord]
-    ) -> Dict[str, Any]:
+    def apply(self, records: Iterable[ServiceTokenClassificationRecord]) -> Dict[str, Any]:
         # store entities per label in dicts
         predicted_entities = {}
         annotated_entities = {}
@@ -66,9 +64,7 @@ class F1Metric(ServicePythonMetric[ServiceTokenClassificationRecord]):
                 {
                     f"{label}_precision": precision,
                     f"{label}_recall": recall,
-                    f"{label}_f1": self._safe_divide(
-                        2 * precision * recall, precision + recall
-                    ),
+                    f"{label}_f1": self._safe_divide(2 * precision * recall, precision + recall),
                 }
             )
 
@@ -83,9 +79,7 @@ class F1Metric(ServicePythonMetric[ServiceTokenClassificationRecord]):
         averaged_metrics = {
             "precision_macro": precision_macro,
             "recall_macro": recall_macro,
-            "f1_macro": self._safe_divide(
-                2 * precision_macro * recall_macro, precision_macro + recall_macro
-            ),
+            "f1_macro": self._safe_divide(2 * precision_macro * recall_macro, precision_macro + recall_macro),
         }
 
         precision_micro = self._safe_divide(correct_total, predicted_total)
@@ -94,18 +88,14 @@ class F1Metric(ServicePythonMetric[ServiceTokenClassificationRecord]):
             {
                 "precision_micro": precision_micro,
                 "recall_micro": recall_micro,
-                "f1_micro": self._safe_divide(
-                    2 * precision_micro * recall_micro, precision_micro + recall_micro
-                ),
+                "f1_micro": self._safe_divide(2 * precision_micro * recall_micro, precision_micro + recall_micro),
             }
         )
 
         return {**averaged_metrics, **per_label_metrics}
 
     @staticmethod
-    def _add_entities_to_dict(
-        entities: List[EntitySpan], dictionary: Dict[str, Set[Tuple[int, int]]]
-    ):
+    def _add_entities_to_dict(entities: List[EntitySpan], dictionary: Dict[str, Set[Tuple[int, int]]]):
         """Helper function for the apply method."""
         for ent in entities:
             try:
@@ -144,21 +134,15 @@ class DatasetLabels(ServicePythonMetric):
     ) -> Dict[str, Any]:
         ds_labels = set()
 
-        for _ in range(
-            0, self.records_to_fetch
-        ):  # Only a few of records will be parsed
+        for _ in range(0, self.records_to_fetch):  # Only a few of records will be parsed
             record: ServiceTokenClassificationRecord = next(records, None)
             if record is None:
                 break
 
             if record.annotation:
-                ds_labels.update(
-                    [entity.label for entity in record.annotation.entities]
-                )
+                ds_labels.update([entity.label for entity in record.annotation.entities])
             if record.prediction:
-                ds_labels.update(
-                    [entity.label for entity in record.prediction.entities]
-                )
+                ds_labels.update([entity.label for entity in record.prediction.entities])
         return {"labels": ds_labels or []}
 
 
@@ -252,9 +236,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 label=entity.label,
                 score=entity.score,
                 capitalness=TokenClassificationMetrics.capitalness(mention),
-                density=TokenClassificationMetrics.density(
-                    _tokens_length, sentence_length=len(record.tokens)
-                ),
+                density=TokenClassificationMetrics.density(_tokens_length, sentence_length=len(record.tokens)),
                 tokens_length=_tokens_length,
                 chars_length=len(mention),
             )
@@ -270,7 +252,6 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
         record: ServiceTokenClassificationRecord,
         tags: Optional[List[str]] = None,
     ) -> List[TokenMetrics]:
-
         return [
             TokenMetrics(
                 idx=token_idx,
@@ -296,26 +277,18 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
         annotated_tags = cls._compute_iob_tags(span_utils, record.annotation) or []
         predicted_tags = cls._compute_iob_tags(span_utils, record.prediction) or []
 
-        tokens_metrics = cls.build_tokens_metrics(
-            record, predicted_tags or annotated_tags
-        )
+        tokens_metrics = cls.build_tokens_metrics(record, predicted_tags or annotated_tags)
         return {
             **base_metrics,
             "tokens": tokens_metrics,
             "tokens_length": len(record.tokens),
             "predicted": {
                 "mentions": cls.mentions_metrics(record, record.predicted_mentions()),
-                "tags": [
-                    TokenTagMetrics(tag=tag, value=token)
-                    for tag, token in zip(predicted_tags, record.tokens)
-                ],
+                "tags": [TokenTagMetrics(tag=tag, value=token) for tag, token in zip(predicted_tags, record.tokens)],
             },
             "annotated": {
                 "mentions": cls.mentions_metrics(record, record.annotated_mentions()),
-                "tags": [
-                    TokenTagMetrics(tag=tag, value=token)
-                    for tag, token in zip(annotated_tags, record.tokens)
-                ],
+                "tags": [TokenTagMetrics(tag=tag, value=token) for tag, token in zip(annotated_tags, record.tokens)],
             },
         }
 
