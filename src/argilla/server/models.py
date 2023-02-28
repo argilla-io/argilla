@@ -46,6 +46,9 @@ class UserWorkspace(Base):
     user: Mapped["User"] = relationship(viewonly=True)
     workspace: Mapped["Workspace"] = relationship(viewonly=True)
 
+    def __repr__(self):
+        return f"UserWorkspace(id={str(self.id)!r}, workspace_id={str(self.workspace_id)!r}, user_id={str(self.user_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+
 
 class Workspace(Base):
     __tablename__ = "workspaces"
@@ -59,6 +62,9 @@ class Workspace(Base):
     users: Mapped[List["User"]] = relationship(
         secondary="users_workspaces", back_populates="workspaces", order_by=UserWorkspace.inserted_at.asc()
     )
+
+    def __repr__(self):
+        return f"Workspace(id={str(self.id)!r}, name={self.name!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
 
 
 class User(Base):
@@ -77,3 +83,6 @@ class User(Base):
     workspaces: Mapped[List["Workspace"]] = relationship(
         secondary="users_workspaces", back_populates="users", order_by=UserWorkspace.inserted_at.asc()
     )
+
+    def __repr__(self):
+        return f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, username={self.username!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
