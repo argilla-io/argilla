@@ -28,7 +28,6 @@
         @validate-records="onValidate"
         @on-select-labels="onSelectLabels($event)"
       />
-      <create-new-action v-if="isCreationLabel" @new-label="onNewLabel" />
     </div>
   </div>
 </template>
