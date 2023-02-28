@@ -46,6 +46,7 @@ const countLabelsByDatasetId = (datasetId) => {
 const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
   const numberOfLabels = countLabelsByDatasetId(datasetId);
+
   GlobalLabelModel.insert({
     data: {
       id: newLabel,

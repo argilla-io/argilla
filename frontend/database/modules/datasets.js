@@ -31,6 +31,7 @@ import {
   getAllLabelsTextByDatasetId,
   isLabelTextExistInGlobalLabel,
 } from "@/models/globalLabel.queries";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -585,32 +586,37 @@ const actions = {
       },
     });
   },
-  async onAddNewLabel(
-    context,
-    { datasetId, datasetName, datasetTask, newLabel }
-  ) {
+  async onAddNewLabel(context, { datasetId, datasetTask, newLabels }) {
+    const { name: datasetName } = getDatasetFromORM(datasetId, datasetTask);
+
     if (datasetName && datasetTask) {
       const labelsbeforeAddNewLabel = getAllLabelsTextByDatasetId(datasetId);
-      const isNewLabelNotInGlobalLabels = !isLabelTextExistInGlobalLabel(
-        datasetId,
-        newLabel
-      );
-      if (isNewLabelNotInGlobalLabels) {
+
+      const isSomeNewLabelNotInGlobalLabels =
+        checkIfSomeNewLabelNotInGlobalLabels(datasetId, newLabels);
+
+      if (isSomeNewLabelNotInGlobalLabels) {
         try {
-          const labels = [...new Set([...labelsbeforeAddNewLabel, newLabel])];
+          const labels = [
+            ...new Set([...labelsbeforeAddNewLabel, ...newLabels]),
+          ];
           await context.dispatch("onSaveDatasetSettings", {
             datasetName,
             datasetTask,
             labels,
           });
 
-          insertNewGlobalLabel({ datasetId, newLabel });
+          newLabels.forEach(
+            (newLabel) =>
+              isLabelTextExistInGlobalLabel(datasetId, newLabel) ||
+              insertNewGlobalLabel({ datasetId, newLabel })
+          );
         } catch (err) {
           throw new Error("Error on adding new labels");
         }
       } else {
         Notification.dispatch("notify", {
-          message: `The label "${newLabel}" already exist in the list of labels`,
+          message: `The labels <b>"${newLabels}"</b> already exist in the list of labels`,
           type: "warning",
         });
       }
@@ -857,10 +863,9 @@ const initGlobalLabels = async ({ name, task, id }) => {
   deleteAllGlobalLabelModel();
   const labels = await fetchLabelsFromSettings({ name, task });
   const joinedDatasetId = id.join(".");
-  const sortedLabels = sortListOfObj(labels, "name");
   const formattedLabels = factoryLabelsForGlobalLabelsModel(
     joinedDatasetId,
-    sortedLabels
+    labels
   );
   upsertLabelsInGlobalLabelModel(formattedLabels);
 };
@@ -906,12 +911,15 @@ const fetchAllRulesAndInsertRulesInTextClassificationORM = async (dataset) => {
   }
 };
 
-const sortListOfObj = (listOfObj, keyOfObj, asc = true) => {
-  const sortedArray = _.sortBy(listOfObj, keyOfObj);
-  if (asc) {
-    return sortedArray;
-  }
-  return _.reverse(sortedArray);
+const checkIfSomeNewLabelNotInGlobalLabels = (datasetId, newLabels) => {
+  const isNewLabelNotInGlobalLabelsByItem = newLabels.map(
+    (newLabel) => !isLabelTextExistInGlobalLabel(datasetId, newLabel)
+  );
+
+  const isSomeNewLabelNotInGlobalLabels =
+    isNewLabelNotInGlobalLabelsByItem.some((value) => value);
+
+  return isSomeNewLabelNotInGlobalLabels;
 };
 
 export default {
