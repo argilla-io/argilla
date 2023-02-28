@@ -51,7 +51,7 @@ class Workspace(BaseModel):
 
 
 class WorkspaceCreate(BaseModel):
-    name: str = Field(regex=_WORKSPACE_NAME_REGEX, min_length=1)
+    name: constr(regex=_WORKSPACE_NAME_REGEX, min_length=1)
 
 
 class UserGetter(GetterDict):
@@ -65,10 +65,10 @@ class UserGetter(GetterDict):
 
 
 class UserCreate(BaseModel):
-    first_name: str = Field(min_length=1)
-    last_name: Optional[str] = Field(min_length=1)
-    username: str = Field(regex=_USER_USERNAME_REGEX, min_length=1)
-    password: str = Field(min_length=_USER_PASSWORD_MIN_LENGTH, max_length=_USER_PASSWORD_MAX_LENGTH)
+    first_name: constr(min_length=1, strip_whitespace=True)
+    last_name: Optional[constr(min_length=1, strip_whitespace=True)]
+    username: constr(regex=_USER_USERNAME_REGEX, min_length=1)
+    password: constr(min_length=_USER_PASSWORD_MIN_LENGTH, max_length=_USER_PASSWORD_MAX_LENGTH)
 
 
 class UserGetter(GetterDict):
