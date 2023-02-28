@@ -589,7 +589,10 @@ const actions = {
         type: "success",
       });
     } catch (error) {
-      console.log(error);
+      Notification.dispatch("notify", {
+        message: `It is not possible to delete ${name}`,
+        type: "warning",
+      });
     }
   },
 
