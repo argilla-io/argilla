@@ -1,7 +1,10 @@
 <template>
   <div class="dataset-settings-page">
+    <div class="dataset-description-component">
+      <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
+    </div>
     <div
-      class="labels-edition"
+      class="labels-edition-component"
       v-if="isTaskTokenClassification || isTaskTextClassification"
     >
       <EditionLabelComponent
@@ -45,6 +48,9 @@ export default {
     },
     isTaskTextClassification() {
       return this.datasetTask === "TextClassification";
+    },
+    settingsDescription() {
+      return "Soon you will be able to edit your information";
     },
   },
   async fetch() {
