@@ -84,16 +84,12 @@ $recordActions: (
       border-color: palette(green);
       background: palette(white);
       opacity: 1;
-      pointer-events: none;
-      cursor: default;
     }
   }
   &__actions-button--discard {
     &[active] {
       background: palette(white);
       opacity: 1;
-      pointer-events: none;
-      cursor: default;
     }
   }
 }

@@ -49,10 +49,10 @@
       <record-action-buttons
         v-if="interactionsEnabled"
         :actions="tokenClassifierActionButtons"
-        @validate="onValidate(record)"
+        @validate="toggleValidateRecord()"
         @clear="onClearAnnotations()"
         @reset="onReset()"
-        @discard="onDiscard()"
+        @discard="toggleDiscardRecord()"
       />
     </div>
   </div>
@@ -179,6 +179,7 @@ export default {
       validate: "entities/datasets/validateAnnotations",
       discard: "entities/datasets/discardAnnotations",
       updateRecords: "entities/datasets/updateDatasetRecords",
+      changeStatusToDefault: "entities/datasets/changeStatusToDefault",
       resetRecords: "entities/datasets/resetRecords",
     }),
     getEntitiesByOrigin(origin) {
@@ -195,19 +196,43 @@ export default {
           : [];
       }
     },
-    async onValidate(record) {
+    async toggleValidateRecord() {
+      if (this.record.status === "Validated") {
+        await this.onChangeStatusToDefault();
+      } else {
+        await this.onValidate();
+      }
+    },
+    async toggleDiscardRecord() {
+      if (this.record.status === "Discarded") {
+        await this.onChangeStatusToDefault();
+      } else {
+        this.onDiscard();
+      }
+    },
+    async onValidate() {
       await this.validate({
         // TODO: Move this as part of token classification dataset logic
         dataset: this.getTokenClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
-            ...record,
+            ...this.record,
             annotatedEntities: undefined,
             annotation: {
-              entities: record.annotatedEntities,
+              entities: this.record.annotatedEntities,
               origin: "annotation",
             },
+          },
+        ],
+      });
+    },
+    async onChangeStatusToDefault() {
+      await this.changeStatusToDefault({
+        dataset: this.getTokenClassificationDataset(),
+        records: [
+          {
+            ...this.record,
           },
         ],
       });

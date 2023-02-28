@@ -553,6 +553,18 @@ const actions = {
       persistBackend: true,
     });
   },
+  async changeStatusToDefault(_, { dataset, records }) {
+    const newRecords = records.map((record) => ({
+      ...record,
+      selected: false,
+      status: "Default",
+    }));
+    return _updateDatasetRecords({
+      dataset,
+      records: newRecords,
+      persistBackend: true,
+    });
+  },
   async resetAnnotations(_, { dataset, records }) {
     const newRecords = records.map((record) => ({
       ...record,

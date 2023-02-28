@@ -39,9 +39,9 @@
       <record-action-buttons
         v-if="interactionsEnabled"
         :actions="textClassifierActionButtons"
-        @validate="validateLabels()"
+        @validate="toggleValidateRecord()"
         @clear="onClearAnnotations()"
-        @discard="onDiscard()"
+        @discard="toggleDiscardRecord()"
         @reset="onReset()"
       />
     </div>
@@ -149,6 +149,7 @@ export default {
       updateRecords: "entities/datasets/updateDatasetRecords",
       validateAnnotations: "entities/datasets/validateAnnotations",
       resetAnnotations: "entities/datasets/resetAnnotations",
+      changeStatusToDefault: "entities/datasets/changeStatusToDefault",
       resetRecords: "entities/datasets/resetRecords",
     }),
     async resetLabels() {
@@ -178,6 +179,20 @@ export default {
         ],
       });
     },
+    async toggleValidateRecord(labels) {
+      if (this.record.status === "Validated") {
+        await this.onChangeStatusToDefault();
+      } else {
+        await this.validateLabels(labels);
+      }
+    },
+    async toggleDiscardRecord() {
+      if (this.record.status === "Discarded") {
+        await this.onChangeStatusToDefault();
+      } else {
+        this.onDiscard();
+      }
+    },
     async validateLabels(labels) {
       const selectedAnnotation = {};
       selectedAnnotation.labels =
@@ -194,6 +209,16 @@ export default {
             annotation: {
               ...selectedAnnotation,
             },
+          },
+        ],
+      });
+    },
+    async onChangeStatusToDefault() {
+      await this.changeStatusToDefault({
+        dataset: this.getTextClassificationDataset(),
+        records: [
+          {
+            ...this.record,
           },
         ],
       });
