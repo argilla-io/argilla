@@ -660,6 +660,12 @@ const actions = {
 
     return await ObservationDataset.api().get("/datasets/", {
       persistBy: "create",
+      dataTransformer: ({ data }) => {
+        return data.map((datasource) => {
+          datasource.workspace = datasource.workspace || datasource.owner;
+          return datasource;
+        });
+      },
     });
   },
   async fetchByName(_, name) {
