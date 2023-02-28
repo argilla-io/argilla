@@ -23,7 +23,7 @@ spec:
           echo Sleeping...; done; echo Elasticsearch Connected " ]
       containers:
         - name: argilla-server
-          image: argilla/argilla-server:pr-2057
+          image: argilla/argilla-server:latest
           env:
             - name: ARGILLA_ELASTICSEARCH
               value: "http://elasticsearch:9200"
