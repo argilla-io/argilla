@@ -117,9 +117,6 @@ export default {
   &__container {
     text-align: right;
     position: relative;
-    margin-right: 0;
-    margin-left: auto;
-    width: 180px;
   }
 }
 </style>

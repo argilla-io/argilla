@@ -97,22 +97,6 @@ class TokenClassificationDataset extends ObservationDataset {
     };
   }
 
-  async initialize() {
-    const settings = await this._getDatasetSettings();
-    const entity = this.getTaskDatasetClass();
-    await entity.insertOrUpdate({
-      where: this.id,
-      data: [
-        {
-          workspace: this.workspace,
-          name: this.name,
-          settings,
-        },
-      ],
-    });
-    return entity.find(this.id);
-  }
-
   get entities() {
     const formatEntities = (entities = []) =>
       entities.map((name, index) => {

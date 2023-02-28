@@ -76,7 +76,6 @@
         :isMultiLabel="dataset.isMultiLabel"
         :datasetId="datasetId"
         :datasetName="dataset.name"
-        :datasetLabels="dataset.labels"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
       />
@@ -92,7 +91,6 @@
         v-if="datasetTask === 'TokenClassification'"
         :datasetId="datasetId"
         :datasetName="dataset.name"
-        :datasetEntities="dataset.entities"
         :datasetQuery="dataset.query"
         :datasetLastSelectedEntity="dataset.lastSelectedEntity"
         :viewSettings="viewSettings"

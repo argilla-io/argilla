@@ -16,25 +16,21 @@
   -->
 
 <template>
-  <div class="container">
-    <div class="entities__wrapper">
-      <div v-if="numberOfLabels" class="entities__container">
-        <entity-label
-          v-for="(label, index) in visibleLabels"
-          :label="label.text"
-          :shortcut="label.shortcut"
-          :key="index"
-          :color="`color_${label.color_id % $entitiesMaxColors}`"
-        />
-        <base-button
-          v-if="isCollapsable"
-          class="entities__container__button secondary light small"
-          @click="toggleLabelsArea"
-        >
-          {{ buttonText }}
-        </base-button>
-      </div>
-    </div>
+  <div v-if="numberOfLabels" class="wrapper">
+    <entity-label
+      v-for="(label, index) in visibleLabels"
+      :label="label.text"
+      :shortcut="label.shortcut"
+      :key="index"
+      :color="`color_${label.color_id % $entitiesMaxColors}`"
+    />
+    <base-button
+      v-if="isCollapsable"
+      class="secondary light small"
+      @click="toggleLabelsArea"
+    >
+      {{ buttonText }}
+    </base-button>
   </div>
 </template>
 
@@ -42,6 +38,7 @@
 const MAX_LABELS_TO_SHOW = 10;
 
 export default {
+  name: "TokenClassificationGlobalLabelsComponent",
   props: {
     labels: {
       type: Array,
@@ -84,33 +81,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.container {
-  @extend %container;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-left: 0;
-  @extend %collapsable-if-metrics !optional;
-}
-.entities {
-  &__wrapper {
-    position: relative;
-  }
-  &__container {
-    padding: 0.4em 0.5em;
-    margin-bottom: $base-space * 2;
-    background: palette(white);
-    border-radius: $border-radius-m;
-    box-shadow: $shadow-300;
-    min-height: 48px;
-    max-height: 189px;
-    overflow: auto;
-    @extend %hide-scrollbar;
-    &__button {
-      display: inline-block;
-    }
-  }
-}
-.entity-label {
-  margin: 4px;
+.wrapper {
+  @extend %hide-scrollbar;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  gap: 8px;
+  max-height: 189px;
+  overflow: auto;
+  scroll-behavior: auto;
+  background: transparent;
 }
 </style>
