@@ -28,7 +28,6 @@
         @validate-records="onValidate"
         @on-select-labels="onSelectLabels($event)"
       />
-      <create-new-action v-if="isCreationLabel" @new-label="onNewLabel" />
     </div>
   </div>
 </template>
@@ -52,10 +51,6 @@ export default {
     datasetVisibleRecords: {
       type: Array,
       required: true,
-    },
-    isCreationLabel: {
-      type: Boolean,
-      default: () => false,
     },
     availableLabels: {
       type: Array,
@@ -83,9 +78,6 @@ export default {
     },
     onSelectLabels($event) {
       this.$emit("on-select-labels", $event);
-    },
-    onNewLabel($event) {
-      this.$emit("new-label", $event);
     },
   },
 };

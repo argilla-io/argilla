@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { ObservationDataset } from "@/models/Dataset";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
 
 async function _updateLastSelectedEntity({ id, lastSelectedEntity }) {
@@ -28,17 +27,6 @@ async function _updateLastSelectedEntity({ id, lastSelectedEntity }) {
 const getters = {};
 
 const actions = {
-  async onSaveTokenDatasetSettings(context, { datasetId, newLabel }) {
-    const { name: datasetName, task: datasetTask } =
-      TokenClassificationDataset.query().whereId(datasetId).first();
-
-    await ObservationDataset.dispatch("onAddNewLabel", {
-      datasetId,
-      datasetName,
-      datasetTask,
-      newLabel,
-    });
-  },
   async updateLastSelectedEntity(_, { dataset, lastSelectedEntity }) {
     await _updateLastSelectedEntity({
       id: dataset.id,
