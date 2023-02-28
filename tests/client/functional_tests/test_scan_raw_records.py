@@ -82,7 +82,7 @@ def test_scan_fail_negative_limit(
         data = list(data)
 
 
-@pytest.mark.parametrize(("limit"), [23, 20])
+@pytest.mark.parametrize(("limit"), [6, 23, 20])
 def test_scan_efficient_limiting(
     monkeypatch: pytest.MonkeyPatch,
     limit,
