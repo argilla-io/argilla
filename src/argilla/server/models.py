@@ -33,18 +33,18 @@ def default_inserted_at(context):
     return context.get_current_parameters()["inserted_at"]
 
 
-class UserWorkspace(Base):
-    __tablename__ = "users_workspaces"
+class WorkspaceUser(Base):
+    __tablename__ = "workspaces_users"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id"))
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
-    user: Mapped["User"] = relationship(viewonly=True)
     workspace: Mapped["Workspace"] = relationship(viewonly=True)
+    user: Mapped["User"] = relationship(viewonly=True)
 
 
 class Workspace(Base):
@@ -57,7 +57,7 @@ class Workspace(Base):
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     users: Mapped[List["User"]] = relationship(
-        secondary="users_workspaces", back_populates="workspaces", order_by=UserWorkspace.inserted_at.asc()
+        secondary="workspaces_users", back_populates="workspaces", order_by=WorkspaceUser.inserted_at.asc()
     )
 
 
@@ -75,5 +75,5 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspaces: Mapped[List["Workspace"]] = relationship(
-        secondary="users_workspaces", back_populates="users", order_by=UserWorkspace.inserted_at.asc()
+        secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
     )

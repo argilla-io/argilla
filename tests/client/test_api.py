@@ -47,7 +47,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
 from argilla.server.contexts import accounts
-from argilla.server.security.model import UserWorkspaceCreate, WorkspaceCreate
+from argilla.server.security.model import WorkspaceCreate, WorkspaceUserCreate
 from sqlalchemy.orm import Session
 
 from tests.helpers import SecuredClient
@@ -454,7 +454,7 @@ def test_dataset_copy_to_another_workspace(mocked_client, admin: User, db: Sessi
     new_workspace_name = "my-fun-workspace"
 
     workspace = accounts.create_workspace(db, WorkspaceCreate(name=new_workspace_name))
-    accounts.create_user_workspace(db, UserWorkspaceCreate(user_id=admin.id, workspace_id=workspace.id))
+    accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=admin.id))
 
     mocked_client.delete(f"/api/datasets/{dataset_name}")
     mocked_client.delete(f"/api/datasets/{dataset_copy}")

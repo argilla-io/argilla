@@ -14,11 +14,11 @@
 
 from uuid import UUID
 
-from argilla.server.models import User, UserWorkspace, Workspace
+from argilla.server.models import User, Workspace, WorkspaceUser
 from argilla.server.security.model import (
     UserCreate,
-    UserWorkspaceCreate,
     WorkspaceCreate,
+    WorkspaceUserCreate,
 )
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -26,27 +26,28 @@ from sqlalchemy.orm import Session
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def get_user_workspace_by_user_id_and_workspace_id(db: Session, user_id: UUID, workspace_id: UUID):
-    return db.query(UserWorkspace).filter_by(user_id=user_id, workspace_id=workspace_id).first()
+def get_workspace_user_by_workspace_id_and_user_id(db: Session, workspace_id: UUID, user_id: UUID):
+    return db.query(WorkspaceUser).filter_by(workspace_id=workspace_id, user_id=user_id).first()
 
 
-def create_user_workspace(db: Session, user_workspace_create: UserWorkspaceCreate):
-    user_workspace = UserWorkspace(
-        user_id=user_workspace_create.user_id, workspace_id=user_workspace_create.workspace_id
+def create_workspace_user(db: Session, workspace_user_create: WorkspaceUserCreate):
+    workspace_user = WorkspaceUser(
+        workspace_id=workspace_user_create.workspace_id,
+        user_id=workspace_user_create.user_id,
     )
 
-    db.add(user_workspace)
+    db.add(workspace_user)
     db.commit()
-    db.refresh(user_workspace)
+    db.refresh(workspace_user)
 
-    return user_workspace
+    return workspace_user
 
 
-def delete_user_workspace(db: Session, user_workspace: UserWorkspace):
-    db.delete(user_workspace)
+def delete_workspace_user(db: Session, workspace_user: WorkspaceUser):
+    db.delete(workspace_user)
     db.commit()
 
-    return user_workspace
+    return workspace_user
 
 
 def get_workspace_by_id(db: Session, workspace_id: UUID):

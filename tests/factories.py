@@ -14,7 +14,14 @@
 
 import factory
 from argilla.server.database import SessionLocal
-from argilla.server.models import User, UserWorkspace, Workspace
+from argilla.server.models import User, Workspace, WorkspaceUser
+
+
+class WorkspaceUserFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = WorkspaceUser
+        sqlalchemy_session = SessionLocal()
+        sqlalchemy_session_persistence = "commit"
 
 
 class WorkspaceFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -36,12 +43,3 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     username = factory.Sequence(lambda n: f"username-{n}")
     api_key = factory.Sequence(lambda n: f"api-key-{n}")
     password_hash = "$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw."
-
-
-class UserWorkspaceFactory(factory.alchemy.SQLAlchemyModelFactory):
-    class Meta:
-        model = UserWorkspace
-        sqlalchemy_session = SessionLocal()
-        sqlalchemy_session_persistence = "commit"
-
-    # TODO: Define relationships with user and workspace

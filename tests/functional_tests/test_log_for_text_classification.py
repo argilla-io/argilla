@@ -23,7 +23,7 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.server.contexts import accounts
 from argilla.server.models import User
-from argilla.server.security.model import UserWorkspaceCreate, WorkspaceCreate
+from argilla.server.security.model import WorkspaceCreate, WorkspaceUserCreate
 from argilla.server.settings import settings
 from sqlalchemy.orm import Session
 
@@ -196,7 +196,7 @@ def test_log_data_in_several_workspaces(mocked_client: SecuredClient, admin: Use
     text = "This is a text"
 
     workspace = accounts.create_workspace(db, WorkspaceCreate(name=workspace_name))
-    accounts.create_user_workspace(db, UserWorkspaceCreate(user_id=admin.id, workspace_id=workspace.id))
+    accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=admin.id))
 
     api = Argilla()
 
