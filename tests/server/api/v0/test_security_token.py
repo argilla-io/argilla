@@ -14,7 +14,6 @@
 
 from argilla.server.models import User
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
 
 
 def test_create_security_token(client: TestClient, admin: User):

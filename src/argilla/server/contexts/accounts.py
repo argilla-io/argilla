@@ -27,14 +27,7 @@ _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_user_workspace_by_user_id_and_workspace_id(db: Session, user_id: UUID, workspace_id: UUID):
-    return (
-        db.query(UserWorkspace)
-        .filter(
-            UserWorkspace.user_id == user_id,
-            UserWorkspace.workspace_id == workspace_id,
-        )
-        .first()
-    )
+    return db.query(UserWorkspace).filter_by(user_id=user_id, workspace_id=workspace_id).first()
 
 
 def create_user_workspace(db: Session, user_workspace_create: UserWorkspaceCreate):
@@ -57,7 +50,7 @@ def delete_user_workspace(db: Session, user_workspace: UserWorkspace):
 
 
 def get_workspace_by_id(db: Session, workspace_id: UUID):
-    return db.query(Workspace).get(workspace_id)
+    return db.get(Workspace, workspace_id)
 
 
 def list_workspaces(db: Session):
@@ -82,15 +75,15 @@ def delete_workspace(db: Session, workspace: Workspace):
 
 
 def get_user_by_id(db: Session, user_id: UUID):
-    return db.query(User).get(user_id)
+    return db.get(User, user_id)
 
 
 def get_user_by_username(db: Session, username: str):
-    return db.query(User).filter(User.username == username).first()
+    return db.query(User).filter_by(username=username).first()
 
 
 def get_user_by_api_key(db: Session, api_key: str):
-    return db.query(User).filter(User.api_key == api_key).first()
+    return db.query(User).filter_by(api_key=api_key).first()
 
 
 def list_users(db: Session):
