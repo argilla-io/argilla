@@ -151,25 +151,25 @@ export default {
           id: "validate",
           name: "Validate",
           allow: true,
-          active: this.record.status !== "Validated",
+          active: this.record.status === "Validated",
         },
         {
           id: "discard",
           name: "Discard",
           allow: true,
-          active: this.record.status !== "Discarded",
+          active: this.record.status === "Discarded",
         },
         {
           id: "clear",
           name: "Clear",
           allow: true,
-          active: this.record.annotatedEntities?.length || false,
+          disable: !this.record.annotatedEntities?.length || false,
         },
         {
           id: "reset",
           name: "Reset",
           allow: true,
-          active: this.record.status === "Edited",
+          disable: this.record.status !== "Edited",
         },
       ];
     },
@@ -254,7 +254,7 @@ export default {
   @include font-size(16px);
   line-height: 34px;
   .list__item--selectable & {
-    padding-left: 50px;
+    padding-left: $base-space * 7;
   }
 }
 

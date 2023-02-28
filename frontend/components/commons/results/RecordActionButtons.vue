@@ -1,10 +1,11 @@
 <template>
   <div class="record__actions-buttons">
-    <span v-for="{ id, name, active } in allowedActions" :key="id">
+    <span v-for="{ id, name, active, disable } in allowedActions" :key="id">
       <base-button
         :class="`record__actions-button--${id}`"
         @click="onAction(id)"
-        :disabled="!active"
+        :disabled="disable"
+        :active="active && !disable"
       >
         <svgicon :name="id" width="14" height="14" />
         {{ name }}
@@ -79,16 +80,20 @@ $recordActions: (
   }
   &__actions-button--validate {
     color: palette(green);
-    &[disabled] {
+    &[active] {
       border-color: palette(green);
       background: palette(white);
       opacity: 1;
+      pointer-events: none;
+      cursor: default;
     }
   }
   &__actions-button--discard {
-    &[disabled] {
+    &[active] {
       background: palette(white);
       opacity: 1;
+      pointer-events: none;
+      cursor: default;
     }
   }
 }

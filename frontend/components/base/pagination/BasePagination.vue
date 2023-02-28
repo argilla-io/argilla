@@ -232,9 +232,9 @@ export default {
     keyDown(event) {
       const arrowRight = event.keyCode === 39;
       const arrowLeft = event.keyCode === 37;
-      const focusInInput = event.target.tagName?.toLowerCase() === "input";
       const allowPagination =
-        !this.paginationSettings.disabledShortCutPagination && !focusInInput;
+        !this.paginationSettings.disabledShortCutPagination &&
+        !this.isEditableAreaFocused(event);
       if (allowPagination) {
         if (arrowRight) {
           this.nextPage();
@@ -242,6 +242,12 @@ export default {
           this.prevPage();
         }
       }
+    },
+    isEditableAreaFocused(event) {
+      return (
+        event.target.tagName?.toLowerCase() === "input" ||
+        event.target.contentEditable?.toLowerCase() === "true"
+      );
     },
     showNotification() {
       Notification.dispatch("notify", {

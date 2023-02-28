@@ -211,8 +211,13 @@ export default {
     margin-top: 0.8em;
     &--left {
       display: flex;
+      gap: 20px;
       align-items: center;
       margin-right: auto;
+      margin-left: 20px;
+      .list__item--selectable & {
+        margin-left: $base-space * 2;
+      }
     }
   }
   &__extra-actions {
@@ -251,9 +256,6 @@ export default {
   }
 }
 .list {
-  &__checkbox.re-checkbox {
-    margin: auto $base-space;
-  }
   &__item {
     position: relative;
     display: inline-block;
@@ -264,7 +266,6 @@ export default {
     margin-top: $base-space-between-records;
     &--selectable {
       @extend .list__item !optional;
-      padding-left: $base-space;
     }
   }
 }

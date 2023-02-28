@@ -22,24 +22,15 @@ class Text2TextRecord extends BaseRecord {
   text;
   lastEditedSentence;
 
-  constructor({ text, lastEditedSentence, ...superData }) {
+  constructor({ text, lastEditedSentence, originStatus, ...superData }) {
     super(superData);
     this.text = text;
     this.lastEditedSentence = lastEditedSentence;
+    this.originStatus = originStatus || this.status;
   }
 
   recordTitle() {
     return this.text;
-  }
-
-  get modified() {
-    if (
-      !(this.lastEditedSentence || this.annotation || this.annotation.sentences)
-    ) {
-      return false;
-    }
-
-    return this.lastEditedSentence !== this.annotation.sentences[0].text;
   }
 
   get sentenceForAnnotation() {

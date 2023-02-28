@@ -1,23 +1,21 @@
 <template>
   <span>
     <div class="content__edition-area">
-      <p
-        ref="text"
-        class="content__text"
-        :contenteditable="contentEditable"
-        :placeholder="placeholder"
-        @input="onInputText"
-        @click="$emit('edit')"
-        v-html="editableText"
-      ></p>
-      <span v-if="editionMode"><strong>shift Enter</strong> to save</span>
+      <transition appear name="fade">
+        <p
+          ref="text"
+          class="content__text"
+          :class="textIsEdited ? '--edited-text' : null"
+          :contenteditable="annotationEnabled"
+          :placeholder="placeholder"
+          @input="onInputText"
+          v-html="editableText"
+          @focus="setFocus(true)"
+          @blur="setFocus(false)"
+        ></p>
+      </transition>
+      <span><strong>shift Enter</strong> to save</span>
     </div>
-    <base-button
-      v-if="editionMode && annotationEnabled && editableText"
-      class="content__edit__button primary outline small"
-      @click="$emit('back')"
-      >Back</base-button
-    >
   </span>
 </template>
 <script>
@@ -27,8 +25,8 @@ export default {
       type: Boolean,
       required: true,
     },
-    editionMode: {
-      type: Boolean,
+    annotations: {
+      type: Array,
       required: true,
     },
     defaultText: {
@@ -42,19 +40,24 @@ export default {
   },
   data: () => {
     return {
-      editableText: undefined,
+      editableText: null,
       shiftPressed: false,
       shiftKey: undefined,
+      focus: false,
     };
   },
   computed: {
-    contentEditable() {
-      return this.annotationEnabled && this.editionMode;
+    textIsEdited() {
+      return (
+        this.defaultText !== this.editableText ||
+        this.defaultText === this.annotations[0]?.text
+      );
     },
   },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
     window.addEventListener("keyup", this.keyUp);
+    window.addEventListener("paste", this.pastePlainText);
     if (this.defaultText) {
       this.editableText = this.defaultText;
     } else {
@@ -63,7 +66,8 @@ export default {
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
-    window.addEventListener("keyup", this.keyUp);
+    window.removeEventListener("keyup", this.keyUp);
+    window.removeEventListener("paste", this.pastePlainText);
   },
   methods: {
     onInputText(event) {
@@ -75,6 +79,7 @@ export default {
       }
     },
     keyUp(event) {
+      event.preventDefault();
       if (this.shiftKey === event.key) {
         this.shiftPressed = false;
       }
@@ -85,8 +90,22 @@ export default {
         this.shiftPressed = true;
       }
       const enter = event.key === "Enter";
-      if (this.shiftPressed && this.editionMode && enter) {
+
+      if (this.focus && this.shiftPressed && enter) {
+        event.preventDefault();
+        this.shiftPressed = false;
         this.annotate();
+      }
+    },
+    setFocus(status) {
+      this.focus = status;
+      this.$emit("on-change-focus", status);
+    },
+    pastePlainText(event) {
+      if (this.focus && event.target.isContentEditable) {
+        event.preventDefault();
+        const text = event.clipboardData.getData("text/plain");
+        document.execCommand("insertText", false, text);
       }
     },
   },
@@ -95,21 +114,22 @@ export default {
 <style lang="scss" scoped>
 $marginRight: 200px;
 [contenteditable="true"] {
-  box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
-  border-radius: $border-radius-s 3px 3px 3px;
+  padding: 0.6em;
+  outline: none;
   &:focus + span {
     display: block;
   }
 }
 [contenteditable="true"]:empty:before {
-  color: palette(grey, verylight);
   content: attr(placeholder);
+  color: $black-37;
   pointer-events: none;
   display: block; /* For Firefox */
 }
 .content {
   &__edition-area {
     position: relative;
+    width: 100%;
     margin-right: $marginRight;
     span {
       position: absolute;
@@ -122,14 +142,15 @@ $marginRight: 200px;
     }
   }
   &__text {
-    color: black;
-    white-space: pre-wrap;
     display: inline-block;
     width: 100%;
-  }
-  &__edit {
-    &__button {
-      margin-top: 2.5em;
+    min-height: 30px;
+    color: $black-87;
+    white-space: pre-wrap;
+    margin: 0;
+    font-style: italic;
+    &.--edited-text {
+      font-style: normal;
     }
   }
 }

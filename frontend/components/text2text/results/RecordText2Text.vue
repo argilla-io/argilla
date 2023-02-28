@@ -19,16 +19,15 @@
   <div class="record">
     <record-string-text-2-text :record="record" />
     <div>
-      <text-2-text-list
+      <Text2TextList
         ref="list"
         :datasetId="datasetId"
         :datasetName="datasetName"
         :record="record"
         :predictions="predictionSentences"
-        :annotations="initialAnnotations"
+        :annotations="annotationSentence"
         :annotation-enabled="interactionsEnabled"
-        @update-initial-record="initializeInitialRecord"
-        @reset-initial-record="onResetInitialRecord"
+        @reset-record="onReset"
         @annotate="onAnnotate"
         @discard="onDiscard"
       />
@@ -36,17 +35,10 @@
   </div>
 </template>
 <script>
-import { IdState } from "vue-virtual-scroller";
 import { Text2TextRecord } from "@/models/Text2Text";
 import { getText2TextDatasetById } from "@/models/text2text.queries";
 import { mapActions } from "vuex";
 export default {
-  mixins: [
-    IdState({
-      // You can customize this
-      idProp: (vm) => `${vm.datasetName}-${vm.record.id}`,
-    }),
-  ],
   props: {
     datasetId: {
       type: Array,
@@ -69,60 +61,33 @@ export default {
       default: false,
     },
   },
-  idState() {
-    return {
-      initialRecord: {},
-    };
-  },
   computed: {
-    initialRecord: {
-      get() {
-        return this.idState.initialRecord;
-      },
-      set(newValue) {
-        this.idState.initialRecord = newValue;
-      },
-    },
     interactionsEnabled() {
       return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
     },
-    annotationSentences() {
-      return this.record.annotation ? this.record.annotation.sentences : [];
-    },
     predictionSentences() {
-      return this.record.prediction ? this.record.prediction.sentences : [];
+      return this.record.prediction?.sentences ?? [];
     },
-    initialAnnotations() {
-      return this.initialRecord.annotation
-        ? this.initialRecord.annotation.sentences
-        : [];
+    annotationSentence() {
+      return this.record.annotation?.sentences ?? [];
     },
-  },
-  mounted() {
-    if (!typeof this.records === Text2TextRecord) {
-      this.record = Text2TextRecord(this.record);
-    }
-    this.initializeInitialRecord();
   },
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
       validate: "entities/datasets/validateAnnotations",
+      resetRecords: "entities/datasets/resetRecords",
     }),
 
-    initializeInitialRecord() {
-      this.initialRecord = Object.assign({}, this.record);
-    },
-    async onResetInitialRecord() {
-      await this.updateRecords({
+    async onReset() {
+      await this.resetRecords({
         dataset: this.getText2TextDataset(),
         records: [
           {
-            ...this.initialRecord,
-            selected: false,
+            ...this.record,
           },
         ],
       });
@@ -135,7 +100,6 @@ export default {
           sentences,
         },
       };
-      this.initialRecord = newRecord;
       await this.validate({
         dataset: this.getText2TextDataset(),
         // TODO: Move user agent to action
@@ -161,7 +125,7 @@ export default {
   width: 100%;
   padding: $base-space * 4 200px 20px 20px;
   .list__item--selectable & {
-    padding-left: 50px;
+    padding-left: $base-space * 7;
   }
   &:hover {
     :deep(.edit) {
