@@ -38,8 +38,8 @@ import { currentWorkspace } from "@/models/Workspace";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 export default {
   props: {
-    datasetName: {
-      type: String,
+    datasetId: {
+      type: Array,
       required: true,
     },
     datasetTask: {
@@ -55,7 +55,7 @@ export default {
   },
   computed: {
     datasetName() {
-      return this.dataset.name;
+      return this.dataset?.name;
     },
     datasetDeleteTitle() {
       return `Delete ${this.workspace}`;
@@ -103,5 +103,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
