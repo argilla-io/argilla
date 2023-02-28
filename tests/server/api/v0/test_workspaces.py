@@ -58,7 +58,7 @@ def test_create_workspace_without_authentication(client: TestClient, db: Session
     assert db.query(Workspace).count() == 0
 
 
-def test_create_workspace_with_empty_name(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_workspace_with_invalid_min_length_name(client: TestClient, db: Session, admin_auth_header: dict):
     response = client.post("/api/workspaces", headers=admin_auth_header, json={"name": ""})
 
     assert response.status_code == 422

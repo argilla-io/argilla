@@ -80,11 +80,17 @@ def test_create_user_without_authentication(client: TestClient, db: Session):
     assert db.query(User).count() == 1
 
 
-# TODO: We need to review all the models because of this.
-# More info here: https://github.com/pydantic/pydantic/issues/1626
-@pytest.mark.skip(reason="pydantic allows empty strings for non optional fields")
-def test_create_user_with_invalid_firstname(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user_with_invalid_min_length_first_name(client: TestClient, db: Session, admin_auth_header: dict):
     user = {"first_name": "", "username": "username", "password": "12345678"}
+
+    response = client.post("/api/users", headers=admin_auth_header, json=user)
+
+    assert response.status_code == 422
+    assert db.query(User).count() == 1
+
+
+def test_create_user_with_invalid_min_length_last_name(client: TestClient, db: Session, admin_auth_header: dict):
+    user = {"first_name": "first-name", "last_name": "", "username": "username", "password": "12345678"}
 
     response = client.post("/api/users", headers=admin_auth_header, json=user)
 
@@ -101,8 +107,17 @@ def test_create_user_with_invalid_username(client: TestClient, db: Session, admi
     assert db.query(User).count() == 1
 
 
-def test_create_user_with_invalid_password(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user_with_invalid_min_password_length(client: TestClient, db: Session, admin_auth_header: dict):
     user = {"first_name": "first-name", "username": "username", "password": "1234"}
+
+    response = client.post("/api/users", headers=admin_auth_header, json=user)
+
+    assert response.status_code == 422
+    assert db.query(User).count() == 1
+
+
+def test_create_user_with_invalid_max_password_length(client: TestClient, db: Session, admin_auth_header: dict):
+    user = {"first_name": "first-name", "username": "username", "password": "p" * 101}
 
     response = client.post("/api/users", headers=admin_auth_header, json=user)
 
