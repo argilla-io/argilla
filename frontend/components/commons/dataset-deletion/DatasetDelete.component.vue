@@ -23,7 +23,7 @@
           <base-button class="primary outline" @click="showDeleteModal(false)">
             Cancel
           </base-button>
-          <base-button class="primary" @click="onDeleteDataset">
+          <base-button class="primary" @click="onConfirmDeleteDataset">
             Yes, delete
           </base-button>
         </div>
@@ -66,15 +66,27 @@ export default {
     ...mapActions({
       deleteDataset: "entities/datasets/deleteDataset",
     }),
-    async onDeleteDataset() {
+    async onConfirmDeleteDataset() {
+      try {
+        await this.deleteSelectedDataset();
+        this.goToDatasetList();
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.showDeleteModal(false);
+      }
+    },
+    showDeleteModal(value) {
+      this.isDeleteModalVisible = value;
+    },
+    goToDatasetList() {
+      this.$router.push("/");
+    },
+    async deleteSelectedDataset() {
       await this.deleteDataset({
         workspace: this.workspace,
         name: this.datasetName,
       });
-      this.showDeleteModal(false);
-    },
-    showDeleteModal(value) {
-      this.isDeleteModalVisible = value;
     },
   },
 };

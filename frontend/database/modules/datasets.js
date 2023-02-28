@@ -588,7 +588,6 @@ const actions = {
         message: `${name} have been deleted`,
         type: "success",
       });
-      $nuxt.$router.push("/");
     } catch (error) {
       console.log(error);
     }
