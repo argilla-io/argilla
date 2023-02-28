@@ -232,7 +232,9 @@ export default {
     keyDown(event) {
       const arrowRight = event.keyCode === 39;
       const arrowLeft = event.keyCode === 37;
-      const focusInInput = event.target.tagName?.toLowerCase() === "input";
+      const focusInInput =
+        event.target.tagName?.toLowerCase() === "input" ||
+        event.target.contentEditable === "true";
       const allowPagination =
         !this.paginationSettings.disabledShortCutPagination && !focusInInput;
       if (allowPagination) {
