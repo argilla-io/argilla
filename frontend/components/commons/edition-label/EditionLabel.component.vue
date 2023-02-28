@@ -13,7 +13,7 @@
         :labels="labels"
       />
       <div class="buttons-area">
-        <create-new-action v-if="allowAddNewLabel" @new-label="onAddNewLabel" />
+        <create-new-action v-if="allowAddNewLabel" @new-label="onAddNewLabels" />
       </div>
     </div>
   </div>
@@ -68,11 +68,11 @@ export default {
   },
   methods: {
     ...mapActions({
-      onAddNewLabelInDataset: "entities/datasets/onAddNewLabel",
+      onAddNewLabelsInDataset: "entities/datasets/onAddNewLabels",
     }),
-    async onAddNewLabel(newLabelsString) {
+    async onAddNewLabels(newLabelsString) {
       const newLabels = this.splitAndTrimArrayString(newLabelsString);
-      await this.onAddNewLabelInDataset({
+      await this.onAddNewLabelsInDataset({
         datasetId: this.datasetId,
         datasetTask: this.datasetTask,
         newLabels,

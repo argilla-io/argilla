@@ -586,7 +586,7 @@ const actions = {
       },
     });
   },
-  async onAddNewLabel(context, { datasetId, datasetTask, newLabels }) {
+  async onAddNewLabels(context, { datasetId, datasetTask, newLabels }) {
     const { name: datasetName } = getDatasetFromORM(datasetId, datasetTask);
 
     if (datasetName && datasetTask) {

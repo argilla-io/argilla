@@ -72,7 +72,7 @@ export default {
   data() {
     return {
       isSortAsc: true,
-      sortBy: "text",
+      sortBy: "order",
     };
   },
   computed: {
