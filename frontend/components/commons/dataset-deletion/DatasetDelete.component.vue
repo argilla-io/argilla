@@ -35,9 +35,14 @@
 <script>
 import { mapActions } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 export default {
   props: {
     datasetName: {
+      type: String,
+      required: true,
+    },
+    datasetTask: {
       type: String,
       required: true,
     },
@@ -49,6 +54,9 @@ export default {
     };
   },
   computed: {
+    datasetName() {
+      return this.dataset.name;
+    },
     datasetDeleteTitle() {
       return `Delete ${this.workspace}`;
     },
@@ -57,6 +65,9 @@ export default {
     },
     modalDescription() {
       return `You are about to delete: <strong>${this.datasetName}</strong> from workspace <strong>${this.workspace}</strong>. This action cannot be undone`;
+    },
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
     },
     workspace() {
       return currentWorkspace(this.$route);
