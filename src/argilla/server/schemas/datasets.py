@@ -17,7 +17,8 @@
 Dataset models definition
 """
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -59,6 +60,7 @@ class CopyDatasetRequest(_BaseDatasetRequest):
 
 
 class Dataset(CreateDatasetRequest):
+    id: Union[str, UUID]
     task: TaskType
     owner: str = Field(description="Deprecated. Use `workspace` instead. Will be removed in v1.5.0")
     workspace: str

@@ -54,6 +54,7 @@ def test_create_dataset(mocked_client):
     )
     assert response.status_code == 200
     dataset = Dataset.parse_obj(response.json())
+    assert dataset.id
     assert dataset.created_by == "argilla"
     assert dataset.metadata == request["metadata"]
     assert dataset.tags == request["tags"]
@@ -171,6 +172,8 @@ def test_list_datasets(mocked_client):
     datasets = [Dataset.parse_obj(item) for item in response.json()]
     assert len(datasets) > 0
     assert dataset in [ds.name for ds in datasets]
+    for ds in datasets:
+        assert ds.id
 
 
 def test_update_dataset(mocked_client):
