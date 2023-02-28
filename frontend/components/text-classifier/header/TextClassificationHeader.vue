@@ -32,12 +32,10 @@
       :datasetTask="datasetTask"
       :datasetVisibleRecords="dataset.visibleRecords"
       :availableLabels="listOfTexts"
-      :isCreationLabel="allowLabelCreation"
       :isMultiLabel="isMultiLabel"
       @discard-records="onDiscard"
       @validate-records="onValidate"
       @on-select-labels="onSelectLabels($event)"
-      @new-label="onNewLabel"
     />
   </div>
 </template>
@@ -97,9 +95,6 @@ export default {
         this.isSortAsc
       );
     },
-    allowLabelCreation() {
-      return !this.dataset.settings.label_schema;
-    },
   },
   methods: {
     ...mapActions({
@@ -154,12 +149,6 @@ export default {
             },
           };
         }),
-      });
-    },
-    async onNewLabel(newLabel) {
-      await this.dataset.$dispatch("onSaveTokenDatasetSettings", {
-        datasetId: this.datasetId,
-        newLabel,
       });
     },
     searchRecords(query) {

@@ -52,10 +52,6 @@ export default {
       type: Array,
       required: true,
     },
-    isCreationLabel: {
-      type: Boolean,
-      default: () => false,
-    },
     availableLabels: {
       type: Array,
       default: () => [],
@@ -82,9 +78,6 @@ export default {
     },
     onSelectLabels($event) {
       this.$emit("on-select-labels", $event);
-    },
-    onNewLabel($event) {
-      this.$emit("new-label", $event);
     },
   },
 };
