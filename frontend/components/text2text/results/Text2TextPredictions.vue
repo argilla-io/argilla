@@ -73,18 +73,18 @@ export default {
   },
   computed: {
     arePredictionsVisible: {
-      get: function () {
+      get() {
         return this.idState.arePredictionsVisible;
       },
-      set: async function (newValue) {
+      set(newValue) {
         this.idState.arePredictionsVisible = newValue;
       },
     },
     selectedPredictionIndex: {
-      get: function () {
+      get() {
         return this.idState.selectedPredictionIndex;
       },
-      set: async function (newValue) {
+      set(newValue) {
         this.idState.selectedPredictionIndex = newValue;
       },
     },

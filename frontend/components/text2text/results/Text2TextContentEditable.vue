@@ -104,7 +104,7 @@ export default {
     pastePlainText(event) {
       if (this.focus && event.target.isContentEditable) {
         event.preventDefault();
-        var text = event.clipboardData.getData("text/plain");
+        const text = event.clipboardData.getData("text/plain");
         document.execCommand("insertText", false, text);
       }
     },
