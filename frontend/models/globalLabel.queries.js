@@ -46,12 +46,12 @@ const countLabelsByDatasetId = (datasetId) => {
 const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
   const numberOfLabels = countLabelsByDatasetId(datasetId);
-
   GlobalLabelModel.insert({
     data: {
       id: newLabel,
       text: newLabel,
       dataset_id: joinedDatasetId,
+      order: numberOfLabels,
       color_id: numberOfLabels,
       shortcut: numberOfLabels < 9 ? String(numberOfLabels + 1) : null,
       is_activate: isActivate,

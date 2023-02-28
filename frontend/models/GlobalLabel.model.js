@@ -7,6 +7,7 @@ class GlobalLabel extends Model {
   static fields() {
     return {
       id: this.uid(),
+      order: this.number(null),
       color_id: this.attr(null),
       text: this.string(null),
       dataset_id: this.attr(null),

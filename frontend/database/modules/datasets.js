@@ -896,6 +896,7 @@ const factoryLabelsForGlobalLabelsModel = (datasetId, labels) => {
   const formattedLabels = labels.map(({ id, name }, index) => {
     return {
       id,
+      order: index,
       text: name,
       dataset_id: datasetId,
       color_id: index,
