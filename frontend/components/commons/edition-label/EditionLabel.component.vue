@@ -13,7 +13,10 @@
         :labels="labels"
       />
       <div class="buttons-area">
-        <create-new-action v-if="allowAddNewLabel" @new-label="onAddNewLabels" />
+        <create-new-action
+          v-if="allowAddNewLabel"
+          @new-label="onAddNewLabels"
+        />
       </div>
     </div>
   </div>
