@@ -58,7 +58,7 @@ def test_create_dataset(mocked_client):
     assert dataset.metadata == request["metadata"]
     assert dataset.tags == request["tags"]
     assert dataset.name == dataset_name
-    assert dataset.owner == "argilla"
+    assert dataset.workspace == "argilla"
     assert dataset.task == TaskType.text_classification
 
     response = mocked_client.post(

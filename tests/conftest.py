@@ -14,8 +14,9 @@
 
 import httpx
 import pytest
-from _pytest.logging import LogCaptureFixture
+from argilla import app
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
+from argilla.client.api import active_api
 from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
@@ -23,13 +24,6 @@ from argilla.server.contexts import accounts
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, Workspace, WorkspaceUser
 from argilla.server.seeds import test_seeds
-
-try:
-    from loguru import logger
-except ModuleNotFoundError:
-    logger = None
-from argilla import app
-from argilla.client.api import active_api
 from starlette.testclient import TestClient
 
 from .helpers import SecuredClient
@@ -43,8 +37,8 @@ def client():
 
 @pytest.fixture(scope="function")
 def db():
-    test_seeds()
     session = SessionLocal()
+    # test_seeds(session)  # without a session, rollback is not working when some error occurs in a test
 
     yield session
 
@@ -56,12 +50,54 @@ def db():
 
 @pytest.fixture(scope="function")
 def admin(db):
-    return accounts.get_user_by_api_key(db, DEFAULT_API_KEY)
+    user = User(
+        first_name="Admin",
+        username="admin",
+        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+        api_key="admin.apikey",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@pytest.fixture
+def mock_user(db):
+    user = User(
+        first_name="Mock",
+        username="mock-user",
+        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+        api_key="mock-user.apikey",
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
 
 
 @pytest.fixture(scope="function")
-def admin_auth_header(db):
-    return {API_KEY_HEADER_NAME: DEFAULT_API_KEY}
+def admin_auth_header(db, admin):
+    return {API_KEY_HEADER_NAME: admin.api_key}
+
+
+@pytest.fixture
+def argilla_user(db):
+    user = User(
+        first_name="Argilla",
+        username="argilla",
+        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+        api_key=DEFAULT_API_KEY,
+        workspaces=[Workspace(name="argilla")],
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
 
 
 @pytest.fixture
@@ -76,23 +112,6 @@ def telemetry_track_data(mocker):
 
 
 @pytest.fixture
-def mock_user(db):
-    user = User(
-        first_name="Mock",
-        username="mock-user",
-        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
-        api_key="mock-user.apikey",
-        workspaces=[Workspace(name="argilla"), Workspace(name="mock-ws")],
-    )
-
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
-
-
-@pytest.fixture
 def api():
     return Argilla()
 
@@ -102,6 +121,7 @@ def mocked_client(
     db,
     monkeypatch,
     telemetry_track_data,
+    argilla_user,
 ) -> SecuredClient:
     with TestClient(app, raise_server_exceptions=False) as _client:
         client_ = SecuredClient(_client)
@@ -126,13 +146,3 @@ def mocked_client(
         monkeypatch.setattr(rb_api._client, "__httpx__", client_)
 
         yield client_
-
-
-@pytest.fixture
-def caplog(caplog: LogCaptureFixture):
-    if not logger:
-        yield caplog
-    else:
-        handler_id = logger.add(caplog.handler, format="{message}")
-        yield caplog
-        logger.remove(handler_id)

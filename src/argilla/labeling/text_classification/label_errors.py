@@ -21,6 +21,7 @@ from pkg_resources import parse_version
 
 from argilla.client.datasets import DatasetForTextClassification
 from argilla.client.models import TextClassificationRecord
+from argilla.utils.dependency import requires_version
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ class SortBy(Enum):
         )
 
 
+@requires_version("cleanlab")
 def find_label_errors(
     records: Union[List[TextClassificationRecord], DatasetForTextClassification],
     sort_by: Union[str, SortBy] = "likelihood",
@@ -76,18 +78,12 @@ def find_label_errors(
         >>> records = rg.load("my_dataset")
         >>> records_with_label_errors = find_label_errors(records)
     """
-    try:
-        import cleanlab
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            "'cleanlab' must be installed to use the `find_label_errors` method! "
-            "You can install 'cleanlab' with the command: `pip install cleanlab`"
-        )
+    import cleanlab
+
+    if parse_version(cleanlab.__version__) < parse_version("2.0"):
+        from cleanlab.pruning import get_noise_indices as find_label_issues
     else:
-        if parse_version(cleanlab.__version__) < parse_version("2.0"):
-            from cleanlab.pruning import get_noise_indices as find_label_issues
-        else:
-            from cleanlab.filter import find_label_issues
+        from cleanlab.filter import find_label_issues
 
     if isinstance(sort_by, str):
         sort_by = SortBy(sort_by)

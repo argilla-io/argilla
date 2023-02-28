@@ -82,7 +82,7 @@ export default {
       { name: "Name", field: "name", class: "table-info__title", type: "link" },
       {
         name: "Workspace",
-        field: "owner",
+        field: "workspace",
         class: "text",
         type: "text",
         filtrable: "true",
@@ -142,7 +142,7 @@ export default {
       const tasks = this.tasks;
       const tags = this.tags;
       return [
-        { column: "owner", values: workspaces || [] },
+        { column: "workspace", values: workspaces || [] },
         { column: "task", values: tasks || [] },
         { column: "tags", values: tags || [] },
       ];
@@ -217,7 +217,7 @@ export default {
       _deleteDataset: "entities/datasets/deleteDataset",
     }),
     onColumnFilterApplied({ column, values }) {
-      if (column === "owner") {
+      if (column === "workspace") {
         if (values !== this.workspaces) {
           this.$router.push({
             query: { ...this.$route.query, workspace: values },
@@ -243,7 +243,7 @@ export default {
       }
     },
     datasetWorkspace(dataset) {
-      var workspace = dataset.owner;
+      var workspace = dataset.workspace;
       if (workspace === null || workspace === "null") {
         workspace = this.workspace;
       }
@@ -285,7 +285,7 @@ export default {
     },
     deleteDataset(dataset) {
       this._deleteDataset({
-        workspace: dataset.owner,
+        workspace: dataset.workspace,
         name: dataset.name,
       });
       this.closeModal();
