@@ -17,7 +17,6 @@ const options = {
   },
 };
 beforeEach(() => {
-  console.log(wrapper);
   wrapper = shallowMount(DatasetDelete, options);
 });
 
