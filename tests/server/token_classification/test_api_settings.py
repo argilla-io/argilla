@@ -11,8 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import argilla as rg
+import pytest
+from argilla.client.sdk.commons.errors import ForbiddenApiError
+from argilla.server.apis.v0.models.dataset_settings import TextClassificationSettings
 from argilla.server.commons.models import TaskType
 
 
@@ -61,6 +63,56 @@ def test_delete_settings(mocked_client):
     response = mocked_client.delete(f"/api/datasets/{TaskType.token_classification}/{name}/settings")
     assert response.status_code == 200
     assert fetch_settings(mocked_client, name).status_code == 404
+
+
+def test_create_settings_no_admin(mocked_client):
+    try:
+        dataset_name = "test_create_settings_no_admin"
+        rg.delete(dataset_name)
+
+        create_dataset(mocked_client, dataset_name)
+
+        mocked_client.change_current_user("mock-user")
+        response = create_settings(mocked_client, dataset_name)
+
+        assert response.status_code == 403
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ForbiddenOperationError",
+                "params": {
+                    "detail": "Cannot save settings for dataset "
+                    "argilla.test_create_settings_no_admin. Only "
+                    "admins can apply this change"
+                },
+            }
+        }
+    finally:
+        mocked_client.reset_default_user()
+
+
+def test_delete_settings_with_no_superuser(mocked_client):
+    try:
+        dataset_name = "test_delete_settings_with_no_superuser"
+        rg.delete(dataset_name)
+
+        create_dataset(mocked_client, dataset_name)
+        assert create_settings(mocked_client, dataset_name).status_code == 200
+
+        mocked_client.change_current_user("mock-user")
+        response = mocked_client.delete(f"/api/datasets/{TaskType.token_classification}/{dataset_name}/settings")
+        assert response.status_code == 403
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ForbiddenOperationError",
+                "params": {
+                    "detail": "Cannot delete settings for dataset "
+                    "argilla.test_delete_settings_with_no_superuser. "
+                    "Only admins can apply this change"
+                },
+            }
+        }
+    finally:
+        mocked_client.reset_default_user()
 
 
 def test_validate_settings_when_logging_data(mocked_client):
