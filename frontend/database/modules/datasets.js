@@ -871,12 +871,14 @@ const isAnyKeyInArrayItem = (arrayWithObjItem, key) => {
 const initGlobalLabels = async ({ name, task, id }) => {
   deleteAllGlobalLabelModel();
   const labels = await fetchLabelsFromSettings({ name, task });
-  const joinedDatasetId = id.join(".");
-  const formattedLabels = factoryLabelsForGlobalLabelsModel(
-    joinedDatasetId,
-    labels
-  );
-  upsertLabelsInGlobalLabelModel(formattedLabels);
+  if (labels) {
+    const joinedDatasetId = id.join(".");
+    const formattedLabels = factoryLabelsForGlobalLabelsModel(
+      joinedDatasetId,
+      labels
+    );
+    upsertLabelsInGlobalLabelModel(formattedLabels);
+  }
 };
 
 const fetchLabelsFromSettings = async ({ name, task }) => {
@@ -893,11 +895,13 @@ const fetchLabelsFromSettings = async ({ name, task }) => {
   } catch (err) {
     const { status } = err.response;
     if (status === 404) {
-      throw new Error(
+      console.log(
         `STATUS: ${status}, This dataset does not contains any settings`
       );
+      return null;
+    } else {
+      throw new Error(`STATUS: ${status}, Could not fetch settings`);
     }
-    throw new Error(`STATUS: ${status}, Could not fetch settings`);
   }
 };
 
