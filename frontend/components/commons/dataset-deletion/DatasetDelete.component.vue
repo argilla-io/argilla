@@ -1,12 +1,12 @@
 <template>
-  <div class="description">
+  <div class="description" v-if="datasetName">
     <h2 class="--heading5 --semibold description__title">{{ sectionTitle }}</h2>
     <base-card
       card-type="danger"
       :title="datasetDeleteTitle"
       text="Be careful, this action is not reversible"
       buttonText="Delete dataset"
-      @card-action="showDeleteModal(true)"
+      @card-action="toggleDeleteModal(true)"
     />
     <base-modal
       class="delete-modal"
@@ -15,12 +15,15 @@
       modal-class="modal-secondary"
       :modal-title="modalTitle"
       :modal-visible="showDeleteModal"
-      @close-modal="showDeleteModal(false)"
+      @close-modal="toggleDeleteModal(false)"
     >
       <div>
         <p v-html="modalDescription"></p>
         <div class="modal-buttons">
-          <base-button class="primary outline" @click="showDeleteModal(false)">
+          <base-button
+            class="primary outline"
+            @click="toggleDeleteModal(false)"
+          >
             Cancel
           </base-button>
           <base-button class="primary" @click="onConfirmDeleteDataset">
@@ -54,6 +57,9 @@ export default {
     };
   },
   computed: {
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
     datasetName() {
       return this.dataset?.name;
     },
@@ -65,9 +71,6 @@ export default {
     },
     modalDescription() {
       return `You are about to delete: <strong>${this.datasetName}</strong> from workspace <strong>${this.workspace}</strong>. This action cannot be undone`;
-    },
-    dataset() {
-      return getDatasetFromORM(this.datasetId, this.datasetTask);
     },
     workspace() {
       return currentWorkspace(this.$route);
@@ -84,10 +87,10 @@ export default {
       } catch (error) {
         console.log(error);
       } finally {
-        this.showDeleteModal(false);
+        this.toggleDeleteModal(false);
       }
     },
-    showDeleteModal(value) {
+    toggleDeleteModal(value) {
       this.showDeleteModal = value;
     },
     goToDatasetList() {
