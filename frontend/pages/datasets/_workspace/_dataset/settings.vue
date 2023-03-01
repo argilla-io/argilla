@@ -1,5 +1,8 @@
 <template>
   <div class="dataset-settings-page">
+    <div class="header">header</div>
+    <div class="top-area">top area</div>
+    <div class="dataset-info">DatasetSettgingsinfo</div>
     <div class="dataset-description-component">
       <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
     </div>
@@ -12,6 +15,7 @@
         :datasetTask="datasetTask"
       />
     </div>
+    <div class="delete-dataset-component">Area for delete dataset</div>
   </div>
 </template>
 

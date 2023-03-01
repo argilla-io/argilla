@@ -58,9 +58,9 @@ export default {
   },
   computed: {
     tag_color() {
-      return this.datasetEntities.filter(
+      return this.datasetEntities?.filter(
         (entity) => entity.text === this.token.entity.label
-      )[0].color_id;
+      )[0]?.color_id;
     },
     queryScore() {
       return this.datasetQuery.score;
