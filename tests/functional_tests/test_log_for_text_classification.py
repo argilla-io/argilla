@@ -198,7 +198,7 @@ def test_log_data_in_several_workspaces(mocked_client: SecuredClient, admin: Use
     workspace = accounts.create_workspace(db, WorkspaceCreate(name=workspace_name))
     accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=admin.id))
 
-    api = Argilla()
+    api = Argilla(api_key=admin.api_key)
 
     current_workspace = api.get_workspace()
     for ws in [current_workspace, workspace_name]:

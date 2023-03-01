@@ -20,6 +20,7 @@ from argilla.server.apis.v0.models.text_classification import (
 )
 from argilla.server.commons.models import TaskType
 
+from tests.factories import WorkspaceUserFactory
 from tests.helpers import SecuredClient
 
 
@@ -236,9 +237,12 @@ def create_mock_dataset(client, dataset, records=[]):
     )
 
 
-def test_delete_records(mocked_client, mock_user):
+def test_delete_records(mocked_client, argilla_user, mock_user):
     dataset_name = "test_delete_records"
     delete_dataset(mocked_client, dataset_name)
+
+    for workspace in argilla_user.workspaces:
+        WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=mock_user.id)
 
     create_mock_dataset(
         mocked_client,
