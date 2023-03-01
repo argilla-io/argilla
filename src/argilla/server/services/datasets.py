@@ -230,6 +230,9 @@ class DatasetsService:
             raise EntityNotFoundError(name=dataset.name, type=class_type)
         return class_type.parse_obj(settings.dict())
 
+    def raw_dataset_update(self, dataset):
+        self.__dao__.update_dataset(dataset)
+
     async def save_settings(
         self, user: User, dataset: ServiceDataset, settings: ServiceDatasetSettings
     ) -> ServiceDatasetSettings:

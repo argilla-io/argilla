@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import argilla
-import argilla as ar
+import argilla as rg
 import pytest
 from argilla.metrics.commons import keywords, records_status, text_length
 
@@ -40,17 +40,17 @@ def gutenberg_spacy_ner(mocked_client):
 def test_status_distribution(mocked_client):
     dataset = "test_status_distribution"
 
-    ar.delete(dataset)
+    rg.delete(dataset)
 
-    ar.log(
+    rg.log(
         [
-            ar.TextClassificationRecord(
+            rg.TextClassificationRecord(
                 id=1,
                 inputs={"text": "my first example"},
                 prediction=[("spam", 0.8), ("ham", 0.2)],
                 annotation=["spam"],
             ),
-            ar.TextClassificationRecord(
+            rg.TextClassificationRecord(
                 id=2,
                 inputs={"text": "my second example"},
                 prediction=[("ham", 0.8), ("spam", 0.2)],
@@ -70,24 +70,24 @@ def test_status_distribution(mocked_client):
 def test_text_length(mocked_client):
     dataset = "test_text_length"
 
-    ar.delete(dataset)
+    rg.delete(dataset)
 
-    ar.log(
+    rg.log(
         [
-            ar.TextClassificationRecord(
+            rg.TextClassificationRecord(
                 id=1,
                 inputs={"text": "my first example"},
                 prediction=[("spam", 0.8), ("ham", 0.2)],
                 annotation=["spam"],
             ),
-            ar.TextClassificationRecord(
+            rg.TextClassificationRecord(
                 id=2,
                 inputs={"text": "my second example"},
                 prediction=[("ham", 0.8), ("spam", 0.2)],
                 annotation=["ham"],
                 status="Default",
             ),
-            ar.TextClassificationRecord(
+            rg.TextClassificationRecord(
                 id=3,
                 inputs={"text": "simple text"},
                 prediction=[("ham", 0.8), ("spam", 0.2)],

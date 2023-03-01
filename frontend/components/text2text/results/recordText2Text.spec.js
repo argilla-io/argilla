@@ -6,7 +6,7 @@ let wrapper = null;
 const options = {
   stubs: ["text-2-text-list", "record-string-text-2-text"],
   propsData: {
-    datasetId: ["owner", "name"],
+    datasetId: ["workspace", "name"],
     datasetName: "name",
     viewSettings: {},
     record: {

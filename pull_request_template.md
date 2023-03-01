@@ -28,7 +28,6 @@ Closes #<issue_number>
 - [ ] I added relevant documentation
 - [ ] follows the style guidelines of this project
 - [ ] I did a self-review of my code
-- [ ] I added comments to my code
 - [ ] I made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works

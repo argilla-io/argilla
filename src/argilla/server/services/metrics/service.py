@@ -116,3 +116,16 @@ class MetricsService:
             dataset=dataset,
             query=query,
         )
+
+    def annotated_records(self, dataset: ServiceDataset) -> int:
+        """Return the number of annotated records for a dataset"""
+        results = self.__dao__.search_records(
+            dataset,
+            size=0,
+            search=DaoRecordsSearch(query=ServiceBaseRecordsQuery(has_annotation=True)),
+        )
+        return results.total
+
+    def total_records(self, dataset: ServiceDataset) -> int:
+        """Return the total number of records for a given dataset"""
+        return self.__dao__.search_records(dataset, size=0).total

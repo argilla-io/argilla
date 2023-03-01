@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
+import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.server.daos.backend.query_helpers import aggregations
@@ -20,6 +21,9 @@ from argilla.server.helpers import unflatten_dict
 
 if TYPE_CHECKING:
     from argilla.server.daos.backend.client_adapters.base import IClientAdapter
+
+
+_LOGGER = logging.getLogger(__file__)
 
 
 @dataclasses.dataclass
@@ -37,11 +41,14 @@ class ElasticsearchMetric:
     def get_function_arg_names(func):
         return func.__code__.co_varnames
 
-    def aggregation_request(self, *args, **kwargs) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    def aggregation_request(self, *args, **kwargs) -> Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]:
         """
         Configures the summary es aggregation definition
         """
-        return {self.id: self._build_aggregation(*args, **kwargs)}
+        try:
+            return {self.id: self._build_aggregation(*args, **kwargs)}
+        except TypeError as ex:
+            _LOGGER.warning(f"Cannot build metric for metric {self.id}. Error: {ex}. Skipping...")
 
     def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
         """

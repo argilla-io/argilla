@@ -20,7 +20,7 @@ from argilla.server.security.model import User, UserCreate
 from pydantic import ValidationError
 
 
-@pytest.mark.parametrize("email", ["my@email.com", "infra@recogn.ai"])
+@pytest.mark.parametrize("email", ["my@email.com", "infra@argilla.io"])
 def test_valid_mail(email):
     user = User(
         username="user",
@@ -73,10 +73,18 @@ def test_check_non_provided_workspaces():
         inserted_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
+    user.is_superuser()
     assert user.check_workspaces([]) == ["test"]
 
-    user.workspaces = ["ws"]
-    assert user.check_workspaces([]) == [user.default_workspace] + user.workspaces
+    user = User(
+        username="test",
+        workspaces=["ws"],
+        id=uuid.uuid4(),
+        inserted_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+        api_key="api-key",
+    )
+    assert set(user.check_workspaces([])) == {"ws", "test"}
 
     with pytest.raises(EntityNotFoundError, match="not-found"):
         assert user.check_workspaces(["ws", "not-found"])
@@ -135,10 +143,52 @@ def test_workspace_for_superuser():
         assert user.check_workspace("some") == "some"
 
     assert user.check_workspace(None) == "admin"
-    assert user.check_workspace("") == ""
+    assert user.check_workspace("") == "admin"
 
     user.workspaces = ["some"]
     assert user.check_workspaces(["some"]) == ["some"]
+
+
+def test_workspaces_with_default():
+    expected_workspaces = ["user", "ws1"]
+    user = User(
+        username="user",
+        workspaces=expected_workspaces,
+        api_key="api-key",
+        id=uuid.uuid4(),
+        inserted_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    assert len(user.workspaces) == len(expected_workspaces)
+    for ws in expected_workspaces:
+        assert ws in user.workspaces
+
+
+def test_is_superuser():
+    admin_user = User(
+        username="admin",
+        api_key="api-key",
+        id=uuid.uuid4(),
+        inserted_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    assert admin_user.is_superuser()
+
+    admin_user.workspaces.append("other-workspace")
+    assert admin_user.is_superuser()
+    assert set(admin_user.workspaces) == {"other-workspace", "admin"}
+
+    user = User(
+        username="test",
+        workspaces=["bod"],
+        api_key="api-key",
+        id=uuid.uuid4(),
+        inserted_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    assert not user.is_superuser()
+    user.superuser = True
+    assert user.is_superuser()
 
 
 @pytest.mark.parametrize(
@@ -146,19 +196,19 @@ def test_workspace_for_superuser():
     [
         (None, ["user"]),
         ([], ["user"]),
-        (["a"], ["user", "a"]),
+        (["a"], ["a", "user"]),
     ],
 )
 def test_check_workspaces_with_default(workspaces, expected):
     user = User(
         username="user",
-        api_key="api-key",
         workspaces=workspaces,
+        api_key="api-key",
         id=uuid.uuid4(),
         inserted_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
-    assert user.check_workspaces([]) == expected
-    assert user.check_workspaces(None) == expected
-    assert user.check_workspaces([None]) == expected
+    assert set(user.check_workspaces([])) == set(expected)
+    assert set(user.check_workspaces(None)) == set(expected)
+    assert set(user.check_workspaces([None])) == set(expected)
     assert user.check_workspace(user.username) == user.username
