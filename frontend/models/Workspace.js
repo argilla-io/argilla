@@ -23,5 +23,5 @@ function currentWorkspace(route) {
   return route.params.workspace;
 }
 
-const NO_WORKSPACE = "-";
-export { defaultWorkspace, currentWorkspace, NO_WORKSPACE };
+
+export { defaultWorkspace, currentWorkspace };

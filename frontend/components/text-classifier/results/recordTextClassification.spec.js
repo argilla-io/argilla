@@ -6,7 +6,7 @@ const options = {
   stubs: ["record-inputs", "classifier-exploration-area", "base-tag"],
   propsData: {
     viewSettings: {},
-    datasetId: ["owner", "name"],
+    datasetId: ["workspace", "name"],
     datasetName: "name",
     datasetLabels: ["label 1", "label 2"],
     record: {

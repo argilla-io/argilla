@@ -20,10 +20,10 @@ keywords = [
     "mlops"
 ]
 authors = [
-    {name = "recognai", email = "contact@recogn.ai"}
+    {name = "argilla", email = "contact@argilla.io"}
 ]
 maintainers = [
-    {name = "recognai", email = "contact@recogn.ai"}
+    {name = "argilla", email = "contact@argilla.io"}
 ]
 dependencies = [
     # Client
@@ -38,11 +38,13 @@ dependencies = [
     "wrapt >= 1.13,< 1.15",
     # weaksupervision
     "numpy < 1.24.0",
+    # for progressbars
     "tqdm >= 4.27.0",
     # monitor background consumers
     "backoff",
-    "monotonic"
-
+    "monotonic",
+    # for logging, tracebacks, printing, progressbars
+    "rich <= 13.0.1"
 ]
 dynamic = ["version"]
 

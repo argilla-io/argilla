@@ -18,13 +18,13 @@ This module centralizes all configuration and logging management
 """
 
 import logging
-from logging import Logger
+from logging import Logger, StreamHandler
 from typing import Type
 
 try:
-    from loguru import logger
+    from rich.logging import RichHandler as ArgillaHandler
 except ModuleNotFoundError:
-    logger = None
+    ArgillaHandler = StreamHandler
 
 
 def full_qualified_class_name(_class: Type) -> str:
@@ -60,64 +60,10 @@ class LoggingMixin:
         return self.__logger__
 
 
-class LoguruLoggerHandler(logging.Handler):
-    """This logging handler enables an easy way to use loguru fo all built-in logger traces"""
-
-    __LOGLEVEL_MAPPING__ = {
-        50: "CRITICAL",
-        40: "ERROR",
-        30: "WARNING",
-        20: "INFO",
-        10: "DEBUG",
-        0: "NOTSET",
-    }
-
-    @property
-    def is_available(self) -> bool:
-        """Return True if handler can tackle log records. False otherwise"""
-        return logger is not None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if not self.is_available:
-            self.emit = lambda record: None
-
-    def emit(self, record: logging.LogRecord):
-        try:
-            level = logger.level(record.levelname).name
-        except AttributeError:
-            level = self.__LOGLEVEL_MAPPING__[record.levelno]
-
-        frame, depth = logging.currentframe(), 2
-        while frame.f_code.co_filename == logging.__file__:
-            frame = frame.f_back
-            depth += 1
-
-        log = logger.bind(request_id="argilla")
-        log.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
-
-
 def configure_logging():
     """Normalizes logging configuration for argilla and its dependencies"""
-    intercept_handler = LoguruLoggerHandler()
-    if not intercept_handler.is_available:
-        return
+    handler = ArgillaHandler()
 
-    logging.basicConfig(handlers=[intercept_handler], level=logging.WARNING)
-    for name in logging.root.manager.loggerDict:
-        logger_ = logging.getLogger(name)
-        logger_.handlers = []
-
-    for name in [
-        "uvicorn",
-        "uvicorn.lifespan",
-        "uvicorn.error",
-        "uvicorn.access",
-        "fastapi",
-        "argilla",
-        "argilla.server",
-    ]:
-        logger_ = logging.getLogger(name)
-        logger_.propagate = False
-        logger_.handlers = [intercept_handler]
+    # See the note here: https://docs.python.org/3/library/logging.html#logging.Logger.propagate
+    # We only attach our handler to the root logger and let propagation take care of the rest
+    logging.basicConfig(handlers=[handler], level=logging.WARNING)

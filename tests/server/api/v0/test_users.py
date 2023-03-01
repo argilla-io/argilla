@@ -46,7 +46,7 @@ def test_list_users(client: TestClient, admin_auth_header: dict):
     assert response.status_code == 200
 
     response_body = response.json()
-    assert list(map(lambda user: user["username"], response_body)) == ["argilla", "username-a", "username-b"]
+    assert list(map(lambda user: user["username"], response_body)) == ["admin", "username-a", "username-b"]
 
 
 def test_list_users_without_authentication(client: TestClient):
@@ -77,7 +77,7 @@ def test_create_user_without_authentication(client: TestClient, db: Session):
     response = client.post("/api/users", json=user)
 
     assert response.status_code == 401
-    assert db.query(User).count() == 1
+    assert db.query(User).count() == 0
 
 
 def test_create_user_with_invalid_min_length_first_name(client: TestClient, db: Session, admin_auth_header: dict):
@@ -143,7 +143,7 @@ def test_delete_user_without_authentication(client: TestClient, db: Session):
     response = client.delete(f"/api/users/{user.id}")
 
     assert response.status_code == 401
-    assert db.query(User).count() == 2
+    assert db.query(User).count() == 1
 
 
 def test_delete_user_with_nonexistent_user_id(client: TestClient, db: Session, admin_auth_header: dict):

@@ -12,5 +12,4 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .labeling_rules_service import LabelingService
 from .service import TextClassificationService

@@ -28,8 +28,6 @@ from argilla.server.daos.models.datasets import (
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.errors import WrongTaskError
 
-NO_WORKSPACE = ""
-
 
 class DatasetsDAO:
     """Datasets DAO"""
@@ -84,7 +82,6 @@ class DatasetsDAO:
         owner_list = owner_list or []
         query = BaseDatasetsQuery(
             owners=owner_list,
-            include_no_owner=NO_WORKSPACE in owner_list,
             tasks=[task for task in task2dataset_map] if task2dataset_map else None,
             name=name,
         )

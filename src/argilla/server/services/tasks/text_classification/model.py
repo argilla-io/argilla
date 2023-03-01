@@ -307,3 +307,16 @@ class ServiceTextClassificationQuery(ServiceBaseRecordsQuery):
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
     uncovered_by_rules: List[str] = Field(default_factory=list)
+
+
+class DatasetLabelingRulesSummary(BaseModel):
+    covered_records: int
+    annotated_covered_records: int
+
+
+class LabelingRuleSummary(BaseModel):
+    covered_records: int
+    annotated_covered_records: int
+    correct_records: int = Field(default=0)
+    incorrect_records: int = Field(default=0)
+    precision: Optional[float] = None

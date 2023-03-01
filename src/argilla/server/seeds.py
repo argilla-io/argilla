@@ -41,16 +41,20 @@ def development_seeds():
         )
 
 
-def test_seeds():
-    with SessionLocal() as session, session.begin():
-        session.add_all(
-            [
-                User(
-                    first_name="John",
-                    last_name="Doe",
-                    username="argilla",
-                    password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
-                    api_key=DEFAULT_API_KEY,
-                ),
-            ]
-        )
+def test_seeds(db: SessionLocal):
+    db.add_all(
+        [
+            Workspace(
+                name="argilla",
+                users=[
+                    User(
+                        first_name="Argilla",
+                        username="argilla",
+                        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+                        api_key=DEFAULT_API_KEY,
+                    ),
+                ],
+            )
+        ]
+    )
+    db.commit()

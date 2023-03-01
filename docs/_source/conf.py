@@ -33,9 +33,9 @@
 import os
 
 try:
-    import argilla as ar
+    import argilla as rg
 
-    version_ = ar.__version__
+    version_ = rg.__version__
 except ModuleNotFoundError:
     version_ = os.environ["VERSION"]
 

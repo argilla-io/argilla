@@ -19,36 +19,41 @@ import pytest
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 
+from tests.factories import WorkspaceUserFactory
+
 
 def test_delete_records_from_dataset(mocked_client):
     dataset = "test_delete_records_from_dataset"
-    import argilla as ar
+    import argilla as rg
 
-    ar.delete(dataset)
-    ar.log(
+    rg.delete(dataset)
+    rg.log(
         name=dataset,
         records=[
-            ar.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
+            rg.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
         ],
     )
 
-    matched, processed = ar.delete_records(name=dataset, ids=[10], discard_only=True)
+    matched, processed = rg.delete_records(name=dataset, ids=[10], discard_only=True)
     assert matched, processed == (1, 1)
 
-    ds = ar.load(name=dataset)
+    ds = rg.load(name=dataset)
     assert len(ds) == 50
 
     time.sleep(1)
-    matched, processed = ar.delete_records(name=dataset, query="id:10", discard_only=False)
+    matched, processed = rg.delete_records(name=dataset, query="id:10", discard_only=False)
     assert matched, processed == (1, 1)
 
     time.sleep(1)
-    ds = ar.load(name=dataset)
+    ds = rg.load(name=dataset)
     assert len(ds) == 49
 
 
-def test_delete_records_without_permission(mocked_client, mock_user):
+def test_delete_records_without_permission(mocked_client, argilla_user, mock_user):
     dataset = "test_delete_records_without_permission"
+
+    for workspace in argilla_user.workspaces:
+        WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=mock_user.id)
 
     argilla_client = Argilla()
 
