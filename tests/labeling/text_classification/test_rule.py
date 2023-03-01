@@ -252,7 +252,7 @@ def test_update_rules(mocked_client, log_dataset):
 
 
 def test_copy_dataset_with_rules(mocked_client, log_dataset):
-    import argilla as ar
+    import argilla as rg
 
     rule = Rule(query="a query", label="LALA")
     delete_rule_silently(mocked_client, log_dataset, rule)
@@ -263,8 +263,8 @@ def test_copy_dataset_with_rules(mocked_client, log_dataset):
     )
 
     copied_dataset = f"{log_dataset}_copy"
-    ar.delete(copied_dataset)
-    ar.copy(log_dataset, name_of_copy=copied_dataset)
+    rg.delete(copied_dataset)
+    rg.copy(log_dataset, name_of_copy=copied_dataset)
 
     assert [{"q": r.query, "l": r.label} for r in load_rules(copied_dataset)] == [
         {"q": r.query, "l": r.label} for r in load_rules(log_dataset)
