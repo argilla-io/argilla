@@ -617,7 +617,7 @@ const actions = {
       } else {
         Notification.dispatch("notify", {
           message: `The labels <b>"${newLabels}"</b> already exist in the list of labels`,
-          type: "warning",
+          type: "info",
         });
       }
     } else {
