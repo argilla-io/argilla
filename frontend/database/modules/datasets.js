@@ -559,11 +559,27 @@ const actions = {
       selected: false,
       status: "Default",
     }));
-    return _updateDatasetRecords({
-      dataset,
-      records: newRecords,
-      persistBackend: true,
-    });
+    const [currentStatus] = records.map((record) =>
+      record.status.toLowerCase()
+    );
+    const messageOk = `1 record is un-${currentStatus} `;
+    const messageKo = `1 record could not be un-${currentStatus} `;
+    try {
+      await _updateDatasetRecords({
+        dataset,
+        records: newRecords,
+        persistBackend: true,
+      });
+      Notification.dispatch("notify", {
+        message: messageOk,
+        type: "success",
+      });
+    } catch (err) {
+      Notification.dispatch("notify", {
+        message: messageKo,
+        type: "error",
+      });
+    }
   },
   async resetAnnotations(_, { dataset, records }) {
     const newRecords = records.map((record) => ({
