@@ -74,7 +74,7 @@ def test_query_builder_with_query_range(backend: GenericElasticEngineBackend):
 def test_query_builder_with_nested(mocked_client, dao, backend: GenericElasticEngineBackend):
     dataset = BaseDatasetDB(
         name="test_query_builder_with_nested",
-        owner=argilla.get_workspace(),
+        workspace=argilla.get_workspace(),
         task=TaskType.token_classification,
     )
     argilla.delete(dataset.name)
@@ -120,7 +120,7 @@ def test_query_builder_with_nested(mocked_client, dao, backend: GenericElasticEn
 def test_failing_metrics(service, mocked_client):
     dataset = BaseDatasetDB(
         name="test_failing_metrics",
-        owner=argilla.get_workspace(),
+        workspace=argilla.get_workspace(),
         task=TaskType.text_classification,
     )
 

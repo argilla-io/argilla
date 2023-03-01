@@ -120,8 +120,8 @@ class DatasetsService:
         workspaces: Optional[List[str]],
         task2dataset_map: Dict[str, Type[ServiceDataset]] = None,
     ) -> List[ServiceDataset]:
-        owners = user.check_workspaces(workspaces)
-        return self.__dao__.list_datasets(owner_list=owners, task2dataset_map=task2dataset_map)
+        workspaces = user.check_workspaces(workspaces)
+        return self.__dao__.list_datasets(workspaces=workspaces, task2dataset_map=task2dataset_map)
 
     def close(self, user: User, dataset: ServiceDataset):
         found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.workspace)

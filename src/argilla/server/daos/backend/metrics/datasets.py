@@ -15,4 +15,5 @@
 # All metrics related to the datasets index
 from argilla.server.daos.backend.metrics.base import TermsAggregation
 
+# TODO: Is still useful this metric???
 METRICS = {"all_workspaces": TermsAggregation(id="all_workspaces", field="owner.keyword")}
