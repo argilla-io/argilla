@@ -270,7 +270,7 @@ class TestMajorityVoter:
             assert records[2].prediction is None
 
     def test_score_sklearn_not_installed(self, monkeypatch, weak_labels):
-        monkeypatch.setitem(sys.modules, "sklearn", None)
+        monkeypatch.setattr(sys, "meta_path", [], raising=False)
 
         mj = MajorityVoter(weak_labels)
         with pytest.raises(ModuleNotFoundError, match="pip install scikit-learn"):
@@ -354,7 +354,7 @@ class TestMajorityVoter:
 
 class TestSnorkel:
     def test_not_installed(self, monkeypatch):
-        monkeypatch.setitem(sys.modules, "snorkel", None)
+        monkeypatch.setattr(sys, "meta_path", [], raising=False)
         with pytest.raises(ModuleNotFoundError, match="pip install snorkel"):
             Snorkel(None)
 
@@ -540,8 +540,8 @@ class TestSnorkel:
 
 class TestFlyingSquid:
     def test_not_installed(self, monkeypatch):
-        monkeypatch.setitem(sys.modules, "flyingsquid", None)
-        with pytest.raises(ModuleNotFoundError, match="pip install pgmpy flyingsquid"):
+        monkeypatch.setattr(sys, "meta_path", [], raising=False)
+        with pytest.raises(ModuleNotFoundError, match="pip install flyingsquid"):
             FlyingSquid(None)
 
     def test_init(self, weak_labels):
@@ -720,22 +720,23 @@ class TestFlyingSquid:
         with pytest.raises(NotFittedError, match="not fitted yet"):
             label_model.score()
 
-    def test_score_sklearn_not_installed(self, monkeypatch, weak_labels):
-        monkeypatch.setitem(sys.modules, "sklearn", None)
-
+    def test_score_sklearn_not_installed(self, monkeypatch: pytest.MonkeyPatch, weak_labels):
         label_model = FlyingSquid(weak_labels)
+
+        monkeypatch.setattr(sys, "meta_path", [], raising=False)
         with pytest.raises(ModuleNotFoundError, match="pip install scikit-learn"):
             label_model.score()
 
     def test_score(self, monkeypatch, weak_labels):
-        def mock_predict(self, weak_label_matrix, verbose):
+        def mock_predict(weak_label_matrix, verbose):
             assert verbose is False
             assert len(weak_label_matrix) == 3
             return np.array([[0.8, 0.1, 0.1], [0.1, 0.8, 0.1], [0.1, 0.1, 0.8]])
 
-        monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
-
         label_model = FlyingSquid(weak_labels)
+        # We have to monkeypatch the instance rather than the class due to decorators
+        # on the class
+        monkeypatch.setattr(label_model, "_predict", mock_predict)
         metrics = label_model.score()
 
         assert "accuracy" in metrics
@@ -746,14 +747,15 @@ class TestFlyingSquid:
 
     @pytest.mark.parametrize("tbp,vrb,expected", [("abstain", False, 1.0), ("random", True, 2 / 3.0)])
     def test_score_tbp(self, monkeypatch, weak_labels, tbp, vrb, expected):
-        def mock_predict(self, weak_label_matrix, verbose):
+        def mock_predict(weak_label_matrix, verbose):
             assert verbose is vrb
             assert len(weak_label_matrix) == 3
             return np.array([[0.8, 0.1, 0.1], [0.4, 0.4, 0.2], [1 / 3.0, 1 / 3.0, 1 / 3.0]])
 
-        monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
-
         label_model = FlyingSquid(weak_labels)
+
+        monkeypatch.setattr(label_model, "_predict", mock_predict)
+
         metrics = label_model.score(tie_break_policy=tbp, verbose=vrb)
 
         assert metrics["accuracy"] == pytest.approx(expected)

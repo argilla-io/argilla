@@ -21,6 +21,7 @@ import numpy as np
 
 from argilla import DatasetForTextClassification, TextClassificationRecord
 from argilla.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
+from argilla.utils.dependency import requires_version
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -310,6 +311,7 @@ class MajorityVoter(LabelModel):
 
         return records_with_prediction
 
+    @requires_version("scikit-learn")
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -344,13 +346,6 @@ class MajorityVoter(LabelModel):
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
-        try:
-            import sklearn  # noqa: F401
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'sklearn' must be installed to compute the metrics! "
-                "You can install 'sklearn' with the command: `pip install scikit-learn`"
-            )
         from sklearn.metrics import classification_report
 
         wl_matrix = self._weak_labels.matrix(has_annotation=True)
@@ -443,6 +438,7 @@ class MajorityVoter(LabelModel):
         return annotation, prediction
 
 
+@requires_version("snorkel")
 class Snorkel(LabelModel):
     """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`__.
 
@@ -463,15 +459,7 @@ class Snorkel(LabelModel):
     """
 
     def __init__(self, weak_labels: WeakLabels, verbose: bool = True, device: str = "cpu"):
-        try:
-            import snorkel  # noqa: F401
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'snorkel' must be installed to use the `Snorkel` label model! "
-                "You can install 'snorkel' with the command: `pip install snorkel`"
-            )
-        else:
-            from snorkel.labeling.model import LabelModel as SnorkelLabelModel
+        from snorkel.labeling.model import LabelModel as SnorkelLabelModel
 
         super().__init__(weak_labels)
 
@@ -618,6 +606,7 @@ class Snorkel(LabelModel):
 
         return DatasetForTextClassification(records_with_prediction)
 
+    @requires_version("scikit-learn")
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -689,6 +678,8 @@ class Snorkel(LabelModel):
         )
 
 
+@requires_version("flyingsquid")
+@requires_version("pgmpy")
 class FlyingSquid(LabelModel):
     """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`__.
 
@@ -708,19 +699,9 @@ class FlyingSquid(LabelModel):
     """
 
     def __init__(self, weak_labels: WeakLabels, **kwargs):
-        try:
-            import flyingsquid  # noqa: F401
-            import pgmpy  # noqa: F401
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'flyingsquid' must be installed to use the `FlyingSquid` label model!"
-                " You can install 'flyingsquid' with the command: `pip install pgmpy"
-                " flyingsquid`"
-            )
-        else:
-            from flyingsquid.label_model import LabelModel as FlyingSquidLabelModel
+        from flyingsquid.label_model import LabelModel as FlyingSquidLabelModel
 
-            self._FlyingSquidLabelModel = FlyingSquidLabelModel
+        self._FlyingSquidLabelModel = FlyingSquidLabelModel
 
         super().__init__(weak_labels)
 
@@ -895,6 +876,7 @@ class FlyingSquid(LabelModel):
 
         return probas
 
+    @requires_version("scikit-learn")
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -932,13 +914,6 @@ class FlyingSquid(LabelModel):
             NotFittedError: If the label model was still not fitted.
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
-        try:
-            import sklearn  # noqa: F401
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'sklearn' must be installed to compute the metrics! "
-                "You can install 'sklearn' with the command: `pip install scikit-learn`"
-            )
         from sklearn.metrics import classification_report
 
         if isinstance(tie_break_policy, str):
