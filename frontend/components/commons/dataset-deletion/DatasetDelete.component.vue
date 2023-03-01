@@ -14,7 +14,7 @@
       :prevent-body-scroll="true"
       modal-class="modal-secondary"
       :modal-title="modalTitle"
-      :modal-visible="showdeleteModal"
+      :modal-visible="showDeleteModal"
       @close-modal="showDeleteModal(false)"
     >
       <div>
@@ -50,7 +50,7 @@ export default {
   data: () => {
     return {
       sectionTitle: "Danger zone",
-      showdeleteModal: false,
+      showDeleteModal: false,
     };
   },
   computed: {
@@ -88,7 +88,7 @@ export default {
       }
     },
     showDeleteModal(value) {
-      this.showdeleteModal = value;
+      this.showDeleteModal = value;
     },
     goToDatasetList() {
       this.$router.push("/");
