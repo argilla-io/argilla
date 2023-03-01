@@ -27,9 +27,10 @@ import {
 } from "../../models/globalLabel.queries";
 import { Notification } from "@/models/Notifications";
 import {
-  insertNewGlobalLabel,
+  upsertNewGlobalLabel,
   getAllLabelsTextByDatasetId,
   isLabelTextExistInGlobalLabel,
+  isLabelTextExistInGlobalLabelAndSavedInBack,
 } from "@/models/globalLabel.queries";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 
@@ -595,7 +596,12 @@ const actions = {
       const isSomeNewLabelNotInGlobalLabels =
         checkIfSomeNewLabelNotInGlobalLabels(datasetId, newLabels);
 
-      if (isSomeNewLabelNotInGlobalLabels) {
+      const isSomeNewLabelNotSavedInBack = checkIfSomeNewLabelNotSavedInBack(
+        datasetId,
+        newLabels
+      );
+
+      if (isSomeNewLabelNotInGlobalLabels || isSomeNewLabelNotSavedInBack) {
         try {
           const labels = [
             ...new Set([...labelsbeforeAddNewLabel, ...newLabels]),
@@ -609,7 +615,12 @@ const actions = {
           newLabels.forEach(
             (newLabel) =>
               isLabelTextExistInGlobalLabel(datasetId, newLabel) ||
-              insertNewGlobalLabel({ datasetId, newLabel })
+              upsertNewGlobalLabel({
+                datasetId,
+                newLabel,
+                isActivate: false,
+                isSavedInBack: true,
+              })
           );
         } catch (err) {
           throw new Error("Error on adding new labels");
@@ -782,7 +793,9 @@ const actions = {
 const fetchByNameForTextClassification = async (dataset) => {
   //TODO - remove this function from this file  && put rules in dedicated ORM table
   await fetchAllRulesAndInsertRulesInTextClassificationORM(dataset);
-  await initGlobalLabels(dataset);
+
+  await formatLabelsAndInitGlobalLabelsORM(dataset);
+
   await _updateAnnotationProgress({
     id: dataset.name,
     total: dataset.globalResults.total,
@@ -792,6 +805,7 @@ const fetchByNameForTextClassification = async (dataset) => {
 
   //TODO - next line => labels to remove when will use only initGlobalLabels(dataset) (dataset update with settings)
   const { labels } = await dataset.fetchMetricSummary("dataset_labels");
+
   const isMultiLabel = records.some((r) => r.multi_label);
   const entity = dataset.getTaskDatasetClass();
   await entity.insertOrUpdate({
@@ -805,8 +819,10 @@ const fetchByNameForTextClassification = async (dataset) => {
   });
   initVectorModel(dataset.id, records);
 };
+
 const fetchByNameForTokenClassification = async (dataset) => {
-  await initGlobalLabels(dataset);
+  await formatLabelsAndInitGlobalLabelsORM(dataset);
+
   await _updateAnnotationProgress({
     id: dataset.name,
     total: dataset.globalResults.total,
@@ -815,6 +831,7 @@ const fetchByNameForTokenClassification = async (dataset) => {
   const records = dataset.results?.records;
   initVectorModel(dataset.id, records);
 };
+
 const fetchByNameForText2Text = async (dataset) => {
   await _updateAnnotationProgress({
     id: name,
@@ -868,17 +885,16 @@ const isAnyKeyInArrayItem = (arrayWithObjItem, key) => {
   return arrayWithObjItem.some(isKeyInItem);
 };
 
-const initGlobalLabels = async ({ name, task, id }) => {
+const initGlobalLabels = async ({ id }, labels, isLabelsSavedInBack) => {
   deleteAllGlobalLabelModel();
-  const labels = await fetchLabelsFromSettings({ name, task });
-  if (labels) {
-    const joinedDatasetId = id.join(".");
-    const formattedLabels = factoryLabelsForGlobalLabelsModel(
-      joinedDatasetId,
-      labels
-    );
-    upsertLabelsInGlobalLabelModel(formattedLabels);
-  }
+
+  const joinedDatasetId = id.join(".");
+  const formattedLabels = factoryLabelsForGlobalLabelsModel(
+    joinedDatasetId,
+    labels,
+    isLabelsSavedInBack
+  );
+  upsertLabelsInGlobalLabelModel(formattedLabels);
 };
 
 const fetchLabelsFromSettings = async ({ name, task }) => {
@@ -898,14 +914,43 @@ const fetchLabelsFromSettings = async ({ name, task }) => {
       console.log(
         `STATUS: ${status}, This dataset does not contains any settings`
       );
-      return null;
+      throw TYPE_OF_FEEDBACK.LABEL_SCHEMA_IS_EMPTY;
     } else {
       throw new Error(`STATUS: ${status}, Could not fetch settings`);
     }
   }
 };
 
-const factoryLabelsForGlobalLabelsModel = (datasetId, labels) => {
+const formatLabelsAndInitGlobalLabelsORM = async (dataset) => {
+  const { labelsToInsertInORM, isLabelSavedInLabelSchema } =
+    await factoryLabelsToInsertInGlobalModelORM(dataset);
+
+  initGlobalLabels(dataset, labelsToInsertInORM, isLabelSavedInLabelSchema);
+};
+
+const factoryLabelsToInsertInGlobalModelORM = async (dataset) => {
+  let labelsToInsertInORM = null;
+  let isLabelSavedInLabelSchema = false;
+  try {
+    const labels = await fetchLabelsFromSettings(dataset);
+    labelsToInsertInORM = labels;
+    isLabelSavedInLabelSchema = true;
+  } catch (err) {
+    if (err === TYPE_OF_FEEDBACK.LABEL_SCHEMA_IS_EMPTY) {
+      const { labels } = await dataset.fetchMetricSummary("dataset_labels");
+      labelsToInsertInORM =
+        factoryAggregationLabelsForGlobalLabelsModel(labels);
+      isLabelSavedInLabelSchema = false;
+    }
+  }
+  return { labelsToInsertInORM, isLabelSavedInLabelSchema };
+};
+
+const factoryLabelsForGlobalLabelsModel = (
+  datasetId,
+  labels,
+  isSavedInBack = false
+) => {
   const formattedLabels = labels.map(({ id, name }, index) => {
     return {
       id,
@@ -914,9 +959,20 @@ const factoryLabelsForGlobalLabelsModel = (datasetId, labels) => {
       dataset_id: datasetId,
       color_id: index,
       shortcut: index < 10 ? String(index + 1) : null,
+      is_saved_in_back: isSavedInBack,
     };
   });
   return formattedLabels;
+};
+
+const factoryAggregationLabelsForGlobalLabelsModel = (
+  aggregationsLabelsModel
+) => {
+  return (
+    aggregationsLabelsModel?.map((label) => {
+      return { id: label, name: label };
+    }) ?? []
+  );
 };
 
 const fetchAllRulesAndInsertRulesInTextClassificationORM = async (dataset) => {
@@ -926,15 +982,32 @@ const fetchAllRulesAndInsertRulesInTextClassificationORM = async (dataset) => {
 };
 
 const checkIfSomeNewLabelNotInGlobalLabels = (datasetId, newLabels) => {
-  const isNewLabelNotInGlobalLabelsByItem = newLabels.map(
+  const isNewLabelsNotInGlobalLabelsByItem = newLabels.map(
     (newLabel) => !isLabelTextExistInGlobalLabel(datasetId, newLabel)
   );
 
   const isSomeNewLabelNotInGlobalLabels =
-    isNewLabelNotInGlobalLabelsByItem.some((value) => value);
+    isNewLabelsNotInGlobalLabelsByItem.some((value) => value);
 
   return isSomeNewLabelNotInGlobalLabels;
 };
+
+const checkIfSomeNewLabelNotSavedInBack = (datasetId, newLabels) => {
+  const isNewLabelsNotSavedInBack = newLabels.map(
+    (newLabel) =>
+      !isLabelTextExistInGlobalLabelAndSavedInBack(datasetId, newLabel)
+  );
+
+  const isSomeNewLabelNotSavedInBack = isNewLabelsNotSavedInBack.some(
+    (value) => value
+  );
+
+  return isSomeNewLabelNotSavedInBack;
+};
+
+const TYPE_OF_FEEDBACK = Object.freeze({
+  LABEL_SCHEMA_IS_EMPTY: "LABEL_SCHEMA_IS_EMPTY",
+});
 
 export default {
   getters,
