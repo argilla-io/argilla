@@ -1,6 +1,8 @@
 <template>
   <div class="layout">
-    <div class="header">here is the header</div>
+    <div class="header">
+      <HeaderComponent />
+    </div>
     <div class="top">
       <slot name="top">here is the top content</slot>
     </div>
