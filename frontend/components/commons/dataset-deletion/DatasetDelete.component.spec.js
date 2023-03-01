@@ -11,7 +11,7 @@ const options = {
   propsData: {
     datasetName: "datasete_1",
     sectionTitle: "Danger zone",
-    isDeleteModalVisible: false,
+    showdeleteModal: false,
   },
   mocks: {
     $route,
@@ -31,13 +31,13 @@ describe("DatasetDeleteComponent", () => {
     expect(wrapper.is(DatasetDelete)).toBe(true);
   });
 
-  it("not render base-modal when isDeleteModalVisible is false", async () => {
+  it("not render base-modal when showdeleteModal is false", async () => {
     expect(wrapper.find(".modal-wrapper").exists()).toBe(false);
   });
 
-  it("render base-modal when isDeleteModalVisible is true", async () => {
+  it("render base-modal when showdeleteModal is true", async () => {
     await wrapper.setProps({
-      isDeleteModalVisible: true,
+      showdeleteModal: true,
     });
     expect(wrapper.find(".delete-modal").exists()).toBe(true);
   });

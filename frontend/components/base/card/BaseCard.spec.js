@@ -25,16 +25,16 @@ describe("BaseCardComponent", () => {
     expect(wrapper.is(BaseCard)).toBe(true);
   });
   it("expect title class to render", () => {
-    return classExist(".card__title");
+    return isClassExist(".card__title");
   });
   it("expect subtitle class to render", () => {
-    return classExist(".card__subtitle");
+    return isClassExist(".card__subtitle");
   });
   it("expect text class to render", () => {
-    return classExist(".card__text");
+    return isClassExist(".card__text");
   });
   it("expect button class to render", () => {
-    return classExist(".card__button");
+    return isClassExist(".card__button");
   });
   it("emit event when button is clicked", async () => {
     const button = wrapper.find(".card__button");
@@ -44,6 +44,6 @@ describe("BaseCardComponent", () => {
   });
 });
 
-const classExist = async (className) => {
+const isClassExist = async (className) => {
   expect(wrapper.find(className).exists()).toBe(true);
 };

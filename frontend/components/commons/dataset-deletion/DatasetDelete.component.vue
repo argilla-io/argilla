@@ -14,7 +14,7 @@
       :prevent-body-scroll="true"
       modal-class="modal-secondary"
       :modal-title="modalTitle"
-      :modal-visible="isDeleteModalVisible"
+      :modal-visible="showdeleteModal"
       @close-modal="showDeleteModal(false)"
     >
       <div>
@@ -50,7 +50,7 @@ export default {
   data: () => {
     return {
       sectionTitle: "Danger zone",
-      isDeleteModalVisible: false,
+      showdeleteModal: false,
     };
   },
   computed: {
@@ -58,7 +58,7 @@ export default {
       return this.dataset?.name;
     },
     datasetDeleteTitle() {
-      return `Delete ${this.workspace}`;
+      return `Delete ${this.datasetName}`;
     },
     modalTitle() {
       return `Delete confirmation`;
@@ -88,7 +88,7 @@ export default {
       }
     },
     showDeleteModal(value) {
-      this.isDeleteModalVisible = value;
+      this.showdeleteModal = value;
     },
     goToDatasetList() {
       this.$router.push("/");
@@ -102,5 +102,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped></style>
