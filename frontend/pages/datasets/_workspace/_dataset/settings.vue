@@ -1,26 +1,41 @@
 <template>
-  <div class="dataset-settings-page">
-    <div class="header">header</div>
-    <div class="top-area">top area</div>
-    <div class="dataset-info">DatasetSettgingsinfo</div>
-    <div class="dataset-description-component">
-      <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
-    </div>
-    <div
-      class="labels-edition-component"
-      v-if="isTaskTokenClassification || isTaskTextClassification"
-    >
-      <EditionLabelComponent
-        :datasetId="datasetId"
-        :datasetTask="datasetTask"
-      />
-    </div>
-    <div class="delete-dataset-component">Area for delete dataset</div>
-  </div>
+  <HeaderAndTopAndTwoColumns>
+    <template v-slot:top>
+      <div class="dataset-info">DatasetSettgingsinfo</div>
+    </template>
+    <template v-slot:left>
+      <div class="left-content">
+        <div class="dataset-description-component">
+          <DatasetDescriptionComponent
+            :datasetDescription="settingsDescription"
+          />
+        </div>
+        <div
+          class="labels-edition-component"
+          v-if="isTaskTokenClassification || isTaskTextClassification"
+        >
+          <EditionLabelComponent
+            :datasetId="datasetId"
+            :datasetTask="datasetTask"
+          />
+        </div>
+        <div class="delete-dataset-component" v-if="datasetTask">
+          <DatasetDeleteComponent
+            :datasetId="datasetId"
+            :datasetTask="datasetTask"
+          />
+        </div>
+      </div>
+    </template>
+    <template v-slot:right>
+      <div class="right-content"></div>
+    </template>
+  </HeaderAndTopAndTwoColumns>
 </template>
 
 <script>
 import { mapActions } from "vuex";
+import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
 import {
   ObservationDataset,
   getDatasetModelPrimaryKey,
@@ -28,6 +43,7 @@ import {
 
 export default {
   name: "SettingsPage",
+  components: { HeaderAndTopAndTwoColumns },
   computed: {
     datasetName() {
       return this.$route.params.dataset;
@@ -70,6 +86,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dataset-settings-page {
+.left-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 </style>
