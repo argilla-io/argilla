@@ -48,7 +48,7 @@ export default {
       isSortAsc: true,
       sortBy: "order",
       allowAddNewLabel: true,
-      characterToSeparateLabels: ",",
+      characterToSeparateLabels: null,
     };
   },
   computed: {
