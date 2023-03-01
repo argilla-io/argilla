@@ -74,6 +74,9 @@ server = [
     # Telemetry
     "segment-analytics-python == 2.2.0"
 ]
+postgresql = [
+   "psycopg2 ~= 2.9.5"
+]
 listeners = [
     "schedule ~= 1.1.0",
     "prodict ~= 0.8.0"
