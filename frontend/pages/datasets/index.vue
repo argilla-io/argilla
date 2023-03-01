@@ -115,6 +115,12 @@ export default {
     ],
     actions: [
       {
+        name: "go-to-settings",
+        icon: "settings",
+        title: "Go to dataset settings",
+        tooltip: "Copied",
+      },
+      {
         name: "copy",
         icon: "link",
         title: "Copy url to clipboard",
@@ -230,6 +236,9 @@ export default {
     },
     onActionClicked(action, dataset) {
       switch (action) {
+        case "go-to-settings":
+          this.goToSetting(dataset);
+          break;
         case "copy":
           this.copyUrl(dataset);
           break;
@@ -242,6 +251,12 @@ export default {
     },
     onSearch(event) {
       this.querySearch = event;
+    },
+    goToSetting(dataset) {
+      const { workspace, name } = dataset;
+      this.$router.push({
+        path: `/datasets/${workspace}/${name}/settings`,
+      });
     },
     copyName(id) {
       this.copy(id);
