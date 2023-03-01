@@ -27,7 +27,7 @@ export default {
   grid-column-gap: 0px;
   grid-row-gap: 10px;
 }
-.header{
+.header {
   grid-area: 1 / 1 / 2 / 3;
 }
 .top {
