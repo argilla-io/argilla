@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as ar
+import argilla as rg
 from argilla import Text2TextRecord, TextClassificationRecord, TokenClassificationRecord
 from argilla.server.commons.models import TaskType
 
@@ -38,7 +38,7 @@ def create_dataset(task: TaskType):
         )
 
     dataset = "test_dataset"
-    ar.delete(dataset)
+    rg.delete(dataset)
 
     if task == TaskType.text_classification:
         record_builder = text_class
@@ -49,7 +49,7 @@ def create_dataset(task: TaskType):
 
     records = [record_builder(i) for i in range(0, 50)]
 
-    ar.log(
+    rg.log(
         name=dataset,
         records=records,
     )

@@ -651,13 +651,22 @@ const actions = {
     }
   },
   async deleteDataset(_, { workspace, name }) {
-    var url = `/datasets/${name}`;
-
+    let url = `/datasets/${name}`;
     url += `?workspace=${workspace}`;
-    const deleteResults = await ObservationDataset.api().delete(url, {
-      delete: [workspace, name],
-    });
-    return deleteResults;
+    try {
+      await ObservationDataset.api().delete(url, {
+        delete: [workspace, name],
+      });
+      Notification.dispatch("notify", {
+        message: `${name} have been deleted`,
+        type: "success",
+      });
+    } catch (error) {
+      Notification.dispatch("notify", {
+        message: `It is not possible to delete ${name}`,
+        type: "warning",
+      });
+    }
   },
 
   async refreshAnnotationProgress(_, dataset) {
