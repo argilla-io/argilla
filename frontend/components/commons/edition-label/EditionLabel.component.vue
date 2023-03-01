@@ -17,7 +17,14 @@
           v-if="allowAddNewLabel"
           @new-label="onAddNewLabels"
         />
+        <BaseButton
+          @click.prevent="onSaveLabelsNotPersisted"
+          v-if="isAnyLabelsInGlobalLabelsModelNotSavedInBack"
+        >
+          {{ saveLabelsButtonLabel }}
+        </BaseButton>
       </div>
+      <p v-html="messageFeedbackIfThereIsLabelsNotSavedInBack" />
     </div>
   </div>
 </template>
@@ -25,7 +32,11 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
-import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
+import {
+  getAllLabelsByDatasetId,
+  getLabelsNotSavedInBackByDatasetId,
+  isExistAnyLabelsNotSavedInBackByDatasetId,
+} from "@/models/globalLabel.queries";
 
 export default {
   name: "EditionLabelComponent",
@@ -49,11 +60,15 @@ export default {
       sortBy: "order",
       allowAddNewLabel: true,
       characterToSeparateLabels: null,
+      saveLabelsButtonLabel: "Saved labels",
     };
   },
   computed: {
     dataset() {
       return getDatasetFromORM(this.datasetId, this.datasetTask, false);
+    },
+    datasetName() {
+      return this.dataset?.name;
     },
     isTaskTokenClassification() {
       return this.datasetTask === "TokenClassification";
@@ -68,23 +83,51 @@ export default {
         this.isSortAsc
       );
     },
+    labelsInGlobalLabelsNotSavedInBack() {
+      return getLabelsNotSavedInBackByDatasetId(this.datasetId);
+    },
+    labelsTextNotSavedInBack() {
+      return this.labelsInGlobalLabelsNotSavedInBack.reduce(
+        (acc, curr) => acc.concat(curr.text),
+        []
+      );
+    },
+    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
+      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
+    },
+    messageFeedbackIfThereIsLabelsNotSavedInBack() {
+      if (this.isAnyLabelsInGlobalLabelsModelNotSavedInBack) {
+        return `The label schema from the dataset ${this.datasetName} is empty. Click on <em>
+        ${this.saveLabelsButtonLabel}</em> to save all labels from aggregations`;
+      }
+      return null;
+    },
   },
   methods: {
     ...mapActions({
       onAddNewLabelsInDataset: "entities/datasets/onAddNewLabels",
     }),
     async onAddNewLabels(newLabelsString) {
-      const newLabels = this.splitAndTrimArrayString(newLabelsString);
+      const newLabels = this.splitAndTrimArrayString(
+        newLabelsString,
+        this.characterToSeparateLabels
+      );
       await this.onAddNewLabelsInDataset({
         datasetId: this.datasetId,
         datasetTask: this.datasetTask,
         newLabels,
       });
     },
-    splitAndTrimArrayString(labels) {
-      return labels
-        .split(this.characterToSeparateLabels)
-        .map((item) => item.trim());
+    async onSaveLabelsNotPersisted() {
+      const newLabels = this.labelsTextNotSavedInBack;
+      await this.onAddNewLabelsInDataset({
+        datasetId: this.datasetId,
+        datasetTask: this.datasetTask,
+        newLabels,
+      });
+    },
+    splitAndTrimArrayString(labels, splitCharacter = null) {
+      return labels.split(splitCharacter).map((item) => item.trim());
     },
   },
 };
