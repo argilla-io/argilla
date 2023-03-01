@@ -117,9 +117,6 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
 
         return metrics.summarize_metric(
             dataset=dataset,
-            # TODO: What metric is using the owner ??!?
-            owner=current_user.check_workspace(request_deps.workspace),
-            workspace=current_user.check_workspace(request_deps.workspace),
             metric=metric_,
             record_class=record_class,
             query=query,
