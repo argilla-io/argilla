@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
 from typing import List, Optional
 
 import yaml
@@ -83,3 +84,7 @@ class UsersMigrator:
 
     def _get_or_new_workspace(self, session: Session, workspace_name: str):
         return session.query(Workspace).filter_by(name=workspace_name).first() or Workspace(name=workspace_name)
+
+
+if __name__ == "__main__":
+    UsersMigrator(os.environ["ARGILLA_LOCAL_AUTH_USERS_DB_FILE"]).migrate()
