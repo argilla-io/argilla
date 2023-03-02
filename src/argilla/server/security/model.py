@@ -17,7 +17,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, root_validator, validator
 
-from argilla._constants import DATASET_NAME_REGEX_PATTERN
+from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.errors import EntityNotFoundError
 
 WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
@@ -37,9 +37,9 @@ class User(BaseModel):
 
     @validator("username")
     def check_username(cls, value):
-        if not re.compile(DATASET_NAME_REGEX_PATTERN).match(value):
+        if not re.compile(ES_INDEX_REGEX_PATTERN).match(value):
             raise ValueError(
-                "Wrong username. " f"The username {value} does not match the pattern {DATASET_NAME_REGEX_PATTERN}"
+                "Wrong username. " f"The username {value} does not match the pattern {ES_INDEX_REGEX_PATTERN}"
             )
         return value
 

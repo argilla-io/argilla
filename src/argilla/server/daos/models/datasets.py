@@ -17,12 +17,12 @@ from typing import Any, Dict, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field, root_validator
 
-from argilla._constants import DATASET_NAME_REGEX_PATTERN
+from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.commons.models import TaskType
 
 
 class BaseDatasetDB(BaseModel):
-    name: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
+    name: str = Field(regex=ES_INDEX_REGEX_PATTERN)
     task: TaskType
     owner: Optional[str] = Field(description="Deprecated. Use `workspace` instead. Will be removed in v1.5.0")
     workspace: Optional[str]

@@ -15,8 +15,6 @@
 from typing import Any, ClassVar, Dict, Iterable, List
 
 from pydantic import Field
-from sklearn.metrics import precision_recall_fscore_support
-from sklearn.preprocessing import MultiLabelBinarizer
 
 from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
 from argilla.server.services.metrics.models import CommonTasksMetrics
@@ -24,6 +22,7 @@ from argilla.server.services.search.model import ServiceRecordsQuery
 from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationRecord,
 )
+from argilla.utils.dependency import requires_version
 
 
 class F1Metric(ServicePythonMetric):
@@ -38,7 +37,10 @@ class F1Metric(ServicePythonMetric):
 
     multi_label: bool = False
 
+    @requires_version("scikit-learn")
     def apply(self, records: Iterable[ServiceTextClassificationRecord]) -> Any:
+        from sklearn.metrics import precision_recall_fscore_support
+
         filtered_records = list(filter(lambda r: r.predicted is not None, records))
         # TODO: This must be precomputed with using a global dataset metric
         ds_labels = {label for record in filtered_records for label in record.annotated_as + record.predicted_as}
@@ -61,6 +63,8 @@ class F1Metric(ServicePythonMetric):
                 y_pred.append([labels_mapping[label] for label in predictions])
 
         if self.multi_label:
+            from sklearn.preprocessing import MultiLabelBinarizer
+
             mlb = MultiLabelBinarizer(classes=list(labels_mapping.values()))
             y_true = mlb.fit_transform(y_true)
             y_pred = mlb.fit_transform(y_pred)
