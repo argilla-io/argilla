@@ -4,6 +4,13 @@
       <h2 class="--heading5 --semibold description__title" v-html="title" />
     </div>
     <div class="content">
+      <div class="feedback-area">
+        <BaseFeedbackComponent
+          v-if="feedbackInputIfThereIsLabelsNotSavedInBack"
+          :feedbackInput="feedbackInputIfThereIsLabelsNotSavedInBack"
+          @on-click="onSaveLabelsNotPersisted"
+        />
+      </div>
       <TokenClassificationGlobalLabelsComponent
         v-if="isTaskTokenClassification"
         :labels="labels"
@@ -17,14 +24,7 @@
           v-if="allowAddNewLabel"
           @new-label="onAddNewLabels"
         />
-        <BaseButton
-          @click.prevent="onSaveLabelsNotPersisted"
-          v-if="isAnyLabelsInGlobalLabelsModelNotSavedInBack"
-        >
-          {{ saveLabelsButtonLabel }}
-        </BaseButton>
       </div>
-      <p v-html="messageFeedbackIfThereIsLabelsNotSavedInBack" />
     </div>
   </div>
 </template>
@@ -61,6 +61,12 @@ export default {
       allowAddNewLabel: true,
       characterToSeparateLabels: null,
       saveLabelsButtonLabel: "Save labels",
+      inputForFeedbackComponent: {
+        message:
+          "Action needed: Add or save labels to validate the annotation schema",
+        buttonLabels: [{ label: "Save schema", value: "SAVE_SCHEMA" }],
+        feedbackType: "ERROR",
+      },
     };
   },
   computed: {
@@ -95,10 +101,9 @@ export default {
     isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
       return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
     },
-    messageFeedbackIfThereIsLabelsNotSavedInBack() {
+    feedbackInputIfThereIsLabelsNotSavedInBack() {
       if (this.isAnyLabelsInGlobalLabelsModelNotSavedInBack) {
-        return `The label schema from the dataset ${this.datasetName} is empty. Click on <em>
-        ${this.saveLabelsButtonLabel}</em> to save all labels from aggregations`;
+        return this.inputForFeedbackComponent;
       }
       return null;
     },
@@ -150,7 +155,13 @@ export default {
     gap: 15px;
   }
 }
+
+.feedback-area {
+  display: inline-flex;
+}
+
 .buttons-area {
   display: inline-flex;
+  align-items: baseline;
 }
 </style>
