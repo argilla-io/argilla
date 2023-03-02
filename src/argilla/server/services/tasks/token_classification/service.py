@@ -150,8 +150,6 @@ class TokenClassificationService:
         ----------
         dataset:
             The dataset name
-        owner:
-            The dataset owner
         query:
             If provided, scan will retrieve only records matching
             the provided query filters. Optional

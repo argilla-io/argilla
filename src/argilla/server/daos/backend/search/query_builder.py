@@ -103,23 +103,13 @@ class EsQueryBuilder:
             return filters.match_all()
 
         query_filters = []
-        if query.owners:
-            owners_filter = filters.terms_filter(
-                "owner.keyword",
-                query.owners,
-            )
-            if query.include_no_owner:
-                query_filters.append(
-                    filters.boolean_filter(
-                        minimum_should_match=1,  # OR Condition
-                        should_filters=[
-                            owners_filter,
-                            filters.boolean_filter(must_not_query=filters.exists_field("owner")),
-                        ],
-                    )
+        if query.workspaces:
+            query_filters.append(
+                filters.terms_filter(
+                    "owner.keyword",  # This will be moved to "workspace.keyword"
+                    query.workspaces,
                 )
-            else:
-                query_filters.append(owners_filter)
+            )
 
         if query.tasks:
             query_filters.append(
