@@ -146,7 +146,6 @@ class DatasetBase:
         return dataset
 
     def _to_datasets_dict(self) -> Dict:
-        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`"""
         raise NotImplementedError
 
     @classmethod
@@ -765,7 +764,7 @@ class DatasetForTextClassification(DatasetBase):
                 },
                 features=datasets.Features(feature_dict),
             )
-        if test_size:
+        if test_size is not None and test_size != 0:
             ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
@@ -978,10 +977,11 @@ class DatasetForTokenClassification(DatasetBase):
 
         ds = self.to_datasets().filter(self.__only_annotations__).map(lambda example: {"ner_tags": spans2iob(example)})
         new_features = ds.features.copy()
-        new_features["ner_tags"] = [class_tags]
+        new_features["ner_tags"] = datasets.Sequence(feature=class_tags)
         ds = ds.cast(new_features)
+        ds = ds.remove_columns(set(ds.column_names) - set(["tokens", "ner_tags"]))
 
-        if train_size or test_size:
+        if test_size is not None and test_size != 0:
             ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
@@ -1229,6 +1229,34 @@ class DatasetForText2Text(DatasetBase):
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
         return cls([Text2TextRecord(**row) for row in dataframe.to_dict("records")])
+
+    @requires_version("datasets>1.17.0")
+    def _prepare_for_training_with_transformers(
+        self,
+        train_size: Optional[float] = None,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+    ):
+        import datasets
+
+        ds_dict = {"text": [], "target": []}
+        for rec in self._records:
+            if rec.annotation is None:
+                continue
+            ds_dict["text"].append(rec.text)
+            ds_dict["target"].append(rec.annotation)
+
+        feature_dict = {
+            "text": datasets.Value("string"),
+            "target": datasets.Value("string"),
+        }
+
+        ds = datasets.Dataset.from_dict(ds_dict, features=datasets.Features(feature_dict))
+
+        if test_size is not None and test_size != 0:
+            ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
+
+        return ds
 
     def _prepare_for_training_with_spark_nlp(self, records: List[Record]) -> "pandas.DataFrame":
         spark_nlp_data = []
