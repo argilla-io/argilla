@@ -203,7 +203,18 @@ argilla_app = FastAPI(
     version=str(argilla_version),
 )
 
-app = FastAPI()
+
+@argilla_app.get("/docs", include_in_schema=False)
+async def redirect_docs():
+    return RedirectResponse(url=f"{settings.base_url}api/docs")
+
+
+@argilla_app.get("/api", include_in_schema=False)
+async def redirect_api():
+    return RedirectResponse(url=f"{settings.base_url}api/docs")
+
+
+app = FastAPI(docs_url=None)
 app.mount(settings.base_url, argilla_app)
 
 configure_app_logging(app)
@@ -219,17 +230,3 @@ for app_configure in [
     configure_app_statics,
 ]:
     app_configure(argilla_app)
-
-
-@app.get("/docs")
-async def redirect_docs():
-    url = app.url_path_for("/api/docs")
-    response = RedirectResponse(url=url)
-    return response
-
-
-@app.get("/api")
-async def redirect_api():
-    url = app.url_path_for("/api/docs")
-    response = RedirectResponse(url=url)
-    return response
