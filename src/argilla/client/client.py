@@ -18,15 +18,15 @@ import os
 import re
 import warnings
 from asyncio import Future
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from rich import print as rprint
 from rich.progress import Progress
 
 from argilla._constants import (
     _OLD_WORKSPACE_HEADER_NAME,
-    DATASET_NAME_REGEX_PATTERN,
     DEFAULT_API_KEY,
+    ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client.apis.datasets import Datasets
@@ -208,6 +208,15 @@ class Argilla:
         if not workspace:
             raise Exception("Must provide a workspace")
 
+        if not re.match(ES_INDEX_REGEX_PATTERN, workspace):
+            raise InputValueError(
+                f"Provided workspace name {workspace} does not match the pattern"
+                f" {ES_INDEX_REGEX_PATTERN}. Please, use a valid name for your"
+                " workspace. This limitation is caused by naming conventions for indexes"
+                " in Elasticsearch. If applicable, you can try to lowercase the name of your workspace."
+                " https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
+            )
+
         if workspace != self.get_workspace():
             if workspace == self._user.username:
                 self._client.headers.pop(WORKSPACE_HEADER_NAME, workspace)
@@ -326,10 +335,10 @@ class Argilla:
         if not name:
             raise InputValueError("Empty dataset name has been passed as argument.")
 
-        if not re.match(DATASET_NAME_REGEX_PATTERN, name):
+        if not re.match(ES_INDEX_REGEX_PATTERN, name):
             raise InputValueError(
                 f"Provided dataset name {name} does not match the pattern"
-                f" {DATASET_NAME_REGEX_PATTERN}. Please, use a valid name for your"
+                f" {ES_INDEX_REGEX_PATTERN}. Please, use a valid name for your"
                 " dataset. This limitation is caused by naming conventions for indexes"
                 " in Elasticsearch."
                 " https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"

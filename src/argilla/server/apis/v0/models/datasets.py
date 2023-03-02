@@ -21,7 +21,7 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from argilla._constants import DATASET_NAME_REGEX_PATTERN
+from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.commons.models import TaskType
 from argilla.server.services.datasets import ServiceBaseDataset
 
@@ -43,7 +43,7 @@ class UpdateDatasetRequest(BaseModel):
 
 
 class _BaseDatasetRequest(UpdateDatasetRequest):
-    name: str = Field(regex=DATASET_NAME_REGEX_PATTERN, description="The dataset name")
+    name: str = Field(regex=ES_INDEX_REGEX_PATTERN, description="The dataset name")
 
 
 class CreateDatasetRequest(_BaseDatasetRequest):

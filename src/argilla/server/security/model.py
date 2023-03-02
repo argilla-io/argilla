@@ -21,7 +21,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, constr, root_validator, validator
 from pydantic.utils import GetterDict
 
-from argilla._constants import DATASET_NAME_REGEX_PATTERN
+from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.errors import EntityNotFoundError
 
 _WORKSPACE_NAME_REGEX = r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$"
@@ -30,7 +30,7 @@ _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
 
 _USER_PASSWORD_MIN_LENGTH = 8
 _USER_PASSWORD_MAX_LENGTH = 100
-_USER_USERNAME_REGEX = DATASET_NAME_REGEX_PATTERN
+_USER_USERNAME_REGEX = ES_INDEX_REGEX_PATTERN
 
 WORKSPACE_NAME_PATTERN = re.compile(_WORKSPACE_NAME_REGEX)
 
@@ -93,9 +93,9 @@ class User(BaseModel):
 
     @validator("username")
     def check_username(cls, value):
-        if not re.compile(DATASET_NAME_REGEX_PATTERN).match(value):
+        if not re.compile(ES_INDEX_REGEX_PATTERN).match(value):
             raise ValueError(
-                "Wrong username. " f"The username {value} does not match the pattern {DATASET_NAME_REGEX_PATTERN}"
+                "Wrong username. " f"The username {value} does not match the pattern {ES_INDEX_REGEX_PATTERN}"
             )
         return value
 

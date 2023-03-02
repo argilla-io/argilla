@@ -20,10 +20,8 @@ from argilla.client.api import active_api
 from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
-from argilla.server.contexts import accounts
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, Workspace, WorkspaceUser
-from argilla.server.seeds import test_seeds
 from starlette.testclient import TestClient
 
 from .helpers import SecuredClient

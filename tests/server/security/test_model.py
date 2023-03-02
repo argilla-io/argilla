@@ -194,9 +194,9 @@ def test_is_superuser():
 @pytest.mark.parametrize(
     "workspaces, expected",
     [
-        (None, ["user"]),
-        ([], ["user"]),
-        (["a"], ["a", "user"]),
+        (None, {"user"}),
+        ([], {"user"}),
+        (["a"], {"user", "a"}),
     ],
 )
 def test_check_workspaces_with_default(workspaces, expected):
@@ -208,7 +208,7 @@ def test_check_workspaces_with_default(workspaces, expected):
         inserted_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
-    assert set(user.check_workspaces([])) == set(expected)
-    assert set(user.check_workspaces(None)) == set(expected)
-    assert set(user.check_workspaces([None])) == set(expected)
+    assert set(user.check_workspaces([])) == expected
+    assert set(user.check_workspaces(None)) == expected
+    assert set(user.check_workspaces([None])) == expected
     assert user.check_workspace(user.username) == user.username
