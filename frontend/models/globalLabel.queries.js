@@ -54,7 +54,7 @@ const upsertNewGlobalLabel = ({
 
   GlobalLabelModel.insertOrUpdate({
     data: {
-      text: newLabel,
+      text: newLabel.toUpperCase(),
       dataset_id: joinedDatasetId,
       order: numberOfLabels,
       color_id: numberOfLabels,

@@ -611,17 +611,14 @@ const actions = {
             datasetTask,
             labels,
           });
-
-          newLabels.forEach(
-            (newLabel) =>
-              isLabelTextExistInGlobalLabel(datasetId, newLabel) ||
-              upsertNewGlobalLabel({
-                datasetId,
-                newLabel,
-                isActivate: false,
-                isSavedInBack: true,
-              })
-          );
+          newLabels.forEach((newLabel) => {
+            upsertNewGlobalLabel({
+              datasetId,
+              newLabel,
+              isActivate: false,
+              isSavedInBack: true,
+            });
+          });
         } catch (err) {
           throw new Error("Error on adding new labels");
         }
@@ -953,9 +950,9 @@ const factoryLabelsForGlobalLabelsModel = (
 ) => {
   const formattedLabels = labels.map(({ id, name }, index) => {
     return {
-      id,
+      id: id.toUpperCase(),
       order: index,
-      text: name,
+      text: name.toUpperCase(),
       dataset_id: datasetId,
       color_id: index,
       shortcut: index < 10 ? String(index + 1) : null,
