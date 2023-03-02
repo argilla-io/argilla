@@ -96,8 +96,9 @@ class BaseRecordsQuery(BaseQuery):
 
     @validator("query_text")
     def check_empty_query_text(cls, value):
-        if value.strip() == "":
-            value = None
+        if value is not None:
+            if value.strip() == "":
+                value = None
         return value
 
 
