@@ -26,6 +26,7 @@ from argilla.server.errors import (
     ForbiddenOperationError,
     WrongTaskError,
 )
+from argilla.server.schemas.datasets import CreateDatasetRequest, Dataset
 from argilla.server.security.model import User
 
 
@@ -53,82 +54,43 @@ class DatasetsService:
     def __init__(self, dao: DatasetsDAO):
         self.__dao__ = dao
 
-    def create_dataset(self, user: User, dataset: ServiceDataset) -> ServiceDataset:
-        user.check_workspace(dataset.owner)
-
+    def create_dataset(self, user: User, dataset: CreateDatasetRequest) -> BaseDatasetDB:
+        dataset.workspace = user.check_workspace(dataset.workspace)
         try:
-            self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner)
-            raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.owner)
+            self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.workspace)
+            raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.workspace)
         except WrongTaskError:  # Found a dataset with same name but different task
-            raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.owner)
+            raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.workspace)
         except EntityNotFoundError:
             # The dataset does not exist -> create it !
             date_now = datetime.utcnow()
-            dataset.created_by = user.username
-            dataset.created_at = date_now
-            dataset.last_updated = date_now
-            return self.__dao__.create_dataset(dataset)
+
+            new_dataset = BaseDatasetDB.parse_obj(dataset.dict())
+            new_dataset.created_by = user.username
+            new_dataset.created_at = date_now
+            new_dataset.last_updated = date_now
+
+            return self.__dao__.create_dataset(new_dataset)
 
     def find_by_name(
         self,
         user: User,
         name: str,
+        workspace: str,
         as_dataset_class: Type[ServiceDataset] = ServiceBaseDataset,
         task: Optional[str] = None,
-        workspace: Optional[str] = None,
     ) -> ServiceDataset:
-        owner = user.check_workspace(workspace)
-
-        if task is None:
-            found_ds = self.__find_by_name_with_superuser_fallback__(
-                user, name=name, owner=owner, as_dataset_class=as_dataset_class
-            )
-            if found_ds:
-                task = found_ds.task
-
-        found_ds = self.__find_by_name_with_superuser_fallback__(
-            user, name=name, owner=owner, task=task, as_dataset_class=as_dataset_class
-        )
-
+        workspace = user.check_workspace(workspace)
+        found_ds = self.__dao__.find_by_name(name=name, workspace=workspace, as_dataset_class=as_dataset_class)
         if found_ds is None:
             raise EntityNotFoundError(name=name, type=ServiceDataset)
-        if found_ds.owner and owner and found_ds.owner != owner:
-            raise EntityNotFoundError(
-                name=name, type=ServiceDataset
-            ) if user.is_superuser() else ForbiddenOperationError()
-
-        return cast(ServiceDataset, found_ds)
-
-    def __find_by_name_with_superuser_fallback__(
-        self,
-        user: User,
-        name: str,
-        owner: Optional[str],
-        as_dataset_class: Optional[Type[ServiceDataset]],
-        task: Optional[str] = None,
-    ):
-        found_ds = self.__dao__.find_by_name(name=name, owner=owner, task=task, as_dataset_class=as_dataset_class)
-        if not found_ds and user.is_superuser():
-            try:
-                found_ds = self.__dao__.find_by_name(
-                    name=name, owner=None, task=task, as_dataset_class=as_dataset_class
-                )
-            except WrongTaskError:
-                # A dataset exists in a different workspace and with a different task
-                pass
-        return found_ds
+        elif task and found_ds.task != task:
+            raise WrongTaskError(detail=f"Provided task {task} cannot be applied to dataset")
+        else:
+            return cast(ServiceDataset, found_ds)
 
     def delete(self, user: User, dataset: ServiceDataset):
-        user.check_workspace(dataset.owner)
-        found = self.__find_by_name_with_superuser_fallback__(
-            user=user,
-            name=dataset.name,
-            owner=dataset.owner,
-            task=dataset.task,
-            as_dataset_class=None,
-        )
-        if not found:
-            return
+        dataset = self.find_by_name(user=user, name=dataset.name, workspace=dataset.workspace, task=dataset.task)
 
         if user.is_superuser() or user.username == dataset.created_by:
             self.__dao__.delete_dataset(dataset)
@@ -144,8 +106,8 @@ class DatasetsService:
         dataset: ServiceDataset,
         tags: Dict[str, str],
         metadata: Dict[str, Any],
-    ) -> ServiceDataset:
-        found = self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner)
+    ) -> Dataset:
+        found = self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.workspace)
 
         dataset.tags = {**found.tags, **(tags or {})}
         dataset.metadata = {**found.metadata, **(metadata or {})}
@@ -158,15 +120,15 @@ class DatasetsService:
         workspaces: Optional[List[str]],
         task2dataset_map: Dict[str, Type[ServiceDataset]] = None,
     ) -> List[ServiceDataset]:
-        owners = user.check_workspaces(workspaces)
-        return self.__dao__.list_datasets(owner_list=owners, task2dataset_map=task2dataset_map)
+        workspaces = user.check_workspaces(workspaces)
+        return self.__dao__.list_datasets(workspaces=workspaces, task2dataset_map=task2dataset_map)
 
     def close(self, user: User, dataset: ServiceDataset):
-        found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.owner)
+        found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.workspace)
         self.__dao__.close(found)
 
     def open(self, user: User, dataset: ServiceDataset):
-        found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.owner)
+        found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.workspace)
         self.__dao__.open(found)
 
     def copy_dataset(
@@ -178,7 +140,7 @@ class DatasetsService:
         copy_tags: Dict[str, Any] = None,
         copy_metadata: Dict[str, Any] = None,
     ) -> ServiceDataset:
-        dataset_workspace = copy_workspace or dataset.owner
+        dataset_workspace = copy_workspace or dataset.workspace
         dataset_workspace = user.check_workspace(dataset_workspace)
 
         self._validate_create_dataset(
@@ -189,15 +151,17 @@ class DatasetsService:
 
         copy_dataset = dataset.copy()
         copy_dataset.name = copy_name
-        copy_dataset.owner = dataset_workspace
+        copy_dataset.workspace = dataset_workspace
+
         date_now = datetime.utcnow()
+
         copy_dataset.created_at = date_now
         copy_dataset.last_updated = date_now
         copy_dataset.tags = {**copy_dataset.tags, **(copy_tags or {})}
         copy_dataset.metadata = {
             **copy_dataset.metadata,
             **(copy_metadata or {}),
-            "source_workspace": dataset.owner,
+            "source_workspace": dataset.workspace,
             "copied_from": dataset.name,
         }
 

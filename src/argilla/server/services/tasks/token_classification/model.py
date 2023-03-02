@@ -205,8 +205,3 @@ class ServiceTokenClassificationQuery(ServiceBaseRecordsQuery):
     annotated_as: List[str] = Field(default_factory=list)
     score: Optional[ServiceScoreRange] = Field(default=None)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-
-
-class ServiceTokenClassificationDataset(ServiceBaseDataset):
-    task: TaskType = Field(default=TaskType.token_classification, const=True)
-    pass

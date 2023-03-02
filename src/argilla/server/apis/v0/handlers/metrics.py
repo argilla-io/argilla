@@ -81,7 +81,6 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
             name=name,
             task=cfg.task,
             workspace=request_deps.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(cfg.task),
         )
 
         metrics = TasksFactory.get_task_metrics(dataset.task)
@@ -111,7 +110,6 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
             name=name,
             task=cfg.task,
             workspace=request_deps.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(cfg.task),
         )
 
         metric_ = TasksFactory.find_task_metric(task=cfg.task, metric_id=metric)
@@ -119,7 +117,6 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
 
         return metrics.summarize_metric(
             dataset=dataset,
-            owner=current_user.check_workspace(request_deps.workspace),
             metric=metric_,
             record_class=record_class,
             query=query,

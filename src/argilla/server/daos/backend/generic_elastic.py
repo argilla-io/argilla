@@ -467,30 +467,11 @@ class GenericElasticEngineBackend(LoggingMixin):
     def find_dataset(
         self,
         id: str,
-        name: Optional[str] = None,
-        owner: Optional[str] = None,
     ):
         document = self.client.get_index_document_by_id(
             index=DATASETS_INDEX_NAME,
             id=id,
         )
-        if not document and owner is None and name:
-            # We must search by name since we have no owner
-            docs = self.client.list_index_documents(
-                index=DATASETS_INDEX_NAME,
-                query=BaseDatasetsQuery(name=name),
-                size=self.__MAX_NUMBER_OF_LISTED_DATASETS__,
-                fetch_once=True,
-            )
-            docs = list(docs)
-            if len(docs) == 0:
-                return None
-
-            if len(docs) > 1:
-                raise ValueError(
-                    f"Ambiguous dataset info found for name {name}. " "Please provide a valid owner/workspace"
-                )
-            document = docs[0]
         return document
 
     def compute_argilla_metric(self, metric_id):
