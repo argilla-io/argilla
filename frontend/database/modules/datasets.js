@@ -407,6 +407,13 @@ async function _updateDatasetRecords({
   }
   let aggregations = {};
   const entity = dataset.getTaskDatasetClass();
+  const arePendingRecords = records.some(
+    (record) => record.status === "Edited"
+  );
+  await _updateViewSettings({
+    id: dataset.name,
+    data: { arePendingRecords },
+  });
   const updatedDataset = await entity.update({
     where: dataset.id,
     data: {
@@ -477,6 +484,21 @@ async function _updatePagination({ id, size, page }) {
   });
 
   return pagination;
+}
+
+async function _chooseContinueOrCancel(action, dataset, query, sort, size) {
+  return await Notification.dispatch("notify", {
+    message: "You will lose actions in pending",
+    type: "warning",
+    buttonText: "Continue",
+    async onClick() {
+      await action(dataset, query, sort, size);
+      await _updateViewSettings({
+        id: dataset.name,
+        data: { arePendingRecords: false },
+      });
+    },
+  });
 }
 
 const getters = {
@@ -625,7 +647,6 @@ const actions = {
     } catch (err) {
       console.log(err);
       message = `${numberOfRecords} record(s) could not have been validated`;
-      console.log(message);
       typeOfNotification = "error";
     } finally {
       Notification.dispatch("notify", {
@@ -712,15 +733,27 @@ const actions = {
   },
 
   async search(_, { dataset, query, sort, size }) {
-    const searchResponse = await _search({
-      dataset,
-      query,
-      sort,
-      size,
-    });
-    const records = searchResponse.results?.records;
-    initVectorModel(dataset.id, records);
-    return searchResponse;
+    const onSearch = async (dataset, query, sort, size) => {
+      const searchResponse = await _search({
+        dataset,
+        query,
+        sort,
+        size,
+      });
+      const records = searchResponse.results?.records;
+      initVectorModel(dataset.id, records);
+      return searchResponse;
+    };
+    if (arePendingRecords(dataset.name)) {
+      return await _chooseContinueOrCancel(
+        onSearch,
+        dataset,
+        query,
+        sort,
+        size
+      );
+    }
+    await onSearch(dataset, query, sort, size);
   },
 
   async changeViewMode(_, { dataset, value }) {
@@ -743,10 +776,15 @@ const actions = {
   },
 
   async paginate(_, { dataset, size, page }) {
-    const datasetPaginate = await _paginate({ dataset, size, page });
-
-    const records = datasetPaginate.results?.records;
-    initVectorModel(dataset.id, records);
+    const onPaginate = async (dataset) => {
+      const datasetPaginate = await _paginate({ dataset, size, page });
+      const records = datasetPaginate.results?.records;
+      initVectorModel(dataset.id, records);
+    };
+    if (arePendingRecords(dataset.name)) {
+      return await _chooseContinueOrCancel(onPaginate, dataset);
+    }
+    await onPaginate(dataset);
   },
 
   async resetSearch(_, { dataset, size }) {
@@ -767,17 +805,23 @@ const actions = {
   },
 
   async refresh(_, { dataset }) {
-    const pagination = Pagination.find(dataset.name);
-    const paginatedDataset = await _paginate({
-      dataset,
-      size: pagination.size,
-      page: pagination.page,
-    });
-    await _refreshDatasetAggregations({ dataset: paginatedDataset });
-    await _fetchAnnotationProgress(paginatedDataset);
+    const onRefresh = async (dataset) => {
+      const pagination = Pagination.find(dataset.name);
+      const paginatedDataset = await _paginate({
+        dataset,
+        size: pagination.size,
+        page: pagination.page,
+      });
+      await _refreshDatasetAggregations({ dataset: paginatedDataset });
+      await _fetchAnnotationProgress(paginatedDataset);
 
-    const records = paginatedDataset.results?.records;
-    initVectorModel(dataset.id, records);
+      const records = paginatedDataset.results?.records;
+      initVectorModel(dataset.id, records);
+    };
+    if (arePendingRecords(dataset.name)) {
+      return await _chooseContinueOrCancel(onRefresh, dataset);
+    }
+    await onRefresh(dataset);
   },
 };
 
@@ -821,6 +865,10 @@ const insertDataInVectorModel = (vectors) => {
 const isAnyKeyInArrayItem = (arrayWithObjItem, key) => {
   const isKeyInItem = (item) => item[key] && Object.keys(item[key]).length;
   return arrayWithObjItem.some(isKeyInItem);
+};
+
+const arePendingRecords = (datasetName) => {
+  return DatasetViewSettings.find(datasetName).arePendingRecords;
 };
 
 export default {
