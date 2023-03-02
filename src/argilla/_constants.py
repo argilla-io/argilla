@@ -17,7 +17,9 @@ import os
 from pathlib import Path
 
 ARGILLA_HOME_PATH = os.getenv("ARGILLA_HOME_PATH", os.path.join(Path.home(), ".argilla"))
-ARGILLA_DATABASE_URL = os.getenv("ARGILLA_DATABASE_URL", f"sqlite:///{os.path.join(ARGILLA_HOME_PATH, 'argilla.db')}?check_same_thread=False")
+ARGILLA_DATABASE_URL = os.getenv(
+    "ARGILLA_DATABASE_URL", f"sqlite:///{os.path.join(ARGILLA_HOME_PATH, 'argilla.db')}?check_same_thread=False"
+)
 
 # Create argilla home path directory if it doesn't exist
 Path(ARGILLA_HOME_PATH).mkdir(parents=True, exist_ok=True)
