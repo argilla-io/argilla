@@ -788,7 +788,9 @@ class TestDatasetForText2Text:
             assert rec == expected
 
     def test_prepare_for_training(self):
-        ds = rg.DatasetForText2Text([rg.Text2TextRecord(text="mock", annotation="mock")] * 10)
+        ds = rg.DatasetForText2Text(
+            [rg.Text2TextRecord(text="mock", annotation="mock"), rg.Text2TextRecord(text="mock")] * 10
+        )
         train = ds.prepare_for_training(train_size=1)
 
         assert isinstance(train, datasets.Dataset)
@@ -806,12 +808,16 @@ class TestDatasetForText2Text:
             assert train_test[split].column_names == ["text", "target"]
 
     def test_prepare_for_training_spacy(self):
-        ds = rg.DatasetForText2Text([rg.Text2TextRecord(text="mock", annotation="mock")] * 10)
+        ds = rg.DatasetForText2Text(
+            [rg.Text2TextRecord(text="mock", annotation="mock"), rg.Text2TextRecord(text="mock")] * 10
+        )
         with pytest.raises(NotImplementedError):
             ds.prepare_for_training("spacy", lang=spacy.blank("en"), train_size=1)
 
     def test_prepare_for_training_spark_nlp(self):
-        ds = rg.DatasetForText2Text([rg.Text2TextRecord(text="mock", annotation="mock")] * 10)
+        ds = rg.DatasetForText2Text(
+            [rg.Text2TextRecord(text="mock", annotation="mock"), rg.Text2TextRecord(text="mock")] * 10
+        )
         ds.prepare_for_training("spark-nlp", train_size=1)
 
     @pytest.mark.skipif(
