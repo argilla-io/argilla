@@ -115,7 +115,7 @@ class Argilla:
     """
 
     # Larger sizes will trigger a warning
-    _MAX_CHUNK_SIZE = 5000
+    _MAX_BATCH_SIZE = 5000
 
     def __init__(
         self,
@@ -256,9 +256,10 @@ class Argilla:
         name: str,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        chunk_size: int = 500,
+        batch_size: int = 500,
         verbose: bool = True,
         background: bool = False,
+        chunk_size: Optional[int] = None,
     ) -> Union[BulkResponse, Future]:
         """Logs Records to argilla.
 
@@ -269,11 +270,12 @@ class Argilla:
             name: The dataset name.
             tags: A dictionary of tags related to the dataset.
             metadata: A dictionary of extra info for the dataset.
-            chunk_size: The chunk size for a data bulk.
+            batch_size: The batch size for a data bulk.
             verbose: If True, shows a progress bar and prints out a quick summary at the end.
             background: If True, we will NOT wait for the logging process to finish and return
                 an ``asyncio.Future`` object. You probably want to set ``verbose`` to False
                 in that case.
+            chunk_size: DEPRECATED! Use `batch_size` instead.
 
         Returns:
             Summary of the response from the REST API.
@@ -286,8 +288,9 @@ class Argilla:
             name=name,
             tags=tags,
             metadata=metadata,
-            chunk_size=chunk_size,
+            batch_size=batch_size,
             verbose=verbose,
+            chunk_size=chunk_size,
         )
         if background:
             return future
@@ -303,8 +306,9 @@ class Argilla:
         name: str,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        chunk_size: int = 500,
+        batch_size: int = 500,
         verbose: bool = True,
+        chunk_size: Optional[int] = None,
     ) -> BulkResponse:
         """Logs Records to argilla with asyncio.
 
@@ -313,8 +317,9 @@ class Argilla:
             name: The dataset name.
             tags: A dictionary of tags related to the dataset.
             metadata: A dictionary of extra info for the dataset.
-            chunk_size: The chunk size for a data bulk.
+            batch_size: The batch size for a data bulk.
             verbose: If True, shows a progress bar and prints out a quick summary at the end.
+            chunk_size: DEPRECATED! Use `batch_size` instead.
 
         Returns:
             Summary of the response from the REST API
@@ -335,11 +340,18 @@ class Argilla:
                 " https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
             )
 
-        if chunk_size > self._MAX_CHUNK_SIZE:
+        if chunk_size is not None:
+            warnings.warn(
+                "The argument `chunk_size` is deprecated and will be removed in a future"
+                " version. Please use `batch_size` instead.",
+                FutureWarning,
+            )
+            batch_size = chunk_size
+
+        if batch_size > self._MAX_BATCH_SIZE:
             _LOGGER.warning(
-                """The introduced chunk size is noticeably large, timeout errors may occur.
-                Consider a chunk size smaller than %s""",
-                self._MAX_CHUNK_SIZE,
+                "The requested batch size is noticeably large, timeout errors may occur. "
+                f"Consider a batch size smaller than {self._MAX_BATCH_SIZE}",
             )
 
         if isinstance(records, Record.__args__):
@@ -367,8 +379,8 @@ class Argilla:
         with Progress() as progress_bar:
             task = progress_bar.add_task("Logging...", total=len(records), visible=verbose)
 
-            for i in range(0, len(records), chunk_size):
-                chunk = records[i : i + chunk_size]
+            for i in range(0, len(records), batch_size):
+                batch = records[i : i + batch_size]
 
                 response = await async_bulk(
                     client=self._client,
@@ -376,14 +388,14 @@ class Argilla:
                     json_body=bulk_class(
                         tags=tags,
                         metadata=metadata,
-                        records=[creation_class.from_client(r) for r in chunk],
+                        records=[creation_class.from_client(r) for r in batch],
                     ),
                 )
 
                 processed += response.parsed.processed
                 failed += response.parsed.failed
 
-                progress_bar.update(task, advance=len(chunk))
+                progress_bar.update(task, advance=len(batch))
 
         # TODO: improve logging policy in library
         if verbose:

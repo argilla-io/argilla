@@ -228,6 +228,14 @@ def test_log_passing_empty_records_list(mocked_client):
         api.log(records=[], name="ds")
 
 
+def test_log_deprecated_chunk_size(mocked_client):
+    dataset_name = "test_log_deprecated_chunk_size"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    record = rg.TextClassificationRecord(text="My text")
+    with pytest.warns(FutureWarning, match="`chunk_size`.*`batch_size`"):
+        api.log(records=[record], name=dataset_name, chunk_size=100)
+
+
 def test_log_background(mocked_client):
     """Verify that logs can be delayed via the background parameter."""
     dataset_name = "test_log_background"
