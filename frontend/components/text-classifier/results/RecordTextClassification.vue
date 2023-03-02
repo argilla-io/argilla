@@ -216,11 +216,7 @@ export default {
     async onChangeStatusToDefault() {
       await this.changeStatusToDefault({
         dataset: this.getTextClassificationDataset(),
-        records: [
-          {
-            ...this.record,
-          },
-        ],
+        records: [this.record],
       });
     },
     onClearAnnotations() {

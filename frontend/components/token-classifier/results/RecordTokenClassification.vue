@@ -230,11 +230,7 @@ export default {
     async onChangeStatusToDefault() {
       await this.changeStatusToDefault({
         dataset: this.getTokenClassificationDataset(),
-        records: [
-          {
-            ...this.record,
-          },
-        ],
+        records: [this.record],
       });
     },
     onClearAnnotations() {

@@ -276,11 +276,7 @@ export default {
     async onChangeStatusToDefault() {
       await this.changeStatusToDefault({
         dataset: this.getText2TextDataset(),
-        records: [
-          {
-            ...this.record,
-          },
-        ],
+        records: [this.record],
       });
     },
     async onClearAnnotations() {
