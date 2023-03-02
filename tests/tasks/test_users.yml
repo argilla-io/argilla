@@ -1,0 +1,22 @@
+- username: john
+  full_name: John Doe
+  email: john@argilla.io
+  api_key: a14427ea-9197-11ec-b909-0242ac120002
+  hashed_password: $2y$05$xtl7iy3bpqchUwiQMjEHe.tY7OaIjDrg43W3TB4EHQ7izvdjvGtPS
+  disabled: False
+
+- username: tanya
+  full_name: Tanya Franklin
+  email: tanya@argilla.io
+  api_key: 78a10b53-8db7-4ab5-9e9e-fbd4b7e76551
+  hashed_password: $2y$05$aqNyXcXRXddNj5toZwT0HugHqKZypvqlBAkZviAGGbsAC8oTj/P5K
+  workspaces: [argilla, team]
+  disabled: True
+
+- username: daisy
+  full_name: Daisy Gonzalez
+  api_key: a8168929-8668-494c-b7a5-98cd35740d9b
+  email: daisy@argilla.io
+  hashed_password: $2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG
+  workspaces: [argilla, team, latam]
+  disabled: False
