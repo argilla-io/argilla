@@ -27,6 +27,19 @@
         :copy-button="copyButton"
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
+
+      <BaseButton class="button-settings" v-if="datasetName">
+        <NuxtLink
+          :to="datasetSettingsPageUrl"
+          v-badge="{
+            showBadge: isAnyLabelsInGlobalLabelsModelNotSavedInBack,
+            verticalPosition: 'top',
+            horizontalPosition: 'right',
+          }"
+        >
+          <svgicon name="settings" width="25" height="25" color="white" />
+        </NuxtLink>
+      </BaseButton>
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
@@ -51,6 +64,7 @@
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Vector as VectorModel } from "@/models/Vector";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { isExistAnyLabelsNotSavedInBackByDatasetId } from "@/models/globalLabel.queries";
 export default {
   data() {
     return {
@@ -113,6 +127,17 @@ export default {
         .where("dataset_id", this.datasetId.join("."))
         .where("is_active", true)
         .exists();
+    },
+    datasetSettingsPageUrl() {
+      if (this.datasetName) {
+        const { fullPath } = this.$route;
+        const datasetSettingsPageUrl = fullPath.replace("?", "/settings?");
+        return datasetSettingsPageUrl;
+      }
+      return null;
+    },
+    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
+      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
     },
   },
   mounted() {
@@ -177,5 +202,9 @@ export default {
   &:not(.sticky) {
     position: relative;
   }
+}
+
+.settings-button {
+  display: inline-flex;
 }
 </style>

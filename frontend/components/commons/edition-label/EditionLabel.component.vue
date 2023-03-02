@@ -60,7 +60,7 @@ export default {
       sortBy: "order",
       allowAddNewLabel: true,
       characterToSeparateLabels: null,
-      saveLabelsButtonLabel: "Saved labels",
+      saveLabelsButtonLabel: "Save labels",
     };
   },
   computed: {
