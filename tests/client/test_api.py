@@ -591,6 +591,9 @@ def test_load_with_sort(mocked_client, supported_vector_search):
         api.load(name=dataset, sort=[("event_timestamp", "ascc")])
 
     ds = api.load(name=dataset, sort=[("event_timestamp", "asc")])
+    assert all([(ds[idx].event_timestamp <= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
+
+    ds = api.load(name=dataset)
     assert all([(ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
 
 
