@@ -14,14 +14,15 @@
 
 from uuid import UUID
 
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
 from argilla.server.models import User, Workspace, WorkspaceUser
 from argilla.server.security.model import (
     UserCreate,
     WorkspaceCreate,
     WorkspaceUserCreate,
 )
-from passlib.context import CryptContext
-from sqlalchemy.orm import Session
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -126,3 +127,8 @@ def authenticate_user(db: Session, username: str, password: str):
         return
     else:
         _CRYPT_CONTEXT.dummy_verify()
+
+
+def is_superuser(user: User) -> bool:
+    # return user.role == "Admin"
+    return user.username == "argilla"
