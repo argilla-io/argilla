@@ -211,7 +211,7 @@ export default {
     },
     async whenClicked(...arg) {
       if (!this.dismissible) return;
-      await this.onClick.apply(null, arg);
+      this.onClick.apply(null, arg);
       this.close();
     },
     toggleTimer(newVal) {
