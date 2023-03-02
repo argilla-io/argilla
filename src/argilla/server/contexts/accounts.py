@@ -54,6 +54,10 @@ def get_workspace_by_id(db: Session, workspace_id: UUID):
     return db.get(Workspace, workspace_id)
 
 
+def get_workspace_by_name(db: Session, workspace_name: str):
+    return db.query(Workspace).filter_by(name=workspace_name).first()
+
+
 def list_workspaces(db: Session):
     return db.query(Workspace).order_by(Workspace.inserted_at.asc()).all()
 
