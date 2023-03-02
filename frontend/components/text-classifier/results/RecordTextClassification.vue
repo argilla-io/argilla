@@ -214,10 +214,11 @@ export default {
       });
     },
     async onChangeStatusToDefault() {
-      await this.changeStatusToDefault({
+      const currentRecordAndDataset = {
         dataset: this.getTextClassificationDataset(),
         records: [this.record],
-      });
+      };
+      await this.changeStatusToDefault(currentRecordAndDataset);
     },
     onClearAnnotations() {
       this.updateRecords({

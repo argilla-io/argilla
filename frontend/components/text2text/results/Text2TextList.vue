@@ -274,10 +274,11 @@ export default {
       this.$emit("annotate", { sentences: [newS] });
     },
     async onChangeStatusToDefault() {
-      await this.changeStatusToDefault({
+      const currentRecordAndDataset = {
         dataset: this.getText2TextDataset(),
         records: [this.record],
-      });
+      };
+      await this.changeStatusToDefault(currentRecordAndDataset);
     },
     async onClearAnnotations() {
       await this.updateRecords({
