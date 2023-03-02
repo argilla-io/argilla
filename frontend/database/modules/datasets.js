@@ -488,7 +488,7 @@ async function _updatePagination({ id, size, page }) {
 
 async function _chooseContinueOrCancel(action, dataset, query, sort, size) {
   return await Notification.dispatch("notify", {
-    message: "You will lose actions in pending",
+    message: "Pending actions will not be maintained when page is updated",
     type: "warning",
     buttonText: "Continue",
     async onClick() {
