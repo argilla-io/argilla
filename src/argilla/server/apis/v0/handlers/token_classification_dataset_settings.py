@@ -22,6 +22,7 @@ from argilla.server.apis.v0.models.commons.params import (
     CommonTaskHandlerDependencies,
 )
 from argilla.server.apis.v0.models.dataset_settings import TokenClassificationSettings
+from argilla.server.apis.v0.validators.commons import validate_is_super_user
 from argilla.server.apis.v0.validators.token_classification import DatasetValidator
 from argilla.server.commons.models import TaskType
 from argilla.server.security import auth
@@ -117,6 +118,9 @@ def configure_router(router: APIRouter):
             name=name,
             task=task,
             workspace=ws_params.workspace,
+        )
+        validate_is_super_user(
+            user, message=f"Cannot delete settings for dataset {found_ds.id}. Only admins can apply this change"
         )
         await datasets.delete_settings(
             user=user,

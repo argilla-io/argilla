@@ -18,6 +18,7 @@ from fastapi import Depends
 
 from argilla.server.apis.v0.models.dataset_settings import TokenClassificationSettings
 from argilla.server.apis.v0.models.datasets import Dataset
+from argilla.server.apis.v0.validators.commons import validate_is_super_user
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.security.model import User
@@ -56,6 +57,9 @@ class DatasetValidator:
         return cls._INSTANCE
 
     async def validate_dataset_settings(self, user: User, dataset: Dataset, settings: TokenClassificationSettings):
+        validate_is_super_user(
+            user, message=f"Cannot save settings for dataset {dataset.id}. Only admins can apply this change"
+        )
         if settings and settings.label_schema:
             results = self.__metrics__.summarize_metric(
                 dataset=dataset,
