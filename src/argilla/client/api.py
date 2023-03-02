@@ -206,6 +206,7 @@ def load(
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
     id_from: Optional[str] = None,
+    batch_size: Optional[int] = None,
     as_pandas=None,
 ) -> Dataset:
     """Loads a argilla dataset.
@@ -220,6 +221,8 @@ def load(
         id_from: If provided, starts gathering the records starting from that Record.
             As the Records returned with the load method are sorted by ID, ´id_from´
             can be used to load using batches.
+        batch_size: If provided, load `batch_size` samples per request. A lower batch
+            size may help avoid timeouts.
         as_pandas: DEPRECATED! To get a pandas DataFrame do
             ``rg.load('my_dataset').to_pandas()``.
 
@@ -251,6 +254,7 @@ def load(
         ids=ids,
         limit=limit,
         id_from=id_from,
+        batch_size=batch_size,
         as_pandas=as_pandas,
     )
 

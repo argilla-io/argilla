@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import argilla as rg
 import pytest
 from argilla.client.api import active_api
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord
@@ -83,16 +84,15 @@ def test_scan_fail_negative_limit(
 
 
 @pytest.mark.parametrize(("limit"), [6, 23, 20])
+@pytest.mark.parametrize(("load_method"), [lambda: active_api().datasets.scan, lambda: rg.load])
 def test_scan_efficient_limiting(
     monkeypatch: pytest.MonkeyPatch,
     limit,
     gutenberg_spacy_ner,
+    load_method,
 ):
-    client_datasets = active_api().datasets
-    # Reduce the default scan size to something small to better test the situation
-    # where limit > DEFAULT_SCAN_SIZE
+    method = load_method()
     batch_size = 10
-    monkeypatch.setattr(client_datasets, "DEFAULT_SCAN_SIZE", batch_size)
 
     # Monkeypatch the .post() call to track with what URLs the server is called
     called_paths = []
@@ -105,7 +105,7 @@ def test_scan_efficient_limiting(
     monkeypatch.setattr(active_api().http_client, "post", tracked_post)
 
     # Try to fetch `limit` samples from the 100
-    data = client_datasets.scan(name=gutenberg_spacy_ner, limit=limit)
+    data = method(name=gutenberg_spacy_ner, limit=limit, batch_size=10)
     data = list(data)
 
     # Ensure that `limit` samples were indeed fetched
