@@ -1230,8 +1230,32 @@ class DatasetForText2Text(DatasetBase):
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
         return cls([Text2TextRecord(**row) for row in dataframe.to_dict("records")])
 
-    @requires_version("datasets>1.17.0")
-    def prepare_for_training(self, **kwargs) -> "datasets.Dataset":
+    def _prepare_for_training_with_spark_nlp(self, records: List[Record]) -> "pandas.DataFrame":
+        spark_nlp_data = []
+        for record in records:
+            if record.annotation is None:
+                continue
+            if record.id is None:
+                record.id = str(uuid.uuid4())
+            text = record.text
+
+            spark_nlp_data.append([record.id, text, record.annotation])
+
+        return pd.DataFrame(spark_nlp_data, columns=["id", "text", "target"])
+
+    def _prepare_for_training_with_transformers(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A datasets Dataset.
+        """
+
+        raise NotImplementedError
+
+    def _prepare_for_training_with_spacy(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training.
 
         Args:
