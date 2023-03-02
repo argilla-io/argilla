@@ -16,14 +16,14 @@
 """
 Dataset models definition
 """
-
-from typing import Any, Dict, Optional
+from datetime import datetime
+from typing import Any, Dict, Optional, Union
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.commons.models import TaskType
-from argilla.server.services.datasets import ServiceBaseDataset
 
 
 class UpdateDatasetRequest(BaseModel):
@@ -48,6 +48,7 @@ class _BaseDatasetRequest(UpdateDatasetRequest):
 
 class CreateDatasetRequest(_BaseDatasetRequest):
     task: TaskType = Field(description="The dataset task")
+    workspace: Optional[str] = None
 
 
 class CopyDatasetRequest(_BaseDatasetRequest):
@@ -58,20 +59,17 @@ class CopyDatasetRequest(_BaseDatasetRequest):
     target_workspace: Optional[str] = None
 
 
-class Dataset(_BaseDatasetRequest, ServiceBaseDataset):
-    """
-    Low level dataset data model
-
-    Attributes:
-    -----------
-    task:
-        The dataset task type. Deprecated
-    owner:
-        The dataset owner
-    created_at:
-        The dataset creation date
-    last_updated:
-        The last modification date
-    """
-
+class Dataset(CreateDatasetRequest):
+    id: Union[str, UUID]
     task: TaskType
+    owner: str = Field(description="Deprecated. Use `workspace` instead. Will be removed in v1.5.0")
+    workspace: str
+
+    tags: Dict[str, str] = Field(default_factory=dict)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+    created_by: Optional[str] = Field(description="The argilla user that created the dataset")
+    last_updated: datetime
+
+    class Config:
+        orm_mode = True

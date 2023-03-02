@@ -76,7 +76,3 @@ class ServiceText2TextRecord(ServiceBaseRecord[ServiceText2TextAnnotation]):
 class ServiceText2TextQuery(ServiceBaseRecordsQuery):
     score: Optional[ServiceScoreRange] = Field(default=None)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-
-
-class ServiceText2TextDataset(ServiceBaseDataset):
-    task: TaskType = Field(default=TaskType.text2text, const=True)

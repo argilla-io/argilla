@@ -60,11 +60,7 @@ class BaseQuery(BaseModel):
 
 class BaseDatasetsQuery(BaseQuery):
     tasks: Optional[List[str]] = None
-    owners: Optional[List[str]] = None
-    # This is used to fetch workspaces without owner/workspace. But this should be moved to
-    # a default workspace
-    # TODO: Should be deprecated
-    include_no_owner: bool = None
+    workspaces: Optional[List[str]] = None
     name: Optional[str] = None
 
 

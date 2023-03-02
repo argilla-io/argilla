@@ -1328,6 +1328,7 @@ def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType], **kwa
         return DatasetForTokenClassification.from_datasets(dataset, **kwargs)
     if task is TaskType.text2text:
         return DatasetForText2Text.from_datasets(dataset, **kwargs)
+
     raise NotImplementedError("Reading a datasets Dataset is not implemented for the given task!")
 
 
