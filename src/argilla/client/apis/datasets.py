@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import math
 import warnings
 from dataclasses import dataclass
 from datetime import datetime
@@ -169,19 +170,18 @@ class Datasets(AbstractApi):
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
-            only id's will be returned
 
         Returns:
-
             An iterable of raw object containing per-record info
-
         """
 
-        url = f"{self._API_PREFIX}/{name}/records/:search?limit={limit or self.DEFAULT_SCAN_SIZE}"
-        query = self._parse_query(query=query)
+        if limit and limit < 0:
+            raise ValueError("The scan limit must be non-negative.")
 
-        if limit == 0:
-            limit = None
+        batch_size = self.DEFAULT_SCAN_SIZE
+        limit = limit if limit else math.inf
+        url = f"{self._API_PREFIX}/{name}/records/:search?limit={{limit}}"
+        query = self._parse_query(query=query)
 
         request = {
             "fields": list(projection) if projection else ["id"],
@@ -200,24 +200,24 @@ class Datasets(AbstractApi):
         if id_from:
             request["next_idx"] = id_from
 
-        yield_fields = 0
         with api_compatibility(self, min_version="1.2.0"):
+            request_limit = min(limit, batch_size)
             response = self.http_client.post(
-                url,
+                url.format(limit=request_limit),
                 json=request,
             )
 
             while response.get("records"):
-                for record in response["records"]:
-                    yield record
-                    yield_fields += 1
-                    if limit and limit <= yield_fields:
-                        return
+                yield from response["records"]
+                limit -= request_limit
+                if limit <= 0:
+                    return
 
                 next_idx = response.get("next_idx")
                 if next_idx:
+                    request_limit = min(limit, batch_size)
                     response = self.http_client.post(
-                        path=url,
+                        path=url.format(limit=request_limit),
                         json={**request, "next_idx": next_idx},
                     )
 

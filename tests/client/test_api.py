@@ -94,6 +94,11 @@ def mock_response_token_401(monkeypatch):
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
 
+def test_init_uppercase_workspace(mocked_client):
+    with pytest.raises(InputValueError):
+        api.init(workspace="UPPERCASE_WORKSPACE")
+
+
 def test_init_correct(mock_response_200):
     """Testing correct default initialization
 
@@ -174,6 +179,18 @@ def test_log_something(monkeypatch, mocked_client):
     assert results.total == 1
     assert len(results.records) == 1
     assert results.records[0].inputs["text"] == "This is a test"
+
+
+def test_load_empty_string(monkeypatch, mocked_client):
+    dataset_name = "test-dataset"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+
+    api.log(
+        name=dataset_name,
+        records=rg.TextClassificationRecord(inputs={"text": "This is a test"}),
+    )
+    assert len(api.load(name=dataset_name, query="")) == 1
+    assert len(api.load(name=dataset_name, query="  ")) == 1
 
 
 def test_load_limits(mocked_client, supported_vector_search):

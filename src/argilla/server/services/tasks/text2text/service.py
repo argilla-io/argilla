@@ -18,6 +18,7 @@ from typing import Iterable, List, Optional
 from fastapi import Depends
 
 from argilla.server.commons.config import TasksFactory
+from argilla.server.services.datasets import ServiceDataset
 from argilla.server.services.search.model import (
     ServiceSearchResults,
     ServiceSortableField,
@@ -27,7 +28,6 @@ from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
 from argilla.server.services.tasks.text2text.models import (
-    ServiceText2TextDataset,
     ServiceText2TextQuery,
     ServiceText2TextRecord,
 )
@@ -61,7 +61,7 @@ class Text2TextService:
 
     async def add_records(
         self,
-        dataset: ServiceText2TextDataset,
+        dataset: ServiceDataset,
         records: List[ServiceText2TextRecord],
     ):
         failed = await self.__storage__.store_records(
@@ -73,7 +73,7 @@ class Text2TextService:
 
     def search(
         self,
-        dataset: ServiceText2TextDataset,
+        dataset: ServiceDataset,
         query: ServiceText2TextQuery,
         sort_by: List[ServiceSortableField],
         record_from: int = 0,
@@ -113,7 +113,7 @@ class Text2TextService:
 
     def read_dataset(
         self,
-        dataset: ServiceText2TextDataset,
+        dataset: ServiceDataset,
         query: Optional[ServiceText2TextQuery] = None,
         id_from: Optional[str] = None,
         limit: int = 1000,

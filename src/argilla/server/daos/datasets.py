@@ -75,13 +75,13 @@ class DatasetsDAO:
 
     def list_datasets(
         self,
-        owner_list: List[str] = None,
+        workspaces: List[str] = None,
         task2dataset_map: Dict[str, Type[DatasetDB]] = None,
         name: Optional[str] = None,
     ) -> List[DatasetDB]:
-        owner_list = owner_list or []
+        workspaces = workspaces or []
         query = BaseDatasetsQuery(
-            owners=owner_list,
+            workspaces=workspaces,
             tasks=[task for task in task2dataset_map] if task2dataset_map else None,
             name=name,
         )
@@ -121,20 +121,16 @@ class DatasetsDAO:
     def find_by_name(
         self,
         name: str,
-        owner: Optional[str],
+        workspace: str,
         as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
-        task: Optional[str] = None,
     ) -> Optional[DatasetDB]:
         dataset_id = BaseDatasetDB.build_dataset_id(
             name=name,
-            owner=owner,
+            workspace=workspace,
         )
-        document = self._es.find_dataset(id=dataset_id, name=name, owner=owner)
+        document = self._es.find_dataset(id=dataset_id)
         if document is None:
             return None
-        base_ds = self._es_doc_to_instance(document)
-        if task and task != base_ds.task:
-            raise WrongTaskError(detail=f"Provided task {task} cannot be applied to dataset")
         dataset_type = as_dataset_class or BaseDatasetDB
         return self._es_doc_to_instance(document, ds_class=dataset_type)
 
@@ -192,11 +188,6 @@ class DatasetsDAO:
     def open(self, dataset: DatasetDB):
         """Make available a dataset"""
         self._es.open(dataset.id)
-
-    def get_all_workspaces(self) -> List[str]:
-        """Get all datasets (Only for super users)"""
-        metric_data = self._es.compute_argilla_metric(metric_id="all_argilla_workspaces")
-        return [k for k in metric_data]
 
     def save_settings(
         self,
