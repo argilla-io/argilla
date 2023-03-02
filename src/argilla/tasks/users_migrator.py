@@ -57,7 +57,7 @@ class UsersMigrator:
             print(f"Users migrating process successfully finished")
 
     def _migrate_user(self, session: Session, user: dict):
-        print(f"User with username {user['username']!r} has been migrated to database")
+        print(f"Migrating User with username {user['username']!r}")
 
         user_create = self._build_user_create(user)
 
