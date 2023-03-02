@@ -181,6 +181,18 @@ def test_log_something(monkeypatch, mocked_client):
     assert results.records[0].inputs["text"] == "This is a test"
 
 
+def test_load_empty_string(monkeypatch, mocked_client):
+    dataset_name = "test-dataset"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+
+    api.log(
+        name=dataset_name,
+        records=rg.TextClassificationRecord(inputs={"text": "This is a test"}),
+    )
+    assert len(api.load(name=dataset_name, query="")) == 1
+    assert len(api.load(name=dataset_name, query="  ")) == 1
+
+
 def test_load_limits(mocked_client, supported_vector_search):
     dataset = "test_load_limits"
     api_ds_prefix = f"/api/datasets/{dataset}"
