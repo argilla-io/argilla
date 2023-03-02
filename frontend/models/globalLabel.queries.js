@@ -111,6 +111,12 @@ const isLabelTextExistInGlobalLabelAndSavedInBack = (datasetId, labelText) => {
     .exists();
 };
 
+const getTotalLabelsInGlobalLabel = (datasetId) => {
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+  return GlobalLabelModel.query().where("dataset_id", joinedDatasetId).get()
+    .length;
+};
+
 export {
   getAllLabelsByDatasetId,
   getLabelsNotSavedInBackByDatasetId,
@@ -121,4 +127,5 @@ export {
   getAllLabelsTextByDatasetId,
   isLabelTextExistInGlobalLabel,
   isLabelTextExistInGlobalLabelAndSavedInBack,
+  getTotalLabelsInGlobalLabel,
 };

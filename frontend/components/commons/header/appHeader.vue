@@ -32,7 +32,9 @@
         <NuxtLink
           :to="datasetSettingsPageUrl"
           v-badge="{
-            showBadge: isAnyLabelsInGlobalLabelsModelNotSavedInBack,
+            showBadge:
+              isNoLabelInGlobalLabelModel ||
+              isAnyLabelsInGlobalLabelsModelNotSavedInBack,
             verticalPosition: 'top',
             horizontalPosition: 'right',
           }"
@@ -64,7 +66,10 @@
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Vector as VectorModel } from "@/models/Vector";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
-import { isExistAnyLabelsNotSavedInBackByDatasetId } from "@/models/globalLabel.queries";
+import {
+  isExistAnyLabelsNotSavedInBackByDatasetId,
+  getTotalLabelsInGlobalLabel,
+} from "@/models/globalLabel.queries";
 export default {
   data() {
     return {
@@ -135,6 +140,9 @@ export default {
         return datasetSettingsPageUrl;
       }
       return null;
+    },
+    isNoLabelInGlobalLabelModel() {
+      return !getTotalLabelsInGlobalLabel(this.datasetId);
     },
     isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
       return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
