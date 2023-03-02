@@ -68,7 +68,7 @@ def test_dataset_creation_fails_on_no_workspace_and_owner():
         BaseDatasetDB(task=TaskType.text_classification, name="tedb", workspace=None, owner=None)
 
 
-def test_accept_create_dataset_with_creator():
+def test_accept_create_dataset_without_created_by():
     ds = Dataset(
         name="a-dataset",
         id=uuid.uuid4(),
