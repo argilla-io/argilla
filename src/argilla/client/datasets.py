@@ -1243,30 +1243,6 @@ class DatasetForText2Text(DatasetBase):
 
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", "target"])
 
-    def _prepare_for_training_with_transformers(self, **kwargs) -> "datasets.Dataset":
-        """Prepares the dataset for training.
-
-        Args:
-            **kwargs: Specific to the task of the dataset.
-
-        Returns:
-            A datasets Dataset.
-        """
-
-        raise NotImplementedError
-
-    def _prepare_for_training_with_spacy(self, **kwargs) -> "datasets.Dataset":
-        """Prepares the dataset for training.
-
-        Args:
-            **kwargs: Specific to the task of the dataset.
-
-        Returns:
-            A datasets Dataset.
-        """
-
-        raise NotImplementedError
-
 
 Dataset = Union[DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text]
 
