@@ -439,7 +439,7 @@ class Argilla:
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
-        batch_size: Optional[int] = None,
+        batch_size: int = 250,
         as_pandas=None,
     ) -> Dataset:
         """Loads a argilla dataset.
@@ -669,7 +669,7 @@ class Argilla:
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
-        batch_size: Optional[int] = None,
+        batch_size: int = 250,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
         task = dataset.task

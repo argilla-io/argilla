@@ -206,7 +206,7 @@ def load(
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
     id_from: Optional[str] = None,
-    batch_size: Optional[int] = None,
+    batch_size: int = 250,
     as_pandas=None,
 ) -> Dataset:
     """Loads a argilla dataset.
