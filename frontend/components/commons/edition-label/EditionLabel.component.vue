@@ -108,7 +108,7 @@ export default {
       onAddNewLabelsInDataset: "entities/datasets/onAddNewLabels",
     }),
     async onAddNewLabels(newLabelsString) {
-      const newLabels = this.splitAndTrimArrayString(
+      const newLabels = this.splitTrimToUpperCaseArrayString(
         newLabelsString,
         this.characterToSeparateLabels
       );
@@ -126,8 +126,10 @@ export default {
         newLabels,
       });
     },
-    splitAndTrimArrayString(labels, splitCharacter = null) {
-      return labels.split(splitCharacter).map((item) => item.trim());
+    splitTrimToUpperCaseArrayString(labels, splitCharacter = null) {
+      return labels
+        .split(splitCharacter)
+        .map((item) => item.trim().toUpperCase());
     },
   },
 };
