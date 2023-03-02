@@ -68,7 +68,7 @@ class Dataset(CreateDatasetRequest):
     tags: Dict[str, str] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
-    created_by: str = Field(description="The argilla user that created the dataset")
+    created_by: Optional[str] = Field(description="The argilla user that created the dataset")
     last_updated: datetime
 
     class Config:

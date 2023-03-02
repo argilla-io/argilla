@@ -12,11 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import datetime
+import uuid
 
 import pytest
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.models.datasets import BaseDatasetDB
-from argilla.server.schemas.datasets import CreateDatasetRequest
+from argilla.server.schemas.datasets import CreateDatasetRequest, Dataset
 from pydantic import ValidationError
 
 
@@ -64,3 +66,18 @@ def test_dataset_creation_sync(dataset, expected_workspace):
 def test_dataset_creation_fails_on_no_workspace_and_owner():
     with pytest.raises(ValueError, match="Missing workspace"):
         BaseDatasetDB(task=TaskType.text_classification, name="tedb", workspace=None, owner=None)
+
+
+def test_accept_create_dataset_with_creator():
+    ds = Dataset(
+        name="a-dataset",
+        id=uuid.uuid4(),
+        task=TaskType.text_classification,
+        owner="dd",
+        workspace="dd",
+        created_at=datetime.datetime.utcnow(),
+        last_updated=datetime.datetime.utcnow(),
+    )
+
+    assert ds
+    assert ds.created_by is None
