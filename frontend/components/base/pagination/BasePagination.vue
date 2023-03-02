@@ -92,11 +92,7 @@
     <div class="pagination__info">
       <template v-if="!onePage">
         <strong>
-          {{ paginationSize * currentPage - (paginationSize - 1) }}-{{
-            paginationSize * currentPage > totalItems
-              ? totalItems
-              : paginationSize * currentPage
-          }}
+          {{ currentPaginationPosition }}
         </strong>
         of
       </template>
@@ -158,8 +154,27 @@ export default {
         (p) => p !== this.paginationSize
       );
     },
+    currentPaginationPosition() {
+      return this.isSingleRecordPage
+        ? this.currentPage
+        : this.currentPaginationRange;
+    },
+    currentPaginationRange() {
+      return `${this.currentRangeFrom} - ${this.currentRangeTo}`;
+    },
+    currentRangeFrom() {
+      return this.paginationSize * this.currentPage - (this.paginationSize - 1);
+    },
+    currentRangeTo() {
+      return this.paginationSize * this.currentPage > this.totalItems
+        ? this.totalItems
+        : this.paginationSize * this.currentPage;
+    },
     currentPage() {
       return this.paginationSettings.page;
+    },
+    isSingleRecordPage() {
+      return this.paginationSize === 1;
     },
     pages() {
       const rangeOfPages = (this.visiblePagesRange - 1) / 2;

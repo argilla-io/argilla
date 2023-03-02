@@ -553,6 +553,34 @@ const actions = {
       persistBackend: true,
     });
   },
+  async changeStatusToDefault(_, { dataset, records }) {
+    const newRecords = records.map((record) => ({
+      ...record,
+      selected: false,
+      status: "Default",
+    }));
+    const [currentStatus] = records.map((record) =>
+      record.status.toLowerCase()
+    );
+    let message = "";
+    let typeOfNotification = "success";
+    try {
+      await _updateDatasetRecords({
+        dataset,
+        records: newRecords,
+        persistBackend: true,
+      });
+      message = `1 record is un${currentStatus}`;
+    } catch (err) {
+      message = `1 record could not be un${currentStatus}`;
+      typeOfNotification = "error";
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        type: typeOfNotification,
+      });
+    }
+  },
   async resetAnnotations(_, { dataset, records }) {
     const newRecords = records.map((record) => ({
       ...record,
@@ -648,6 +676,12 @@ const actions = {
 
     return await ObservationDataset.api().get("/datasets/", {
       persistBy: "create",
+      dataTransformer: ({ data }) => {
+        return data.map((datasource) => {
+          datasource.workspace = datasource.workspace || datasource.owner;
+          return datasource;
+        });
+      },
     });
   },
   async fetchByName(_, name) {

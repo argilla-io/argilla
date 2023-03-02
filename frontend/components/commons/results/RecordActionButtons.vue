@@ -47,9 +47,9 @@ export default {
 <style lang="scss" scoped>
 $recordActions: (
   validate: palette(green),
-  discard: $black-37,
-  clear: $black-37,
-  reset: $black-37,
+  discard: $black-54,
+  clear: $black-54,
+  reset: $black-54,
 );
 .record {
   &__actions-buttons {
@@ -65,9 +65,10 @@ $recordActions: (
       padding: 7px 8px;
       color: $black-54;
       &:hover {
-        background: darken(palette(grey, 700), 5%);
+        background: darken(palette(grey, 700), 2%);
       }
       .svg-icon {
+        flex-shrink: 0;
         color: $color;
       }
       &:active .svg-icon {
@@ -84,16 +85,12 @@ $recordActions: (
       border-color: palette(green);
       background: palette(white);
       opacity: 1;
-      pointer-events: none;
-      cursor: default;
     }
   }
   &__actions-button--discard {
     &[active] {
       background: palette(white);
       opacity: 1;
-      pointer-events: none;
-      cursor: default;
     }
   }
 }

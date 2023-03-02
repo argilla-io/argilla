@@ -126,7 +126,7 @@ form {
   background: #f0f0fe;
   border-radius: 25px;
   color: #4c4ea3;
-  padding: calc($base-space / 2) $base-space * 3.5 calc($base-space / 2)
+  padding: calc($base-space / 2) $base-space * 4.5 calc($base-space / 2)
     $base-space;
   @include truncate;
   width: auto;

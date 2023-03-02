@@ -70,10 +70,10 @@
     <record-action-buttons
       v-if="annotationEnabled"
       :actions="text2textClassifierActionButtons"
-      @validate="onValidate()"
+      @validate="toggleValidateRecord()"
       @clear="onClearAnnotations()"
       @reset="onReset()"
-      @discard="onDiscard()"
+      @discard="toggleDiscardRecord()"
     />
   </div>
 </template>
@@ -230,6 +230,7 @@ export default {
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
+      changeStatusToDefault: "entities/datasets/changeStatusToDefault",
     }),
     async showPredictionNumber(index) {
       this.refresh++;
@@ -251,12 +252,33 @@ export default {
         ],
       });
     },
+    async toggleValidateRecord() {
+      if (this.record.status === "Validated") {
+        await this.onChangeStatusToDefault();
+      } else {
+        this.onValidate();
+      }
+    },
+    async toggleDiscardRecord() {
+      if (this.record.status === "Discarded") {
+        await this.onChangeStatusToDefault();
+      } else {
+        this.onDiscard();
+      }
+    },
     async onValidate() {
       let newS = {
         score: 1,
         text: this.record.sentenceForAnnotation || null,
       };
       this.$emit("annotate", { sentences: [newS] });
+    },
+    async onChangeStatusToDefault() {
+      const currentRecordAndDataset = {
+        dataset: this.getText2TextDataset(),
+        records: [this.record],
+      };
+      await this.changeStatusToDefault(currentRecordAndDataset);
     },
     async onClearAnnotations() {
       await this.updateRecords({
