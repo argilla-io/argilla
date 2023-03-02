@@ -562,22 +562,22 @@ const actions = {
     const [currentStatus] = records.map((record) =>
       record.status.toLowerCase()
     );
-    const messageOk = `1 record is un${currentStatus} `;
-    const messageKo = `1 record could not be un${currentStatus} `;
+    let message = "";
+    let typeOfNotification = "success";
     try {
       await _updateDatasetRecords({
         dataset,
         records: newRecords,
         persistBackend: true,
       });
-      Notification.dispatch("notify", {
-        message: messageOk,
-        type: "success",
-      });
+      message = `1 record is un${currentStatus}`;
     } catch (err) {
+      message = `1 record could not be un${currentStatus}`;
+      typeOfNotification = "error";
+    } finally {
       Notification.dispatch("notify", {
-        message: messageKo,
-        type: "error",
+        message,
+        type: typeOfNotification,
       });
     }
   },
