@@ -160,13 +160,15 @@ export default {
         : this.currentPaginationRange;
     },
     currentPaginationRange() {
-      const rangeFrom =
-        this.paginationSize * this.currentPage - (this.paginationSize - 1);
-      const rangeTo =
-        this.paginationSize * this.currentPage > this.totalItems
-          ? this.totalItems
-          : this.paginationSize * this.currentPage;
-      return `${rangeFrom} - ${rangeTo}`;
+      return `${this.currentRangeFrom} - ${this.currentRangeTo}`;
+    },
+    currentRangeFrom() {
+      return this.paginationSize * this.currentPage - (this.paginationSize - 1);
+    },
+    currentRangeTo() {
+      return this.paginationSize * this.currentPage > this.totalItems
+        ? this.totalItems
+        : this.paginationSize * this.currentPage;
     },
     currentPage() {
       return this.paginationSettings.page;
