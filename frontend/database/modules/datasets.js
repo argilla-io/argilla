@@ -562,8 +562,8 @@ const actions = {
     const [currentStatus] = records.map((record) =>
       record.status.toLowerCase()
     );
-    const messageOk = `1 record is un-${currentStatus} `;
-    const messageKo = `1 record could not be un-${currentStatus} `;
+    const messageOk = `1 record is un${currentStatus} `;
+    const messageKo = `1 record could not be un${currentStatus} `;
     try {
       await _updateDatasetRecords({
         dataset,
