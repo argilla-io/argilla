@@ -205,7 +205,7 @@ def load(
     vector: Optional[Tuple[str, List[float]]] = None,
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
-    sort: Optional[Union[Dict[str, str], List[Tuple[str, str]]]] = None,
+    sort: Optional[List[Tuple[str, str]]] = None,
     id_from: Optional[str] = None,
     as_pandas=None,
 ) -> Dataset:
@@ -218,6 +218,7 @@ def load(
         vector: Vector configuration for a semantic search
         ids: If provided, load dataset records with given ids.
         limit: The number of records to retrieve.
+        sort: The fields on which to sort [(<field_name>, 'asc|decs')].
         id_from: If provided, starts gathering the records starting from that Record.
             As the Records returned with the load method are sorted by ID, ´id_from´
             can be used to load using batches.

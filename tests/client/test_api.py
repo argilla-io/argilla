@@ -575,6 +575,25 @@ def test_load_with_query(mocked_client, supported_vector_search):
     assert ds.id.iloc[0] == 1
 
 
+def test_load_with_sort(mocked_client, supported_vector_search):
+    dataset = "test_load_with_sort"
+    mocked_client.delete(f"/api/datasets/{dataset}")
+    sleep(1)
+
+    expected_data = 4
+    create_some_data_for_text_classification(
+        mocked_client,
+        dataset,
+        n=expected_data,
+        with_vectors=supported_vector_search,
+    )
+    with pytest.raises(ValueError, "sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]"):
+        api.load(name=dataset, sort=[("event_timestamp", "ascc")])
+
+    ds = api.load(name=dataset, sort=[("event_timestamp", "asc")])
+    assert all([(ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
+
+
 def test_load_as_pandas(mocked_client, supported_vector_search):
     dataset = "test_load_as_pandas"
     mocked_client.delete(f"/api/datasets/{dataset}")

@@ -438,7 +438,7 @@ class Argilla:
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
-        sort: Optional[Union[Dict[str, str], List[Tuple[str, str]]]] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         as_pandas=None,
     ) -> Dataset:
@@ -451,6 +451,7 @@ class Argilla:
             vector: Vector configuration for a semantic search
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
+            sort: The fields on which to sort [(<field_name>, 'asc|decs')].
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
@@ -653,7 +654,7 @@ class Argilla:
         )
 
         records = [sdk_record.to_client() for sdk_record in response.parsed]
-        return dataset_class(self.__sort_records_by_id__(records))
+        return dataset_class(records)
 
     def _load_records_new_fashion(
         self,
@@ -662,7 +663,7 @@ class Argilla:
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
-        sort: Optional[Union[Dict[str, str], List[Tuple[str, str]]]] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
@@ -692,9 +693,9 @@ class Argilla:
             )
 
         if vector:
-            assert sort is None, InputValueError(
-                "Results are sorted by vector similarity, so 'sort' parameter is ignored."
-            )
+            if sort is not None:
+                _LOGGER.warning("Results are sorted by vector similarity, so 'sort' parameter is ignored.")
+
             vector_search = VectorSearch(
                 name=vector[0],
                 value=vector[1],
@@ -720,12 +721,4 @@ class Argilla:
             ids=ids,
         )
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
-        return dataset_class(self.__sort_records_by_id__(records))
-
-    def __sort_records_by_id__(self, records: list) -> list:
-        try:
-            records_sorted_by_id = sorted(records, key=lambda x: x.id)
-        # record ids can be a mix of int/str -> sort all as str type
-        except TypeError:
-            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
-        return records_sorted_by_id
+        return dataset_class(records)
