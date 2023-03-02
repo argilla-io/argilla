@@ -24,15 +24,12 @@ from pydantic.utils import GetterDict
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.errors import EntityNotFoundError
 
-_WORKSPACE_NAME_REGEX = r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$"
+_WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
 
-_EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
 
 _USER_PASSWORD_MIN_LENGTH = 8
 _USER_PASSWORD_MAX_LENGTH = 100
 _USER_USERNAME_REGEX = ES_INDEX_REGEX_PATTERN
-
-WORKSPACE_NAME_PATTERN = re.compile(_WORKSPACE_NAME_REGEX)
 
 
 class WorkspaceUserCreate(BaseModel):
@@ -76,7 +73,6 @@ class User(BaseModel):
 
     id: UUID
     username: str = Field()
-    email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
 
@@ -90,24 +86,6 @@ class User(BaseModel):
     class Config:
         orm_mode = True
         getter_dict = UserGetter
-
-    @validator("username")
-    def check_username(cls, value):
-        if not re.compile(ES_INDEX_REGEX_PATTERN).match(value):
-            raise ValueError(
-                "Wrong username. " f"The username {value} does not match the pattern {ES_INDEX_REGEX_PATTERN}"
-            )
-        return value
-
-    @validator("workspaces", each_item=True)
-    def check_workspace_pattern(cls, workspace: str):
-        """Check workspace pattern"""
-        if not workspace:
-            return workspace
-        assert WORKSPACE_NAME_PATTERN.match(workspace), (
-            "Wrong workspace format. " f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
-        )
-        return workspace
 
     @root_validator()
     def check_defaults(cls, values):

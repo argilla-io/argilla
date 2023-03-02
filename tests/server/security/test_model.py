@@ -16,34 +16,8 @@ from datetime import datetime
 
 import pytest
 from argilla.server.errors import EntityNotFoundError
-from argilla.server.security.model import User, UserCreate
+from argilla.server.security.model import User, UserCreate, WorkspaceCreate
 from pydantic import ValidationError
-
-
-@pytest.mark.parametrize("email", ["my@email.com", "infra@argilla.io"])
-def test_valid_mail(email):
-    user = User(
-        username="user",
-        api_key="api-key",
-        email=email,
-        id=uuid.uuid4(),
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    )
-    assert user.email == email
-
-
-@pytest.mark.parametrize("wrong_email", ["non-valid-email", "wrong@mail", "@wrong" "wrong.mail"])
-def test_email_validator(wrong_email):
-    with pytest.raises(ValidationError):
-        User(
-            username="user",
-            api_key="api-key",
-            email=wrong_email,
-            id=uuid.uuid4(),
-            inserted_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-        )
 
 
 @pytest.mark.parametrize("wrong_name", ["user name", "user/name", "user.name", "UserName", "userName"])
@@ -55,14 +29,7 @@ def test_username_validator(wrong_name):
 @pytest.mark.parametrize("wrong_workspace", ["work space", "work/space", "work.space", "_", "-"])
 def test_workspace_validator(wrong_workspace):
     with pytest.raises(ValidationError):
-        User(
-            username="username",
-            api_key="api-key",
-            workspaces=[wrong_workspace],
-            id=uuid.uuid4(),
-            inserted_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-        )
+        WorkspaceCreate(name=wrong_workspace)
 
 
 def test_check_non_provided_workspaces():

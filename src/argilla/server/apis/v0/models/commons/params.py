@@ -21,7 +21,6 @@ from argilla._constants import (
     ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
 )
-from argilla.server.security.model import WORKSPACE_NAME_PATTERN
 
 DATASET_NAME_PATH_PARAM = Path(..., regex=ES_INDEX_REGEX_PATTERN, description="The dataset name")
 
@@ -57,8 +56,4 @@ class CommonTaskHandlerDependencies:
     def workspace(self) -> str:
         """Return read workspace. Query param prior to header param"""
         workspace = self.__workspace_param__ or self.__workspace_header__ or self.__old_workspace_header__
-        if workspace:
-            assert WORKSPACE_NAME_PATTERN.match(workspace), (
-                "Wrong workspace format. " f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
-            )
         return workspace
