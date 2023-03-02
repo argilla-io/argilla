@@ -306,12 +306,8 @@ $toast-colors: map-merge(
       }
     }
   }
-  &__button.button {
+  &__button {
     margin: 0 3em;
-    background: palette(apricot, dark);
-    &:hover {
-      background: darken(palette(apricot, dark), 5%);
-    }
   }
   &__close {
     margin-right: 1em;
