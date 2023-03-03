@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace
+from argilla.server.security.auth_provider.local.settings import settings
 from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
 
 
@@ -101,4 +102,4 @@ class UsersMigrator:
 
 
 if __name__ == "__main__":
-    UsersMigrator(os.environ["ARGILLA_LOCAL_AUTH_USERS_DB_FILE"]).migrate()
+    UsersMigrator(settings.users_db_file).migrate()

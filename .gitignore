@@ -137,4 +137,4 @@ package-lock.json
 src/**/server/static/
 
 # Old users db file
-/users.yml
+.users.yml
