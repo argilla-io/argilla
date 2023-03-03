@@ -1,5 +1,21 @@
 <template>
   <div class="left-content">
+    <div class="dataset-description">
+      <div class="item">
+        <p v-html="datasetName" />
+        <p class="dataset-task" v-html="datasetTask" />
+      </div>
+      <base-action-tooltip tooltip="Copied">
+        <base-button
+          title="Copy to clipboard"
+          class="table-info__actions__button button-icon"
+          @click.prevent="$copyToClipboard(datasetSettingsUrl)"
+        >
+          <svgicon name="copy" width="16" height="16" />
+          Copy Link
+        </base-button>
+      </base-action-tooltip>
+    </div>
     <div class="dataset-description-component">
       <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
     </div>
@@ -31,6 +47,11 @@ import {
 export default {
   name: "LeftDatasetSettingsContent",
   computed: {
+    datasetSettingsUrl() {
+      const { fullPath } = this.$route;
+      const datasetSettingsUrl = `${window.origin}${fullPath}`;
+      return datasetSettingsUrl;
+    },
     datasetName() {
       return this.$route.params.dataset;
     },
@@ -76,5 +97,15 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  .dataset-description {
+    display: flex;
+    align-items: center;
+    .item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  }
 }
 </style>
