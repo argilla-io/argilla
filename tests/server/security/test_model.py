@@ -70,6 +70,8 @@ def test_check_user_workspaces():
 def test_workspace_for_superuser():
     user = User(username="admin")
 
+    assert user.check_workspace("admin") == "admin"
+
     with pytest.raises(EntityNotFoundError):
         assert user.check_workspace("some") == "some"
 
