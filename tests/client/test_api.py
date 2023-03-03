@@ -466,19 +466,19 @@ def test_dataset_copy(mocked_client):
         api.copy(dataset, name_of_copy=dataset_copy, workspace=other_workspace)
 
 
-def test_dataset_copy_to_another_workspace(mocked_client, admin: User, db: Session, admin_auth_header: dict):
+def test_dataset_copy_to_another_workspace(mocked_client, argilla_user: User, db: Session):
     dataset_name = "test_dataset_copy_to_another_workspace"
     dataset_copy = "new_dataset"
     new_workspace_name = "my-fun-workspace"
 
     workspace = accounts.create_workspace(db, WorkspaceCreate(name=new_workspace_name))
-    accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=admin.id))
+    accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=argilla_user.id))
 
-    mocked_client.delete(f"/api/datasets/{dataset_name}", headers=admin_auth_header)
-    mocked_client.delete(f"/api/datasets/{dataset_copy}", headers=admin_auth_header)
-    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace_name}", headers=admin_auth_header)
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.delete(f"/api/datasets/{dataset_copy}")
+    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace_name}")
 
-    api = Argilla(api_key=admin.api_key)
+    api = Argilla(api_key=argilla_user.api_key)
 
     api.log(
         rg.TextClassificationRecord(
