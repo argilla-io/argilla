@@ -64,7 +64,7 @@ class ServiceLabelingRule(BaseModel):
 
 
 class ServiceTextClassificationDataset(ServiceBaseDataset):
-    task: TaskType = Field(default=TaskType.text_classification, const=True)
+    task: TaskType = Field(default=TaskType.text_classification)
     rules: List[ServiceLabelingRule] = Field(default_factory=list)
 
 

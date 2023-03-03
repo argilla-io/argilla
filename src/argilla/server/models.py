@@ -14,6 +14,7 @@
 
 import secrets
 from datetime import datetime
+from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
 
@@ -31,6 +32,11 @@ def generate_user_api_key():
 
 def default_inserted_at(context):
     return context.get_current_parameters()["inserted_at"]
+
+
+class UserRole(str, Enum):
+    admin = "admin"
+    annotator = "annotator"
 
 
 class WorkspaceUser(Base):
@@ -74,6 +80,7 @@ class User(Base):
     first_name: Mapped[str]
     last_name: Mapped[Optional[str]]
     username: Mapped[str] = mapped_column(unique=True)
+    role: Mapped[UserRole] = mapped_column(default=UserRole.annotator)
     api_key: Mapped[str] = mapped_column(Text, unique=True, default=generate_user_api_key)
     password_hash: Mapped[str] = mapped_column(Text)
 
@@ -85,4 +92,4 @@ class User(Base):
     )
 
     def __repr__(self):
-        return f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, username={self.username!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, username={self.username!r}, role={self.role.value!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"

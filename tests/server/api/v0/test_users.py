@@ -15,7 +15,7 @@
 from uuid import uuid4
 
 import pytest
-from argilla.server.models import User
+from argilla.server.models import User, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -69,6 +69,23 @@ def test_create_user(client: TestClient, db: Session, admin_auth_header: dict):
     response_body = response.json()
     assert response_body["username"] == "username"
     assert response_body["api_key"] == db_user.api_key
+    assert response_body["role"] == UserRole.annotator.value
+
+
+def test_create_user_with_non_default_role(client: TestClient, db: Session, admin_auth_header: dict):
+    user = {"first_name": "first-name", "username": "username", "password": "12345678", "role": UserRole.admin.value}
+
+    response = client.post("/api/users", headers=admin_auth_header, json=user)
+
+    assert response.status_code == 200
+    assert db.query(User).count() == 2
+
+    db_user = db.query(User).filter_by(username="username").first()
+    assert db_user
+
+    response_body = response.json()
+    assert response_body["username"] == "username"
+    assert response_body["role"] == UserRole.admin.value
 
 
 def test_create_user_without_authentication(client: TestClient, db: Session):
@@ -100,6 +117,15 @@ def test_create_user_with_invalid_min_length_last_name(client: TestClient, db: S
 
 def test_create_user_with_invalid_username(client: TestClient, db: Session, admin_auth_header: dict):
     user = {"first_name": "first-name", "username": "invalid username", "password": "12345678"}
+
+    response = client.post("/api/users", headers=admin_auth_header, json=user)
+
+    assert response.status_code == 422
+    assert db.query(User).count() == 1
+
+
+def test_create_user_with_invalid_role(client: TestClient, db: Session, admin_auth_header: dict):
+    user = {"first_name": "first-name", "username": "username", "password": "12345678", "role": "invalid role"}
 
     response = client.post("/api/users", headers=admin_auth_header, json=user)
 

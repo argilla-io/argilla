@@ -54,6 +54,10 @@ def get_workspace_by_id(db: Session, workspace_id: UUID):
     return db.get(Workspace, workspace_id)
 
 
+def get_workspace_by_name(db: Session, workspace_name: str):
+    return db.query(Workspace).filter_by(name=workspace_name).first()
+
+
 def list_workspaces(db: Session):
     return db.query(Workspace).order_by(Workspace.inserted_at.asc()).all()
 
@@ -96,6 +100,7 @@ def create_user(db: Session, user_create: UserCreate):
         first_name=user_create.first_name,
         last_name=user_create.last_name,
         username=user_create.username,
+        role=user_create.role,
         password_hash=_CRYPT_CONTEXT.hash(user_create.password),
     )
 

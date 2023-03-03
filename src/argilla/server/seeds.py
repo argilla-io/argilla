@@ -14,7 +14,7 @@
 
 from argilla._constants import DEFAULT_API_KEY
 from argilla.server.database import SessionLocal
-from argilla.server.models import User, Workspace
+from argilla.server.models import User, UserRole, Workspace
 
 
 def development_seeds():
@@ -27,6 +27,7 @@ def development_seeds():
                     first_name="John",
                     last_name="Doe",
                     username="argilla",
+                    role=UserRole.admin,
                     password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
                     api_key="1234",
                 ),
@@ -50,6 +51,7 @@ def test_seeds(db: SessionLocal):
                     User(
                         first_name="Argilla",
                         username="argilla",
+                        role=UserRole.admin,
                         password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
                         api_key=DEFAULT_API_KEY,
                     ),
