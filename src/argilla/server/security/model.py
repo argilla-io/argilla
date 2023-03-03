@@ -23,6 +23,7 @@ from pydantic.utils import GetterDict
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.errors import EntityNotFoundError
+from argilla.server.models import UserRole
 
 _WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
 
@@ -55,6 +56,7 @@ class UserCreate(BaseModel):
     first_name: constr(min_length=1, strip_whitespace=True)
     last_name: Optional[constr(min_length=1, strip_whitespace=True)]
     username: constr(regex=_USER_USERNAME_REGEX, min_length=1)
+    role: Optional[UserRole]
     password: constr(min_length=_USER_PASSWORD_MIN_LENGTH, max_length=_USER_PASSWORD_MAX_LENGTH)
 
 
@@ -73,6 +75,7 @@ class User(BaseModel):
 
     id: UUID
     username: str = Field()
+    role: UserRole
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
 
