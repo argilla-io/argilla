@@ -210,7 +210,7 @@ function _normalizeSearchQuery({ query, dataset }) {
     : { ...dataset.query, ...query, metadata };
 }
 
-async function _updateViewSettings({ id, data }) {
+async function updateViewSettings({ id, data }) {
   /**
    * Wraps view settings updates
    */
@@ -296,7 +296,7 @@ async function _paginate({ dataset, size, page }) {
   const pagination = new Pagination({ size, page });
 
   try {
-    await _updateViewSettings({ id: dataset.name, data: { loading: true } });
+    await updateViewSettings({ id: dataset.name, data: { loading: true } });
     const results = await _callSearchApi({
       dataset,
       query: dataset.query,
@@ -306,7 +306,7 @@ async function _paginate({ dataset, size, page }) {
     });
     return await _updateTaskDataset({ dataset, data: { results } });
   } finally {
-    const { viewMode } = await _updateViewSettings({
+    const { viewMode } = await updateViewSettings({
       id: dataset.name,
       data: { loading: false },
     });
@@ -346,10 +346,10 @@ async function _search({ dataset, query, sort, size }) {
   sort = sort || dataset.sort || [];
   size = size || Pagination.find(dataset.name).size;
   try {
-    await _updateViewSettings({ id: dataset.name, data: { loading: true } });
+    await updateViewSettings({ id: dataset.name, data: { loading: true } });
     await _querySearch({ dataset, query, sort, size });
   } finally {
-    await _updateViewSettings({ id: dataset.name, data: { loading: false } });
+    await updateViewSettings({ id: dataset.name, data: { loading: false } });
   }
 
   const viewSettings = DatasetViewSettings.find(dataset.name);
@@ -410,7 +410,7 @@ async function _updateDatasetRecords({
   const arePendingRecords = records.some(
     (record) => record.status === "Edited"
   );
-  await _updateViewSettings({
+  await updateViewSettings({
     id: dataset.name,
     data: { arePendingRecords },
   });
@@ -486,20 +486,24 @@ async function _updatePagination({ id, size, page }) {
   return pagination;
 }
 
-async function _chooseContinueOrCancel(action, dataset, query, sort, size) {
-  return await Notification.dispatch("notify", {
+async function chooseContinueOrCancel(action, dataset, query, sort, size) {
+  const notificationAction = async () => {
+    await action(dataset, query, sort, size);
+    await updateViewSettings({
+      id: dataset.name,
+      data: { arePendingRecords: false },
+    });
+  };
+  const notificationSettings = {
     message: "Pending actions will be lost when the page is refreshed",
     type: "warning",
     numberOfChars: 20000,
     buttonText: "Ok, got it!",
     async onClick() {
-      await action(dataset, query, sort, size);
-      await _updateViewSettings({
-        id: dataset.name,
-        data: { arePendingRecords: false },
-      });
+      notificationAction();
     },
-  });
+  };
+  return await Notification.dispatch("notify", notificationSettings);
 }
 
 const getters = {
@@ -746,19 +750,13 @@ const actions = {
       return searchResponse;
     };
     if (arePendingRecords(dataset.name)) {
-      return await _chooseContinueOrCancel(
-        onSearch,
-        dataset,
-        query,
-        sort,
-        size
-      );
+      return await chooseContinueOrCancel(onSearch, dataset, query, sort, size);
     }
     await onSearch(dataset, query, sort, size);
   },
 
   async changeViewMode(_, { dataset, value }) {
-    const settings = await _updateViewSettings({
+    const settings = await updateViewSettings({
       id: dataset.name,
       data: { viewMode: value, visibleRulesList: false },
     });
@@ -783,7 +781,7 @@ const actions = {
       initVectorModel(dataset.id, records);
     };
     if (arePendingRecords(dataset.name)) {
-      return await _chooseContinueOrCancel(onPaginate, dataset);
+      return await chooseContinueOrCancel(onPaginate, dataset);
     }
     await onPaginate(dataset);
   },
@@ -820,7 +818,7 @@ const actions = {
       initVectorModel(dataset.id, records);
     };
     if (arePendingRecords(dataset.name)) {
-      return await _chooseContinueOrCancel(onRefresh, dataset);
+      return await chooseContinueOrCancel(onRefresh, dataset);
     }
     await onRefresh(dataset);
   },
