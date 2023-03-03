@@ -76,12 +76,11 @@ class User(BaseModel):
     username: str = Field()
     role: UserRole
     full_name: Optional[str] = None
-    disabled: Optional[bool] = None
 
     superuser: Optional[bool]
     workspaces: Optional[List[str]]
     api_key: str
-    workspaces: Optional[List[str]] = None
+
     inserted_at: datetime
     updated_at: datetime
 
