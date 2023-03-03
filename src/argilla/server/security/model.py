@@ -79,11 +79,6 @@ class User(BaseModel):
 
         return list(set(value))
 
-    @property
-    def default_workspace(self) -> Optional[str]:
-        """Get the default user workspace"""
-        return self.username
-
     def check_workspaces(self, workspaces: List[str]) -> List[str]:
         """
         Given a list of workspaces, apply a belongs to validation for each one. Then, return

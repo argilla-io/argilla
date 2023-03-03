@@ -67,17 +67,8 @@ def test_check_user_workspaces():
         assert user.check_workspaces(["not-found-ws"])
 
 
-def test_default_workspace():
-    user = User(username="admin")
-    assert user.default_workspace == "admin"
-
-    test_user = User(username="test", workspaces=["ws"])
-    assert test_user.default_workspace == test_user.username
-
-
 def test_workspace_for_superuser():
     user = User(username="admin")
-    assert user.default_workspace == "admin"
 
     with pytest.raises(EntityNotFoundError):
         assert user.check_workspace("some") == "some"
