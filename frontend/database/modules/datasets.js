@@ -491,7 +491,7 @@ async function _chooseContinueOrCancel(action, dataset, query, sort, size) {
     message: "Pending actions will be lost when the page is refreshed",
     type: "warning",
     numberOfChars: 20000,
-    buttonText: "OK, continue",
+    buttonText: "Ok, got it!",
     async onClick() {
       await action(dataset, query, sort, size);
       await _updateViewSettings({
