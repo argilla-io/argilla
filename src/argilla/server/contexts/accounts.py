@@ -17,7 +17,8 @@ from uuid import UUID
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from argilla.server.models import User, Workspace, WorkspaceUser
+from argilla.server.errors import EntityNotFoundError
+from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 from argilla.server.security.model import (
     UserCreate,
     WorkspaceCreate,
@@ -57,6 +58,13 @@ def get_workspace_by_id(db: Session, workspace_id: UUID):
 
 def get_workspace_by_name(db: Session, workspace_name: str):
     return db.query(Workspace).filter_by(name=workspace_name).first()
+
+
+def get_workspace_by_name_or_raise(db: Session, workspace_name: str) -> Workspace:
+    workspace = get_workspace_by_name(db, workspace_name)
+    if not workspace:
+        raise EntityNotFoundError(name=workspace_name, type=Workspace)
+    return workspace
 
 
 def list_workspaces(db: Session):
@@ -130,6 +138,5 @@ def authenticate_user(db: Session, username: str, password: str):
         _CRYPT_CONTEXT.dummy_verify()
 
 
-def is_superuser(user: User) -> bool:
-    # return user.role == "Admin"
-    return user.username == "argilla"
+def is_admin_user(user: User) -> bool:
+    return user.role == UserRole.admin

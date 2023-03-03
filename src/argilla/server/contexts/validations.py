@@ -13,24 +13,13 @@
 #  limitations under the License.
 
 from argilla.server.contexts import accounts
-from argilla.server.database import SessionLocal
-from argilla.server.errors import EntityNotFoundError, ForbiddenOperationError
 from argilla.server.models import User, Workspace
 
 
-def validate_workspaces_user_access(user: User, *workspaces: Workspace):
-    for workspace in workspaces:
-        if workspace in user.workspaces:
-            continue
-        elif accounts.is_superuser(user):
-            continue
-        else:
-            raise ForbiddenOperationError(f"Cannot access workspace {workspace}")
-    return True
-
-
-def validate_and_get_workspace_by_name(db: SessionLocal, workspace_name: str) -> Workspace:
-    workspace = accounts.get_workspace_by_name(db, workspace_name)
-    if not workspace:
-        raise EntityNotFoundError(name=workspace_name, type=Workspace)
-    return workspace
+def can_user_access_to_workspace(user: User, workspace: Workspace):
+    if workspace in user.workspaces:
+        return True
+    elif accounts.is_admin_user(user):
+        return True
+    else:
+        return False
