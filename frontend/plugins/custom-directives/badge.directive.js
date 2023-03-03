@@ -11,27 +11,33 @@ Vue.directive("badge", {
   bind: (element, binding) => {
     const { showBadge } = binding.value;
     if (showBadge) {
-      const { verticalPosition, horizontalPosition, backgroundColor } =
-        binding.value;
+      const {
+        verticalPosition,
+        horizontalPosition,
+        backgroundColor,
+        borderColor,
+      } = binding.value;
+
       element.style.position = "relative";
       const badge = document.createElement("div");
       badge.setAttribute("id", `${element.id}Badge`);
       badge.style.position = "absolute";
       badge.style.backgroundColor = backgroundColor || "#ff675f";
-      badge.style.width = "10px";
-      badge.style.height = "10px";
+      badge.style.width = "14px";
+      badge.style.height = "14px";
       badge.style.borderRadius = "5em";
+      badge.style.border = `2px ${borderColor ?? "transparent"} solid`;
 
       if (verticalPosition === "top") {
-        badge.style.top = "-7px";
+        badge.style.top = "-3px";
       } else if (verticalPosition === "bottom") {
-        badge.style.bottom = "-7px";
+        badge.style.bottom = "-3px";
       }
 
       if (horizontalPosition === "right") {
-        badge.style.right = "-7px";
+        badge.style.right = "-3px";
       } else if (horizontalPosition === "left") {
-        badge.style.left = "-7px";
+        badge.style.left = "-3px";
       }
       element.appendChild(badge);
     }

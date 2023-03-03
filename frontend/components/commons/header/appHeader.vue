@@ -37,6 +37,7 @@
               isAnyLabelsInGlobalLabelsModelNotSavedInBack,
             verticalPosition: 'top',
             horizontalPosition: 'right',
+            borderColor: 'black',
           }"
         >
           <svgicon name="settings" width="25" height="25" color="white" />
