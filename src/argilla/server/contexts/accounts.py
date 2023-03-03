@@ -101,6 +101,7 @@ def create_user(db: Session, user_create: UserCreate):
         first_name=user_create.first_name,
         last_name=user_create.last_name,
         username=user_create.username,
+        role=user_create.role,
         password_hash=_CRYPT_CONTEXT.hash(user_create.password),
     )
 
