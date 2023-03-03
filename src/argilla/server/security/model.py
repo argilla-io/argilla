@@ -18,7 +18,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, root_validator, validator
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
-from argilla.server.errors import EntityNotFoundError
+from argilla.server.errors import BadRequestError, EntityNotFoundError
 
 WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
 _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
@@ -79,11 +79,6 @@ class User(BaseModel):
 
         return list(set(value))
 
-    @property
-    def default_workspace(self) -> Optional[str]:
-        """Get the default user workspace"""
-        return self.username
-
     def check_workspaces(self, workspaces: List[str]) -> List[str]:
         """
         Given a list of workspaces, apply a belongs to validation for each one. Then, return
@@ -122,7 +117,7 @@ class User(BaseModel):
 
         """
         if not workspace:
-            return self.default_workspace
+            raise BadRequestError("Missing workspace. A workspace must by provided")
         elif workspace not in self.workspaces:
             raise EntityNotFoundError(name=workspace, type="Workspace")
         return workspace
