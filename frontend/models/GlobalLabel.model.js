@@ -16,14 +16,6 @@ class GlobalLabel extends Model {
       is_saved_in_back: this.boolean(false),
     };
   }
-
-  static mutators() {
-    return {
-      text(value) {
-        return value.toUpperCase();
-      },
-    };
-  }
 }
 
 const formatDatasetIdForGlobalLabelModel = (dataset_id) => dataset_id.join(".");

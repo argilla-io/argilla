@@ -54,7 +54,7 @@ const upsertNewGlobalLabel = ({
 
   GlobalLabelModel.insertOrUpdate({
     data: {
-      text: newLabel.toUpperCase(),
+      text: newLabel,
       dataset_id: joinedDatasetId,
       order: numberOfLabels,
       color_id: numberOfLabels,
@@ -89,24 +89,22 @@ const isExistAnyLabelsNotSavedInBackByDatasetId = (datasetId) => {
 const isLabelTextExistInGlobalLabel = (datasetId, labelText) => {
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
 
-  const compareWithCaseInsensitive = (value) =>
-    value.toUpperCase() === labelText.toUpperCase();
+  const compareValueToLabelText = (value) => value === labelText;
 
   return GlobalLabelModel.query()
     .where("dataset_id", joinedDatasetId)
-    .where("text", compareWithCaseInsensitive)
+    .where("text", compareValueToLabelText)
     .exists();
 };
 
 const isLabelTextExistInGlobalLabelAndSavedInBack = (datasetId, labelText) => {
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
 
-  const compareWithCaseInsensitive = (value) =>
-    value.toUpperCase() === labelText.toUpperCase();
+  const compareValueToLabelText = (value) => value === labelText;
 
   return GlobalLabelModel.query()
     .where("dataset_id", joinedDatasetId)
-    .where("text", compareWithCaseInsensitive)
+    .where("text", compareValueToLabelText)
     .where("is_saved_in_back", true)
     .exists();
 };
