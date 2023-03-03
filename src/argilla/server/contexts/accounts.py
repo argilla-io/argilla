@@ -136,7 +136,3 @@ def authenticate_user(db: Session, username: str, password: str):
         return
     else:
         _CRYPT_CONTEXT.dummy_verify()
-
-
-def is_admin_user(user: User) -> bool:
-    return user.role == UserRole.admin
