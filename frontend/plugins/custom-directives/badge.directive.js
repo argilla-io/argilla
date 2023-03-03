@@ -28,17 +28,24 @@ Vue.directive("badge", {
       badge.style.borderRadius = "5em";
       badge.style.border = `2px ${borderColor ?? "transparent"} solid`;
 
-      if (verticalPosition === "top") {
-        badge.style.top = "-3px";
-      } else if (verticalPosition === "bottom") {
-        badge.style.bottom = "-3px";
+      switch (verticalPosition) {
+        case "top":
+          badge.style.top = "-3px";
+          break;
+        case "bottom":
+          badge.style.bottom = "-3px";
+          break;
       }
 
-      if (horizontalPosition === "right") {
-        badge.style.right = "-3px";
-      } else if (horizontalPosition === "left") {
-        badge.style.left = "-3px";
+      switch (horizontalPosition) {
+        case "right":
+          badge.style.right = "-3px";
+          break;
+        case "left":
+          badge.style.left = "-3px";
+          break;
       }
+
       element.appendChild(badge);
     }
   },
