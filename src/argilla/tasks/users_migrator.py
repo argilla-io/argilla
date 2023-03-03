@@ -69,7 +69,7 @@ class UsersMigrator:
             role=self._user_role(user),
             api_key=user["api_key"],
             password_hash=user["hashed_password"],
-            workspaces=[WorkspaceCreate(name=name) for name in user.get("workspaces", [])],
+            workspaces=[WorkspaceCreate(name=workspace_name) for workspace_name in self._user_workspace_names(user)],
         )
 
     def _build_user(self, session: Session, user_create: UserCreate):
@@ -87,6 +87,14 @@ class UsersMigrator:
             return UserRole.admin
         else:
             return UserRole.annotator
+
+    def _user_workspace_names(self, user: dict):
+        workspace_names = [workspace_name for workspace_name in user.get("workspaces", [])]
+
+        if user["username"] in workspace_names:
+            return workspace_names
+        else:
+            return [user["username"]] + workspace_names
 
     def _get_or_new_workspace(self, session: Session, workspace_name: str):
         return session.query(Workspace).filter_by(name=workspace_name).first() or Workspace(name=workspace_name)

@@ -25,7 +25,7 @@
   email: connor.macleod@argilla.io
   api_key: 7c3b4d6e-1898-4c42-84c8-e1758cea1ce0
   hashed_password: $2y$05$Fb3iv7AGv8k.o5cl9qdCtuwkrLcDcSYKWyJk1QNl6RXKUecvP.Ium
-  workspaces: [highlands]
+  workspaces: [macleod, highlands]
   disabled: False
 
 - username: sanchez
