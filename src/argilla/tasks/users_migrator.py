@@ -30,7 +30,7 @@ class WorkspaceCreate(BaseModel):
 
 
 class UserCreate(BaseModel):
-    first_name: constr(min_length=1, strip_whitespace=True)
+    first_name: constr(strip_whitespace=True)
     username: constr(regex=USER_USERNAME_REGEX, min_length=1)
     api_key: constr(min_length=1)
     password_hash: constr(min_length=1)
@@ -48,13 +48,13 @@ class UsersMigrator:
             self._users = []
 
     def migrate(self):
-        print(f"Starting users migrating process using file {self._users_filename!r}")
+        print(f"Starting users migration process using file {self._users_filename!r}")
 
         with SessionLocal() as session, session.begin():
             for user in self._users:
                 self._migrate_user(session, user)
 
-            print(f"Users migrating process successfully finished")
+            print(f"Users migration process successfully finished")
 
     def _migrate_user(self, session: Session, user: dict):
         print(f"Migrating User with username {user['username']!r}")
@@ -66,7 +66,7 @@ class UsersMigrator:
 
     def _build_user_create(self, user: dict):
         return UserCreate(
-            first_name=user["full_name"],
+            first_name=user.get("full_name", ""),
             username=user["username"],
             api_key=user["api_key"],
             password_hash=user["hashed_password"],

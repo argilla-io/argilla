@@ -24,9 +24,9 @@ from sqlalchemy.orm import Session
 def test_users_migrator(db: Session):
     UsersMigrator(os.path.join(os.path.dirname(__file__), "test_users.yml")).migrate()
 
-    assert db.query(User).count() == 3
-    assert db.query(Workspace).count() == 3
-    assert db.query(WorkspaceUser).count() == 5
+    assert db.query(User).count() == 4
+    assert db.query(Workspace).count() == 4
+    assert db.query(WorkspaceUser).count() == 6
 
     user = db.query(User).filter_by(username="john").first()
     assert user.first_name == "John Doe"
@@ -48,6 +48,13 @@ def test_users_migrator(db: Session):
     assert user.api_key == "a8168929-8668-494c-b7a5-98cd35740d9b"
     assert user.password_hash == "$2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG"
     assert [ws.name for ws in user.workspaces] == ["argilla", "team", "latam"]
+
+    user = db.query(User).filter_by(username="macleod").first()
+    assert user.first_name == ""
+    assert user.username == "macleod"
+    assert user.api_key == "7c3b4d6e-1898-4c42-84c8-e1758cea1ce0"
+    assert user.password_hash == "$2y$05$Fb3iv7AGv8k.o5cl9qdCtuwkrLcDcSYKWyJk1QNl6RXKUecvP.Ium"
+    assert [ws.name for ws in user.workspaces] == ["highlands"]
 
 
 def test_users_migrator_with_one_user_file(db: Session):

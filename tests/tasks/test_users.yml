@@ -20,3 +20,10 @@
   hashed_password: $2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG
   workspaces: [argilla, team, latam]
   disabled: False
+
+- username: macleod
+  api_key: 7c3b4d6e-1898-4c42-84c8-e1758cea1ce0
+  email: connor.macleod@argilla.io
+  hashed_password: $2y$05$Fb3iv7AGv8k.o5cl9qdCtuwkrLcDcSYKWyJk1QNl6RXKUecvP.Ium
+  workspaces: [highlands]
+  disabled: False
