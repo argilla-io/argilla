@@ -1,6 +1,6 @@
 <template>
   <div class="left-content">
-    <div class="dataset-description">
+    <div class="left-content-item dataset-description">
       <div class="item">
         <p v-html="datasetName" />
         <p class="dataset-task" v-html="datasetTask" />
@@ -16,11 +16,11 @@
         </base-button>
       </base-action-tooltip>
     </div>
-    <div class="dataset-description-component">
+    <div class="dataset-description-component left-content-item">
       <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
     </div>
     <div
-      class="labels-edition-component"
+      class="labels-edition-component left-content-item"
       v-if="isTaskTokenClassification || isTaskTextClassification"
     >
       <EditionLabelComponent
@@ -100,6 +100,7 @@ export default {
   .dataset-description {
     display: flex;
     align-items: center;
+    min-height: 5em;
     .item {
       flex: 1;
       display: flex;
@@ -107,5 +108,13 @@ export default {
       gap: 10px;
     }
   }
+}
+
+.left-content-item {
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.labels-edition-component {
+  min-height: 15em;
 }
 </style>
