@@ -41,11 +41,8 @@ class UsersMigrator:
     def __init__(self, users_filename: str):
         self._users_filename = users_filename
 
-        try:
-            with open(users_filename) as users_file:
-                self._users = yaml.safe_load(users_file.read())
-        except FileNotFoundError:
-            self._users = []
+        with open(users_filename) as users_file:
+            self._users = yaml.safe_load(users_file.read())
 
     def migrate(self):
         print(f"Starting users migration process using file {self._users_filename!r}")

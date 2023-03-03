@@ -91,7 +91,8 @@ def test_users_migrator_with_invalid_workspace(db: Session):
 
 
 def test_users_migrator_with_nonexistent_file(db: Session):
-    UsersMigrator("nonexistent.yml").migrate()
+    with pytest.raises(FileNotFoundError):
+        UsersMigrator("nonexistent.yml").migrate()
 
     assert db.query(User).count() == 0
     assert db.query(Workspace).count() == 0
