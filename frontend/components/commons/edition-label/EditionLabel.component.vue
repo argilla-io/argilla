@@ -20,7 +20,8 @@
         :labels="labels"
       />
       <div class="buttons-area">
-        <create-new-action
+        <CreateNewAction
+          text="+ Create label"
           v-if="allowAddNewLabel"
           @new-label="onAddNewLabels"
         />
