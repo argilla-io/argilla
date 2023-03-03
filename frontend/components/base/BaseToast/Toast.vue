@@ -34,8 +34,8 @@
         v-if="buttonText"
         class="primary small toast__button"
         @click="whenClicked"
-        >{{ buttonText }}</base-button
-      >
+        >{{ buttonText }}
+      </base-button>
       <span class="toast__close" @click="close()"></span>
     </div>
   </transition>
