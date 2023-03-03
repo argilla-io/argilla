@@ -15,7 +15,7 @@
 import os
 
 import pytest
-from argilla.server.models import User, Workspace, WorkspaceUser
+from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 from argilla.tasks.users_migrator import UsersMigrator
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -24,13 +24,14 @@ from sqlalchemy.orm import Session
 def test_users_migrator(db: Session):
     UsersMigrator(os.path.join(os.path.dirname(__file__), "test_users.yml")).migrate()
 
-    assert db.query(User).count() == 4
+    assert db.query(User).count() == 5
     assert db.query(Workspace).count() == 4
     assert db.query(WorkspaceUser).count() == 6
 
     user = db.query(User).filter_by(username="john").first()
     assert user.first_name == "John Doe"
     assert user.username == "john"
+    assert user.role == UserRole.admin
     assert user.api_key == "a14427ea-9197-11ec-b909-0242ac120002"
     assert user.password_hash == "$2y$05$xtl7iy3bpqchUwiQMjEHe.tY7OaIjDrg43W3TB4EHQ7izvdjvGtPS"
     assert user.workspaces == []
@@ -38,6 +39,7 @@ def test_users_migrator(db: Session):
     user = db.query(User).filter_by(username="tanya").first()
     assert user.first_name == "Tanya Franklin"
     assert user.username == "tanya"
+    assert user.role == UserRole.annotator
     assert user.api_key == "78a10b53-8db7-4ab5-9e9e-fbd4b7e76551"
     assert user.password_hash == "$2y$05$aqNyXcXRXddNj5toZwT0HugHqKZypvqlBAkZviAGGbsAC8oTj/P5K"
     assert [ws.name for ws in user.workspaces] == ["argilla", "team"]
@@ -45,6 +47,7 @@ def test_users_migrator(db: Session):
     user = db.query(User).filter_by(username="daisy").first()
     assert user.first_name == "Daisy Gonzalez"
     assert user.username == "daisy"
+    assert user.role == UserRole.annotator
     assert user.api_key == "a8168929-8668-494c-b7a5-98cd35740d9b"
     assert user.password_hash == "$2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG"
     assert [ws.name for ws in user.workspaces] == ["argilla", "team", "latam"]
@@ -52,9 +55,18 @@ def test_users_migrator(db: Session):
     user = db.query(User).filter_by(username="macleod").first()
     assert user.first_name == ""
     assert user.username == "macleod"
+    assert user.role == UserRole.annotator
     assert user.api_key == "7c3b4d6e-1898-4c42-84c8-e1758cea1ce0"
     assert user.password_hash == "$2y$05$Fb3iv7AGv8k.o5cl9qdCtuwkrLcDcSYKWyJk1QNl6RXKUecvP.Ium"
     assert [ws.name for ws in user.workspaces] == ["highlands"]
+
+    user = db.query(User).filter_by(username="sanchez").first()
+    assert user.first_name == "Juan Sánchez Villalobos Ramírez"
+    assert user.username == "sanchez"
+    assert user.role == UserRole.annotator
+    assert user.api_key == "ac7b6b86-7d63-45ce-a76a-08f64e0d5fd6"
+    assert user.password_hash == "$2y$05$wMvfoz2TwrRFRZhNELHjbOcqEucVYImNORuRvh7Vp26.dIqvo9tY2"
+    assert user.workspaces == []
 
 
 def test_users_migrator_with_one_user_file(db: Session):
@@ -67,6 +79,7 @@ def test_users_migrator_with_one_user_file(db: Session):
     user = db.query(User).filter_by(username="john").first()
     assert user.first_name == "John Doe"
     assert user.username == "john"
+    assert user.role == UserRole.annotator
     assert user.api_key == "a14427ea-9197-11ec-b909-0242ac120002"
     assert user.password_hash == "$2y$05$xtl7iy3bpqchUwiQMjEHe.tY7OaIjDrg43W3TB4EHQ7izvdjvGtPS"
     assert [ws.name for ws in user.workspaces] == ["argilla", "team"]

@@ -15,15 +15,23 @@
 
 - username: daisy
   full_name: Daisy Gonzalez
-  api_key: a8168929-8668-494c-b7a5-98cd35740d9b
   email: daisy@argilla.io
+  api_key: a8168929-8668-494c-b7a5-98cd35740d9b
   hashed_password: $2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG
   workspaces: [argilla, team, latam]
   disabled: False
 
 - username: macleod
-  api_key: 7c3b4d6e-1898-4c42-84c8-e1758cea1ce0
   email: connor.macleod@argilla.io
+  api_key: 7c3b4d6e-1898-4c42-84c8-e1758cea1ce0
   hashed_password: $2y$05$Fb3iv7AGv8k.o5cl9qdCtuwkrLcDcSYKWyJk1QNl6RXKUecvP.Ium
   workspaces: [highlands]
+  disabled: False
+
+- username: sanchez
+  full_name: Juan Sánchez Villalobos Ramírez
+  email: juan@argilla.io
+  api_key: ac7b6b86-7d63-45ce-a76a-08f64e0d5fd6
+  hashed_password: $2y$05$wMvfoz2TwrRFRZhNELHjbOcqEucVYImNORuRvh7Vp26.dIqvo9tY2
+  workspaces: []
   disabled: False

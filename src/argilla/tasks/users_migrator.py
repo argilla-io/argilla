@@ -21,7 +21,7 @@ from rich import print
 from sqlalchemy.orm import Session
 
 from argilla.server.database import SessionLocal
-from argilla.server.models import User, Workspace
+from argilla.server.models import User, UserRole, Workspace
 from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
 
 
@@ -32,6 +32,7 @@ class WorkspaceCreate(BaseModel):
 class UserCreate(BaseModel):
     first_name: constr(strip_whitespace=True)
     username: constr(regex=USER_USERNAME_REGEX, min_length=1)
+    role: UserRole
     api_key: constr(min_length=1)
     password_hash: constr(min_length=1)
     workspaces: Optional[List[WorkspaceCreate]]
@@ -65,6 +66,7 @@ class UsersMigrator:
         return UserCreate(
             first_name=user.get("full_name", ""),
             username=user["username"],
+            role=self._user_role(user),
             api_key=user["api_key"],
             password_hash=user["hashed_password"],
             workspaces=[WorkspaceCreate(name=name) for name in user.get("workspaces", [])],
@@ -74,10 +76,17 @@ class UsersMigrator:
         return User(
             first_name=user_create.first_name,
             username=user_create.username,
+            role=user_create.role,
             api_key=user_create.api_key,
             password_hash=user_create.password_hash,
             workspaces=[self._get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
         )
+
+    def _user_role(self, user: dict):
+        if user.get("workspaces") == None:
+            return UserRole.admin
+        else:
+            return UserRole.annotator
 
     def _get_or_new_workspace(self, session: Session, workspace_name: str):
         return session.query(Workspace).filter_by(name=workspace_name).first() or Workspace(name=workspace_name)
