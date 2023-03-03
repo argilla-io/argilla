@@ -17,17 +17,19 @@
 Common environment vars / settings
 """
 import logging
+import os
+from pathlib import Path
 from typing import List, Optional
 from urllib.parse import urlparse
 
-from pydantic import BaseSettings, Field, validator
+from pydantic import BaseSettings, Field, root_validator, validator
 
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 
 
-class ApiSettings(BaseSettings):
+class Settings(BaseSettings):
     """
-    Main api settings. The pydantic BaseSettings class makes
+    Main application settings. The pydantic BaseSettings class makes
     accessible environment variables by setting attributes.
 
     See <https://pydantic-docs.helpmanual.io/usage/settings/>
@@ -60,23 +62,9 @@ class ApiSettings(BaseSettings):
     __DATASETS_INDEX_NAME__ = "ar.datasets"
     __DATASETS_RECORDS_INDEX_NAME__ = "ar.dataset.{}"
 
-    base_url: str = Field(
-        default="/",
-        description="The default base url where server will be deployed",
-    )
-
-    @validator("base_url")
-    @classmethod
-    def normalize_base_url(cls, value: str):
-        if not value:
-            value = "/"
-        if not value.startswith("/"):
-            value = "/" + value
-
-        if not value.endswith("/"):
-            value += "/"
-
-        return value
+    home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
+    base_url: Optional[str] = Field(description="The default base url where server will be deployed")
+    database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
 
     elasticsearch: str = "http://localhost:9200"
     elasticsearch_ssl_verify: bool = True
@@ -121,6 +109,31 @@ class ApiSettings(BaseSettings):
     enable_telemetry: bool = True
 
     telemetry_key: Optional[str] = None
+
+    @validator("home_path", always=True)
+    def set_home_path_default(cls, home_path: str):
+        return home_path or os.path.join(Path.home(), ".argilla")
+
+    @validator("base_url", always=True)
+    def normalize_base_url(cls, base_url: str):
+        if not base_url:
+            base_url = "/"
+        if not base_url.startswith("/"):
+            base_url = "/" + base_url
+        if not base_url.endswith("/"):
+            base_url += "/"
+
+        return base_url
+
+    @validator("database_url", always=True)
+    def set_database_url_default(cls, database_url: str, values: dict):
+        return database_url or f"sqlite:///{os.path.join(values['home_path'], 'argilla.db')}?check_same_thread=False"
+
+    @root_validator(skip_on_failure=True)
+    def create_home_path(cls, values):
+        Path(values["home_path"]).mkdir(parents=True, exist_ok=True)
+
+        return values
 
     @property
     def dataset_index_name(self) -> str:
@@ -190,4 +203,4 @@ class ApiSettings(BaseSettings):
         }
 
 
-settings = ApiSettings()
+settings = Settings()

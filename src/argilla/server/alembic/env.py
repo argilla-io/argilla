@@ -15,15 +15,15 @@
 from logging.config import fileConfig
 
 from alembic import context
-from argilla._constants import ARGILLA_DATABASE_URL
+from argilla.server.settings import settings
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-# Overwrites the SQLAlchemy URL getting it from argilla database config
-config.set_main_option("sqlalchemy.url", ARGILLA_DATABASE_URL)
+# Overwrites the SQLAlchemy URL getting it from argilla database_url settings
+config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

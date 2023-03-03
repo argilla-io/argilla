@@ -18,7 +18,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-from argilla._constants import ARGILLA_DATABASE_URL
+from argilla.server.settings import settings
 
 
 @event.listens_for(Engine, "connect")
@@ -29,7 +29,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.close()
 
 
-engine = create_engine(ARGILLA_DATABASE_URL)
+engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
