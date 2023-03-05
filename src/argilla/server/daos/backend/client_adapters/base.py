@@ -73,7 +73,7 @@ class IClientAdapter(metaclass=ABCMeta):
         enable_highlight: bool = False,
         include_fields: Optional[List[str]] = None,
         exclude_fields: Optional[List[str]] = None,
-    ) -> Tuple[List[Dict[str, Any]], Any]:
+    ) -> Iterable[Dict[str, Any]]:
         pass
 
     @abstractmethod
