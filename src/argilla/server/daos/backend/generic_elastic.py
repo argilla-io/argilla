@@ -14,6 +14,8 @@
 
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from pydantic import BaseModel, Field
+
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend.base import IndexNotFoundError, InvalidSearchError
@@ -52,6 +54,12 @@ from argilla.server.settings import settings
 def dataset_records_index(dataset_id: str) -> str:
     index_mame_template = settings.dataset_records_index_name
     return index_mame_template.format(dataset_id)
+
+
+class PaginatedSortInfo(BaseModel):
+    shuffle: bool = False
+    sort_by: List[SortableField] = Field(default_factory=list)
+    next: Optional[Any] = None
 
 
 class GenericElasticEngineBackend(LoggingMixin):
@@ -204,29 +212,27 @@ class GenericElasticEngineBackend(LoggingMixin):
 
         return total, records
 
-    # TODO(@frascuchon): Include sort parameter
     def scan_records(
         self,
         id: str,
-        query: Optional[BackendRecordsQuery] = None,
-        id_from: Optional[str] = None,
+        query: BackendRecordsQuery,
+        sort: PaginatedSortInfo,
         limit: Optional[int] = None,
-        shuffle: bool = False,
         include_fields: Optional[List[str]] = None,
         exclude_fields: Optional[List[str]] = None,
     ) -> Iterable[Dict[str, Any]]:
         index = dataset_records_index(id)
 
-        yield from self.client.list_index_documents(
+        yield from self.client.scan_docs(
             index=index,
             query=query,
+            sort=SortConfig(shuffle=sort.shuffle, sort_by=sort.sort_by),
             size=limit,
-            id_from=id_from,
-            fetch_once=shuffle,
+            search_from_params=sort.next,
+            fetch_once=sort.shuffle,
             include_fields=include_fields,
             exclude_fields=exclude_fields,
             enable_highlight=True,
-            shuffle=shuffle,
         )
 
     def open(self, id: str):
@@ -379,6 +385,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             force_recreate=force_recreate,
             mappings=datasets_index_mappings(),
         )
+        # TODO: Remove this section of code
         if settings.enable_migration:
             try:
                 self._migrate_from_rubrix()
@@ -395,7 +402,7 @@ class GenericElasticEngineBackend(LoggingMixin):
                 target_index=target_index,
                 reindex=True,
             )
-            for doc in self.client.list_index_documents(index=source_index):
+            for doc in self.client.scan_docs(index=source_index, query=BaseQuery(), sort=SortConfig()):
                 dataset_id = doc["id"]
                 index = self._old_dataset_index(dataset_id)
                 alias = dataset_records_index(dataset_id=dataset_id)
@@ -414,9 +421,16 @@ class GenericElasticEngineBackend(LoggingMixin):
         )
 
     def list_datasets(self, query: BaseDatasetsQuery):
-        return self.client.list_index_documents(
+        sort = SortConfig()
+
+        schema = self.client.get_index_schema(index=DATASETS_INDEX_NAME)
+        if schema and "id" in schema["mappings"]["properties"]:
+            sort.sort_by = [SortableField(id="id")]
+
+        return self.client.scan_docs(
             index=DATASETS_INDEX_NAME,
             query=query,
+            sort=sort,
             fetch_once=True,
             size=self.__MAX_NUMBER_OF_LISTED_DATASETS__,
         )
