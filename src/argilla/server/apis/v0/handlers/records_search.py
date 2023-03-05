@@ -48,14 +48,14 @@ def configure_router(router: APIRouter):
             description="Set a sort config for records scan. "
             "The `next_id` field will be ignored if a sort configuration is found",
         )
-        next_pagination_id: Optional[str] = Field(
+        next_pagination_cfg: Optional[str] = Field(
             description="Field to paginate over scan results. Use value fetched from previous response"
         )
 
     class SearchRecordsResponse(BaseModel):
         records: List[dict]
         next_idx: Optional[str]
-        next_pagination_id: Optional[str]
+        next_pagination_cfg: Optional[str]
 
     @router.post("/{name}/records/:search", operation_id="scan_dataset_records", response_model=SearchRecordsResponse)
     async def scan_dataset_records(
@@ -76,9 +76,9 @@ def configure_router(router: APIRouter):
         request = request or SearchRecordsRequest()
 
         sort_info = PaginatedSortInfo(sort_by=request.sort_by or [SortableField(id="id")])
-        if request.next_pagination_id:
+        if request.next_pagination_cfg:
             try:
-                data = json.loads(request.next_pagination_id)
+                data = json.loads(request.next_pagination_cfg)
                 sort_info = PaginatedSortInfo.parse_obj(data)
             except Exception as ex:
                 pass
@@ -100,7 +100,7 @@ def configure_router(router: APIRouter):
 
         return SearchRecordsResponse(
             next_idx=sort_info.next[0] if not request.sort_by else None,
-            next_pagination_id=sort_info.json(),
+            next_pagination_cfg=sort_info.json(),
             records=docs,
         )
 
