@@ -62,19 +62,18 @@ class IClientAdapter(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def list_index_documents(
+    def scan_docs(
         self,
         index: str,
-        query: Optional[BaseQuery] = None,
+        query: BaseQuery,
+        sort: SortConfig,
         size: Optional[int] = None,
         fetch_once: bool = False,
-        id_from: Optional[str] = None,
+        search_from_params: Optional[Any] = None,
         enable_highlight: bool = False,
-        sort: Optional[SortConfig] = None,
         include_fields: Optional[List[str]] = None,
         exclude_fields: Optional[List[str]] = None,
-        shuffle: bool = False,
-    ) -> Iterable[Dict[str, Any]]:
+    ) -> Tuple[List[Dict[str, Any]], Any]:
         pass
 
     @abstractmethod
