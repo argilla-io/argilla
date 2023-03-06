@@ -421,16 +421,10 @@ class GenericElasticEngineBackend(LoggingMixin):
         )
 
     def list_datasets(self, query: BaseDatasetsQuery):
-        sort = SortConfig()
-
-        schema = self.client.get_index_schema(index=DATASETS_INDEX_NAME)
-        if schema and "id" in schema["mappings"]["properties"]:
-            sort.sort_by = [SortableField(id="id")]
-
         return self.client.scan_docs(
             index=DATASETS_INDEX_NAME,
             query=query,
-            sort=sort,
+            sort=SortConfig(),
             fetch_once=True,
             size=self.__MAX_NUMBER_OF_LISTED_DATASETS__,
         )

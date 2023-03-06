@@ -205,11 +205,15 @@ class DatasetRecordsDAO:
         """
 
         search = search or DaoRecordsSearch()
-        next = [id_from] if id_from else None
+        next_page_cfg = [id_from] if id_from else None
+        sort_info = PaginatedSortInfo(
+            sort_by=[SortableField(id="id")], shuffle=search.sort.shuffle, next_page_cfg=next_page_cfg
+        )
+
         return self._es.scan_records(
             id=dataset.id,
             query=search.query,
-            sort=PaginatedSortInfo(sort_by=[SortableField(id="id")], shuffle=search.sort.shuffle, next_page_cfg=next),
+            sort=sort_info,
             limit=limit,
             include_fields=list(include_fields) if include_fields else None,
             exclude_fields=list(exclude_fields) if exclude_fields else None,

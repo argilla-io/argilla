@@ -52,29 +52,26 @@ def configure_router(router: APIRouter):
             description="Field to paginate over scan results. Use value fetched from previous response"
         )
 
-    class SearchRecordsResponse(BaseModel):
+    class ScanDatasetRecordsResponse(BaseModel):
         records: List[dict]
         next_idx: Optional[str]
         next_page_cfg: Optional[str]
 
-    @router.post("/{name}/records/:search", operation_id="scan_dataset_records", response_model=SearchRecordsResponse)
+    @router.post(
+        "/{name}/records/:search", operation_id="scan_dataset_records", response_model=ScanDatasetRecordsResponse
+    )
     async def scan_dataset_records(
         name: str,
         request: Optional[ScanDatasetRecordsRequest] = None,
-        limit: int = Query(
-            default=100,
-            gte=0,
-            le=500,
-            description="Number of records to retrieve",
-        ),
+        limit: int = Query(default=100, gte=0, le=500, description="Number of records to retrieve"),
         request_deps: CommonTaskHandlerDependencies = Depends(),
         service: DatasetsService = Depends(DatasetsService.get_instance),
         engine: GenericElasticEngineBackend = Depends(GenericElasticEngineBackend.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ):
         found = service.find_by_name(user=current_user, name=name, workspace=request_deps.workspace)
-        request = request or ScanDatasetRecordsRequest()
 
+        request = request or ScanDatasetRecordsRequest()
         sort_info = PaginatedSortInfo(sort_by=request.sort_by or [SortableField(id="id")])
         if request.next_page_cfg:
             try:
@@ -85,28 +82,18 @@ def configure_router(router: APIRouter):
         elif request.next_idx and not request.sort_by:
             sort_info.next_page_cfg = [request.next_idx]
 
-        docs = list(
-            engine.scan_records(
-                id=found.id,
-                query=request.query,
-                sort=sort_info,
-                include_fields=request.fields,
-                limit=limit,
-            )
+        docs = engine.scan_records(
+            id=found.id, query=request.query, sort=sort_info, include_fields=request.fields, limit=limit
         )
 
+        docs = list(docs)
         for doc in docs:
+            # Removing sort config for each document and keep the last one, used for next page configuration
             sort_info.next_page_cfg = doc.pop("sort", None)
 
-        return SearchRecordsResponse(
-            next_idx=sort_info.next_page_cfg[0] if not request.sort_by else None,
-            next_page_cfg=sort_info.json(),
-            records=docs,
-        )
+        next_idx = sort_info.next_page_cfg[0] if not request.sort_by else None
+        return ScanDatasetRecordsResponse(next_idx=next_idx, next_page_cfg=sort_info.json(), records=docs)
 
 
-router = APIRouter(
-    tags=["datasets"],
-    prefix="/datasets",
-)
+router = APIRouter(tags=["datasets"], prefix="/datasets")
 configure_router(router)
