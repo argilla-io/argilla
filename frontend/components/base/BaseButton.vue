@@ -179,15 +179,15 @@ export default {
 }
 
 .secondary {
-  background-color: palette(grey, 200);
-  color: palette(white);
+  background-color: palette(grey, 600);
+  color: palette(grey, 200);
   .svg-icon {
-    fill: palette(white);
+    fill: palette(grey, 200);
   }
   &:hover,
   &:active,
   &.active {
-    background-color: darken(palette(grey, 200), 5%);
+    background-color: darken(palette(grey, 600), 5%);
   }
   &.outline {
     background: none;
@@ -204,6 +204,26 @@ export default {
     }
     .svg-icon {
       fill: $black-54;
+    }
+  }
+
+  &.text {
+    padding-left: 0;
+    padding-right: 0;
+    background: none;
+    color: $black-54;
+    &:hover {
+      background: none;
+      color: $black-87;
+    }
+  }
+  &.link {
+    background: none;
+    color: $black-54;
+    padding: 0;
+    &:hover {
+      text-decoration: underline;
+      background: none;
     }
   }
 }

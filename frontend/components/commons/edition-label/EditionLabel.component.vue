@@ -4,19 +4,14 @@
       <h2 class="--heading5 --semibold description__title" v-html="title" />
     </div>
     <div class="content">
-      <div class="feedback-area">
-        <BaseFeedbackComponent
-          v-if="feedbackInputIfThereIsLabelsNotSavedInBack"
-          :feedbackInput="feedbackInputIfThereIsLabelsNotSavedInBack"
-          @on-click="onSaveLabelsNotPersisted"
-        />
-      </div>
-
-      <p
-        class="is-labels-loading"
-        v-if="isloading"
-        v-html="'Labels are loading'"
+      <BaseFeedbackComponent
+        v-if="feedbackInputIfThereIsLabelsNotSavedInBack"
+        :feedbackInput="feedbackInputIfThereIsLabelsNotSavedInBack"
+        @on-click="onSaveLabelsNotPersisted"
+        class="feedback-area"
       />
+
+      <BaseSpinner v-if="isloading" />
 
       <TokenClassificationGlobalLabelsComponent
         v-if="isTaskTokenClassification && !isloading"
@@ -168,6 +163,7 @@ export default {
 
 .feedback-area {
   display: inline-flex;
+  margin-bottom: $base-space * 5;
 }
 
 .buttons-area {

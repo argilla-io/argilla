@@ -1,6 +1,6 @@
 <template>
-  <div class="description" v-if="datasetName">
-    <h2 class="--heading5 --semibold description__title">{{ sectionTitle }}</h2>
+  <div class="dataset-delete" v-if="datasetName">
+    <h2 class="--heading5 --semibold">{{ sectionTitle }}</h2>
     <base-card
       card-type="danger"
       :title="datasetDeleteTitle"
@@ -105,3 +105,8 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.dataset-delete {
+  margin-bottom: $base-space * 5;
+}
+</style>

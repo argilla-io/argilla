@@ -37,9 +37,9 @@ export default {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  padding: 0.5em;
-  background-color: rgb(255, 103, 95, 0.4);
+  gap: $base-space * 2;
+  padding: $base-space;
+  background-color: rgba(255, 103, 95, 0.2);
   border-radius: $border-radius;
 }
 
