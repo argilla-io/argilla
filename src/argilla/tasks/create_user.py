@@ -17,6 +17,7 @@ from typing import Optional
 import click
 from pydantic import BaseModel, constr
 
+from argilla.server.contexts import accounts
 from argilla.server.contexts.accounts import CRYPT_CONTEXT
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole
@@ -24,39 +25,38 @@ from argilla.server.security.model import (
     USER_PASSWORD_MAX_LENGTH,
     USER_PASSWORD_MIN_LENGTH,
     USER_USERNAME_REGEX,
+    UserCreate,
 )
 
 
-class UserCreate(BaseModel):
-    username: constr(regex=USER_USERNAME_REGEX, min_length=1)
-    role: Optional[UserRole]
-    password: constr(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
-    api_key: Optional[str]
+def _show_created_user(user: User):
+    message = f"\nUsername: {user.username!r}" f"\nRole: {user.role.value!r}" f"\nFirst name: {user.first_name!r}"
+
+    if user.last_name:
+        message += f"\nLast name: {user.last_name!r}"
+
+    message += f"\nAPI-Key: {user.api_key!r}"
+
+    return message
 
 
 @click.command()
+@click.option("--first-name", prompt=True)
+@click.option("--last-name")
 @click.option("--username", prompt=True)
+@click.option(
+    "--role", prompt=True, type=click.Choice(UserRole.__members__, case_sensitive=False), default=UserRole.annotator
+)
 @click.option("--password", prompt=True, hide_input=True, confirmation_prompt=True)
-@click.option("--role", type=click.Choice(UserRole, case_sensitive=False))
-@click.option("--api-key")
-def create_user(username: str, password: str, role: Optional[UserRole], api_key: Optional[str]):
-    with SessionLocal() as session, session.begin():
-        user_create = UserCreate(username=username, password=password, role=role)
-
-        user = User(
-            first_name="",
-            username=user_create.username,
-            role=user_create.role,
-            password_hash=CRYPT_CONTEXT.hash(user_create.password),
-            api_key=api_key,
+def create_user(username: str, password: str, role: Optional[UserRole], first_name: str, last_name: Optional[str]):
+    with SessionLocal() as session:
+        user_create = UserCreate(
+            username=username, password=password, role=role, first_name=first_name, last_name=last_name
         )
-
-        session.add(user)
-        session.flush()
-        session.refresh(user)
+        user = accounts.create_user(session, user_create)
 
         print(f"User created successfully!")
-        print(f"\nUsername: {user.username!r}" f"\nRole: {user.role.value!r}" f"\nAPI-Key: {user.api_key!r}")
+        print(_show_created_user(user))
         print("\nPlease, save user credentials")
 
 
