@@ -11,12 +11,19 @@
           @on-click="onSaveLabelsNotPersisted"
         />
       </div>
+
+      <p
+        class="is-labels-loading"
+        v-if="isloading"
+        v-html="'Labels are loading'"
+      />
+
       <TokenClassificationGlobalLabelsComponent
-        v-if="isTaskTokenClassification"
+        v-if="isTaskTokenClassification && !isloading"
         :labels="labels"
       />
       <TextClassificationGlobalLabelsComponent
-        v-if="isTaskTextClassification"
+        v-if="isTaskTextClassification && !isloading"
         :labels="labels"
       />
       <div class="buttons-area">
@@ -38,6 +45,7 @@ import {
   getLabelsNotSavedInBackByDatasetId,
   isExistAnyLabelsNotSavedInBackByDatasetId,
 } from "@/models/globalLabel.queries";
+import { getLoadingValue } from "@/models/viewSettings.queries";
 
 export default {
   name: "EditionLabelComponent",
@@ -76,6 +84,9 @@ export default {
     },
     datasetName() {
       return this.dataset?.name;
+    },
+    isloading() {
+      return getLoadingValue(this.datasetName)?.loading ?? false;
     },
     isTaskTokenClassification() {
       return this.datasetTask === "TokenClassification";
