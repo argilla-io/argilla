@@ -822,7 +822,7 @@ class DatasetForTextClassification(DatasetBase):
         all_labels = set()
         for record in self._records:
             if record.annotation:
-                all_labels.update(record.annotation)
+                all_labels.update({record.annotation})
 
         return list(all_labels)
 
