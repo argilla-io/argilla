@@ -14,6 +14,7 @@
 #  limitations under the License.
 import concurrent.futures
 import datetime
+import re
 from time import sleep
 from typing import Any, Iterable
 
@@ -22,6 +23,7 @@ import datasets
 import httpx
 import pandas as pd
 import pytest
+from argilla import TextClassificationRecord
 from argilla._constants import (
     _OLD_WORKSPACE_HEADER_NAME,
     DEFAULT_API_KEY,
@@ -598,19 +600,16 @@ def test_load_with_sort(mocked_client, supported_vector_search):
     sleep(1)
 
     expected_data = 4
-    create_some_data_for_text_classification(
-        mocked_client,
-        dataset,
-        n=expected_data,
-        with_vectors=supported_vector_search,
-    )
-    with pytest.raises(ValueError, "sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]"):
+    api.log([TextClassificationRecord(text=text) for text in ["This is my text"] * expected_data], name=dataset)
+    with pytest.raises(
+        ValueError, match=re.escape("sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]")
+    ):
         api.load(name=dataset, sort=[("event_timestamp", "ascc")])
 
     ds = api.load(name=dataset, sort=[("event_timestamp", "asc")])
     assert all([(ds[idx].event_timestamp <= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
 
-    ds = api.load(name=dataset)
+    ds = api.load(name=dataset, sort=[("event_timestamp", "desc")])
     assert all([(ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
 
 
@@ -738,7 +737,7 @@ def test_load_sort(mocked_client):
     assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
     ds = api.load(name=dataset, ids=[1, 2, 11])
     df = ds.to_pandas()
-    assert list(df.id) == [1, 2, 11]
+    assert list(df.id) == [1, 11, 2]
     ds = api.load(name=dataset, ids=["1str", "2str", "11str"])
     df = ds.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]

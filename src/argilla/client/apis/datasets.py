@@ -196,8 +196,10 @@ class Datasets(AbstractApi):
                     raise Exception()
             except Exception:
                 raise ValueError("sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]")
+            request["sort_by"] = [{"id": item[0], "order": item[-1]} for item in sort]
 
-        if id_from:
+        elif id_from:
+            # TODO: Show message since sort + next_id is not compatible since fixes a sort by id
             request["next_idx"] = id_from
 
         with api_compatibility(self, min_version="1.2.0"):
@@ -213,13 +215,15 @@ class Datasets(AbstractApi):
                 if limit <= 0:
                     return
 
-                next_idx = response.get("next_idx")
-                if next_idx:
-                    request_limit = min(limit, batch_size)
-                    response = self.http_client.post(
-                        path=url.format(limit=request_limit),
-                        json={**request, "next_idx": next_idx},
-                    )
+                next_request_params = {k: response[k] for k in ["next_idx", "next_page_cfg"] if response.get(k)}
+                if not next_request_params:
+                    return
+
+                request_limit = min(limit, batch_size)
+                response = self.http_client.post(
+                    path=url.format(limit=request_limit),
+                    json={**request, **next_request_params},
+                )
 
     def update_record(
         self,
