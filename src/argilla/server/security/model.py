@@ -22,15 +22,14 @@ from pydantic import BaseModel, Field, constr, root_validator, validator
 from pydantic.utils import GetterDict
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
-from argilla.server.errors import EntityNotFoundError
+from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.models import UserRole
 
-_WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
+WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
 
-
+USER_USERNAME_REGEX = ES_INDEX_REGEX_PATTERN
 _USER_PASSWORD_MIN_LENGTH = 8
 _USER_PASSWORD_MAX_LENGTH = 100
-_USER_USERNAME_REGEX = ES_INDEX_REGEX_PATTERN
 
 
 class WorkspaceUserCreate(BaseModel):
@@ -49,13 +48,13 @@ class Workspace(BaseModel):
 
 
 class WorkspaceCreate(BaseModel):
-    name: constr(regex=_WORKSPACE_NAME_REGEX, min_length=1)
+    name: constr(regex=WORKSPACE_NAME_REGEX, min_length=1)
 
 
 class UserCreate(BaseModel):
     first_name: constr(min_length=1, strip_whitespace=True)
     last_name: Optional[constr(min_length=1, strip_whitespace=True)]
-    username: constr(regex=_USER_USERNAME_REGEX, min_length=1)
+    username: constr(regex=USER_USERNAME_REGEX, min_length=1)
     role: Optional[UserRole]
     password: constr(min_length=_USER_PASSWORD_MIN_LENGTH, max_length=_USER_PASSWORD_MAX_LENGTH)
 
@@ -115,11 +114,6 @@ class User(BaseModel):
 
         return list(set(value))
 
-    @property
-    def default_workspace(self) -> Optional[str]:
-        """Get the default user workspace"""
-        return self.username
-
     def check_workspaces(self, workspaces: List[str]) -> List[str]:
         """
         Given a list of workspaces, apply a belongs to validation for each one. Then, return
@@ -158,7 +152,7 @@ class User(BaseModel):
 
         """
         if not workspace:
-            return self.default_workspace
+            raise BadRequestError("Missing workspace. A workspace must by provided")
         elif workspace not in self.workspaces:
             raise EntityNotFoundError(name=workspace, type="Workspace")
         return workspace

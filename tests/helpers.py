@@ -12,8 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla.server.security.auth_provider.local.settings import settings
+from argilla._constants import (
+    API_KEY_HEADER_NAME,
+    DEFAULT_API_KEY,
+    DEFAULT_USERNAME,
+    WORKSPACE_HEADER_NAME,
+)
 from fastapi import FastAPI
 from starlette.testclient import TestClient
 
@@ -21,7 +25,10 @@ from starlette.testclient import TestClient
 class SecuredClient:
     def __init__(self, client: TestClient):
         self._client = client
-        self._header = {API_KEY_HEADER_NAME: DEFAULT_API_KEY}
+        self._header = {
+            API_KEY_HEADER_NAME: DEFAULT_API_KEY,
+            WORKSPACE_HEADER_NAME: DEFAULT_USERNAME,
+        }
         self._current_user = None
 
     def update_api_key(self, api_key):

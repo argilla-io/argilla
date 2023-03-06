@@ -53,7 +53,7 @@ class WorkspaceUser(Base):
     user: Mapped["User"] = relationship(viewonly=True)
 
     def __repr__(self):
-        return f"UserWorkspace(id={str(self.id)!r}, workspace_id={str(self.workspace_id)!r}, user_id={str(self.user_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return f"WorkspaceUser(id={str(self.id)!r}, workspace_id={str(self.workspace_id)!r}, user_id={str(self.user_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
 
 
 class Workspace(Base):
