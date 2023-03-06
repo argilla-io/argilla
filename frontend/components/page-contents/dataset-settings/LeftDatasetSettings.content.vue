@@ -8,11 +8,10 @@
       <base-action-tooltip tooltip="Copied">
         <base-button
           title="Copy to clipboard"
-          class="table-info__actions__button button-icon"
+          class="secondary small"
           @click.prevent="$copyToClipboard(datasetSettingsUrl)"
         >
-          <svgicon name="copy" width="16" height="16" />
-          Copy Link
+          Copy link
         </base-button>
       </base-action-tooltip>
     </div>
@@ -105,17 +104,18 @@ export default {
       flex: 1;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: $base-space * 2;
     }
   }
 }
 
 .left-content-item {
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid $black-10;
 }
 
 .labels-edition-component {
   min-height: 15em;
+  padding-bottom: $base-space * 4;
 }
 .dataset-name {
   @include font-size(16px);

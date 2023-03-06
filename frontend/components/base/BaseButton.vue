@@ -179,15 +179,15 @@ export default {
 }
 
 .secondary {
-  background-color: palette(grey, 200);
-  color: palette(white);
+  background-color: palette(grey, 600);
+  color: palette(grey, 200);
   .svg-icon {
-    fill: palette(white);
+    fill: palette(grey, 200);
   }
   &:hover,
   &:active,
   &.active {
-    background-color: darken(palette(grey, 200), 5%);
+    background-color: darken(palette(grey, 600), 5%);
   }
   &.outline {
     background: none;

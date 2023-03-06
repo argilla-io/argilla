@@ -5,7 +5,7 @@
       <h4 v-if="subtitle" class="--body2 --semibold card__subtitle">
         {{ subtitle }}
       </h4>
-      <p v-if="text" class="--body3 card__text">
+      <p v-if="text" class="--body2 card__text">
         {{ text }}
       </p>
     </div>
