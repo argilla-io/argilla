@@ -188,9 +188,6 @@ class Datasets(AbstractApi):
             "query": query,
         }
 
-        if not sort and not id_from:
-            sort = [("event_timestamp", "desc")]  # Defaults
-
         if sort is not None:
             try:
                 if isinstance(sort, list):
@@ -218,7 +215,7 @@ class Datasets(AbstractApi):
                 if limit <= 0:
                     return
 
-                next_request_params = {k: response[k] for k in ["next_idx", "next_pagination_id"] if response.get(k)}
+                next_request_params = {k: response[k] for k in ["next_idx", "next_pagination_cfg"] if response.get(k)}
                 if not next_request_params:
                     return
 
