@@ -28,8 +28,8 @@ from argilla.server.models import UserRole
 WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
 
 USER_USERNAME_REGEX = ES_INDEX_REGEX_PATTERN
-USER_PASSWORD_MIN_LENGTH = 8
-USER_PASSWORD_MAX_LENGTH = 100
+_USER_PASSWORD_MIN_LENGTH = 8
+_USER_PASSWORD_MAX_LENGTH = 100
 
 
 class WorkspaceUserCreate(BaseModel):
@@ -56,7 +56,7 @@ class UserCreate(BaseModel):
     last_name: Optional[constr(min_length=1, strip_whitespace=True)]
     username: constr(regex=USER_USERNAME_REGEX, min_length=1)
     role: Optional[UserRole]
-    password: constr(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
+    password: constr(min_length=_USER_PASSWORD_MIN_LENGTH, max_length=_USER_PASSWORD_MAX_LENGTH)
 
 
 class UserGetter(GetterDict):

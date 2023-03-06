@@ -15,16 +15,11 @@
 from typing import Optional
 
 import click
-from pydantic import BaseModel, constr
 
 from argilla.server.contexts import accounts
-from argilla.server.contexts.accounts import CRYPT_CONTEXT
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole
 from argilla.server.security.model import (
-    USER_PASSWORD_MAX_LENGTH,
-    USER_PASSWORD_MIN_LENGTH,
-    USER_USERNAME_REGEX,
     UserCreate,
 )
 
