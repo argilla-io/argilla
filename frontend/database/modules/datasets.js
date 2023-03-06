@@ -612,7 +612,10 @@ const actions = {
             datasetTask,
             labels,
           });
-          newLabels.forEach((newLabel) => {
+
+          // NOTE - delete then init globalLabels to update shortcuts by labels
+          deleteAllGlobalLabelModel();
+          labels.forEach((newLabel) => {
             upsertNewGlobalLabel({
               datasetId,
               newLabel,
