@@ -372,6 +372,28 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
         assert record == expected
 
 
+@pytest.mark.parametrize(
+    "records, dataset_class",
+    [
+        ("singlelabel_textclassification_records", rg.DatasetForTextClassification),
+    ],
+)
+def test_log_load_with_workspace(mocked_client, monkeypatch, request, records, dataset_class):
+    dataset_names = [
+        f"test_general_log_load_{dataset_class.__name__.lower()}_" + input_type
+        for input_type in ["single", "list", "dataset"]
+    ]
+    for name in dataset_names:
+        mocked_client.delete(f"/api/datasets/{name}")
+
+    records = request.getfixturevalue(records)
+
+    api.log(records, name=dataset_names[0], workspace="argilla")
+    ds = api.load(dataset_names[0], workspace="argilla")
+    api.delete_records(dataset_names[0], ids=[rec.id for rec in ds][:1], workspace="argilla")
+    api.delete(dataset_names[0], workspace="argilla")
+
+
 def test_passing_wrong_iterable_data(mocked_client):
     dataset_name = "test_log_single_records"
     mocked_client.delete(f"/api/datasets/{dataset_name}")

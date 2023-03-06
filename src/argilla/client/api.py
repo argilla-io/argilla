@@ -109,6 +109,7 @@ def init(
 def log(
     records: Union[Record, Iterable[Record], Dataset],
     name: str,
+    workspace: Optional[str] = None,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
     chunk_size: int = 500,
@@ -122,6 +123,8 @@ def log(
     Args:
         records: The record, an iterable of records, or a dataset to log.
         name: The dataset name.
+        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
+            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         tags: A dictionary of tags related to the dataset.
         metadata: A dictionary of extra info for the dataset.
         chunk_size: The chunk size for a data bulk.
@@ -150,6 +153,7 @@ def log(
     return ArgillaSingleton.get().log(
         records=records,
         name=name,
+        workspace=workspace,
         tags=tags,
         metadata=metadata,
         chunk_size=chunk_size,
@@ -161,6 +165,7 @@ def log(
 async def log_async(
     records: Union[Record, Iterable[Record], Dataset],
     name: str,
+    workspace: Optional[str] = None,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
     chunk_size: int = 500,
@@ -171,6 +176,8 @@ async def log_async(
     Args:
         records: The record, an iterable of records, or a dataset to log.
         name: The dataset name.
+        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
+            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         tags: A dictionary of tags related to the dataset.
         metadata: A dictionary of extra info for the dataset.
         chunk_size: The chunk size for a data bulk.
@@ -192,6 +199,7 @@ async def log_async(
     return await ArgillaSingleton.get().log_async(
         records=records,
         name=name,
+        workspace=workspace,
         tags=tags,
         metadata=metadata,
         chunk_size=chunk_size,
@@ -201,6 +209,7 @@ async def log_async(
 
 def load(
     name: str,
+    workspace: Optional[str] = None,
     query: Optional[str] = None,
     vector: Optional[Tuple[str, List[float]]] = None,
     ids: Optional[List[Union[str, int]]] = None,
@@ -212,6 +221,8 @@ def load(
 
     Args:
         name: The dataset name.
+        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
+            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         query: An ElasticSearch query with the `query string
             syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
         vector: Vector configuration for a semantic search
@@ -246,6 +257,7 @@ def load(
     """
     return ArgillaSingleton.get().load(
         name=name,
+        workspace=workspace,
         query=query,
         vector=vector,
         ids=ids,
@@ -280,22 +292,25 @@ def copy(
     )
 
 
-def delete(name: str):
+def delete(name: str, workspace: Optional[str] = None):
     """
     Deletes a dataset.
 
     Args:
         name: The dataset name.
+        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
+            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
 
     Examples:
         >>> import argilla as rg
         >>> rg.delete(name="example-dataset")
     """
-    ArgillaSingleton.get().delete(name)
+    ArgillaSingleton.get().delete(name=name, workspace=workspace)
 
 
 def delete_records(
     name: str,
+    workspace: Optional[str] = None,
     query: Optional[str] = None,
     ids: Optional[List[Union[str, int]]] = None,
     discard_only: bool = False,
@@ -305,6 +320,8 @@ def delete_records(
 
     Args:
         name: The dataset name.
+        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
+            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         query: An ElasticSearch query with the `query string syntax
             <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
         ids: If provided, deletes dataset records with given ids.
@@ -329,6 +346,7 @@ def delete_records(
     """
     return ArgillaSingleton.get().delete_records(
         name=name,
+        workspace=workspace,
         query=query,
         ids=ids,
         discard_only=discard_only,

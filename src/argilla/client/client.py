@@ -100,9 +100,7 @@ class _ArgillaLogAgent:
             return await api.log_async(*args, **kwargs)
         except Exception as ex:
             dataset = kwargs["name"]
-            _LOGGER.error(
-                f"\nCannot log data in dataset '{dataset}'\n" f"Error: {type(ex).__name__}\n" f"Details: {ex}"
-            )
+            _LOGGER.error(f"\nCannot log data in dataset '{dataset}'\nError: {type(ex).__name__}\nDetails: {ex}")
             raise ex
 
     def log(self, *args, **kwargs) -> Future:
@@ -169,7 +167,7 @@ class Argilla:
     def client(self) -> AuthenticatedClient:
         """The underlying authenticated HTTP client"""
         warnings.warn(
-            message=("This prop will be removed in next release. " "Please use the http_client prop instead."),
+            message="This prop will be removed in next release. Please use the http_client prop instead.",
             category=UserWarning,
         )
         return self._client
@@ -251,18 +249,22 @@ class Argilla:
             ),
         )
 
-    def delete(self, name: str):
+    def delete(self, name: str, workspace: Optional[str] = None):
         """Deletes a dataset.
 
         Args:
             name: The dataset name.
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         datasets_api.delete_dataset(client=self._client, name=name)
 
     def log(
         self,
         records: Union[Record, Iterable[Record], Dataset],
         name: str,
+        workspace: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         chunk_size: int = 500,
@@ -290,6 +292,9 @@ class Argilla:
             will be returned instead.
 
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         future = self._agent.log(
             records=records,
             name=name,
@@ -310,6 +315,7 @@ class Argilla:
         self,
         records: Union[Record, Iterable[Record], Dataset],
         name: str,
+        workspace: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         chunk_size: int = 500,
@@ -331,6 +337,9 @@ class Argilla:
         """
         tags = tags or {}
         metadata = metadata or {}
+
+        if workspace is not None:
+            self.set_workspace(workspace)
 
         if not name:
             raise InputValueError("Empty dataset name has been passed as argument.")
@@ -370,7 +379,7 @@ class Argilla:
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
         else:
-            raise InputValueError(f"Unknown record type {record_type}. Available values are" f" {Record.__args__}")
+            raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
 
         processed, failed = 0, 0
         with Progress() as progress_bar:
@@ -408,6 +417,7 @@ class Argilla:
     def delete_records(
         self,
         name: str,
+        workspace: Optional[str] = None,
         query: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         discard_only: bool = False,
@@ -432,6 +442,9 @@ class Argilla:
             deletion).
 
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         return self.datasets.delete_records(
             name=name,
             mark_as_discarded=discard_only,
@@ -443,6 +456,7 @@ class Argilla:
     def load(
         self,
         name: str,
+        workspace: Optional[str] = None,
         query: Optional[str] = None,
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
@@ -469,6 +483,9 @@ class Argilla:
             A argilla dataset.
 
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         if as_pandas is False:
             warnings.warn(
                 "The argument `as_pandas` is deprecated and will be removed in a future"
@@ -479,7 +496,7 @@ class Argilla:
             raise ValueError(
                 "The argument `as_pandas` is deprecated and will be removed in a future"
                 " version. Please adapt your code accordingly. ",
-                "If you want a pandas DataFrame do" " `rg.load('my_dataset').to_pandas()`.",
+                "If you want a pandas DataFrame do `rg.load('my_dataset').to_pandas()`.",
             )
 
         try:
@@ -495,13 +512,15 @@ class Argilla:
             from argilla import __version__ as version
 
             warnings.warn(
-                message=f"Using python client argilla=={version},"
-                f" however deployed server version is {err.api_version}."
-                " This might lead to compatibility issues.\n"
-                f" Preferably, update your server version to {version}"
-                " or downgrade your Python API at the loss"
-                " of functionality and robustness via\n"
-                f"`pip install argilla=={err.api_version}`",
+                message=(
+                    f"Using python client argilla=={version},"
+                    f" however deployed server version is {err.api_version}."
+                    " This might lead to compatibility issues.\n"
+                    f" Preferably, update your server version to {version}"
+                    " or downgrade your Python API at the loss"
+                    " of functionality and robustness via\n"
+                    f"`pip install argilla=={err.api_version}`"
+                ),
                 category=UserWarning,
             )
 
