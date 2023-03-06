@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-if __name__ == "__main__":
-    from argilla.server.database import migrate_db
+from argilla.server.database import migrate_db
 
+if __name__ == "__main__":
     migrate_db()
