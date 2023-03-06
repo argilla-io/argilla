@@ -59,7 +59,7 @@ def dataset_records_index(dataset_id: str) -> str:
 class PaginatedSortInfo(BaseModel):
     shuffle: bool = False
     sort_by: List[SortableField] = Field(default_factory=list)
-    next_page_cfg: Optional[Any] = None
+    next_search_params: Optional[Any] = None
 
 
 class GenericElasticEngineBackend(LoggingMixin):
@@ -228,7 +228,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             query=query,
             sort=SortConfig(shuffle=sort.shuffle, sort_by=sort.sort_by),
             size=limit,
-            search_from_params=sort.next_page_cfg,
+            search_from_params=sort.next_search_params,
             fetch_once=sort.shuffle,
             include_fields=include_fields,
             exclude_fields=exclude_fields,

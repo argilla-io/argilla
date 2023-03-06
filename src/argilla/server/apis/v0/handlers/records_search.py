@@ -72,27 +72,30 @@ def configure_router(router: APIRouter):
         found = service.find_by_name(user=current_user, name=name, workspace=request_deps.workspace)
 
         request = request or ScanDatasetRecordsRequest()
-        sort_info = PaginatedSortInfo(sort_by=request.sort_by or [SortableField(id="id")])
+        paginated_sort = PaginatedSortInfo(sort_by=request.sort_by or [SortableField(id="id")])
         if request.next_page_cfg:
             try:
                 data = json.loads(request.next_page_cfg)
-                sort_info = PaginatedSortInfo.parse_obj(data)
+                paginated_sort = PaginatedSortInfo.parse_obj(data)
             except Exception as ex:
                 pass
         elif request.next_idx and not request.sort_by:
-            sort_info.next_page_cfg = [request.next_idx]
+            paginated_sort.next_search_params = [request.next_idx]
 
         docs = engine.scan_records(
-            id=found.id, query=request.query, sort=sort_info, include_fields=request.fields, limit=limit
+            id=found.id, query=request.query, sort=paginated_sort, include_fields=request.fields, limit=limit
         )
 
         docs = list(docs)
         for doc in docs:
             # Removing sort config for each document and keep the last one, used for next page configuration
-            sort_info.next_page_cfg = doc.pop("sort", None)
+            paginated_sort.next_search_params = doc.pop("sort", None)
 
-        next_idx = sort_info.next_page_cfg[0] if not request.sort_by else None
-        return ScanDatasetRecordsResponse(next_idx=next_idx, next_page_cfg=sort_info.json(), records=docs)
+        next_idx = None
+        if paginated_sort.next_search_params and not request.sort_by:
+            next_idx = paginated_sort.next_search_params[0]
+
+        return ScanDatasetRecordsResponse(next_idx=next_idx, next_page_cfg=paginated_sort.json(), records=docs)
 
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
