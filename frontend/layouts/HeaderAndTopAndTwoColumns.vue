@@ -1,19 +1,21 @@
 <template>
-  <div class="layout">
+  <div>
     <div class="header">
       <HeaderComponent />
     </div>
-    <div class="empty-content-left"></div>
-    <div class="empty-content-right"></div>
-    <div class="top">
-      <slot name="top">here is the top content</slot>
-    </div>
-    <div class="left">
-      <slot name="left">here is the left content</slot>
-    </div>
-    <div class="right">
-      <slot name="right">here is the right content</slot>
-    </div>
+    <main class="layout">
+      <div class="empty-content-left"></div>
+      <div class="empty-content-right"></div>
+      <div class="top">
+        <slot name="top">here is the top content</slot>
+      </div>
+      <div class="left">
+        <slot name="left">here is the left content</slot>
+      </div>
+      <div class="right">
+        <slot name="right">here is the right content</slot>
+      </div>
+    </main>
   </div>
 </template>
 
@@ -27,11 +29,12 @@ export default {
 .layout {
   display: grid;
   grid-template-columns: 100px 1fr 1fr 1fr 100px;
-  grid-template-rows: 56px 100px 1fr 1fr 1fr;
+  grid-template-rows: 0 100px 1fr 1fr 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
+  overflow: auto;
+  height: calc(100vh - $topbarHeight);
 }
-
 .header {
   grid-area: 1 / 1 / 2 / 6;
 }
