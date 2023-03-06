@@ -15,7 +15,6 @@
 
 from pydantic import BaseSettings
 
-from argilla._constants import DEFAULT_API_KEY
 from argilla.server import helpers
 from argilla.server.settings import settings as server_settings
 
@@ -41,9 +40,6 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     token_expiration_in_minutes: int = 30000
     token_api_url: str = "/api/security/token"
-
-    default_apikey: str = DEFAULT_API_KEY
-    default_password: str = "$2y$12$MPcRR71ByqgSI8AaqgxrMeSdrD4BcxDIdYkr.ePQoKz7wsGK7SAca"  # 1234
     users_db_file: str = ".users.yml"
 
     @property
