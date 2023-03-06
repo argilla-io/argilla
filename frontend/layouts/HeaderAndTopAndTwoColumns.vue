@@ -34,6 +34,7 @@ export default {
   grid-row-gap: 0px;
   overflow: auto;
   height: calc(100vh - $topbarHeight);
+  background: palette(white);
 }
 .header {
   grid-area: 1 / 1 / 2 / 6;
