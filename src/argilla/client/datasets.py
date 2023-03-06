@@ -789,7 +789,11 @@ class DatasetForTextClassification(DatasetBase):
             doc = nlp.make_doc(text)
 
             cats = dict.fromkeys(all_labels, 0)
-            for anno in record.annotation:
+            
+            if isinstance(record.annotation, list):
+                for anno in record.annotation:
+                    cats[anno] = 1
+            else:
                 cats[anno] = 1
 
             doc.cats = cats
@@ -819,10 +823,18 @@ class DatasetForTextClassification(DatasetBase):
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", label_name])
 
     def __all_labels__(self):
+        
         all_labels = set()
         for record in self._records:
-            if record.annotation:
-                all_labels.update({record.annotation})
+            if record.annotation is None:
+                continue
+            elif isinstance(record.annotation, str):
+                all_labels.add(record.annotation)
+            elif isinstance(record.annotation, list):
+                all_labels.update((tuple(record.annotation)))
+            else:
+                # this is highly unlikely
+                raise TypeError("Record.annotation contains an unsupported type: {}".format(type(record.annotation)))
 
         return list(all_labels)
 
