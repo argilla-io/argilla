@@ -34,7 +34,7 @@ from pydantic import ConfigError
 from sqlalchemy.orm import Session
 
 from argilla import __version__ as argilla_version
-from argilla._constants import DEFAULT_PASSWORD, DEFAULT_USERNAME
+from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.logging import configure_logging
 from argilla.server import helpers
 from argilla.server.contexts import accounts
@@ -51,9 +51,6 @@ from argilla.server.errors import (
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.routes import api_router
 from argilla.server.security import auth
-from argilla.server.security.auth_provider.local.settings import (
-    settings as auth_settings,
-)
 from argilla.server.settings import settings
 from argilla.server.static_rewrite import RewriteStaticFiles
 
@@ -214,8 +211,8 @@ def configure_database(app: FastAPI):
             first_name="",
             username=DEFAULT_USERNAME,
             role=UserRole.admin,
-            api_key=auth_settings.default_apikey,
-            password_hash=auth_settings.default_password,
+            api_key=DEFAULT_API_KEY,
+            password_hash=accounts.CRYPT_CONTEXT.hash(DEFAULT_PASSWORD),
             workspaces=[Workspace(name=DEFAULT_USERNAME)],
         )
 
@@ -226,9 +223,7 @@ def configure_database(app: FastAPI):
         return user
 
     def _user_has_default_credentials(user: User):
-        return user.api_key == auth_settings.default_apikey or accounts.CRYPT_CONTEXT.verify(
-            DEFAULT_PASSWORD, user.password_hash
-        )
+        return user.api_key == DEFAULT_API_KEY or accounts.CRYPT_CONTEXT.verify(DEFAULT_PASSWORD, user.password_hash)
 
     def _log_default_user_warning():
         _LOGGER.warning(
