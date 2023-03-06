@@ -26,7 +26,10 @@ from starlette.testclient import TestClient
 class SecuredClient:
     def __init__(self, client: TestClient):
         self._client = client
-        self._header = {API_KEY_HEADER_NAME: settings.default_apikey}
+        self._header = {
+            API_KEY_HEADER_NAME: settings.default_apikey,
+            WORKSPACE_HEADER_NAME: "argilla",  # Hard-coded default workspace
+        }
         self._current_user = None
 
     @property

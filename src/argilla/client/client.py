@@ -100,9 +100,7 @@ class _ArgillaLogAgent:
             return await api.log_async(*args, **kwargs)
         except Exception as ex:
             dataset = kwargs["name"]
-            _LOGGER.error(
-                f"\nCannot log data in dataset '{dataset}'\n" f"Error: {type(ex).__name__}\n" f"Details: {ex}"
-            )
+            _LOGGER.error(f"\nCannot log data in dataset '{dataset}'\nError: {type(ex).__name__}\nDetails: {ex}")
             raise ex
 
     def log(self, *args, **kwargs) -> Future:
@@ -115,7 +113,7 @@ class Argilla:
     """
 
     # Larger sizes will trigger a warning
-    _MAX_CHUNK_SIZE = 5000
+    _MAX_BATCH_SIZE = 5000
 
     def __init__(
         self,
@@ -169,7 +167,7 @@ class Argilla:
     def client(self) -> AuthenticatedClient:
         """The underlying authenticated HTTP client"""
         warnings.warn(
-            message=("This prop will be removed in next release. " "Please use the http_client prop instead."),
+            message="This prop will be removed in next release. Please use the http_client prop instead.",
             category=UserWarning,
         )
         return self._client
@@ -251,23 +249,28 @@ class Argilla:
             ),
         )
 
-    def delete(self, name: str):
+    def delete(self, name: str, workspace: Optional[str] = None):
         """Deletes a dataset.
 
         Args:
             name: The dataset name.
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         datasets_api.delete_dataset(client=self._client, name=name)
 
     def log(
         self,
         records: Union[Record, Iterable[Record], Dataset],
         name: str,
+        workspace: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        chunk_size: int = 500,
+        batch_size: int = 500,
         verbose: bool = True,
         background: bool = False,
+        chunk_size: Optional[int] = None,
     ) -> Union[BulkResponse, Future]:
         """Logs Records to argilla.
 
@@ -278,11 +281,12 @@ class Argilla:
             name: The dataset name.
             tags: A dictionary of tags related to the dataset.
             metadata: A dictionary of extra info for the dataset.
-            chunk_size: The chunk size for a data bulk.
+            batch_size: The batch size for a data bulk.
             verbose: If True, shows a progress bar and prints out a quick summary at the end.
             background: If True, we will NOT wait for the logging process to finish and return
                 an ``asyncio.Future`` object. You probably want to set ``verbose`` to False
                 in that case.
+            chunk_size: DEPRECATED! Use `batch_size` instead.
 
         Returns:
             Summary of the response from the REST API.
@@ -290,13 +294,17 @@ class Argilla:
             will be returned instead.
 
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         future = self._agent.log(
             records=records,
             name=name,
             tags=tags,
             metadata=metadata,
-            chunk_size=chunk_size,
+            batch_size=batch_size,
             verbose=verbose,
+            chunk_size=chunk_size,
         )
         if background:
             return future
@@ -310,10 +318,12 @@ class Argilla:
         self,
         records: Union[Record, Iterable[Record], Dataset],
         name: str,
+        workspace: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        chunk_size: int = 500,
+        batch_size: int = 500,
         verbose: bool = True,
+        chunk_size: Optional[int] = None,
     ) -> BulkResponse:
         """Logs Records to argilla with asyncio.
 
@@ -322,8 +332,9 @@ class Argilla:
             name: The dataset name.
             tags: A dictionary of tags related to the dataset.
             metadata: A dictionary of extra info for the dataset.
-            chunk_size: The chunk size for a data bulk.
+            batch_size: The batch size for a data bulk.
             verbose: If True, shows a progress bar and prints out a quick summary at the end.
+            chunk_size: DEPRECATED! Use `batch_size` instead.
 
         Returns:
             Summary of the response from the REST API
@@ -331,6 +342,9 @@ class Argilla:
         """
         tags = tags or {}
         metadata = metadata or {}
+
+        if workspace is not None:
+            self.set_workspace(workspace)
 
         if not name:
             raise InputValueError("Empty dataset name has been passed as argument.")
@@ -344,11 +358,18 @@ class Argilla:
                 " https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
             )
 
-        if chunk_size > self._MAX_CHUNK_SIZE:
+        if chunk_size is not None:
+            warnings.warn(
+                "The argument `chunk_size` is deprecated and will be removed in a future"
+                " version. Please use `batch_size` instead.",
+                FutureWarning,
+            )
+            batch_size = chunk_size
+
+        if batch_size > self._MAX_BATCH_SIZE:
             _LOGGER.warning(
-                """The introduced chunk size is noticeably large, timeout errors may occur.
-                Consider a chunk size smaller than %s""",
-                self._MAX_CHUNK_SIZE,
+                "The requested batch size is noticeably large, timeout errors may occur. "
+                f"Consider a batch size smaller than {self._MAX_BATCH_SIZE}",
             )
 
         if isinstance(records, Record.__args__):
@@ -370,14 +391,14 @@ class Argilla:
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
         else:
-            raise InputValueError(f"Unknown record type {record_type}. Available values are" f" {Record.__args__}")
+            raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
 
         processed, failed = 0, 0
         with Progress() as progress_bar:
             task = progress_bar.add_task("Logging...", total=len(records), visible=verbose)
 
-            for i in range(0, len(records), chunk_size):
-                chunk = records[i : i + chunk_size]
+            for i in range(0, len(records), batch_size):
+                batch = records[i : i + batch_size]
 
                 response = await async_bulk(
                     client=self._client,
@@ -385,14 +406,14 @@ class Argilla:
                     json_body=bulk_class(
                         tags=tags,
                         metadata=metadata,
-                        records=[creation_class.from_client(r) for r in chunk],
+                        records=[creation_class.from_client(r) for r in batch],
                     ),
                 )
 
                 processed += response.parsed.processed
                 failed += response.parsed.failed
 
-                progress_bar.update(task, advance=len(chunk))
+                progress_bar.update(task, advance=len(batch))
 
         # TODO: improve logging policy in library
         if verbose:
@@ -408,6 +429,7 @@ class Argilla:
     def delete_records(
         self,
         name: str,
+        workspace: Optional[str] = None,
         query: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         discard_only: bool = False,
@@ -432,6 +454,9 @@ class Argilla:
             deletion).
 
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         return self.datasets.delete_records(
             name=name,
             mark_as_discarded=discard_only,
@@ -443,12 +468,14 @@ class Argilla:
     def load(
         self,
         name: str,
+        workspace: Optional[str] = None,
         query: Optional[str] = None,
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
+        batch_size: int = 250,
         as_pandas=None,
     ) -> Dataset:
         """Loads a argilla dataset.
@@ -471,6 +498,9 @@ class Argilla:
             A argilla dataset.
 
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         if as_pandas is False:
             warnings.warn(
                 "The argument `as_pandas` is deprecated and will be removed in a future"
@@ -481,7 +511,7 @@ class Argilla:
             raise ValueError(
                 "The argument `as_pandas` is deprecated and will be removed in a future"
                 " version. Please adapt your code accordingly. ",
-                "If you want a pandas DataFrame do" " `rg.load('my_dataset').to_pandas()`.",
+                "If you want a pandas DataFrame do `rg.load('my_dataset').to_pandas()`.",
             )
 
         try:
@@ -493,20 +523,30 @@ class Argilla:
                 limit=limit,
                 sort=sort,
                 id_from=id_from,
+                batch_size=batch_size,
             )
         except ApiCompatibilityError as err:  # Api backward compatibility
             from argilla import __version__ as version
 
             warnings.warn(
-                message=f"Using python client argilla=={version},"
-                f" however deployed server version is {err.api_version}."
-                " This might lead to compatibility issues.\n"
-                f" Preferably, update your server version to {version}"
-                " or downgrade your Python API at the loss"
-                " of functionality and robustness via\n"
-                f"`pip install argilla=={err.api_version}`",
+                message=(
+                    f"Using python client argilla=={version},"
+                    f" however deployed server version is {err.api_version}."
+                    " This might lead to compatibility issues.\n"
+                    f" Preferably, update your server version to {version}"
+                    " or downgrade your Python API at the loss"
+                    " of functionality and robustness via\n"
+                    f"`pip install argilla=={err.api_version}`"
+                ),
                 category=UserWarning,
             )
+            if batch_size is not None:
+                warnings.warn(
+                    message="The `batch_size` parameter is not supported"
+                    f" on server version {err.api_version}. Consider"
+                    f" updating your server version to {version} to"
+                    " take advantage of this functionality."
+                )
 
             return self._load_records_old_fashion(
                 name=name,
@@ -674,6 +714,7 @@ class Argilla:
         limit: Optional[int] = None,
         sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
+        batch_size: int = 250,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
         task = dataset.task
@@ -725,6 +766,7 @@ class Argilla:
             limit=limit,
             sort=sort,
             id_from=id_from,
+            batch_size=batch_size,
             # Query
             query_text=query,
             ids=ids,

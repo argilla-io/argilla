@@ -62,8 +62,13 @@ def configure_router(router: APIRouter):
     )
     async def scan_dataset_records(
         name: str,
-        request: Optional[ScanDatasetRecordsRequest] = None,
-        limit: int = Query(default=100, gte=0, le=500, description="Number of records to retrieve"),
+        request: Optional[SearchRecordsRequest] = None,
+        limit: int = Query(
+            default=100,
+            gte=0,
+            le=1000,
+            description="Number of records to retrieve",
+        ),
         request_deps: CommonTaskHandlerDependencies = Depends(),
         service: DatasetsService = Depends(DatasetsService.get_instance),
         engine: GenericElasticEngineBackend = Depends(GenericElasticEngineBackend.get_instance),
