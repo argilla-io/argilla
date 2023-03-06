@@ -102,8 +102,6 @@ class Datasets(AbstractApi):
 
     __SETTINGS_MIN_API_VERSION__ = "0.15"
 
-    DEFAULT_SCAN_SIZE = 250
-
     class _DatasetApiModel(BaseModel):
         name: str
         task: TaskType
@@ -155,6 +153,7 @@ class Datasets(AbstractApi):
         projection: Optional[Set[str]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
+        batch_size: int = 250,
         **query,
     ) -> Iterable[dict]:
         """
@@ -169,6 +168,8 @@ class Datasets(AbstractApi):
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
+            batch_size: If provided, load `batch_size` samples per request. A lower batch
+                size may help avoid timeouts.
 
         Returns:
             An iterable of raw object containing per-record info
@@ -177,7 +178,6 @@ class Datasets(AbstractApi):
         if limit and limit < 0:
             raise ValueError("The scan limit must be non-negative.")
 
-        batch_size = self.DEFAULT_SCAN_SIZE
         limit = limit if limit else math.inf
         url = f"{self._API_PREFIX}/{name}/records/:search?limit={{limit}}"
         query = self._parse_query(query=query)

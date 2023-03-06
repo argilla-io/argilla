@@ -474,6 +474,7 @@ class Argilla:
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
+        batch_size: int = 250,
         as_pandas=None,
     ) -> Dataset:
         """Loads a argilla dataset.
@@ -519,6 +520,7 @@ class Argilla:
                 ids=ids,
                 limit=limit,
                 id_from=id_from,
+                batch_size=batch_size,
             )
         except ApiCompatibilityError as err:  # Api backward compatibility
             from argilla import __version__ as version
@@ -535,6 +537,13 @@ class Argilla:
                 ),
                 category=UserWarning,
             )
+            if batch_size is not None:
+                warnings.warn(
+                    message="The `batch_size` parameter is not supported"
+                    f" on server version {err.api_version}. Consider"
+                    f" updating your server version to {version} to"
+                    " take advantage of this functionality."
+                )
 
             return self._load_records_old_fashion(
                 name=name,
@@ -700,6 +709,7 @@ class Argilla:
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
+        batch_size: int = 250,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
         task = dataset.task
@@ -747,6 +757,7 @@ class Argilla:
             projection={"*"},
             limit=limit,
             id_from=id_from,
+            batch_size=batch_size,
             # Query
             query_text=query,
             ids=ids,
