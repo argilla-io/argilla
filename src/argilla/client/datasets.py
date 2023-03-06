@@ -789,8 +789,12 @@ class DatasetForTextClassification(DatasetBase):
             doc = nlp.make_doc(text)
 
             cats = dict.fromkeys(all_labels, 0)
-            for anno in record.annotation:
-                cats[anno] = 1
+
+            if isinstance(record.annotation, list):
+                for anno in record.annotation:
+                    cats[anno] = 1
+            else:
+                cats[record.annotation] = 1
 
             doc.cats = cats
             db.add(doc)
@@ -821,8 +825,15 @@ class DatasetForTextClassification(DatasetBase):
     def __all_labels__(self):
         all_labels = set()
         for record in self._records:
-            if record.annotation:
-                all_labels.update(record.annotation)
+            if record.annotation is None:
+                continue
+            elif isinstance(record.annotation, str):
+                all_labels.add(record.annotation)
+            elif isinstance(record.annotation, list):
+                all_labels.update((tuple(record.annotation)))
+            else:
+                # this is highly unlikely
+                raise TypeError("Record.annotation contains an unsupported type: {}".format(type(record.annotation)))
 
         return list(all_labels)
 
@@ -1257,6 +1268,19 @@ class DatasetForText2Text(DatasetBase):
             ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
+
+    def _prepare_for_training_with_spark_nlp(self, records: List[Record]) -> "pandas.DataFrame":
+        spark_nlp_data = []
+        for record in records:
+            if record.annotation is None:
+                continue
+            if record.id is None:
+                record.id = str(uuid.uuid4())
+            text = record.text
+
+            spark_nlp_data.append([record.id, text, record.annotation])
+
+        return pd.DataFrame(spark_nlp_data, columns=["id", "text", "target"])
 
 
 Dataset = Union[DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text]
