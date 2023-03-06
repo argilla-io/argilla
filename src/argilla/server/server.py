@@ -42,7 +42,7 @@ from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.database import get_db
+from argilla.server.database import get_db, run_db_migrations
 from argilla.server.errors import (
     APIErrorHandler,
     EntityNotFoundError,
@@ -206,6 +206,16 @@ def configure_telemetry(app: FastAPI):
 def configure_database(app: FastAPI):
     get_db_wrapper = contextlib.contextmanager(get_db)
 
+    def _create_default_user_if_not_present():
+        with get_db_wrapper() as db:
+            if db.query(User).count() == 0:
+                _create_default_user(db)
+                _log_default_user_warning()
+            else:
+                default_user = accounts.get_user_by_username(db, DEFAULT_USERNAME)
+                if default_user and _user_has_default_credentials(default_user):
+                    _log_default_user_warning()
+
     def _create_default_user(db: Session):
         user = User(
             first_name="",
@@ -233,15 +243,9 @@ def configure_database(app: FastAPI):
         )
 
     @app.on_event("startup")
-    async def create_default_user_if_not_present():
-        with get_db_wrapper() as db:
-            if db.query(User).count() == 0:
-                _create_default_user(db)
-                _log_default_user_warning()
-            else:
-                default_user = accounts.get_user_by_username(db, DEFAULT_USERNAME)
-                if default_user and _user_has_default_credentials(default_user):
-                    _log_default_user_warning()
+    async def _configure_database():
+        run_db_migrations()
+        _create_default_user_if_not_present()
 
 
 argilla_app = FastAPI(
