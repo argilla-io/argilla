@@ -30,6 +30,8 @@ export default {
   grid-template-rows: 56px 100px 1fr 1fr 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
+  height: calc(100vh - $topbarHeight);
+  overflow: auto;
 }
 
 .header {
