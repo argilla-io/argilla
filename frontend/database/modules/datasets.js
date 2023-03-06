@@ -24,7 +24,7 @@ import { Vector as VectorModel } from "@/models/Vector";
 import {
   upsertLabelsInGlobalLabelModel,
   deleteAllGlobalLabelModel,
-} from "../../models/globalLabel.queries";
+} from "@/models/globalLabel.queries";
 import { Notification } from "@/models/Notifications";
 import {
   upsertNewGlobalLabel,
