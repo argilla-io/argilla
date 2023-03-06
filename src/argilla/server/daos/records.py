@@ -209,7 +209,7 @@ class DatasetRecordsDAO:
         return self._es.scan_records(
             id=dataset.id,
             query=search.query,
-            sort=PaginatedSortInfo(sort_by=[SortableField(id="id")], shuffle=search.sort.shuffle, next=next),
+            sort=PaginatedSortInfo(sort_by=[SortableField(id="id")], shuffle=search.sort.shuffle, next_page_cfg=next),
             limit=limit,
             include_fields=list(include_fields) if include_fields else None,
             exclude_fields=list(exclude_fields) if exclude_fields else None,

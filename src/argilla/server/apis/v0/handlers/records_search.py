@@ -39,7 +39,7 @@ def configure_router(router: APIRouter):
         Text2TextQuery,
     ]
 
-    class SearchRecordsRequest(BaseModel):
+    class ScanDatasetRecordsRequest(BaseModel):
         query: Optional[QueryType]
         next_idx: Optional[str] = Field(description="Field to fetch data from a record id")
         fields: Optional[List[str]]
@@ -48,19 +48,19 @@ def configure_router(router: APIRouter):
             description="Set a sort config for records scan. "
             "The `next_id` field will be ignored if a sort configuration is found",
         )
-        next_pagination_cfg: Optional[str] = Field(
+        next_page_cfg: Optional[str] = Field(
             description="Field to paginate over scan results. Use value fetched from previous response"
         )
 
     class SearchRecordsResponse(BaseModel):
         records: List[dict]
         next_idx: Optional[str]
-        next_pagination_cfg: Optional[str]
+        next_page_cfg: Optional[str]
 
     @router.post("/{name}/records/:search", operation_id="scan_dataset_records", response_model=SearchRecordsResponse)
     async def scan_dataset_records(
         name: str,
-        request: Optional[SearchRecordsRequest] = None,
+        request: Optional[ScanDatasetRecordsRequest] = None,
         limit: int = Query(
             default=100,
             gte=0,
@@ -73,17 +73,17 @@ def configure_router(router: APIRouter):
         current_user: User = Security(auth.get_user, scopes=[]),
     ):
         found = service.find_by_name(user=current_user, name=name, workspace=request_deps.workspace)
-        request = request or SearchRecordsRequest()
+        request = request or ScanDatasetRecordsRequest()
 
         sort_info = PaginatedSortInfo(sort_by=request.sort_by or [SortableField(id="id")])
-        if request.next_pagination_cfg:
+        if request.next_page_cfg:
             try:
-                data = json.loads(request.next_pagination_cfg)
+                data = json.loads(request.next_page_cfg)
                 sort_info = PaginatedSortInfo.parse_obj(data)
             except Exception as ex:
                 pass
         elif request.next_idx and not request.sort_by:
-            sort_info.next = [request.next_idx]
+            sort_info.next_page_cfg = [request.next_idx]
 
         docs = list(
             engine.scan_records(
@@ -96,11 +96,11 @@ def configure_router(router: APIRouter):
         )
 
         for doc in docs:
-            sort_info.next = doc.pop("sort", None)
+            sort_info.next_page_cfg = doc.pop("sort", None)
 
         return SearchRecordsResponse(
-            next_idx=sort_info.next[0] if not request.sort_by else None,
-            next_pagination_cfg=sort_info.json(),
+            next_idx=sort_info.next_page_cfg[0] if not request.sort_by else None,
+            next_page_cfg=sort_info.json(),
             records=docs,
         )
 
