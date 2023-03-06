@@ -794,7 +794,7 @@ class DatasetForTextClassification(DatasetBase):
                 for anno in record.annotation:
                     cats[anno] = 1
             else:
-                cats[anno] = 1
+                cats[record.annotation] = 1
 
             doc.cats = cats
             db.add(doc)
