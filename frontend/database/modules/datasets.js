@@ -950,9 +950,9 @@ const factoryLabelsForGlobalLabelsModel = (
 ) => {
   const formattedLabels = labels.map(({ id, name }, index) => {
     return {
-      id: id.toUpperCase(),
+      id: id,
       order: index,
-      text: name.toUpperCase(),
+      text: name,
       dataset_id: datasetId,
       color_id: index,
       shortcut: index < 10 ? String(index + 1) : null,

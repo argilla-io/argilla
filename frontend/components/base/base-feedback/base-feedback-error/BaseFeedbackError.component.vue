@@ -59,8 +59,11 @@ export default {
 }
 
 .button {
-  border-radius: $border-radius;
-  background-color: rgba(255, 103, 95, 0.6);
   color: white;
+  background-color: rgba(255, 103, 95, 0.6);
+  border-radius: $border-radius;
+  button {
+    height: 1em;
+  }
 }
 </style>
