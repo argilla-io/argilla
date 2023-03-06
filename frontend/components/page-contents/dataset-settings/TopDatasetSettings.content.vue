@@ -1,9 +1,10 @@
 <template>
   <div class="top-content">
     <h1 v-html="title" />
-    <NuxtLink :to="datasetPageUrl">
+    <base-button :to="datasetPageUrl" class="secondary link">
+      <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
       {{ goToDatasetPageLabel }}
-    </NuxtLink>
+    </base-button>
   </div>
 </template>
 
@@ -13,7 +14,7 @@ export default {
   data() {
     return {
       title: "Dataset settings",
-      goToDatasetPageLabel: "< See your dataset",
+      goToDatasetPageLabel: "See your dataset",
     };
   },
   computed: {

@@ -217,6 +217,15 @@ export default {
       color: $black-87;
     }
   }
+  &.link {
+    background: none;
+    color: $black-54;
+    padding: 0;
+    &:hover {
+      text-decoration: underline;
+      background: none;
+    }
+  }
 }
 .--danger {
   background-color: $danger;
