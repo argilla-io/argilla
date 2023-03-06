@@ -206,6 +206,17 @@ export default {
       fill: $black-54;
     }
   }
+
+  &.text {
+    padding-left: 0;
+    padding-right: 0;
+    background: none;
+    color: $black-54;
+    &:hover {
+      background: none;
+      color: $black-87;
+    }
+  }
 }
 .--danger {
   background-color: $danger;

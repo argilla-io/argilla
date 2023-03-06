@@ -12,11 +12,7 @@
         />
       </div>
 
-      <p
-        class="is-labels-loading"
-        v-if="isloading"
-        v-html="'Labels are loading'"
-      />
+      <BaseSpinner v-if="isloading" />
 
       <TokenClassificationGlobalLabelsComponent
         v-if="isTaskTokenClassification && !isloading"

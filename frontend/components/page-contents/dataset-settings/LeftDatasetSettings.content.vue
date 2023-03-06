@@ -2,7 +2,7 @@
   <div class="left-content">
     <div class="left-content-item dataset-description">
       <div class="item">
-        <p v-html="datasetName" />
+        <p class="dataset-name" v-html="datasetName" />
         <p class="dataset-task" v-html="datasetTask" />
       </div>
       <base-action-tooltip tooltip="Copied">
@@ -116,5 +116,16 @@ export default {
 
 .labels-edition-component {
   min-height: 15em;
+}
+.dataset-name {
+  @include font-size(16px);
+}
+.dataset-task {
+  color: $black-54;
+  border: 1px solid $black-37;
+  border-radius: $border-radius;
+  padding: calc($base-space / 2);
+  @include font-size(12px);
+  @include line-height(12px);
 }
 </style>
