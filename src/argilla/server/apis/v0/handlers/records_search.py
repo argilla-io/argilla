@@ -62,7 +62,7 @@ def configure_router(router: APIRouter):
     )
     async def scan_dataset_records(
         name: str,
-        request: Optional[SearchRecordsRequest] = None,
+        request: Optional[ScanDatasetRecordsRequest] = None,
         limit: int = Query(
             default=100,
             gte=0,
@@ -82,7 +82,7 @@ def configure_router(router: APIRouter):
             try:
                 data = json.loads(request.next_page_cfg)
                 paginated_sort = PaginatedSortInfo.parse_obj(data)
-            except Exception as ex:
+            except Exception:
                 pass
         elif request.next_idx and not request.sort_by:
             paginated_sort.next_search_params = [request.next_idx]
