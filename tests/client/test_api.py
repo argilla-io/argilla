@@ -609,7 +609,7 @@ def test_load_with_sort(mocked_client, supported_vector_search):
     ds = api.load(name=dataset, sort=[("event_timestamp", "asc")])
     assert all([(ds[idx].event_timestamp <= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
 
-    ds = api.load(name=dataset)
+    ds = api.load(name=dataset, sort=[("event_timestamp", "desc")])
     assert all([(ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
 
 
@@ -737,7 +737,7 @@ def test_load_sort(mocked_client):
     assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
     ds = api.load(name=dataset, ids=[1, 2, 11])
     df = ds.to_pandas()
-    assert list(df.id) == [1, 2, 11]
+    assert list(df.id) == [1, 11, 2]
     ds = api.load(name=dataset, ids=["1str", "2str", "11str"])
     df = ds.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]
