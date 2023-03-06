@@ -2,6 +2,7 @@ import {
   GlobalLabel as GlobalLabelModel,
   formatDatasetIdForGlobalLabelModel,
 } from "./GlobalLabel.model";
+import { getShortcutChars } from "@/models/viewSettings.queries";
 
 const upsertLabelsInGlobalLabelModel = (labels) => {
   GlobalLabelModel.insertOrUpdate({
@@ -45,6 +46,7 @@ const countLabelsByDatasetId = (datasetId) => {
 
 const upsertNewGlobalLabel = ({
   datasetId,
+  datasetName,
   newLabel,
   isActivate = false,
   isSavedInBack = false,
@@ -52,13 +54,19 @@ const upsertNewGlobalLabel = ({
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
   const numberOfLabels = countLabelsByDatasetId(datasetId);
 
+  const shortcuts = getShortcutChars(datasetName);
+  const shortcutsLength = shortcuts.length;
+
   GlobalLabelModel.insertOrUpdate({
     data: {
       text: newLabel,
       dataset_id: joinedDatasetId,
       order: numberOfLabels,
       color_id: numberOfLabels,
-      shortcut: numberOfLabels < 9 ? String(numberOfLabels + 1) : null,
+      shortcut:
+        numberOfLabels < shortcutsLength
+          ? String(shortcuts[numberOfLabels])
+          : null,
       is_activate: isActivate,
       is_saved_in_back: isSavedInBack,
     },

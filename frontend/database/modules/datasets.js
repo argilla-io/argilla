@@ -17,7 +17,10 @@
 import _ from "lodash";
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
-import { updateLoadingState } from "@/models/viewSettings.queries";
+import {
+  updateLoadingState,
+  getShortcutChars,
+} from "@/models/viewSettings.queries";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
@@ -618,6 +621,7 @@ const actions = {
           labels.forEach((newLabel) => {
             upsertNewGlobalLabel({
               datasetId,
+              datasetName,
               newLabel,
               isActivate: false,
               isSavedInBack: true,
@@ -886,12 +890,17 @@ const isAnyKeyInArrayItem = (arrayWithObjItem, key) => {
   return arrayWithObjItem.some(isKeyInItem);
 };
 
-const initGlobalLabels = async ({ id }, labels, isLabelsSavedInBack) => {
+const initGlobalLabels = async (
+  { id, name: datasetName },
+  labels,
+  isLabelsSavedInBack
+) => {
   deleteAllGlobalLabelModel();
 
   const joinedDatasetId = id.join(".");
   const formattedLabels = factoryLabelsForGlobalLabelsModel(
     joinedDatasetId,
+    datasetName,
     labels,
     isLabelsSavedInBack
   );
@@ -957,9 +966,13 @@ const factoryLabelsToInsertInGlobalModelORM = async (dataset) => {
 
 const factoryLabelsForGlobalLabelsModel = (
   datasetId,
+  datasetName,
   labels,
   isSavedInBack = false
 ) => {
+  const shortcuts = getShortcutChars(datasetName);
+  const shortcutsLength = shortcuts.length;
+
   const formattedLabels = labels.map(({ id, name }, index) => {
     return {
       id: id,
@@ -967,7 +980,7 @@ const factoryLabelsForGlobalLabelsModel = (
       text: name,
       dataset_id: datasetId,
       color_id: index,
-      shortcut: index < 10 ? String(index + 1) : null,
+      shortcut: index < shortcutsLength ? String(shortcuts[index]) : null,
       is_saved_in_back: isSavedInBack,
     };
   });

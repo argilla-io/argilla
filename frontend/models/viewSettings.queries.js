@@ -17,9 +17,16 @@ const getLoadingValue = (datasetName) => {
   return ViewSettingsModel.query().whereId(datasetName).first();
 };
 
+const getShortcutChars = (datasetName) => {
+  return (
+    ViewSettingsModel.query().whereId(datasetName).first()?.shortcut_chars ?? ""
+  );
+};
+
 export {
   getViewSettingsWithPaginationByDatasetName,
   getViewSettingsByDatasetName,
   getLoadingValue,
   updateLoadingState,
+  getShortcutChars,
 };
