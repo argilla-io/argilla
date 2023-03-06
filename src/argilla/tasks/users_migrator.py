@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import os
 from typing import List, Optional
 
 import yaml
@@ -20,7 +19,7 @@ from pydantic import BaseModel, constr
 from rich import print
 from sqlalchemy.orm import Session
 
-from argilla.server.database import SessionLocal
+from argilla.server.database import SessionLocal, run_db_migrations
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.security.auth_provider.local.settings import settings
 from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
@@ -102,4 +101,5 @@ class UsersMigrator:
 
 
 if __name__ == "__main__":
+    run_db_migrations()
     UsersMigrator(settings.users_db_file).migrate()
