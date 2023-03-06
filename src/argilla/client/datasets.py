@@ -789,7 +789,7 @@ class DatasetForTextClassification(DatasetBase):
             doc = nlp.make_doc(text)
 
             cats = dict.fromkeys(all_labels, 0)
-            
+
             if isinstance(record.annotation, list):
                 for anno in record.annotation:
                     cats[anno] = 1
@@ -823,7 +823,6 @@ class DatasetForTextClassification(DatasetBase):
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", label_name])
 
     def __all_labels__(self):
-        
         all_labels = set()
         for record in self._records:
             if record.annotation is None:
