@@ -245,6 +245,23 @@ def test_log_passing_empty_records_list(mocked_client):
         api.log(records=[], name="ds")
 
 
+def test_log_deprecated_chunk_size(mocked_client):
+    dataset_name = "test_log_deprecated_chunk_size"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    record = rg.TextClassificationRecord(text="My text")
+    with pytest.warns(FutureWarning, match="`chunk_size`.*`batch_size`"):
+        api.log(records=[record], name=dataset_name, chunk_size=100)
+
+
+def test_large_batch_size_warning(mocked_client, caplog: pytest.LogCaptureFixture):
+    dataset_name = "test_large_batch_size_warning"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    record = rg.TextClassificationRecord(text="My text")
+    api.log(records=[record], name=dataset_name, batch_size=10000)
+    assert len(caplog.record_tuples) == 1
+    assert "batch size is noticeably large" in caplog.record_tuples[0][2]
+
+
 def test_log_background(mocked_client):
     """Verify that logs can be delayed via the background parameter."""
     dataset_name = "test_log_background"

@@ -112,9 +112,10 @@ def log(
     workspace: Optional[str] = None,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
-    chunk_size: int = 500,
+    batch_size: int = 500,
     verbose: bool = True,
     background: bool = False,
+    chunk_size: Optional[int] = None,
 ) -> Union[BulkResponse, Future]:
     """Logs Records to argilla.
 
@@ -127,10 +128,11 @@ def log(
             env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         tags: A dictionary of tags related to the dataset.
         metadata: A dictionary of extra info for the dataset.
-        chunk_size: The chunk size for a data bulk.
+        batch_size: The batch size for a data bulk.
         verbose: If True, shows a progress bar and prints out a quick summary at the end.
         background: If True, we will NOT wait for the logging process to finish and return an ``asyncio.Future``
             object. You probably want to set ``verbose`` to False in that case.
+        chunk_size: DEPRECATED! Use `batch_size` instead.
 
     Returns:
         Summary of the response from the REST API.
@@ -156,9 +158,10 @@ def log(
         workspace=workspace,
         tags=tags,
         metadata=metadata,
-        chunk_size=chunk_size,
+        batch_size=batch_size,
         verbose=verbose,
         background=background,
+        chunk_size=chunk_size,
     )
 
 
@@ -168,8 +171,9 @@ async def log_async(
     workspace: Optional[str] = None,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
-    chunk_size: int = 500,
+    batch_size: int = 500,
     verbose: bool = True,
+    chunk_size: Optional[int] = None,
 ) -> BulkResponse:
     """Logs Records to argilla with asyncio.
 
@@ -180,8 +184,9 @@ async def log_async(
             env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         tags: A dictionary of tags related to the dataset.
         metadata: A dictionary of extra info for the dataset.
-        chunk_size: The chunk size for a data bulk.
+        batch_size: The batch size for a data bulk.
         verbose: If True, shows a progress bar and prints out a quick summary at the end.
+        chunk_size: DEPRECATED! Use `batch_size` instead.
 
     Returns:
         Summary of the response from the REST API
@@ -202,8 +207,9 @@ async def log_async(
         workspace=workspace,
         tags=tags,
         metadata=metadata,
-        chunk_size=chunk_size,
+        batch_size=batch_size,
         verbose=verbose,
+        chunk_size=chunk_size,
     )
 
 
