@@ -16,6 +16,7 @@
 """
 This module configures the global fastapi application
 """
+import contextlib
 import glob
 import inspect
 import logging
@@ -30,21 +31,29 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ConfigError
+from sqlalchemy.orm import Session
 
 from argilla import __version__ as argilla_version
+from argilla._constants import DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.logging import configure_logging
 from argilla.server import helpers
+from argilla.server.contexts import accounts
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
+from argilla.server.database import get_db
 from argilla.server.errors import (
     APIErrorHandler,
     EntityNotFoundError,
     UnauthorizedError,
 )
+from argilla.server.models import User, UserRole, Workspace
 from argilla.server.routes import api_router
 from argilla.server.security import auth
+from argilla.server.security.auth_provider.local.settings import (
+    settings as auth_settings,
+)
 from argilla.server.settings import settings
 from argilla.server.static_rewrite import RewriteStaticFiles
 
@@ -173,7 +182,7 @@ def configure_app_logging(app: FastAPI):
     app.on_event("startup")(configure_logging)
 
 
-def configure_telemetry(app):
+def configure_telemetry(app: FastAPI):
     message = "\n"
     message += inspect.cleandoc(
         """
@@ -197,6 +206,49 @@ def configure_telemetry(app):
             print(message, flush=True)
 
 
+def configure_database(app: FastAPI):
+    get_db_wrapper = contextlib.contextmanager(get_db)
+
+    def _create_default_user(db: Session):
+        user = User(
+            first_name="",
+            username=DEFAULT_USERNAME,
+            role=UserRole.admin,
+            api_key=auth_settings.default_apikey,
+            password_hash=auth_settings.default_password,
+            workspaces=[Workspace(name=DEFAULT_USERNAME)],
+        )
+
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        return user
+
+    def _user_has_default_credentials(user: User):
+        return user.api_key == auth_settings.default_apikey or accounts.CRYPT_CONTEXT.verify(
+            DEFAULT_PASSWORD, user.password_hash
+        )
+
+    def _log_default_user_warning():
+        _LOGGER.warning(
+            f"User {DEFAULT_USERNAME!r} with default credentials has been found in the database. "
+            "If you are using argilla in a production environment this can be a serious security problem. "
+            f"We recommend that you create a new admin user and then delete the default {DEFAULT_USERNAME!r} one."
+        )
+
+    @app.on_event("startup")
+    async def create_default_user_if_not_present():
+        with get_db_wrapper() as db:
+            if db.query(User).count() == 0:
+                _create_default_user(db)
+                _log_default_user_warning()
+            else:
+                default_user = accounts.get_user_by_username(db, DEFAULT_USERNAME)
+                if default_user and _user_has_default_credentials(default_user):
+                    _log_default_user_warning()
+
+
 argilla_app = FastAPI(
     title="Argilla",
     description="Argilla API",
@@ -211,6 +263,7 @@ app = FastAPI()
 app.mount(settings.base_url, argilla_app)
 
 configure_app_logging(app)
+configure_database(app)
 configure_storage(app)
 configure_telemetry(app)
 

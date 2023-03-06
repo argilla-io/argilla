@@ -17,6 +17,9 @@ DEFAULT_MAX_KEYWORD_LENGTH = 128
 
 API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
 WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
+
+DEFAULT_USERNAME = "argilla"
+DEFAULT_PASSWORD = "1234"
 DEFAULT_API_KEY = "argilla.apikey"  # Keep the same api key for now
 
 # TODO: This constant will be drop out with issue
