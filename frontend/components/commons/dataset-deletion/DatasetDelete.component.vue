@@ -84,8 +84,12 @@ export default {
       try {
         await this.deleteSelectedDataset();
         this.goToDatasetList();
-      } catch (error) {
-        console.log(error);
+      } catch ({ response }) {
+        if (response === "NOT_ALLOWED_TO_UPDATE_LABELS") {
+          console.log("user is not allowed to delete dataset");
+        } else {
+          console.log(response);
+        }
       } finally {
         this.toggleDeleteModal(false);
       }

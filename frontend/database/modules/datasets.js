@@ -678,22 +678,33 @@ const actions = {
         });
     }
   },
-  async deleteDataset(_, { workspace, name }) {
-    let url = `/datasets/${name}`;
+  async deleteDataset(_, { workspace, name: datasetName }) {
+    let message = "";
+    let typeOfNotification = "";
+    let statusCall = null;
+
+    let url = `/datasets/${datasetName}`;
     url += `?workspace=${workspace}`;
     try {
       await ObservationDataset.api().delete(url, {
-        delete: [workspace, name],
+        delete: [workspace, datasetName],
       });
-      Notification.dispatch("notify", {
-        message: `${name} have been deleted`,
-        type: "success",
-      });
-    } catch (error) {
-      Notification.dispatch("notify", {
-        message: `It is not possible to delete ${name}`,
-        type: "warning",
-      });
+      message = `${datasetName} have been deleted`;
+      typeOfNotification = "success";
+    } catch ({ response }) {
+      let { status } = response;
+      statusCall = status;
+      message = `It is not possible to delete ${datasetName}`;
+      typeOfNotification = "error";
+      if (status === 403) {
+        throw { response: TYPE_OF_FEEDBACK.NOT_ALLOWED_TO_UPDATE_LABELS };
+      }
+    } finally {
+      statusCall === 403 ||
+        Notification.dispatch("notify", {
+          message,
+          type: typeOfNotification,
+        });
     }
   },
 
