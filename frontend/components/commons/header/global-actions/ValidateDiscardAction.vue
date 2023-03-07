@@ -161,6 +161,9 @@ export default {
         this.selectedRecords.reduce((acc, curr) => [...acc, curr.id], [])
       );
     },
+    areAllRecordsSelected() {
+      return this.visibleRecords.every((record) => record.selected);
+    },
     message() {
       let pendingSentence = "";
       let nonPendingSentence = "";
@@ -185,10 +188,8 @@ export default {
     },
   },
   watch: {
-    visibleRecords(newValue) {
-      this.allSelected = newValue.length
-        ? newValue.every((record) => record.selected)
-        : false;
+    areAllRecordsSelected(newValue) {
+      this.allSelected = newValue;
     },
     allSelected(allSelected) {
       if (
