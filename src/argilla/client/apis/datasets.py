@@ -164,6 +164,7 @@ class Datasets(AbstractApi):
             name: the dataset
             query: the search query
             projection: a subset of record fields to retrieve. If not provided,
+                 only id's will be returned
             sort: The fields on which to sort [(<field_name>, 'asc|decs')].
             limit: The number of records to retrieve
             id_from: If provided, starts gathering the records starting from that Record.
