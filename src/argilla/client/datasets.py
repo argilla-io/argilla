@@ -146,7 +146,6 @@ class DatasetBase:
         return dataset
 
     def _to_datasets_dict(self) -> Dict:
-        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`"""
         raise NotImplementedError
 
     @classmethod
@@ -765,7 +764,7 @@ class DatasetForTextClassification(DatasetBase):
                 },
                 features=datasets.Features(feature_dict),
             )
-        if test_size:
+        if test_size is not None and test_size != 0:
             ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
@@ -790,8 +789,12 @@ class DatasetForTextClassification(DatasetBase):
             doc = nlp.make_doc(text)
 
             cats = dict.fromkeys(all_labels, 0)
-            for anno in record.annotation:
-                cats[anno] = 1
+
+            if isinstance(record.annotation, list):
+                for anno in record.annotation:
+                    cats[anno] = 1
+            else:
+                cats[record.annotation] = 1
 
             doc.cats = cats
             db.add(doc)
@@ -822,8 +825,15 @@ class DatasetForTextClassification(DatasetBase):
     def __all_labels__(self):
         all_labels = set()
         for record in self._records:
-            if record.annotation:
-                all_labels.update(record.annotation)
+            if record.annotation is None:
+                continue
+            elif isinstance(record.annotation, str):
+                all_labels.add(record.annotation)
+            elif isinstance(record.annotation, list):
+                all_labels.update((tuple(record.annotation)))
+            else:
+                # this is highly unlikely
+                raise TypeError("Record.annotation contains an unsupported type: {}".format(type(record.annotation)))
 
         return list(all_labels)
 
@@ -978,10 +988,11 @@ class DatasetForTokenClassification(DatasetBase):
 
         ds = self.to_datasets().filter(self.__only_annotations__).map(lambda example: {"ner_tags": spans2iob(example)})
         new_features = ds.features.copy()
-        new_features["ner_tags"] = [class_tags]
+        new_features["ner_tags"] = datasets.Sequence(feature=class_tags)
         ds = ds.cast(new_features)
+        ds = ds.remove_columns(set(ds.column_names) - set(["tokens", "ner_tags"]))
 
-        if train_size or test_size:
+        if test_size is not None and test_size != 0:
             ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
@@ -1231,17 +1242,45 @@ class DatasetForText2Text(DatasetBase):
         return cls([Text2TextRecord(**row) for row in dataframe.to_dict("records")])
 
     @requires_version("datasets>1.17.0")
-    def prepare_for_training(self, **kwargs) -> "datasets.Dataset":
-        """Prepares the dataset for training.
+    def _prepare_for_training_with_transformers(
+        self,
+        train_size: Optional[float] = None,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+    ):
+        import datasets
 
-        Args:
-            **kwargs: Specific to the task of the dataset.
+        ds_dict = {"text": [], "target": []}
+        for rec in self._records:
+            if rec.annotation is None:
+                continue
+            ds_dict["text"].append(rec.text)
+            ds_dict["target"].append(rec.annotation)
 
-        Returns:
-            A datasets Dataset.
-        """
+        feature_dict = {
+            "text": datasets.Value("string"),
+            "target": datasets.Value("string"),
+        }
 
-        raise NotImplementedError
+        ds = datasets.Dataset.from_dict(ds_dict, features=datasets.Features(feature_dict))
+
+        if test_size is not None and test_size != 0:
+            ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
+
+        return ds
+
+    def _prepare_for_training_with_spark_nlp(self, records: List[Record]) -> "pandas.DataFrame":
+        spark_nlp_data = []
+        for record in records:
+            if record.annotation is None:
+                continue
+            if record.id is None:
+                record.id = str(uuid.uuid4())
+            text = record.text
+
+            spark_nlp_data.append([record.id, text, record.annotation])
+
+        return pd.DataFrame(spark_nlp_data, columns=["id", "text", "target"])
 
 
 Dataset = Union[DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text]
@@ -1300,6 +1339,7 @@ def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType], **kwa
         return DatasetForTokenClassification.from_datasets(dataset, **kwargs)
     if task is TaskType.text2text:
         return DatasetForText2Text.from_datasets(dataset, **kwargs)
+
     raise NotImplementedError("Reading a datasets Dataset is not implemented for the given task!")
 
 
