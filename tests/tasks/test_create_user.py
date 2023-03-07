@@ -18,7 +18,7 @@ from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole
 from argilla.tasks.create_user import create_user
 from click.testing import CliRunner
-from pydantic import ValidationError
+from sqlalchemy.orm import Session
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def test_create_user_passing_all_params(db: Session):
     cli_params = f"--username {username} --password {password} --role {role.value} --first-name {first_name}"
     CliRunner().invoke(create_user, cli_params)
 
-    user = db.query(User).filter_by(username="username").first()
+    user = db.query(User).filter_by(username=username).first()
     assert user
     assert user.role == UserRole.admin
     assert user.first_name == first_name
@@ -50,11 +50,10 @@ def test_create_user_with_input_role(db):
     username = "test-user"
     role = "admin"
 
-    runner = CliRunner()
     cli_params = f"--username {username} --password 12345678 --first-name First"
-    runner.invoke(create_user, cli_params, input=f"{role}\n")
+    CliRunner().invoke(create_user, cli_params, input=f"{role}\n")
 
-    user = accounts.get_user_by_username(db, username)
+    user = db.query(User).filter_by(username=username).first()
     assert user
     assert user.role.value == role
 
@@ -63,11 +62,10 @@ def test_create_user_with_input_password(db):
     username = "test-user"
     password = "12345678"
 
-    runner = CliRunner()
     cli_params = f"--username {username} --role admin --first-name First"
-    runner.invoke(create_user, cli_params, input=f"{password}\n{password}\n")
+    CliRunner().invoke(create_user, cli_params, input=f"{password}\n{password}\n")
 
-    user = accounts.get_user_by_username(db, username)
+    user = db.query(User).filter_by(username=username).first()
     assert user
     assert accounts.authenticate_user(db, username=username, password=password) == user
 
@@ -76,11 +74,10 @@ def test_create_user_with_role_default(db):
     username = "test-user"
     password = "12345678"
 
-    runner = CliRunner()
     cli_params = f"--username {username} --password {password} --first-name First"
-    runner.invoke(create_user, cli_params, input=f"\n")
+    CliRunner().invoke(create_user, cli_params, input=f"\n")
 
-    user = accounts.get_user_by_username(db, username)
+    user = db.query(User).filter_by(username=username).first()
     assert user
     assert user.role == UserRole.annotator
 
@@ -89,11 +86,10 @@ def test_create_user_with_input_username(db):
     username = "test-user"
     password = "12345678"
 
-    runner = CliRunner()
     cli_params = f"--password {password} --first-name First"
-    runner.invoke(create_user, cli_params, input=f"{username}\n")
+    CliRunner().invoke(create_user, cli_params, input=f"{username}\n")
 
-    assert accounts.get_user_by_username(db, username)
+    assert db.query(User).filter_by(username=username).first()
 
 
 def test_create_user_with_last_name(db):
@@ -101,11 +97,10 @@ def test_create_user_with_last_name(db):
     password = "12345678"
     last_name = "Last"
 
-    runner = CliRunner()
     cli_params = f"--username {username} --password {password} --role admin --first-name First --last-name {last_name}"
-    runner.invoke(create_user, cli_params)
+    CliRunner().invoke(create_user, cli_params)
 
-    user = accounts.get_user_by_username(db, username)
+    user = db.query(User).filter_by(username=username).first()
     assert user
     assert user.last_name == last_name
 
@@ -118,7 +113,7 @@ def test_create_user_with_invalid_username(db: Session):
     cli_params = f"--username {username} --password {password} --role admin --first-name First"
     result = runner.invoke(create_user, cli_params)
 
-    assert accounts.get_user_by_username(db, username) is None
+    assert db.query(User).filter_by(username=username).first() is None
     assert str(result.exception) == (
         "1 validation error for UserCreate\n"
         "username\n"
@@ -131,11 +126,10 @@ def test_create_user_with_invalid_password(db: Session):
     username = "username"
     password = "11"
 
-    runner = CliRunner()
     cli_params = f"--username {username} --password {password} --role admin --first-name First"
-    result = runner.invoke(create_user, cli_params)
+    result = CliRunner().invoke(create_user, cli_params)
 
-    assert accounts.get_user_by_username(db, username) is None
+    assert db.query(User).filter_by(username=username).first() is None
     assert str(result.exception) == (
         "1 validation error for UserCreate\n"
         "password\n"
