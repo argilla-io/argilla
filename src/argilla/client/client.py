@@ -152,7 +152,7 @@ class Argilla:
         )
 
         self._user: User = users_api.whoami(client=self._client)
-        self.set_workspace(workspace or self.user.username)
+        self.set_workspace(workspace or self._user.username)
 
         self._agent = _ArgillaLogAgent(self)
 
