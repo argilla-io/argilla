@@ -19,9 +19,7 @@ import click
 from argilla.server.contexts import accounts
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole
-from argilla.server.security.model import (
-    UserCreate,
-)
+from argilla.server.security.model import UserCreate
 
 
 def _show_created_user(user: User):
