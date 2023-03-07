@@ -911,23 +911,24 @@ const fetchLabelsFromSettings = async ({ name, task }) => {
   try {
     let labelsResponse = null;
     await ObservationDataset.api().get(`/datasets/${name}/${task}/settings`, {
+      validateStatus: validateStatusForSettings,
       dataTransformer: ({ data }) => {
         const { label_schema } = data;
-        labelsResponse = label_schema?.labels || null;
+        labelsResponse = label_schema?.labels || [];
       },
     });
 
+    if (labelsResponse.length === 0) {
+      throw { response: TYPE_OF_FEEDBACK.LABEL_SCHEMA_IS_EMPTY };
+    }
     return labelsResponse;
   } catch (err) {
-    const { status } = err.response;
-    if (status === 404) {
-      console.log(
-        `STATUS: ${status}, This dataset does not contains any settings`
-      );
-      throw TYPE_OF_FEEDBACK.LABEL_SCHEMA_IS_EMPTY;
-    } else {
-      throw new Error(`STATUS: ${status}, Could not fetch settings`);
+    if (err.response === TYPE_OF_FEEDBACK.LABEL_SCHEMA_IS_EMPTY) {
+      console.log(`This dataset does not contains any settings`);
+      throw { response: TYPE_OF_FEEDBACK.LABEL_SCHEMA_IS_EMPTY };
     }
+    const { status } = err.response;
+    throw new Error(`STATUS: ${status}, Could not fetch settings`);
   }
 };
 
@@ -954,7 +955,7 @@ const factoryLabelsToInsertInGlobalModelORM = async (dataset) => {
     labelsToInsertInORM = labels;
     isLabelSavedInLabelSchema = true;
   } catch (err) {
-    if (err === TYPE_OF_FEEDBACK.LABEL_SCHEMA_IS_EMPTY) {
+    if (err.response === TYPE_OF_FEEDBACK.LABEL_SCHEMA_IS_EMPTY) {
       const { labels } = await dataset.fetchMetricSummary("dataset_labels");
       labelsToInsertInORM =
         factoryAggregationLabelsForGlobalLabelsModel(labels);
@@ -1025,6 +1026,11 @@ const checkIfSomeNewLabelNotSavedInBack = (datasetId, newLabels) => {
   );
 
   return isSomeNewLabelNotSavedInBack;
+};
+
+const validateStatusForSettings = (status) => {
+  if (status >= 200 && status <= 400) return true;
+  else if (status === 404) return true;
 };
 
 const TYPE_OF_FEEDBACK = Object.freeze({
