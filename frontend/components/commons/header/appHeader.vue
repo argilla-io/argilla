@@ -28,7 +28,11 @@
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
 
-      <BaseButton class="button-settings" v-if="datasetName">
+      <BaseButton
+        class="button-settings"
+        v-if="datasetName"
+        data-title="Dataset settings"
+      >
         <NuxtLink
           :to="datasetSettingsPageUrl"
           v-badge="{
@@ -37,10 +41,10 @@
               isAnyLabelsInGlobalLabelsModelNotSavedInBack,
             verticalPosition: 'top',
             horizontalPosition: 'right',
-            borderColor: 'black',
+            borderColor: '#212121',
           }"
         >
-          <svgicon name="settings" width="25" height="25" color="white" />
+          <svgicon name="settings" width="22" height="22" color="white" />
         </NuxtLink>
       </BaseButton>
       <user />
@@ -213,7 +217,11 @@ export default {
   }
 }
 
-.settings-button {
-  display: inline-flex;
+.button-settings {
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @extend %has-tooltip--bottom;
+  }
 }
 </style>

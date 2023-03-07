@@ -25,6 +25,7 @@ export default {
   flex-wrap: wrap;
   gap: 8px;
   max-height: 189px;
+  max-width: 600px;
   overflow: auto;
   scroll-behavior: auto;
   background: transparent;

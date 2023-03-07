@@ -35,7 +35,7 @@ export default {
 .wrapper {
   display: inline-flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   gap: $base-space * 2;
   padding: $base-space;
@@ -45,8 +45,7 @@ export default {
 
 .message {
   @include font-size(14px);
-  font-weight: 500;
-  margin: inherit;
+  margin: 0;
   color: $black-54;
   word-break: break-word;
 }
