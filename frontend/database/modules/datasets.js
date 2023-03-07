@@ -631,7 +631,7 @@ const actions = {
     let typeOfNotification = "";
     try {
       const data = { label_schema: { labels } };
-      await ObservationDataset.api().put(
+      await ObservationDataset.api().patch(
         `/datasets/${datasetName}/${datasetTask}/settings`,
         data
       );
