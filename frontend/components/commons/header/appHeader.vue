@@ -32,9 +32,10 @@
         class="button-settings"
         v-if="datasetName"
         data-title="Dataset settings"
+        :to="datasetSettingsPageUrl"
       >
-        <NuxtLink
-          :to="datasetSettingsPageUrl"
+        <i
+          class="icon-wrapper"
           v-badge="{
             showBadge:
               isNoLabelInGlobalLabelModel ||
@@ -45,7 +46,7 @@
           }"
         >
           <svgicon name="settings" width="22" height="22" color="white" />
-        </NuxtLink>
+        </i>
       </BaseButton>
       <user />
     </base-topbar-brand>
