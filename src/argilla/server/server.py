@@ -32,7 +32,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from pydantic import ConfigError
-from sqlalchemy.orm import Session
 
 from argilla import __version__ as argilla_version
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
@@ -49,7 +48,7 @@ from argilla.server.errors import (
     EntityNotFoundError,
     UnauthorizedError,
 )
-from argilla.server.models import User, UserRole, Workspace
+from argilla.server.models import User
 from argilla.server.routes import api_router
 from argilla.server.security import auth
 from argilla.server.settings import settings
@@ -207,22 +206,6 @@ def configure_telemetry(app: FastAPI):
 def configure_database(app: FastAPI):
     get_db_wrapper = contextlib.contextmanager(get_db)
 
-    def _create_default_user(db: Session):
-        user = User(
-            first_name="",
-            username=DEFAULT_USERNAME,
-            role=UserRole.admin,
-            api_key=DEFAULT_API_KEY,
-            password_hash=accounts.CRYPT_CONTEXT.hash(DEFAULT_PASSWORD),
-            workspaces=[Workspace(name=DEFAULT_USERNAME)],
-        )
-
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-
-        return user
-
     def _user_has_default_credentials(user: User):
         return user.api_key == DEFAULT_API_KEY or accounts.CRYPT_CONTEXT.verify(DEFAULT_PASSWORD, user.password_hash)
 
@@ -234,15 +217,11 @@ def configure_database(app: FastAPI):
         )
 
     @app.on_event("startup")
-    async def create_default_user_if_not_present():
+    async def log_default_user_warning_if_present():
         with get_db_wrapper() as db:
-            if db.query(User).count() == 0:
-                _create_default_user(db)
+            default_user = accounts.get_user_by_username(db, DEFAULT_USERNAME)
+            if default_user and _user_has_default_credentials(default_user):
                 _log_default_user_warning()
-            else:
-                default_user = accounts.get_user_by_username(db, DEFAULT_USERNAME)
-                if default_user and _user_has_default_credentials(default_user):
-                    _log_default_user_warning()
 
 
 argilla_app = FastAPI(
