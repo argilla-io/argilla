@@ -28,7 +28,7 @@
         />
         <base-button
           v-if="isCollapsable"
-          class="entities__container__button secondary light small"
+          class="entities__container__button secondary text"
           @click="toggleEntitiesNumber"
           >{{ buttonText }}</base-button
         >
@@ -109,12 +109,6 @@ export default {
     }
     &__button {
       display: inline-block;
-      &.button {
-        background: $black-4;
-        &:hover {
-          background: $black-10;
-        }
-      }
     }
   }
 }

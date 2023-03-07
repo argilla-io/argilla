@@ -42,7 +42,7 @@
       <template v-if="!allowToShowAllLabels">
         <base-button
           v-if="visibleLabels.length < filteredLabels.length"
-          class="feedback-interactions__more secondary light"
+          class="feedback-interactions__more secondary text"
           @click="expandLabels()"
           >+{{ filteredLabels.length - visibleLabels.length }}</base-button
         >
@@ -50,7 +50,7 @@
           v-else-if="
             visibleLabels.length > maxVisibleLabels && !allowToShowAllLabels
           "
-          class="feedback-interactions__more secondary light"
+          class="feedback-interactions__more secondary text"
           @click="collapseLabels()"
           >Show less</base-button
         >
