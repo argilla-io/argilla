@@ -117,7 +117,11 @@ class User(BaseModel):
 
         """
         if not workspace:
-            raise BadRequestError("Missing workspace. A workspace must by provided")
+            # TODO(frascuchon): We still need to return the username since
+            #  current clients do not send the workspace when match with the username.
+            #  Once the db migration is set, the workspace will be required for current endpoints.
+            # raise BadRequestError("Missing workspace. A workspace must by provided")
+            return self.username
         elif workspace not in self.workspaces:
             raise EntityNotFoundError(name=workspace, type="Workspace")
         return workspace
