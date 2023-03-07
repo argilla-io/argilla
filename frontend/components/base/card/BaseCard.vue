@@ -5,13 +5,13 @@
       <h4 v-if="subtitle" class="--body2 --semibold card__subtitle">
         {{ subtitle }}
       </h4>
-      <p v-if="text" class="--body2 card__text">
+      <p v-if="text" class="--body1 card__text">
         {{ text }}
       </p>
     </div>
     <div class="card__buttons" v-if="buttonText">
       <base-button
-        class="card__button outline"
+        class="card__button outline small"
         :class="[cardClasses]"
         @click="action"
         >{{ buttonText }}</base-button
@@ -76,6 +76,7 @@ export default {
   }
   &__text {
     margin-bottom: 0;
+    color: $black-37;
   }
 }
 </style>

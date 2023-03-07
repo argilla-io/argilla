@@ -45,7 +45,6 @@ export default {
 
 .message {
   @include font-size(14px);
-  font-weight: 500;
   margin: 0;
   color: $black-54;
   word-break: break-word;
