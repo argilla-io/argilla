@@ -165,6 +165,7 @@ $annotation-button-size: 20px;
         display: inline-block;
         white-space: nowrap;
         vertical-align: top;
+        margin: auto;
       }
       &__info {
         margin-right: 0;
