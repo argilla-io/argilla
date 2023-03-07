@@ -152,8 +152,7 @@ class Argilla:
         )
 
         self._user: User = users_api.whoami(client=self._client)
-        if workspace is not None:
-            self.set_workspace(workspace)
+        self.set_workspace(workspace or self.user.username)
 
         self._agent = _ArgillaLogAgent(self)
 
@@ -216,12 +215,11 @@ class Argilla:
             )
 
         if workspace != self.get_workspace():
-            if workspace == self._user.username:
-                self._client.headers.pop(WORKSPACE_HEADER_NAME, workspace)
-            elif self._user.workspaces is not None and workspace not in self._user.workspaces:
+            if workspace == self.user.username or workspace in self.user.workspaces:
+                self._client.headers[WORKSPACE_HEADER_NAME] = workspace
+                self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
+            else:
                 raise Exception(f"Wrong provided workspace {workspace}")
-            self._client.headers[WORKSPACE_HEADER_NAME] = workspace
-            self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
 
     def get_workspace(self) -> str:
         """Returns the name of the active workspace.
@@ -229,7 +227,7 @@ class Argilla:
         Returns:
             The name of the active workspace as a string.
         """
-        return self._client.headers.get(WORKSPACE_HEADER_NAME, self._user.username)
+        return self._client.headers.get(WORKSPACE_HEADER_NAME)
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
