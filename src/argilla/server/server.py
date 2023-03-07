@@ -46,6 +46,7 @@ from argilla.server.database import get_db
 from argilla.server.errors import (
     APIErrorHandler,
     EntityNotFoundError,
+    ForbiddenOperationError,
     UnauthorizedError,
 )
 from argilla.server.models import User, UserRole, Workspace
@@ -76,6 +77,7 @@ def configure_api_exceptions(api: FastAPI):
     api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
     api.exception_handler(UnauthorizedError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ForbiddenOperationError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
 
 
@@ -232,7 +234,8 @@ def configure_database(app: FastAPI):
             f"We recommend that you create a new admin user and then delete the default {DEFAULT_USERNAME!r} one."
         )
 
-    @app.on_event("startup")
+    # This was breaking tests adding the default user
+    # @app.on_event("startup")
     async def create_default_user_if_not_present():
         with get_db_wrapper() as db:
             if db.query(User).count() == 0:

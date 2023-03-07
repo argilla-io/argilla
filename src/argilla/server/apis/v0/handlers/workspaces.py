@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
 from argilla.server.errors import EntityNotFoundError
+from argilla.server.policies import WorkspacePolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import (
     User,
@@ -35,6 +36,8 @@ router = APIRouter(tags=["workspaces"])
 
 @router.get("/workspaces", response_model=List[Workspace], response_model_exclude_none=True)
 def list_workspaces(*, db: Session = Depends(get_db), current_user: User = Security(auth.get_user, scopes=[])):
+    authorize(current_user, WorkspacePolicy.list)
+
     workspaces = accounts.list_workspaces(db)
 
     return parse_obj_as(List[Workspace], workspaces)
@@ -47,6 +50,8 @@ def create_workspace(
     workspace_create: WorkspaceCreate,
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
+    authorize(current_user, WorkspacePolicy.create)
+
     workspace = accounts.create_workspace(db, workspace_create)
 
     return Workspace.from_orm(workspace)
@@ -62,6 +67,8 @@ def delete_workspace(
     workspace = accounts.get_workspace_by_id(db, workspace_id)
     if not workspace:
         raise EntityNotFoundError(name=str(workspace_id), type=Workspace)
+
+    authorize(current_user, WorkspacePolicy.delete, workspace)
 
     accounts.delete_workspace(db, workspace)
 

@@ -14,7 +14,7 @@
 
 import factory
 from argilla.server.database import SessionLocal
-from argilla.server.models import User, Workspace, WorkspaceUser
+from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 
 
 class WorkspaceUserFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -43,3 +43,11 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     username = factory.Sequence(lambda n: f"username-{n}")
     api_key = factory.Sequence(lambda n: f"api-key-{n}")
     password_hash = "$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw."
+
+
+class AdminFactory(UserFactory):
+    role = UserRole.admin
+
+
+class AnnotatorFactory(UserFactory):
+    role = UserRole.annotator

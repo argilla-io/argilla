@@ -15,11 +15,17 @@
 from uuid import UUID, uuid4
 
 import pytest
+from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import User, Workspace, WorkspaceUser
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import (
+    AnnotatorFactory,
+    UserFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 
 def test_list_workspaces(client: TestClient, admin_auth_header: dict):
@@ -55,6 +61,17 @@ def test_create_workspace_without_authentication(client: TestClient, db: Session
     response = client.post("/api/workspaces", json={"name": "workspace"})
 
     assert response.status_code == 401
+    assert db.query(Workspace).count() == 0
+
+
+def test_create_workspace_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+
+    response = client.post(
+        "/api/workspaces", headers={API_KEY_HEADER_NAME: annotator.api_key}, json={"name": "workspaces"}
+    )
+
+    assert response.status_code == 403
     assert db.query(Workspace).count() == 0
 
 
