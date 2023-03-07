@@ -30,19 +30,18 @@ def db():
         db.commit()
 
 
-def test_create_user_passing_all_params(db):
+def test_create_user_passing_all_params(db: Session):
     username = "test-user"
     first_name = "First"
-    role = "admin"
+    role = UserRole.admin
     password = "12345678"
 
-    runner = CliRunner()
-    cli_params = f"--username {username} --password {password} --role {role} --first-name {first_name}"
-    runner.invoke(create_user, cli_params)
+    cli_params = f"--username {username} --password {password} --role {role.value} --first-name {first_name}"
+    CliRunner().invoke(create_user, cli_params)
 
-    user = accounts.get_user_by_username(db, username)
+    user = db.query(User).filter_by(username="username").first()
     assert user
-    assert user.role.value == role
+    assert user.role == UserRole.admin
     assert user.first_name == first_name
     assert accounts.authenticate_user(db, username=username, password=password) == user
 
@@ -94,8 +93,7 @@ def test_create_user_with_input_username(db):
     cli_params = f"--password {password} --first-name First"
     runner.invoke(create_user, cli_params, input=f"{username}\n")
 
-    user = accounts.get_user_by_username(db, username)
-    assert user
+    assert accounts.get_user_by_username(db, username)
 
 
 def test_create_user_with_last_name(db):
@@ -112,8 +110,8 @@ def test_create_user_with_last_name(db):
     assert user.last_name == last_name
 
 
-def test_create_user_with_wrong_username(db):
-    username = "Wrong-username "
+def test_create_user_with_invalid_username(db: Session):
+    username = "Invalid-Username"
     password = "12345678"
 
     runner = CliRunner()
@@ -129,7 +127,7 @@ def test_create_user_with_wrong_username(db):
     )
 
 
-def test_create_user_with_wrong_password(db):
+def test_create_user_with_invalid_password(db: Session):
     username = "username"
     password = "11"
 
