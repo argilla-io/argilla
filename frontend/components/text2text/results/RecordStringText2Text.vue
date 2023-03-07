@@ -26,7 +26,7 @@
       v-if="scrollHeight >= visibleRecordHeight"
       class="secondary text record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
-      >{{ !showFullRecord ? "Full record" : "Less" }}
+      >{{ !showFullRecord ? "Full record" : "Show less" }}
     </base-button>
   </div>
 </template>
@@ -87,9 +87,6 @@ export default {
     display: block;
     color: $black-54;
     width: calc(100% - 200px);
-  }
-  &__show-more {
-    margin-top: 1em;
   }
 }
 </style>
