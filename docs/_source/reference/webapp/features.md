@@ -52,16 +52,22 @@ After editing or drafting your annotation, don't forget to save your changes.
 ### Bulk annotate
 
 
-For all [tasks](../../guides/task_examples.ipynb), you can **bulk validate** the predictions of the records.
-You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page.
-Then you can either _Validate_ or _Discard_ the selected records.
+For all [tasks](../../guides/task_examples.ipynb), you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
 
-For the text classification task, you can additionally **bulk annotate** the selected records with a specific label, by simply selecting the label from the _"Annotate as ..."_ list.
+For the text classification task, you can additionally **bulk annotate** the selected records by simply clicking on the pencil icon next to the global selection box and selecting the label(s) from the list.
+
+In multi-label text classification, you can remove labels from selected records by clicking the cross next to the label. You can also assign a partially used label to the whole selection by clicking on the tag button. Once you have made your selection, click *Select* to apply the annotations to all selected records. To finalize the validation, click on the "validate" icon.
+
+In single-label text classification, there is no need to validate after selecting your label.
 
 ### Validate predictions
 
 In Argilla you can pre-annotate your data by including model predictions in your records.
 Assuming that the model works reasonably well on your dataset, you can filter for records with high prediction scores, and simply _validate_ their predictions to quickly annotate records.
+
+```{note}
+If you make any changes to predictions, validated annotations or annotate from scratch, you will need to validate the records to save the changes.
+```
 
 #### Text Classification
 
@@ -71,17 +77,20 @@ You can validate the predictions shown in a slightly darker tone by pressing the
 - for a **single label** classification task, this will be the prediction with the highest percentage
 - for a **multi label** classification task, this will be the predictions with a percentage above 50%
 
+If you select a different label in the single label task, the status will change to _Validated_ automatically. In the multi-label task, if you make any changes or clear the predictions/annotations, the status will change to _Pending_. You can then click _Validate_ to save the changes or _Reset_ to revert them and restore the previous status.
+
 #### Token Classification
 
 For this task, predictions are shown as underlines.
 You can also validate the predictions (or the absence of them) by pressing the _Validate_ button.
 
-Once the record is saved or validated, its status will change to _Validated_.
+If you make any changes or clear the predictions/annotations, the status will change to _Pending_. You can then click _Validate_ to save the changes or _Reset_ to revert them and restore the previous status.
 
 #### Text2Text
 
-You can validate or edit a prediction, by first clicking on the _view predictions_ button, and then the _Edit_ or _Validate_ button.
-After editing or drafting your annotation, don't forget to save your changes.
+The prediction and its score will appear in a text box below the main text. You can validate the prediction by clicking on the *Validate* button or edit the text making the changes directly in the text box.
+
+If you make any changes, the status will change to *Pending* and you will need to press shift+Enter or click the *Validate* button to save the changes. You can also click the *Clear* button to start writing from scratch or *Reset* to undo your changes and restore the previous status.
 
 ### Search and filter
 
