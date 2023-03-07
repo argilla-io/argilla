@@ -11,28 +11,42 @@ Vue.directive("badge", {
   bind: (element, binding) => {
     const { showBadge } = binding.value;
     if (showBadge) {
-      const { verticalPosition, horizontalPosition, backgroundColor } =
-        binding.value;
+      const {
+        verticalPosition,
+        horizontalPosition,
+        backgroundColor,
+        borderColor,
+        size,
+      } = binding.value;
+
       element.style.position = "relative";
       const badge = document.createElement("div");
       badge.setAttribute("id", `${element.id}Badge`);
       badge.style.position = "absolute";
       badge.style.backgroundColor = backgroundColor || "#ff675f";
-      badge.style.width = "10px";
-      badge.style.height = "10px";
+      badge.style.width = size || "14px";
+      badge.style.height = size || "14px";
       badge.style.borderRadius = "5em";
+      badge.style.border = `2px ${borderColor ?? "transparent"} solid`;
 
-      if (verticalPosition === "top") {
-        badge.style.top = "-7px";
-      } else if (verticalPosition === "bottom") {
-        badge.style.bottom = "-7px";
+      switch (verticalPosition) {
+        case "top":
+          badge.style.top = "-3px";
+          break;
+        case "bottom":
+          badge.style.bottom = "-3px";
+          break;
       }
 
-      if (horizontalPosition === "right") {
-        badge.style.right = "-7px";
-      } else if (horizontalPosition === "left") {
-        badge.style.left = "-7px";
+      switch (horizontalPosition) {
+        case "right":
+          badge.style.right = "-3px";
+          break;
+        case "left":
+          badge.style.left = "-3px";
+          break;
       }
+
       element.appendChild(badge);
     }
   },

@@ -51,6 +51,7 @@
             showBadge: isAnyPendingStatusRecord,
             verticalPosition: 'top',
             horizontalPosition: 'right',
+            size: '10px',
           }"
         >
           <svgicon name="validate" />
