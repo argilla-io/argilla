@@ -285,7 +285,7 @@ class Datasets(AbstractApi):
         try:
             with api_compatibility(self, min_version="1.4"):
                 self.http_client.patch(
-                    f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
+                    f"{self._API_PREFIX}/{dataset.name}/{dataset.task}/settings",
                     json=settings_.dict(),
                 )
         except ApiCompatibilityError:
@@ -307,8 +307,8 @@ class Datasets(AbstractApi):
         """
         dataset = self.find_by_name(name)
         try:
-            with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-                response = self.http_client.get(f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings")
+            with api_compatibility(self, min_version="1.0"):
+                response = self.http_client.get(f"{self._API_PREFIX}/{dataset.name}/{dataset.task}/settings")
                 return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)
         except NotFoundApiError:
             return None
