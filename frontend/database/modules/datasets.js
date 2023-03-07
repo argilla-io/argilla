@@ -628,7 +628,14 @@ const actions = {
             });
           });
         } catch (err) {
-          throw new Error("Error on adding new labels");
+          const { response } = err;
+          if (response === TYPE_OF_FEEDBACK.NOT_ALLOWED_TO_UPDATE_LABELS) {
+            console.log(
+              "The user is not allowed to update dataset settings labels"
+            );
+          } else {
+            throw new Error("Error on adding new labels");
+          }
         }
       } else {
         Notification.dispatch("notify", {
@@ -645,6 +652,7 @@ const actions = {
   async onSaveDatasetSettings(context, { datasetName, datasetTask, labels }) {
     let message = "";
     let typeOfNotification = "";
+    let statusCall = null;
     try {
       const data = { label_schema: { labels } };
       await ObservationDataset.api().put(
@@ -658,12 +666,16 @@ const actions = {
       const { status } = err.response;
       message = `STATUS:${status} The labels of the dataset ${datasetName} with task ${datasetTask} could not be saved`;
       typeOfNotification = "error";
-      console.error(message);
+      statusCall = status;
+      if (status === 403) {
+        throw { response: TYPE_OF_FEEDBACK.NOT_ALLOWED_TO_UPDATE_LABELS };
+      }
     } finally {
-      Notification.dispatch("notify", {
-        message,
-        type: typeOfNotification,
-      });
+      statusCall === 403 ||
+        Notification.dispatch("notify", {
+          message,
+          type: typeOfNotification,
+        });
     }
   },
   async deleteDataset(_, { workspace, name }) {
@@ -917,7 +929,6 @@ const fetchLabelsFromSettings = async ({ name, task }) => {
         labelsResponse = label_schema?.labels || [];
       },
     });
-
     if (labelsResponse.length === 0) {
       throw { response: TYPE_OF_FEEDBACK.LABEL_SCHEMA_IS_EMPTY };
     }
@@ -1035,6 +1046,7 @@ const validateStatusForSettings = (status) => {
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   LABEL_SCHEMA_IS_EMPTY: "LABEL_SCHEMA_IS_EMPTY",
+  NOT_ALLOWED_TO_UPDATE_LABELS: "NOT_ALLOWED_TO_UPDATE_LABELS",
 });
 
 export default {
