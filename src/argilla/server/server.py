@@ -30,6 +30,7 @@ from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import ConfigError
 from sqlalchemy.orm import Session
 
@@ -254,7 +255,18 @@ argilla_app = FastAPI(
     version=str(argilla_version),
 )
 
-app = FastAPI()
+
+@argilla_app.get("/docs", include_in_schema=False)
+async def redirect_docs():
+    return RedirectResponse(url=f"{settings.base_url}api/docs")
+
+
+@argilla_app.get("/api", include_in_schema=False)
+async def redirect_api():
+    return RedirectResponse(url=f"{settings.base_url}api/docs")
+
+
+app = FastAPI(docs_url=None)
 app.mount(settings.base_url, argilla_app)
 
 configure_app_logging(app)

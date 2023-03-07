@@ -111,6 +111,12 @@ def telemetry_track_data(mocker):
         return spy
 
 
+@pytest.fixture(scope="session")
+def test_client():
+    with TestClient(app) as client:
+        yield client
+
+
 @pytest.fixture
 def api():
     return Argilla()
