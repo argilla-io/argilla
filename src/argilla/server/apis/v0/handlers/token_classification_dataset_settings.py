@@ -70,7 +70,8 @@ def configure_router(router: APIRouter):
     @deprecate_endpoint(
         path=base_endpoint,
         new_path=new_base_endpoint,
-        router_method=router.put,
+        router_method=router.patch,
+        old_router_method=router.put,
         name=f"save_dataset_settings_for_{task}",
         operation_id=f"save_dataset_settings_for_{task}",
         description=f"Save the {task} dataset settings",
