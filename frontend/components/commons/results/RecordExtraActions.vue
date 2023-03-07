@@ -87,6 +87,9 @@ export default {
       },
     },
   },
+  beforeDestroy() {
+    this.close();
+  },
   methods: {
     // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
