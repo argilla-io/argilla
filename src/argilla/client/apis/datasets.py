@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 from argilla.client.apis import AbstractApi, api_compatibility
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
+    ApiCompatibilityError,
     ForbiddenApiError,
     NotFoundApiError,
 )
@@ -100,8 +101,6 @@ class Datasets(AbstractApi):
 
     _API_PREFIX = "/api/datasets"
 
-    __SETTINGS_MIN_API_VERSION__ = "0.15"
-
     class _DatasetApiModel(BaseModel):
         name: str
         task: TaskType
@@ -127,10 +126,10 @@ class Datasets(AbstractApi):
             else TaskType.token_classification
         )
 
-        with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
+        with api_compatibility(self, min_version="0.15"):
             dataset = self._DatasetApiModel(name=name, task=task)
             self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
-            self.__save_settings__(dataset, settings=settings)
+            self._save_settings(dataset, settings=settings)
 
     def configure(self, name: str, settings: Settings):
         """
@@ -145,7 +144,7 @@ class Datasets(AbstractApi):
             self.create(name=name, settings=settings)
         except AlreadyExistsApiError:
             ds = self.find_by_name(name)
-            self.__save_settings__(dataset=ds, settings=settings)
+            self._save_settings(dataset=ds, settings=settings)
 
     def scan(
         self,
@@ -275,7 +274,7 @@ class Datasets(AbstractApi):
                 else:
                     raise faer
 
-    def __save_settings__(self, dataset: _DatasetApiModel, settings: Settings):
+    def _save_settings(self, dataset: _DatasetApiModel, settings: Settings):
         if __TASK_TO_SETTINGS__.get(dataset.task) != type(settings):
             raise ValueError(
                 f"The provided settings type {type(settings)} cannot be applied to dataset." " Task type mismatch"
@@ -283,11 +282,18 @@ class Datasets(AbstractApi):
 
         settings_ = self._SettingsApiModel(label_schema={"labels": [label for label in settings.label_schema]})
 
-        with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-            self.http_client.put(
-                f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
-                json=settings_.dict(),
-            )
+        try:
+            with api_compatibility(self, min_version="1.4"):
+                self.http_client.patch(
+                    f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
+                    json=settings_.dict(),
+                )
+        except ApiCompatibilityError:
+            with api_compatibility(self, min_version="0.15"):
+                self.http_client.put(
+                    f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
+                    json=settings_.dict(),
+                )
 
     def load_settings(self, name: str) -> Optional[Settings]:
         """
