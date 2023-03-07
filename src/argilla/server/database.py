@@ -14,6 +14,7 @@
 
 from sqlite3 import Connection as SQLite3Connection
 
+import alembic.config
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
@@ -39,6 +40,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def migrate_db():
+    alembic.config.main(argv=["upgrade", "head"])
 
 
 class Base(DeclarativeBase):

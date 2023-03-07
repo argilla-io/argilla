@@ -21,8 +21,17 @@
 </a>
 </p>
 
-<h2 align="center">Open-source framework for data-centric NLP</h2>
+<h2 align="center">Open-source platform for data-centric NLP</h2>
 <p align="center">Data Labeling for MLOps & Feedback Loops</p>
+
+
+
+
+https://user-images.githubusercontent.com/1107111/223220683-fbfa63da-367c-4cfa-bda5-66f47413b6b0.mp4
+
+<br />
+
+> 🆕 🔥 Train custom transformers models with no-code: [Argilla + AutoTrain](https://www.argilla.io/blog/argilla-meets-autotrain)
 
 > 🆕 🔥 Deploy [Argilla on Spaces](https://huggingface.co/new-space?template=argilla/argilla-template-space)
 

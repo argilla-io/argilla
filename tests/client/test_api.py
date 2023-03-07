@@ -250,6 +250,23 @@ def test_log_passing_empty_records_list(mocked_client):
         api.log(records=[], name="ds")
 
 
+def test_log_deprecated_chunk_size(mocked_client):
+    dataset_name = "test_log_deprecated_chunk_size"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    record = rg.TextClassificationRecord(text="My text")
+    with pytest.warns(FutureWarning, match="`chunk_size`.*`batch_size`"):
+        api.log(records=[record], name=dataset_name, chunk_size=100)
+
+
+def test_large_batch_size_warning(mocked_client, caplog: pytest.LogCaptureFixture):
+    dataset_name = "test_large_batch_size_warning"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    record = rg.TextClassificationRecord(text="My text")
+    api.log(records=[record], name=dataset_name, batch_size=10000)
+    assert len(caplog.record_tuples) == 1
+    assert "batch size is noticeably large" in caplog.record_tuples[0][2]
+
+
 def test_log_background(mocked_client):
     """Verify that logs can be delayed via the background parameter."""
     dataset_name = "test_log_background"
@@ -375,6 +392,28 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
     for record, expected in zip(dataset, records):
         record.metrics = expected.metrics
         assert record == expected
+
+
+@pytest.mark.parametrize(
+    "records, dataset_class",
+    [
+        ("singlelabel_textclassification_records", rg.DatasetForTextClassification),
+    ],
+)
+def test_log_load_with_workspace(mocked_client, monkeypatch, request, records, dataset_class):
+    dataset_names = [
+        f"test_general_log_load_{dataset_class.__name__.lower()}_" + input_type
+        for input_type in ["single", "list", "dataset"]
+    ]
+    for name in dataset_names:
+        mocked_client.delete(f"/api/datasets/{name}")
+
+    records = request.getfixturevalue(records)
+
+    api.log(records, name=dataset_names[0], workspace="argilla")
+    ds = api.load(dataset_names[0], workspace="argilla")
+    api.delete_records(dataset_names[0], ids=[rec.id for rec in ds][:1], workspace="argilla")
+    api.delete(dataset_names[0], workspace="argilla")
 
 
 def test_passing_wrong_iterable_data(mocked_client):

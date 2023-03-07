@@ -20,6 +20,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationRecord,
 )
 from argilla.server.commons.models import TaskStatus, TaskType
+from starlette.testclient import TestClient
 
 
 def create_some_data_for_text_classification(
@@ -109,3 +110,13 @@ def uri_2_path(uri: str):
 
     p = urlparse(uri)
     return os.path.abspath(os.path.join(p.netloc, p.path))
+
+
+def test_docs_redirect(test_client: TestClient):
+    response = test_client.get("/docs", follow_redirects=False)
+    assert response.status_code == 307
+    assert response.next_request.url.path == "/api/docs"
+
+    response = test_client.get("/api", follow_redirects=False)
+    assert response.status_code == 307
+    assert response.next_request.url.path == "/api/docs"
