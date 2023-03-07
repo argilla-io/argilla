@@ -33,15 +33,15 @@ def _show_created_user(user: User):
     return message
 
 
-@click.command()
+@click.command("create-user")
 @click.option("--first-name", prompt=True)
-@click.option("--last-name")
 @click.option("--username", prompt=True)
 @click.option(
     "--role", prompt=True, type=click.Choice(UserRole.__members__, case_sensitive=False), default=UserRole.annotator
 )
 @click.option("--password", prompt=True, hide_input=True, confirmation_prompt=True)
-def create_user(username: str, password: str, role: Optional[UserRole], first_name: str, last_name: Optional[str]):
+@click.option("--last-name")
+def create_user(first_name: str, username: str, role: UserRole, password: str, last_name: Optional[str]):
     with SessionLocal() as session:
         user_create = UserCreate(
             username=username, password=password, role=role, first_name=first_name, last_name=last_name
