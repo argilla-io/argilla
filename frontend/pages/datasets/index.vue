@@ -118,7 +118,7 @@ export default {
         name: "go-to-settings",
         icon: "settings",
         title: "Go to dataset settings",
-        tooltip: "Copied",
+        tooltip: "Dataset settings",
       },
       {
         name: "copy",
