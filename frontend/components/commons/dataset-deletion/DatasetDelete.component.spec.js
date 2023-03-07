@@ -5,12 +5,21 @@ const $route = {
     workspace: "argilla",
   },
 };
+
+jest.mock("@/models/dataset.utilities", () => ({
+  getDatasetFromORM: () => ({
+    $id: "settings_textclass_no_labels",
+    id: "settings_textclass_no_labels",
+    name: "settings_textclass_no_labels",
+  }),
+}));
 let wrapper = null;
 const options = {
   stubs: ["base-button", "base-card", "base-modal"],
   propsData: {
-    datasetName: "datasete_1",
+    datasetId: ["recognai", "settings_textclass_no_labels"],
     datasetTask: "TextClassification",
+    showDeleteModal: false,
   },
   mocks: {
     $route,
@@ -33,12 +42,8 @@ describe("DatasetDeleteComponent", () => {
     expect(wrapper.find(".modal-wrapper").exists()).toBe(false);
   });
 
-  it.skip("render base-modal when showDeleteModal is true", async () => {
-    //FIXME - expect true but received false
-    await wrapper.setProps({
-      showDeleteModal: true,
-    });
-
+  it("render base-modal when showDeleteModal is true", async () => {
+    await wrapper.setProps({ showDeleteModal: true });
     expect(wrapper.find(".delete-modal").exists()).toBe(true);
   });
 });
