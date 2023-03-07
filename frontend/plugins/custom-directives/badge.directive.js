@@ -6,6 +6,7 @@ import Vue from "vue";
 //    => showBadge (Boolean) to show or not the badge : true or false
 //    => verticalPosition (String) vertical position : 'top' or 'bottom'
 //    => horizontalPosition (String) horizontal position : 'right' or 'left'
+//    => size (String) height and size of the badge: '10px
 
 Vue.directive("badge", {
   bind: (element, binding) => {
