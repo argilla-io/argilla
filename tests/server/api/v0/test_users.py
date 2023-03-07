@@ -14,12 +14,12 @@
 
 from uuid import uuid4
 
-import pytest
+from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import User, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from tests.factories import UserFactory
+from tests.factories import AnnotatorFactory, UserFactory
 
 
 def test_me(client: TestClient, admin: User, admin_auth_header: dict):
@@ -53,6 +53,14 @@ def test_list_users_without_authentication(client: TestClient):
     response = client.get("/api/users")
 
     assert response.status_code == 401
+
+
+def test_list_users_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+
+    response = client.get("/api/users", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
 
 
 def test_create_user(client: TestClient, db: Session, admin_auth_header: dict):
@@ -95,6 +103,16 @@ def test_create_user_without_authentication(client: TestClient, db: Session):
 
     assert response.status_code == 401
     assert db.query(User).count() == 0
+
+
+def test_create_user_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    user = {"first_name": "first-name", "username": "username", "password": "12345678"}
+
+    response = client.post("/api/users", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=user)
+
+    assert response.status_code == 403
+    assert db.query(User).count() == 1
 
 
 def test_create_user_with_invalid_min_length_first_name(client: TestClient, db: Session, admin_auth_header: dict):
@@ -170,6 +188,16 @@ def test_delete_user_without_authentication(client: TestClient, db: Session):
 
     assert response.status_code == 401
     assert db.query(User).count() == 1
+
+
+def test_delete_user_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    user = UserFactory.create()
+
+    response = client.delete(f"/api/users/{user.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
+    assert db.query(User).count() == 2
 
 
 def test_delete_user_with_nonexistent_user_id(client: TestClient, db: Session, admin_auth_header: dict):

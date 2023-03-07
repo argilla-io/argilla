@@ -24,6 +24,7 @@ from argilla.server.commons import telemetry
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
 from argilla.server.errors import EntityNotFoundError
+from argilla.server.policies import UserPolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import User, UserCreate
 
@@ -49,11 +50,14 @@ async def whoami(request: Request, current_user: User = Security(auth.get_user, 
     """
 
     await telemetry.track_login(request, username=current_user.username)
+
     return current_user
 
 
 @router.get("/users", response_model=List[User], response_model_exclude_none=True)
 def list_users(*, db: Session = Depends(get_db), current_user: User = Security(auth.get_user, scopes=[])):
+    authorize(current_user, UserPolicy.list)
+
     users = accounts.list_users(db)
 
     return parse_obj_as(List[User], users)
@@ -63,6 +67,8 @@ def list_users(*, db: Session = Depends(get_db), current_user: User = Security(a
 def create_user(
     *, db: Session = Depends(get_db), user_create: UserCreate, current_user: User = Security(auth.get_user, scopes=[])
 ):
+    authorize(current_user, UserPolicy.create)
+
     user = accounts.create_user(db, user_create)
 
     return User.from_orm(user)
@@ -79,6 +85,8 @@ def delete_user(
         # Possible solution redefining JSONEncoder.default here:
         # https://github.com/jazzband/django-push-notifications/issues/586
         raise EntityNotFoundError(name=str(user_id), type=User)
+
+    authorize(current_user, UserPolicy.delete, user)
 
     accounts.delete_user(db, user)
 

@@ -234,8 +234,7 @@ def configure_database(app: FastAPI):
             f"We recommend that you create a new admin user and then delete the default {DEFAULT_USERNAME!r} one."
         )
 
-    # This was breaking tests adding the default user
-    # @app.on_event("startup")
+    @app.on_event("startup")
     async def create_default_user_if_not_present():
         with get_db_wrapper() as db:
             if db.query(User).count() == 0:
