@@ -26,6 +26,7 @@
         :isMultiLabel="isMultiLabel"
         :paginationSize="paginationSize"
         :record="record"
+        @update-labels="updateLabels"
         @validate="validateLabels"
         @reset="resetLabels"
       />
@@ -35,14 +36,14 @@
         :paginationSize="paginationSize"
         :record="record"
       />
-      <div v-if="interactionsEnabled" class="content__actions-buttons">
-        <base-button
-          v-if="allowValidate"
-          class="primary"
-          @click="onValidate(record)"
-          >Validate</base-button
-        >
-      </div>
+      <record-action-buttons
+        v-if="interactionsEnabled"
+        :actions="textClassifierActionButtons"
+        @validate="toggleValidateRecord()"
+        @clear="onClearAnnotations()"
+        @discard="toggleDiscardRecord()"
+        @reset="onReset()"
+      />
     </div>
 
     <div v-if="!annotationEnabled" class="record__labels">
@@ -95,7 +96,6 @@ export default {
   },
   computed: {
     interactionsEnabled() {
-      // console.log(this.getTextClassificationDataset());
       return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
@@ -107,66 +107,153 @@ export default {
     allowValidate() {
       return (
         this.record.status !== "Validated" &&
-        (this.record.annotation || this.record.prediction || this.isMultiLabel)
+        (this.record.currentAnnotation ||
+          this.record.prediction ||
+          this.isMultiLabel)
       );
     },
     paginationSize() {
       return this.viewSettings?.pagination?.size;
     },
+    textClassifierActionButtons() {
+      return [
+        {
+          id: "validate",
+          name: "Validate",
+          allow: this.isMultiLabel,
+          active: !this.allowValidate,
+        },
+        {
+          id: "discard",
+          name: "Discard",
+          allow: true,
+          active: this.record.status === "Discarded",
+        },
+        {
+          id: "clear",
+          name: "Clear",
+          allow: this.isMultiLabel,
+          disable: !this.record.currentAnnotation?.labels?.length || false,
+        },
+        {
+          id: "reset",
+          name: "Reset",
+          allow: this.isMultiLabel,
+          disable: this.record.status !== "Edited",
+        },
+      ];
+    },
   },
   methods: {
     ...mapActions({
+      updateRecords: "entities/datasets/updateDatasetRecords",
       validateAnnotations: "entities/datasets/validateAnnotations",
       resetAnnotations: "entities/datasets/resetAnnotations",
+      changeStatusToDefault: "entities/datasets/changeStatusToDefault",
+      resetRecords: "entities/datasets/resetRecords",
     }),
     async resetLabels() {
       await this.resetAnnotations({
         dataset: this.getTextClassificationDataset(),
-        records: [this.record],
+        records: [
+          {
+            ...this.record,
+            currentAnnotation: null,
+          },
+        ],
       });
     },
-
-    async validateLabels({ labels }) {
-      const annotation = {
-        labels: labels.map((label) => ({
-          class: label,
-          score: 1.0,
-        })),
-      };
-
+    async updateLabels(labels = []) {
+      await this.updateRecords({
+        dataset: this.getTextClassificationDataset(),
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            currentAnnotation: {
+              agent: this.$auth.user.username,
+              labels: this.formatLabels(labels),
+            },
+          },
+        ],
+      });
+    },
+    async toggleValidateRecord(labels) {
+      if (this.record.status === "Validated") {
+        await this.onChangeStatusToDefault();
+      } else {
+        await this.validateLabels(labels);
+      }
+    },
+    async toggleDiscardRecord() {
+      if (this.record.status === "Discarded") {
+        await this.onChangeStatusToDefault();
+      } else {
+        this.onDiscard();
+      }
+    },
+    async validateLabels(labels) {
+      const selectedAnnotation = {};
+      selectedAnnotation.labels =
+        this.formatLabels(labels) ||
+        this.record.currentAnnotation?.labels ||
+        this.formatLabels(this.record.predicted_as);
       await this.validateAnnotations({
         dataset: this.getTextClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
             ...this.record,
-            annotation,
-          },
-        ],
-      });
-    },
-    async onValidate(record) {
-      let modelPrediction = {};
-      modelPrediction.labels = record.predicted_as.map((pred) => ({
-        class: pred,
-        score: 1,
-      }));
-      // TODO: do not validate records without labels
-      await this.validateAnnotations({
-        dataset: this.getTextClassificationDataset(),
-        agent: this.$auth.user.username,
-        records: [
-          {
-            ...record,
+            currentAnnotation: null,
             annotation: {
-              ...(record.annotation || modelPrediction),
+              ...selectedAnnotation,
             },
           },
         ],
       });
     },
+    async onChangeStatusToDefault() {
+      const currentRecordAndDataset = {
+        dataset: this.getTextClassificationDataset(),
+        records: [this.record],
+      };
+      await this.changeStatusToDefault(currentRecordAndDataset);
+    },
+    onClearAnnotations() {
+      this.updateRecords({
+        dataset: this.getTextClassificationDataset(),
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            currentAnnotation: {
+              labels: [],
+            },
+          },
+        ],
+      });
+    },
+    async onReset() {
+      await this.resetRecords({
+        dataset: this.getTextClassificationDataset(),
+        records: [
+          { ...this.record, currentAnnotation: this.record.annotation },
+        ],
+      });
+    },
+    onDiscard() {
+      this.$emit("discard");
+    },
     getTextClassificationDataset() {
       return getTextClassificationDatasetById(this.datasetId);
+    },
+    formatLabels(labels) {
+      return labels?.map((label) => ({
+        class: label,
+        score: 1.0,
+      }));
     },
   },
 };
@@ -177,9 +264,10 @@ export default {
   display: flex;
   &--left {
     width: 100%;
-    padding: 20px 20px 50px 50px;
-    .list__item--annotation-mode & {
+    padding: $base-space * 4 20px 20px 20px;
+    .list__item--selectable & {
       padding-right: 240px;
+      padding-left: $base-space * 7;
     }
   }
   &__labels {
@@ -192,20 +280,6 @@ export default {
     text-align: right;
     padding: 1em 1.4em 1em 1em;
     @extend %hide-scrollbar;
-  }
-}
-.content {
-  &__actions-buttons {
-    margin-right: 0;
-    margin-left: auto;
-    display: flex;
-    min-width: 20%;
-    .button {
-      margin: 1.5em auto 0 0;
-      & + .button {
-        margin-left: $base-space * 2;
-      }
-    }
   }
 }
 </style>

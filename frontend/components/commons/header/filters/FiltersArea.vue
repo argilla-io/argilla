@@ -162,7 +162,7 @@ export default {
     align-items: center;
   }
   &__content {
-    padding: $base-space * 4 0;
+    padding: $base-space * 2 0;
     position: relative;
     width: 100%;
   }

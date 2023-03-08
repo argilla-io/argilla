@@ -17,17 +17,13 @@
 
 <template>
   <div v-if="dataset && viewSettings">
-    <div
-      :class="[
-        annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
-        record.status === 'Discarded' ? 'discarded' : null,
-      ]"
-    >
+    <div :class="isSelectableRecord ? 'list__item--selectable' : 'list__item'">
       <div class="record__header">
         <template v-if="!weakLabelingEnabled">
           <template v-if="annotationEnabled">
             <div class="record__header--left" v-if="!isReferenceRecord">
               <base-checkbox
+                v-if="!isPageSizeEqualOne"
                 class="list__checkbox"
                 :value="record.selected"
                 @change="onCheckboxChanged($event, record.id)"
@@ -62,12 +58,10 @@
         </template>
         <record-extra-actions
           :key="record.id"
-          :allow-change-status="annotationEnabled && !isReferenceRecord"
           :datasetName="dataset.name"
           :recordId="record.id"
           :recordClipboardText="record.clipboardText"
-          @on-change-record-status="onChangeRecordStatus"
-          @show-record-info-modal="onShowRecordInfoModal()"
+          @show-record-info-modal="onShowRecordInfoModal"
         />
       </div>
       <RecordTextClassification
@@ -79,6 +73,7 @@
         :datasetLabels="dataset.labels"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
+        @discard="onDiscard()"
       />
       <RecordText2Text
         v-if="datasetTask === 'Text2Text'"
@@ -87,6 +82,7 @@
         :datasetName="dataset.name"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
+        @discard="onDiscard()"
       />
       <RecordTokenClassification
         v-if="datasetTask === 'TokenClassification'"
@@ -98,6 +94,7 @@
         :viewSettings="viewSettings"
         :record="record"
         :isReferenceRecord="isReferenceRecord"
+        @discard="onDiscard()"
       />
     </div>
   </div>
@@ -137,6 +134,12 @@ export default {
     viewSettings() {
       return getViewSettingsWithPaginationByDatasetName(this.dataset.name);
     },
+    isSelectableRecord() {
+      return this.annotationEnabled && !this.isPageSizeEqualOne;
+    },
+    isPageSizeEqualOne() {
+      return this.viewSettings.pagination.size === 1;
+    },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
     },
@@ -169,7 +172,6 @@ export default {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
       discard: "entities/datasets/discardAnnotations",
-      validate: "entities/datasets/validateAnnotations",
     }),
     async onCheckboxChanged(checkboxStatus, id) {
       const record = this.visibleRecords.find((r) => r.id === id);
@@ -179,23 +181,11 @@ export default {
         // TODO: update annotation status if proceed
       });
     },
-    async onChangeRecordStatus(status) {
-      switch (status) {
-        case "Validated":
-          await this.validate({
-            dataset: this.dataset,
-            records: [this.record],
-          });
-          break;
-        case "Discarded":
-          await this.discard({
-            dataset: this.dataset,
-            records: [this.record],
-          });
-          break;
-        default:
-          console.warn(`The status ${status} is unknown`);
-      }
+    async onDiscard() {
+      await this.discard({
+        dataset: this.dataset,
+        records: [this.record],
+      });
     },
     onShowRecordInfoModal() {
       this.$emit("show-record-info-modal", this.record);
@@ -221,8 +211,13 @@ export default {
     margin-top: 0.8em;
     &--left {
       display: flex;
+      gap: 20px;
       align-items: center;
       margin-right: auto;
+      margin-left: 20px;
+      .list__item--selectable & {
+        margin-left: $base-space * 2;
+      }
     }
   }
   &__extra-actions {
@@ -261,28 +256,16 @@ export default {
   }
 }
 .list {
-  &__checkbox.re-checkbox {
-    margin: auto $base-space;
-  }
   &__item {
     position: relative;
+    display: inline-block;
     background: palette(white);
     border-radius: $border-radius-m;
-    display: inline-block;
     width: 100%;
     border: 1px solid palette(grey, 600);
-    margin-bottom: $base-space-between-records;
-    &--annotation-mode {
+    margin-top: $base-space-between-records;
+    &--selectable {
       @extend .list__item !optional;
-      padding-left: $base-space;
-      &.discarded {
-        opacity: 0.5;
-        transition: 0.3s ease-in-out;
-        &:hover {
-          opacity: 1;
-          transition: 0.3s ease-in-out;
-        }
-      }
     }
   }
 }
