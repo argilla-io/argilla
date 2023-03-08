@@ -1,5 +1,6 @@
 <template>
   <BaseFeedbackErrorComponent
+    id="daboudi"
     v-if="isFeedbackError"
     :message="feedbackInput.message"
     :buttonLabels="feedbackInput.buttonLabels"
