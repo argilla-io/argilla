@@ -67,16 +67,8 @@ class UserPolicy:
 
 class DatasetPolicy:
     @classmethod
-    def get(cls, workspace: Workspace) -> PolicyAction:
-        return lambda actor: actor.role == UserRole.admin or workspace in actor.workspaces
-
-    @classmethod
-    def create(cls, workspace: Workspace) -> PolicyAction:
-        return lambda actor: actor.role == UserRole.admin or workspace in actor.workspaces
-
-    @classmethod
     def delete(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.role == UserRole.admin or actor.username == dataset.created_by
+        return lambda actor: actor.is_admin or actor.username == dataset.created_by
 
 
 def authorize(actor: User, policy_action: PolicyAction) -> None:
