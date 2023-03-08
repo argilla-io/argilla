@@ -39,6 +39,7 @@ export default {
   align-items: center;
   gap: $base-space * 2;
   padding: $base-space;
+  margin-right: auto;
   background-color: rgba(255, 103, 95, 0.2);
   border-radius: $border-radius;
 }
