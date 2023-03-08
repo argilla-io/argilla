@@ -72,10 +72,9 @@ def test_query_builder_with_query_range(backend: GenericElasticEngineBackend):
 
 
 def test_query_builder_with_nested(mocked_client, dao, backend: GenericElasticEngineBackend):
+    argilla.init()
     dataset = BaseDatasetDB(
-        name="test_query_builder_with_nested",
-        workspace=argilla.get_workspace(),
-        task=TaskType.token_classification,
+        name="test_query_builder_with_nested", workspace=argilla.get_workspace(), task=TaskType.token_classification
     )
     argilla.delete(dataset.name)
     argilla.log(
@@ -118,6 +117,8 @@ def test_query_builder_with_nested(mocked_client, dao, backend: GenericElasticEn
 
 
 def test_failing_metrics(service, mocked_client):
+    argilla.init()
+
     dataset = BaseDatasetDB(
         name="test_failing_metrics",
         workspace=argilla.get_workspace(),
