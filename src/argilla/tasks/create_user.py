@@ -54,9 +54,9 @@ def create_user(first_name: str, username: str, role: UserRole, password: str, l
         )
         user = accounts.create_user(session, user_create)
 
-        print(f"User created successfully!")
-        print(_show_created_user(user))
-        print("\nPlease, save user credentials")
+        click.echo(f"User created successfully!")
+        click.echo(_show_created_user(user))
+        click.echo("\nPlease, save user credentials")
 
 
 if __name__ == "__main__":
