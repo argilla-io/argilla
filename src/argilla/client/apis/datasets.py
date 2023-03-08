@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 from argilla.client.apis import AbstractApi, api_compatibility
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
+    ApiCompatibilityError,
     ForbiddenApiError,
     NotFoundApiError,
 )
@@ -120,29 +121,36 @@ class Datasets(AbstractApi):
         dataset = get_dataset(self.http_client, name=name).parsed
         return self._DatasetApiModel.parse_obj(dataset)
 
-    def create(self, name: str, settings: Settings):
+    def create(self, name: str, workspace: str, settings: Settings):
         task = (
             TaskType.text_classification
             if isinstance(settings, TextClassificationSettings)
             else TaskType.token_classification
         )
 
-        with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-            dataset = self._DatasetApiModel(name=name, task=task)
-            self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
-            self.__save_settings__(dataset, settings=settings)
+        try:
+            with api_compatibility(self, min_version="1.4.0"):
+                dataset = self._DatasetApiModel(name=name, task=task, workspace=workspace)
+                self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
+                self.__save_settings__(dataset, settings=settings)
+        except ApiCompatibilityError:
+            with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
+                dataset = self._DatasetApiModel(name=name, task=task)
+                self.http_client.post(f"{self._API_PREFIX}?workspace={workspace}", json=dataset.dict())
+                self.__save_settings__(dataset, settings=settings)
 
-    def configure(self, name: str, settings: Settings):
+    def configure(self, name: str, workspace: str, settings: Settings):
         """
         Configures dataset settings. If dataset does not exist, a new one will be created.
         Pass only settings that want to configure
 
         Args:
             name: The dataset name
+            workspace: The dataset workspace
             settings: The dataset settings
         """
         try:
-            self.create(name=name, settings=settings)
+            self.create(name=name, workspace=workspace, settings=settings)
         except AlreadyExistsApiError:
             ds = self.find_by_name(name)
             self.__save_settings__(dataset=ds, settings=settings)
