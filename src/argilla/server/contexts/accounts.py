@@ -23,7 +23,7 @@ from argilla.server.security.model import (
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_workspace_user_by_workspace_id_and_user_id(db: Session, workspace_id: UUID, user_id: UUID):
@@ -101,7 +101,7 @@ def create_user(db: Session, user_create: UserCreate):
         last_name=user_create.last_name,
         username=user_create.username,
         role=user_create.role,
-        password_hash=CRYPT_CONTEXT.hash(user_create.password),
+        password_hash=hash_password(user_create.password),
     )
 
     db.add(user)
@@ -121,9 +121,17 @@ def delete_user(db: Session, user: User):
 def authenticate_user(db: Session, username: str, password: str):
     user = get_user_by_username(db, username)
 
-    if user and CRYPT_CONTEXT.verify(password, user.password_hash):
+    if user and verify_password(password, user.password_hash):
         return user
     elif user:
         return
     else:
-        CRYPT_CONTEXT.dummy_verify()
+        _CRYPT_CONTEXT.dummy_verify()
+
+
+def hash_password(password: str):
+    return _CRYPT_CONTEXT.hash(password)
+
+
+def verify_password(password: str, password_hash: str):
+    return _CRYPT_CONTEXT.verify(password, password_hash)
