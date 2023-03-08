@@ -25,7 +25,7 @@
     </li>
     <base-button
       v-if="limit !== 0 && sortedObject.length > 3"
-      class="secondary light small"
+      class="secondary text"
       @click="$emit('limit', k)"
       >{{ limit === 3 ? `Show more` : `Show less` }}</base-button
     >
