@@ -73,6 +73,9 @@ export default {
       },
     },
   },
+  beforeDestroy() {
+    this.close();
+  },
   methods: {
     showRecordInfoModal() {
       this.$emit("show-record-info-modal");
