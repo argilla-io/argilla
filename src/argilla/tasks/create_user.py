@@ -46,6 +46,8 @@ def _show_created_user(user: User):
 @click.password_option("--password", prompt=True)
 @click.option("--last-name", required=False)
 def create_user(first_name: str, username: str, role: UserRole, password: str, last_name: Optional[str]):
+    """Creates a new user in the Argilla DB with provided parameters"""
+
     with SessionLocal() as session:
         user_create = UserCreate(
             username=username, password=password, role=role, first_name=first_name, last_name=last_name
