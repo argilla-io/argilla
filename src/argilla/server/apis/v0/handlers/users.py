@@ -86,7 +86,7 @@ def delete_user(
         # https://github.com/jazzband/django-push-notifications/issues/586
         raise EntityNotFoundError(name=str(user_id), type=User)
 
-    authorize(current_user, UserPolicy.delete, user)
+    authorize(current_user, UserPolicy.delete(user))
 
     accounts.delete_user(db, user)
 

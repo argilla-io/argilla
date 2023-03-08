@@ -12,58 +12,62 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Callable
+
 from argilla.server.errors import ForbiddenOperationError
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
+
+PolicyAction = Callable[[User], bool]
 
 
 class WorkspaceUserPolicy:
     @classmethod
-    def list(cls, actor: User, workspace_user: WorkspaceUser) -> bool:
+    def list(cls, actor: User) -> bool:
         return actor.role == UserRole.admin
 
     @classmethod
-    def create(cls, actor: User, workspace_user: WorkspaceUser) -> bool:
+    def create(cls, actor: User) -> bool:
         return actor.role == UserRole.admin
 
     @classmethod
-    def delete(cls, actor: User, workspace_user: WorkspaceUser) -> bool:
-        return actor.role == UserRole.admin
+    def delete(cls, workspace_user: WorkspaceUser) -> PolicyAction:
+        return lambda actor: actor.role == UserRole.admin
 
 
 class WorkspacePolicy:
     @classmethod
-    def list(cls, actor: User, workspace: Workspace) -> bool:
+    def list(cls, actor: User) -> bool:
         return True
 
     @classmethod
-    def create(cls, actor: User, workspace: Workspace) -> bool:
+    def create(cls, actor: User) -> bool:
         # TODO: Once we receive ORM User models instead of Pydantic schema for current_user we can
         # change role checks to use `actor.is_admin` or `actor.is_annotator`
         return actor.role == UserRole.admin
 
     @classmethod
-    def delete(cls, actor: User, workspace: Workspace) -> bool:
-        return actor.role == UserRole.admin
+    def delete(cls, workspace: Workspace) -> PolicyAction:
+        return lambda actor: actor.role == UserRole.admin
 
 
 class UserPolicy:
     @classmethod
-    def list(cls, actor: User, user: User) -> bool:
+    def list(cls, actor: User) -> bool:
         return actor.role == UserRole.admin
 
     @classmethod
-    def create(cls, actor: User, user: User) -> bool:
+    def create(cls, actor: User) -> bool:
         return actor.role == UserRole.admin
 
     @classmethod
-    def delete(cls, actor: User, user: User) -> bool:
-        return actor.role == UserRole.admin
+    def delete(cls, user: User) -> PolicyAction:
+        return lambda actor: actor.role == UserRole.admin
 
 
-def authorize(actor: User, policy_action, resource=None):
-    if not is_authorized(actor, policy_action, resource):
+def authorize(actor: User, policy_action: PolicyAction) -> None:
+    if not is_authorized(actor, policy_action):
         raise ForbiddenOperationError()
 
 
-def is_authorized(actor: User, policy_action, resource=None) -> bool:
-    return policy_action(actor, resource)
+def is_authorized(actor: User, policy_action: PolicyAction) -> bool:
+    return policy_action(actor)

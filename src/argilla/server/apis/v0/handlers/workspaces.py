@@ -68,7 +68,7 @@ def delete_workspace(
     if not workspace:
         raise EntityNotFoundError(name=str(workspace_id), type=Workspace)
 
-    authorize(current_user, WorkspacePolicy.delete, workspace)
+    authorize(current_user, WorkspacePolicy.delete(workspace))
 
     accounts.delete_workspace(db, workspace)
 
@@ -123,7 +123,7 @@ def delete_workspace_user(
     if not workspace_user:
         raise EntityNotFoundError(name=str(user_id), type=User)
 
-    authorize(current_user, WorkspaceUserPolicy.delete, workspace_user)
+    authorize(current_user, WorkspaceUserPolicy.delete(workspace_user))
 
     user = workspace_user.user
     accounts.delete_workspace_user(db, workspace_user)
