@@ -215,7 +215,7 @@ class Argilla:
             )
 
         if workspace != self.get_workspace():
-            if workspace == self.user.username or workspace in self.user.workspaces:
+            if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
                 self._client.headers[WORKSPACE_HEADER_NAME] = workspace
                 self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
             else:
