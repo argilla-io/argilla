@@ -207,7 +207,7 @@ def configure_database(app: FastAPI):
     get_db_wrapper = contextlib.contextmanager(get_db)
 
     def _user_has_default_credentials(user: User):
-        return user.api_key == DEFAULT_API_KEY or accounts.CRYPT_CONTEXT.verify(DEFAULT_PASSWORD, user.password_hash)
+        return user.api_key == DEFAULT_API_KEY or accounts.verify_password(DEFAULT_PASSWORD, user.password_hash)
 
     def _log_default_user_warning():
         _LOGGER.warning(
