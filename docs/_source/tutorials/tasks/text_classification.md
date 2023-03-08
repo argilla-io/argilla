@@ -37,4 +37,6 @@
 ```
 ```{include} /_static/tutorials/training-textclassification-modal-activelearning/modal.md
 ```
+```{include} /_static/tutorials/model-comparison-for-text-classification/modal.md
+```
 ````
