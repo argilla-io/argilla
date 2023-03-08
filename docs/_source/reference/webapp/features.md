@@ -18,19 +18,21 @@ On the right side of the bulk validation bar, you will find a _"+ Create new lab
 
 ### Annotate
 
-To annotate the records, the Argilla UI provides a simple and intuitive interface that tries to follow the same interaction pattern as in the [Explore mode](explore_records.md).
-As in the _Explore mode_, the record cards in the _Annotate mode_ are also customized depending on the [task](../../guides/task_examples.ipynb) of the dataset.
+The Argilla UI provides a simple and intuitive interface for annotating records. Each task offers a variety of small features and interactions to optimize annotations.
 
 #### Text Classification
 
+##### Single label
+You can annotate the records with one click on the label. The record will be validated automatically.
 
-When switching in the _Annotate mode_ for a text classification dataset, the labels in the record cards become clickable and you can annotate the records by simply clicking on them.
-For multi-label classification tasks, you can also annotate a record with no labels by either validating an empty selection or deselecting all labels.
+##### Multi-label
 
-Once a record is annotated, it will be marked as _Validated_ in the upper right corner of the record card.
+To annotate a record, click on one or multiple labels. Once a record is annotated, its status will show as *Pending*. Click *Reset* if you want to discard your changes and recover the previous state of the record or *Validate* to save your annotation into the dataset. The status will then change to *Validated* in the upper left corner of the record card.
+
+You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
 
 ```{note}
-When the dataset contains a large list of labels (10 +) we encourage viewing the record one by one (from the footer) and using the arrow keys to move quickly to the next record.
+When the dataset contains a large list of labels (10 +), we encourage viewing the record cards one by one (select 1 record per page from the footer) and using the arrow keys to move quickly between records.
 ```
 
 #### Token Classification
@@ -38,16 +40,21 @@ When the dataset contains a large list of labels (10 +) we encourage viewing the
 
 For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label.
 Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](../python/python_client.rst#Argilla.client.models.TokenClassificationRecord).
-You can also remove annotations by hovering over the highlights and pressing the _X_ button.
+To remove specific labels, hover over the highlights and press the _X_ button or double-click directly on the colored area. You can also click the _Clear_ button to remove all annotations in the record.
 
-After modifying a record, either by adding or removing annotations, its status will change to _Pending_ and a _Save_ button will appear.
-Once a record is saved, its status will change to _Validated_.
+After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click *Validate* to save the changes. The status will change to *Validated* in the upper left corner of the record card. Alternatively, you can use the *Reset* button to discard your changes and recover the previous state of the record.
+
+If you want to discard the record from the dataset, click *Discard*.
 
 #### Text2Text
 
+For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can empty the text field by clicking the *Clear* button.
 
-For Text2Text datasets, you have a text box available, in which you can draft or edit an annotation.
-After editing or drafting your annotation, don't forget to save your changes.
+Remember to validate to save your changes after editing or drafting your annotation. Alternatively, you can discard your changes and revert to the previous state of the record using the *Reset* button.
+
+After validating your annotation, predictions can still be accessed in the prediction panel on the right side of the record card.
+
+If you want to discard the record from the dataset, click *Discard*.
 
 ### Bulk annotate
 
