@@ -19,7 +19,7 @@ import click
 from argilla.server.contexts import accounts
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole
-from argilla.server.security.model import UserCreate
+from argilla.server.security.model import USER_PASSWORD_MIN_LENGTH, UserCreate
 
 
 def _show_created_user(user: User):
@@ -35,7 +35,11 @@ def _show_created_user(user: User):
 
 @click.command()
 @click.option("--first-name", prompt=True)
-@click.option("--username", prompt=True)
+@click.option(
+    "--username",
+    prompt=True,
+    help="A lowercase string without spaces allowing letters, numbers, dashes and underscores.",
+)
 @click.option(
     "--role",
     prompt=True,
@@ -43,9 +47,11 @@ def _show_created_user(user: User):
     default=UserRole.annotator,
     show_default=True,
 )
-@click.password_option("--password", prompt=True)
+@click.password_option(
+    "--password", prompt=True, help=f"A password with a minimum length of {USER_PASSWORD_MIN_LENGTH} characters."
+)
 @click.option("--last-name", required=False)
-def create_user(first_name: str, username: str, role: UserRole, password: str, last_name: Optional[str]):
+def create(first_name: str, username: str, role: UserRole, password: str, last_name: Optional[str]):
     """Creates a new user in the Argilla DB with provided parameters"""
 
     with SessionLocal() as session:
@@ -60,4 +66,4 @@ def create_user(first_name: str, username: str, role: UserRole, password: str, l
 
 
 if __name__ == "__main__":
-    create_user()
+    create()
