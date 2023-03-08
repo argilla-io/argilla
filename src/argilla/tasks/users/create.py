@@ -35,7 +35,11 @@ def _show_created_user(user: User):
 
 @click.command()
 @click.option("--first-name", prompt=True)
-@click.option("--username", prompt=True)
+@click.option(
+    "--username",
+    prompt=True,
+    help="A lowercase string without spaces allowing letters, numbers, dashes and underscores.",
+)
 @click.option(
     "--role",
     prompt=True,
