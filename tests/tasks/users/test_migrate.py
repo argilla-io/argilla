@@ -16,13 +16,13 @@ import os
 
 import pytest
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
-from argilla.tasks.users_migrator import UsersMigrator
+from argilla.tasks.users.migrate import UsersMigrator
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 
 def test_users_migrator(db: Session):
-    UsersMigrator(os.path.join(os.path.dirname(__file__), "test_users.yml")).migrate()
+    UsersMigrator(os.path.join(os.path.dirname(__file__), "test_user_files", "users.yml")).migrate()
 
     assert db.query(User).count() == 5
     assert db.query(Workspace).count() == 9
@@ -70,7 +70,7 @@ def test_users_migrator(db: Session):
 
 
 def test_users_migrator_with_one_user_file(db: Session):
-    UsersMigrator(os.path.join(os.path.dirname(__file__), "test_users_one.yml")).migrate()
+    UsersMigrator(os.path.join(os.path.dirname(__file__), "test_user_files", "users_one.yml")).migrate()
 
     assert db.query(User).count() == 1
     assert db.query(Workspace).count() == 3
@@ -87,7 +87,7 @@ def test_users_migrator_with_one_user_file(db: Session):
 
 def test_users_migrator_with_invalid_user(db: Session):
     with pytest.raises(ValidationError):
-        UsersMigrator(os.path.join(os.path.dirname(__file__), "test_users_invalid_user.yml")).migrate()
+        UsersMigrator(os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_user.yml")).migrate()
 
     assert db.query(User).count() == 0
     assert db.query(Workspace).count() == 0
@@ -96,7 +96,9 @@ def test_users_migrator_with_invalid_user(db: Session):
 
 def test_users_migrator_with_invalid_workspace(db: Session):
     with pytest.raises(ValidationError):
-        UsersMigrator(os.path.join(os.path.dirname(__file__), "test_users_invalid_workspace.yml")).migrate()
+        UsersMigrator(
+            os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_workspace.yml")
+        ).migrate()
 
     assert db.query(User).count() == 0
     assert db.query(Workspace).count() == 0
