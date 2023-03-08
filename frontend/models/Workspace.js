@@ -23,5 +23,4 @@ function currentWorkspace(route) {
   return route.params.workspace;
 }
 
-
 export { defaultWorkspace, currentWorkspace };
