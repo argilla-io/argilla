@@ -3,7 +3,7 @@
 
 ## Home page
 
-![Home page](../../_static/reference/webapp/homepage.png)
+![Home page](../../_static/reference/webapp/pages-homepage.png)
 
 The _Home page_ is mainly a **filterable, searchable and sortable list** of **datasets**.
 It is the **entry point** to the Argilla web app and is composed of the following three components.
@@ -33,7 +33,7 @@ You can find a user icon and a refresh button on the top right:
 
 
 ## Dataset
-
+![Dataset page](../../_static/reference/webapp/pages-dataset_page.png)
 
 The _Dataset_ page is the main page of the Argilla web app.
 From here you can access most of Argilla's features, like **exploring and annotating** the records of your dataset.
@@ -72,18 +72,14 @@ Check out our [exploration](../webapp/features.md#explore-records) and [annotati
 
 #### Text classification
 
-![Text classification view](../../_static/reference/webapp/explore-text-classification.png)
-
 In this task the predictions are given as tags below the input text.
 They contain the label as well as a percentage score.
 When in [Explore mode](#modes) annotations are shown as tags on the right together with a symbol indicating if the predictions match the annotations or not.
 When in [Annotate mode](#modes) predictions and annotations share the same labels (annotation labels are darker).
 
-A text classification dataset can support either single-label or multi-label classification - in other words, records are either annotated with one single label or various.
+A text classification dataset can support either single-label or multi-label classification - in other words, records are either annotated with one or multiple labels.
 
 #### Token classification
-
-![Token classification view](../../_static/reference/webapp/explore-token-classification.png)
 
 In this task annotations are given as colored highlights in the input text, while predictions are indicated by underlines.
 At the top of the record list you will find a legend that connects the colors to the respective labels.
@@ -95,14 +91,8 @@ When using the [score filter](./features.md), the predictions that do **not** fa
 
 #### Text2Text
 
-![Text2Text view](../../_static/reference/webapp/explore-text2text.png)
+In this task, predictions and annotations are displayed at the same level to allow for easy comparison of versions. The user interface supports the display of multiple predictions for one record, ordered by score. In [Annotate mode](#modes), you can edit a prediction directly in the text box to produce your annotation.
 
-In this task predictions and the annotation are given in a text field below the input text.
-You can switch between prediction and annotation via the "_View annotation_"/"_View predictions_" buttons.
-For the predictions you can find an associated score in the lower left corner.
-If you have multiple predictions you can toggle between them using the arrows on the button of the record card.
-
-![Text2Text New view](../../_static/reference/webapp/pages-text2text.png)
 
 ### Sidebar
 
