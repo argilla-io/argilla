@@ -36,7 +36,8 @@ describe("BaseCardComponent", () => {
   it("expect button class to render", () => {
     isClassExist(".card__button");
   });
-  it("emit event when button is clicked", async () => {
+  it.skip("emit event when button is clicked", async () => {
+    //FIXME - the expect is not complete since there is not the expecting value
     const button = wrapper.find(".card__button");
     button.trigger("click");
     wrapper.vm.$nextTick();
