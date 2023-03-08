@@ -21,15 +21,6 @@ from click.testing import CliRunner
 from sqlalchemy.orm import Session
 
 
-@pytest.fixture
-def db():
-    with SessionLocal() as db, db.begin():
-        yield db
-
-        db.query(User).delete()
-        db.commit()
-
-
 def test_create_user_passing_all_params(db: Session):
     username = "test-user"
     first_name = "First"
