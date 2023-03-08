@@ -24,7 +24,7 @@
     :disabled="disabled"
     :target="target"
     :rel="newRel"
-    @click="$emit('click', $event)"
+    @click="onClick"
   >
     <slot />
   </a>
@@ -35,7 +35,7 @@
     :to="to"
     :loading="loading"
     :disabled="disabled"
-    @click="$emit('click', $event)"
+    @click="onClick"
   >
     <slot />
   </nuxt-link>
@@ -47,7 +47,7 @@
     :loading="loading"
     :type="type"
     :disabled="disabled"
-    @click="$emit('click', $event)"
+    @click="onClick"
   >
     <slot />
   </button>
@@ -55,7 +55,7 @@
 
 <script>
 export default {
-  name: "ReButton",
+  name: "BaseButton",
   props: {
     href: String,
     target: String,
@@ -83,6 +83,13 @@ export default {
         loading: this.loading,
         centered: this.centered,
       };
+    },
+  },
+  methods: {
+    onClick($event) {
+      //FIXME - replace "click" event by "on-click"
+      this.$emit("click", $event);
+      this.$emit("on-click", $event);
     },
   },
 };
