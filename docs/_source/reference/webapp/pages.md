@@ -65,7 +65,7 @@ All of them share the same basic structure showing the input text and a horizont
 Predictions and annotations are shown depending on the current [mode](#modes) and [task](../../guides/task_examples.ipynb) of the dataset.
 
 ```{hint}
-Use the menu on the bottom left corner of the page to select how many record cards you want to see per page: 1, 20, 50 or 100. This allows you to annotate record by record or in smaller or bigger bulks.
+Use the menu on the bottom left corner of the page to select how many record cards you want to see per page: 1, 20, 50 or 100. This allows you to annotate record by record or in bigger bulks.
 ```
 
 Check out our [exploration](../webapp/features.md#explore-records) and [annotation](../webapp/features.md#annotate-records) guides to see how the record cards work in the different [modes](#modes).
@@ -101,6 +101,8 @@ In this task predictions and the annotation are given in a text field below the 
 You can switch between prediction and annotation via the "_View annotation_"/"_View predictions_" buttons.
 For the predictions you can find an associated score in the lower left corner.
 If you have multiple predictions you can toggle between them using the arrows on the button of the record card.
+
+![Text2Text New view](../../_static/reference/webapp/pages-text2text.png)
 
 ### Sidebar
 
