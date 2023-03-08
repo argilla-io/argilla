@@ -148,6 +148,27 @@ class LocalAuthProvider(AuthProvider):
         except JWTError:
             return None
 
+    def get_current_user(
+        self,
+        security_scopes: SecurityScopes,
+        db: Session = Depends(get_db),
+        api_key: Optional[str] = Depends(api_key_header),
+        old_api_key: Optional[str] = Depends(old_api_key_header),
+        token: Optional[str] = Depends(_oauth2_scheme),
+    ) -> User:
+        api_key = api_key or old_api_key
+        user = None
+
+        if api_key:
+            user = accounts.get_user_by_api_key(db, api_key)
+        elif token:
+            user = self.fetch_token_user(db, token)
+
+        if user is None:
+            raise UnauthorizedError()
+
+        return user
+
     async def get_user(
         self,
         security_scopes: SecurityScopes,
@@ -172,17 +193,7 @@ class LocalAuthProvider(AuthProvider):
         -------
 
         """
-        api_key = api_key or old_api_key
-        user = None
-
-        if api_key:
-            user = accounts.get_user_by_api_key(db, api_key)
-        elif token:
-            user = self.fetch_token_user(db, token)
-
-        if user is None:
-            raise UnauthorizedError()
-
+        user = self.get_current_user(security_scopes, db, api_key, old_api_key, token)
         return User.from_orm(user)
 
 

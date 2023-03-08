@@ -118,16 +118,16 @@ class DatasetsDAO:
     def delete_dataset(self, dataset: DatasetDB):
         self._es.delete(dataset.id)
 
+    def find_by_name_and_workspace(self, name: str, workspace: str) -> Optional[DatasetDB]:
+        return self.find_by_name(name=name, workspace=workspace)
+
     def find_by_name(
         self,
         name: str,
         workspace: str,
         as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
     ) -> Optional[DatasetDB]:
-        dataset_id = BaseDatasetDB.build_dataset_id(
-            name=name,
-            workspace=workspace,
-        )
+        dataset_id = BaseDatasetDB.build_dataset_id(name=name, workspace=workspace)
         document = self._es.find_dataset(id=dataset_id)
         if document is None:
             return None
