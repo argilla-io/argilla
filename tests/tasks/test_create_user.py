@@ -27,7 +27,7 @@ def test_create_user_passing_all_params(db: Session):
     role = UserRole.admin
     password = "12345678"
 
-    cli_params = f"--username {username} --password {password} --role {role.value} --first-name {first_name}"
+    cli_params = f"--first-name {first_name} --username {username} --role {role} --password {password}"
     CliRunner().invoke(create_user, cli_params)
 
     user = db.query(User).filter_by(username=username).first()
