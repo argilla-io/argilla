@@ -216,29 +216,25 @@ Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
 ### Predictions and annotations
 
 Predictions and annotations are an integral part of Argilla's [data models](../python/python_client.rst#module-Argilla.client.models).
-The way they are presented in the Argilla UI depends on the [task](../../guides/task_examples.ipynb) of the dataset.
+The way they are presented in the Argilla UI depends on the [task](../../guides/task_examples.ipynb) of the dataset and the mode activated in the right column.
 
 #### Text classification
 
+In this task, the predictions are given as tags below the input text. They contain the label as well as a percentage score.
 
-In this task the predictions are given as tags below the input text.
-They contain the label as well as a percentage score.
-Annotations are shown as tags on the right together with a symbol indicating if the predictions match the annotations or not.
+In the annotation view, the predicted labels come in a slightly darker tone, while annotations have a much darker shade and white lettering. In the exploration view, the predicted labels appear below the input text and annotations are shown as tags on the right side of the card.
 
 #### Token classification
 
 
-In this task, predictions and annotations are displayed as highlights in the input text. To easily identify them at a glance, **annotations** are highlighted with the color of their corresponding label, while **predictions** are underlined with a solid line (see picture).
+In this task, predictions and annotations are displayed as highlights in the input text. To easily identify them at a glance, **annotations** are <span style="background-color:rgba(198, 200, 204,0.5)">highlighted</span> with the color of their corresponding label, while **predictions** are <span style="color: #afc8f0;text-decoration:underline">underlined</span> with a solid line.
 
-For datasets with available score, the solid line for **predictions** disappears when the **score filter** (in **Predictions filter** section) is applied.
 
 #### Text2Text
 
+In this task, the prediction with the highest score appears in a text field below the input text. You can switch between predictions by clicking on their associated score, which appears on the upper right corner.
 
-In this task predictions and the annotation are given in a text field below the input text.
-You can switch between prediction and annotation via the "_View annotation_"/"_View predictions_" buttons.
-For the predictions you can find an associated score in the lower left corner.
-If you have multiple predictions you can toggle between them using the arrows on the button of the record card.
+Once you start making changes to the text or after you have validated the annotation, the predictions will still be visible from the *Prediction* banner at the right hand side of the text field.
 
 ### Metrics
 
