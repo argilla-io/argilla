@@ -144,14 +144,16 @@ def delete_dataset(
         raise EntityNotFoundError(name=workspace_name, type=Workspace)
 
     dataset = datasets.find_by_name_and_workspace(name=name, workspace=workspace.name)
-    if dataset:
-        if not is_authorized(user, DatasetPolicy.delete(dataset)):
-            raise ForbiddenOperationError(
-                "You don't have the necessary permissions to delete this dataset. "
-                "Only dataset creators or administrators can delete datasets"
-            )
-        else:
-            datasets.delete_dataset(dataset)
+    if not dataset:
+        return
+
+    if not is_authorized(user, DatasetPolicy.delete(dataset)):
+        raise ForbiddenOperationError(
+            "You don't have the necessary permissions to delete this dataset. "
+            "Only dataset creators or administrators can delete datasets"
+        )
+
+    datasets.delete_dataset(dataset)
 
 
 @router.put(
