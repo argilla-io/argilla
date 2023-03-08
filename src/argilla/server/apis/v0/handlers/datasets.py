@@ -143,7 +143,7 @@ def delete_dataset(
     if not workspace:
         raise EntityNotFoundError(name=workspace_name, type=Workspace)
 
-    dataset = datasets.find_by_name(name=name, workspace=workspace.name)
+    dataset = datasets.find_by_name_and_workspace(name=name, workspace=workspace.name)
     if dataset:
         if not is_authorized(user, DatasetPolicy.delete(dataset)):
             raise ForbiddenOperationError(
