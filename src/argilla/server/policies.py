@@ -16,6 +16,7 @@ from typing import Callable
 
 from argilla.server.errors import ForbiddenOperationError
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
+from argilla.server.schemas.datasets import Dataset
 
 PolicyAction = Callable[[User], bool]
 
@@ -62,6 +63,20 @@ class UserPolicy:
     @classmethod
     def delete(cls, user: User) -> PolicyAction:
         return lambda actor: actor.role == UserRole.admin
+
+
+class DatasetPolicy:
+    @classmethod
+    def get(cls, workspace: Workspace) -> PolicyAction:
+        return lambda actor: actor.role == UserRole.admin or workspace in actor.workspaces
+
+    @classmethod
+    def create(cls, workspace: Workspace) -> PolicyAction:
+        return lambda actor: actor.role == UserRole.admin or workspace in actor.workspaces
+
+    @classmethod
+    def delete(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.role == UserRole.admin or actor.username == dataset.created_by
 
 
 def authorize(actor: User, policy_action: PolicyAction) -> None:

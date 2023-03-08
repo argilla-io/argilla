@@ -124,10 +124,7 @@ class DatasetsDAO:
         workspace: str,
         as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
     ) -> Optional[DatasetDB]:
-        dataset_id = BaseDatasetDB.build_dataset_id(
-            name=name,
-            workspace=workspace,
-        )
+        dataset_id = BaseDatasetDB.build_dataset_id(name=name, workspace=workspace)
         document = self._es.find_dataset(id=dataset_id)
         if document is None:
             return None

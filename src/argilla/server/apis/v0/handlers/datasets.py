@@ -17,10 +17,15 @@ from typing import List
 
 from fastapi import APIRouter, Body, Depends, Security
 from pydantic import parse_obj_as
+from sqlalchemy.orm import Session
 
+from argilla.server import database
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
-from argilla.server.errors import EntityNotFoundError
+from argilla.server.contexts import accounts
+from argilla.server.daos.datasets import DatasetsDAO
+from argilla.server.errors import EntityNotFoundError, ForbiddenOperationError
+from argilla.server.policies import DatasetPolicy, is_authorized
 from argilla.server.schemas.datasets import (
     CopyDatasetRequest,
     CreateDatasetRequest,
@@ -28,7 +33,7 @@ from argilla.server.schemas.datasets import (
     UpdateDatasetRequest,
 )
 from argilla.server.security import auth
-from argilla.server.security.model import User
+from argilla.server.security.model import User, Workspace
 from argilla.server.services.datasets import DatasetsService
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
@@ -127,20 +132,28 @@ def update_dataset(
 )
 def delete_dataset(
     name: str,
-    ds_params: CommonTaskHandlerDependencies = Depends(),
-    service: DatasetsService = Depends(DatasetsService.get_instance),
-    current_user: User = Security(auth.get_user, scopes=[]),
+    request_params: CommonTaskHandlerDependencies = Depends(),
+    db: Session = Depends(database.get_db),
+    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
+    user: User = Security(auth.get_current_user, scopes=[]),
 ):
+    workspace_name = request_params.workspace
+
+    workspace = accounts.get_workspace_by_name(db, workspace_name=workspace_name)
+    if not workspace:
+        raise EntityNotFoundError(name=workspace_name, type=Workspace)
+
     try:
-        found_ds = service.find_by_name(
-            user=current_user,
-            name=name,
-            workspace=ds_params.workspace,
-        )
-        service.delete(
-            user=current_user,
-            dataset=found_ds,
-        )
+        dataset = datasets.find_by_name(name=name, workspace=workspace.name)
+        if not dataset:
+            raise EntityNotFoundError(name=name, type=Dataset)
+
+        if not is_authorized(user, DatasetPolicy.delete(dataset)):
+            raise ForbiddenOperationError(
+                "You don't have the necessary permissions to delete this dataset. "
+                "Only dataset creators or administrators can delete datasets"
+            )
+        datasets.delete_dataset(dataset)
     except EntityNotFoundError:
         pass
 
