@@ -1,9 +1,9 @@
 <template>
   <div class="wrapper">
     <p class="message">{{ message }}</p>
-    <div class="buttons-area" v-if="buttonLabels.length">
+    <div class="buttons-area" v-if="isButtonLabels">
       <div class="button" v-for="{ label, value } in buttonLabels" :key="value">
-        <BaseButton @click.prevent="onClick(value)">
+        <BaseButton :id="label" @on-click="onClick(value)">
           {{ label }}
         </BaseButton>
       </div>
@@ -23,9 +23,14 @@ export default {
       type: Array | null,
     },
   },
+  computed: {
+    isButtonLabels() {
+      return this.buttonLabels?.length ?? false;
+    },
+  },
   methods: {
-    onClick(buttonValue) {
-      this.$emit("on-click", buttonValue);
+    onClick(value) {
+      this.$emit("on-click", value);
     },
   },
 };
