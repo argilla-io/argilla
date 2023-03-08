@@ -227,6 +227,7 @@ export default {
     &:before,
     &:after {
       margin-top: calc($base-space/2);
+      margin-right: -3px;
     }
   }
 }
