@@ -9,12 +9,13 @@ First, you need to create a network to make both standalone containers visibles 
 Just run the folowing command:
 ```bash
 docker network create argilla-net
+```
 
 Setting up Elasticsearch (ES) via docker is straightforward.
 Simply run the following command:
 
 ```bash
-docker run -d --name elasticsearch-for-argilla --network argilla-net  -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+docker run -d --name elasticsearch-for-argilla --network argilla-net  -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.5.3
 ```
 
 This will create an ES docker container named *"elasticsearch-for-argilla"* that will run in the background.

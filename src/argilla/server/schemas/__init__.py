@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-DEFAULT_MAX_KEYWORD_LENGTH = 128
-
-
-API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
-WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
-DEFAULT_API_KEY = "argilla.apikey"  # Keep the same api key for now
-
-# TODO: This constant will be drop out with issue
-#  https://github.com/argilla-io/argilla/issues/2251 fix
-_OLD_DEFAULT_API_KEY = "rubrix.apikey"
-_OLD_API_KEY_HEADER_NAME = "X-Rubrix-Api-Key"
-_OLD_WORKSPACE_HEADER_NAME = "X-Rubrix-Workspace"
-
-ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"

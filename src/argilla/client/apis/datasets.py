@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import math
 import warnings
 from dataclasses import dataclass
 from datetime import datetime
@@ -22,6 +23,7 @@ from pydantic import BaseModel, Field
 from argilla.client.apis import AbstractApi, api_compatibility
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
+    ApiCompatibilityError,
     ForbiddenApiError,
     NotFoundApiError,
 )
@@ -99,10 +101,6 @@ class Datasets(AbstractApi):
 
     _API_PREFIX = "/api/datasets"
 
-    __SETTINGS_MIN_API_VERSION__ = "0.15"
-
-    DEFAULT_SCAN_SIZE = 250
-
     class _DatasetApiModel(BaseModel):
         name: str
         task: TaskType
@@ -128,10 +126,10 @@ class Datasets(AbstractApi):
             else TaskType.token_classification
         )
 
-        with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
+        with api_compatibility(self, min_version="0.15"):
             dataset = self._DatasetApiModel(name=name, task=task)
             self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
-            self.__save_settings__(dataset, settings=settings)
+            self._save_settings(dataset, settings=settings)
 
     def configure(self, name: str, settings: Settings):
         """
@@ -146,7 +144,7 @@ class Datasets(AbstractApi):
             self.create(name=name, settings=settings)
         except AlreadyExistsApiError:
             ds = self.find_by_name(name)
-            self.__save_settings__(dataset=ds, settings=settings)
+            self._save_settings(dataset=ds, settings=settings)
 
     def scan(
         self,
@@ -154,6 +152,7 @@ class Datasets(AbstractApi):
         projection: Optional[Set[str]] = None,
         limit: Optional[int] = None,
         id_from: Optional[str] = None,
+        batch_size: int = 250,
         **query,
     ) -> Iterable[dict]:
         """
@@ -163,23 +162,24 @@ class Datasets(AbstractApi):
             name: the dataset
             query: the search query
             projection: a subset of record fields to retrieve. If not provided,
-            limit: The number of records to retrieve
+                only id's will be returned
+            limit: The number of records to retrieve.
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
-            only id's will be returned
+            batch_size: If provided, load `batch_size` samples per request. A lower batch
+                size may help avoid timeouts.
 
         Returns:
-
             An iterable of raw object containing per-record info
-
         """
 
-        url = f"{self._API_PREFIX}/{name}/records/:search?limit={self.DEFAULT_SCAN_SIZE}"
-        query = self._parse_query(query=query)
+        if limit and limit < 0:
+            raise ValueError("The scan limit must be non-negative.")
 
-        if limit == 0:
-            limit = None
+        limit = limit if limit else math.inf
+        url = f"{self._API_PREFIX}/{name}/records/:search?limit={{limit}}"
+        query = self._parse_query(query=query)
 
         request = {
             "fields": list(projection) if projection else ["id"],
@@ -189,24 +189,24 @@ class Datasets(AbstractApi):
         if id_from:
             request["next_idx"] = id_from
 
-        yield_fields = 0
         with api_compatibility(self, min_version="1.2.0"):
+            request_limit = min(limit, batch_size)
             response = self.http_client.post(
-                url,
+                url.format(limit=request_limit),
                 json=request,
             )
 
             while response.get("records"):
-                for record in response["records"]:
-                    yield record
-                    yield_fields += 1
-                    if limit and limit <= yield_fields:
-                        return
+                yield from response["records"]
+                limit -= request_limit
+                if limit <= 0:
+                    return
 
                 next_idx = response.get("next_idx")
                 if next_idx:
+                    request_limit = min(limit, batch_size)
                     response = self.http_client.post(
-                        path=url,
+                        path=url.format(limit=request_limit),
                         json={**request, "next_idx": next_idx},
                     )
 
@@ -274,7 +274,7 @@ class Datasets(AbstractApi):
                 else:
                     raise faer
 
-    def __save_settings__(self, dataset: _DatasetApiModel, settings: Settings):
+    def _save_settings(self, dataset: _DatasetApiModel, settings: Settings):
         if __TASK_TO_SETTINGS__.get(dataset.task) != type(settings):
             raise ValueError(
                 f"The provided settings type {type(settings)} cannot be applied to dataset." " Task type mismatch"
@@ -282,11 +282,18 @@ class Datasets(AbstractApi):
 
         settings_ = self._SettingsApiModel(label_schema={"labels": [label for label in settings.label_schema]})
 
-        with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-            self.http_client.put(
-                f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
-                json=settings_.dict(),
-            )
+        try:
+            with api_compatibility(self, min_version="1.4"):
+                self.http_client.patch(
+                    f"{self._API_PREFIX}/{dataset.name}/{dataset.task}/settings",
+                    json=settings_.dict(),
+                )
+        except ApiCompatibilityError:
+            with api_compatibility(self, min_version="0.15"):
+                self.http_client.put(
+                    f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
+                    json=settings_.dict(),
+                )
 
     def load_settings(self, name: str) -> Optional[Settings]:
         """
@@ -300,8 +307,8 @@ class Datasets(AbstractApi):
         """
         dataset = self.find_by_name(name)
         try:
-            with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-                response = self.http_client.get(f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings")
+            with api_compatibility(self, min_version="1.0"):
+                response = self.http_client.get(f"{self._API_PREFIX}/{dataset.name}/{dataset.task}/settings")
                 return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)
         except NotFoundApiError:
             return None

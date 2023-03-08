@@ -339,7 +339,7 @@ class TestDatasetForTextClassification:
         records = request.getfixturevalue(records)
 
         ds = rg.DatasetForTextClassification(records)
-        train = ds.prepare_for_training()
+        train = ds.prepare_for_training(seed=42)
 
         if not ds[0].multi_label:
             column_names = ["text", "context", "label"]
@@ -357,11 +357,72 @@ class TestDatasetForTextClassification:
         else:
             assert train.features["label"] == datasets.ClassLabel(names=["a"])
 
-        train_test = ds.prepare_for_training(train_size=0.5)
+        train_test = ds.prepare_for_training(train_size=0.5, seed=42)
         assert len(train_test["train"]) == 1
         assert len(train_test["test"]) == 1
         for split in ["train", "test"]:
             assert train_test[split].column_names == column_names
+
+    @pytest.mark.parametrize(
+        "records",
+        [
+            "singlelabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ],
+    )
+    def test_prepare_for_training_with_spacy(self, request, records):
+        records = request.getfixturevalue(records)
+
+        ds = rg.DatasetForTextClassification(records)
+        with pytest.raises(ValueError):
+            train = ds.prepare_for_training(framework="spacy", seed=42)
+        nlp = spacy.blank("en")
+        doc_bin = ds.prepare_for_training(framework="spacy", lang=nlp, seed=42)
+
+        assert isinstance(doc_bin, spacy.tokens.DocBin)
+        docs = list(doc_bin.get_docs(nlp.vocab))
+        assert len(docs) == 2
+
+        if records[0].multi_label:
+            assert set(list(docs[0].cats.keys())) == set(["a", "b"])
+        else:
+            assert isinstance(docs[0].cats, dict)
+
+        train, test = ds.prepare_for_training(train_size=0.5, framework="spacy", lang=nlp, seed=42)
+        docs_train = list(train.get_docs(nlp.vocab))
+        docs_test = list(train.get_docs(nlp.vocab))
+        assert len(list(docs_train)) == 1
+        assert len(list(docs_test)) == 1
+
+    @pytest.mark.parametrize(
+        "records",
+        [
+            "singlelabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ],
+    )
+    def test_prepare_for_training_with_spark_nlp(self, request, records):
+        records = request.getfixturevalue(records)
+
+        ds = rg.DatasetForTextClassification(records)
+        df = ds.prepare_for_training("spark-nlp", train_size=1, seed=42)
+
+        if ds[0].multi_label:
+            column_names = ["id", "text", "labels"]
+        else:
+            column_names = ["id", "text", "label"]
+
+        assert isinstance(df, pd.DataFrame)
+        assert list(df.columns) == column_names
+        assert len(df) == 2
+
+        df_train, df_test = ds.prepare_for_training("spark-nlp", train_size=0.5, seed=42)
+        assert len(df_train) == 1
+        assert len(df_test) == 1
+        assert isinstance(df_train, pd.DataFrame)
+        assert isinstance(df_test, pd.DataFrame)
+        assert list(df_train.columns) == column_names
+        assert list(df_test.columns) == column_names
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,
@@ -574,13 +635,15 @@ class TestDatasetForTokenClassification:
             r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
 
         with pytest.raises(ValueError):
-            train = rb_dataset.prepare_for_training(framework="spacy")
+            train = rb_dataset.prepare_for_training(framework="spacy", seed=42)
 
-        train = rb_dataset.prepare_for_training(framework="spacy", lang=spacy.blank("en"))
+        train = rb_dataset.prepare_for_training(framework="spacy", lang=spacy.blank("en"), seed=42)
         assert isinstance(train, spacy.tokens.DocBin)
         assert len(train) == 100
 
-        train, test = rb_dataset.prepare_for_training(framework="spacy", lang=spacy.blank("en"), train_size=0.8)
+        train, test = rb_dataset.prepare_for_training(
+            framework="spacy", lang=spacy.blank("en"), train_size=0.8, seed=42
+        )
         assert isinstance(train, spacy.tokens.DocBin)
         assert isinstance(test, spacy.tokens.DocBin)
         assert len(train) == 80
@@ -601,11 +664,11 @@ class TestDatasetForTokenClassification:
         for r in rb_dataset:
             r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
 
-        train = rb_dataset.prepare_for_training(framework="spark-nlp")
+        train = rb_dataset.prepare_for_training(framework="spark-nlp", seed=42)
         assert isinstance(train, pd.DataFrame)
         assert len(train) == 100
 
-        train, test = rb_dataset.prepare_for_training(framework="spark-nlp", train_size=0.8)
+        train, test = rb_dataset.prepare_for_training(framework="spark-nlp", train_size=0.8, seed=42)
         assert isinstance(train, pd.DataFrame)
         assert isinstance(test, pd.DataFrame)
         assert len(train) == 80
@@ -627,6 +690,8 @@ class TestDatasetForTokenClassification:
             r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
 
         train = rb_dataset.prepare_for_training()
+        assert (set(train.column_names)) == set(["tokens", "ner_tags"])
+
         assert isinstance(train, datasets.DatasetD.Dataset) or isinstance(train, datasets.Dataset)
         assert "ner_tags" in train.column_names
         assert len(train) == 100
@@ -784,6 +849,40 @@ class TestDatasetForText2Text:
         assert isinstance(dataset, rg.DatasetForText2Text)
         for rec, expected in zip(dataset, expected_dataset):
             assert rec == expected
+
+    def test_prepare_for_training(self):
+        ds = rg.DatasetForText2Text(
+            [rg.Text2TextRecord(text="mock", annotation="mock"), rg.Text2TextRecord(text="mock")] * 10
+        )
+        train = ds.prepare_for_training(train_size=1, seed=42)
+
+        assert isinstance(train, datasets.Dataset)
+        assert train.column_names == ["text", "target"]
+        assert len(train) == 10
+        assert train[1]["text"] == "mock"
+        assert train[1]["target"] == "mock"
+        assert train.features["text"] == datasets.Value("string")
+        assert train.features["target"] == datasets.Value("string")
+
+        train_test = ds.prepare_for_training(train_size=0.5, seed=42)
+        assert len(train_test["train"]) == 5
+        assert len(train_test["test"]) == 5
+        for split in ["train", "test"]:
+            assert train_test[split].column_names == ["text", "target"]
+
+    def test_prepare_for_training_with_spacy(self):
+        ds = rg.DatasetForText2Text(
+            [rg.Text2TextRecord(text="mock", annotation="mock"), rg.Text2TextRecord(text="mock")] * 10
+        )
+        with pytest.raises(NotImplementedError):
+            ds.prepare_for_training("spacy", lang=spacy.blank("en"), train_size=1)
+
+    def test_prepare_for_training_with_spark_nlp(self):
+        ds = rg.DatasetForText2Text(
+            [rg.Text2TextRecord(text="mock", annotation="mock"), rg.Text2TextRecord(text="mock")] * 10
+        )
+        df = ds.prepare_for_training("spark-nlp", train_size=1)
+        assert list(df.columns) == ["id", "text", "target"]
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,

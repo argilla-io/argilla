@@ -57,7 +57,7 @@ def configure_router(router: APIRouter):
         limit: int = Query(
             default=100,
             gte=0,
-            le=500,
+            le=1000,
             description="Number of records to retrieve",
         ),
         request_deps: CommonTaskHandlerDependencies = Depends(),

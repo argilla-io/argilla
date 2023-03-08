@@ -12,7 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# All metrics related to the datasets index
-from argilla.server.daos.backend.metrics.base import TermsAggregation
+from argilla.server.errors import ForbiddenOperationError
+from argilla.server.security.model import User
 
-METRICS = {"all_workspaces": TermsAggregation(id="all_workspaces", field="owner.keyword")}
+
+def validate_is_super_user(user: User, message: str = None):
+    """Common validation to ensure the current user is a admin/superuser"""
+    if not user.is_superuser():
+        raise ForbiddenOperationError(message or "Only admin users can apply this change")

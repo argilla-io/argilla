@@ -107,6 +107,56 @@ def test_validate_settings_after_logging(mocked_client):
     }
 
 
+def test_create_settings_no_admin(mocked_client):
+    try:
+        dataset_name = "test_create_settings_no_admin"
+        rg.delete(dataset_name)
+
+        create_dataset(mocked_client, dataset_name)
+
+        mocked_client.change_current_user("mock-user")
+        response = create_settings(mocked_client, dataset_name)
+
+        assert response.status_code == 403
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ForbiddenOperationError",
+                "params": {
+                    "detail": "Cannot save settings for dataset "
+                    "argilla.test_create_settings_no_admin. Only "
+                    "admins can apply this change"
+                },
+            }
+        }
+    finally:
+        mocked_client.reset_default_user()
+
+
+def test_delete_settings_with_no_superuser(mocked_client):
+    try:
+        dataset_name = "test_delete_settings_with_no_superuser"
+        rg.delete(dataset_name)
+
+        create_dataset(mocked_client, dataset_name)
+        assert create_settings(mocked_client, dataset_name).status_code == 200
+
+        mocked_client.change_current_user("mock-user")
+        response = mocked_client.delete(f"/api/datasets/{TaskType.text_classification}/{dataset_name}/settings")
+        assert response.status_code == 403
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ForbiddenOperationError",
+                "params": {
+                    "detail": "Cannot delete settings for dataset "
+                    "argilla.test_delete_settings_with_no_superuser. "
+                    "Only admins can apply this change"
+                },
+            }
+        }
+    finally:
+        mocked_client.reset_default_user()
+
+
 def log_some_data(mocked_client, name):
     return mocked_client.post(
         f"/api/datasets/{name}/TextClassification:bulk",

@@ -15,7 +15,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from argilla.server.commons.models import TaskStatus
 
@@ -60,11 +60,7 @@ class BaseQuery(BaseModel):
 
 class BaseDatasetsQuery(BaseQuery):
     tasks: Optional[List[str]] = None
-    owners: Optional[List[str]] = None
-    # This is used to fetch workspaces without owner/workspace. But this should be moved to
-    # a default workspace
-    # TODO: Should be deprecated
-    include_no_owner: bool = None
+    workspaces: Optional[List[str]] = None
     name: Optional[str] = None
 
 
@@ -93,6 +89,13 @@ class BaseRecordsQuery(BaseQuery):
     has_prediction: Optional[bool] = None
 
     vector: Optional[VectorSearch] = Field(default=None)
+
+    @validator("query_text")
+    def check_empty_query_text(cls, value):
+        if value is not None:
+            if value.strip() == "":
+                value = None
+        return value
 
 
 BackendQuery = TypeVar("BackendQuery", bound=BaseQuery)
