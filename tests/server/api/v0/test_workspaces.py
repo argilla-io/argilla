@@ -15,11 +15,17 @@
 from uuid import UUID, uuid4
 
 import pytest
+from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import User, Workspace, WorkspaceUser
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import (
+    AnnotatorFactory,
+    UserFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 
 def test_list_workspaces(client: TestClient, admin_auth_header: dict):
@@ -40,6 +46,14 @@ def test_list_workspaces_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
+def test_list_workspaces_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+
+    response = client.get("/api/workspaces", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 200
+
+
 def test_create_workspace(client: TestClient, db: Session, admin_auth_header: dict):
     response = client.post("/api/workspaces", headers=admin_auth_header, json={"name": "workspace"})
 
@@ -55,6 +69,17 @@ def test_create_workspace_without_authentication(client: TestClient, db: Session
     response = client.post("/api/workspaces", json={"name": "workspace"})
 
     assert response.status_code == 401
+    assert db.query(Workspace).count() == 0
+
+
+def test_create_workspace_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+
+    response = client.post(
+        "/api/workspaces", headers={API_KEY_HEADER_NAME: annotator.api_key}, json={"name": "workspaces"}
+    )
+
+    assert response.status_code == 403
     assert db.query(Workspace).count() == 0
 
 
@@ -79,6 +104,11 @@ def test_delete_workspace():
 
 @pytest.mark.skip(reason="we are not allowing deletion of workspaces right now")
 def test_delete_workspace_without_authentication():
+    pass
+
+
+@pytest.mark.skip(reason="we are not allowing deletion of workspaces right now")
+def test_delete_workspace_as_annotator():
     pass
 
 
@@ -112,6 +142,15 @@ def test_list_workspace_users_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
+def test_list_workspace_users_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    workspace = WorkspaceFactory.create()
+
+    response = client.get(f"/api/workspaces/{workspace.id}/users", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
+
+
 def test_create_workspace_user(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
     workspace = WorkspaceFactory.create()
 
@@ -132,6 +171,19 @@ def test_create_workspace_user_without_authentication(client: TestClient, db: Se
     response = client.post(f"/api/workspaces/{workspace.id}/users/{admin.id}")
 
     assert response.status_code == 401
+    assert db.query(WorkspaceUser).count() == 0
+
+
+def test_create_workspace_user_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    workspace = WorkspaceFactory.create()
+    user = UserFactory.create()
+
+    response = client.post(
+        f"/api/workspaces/{workspace.id}/users/{user.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
+
+    assert response.status_code == 403
     assert db.query(WorkspaceUser).count() == 0
 
 
@@ -179,6 +231,22 @@ def test_delete_workspace_user_without_authentication(client: TestClient, db: Se
     response = client.delete(f"/api/workspaces/{workspace_user.workspace_id}/users/{workspace_user.user_id}")
 
     assert response.status_code == 401
+    assert db.query(WorkspaceUser).count() == 1
+
+
+def test_delete_workspace_user_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    workspace_user = WorkspaceUserFactory.create(
+        workspace_id=WorkspaceFactory.create().id,
+        user_id=UserFactory.create().id,
+    )
+
+    response = client.delete(
+        f"/api/workspaces/{workspace_user.workspace_id}/users/{workspace_user.user_id}",
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+    )
+
+    assert response.status_code == 403
     assert db.query(WorkspaceUser).count() == 1
 
 

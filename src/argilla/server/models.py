@@ -91,5 +91,13 @@ class User(Base):
         secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
     )
 
+    @property
+    def is_admin(self):
+        return self.role == UserRole.admin
+
+    @property
+    def is_annotator(self):
+        return self.role == UserRole.annotator
+
     def __repr__(self):
         return f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, username={self.username!r}, role={self.role.value!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"

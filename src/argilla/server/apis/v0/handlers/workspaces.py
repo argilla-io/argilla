@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
 from argilla.server.errors import EntityNotFoundError
+from argilla.server.policies import WorkspacePolicy, WorkspaceUserPolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import (
     User,
@@ -35,6 +36,8 @@ router = APIRouter(tags=["workspaces"])
 
 @router.get("/workspaces", response_model=List[Workspace], response_model_exclude_none=True)
 def list_workspaces(*, db: Session = Depends(get_db), current_user: User = Security(auth.get_user, scopes=[])):
+    authorize(current_user, WorkspacePolicy.list)
+
     workspaces = accounts.list_workspaces(db)
 
     return parse_obj_as(List[Workspace], workspaces)
@@ -47,6 +50,8 @@ def create_workspace(
     workspace_create: WorkspaceCreate,
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
+    authorize(current_user, WorkspacePolicy.create)
+
     workspace = accounts.create_workspace(db, workspace_create)
 
     return Workspace.from_orm(workspace)
@@ -63,6 +68,8 @@ def delete_workspace(
     if not workspace:
         raise EntityNotFoundError(name=str(workspace_id), type=Workspace)
 
+    authorize(current_user, WorkspacePolicy.delete(workspace))
+
     accounts.delete_workspace(db, workspace)
 
     return Workspace.from_orm(workspace)
@@ -72,6 +79,8 @@ def delete_workspace(
 def list_workspace_users(
     *, db: Session = Depends(get_db), workspace_id: UUID, current_user: User = Security(auth.get_user, scopes=[])
 ):
+    authorize(current_user, WorkspaceUserPolicy.list)
+
     workspace = accounts.get_workspace_by_id(db, workspace_id)
     if not workspace:
         raise EntityNotFoundError(name=str(workspace_id), type=Workspace)
@@ -87,6 +96,8 @@ def create_workspace_user(
     user_id: UUID,
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
+    authorize(current_user, WorkspaceUserPolicy.create)
+
     workspace = accounts.get_workspace_by_id(db, workspace_id)
     if not workspace:
         raise EntityNotFoundError(name=str(workspace_id), type=Workspace)
@@ -111,6 +122,8 @@ def delete_workspace_user(
     workspace_user = accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id)
     if not workspace_user:
         raise EntityNotFoundError(name=str(user_id), type=User)
+
+    authorize(current_user, WorkspaceUserPolicy.delete(workspace_user))
 
     user = workspace_user.user
     accounts.delete_workspace_user(db, workspace_user)

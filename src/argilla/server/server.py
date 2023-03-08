@@ -46,6 +46,7 @@ from argilla.server.database import get_db
 from argilla.server.errors import (
     APIErrorHandler,
     EntityNotFoundError,
+    ForbiddenOperationError,
     UnauthorizedError,
 )
 from argilla.server.models import User
@@ -76,6 +77,7 @@ def configure_api_exceptions(api: FastAPI):
     api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
     api.exception_handler(UnauthorizedError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ForbiddenOperationError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
 
 
