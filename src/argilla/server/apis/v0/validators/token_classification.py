@@ -17,9 +17,9 @@ from typing import List, Set, Type
 from fastapi import Depends
 
 from argilla.server.apis.v0.models.dataset_settings import TokenClassificationSettings
-from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import BadRequestError, EntityNotFoundError
+from argilla.server.schemas.datasets import Dataset
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
 from argilla.server.services.tasks.token_classification.metrics import DatasetLabels
@@ -55,9 +55,7 @@ class DatasetValidator:
             cls._INSTANCE = cls(datasets, metrics=metrics)
         return cls._INSTANCE
 
-    async def validate_dataset_settings(
-        self, user: User, dataset: Dataset, settings: TokenClassificationSettings
-    ):
+    async def validate_dataset_settings(self, user: User, dataset: Dataset, settings: TokenClassificationSettings):
         if settings and settings.label_schema:
             results = self.__metrics__.summarize_metric(
                 dataset=dataset,
@@ -67,9 +65,7 @@ class DatasetValidator:
             )
             if results:
                 labels = results.get("labels", [])
-                label_schema = set(
-                    [label.name for label in settings.label_schema.labels]
-                )
+                label_schema = set([label.name for label in settings.label_schema.labels])
                 for label in labels:
                     if label not in label_schema:
                         raise BadRequestError(
@@ -84,15 +80,11 @@ class DatasetValidator:
         records: List[ServiceTokenClassificationRecord],
     ):
         try:
-            settings: TokenClassificationSettings = (
-                await self.__datasets__.get_settings(
-                    user=user, dataset=dataset, class_type=__svc_settings_class__
-                )
+            settings: TokenClassificationSettings = await self.__datasets__.get_settings(
+                user=user, dataset=dataset, class_type=__svc_settings_class__
             )
             if settings and settings.label_schema:
-                label_schema = set(
-                    [label.name for label in settings.label_schema.labels]
-                )
+                label_schema = set([label.name for label in settings.label_schema.labels])
 
                 for r in records:
                     if r.prediction:
@@ -103,9 +95,7 @@ class DatasetValidator:
             pass
 
     @staticmethod
-    def __check_label_entities__(
-        label_schema: Set[str], annotation: ServiceTokenClassificationAnnotation
-    ):
+    def __check_label_entities__(label_schema: Set[str], annotation: ServiceTokenClassificationAnnotation):
         if not annotation:
             return
         for entity in annotation.entities:

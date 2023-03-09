@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
@@ -21,9 +20,7 @@ from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.services.datasets import ServiceBaseDataset
 from argilla.server.services.search.model import (
     ServiceBaseRecordsQuery,
-    ServiceBaseSearchResultsAggregations,
     ServiceScoreRange,
-    ServiceSearchResults,
 )
 from argilla.server.services.tasks.commons import (
     ServiceBaseAnnotation,
@@ -53,19 +50,11 @@ class ServiceText2TextRecord(ServiceBaseRecord[ServiceText2TextAnnotation]):
 
     @property
     def predicted_as(self) -> Optional[List[str]]:
-        return (
-            [sentence.text for sentence in self.prediction.sentences]
-            if self.prediction
-            else None
-        )
+        return [sentence.text for sentence in self.prediction.sentences] if self.prediction else None
 
     @property
     def annotated_as(self) -> Optional[List[str]]:
-        return (
-            [sentence.text for sentence in self.annotation.sentences]
-            if self.annotation
-            else None
-        )
+        return [sentence.text for sentence in self.annotation.sentences] if self.annotation else None
 
     @property
     def scores(self) -> List[float]:
@@ -87,8 +76,3 @@ class ServiceText2TextRecord(ServiceBaseRecord[ServiceText2TextAnnotation]):
 class ServiceText2TextQuery(ServiceBaseRecordsQuery):
     score: Optional[ServiceScoreRange] = Field(default=None)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-
-
-class ServiceText2TextDataset(ServiceBaseDataset):
-    task: TaskType = Field(default=TaskType.text2text, const=True)
-    pass

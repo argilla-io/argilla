@@ -13,20 +13,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-
 from argilla.client.sdk.datasets.models import Dataset, TaskType
-from argilla.server.apis.v0.models.datasets import Dataset as ServerDataset
+from argilla.server.schemas.datasets import Dataset as ServerDataset
 
 
 def test_dataset_schema(helpers):
     client_schema = Dataset.schema()
-    server_schema = helpers.remove_key(
-        ServerDataset.schema(), key="created_by"
-    )  # don't care about creator here
+    server_schema = helpers.remove_key(ServerDataset.schema(), key="created_by")  # don't care about creator here
 
-    assert helpers.remove_description(client_schema) == helpers.remove_description(
-        server_schema
-    )
+    assert helpers.are_compatible_api_schemas(client_schema, server_schema)
 
 
 def test_TaskType_enum():

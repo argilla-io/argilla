@@ -28,8 +28,6 @@ from argilla.server.daos.models.datasets import (
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.errors import WrongTaskError
 
-NO_WORKSPACE = ""
-
 
 class DatasetsDAO:
     """Datasets DAO"""
@@ -39,9 +37,7 @@ class DatasetsDAO:
     @classmethod
     def get_instance(
         cls,
-        es: GenericElasticEngineBackend = Depends(
-            GenericElasticEngineBackend.get_instance
-        ),
+        es: GenericElasticEngineBackend = Depends(GenericElasticEngineBackend.get_instance),
         records_dao: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance),
     ) -> "DatasetsDAO":
         """
@@ -79,14 +75,13 @@ class DatasetsDAO:
 
     def list_datasets(
         self,
-        owner_list: List[str] = None,
+        workspaces: List[str] = None,
         task2dataset_map: Dict[str, Type[DatasetDB]] = None,
         name: Optional[str] = None,
     ) -> List[DatasetDB]:
-        owner_list = owner_list or []
+        workspaces = workspaces or []
         query = BaseDatasetsQuery(
-            owners=owner_list,
-            include_no_owner=NO_WORKSPACE in owner_list,
+            workspaces=workspaces,
             tasks=[task for task in task2dataset_map] if task2dataset_map else None,
             name=name,
         )
@@ -117,10 +112,7 @@ class DatasetsDAO:
         self,
         dataset: DatasetDB,
     ) -> DatasetDB:
-
-        self._es.update_dataset_document(
-            id=dataset.id, document=self._dataset_to_es_doc(dataset)
-        )
+        self._es.update_dataset_document(id=dataset.id, document=self._dataset_to_es_doc(dataset))
         return dataset
 
     def delete_dataset(self, dataset: DatasetDB):
@@ -129,23 +121,16 @@ class DatasetsDAO:
     def find_by_name(
         self,
         name: str,
-        owner: Optional[str],
+        workspace: str,
         as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
-        task: Optional[str] = None,
     ) -> Optional[DatasetDB]:
-
         dataset_id = BaseDatasetDB.build_dataset_id(
             name=name,
-            owner=owner,
+            workspace=workspace,
         )
-        document = self._es.find_dataset(id=dataset_id, name=name, owner=owner)
+        document = self._es.find_dataset(id=dataset_id)
         if document is None:
             return None
-        base_ds = self._es_doc_to_instance(document)
-        if task and task != base_ds.task:
-            raise WrongTaskError(
-                detail=f"Provided task {task} cannot be applied to dataset"
-            )
         dataset_type = as_dataset_class or BaseDatasetDB
         return self._es_doc_to_instance(document, ds_class=dataset_type)
 
@@ -156,9 +141,7 @@ class DatasetsDAO:
     ) -> DatasetDB:
         """Transforms a stored elasticsearch document into a `BaseDatasetDB`"""
 
-        def key_value_list_to_dict(
-            key_value_list: List[Dict[str, Any]]
-        ) -> Dict[str, Any]:
+        def key_value_list_to_dict(key_value_list: List[Dict[str, Any]]) -> Dict[str, Any]:
             return {data["key"]: json.loads(data["value"]) for data in key_value_list}
 
         tags = doc.get("tags", [])
@@ -175,9 +158,7 @@ class DatasetsDAO:
     @staticmethod
     def _dataset_to_es_doc(dataset: DatasetDB) -> Dict[str, Any]:
         def dict_to_key_value_list(data: Dict[str, Any]) -> List[Dict[str, Any]]:
-            return [
-                {"key": key, "value": json.dumps(value)} for key, value in data.items()
-            ]
+            return [{"key": key, "value": json.dumps(value)} for key, value in data.items()]
 
         data = dataset.dict(by_alias=True)
         tags = data.get("tags", {})
@@ -208,19 +189,11 @@ class DatasetsDAO:
         """Make available a dataset"""
         self._es.open(dataset.id)
 
-    def get_all_workspaces(self) -> List[str]:
-        """Get all datasets (Only for super users)"""
-        metric_data = self._es.compute_argilla_metric(
-            metric_id="all_argilla_workspaces"
-        )
-        return [k for k in metric_data]
-
     def save_settings(
         self,
         dataset: DatasetDB,
         settings: DatasetSettingsDB,
     ) -> BaseDatasetSettingsDB:
-
         self._configure_vectors(dataset, settings)
         self._es.update_dataset_document(
             id=dataset.id,
@@ -231,19 +204,14 @@ class DatasetsDAO:
     def _configure_vectors(self, dataset, settings):
         if not settings.vectors:
             return
-        vectors_cfg = {
-            k: v.dim if isinstance(v, EmbeddingsConfig) else int(v)
-            for k, v in settings.vectors.items()
-        }
+        vectors_cfg = {k: v.dim if isinstance(v, EmbeddingsConfig) else int(v) for k, v in settings.vectors.items()}
         self._es.create_dataset(
             id=dataset.id,
             task=dataset.task,
             vectors_cfg=vectors_cfg,
         )
 
-    def load_settings(
-        self, dataset: DatasetDB, as_class: Type[DatasetSettingsDB]
-    ) -> Optional[DatasetSettingsDB]:
+    def load_settings(self, dataset: DatasetDB, as_class: Type[DatasetSettingsDB]) -> Optional[DatasetSettingsDB]:
         doc = self._es.find_dataset(id=dataset.id)
         if doc and "settings" in doc:
             settings = doc["settings"]

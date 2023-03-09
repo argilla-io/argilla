@@ -14,7 +14,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
@@ -30,11 +29,10 @@ dao = DatasetsDAO.get_instance(es_wrapper, records)
 def test_retrieve_ownered_dataset_for_no_owner_user():
     dataset = "test_retrieve_owned_dataset_for_no_owner_user"
     created = dao.create_dataset(
-        BaseDatasetDB(name=dataset, owner="other", task=TaskType.text_classification),
+        BaseDatasetDB(name=dataset, workspace="other", task=TaskType.text_classification),
     )
-    assert dao.find_by_name(created.name, owner=created.owner) == created
-    assert dao.find_by_name(created.name, owner=None) == created
-    assert dao.find_by_name(created.name, owner="me") is None
+    assert dao.find_by_name(created.name, workspace=created.workspace) == created
+    assert dao.find_by_name(created.name, workspace="me") is None
 
 
 def test_list_datasets_by_task():
@@ -47,7 +45,7 @@ def test_list_datasets_by_task():
     created_text = dao.create_dataset(
         BaseDatasetDB(
             name=dataset + "_text",
-            owner="other",
+            workspace="other",
             task=TaskType.text_classification,
         ),
     )
@@ -55,7 +53,7 @@ def test_list_datasets_by_task():
     created_token = dao.create_dataset(
         BaseDatasetDB(
             name=dataset + "_token",
-            owner="other",
+            workspace="other",
             task=TaskType.token_classification,
         ),
     )
@@ -77,7 +75,7 @@ def test_close_dataset():
     dataset = "test_close_dataset"
 
     created = dao.create_dataset(
-        BaseDatasetDB(name=dataset, owner="other", task=TaskType.text_classification),
+        BaseDatasetDB(name=dataset, workspace="other", task=TaskType.text_classification),
     )
 
     dao.close(created)

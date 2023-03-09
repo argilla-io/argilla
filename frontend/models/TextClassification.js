@@ -22,11 +22,20 @@ import _ from "lodash";
 class TextClassificationRecord extends BaseRecord {
   inputs;
 
-  constructor({ inputs, explanation, multi_label, ...superData }) {
+  constructor({
+    inputs,
+    explanation,
+    multi_label,
+    currentAnnotation,
+    originStatus,
+    ...superData
+  }) {
     super(superData);
     this.inputs = inputs;
     this.explanation = explanation;
     this.multi_label = multi_label;
+    this.currentAnnotation = currentAnnotation || this.annotation || null;
+    this.originStatus = originStatus || this.status;
   }
 
   recordTitle() {
@@ -152,7 +161,7 @@ class TextClassificationDataset extends ObservationDataset {
       where: this.id,
       data: [
         {
-          owner: this.owner,
+          workspace: this.workspace,
           name: this.name,
           _labels: labels,
           settings,
@@ -303,7 +312,7 @@ class TextClassificationDataset extends ObservationDataset {
     return await TextClassificationDataset.insertOrUpdate({
       where: this.id,
       data: {
-        owner: this.owner,
+        workspace: this.workspace,
         name: this.name,
         perRuleQueryMetrics,
         rulesOveralMetrics: overalMetrics,
@@ -315,7 +324,7 @@ class TextClassificationDataset extends ObservationDataset {
     const rules = await this._fetchAllRules();
     await TextClassificationDataset.insertOrUpdate({
       data: {
-        owner: this.owner,
+        workspace: this.workspace,
         name: this.name,
         rules,
       },
@@ -394,7 +403,7 @@ class TextClassificationDataset extends ObservationDataset {
 
     await TextClassificationDataset.insertOrUpdate({
       data: {
-        owner: this.owner,
+        workspace: this.workspace,
         name: this.name,
         activeRule: rule || {
           query,
@@ -427,7 +436,7 @@ class TextClassificationDataset extends ObservationDataset {
 
     await TextClassificationDataset.insertOrUpdate({
       data: {
-        owner: this.owner,
+        workspace: this.workspace,
         name: this.name,
         rules,
         activeRule,
@@ -454,7 +463,7 @@ class TextClassificationDataset extends ObservationDataset {
 
     await TextClassificationDataset.insertOrUpdate({
       data: {
-        owner: this.owner,
+        workspace: this.workspace,
         name: this.name,
         rules,
         perRuleQueryMetrics,
@@ -466,7 +475,7 @@ class TextClassificationDataset extends ObservationDataset {
   async clearCurrentLabelingRule() {
     await TextClassificationDataset.insertOrUpdate({
       data: {
-        owner: this.owner,
+        workspace: this.workspace,
         name: this.name,
         activeRule: null,
         activeRuleMetrics: null,

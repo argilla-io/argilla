@@ -22,18 +22,15 @@ from argilla.server.apis.v0.models.commons.model import (
     BaseSearchResults,
     ScoreRange,
 )
-from argilla.server.apis.v0.models.datasets import UpdateDatasetRequest
 from argilla.server.commons.models import PredictionStatus
 from argilla.server.daos.backend.search.model import SortableField
+from argilla.server.schemas.datasets import UpdateDatasetRequest
 from argilla.server.services.search.model import (
     ServiceBaseRecordsQuery,
     ServiceBaseSearchResultsAggregations,
 )
 from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationAnnotation as _TokenClassificationAnnotation,
-)
-from argilla.server.services.tasks.token_classification.model import (
-    ServiceTokenClassificationDataset,
 )
 
 
@@ -42,7 +39,6 @@ class TokenClassificationAnnotation(_TokenClassificationAnnotation):
 
 
 class TokenClassificationRecordInputs(BaseRecordInputs[TokenClassificationAnnotation]):
-
     text: str = Field()
     tokens: List[str] = Field(min_items=1)
     # TODO(@frascuchon): Delete this field and all related logic
@@ -62,9 +58,7 @@ class TokenClassificationRecordInputs(BaseRecordInputs[TokenClassificationAnnota
         return text
 
 
-class TokenClassificationRecord(
-    TokenClassificationRecordInputs, BaseRecord[TokenClassificationAnnotation]
-):
+class TokenClassificationRecord(TokenClassificationRecordInputs, BaseRecord[TokenClassificationAnnotation]):
     pass
 
 
@@ -73,7 +67,6 @@ class TokenClassificationBulkRequest(UpdateDatasetRequest):
 
 
 class TokenClassificationQuery(ServiceBaseRecordsQuery):
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)
@@ -90,11 +83,5 @@ class TokenClassificationAggregations(ServiceBaseSearchResultsAggregations):
     mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 
-class TokenClassificationSearchResults(
-    BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]
-):
-    pass
-
-
-class TokenClassificationDataset(ServiceTokenClassificationDataset):
+class TokenClassificationSearchResults(BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]):
     pass

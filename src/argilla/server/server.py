@@ -16,7 +16,6 @@
 """
 This module configures the global fastapi application
 """
-import fileinput
 import glob
 import inspect
 import logging
@@ -30,6 +29,7 @@ from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import ConfigError
 
 from argilla import __version__ as argilla_version
@@ -66,9 +66,7 @@ def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers"""
     api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(RequestValidationError)(
-        APIErrorHandler.common_exception_handler
-    )
+    api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
 
 
 def configure_api_router(app: FastAPI):
@@ -162,7 +160,6 @@ def configure_storage(app: FastAPI):
 
 
 def configure_app_security(app: FastAPI):
-
     if hasattr(auth, "router"):
         app.include_router(auth.router)
 
@@ -187,11 +184,7 @@ def configure_telemetry(app):
     """
     )
     message += "\n\n    "
-    message += (
-        "#set ARGILLA_ENABLE_TELEMETRY=0"
-        if os.name == "nt"
-        else "$>export ARGILLA_ENABLE_TELEMETRY=0"
-    )
+    message += "#set ARGILLA_ENABLE_TELEMETRY=0" if os.name == "nt" else "$>export ARGILLA_ENABLE_TELEMETRY=0"
     message += "\n"
 
     @app.on_event("startup")
@@ -210,7 +203,18 @@ argilla_app = FastAPI(
     version=str(argilla_version),
 )
 
-app = FastAPI()
+
+@argilla_app.get("/docs", include_in_schema=False)
+async def redirect_docs():
+    return RedirectResponse(url=f"{settings.base_url}api/docs")
+
+
+@argilla_app.get("/api", include_in_schema=False)
+async def redirect_api():
+    return RedirectResponse(url=f"{settings.base_url}api/docs")
+
+
+app = FastAPI(docs_url=None)
 app.mount(settings.base_url, argilla_app)
 
 configure_app_logging(app)

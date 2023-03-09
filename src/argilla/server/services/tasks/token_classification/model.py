@@ -74,10 +74,7 @@ class ServiceTokenClassificationAnnotation(ServiceBaseAnnotation):
     score: Optional[float] = None
 
 
-class ServiceTokenClassificationRecord(
-    ServiceBaseRecord[ServiceTokenClassificationAnnotation]
-):
-
+class ServiceTokenClassificationRecord(ServiceBaseRecord[ServiceTokenClassificationAnnotation]):
     tokens: List[str] = Field(min_items=1)
     text: str = Field()
     _raw_text: Optional[str] = Field(alias="raw_text")
@@ -87,7 +84,6 @@ class ServiceTokenClassificationRecord(
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
     def extended_fields(self) -> Dict[str, Any]:
-
         return {
             **super().extended_fields(),
             # See ../service/service.py
@@ -96,8 +92,7 @@ class ServiceTokenClassificationRecord(
                 for mention, entity in self.predicted_mentions()
             ],
             MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label}
-                for mention, entity in self.annotated_mentions()
+                {"mention": mention, "entity": entity.label} for mention, entity in self.annotated_mentions()
             ],
         }
 
@@ -144,18 +139,13 @@ class ServiceTokenClassificationRecord(
     @property
     def predicted(self) -> Optional[PredictionStatus]:
         if self.annotation and self.prediction:
-
             annotated_entities = self.annotation.entities
             predicted_entities = self.prediction.entities
             if len(annotated_entities) != len(predicted_entities):
                 return PredictionStatus.KO
 
             for ann, pred in zip(annotated_entities, predicted_entities):
-                if (
-                    ann.start != pred.start
-                    or ann.end != pred.end
-                    or ann.label != pred.label
-                ):
+                if ann.start != pred.start or ann.end != pred.end or ann.label != pred.label:
                     return PredictionStatus.KO
 
             return PredictionStatus.OK
@@ -182,18 +172,12 @@ class ServiceTokenClassificationRecord(
 
     def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
-            (mention, entity)
-            for mention, entity in self.__mentions_from_entities__(
-                self.predicted_entities()
-            ).items()
+            (mention, entity) for mention, entity in self.__mentions_from_entities__(self.predicted_entities()).items()
         ]
 
     def annotated_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
-            (mention, entity)
-            for mention, entity in self.__mentions_from_entities__(
-                self.annotated_entities()
-            ).items()
+            (mention, entity) for mention, entity in self.__mentions_from_entities__(self.annotated_entities()).items()
         ]
 
     def annotated_entities(self) -> Set[EntitySpan]:
@@ -208,14 +192,8 @@ class ServiceTokenClassificationRecord(
             return set()
         return set(self.prediction.entities)
 
-    def __mentions_from_entities__(
-        self, entities: Set[EntitySpan]
-    ) -> Dict[str, EntitySpan]:
-        return {
-            mention: entity
-            for entity in entities
-            for mention in [self.text[entity.start : entity.end]]
-        }
+    def __mentions_from_entities__(self, entities: Set[EntitySpan]) -> Dict[str, EntitySpan]:
+        return {mention: entity for entity in entities for mention in [self.text[entity.start : entity.end]]}
 
     class Config:
         allow_population_by_field_name = True
@@ -223,13 +201,7 @@ class ServiceTokenClassificationRecord(
 
 
 class ServiceTokenClassificationQuery(ServiceBaseRecordsQuery):
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
     score: Optional[ServiceScoreRange] = Field(default=None)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-
-
-class ServiceTokenClassificationDataset(ServiceBaseDataset):
-    task: TaskType = Field(default=TaskType.token_classification, const=True)
-    pass

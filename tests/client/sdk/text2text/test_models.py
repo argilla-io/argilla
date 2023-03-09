@@ -16,7 +16,6 @@ import socket
 from datetime import datetime
 
 import pytest
-
 from argilla.client.models import Text2TextRecord
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
@@ -66,9 +65,7 @@ def test_from_client_prediction(prediction, expected):
     sdk_record = CreationText2TextRecord.from_client(record)
 
     assert len(sdk_record.prediction.sentences) == len(prediction)
-    assert all(
-        [sentence.score == expected for sentence in sdk_record.prediction.sentences]
-    )
+    assert all([sentence.score == expected for sentence in sdk_record.prediction.sentences])
     assert sdk_record.metrics == {}
 
 

@@ -12,14 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Optional, Type, Union
 
 import pydantic
 from starlette import status
 
 
 class ServerError(Exception):
-
     HTTP_STATUS: int = status.HTTP_500_INTERNAL_SERVER_ERROR
 
     @classmethod
@@ -47,11 +46,7 @@ class ServerError(Exception):
 
     @property
     def arguments(self):
-        return (
-            {k: v for k, v in vars(self).items() if v is not None}
-            if vars(self)
-            else None
-        )
+        return {k: v for k, v in vars(self).items() if v is not None} if vars(self) else None
 
     def __str__(self):
         args = self.arguments or {}
@@ -78,11 +73,7 @@ class GenericServerError(ServerError):
     @classmethod
     def api_documentation(cls):
         return {
-            "content": {
-                "application/json": {
-                    "example": {"detail": {"code": "builtins.TypeError"}}
-                }
-            },
+            "content": {"application/json": {"example": {"detail": {"code": "builtins.TypeError"}}}},
         }
 
 

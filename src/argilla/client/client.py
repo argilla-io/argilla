@@ -18,14 +18,15 @@ import os
 import re
 import warnings
 from asyncio import Future
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
-from tqdm.auto import tqdm
+from rich import print as rprint
+from rich.progress import Progress
 
 from argilla._constants import (
     _OLD_WORKSPACE_HEADER_NAME,
-    DATASET_NAME_REGEX_PATTERN,
     DEFAULT_API_KEY,
+    ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client.apis.datasets import Datasets
@@ -99,17 +100,11 @@ class _ArgillaLogAgent:
             return await api.log_async(*args, **kwargs)
         except Exception as ex:
             dataset = kwargs["name"]
-            _LOGGER.error(
-                f"\nCannot log data in dataset '{dataset}'\n"
-                f"Error: {type(ex).__name__}\n"
-                f"Details: {ex}"
-            )
+            _LOGGER.error(f"\nCannot log data in dataset '{dataset}'\nError: {type(ex).__name__}\nDetails: {ex}")
             raise ex
 
     def log(self, *args, **kwargs) -> Future:
-        return asyncio.run_coroutine_threadsafe(
-            self.__log_internal__(self.__api__, *args, **kwargs), self.__loop__
-        )
+        return asyncio.run_coroutine_threadsafe(self.__log_internal__(self.__api__, *args, **kwargs), self.__loop__)
 
 
 class Argilla:
@@ -118,7 +113,7 @@ class Argilla:
     """
 
     # Larger sizes will trigger a warning
-    _MAX_CHUNK_SIZE = 5000
+    _MAX_BATCH_SIZE = 5000
 
     def __init__(
         self,
@@ -157,8 +152,7 @@ class Argilla:
         )
 
         self._user: User = users_api.whoami(client=self._client)
-        if workspace is not None:
-            self.set_workspace(workspace)
+        self.set_workspace(workspace or self._user.username)
 
         self._agent = _ArgillaLogAgent(self)
 
@@ -172,10 +166,7 @@ class Argilla:
     def client(self) -> AuthenticatedClient:
         """The underlying authenticated HTTP client"""
         warnings.warn(
-            message=(
-                "This prop will be removed in next release. "
-                "Please use the http_client prop instead."
-            ),
+            message="This prop will be removed in next release. Please use the http_client prop instead.",
             category=UserWarning,
         )
         return self._client
@@ -211,19 +202,24 @@ class Argilla:
         Args:
             workspace: The new workspace
         """
-        if workspace is None:
+        if not workspace:
             raise Exception("Must provide a workspace")
 
+        if not re.match(ES_INDEX_REGEX_PATTERN, workspace):
+            raise InputValueError(
+                f"Provided workspace name {workspace} does not match the pattern"
+                f" {ES_INDEX_REGEX_PATTERN}. Please, use a valid name for your"
+                " workspace. This limitation is caused by naming conventions for indexes"
+                " in Elasticsearch. If applicable, you can try to lowercase the name of your workspace."
+                " https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
+            )
+
         if workspace != self.get_workspace():
-            if workspace == self._user.username:
-                self._client.headers.pop(WORKSPACE_HEADER_NAME, workspace)
-            elif (
-                self._user.workspaces is not None
-                and workspace not in self._user.workspaces
-            ):
+            if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
+                self._client.headers[WORKSPACE_HEADER_NAME] = workspace
+                self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
+            else:
                 raise Exception(f"Wrong provided workspace {workspace}")
-            self._client.headers[WORKSPACE_HEADER_NAME] = workspace
-            self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
 
     def get_workspace(self) -> str:
         """Returns the name of the active workspace.
@@ -231,7 +227,7 @@ class Argilla:
         Returns:
             The name of the active workspace as a string.
         """
-        return self._client.headers.get(WORKSPACE_HEADER_NAME, self._user.username)
+        return self._client.headers.get(WORKSPACE_HEADER_NAME)
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
@@ -251,23 +247,28 @@ class Argilla:
             ),
         )
 
-    def delete(self, name: str):
+    def delete(self, name: str, workspace: Optional[str] = None):
         """Deletes a dataset.
 
         Args:
             name: The dataset name.
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         datasets_api.delete_dataset(client=self._client, name=name)
 
     def log(
         self,
         records: Union[Record, Iterable[Record], Dataset],
         name: str,
+        workspace: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        chunk_size: int = 500,
+        batch_size: int = 500,
         verbose: bool = True,
         background: bool = False,
+        chunk_size: Optional[int] = None,
     ) -> Union[BulkResponse, Future]:
         """Logs Records to argilla.
 
@@ -278,11 +279,12 @@ class Argilla:
             name: The dataset name.
             tags: A dictionary of tags related to the dataset.
             metadata: A dictionary of extra info for the dataset.
-            chunk_size: The chunk size for a data bulk.
+            batch_size: The batch size for a data bulk.
             verbose: If True, shows a progress bar and prints out a quick summary at the end.
             background: If True, we will NOT wait for the logging process to finish and return
                 an ``asyncio.Future`` object. You probably want to set ``verbose`` to False
                 in that case.
+            chunk_size: DEPRECATED! Use `batch_size` instead.
 
         Returns:
             Summary of the response from the REST API.
@@ -290,13 +292,17 @@ class Argilla:
             will be returned instead.
 
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         future = self._agent.log(
             records=records,
             name=name,
             tags=tags,
             metadata=metadata,
-            chunk_size=chunk_size,
+            batch_size=batch_size,
             verbose=verbose,
+            chunk_size=chunk_size,
         )
         if background:
             return future
@@ -310,10 +316,12 @@ class Argilla:
         self,
         records: Union[Record, Iterable[Record], Dataset],
         name: str,
+        workspace: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        chunk_size: int = 500,
+        batch_size: int = 500,
         verbose: bool = True,
+        chunk_size: Optional[int] = None,
     ) -> BulkResponse:
         """Logs Records to argilla with asyncio.
 
@@ -322,8 +330,9 @@ class Argilla:
             name: The dataset name.
             tags: A dictionary of tags related to the dataset.
             metadata: A dictionary of extra info for the dataset.
-            chunk_size: The chunk size for a data bulk.
+            batch_size: The batch size for a data bulk.
             verbose: If True, shows a progress bar and prints out a quick summary at the end.
+            chunk_size: DEPRECATED! Use `batch_size` instead.
 
         Returns:
             Summary of the response from the REST API
@@ -332,23 +341,33 @@ class Argilla:
         tags = tags or {}
         metadata = metadata or {}
 
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         if not name:
             raise InputValueError("Empty dataset name has been passed as argument.")
 
-        if not re.match(DATASET_NAME_REGEX_PATTERN, name):
+        if not re.match(ES_INDEX_REGEX_PATTERN, name):
             raise InputValueError(
                 f"Provided dataset name {name} does not match the pattern"
-                f" {DATASET_NAME_REGEX_PATTERN}. Please, use a valid name for your"
+                f" {ES_INDEX_REGEX_PATTERN}. Please, use a valid name for your"
                 " dataset. This limitation is caused by naming conventions for indexes"
                 " in Elasticsearch."
                 " https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
             )
 
-        if chunk_size > self._MAX_CHUNK_SIZE:
+        if chunk_size is not None:
+            warnings.warn(
+                "The argument `chunk_size` is deprecated and will be removed in a future"
+                " version. Please use `batch_size` instead.",
+                FutureWarning,
+            )
+            batch_size = chunk_size
+
+        if batch_size > self._MAX_BATCH_SIZE:
             _LOGGER.warning(
-                """The introduced chunk size is noticeably large, timeout errors may occur.
-                Consider a chunk size smaller than %s""",
-                self._MAX_CHUNK_SIZE,
+                "The requested batch size is noticeably large, timeout errors may occur. "
+                f"Consider a batch size smaller than {self._MAX_BATCH_SIZE}",
             )
 
         if isinstance(records, Record.__args__):
@@ -370,46 +389,37 @@ class Argilla:
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
         else:
-            raise InputValueError(
-                f"Unknown record type {record_type}. Available values are"
-                f" {Record.__args__}"
-            )
+            raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
 
         processed, failed = 0, 0
-        progress_bar = tqdm(total=len(records), disable=not verbose)
-        for i in range(0, len(records), chunk_size):
-            chunk = records[i : i + chunk_size]
+        with Progress() as progress_bar:
+            task = progress_bar.add_task("Logging...", total=len(records), visible=verbose)
 
-            response = await async_bulk(
-                client=self._client,
-                name=name,
-                json_body=bulk_class(
-                    tags=tags,
-                    metadata=metadata,
-                    records=[creation_class.from_client(r) for r in chunk],
-                ),
-            )
+            for i in range(0, len(records), batch_size):
+                batch = records[i : i + batch_size]
 
-            processed += response.parsed.processed
-            failed += response.parsed.failed
+                response = await async_bulk(
+                    client=self._client,
+                    name=name,
+                    json_body=bulk_class(
+                        tags=tags,
+                        metadata=metadata,
+                        records=[creation_class.from_client(r) for r in batch],
+                    ),
+                )
 
-            progress_bar.update(len(chunk))
-        progress_bar.close()
+                processed += response.parsed.processed
+                failed += response.parsed.failed
+
+                progress_bar.update(task, advance=len(batch))
 
         # TODO: improve logging policy in library
         if verbose:
-            _LOGGER.info(
-                f"Processed {processed} records in dataset {name}. Failed: {failed}"
-            )
+            _LOGGER.info(f"Processed {processed} records in dataset {name}. Failed: {failed}")
             workspace = self.get_workspace()
-            if (
-                not workspace
-            ):  # Just for backward comp. with datasets with no workspaces
+            if not workspace:  # Just for backward comp. with datasets with no workspaces
                 workspace = "-"
-            print(
-                f"{processed} records logged to"
-                f" {self._client.base_url}/datasets/{workspace}/{name}"
-            )
+            rprint(f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}")
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
@@ -417,6 +427,7 @@ class Argilla:
     def delete_records(
         self,
         name: str,
+        workspace: Optional[str] = None,
         query: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         discard_only: bool = False,
@@ -441,6 +452,9 @@ class Argilla:
             deletion).
 
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         return self.datasets.delete_records(
             name=name,
             mark_as_discarded=discard_only,
@@ -452,11 +466,14 @@ class Argilla:
     def load(
         self,
         name: str,
+        workspace: Optional[str] = None,
         query: Optional[str] = None,
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
+        batch_size: int = 250,
         as_pandas=None,
     ) -> Dataset:
         """Loads a argilla dataset.
@@ -468,6 +485,7 @@ class Argilla:
             vector: Vector configuration for a semantic search
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
+            sort: The fields on which to sort [(<field_name>, 'asc|decs')].
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
@@ -478,6 +496,9 @@ class Argilla:
             A argilla dataset.
 
         """
+        if workspace is not None:
+            self.set_workspace(workspace)
+
         if as_pandas is False:
             warnings.warn(
                 "The argument `as_pandas` is deprecated and will be removed in a future"
@@ -488,8 +509,7 @@ class Argilla:
             raise ValueError(
                 "The argument `as_pandas` is deprecated and will be removed in a future"
                 " version. Please adapt your code accordingly. ",
-                "If you want a pandas DataFrame do"
-                " `rg.load('my_dataset').to_pandas()`.",
+                "If you want a pandas DataFrame do `rg.load('my_dataset').to_pandas()`.",
             )
 
         try:
@@ -499,35 +519,45 @@ class Argilla:
                 vector=vector,
                 ids=ids,
                 limit=limit,
+                sort=sort,
                 id_from=id_from,
+                batch_size=batch_size,
             )
         except ApiCompatibilityError as err:  # Api backward compatibility
             from argilla import __version__ as version
 
             warnings.warn(
-                message=f"Using python client argilla=={version},"
-                f" however deployed server version is {err.api_version}."
-                " This might lead to compatibility issues.\n"
-                f" Preferably, update your server version to {version}"
-                " or downgrade your Python API at the loss"
-                " of functionality and robustness via\n"
-                f"`pip install argilla=={err.api_version}`",
+                message=(
+                    f"Using python client argilla=={version},"
+                    f" however deployed server version is {err.api_version}."
+                    " This might lead to compatibility issues.\n"
+                    f" Preferably, update your server version to {version}"
+                    " or downgrade your Python API at the loss"
+                    " of functionality and robustness via\n"
+                    f"`pip install argilla=={err.api_version}`"
+                ),
                 category=UserWarning,
             )
+            if batch_size is not None:
+                warnings.warn(
+                    message="The `batch_size` parameter is not supported"
+                    f" on server version {err.api_version}. Consider"
+                    f" updating your server version to {version} to"
+                    " take advantage of this functionality."
+                )
 
             return self._load_records_old_fashion(
                 name=name,
                 query=query,
                 ids=ids,
                 limit=limit,
+                sort=sort,
                 id_from=id_from,
             )
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
-        response = metrics_api.get_dataset_metrics(
-            self._client, name=name, task=response.parsed.task
-        )
+        response = metrics_api.get_dataset_metrics(self._client, name=name, task=response.parsed.task)
 
         return response.parsed
 
@@ -572,9 +602,7 @@ class Argilla:
                     rule=rule,
                 )
             except AlreadyExistsApiError:
-                _LOGGER.warning(
-                    f"Rule {rule} already exists. Please, update the rule instead."
-                )
+                _LOGGER.warning(f"Rule {rule} already exists. Please, update the rule instead.")
             except Exception as ex:
                 _LOGGER.warning(f"Cannot create rule {rule}: {ex}")
 
@@ -593,36 +621,26 @@ class Argilla:
                 )
             except NotFoundApiError:
                 _LOGGER.info(f"Rule {rule} does not exists, creating...")
-                text_classification_api.add_dataset_labeling_rule(
-                    self._client, name=dataset, rule=rule
-                )
+                text_classification_api.add_dataset_labeling_rule(self._client, name=dataset, rule=rule)
             except Exception as ex:
                 _LOGGER.warning(f"Cannot update rule {rule}: {ex}")
 
     def delete_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
         for rule in rules:
             try:
-                text_classification_api.delete_dataset_labeling_rule(
-                    self._client, name=dataset, rule=rule
-                )
+                text_classification_api.delete_dataset_labeling_rule(self._client, name=dataset, rule=rule)
             except Exception as ex:
                 _LOGGER.warning(f"Cannot delete rule {rule}: {ex}")
         """Deletes the dataset labeling rules"""
         for rule in rules:
-            text_classification_api.delete_dataset_labeling_rule(
-                self._client, name=dataset, rule=rule
-            )
+            text_classification_api.delete_dataset_labeling_rule(self._client, name=dataset, rule=rule)
 
     def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
-        response = text_classification_api.fetch_dataset_labeling_rules(
-            self._client, name=dataset
-        )
+        response = text_classification_api.fetch_dataset_labeling_rules(self._client, name=dataset)
 
         return [LabelingRule.parse_obj(data) for data in response.parsed]
 
-    def rule_metrics_for_dataset(
-        self, dataset: str, rule: LabelingRule
-    ) -> LabelingRuleMetricsSummary:
+    def rule_metrics_for_dataset(self, dataset: str, rule: LabelingRule) -> LabelingRuleMetricsSummary:
         response = text_classification_api.dataset_rule_metrics(
             self._client, name=dataset, query=rule.query, label=rule.label
         )
@@ -683,7 +701,7 @@ class Argilla:
         )
 
         records = [sdk_record.to_client() for sdk_record in response.parsed]
-        return dataset_class(self.__sort_records_by_id__(records))
+        return dataset_class(records)
 
     def _load_records_new_fashion(
         self,
@@ -692,7 +710,9 @@ class Argilla:
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
+        batch_size: int = 250,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
         task = dataset.task
@@ -721,6 +741,9 @@ class Argilla:
             )
 
         if vector:
+            if sort is not None:
+                _LOGGER.warning("Results are sorted by vector similarity, so 'sort' parameter is ignored.")
+
             vector_search = VectorSearch(
                 name=vector[0],
                 value=vector[1],
@@ -739,18 +762,12 @@ class Argilla:
             name=name,
             projection={"*"},
             limit=limit,
+            sort=sort,
             id_from=id_from,
+            batch_size=batch_size,
             # Query
             query_text=query,
             ids=ids,
         )
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
-        return dataset_class(self.__sort_records_by_id__(records))
-
-    def __sort_records_by_id__(self, records: list) -> list:
-        try:
-            records_sorted_by_id = sorted(records, key=lambda x: x.id)
-        # record ids can be a mix of int/str -> sort all as str type
-        except TypeError:
-            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
-        return records_sorted_by_id
+        return dataset_class(records)

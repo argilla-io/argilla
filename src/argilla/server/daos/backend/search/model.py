@@ -15,7 +15,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from argilla.server.commons.models import TaskStatus
 
@@ -26,7 +26,6 @@ class SortOrder(str, Enum):
 
 
 class QueryRange(BaseModel):
-
     range_from: float = Field(default=0.0, alias="from")
     range_to: float = Field(default=None, alias="to")
 
@@ -61,8 +60,7 @@ class BaseQuery(BaseModel):
 
 class BaseDatasetsQuery(BaseQuery):
     tasks: Optional[List[str]] = None
-    owners: Optional[List[str]] = None
-    include_no_owner: bool = None
+    workspaces: Optional[List[str]] = None
     name: Optional[str] = None
 
 
@@ -71,13 +69,11 @@ class VectorSearch(BaseModel):
     value: List[float]
     k: Optional[int] = Field(
         default=None,
-        description="Number of elements to retrieve. "
-        "If not provided, the request size will be used instead",
+        description="Number of elements to retrieve. " "If not provided, the request size will be used instead",
     )
 
 
 class BaseRecordsQuery(BaseQuery):
-
     query_text: Optional[str] = None
     advanced_query_dsl: bool = False
 
@@ -93,6 +89,13 @@ class BaseRecordsQuery(BaseQuery):
     has_prediction: Optional[bool] = None
 
     vector: Optional[VectorSearch] = Field(default=None)
+
+    @validator("query_text")
+    def check_empty_query_text(cls, value):
+        if value is not None:
+            if value.strip() == "":
+                value = None
+        return value
 
 
 BackendQuery = TypeVar("BackendQuery", bound=BaseQuery)

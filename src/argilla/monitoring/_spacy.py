@@ -61,15 +61,10 @@ class SpacyNERMonitor(BaseMonitor):
             event_timestamp=datetime.utcnow(),
         )
 
-    def _prepare_log_data(
-        self, docs_info: Tuple[Doc, Optional[Dict[str, Any]]]
-    ) -> Dict[str, Any]:
-
+    def _prepare_log_data(self, docs_info: Tuple[Doc, Optional[Dict[str, Any]]]) -> Dict[str, Any]:
         return dict(
             records=[
-                self.doc2token_classification(
-                    doc, agent=self.__wrapped__.path.name, metadata=metadata
-                )
+                self.doc2token_classification(doc, agent=self.__wrapped__.path.name, metadata=metadata)
                 for doc, metadata in docs_info
             ],
             name=self.dataset,

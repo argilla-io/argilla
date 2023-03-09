@@ -18,7 +18,7 @@ from pydantic import BaseModel
 
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError, WrongTaskError
-from argilla.server.services.datasets import ServiceDataset
+from argilla.server.services.datasets import ServiceBaseDataset, ServiceDataset
 from argilla.server.services.metrics import ServiceBaseMetric
 from argilla.server.services.metrics.models import ServiceBaseTaskMetrics
 from argilla.server.services.search.model import ServiceRecordsQuery
@@ -34,22 +34,20 @@ class TaskConfig(BaseModel):
 
 
 class TasksFactory:
-
     __REGISTERED_TASKS__ = dict()
 
     @classmethod
     def register_task(
         cls,
         task_type: TaskType,
-        dataset_class: Type[ServiceDataset],
         query_request: Type[ServiceRecordsQuery],
         record_class: Type[ServiceRecord],
+        dataset_class: Optional[Type[ServiceDataset]] = None,
         metrics: Optional[Type[ServiceBaseTaskMetrics]] = None,
     ):
-
         cls.__REGISTERED_TASKS__[task_type] = TaskConfig(
             task=task_type,
-            dataset=dataset_class,
+            dataset=dataset_class or ServiceBaseDataset,
             query=query_request,
             record=record_class,
             metrics=metrics,
@@ -87,19 +85,14 @@ class TasksFactory:
         return config
 
     @classmethod
-    def find_task_metric(
-        cls, task: TaskType, metric_id: str
-    ) -> Optional[ServiceBaseMetric]:
+    def find_task_metric(cls, task: TaskType, metric_id: str) -> Optional[ServiceBaseMetric]:
         metrics = cls.find_task_metrics(task, {metric_id})
         if metrics:
             return metrics[0]
         raise EntityNotFoundError(name=metric_id, type=ServiceBaseMetric)
 
     @classmethod
-    def find_task_metrics(
-        cls, task: TaskType, metric_ids: Set[str]
-    ) -> List[ServiceBaseMetric]:
-
+    def find_task_metrics(cls, task: TaskType, metric_ids: Set[str]) -> List[ServiceBaseMetric]:
         if not metric_ids:
             return []
 

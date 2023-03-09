@@ -8,7 +8,7 @@
 The Argilla UI has a dedicated mode to quickly label your data in a very intuitive way, or revise previous gold labels and correct them.
 Argilla's powerful search and filter functionalities, together with potential model predictions, can guide the annotation process and support the annotator.
 
-You can access the _Annotate mode_ via the sidebar of the [Dataset page](dataset.md).
+The _Annotate mode_ is the default mode of the [Dataset page](dataset.md).
 
 ### Create labels
 
@@ -18,50 +18,68 @@ On the right side of the bulk validation bar, you will find a _"+ Create new lab
 
 ### Annotate
 
-To annotate the records, the Argilla UI provides a simple and intuitive interface that tries to follow the same interaction pattern as in the [Explore mode](explore_records.md).
-As in the _Explore mode_, the record cards in the _Annotate mode_ are also customized depending on the [task](../../guides/task_examples.ipynb) of the dataset.
+The Argilla UI provides a simple and intuitive interface for annotating records. Each task offers a variety of small features and interactions to optimize annotations.
 
 #### Text Classification
 
+##### Single label
+![Single label text classification record](../../_static/reference/webapp/features-single_textclass_record.png)
+You can annotate the records with one click on the label. The record will be validated automatically.
 
-When switching in the _Annotate mode_ for a text classification dataset, the labels in the record cards become clickable and you can annotate the records by simply clicking on them.
-For multi-label classification tasks, you can also annotate a record with no labels by either validating an empty selection or deselecting all labels.
+##### Multi-label
+![Multi-label text classification record](../../_static/reference/webapp/features-multi_textclass_record.png)
+To annotate a record, click on one or multiple labels. Once a record is annotated, its status will show as *Pending*. Click *Reset* if you want to discard your changes and recover the previous state of the record or *Validate* to save your annotation into the dataset. The status will then change to *Validated* in the upper left corner of the record card.
 
-Once a record is annotated, it will be marked as _Validated_ in the upper right corner of the record card.
+You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
 
 ```{note}
-When the dataset contains a large list of labels (10 +) we encourage viewing the record one by one (from the footer) and using the arrow keys to move quickly to the next record.
+When the dataset contains a large list of labels (10 +), we encourage viewing the record cards one by one (select 1 record per page from the footer) and using the arrow keys to move quickly between records.
 ```
 
 #### Token Classification
-
+![Token classification record](../../_static/reference/webapp/features-tokclass_record.png)
 
 For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label.
 Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](../python/python_client.rst#Argilla.client.models.TokenClassificationRecord).
-You can also remove annotations by hovering over the highlights and pressing the _X_ button.
+To remove specific labels, hover over the highlights and press the _X_ button or double-click directly on the colored area. You can also click the _Clear_ button to remove all annotations in the record.
 
-After modifying a record, either by adding or removing annotations, its status will change to _Pending_ and a _Save_ button will appear.
-Once a record is saved, its status will change to _Validated_.
+After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click *Validate* to save the changes. The status will change to *Validated* in the upper left corner of the record card. Alternatively, you can use the *Reset* button to discard your changes and recover the previous state of the record.
+
+If you want to discard the record from the dataset, click *Discard*.
 
 #### Text2Text
+![Text2Text record](../../_static/reference/webapp/features-text2text_record.png)
+For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can empty the text field by clicking the *Clear* button.
 
+Remember to validate to save your changes after editing or drafting your annotation. Alternatively, you can discard your changes and revert to the previous state of the record using the *Reset* button.
 
-For Text2Text datasets, you have a text box available, in which you can draft or edit an annotation.
-After editing or drafting your annotation, don't forget to save your changes.
+After validating your annotation, predictions can still be accessed in the prediction panel on the right side of the record card.
+
+If you want to discard the record from the dataset, click *Discard*.
 
 ### Bulk annotate
 
 
-For all [tasks](../../guides/task_examples.ipynb), you can **bulk validate** the predictions of the records.
-You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page.
-Then you can either _Validate_ or _Discard_ the selected records.
+For all [tasks](../../guides/task_examples.ipynb), you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
 
-For the text classification task, you can additionally **bulk annotate** the selected records with a specific label, by simply selecting the label from the _"Annotate as ..."_ list.
+![Bulk actions bar](../../_static/reference/webapp/features-bulk-actions.png)
+
+For the text classification task, you can additionally **bulk annotate** the selected records by simply clicking on the pencil icon next to the global selection box and selecting the label(s) from the list.
+
+In multi-label text classification, you can remove labels from selected records by clicking the cross next to the label. You can also assign a partially used label to the whole selection by clicking on the tag button. Once you have made your selection, click *Select* to apply the annotations to all selected records. To finalize the validation, click on the "validate" icon.
+
+![Multi-label bulk annotation](../../_static/reference/webapp/features-multiclass-bulk-labels.png)
+
+In single-label text classification, there is no need to validate after selecting your label.
 
 ### Validate predictions
 
 In Argilla you can pre-annotate your data by including model predictions in your records.
 Assuming that the model works reasonably well on your dataset, you can filter for records with high prediction scores, and simply _validate_ their predictions to quickly annotate records.
+
+```{note}
+If you make any changes to predictions, validated annotations or annotate from scratch, you will need to validate the records to save the changes.
+```
 
 #### Text Classification
 
@@ -71,17 +89,20 @@ You can validate the predictions shown in a slightly darker tone by pressing the
 - for a **single label** classification task, this will be the prediction with the highest percentage
 - for a **multi label** classification task, this will be the predictions with a percentage above 50%
 
+If you select a different label in the single label task, the status will change to _Validated_ automatically. In the multi-label task, if you make any changes or clear the predictions/annotations, the status will change to _Pending_. You can then click _Validate_ to save the changes or _Reset_ to revert them and restore the previous status.
+
 #### Token Classification
 
 For this task, predictions are shown as underlines.
 You can also validate the predictions (or the absence of them) by pressing the _Validate_ button.
 
-Once the record is saved or validated, its status will change to _Validated_.
+If you make any changes or clear the predictions/annotations, the status will change to _Pending_. You can then click _Validate_ to save the changes or _Reset_ to revert them and restore the previous status.
 
 #### Text2Text
 
-You can validate or edit a prediction, by first clicking on the _view predictions_ button, and then the _Edit_ or _Validate_ button.
-After editing or drafting your annotation, don't forget to save your changes.
+The prediction and its score will appear in a text box below the main text. You can validate the prediction by clicking on the *Validate* button or edit the text making the changes directly in the text box.
+
+If you make any changes, the status will change to *Pending* and you will need to press shift+Enter or click the *Validate* button to save the changes. You can also click the *Clear* button to start writing from scratch or *Reset* to undo your changes and restore the previous status.
 
 ### Search and filter
 
@@ -200,29 +221,25 @@ Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
 ### Predictions and annotations
 
 Predictions and annotations are an integral part of Argilla's [data models](../python/python_client.rst#module-Argilla.client.models).
-The way they are presented in the Argilla UI depends on the [task](../../guides/task_examples.ipynb) of the dataset.
+The way they are presented in the Argilla UI depends on the [task](../../guides/task_examples.ipynb) of the dataset and the mode activated in the right column.
 
 #### Text classification
 
+In this task, the predictions are given as tags below the input text. They contain the label as well as a percentage score.
 
-In this task the predictions are given as tags below the input text.
-They contain the label as well as a percentage score.
-Annotations are shown as tags on the right together with a symbol indicating if the predictions match the annotations or not.
+In the annotation view, the predicted labels come in a slightly darker tone, while annotations have a much darker shade and white lettering. In the exploration view, the predicted labels appear below the input text and annotations are shown as tags on the right side of the card.
 
 #### Token classification
 
 
-In this task, predictions and annotations are displayed as highlights in the input text. To easily identify them at a glance, **annotations** are highlighted with the color of their corresponding label, while **predictions** are underlined with a solid line (see picture).
+In this task, predictions and annotations are displayed as highlights in the input text. To easily identify them at a glance, **annotations** are <span style="background-color:rgba(175,200,240,0.5)">highlighted</span> with the color of their corresponding label, while **predictions** are <span style="color: rgba(175,200,240);text-decoration:underline">underlined</span> with a solid line.
 
-For datasets with available score, the solid line for **predictions** disappears when the **score filter** (in **Predictions filter** section) is applied.
 
 #### Text2Text
 
+In this task, the prediction with the highest score appears in a text field below the input text. You can switch between predictions by clicking on their associated score, which appears on the upper right corner.
 
-In this task predictions and the annotation are given in a text field below the input text.
-You can switch between prediction and annotation via the "_View annotation_"/"_View predictions_" buttons.
-For the predictions you can find an associated score in the lower left corner.
-If you have multiple predictions you can toggle between them using the arrows on the button of the record card.
+Once you start making changes to the text or after you have validated the annotation, the predictions will still be visible from the *Prediction* banner at the right hand side of the text field.
 
 ### Metrics
 

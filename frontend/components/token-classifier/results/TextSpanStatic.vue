@@ -162,7 +162,7 @@ export default {
   }
 }
 
-.list__item--annotation-mode span span {
+.list__item--selectable span span {
   cursor: text;
 }
 .entity {

@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-
 from argilla.utils.span_utils import SpanUtils
 
 
@@ -44,9 +43,7 @@ def test_init():
 
 
 def test_init_value_error():
-    with pytest.raises(
-        ValueError, match="Token 'ValueError' not found in text: test error"
-    ):
+    with pytest.raises(ValueError, match="Token 'ValueError' not found in text: test error"):
         SpanUtils(text="test error", tokens=["test", "ValueError"])
 
 
@@ -57,9 +54,7 @@ def test_validate():
 
 def test_validate_not_valid_spans():
     span_utils = SpanUtils("test this.", ["test", "this", "."])
-    with pytest.raises(
-        ValueError, match="Following entity spans are not valid: \[\('mock', 2, 1\)\]\n"
-    ):
+    with pytest.raises(ValueError, match="Following entity spans are not valid: \[\('mock', 2, 1\)\]\n"):
         span_utils.validate([("mock", 2, 1)])
 
 
@@ -68,7 +63,7 @@ def test_validate_misaligned_spans():
     with pytest.raises(
         ValueError,
         match="Following entity spans are not aligned with provided tokenization\n"
-        r"Spans:\n- \[test \] defined in test this.\n"
+        r"Spans:\n\('mock', 0, 5\) - 'test '\n"
         r"Tokens:\n\['test', 'this', '.'\]",
     ):
         span_utils.validate([("mock", 0, 5)])
@@ -80,7 +75,7 @@ def test_validate_not_valid_and_misaligned_spans():
         ValueError,
         match=r"Following entity spans are not valid: \[\('mock', 2, 1\)\]\n"
         "Following entity spans are not aligned with provided tokenization\n"
-        r"Spans:\n- \[test \] defined in test this.\n"
+        r"Spans:\n\('mock', 0, 5\) - 'test '\n"
         r"Tokens:\n\['test', 'this', '.'\]",
     ):
         span_utils.validate([("mock", 2, 1), ("mock", 0, 5)])

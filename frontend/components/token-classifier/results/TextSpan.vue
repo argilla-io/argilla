@@ -111,7 +111,7 @@ export default {
         .sort((a, b) => a.text.localeCompare(b.text));
     },
     formattedEntities() {
-      const characters = "1234567890".split("");
+      const characters = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM".split("");
       return this.filteredEntities.map((ent, index) => ({
         ...ent,
         shortCut: characters[index],
@@ -223,7 +223,7 @@ export default {
     background: none;
   }
 }
-.list__item--annotation-mode span span {
+.list__item--selectable span span {
   cursor: text;
 }
 // ner colors

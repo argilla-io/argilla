@@ -15,16 +15,18 @@
 from datetime import datetime
 from typing import Any, Dict, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator
 
-from argilla._constants import DATASET_NAME_REGEX_PATTERN
+from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.commons.models import TaskType
 
 
 class BaseDatasetDB(BaseModel):
-    name: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
+    name: str = Field(regex=ES_INDEX_REGEX_PATTERN)
     task: TaskType
-    owner: Optional[str] = None
+    owner: Optional[str] = Field(description="Deprecated. Use `workspace` instead. Will be removed in v1.5.0")
+    workspace: Optional[str]
+
     tags: Dict[str, str] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = None
@@ -34,19 +36,34 @@ class BaseDatasetDB(BaseModel):
     )
     last_updated: datetime = None
 
+    @root_validator(pre=True)
+    def set_defaults(cls, values):
+        workspace = values.get("workspace") or values.get("owner")
+
+        cls._check_workspace(workspace)
+
+        values["workspace"] = workspace
+        values["owner"] = workspace
+
+        return values
+
     @classmethod
-    def build_dataset_id(cls, name: str, owner: Optional[str] = None) -> str:
-        """Build a dataset id for a given name and owner"""
-        if owner:
-            return f"{owner}.{name}"
-        return name
+    def _check_workspace(cls, workspace: str):
+        if not workspace:
+            raise ValueError("Missing workspace")
+
+    @classmethod
+    def build_dataset_id(cls, name: str, workspace: str) -> str:
+        """Build a dataset id for a given name and workspace"""
+        cls._check_workspace(workspace)
+        return f"{workspace}.{name}"
 
     @property
     def id(self) -> str:
-        """The dataset id. Compounded by owner and name"""
-        return self.build_dataset_id(self.name, self.owner)
+        """The dataset id. Compounded by workspace and name"""
+        return self.build_dataset_id(self.name, self.workspace)
 
-    def dict(self, *args, **kwargs) -> "DictStrAny":
+    def dict(self, *args, **kwargs) -> Dict[str, Any]:
         """
         Extends base component dict extending object properties
         and user defined extended fields

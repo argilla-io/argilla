@@ -15,8 +15,6 @@
 from typing import Any, ClassVar, Dict, Iterable, List
 
 from pydantic import Field
-from sklearn.metrics import precision_recall_fscore_support
-from sklearn.preprocessing import MultiLabelBinarizer
 
 from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
 from argilla.server.services.metrics.models import CommonTasksMetrics
@@ -24,6 +22,7 @@ from argilla.server.services.search.model import ServiceRecordsQuery
 from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationRecord,
 )
+from argilla.utils.dependency import requires_version
 
 
 class F1Metric(ServicePythonMetric):
@@ -38,14 +37,13 @@ class F1Metric(ServicePythonMetric):
 
     multi_label: bool = False
 
+    @requires_version("scikit-learn")
     def apply(self, records: Iterable[ServiceTextClassificationRecord]) -> Any:
+        from sklearn.metrics import precision_recall_fscore_support
+
         filtered_records = list(filter(lambda r: r.predicted is not None, records))
         # TODO: This must be precomputed with using a global dataset metric
-        ds_labels = {
-            label
-            for record in filtered_records
-            for label in record.annotated_as + record.predicted_as
-        }
+        ds_labels = {label for record in filtered_records for label in record.annotated_as + record.predicted_as}
 
         if not len(ds_labels):
             return {}
@@ -65,16 +63,14 @@ class F1Metric(ServicePythonMetric):
                 y_pred.append([labels_mapping[label] for label in predictions])
 
         if self.multi_label:
+            from sklearn.preprocessing import MultiLabelBinarizer
+
             mlb = MultiLabelBinarizer(classes=list(labels_mapping.values()))
             y_true = mlb.fit_transform(y_true)
             y_pred = mlb.fit_transform(y_pred)
 
-        micro_p, micro_r, micro_f, _ = precision_recall_fscore_support(
-            y_true=y_true, y_pred=y_pred, average="micro"
-        )
-        macro_p, macro_r, macro_f, _ = precision_recall_fscore_support(
-            y_true=y_true, y_pred=y_pred, average="macro"
-        )
+        micro_p, micro_r, micro_f, _ = precision_recall_fscore_support(y_true=y_true, y_pred=y_pred, average="micro")
+        macro_p, macro_r, macro_f, _ = precision_recall_fscore_support(y_true=y_true, y_pred=y_pred, average="macro")
 
         per_label = {}
         for label, p, r, f, s in zip(
@@ -127,21 +123,15 @@ class DatasetLabels(ServicePythonMetric):
         records: Iterable[ServiceTextClassificationRecord],
     ) -> Dict[str, Any]:
         ds_labels = set()
-        for _ in range(
-            0, self.records_to_fetch
-        ):  # Only a few of records will be parsed
+        for _ in range(0, self.records_to_fetch):  # Only a few of records will be parsed
             record = next(records, None)
             if record is None:
                 break
 
             if record.annotation:
-                ds_labels.update(
-                    [label.class_label for label in record.annotation.labels]
-                )
+                ds_labels.update([label.class_label for label in record.annotation.labels])
             if record.prediction:
-                ds_labels.update(
-                    [label.class_label for label in record.prediction.labels]
-                )
+                ds_labels.update([label.class_label for label in record.prediction.labels])
         return {"labels": ds_labels or []}
 
 
@@ -172,6 +162,14 @@ class TextClassificationMetrics(CommonTasksMetrics[ServiceTextClassificationReco
             ServiceBaseMetric(
                 id="annotated_as",
                 name="Annotated labels distribution",
+            ),
+            ServiceBaseMetric(
+                id="labeling_rule",
+                name="Labeling rule metric based on a query rule and a set of labels",
+            ),
+            ServiceBaseMetric(
+                id="dataset_labeling_rules",
+                name="Computes the overall labeling rules stats",
             ),
         ]
     )

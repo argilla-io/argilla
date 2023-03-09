@@ -26,11 +26,7 @@ class WrongResponseError(BaseClientError):
         self.response = response
 
     def __str__(self):
-        return (
-            f"\nUnexpected response: {self.message}"
-            "\nResponse content:"
-            f"\n{self.response}"
-        )
+        return f"\nUnexpected response: {self.message}" "\nResponse content:" f"\n{self.response}"
 
 
 class InputValueError(BaseClientError):
@@ -65,7 +61,6 @@ class HttpResponseError(BaseClientError):
 
 
 class ArApiResponseError(BaseClientError):
-
     HTTP_STATUS: int
 
     def __init__(self, **ctx):
@@ -73,8 +68,7 @@ class ArApiResponseError(BaseClientError):
 
     def __str__(self):
         return (
-            f"Argilla server returned an error with http status: {self.HTTP_STATUS}"
-            + f"\nError details: [{self.ctx}]"
+            f"Argilla server returned an error with http status: {self.HTTP_STATUS}" + f"\nError details: [{self.ctx}]"
         )
 
 
@@ -106,7 +100,6 @@ class ValidationApiError(ArApiResponseError):
     HTTP_STATUS = 422
 
     def __init__(self, client_ctx, params, **ctx):
-
         for error in params.get("errors", []):
             current_level = client_ctx
             for loc in error["loc"]:

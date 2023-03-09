@@ -6,7 +6,7 @@ let wrapper = null;
 const options = {
   stubs: ["nuxt", "results-record"],
   propsData: {
-    datasetId: ["owner", "name"],
+    datasetId: ["workspace", "name"],
     datasetTask: "TextClassification",
     dataset: {
       type: Object,

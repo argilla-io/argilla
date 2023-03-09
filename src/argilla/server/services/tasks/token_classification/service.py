@@ -19,12 +19,12 @@ from fastapi import Depends
 
 from argilla.server.commons.config import TasksFactory
 from argilla.server.daos.backend.search.model import SortableField
+from argilla.server.services.datasets import ServiceBaseDataset
 from argilla.server.services.search.model import ServiceSearchResults, ServiceSortConfig
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
 from argilla.server.services.tasks.token_classification.model import (
-    ServiceTokenClassificationDataset,
     ServiceTokenClassificationQuery,
     ServiceTokenClassificationRecord,
 )
@@ -58,7 +58,7 @@ class TokenClassificationService:
 
     async def add_records(
         self,
-        dataset: ServiceTokenClassificationDataset,
+        dataset: ServiceBaseDataset,
         records: List[ServiceTokenClassificationRecord],
     ):
         failed = await self.__storage__.store_records(
@@ -70,14 +70,13 @@ class TokenClassificationService:
 
     def search(
         self,
-        dataset: ServiceTokenClassificationDataset,
+        dataset: ServiceBaseDataset,
         query: ServiceTokenClassificationQuery,
         sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
         exclude_metrics: bool = True,
     ) -> ServiceSearchResults:
-
         """
         Run a search in a dataset
 
@@ -132,18 +131,14 @@ class TokenClassificationService:
             results.metrics["status"] = results.metrics["status_distribution"]
             results.metrics["predicted"] = results.metrics["error_distribution"]
             results.metrics["predicted"].pop("unknown", None)
-            results.metrics["mentions"] = results.metrics[
-                "annotated_mentions_distribution"
-            ]
-            results.metrics["predicted_mentions"] = results.metrics[
-                "predicted_mentions_distribution"
-            ]
+            results.metrics["mentions"] = results.metrics["annotated_mentions_distribution"]
+            results.metrics["predicted_mentions"] = results.metrics["predicted_mentions_distribution"]
 
         return results
 
     def read_dataset(
         self,
-        dataset: ServiceTokenClassificationDataset,
+        dataset: ServiceBaseDataset,
         query: ServiceTokenClassificationQuery,
         id_from: Optional[str] = None,
         limit: int = 1000,
@@ -155,8 +150,6 @@ class TokenClassificationService:
         ----------
         dataset:
             The dataset name
-        owner:
-            The dataset owner
         query:
             If provided, scan will retrieve only records matching
             the provided query filters. Optional

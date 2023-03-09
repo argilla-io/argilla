@@ -16,17 +16,17 @@
 from typing import List
 
 from fastapi import APIRouter, Body, Depends, Security
+from pydantic import parse_obj_as
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
-from argilla.server.apis.v0.models.datasets import (
+from argilla.server.errors import EntityNotFoundError
+from argilla.server.schemas.datasets import (
     CopyDatasetRequest,
     CreateDatasetRequest,
     Dataset,
     UpdateDatasetRequest,
 )
-from argilla.server.commons.config import TasksFactory
-from argilla.server.errors import EntityNotFoundError
 from argilla.server.security import auth
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
@@ -47,12 +47,12 @@ async def list_datasets(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> List[Dataset]:
-    return service.list(
+    datasets = service.list(
         user=current_user,
-        workspaces=[request_deps.workspace]
-        if request_deps.workspace is not None
-        else None,
+        workspaces=[request_deps.workspace] if request_deps.workspace is not None else None,
     )
+
+    return parse_obj_as(List[Dataset], datasets)
 
 
 @router.post(
@@ -64,20 +64,15 @@ async def list_datasets(
     description="Create a new dataset",
 )
 async def create_dataset(
-    request: CreateDatasetRequest = Body(..., description=f"The request dataset info"),
+    request: CreateDatasetRequest = Body(..., description="The request dataset info"),
     ws_params: CommonTaskHandlerDependencies = Depends(),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     user: User = Security(auth.get_user, scopes=["create:datasets"]),
 ) -> Dataset:
+    request.workspace = request.workspace or ws_params.workspace
+    dataset = datasets.create_dataset(user=user, dataset=request)
 
-    owner = user.check_workspace(ws_params.workspace)
-
-    dataset_class = TasksFactory.get_task_dataset(request.task)
-    dataset = dataset_class.parse_obj({**request.dict()})
-    dataset.owner = owner
-
-    response = datasets.create_dataset(user=user, dataset=dataset)
-    return Dataset.parse_obj(response)
+    return Dataset.from_orm(dataset)
 
 
 @router.get(
@@ -92,7 +87,7 @@ def get_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
-    return Dataset.parse_obj(
+    return Dataset.from_orm(
         service.find_by_name(
             user=current_user,
             name=name,
@@ -114,17 +109,16 @@ def update_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
+    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
 
-    found_ds = service.find_by_name(
-        user=current_user, name=name, workspace=ds_params.workspace
-    )
-
-    return service.update(
+    dataset = service.update(
         user=current_user,
         dataset=found_ds,
         tags=request.tags,
         metadata=request.metadata,
     )
+
+    return Dataset.from_orm(dataset)
 
 
 @router.delete(
@@ -161,9 +155,7 @@ def close_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
-    found_ds = service.find_by_name(
-        user=current_user, name=name, workspace=ds_params.workspace
-    )
+    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
     service.close(user=current_user, dataset=found_ds)
 
 
@@ -177,9 +169,7 @@ def open_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
-    found_ds = service.find_by_name(
-        user=current_user, name=name, workspace=ds_params.workspace
-    )
+    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
     service.open(user=current_user, dataset=found_ds)
 
 
@@ -196,10 +186,8 @@ def copy_dataset(
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
-    found = service.find_by_name(
-        user=current_user, name=name, workspace=ds_params.workspace
-    )
-    return service.copy_dataset(
+    found = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
+    dataset = service.copy_dataset(
         user=current_user,
         dataset=found,
         copy_name=copy_request.name,
@@ -207,3 +195,5 @@ def copy_dataset(
         copy_tags=copy_request.tags,
         copy_metadata=copy_request.metadata,
     )
+
+    return Dataset.from_orm(dataset)

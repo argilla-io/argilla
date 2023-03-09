@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.server.daos.backend.search.model import (
     SortableField,
     SortConfig,
@@ -61,24 +60,34 @@ from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
     ],
 )
 def test_build_sort_configuration(index_schema, sort_cfg, expected_sort):
-
     builder = EsQueryBuilder()
 
-    es_sort = builder.map_2_es_sort_configuration(
-        sort=SortConfig(sort_by=sort_cfg), schema=index_schema
-    )
+    es_sort = builder.map_2_es_sort_configuration(sort=SortConfig(sort_by=sort_cfg), schema=index_schema)
     assert es_sort == expected_sort
 
 
 def test_build_sort_with_wrong_field_name():
     builder = EsQueryBuilder()
 
+    index_schema = {
+        "mappings": {
+            "properties": {
+                "id": {"type": "keyword"},
+            }
+        }
+    }
+
     with pytest.raises(Exception):
-        builder.map_2_es_sort_configuration(
-            sort=SortConfig(sort_by=[SortableField(id="wat?!")])
-        )
+        builder.map_2_es_sort_configuration(schema=index_schema, sort=SortConfig(sort_by=[SortableField(id="wat?!")]))
 
 
 def test_build_sort_without_sort_config():
     builder = EsQueryBuilder()
-    assert builder.map_2_es_sort_configuration() is None
+    index_schema = {
+        "mappings": {
+            "properties": {
+                "id": {"type": "keyword"},
+            }
+        }
+    }
+    assert builder.map_2_es_sort_configuration(sort=SortConfig(), schema=index_schema) is None

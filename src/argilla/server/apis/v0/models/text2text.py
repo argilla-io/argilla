@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
@@ -26,14 +25,13 @@ from argilla.server.apis.v0.models.commons.model import (
     ScoreRange,
     SortableField,
 )
-from argilla.server.apis.v0.models.datasets import UpdateDatasetRequest
-from argilla.server.commons.models import PredictionStatus, TaskType
+from argilla.server.commons.models import PredictionStatus
+from argilla.server.schemas.datasets import UpdateDatasetRequest
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.search.model import (
     ServiceBaseRecordsQuery,
     ServiceBaseSearchResultsAggregations,
 )
-from argilla.server.services.tasks.text2text.models import ServiceText2TextDataset
 
 
 class Text2TextPrediction(BaseModel):
@@ -51,7 +49,6 @@ class Text2TextAnnotation(BaseAnnotation):
 
 
 class Text2TextRecordInputs(BaseRecordInputs[Text2TextAnnotation]):
-
     text: str
 
 
@@ -73,13 +70,7 @@ class Text2TextSearchAggregations(ServiceBaseSearchResultsAggregations):
     annotated_text: Dict[str, int] = Field(default_factory=dict)
 
 
-class Text2TextSearchResults(
-    BaseSearchResults[Text2TextRecord, Text2TextSearchAggregations]
-):
-    pass
-
-
-class Text2TextDataset(ServiceText2TextDataset):
+class Text2TextSearchResults(BaseSearchResults[Text2TextRecord, Text2TextSearchAggregations]):
     pass
 
 

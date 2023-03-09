@@ -86,18 +86,22 @@ export default {
     },
     async onValidate(records) {
       const filteredRecords = this.validationFilter(records);
-      await this.validateAnnotations({
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: filteredRecords.map((record) => {
-          return {
-            ...record,
-            annotation: {
-              sentences: [{ text: record.sentenceForAnnotation, score: 1 }],
-            },
-          };
-        }),
-      });
+      try {
+        await this.validateAnnotations({
+          dataset: this.dataset,
+          agent: this.$auth.user.username,
+          records: filteredRecords.map((record) => {
+            return {
+              ...record,
+              annotation: {
+                sentences: [{ text: record.sentenceForAnnotation, score: 1 }],
+              },
+            };
+          }),
+        });
+      } catch (err) {
+        console.log(err);
+      }
     },
     searchRecords(query) {
       this.$emit("search-records", query);

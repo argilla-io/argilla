@@ -35,7 +35,7 @@ If you do not retrieve any results after a version update, you should use the `w
 The (arguably) most important fields are the `text` and `text.exact` fields.
 They both contain the text of the records, however in two different forms:
 
-- the `text` field uses Elasticsearch's [standard analyzer](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/analysis-standard-analyzer.html) that ignores capitalization and removes most of the punctuatio;
+- the `text` field uses Elasticsearch's [standard analyzer](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/analysis-standard-analyzer.html) that ignores capitalization and removes most of the punctuation;
 - the `text.exact` field uses the [whitespace analyzer](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/analysis-whitespace-analyzer.html) that differentiates between lower and upper case, and does take into account punctuation;
 
 Let's have a look at a few examples.

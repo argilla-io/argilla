@@ -29,9 +29,7 @@ from argilla.client.sdk.commons.errors import (
 )
 
 
-def handle_response_error(
-    response: httpx.Response, parse_response: bool = True, **client_ctx
-):
+def handle_response_error(response: httpx.Response, parse_response: bool = True, **client_ctx):
     try:
         response_content = response.json() if parse_response else {}
     except JSONDecodeError:

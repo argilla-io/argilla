@@ -12,12 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import datetime
+import uuid
 
 import pytest
-from pydantic import ValidationError
-
-from argilla.server.apis.v0.models.datasets import CreateDatasetRequest
 from argilla.server.commons.models import TaskType
+from argilla.server.daos.models.datasets import BaseDatasetDB
+from argilla.server.schemas.datasets import CreateDatasetRequest, Dataset
+from pydantic import ValidationError
 
 
 @pytest.mark.parametrize(
@@ -44,3 +46,38 @@ def test_dataset_naming_ok(name):
 def test_dataset_naming_ko(name):
     with pytest.raises(ValidationError, match="string does not match regex"):
         CreateDatasetRequest(name=name, task=TaskType.token_classification)
+
+
+@pytest.mark.parametrize(
+    ("dataset", "expected_workspace"),
+    [
+        (BaseDatasetDB(name="ds", workspace="ws", task=TaskType.text_classification), "ws"),
+        (BaseDatasetDB(name="ds", owner="owner", task=TaskType.text_classification), "owner"),
+        (BaseDatasetDB(name="ds", workspace="ws", owner="owner", task=TaskType.text_classification), "ws"),
+        (BaseDatasetDB(name="ds", workspace=None, owner="ws", task=TaskType.text_classification), "ws"),
+    ],
+)
+def test_dataset_creation_sync(dataset, expected_workspace):
+    assert dataset.workspace == expected_workspace
+    assert dataset.owner == dataset.workspace
+    assert dataset.id == f"{dataset.workspace}.{dataset.name}"
+
+
+def test_dataset_creation_fails_on_no_workspace_and_owner():
+    with pytest.raises(ValueError, match="Missing workspace"):
+        BaseDatasetDB(task=TaskType.text_classification, name="tedb", workspace=None, owner=None)
+
+
+def test_accept_create_dataset_without_created_by():
+    ds = Dataset(
+        name="a-dataset",
+        id=uuid.uuid4(),
+        task=TaskType.text_classification,
+        owner="dd",
+        workspace="dd",
+        created_at=datetime.datetime.utcnow(),
+        last_updated=datetime.datetime.utcnow(),
+    )
+
+    assert ds
+    assert ds.created_by is None

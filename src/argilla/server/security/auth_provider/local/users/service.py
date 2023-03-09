@@ -18,8 +18,6 @@ from typing import List, Optional
 from fastapi import Depends
 from passlib.context import CryptContext
 
-from argilla.server.daos.datasets import NO_WORKSPACE
-
 from .dao import UsersDAO, create_users_dao
 from .model import User
 
@@ -66,9 +64,7 @@ class UsersService:
     def get_user(self, username) -> Optional[User]:
         user = self.__dao__.get_user(username)
         if user and user.is_superuser():
-            workspaces = list(self._fetch_all_workspaces())
-            if NO_WORKSPACE not in workspaces:
-                workspaces.append(NO_WORKSPACE)
+            workspaces = self._fetch_all_workspaces()
             user.workspaces = workspaces
         return user
 
@@ -84,7 +80,7 @@ class UsersService:
     async def find_user_by_api_key(self, api_key: str) -> Optional[User]:
         user = await self.__dao__.get_user_by_api_key(api_key)
         if user and user.is_superuser():
-            user.workspaces = [NO_WORKSPACE] + list(self._fetch_all_workspaces())
+            user.workspaces = list(self._fetch_all_workspaces())
         return user
 
     def __verify_password__(self, password: str, hashed_password: str) -> bool:

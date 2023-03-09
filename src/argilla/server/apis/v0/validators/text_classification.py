@@ -17,9 +17,9 @@ from typing import List, Optional, Set, Type
 from fastapi import Depends
 
 from argilla.server.apis.v0.models.dataset_settings import TextClassificationSettings
-from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import BadRequestError, EntityNotFoundError
+from argilla.server.schemas.datasets import Dataset
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
 from argilla.server.services.tasks.text_classification.metrics import DatasetLabels
@@ -38,7 +38,6 @@ from argilla.server.services.tasks.text_classification.model import (
 
 # TODO(@frascuchon): Move validator and its models to the service layer
 class DatasetValidator:
-
     _INSTANCE = None
 
     def __init__(self, datasets: DatasetsService, metrics: MetricsService):
@@ -55,9 +54,7 @@ class DatasetValidator:
             cls._INSTANCE = cls(datasets, metrics=metrics)
         return cls._INSTANCE
 
-    async def validate_dataset_settings(
-        self, user: User, dataset: Dataset, settings: TextClassificationSettings
-    ):
+    async def validate_dataset_settings(self, user: User, dataset: Dataset, settings: TextClassificationSettings):
         if settings and settings.label_schema:
             results = self.__metrics__.summarize_metric(
                 dataset=dataset,
@@ -67,9 +64,7 @@ class DatasetValidator:
             )
             if results:
                 labels = results.get("labels", [])
-                label_schema = set(
-                    [label.name for label in settings.label_schema.labels]
-                )
+                label_schema = set([label.name for label in settings.label_schema.labels])
                 for label in labels:
                     if label not in label_schema:
                         raise BadRequestError(
@@ -88,9 +83,7 @@ class DatasetValidator:
                 user=user, dataset=dataset, class_type=__svc_settings_class__
             )
             if settings and settings.label_schema:
-                label_schema = set(
-                    [label.name for label in settings.label_schema.labels]
-                )
+                label_schema = set([label.name for label in settings.label_schema.labels])
                 for r in records:
                     if r.prediction:
                         self.__check_label_classes__(

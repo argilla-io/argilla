@@ -15,11 +15,10 @@
 import uuid
 
 import pytest
-from fastapi import Request
-
 from argilla.server.commons import telemetry
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import ServerError
+from fastapi import Request
 
 mock_request = Request(scope={"type": "http", "headers": {}})
 
@@ -46,9 +45,7 @@ async def test_track_bulk(telemetry_track_data):
     task, records = TaskType.token_classification, 100
 
     await telemetry.track_bulk(task=task, records=records)
-    telemetry_track_data.assert_called_once_with(
-        "LogRecordsRequested", {"task": task, "records": records}
-    )
+    telemetry_track_data.assert_called_once_with("LogRecordsRequested", {"task": task, "records": records})
 
 
 @pytest.mark.asyncio

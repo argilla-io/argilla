@@ -16,6 +16,7 @@ from typing import Any, Dict, Optional, Type
 
 from fastapi import Depends
 
+from argilla.server.daos.backend.search.model import SortConfig
 from argilla.server.daos.models.records import DaoRecordsSearch
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.services.datasets import ServiceDataset
@@ -99,8 +100,7 @@ class MetricsService:
             query = metric.prepare_query(query)
             records = self.__dao__.scan_dataset(
                 dataset,
-                search=DaoRecordsSearch(query=query),
-                shuffle=metric.shuffle_records,
+                search=DaoRecordsSearch(query=query, sort=SortConfig(shuffle=metric.shuffle_records)),
                 limit=metric.records_to_fetch,
                 exclude_fields={
                     "vectors",
@@ -116,3 +116,16 @@ class MetricsService:
             dataset=dataset,
             query=query,
         )
+
+    def annotated_records(self, dataset: ServiceDataset) -> int:
+        """Return the number of annotated records for a dataset"""
+        results = self.__dao__.search_records(
+            dataset,
+            size=0,
+            search=DaoRecordsSearch(query=ServiceBaseRecordsQuery(has_annotation=True)),
+        )
+        return results.total
+
+    def total_records(self, dataset: ServiceDataset) -> int:
+        """Return the total number of records for a given dataset"""
+        return self.__dao__.search_records(dataset, size=0).total

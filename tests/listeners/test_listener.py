@@ -15,9 +15,8 @@
 import time
 from typing import List
 
+import argilla as rg
 import pytest
-
-import argilla as ar
 from argilla import RGListenerContext, listener
 from argilla.client.models import Record
 
@@ -40,10 +39,8 @@ def condition_check_params(search):
         ("dataset", "val + {param}", None, condition_check_params, {"param": 100}),
     ],
 )
-def test_listener_with_parameters(
-    mocked_client, dataset, query, metrics, condition, query_params
-):
-    ar.delete(dataset)
+def test_listener_with_parameters(mocked_client, dataset, query, metrics, condition, query_params):
+    rg.delete(dataset)
 
     class TestListener:
         executed = False
@@ -81,7 +78,7 @@ def test_listener_with_parameters(
 
     time.sleep(1.5)
     assert test.action.is_running()
-    ar.log(ar.TextClassificationRecord(text="This is a text"), name=dataset)
+    rg.log(rg.TextClassificationRecord(text="This is a text"), name=dataset)
 
     with pytest.raises(ValueError):
         test.action.start()

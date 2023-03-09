@@ -12,11 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 import argilla
+import pytest
 from argilla.server.apis.v0.models.commons.model import ScoreRange
-from argilla.server.apis.v0.models.datasets import Dataset
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
@@ -25,7 +23,9 @@ from argilla.server.apis.v0.models.token_classification import TokenClassificati
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
+from argilla.server.daos.models.datasets import BaseDatasetDB
 from argilla.server.daos.records import DatasetRecordsDAO
+from argilla.server.schemas.datasets import Dataset
 from argilla.server.services.metrics import MetricsService, ServicePythonMetric
 from argilla.server.services.search.model import ServiceSortConfig
 from argilla.server.services.search.service import SearchRecordsService
@@ -71,13 +71,10 @@ def test_query_builder_with_query_range(backend: GenericElasticEngineBackend):
     }
 
 
-def test_query_builder_with_nested(
-    mocked_client, dao, backend: GenericElasticEngineBackend
-):
-    dataset = Dataset(
-        name="test_query_builder_with_nested",
-        owner=argilla.get_workspace(),
-        task=TaskType.token_classification,
+def test_query_builder_with_nested(mocked_client, dao, backend: GenericElasticEngineBackend):
+    argilla.init()
+    dataset = BaseDatasetDB(
+        name="test_query_builder_with_nested", workspace=argilla.get_workspace(), task=TaskType.token_classification
     )
     argilla.delete(dataset.name)
     argilla.log(
@@ -107,20 +104,8 @@ def test_query_builder_with_nested(
                         "query": {
                             "bool": {
                                 "must": [
-                                    {
-                                        "term": {
-                                            "metrics.predicted.mentions.label": {
-                                                "value": "NAME"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "range": {
-                                            "metrics.predicted.mentions.score": {
-                                                "lte": "0.1"
-                                            }
-                                        }
-                                    },
+                                    {"term": {"metrics.predicted.mentions.label": {"value": "NAME"}}},
+                                    {"range": {"metrics.predicted.mentions.score": {"lte": "0.1"}}},
                                 ]
                             }
                         },
@@ -132,18 +117,16 @@ def test_query_builder_with_nested(
 
 
 def test_failing_metrics(service, mocked_client):
+    argilla.init()
 
-    dataset = Dataset(
+    dataset = BaseDatasetDB(
         name="test_failing_metrics",
-        owner=argilla.get_workspace(),
+        workspace=argilla.get_workspace(),
         task=TaskType.text_classification,
     )
 
     argilla.delete(dataset.name)
-    argilla.log(
-        argilla.TextClassificationRecord(text="This is a text, yeah!"),
-        name=dataset.name,
-    )
+    argilla.log(argilla.TextClassificationRecord(text="This is a text, yeah!"), name=dataset.name)
     results = service.search(
         dataset=dataset,
         query=TextClassificationQuery(),

@@ -29,9 +29,7 @@ class DatasetLabelingRulesMetric(ElasticsearchMetric):
         rules_filters = [filters.text_query(rule_query) for rule_query in queries]
         return aggregations.filters_aggregation(
             filters={
-                "covered_records": filters.boolean_filter(
-                    should_filters=rules_filters, minimum_should_match=1
-                ),
+                "covered_records": filters.boolean_filter(should_filters=rules_filters, minimum_should_match=1),
                 "annotated_covered_records": filters.boolean_filter(
                     filter_query=filters.exists_field("annotated_as"),
                     should_filters=rules_filters,
@@ -45,10 +43,7 @@ class DatasetLabelingRulesMetric(ElasticsearchMetric):
 class LabelingRulesMetric(ElasticsearchMetric):
     id: str
 
-    def _build_aggregation(
-        self, rule_query: str, labels: Optional[List[str]]
-    ) -> Dict[str, Any]:
-
+    def _build_aggregation(self, rule_query: str, labels: Optional[List[str]] = None) -> Dict[str, Any]:
         annotated_records_filter = filters.exists_field("annotated_as")
         rule_query_filter = filters.text_query(rule_query)
         aggr_filters = {
@@ -61,9 +56,7 @@ class LabelingRulesMetric(ElasticsearchMetric):
 
         if labels is not None:
             for label in labels:
-                rule_label_annotated_filter = filters.term_filter(
-                    "annotated_as", value=label
-                )
+                rule_label_annotated_filter = filters.term_filter("annotated_as", value=label)
                 encoded_label = self._encode_label_name(label)
                 aggr_filters.update(
                     {
@@ -100,9 +93,7 @@ class LabelingRulesMetric(ElasticsearchMetric):
         aggregation_result = unflatten_dict(aggregation_result)
         results = {
             "covered_records": aggregation_result.pop("covered_records"),
-            "annotated_covered_records": aggregation_result.pop(
-                "annotated_covered_records"
-            ),
+            "annotated_covered_records": aggregation_result.pop("annotated_covered_records"),
         }
 
         all_correct = []

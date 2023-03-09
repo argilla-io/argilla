@@ -15,7 +15,6 @@
 from typing import Callable
 
 import pytest
-
 from argilla.server.apis.v0.models.commons.model import BulkResponse, SortableField
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationBulkRequest,
@@ -24,6 +23,7 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationSearchRequest,
     TokenClassificationSearchResults,
 )
+
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
 
@@ -58,10 +58,7 @@ def test_load_as_different_task(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "argilla.api.errors::WrongTaskError",
-            "params": {
-                "message": "Provided task TextClassification cannot be "
-                "applied to dataset"
-            },
+            "params": {"message": "Provided task TextClassification cannot be " "applied to dataset"},
         }
     }
 
@@ -90,9 +87,7 @@ def test_search_special_characters(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:search",
-        json=TokenClassificationSearchRequest(
-            query=TokenClassificationQuery(query_text="\!")
-        ).dict(),
+        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text="\!")).dict(),
     )
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
@@ -100,9 +95,7 @@ def test_search_special_characters(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:search",
-        json=TokenClassificationSearchRequest(
-            query=TokenClassificationQuery(query_text="text.exact:\!")
-        ).dict(),
+        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text="text.exact:\!")).dict(),
     )
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
@@ -161,9 +154,7 @@ def test_some_sort(mocked_client):
         (None, lambda r: len(r.metrics) == 0),
     ],
 )
-def test_create_records_for_token_classification(
-    mocked_client, include_metrics: bool, metrics_validator: Callable
-):
+def test_create_records_for_token_classification(mocked_client, include_metrics: bool, metrics_validator: Callable):
     dataset = "test_create_records_for_token_classification"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     entity_label = "TEST"

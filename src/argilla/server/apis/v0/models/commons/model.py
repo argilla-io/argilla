@@ -67,9 +67,7 @@ class BulkResponse(BaseModel):
     failed: int = 0
 
 
-class BaseSearchResults(
-    GenericModel, Generic[_Record, ServiceSearchResultsAggregations]
-):
+class BaseSearchResults(GenericModel, Generic[_Record, ServiceSearchResultsAggregations]):
     total: int = 0
     records: List[_Record] = Field(default_factory=list)
     aggregations: ServiceSearchResultsAggregations = None

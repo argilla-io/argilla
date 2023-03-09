@@ -14,9 +14,8 @@
 from time import sleep
 from typing import List, Union
 
-import pytest
-
 import argilla
+import pytest
 from argilla import TextClassificationRecord
 
 
@@ -199,10 +198,7 @@ def check_zero_shot_results(
     assert record.inputs["text"] == text
     assert record.metadata == {"labels": labels, "hypothesis_template": hypothesis}
     assert record.prediction_agent == zero_shot_classifier.model.config.name_or_path
-    assert record.prediction == [
-        (label, score)
-        for label, score in zip(predictions["labels"], predictions["scores"])
-    ]
+    assert record.prediction == [(label, score) for label, score in zip(predictions["labels"], predictions["scores"])]
 
 
 @pytest.mark.parametrize(
@@ -242,7 +238,6 @@ def test_monitor_zero_short_passing_labels_keyword_arg(
     mocked_monitor,
     dataset,
 ):
-
     argilla.delete(dataset)
     predictions = mocked_monitor(
         text,
@@ -307,11 +302,8 @@ def test_monitor_zero_shot_with_text_array(
     mocked_monitor,
     dataset,
 ):
-
     argilla.delete(dataset)
-    predictions = mocked_monitor(
-        [text], candidate_labels=labels, hypothesis_template=hypothesis
-    )
+    predictions = mocked_monitor([text], candidate_labels=labels, hypothesis_template=hypothesis)
 
     check_zero_shot_results(
         predictions,

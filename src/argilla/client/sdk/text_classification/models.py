@@ -60,24 +60,15 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         prediction = None
         if record.prediction is not None:
             prediction = TextClassificationAnnotation(
-                labels=[
-                    ClassPrediction(**{"class": label, "score": score})
-                    for label, score in record.prediction
-                ],
+                labels=[ClassPrediction(**{"class": label, "score": score}) for label, score in record.prediction],
                 agent=record.prediction_agent or MACHINE_NAME,
             )
 
         annotation = None
         if record.annotation is not None:
-            annotation_list = (
-                record.annotation
-                if isinstance(record.annotation, list)
-                else [record.annotation]
-            )
+            annotation_list = record.annotation if isinstance(record.annotation, list) else [record.annotation]
             annotation = TextClassificationAnnotation(
-                labels=[
-                    ClassPrediction(**{"class": label}) for label in annotation_list
-                ],
+                labels=[ClassPrediction(**{"class": label}) for label in annotation_list],
                 agent=record.annotation_agent or MACHINE_NAME,
             )
 
@@ -101,11 +92,7 @@ class TextClassificationRecord(CreationTextClassificationRecord):
 
     def to_client(self) -> ClientTextClassificationRecord:
         """Returns the client model"""
-        annotations = (
-            [label.class_label for label in self.annotation.labels]
-            if self.annotation
-            else None
-        )
+        annotations = [label.class_label for label in self.annotation.labels] if self.annotation else None
         if annotations and not self.multi_label:
             annotations = annotations[0]
 
@@ -116,9 +103,7 @@ class TextClassificationRecord(CreationTextClassificationRecord):
             multi_label=self.multi_label,
             status=self.status,
             metadata=self.metadata or {},
-            prediction=[
-                (label.class_label, label.score) for label in self.prediction.labels
-            ]
+            prediction=[(label.class_label, label.score) for label in self.prediction.labels]
             if self.prediction
             else None,
             prediction_agent=self.prediction.agent if self.prediction else None,
@@ -126,10 +111,7 @@ class TextClassificationRecord(CreationTextClassificationRecord):
             annotation_agent=self.annotation.agent if self.annotation else None,
             vectors=self._to_client_vectors(self.vectors),
             explanation={
-                key: [
-                    ClientTokenAttributions.parse_obj(attribution)
-                    for attribution in attributions
-                ]
+                key: [ClientTokenAttributions.parse_obj(attribution) for attribution in attributions]
                 for key, attributions in self.explanation.items()
             }
             if self.explanation

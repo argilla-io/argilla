@@ -56,7 +56,6 @@ def configure_router(router: APIRouter):
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         user: User = Security(auth.get_user, scopes=["read:dataset.settings"]),
     ) -> TokenClassificationSettings:
-
         found_ds = datasets.find_by_name(
             user=user,
             name=name,
@@ -64,9 +63,7 @@ def configure_router(router: APIRouter):
             task=task,
         )
 
-        settings = await datasets.get_settings(
-            user=user, dataset=found_ds, class_type=__svc_settings_class__
-        )
+        settings = await datasets.get_settings(user=user, dataset=found_ds, class_type=__svc_settings_class__)
         return TokenClassificationSettings.parse_obj(settings)
 
     @deprecate_endpoint(
@@ -80,25 +77,20 @@ def configure_router(router: APIRouter):
         response_model=TokenClassificationSettings,
     )
     async def save_settings(
-        request: TokenClassificationSettings = Body(
-            ..., description=f"The {task} dataset settings"
-        ),
+        request: TokenClassificationSettings = Body(..., description=f"The {task} dataset settings"),
         name: str = DATASET_NAME_PATH_PARAM,
         ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         user: User = Security(auth.get_user, scopes=["write:dataset.settings"]),
     ) -> TokenClassificationSettings:
-
         found_ds = datasets.find_by_name(
             user=user,
             name=name,
             task=task,
             workspace=ws_params.workspace,
         )
-        await validator.validate_dataset_settings(
-            user=user, dataset=found_ds, settings=request
-        )
+        await validator.validate_dataset_settings(user=user, dataset=found_ds, settings=request)
         settings = await datasets.save_settings(
             user=user,
             dataset=found_ds,

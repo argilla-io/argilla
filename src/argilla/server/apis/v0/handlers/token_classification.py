@@ -23,7 +23,6 @@ from argilla.server.apis.v0.handlers import (
     metrics,
     token_classification_dataset_settings,
 )
-from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.commons.params import (
     CommonTaskHandlerDependencies,
@@ -32,7 +31,6 @@ from argilla.server.apis.v0.models.commons.params import (
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationAggregations,
     TokenClassificationBulkRequest,
-    TokenClassificationDataset,
     TokenClassificationQuery,
     TokenClassificationRecord,
     TokenClassificationSearchRequest,
@@ -44,9 +42,10 @@ from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.helpers import takeuntil
 from argilla.server.responses import StreamingResponseWithErrorHandling
+from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.security.model import User
-from argilla.server.services.datasets import DatasetsService
+from argilla.server.services.datasets import DatasetsService, ServiceBaseDataset
 from argilla.server.services.tasks.token_classification import (
     TokenClassificationService,
 )
@@ -66,7 +65,6 @@ def configure_router():
 
     TasksFactory.register_task(
         task_type=task_type,
-        dataset_class=TokenClassificationDataset,
         query_request=TokenClassificationQuery,
         record_class=ServiceTokenClassificationRecord,
         metrics=TokenClassificationMetrics,
@@ -84,23 +82,19 @@ def configure_router():
         name: str,
         bulk: TokenClassificationBulkRequest,
         common_params: CommonTaskHandlerDependencies = Depends(),
-        service: TokenClassificationService = Depends(
-            TokenClassificationService.get_instance
-        ),
+        service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> BulkResponse:
-
         task = task_type
-        owner = current_user.check_workspace(common_params.workspace)
+        workspace = current_user.check_workspace(common_params.workspace)
         try:
             dataset = datasets.find_by_name(
                 current_user,
                 name=name,
                 task=task,
-                workspace=owner,
-                as_dataset_class=TasksFactory.get_task_dataset(task_type),
+                workspace=workspace,
             )
             datasets.update(
                 user=current_user,
@@ -109,10 +103,8 @@ def configure_router():
                 metadata=bulk.metadata,
             )
         except EntityNotFoundError:
-            dataset_class = TasksFactory.get_task_dataset(task)
-            dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
-            dataset.owner = owner
-            datasets.create_dataset(user=current_user, dataset=dataset)
+            dataset = CreateDatasetRequest(name=name, workspace=workspace, task=task, **bulk.dict())
+            dataset = datasets.create_dataset(user=current_user, dataset=dataset)
 
         records = [ServiceTokenClassificationRecord.parse_obj(r) for r in bulk.records]
         # TODO(@frascuchon): validator can be applied in service layer
@@ -147,13 +139,10 @@ def configure_router():
             description="If enabled, return related record metrics",
         ),
         pagination: RequestPagination = Depends(),
-        service: TokenClassificationService = Depends(
-            TokenClassificationService.get_instance
-        ),
+        service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> TokenClassificationSearchResults:
-
         search = search or TokenClassificationSearchRequest()
         query = search.query or TokenClassificationQuery()
 
@@ -162,7 +151,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
         results = service.search(
             dataset=dataset,
@@ -176,9 +164,7 @@ def configure_router():
         return TokenClassificationSearchResults(
             total=results.total,
             records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
-            aggregations=TokenClassificationAggregations.parse_obj(results.metrics)
-            if results.metrics
-            else None,
+            aggregations=TokenClassificationAggregations.parse_obj(results.metrics) if results.metrics else None,
         )
 
     def scan_data_response(
@@ -210,9 +196,7 @@ def configure_router():
                     )
                 ) + "\n"
 
-        return StreamingResponseWithErrorHandling(
-            stream_generator(data_stream), media_type="application/json"
-        )
+        return StreamingResponseWithErrorHandling(stream_generator(data_stream), media_type="application/json")
 
     @router.post(
         path=f"{base_endpoint}/data",
@@ -224,9 +208,7 @@ def configure_router():
         query: Optional[TokenClassificationQuery] = None,
         common_params: CommonTaskHandlerDependencies = Depends(),
         limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-        service: TokenClassificationService = Depends(
-            TokenClassificationService.get_instance
-        ),
+        service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_user, scopes=[]),
         id_from: Optional[str] = None,
@@ -260,7 +242,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
         data_stream = map(
             TokenClassificationRecord.parse_obj,

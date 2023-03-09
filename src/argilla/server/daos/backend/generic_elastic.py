@@ -14,6 +14,8 @@
 
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from pydantic import BaseModel, Field
+
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend.base import IndexNotFoundError, InvalidSearchError
@@ -52,6 +54,12 @@ from argilla.server.settings import settings
 def dataset_records_index(dataset_id: str) -> str:
     index_mame_template = settings.dataset_records_index_name
     return index_mame_template.format(dataset_id)
+
+
+class PaginatedSortInfo(BaseModel):
+    shuffle: bool = False
+    sort_by: List[SortableField] = Field(default_factory=list)
+    next_search_params: Optional[Any] = None
 
 
 class GenericElasticEngineBackend(LoggingMixin):
@@ -184,7 +192,6 @@ class GenericElasticEngineBackend(LoggingMixin):
         exclude_fields: List[str] = None,
         enable_highlight: bool = True,
     ) -> Tuple[int, List[Dict[str, Any]]]:
-
         index = dataset_records_index(id)
 
         if not sort.sort_by and sort.shuffle is False:
@@ -205,29 +212,27 @@ class GenericElasticEngineBackend(LoggingMixin):
 
         return total, records
 
-    # TODO(@frascuchon): Include sort parameter
     def scan_records(
         self,
         id: str,
-        query: Optional[BackendRecordsQuery] = None,
-        id_from: Optional[str] = None,
+        query: BackendRecordsQuery,
+        sort: PaginatedSortInfo,
         limit: Optional[int] = None,
-        shuffle: bool = False,
         include_fields: Optional[List[str]] = None,
         exclude_fields: Optional[List[str]] = None,
     ) -> Iterable[Dict[str, Any]]:
         index = dataset_records_index(id)
 
-        yield from self.client.list_index_documents(
+        yield from self.client.scan_docs(
             index=index,
             query=query,
+            sort=SortConfig(shuffle=sort.shuffle, sort_by=sort.sort_by),
             size=limit,
-            id_from=id_from,
-            fetch_once=shuffle,
+            search_from_params=sort.next_search_params,
+            fetch_once=sort.shuffle,
             include_fields=include_fields,
             exclude_fields=exclude_fields,
             enable_highlight=True,
-            shuffle=shuffle,
         )
 
     def open(self, id: str):
@@ -248,7 +253,6 @@ class GenericElasticEngineBackend(LoggingMixin):
         vectors_cfg: Optional[Dict[str, Any]] = None,
         force_recreate: bool = False,
     ) -> None:
-
         _mappings = self._common_records_mappings
         task_mappings = self.get_task_mapping(task).copy()
         for k in task_mappings:
@@ -293,8 +297,7 @@ class GenericElasticEngineBackend(LoggingMixin):
 
             if len(vector_names) > settings.vectors_fields_limit:
                 raise BadRequestError(
-                    detail=f"Cannot create more than {settings.vectors_fields_limit} "
-                    "kind of vectors per dataset"
+                    detail=f"Cannot create more than {settings.vectors_fields_limit} " "kind of vectors per dataset"
                 )
 
         _check_max_number_of_vectors()
@@ -382,6 +385,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             force_recreate=force_recreate,
             mappings=datasets_index_mappings(),
         )
+        # TODO: Remove this section of code
         if settings.enable_migration:
             try:
                 self._migrate_from_rubrix()
@@ -398,7 +402,7 @@ class GenericElasticEngineBackend(LoggingMixin):
                 target_index=target_index,
                 reindex=True,
             )
-            for doc in self.client.list_index_documents(index=source_index):
+            for doc in self.client.scan_docs(index=source_index, query=BaseQuery(), sort=SortConfig()):
                 dataset_id = doc["id"]
                 index = self._old_dataset_index(dataset_id)
                 alias = dataset_records_index(dataset_id=dataset_id)
@@ -417,9 +421,10 @@ class GenericElasticEngineBackend(LoggingMixin):
         )
 
     def list_datasets(self, query: BaseDatasetsQuery):
-        return self.client.list_index_documents(
+        return self.client.scan_docs(
             index=DATASETS_INDEX_NAME,
             query=query,
+            sort=SortConfig(),
             fetch_once=True,
             size=self.__MAX_NUMBER_OF_LISTED_DATASETS__,
         )
@@ -470,31 +475,11 @@ class GenericElasticEngineBackend(LoggingMixin):
     def find_dataset(
         self,
         id: str,
-        name: Optional[str] = None,
-        owner: Optional[str] = None,
     ):
         document = self.client.get_index_document_by_id(
             index=DATASETS_INDEX_NAME,
             id=id,
         )
-        if not document and owner is None and name:
-            # We must search by name since we have no owner
-            docs = self.client.list_index_documents(
-                index=DATASETS_INDEX_NAME,
-                query=BaseDatasetsQuery(name=name),
-                size=self.__MAX_NUMBER_OF_LISTED_DATASETS__,
-                fetch_once=True,
-            )
-            docs = list(docs)
-            if len(docs) == 0:
-                return None
-
-            if len(docs) > 1:
-                raise ValueError(
-                    f"Ambiguous dataset info found for name {name}. "
-                    "Please provide a valid owner/workspace"
-                )
-            document = docs[0]
         return document
 
     def compute_argilla_metric(self, metric_id):

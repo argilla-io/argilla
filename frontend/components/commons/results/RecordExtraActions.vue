@@ -29,13 +29,6 @@
           <span>Copy text</span>
         </div>
       </base-action-tooltip>
-      <div
-        v-if="allowChangeStatus"
-        :class="recordStatus === 'Discarded' ? 'disabled' : null"
-        @click="onChangeRecordStatus('Discarded')"
-      >
-        <span>Discard record</span>
-      </div>
     </div>
   </div>
 </template>
@@ -52,16 +45,9 @@ export default {
     }),
   ],
   props: {
-    allowChangeStatus: {
-      type: Boolean,
-      default: false,
-    },
     recordId: {
       type: String | Number,
       required: true,
-    },
-    recordStatus: {
-      type: String,
     },
     recordClipboardText: {
       type: Array | String,
@@ -91,13 +77,6 @@ export default {
     this.close();
   },
   methods: {
-    // TODO: call vuex-actions here instead of trigger event
-    onChangeRecordStatus(status) {
-      if (this.recordStatus !== status) {
-        this.$emit("on-change-record-status", status);
-      }
-      this.close();
-    },
     showRecordInfoModal() {
       this.$emit("show-record-info-modal");
       this.close();

@@ -21,10 +21,11 @@ import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 class TokenClassificationRecord extends BaseRecord {
   tokens;
   text;
-  constructor({ tokens, text, annotatedEntities, ...superData }) {
+  constructor({ tokens, text, annotatedEntities, originStatus, ...superData }) {
     super({ ...superData });
     this.tokens = tokens;
     this.text = text;
+    this.originStatus = originStatus || this.status;
 
     if (!annotatedEntities) {
       if (this.annotation) {
@@ -104,7 +105,7 @@ class TokenClassificationDataset extends ObservationDataset {
       where: this.id,
       data: [
         {
-          owner: this.owner,
+          workspace: this.workspace,
           name: this.name,
           settings,
         },

@@ -185,11 +185,7 @@ def dynamic_metadata_text():
 
 def dynamic_annotations_text(path: str):
     path = f"{path}.*"
-    return {
-        path: mappings.path_match_keyword_template(
-            path=path, enable_text_search_in_keywords=True
-        )
-    }
+    return {path: mappings.path_match_keyword_template(path=path, enable_text_search_in_keywords=True)}
 
 
 def tasks_common_mappings():
@@ -208,8 +204,8 @@ def tasks_common_mappings():
             "predictions": mappings.dynamic_field(),
             "annotations": mappings.dynamic_field(),
             "status": mappings.keyword_field(),
-            "event_timestamp": {"type": "date"},
-            "last_updated": {"type": "date"},
+            "event_timestamp": {"type": "date_nanos"},
+            "last_updated": {"type": "date_nanos"},
             "annotated_by": mappings.keyword_field(enable_text_search=True),
             "predicted_by": mappings.keyword_field(enable_text_search=True),
             "metrics": mappings.dynamic_field(),

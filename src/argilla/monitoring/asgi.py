@@ -18,26 +18,19 @@ import logging
 import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from argilla.monitoring.base import BaseMonitor
-
-try:
-    import starlette
-except ModuleNotFoundError:
-    raise ModuleNotFoundError(
-        "'starlette' must be installed to use the middleware feature! "
-        "You can install 'starlette' with the command: `pip install starlette>=0.13.0`"
-    )
-else:
-    from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-    from starlette.requests import Request
-    from starlette.responses import JSONResponse, Response, StreamingResponse
-    from starlette.types import Message, Receive
-
 from argilla.client.models import (
     Record,
     TextClassificationRecord,
     TokenClassificationRecord,
 )
+from argilla.monitoring.base import BaseMonitor
+from argilla.utils.dependency import require_version
+
+require_version("starlette>=0.13.0")
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.requests import Request
+from starlette.responses import JSONResponse, Response, StreamingResponse
+from starlette.types import Message, Receive
 
 _logger = logging.getLogger(__name__)
 _default_tokenization_pattern = re.compile(r"\W+")
@@ -56,9 +49,7 @@ def token_classification_mapper(inputs, outputs):
         tokens=tokens or _default_tokenization_pattern.split(text),
         prediction=[
             (entity["label"], entity["start"], entity["end"])
-            for entity in (
-                outputs.get("entities") if isinstance(outputs, dict) else outputs
-            )
+            for entity in (outputs.get("entities") if isinstance(outputs, dict) else outputs)
         ],
         event_timestamp=datetime.datetime.now(),
     )
@@ -67,12 +58,7 @@ def token_classification_mapper(inputs, outputs):
 def text_classification_mapper(inputs, outputs):
     return TextClassificationRecord(
         inputs=inputs,
-        prediction=[
-            (label, score)
-            for label, score in zip(
-                outputs.get("labels", []), outputs.get("scores", [])
-            )
-        ],
+        prediction=[(label, score) for label, score in zip(outputs.get("labels", []), outputs.get("scores", []))],
         event_timestamp=datetime.datetime.now(),
     )
 
@@ -112,7 +98,7 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
         agent: Optional[str] = None,
         tags: Dict[str, str] = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         BaseHTTPMiddleware.__init__(self, *args, **kwargs)
 
@@ -167,16 +153,11 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
             elif cached_request.method == "GET":
                 inputs = cached_request.query_params._dict
             else:
-                raise NotImplementedError(
-                    "Only request methods POST, PUT and GET are implemented."
-                )
+                raise NotImplementedError("Only request methods POST, PUT and GET are implemented.")
 
             # Must obtain response from request
             response: Response = await call_next(cached_request)
-            if (
-                not isinstance(response, (JSONResponse, StreamingResponse))
-                or response.status_code >= 400
-            ):
+            if not isinstance(response, (JSONResponse, StreamingResponse)) or response.status_code >= 400:
                 return response
 
             new_response, outputs = await self._extract_response_content(response)
@@ -186,9 +167,7 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
             _logger.error("Cannot log to argilla", exc_info=ex)
             return await call_next(request)
 
-    async def _extract_response_content(
-        self, response: Response
-    ) -> Tuple[Response, List[Dict[str, Any]]]:
+    async def _extract_response_content(self, response: Response) -> Tuple[Response, List[Dict[str, Any]]]:
         """Extracts response body content from response and returns a new processable response"""
         body = b""
         new_response = response
@@ -206,23 +185,17 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
             body = response.body
         return new_response, json.loads(body)
 
-    def _prepare_argilla_data(
-        self, inputs: List[Dict[str, Any]], outputs: List[Dict[str, Any]], **tags
-    ):
+    def _prepare_argilla_data(self, inputs: List[Dict[str, Any]], outputs: List[Dict[str, Any]], **tags):
         # using the base monitor, we only need to provide the input data to the rg.log function
         # and the monitor will handle the sample rate, queue and argilla interaction
         try:
             records = self._records_mapper(inputs, outputs)
-            assert records, ValueError(
-                "The records_mapper returns and empty record list."
-            )
+            assert records, ValueError("The records_mapper returns and empty record list.")
             if not isinstance(records, list):
                 records = [records]
         except Exception as ex:
             records = []
-            _logger.error(
-                "Cannot log to argilla. Error in records mapper.", exc_info=ex
-            )
+            _logger.error("Cannot log to argilla. Error in records mapper.", exc_info=ex)
 
         for record in records:
             if self._monitor.agent is not None and not record.prediction_agent:

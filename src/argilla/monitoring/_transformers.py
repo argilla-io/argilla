@@ -56,7 +56,6 @@ class HuggingFaceMonitor(BaseMonitor):
         data: List[Tuple[str, Dict[str, Any], List[LabelPrediction]]],
         multi_label: bool = False,
     ) -> Dict[str, Any]:
-
         agent = self.model_config.name_or_path
 
         records = []
@@ -64,9 +63,7 @@ class HuggingFaceMonitor(BaseMonitor):
             record = TextClassificationRecord(
                 text=input_ if isinstance(input_, str) else None,
                 inputs=input_ if not isinstance(input_, str) else None,
-                prediction=[
-                    (prediction.label, prediction.score) for prediction in predictions
-                ],
+                prediction=[(prediction.label, prediction.score) for prediction in predictions],
                 prediction_agent=agent,
                 metadata=metadata or {},
                 multi_label=multi_label,
@@ -83,9 +80,7 @@ class HuggingFaceMonitor(BaseMonitor):
             name=dataset_name,
             tags={
                 "name": self.model_config.name_or_path,
-                "transformers_version": self.fetch_transformers_version(
-                    self.model_config
-                ),
+                "transformers_version": self.fetch_transformers_version(self.model_config),
                 "model_type": self.model_config.model_type,
                 "task": self.__model__.task,
             },
@@ -100,7 +95,7 @@ class ZeroShotMonitor(HuggingFaceMonitor):
         sequences: Union[str, List[str]],
         candidate_labels: List[str],
         *args,
-        **kwargs
+        **kwargs,
     ):
         metadata = (kwargs.pop("metadata", None) or {}).copy()
         hypothesis_template = kwargs.get("hypothesis_template", "@default")

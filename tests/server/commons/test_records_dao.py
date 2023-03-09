@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.models.datasets import BaseDatasetDB
@@ -27,6 +26,7 @@ def test_raise_proper_error():
         dao.search_records(
             dataset=BaseDatasetDB(
                 name="mock-notfound",
+                workspace="workspace-name",
                 task=TaskType.text_classification,
             )
         )

@@ -41,7 +41,6 @@ from argilla.server.daos.backend.search.query_builder import (
 
 @dataclasses.dataclass
 class OpenSearchClient(IClientAdapter):
-
     index_shards: int
 
     config_backend: Dict[str, Any]
@@ -110,7 +109,6 @@ class OpenSearchClient(IClientAdapter):
         enable_highlight: bool = True,
         routing: str = None,
     ) -> Dict[str, Any]:
-
         with self.error_handling(index=index):
             highlight = self.highlight if enable_highlight else None
             es_query = self.query_builder.map_2_es_query(
@@ -222,11 +220,7 @@ class OpenSearchClient(IClientAdapter):
             }
         )
 
-        filtered_params = {
-            argument: params[argument]
-            for argument in metric.metric_arg_names
-            if argument in params
-        }
+        filtered_params = {argument: params[argument] for argument in metric.metric_arg_names if argument in params}
 
         aggregations = metric.aggregation_request(**filtered_params)
         if not aggregations:
@@ -252,9 +246,7 @@ class OpenSearchClient(IClientAdapter):
 
                 search_aggregations = search.get("aggregations", {})
                 if search_aggregations:
-                    parsed_aggregations = query_helpers.parse_aggregations(
-                        search_aggregations
-                    )
+                    parsed_aggregations = query_helpers.parse_aggregations(search_aggregations)
                     results.update(parsed_aggregations)
             return metric.aggregation_result(results.get(metric.id, results))
 
@@ -317,37 +309,29 @@ class OpenSearchClient(IClientAdapter):
                 "updated": response["updated"],
             }
 
-    def list_index_documents(
+    def scan_docs(
         self,
         index: str,
-        query: Optional[BaseQuery] = None,
+        query: BaseQuery,
+        sort: SortConfig,
         size: Optional[int] = None,
         fetch_once: bool = False,
-        id_from: Optional[str] = None,
+        search_from_params: Optional[Any] = None,
         enable_highlight: bool = False,
-        sort: Optional[SortConfig] = None,
         include_fields: Optional[List[str]] = None,
         exclude_fields: Optional[List[str]] = None,
-        shuffle: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         batch_size = size or 500
 
         highlight = self.highlight if enable_highlight else None
-        index_schema = self.get_index_schema(index=index)
-        if index_schema and "id" in index_schema["mappings"]["properties"]:
-            sort = SortConfig(sort_by=[SortableField(id="id")])
-        else:
-            fetch_once = True
-
         es_query = self.query_builder.map_2_es_query(
             query=query,
-            schema=index_schema,
+            schema=self.get_index_schema(index=index),
             sort=sort,
-            id_from=id_from,
+            search_after_param=search_from_params,
             include_fields=include_fields,
             exclude_fields=exclude_fields,
             highlight=highlight,
-            shuffle=shuffle,
         )
         es_query = es_query.copy() or {}
         response = self.__client__.search(
@@ -360,18 +344,15 @@ class OpenSearchClient(IClientAdapter):
         while response["hits"]["hits"]:
             hit = None
             for hit in response["hits"]["hits"]:
-                yield self._normalize_document(
-                    document=hit,
-                    highlight=highlight,
-                )
+                yield self._normalize_document(document=hit, highlight=highlight, add_sort_info=True)
                 records_yield += 1
 
             if fetch_once or (size and size >= records_yield):
                 break
 
-            last_id = hit["_id"]
-            es_query["search_after"] = [last_id]
-            response = self.__client__.search(index=index, body=es_query, size=size)
+            next_search_from = hit["sort"]
+            es_query["search_after"] = next_search_from
+            response = self.__client__.search(index=index, body=es_query, size=size, track_total_hits=False)
 
     def _process_search_results(
         self,
@@ -461,9 +442,7 @@ class OpenSearchClient(IClientAdapter):
                             return True
                     return False
 
-                schema = {
-                    key: value for key, value in schema.items() if not is_subfield(key)
-                }
+                schema = {key: value for key, value in schema.items() if not is_subfield(key)}
 
             return schema
         except IndexNotFoundError:
@@ -690,11 +669,7 @@ class OpenSearchClient(IClientAdapter):
                 allow_no_indices=True,
                 flat_settings=True,
             )
-            return (
-                response[index]["settings"]["index.blocks.write"] == "true"
-                if response
-                else False
-            )
+            return response[index]["settings"]["index.blocks.write"] == "true" if response else False
 
     def enable_read_only_index(self, index: str):
         return self._enable_or_disable_read_only_index(
@@ -772,8 +747,7 @@ class OpenSearchClient(IClientAdapter):
                 data = response
 
             return {
-                key: list(definition["mapping"].values())[0]["type"]
-                for key, definition in data["mappings"].items()
+                key: list(definition["mapping"].values())[0]["type"] for key, definition in data["mappings"].items()
             }
 
     def _normalize_document(
@@ -781,12 +755,15 @@ class OpenSearchClient(IClientAdapter):
         document: Dict[str, Any],
         highlight: Optional[HighlightParser] = None,
         is_phrase_query: bool = True,
+        add_sort_info: bool = False,
     ):
-
         data = {
             **document["_source"],
             "id": document["_id"],
         }
+
+        if add_sort_info and "sort" in document:
+            data["sort"] = document["sort"]
 
         if highlight:
             keywords = highlight.parse_highligth_results(

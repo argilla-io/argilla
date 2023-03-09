@@ -26,10 +26,19 @@ from argilla.logging import configure_logging as _configure_logging
 from . import _version
 from .utils import LazyargillaModule as _LazyargillaModule
 
+try:
+    from rich.traceback import install as _install_rich
+
+    # Rely on `rich` for tracebacks
+    _install_rich()
+except ModuleNotFoundError:
+    pass
+
 __version__ = _version.version
 
 if _TYPE_CHECKING:
     from argilla.client.api import (
+        active_client,
         copy,
         delete,
         delete_records,
@@ -48,11 +57,9 @@ if _TYPE_CHECKING:
         read_pandas,
     )
     from argilla.client.models import (
-        TextGenerationRecord,  # TODO Remove TextGenerationRecord
-    )
-    from argilla.client.models import (
         Text2TextRecord,
         TextClassificationRecord,
+        TextGenerationRecord,  # TODO Remove TextGenerationRecord
         TokenAttributions,
         TokenClassificationRecord,
     )
@@ -78,6 +85,7 @@ _import_structure = {
         "log",
         "log_async",
         "set_workspace",
+        "active_client",
     ],
     "client.models": [
         "Text2TextRecord",
