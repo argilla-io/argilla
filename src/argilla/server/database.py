@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
 from sqlite3 import Connection as SQLite3Connection
 
 import alembic.config
@@ -43,7 +44,8 @@ def get_db():
 
 
 def migrate_db():
-    alembic.config.main(argv=["upgrade", "head"])
+    alembic_config = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "alembic.ini"))
+    alembic.config.main(argv=["-c", alembic_config, "upgrade", "head"])
 
 
 class Base(DeclarativeBase):
