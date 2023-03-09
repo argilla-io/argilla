@@ -17,27 +17,37 @@ import uuid
 import pytest
 from argilla.server.commons import telemetry
 from argilla.server.commons.models import TaskType
-from argilla.server.errors import ServerError
+from argilla.server.commons.telemetry import TelemetryClient
+from argilla.server.errors import (
+    EntityAlreadyExistsError,
+    EntityNotFoundError,
+    GenericServerError,
+    ServerError,
+)
+from argilla.server.schemas.datasets import Dataset
 from fastapi import Request
 
 mock_request = Request(scope={"type": "http", "headers": {}})
+
+
+def test_disable_telemetry():
+    telemetry_client = TelemetryClient(enable_telemetry=False)
+
+    assert telemetry_client.client is None
 
 
 @pytest.mark.asyncio
 async def test_track_login(telemetry_track_data):
     await telemetry.track_login(request=mock_request, username="argilla")
 
-    current_server_id = telemetry._TelemetryClient.get().server_id
+    current_server_id = telemetry.telemetry_client.server_id
     expected_event_data = {
         "accept-language": None,
         "is_default_user": True,
         "user-agent": None,
         "user_hash": str(uuid.uuid5(current_server_id, name="argilla")),
     }
-    telemetry_track_data.assert_called_once_with(
-        "UserInfoRequested",
-        expected_event_data,
-    )
+    telemetry_track_data.assert_called_once_with("UserInfoRequested", expected_event_data)
 
 
 @pytest.mark.asyncio
@@ -49,14 +59,47 @@ async def test_track_bulk(telemetry_track_data):
 
 
 @pytest.mark.asyncio
-async def test_track_error(telemetry_track_data):
-    error = ServerError()
+@pytest.mark.parametrize(
+    ["error", "expected_event"],
+    [
+        (
+            EntityNotFoundError(name="mock-name", type="MockType"),
+            {
+                "accept-language": None,
+                "code": "argilla.api.errors::EntityNotFoundError",
+                "type": "MockType",
+                "user-agent": None,
+            },
+        ),
+        (
+            EntityAlreadyExistsError(name="mock-name", type=Dataset, workspace="mock-workspace"),
+            {
+                "accept-language": None,
+                "code": "argilla.api.errors::EntityAlreadyExistsError",
+                "type": "Dataset",
+                "user-agent": None,
+            },
+        ),
+        (
+            GenericServerError(RuntimeError("This is a mock error")),
+            {
+                "accept-language": None,
+                "code": "argilla.api.errors::GenericServerError",
+                "type": "builtins.RuntimeError",
+                "user-agent": None,
+            },
+        ),
+        (
+            ServerError(),
+            {
+                "accept-language": None,
+                "code": "argilla.api.errors::ServerError",
+                "user-agent": None,
+            },
+        ),
+    ],
+)
+async def test_track_error(telemetry_track_data, error, expected_event):
     await telemetry.track_error(error, request=mock_request)
-    telemetry_track_data.assert_called_once_with(
-        "ServerErrorFound",
-        {
-            "accept-language": None,
-            "code": "argilla.api.errors::ServerError",
-            "user-agent": None,
-        },
-    )
+
+    telemetry_track_data.assert_called_once_with("ServerErrorFound", expected_event)
