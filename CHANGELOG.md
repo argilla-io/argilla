@@ -11,5 +11,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removing some data scan deprecated endpoints used by old clients. This change will break compatibility with client `<v1.3.0`
-
+- Stop using old scan deprecated endpoints in python client. This logic will break client compatibility with server version `<1.3.0`
 
