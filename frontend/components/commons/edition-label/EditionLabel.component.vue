@@ -4,27 +4,36 @@
       <h2 class="--heading5 --semibold description__title" v-html="title" />
     </div>
     <div class="content">
+      <BaseSpinner v-if="isLoading" />
+
+      <p
+        class="--body1 empty-label-component"
+        v-if="!numberOfLabels && !isLoading"
+        v-html="
+          'You still have no labels in your dataset, start by creating some'
+        "
+      />
+
       <BaseFeedbackComponent
-        v-if="feedbackInputIfThereIsLabelsNotSavedInBack"
+        v-if="feedbackInputIfThereIsLabelsNotSavedInBack && !isLoading"
         :feedbackInput="feedbackInputIfThereIsLabelsNotSavedInBack"
         @on-click="onSaveLabelsNotPersisted"
         class="feedback-area"
       />
 
-      <BaseSpinner v-if="isLoading" />
-
       <TokenClassificationGlobalLabelsComponent
-        v-if="isTaskTokenClassification && !isLoading"
+        v-if="isTaskTokenClassification && numberOfLabels && !isLoading"
         :labels="labels"
         :showAllLabels="showAllLabels"
         @on-toggle-show-less-more-labels="showAllLabels = !showAllLabels"
       />
       <TextClassificationGlobalLabelsComponent
-        v-if="isTaskTextClassification && !isLoading"
+        v-if="isTaskTextClassification && numberOfLabels && !isLoading"
         :labels="labels"
         :showAllLabels="showAllLabels"
         @on-toggle-show-less-more-labels="showAllLabels = !showAllLabels"
       />
+
       <div class="buttons-area">
         <CreateNewAction
           text="+ Create label"
@@ -100,6 +109,9 @@ export default {
         this.sortBy,
         this.isSortAsc
       );
+    },
+    numberOfLabels() {
+      return this.labels.length;
     },
     labelsInGlobalLabelsNotSavedInBack() {
       return getLabelsNotSavedInBackByDatasetId(this.datasetId);
@@ -182,6 +194,10 @@ export default {
 .feedback-area {
   display: inline-flex;
   margin-bottom: $base-space * 5;
+}
+
+.empty-label-component {
+  color: rgba(0, 0, 0, 0.37);
 }
 
 .buttons-area {

@@ -17,25 +17,17 @@
 
 <template>
   <div class="wrapper">
-    <div
-      v-if="numberOfLabels"
-      ref="wrapperLabels"
-      class="wrapper-labels"
-      :class="[showAllLabels || 'show-less-labels']"
-      :style="cssVars"
-    >
+    <div v-if="numberOfLabels" class="wrapper-labels">
       <entity-label
-        v-for="(label, index) in labels"
-        :label="label.text"
-        :shortcut="label.shortcut"
-        :key="index"
-        :color="`color_${label.color_id % $entitiesMaxColors}`"
+        v-for="{ text, shortcut, id, color_id } in filteredLabels"
+        :label="text"
+        :shortcut="shortcut"
+        :key="id"
+        :color="`color_${color_id % $entitiesMaxColors}`"
       />
-    </div>
-    <div class="button-area">
       <BaseButton
         v-if="showLessMoreButton"
-        class="primary"
+        class="secondary light small"
         @on-click="$emit('on-toggle-show-less-more-labels')"
       >
         {{ titleShowLessMoreButton }}
@@ -45,6 +37,7 @@
 </template>
 
 <script>
+const MAX_LABELS_TO_SHOW = 10;
 export default {
   name: "TokenClassificationGlobalLabelsComponent",
   props: {
@@ -57,43 +50,27 @@ export default {
       default: () => true,
     },
   },
-  data() {
-    return {
-      wrapperHeight: 0,
-      heightLimit: 170,
-    };
-  },
-  mounted() {
-    this.calculateHeight();
-  },
   computed: {
     numberOfLabels() {
       return this.labels.length;
     },
-    isCollapsable() {
-      return this.numberOfLabels > this.MAX_LABELS_NUMBER;
+    maxNumberOfLabelToShow() {
+      if (this.showAllLabels) return this.numberOfLabels;
+      return MAX_LABELS_TO_SHOW;
     },
     showLessMoreButton() {
-      return this.wrapperHeight >= this.heightLimit;
+      return this.numberOfLabels >= MAX_LABELS_TO_SHOW;
+    },
+    filteredLabels() {
+      return this.labels.filter(
+        (label, index) => index < this.maxNumberOfLabelToShow
+      );
     },
     titleShowLessMoreButton() {
       if (this.showAllLabels) {
-        return `Show Less`;
+        return `Show less`;
       }
-      return `Show more`;
-    },
-    cssVars() {
-      return { "--wrapper-height-limit": `${this.heightLimit}px` };
-    },
-  },
-  watch: {
-    labels() {
-      this.calculateHeight();
-    },
-  },
-  methods: {
-    calculateHeight() {
-      this.wrapperHeight = this.$refs.wrapperLabels?.clientHeight;
+      return `+${this.numberOfLabels - MAX_LABELS_TO_SHOW}`;
     },
   },
 };
@@ -113,18 +90,6 @@ export default {
   flex-direction: row;
   gap: 8px;
   max-width: 600px;
-  // scroll-behavior: auto;
   background: transparent;
 }
-
-.show-less-labels {
-  max-height: var(--wrapper-height-limit);
-  overflow: hidden;
-}
 </style>
-
-[ "LOC", "MISC", "PER", "ORG", "patati", "patata", "LOCa", "MISCa", "PERa",
-"ORGa", "patatia", "patataa", "ORGo", "patatio", "patatao", "youhou", "haha",
-"hihi", "ohoh", "azdazdazdazdazdazd", "eadfadazdzadaz", "zefzefzefzefzef",
-"gergerg", "hrthtrh", "dfgdfgfdg", "hfghfghfgh", "d", "azeazeaze",
-"sdfsdfsdfsdf", "sdqfsqdfqsdfsdqf", ]

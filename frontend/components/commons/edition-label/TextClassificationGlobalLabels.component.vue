@@ -1,13 +1,20 @@
 <template>
-  <div class="wrapper" :class="[showAllLabels || 'show-less-labels']">
-    <div class="container" v-for="label in labels" :key="label.key">
-      <div class="label-text" v-html="label.text" />
+  <div class="wrapper">
+    <div class="container" v-for="{ id, text } in filteredLabels" :key="id">
+      <div class="label-text" v-html="text" />
     </div>
-    <button>Daboudi</button>
+    <BaseButton
+      v-if="showLessMoreButton"
+      class="secondary light small"
+      @on-click="$emit('on-toggle-show-less-more-labels')"
+    >
+      {{ titleShowLessMoreButton }}
+    </BaseButton>
   </div>
 </template>
 
 <script>
+const MAX_LABELS_TO_SHOW = 10;
 export default {
   name: "TextClassificationGlobalLabelsComponent",
   props: {
@@ -18,6 +25,29 @@ export default {
     showAllLabels: {
       type: Boolean,
       default: () => true,
+    },
+  },
+  computed: {
+    numberOfLabels() {
+      return this.labels.length;
+    },
+    maxNumberOfLabelToShow() {
+      if (this.showAllLabels) return this.numberOfLabels;
+      return MAX_LABELS_TO_SHOW;
+    },
+    showLessMoreButton() {
+      return this.numberOfLabels >= MAX_LABELS_TO_SHOW;
+    },
+    filteredLabels() {
+      return this.labels.filter(
+        (label, index) => index < this.maxNumberOfLabelToShow
+      );
+    },
+    titleShowLessMoreButton() {
+      if (this.showAllLabels) {
+        return `Show less`;
+      }
+      return `+${this.numberOfLabels - MAX_LABELS_TO_SHOW}`;
     },
   },
 };
@@ -52,10 +82,5 @@ export default {
   color: #4c4ea3;
   box-shadow: 0;
   transition: all 0.2s ease-in-out;
-}
-
-.show-less-labels {
-  max-height: 189px;
-  // overflow: auto;
 }
 </style>
