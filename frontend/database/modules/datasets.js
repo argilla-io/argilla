@@ -639,6 +639,7 @@ const actions = {
           message: `The labels <b>"${newLabels}"</b> already exist in the list of labels`,
           type: "info",
         });
+        throw new Error({ response: TYPE_OF_FEEDBACK.LABEL_ALREADY_EXIST });
       }
     } else {
       console.error(
@@ -1051,6 +1052,7 @@ const validateStatusForSettings = (status) => {
 const TYPE_OF_FEEDBACK = Object.freeze({
   LABEL_SCHEMA_IS_EMPTY: "LABEL_SCHEMA_IS_EMPTY",
   NOT_ALLOWED_TO_UPDATE_LABELS: "NOT_ALLOWED_TO_UPDATE_LABELS",
+  LABEL_ALREADY_EXIST: "LABEL_ALREADY_EXIST",
 });
 
 export default {
