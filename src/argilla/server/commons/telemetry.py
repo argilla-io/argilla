@@ -22,7 +22,12 @@ import httpx
 from fastapi import Request
 
 from argilla.server.commons.models import TaskType
-from argilla.server.errors.base_errors import ServerError
+from argilla.server.errors.base_errors import (
+    EntityAlreadyExistsError,
+    EntityNotFoundError,
+    GenericServerError,
+    ServerError,
+)
 from argilla.server.settings import settings
 
 try:
@@ -33,51 +38,34 @@ except (ImportError, ModuleNotFoundError):
     Client = None
 
 
-def _configure_analytics(disable_send: bool = False) -> Client:
-    API_KEY = settings.telemetry_key or "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
-    TELEMETRY_HOST = "https://api.segment.io"
-
-    # Check host connection
-    httpx.options(TELEMETRY_HOST, timeout=1, verify=False)
-
-    return Client(
-        write_key=API_KEY,
-        gzip=True,
-        host=TELEMETRY_HOST,
-        send=not disable_send,
-        max_retries=5,
-    )
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
-class _TelemetryClient:
-    client: Client
+class TelemetryClient:
+    enable_telemetry: dataclasses.InitVar[bool] = settings.enable_telemetry
+    disable_send: dataclasses.InitVar[bool] = False
+    api_key: dataclasses.InitVar[str] = settings.telemetry_key or "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+    host: dataclasses.InitVar[str] = "https://api.segment.io"
 
-    __INSTANCE__: "_TelemetryClient" = None
-    __server_id__: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
+    _server_id: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
 
     @property
     def server_id(self) -> uuid.UUID:
-        return self.__server_id__
+        return self._server_id
 
-    @classmethod
-    def get(cls):
-        if settings.enable_telemetry:
-            if cls.__INSTANCE__ is None:
-                try:
-                    cls.__INSTANCE__ = cls(client=_configure_analytics())
-                except Exception as err:
-                    logging.getLogger(__name__).warning(f"Cannot initialize telemetry. Error: {err}. Disabling...")
-                    settings.enable_telemetry = False
-                    return None
-            return cls.__INSTANCE__
-
-    def __post_init__(self):
+    def __post_init__(self, enable_telemetry: bool, disable_send: bool, api_key: str, host: str):
         from argilla import __version__
 
-        self.__server_id__ = uuid.UUID(int=uuid.getnode())
-        self.__server_id_str__ = str(self.__server_id__)
-        self.__system_info__ = {
+        self.client = None
+        if enable_telemetry:
+            try:
+                self.client = Client(write_key=api_key, gzip=True, host=host, send=not disable_send, max_retries=10)
+            except Exception as err:
+                _LOGGER.warning(f"Cannot initialize telemetry. Error: {err}. Disabling...")
+
+        self._server_id = uuid.UUID(int=uuid.getnode())
+        self._system_info = {
             "system": platform.system(),
             "machine": platform.machine(),
             "platform": platform.platform(),
@@ -87,13 +75,19 @@ class _TelemetryClient:
         }
 
     def track_data(self, action: str, data: Dict[str, Any], include_system_info: bool = True):
+        if not self.client:
+            return
+
         event_data = data.copy()
         self.client.track(
-            user_id=self.__server_id_str__,
+            user_id=str(self._server_id),
             event=action,
             properties=event_data,
-            context=self.__system_info__ if include_system_info else {},
+            context=self._system_info if include_system_info else {},
         )
+
+
+telemetry_client = TelemetryClient()
 
 
 def _process_request_info(request: Request):
@@ -101,25 +95,31 @@ def _process_request_info(request: Request):
 
 
 async def track_error(error: ServerError, request: Request):
-    client = _TelemetryClient.get()
-    if client:
-        client.track_data("ServerErrorFound", {"code": error.code, **_process_request_info(request)})
+    global telemetry_client
+
+    data = {"code": error.code}
+    if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
+        data["type"] = error.type
+
+    data.update(_process_request_info(request))
+
+    telemetry_client.track_data("ServerErrorFound", data)
 
 
 async def track_bulk(task: TaskType, records: int):
-    client = _TelemetryClient.get()
-    if client:
-        client.track_data("LogRecordsRequested", {"task": task, "records": records})
+    global telemetry_client
+
+    telemetry_client.track_data("LogRecordsRequested", {"task": task, "records": records})
 
 
 async def track_login(request: Request, username: str):
-    client = _TelemetryClient.get()
-    if client:
-        client.track_data(
-            "UserInfoRequested",
-            {
-                "is_default_user": username == "argilla",
-                "user_hash": str(uuid.uuid5(namespace=client.server_id, name=username)),
-                **_process_request_info(request),
-            },
-        )
+    global telemetry_client
+
+    telemetry_client.track_data(
+        "UserInfoRequested",
+        {
+            "is_default_user": username == "argilla",
+            "user_hash": str(uuid.uuid5(namespace=telemetry_client.server_id, name=username)),
+            **_process_request_info(request),
+        },
+    )
