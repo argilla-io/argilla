@@ -53,7 +53,6 @@ import {
   getLabelsNotSavedInBackByDatasetId,
   isExistAnyLabelsNotSavedInBackByDatasetId,
 } from "@/models/globalLabel.queries";
-import { getLoadingValue } from "@/models/viewSettings.queries";
 
 export default {
   name: "EditionLabelComponent",
@@ -69,6 +68,10 @@ export default {
     datasetTask: {
       type: String,
       required: true,
+    },
+    isLoading: {
+      type: Boolean,
+      default: () => true,
     },
   },
   data() {
@@ -93,9 +96,6 @@ export default {
     },
     datasetName() {
       return this.dataset?.name;
-    },
-    isLoading() {
-      return getLoadingValue(this.datasetName)?.loading ?? false;
     },
     isTaskTokenClassification() {
       return this.datasetTask === "TokenClassification";

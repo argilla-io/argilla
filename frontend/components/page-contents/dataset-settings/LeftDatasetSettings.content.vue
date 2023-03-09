@@ -25,6 +25,7 @@
       <EditionLabelComponent
         :datasetId="datasetId"
         :datasetTask="datasetTask"
+        :isLoading="$fetchState.pending"
       />
     </div>
     <div class="delete-dataset-component" v-if="datasetTask">
