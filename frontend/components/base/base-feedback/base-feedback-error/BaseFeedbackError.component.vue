@@ -3,7 +3,7 @@
     <p class="message">{{ message }}</p>
     <div class="buttons-area" v-if="isButtonLabels">
       <div class="button" v-for="{ label, value } in buttonLabels" :key="value">
-        <BaseButton :id="label" @on-click="onClick(value)">
+        <BaseButton class="small" :id="label" @on-click="onClick(value)">
           {{ label }}
         </BaseButton>
       </div>
@@ -68,7 +68,7 @@ export default {
   background-color: rgba(255, 103, 95, 0.6);
   border-radius: $border-radius;
   button {
-    height: 1em;
+    padding: 6px 12px;
   }
 }
 </style>
