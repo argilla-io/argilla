@@ -36,6 +36,8 @@
       :isMultiLabel="isMultiLabel"
       @discard-records="onDiscard"
       @validate-records="onValidate"
+      @clear-records="onClear"
+      @reset-records="onReset"
       @on-select-labels="onSelectLabels($event)"
       @new-label="onNewLabel"
     />
@@ -45,6 +47,7 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { Notification } from "@/models/Notifications";
 export default {
   props: {
     datasetId: {
@@ -87,28 +90,95 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateRecords: "entities/datasets/updateRecords",
+      updateRecords: "entities/datasets/updateDatasetRecords",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
+      resetRecords: "entities/datasets/resetRecords",
     }),
-    async onSelectLabels({ labels, selectedRecords }) {
+    async onSelectLabels({ labels, selectedRecords, labelsToRemove }) {
       const records = selectedRecords.map((record) => {
-        let newLabels = labels.map((label) => ({
-          class: label,
-          score: 1.0,
-        }));
+        const pendingStatusProperties = {
+          selected: true,
+          status: "Edited",
+        };
+        const currentAnnotationLabels = record.currentAnnotation?.labels ?? [];
+        const labelsToSend = this.labelsFactoryBySingleOrMultiLabel(
+          labels,
+          labelsToRemove,
+          currentAnnotationLabels
+        );
+
         return {
           ...record,
-          annotation: {
-            labels: newLabels,
+          ...(this.isMultiLabel && pendingStatusProperties),
+          currentAnnotation: {
+            agent: this.$auth.user.username,
+            labels: labelsToSend,
           },
         };
       });
-      await this.validate({
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: records,
-      });
+
+      let message = "";
+      let numberOfChars = 0;
+      let typeOfNotification = "";
+      try {
+        if (this.isMultiLabel) {
+          const updatedRecords = {
+            dataset: this.dataset,
+            agent: this.$auth.user.username,
+            records,
+          };
+          await this.updateRecords(updatedRecords);
+          message = `${selectedRecords.length} records are in pending`;
+          numberOfChars = 25;
+          typeOfNotification = "info";
+        } else {
+          await this.onValidate(records);
+        }
+      } catch (err) {
+        console.log(err);
+        message = "There was a problem on annotate records";
+        typeOfNotification = "error";
+      } finally {
+        if (this.isMultiLabel) {
+          Notification.dispatch("notify", {
+            message,
+            numberOfChars,
+            type: typeOfNotification,
+          });
+        }
+      }
+    },
+    labelsFactoryBySingleOrMultiLabel(
+      labels,
+      labelsToRemove,
+      currentAnnotationLabels
+    ) {
+      return this.isMultiLabel
+        ? this.formatLabelsForBulkAnnotation(
+            labels,
+            labelsToRemove,
+            currentAnnotationLabels
+          )
+        : this.formatLabels(labels);
+    },
+    formatLabelsForBulkAnnotation(
+      labels,
+      labelsToRemove,
+      currentAnnotationLabels
+    ) {
+      const formattedLabels = this.formatLabels(labels);
+
+      let labelsToSend = [
+        ...new Set([...formattedLabels, ...currentAnnotationLabels]),
+      ];
+      labelsToSend = labelsToRemove?.length
+        ? labelsToSend?.filter(
+            (labelObj) => !labelsToRemove.includes(labelObj.class)
+          )
+        : labelsToSend;
+
+      return labelsToSend;
     },
     async onDiscard(records) {
       await this.discard({
@@ -117,27 +187,59 @@ export default {
       });
     },
     async onValidate(records) {
-      const filterdRecord = records.filter(
-        (r) => r.annotation || r.predicted_as || r.multi_label
+      const filteredRecord = records.filter(
+        (r) => r.currentAnnotation || r.predicted_as || r.multi_label
       );
-      await this.validate({
+      const validatedRecords = filteredRecord.map((record) => {
+        const annotationLabels = record.currentAnnotation?.labels || null;
+        const modelPredictionLabels = this.formatLabels(record.predicted_as);
+        const labelsForValidate =
+          annotationLabels || modelPredictionLabels || [];
+        return {
+          ...record,
+          currentAnnotation: null,
+          annotation: {
+            labels: labelsForValidate,
+          },
+        };
+      });
+
+      try {
+        await this.validate({
+          dataset: this.dataset,
+          agent: this.$auth.user.username,
+          records: validatedRecords,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    async onClear(records) {
+      const clearedRecords = records.map((record) => {
+        return {
+          ...record,
+          currentAnnotation: {
+            labels: [],
+          },
+          selected: true,
+          status: "Edited",
+        };
+      });
+      this.updateRecords({
         dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: filterdRecord.map((record) => {
-          let modelPrediction = {};
-          modelPrediction.labels = record.predicted_as.map((pred) => ({
-            class: pred,
-            score: 1,
-          }));
-          const emptyLabels = {};
-          emptyLabels.labels = [];
-          return {
-            ...record,
-            annotation: {
-              ...(record.annotation || modelPrediction || emptyLabels),
-            },
-          };
-        }),
+        records: clearedRecords,
+      });
+    },
+    async onReset(records) {
+      const restartedRecords = records.map((record) => {
+        return {
+          ...record,
+          currentAnnotation: record.annotation,
+        };
+      });
+      this.resetRecords({
+        dataset: this.dataset,
+        records: restartedRecords,
       });
     },
     async onNewLabel(newLabel) {
@@ -148,6 +250,14 @@ export default {
     },
     searchRecords(query) {
       this.$emit("search-records", query);
+    },
+    formatLabels(labels) {
+      return (
+        labels?.map((label) => ({
+          class: label,
+          score: 1.0,
+        })) || null
+      );
     },
   },
 };

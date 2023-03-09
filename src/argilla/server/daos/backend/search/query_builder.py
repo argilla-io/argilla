@@ -166,16 +166,15 @@ class EsQueryBuilder:
 
     def map_2_es_query(
         self,
-        schema: Optional[Dict[str, Any]] = None,
-        query: Optional[BackendQuery] = None,
-        sort: Optional[SortConfig] = None,
+        schema: Dict[str, Any],
+        query: BackendQuery,
+        sort: SortConfig = SortConfig(),
         exclude_fields: Optional[List[str]] = None,
         include_fields: List[str] = None,
         doc_from: Optional[int] = None,
         highlight: Optional[HighlightParser] = None,
         size: Optional[int] = None,
-        id_from: Optional[str] = None,
-        shuffle: bool = False,
+        search_after_param: Optional[Any] = None,
     ) -> Dict[str, Any]:
         if query and query.raw_query:
             es_query = {"query": query.raw_query}
@@ -186,16 +185,15 @@ class EsQueryBuilder:
                 else {"query": self._search_to_es_query(schema, query)}
             )
 
-        if id_from:
-            es_query["search_after"] = [id_from]
-            sort = SortConfig()  # sort by id as default
+        if search_after_param:
+            es_query["search_after"] = search_after_param
 
-        if shuffle:
+        if sort.shuffle:
             self._setup_random_score(es_query)
-
-        es_sort = self.map_2_es_sort_configuration(schema=schema, sort=sort)
-        if es_sort and not shuffle:
-            es_query["sort"] = es_sort
+        else:
+            es_sort = self.map_2_es_sort_configuration(schema=schema, sort=sort)
+            if es_sort:
+                es_query["sort"] = es_sort
 
         if doc_from:
             es_query["from"] = doc_from
@@ -227,12 +225,8 @@ class EsQueryBuilder:
 
         return es_query
 
-    def map_2_es_sort_configuration(
-        self,
-        schema: Optional[Dict[str, Any]] = None,
-        sort: Optional[SortConfig] = None,
-    ) -> Optional[List[Dict[str, Any]]]:
-        if not sort:
+    def map_2_es_sort_configuration(self, schema: Dict[str, Any], sort: SortConfig) -> Optional[List[Dict[str, Any]]]:
+        if not sort.sort_by or sort.shuffle:
             return None
 
         # TODO(@frascuchon): compute valid list from the schema

@@ -52,6 +52,7 @@ export default class DatasetViewSettings extends Model {
       headerHeight: this.number(140),
       visibleMetrics: this.boolean(false),
       visibleRulesList: this.boolean(false),
+      arePendingRecords: this.boolean(false),
     };
   }
 
@@ -72,6 +73,7 @@ export default class DatasetViewSettings extends Model {
       },
     });
   }
+
   async disableShortCutPagination(value) {
     return await Pagination.update({
       where: this.$id,

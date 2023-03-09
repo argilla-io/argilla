@@ -152,8 +152,7 @@ class Argilla:
         )
 
         self._user: User = users_api.whoami(client=self._client)
-        if workspace is not None:
-            self.set_workspace(workspace)
+        self.set_workspace(workspace or self._user.username)
 
         self._agent = _ArgillaLogAgent(self)
 
@@ -216,12 +215,11 @@ class Argilla:
             )
 
         if workspace != self.get_workspace():
-            if workspace == self._user.username:
-                self._client.headers.pop(WORKSPACE_HEADER_NAME, workspace)
-            elif self._user.workspaces is not None and workspace not in self._user.workspaces:
+            if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
+                self._client.headers[WORKSPACE_HEADER_NAME] = workspace
+                self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
+            else:
                 raise Exception(f"Wrong provided workspace {workspace}")
-            self._client.headers[WORKSPACE_HEADER_NAME] = workspace
-            self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
 
     def get_workspace(self) -> str:
         """Returns the name of the active workspace.
@@ -229,7 +227,7 @@ class Argilla:
         Returns:
             The name of the active workspace as a string.
         """
-        return self._client.headers.get(WORKSPACE_HEADER_NAME, self._user.username)
+        return self._client.headers.get(WORKSPACE_HEADER_NAME)
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
@@ -473,6 +471,7 @@ class Argilla:
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         batch_size: int = 250,
         as_pandas=None,
@@ -486,6 +485,7 @@ class Argilla:
             vector: Vector configuration for a semantic search
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
+            sort: The fields on which to sort [(<field_name>, 'asc|decs')].
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
@@ -519,6 +519,7 @@ class Argilla:
                 vector=vector,
                 ids=ids,
                 limit=limit,
+                sort=sort,
                 id_from=id_from,
                 batch_size=batch_size,
             )
@@ -550,6 +551,7 @@ class Argilla:
                 query=query,
                 ids=ids,
                 limit=limit,
+                sort=sort,
                 id_from=id_from,
             )
 
@@ -699,7 +701,7 @@ class Argilla:
         )
 
         records = [sdk_record.to_client() for sdk_record in response.parsed]
-        return dataset_class(self.__sort_records_by_id__(records))
+        return dataset_class(records)
 
     def _load_records_new_fashion(
         self,
@@ -708,6 +710,7 @@ class Argilla:
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         batch_size: int = 250,
     ) -> Dataset:
@@ -738,6 +741,9 @@ class Argilla:
             )
 
         if vector:
+            if sort is not None:
+                _LOGGER.warning("Results are sorted by vector similarity, so 'sort' parameter is ignored.")
+
             vector_search = VectorSearch(
                 name=vector[0],
                 value=vector[1],
@@ -756,6 +762,7 @@ class Argilla:
             name=name,
             projection={"*"},
             limit=limit,
+            sort=sort,
             id_from=id_from,
             batch_size=batch_size,
             # Query
@@ -763,12 +770,4 @@ class Argilla:
             ids=ids,
         )
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
-        return dataset_class(self.__sort_records_by_id__(records))
-
-    def __sort_records_by_id__(self, records: list) -> list:
-        try:
-            records_sorted_by_id = sorted(records, key=lambda x: x.id)
-        # record ids can be a mix of int/str -> sort all as str type
-        except TypeError:
-            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
-        return records_sorted_by_id
+        return dataset_class(records)

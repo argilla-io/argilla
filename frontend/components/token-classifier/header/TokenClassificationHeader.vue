@@ -34,6 +34,8 @@
       :isCreationLabel="allowLabelCreation"
       @discard-records="onDiscard"
       @validate-records="onValidate"
+      @clear-records="onClear"
+      @reset-records="onReset"
       @new-label="onNewLabel"
     />
   </div>
@@ -74,6 +76,8 @@ export default {
     ...mapActions({
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
+      updateRecords: "entities/datasets/updateDatasetRecords",
+      resetRecords: "entities/datasets/resetRecords",
     }),
 
     async onDiscard(records) {
@@ -83,18 +87,49 @@ export default {
       });
     },
     async onValidate(records) {
-      await this.validate({
+      try {
+        await this.validate({
+          dataset: this.dataset,
+          agent: this.$auth.user.username,
+          records: records.map((record) => {
+            return {
+              ...record,
+              annotatedEntities: undefined,
+              annotation: {
+                entities: record.annotatedEntities,
+              },
+            };
+          }),
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    async onClear(records) {
+      const clearedRecords = records.map((record) => {
+        return {
+          ...record,
+          annotatedEntities: [],
+          annotation: null,
+          selected: true,
+          status: "Edited",
+        };
+      });
+      await this.updateRecords({
         dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: records.map((record) => {
-          return {
-            ...record,
-            annotatedEntities: undefined,
-            annotation: {
-              entities: record.annotatedEntities,
-            },
-          };
-        }),
+        records: clearedRecords,
+      });
+    },
+    async onReset(records) {
+      const restartedRecords = records.map((record) => {
+        return {
+          ...record,
+          annotatedEntities: record.annotation?.entities,
+        };
+      });
+      await this.resetRecords({
+        dataset: this.dataset,
+        records: restartedRecords,
       });
     },
     async onNewLabel(label) {
