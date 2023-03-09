@@ -17,10 +17,7 @@
 import _ from "lodash";
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
-import {
-  updateLoadingState,
-  getShortcutChars,
-} from "@/models/viewSettings.queries";
+import { getShortcutChars } from "@/models/viewSettings.queries";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
@@ -955,17 +952,13 @@ const fetchLabelsFromSettings = async ({ name, task }) => {
 };
 
 const formatLabelsAndInitGlobalLabelsORM = async (dataset) => {
-  const { name: datasetName } = dataset;
   try {
-    updateLoadingState(datasetName, true);
     const { labelsToInsertInORM, isLabelSavedInLabelSchema } =
       await factoryLabelsToInsertInGlobalModelORM(dataset);
 
     initGlobalLabels(dataset, labelsToInsertInORM, isLabelSavedInLabelSchema);
   } catch (err) {
     console.log(err);
-  } finally {
-    updateLoadingState(datasetName, false);
   }
 };
 
