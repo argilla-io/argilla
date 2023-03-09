@@ -11,14 +11,14 @@
         class="feedback-area"
       />
 
-      <BaseSpinner v-if="isloading" />
+      <BaseSpinner v-if="isLoading" />
 
       <TokenClassificationGlobalLabelsComponent
-        v-if="isTaskTokenClassification && !isloading"
+        v-if="isTaskTokenClassification && !isLoading"
         :labels="labels"
       />
       <TextClassificationGlobalLabelsComponent
-        v-if="isTaskTextClassification && !isloading"
+        v-if="isTaskTextClassification && !isLoading"
         :labels="labels"
       />
       <div class="buttons-area">
@@ -80,7 +80,7 @@ export default {
     datasetName() {
       return this.dataset?.name;
     },
-    isloading() {
+    isLoading() {
       return getLoadingValue(this.datasetName)?.loading ?? false;
     },
     isTaskTokenClassification() {
