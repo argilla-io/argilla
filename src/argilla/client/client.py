@@ -100,7 +100,8 @@ class _ArgillaLogAgent:
             return await api.log_async(*args, **kwargs)
         except Exception as ex:
             dataset = kwargs["name"]
-            _LOGGER.error(f"\nCannot log data in dataset '{dataset}'\nError: {type(ex).__name__}\nDetails: {ex}")
+            _LOGGER.error(
+                f"\nCannot log data in dataset '{dataset}'\nError: {type(ex).__name__}\nDetails: {ex}")
             raise ex
 
     def log(self, *args, **kwargs) -> Future:
@@ -137,7 +138,8 @@ class Argilla:
                 the headers of argilla client requests, like additional security restrictions. Default: `None`.
 
         """
-        api_url = api_url or os.getenv("ARGILLA_API_URL", "http://localhost:6900")
+        api_url = api_url or os.getenv(
+            "ARGILLA_API_URL", "http://localhost:6900")
         # Checking that the api_url does not end in '/'
         api_url = re.sub(r"\/$", "", api_url)
         api_key = api_key or os.getenv("ARGILLA_API_KEY", DEFAULT_API_KEY)
@@ -345,7 +347,8 @@ class Argilla:
             self.set_workspace(workspace)
 
         if not name:
-            raise InputValueError("Empty dataset name has been passed as argument.")
+            raise InputValueError(
+                "Empty dataset name has been passed as argument.")
 
         if not re.match(ES_INDEX_REGEX_PATTERN, name):
             raise InputValueError(
@@ -377,7 +380,8 @@ class Argilla:
         try:
             record_type = type(records[0])
         except IndexError:
-            raise InputValueError("Empty record list has been passed as argument.")
+            raise InputValueError(
+                "Empty record list has been passed as argument.")
 
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
@@ -389,14 +393,16 @@ class Argilla:
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
         else:
-            raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
+            raise InputValueError(
+                f"Unknown record type {record_type}. Available values are {Record.__args__}")
 
         processed, failed = 0, 0
         with Progress() as progress_bar:
-            task = progress_bar.add_task("Logging...", total=len(records), visible=verbose)
+            task = progress_bar.add_task(
+                "Logging...", total=len(records), visible=verbose)
 
             for i in range(0, len(records), batch_size):
-                batch = records[i : i + batch_size]
+                batch = records[i: i + batch_size]
 
                 response = await async_bulk(
                     client=self._client,
@@ -415,11 +421,13 @@ class Argilla:
 
         # TODO: improve logging policy in library
         if verbose:
-            _LOGGER.info(f"Processed {processed} records in dataset {name}. Failed: {failed}")
+            _LOGGER.info(
+                f"Processed {processed} records in dataset {name}. Failed: {failed}")
             workspace = self.get_workspace()
             if not workspace:  # Just for backward comp. with datasets with no workspaces
                 workspace = "-"
-            rprint(f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}")
+            rprint(
+                f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}")
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
@@ -562,7 +570,8 @@ class Argilla:
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
-        response = metrics_api.get_dataset_metrics(self._client, name=name, task=response.parsed.task)
+        response = metrics_api.get_dataset_metrics(
+            self._client, name=name, task=response.parsed.task)
 
         return response.parsed
 
@@ -607,7 +616,8 @@ class Argilla:
                     rule=rule,
                 )
             except AlreadyExistsApiError:
-                _LOGGER.warning(f"Rule {rule} already exists. Please, update the rule instead.")
+                _LOGGER.warning(
+                    f"Rule {rule} already exists. Please, update the rule instead.")
             except Exception as ex:
                 _LOGGER.warning(f"Cannot create rule {rule}: {ex}")
 
@@ -626,22 +636,26 @@ class Argilla:
                 )
             except NotFoundApiError:
                 _LOGGER.info(f"Rule {rule} does not exists, creating...")
-                text_classification_api.add_dataset_labeling_rule(self._client, name=dataset, rule=rule)
+                text_classification_api.add_dataset_labeling_rule(
+                    self._client, name=dataset, rule=rule)
             except Exception as ex:
                 _LOGGER.warning(f"Cannot update rule {rule}: {ex}")
 
     def delete_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
         for rule in rules:
             try:
-                text_classification_api.delete_dataset_labeling_rule(self._client, name=dataset, rule=rule)
+                text_classification_api.delete_dataset_labeling_rule(
+                    self._client, name=dataset, rule=rule)
             except Exception as ex:
                 _LOGGER.warning(f"Cannot delete rule {rule}: {ex}")
         """Deletes the dataset labeling rules"""
         for rule in rules:
-            text_classification_api.delete_dataset_labeling_rule(self._client, name=dataset, rule=rule)
+            text_classification_api.delete_dataset_labeling_rule(
+                self._client, name=dataset, rule=rule)
 
     def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
-        response = text_classification_api.fetch_dataset_labeling_rules(self._client, name=dataset)
+        response = text_classification_api.fetch_dataset_labeling_rules(
+            self._client, name=dataset)
 
         return [LabelingRule.parse_obj(data) for data in response.parsed]
 
@@ -748,7 +762,8 @@ class Argilla:
 
         if vector:
             if sort is not None:
-                _LOGGER.warning("Results are sorted by vector similarity, so 'sort' parameter is ignored.")
+                _LOGGER.warning(
+                    "Results are sorted by vector similarity, so 'sort' parameter is ignored.")
 
             vector_search = VectorSearch(
                 name=vector[0],
@@ -764,7 +779,7 @@ class Argilla:
             )
             return dataset_class(results.records)
         if fields:
-            fields.extend(["id", "inputs"])
+            fields.extend(["id", "text", "tokens", "inputs"])
 
         records = self.datasets.scan(
             name=name,
