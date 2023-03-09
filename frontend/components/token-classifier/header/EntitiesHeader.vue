@@ -28,7 +28,7 @@
         />
         <base-button
           v-if="isCollapsable"
-          class="entities__container__button secondary light small"
+          class="entities__container__button secondary text"
           @click="toggleEntitiesNumber"
           >{{ buttonText }}</base-button
         >
@@ -99,15 +99,14 @@ export default {
     position: relative;
   }
   &__container {
-    padding: 0.4em 0.5em;
-    margin-bottom: $base-space * 2;
-    background: palette(white);
+    margin-bottom: $base-space;
     border-radius: $border-radius-m;
-    box-shadow: $shadow-300;
-    min-height: 48px;
     max-height: 189px;
     overflow: auto;
     @extend %hide-scrollbar;
+    .--annotation & {
+      margin-bottom: $base-space * 2;
+    }
     &__button {
       display: inline-block;
     }

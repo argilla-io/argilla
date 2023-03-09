@@ -35,8 +35,10 @@ from argilla.client.sdk.commons.errors import ForbiddenApiError
 )
 def test_settings_workflow(mocked_client, settings_, wrong_settings):
     dataset = "test-dataset"
+    workspace = rg.get_workspace()
+
     rg.delete(dataset)
-    rg.configure_dataset(dataset, settings=settings_)
+    rg.configure_dataset(dataset, settings=settings_, workspace=workspace)
 
     current_api = api.active_api()
     datasets_api = current_api.datasets
@@ -45,13 +47,13 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
     assert found_settings == settings_
 
     settings_.label_schema = {"LALALA"}
-    rg.configure_dataset(dataset, settings_)
+    rg.configure_dataset(dataset, settings_, workspace=workspace)
 
     found_settings = datasets_api.load_settings(dataset)
     assert found_settings == settings_
 
     with pytest.raises(ValueError, match="Task type mismatch"):
-        rg.configure_dataset(dataset, wrong_settings)
+        rg.configure_dataset(dataset, wrong_settings, workspace=workspace)
 
 
 def test_list_dataset(mocked_client):

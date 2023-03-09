@@ -3,15 +3,15 @@
     <svgicon
       :name="
         title === 'Validated'
-          ? 'check'
+          ? 'validate'
           : null || title === 'Edited'
           ? 'time'
           : null || title === 'Discarded'
-          ? 'unavailable'
+          ? 'discard'
           : null
       "
-      width="16"
-      height="16"
+      width="14"
+      height="14"
       color="#ffffff"
     ></svgicon>
     {{ title === "Edited" ? "Pending" : title }}
@@ -19,9 +19,9 @@
 </template>
 
 <script>
-import "assets/icons/check";
+import "assets/icons/validate";
 import "assets/icons/time";
-import "assets/icons/unavailable";
+import "assets/icons/discard";
 export default {
   props: {
     title: {
@@ -35,11 +35,10 @@ export default {
 .status-tag {
   display: inline-flex;
   align-items: center;
-  margin-left: 1em;
   background: palette(green);
   color: palette(white);
   border-radius: 50px;
-  padding: 0.4em 1em;
+  padding: 0.2em 1em;
   @include font-size(12px);
   font-weight: 600;
   z-index: 0;

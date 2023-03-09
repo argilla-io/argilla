@@ -35,6 +35,7 @@ def test_log_records_with_multi_and_single_label_task(mocked_client):
     dataset = "test_log_records_with_multi_and_single_label_task"
     expected_inputs = ["This is a text"]
 
+    rg.init()
     rg.delete(dataset)
     records = [
         rg.TextClassificationRecord(
@@ -195,8 +196,9 @@ def test_log_data_in_several_workspaces(mocked_client: SecuredClient, admin: Use
     dataset_name = "test_log_data_in_several_workspaces"
     text = "This is a text"
 
-    workspace = accounts.create_workspace(db, WorkspaceCreate(name=workspace_name))
-    accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=admin.id))
+    for ws_name in [workspace_name, admin.username]:
+        workspace = accounts.create_workspace(db, WorkspaceCreate(name=ws_name))
+        accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=admin.id))
 
     api = Argilla(api_key=admin.api_key)
 
@@ -210,10 +212,12 @@ def test_log_data_in_several_workspaces(mocked_client: SecuredClient, admin: Use
 
     api.set_workspace(workspace_name)
     api.log(rg.TextClassificationRecord(id=1, inputs=text), name=dataset_name)
+
     ds = api.load(dataset_name)
     assert len(ds) == 1
 
     api.set_workspace(current_workspace)
+
     ds = api.load(dataset_name)
     assert len(ds) == 1
 

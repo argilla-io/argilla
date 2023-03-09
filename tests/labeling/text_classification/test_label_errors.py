@@ -219,4 +219,4 @@ def dataset(mocked_client, records):
 def test_find_label_errors_integration(dataset):
     records = rg.load(dataset)
     recs = find_label_errors(records)
-    assert [rec.id for rec in recs] == list(range(0, 11, 2)) + list(range(1, 12, 2))
+    assert [rec.id for rec in recs] == [0, 10, 2, 4, 6, 8, 1, 11, 3, 5, 7, 9]
