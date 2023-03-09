@@ -10,6 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Removing deprecated endpoint used by old clients. This change will break compatibility with client `<v1.3.0`
+- Removing some data scan deprecated endpoints used by old clients. This change will break compatibility with client `<v1.3.0`
 
 
