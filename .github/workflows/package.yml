@@ -97,7 +97,7 @@ jobs:
         if: steps.filter.outputs.python_code == 'true'
         run: |
           pip install -e ".[server,listeners]"
-          alembic upgrade head
+          alembic --config src/argilla/alembic.ini upgrade head
           pytest --cov=argilla --cov-report=xml
           pip install "spacy<3.0" && python -m spacy download en_core_web_sm
           pytest tests/monitoring/test_spacy_monitoring.py
@@ -184,7 +184,7 @@ jobs:
         if: steps.filter.outputs.python_code == 'true'
         run: |
           pip install -e ".[server,listeners]"
-          alembic upgrade head
+          alembic --config src/argilla/alembic.ini upgrade head
           pytest --cov=argilla --cov-report=xml
           pip install "spacy<3.0" && python -m spacy download en_core_web_sm
           pytest tests/monitoring/test_spacy_monitoring.py
