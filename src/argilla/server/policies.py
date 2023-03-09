@@ -67,12 +67,36 @@ class UserPolicy:
 
 class DatasetPolicy:
     @classmethod
-    def delete(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin or actor.username == dataset.created_by
+    def list(cls, user: User) -> bool:
+        return True
+
+    @classmethod
+    def get(cls, user: User) -> bool:
+        return True
+
+    @classmethod
+    def create(cls, user: User) -> bool:
+        return user.is_admin
 
     @classmethod
     def update(cls, dataset: Dataset) -> PolicyAction:
         return lambda actor: actor.is_admin or actor.username == dataset.created_by
+
+    @classmethod
+    def delete(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.username == dataset.created_by
+
+    @classmethod
+    def open(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.username == dataset.created_by
+
+    @classmethod
+    def close(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.username == dataset.created_by
+
+    @classmethod
+    def copy(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: cls.get(actor) and cls.create(actor)
 
 
 def authorize(actor: User, policy_action: PolicyAction) -> None:

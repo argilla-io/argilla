@@ -181,13 +181,13 @@ class DatasetsDAO:
         )
         self._es.copy(id_from=source.id, id_to=target.id)
 
-    def close(self, dataset: DatasetDB):
-        """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
-        self._es.close(dataset.id)
-
     def open(self, dataset: DatasetDB):
         """Make available a dataset"""
         self._es.open(dataset.id)
+
+    def close(self, dataset: DatasetDB):
+        """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
+        self._es.close(dataset.id)
 
     def save_settings(
         self,
