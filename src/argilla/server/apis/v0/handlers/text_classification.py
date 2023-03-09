@@ -47,8 +47,6 @@ from argilla.server.apis.v0.validators.text_classification import DatasetValidat
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError
-from argilla.server.helpers import takeuntil
-from argilla.server.responses import StreamingResponseWithErrorHandling
 from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.security.model import User
@@ -194,98 +192,6 @@ def configure_router():
             total=result.total,
             records=result.records,
             aggregations=TextClassificationSearchAggregations.parse_obj(result.metrics) if result.metrics else None,
-        )
-
-    def scan_data_response(
-        data_stream: Iterable[TextClassificationRecord],
-        chunk_size: int = 1000,
-        limit: Optional[int] = None,
-    ) -> StreamingResponseWithErrorHandling:
-        """Generate an textual stream data response for a dataset scan"""
-
-        async def stream_generator(stream):
-            """Converts dataset scan into a text stream"""
-
-            def grouper(n, iterable, fillvalue=None):
-                args = [iter(iterable)] * n
-                return itertools.zip_longest(fillvalue=fillvalue, *args)
-
-            if limit:
-                stream = takeuntil(stream, limit=limit)
-
-            for batch in grouper(
-                n=chunk_size,
-                iterable=stream,
-            ):
-                filtered_records = filter(lambda r: r is not None, batch)
-                yield "\n".join(
-                    map(
-                        lambda r: r.json(by_alias=True, exclude_none=True),
-                        filtered_records,
-                    )
-                ) + "\n"
-
-        return StreamingResponseWithErrorHandling(stream_generator(data_stream), media_type="application/json")
-
-    @router.post(
-        f"{base_endpoint}/data",
-        deprecated=True,
-        operation_id="stream_data",
-    )
-    async def stream_data(
-        name: str,
-        query: Optional[TextClassificationQuery] = None,
-        common_params: CommonTaskHandlerDependencies = Depends(),
-        id_from: Optional[str] = None,
-        limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-        service: TextClassificationService = Depends(TextClassificationService.get_instance),
-        datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
-    ) -> StreamingResponse:
-        """
-            Creates a data stream over dataset records
-
-        Parameters
-        ----------
-        name
-            The dataset name
-        query:
-            The stream data query
-        common_params:
-            Common query params
-        limit:
-            The load number of records limit. Optional
-        service:
-            The dataset records service
-        datasets:
-            The datasets service
-        current_user:
-            Request user
-
-        id_from:
-            Search after the given record ID
-
-        """
-        query = query or TextClassificationQuery()
-        dataset = datasets.find_by_name(
-            user=current_user,
-            name=name,
-            task=task_type,
-            workspace=common_params.workspace,
-        )
-
-        data_stream = map(
-            TextClassificationRecord.parse_obj,
-            service.read_dataset(
-                dataset,
-                query=ServiceTextClassificationQuery.parse_obj(query),
-                id_from=id_from,
-                limit=limit,
-            ),
-        )
-        return scan_data_response(
-            data_stream=data_stream,
-            limit=limit,
         )
 
     @deprecate_endpoint(
