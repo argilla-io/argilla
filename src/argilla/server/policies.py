@@ -70,6 +70,10 @@ class DatasetPolicy:
     def delete(cls, dataset: Dataset) -> PolicyAction:
         return lambda actor: actor.is_admin or actor.username == dataset.created_by
 
+    @classmethod
+    def update(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.username == dataset.created_by
+
 
 def authorize(actor: User, policy_action: PolicyAction) -> None:
     if not is_authorized(actor, policy_action):

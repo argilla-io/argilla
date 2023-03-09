@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from datetime import datetime
 from typing import List
 
 from fastapi import APIRouter, Body, Depends, Security
@@ -110,20 +110,31 @@ def get_dataset(
 def update_dataset(
     name: str,
     request: UpdateDatasetRequest,
-    ds_params: CommonTaskHandlerDependencies = Depends(),
-    service: DatasetsService = Depends(DatasetsService.get_instance),
-    current_user: User = Security(auth.get_user, scopes=[]),
+    workspace_request_params: CommonTaskHandlerDependencies = Depends(),
+    db: Session = Depends(database.get_db),
+    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
+    user: User = Security(auth.get_current_user, scopes=[]),
 ) -> Dataset:
-    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
+    workspace_name = workspace_request_params.workspace
 
-    dataset = service.update(
-        user=current_user,
-        dataset=found_ds,
-        tags=request.tags,
-        metadata=request.metadata,
-    )
+    workspace = accounts.get_workspace_by_name(db, workspace_name=workspace_name)
+    if not workspace:
+        raise EntityNotFoundError(name=workspace_name, type=Workspace)
 
-    return Dataset.from_orm(dataset)
+    dataset = datasets.find_by_name_and_workspace(name=name, workspace=workspace.name)
+    if not dataset:
+        raise EntityNotFoundError(name=dataset, type=Dataset)
+
+    if not is_authorized(user, DatasetPolicy.update(dataset)):
+        raise ForbiddenOperationError(
+            "You don't have the necessary permissions to update this dataset. "
+            "Only dataset creators or administrators can delete datasets"
+        )
+
+    dataset_update = dataset.copy(update={**request.dict(), "last_updated": datetime.utcnow()})
+    updated_dataset = datasets.update_dataset(dataset_update)
+
+    return Dataset.from_orm(updated_dataset)
 
 
 @router.delete(
@@ -132,12 +143,12 @@ def update_dataset(
 )
 def delete_dataset(
     name: str,
-    request_params: CommonTaskHandlerDependencies = Depends(),
+    workspace_request_params: CommonTaskHandlerDependencies = Depends(),
     db: Session = Depends(database.get_db),
     datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
     user: User = Security(auth.get_current_user, scopes=[]),
 ):
-    workspace_name = request_params.workspace
+    workspace_name = workspace_request_params.workspace
 
     workspace = accounts.get_workspace_by_name(db, workspace_name=workspace_name)
     if not workspace:
