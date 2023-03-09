@@ -475,6 +475,7 @@ class Argilla:
         id_from: Optional[str] = None,
         batch_size: int = 250,
         as_pandas=None,
+        fields: Optional[List[str]] = None,
     ) -> Dataset:
         """Loads a argilla dataset.
 
@@ -491,6 +492,8 @@ class Argilla:
                 can be used to load using batches.
             as_pandas: DEPRECATED! To get a pandas DataFrame do
                 ``rg.load('my_dataset').to_pandas()``.
+            fields: If provided, only the given fields will be retrieved.
+                ``rg.load('my_dataset', fields=['text'])``
 
         Returns:
             A argilla dataset.
@@ -520,6 +523,7 @@ class Argilla:
             limit=limit,
             sort=sort,
             id_from=id_from,
+            fields=fields,
             batch_size=batch_size,
         )
 
@@ -624,6 +628,7 @@ class Argilla:
         limit: Optional[int] = None,
         sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
+        fields: Optional[List[str]] = None,
         batch_size: int = 250,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
@@ -659,9 +664,12 @@ class Argilla:
 
             return dataset_class(results.records)
 
+        if fields:
+            fields.extend(["id", "text", "tokens", "inputs"])
+
         records = self.datasets.scan(
             name=name,
-            projection={"*"},
+            projection=set(fields or "*"),
             limit=limit,
             sort=sort,
             id_from=id_from,
