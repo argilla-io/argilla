@@ -65,7 +65,7 @@ export default {
   height: 40px;
   line-height: 40px;
   color: palette(white);
-  border-radius: $border-radius-m;
+  border-radius: 25px;
   padding: $base-space $base-space * 2;
   @include font-size(14px);
   border: 1px solid transparent;

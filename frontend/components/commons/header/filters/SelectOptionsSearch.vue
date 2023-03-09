@@ -9,7 +9,7 @@
     />
     <a href="#" class="options-search__clear" @click.prevent="clear">
       <svgicon
-        v-if="allowClear && searchText !== ''"
+        v-if="allowClear && !!searchText"
         name="close"
         width="10"
         height="10"

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as ar
+import argilla as rg
 import pytest
 from argilla import TextClassificationSettings, TokenClassificationSettings
 from argilla.client import api
@@ -34,8 +34,10 @@ from argilla.client.sdk.commons.errors import ForbiddenApiError
 )
 def test_settings_workflow(mocked_client, settings_, wrong_settings):
     dataset = "test-dataset"
-    ar.delete(dataset)
-    ar.configure_dataset(dataset, settings=settings_)
+    workspace = rg.get_workspace()
+
+    rg.delete(dataset)
+    rg.configure_dataset(dataset, settings=settings_, workspace=workspace)
 
     current_api = api.active_api()
     datasets_api = current_api.datasets
@@ -44,13 +46,13 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
     assert found_settings == settings_
 
     settings_.label_schema = {"LALALA"}
-    ar.configure_dataset(dataset, settings_)
+    rg.configure_dataset(dataset, settings_, workspace=workspace)
 
     found_settings = datasets_api.load_settings(dataset)
     assert found_settings == settings_
 
     with pytest.raises(ValueError, match="Task type mismatch"):
-        ar.configure_dataset(dataset, wrong_settings)
+        rg.configure_dataset(dataset, wrong_settings, workspace=workspace)
 
 
 def test_list_dataset(mocked_client):
@@ -66,10 +68,14 @@ def test_list_dataset(mocked_client):
 def test_delete_dataset_by_non_creator(mocked_client):
     try:
         dataset = "test_delete_dataset_by_non_creator"
-        ar.delete(dataset)
-        ar.configure_dataset(dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}))
+        workspace = rg.get_workspace()
+        settings = TextClassificationSettings(label_schema={"A", "B", "C"})
+
+        rg.delete(dataset)
+        rg.configure_dataset(dataset, settings=settings, workspace=workspace)
+
         mocked_client.change_current_user("mock-user")
         with pytest.raises(ForbiddenApiError):
-            ar.delete(dataset)
+            rg.delete(dataset)
     finally:
         mocked_client.reset_default_user()

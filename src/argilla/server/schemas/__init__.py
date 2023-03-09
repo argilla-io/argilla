@@ -11,8 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-# All metrics related to the datasets index
-from argilla.server.daos.backend.metrics.base import TermsAggregation
-
-METRICS = {"all_workspaces": TermsAggregation(id="all_workspaces", field="owner.keyword")}

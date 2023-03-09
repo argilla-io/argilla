@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import argilla
-import argilla as ar
+import argilla as rg
 import pytest
 from argilla.metrics import entity_consistency
 from argilla.metrics.token_classification import (
@@ -35,30 +35,30 @@ def log_some_data(dataset: str):
     argilla.delete(dataset)
     text = "My first great example \n"
     tokens = text.split(" ")
-    ar.log(
+    rg.log(
         [
-            ar.TokenClassificationRecord(
+            rg.TokenClassificationRecord(
                 id=1,
                 text=text,
                 tokens=tokens,
                 prediction=[("CARDINAL", 3, 8)],
                 annotation=[("CARDINAL", 3, 8)],
             ),
-            ar.TokenClassificationRecord(
+            rg.TokenClassificationRecord(
                 id=2,
                 text=text,
                 tokens=tokens,
                 prediction=[("CARDINAL", 3, 8)],
                 annotation=[("CARDINAL", 3, 8)],
             ),
-            ar.TokenClassificationRecord(
+            rg.TokenClassificationRecord(
                 id=3,
                 text=text,
                 tokens=tokens,
                 prediction=[("NUMBER", 3, 8)],
                 annotation=[("NUMBER", 3, 8)],
             ),
-            ar.TokenClassificationRecord(
+            rg.TokenClassificationRecord(
                 id=4,
                 text=text,
                 tokens=tokens,
@@ -72,10 +72,10 @@ def log_some_data(dataset: str):
 
 def test_search_by_nested_metric(mocked_client):
     dataset = "test_search_by_nested_metric"
-    ar.delete(dataset)
+    rg.delete(dataset)
     log_some_data(dataset)
 
-    df = ar.load(dataset, query="metrics.predicted.mentions.capitalness: LOWER")
+    df = rg.load(dataset, query="metrics.predicted.mentions.capitalness: LOWER")
     assert len(df) > 0
 
 
@@ -286,12 +286,12 @@ def validate_mentions(
 )
 def test_metrics_without_data(mocked_client, metric, expected_results, monkeypatch):
     dataset = "test_metrics_without_data"
-    ar.delete(dataset)
+    rg.delete(dataset)
 
     text = "M"
     tokens = text.split(" ")
-    ar.log(
-        ar.TokenClassificationRecord(
+    rg.log(
+        rg.TokenClassificationRecord(
             id=1,
             text=text,
             tokens=tokens,
@@ -305,12 +305,12 @@ def test_metrics_without_data(mocked_client, metric, expected_results, monkeypat
     results.visualize()
 
 
-def test_metrics_for_text_classification(mocked_client):
+def test_metrics_for_token_classification(mocked_client):
     dataset = "test_metrics_for_token_classification"
 
     text = "test the f1 metric of the token classification task"
-    ar.log(
-        ar.TokenClassificationRecord(
+    rg.log(
+        rg.TokenClassificationRecord(
             id=1,
             text=text,
             tokens=text.split(),

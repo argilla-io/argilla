@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import pytest
-from argilla.server.errors import EntityNotFoundError
+from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.security.model import User
 from pydantic import ValidationError
 
@@ -67,23 +67,13 @@ def test_check_user_workspaces():
         assert user.check_workspaces(["not-found-ws"])
 
 
-def test_default_workspace():
-    user = User(username="admin")
-    assert user.default_workspace == "admin"
-
-    test_user = User(username="test", workspaces=["ws"])
-    assert test_user.default_workspace == test_user.username
-
-
 def test_workspace_for_superuser():
     user = User(username="admin")
-    assert user.default_workspace == "admin"
+
+    assert user.check_workspace("admin") == "admin"
 
     with pytest.raises(EntityNotFoundError):
         assert user.check_workspace("some") == "some"
-
-    assert user.check_workspace(None) == "admin"
-    assert user.check_workspace("") == "admin"
 
     user.workspaces = ["some"]
     assert user.check_workspaces(["some"]) == ["some"]
@@ -111,17 +101,20 @@ def test_is_superuser():
     assert user.is_superuser()
 
 
+@pytest.mark.parametrize("workspaces", [None, [], ["a"]])
+def test_check_workspaces_with_default(workspaces):
+    user = User(username="user", workspaces=workspaces)
+    assert set(user.check_workspace(user.username)) == set(user.username)
+
+
 @pytest.mark.parametrize(
-    "workspaces, expected",
+    "user",
     [
-        (None, {"user"}),
-        ([], {"user"}),
-        (["a"], {"user", "a"}),
+        User(username="admin", workspaces=None, superuser=True),
+        User(username="mock", workspaces=None, superuser=False),
+        User(username="user", workspaces=["ab"], superuser=True),
     ],
 )
-def test_check_workspaces_with_default(workspaces, expected):
-    user = User(username="user", workspaces=workspaces)
-    assert set(user.check_workspaces([])) == expected
-    assert set(user.check_workspaces(None)) == expected
-    assert set(user.check_workspaces([None])) == expected
-    assert set(user.check_workspace(user.username)) == set(user.username)
+def test_check_workspace_without_workspace(user):
+    assert user.check_workspace("") == user.username
+    assert user.check_workspace(None) == user.username
