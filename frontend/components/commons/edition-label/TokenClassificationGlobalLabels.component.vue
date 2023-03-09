@@ -16,14 +16,31 @@
   -->
 
 <template>
-  <div v-if="numberOfLabels" class="wrapper">
-    <entity-label
-      v-for="(label, index) in labels"
-      :label="label.text"
-      :shortcut="label.shortcut"
-      :key="index"
-      :color="`color_${label.color_id % $entitiesMaxColors}`"
-    />
+  <div class="wrapper">
+    <div
+      v-if="numberOfLabels"
+      ref="wrapperLabels"
+      class="wrapper-labels"
+      :class="[showAllLabels || 'show-less-labels']"
+      :style="cssVars"
+    >
+      <entity-label
+        v-for="(label, index) in labels"
+        :label="label.text"
+        :shortcut="label.shortcut"
+        :key="index"
+        :color="`color_${label.color_id % $entitiesMaxColors}`"
+      />
+    </div>
+    <div class="button-area">
+      <BaseButton
+        v-if="showLessMoreButton"
+        class="primary"
+        @on-click="$emit('on-toggle-show-less-more-labels')"
+      >
+        {{ titleShowLessMoreButton }}
+      </BaseButton>
+    </div>
   </div>
 </template>
 
@@ -35,6 +52,19 @@ export default {
       type: Array,
       required: true,
     },
+    showAllLabels: {
+      type: Boolean,
+      default: () => true,
+    },
+  },
+  data() {
+    return {
+      wrapperHeight: 0,
+      heightLimit: 170,
+    };
+  },
+  mounted() {
+    this.calculateHeight();
   },
   computed: {
     numberOfLabels() {
@@ -43,21 +73,58 @@ export default {
     isCollapsable() {
       return this.numberOfLabels > this.MAX_LABELS_NUMBER;
     },
+    showLessMoreButton() {
+      return this.wrapperHeight >= this.heightLimit;
+    },
+    titleShowLessMoreButton() {
+      if (this.showAllLabels) {
+        return `Show Less`;
+      }
+      return `Show more`;
+    },
+    cssVars() {
+      return { "--wrapper-height-limit": `${this.heightLimit}px` };
+    },
+  },
+  watch: {
+    labels() {
+      this.calculateHeight();
+    },
+  },
+  methods: {
+    calculateHeight() {
+      this.wrapperHeight = this.$refs.wrapperLabels?.clientHeight;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.wrapper-labels {
   @extend %hide-scrollbar;
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
   gap: 8px;
-  max-height: 189px;
   max-width: 600px;
-  overflow: auto;
-  scroll-behavior: auto;
+  // scroll-behavior: auto;
   background: transparent;
 }
+
+.show-less-labels {
+  max-height: var(--wrapper-height-limit);
+  overflow: hidden;
+}
 </style>
+
+[ "LOC", "MISC", "PER", "ORG", "patati", "patata", "LOCa", "MISCa", "PERa",
+"ORGa", "patatia", "patataa", "ORGo", "patatio", "patatao", "youhou", "haha",
+"hihi", "ohoh", "azdazdazdazdazdazd", "eadfadazdzadaz", "zefzefzefzefzef",
+"gergerg", "hrthtrh", "dfgdfgfdg", "hfghfghfgh", "d", "azeazeaze",
+"sdfsdfsdfsdf", "sdqfsqdfqsdfsdqf", ]

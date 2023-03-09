@@ -1,8 +1,9 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper" :class="[showAllLabels || 'show-less-labels']">
     <div class="container" v-for="label in labels" :key="label.key">
       <div class="label-text" v-html="label.text" />
     </div>
+    <button>Daboudi</button>
   </div>
 </template>
 
@@ -14,6 +15,10 @@ export default {
       type: Array,
       required: true,
     },
+    showAllLabels: {
+      type: Boolean,
+      default: () => true,
+    },
   },
 };
 </script>
@@ -24,9 +29,7 @@ export default {
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
-  max-height: 189px;
   max-width: 600px;
-  overflow: auto;
   scroll-behavior: auto;
   background: transparent;
   .container {
@@ -49,5 +52,10 @@ export default {
   color: #4c4ea3;
   box-shadow: 0;
   transition: all 0.2s ease-in-out;
+}
+
+.show-less-labels {
+  max-height: 189px;
+  // overflow: auto;
 }
 </style>

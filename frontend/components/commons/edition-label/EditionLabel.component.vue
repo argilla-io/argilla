@@ -11,15 +11,19 @@
         class="feedback-area"
       />
 
-      <BaseSpinner v-if="isloading" />
+      <BaseSpinner v-if="isLoading" />
 
       <TokenClassificationGlobalLabelsComponent
-        v-if="isTaskTokenClassification && !isloading"
+        v-if="isTaskTokenClassification && !isLoading"
         :labels="labels"
+        :showAllLabels="showAllLabels"
+        @on-toggle-show-less-more-labels="showAllLabels = !showAllLabels"
       />
       <TextClassificationGlobalLabelsComponent
-        v-if="isTaskTextClassification && !isloading"
+        v-if="isTaskTextClassification && !isLoading"
         :labels="labels"
+        :showAllLabels="showAllLabels"
+        @on-toggle-show-less-more-labels="showAllLabels = !showAllLabels"
       />
       <div class="buttons-area">
         <CreateNewAction
@@ -71,6 +75,7 @@ export default {
         buttonLabels: [{ label: "Save schema", value: "SAVE_SCHEMA" }],
         feedbackType: "ERROR",
       },
+      showAllLabels: false,
     };
   },
   computed: {
@@ -80,7 +85,7 @@ export default {
     datasetName() {
       return this.dataset?.name;
     },
-    isloading() {
+    isLoading() {
       return getLoadingValue(this.datasetName)?.loading ?? false;
     },
     isTaskTokenClassification() {
@@ -124,22 +129,35 @@ export default {
         newLabelsString,
         this.characterToSeparateLabels
       );
-      await this.onAddNewLabelsInDataset({
-        datasetId: this.datasetId,
-        datasetTask: this.datasetTask,
-        newLabels,
-      });
+      try {
+        await this.onAddNewLabelsInDataset({
+          datasetId: this.datasetId,
+          datasetTask: this.datasetTask,
+          newLabels,
+        });
+        this.toggleShowAllLabels(true);
+      } catch (err) {
+        console.log(err);
+      }
     },
     async onSaveLabelsNotPersisted() {
       const newLabels = this.labelsTextNotSavedInBack;
-      await this.onAddNewLabelsInDataset({
-        datasetId: this.datasetId,
-        datasetTask: this.datasetTask,
-        newLabels,
-      });
+      try {
+        await this.onAddNewLabelsInDataset({
+          datasetId: this.datasetId,
+          datasetTask: this.datasetTask,
+          newLabels,
+        });
+        this.toggleShowAllLabels(true);
+      } catch (err) {
+        console.log(err);
+      }
     },
     splitTrimArrayString(labels, splitCharacter = null) {
       return labels.split(splitCharacter).map((item) => item.trim());
+    },
+    toggleShowAllLabels(trueOrFalse) {
+      this.showAllLabels = trueOrFalse;
     },
   },
 };
