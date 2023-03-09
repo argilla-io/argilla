@@ -1,7 +1,7 @@
 <template>
   <div class="top-content">
     <h1 v-html="title" />
-    <base-button :to="datasetPageUrl" class="secondary link">
+    <base-button :to="datasetPageUrl" class="secondary text">
       <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
       {{ goToDatasetPageLabel }}
     </base-button>
