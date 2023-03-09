@@ -23,7 +23,7 @@ from argilla.client.apis.datasets import (
 __all__ = [TextClassificationSettings, TokenClassificationSettings, Settings]
 
 
-def configure_dataset(name: str, settings: Settings, workspace: Optional[str]) -> None:
+def configure_dataset(name: str, settings: Settings, workspace: Optional[str] = None) -> None:
     """
     Configures a dataset with a set of configured labels. If dataset does not
     exist yet, an empty dataset will be created.
