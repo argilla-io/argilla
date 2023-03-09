@@ -193,7 +193,7 @@ class Datasets(AbstractApi):
         query = self._parse_query(query=query)
 
         request = {
-            "fields": list(projection) if projection else ["id"]
+            "fields": list(projection) if projection else ["id"],
             "query": query,
         }
 
