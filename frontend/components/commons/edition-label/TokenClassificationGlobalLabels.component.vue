@@ -37,7 +37,8 @@
 </template>
 
 <script>
-const MAX_LABELS_TO_SHOW = 10;
+import { PROPERTIES } from "./editionLabel.properties";
+
 export default {
   name: "TokenClassificationGlobalLabelsComponent",
   props: {
@@ -56,10 +57,10 @@ export default {
     },
     maxNumberOfLabelToShow() {
       if (this.showAllLabels) return this.numberOfLabels;
-      return MAX_LABELS_TO_SHOW;
+      return PROPERTIES.MAX_LABELS_TO_SHOW;
     },
     showLessMoreButton() {
-      return this.numberOfLabels >= MAX_LABELS_TO_SHOW;
+      return this.numberOfLabels >= PROPERTIES.MAX_LABELS_TO_SHOW;
     },
     filteredLabels() {
       return this.labels.filter(
@@ -70,7 +71,7 @@ export default {
       if (this.showAllLabels) {
         return `Show less`;
       }
-      return `+${this.numberOfLabels - MAX_LABELS_TO_SHOW}`;
+      return `+${this.numberOfLabels - PROPERTIES.MAX_LABELS_TO_SHOW}`;
     },
   },
 };
