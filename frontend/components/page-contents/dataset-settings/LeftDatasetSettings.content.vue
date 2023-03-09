@@ -124,7 +124,7 @@ export default {
 .dataset-task {
   color: $black-54;
   border: 1px solid $black-37;
-  border-radius: $border-radius;
+  border-radius: $border-radius-m;
   padding: calc($base-space / 2);
   @include font-size(12px);
   @include line-height(12px);

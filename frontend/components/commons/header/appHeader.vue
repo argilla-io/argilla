@@ -27,27 +27,14 @@
         :copy-button="copyButton"
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
-
-      <BaseButton
-        class="button-settings"
+      <DatasetSettingsIcon
         v-if="datasetName"
-        data-title="Dataset settings"
-        :to="datasetSettingsPageUrl"
-      >
-        <i
-          class="icon-wrapper"
-          v-badge="{
-            showBadge:
-              isNoLabelInGlobalLabelModel ||
-              isAnyLabelsInGlobalLabelsModelNotSavedInBack,
-            verticalPosition: 'top',
-            horizontalPosition: 'right',
-            borderColor: '#212121',
-          }"
-        >
-          <svgicon name="settings" width="22" height="22" color="white" />
-        </i>
-      </BaseButton>
+        :visible-badge="
+          isNoLabelInGlobalLabelModel ||
+          isAnyLabelsInGlobalLabelsModelNotSavedInBack
+        "
+        @click-settings-icon="goToSettings()"
+      />
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
@@ -122,6 +109,9 @@ export default {
     currentTaskHeader() {
       return this.datasetTask && `${this.datasetTask}Header`;
     },
+    workspace() {
+      return this.$route.params.workspace;
+    },
     viewSettings() {
       return DatasetViewSettings.query().whereId(this.datasetName).first();
     },
@@ -138,14 +128,6 @@ export default {
         .where("dataset_id", this.datasetId.join("."))
         .where("is_active", true)
         .exists();
-    },
-    datasetSettingsPageUrl() {
-      if (this.datasetName) {
-        const { fullPath } = this.$route;
-        const datasetSettingsPageUrl = fullPath.replace("?", "/settings?");
-        return datasetSettingsPageUrl;
-      }
-      return null;
     },
     isNoLabelInGlobalLabelModel() {
       return !getTotalLabelsInGlobalLabel(this.datasetId);
@@ -194,6 +176,14 @@ export default {
     searchRecords(query) {
       this.$emit("on-search-or-on-filter-records", query);
     },
+    goToSettings() {
+      const currentRoute = this.$route.path;
+      const newRoute = `/datasets/${this.workspace}/${this.datasetName}/settings`;
+      const allowNavigate = currentRoute !== newRoute;
+      if (this.datasetName && allowNavigate) {
+        this.$router.push(newRoute);
+      }
+    },
   },
 };
 </script>
@@ -215,19 +205,6 @@ export default {
   }
   &:not(.sticky) {
     position: relative;
-  }
-}
-
-.button-settings {
-  margin-right: $base-space;
-  &[data-title] {
-    position: relative;
-    overflow: visible;
-    @extend %has-tooltip--bottom;
-    &:before,
-    &:after {
-      margin-top: calc($base-space/2);
-    }
   }
 }
 </style>

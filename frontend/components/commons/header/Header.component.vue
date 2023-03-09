@@ -6,11 +6,24 @@
       :copy-button="copyButton"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
+    <DatasetSettingsIcon
+      v-if="datasetName"
+      :visible-badge="
+        isNoLabelInGlobalLabelModel ||
+        isAnyLabelsInGlobalLabelsModelNotSavedInBack
+      "
+      @click-settings-icon="goToSettings()"
+    />
     <user />
   </BaseTopbarBrand>
 </template>
 
 <script>
+import { getDatasetModelPrimaryKey } from "@/models/Dataset";
+import {
+  isExistAnyLabelsNotSavedInBackByDatasetId,
+  getTotalLabelsInGlobalLabel,
+} from "@/models/globalLabel.queries";
 export default {
   name: "HeaderComponent",
   data() {
@@ -19,6 +32,12 @@ export default {
     };
   },
   computed: {
+    datasetId() {
+      return getDatasetModelPrimaryKey({
+        name: this.datasetName,
+        workspace: this.workspace,
+      });
+    },
     workspace() {
       return this.$route.params.workspace;
     },
@@ -47,6 +66,22 @@ export default {
           name: "settings",
         },
       ];
+    },
+    isNoLabelInGlobalLabelModel() {
+      return !getTotalLabelsInGlobalLabel(this.datasetId);
+    },
+    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
+      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
+    },
+  },
+  methods: {
+    goToSettings() {
+      const currentRoute = this.$route.path;
+      const newRoute = `/datasets/${this.workspace}/${this.datasetName}/settings`;
+      const allowNavigate = currentRoute !== newRoute;
+      if (this.datasetName && allowNavigate) {
+        this.$router.push(newRoute);
+      }
     },
   },
 };
