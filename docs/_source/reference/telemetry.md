@@ -30,7 +30,7 @@ We do not collect any piece of information related to the source data you store 
 ## Information reported
 The following usage and error information is reported:
 
-* The code of the raised error
+* The code of the raised error and the entity type related to the error, if any (Dataset, Workspace,...)
 * The `user-agent` and `accept-language` http headers
 * Task name and number of records for bulk operations
 * An anonymous generated user uuid
