@@ -37,7 +37,7 @@ export default {
       return PROPERTIES.MAX_LABELS_TO_SHOW;
     },
     showLessMoreButton() {
-      return this.numberOfLabels >= PROPERTIES.MAX_LABELS_TO_SHOW;
+      return this.numberOfLabels > PROPERTIES.MAX_LABELS_TO_SHOW;
     },
     filteredLabels() {
       return this.labels.filter(
