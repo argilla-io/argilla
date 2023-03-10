@@ -17,7 +17,10 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 
 from fastapi import Depends
+from sqlalchemy.orm import Session
 
+from argilla.server import database
+from argilla.server.contexts import accounts
 from argilla.server.daos.datasets import BaseDatasetSettingsDB, DatasetsDAO
 from argilla.server.daos.models.datasets import BaseDatasetDB
 from argilla.server.errors import (
@@ -26,6 +29,9 @@ from argilla.server.errors import (
     ForbiddenOperationError,
     WrongTaskError,
 )
+from argilla.server.models import User as UserModel
+from argilla.server.models import Workspace
+from argilla.server.policies import DatasetPolicy, is_authorized
 from argilla.server.schemas.datasets import CreateDatasetRequest, Dataset
 from argilla.server.security.model import User
 
@@ -46,16 +52,24 @@ class DatasetsService:
     _INSTANCE: "DatasetsService" = None
 
     @classmethod
-    def get_instance(cls, dao: DatasetsDAO = Depends(DatasetsDAO.get_instance)) -> "DatasetsService":
-        if not cls._INSTANCE:
-            cls._INSTANCE = cls(dao)
-        return cls._INSTANCE
+    def get_instance(
+        cls, db: Session = Depends(database.get_db), dao: DatasetsDAO = Depends(DatasetsDAO.get_instance)
+    ) -> "DatasetsService":
+        return cls(db, dao)
 
-    def __init__(self, dao: DatasetsDAO):
+    def __init__(self, db: Session, dao: DatasetsDAO):
+        self._db = db
         self.__dao__ = dao
 
-    def create_dataset(self, user: User, dataset: CreateDatasetRequest) -> BaseDatasetDB:
-        dataset.workspace = user.check_workspace(dataset.workspace)
+    def create_dataset(self, user: UserModel, dataset: CreateDatasetRequest) -> BaseDatasetDB:
+        if not accounts.get_workspace_by_name(self._db, workspace_name=dataset.workspace):
+            raise EntityNotFoundError(name=dataset.workspace, type=Workspace)
+
+        if not is_authorized(user, DatasetPolicy.create):
+            raise ForbiddenOperationError(
+                "You don't have the necessary permissions to create datasets. Only administrators can create datasets"
+            )
+
         try:
             self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.workspace)
             raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.workspace)
@@ -74,114 +88,136 @@ class DatasetsService:
 
     def find_by_name(
         self,
-        user: User,
+        user: UserModel,
         name: str,
         workspace: str,
         as_dataset_class: Type[ServiceDataset] = ServiceBaseDataset,
         task: Optional[str] = None,
     ) -> ServiceDataset:
-        workspace = user.check_workspace(workspace)
-        found_ds = self.__dao__.find_by_name(name=name, workspace=workspace, as_dataset_class=as_dataset_class)
-        if found_ds is None:
+        found_dataset = self.__dao__.find_by_name(name=name, workspace=workspace, as_dataset_class=as_dataset_class)
+
+        if found_dataset is None:
             raise EntityNotFoundError(name=name, type=ServiceDataset)
-        elif task and found_ds.task != task:
+
+        elif task and found_dataset.task != task:
             raise WrongTaskError(detail=f"Provided task {task} cannot be applied to dataset")
-        else:
-            return cast(ServiceDataset, found_ds)
 
-    def delete(self, user: User, dataset: ServiceDataset):
-        dataset = self.find_by_name(user=user, name=dataset.name, workspace=dataset.workspace, task=dataset.task)
+        if not is_authorized(user, DatasetPolicy.get(found_dataset)):
+            raise ForbiddenOperationError("You don't have the necessary permissions to get this dataset.")
 
-        if user.is_superuser() or user.username == dataset.created_by:
-            self.__dao__.delete_dataset(dataset)
-        else:
+        return cast(ServiceDataset, found_dataset)
+
+    def delete(self, user: UserModel, dataset: ServiceDataset):
+        if not is_authorized(user, DatasetPolicy.delete(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to delete this dataset. "
                 "Only dataset creators or administrators can delete datasets"
             )
+        self.__dao__.delete_dataset(dataset)
 
     def update(
         self,
-        user: User,
+        user: UserModel,
         dataset: ServiceDataset,
         tags: Dict[str, str],
         metadata: Dict[str, Any],
     ) -> Dataset:
         found = self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.workspace)
 
+        if not is_authorized(user, DatasetPolicy.update(found)):
+            raise ForbiddenOperationError(
+                "You don't have the necessary permissions to update this dataset. "
+                "Only dataset creators or administrators can update datasets"
+            )
+
         dataset.tags = {**found.tags, **(tags or {})}
         dataset.metadata = {**found.metadata, **(metadata or {})}
         updated = found.copy(update={**dataset.dict(by_alias=True), "last_updated": datetime.utcnow()})
+
         return self.__dao__.update_dataset(updated)
 
     def list(
         self,
-        user: User,
+        user: UserModel,
         workspaces: Optional[List[str]],
         task2dataset_map: Dict[str, Type[ServiceDataset]] = None,
     ) -> List[ServiceDataset]:
-        workspaces = user.check_workspaces(workspaces)
-        return self.__dao__.list_datasets(workspaces=workspaces, task2dataset_map=task2dataset_map)
+        if not is_authorized(user, DatasetPolicy.list):
+            raise ForbiddenOperationError("You don't have the necessary permissions to list datasets.")
 
-    def close(self, user: User, dataset: ServiceDataset):
-        found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.workspace)
-        self.__dao__.close(found)
+        accessible_workspace_names = [
+            ws.name for ws in (accounts.list_workspaces(self._db) if user.is_admin else user.workspaces)
+        ]
 
-    def open(self, user: User, dataset: ServiceDataset):
-        found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.workspace)
-        self.__dao__.open(found)
+        if workspaces:
+            for ws in workspaces:
+                if ws not in accessible_workspace_names:
+                    raise EntityNotFoundError(name=ws, type=Workspace)
+            workspace_names = workspaces
+        else:  # no workspaces
+            workspace_names = accessible_workspace_names
+
+        return self.__dao__.list_datasets(workspaces=workspace_names, task2dataset_map=task2dataset_map)
+
+    def close(self, user: UserModel, dataset: ServiceDataset):
+        if not is_authorized(user, DatasetPolicy.close(dataset)):
+            raise ForbiddenOperationError(
+                "You don't have the necessary permissions to close this dataset. "
+                "Only dataset creators or administrators can close datasets"
+            )
+        self.__dao__.close(dataset)
+
+    def open(self, user: UserModel, dataset: ServiceDataset):
+        if not is_authorized(user, DatasetPolicy.open(dataset)):
+            raise ForbiddenOperationError(
+                "You don't have the necessary permissions to open this dataset. "
+                "Only dataset creators or administrators can open datasets"
+            )
+        self.__dao__.open(dataset)
 
     def copy_dataset(
         self,
-        user: User,
+        user: UserModel,
         dataset: ServiceDataset,
         copy_name: str,
         copy_workspace: Optional[str] = None,
         copy_tags: Dict[str, Any] = None,
         copy_metadata: Dict[str, Any] = None,
     ) -> ServiceDataset:
-        dataset_workspace = copy_workspace or dataset.workspace
-        dataset_workspace = user.check_workspace(dataset_workspace)
+        target_workspace_name = copy_workspace or dataset.workspace
 
-        self._validate_create_dataset(
-            name=copy_name,
-            workspace=dataset_workspace,
-            user=user,
-        )
+        target_workspace = accounts.get_workspace_by_name(self._db, target_workspace_name)
+        if not target_workspace:
+            raise EntityNotFoundError(name=target_workspace_name, type=Workspace)
 
-        copy_dataset = dataset.copy()
-        copy_dataset.name = copy_name
-        copy_dataset.workspace = dataset_workspace
+        if self.__dao__.find_by_name_and_workspace(name=copy_name, workspace=target_workspace_name):
+            raise EntityAlreadyExistsError(name=copy_name, workspace=target_workspace_name, type=Dataset)
+
+        if not is_authorized(user, DatasetPolicy.copy(dataset)):
+            raise ForbiddenOperationError(
+                "You don't have the necessary permissions to copy this dataset. "
+                "Only dataset creators or administrators can copy datasets"
+            )
+
+        dataset_copy = dataset.copy()
+        dataset_copy.name = copy_name
+        dataset_copy.workspace = target_workspace_name
 
         date_now = datetime.utcnow()
 
-        copy_dataset.created_at = date_now
-        copy_dataset.last_updated = date_now
-        copy_dataset.tags = {**copy_dataset.tags, **(copy_tags or {})}
-        copy_dataset.metadata = {
-            **copy_dataset.metadata,
+        dataset_copy.created_at = date_now
+        dataset_copy.last_updated = date_now
+        dataset_copy.tags = {**dataset_copy.tags, **(copy_tags or {})}
+        dataset_copy.metadata = {
+            **dataset_copy.metadata,
             **(copy_metadata or {}),
             "source_workspace": dataset.workspace,
             "copied_from": dataset.name,
         }
 
-        self.__dao__.copy(
-            source=dataset,
-            target=copy_dataset,
-        )
+        self.__dao__.copy(source=dataset, target=dataset_copy)
 
-        return copy_dataset
-
-    def _validate_create_dataset(self, name: str, workspace: str, user: User):
-        try:
-            found = self.find_by_name(user=user, name=name, workspace=workspace)
-            raise EntityAlreadyExistsError(
-                name=found.name,
-                type=found.__class__,
-                workspace=workspace,
-            )
-        except (EntityNotFoundError, ForbiddenOperationError):
-            pass
+        return dataset_copy
 
     async def get_settings(
         self,
