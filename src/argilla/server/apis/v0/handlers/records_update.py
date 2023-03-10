@@ -53,7 +53,7 @@ def configure_router(router: APIRouter):
         service: DatasetsService = Depends(DatasetsService.get_instance),
         search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
         storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user, scopes=[]),
     ) -> RecordType:
         dataset = service.find_by_name(
             user=current_user,

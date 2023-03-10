@@ -35,7 +35,7 @@ router = APIRouter(tags=["workspaces"])
 
 
 @router.get("/workspaces", response_model=List[Workspace], response_model_exclude_none=True)
-def list_workspaces(*, db: Session = Depends(get_db), current_user: User = Security(auth.get_user, scopes=[])):
+def list_workspaces(*, db: Session = Depends(get_db), current_user: User = Security(auth.get_current_user)):
     authorize(current_user, WorkspacePolicy.list)
 
     workspaces = accounts.list_workspaces(db)
@@ -48,7 +48,7 @@ def create_workspace(
     *,
     db: Session = Depends(get_db),
     workspace_create: WorkspaceCreate,
-    current_user: User = Security(auth.get_user, scopes=[]),
+    current_user: User = Security(auth.get_current_user),
 ):
     authorize(current_user, WorkspacePolicy.create)
 
@@ -62,7 +62,7 @@ def create_workspace(
 # any dataset then we can delete them.
 # @router.delete("/workspaces/{workspace_id}", response_model=Workspace, response_model_exclude_none=True)
 def delete_workspace(
-    *, db: Session = Depends(get_db), workspace_id: UUID, current_user: User = Security(auth.get_user, scopes=[])
+    *, db: Session = Depends(get_db), workspace_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     workspace = accounts.get_workspace_by_id(db, workspace_id)
     if not workspace:
@@ -77,7 +77,7 @@ def delete_workspace(
 
 @router.get("/workspaces/{workspace_id}/users", response_model=List[User], response_model_exclude_none=True)
 def list_workspace_users(
-    *, db: Session = Depends(get_db), workspace_id: UUID, current_user: User = Security(auth.get_user, scopes=[])
+    *, db: Session = Depends(get_db), workspace_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     authorize(current_user, WorkspaceUserPolicy.list)
 
@@ -94,7 +94,7 @@ def create_workspace_user(
     db: Session = Depends(get_db),
     workspace_id: UUID,
     user_id: UUID,
-    current_user: User = Security(auth.get_user, scopes=[]),
+    current_user: User = Security(auth.get_current_user),
 ):
     authorize(current_user, WorkspaceUserPolicy.create)
 
@@ -117,7 +117,7 @@ def delete_workspace_user(
     db: Session = Depends(get_db),
     workspace_id: UUID,
     user_id: UUID,
-    current_user: User = Security(auth.get_user, scopes=[]),
+    current_user: User = Security(auth.get_current_user),
 ):
     workspace_user = accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id)
     if not workspace_user:

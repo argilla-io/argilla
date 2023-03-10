@@ -93,10 +93,10 @@ def configure_router():
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> BulkResponse:
         task = task_type
-        workspace = current_user.check_workspace(common_params.workspace)
+        workspace = common_params.workspace
         try:
             dataset = datasets.find_by_name(
                 current_user,
@@ -142,7 +142,7 @@ def configure_router():
         pagination: RequestPagination = Depends(),
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> TextClassificationSearchResults:
         """
         Searches data from dataset
@@ -240,7 +240,7 @@ def configure_router():
         limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> StreamingResponse:
         """
             Creates a data stream over dataset records
@@ -302,7 +302,7 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> List[LabelingRule]:
         dataset = datasets.find_by_name(
             user=current_user,
@@ -329,7 +329,7 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> LabelingRule:
         dataset = datasets.find_by_name(
             user=current_user,
@@ -365,7 +365,7 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> LabelingRuleMetricsSummary:
         dataset = datasets.find_by_name(
             user=current_user,
@@ -391,7 +391,7 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> DatasetLabelingRulesMetricsSummary:
         dataset = datasets.find_by_name(
             user=current_user,
@@ -416,7 +416,7 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> None:
         dataset = datasets.find_by_name(
             user=current_user,
@@ -443,7 +443,7 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> LabelingRule:
         dataset = datasets.find_by_name(
             user=current_user,
@@ -471,7 +471,7 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         service: TextClassificationService = Depends(TextClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> LabelingRule:
         dataset = datasets.find_by_name(
             user=current_user,

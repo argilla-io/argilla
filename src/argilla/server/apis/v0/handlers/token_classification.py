@@ -85,10 +85,10 @@ def configure_router():
         service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user, scopes=[]),
     ) -> BulkResponse:
         task = task_type
-        workspace = current_user.check_workspace(common_params.workspace)
+        workspace = common_params.workspace
         try:
             dataset = datasets.find_by_name(
                 current_user,
@@ -141,7 +141,7 @@ def configure_router():
         pagination: RequestPagination = Depends(),
         service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user, scopes=[]),
     ) -> TokenClassificationSearchResults:
         search = search or TokenClassificationSearchRequest()
         query = search.query or TokenClassificationQuery()
@@ -210,7 +210,7 @@ def configure_router():
         limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
         service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
         id_from: Optional[str] = None,
     ) -> StreamingResponse:
         """
