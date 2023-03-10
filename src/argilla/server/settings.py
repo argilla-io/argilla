@@ -24,7 +24,12 @@ from urllib.parse import urlparse
 
 from pydantic import BaseSettings, Field, root_validator, validator
 
-from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH, DEFAULT_TELEMETRY_KEY
+from argilla._constants import (
+    DEFAULT_API_KEY,
+    DEFAULT_MAX_KEYWORD_LENGTH,
+    DEFAULT_PASSWORD,
+    DEFAULT_TELEMETRY_KEY,
+)
 
 
 class Settings(BaseSettings):
@@ -61,6 +66,9 @@ class Settings(BaseSettings):
 
     __DATASETS_INDEX_NAME__ = "ar.datasets"
     __DATASETS_RECORDS_INDEX_NAME__ = "ar.dataset.{}"
+
+    api_key: str = Field(default=DEFAULT_API_KEY, description="The api key used when creating default user")
+    password: str = Field(default=DEFAULT_PASSWORD, description="The password used when creating default user")
 
     home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
     base_url: Optional[str] = Field(description="The default base url where server will be deployed")

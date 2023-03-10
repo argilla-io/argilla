@@ -14,10 +14,11 @@
 
 import click
 
-from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
+from argilla._constants import DEFAULT_USERNAME
 from argilla.server.contexts import accounts
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace
+from argilla.server.settings import settings
 
 
 @click.command()
@@ -30,8 +31,8 @@ def create_default(quiet: bool):
                 first_name="",
                 username=DEFAULT_USERNAME,
                 role=UserRole.admin,
-                api_key=DEFAULT_API_KEY,
-                password_hash=accounts.hash_password(DEFAULT_PASSWORD),
+                api_key=settings.api_key,
+                password_hash=accounts.hash_password(settings.password),
                 workspaces=[Workspace(name=DEFAULT_USERNAME)],
             )
         )
@@ -39,8 +40,8 @@ def create_default(quiet: bool):
     if not quiet:
         click.echo("User with default credentials succesfully created:")
         click.echo(f"• username: {DEFAULT_USERNAME!r}")
-        click.echo(f"• password: {DEFAULT_PASSWORD!r}")
-        click.echo(f"• api_key:  {DEFAULT_API_KEY!r}")
+        click.echo(f"• password: {settings.password!r}")
+        click.echo(f"• api_key:  {settings.api_key!r}")
 
 
 if __name__ == "__main__":

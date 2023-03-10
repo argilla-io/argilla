@@ -15,6 +15,7 @@
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.server.contexts import accounts
 from argilla.server.models import User, UserRole
+from argilla.server.settings import settings
 from argilla.tasks.users.create_default import create_default
 from click.testing import CliRunner
 from sqlalchemy.orm import Session
@@ -32,6 +33,24 @@ def test_create_default(db: Session):
     assert default_user.role == UserRole.admin
     assert default_user.api_key == DEFAULT_API_KEY
     assert accounts.verify_password(DEFAULT_PASSWORD, default_user.password_hash)
+    assert [ws.name for ws in default_user.workspaces] == [DEFAULT_USERNAME]
+
+
+def test_create_default_with_specific_api_key_and_password(monkeypatch, db: Session):
+    monkeypatch.setattr(settings, "api_key", "my-api-key")
+    monkeypatch.setattr(settings, "password", "my-password")
+
+    result = CliRunner().invoke(create_default)
+
+    assert result.exit_code == 0
+    assert result.output != ""
+    assert db.query(User).count() == 1
+
+    default_user = db.query(User).filter_by(username=DEFAULT_USERNAME).first()
+    assert default_user
+    assert default_user.role == UserRole.admin
+    assert default_user.api_key == "my-api-key"
+    assert accounts.verify_password("my-password", default_user.password_hash)
     assert [ws.name for ws in default_user.workspaces] == [DEFAULT_USERNAME]
 
 
