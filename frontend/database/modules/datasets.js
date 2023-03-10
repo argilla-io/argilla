@@ -658,7 +658,7 @@ const actions = {
         data
       );
 
-      message = "The Labels are updated!";
+      message = "The labels are updated!";
       typeOfNotification = "success";
     } catch (err) {
       const { status } = err.response;
