@@ -29,11 +29,9 @@ from argilla.server.errors import (
     ForbiddenOperationError,
     WrongTaskError,
 )
-from argilla.server.models import User as UserModel
-from argilla.server.models import Workspace
+from argilla.server.models import User, Workspace
 from argilla.server.policies import DatasetPolicy, is_authorized
 from argilla.server.schemas.datasets import CreateDatasetRequest, Dataset
-from argilla.server.security.model import User
 
 
 class ServiceBaseDataset(BaseDatasetDB):
@@ -61,7 +59,7 @@ class DatasetsService:
         self._db = db
         self.__dao__ = dao
 
-    def create_dataset(self, user: UserModel, dataset: CreateDatasetRequest) -> BaseDatasetDB:
+    def create_dataset(self, user: User, dataset: CreateDatasetRequest) -> BaseDatasetDB:
         if not accounts.get_workspace_by_name(self._db, workspace_name=dataset.workspace):
             raise EntityNotFoundError(name=dataset.workspace, type=Workspace)
 
@@ -88,7 +86,7 @@ class DatasetsService:
 
     def find_by_name(
         self,
-        user: UserModel,
+        user: User,
         name: str,
         workspace: str,
         as_dataset_class: Type[ServiceDataset] = ServiceBaseDataset,
@@ -107,7 +105,7 @@ class DatasetsService:
 
         return cast(ServiceDataset, found_dataset)
 
-    def delete(self, user: UserModel, dataset: ServiceDataset):
+    def delete(self, user: User, dataset: ServiceDataset):
         if not is_authorized(user, DatasetPolicy.delete(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to delete this dataset. "
@@ -117,7 +115,7 @@ class DatasetsService:
 
     def update(
         self,
-        user: UserModel,
+        user: User,
         dataset: ServiceDataset,
         tags: Dict[str, str],
         metadata: Dict[str, Any],
@@ -138,7 +136,7 @@ class DatasetsService:
 
     def list(
         self,
-        user: UserModel,
+        user: User,
         workspaces: Optional[List[str]],
         task2dataset_map: Dict[str, Type[ServiceDataset]] = None,
     ) -> List[ServiceDataset]:
@@ -159,7 +157,7 @@ class DatasetsService:
 
         return self.__dao__.list_datasets(workspaces=workspace_names, task2dataset_map=task2dataset_map)
 
-    def close(self, user: UserModel, dataset: ServiceDataset):
+    def close(self, user: User, dataset: ServiceDataset):
         if not is_authorized(user, DatasetPolicy.close(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to close this dataset. "
@@ -167,7 +165,7 @@ class DatasetsService:
             )
         self.__dao__.close(dataset)
 
-    def open(self, user: UserModel, dataset: ServiceDataset):
+    def open(self, user: User, dataset: ServiceDataset):
         if not is_authorized(user, DatasetPolicy.open(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to open this dataset. "
@@ -177,7 +175,7 @@ class DatasetsService:
 
     def copy_dataset(
         self,
-        user: UserModel,
+        user: User,
         dataset: ServiceDataset,
         copy_name: str,
         copy_workspace: Optional[str] = None,
