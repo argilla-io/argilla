@@ -54,7 +54,7 @@ def configure_router(router: APIRouter):
         name: str = DATASET_NAME_PATH_PARAM,
         ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        user: User = Security(auth.get_current_user),
+        current_user: User = Security(auth.get_current_user),
     ) -> TextClassificationSettings:
         found_ds = datasets.find_by_name(
             user=user,
@@ -82,7 +82,7 @@ def configure_router(router: APIRouter):
         ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
-        user: User = Security(auth.get_current_user),
+        current_user: User = Security(auth.get_current_user),
     ) -> TextClassificationSettings:
         found_ds = datasets.find_by_name(
             user=user,

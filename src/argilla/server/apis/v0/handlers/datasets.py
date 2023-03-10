@@ -67,10 +67,10 @@ async def create_dataset(
     request: CreateDatasetRequest = Body(..., description="The request dataset info"),
     ws_params: CommonTaskHandlerDependencies = Depends(),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
-    user: User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ) -> Dataset:
     request.workspace = request.workspace or ws_params.workspace
-    dataset = datasets.create_dataset(user=user, dataset=request)
+    dataset = datasets.create_dataset(user=current_user, dataset=request)
 
     return Dataset.from_orm(dataset)
 
