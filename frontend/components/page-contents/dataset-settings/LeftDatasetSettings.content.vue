@@ -25,7 +25,7 @@
       <EditionLabelComponent
         :datasetId="datasetId"
         :datasetTask="datasetTask"
-        :isLoading="$fetchState.pending"
+        :isLoading="isLoading"
       />
     </div>
     <div class="delete-dataset-component" v-if="datasetTask">
@@ -79,10 +79,18 @@ export default {
     settingsDescription() {
       return "Soon you will be able to edit your information";
     },
+    isLoading() {
+      return this.$fetchState.pending;
+    },
   },
   async fetch() {
     //  Fetch the record data and initialize the corresponding data models and fetch labels
     await this.fetchByName(this.datasetName);
+  },
+  watch: {
+    isLoading(newValue) {
+      this.$root.$emit("is-loading-value", newValue);
+    },
   },
   methods: {
     ...mapActions({
