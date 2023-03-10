@@ -88,14 +88,17 @@ export default {
     await this.fetchByName(this.datasetName);
   },
   watch: {
-    isLoading(newValue) {
-      this.$root.$emit("is-loading-value", newValue);
+    isLoading(loadingState) {
+      this.onEmitLoadingStateByBusEvent(loadingState);
     },
   },
   methods: {
     ...mapActions({
       fetchByName: "entities/datasets/fetchByName",
     }),
+    onEmitLoadingStateByBusEvent(loadingState) {
+      this.$root.$emit("is-loading-value", loadingState);
+    },
   },
 };
 </script>
