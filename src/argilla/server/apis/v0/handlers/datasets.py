@@ -12,24 +12,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from datetime import datetime
+
 from typing import List
 
 from fastapi import APIRouter, Body, Depends, Security
 from pydantic import parse_obj_as
-from sqlalchemy.orm import Session
 
-from argilla.server import database
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
-from argilla.server.contexts import accounts
-from argilla.server.daos.datasets import DatasetsDAO
-from argilla.server.errors import (
-    EntityAlreadyExistsError,
-    EntityNotFoundError,
-    ForbiddenOperationError,
-)
-from argilla.server.policies import DatasetPolicy, is_authorized
+from argilla.server.errors import EntityNotFoundError
+from argilla.server.models import User
 from argilla.server.schemas.datasets import (
     CopyDatasetRequest,
     CreateDatasetRequest,
@@ -37,7 +29,7 @@ from argilla.server.schemas.datasets import (
     UpdateDatasetRequest,
 )
 from argilla.server.security import auth
-from argilla.server.security.model import User, Workspace
+from argilla.server.services.datasets import DatasetsService
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
 
@@ -51,39 +43,16 @@ router = APIRouter(tags=["datasets"], prefix="/datasets")
     operation_id="list_datasets",
 )
 async def list_datasets(
-    db: Session = Depends(database.get_db),
-    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
-    current_user: User = Security(auth.get_current_user, scopes=[]),
+    request_deps: CommonTaskHandlerDependencies = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_current_user),
 ) -> List[Dataset]:
-    if not is_authorized(current_user, DatasetPolicy.list):
-        raise ForbiddenOperationError("You don't have the necessary permissions to list datasets.")
+    datasets = service.list(
+        user=current_user,
+        workspaces=[request_deps.workspace] if request_deps.workspace is not None else None,
+    )
 
-    workspaces = []
-    if current_user.is_admin:
-        workspaces = accounts.list_workspaces(db)
-    else:
-        workspaces = current_user.workspaces
-
-    workspace_names = [workspace.name for workspace in workspaces]
-
-    return parse_obj_as(List[Dataset], datasets.list_datasets(workspaces=workspace_names))
-
-
-@router.get("/{dataset_name}", response_model=Dataset, response_model_exclude_none=True, operation_id="get_dataset")
-def get_dataset(
-    dataset_name: str,
-    workspace_params: CommonTaskHandlerDependencies = Depends(),
-    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
-    current_user: User = Security(auth.get_current_user, scopes=[]),
-) -> Dataset:
-    dataset = datasets.find_by_name_and_workspace(dataset_name, workspace_params.workspace)
-    if not dataset:
-        raise EntityNotFoundError(name=dataset, type=Dataset)
-
-    if not is_authorized(current_user, DatasetPolicy.get):
-        raise ForbiddenOperationError("You don't have the necessary permissions to get datasets.")
-
-    return Dataset.from_orm(dataset)
+    return parse_obj_as(List[Dataset], datasets)
 
 
 @router.post(
@@ -95,162 +64,136 @@ def get_dataset(
     description="Create a new dataset",
 )
 async def create_dataset(
-    db: Session = Depends(database.get_db),
-    create_dataset: CreateDatasetRequest = Body(..., description="The request dataset info"),
-    workspace_params: CommonTaskHandlerDependencies = Depends(),
-    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
-    current_user: User = Security(auth.get_current_user, scopes=[]),
+    request: CreateDatasetRequest = Body(..., description="The request dataset info"),
+    ws_params: CommonTaskHandlerDependencies = Depends(),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    user: User = Security(auth.get_current_user),
 ) -> Dataset:
-    create_dataset.workspace = create_dataset.workspace or workspace_params.workspace
-
-    if not accounts.get_workspace_by_name(db, workspace_name=create_dataset.workspace):
-        raise EntityNotFoundError(name=create_dataset.workspace, type=Workspace)
-
-    if not is_authorized(current_user, DatasetPolicy.create):
-        raise ForbiddenOperationError(
-            "You don't have the necessary permissions to create datasets. Only administrators can create datasets"
-        )
-
-    dataset = datasets.create_dataset(user=current_user, dataset=create_dataset)
+    request.workspace = request.workspace or ws_params.workspace
+    dataset = datasets.create_dataset(user=user, dataset=request)
 
     return Dataset.from_orm(dataset)
 
 
+@router.get(
+    "/{name}",
+    response_model=Dataset,
+    response_model_exclude_none=True,
+    operation_id="get_dataset",
+)
+def get_dataset(
+    name: str,
+    ds_params: CommonTaskHandlerDependencies = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_current_user),
+) -> Dataset:
+    return Dataset.from_orm(
+        service.find_by_name(
+            user=current_user,
+            name=name,
+            workspace=ds_params.workspace,
+        )
+    )
+
+
 @router.patch(
-    "/{dataset_name}", operation_id="update_dataset", response_model=Dataset, response_model_exclude_none=True
+    "/{name}",
+    operation_id="update_dataset",
+    response_model=Dataset,
+    response_model_exclude_none=True,
 )
 def update_dataset(
-    dataset_name: str,
-    update_dataset: UpdateDatasetRequest,
-    workspace_params: CommonTaskHandlerDependencies = Depends(),
-    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
-    current_user: User = Security(auth.get_current_user, scopes=[]),
+    name: str,
+    request: UpdateDatasetRequest,
+    ds_params: CommonTaskHandlerDependencies = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_current_user),
 ) -> Dataset:
-    dataset = datasets.find_by_name_and_workspace(name=dataset_name, workspace=workspace_params.workspace)
-    if not dataset:
-        raise EntityNotFoundError(name=dataset, type=Dataset)
+    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
 
-    if not is_authorized(current_user, DatasetPolicy.update(dataset)):
-        raise ForbiddenOperationError(
-            "You don't have the necessary permissions to update this dataset. "
-            "Only dataset creators or administrators can delete datasets"
-        )
+    dataset = service.update(
+        user=current_user,
+        dataset=found_ds,
+        tags=request.tags,
+        metadata=request.metadata,
+    )
 
-    dataset_update = dataset.copy(update={**update_dataset.dict(), "last_updated": datetime.utcnow()})
-    updated_dataset = datasets.update_dataset(dataset_update)
-
-    return Dataset.from_orm(updated_dataset)
+    return Dataset.from_orm(dataset)
 
 
-@router.delete("/{dataset_name}", operation_id="delete_dataset")
+@router.delete(
+    "/{name}",
+    operation_id="delete_dataset",
+)
 def delete_dataset(
-    dataset_name: str,
-    workspace_params: CommonTaskHandlerDependencies = Depends(),
-    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
-    current_user: User = Security(auth.get_current_user, scopes=[]),
+    name: str,
+    ds_params: CommonTaskHandlerDependencies = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_current_user),
 ):
-    dataset = datasets.find_by_name_and_workspace(name=dataset_name, workspace=workspace_params.workspace)
-    if not dataset:
-        # We are not raising an EntityNotFoundError because this endpoint
-        # was not doing it originally so we want to continue doing the same.
-        return
-
-    if not is_authorized(current_user, DatasetPolicy.delete(dataset)):
-        raise ForbiddenOperationError(
-            "You don't have the necessary permissions to delete this dataset. "
-            "Only dataset creators or administrators can delete datasets"
+    try:
+        found_ds = service.find_by_name(
+            user=current_user,
+            name=name,
+            workspace=ds_params.workspace,
         )
-
-    datasets.delete_dataset(dataset)
-
-
-@router.put("/{dataset_name}:open", operation_id="open_dataset")
-def open_dataset(
-    dataset_name: str,
-    workspace_params: CommonTaskHandlerDependencies = Depends(),
-    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
-    current_user: User = Security(auth.get_current_user, scopes=[]),
-):
-    dataset = datasets.find_by_name_and_workspace(dataset_name, workspace_params.workspace)
-    if not dataset:
-        raise EntityNotFoundError(name=dataset_name, type=Dataset)
-
-    if not is_authorized(current_user, DatasetPolicy.open(dataset)):
-        raise ForbiddenOperationError(
-            "You don't have the necessary permissions to open this dataset. "
-            "Only dataset creators or administrators can open datasets"
+        service.delete(
+            user=current_user,
+            dataset=found_ds,
         )
-
-    datasets.open(dataset)
-
-
-@router.put("/{dataset_name}:close", operation_id="close_dataset")
-def close_dataset(
-    dataset_name: str,
-    workspace_params: CommonTaskHandlerDependencies = Depends(),
-    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
-    current_user: User = Security(auth.get_current_user, scopes=[]),
-):
-    dataset = datasets.find_by_name_and_workspace(dataset_name, workspace_params.workspace)
-    if not dataset:
-        raise EntityNotFoundError(name=dataset_name, type=Dataset)
-
-    if not is_authorized(current_user, DatasetPolicy.close(dataset)):
-        raise ForbiddenOperationError(
-            "You don't have the necessary permissions to close this dataset. "
-            "Only dataset creators or administrators can close datasets"
-        )
-
-    datasets.close(dataset)
+    except EntityNotFoundError:
+        pass
 
 
 @router.put(
-    "/{dataset_name}:copy", operation_id="copy_dataset", response_model=Dataset, response_model_exclude_none=True
+    "/{name}:close",
+    operation_id="close_dataset",
+)
+def close_dataset(
+    name: str,
+    ds_params: CommonTaskHandlerDependencies = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_current_user),
+):
+    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
+    service.close(user=current_user, dataset=found_ds)
+
+
+@router.put(
+    "/{name}:open",
+    operation_id="open_dataset",
+)
+def open_dataset(
+    name: str,
+    ds_params: CommonTaskHandlerDependencies = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_current_user),
+):
+    found_ds = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
+    service.open(user=current_user, dataset=found_ds)
+
+
+@router.put(
+    "/{name}:copy",
+    operation_id="copy_dataset",
+    response_model=Dataset,
+    response_model_exclude_none=True,
 )
 def copy_dataset(
-    *,
-    db: Session = Depends(database.get_db),
-    dataset_name: str,
-    workspace_params: CommonTaskHandlerDependencies = Depends(),
-    copy_dataset: CopyDatasetRequest,
-    datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
-    current_user: User = Security(auth.get_current_user, scopes=[]),
+    name: str,
+    copy_request: CopyDatasetRequest,
+    ds_params: CommonTaskHandlerDependencies = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_current_user),
 ) -> Dataset:
-    source_dataset_name = dataset_name
-    source_workspace_name = workspace_params.workspace
+    found = service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace)
+    dataset = service.copy_dataset(
+        user=current_user,
+        dataset=found,
+        copy_name=copy_request.name,
+        copy_workspace=copy_request.target_workspace,
+        copy_tags=copy_request.tags,
+        copy_metadata=copy_request.metadata,
+    )
 
-    target_dataset_name = copy_dataset.name
-    target_workspace_name = copy_dataset.target_workspace or source_workspace_name
-
-    source_dataset = datasets.find_by_name_and_workspace(source_dataset_name, source_workspace_name)
-    if not source_dataset:
-        raise EntityNotFoundError(name=source_dataset_name, type=Dataset)
-
-    target_workspace = accounts.get_workspace_by_name(db, target_workspace_name)
-    if not target_workspace:
-        raise EntityNotFoundError(name=target_workspace_name, type=Workspace)
-
-    if datasets.find_by_name_and_workspace(target_dataset_name, target_workspace_name):
-        raise EntityAlreadyExistsError(name=target_dataset_name, workspace=target_workspace_name, type=Dataset)
-
-    if not is_authorized(current_user, DatasetPolicy.copy(source_dataset)):
-        raise ForbiddenOperationError(
-            "You don't have the necessary permissions to copy this dataset. "
-            "Only dataset creators or administrators can copy datasets"
-        )
-
-    target_dataset = source_dataset.copy()
-    target_dataset.name = target_dataset_name
-    target_dataset.workspace = target_workspace_name
-    target_dataset.created_at = target_dataset.last_updated = datetime.utcnow()
-    target_dataset.tags = {**target_dataset.tags, **(copy_dataset.tags or {})}
-    target_dataset.metadata = {
-        **target_dataset.metadata,
-        **(copy_dataset.metadata or {}),
-        "source_workspace": source_workspace_name,
-        "copied_from": source_dataset_name,
-    }
-
-    datasets.copy(source_dataset, target_dataset)
-
-    return Dataset.from_orm(target_dataset)
+    return Dataset.from_orm(dataset)
