@@ -143,7 +143,6 @@ def configure_router():
             aggregations=Text2TextSearchAggregations.parse_obj(result.metrics) if result.metrics else None,
         )
 
-
     metrics.configure_router(
         router,
         cfg=TasksFactory.get_task_by_task_type(task_type),
