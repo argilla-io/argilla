@@ -22,6 +22,7 @@ on:
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
   CACHE_NUMBER:  5
+  ALEMBIC_CONFIG: src/argilla/alembic.ini
 
 jobs:
   test-elastic:

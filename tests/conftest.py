@@ -20,6 +20,7 @@ from argilla.client.api import active_api
 from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
+from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 from starlette.testclient import TestClient
@@ -102,13 +103,9 @@ def argilla_user(db):
 
 @pytest.fixture
 def telemetry_track_data(mocker):
-    client = telemetry._TelemetryClient.get()
-    if client:
-        # Disable sending data for tests
-        client.client = telemetry._configure_analytics(disable_send=True)
-        spy = mocker.spy(client, "track_data")
+    telemetry.telemetry_client = TelemetryClient(disable_send=True)
 
-        return spy
+    return mocker.spy(telemetry.telemetry_client, "track_data")
 
 
 @pytest.fixture(scope="session")
