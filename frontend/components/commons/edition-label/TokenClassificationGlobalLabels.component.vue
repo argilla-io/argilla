@@ -100,7 +100,6 @@ export default {
   flex-wrap: wrap;
   flex-direction: row;
   gap: 8px;
-  // max-width: 600px;
   background: transparent;
 }
 </style>

@@ -70,7 +70,6 @@ export default {
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
-  // max-width: 600px;
   scroll-behavior: auto;
   background: transparent;
   .container {
