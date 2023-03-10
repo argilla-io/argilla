@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
 from argilla.server.errors import UnauthorizedError
+from argilla.server.models import User
 from argilla.server.security.auth_provider.base import (
     AuthProvider,
     api_key_header,
@@ -143,7 +144,6 @@ class LocalAuthProvider(AuthProvider):
             )
             username: str = payload.get("sub")
             if username:
-                # return self.users.get_user(username=username)
                 return accounts.get_user_by_username(db, username)
         except JWTError:
             return None
@@ -168,33 +168,6 @@ class LocalAuthProvider(AuthProvider):
             raise UnauthorizedError()
 
         return user
-
-    async def get_user(
-        self,
-        security_scopes: SecurityScopes,
-        db: Session = Depends(get_db),
-        api_key: Optional[str] = Depends(api_key_header),
-        old_api_key: Optional[str] = Depends(old_api_key_header),
-        token: Optional[str] = Depends(_oauth2_scheme),
-    ) -> User:
-        """
-        Fetches the user for a given token
-
-        Parameters
-        ----------
-        api_key:
-            The apikey header info if provided
-        old_api_key:
-            Same as api key but for old clients
-        token:
-            The login token.
-            fastapi injects this param from request
-        Returns
-        -------
-
-        """
-        user = self.get_current_user(security_scopes, db, api_key, old_api_key, token)
-        return User.from_orm(user)
 
 
 def create_local_auth_provider():
