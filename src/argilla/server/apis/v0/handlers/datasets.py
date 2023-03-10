@@ -51,16 +51,22 @@ router = APIRouter(tags=["datasets"], prefix="/datasets")
     operation_id="list_datasets",
 )
 async def list_datasets(
-    workspace_params: CommonTaskHandlerDependencies = Depends(),
+    db: Session = Depends(database.get_db),
     datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
     current_user: User = Security(auth.get_current_user, scopes=[]),
 ) -> List[Dataset]:
     if not is_authorized(current_user, DatasetPolicy.list):
         raise ForbiddenOperationError("You don't have the necessary permissions to list datasets.")
 
-    workspaces = [workspace_params.workspace] if workspace_params.workspace is not None else None
+    workspaces = []
+    if current_user.is_admin:
+        workspaces = accounts.list_workspaces(db)
+    else:
+        workspaces = current_user.workspaces
 
-    return parse_obj_as(List[Dataset], datasets.list_datasets(workspaces=workspaces))
+    workspace_names = [workspace.name for workspace in workspaces]
+
+    return parse_obj_as(List[Dataset], datasets.list_datasets(workspaces=workspace_names))
 
 
 @router.get("/{dataset_name}", response_model=Dataset, response_model_exclude_none=True, operation_id="get_dataset")
@@ -90,22 +96,22 @@ def get_dataset(
 )
 async def create_dataset(
     db: Session = Depends(database.get_db),
-    request: CreateDatasetRequest = Body(..., description="The request dataset info"),
+    create_dataset: CreateDatasetRequest = Body(..., description="The request dataset info"),
     workspace_params: CommonTaskHandlerDependencies = Depends(),
     datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
     current_user: User = Security(auth.get_current_user, scopes=[]),
 ) -> Dataset:
-    request.workspace = request.workspace or workspace_params.workspace
+    create_dataset.workspace = create_dataset.workspace or workspace_params.workspace
 
-    if not accounts.get_workspace_by_name(db, workspace_name=request.workspace):
-        raise EntityNotFoundError(name=request.workspace, type=Workspace)
+    if not accounts.get_workspace_by_name(db, workspace_name=create_dataset.workspace):
+        raise EntityNotFoundError(name=create_dataset.workspace, type=Workspace)
 
     if not is_authorized(current_user, DatasetPolicy.create):
         raise ForbiddenOperationError(
             "You don't have the necessary permissions to create datasets. Only administrators can create datasets"
         )
 
-    dataset = datasets.create_dataset(user=current_user, dataset=request)
+    dataset = datasets.create_dataset(user=current_user, dataset=create_dataset)
 
     return Dataset.from_orm(dataset)
 
@@ -115,7 +121,7 @@ async def create_dataset(
 )
 def update_dataset(
     dataset_name: str,
-    request: UpdateDatasetRequest,
+    update_dataset: UpdateDatasetRequest,
     workspace_params: CommonTaskHandlerDependencies = Depends(),
     datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
     current_user: User = Security(auth.get_current_user, scopes=[]),
@@ -130,7 +136,7 @@ def update_dataset(
             "Only dataset creators or administrators can delete datasets"
         )
 
-    dataset_update = dataset.copy(update={**request.dict(), "last_updated": datetime.utcnow()})
+    dataset_update = dataset.copy(update={**update_dataset.dict(), "last_updated": datetime.utcnow()})
     updated_dataset = datasets.update_dataset(dataset_update)
 
     return Dataset.from_orm(updated_dataset)
@@ -206,15 +212,15 @@ def copy_dataset(
     db: Session = Depends(database.get_db),
     dataset_name: str,
     workspace_params: CommonTaskHandlerDependencies = Depends(),
-    copy_request: CopyDatasetRequest,
+    copy_dataset: CopyDatasetRequest,
     datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
     current_user: User = Security(auth.get_current_user, scopes=[]),
 ) -> Dataset:
     source_dataset_name = dataset_name
     source_workspace_name = workspace_params.workspace
 
-    target_dataset_name = copy_request.name
-    target_workspace_name = copy_request.target_workspace or source_workspace_name
+    target_dataset_name = copy_dataset.name
+    target_workspace_name = copy_dataset.target_workspace or source_workspace_name
 
     source_dataset = datasets.find_by_name_and_workspace(source_dataset_name, source_workspace_name)
     if not source_dataset:
@@ -237,10 +243,10 @@ def copy_dataset(
     target_dataset.name = target_dataset_name
     target_dataset.workspace = target_workspace_name
     target_dataset.created_at = target_dataset.last_updated = datetime.utcnow()
-    target_dataset.tags = {**target_dataset.tags, **(copy_request.tags or {})}
+    target_dataset.tags = {**target_dataset.tags, **(copy_dataset.tags or {})}
     target_dataset.metadata = {
         **target_dataset.metadata,
-        **(copy_request.metadata or {}),
+        **(copy_dataset.metadata or {}),
         "source_workspace": source_workspace_name,
         "copied_from": source_dataset_name,
     }

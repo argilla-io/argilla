@@ -79,7 +79,9 @@ class DatasetsDAO:
         task2dataset_map: Dict[str, Type[DatasetDB]] = None,
         name: Optional[str] = None,
     ) -> List[DatasetDB]:
-        workspaces = workspaces or []
+        if not workspaces:
+            return []
+
         query = BaseDatasetsQuery(
             workspaces=workspaces,
             tasks=[task for task in task2dataset_map] if task2dataset_map else None,
