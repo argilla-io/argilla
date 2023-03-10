@@ -28,11 +28,8 @@
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
       <DatasetSettingsIcon
-        v-if="datasetName"
-        :visible-badge="
-          isNoLabelInGlobalLabelModel ||
-          isAnyLabelsInGlobalLabelsModelNotSavedInBack
-        "
+        v-if="datasetId && datasetName"
+        :datasetId="datasetId"
         @click-settings-icon="goToSettings()"
       />
       <user />
@@ -59,10 +56,6 @@
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Vector as VectorModel } from "@/models/Vector";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
-import {
-  isExistAnyLabelsNotSavedInBackByDatasetId,
-  getTotalLabelsInGlobalLabel,
-} from "@/models/globalLabel.queries";
 export default {
   data() {
     return {
@@ -101,7 +94,7 @@ export default {
   },
   computed: {
     dataset() {
-      //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
+      //TODO - when refactor of filter part from header, remove this computed/and get only what is necessary as props
       return this.datasetId && this.datasetTask
         ? getDatasetFromORM(this.datasetId, this.datasetTask, true)
         : null;
@@ -128,12 +121,6 @@ export default {
         .where("dataset_id", this.datasetId.join("."))
         .where("is_active", true)
         .exists();
-    },
-    isNoLabelInGlobalLabelModel() {
-      return !getTotalLabelsInGlobalLabel(this.datasetId);
-    },
-    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
-      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
     },
   },
   mounted() {

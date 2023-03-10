@@ -7,11 +7,8 @@
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
     <DatasetSettingsIcon
-      v-if="datasetName"
-      :visible-badge="
-        isNoLabelInGlobalLabelModel ||
-        isAnyLabelsInGlobalLabelsModelNotSavedInBack
-      "
+      v-if="datasetId && datasetName"
+      :datasetId="datasetId"
       @click-settings-icon="goToSettings()"
     />
     <user />
@@ -20,10 +17,6 @@
 
 <script>
 import { getDatasetModelPrimaryKey } from "@/models/Dataset";
-import {
-  isExistAnyLabelsNotSavedInBackByDatasetId,
-  getTotalLabelsInGlobalLabel,
-} from "@/models/globalLabel.queries";
 export default {
   name: "HeaderComponent",
   data() {
@@ -66,12 +59,6 @@ export default {
           name: "settings",
         },
       ];
-    },
-    isNoLabelInGlobalLabelModel() {
-      return !getTotalLabelsInGlobalLabel(this.datasetId);
-    },
-    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
-      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
     },
   },
   methods: {
