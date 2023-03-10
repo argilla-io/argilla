@@ -24,7 +24,7 @@ from urllib.parse import urlparse
 
 from pydantic import BaseSettings, Field, root_validator, validator
 
-from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH, DEFAULT_TELEMETRY_KEY
 
 
 class Settings(BaseSettings):
@@ -108,7 +108,7 @@ class Settings(BaseSettings):
 
     enable_telemetry: bool = True
 
-    telemetry_key: Optional[str] = None
+    telemetry_key: str = DEFAULT_TELEMETRY_KEY
 
     @validator("home_path", always=True)
     def set_home_path_default(cls, home_path: str):
