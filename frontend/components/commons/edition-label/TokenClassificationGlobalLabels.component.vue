@@ -55,12 +55,22 @@ export default {
     numberOfLabels() {
       return this.labels.length;
     },
+    diffNumberOfLabelAndMax() {
+      return this.numberOfLabels - PROPERTIES.MAX_LABELS_TO_SHOW;
+    },
+    isDiffInferiorOrEqualToOffset() {
+      return Math.abs(this.diffNumberOfLabelAndMax) <= PROPERTIES.OFFSET;
+    },
     maxNumberOfLabelToShow() {
-      if (this.showAllLabels) return this.numberOfLabels;
+      if (this.showAllLabels || this.isDiffInferiorOrEqualToOffset)
+        return this.numberOfLabels;
       return PROPERTIES.MAX_LABELS_TO_SHOW;
     },
     showLessMoreButton() {
-      return this.numberOfLabels > PROPERTIES.MAX_LABELS_TO_SHOW;
+      return (
+        this.numberOfLabels > PROPERTIES.MAX_LABELS_TO_SHOW &&
+        !this.isDiffInferiorOrEqualToOffset
+      );
     },
     filteredLabels() {
       return this.labels.filter(
@@ -90,7 +100,7 @@ export default {
   flex-wrap: wrap;
   flex-direction: row;
   gap: 8px;
-  max-width: 600px;
+  // max-width: 600px;
   background: transparent;
 }
 </style>
