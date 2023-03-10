@@ -57,13 +57,13 @@ def configure_router(router: APIRouter):
         current_user: User = Security(auth.get_current_user),
     ) -> TextClassificationSettings:
         found_ds = datasets.find_by_name(
-            user=user,
+            user=current_user,
             name=name,
             workspace=ws_params.workspace,
             task=task,
         )
 
-        settings = await datasets.get_settings(user=user, dataset=found_ds, class_type=__svc_settings_class__)
+        settings = await datasets.get_settings(user=current_user, dataset=found_ds, class_type=__svc_settings_class__)
         return TextClassificationSettings.parse_obj(settings)
 
     @deprecate_endpoint(
@@ -85,14 +85,14 @@ def configure_router(router: APIRouter):
         current_user: User = Security(auth.get_current_user),
     ) -> TextClassificationSettings:
         found_ds = datasets.find_by_name(
-            user=user,
+            user=current_user,
             name=name,
             task=task,
             workspace=ws_params.workspace,
         )
-        await validator.validate_dataset_settings(user=user, dataset=found_ds, settings=request)
+        await validator.validate_dataset_settings(user=current_user, dataset=found_ds, settings=request)
         settings = await datasets.save_settings(
-            user=user,
+            user=current_user,
             dataset=found_ds,
             settings=__svc_settings_class__.parse_obj(request.dict()),
         )
