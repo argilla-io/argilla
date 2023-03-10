@@ -45,7 +45,7 @@ _LOGGER = logging.getLogger(__name__)
 class TelemetryClient:
     enable_telemetry: dataclasses.InitVar[bool] = settings.enable_telemetry
     disable_send: dataclasses.InitVar[bool] = False
-    api_key: dataclasses.InitVar[str] = settings.telemetry_key or "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+    api_key: dataclasses.InitVar[str] = settings.telemetry_key
     host: dataclasses.InitVar[str] = "https://api.segment.io"
 
     _server_id: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
