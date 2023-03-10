@@ -71,8 +71,8 @@ class DatasetPolicy:
         return True
 
     @classmethod
-    def get(cls, user: User) -> bool:
-        return True
+    def get(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.is_admin or dataset.workspace in [ws.name for ws in actor.workspaces]
 
     @classmethod
     def create(cls, user: User) -> bool:
@@ -80,23 +80,27 @@ class DatasetPolicy:
 
     @classmethod
     def update(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin or actor.username == dataset.created_by
+        is_get_allowed = cls.get(dataset)
+        return lambda actor: actor.is_admin or (is_get_allowed(actor) and actor.username == dataset.created_by)
 
     @classmethod
     def delete(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin or actor.username == dataset.created_by
+        is_get_allowed = cls.get(dataset)
+        return lambda actor: actor.is_admin or (is_get_allowed(actor) and actor.username == dataset.created_by)
 
     @classmethod
     def open(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin or actor.username == dataset.created_by
+        is_get_allowed = cls.get(dataset)
+        return lambda actor: actor.is_admin or (is_get_allowed(actor) and actor.username == dataset.created_by)
 
     @classmethod
     def close(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin or actor.username == dataset.created_by
+        return lambda actor: actor.is_admin
 
     @classmethod
     def copy(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: cls.get(actor) and cls.create(actor)
+        is_get_allowed = cls.get(dataset)
+        return lambda actor: actor.is_admin or is_get_allowed(actor) and cls.create(actor)
 
 
 def authorize(actor: User, policy_action: PolicyAction) -> None:
