@@ -73,10 +73,10 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         service: Text2TextService = Depends(Text2TextService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> BulkResponse:
         task = task_type
-        workspace = current_user.check_workspace(common_params.workspace)
+        workspace = common_params.workspace
         try:
             dataset = datasets.find_by_name(
                 current_user,
@@ -118,7 +118,7 @@ def configure_router():
         pagination: RequestPagination = Depends(),
         service: Text2TextService = Depends(Text2TextService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> Text2TextSearchResults:
         search = search or Text2TextSearchRequest()
         query = search.query or Text2TextQuery()

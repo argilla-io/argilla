@@ -72,7 +72,7 @@ def configure_router(router: APIRouter):
         request_deps: CommonTaskHandlerDependencies = Depends(),
         service: DatasetsService = Depends(DatasetsService.get_instance),
         engine: GenericElasticEngineBackend = Depends(GenericElasticEngineBackend.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ):
         found = service.find_by_name(user=current_user, name=name, workspace=request_deps.workspace)
 
