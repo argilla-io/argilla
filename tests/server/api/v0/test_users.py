@@ -45,10 +45,7 @@ def test_me_without_authentication(client: TestClient):
 
 def test_me_as_admin(client: TestClient, db: Session):
     admin = AdminFactory.create(
-        workspaces=[
-            WorkspaceFactory.build(name="workspace-a"),
-            WorkspaceFactory.build(name="workspace-b")
-        ]
+        workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
     )
     WorkspaceFactory.create(name="workspace-c")
 
@@ -63,10 +60,7 @@ def test_me_as_admin(client: TestClient, db: Session):
 
 def test_me_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create(
-        workspaces=[
-            WorkspaceFactory.build(name="workspace-a"),
-            WorkspaceFactory.build(name="workspace-b")
-        ]
+        workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
     )
     WorkspaceFactory.create(name="workspace-c")
 
