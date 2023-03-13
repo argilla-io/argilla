@@ -23,6 +23,7 @@
       v-if="isTaskTokenClassification || isTaskTextClassification"
     >
       <EditionLabelComponent
+        class="labels-edition-component__content"
         :datasetId="datasetId"
         :datasetTask="datasetTask"
         :isLoading="isLoading"
@@ -128,6 +129,9 @@ export default {
 .labels-edition-component {
   min-height: 15em;
   padding-bottom: $base-space * 4;
+  &__content {
+    max-width: calc(100% - 150px);
+  }
 }
 .dataset-name {
   @include font-size(16px);
