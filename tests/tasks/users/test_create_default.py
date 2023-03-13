@@ -36,11 +36,8 @@ def test_create_default(db: Session):
     assert [ws.name for ws in default_user.workspaces] == [DEFAULT_USERNAME]
 
 
-def test_create_default_with_specific_api_key_and_password(monkeypatch, db: Session):
-    monkeypatch.setattr(settings, "api_key", "my-api-key")
-    monkeypatch.setattr(settings, "password", "my-password")
-
-    result = CliRunner().invoke(create_default)
+def test_create_default_with_specific_api_key_and_password(db: Session):
+    result = CliRunner().invoke(create_default, "--api-key my-api-key --password my-password")
 
     assert result.exit_code == 0
     assert result.output != ""
