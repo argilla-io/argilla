@@ -26,7 +26,13 @@ from argilla.server.models import User, UserRole, Workspace
 @click.option("-q", "--quiet", is_flag=True, default=False, help="Run without output.")
 def create_default(api_key: str, password: str, quiet: bool):
     """Creates a user with default credentials on database suitable to start experimenting with argilla."""
-    with SessionLocal() as session, session.begin():
+    with SessionLocal() as session:
+        if accounts.get_user_by_username(session, DEFAULT_USERNAME):
+            if not quiet:
+                click.echo(f"User with default username already found on database, will not do anything.")
+
+            return
+
         session.add(
             User(
                 first_name="",
@@ -37,12 +43,13 @@ def create_default(api_key: str, password: str, quiet: bool):
                 workspaces=[Workspace(name=DEFAULT_USERNAME)],
             )
         )
+        session.commit()
 
-    if not quiet:
-        click.echo("User with default credentials succesfully created:")
-        click.echo(f"• username: {DEFAULT_USERNAME!r}")
-        click.echo(f"• password: {password!r}")
-        click.echo(f"• api_key:  {api_key!r}")
+        if not quiet:
+            click.echo("User with default credentials succesfully created:")
+            click.echo(f"• username: {DEFAULT_USERNAME!r}")
+            click.echo(f"• password: {password!r}")
+            click.echo(f"• api_key:  {api_key!r}")
 
 
 if __name__ == "__main__":

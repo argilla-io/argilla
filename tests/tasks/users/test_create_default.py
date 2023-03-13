@@ -56,3 +56,32 @@ def test_create_default_quiet(db: Session):
 
     assert result.exit_code == 0
     assert result.output == ""
+    assert db.query(User).count() == 1
+
+
+def test_create_default_with_existent_default_user(db: Session):
+    result = CliRunner().invoke(create_default)
+
+    assert result.exit_code == 0
+    assert result.output != ""
+    assert db.query(User).count() == 1
+
+    result = CliRunner().invoke(create_default)
+
+    assert result.exit_code == 0
+    assert result.output == "User with default username already found on database, will not do anything.\n"
+    assert db.query(User).count() == 1
+
+
+def test_create_default_with_existent_default_user_and_quiet(db: Session):
+    result = CliRunner().invoke(create_default)
+
+    assert result.exit_code == 0
+    assert result.output != ""
+    assert db.query(User).count() == 1
+
+    result = CliRunner().invoke(create_default, ["--quiet"])
+
+    assert result.exit_code == 0
+    assert result.output == ""
+    assert db.query(User).count() == 1
