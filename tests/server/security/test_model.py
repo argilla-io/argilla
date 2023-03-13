@@ -15,7 +15,6 @@ import uuid
 from datetime import datetime
 
 import pytest
-from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.models import UserRole
 from argilla.server.security.model import User, UserCreate, WorkspaceCreate
 from pydantic import ValidationError
@@ -33,71 +32,6 @@ def test_workspace_validator(wrong_workspace):
         WorkspaceCreate(name=wrong_workspace)
 
 
-def test_check_non_provided_workspaces():
-    user = User(
-        id=uuid.uuid4(),
-        username="test",
-        role=UserRole.annotator,
-        api_key="api-key",
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    )
-    user.is_superuser()
-    assert user.check_workspaces([]) == ["test"]
-
-    user = User(
-        id=uuid.uuid4(),
-        username="test",
-        workspaces=["ws"],
-        role=UserRole.annotator,
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-        api_key="api-key",
-    )
-    assert set(user.check_workspaces([])) == {"ws", "test"}
-
-    with pytest.raises(EntityNotFoundError, match="not-found"):
-        assert user.check_workspaces(["ws", "not-found"])
-
-
-def test_check_user_workspaces():
-    a_ws = "A-workspace"
-    expected_workspaces = [a_ws, "B-ws"]
-    user = User(
-        id=uuid.uuid4(),
-        username="test-user",
-        role=UserRole.annotator,
-        api_key="api-key",
-        workspaces=[a_ws, "B-ws", "C-ws"],
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    )
-
-    assert user.check_workspace(a_ws) == a_ws
-    assert user.check_workspaces(expected_workspaces) == expected_workspaces
-    with pytest.raises(EntityNotFoundError):
-        assert user.check_workspaces(["not-found-ws"])
-
-
-def test_workspace_for_superuser():
-    user = User(
-        id=uuid.uuid4(),
-        username="admin",
-        role=UserRole.admin,
-        api_key="api-key",
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    )
-
-    assert user.check_workspace("admin") == "admin"
-
-    with pytest.raises(EntityNotFoundError):
-        assert user.check_workspace("some") == "some"
-
-    user.workspaces = ["some"]
-    assert user.check_workspaces(["some"]) == ["some"]
-
-
 def test_workspaces_with_default():
     expected_workspaces = ["user", "ws1"]
     user = User(
@@ -112,86 +46,3 @@ def test_workspaces_with_default():
     assert len(user.workspaces) == len(expected_workspaces)
     for ws in expected_workspaces:
         assert ws in user.workspaces
-
-
-def test_is_superuser():
-    admin_user = User(
-        id=uuid.uuid4(),
-        username="admin",
-        role=UserRole.admin,
-        api_key="api-key",
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    )
-    assert admin_user.is_superuser()
-
-    admin_user.workspaces.append("other-workspace")
-    assert admin_user.is_superuser()
-    assert set(admin_user.workspaces) == {"other-workspace", "admin"}
-
-    user = User(
-        username="test",
-        role=UserRole.annotator,
-        workspaces=["bod"],
-        api_key="api-key",
-        id=uuid.uuid4(),
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    )
-    assert not user.is_superuser()
-    user.superuser = True
-    assert user.is_superuser()
-
-
-@pytest.mark.parametrize("workspaces", [None, [], ["a"]])
-def test_check_workspaces_with_default(workspaces):
-    user = User(
-        username="user",
-        workspaces=workspaces,
-        api_key="api-key",
-        id=uuid.uuid4(),
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-        role=UserRole.admin,
-    )
-    assert set(user.check_workspace(user.username)) == set(user.username)
-
-
-@pytest.mark.parametrize(
-    "user",
-    [
-        User(
-            username="admin",
-            workspaces=None,
-            superuser=True,
-            api_key="api-key",
-            id=uuid.uuid4(),
-            inserted_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            role=UserRole.admin,
-        ),
-        User(
-            username="mock",
-            workspaces=None,
-            superuser=False,
-            api_key="api-key",
-            id=uuid.uuid4(),
-            inserted_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            role=UserRole.annotator,
-        ),
-        User(
-            username="user",
-            workspaces=["ab"],
-            superuser=True,
-            api_key="api-key",
-            id=uuid.uuid4(),
-            inserted_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            role=UserRole.admin,
-        ),
-    ],
-)
-def test_check_workspace_without_workspace(user):
-    assert user.check_workspace("") == user.username
-    assert user.check_workspace(None) == user.username
