@@ -28,7 +28,7 @@ export default {
 <style lang="scss" scoped>
 .layout {
   display: grid;
-  grid-template-columns: 56px 1fr 1fr 1fr 1fr 56px;
+  grid-template-columns: 56px 1fr 1fr 1fr 56px;
   grid-template-rows: 0 100px 1fr 1fr 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
@@ -46,12 +46,12 @@ export default {
   grid-area: 2 / 5 / 6 / 6;
 }
 .top {
-  grid-area: 2 / 2 / 3 / 6;
+  grid-area: 2 / 2 / 3 / 5;
 }
 .left {
-  grid-area: 3 / 2 / 6 / 5;
+  grid-area: 3 / 2 / 6 / 4;
 }
 .right {
-  grid-area: 3 / 5 / 6 / 5;
+  grid-area: 3 / 4 / 6 / 5;
 }
 </style>
