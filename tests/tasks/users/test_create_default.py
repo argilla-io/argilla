@@ -35,8 +35,52 @@ def test_create_default(db: Session):
     assert [ws.name for ws in default_user.workspaces] == [DEFAULT_USERNAME]
 
 
+def test_create_default_with_specific_api_key_and_password(db: Session):
+    result = CliRunner().invoke(create_default, "--api-key my-api-key --password my-password")
+
+    assert result.exit_code == 0
+    assert result.output != ""
+    assert db.query(User).count() == 1
+
+    default_user = db.query(User).filter_by(username=DEFAULT_USERNAME).first()
+    assert default_user
+    assert default_user.role == UserRole.admin
+    assert default_user.api_key == "my-api-key"
+    assert accounts.verify_password("my-password", default_user.password_hash)
+    assert [ws.name for ws in default_user.workspaces] == [DEFAULT_USERNAME]
+
+
 def test_create_default_quiet(db: Session):
     result = CliRunner().invoke(create_default, ["--quiet"])
 
     assert result.exit_code == 0
     assert result.output == ""
+    assert db.query(User).count() == 1
+
+
+def test_create_default_with_existent_default_user(db: Session):
+    result = CliRunner().invoke(create_default)
+
+    assert result.exit_code == 0
+    assert result.output != ""
+    assert db.query(User).count() == 1
+
+    result = CliRunner().invoke(create_default)
+
+    assert result.exit_code == 0
+    assert result.output == "User with default username already found on database, will not do anything.\n"
+    assert db.query(User).count() == 1
+
+
+def test_create_default_with_existent_default_user_and_quiet(db: Session):
+    result = CliRunner().invoke(create_default)
+
+    assert result.exit_code == 0
+    assert result.output != ""
+    assert db.query(User).count() == 1
+
+    result = CliRunner().invoke(create_default, ["--quiet"])
+
+    assert result.exit_code == 0
+    assert result.output == ""
+    assert db.query(User).count() == 1

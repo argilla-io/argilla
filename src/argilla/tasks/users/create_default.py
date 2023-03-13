@@ -21,26 +21,35 @@ from argilla.server.models import User, UserRole, Workspace
 
 
 @click.command()
+@click.option("--api-key", default=DEFAULT_API_KEY, help="API key for the user.")
+@click.option("--password", default=DEFAULT_PASSWORD, help="Password for the user.")
 @click.option("-q", "--quiet", is_flag=True, default=False, help="Run without output.")
-def create_default(quiet: bool):
+def create_default(api_key: str, password: str, quiet: bool):
     """Creates a user with default credentials on database suitable to start experimenting with argilla."""
-    with SessionLocal() as session, session.begin():
+    with SessionLocal() as session:
+        if accounts.get_user_by_username(session, DEFAULT_USERNAME):
+            if not quiet:
+                click.echo(f"User with default username already found on database, will not do anything.")
+
+            return
+
         session.add(
             User(
                 first_name="",
                 username=DEFAULT_USERNAME,
                 role=UserRole.admin,
-                api_key=DEFAULT_API_KEY,
-                password_hash=accounts.hash_password(DEFAULT_PASSWORD),
+                api_key=api_key,
+                password_hash=accounts.hash_password(password),
                 workspaces=[Workspace(name=DEFAULT_USERNAME)],
             )
         )
+        session.commit()
 
-    if not quiet:
-        click.echo("User with default credentials succesfully created:")
-        click.echo(f"• username: {DEFAULT_USERNAME!r}")
-        click.echo(f"• password: {DEFAULT_PASSWORD!r}")
-        click.echo(f"• api_key:  {DEFAULT_API_KEY!r}")
+        if not quiet:
+            click.echo("User with default credentials succesfully created:")
+            click.echo(f"• username: {DEFAULT_USERNAME!r}")
+            click.echo(f"• password: {password!r}")
+            click.echo(f"• api_key:  {api_key!r}")
 
 
 if __name__ == "__main__":
