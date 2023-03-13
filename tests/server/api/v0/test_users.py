@@ -19,7 +19,12 @@ from argilla.server.models import User, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from tests.factories import AnnotatorFactory, UserFactory
+from tests.factories import (
+    AdminFactory,
+    AnnotatorFactory,
+    UserFactory,
+    WorkspaceFactory,
+)
 
 
 def test_me(client: TestClient, admin: User, admin_auth_header: dict):
@@ -35,6 +40,25 @@ def test_me_without_authentication(client: TestClient):
     response = client.get("/api/me")
 
     assert response.status_code == 401
+
+
+def test_admin_user_will_list_all_workspaces(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+    annotator = AnnotatorFactory.create()
+    ws1, ws2 = WorkspaceFactory.create(), WorkspaceFactory.create()
+
+    response = client.get("/api/me", headers={API_KEY_HEADER_NAME: admin.api_key})
+    response_body = response.json()
+
+    assert response_body["id"] == str(admin.id)
+    assert ws1.name in response_body["workspaces"]
+    assert ws2.name in response_body["workspaces"]
+
+    response = client.get("/api/me", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response_body = response.json()
+
+    assert response_body["id"] == str(annotator.id)
+    assert not response_body["workspaces"]
 
 
 def test_list_users(client: TestClient, admin_auth_header: dict):

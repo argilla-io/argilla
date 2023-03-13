@@ -56,10 +56,11 @@ async def whoami(
 
     await telemetry.track_login(request, username=current_user.username)
 
-    workspaces = accounts.list_workspaces(db)
-
     user = User.from_orm(current_user)
-    user.workspaces.extend([workspace.name for workspace in workspaces])
+
+    if current_user.is_admin:
+        workspaces = accounts.list_workspaces(db)
+        user.workspaces.extend([workspace.name for workspace in workspaces])
 
     return user
 
