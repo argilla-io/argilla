@@ -6,12 +6,10 @@
     <div class="content">
       <BaseSpinner v-if="isLoading" />
 
-      <p
-        class="--body1 empty-label-component"
+      <BaseFeedbackComponent
         v-if="!numberOfLabels && !isLoading"
-        v-html="
-          'You still have no labels in your dataset, start by creating some'
-        "
+        :feedbackInput="inputForEmptyLabelsFeedback"
+        class="feedback-area"
       />
 
       <BaseFeedbackComponent
@@ -85,6 +83,11 @@ export default {
         message:
           "Action needed: Add or save labels to validate the annotation schema",
         buttonLabels: [{ label: "Save schema", value: "SAVE_SCHEMA" }],
+        feedbackType: "ERROR",
+      },
+      inputForEmptyLabelsFeedback: {
+        message:
+          "You still have no labels in your dataset, start by creating some",
         feedbackType: "ERROR",
       },
       showAllLabels: false,
@@ -194,10 +197,6 @@ export default {
 .feedback-area {
   display: inline-flex;
   margin-bottom: $base-space * 5;
-}
-
-.empty-label-component {
-  color: rgba(0, 0, 0, 0.37);
 }
 
 .buttons-area {
