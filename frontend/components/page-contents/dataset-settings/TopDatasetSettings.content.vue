@@ -1,7 +1,7 @@
 <template>
   <div class="top-content">
     <h1 v-html="title" />
-    <base-button :to="datasetPageUrl" class="secondary text">
+    <base-button :to="datasetPage" class="secondary text">
       <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
       {{ goToDatasetPageLabel }}
     </base-button>
@@ -18,10 +18,21 @@ export default {
     };
   },
   computed: {
-    datasetPageUrl() {
-      const { fullPath } = this.$route;
-      const datasetPageUrl = fullPath.replace("/settings?", "?");
-      return datasetPageUrl;
+    workspace() {
+      return this.$route.params.workspace;
+    },
+    datasetName() {
+      return this.$route.params.dataset;
+    },
+    datasetPage() {
+      const { workspace, datasetName } = this;
+
+      const datasetPageObjWithParams = {
+        name: "datasets-workspace-dataset",
+        params: { workspace, dataset: datasetName },
+      };
+
+      return datasetPageObjWithParams;
     },
   },
 };
