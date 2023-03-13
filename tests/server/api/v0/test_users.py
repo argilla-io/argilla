@@ -24,6 +24,7 @@ from tests.factories import (
     AnnotatorFactory,
     UserFactory,
     WorkspaceFactory,
+    WorkspaceUserFactory,
 )
 
 
@@ -59,6 +60,24 @@ def test_admin_user_will_list_all_workspaces(client: TestClient, db: Session):
 
     assert response_body["id"] == str(annotator.id)
     assert not response_body["workspaces"]
+
+
+def test_admin_user_with_assigned_workspace_will_list_all_workspaces_without_duplicates(
+    client: TestClient, db: Session
+):
+    admin = AdminFactory.create()
+    ws1, ws2 = WorkspaceFactory.create(name="ws01"), WorkspaceFactory.create(name="ws02")
+    WorkspaceUserFactory.create(user_id=admin.id, workspace_id=ws1.id)
+
+    response = client.get("/api/me", headers={API_KEY_HEADER_NAME: admin.api_key})
+    response_body = response.json()
+
+    assert response_body["id"] == str(admin.id)
+
+    user_workspace_names = response_body["workspaces"]
+    user_workspace_names.sort()
+
+    assert user_workspace_names == [ws1.name, ws2.name]
 
 
 def test_list_users(client: TestClient, admin_auth_header: dict):

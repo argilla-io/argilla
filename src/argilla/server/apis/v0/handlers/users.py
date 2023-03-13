@@ -57,10 +57,16 @@ async def whoami(
     await telemetry.track_login(request, username=current_user.username)
 
     user = User.from_orm(current_user)
-
+    # TODO: The current client checks if a user can work on a specific workspace
+    #  by using workspaces info returning in `/api/me`.
+    #  Returning all workspaces from the `/api/me` for admin users keeps the
+    #  backward compatibility with the client flow.
+    #  This logic will be removed in future versions, when python client
+    #  start using the list workspaces (`/api/workspaces`) endpoint to handle
+    #  accessible workspaces for connected user.
     if current_user.is_admin:
         workspaces = accounts.list_workspaces(db)
-        user.workspaces.extend([workspace.name for workspace in workspaces])
+        user.workspaces = [workspace.name for workspace in workspaces]
 
     return user
 
