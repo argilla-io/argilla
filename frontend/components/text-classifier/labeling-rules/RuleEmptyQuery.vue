@@ -134,9 +134,13 @@ export default {
       this.shownLabels = this.maxVisibleLabels;
     },
     goToSettings() {
-      this.$router.push(
-        `/datasets/${this.datasetWorkspace}/${this.datasetName}/settings`
-      );
+      this.$router.push({
+        name: "datasets-workspace-dataset-settings",
+        params: {
+          dataset: this.datasetName,
+          workspace: this.datasetWorkspace,
+        },
+      });
     },
   },
 };
