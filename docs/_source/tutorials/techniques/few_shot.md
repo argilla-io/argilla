@@ -16,6 +16,4 @@ These tutorials show how to use few and zero-shot classifications with Argilla.
 ```
 ```{include} /_static/tutorials/model-comparison-for-text-classification/modal.md
 ```
-```{include} /_static/tutorials/model-comparison-for-text-classification/modal.md
-```
 ````
