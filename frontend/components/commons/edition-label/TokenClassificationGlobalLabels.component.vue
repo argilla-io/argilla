@@ -27,7 +27,7 @@
       />
       <BaseButton
         v-if="showLessMoreButton"
-        class="secondary light small"
+        class="secondary text"
         @on-click="$emit('on-toggle-show-less-more-labels')"
       >
         {{ titleShowLessMoreButton }}
@@ -99,6 +99,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
+  align-items: center;
   gap: 8px;
   background: transparent;
 }

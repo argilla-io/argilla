@@ -1,5 +1,6 @@
 <template>
   <BaseIconWithBadge
+    class="button-settings"
     :key="showBadge && !isLoading"
     tooltip="Dataset settings"
     :show-badge="showBadge"

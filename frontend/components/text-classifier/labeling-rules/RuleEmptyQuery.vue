@@ -70,9 +70,10 @@ export default {
         buttonLabels: [{ label: "Create labels", value: "CREATE_LABELS" }],
         feedbackType: "ERROR",
       },
-      messageNotLabels: "To create new rules, you need al least two labels",
+      messageNotLabels:
+        "To create new rules, you need al least two labels. We highly recommended starting by annotating some records with these labels.",
       messageNotAnnotation:
-        "It's highly recommended to annotate some records with these labels.",
+        "We highly recommended starting by annotating some records with these labels.",
     };
   },
   computed: {
@@ -133,9 +134,13 @@ export default {
       this.shownLabels = this.maxVisibleLabels;
     },
     goToSettings() {
-      this.$router.push(
-        `/datasets/${this.datasetWorkspace}/${this.datasetName}/settings`
-      );
+      this.$router.push({
+        name: "datasets-workspace-dataset-settings",
+        params: {
+          dataset: this.datasetName,
+          workspace: this.datasetWorkspace,
+        },
+      });
     },
   },
 };
@@ -162,6 +167,7 @@ export default {
 }
 .help-message {
   color: $black-37;
+  max-width: 480px;
 }
 .label-button {
   margin: 5px;
