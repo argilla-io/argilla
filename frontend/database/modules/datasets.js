@@ -1045,8 +1045,13 @@ const checkIfSomeNewLabelNotSavedInBack = (datasetId, newLabels) => {
 };
 
 const validateStatusForSettings = (status) => {
-  if (status >= 200 && status <= 400) return true;
-  else if (status === 404) return true;
+  switch (true) {
+    case status >= 200 && status < 400:
+    case status === 404:
+      return true;
+    default:
+      return false;
+  }
 };
 
 const TYPE_OF_FEEDBACK = Object.freeze({
