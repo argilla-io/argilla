@@ -23,8 +23,8 @@ from argilla.server.apis.v0.models.text_classification import TextClassification
 from argilla.server.apis.v0.models.token_classification import TokenClassificationRecord
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskStatus
+from argilla.server.models import User
 from argilla.server.security import auth
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService

@@ -24,8 +24,8 @@ from argilla.server.apis.v0.models.commons.params import (
 from argilla.server.apis.v0.models.dataset_settings import TextClassificationSettings
 from argilla.server.apis.v0.validators.text_classification import DatasetValidator
 from argilla.server.commons.models import TaskType
+from argilla.server.models import User
 from argilla.server.security import auth
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
 
 __svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(

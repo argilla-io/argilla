@@ -65,7 +65,7 @@ async def whoami(
 
 
 @router.get("/users", response_model=List[User], response_model_exclude_none=True)
-def list_users(*, db: Session = Depends(get_db), current_user: User = Security(auth.get_current_user)):
+def list_users(*, db: Session = Depends(get_db), current_user: models.User = Security(auth.get_current_user)):
     authorize(current_user, UserPolicy.list)
 
     users = accounts.list_users(db)
@@ -75,7 +75,10 @@ def list_users(*, db: Session = Depends(get_db), current_user: User = Security(a
 
 @router.post("/users", response_model=User, response_model_exclude_none=True)
 def create_user(
-    *, db: Session = Depends(get_db), user_create: UserCreate, current_user: User = Security(auth.get_current_user)
+    *,
+    db: Session = Depends(get_db),
+    user_create: UserCreate,
+    current_user: models.User = Security(auth.get_current_user),
 ):
     authorize(current_user, UserPolicy.create)
 
@@ -85,7 +88,9 @@ def create_user(
 
 
 @router.delete("/users/{user_id}", response_model=User, response_model_exclude_none=True)
-def delete_user(*, db: Session = Depends(get_db), user_id: UUID, current_user: User = Security(auth.get_current_user)):
+def delete_user(
+    *, db: Session = Depends(get_db), user_id: UUID, current_user: models.User = Security(auth.get_current_user)
+):
     user = accounts.get_user_by_id(db, user_id)
     if not user:
         # TODO: Forcing here user_id to be an string.
