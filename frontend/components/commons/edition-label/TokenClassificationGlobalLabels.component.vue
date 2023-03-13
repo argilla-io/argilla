@@ -20,12 +20,14 @@
     <div v-if="numberOfLabels" class="wrapper-labels">
       <entity-label
         v-for="{ text, shortcut, id, color_id } in filteredLabels"
+        class="container"
         :label="text"
         :shortcut="shortcut"
         :key="id"
         :color="`color_${color_id % $entitiesMaxColors}`"
       />
       <BaseButton
+        id="showLessMoreButtonId"
         v-if="showLessMoreButton"
         class="secondary text"
         @on-click="$emit('on-toggle-show-less-more-labels')"

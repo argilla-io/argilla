@@ -4,6 +4,7 @@
       <div class="label-text" v-html="text" />
     </div>
     <BaseButton
+      id="showLessMoreButtonId"
       v-if="showLessMoreButton"
       class="secondary text"
       @on-click="$emit('on-toggle-show-less-more-labels')"
