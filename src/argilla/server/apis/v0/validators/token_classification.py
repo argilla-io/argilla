@@ -19,8 +19,8 @@ from fastapi import Depends
 from argilla.server.apis.v0.models.dataset_settings import TokenClassificationSettings
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import BadRequestError, EntityNotFoundError
+from argilla.server.models import User
 from argilla.server.schemas.datasets import Dataset
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
 from argilla.server.services.tasks.token_classification.metrics import DatasetLabels
 

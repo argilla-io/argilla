@@ -24,8 +24,8 @@ from argilla.server.apis.v0.models.text2text import Text2TextQuery
 from argilla.server.apis.v0.models.text_classification import TextClassificationQuery
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.generic_elastic import PaginatedSortInfo
+from argilla.server.models import User
 from argilla.server.security import auth
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
 
 # TODO(@frascuchon): This will be merged with `records.py`

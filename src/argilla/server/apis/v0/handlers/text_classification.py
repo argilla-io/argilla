@@ -47,9 +47,9 @@ from argilla.server.apis.v0.validators.text_classification import DatasetValidat
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError
+from argilla.server.models import User
 from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.tasks.text_classification import TextClassificationService
 from argilla.server.services.tasks.text_classification.metrics import (
