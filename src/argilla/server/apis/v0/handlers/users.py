@@ -20,7 +20,7 @@ from fastapi import APIRouter, Depends, Request, Security
 from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 
-from argilla.server import models
+from argilla.server import database, models
 from argilla.server.commons import telemetry
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
@@ -33,7 +33,11 @@ router = APIRouter(tags=["users"])
 
 
 @router.get("/me", response_model=User, response_model_exclude_none=True, operation_id="whoami")
-async def whoami(request: Request, current_user: models.User = Security(auth.get_current_user)):
+async def whoami(
+    request: Request,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Security(auth.get_current_user),
+):
     """
     User info endpoint
 
@@ -52,7 +56,12 @@ async def whoami(request: Request, current_user: models.User = Security(auth.get
 
     await telemetry.track_login(request, username=current_user.username)
 
-    return User.from_orm(current_user)
+    workspaces = accounts.list_workspaces(db)
+
+    user = User.from_orm(current_user)
+    user.workspaces.extend([workspace.name for workspace in workspaces])
+
+    return user
 
 
 @router.get("/users", response_model=List[User], response_model_exclude_none=True)
