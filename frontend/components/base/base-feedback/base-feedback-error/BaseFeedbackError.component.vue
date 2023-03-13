@@ -40,7 +40,6 @@ export default {
 .wrapper {
   display: inline-flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
   gap: $base-space * 2;
   padding: $base-space;
