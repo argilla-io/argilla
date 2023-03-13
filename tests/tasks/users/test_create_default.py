@@ -15,7 +15,6 @@
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.server.contexts import accounts
 from argilla.server.models import User, UserRole
-from argilla.server.settings import settings
 from argilla.tasks.users.create_default import create_default
 from click.testing import CliRunner
 from sqlalchemy.orm import Session
