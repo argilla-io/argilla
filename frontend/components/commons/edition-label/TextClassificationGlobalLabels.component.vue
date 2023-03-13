@@ -5,7 +5,7 @@
     </div>
     <BaseButton
       v-if="showLessMoreButton"
-      class="secondary light small"
+      class="secondary text"
       @on-click="$emit('on-toggle-show-less-more-labels')"
     >
       {{ titleShowLessMoreButton }}
@@ -69,7 +69,7 @@ export default {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: $base-space;
   scroll-behavior: auto;
   background: transparent;
   .container {
