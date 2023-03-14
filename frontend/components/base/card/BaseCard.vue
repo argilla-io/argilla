@@ -1,17 +1,18 @@
 <template>
   <div class="card" :class="[cardClasses]">
-    <h3 v-if="title" class="--body1 --semibold card__title">{{ title }}</h3>
-    <h4 v-if="subtitle" class="--body2 --semibold card__subtitle">
-      {{ subtitle }}
-    </h4>
-    <p v-if="text" class="--body3 card__text">
-      {{ text }}
-    </p>
-    <div class="card__buttons">
+    <div class="card__content">
+      <h3 v-if="title" class="--body1 --semibold card__title">{{ title }}</h3>
+      <h4 v-if="subtitle" class="--body2 --semibold card__subtitle">
+        {{ subtitle }}
+      </h4>
+      <p v-if="text" class="--body1 card__text">
+        {{ text }}
+      </p>
+    </div>
+    <div class="card__buttons" v-if="buttonText">
       <base-button
-        class="card__button"
+        class="card__button outline small"
         :class="[cardClasses]"
-        v-if="buttonText"
         @click="action"
         >{{ buttonText }}</base-button
       >
@@ -62,18 +63,20 @@ export default {
 
 <style lang="scss">
 .card {
+  display: flex;
+  align-items: flex-end;
   padding: $base-space * 2;
   border: 1px solid $black-10;
   border-radius: $border-radius;
   &__buttons {
-    margin-top: $base-space * 4;
+    margin-left: auto;
   }
   &__title {
     margin-top: 0;
   }
-}
-.--danger {
-  .button {
+  &__text {
+    margin-bottom: 0;
+    color: $black-37;
   }
 }
 </style>

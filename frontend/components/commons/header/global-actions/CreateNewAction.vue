@@ -19,7 +19,7 @@
   <div class="new-label__container">
     <base-button
       v-if="!showLabelCreation"
-      class="new-label__main-button primary light small"
+      class="new-label__main-button secondary text"
       @click="openLabelCreation()"
       >{{ text }}</base-button
     >

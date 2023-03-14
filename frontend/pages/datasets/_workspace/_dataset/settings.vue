@@ -1,75 +1,24 @@
 <template>
-  <div class="dataset-settings-page">
-    <div class="header">header</div>
-    <div class="top-area">top area</div>
-    <div class="dataset-info">DatasetSettgingsinfo</div>
-    <div class="dataset-description-component">
-      <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
-    </div>
-    <div
-      class="labels-edition-component"
-      v-if="isTaskTokenClassification || isTaskTextClassification"
-    >
-      <EditionLabelComponent
-        :datasetId="datasetId"
-        :datasetTask="datasetTask"
-      />
-    </div>
-    <div class="delete-dataset-component">Area for delete dataset</div>
-  </div>
+  <HeaderAndTopAndTwoColumns>
+    <template v-slot:top>
+      <TopDatasetSettingsContent />
+    </template>
+    <template v-slot:left>
+      <LeftDatasetSettingsContent />
+    </template>
+    <template v-slot:right>
+      <div class="right-content"></div>
+    </template>
+  </HeaderAndTopAndTwoColumns>
 </template>
 
 <script>
-import { mapActions } from "vuex";
-import {
-  ObservationDataset,
-  getDatasetModelPrimaryKey,
-} from "@/models/Dataset";
+import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
 
 export default {
   name: "SettingsPage",
-  computed: {
-    datasetName() {
-      return this.$route.params.dataset;
-    },
-    datasetWorkspace() {
-      return this.$route.params.workspace;
-    },
-    datasetId() {
-      return getDatasetModelPrimaryKey({
-        name: this.datasetName,
-        workspace: this.datasetWorkspace,
-      });
-    },
-    dataset() {
-      return ObservationDataset.query().whereId(this.datasetId).first();
-    },
-    datasetTask() {
-      return this.dataset?.task;
-    },
-    isTaskTokenClassification() {
-      return this.datasetTask === "TokenClassification";
-    },
-    isTaskTextClassification() {
-      return this.datasetTask === "TextClassification";
-    },
-    settingsDescription() {
-      return "Soon you will be able to edit your information";
-    },
-  },
-  async fetch() {
-    //  Fetch the record data and initialize the corresponding data models and fetch labels
-    await this.fetchByName(this.datasetName);
-  },
-  methods: {
-    ...mapActions({
-      fetchByName: "entities/datasets/fetchByName",
-    }),
+  components: {
+    HeaderAndTopAndTwoColumns,
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.dataset-settings-page {
-}
-</style>

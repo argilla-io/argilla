@@ -4,16 +4,26 @@
       <h2 class="--heading5 --semibold description__title" v-html="title" />
     </div>
     <div class="content">
+      <BaseFeedbackComponent
+        v-if="feedbackInputIfThereIsLabelsNotSavedInBack"
+        :feedbackInput="feedbackInputIfThereIsLabelsNotSavedInBack"
+        @on-click="onSaveLabelsNotPersisted"
+        class="feedback-area"
+      />
+
+      <BaseSpinner v-if="isLoading" />
+
       <TokenClassificationGlobalLabelsComponent
-        v-if="isTaskTokenClassification"
+        v-if="isTaskTokenClassification && !isLoading"
         :labels="labels"
       />
       <TextClassificationGlobalLabelsComponent
-        v-if="isTaskTextClassification"
+        v-if="isTaskTextClassification && !isLoading"
         :labels="labels"
       />
       <div class="buttons-area">
-        <create-new-action
+        <CreateNewAction
+          text="+ Create label"
           v-if="allowAddNewLabel"
           @new-label="onAddNewLabels"
         />
@@ -25,7 +35,12 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
-import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
+import {
+  getAllLabelsByDatasetId,
+  getLabelsNotSavedInBackByDatasetId,
+  isExistAnyLabelsNotSavedInBackByDatasetId,
+} from "@/models/globalLabel.queries";
+import { getLoadingValue } from "@/models/viewSettings.queries";
 
 export default {
   name: "EditionLabelComponent",
@@ -48,12 +63,25 @@ export default {
       isSortAsc: true,
       sortBy: "order",
       allowAddNewLabel: true,
-      characterToSeparateLabels: ",",
+      characterToSeparateLabels: null,
+      saveLabelsButtonLabel: "Save labels",
+      inputForFeedbackComponent: {
+        message:
+          "Action needed: Add or save labels to validate the annotation schema",
+        buttonLabels: [{ label: "Save schema", value: "SAVE_SCHEMA" }],
+        feedbackType: "ERROR",
+      },
     };
   },
   computed: {
     dataset() {
       return getDatasetFromORM(this.datasetId, this.datasetTask, false);
+    },
+    datasetName() {
+      return this.dataset?.name;
+    },
+    isLoading() {
+      return getLoadingValue(this.datasetName)?.loading ?? false;
     },
     isTaskTokenClassification() {
       return this.datasetTask === "TokenClassification";
@@ -68,23 +96,50 @@ export default {
         this.isSortAsc
       );
     },
+    labelsInGlobalLabelsNotSavedInBack() {
+      return getLabelsNotSavedInBackByDatasetId(this.datasetId);
+    },
+    labelsTextNotSavedInBack() {
+      return this.labelsInGlobalLabelsNotSavedInBack.reduce(
+        (acc, curr) => acc.concat(curr.text),
+        []
+      );
+    },
+    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
+      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
+    },
+    feedbackInputIfThereIsLabelsNotSavedInBack() {
+      if (this.isAnyLabelsInGlobalLabelsModelNotSavedInBack) {
+        return this.inputForFeedbackComponent;
+      }
+      return null;
+    },
   },
   methods: {
     ...mapActions({
       onAddNewLabelsInDataset: "entities/datasets/onAddNewLabels",
     }),
     async onAddNewLabels(newLabelsString) {
-      const newLabels = this.splitAndTrimArrayString(newLabelsString);
+      const newLabels = this.splitTrimArrayString(
+        newLabelsString,
+        this.characterToSeparateLabels
+      );
       await this.onAddNewLabelsInDataset({
         datasetId: this.datasetId,
         datasetTask: this.datasetTask,
         newLabels,
       });
     },
-    splitAndTrimArrayString(labels) {
-      return labels
-        .split(this.characterToSeparateLabels)
-        .map((item) => item.trim());
+    async onSaveLabelsNotPersisted() {
+      const newLabels = this.labelsTextNotSavedInBack;
+      await this.onAddNewLabelsInDataset({
+        datasetId: this.datasetId,
+        datasetTask: this.datasetTask,
+        newLabels,
+      });
+    },
+    splitTrimArrayString(labels, splitCharacter = null) {
+      return labels.split(splitCharacter).map((item) => item.trim());
     },
   },
 };
@@ -105,7 +160,14 @@ export default {
     gap: 15px;
   }
 }
+
+.feedback-area {
+  display: inline-flex;
+  margin-bottom: $base-space * 5;
+}
+
 .buttons-area {
   display: inline-flex;
+  align-items: baseline;
 }
 </style>

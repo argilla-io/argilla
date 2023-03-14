@@ -27,6 +27,27 @@
         :copy-button="copyButton"
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
+
+      <BaseButton
+        class="button-settings"
+        v-if="datasetName"
+        data-title="Dataset settings"
+        :to="datasetSettingsPageUrl"
+      >
+        <i
+          class="icon-wrapper"
+          v-badge="{
+            showBadge:
+              isNoLabelInGlobalLabelModel ||
+              isAnyLabelsInGlobalLabelsModelNotSavedInBack,
+            verticalPosition: 'top',
+            horizontalPosition: 'right',
+            borderColor: '#212121',
+          }"
+        >
+          <svgicon name="settings" width="22" height="22" color="white" />
+        </i>
+      </BaseButton>
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
@@ -51,6 +72,10 @@
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Vector as VectorModel } from "@/models/Vector";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import {
+  isExistAnyLabelsNotSavedInBackByDatasetId,
+  getTotalLabelsInGlobalLabel,
+} from "@/models/globalLabel.queries";
 export default {
   data() {
     return {
@@ -114,6 +139,20 @@ export default {
         .where("is_active", true)
         .exists();
     },
+    datasetSettingsPageUrl() {
+      if (this.datasetName) {
+        const { fullPath } = this.$route;
+        const datasetSettingsPageUrl = fullPath.replace("?", "/settings?");
+        return datasetSettingsPageUrl;
+      }
+      return null;
+    },
+    isNoLabelInGlobalLabelModel() {
+      return !getTotalLabelsInGlobalLabel(this.datasetId);
+    },
+    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
+      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
+    },
   },
   mounted() {
     if (this.sticky && this.dataset) {
@@ -176,6 +215,19 @@ export default {
   }
   &:not(.sticky) {
     position: relative;
+  }
+}
+
+.button-settings {
+  margin-right: $base-space;
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @extend %has-tooltip--bottom;
+    &:before,
+    &:after {
+      margin-top: calc($base-space/2);
+    }
   }
 }
 </style>

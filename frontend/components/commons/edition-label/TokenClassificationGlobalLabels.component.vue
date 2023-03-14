@@ -18,25 +18,16 @@
 <template>
   <div v-if="numberOfLabels" class="wrapper">
     <entity-label
-      v-for="(label, index) in visibleLabels"
+      v-for="(label, index) in labels"
       :label="label.text"
       :shortcut="label.shortcut"
       :key="index"
       :color="`color_${label.color_id % $entitiesMaxColors}`"
     />
-    <base-button
-      v-if="isCollapsable"
-      class="secondary light small"
-      @click="toggleLabelsArea"
-    >
-      {{ buttonText }}
-    </base-button>
   </div>
 </template>
 
 <script>
-const MAX_LABELS_TO_SHOW = 10;
-
 export default {
   name: "TokenClassificationGlobalLabelsComponent",
   props: {
@@ -45,36 +36,12 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    showExpandedList: false,
-    MAX_LABELS_NUMBER: MAX_LABELS_TO_SHOW,
-  }),
   computed: {
-    visibleLabels() {
-      const visibleLabels = this.showExpandedList
-        ? this.labels
-        : this.showMaxLabels(this.labels);
-
-      return visibleLabels;
-    },
     numberOfLabels() {
       return this.labels.length;
     },
     isCollapsable() {
       return this.numberOfLabels > this.MAX_LABELS_NUMBER;
-    },
-    buttonText() {
-      return this.showExpandedList
-        ? `Show less`
-        : `+ ${this.numberOfLabels - this.MAX_LABELS_NUMBER}`;
-    },
-  },
-  methods: {
-    toggleLabelsArea() {
-      this.showExpandedList = !this.showExpandedList;
-    },
-    showMaxLabels(labels) {
-      return labels.slice(0, this.MAX_LABELS_NUMBER);
     },
   },
 };
@@ -88,6 +55,7 @@ export default {
   flex-direction: row;
   gap: 8px;
   max-height: 189px;
+  max-width: 600px;
   overflow: auto;
   scroll-behavior: auto;
   background: transparent;

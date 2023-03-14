@@ -2,7 +2,7 @@ import { Model } from "@vuex-orm/core";
 
 class GlobalLabel extends Model {
   static entity = "globalLabels";
-  static primaryKey = ["text", "color_id"];
+  static primaryKey = ["text", "dataset_id"];
 
   static fields() {
     return {
@@ -13,14 +13,7 @@ class GlobalLabel extends Model {
       dataset_id: this.attr(null),
       is_activate: this.attr(false),
       shortcut: this.attr(null),
-    };
-  }
-
-  static mutators() {
-    return {
-      text(value) {
-        return value.toUpperCase();
-      },
+      is_saved_in_back: this.boolean(false),
     };
   }
 }

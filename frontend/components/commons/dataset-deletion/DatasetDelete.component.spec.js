@@ -5,12 +5,20 @@ const $route = {
     workspace: "argilla",
   },
 };
+
+jest.mock("@/models/dataset.utilities", () => ({
+  getDatasetFromORM: () => ({
+    $id: "settings_textclass_no_labels",
+    id: "settings_textclass_no_labels",
+    name: "settings_textclass_no_labels",
+  }),
+}));
 let wrapper = null;
 const options = {
   stubs: ["base-button", "base-card", "base-modal"],
   propsData: {
-    datasetName: "datasete_1",
-    sectionTitle: "Danger zone",
+    datasetId: ["recognai", "settings_textclass_no_labels"],
+    datasetTask: "TextClassification",
     showDeleteModal: false,
   },
   mocks: {
@@ -18,7 +26,6 @@ const options = {
   },
 };
 beforeEach(() => {
-  console.log(wrapper);
   wrapper = shallowMount(DatasetDelete, options);
 });
 
@@ -36,9 +43,7 @@ describe("DatasetDeleteComponent", () => {
   });
 
   it("render base-modal when showDeleteModal is true", async () => {
-    await wrapper.setProps({
-      showDeleteModal: true,
-    });
+    await wrapper.setProps({ showDeleteModal: true });
     expect(wrapper.find(".delete-modal").exists()).toBe(true);
   });
 });

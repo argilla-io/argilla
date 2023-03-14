@@ -2,6 +2,7 @@ import {
   GlobalLabel as GlobalLabelModel,
   formatDatasetIdForGlobalLabelModel,
 } from "./GlobalLabel.model";
+import { getShortcutChars } from "@/models/viewSettings.queries";
 
 const upsertLabelsInGlobalLabelModel = (labels) => {
   GlobalLabelModel.insertOrUpdate({
@@ -43,39 +44,94 @@ const countLabelsByDatasetId = (datasetId) => {
   return numberOfLabels;
 };
 
-const insertNewGlobalLabel = ({ datasetId, newLabel, isActivate = false }) => {
+const upsertNewGlobalLabel = ({
+  datasetId,
+  datasetName,
+  newLabel,
+  isActivate = false,
+  isSavedInBack = false,
+}) => {
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
   const numberOfLabels = countLabelsByDatasetId(datasetId);
-  GlobalLabelModel.insert({
+
+  const shortcuts = getShortcutChars(datasetName);
+  const shortcutsLength = shortcuts.length;
+
+  GlobalLabelModel.insertOrUpdate({
     data: {
-      id: newLabel,
       text: newLabel,
       dataset_id: joinedDatasetId,
       order: numberOfLabels,
       color_id: numberOfLabels,
-      shortcut: numberOfLabels < 9 ? String(numberOfLabels + 1) : null,
+      shortcut:
+        numberOfLabels < shortcutsLength
+          ? String(shortcuts[numberOfLabels])
+          : null,
       is_activate: isActivate,
+      is_saved_in_back: isSavedInBack,
     },
   });
+};
+
+const getLabelsNotSavedInBackByDatasetId = (datasetId, sortBy = "order") => {
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+  const labels = GlobalLabelModel.query()
+    .where("dataset_id", joinedDatasetId)
+    .where("is_saved_in_back", false)
+    .orderBy(sortBy)
+    .get();
+
+  return labels;
+};
+
+const isExistAnyLabelsNotSavedInBackByDatasetId = (datasetId) => {
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+  const isAnyLabels = GlobalLabelModel.query()
+    .where("dataset_id", joinedDatasetId)
+    .where("is_saved_in_back", false)
+    .exists();
+
+  return isAnyLabels;
 };
 
 const isLabelTextExistInGlobalLabel = (datasetId, labelText) => {
   const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
 
-  const compareWithCaseInsensitive = (value) =>
-    value.toUpperCase() === labelText.toUpperCase();
+  const compareValueToLabelText = (value) => value === labelText;
 
   return GlobalLabelModel.query()
     .where("dataset_id", joinedDatasetId)
-    .where("text", compareWithCaseInsensitive)
+    .where("text", compareValueToLabelText)
     .exists();
+};
+
+const isLabelTextExistInGlobalLabelAndSavedInBack = (datasetId, labelText) => {
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+
+  const compareValueToLabelText = (value) => value === labelText;
+
+  return GlobalLabelModel.query()
+    .where("dataset_id", joinedDatasetId)
+    .where("text", compareValueToLabelText)
+    .where("is_saved_in_back", true)
+    .exists();
+};
+
+const getTotalLabelsInGlobalLabel = (datasetId) => {
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+  return GlobalLabelModel.query().where("dataset_id", joinedDatasetId).get()
+    .length;
 };
 
 export {
   getAllLabelsByDatasetId,
+  getLabelsNotSavedInBackByDatasetId,
+  isExistAnyLabelsNotSavedInBackByDatasetId,
   upsertLabelsInGlobalLabelModel,
   deleteAllGlobalLabelModel,
-  insertNewGlobalLabel,
+  upsertNewGlobalLabel,
   getAllLabelsTextByDatasetId,
   isLabelTextExistInGlobalLabel,
+  isLabelTextExistInGlobalLabelAndSavedInBack,
+  getTotalLabelsInGlobalLabel,
 };

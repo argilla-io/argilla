@@ -1,7 +1,7 @@
 <template>
   <div class="description">
     <h2 class="--heading5 --semibold description__title">{{ title }}</h2>
-    <p class="--body2 description__text">{{ datasetDescription }}</p>
+    <p class="--body1 description__text">{{ datasetDescription }}</p>
   </div>
 </template>
 
