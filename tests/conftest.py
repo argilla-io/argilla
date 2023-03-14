@@ -83,6 +83,11 @@ def admin_auth_header(db, admin):
     return {API_KEY_HEADER_NAME: admin.api_key}
 
 
+@pytest.fixture(scope="function")
+def argilla_auth_header(db, argilla_user):
+    return {API_KEY_HEADER_NAME: argilla_user.api_key}
+
+
 @pytest.fixture
 def argilla_user(db):
     user = User(
