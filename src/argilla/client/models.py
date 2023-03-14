@@ -38,6 +38,7 @@ Vectors = Dict[str, List[float]]
 
 class Framework(Enum):
     TRANSFORMERS = "transformers"
+    SETFIT = "setfit"
     SPACY = "spacy"
     SPARK_NLP = "spark-nlp"
 
