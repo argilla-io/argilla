@@ -59,5 +59,5 @@ class CommonTaskHandlerDependencies(OptionalWorkspaceRequestDependency):
     def workspace(self) -> str:
         workspace = super().workspace
         if not workspace:
-            raise MissingInputParamError("A workspace must be provided!")
+            raise MissingInputParamError("A workspace must be provided")
         return workspace

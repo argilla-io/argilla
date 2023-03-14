@@ -82,7 +82,7 @@ def test_delete_dataset(test_client: TestClient, argilla_user: User, argilla_aut
 
 
 def test_delete_dataset_with_missing_workspace(test_client: TestClient, argilla_user: User, argilla_auth_header: dict):
-    response = test_client.delete(f"/api/datasets/dataset", headers=argilla_auth_header)
+    response = test_client.delete("/api/datasets/dataset", headers=argilla_auth_header)
 
     assert response.status_code == 400
     assert response.json() == {
