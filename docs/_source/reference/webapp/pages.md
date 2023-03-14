@@ -137,7 +137,7 @@ In this page, you will be able to access the settings of a specific dataset and 
 Soon you will be able to edit this information.
 
 ### Labels
-Here you can see the current label schema for this dataset and create new ones.
+Here you can [define your labeling schema](../../guides/log_load_and_prepare_data.ipynb#update-a-dataset) for this dataset, see the current one and add new labels to it.
 
 ### Danger zone
 In this area, you will find a button to delete the current dataset.
