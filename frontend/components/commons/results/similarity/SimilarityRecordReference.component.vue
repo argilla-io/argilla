@@ -38,7 +38,7 @@ export default {
 
 <style lang="scss" scoped>
 .record--reference {
-  :deep(.list__item--annotation-mode),
+  :deep(.list__item--selectable),
   :deep(.list__item) {
     border: 1px solid $record-reference-border-color;
     background: $record-reference-background-color;

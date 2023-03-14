@@ -6,6 +6,7 @@ import Vue from "vue";
 //    => showBadge (Boolean) to show or not the badge : true or false
 //    => verticalPosition (String) vertical position : 'top' or 'bottom'
 //    => horizontalPosition (String) horizontal position : 'right' or 'left'
+//    => size (String) height and size of the badge: '10px
 
 Vue.directive("badge", {
   bind: (element, binding) => {
@@ -16,6 +17,7 @@ Vue.directive("badge", {
         horizontalPosition,
         backgroundColor,
         borderColor,
+        size,
       } = binding.value;
 
       element.style.position = "relative";
@@ -23,8 +25,8 @@ Vue.directive("badge", {
       badge.setAttribute("id", `${element.id}Badge`);
       badge.style.position = "absolute";
       badge.style.backgroundColor = backgroundColor || "#ff675f";
-      badge.style.width = "14px";
-      badge.style.height = "14px";
+      badge.style.width = size || "14px";
+      badge.style.height = size || "14px";
       badge.style.borderRadius = "5em";
       badge.style.border = `2px ${borderColor ?? "transparent"} solid`;
 

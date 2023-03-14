@@ -25,6 +25,7 @@
         :showAllLabels="showAllLabels"
         @on-toggle-show-less-more-labels="showAllLabels = !showAllLabels"
       />
+
       <TextClassificationGlobalLabelsComponent
         v-if="isTaskTextClassification && numberOfLabels && !isLoading"
         :labels="labels"
@@ -51,6 +52,7 @@ import {
   getLabelsNotSavedInBackByDatasetId,
   isExistAnyLabelsNotSavedInBackByDatasetId,
 } from "@/models/globalLabel.queries";
+import { getLoadingValue } from "@/models/viewSettings.queries";
 
 export default {
   name: "EditionLabelComponent",

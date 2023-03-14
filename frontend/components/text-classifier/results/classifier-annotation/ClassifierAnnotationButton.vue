@@ -111,9 +111,9 @@ $annotation-button-size: 20px;
       outline: none;
       cursor: pointer;
       background: #f0f0fe;
-      border-radius: $base-space;
-      height: 40px;
-      line-height: 40px;
+      border-radius: 25px;
+      height: $base-space * 5;
+      line-height: $base-space * 5;
       padding-left: $base-space * 2;
       padding-right: $base-space * 2;
       width: 100%;
@@ -165,6 +165,7 @@ $annotation-button-size: 20px;
         display: inline-block;
         white-space: nowrap;
         vertical-align: top;
+        margin: auto;
       }
       &__info {
         margin-right: 0;

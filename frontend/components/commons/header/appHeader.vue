@@ -56,6 +56,10 @@
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Vector as VectorModel } from "@/models/Vector";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import {
+  isExistAnyLabelsNotSavedInBackByDatasetId,
+  getTotalLabelsInGlobalLabel,
+} from "@/models/globalLabel.queries";
 export default {
   data() {
     return {
@@ -121,6 +125,20 @@ export default {
         .where("dataset_id", this.datasetId.join("."))
         .where("is_active", true)
         .exists();
+    },
+    datasetSettingsPageUrl() {
+      if (this.datasetName) {
+        const { fullPath } = this.$route;
+        const datasetSettingsPageUrl = fullPath.replace("?", "/settings?");
+        return datasetSettingsPageUrl;
+      }
+      return null;
+    },
+    isNoLabelInGlobalLabelModel() {
+      return !getTotalLabelsInGlobalLabel(this.datasetId);
+    },
+    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
+      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
     },
   },
   mounted() {
@@ -192,6 +210,19 @@ export default {
   }
   &:not(.sticky) {
     position: relative;
+  }
+}
+
+.button-settings {
+  margin-right: $base-space;
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @extend %has-tooltip--bottom;
+    &:before,
+    &:after {
+      margin-top: calc($base-space/2);
+    }
   }
 }
 </style>

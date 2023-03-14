@@ -20,7 +20,8 @@ from fastapi import Depends
 
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.base import ClosedIndexError, IndexNotFoundError
-from argilla.server.daos.backend.search.model import BaseRecordsQuery
+from argilla.server.daos.backend.generic_elastic import PaginatedSortInfo
+from argilla.server.daos.backend.search.model import BaseRecordsQuery, SortableField
 from argilla.server.daos.models.datasets import DatasetDB
 from argilla.server.daos.models.records import (
     DaoRecordsSearch,
@@ -177,7 +178,6 @@ class DatasetRecordsDAO:
         search: Optional[DaoRecordsSearch] = None,
         limit: Optional[int] = 1000,
         id_from: Optional[str] = None,
-        shuffle: bool = False,
         include_fields: Optional[Set[str]] = None,
         exclude_fields: Optional[Set[str]] = None,
     ) -> Iterable[Dict[str, Any]]:
@@ -203,13 +203,18 @@ class DatasetRecordsDAO:
         -------
             An iterable over found dataset records
         """
+
         search = search or DaoRecordsSearch()
+        next_search_params = [id_from] if id_from else None
+        paginated_sort = PaginatedSortInfo(
+            sort_by=[SortableField(id="id")], shuffle=search.sort.shuffle, next_search_params=next_search_params
+        )
+
         return self._es.scan_records(
             id=dataset.id,
             query=search.query,
+            sort=paginated_sort,
             limit=limit,
-            id_from=id_from,
-            shuffle=shuffle,
             include_fields=list(include_fields) if include_fields else None,
             exclude_fields=list(exclude_fields) if exclude_fields else None,
         )

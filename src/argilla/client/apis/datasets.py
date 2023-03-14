@@ -16,7 +16,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -119,29 +119,36 @@ class Datasets(AbstractApi):
         dataset = get_dataset(self.http_client, name=name).parsed
         return self._DatasetApiModel.parse_obj(dataset)
 
-    def create(self, name: str, settings: Settings):
+    def create(self, name: str, workspace: str, settings: Settings):
         task = (
             TaskType.text_classification
             if isinstance(settings, TextClassificationSettings)
             else TaskType.token_classification
         )
 
-        with api_compatibility(self, min_version="0.15"):
-            dataset = self._DatasetApiModel(name=name, task=task)
-            self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
-            self._save_settings(dataset, settings=settings)
+        try:
+            with api_compatibility(self, min_version="1.4.0"):
+                dataset = self._DatasetApiModel(name=name, task=task, workspace=workspace)
+                self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
+                self.__save_settings__(dataset, settings=settings)
+        except ApiCompatibilityError:
+            with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
+                dataset = self._DatasetApiModel(name=name, task=task)
+                self.http_client.post(f"{self._API_PREFIX}?workspace={workspace}", json=dataset.dict())
+                self.__save_settings__(dataset, settings=settings)
 
-    def configure(self, name: str, settings: Settings):
+    def configure(self, name: str, workspace: str, settings: Settings):
         """
         Configures dataset settings. If dataset does not exist, a new one will be created.
         Pass only settings that want to configure
 
         Args:
             name: The dataset name
+            workspace: The dataset workspace
             settings: The dataset settings
         """
         try:
-            self.create(name=name, settings=settings)
+            self.create(name=name, workspace=workspace, settings=settings)
         except AlreadyExistsApiError:
             ds = self.find_by_name(name)
             self._save_settings(dataset=ds, settings=settings)
@@ -151,6 +158,7 @@ class Datasets(AbstractApi):
         name: str,
         projection: Optional[Set[str]] = None,
         limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         batch_size: int = 250,
         **query,
@@ -162,8 +170,9 @@ class Datasets(AbstractApi):
             name: the dataset
             query: the search query
             projection: a subset of record fields to retrieve. If not provided,
-                only id's will be returned
-            limit: The number of records to retrieve.
+                 only id's will be returned
+            sort: The fields on which to sort [(<field_name>, 'asc|decs')].
+            limit: The number of records to retrieve
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
@@ -186,7 +195,18 @@ class Datasets(AbstractApi):
             "query": query,
         }
 
-        if id_from:
+        if sort is not None:
+            try:
+                if isinstance(sort, list):
+                    assert all([(isinstance(item, tuple)) and (item[-1] in ["asc", "desc"]) for item in sort])
+                else:
+                    raise Exception()
+            except Exception:
+                raise ValueError("sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]")
+            request["sort_by"] = [{"id": item[0], "order": item[-1]} for item in sort]
+
+        elif id_from:
+            # TODO: Show message since sort + next_id is not compatible since fixes a sort by id
             request["next_idx"] = id_from
 
         with api_compatibility(self, min_version="1.2.0"):
@@ -202,13 +222,15 @@ class Datasets(AbstractApi):
                 if limit <= 0:
                     return
 
-                next_idx = response.get("next_idx")
-                if next_idx:
-                    request_limit = min(limit, batch_size)
-                    response = self.http_client.post(
-                        path=url.format(limit=request_limit),
-                        json={**request, "next_idx": next_idx},
-                    )
+                next_request_params = {k: response[k] for k in ["next_idx", "next_page_cfg"] if response.get(k)}
+                if not next_request_params:
+                    return
+
+                request_limit = min(limit, batch_size)
+                response = self.http_client.post(
+                    path=url.format(limit=request_limit),
+                    json={**request, **next_request_params},
+                )
 
     def update_record(
         self,
