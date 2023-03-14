@@ -720,13 +720,14 @@ class DatasetForTextClassification(DatasetBase):
 
         inputs_keys = {key: None for rec in self._records for key in rec.inputs if rec.annotation is not None}.keys()
 
-        ds_dict = {**{key: [] for key in inputs_keys}, "label": []}
+        ds_dict = {"id": [], **{key: [] for key in inputs_keys}, "label": []}
         for rec in self._records:
             if rec.annotation is None:
                 continue
             for key in inputs_keys:
                 ds_dict[key].append(rec.inputs.get(key))
             ds_dict["label"].append(rec.annotation)
+            ds_dict["id"].append(str(rec.id))
 
         if self._records[0].multi_label:
             labels = {label: None for labels in ds_dict["label"] for label in labels}
@@ -741,6 +742,7 @@ class DatasetForTextClassification(DatasetBase):
         )
 
         feature_dict = {
+            "id": datasets.Value("string"),
             **{key: datasets.Value("string") for key in inputs_keys},
             "label": [class_label] if self._records[0].multi_label else class_label,
         }
@@ -757,6 +759,7 @@ class DatasetForTextClassification(DatasetBase):
             feature_dict["binarized_label"] = feature_dict["label"]
             ds = datasets.Dataset.from_dict(
                 {
+                    "id": ds["id"],
                     "text": ds["text"],
                     "context": ds_dict["context"],
                     "label": labels,
@@ -787,6 +790,7 @@ class DatasetForTextClassification(DatasetBase):
             else:
                 text = record.text
             doc = nlp.make_doc(text)
+            doc.user_data["id"] = record.id
 
             cats = dict.fromkeys(all_labels, 0)
 
@@ -990,7 +994,7 @@ class DatasetForTokenClassification(DatasetBase):
         new_features = ds.features.copy()
         new_features["ner_tags"] = datasets.Sequence(feature=class_tags)
         ds = ds.cast(new_features)
-        ds = ds.remove_columns(set(ds.column_names) - set(["tokens", "ner_tags"]))
+        ds = ds.remove_columns(set(ds.column_names) - set(["id", "tokens", "ner_tags"]))
 
         if test_size is not None and test_size != 0:
             ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
@@ -1009,6 +1013,7 @@ class DatasetForTokenClassification(DatasetBase):
                 continue
 
             doc = nlp.make_doc(record.text)
+            doc.user_data["id"] = record.id
             entities = []
 
             for anno in record.annotation:
@@ -1250,14 +1255,16 @@ class DatasetForText2Text(DatasetBase):
     ):
         import datasets
 
-        ds_dict = {"text": [], "target": []}
+        ds_dict = {"id": [], "text": [], "target": []}
         for rec in self._records:
             if rec.annotation is None:
                 continue
+            ds_dict["id"].append(rec.id)
             ds_dict["text"].append(rec.text)
             ds_dict["target"].append(rec.annotation)
 
         feature_dict = {
+            "id": datasets.Value("string"),
             "text": datasets.Value("string"),
             "target": datasets.Value("string"),
         }

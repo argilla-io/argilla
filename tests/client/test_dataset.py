@@ -342,9 +342,9 @@ class TestDatasetForTextClassification:
         train = ds.prepare_for_training(seed=42)
 
         if not ds[0].multi_label:
-            column_names = ["text", "context", "label"]
+            column_names = ["id", "text", "context", "label"]
         else:
-            column_names = ["text", "context", "label", "binarized_label"]
+            column_names = ["id", "text", "context", "label", "binarized_label"]
 
         assert isinstance(train, datasets.Dataset)
         assert train.column_names == column_names
@@ -361,7 +361,7 @@ class TestDatasetForTextClassification:
         assert len(train_test["train"]) == 1
         assert len(train_test["test"]) == 1
         for split in ["train", "test"]:
-            assert train_test[split].column_names == column_names
+            assert set(train_test[split].column_names) == set(column_names)
 
     @pytest.mark.parametrize(
         "records",
@@ -393,6 +393,8 @@ class TestDatasetForTextClassification:
         docs_test = list(train.get_docs(nlp.vocab))
         assert len(list(docs_train)) == 1
         assert len(list(docs_test)) == 1
+        assert "id" in docs_train[0].user_data
+        assert "id" in docs_test[0].user_data
 
     @pytest.mark.parametrize(
         "records",
@@ -648,6 +650,8 @@ class TestDatasetForTokenClassification:
         assert isinstance(test, spacy.tokens.DocBin)
         assert len(train) == 80
         assert len(test) == 20
+        assert "id" in train[0].user_data
+        assert "id" in test[0].user_data
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,
@@ -690,7 +694,7 @@ class TestDatasetForTokenClassification:
             r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
 
         train = rb_dataset.prepare_for_training()
-        assert (set(train.column_names)) == set(["tokens", "ner_tags"])
+        assert (set(train.column_names)) == set(["id", "tokens", "ner_tags"])
 
         assert isinstance(train, datasets.DatasetD.Dataset) or isinstance(train, datasets.Dataset)
         assert "ner_tags" in train.column_names
@@ -857,7 +861,7 @@ class TestDatasetForText2Text:
         train = ds.prepare_for_training(train_size=1, seed=42)
 
         assert isinstance(train, datasets.Dataset)
-        assert train.column_names == ["text", "target"]
+        assert set(train.column_names) == set(["id", "text", "target"])
         assert len(train) == 10
         assert train[1]["text"] == "mock"
         assert train[1]["target"] == "mock"
@@ -868,7 +872,7 @@ class TestDatasetForText2Text:
         assert len(train_test["train"]) == 5
         assert len(train_test["test"]) == 5
         for split in ["train", "test"]:
-            assert train_test[split].column_names == ["text", "target"]
+            assert set(train_test[split].column_names) == set(["id", "text", "target"])
 
     def test_prepare_for_training_with_spacy(self):
         ds = rg.DatasetForText2Text(
