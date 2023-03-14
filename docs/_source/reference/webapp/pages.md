@@ -1,4 +1,3 @@
-(pages)=
 # Pages
 
 ## Home page
