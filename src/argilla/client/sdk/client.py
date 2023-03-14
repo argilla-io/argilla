@@ -25,7 +25,7 @@ from urllib.parse import urlparse
 import httpx
 
 from argilla._constants import _OLD_API_KEY_HEADER_NAME, API_KEY_HEADER_NAME
-from argilla.client.sdk._helpers import build_raw_response
+from argilla.client.sdk._helpers import RetryTransport, build_raw_response
 from argilla.client.sdk.commons.errors import BaseClientError
 
 
@@ -86,17 +86,22 @@ class _EnhancedJSONEncoder(JSONEncoder):
 class Client(_ClientCommonDefaults, _Client):
     def __post_init__(self):
         super().__post_init__()
+
+        transport = RetryTransport(httpx.HTTPTransport(retries=1))
         self.__httpx__ = httpx.Client(
             base_url=self.base_url,
             headers=self.get_headers(),
             cookies=self.get_cookies(),
             timeout=self.get_timeout(),
+            transport=transport,
         )
+        async_transport = RetryTransport(httpx.AsyncHTTPTransport(retries=1))
         self.__http_async__ = httpx.AsyncClient(
             base_url=self.base_url,
             headers=self.get_headers(),
             cookies=self.get_cookies(),
             timeout=self.get_timeout(),
+            transport=async_transport,
         )
 
     def __del__(self):
