@@ -19,7 +19,10 @@ from fastapi import APIRouter, Body, Depends, Security
 from pydantic import parse_obj_as
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
-from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
+from argilla.server.apis.v0.models.commons.params import (
+    CommonTaskHandlerDependencies,
+    OptionalWorkspaceRequestDependency,
+)
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.models import User
 from argilla.server.schemas.datasets import (
@@ -43,13 +46,13 @@ router = APIRouter(tags=["datasets"], prefix="/datasets")
     operation_id="list_datasets",
 )
 async def list_datasets(
-    request_deps: CommonTaskHandlerDependencies = Depends(),
+    workspace_request: OptionalWorkspaceRequestDependency = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_current_user),
 ) -> List[Dataset]:
     datasets = service.list(
         user=current_user,
-        workspaces=[request_deps.workspace] if request_deps.workspace is not None else None,
+        workspaces=[workspace_request.workspace] if workspace_request.workspace is not None else None,
     )
 
     return parse_obj_as(List[Dataset], datasets)
