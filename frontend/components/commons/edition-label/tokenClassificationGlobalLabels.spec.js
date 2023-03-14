@@ -3,7 +3,7 @@ import tokenClassificationGlobalLabelsComponent from "./TokenClassificationGloba
 
 let wrapper = null;
 const options = {
-  stubs: ["entity-label", "base-button"],
+  stubs: ["entity-label", "BaseButton"],
   propsData: {
     labels: [],
   },
