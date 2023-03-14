@@ -33,7 +33,11 @@ router = APIRouter(tags=["users"])
 
 
 @router.get("/me", response_model=User, response_model_exclude_none=True, operation_id="whoami")
-async def whoami(request: Request, current_user: models.User = Security(auth.get_current_user)):
+async def whoami(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: models.User = Security(auth.get_current_user),
+):
     """
     User info endpoint
 
@@ -52,7 +56,19 @@ async def whoami(request: Request, current_user: models.User = Security(auth.get
 
     await telemetry.track_login(request, username=current_user.username)
 
-    return User.from_orm(current_user)
+    user = User.from_orm(current_user)
+    # TODO: The current client checks if a user can work on a specific workspace
+    #  by using workspaces info returning in `/api/me`.
+    #  Returning all workspaces from the `/api/me` for admin users keeps the
+    #  backward compatibility with the client flow.
+    #  This logic will be removed in future versions, when python client
+    #  start using the list workspaces (`/api/workspaces`) endpoint to handle
+    #  accessible workspaces for connected user.
+    if current_user.is_admin:
+        workspaces = accounts.list_workspaces(db)
+        user.workspaces = [workspace.name for workspace in workspaces]
+
+    return user
 
 
 @router.get("/users", response_model=List[User], response_model_exclude_none=True)

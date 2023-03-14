@@ -19,7 +19,13 @@ from argilla.server.models import User, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from tests.factories import AnnotatorFactory, UserFactory
+from tests.factories import (
+    AdminFactory,
+    AnnotatorFactory,
+    UserFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 
 def test_me(client: TestClient, admin: User, admin_auth_header: dict):
@@ -35,6 +41,36 @@ def test_me_without_authentication(client: TestClient):
     response = client.get("/api/me")
 
     assert response.status_code == 401
+
+
+def test_me_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create(
+        workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
+    )
+    WorkspaceFactory.create(name="workspace-c")
+
+    response = client.get("/api/me", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 200
+
+    response_body = response.json()
+    assert response_body["id"] == str(admin.id)
+    assert response_body["workspaces"] == ["workspace-a", "workspace-b", "workspace-c"]
+
+
+def test_me_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create(
+        workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
+    )
+    WorkspaceFactory.create(name="workspace-c")
+
+    response = client.get("/api/me", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 200
+
+    response_body = response.json()
+    assert response_body["id"] == str(annotator.id)
+    assert response_body["workspaces"] == ["workspace-a", "workspace-b"]
 
 
 def test_list_users(client: TestClient, admin_auth_header: dict):
