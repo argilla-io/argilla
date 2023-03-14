@@ -26,7 +26,7 @@ afterEach(() => {
 describe("BaseFeedbackErrorComponent", () => {
   it("render the component", async () => {
     expect(wrapper.is(BaseFeedBackErrorComponent)).toBe(true);
-    isClassExist("wrapper");
+    isClassExist("feedback-wrapper");
     isMessageExistAndisMessageContentRendered();
     isClassExist("buttons-area", false);
     isClassExist("button", false);
