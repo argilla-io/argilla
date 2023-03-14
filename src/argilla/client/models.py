@@ -343,7 +343,7 @@ class TokenClassificationRecord(_Validators):
     search_keywords: Optional[List[str]] = None
     _span_utils: SpanUtils = PrivateAttr()
 
-    projection: Optional[bool] = None  # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
+    projection: Optional[bool] = Field(default=None, exclude=True)  # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
 
     def __init__(
         self,
