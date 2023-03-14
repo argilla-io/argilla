@@ -130,12 +130,12 @@ class Datasets(AbstractApi):
             with api_compatibility(self, min_version="1.4.0"):
                 dataset = self._DatasetApiModel(name=name, task=task, workspace=workspace)
                 self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
-                self.__save_settings__(dataset, settings=settings)
+                self._save_settings(dataset, settings=settings)
         except ApiCompatibilityError:
             with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
                 dataset = self._DatasetApiModel(name=name, task=task)
                 self.http_client.post(f"{self._API_PREFIX}?workspace={workspace}", json=dataset.dict())
-                self.__save_settings__(dataset, settings=settings)
+                self._save_settings(dataset, settings=settings)
 
     def configure(self, name: str, workspace: str, settings: Settings):
         """
