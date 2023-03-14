@@ -210,7 +210,7 @@ def test_metadata_values_length():
 def test_model_serialization_with_numpy_nan():
     record = Text2TextRecord(text="My name is Sarah and I love my dog.", metadata={"nan": numpy.nan})
 
-    json_record = json.loads(record.json())
+    json.loads(record.json())
 
 
 def test_warning_when_only_agent():

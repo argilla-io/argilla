@@ -160,6 +160,19 @@ def test_trailing_slash(mock_response_200):
     assert api.active_api()._client.base_url == "http://mock.com"
 
 
+def test_log_projection(mocked_client):
+    dataset_name = "test-dataset"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+
+    api.init()
+    api.log(
+        name=dataset_name, records=rg.TextClassificationRecord(inputs={"text": "This is a test"}, annotation="label")
+    )
+    with pytest.raises(InputValueError):
+        rec = rg.load(dataset_name, fields=["id", "text"])
+        rg.log(rec, name=dataset_name)
+
+
 def test_log_something(mocked_client):
     dataset_name = "test-dataset"
     mocked_client.delete(f"/api/datasets/{dataset_name}")

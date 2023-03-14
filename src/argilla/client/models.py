@@ -238,6 +238,8 @@ class TextClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
+    projection: Optional[bool] = None  # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
+
     @root_validator
     def _check_text_and_inputs(cls, values):
         """Check if either text or inputs were provided. Copy text to inputs."""
@@ -340,6 +342,8 @@ class TokenClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
     _span_utils: SpanUtils = PrivateAttr()
+
+    projection: Optional[bool] = None  # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
 
     def __init__(
         self,
@@ -545,6 +549,8 @@ class Text2TextRecord(_Validators):
 
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
+
+    projection: Optional[bool] = None  # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
 
     @validator("prediction")
     def prediction_as_tuples(cls, prediction: Optional[List[Union[str, Tuple[str, float]]]]):

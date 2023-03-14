@@ -50,7 +50,6 @@ from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import async_bulk
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
-    ApiCompatibilityError,
     InputValueError,
     NotFoundApiError,
 )
@@ -69,7 +68,6 @@ from argilla.client.sdk.text_classification.models import (
     LabelingRule,
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
-    TextClassificationQuery,
 )
 from argilla.client.sdk.text_classification.models import (
     TextClassificationRecord as SdkTextClassificationRecord,
@@ -77,7 +75,6 @@ from argilla.client.sdk.text_classification.models import (
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
-    TokenClassificationQuery,
 )
 from argilla.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
@@ -391,6 +388,14 @@ class Argilla:
         else:
             raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
 
+        # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
+        if any([rec.projection for rec in records]):
+            raise InputValueError(
+                "Re-logging field projected records will remove previous info.",
+                "If desidered, set record.projection to None before re-logging.",
+                "If not, look at https://github.com/argilla-io/argilla/issues/2535 for resolving this.",
+            )
+
         processed, failed = 0, 0
         with Progress() as progress_bar:
             task = progress_bar.add_task("Logging...", total=len(records), visible=verbose)
@@ -679,4 +684,7 @@ class Argilla:
             ids=ids,
         )
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
+        if fields is not None:
+            for rec in records:
+                rec.projection = True
         return dataset_class(records)
