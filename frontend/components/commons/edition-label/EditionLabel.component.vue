@@ -52,7 +52,6 @@ import {
   getLabelsNotSavedInBackByDatasetId,
   isExistAnyLabelsNotSavedInBackByDatasetId,
 } from "@/models/globalLabel.queries";
-import { getLoadingValue } from "@/models/viewSettings.queries";
 
 export default {
   name: "EditionLabelComponent",
