@@ -1055,6 +1055,8 @@ const checkIfSomeNewLabelNotInGlobalLabels = (datasetId, newLabels) => {
     isNewLabelNotInGlobalLabelsByItem.some((value) => value);
 
   return isSomeNewLabelNotInGlobalLabels;
+};
+
 const arePendingRecords = (datasetName) => {
   return DatasetViewSettings.find(datasetName).arePendingRecords;
 };
