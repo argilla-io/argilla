@@ -270,14 +270,16 @@ class TestDatasetForTextClassification:
         assert rec.inputs == {"text": "mock"}
 
     def test_from_to_datasets_id(self):
-        dataset_rb = rg.DatasetForTextClassification([rg.TextClassificationRecord(text="mock")])
+        record = rg.TextClassificationRecord(text="mock")
+        dataset_rb = rg.DatasetForTextClassification([record])
         dataset_ds = dataset_rb.to_datasets()
-        assert dataset_ds["id"] == [None]
+        assert dataset_ds["id"] == [record.id]
 
-        assert rg.read_datasets(dataset_ds, task="TextClassification")[0].id is None
+        assert rg.read_datasets(dataset_ds, task="TextClassification")[0].id is record.id
 
     def test_datasets_empty_metadata(self):
-        dataset = rg.DatasetForTextClassification([rg.TextClassificationRecord(text="mock")])
+        record = rg.TextClassificationRecord(text="mock")
+        dataset = rg.DatasetForTextClassification([record])
         assert dataset.to_datasets()["metadata"] == [None]
 
     @pytest.mark.parametrize(
@@ -567,11 +569,12 @@ class TestDatasetForTokenClassification:
         assert rec.text == "mock" and rec.tokens == ["mock"]
 
     def test_from_to_datasets_id(self):
-        dataset_rb = rg.DatasetForTokenClassification([rg.TokenClassificationRecord(text="mock", tokens=["mock"])])
+        record = rg.TokenClassificationRecord(text="mock", tokens=["mock"])
+        dataset_rb = rg.DatasetForTokenClassification([record])
         dataset_ds = dataset_rb.to_datasets()
-        assert dataset_ds["id"] == [None]
+        assert dataset_ds["id"] == [record.id]
 
-        assert rg.read_datasets(dataset_ds, task="TokenClassification")[0].id is None
+        assert rg.read_datasets(dataset_ds, task="TokenClassification")[0].id is record.id
 
     def test_prepare_for_training_empty(self):
         dataset = rg.DatasetForTokenClassification([rg.TokenClassificationRecord(text="mock", tokens=["mock"])])
@@ -826,11 +829,12 @@ class TestDatasetForText2Text:
         assert rec.prediction[0][1] == pytest.approx(1.0)
 
     def test_from_to_datasets_id(self):
-        dataset_rb = rg.DatasetForText2Text([rg.Text2TextRecord(text="mock")])
+        record = rg.Text2TextRecord(text="mock")
+        dataset_rb = rg.DatasetForText2Text([record])
         dataset_ds = dataset_rb.to_datasets()
-        assert dataset_ds["id"] == [None]
+        assert dataset_ds["id"] == [record.id]
 
-        assert rg.read_datasets(dataset_ds, task="Text2Text")[0].id is None
+        assert rg.read_datasets(dataset_ds, task="Text2Text")[0].id is record.id
 
     def test_datasets_empty_metadata(self):
         dataset = rg.DatasetForText2Text([rg.Text2TextRecord(text="mock")])
