@@ -46,21 +46,14 @@
           :entities="getEntitiesByOrigin('annotation')"
         />
       </div>
-      <div
-        class="content__actions-buttons"
-        v-if="interactionsEnabled && record.status !== 'Validated'"
-      >
-        <base-button class="primary" @click="onValidate(record)">
-          {{ record.status === "Edited" ? "Save" : "Validate" }}
-        </base-button>
-        <base-button
-          :disabled="!record.annotatedEntities.length"
-          class="primary outline"
-          @click="onClearAnnotations()"
-        >
-          Clear annotations
-        </base-button>
-      </div>
+      <record-action-buttons
+        v-if="interactionsEnabled"
+        :actions="tokenClassifierActionButtons"
+        @validate="toggleValidateRecord()"
+        @clear="onClearAnnotations()"
+        @reset="onReset()"
+        @discard="toggleDiscardRecord()"
+      />
     </div>
   </div>
 </template>
@@ -162,11 +155,42 @@ export default {
       );
       return visualTokens;
     },
+    tokenClassifierActionButtons() {
+      return [
+        {
+          id: "validate",
+          name: "Validate",
+          allow: true,
+          active: this.record.status === "Validated",
+        },
+        {
+          id: "discard",
+          name: "Discard",
+          allow: true,
+          active: this.record.status === "Discarded",
+        },
+        {
+          id: "clear",
+          name: "Clear",
+          allow: true,
+          disable: !this.record.annotatedEntities?.length || false,
+        },
+        {
+          id: "reset",
+          name: "Reset",
+          allow: true,
+          disable: this.record.status !== "Edited",
+        },
+      ];
+    },
   },
   methods: {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
+      discard: "entities/datasets/discardAnnotations",
       updateRecords: "entities/datasets/updateDatasetRecords",
+      changeStatusToDefault: "entities/datasets/changeStatusToDefault",
+      resetRecords: "entities/datasets/resetRecords",
     }),
     getEntitiesByOrigin(origin) {
       if (this.interactionsEnabled) {
@@ -182,22 +206,43 @@ export default {
           : [];
       }
     },
-    async onValidate(record) {
+    async toggleValidateRecord() {
+      if (this.record.status === "Validated") {
+        await this.onChangeStatusToDefault();
+      } else {
+        await this.onValidate();
+      }
+    },
+    async toggleDiscardRecord() {
+      if (this.record.status === "Discarded") {
+        await this.onChangeStatusToDefault();
+      } else {
+        this.onDiscard();
+      }
+    },
+    async onValidate() {
       await this.validate({
         // TODO: Move this as part of token classification dataset logic
         dataset: this.getTokenClassificationDataset(),
         agent: this.$auth.user.username,
         records: [
           {
-            ...record,
+            ...this.record,
             annotatedEntities: undefined,
             annotation: {
-              entities: record.annotatedEntities,
+              entities: this.record.annotatedEntities,
               origin: "annotation",
             },
           },
         ],
       });
+    },
+    async onChangeStatusToDefault() {
+      const currentRecordAndDataset = {
+        dataset: this.getTokenClassificationDataset(),
+        records: [this.record],
+      };
+      await this.changeStatusToDefault(currentRecordAndDataset);
     },
     onClearAnnotations() {
       this.updateRecords({
@@ -212,6 +257,20 @@ export default {
         ],
       });
     },
+    async onReset() {
+      await this.resetRecords({
+        dataset: this.getTokenClassificationDataset(),
+        records: [
+          {
+            ...this.record,
+            annotatedEntities: this.record.annotation?.entities,
+          },
+        ],
+      });
+    },
+    onDiscard() {
+      this.$emit("discard");
+    },
     getTokenClassificationDataset() {
       return getTokenClassificationDatasetById(this.datasetId);
     },
@@ -221,11 +280,14 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: 26px 200px 50px 50px;
+  padding: $base-space * 4 200px 20px 20px;
   display: block;
   margin-bottom: 0;
   @include font-size(16px);
   line-height: 34px;
+  .list__item--selectable & {
+    padding-left: $base-space * 7;
+  }
 }
 
 .content {
@@ -233,18 +295,6 @@ export default {
   white-space: pre-line;
   &__input {
     padding-right: 200px;
-  }
-  &__actions-buttons {
-    margin-right: 0;
-    margin-left: auto;
-    display: flex;
-    min-width: 20%;
-    .button {
-      margin: 1.5em 0 0 0;
-      & + .button {
-        margin-left: $base-space;
-      }
-    }
   }
 }
 

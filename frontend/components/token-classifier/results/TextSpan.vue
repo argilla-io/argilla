@@ -211,7 +211,7 @@ export default {
     background: none;
   }
 }
-.list__item--annotation-mode span span {
+.list__item--selectable span span {
   cursor: text;
 }
 // ner colors

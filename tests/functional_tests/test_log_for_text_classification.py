@@ -29,6 +29,7 @@ def test_log_records_with_multi_and_single_label_task(mocked_client):
     dataset = "test_log_records_with_multi_and_single_label_task"
     expected_inputs = ["This is a text"]
 
+    rg.init()
     rg.delete(dataset)
     records = [
         rg.TextClassificationRecord(

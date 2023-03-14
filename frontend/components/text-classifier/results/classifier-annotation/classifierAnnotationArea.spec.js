@@ -49,6 +49,12 @@ describe("ClassifierAnnotationAreaComponent", () => {
   it("emit an empty list to the parent if the user have selected any annotations", async () => {
     testIfEmittedValuesFromValidateEventIsEqualToUserSelectedAnnotations([]);
   });
+  it("emit the 1 annotation selected by the user to the parent component when multiple label is false", async () => {
+    await wrapper.setProps({ isMultiLabel: false });
+    testIfEmittedValuesFromValidateEventIsEqualToUserSelectedAnnotations([
+      "label1",
+    ]);
+  });
 });
 
 const testIfEmittedValuesFromValidateEventIsEqualToUserSelectedAnnotations =
@@ -66,8 +72,17 @@ const testIfEmittedValuesFromValidateEventIsEqualToUserSelectedAnnotations =
     expect(wrapper.vm.selectedLabels.length).toBe(
       emittedValuesFromAnnotationButtons.length
     );
-    expect(wrapper.emitted("validate"));
-    expect(wrapper.emitted().validate[0]).toEqual([
-      { labels: emittedValuesFromAnnotationButtons },
-    ]);
+    if (wrapper.vm.isMultiLabel) {
+      emittedValuesWithAction(
+        "update-labels",
+        emittedValuesFromAnnotationButtons
+      );
+    } else {
+      emittedValuesWithAction("validate", emittedValuesFromAnnotationButtons);
+    }
   };
+
+const emittedValuesWithAction = async (action, values) => {
+  expect(wrapper.emitted(action));
+  expect(wrapper.emitted(action)[0]).toEqual([values]);
+};
