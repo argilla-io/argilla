@@ -31,7 +31,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from pydantic import ConfigError
+from pydantic import ConfigError, ValidationError
 
 from argilla import __version__ as argilla_version
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
@@ -45,8 +45,11 @@ from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.database import get_db
 from argilla.server.errors import (
     APIErrorHandler,
+    ClosedDatasetError,
+    EntityAlreadyExistsError,
     EntityNotFoundError,
     ForbiddenOperationError,
+    MissingInputParamError,
     UnauthorizedError,
 )
 from argilla.server.models import User
@@ -78,6 +81,10 @@ def configure_api_exceptions(api: FastAPI):
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
     api.exception_handler(UnauthorizedError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(ForbiddenOperationError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(EntityAlreadyExistsError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ClosedDatasetError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ValidationError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(MissingInputParamError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
 
 
