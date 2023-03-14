@@ -63,7 +63,7 @@ export default {
 }
 
 .button {
-  color: $black-54;
+  color: white;
   background-color: rgba(255, 103, 95, 0.6);
   border-radius: $border-radius;
   button {
