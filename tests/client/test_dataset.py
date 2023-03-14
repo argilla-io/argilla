@@ -275,7 +275,7 @@ class TestDatasetForTextClassification:
         dataset_ds = dataset_rb.to_datasets()
         assert dataset_ds["id"] == [record.id]
 
-        assert rg.read_datasets(dataset_ds, task="TextClassification")[0].id is record.id
+        assert rg.read_datasets(dataset_ds, task="TextClassification")[0].id == record.id
 
     def test_datasets_empty_metadata(self):
         record = rg.TextClassificationRecord(text="mock")
@@ -574,7 +574,7 @@ class TestDatasetForTokenClassification:
         dataset_ds = dataset_rb.to_datasets()
         assert dataset_ds["id"] == [record.id]
 
-        assert rg.read_datasets(dataset_ds, task="TokenClassification")[0].id is record.id
+        assert rg.read_datasets(dataset_ds, task="TokenClassification")[0].id == record.id
 
     def test_prepare_for_training_empty(self):
         dataset = rg.DatasetForTokenClassification([rg.TokenClassificationRecord(text="mock", tokens=["mock"])])
@@ -834,7 +834,7 @@ class TestDatasetForText2Text:
         dataset_ds = dataset_rb.to_datasets()
         assert dataset_ds["id"] == [record.id]
 
-        assert rg.read_datasets(dataset_ds, task="Text2Text")[0].id is record.id
+        assert rg.read_datasets(dataset_ds, task="Text2Text")[0].id == record.id
 
     def test_datasets_empty_metadata(self):
         dataset = rg.DatasetForText2Text([rg.Text2TextRecord(text="mock")])
