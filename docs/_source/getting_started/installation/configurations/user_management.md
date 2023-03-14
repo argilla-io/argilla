@@ -11,15 +11,15 @@ Let's first describe Argilla's user management model:
 A Argilla user is defined by the following fields:
 
 - `username`: The username to use for login into the Webapp.
-- `email`(optional): The user's email.
-- `fullname` (optional): The user's full name
-- `disabled`(optional): Whether this use is enabled (and can interact with Argilla), this might be useful for disabling user access temporarily.
-- `workspaces`(optional): The team workspaces where the user has read and write access (both from the Webapp and the Python client). If this field is not defined the user will be a super-user and have access to all datasets in the instance. If this field is set to an empty list `[]` the user will only have access to her user workspace. Read more about workspaces and users below.
+- `first_name`: The user's first name
+- `last_name` (optional): The user's last name
+- `role`: The user's role in Argilla. Available roles are: "admin" and "annotator". Only "admin" users can create and delete workspaces and datasets
+- `workspaces` : The workspaces where the user has read and write access (both from the Webapp and the Python client). If this field is not defined the user will be a super-user and have access to all datasets in the instance. If this field is set to an empty list `[]` the user will only have access to her user workspace. Read more about workspaces and users below.
 - `api_key`: The API key to interact with Argilla API, mainly through the Python client but also via HTTP for advanced users.
 
 ### `Workspace`
 
-A workspace is a Argilla "space" where users can collaborate, both using the Webapp and the Python client. There are two types of workspace:
+A workspace is a Argilla "space" where users can collaborate, both using the Webapp and the Python client:
 
 - `Team workspace`: Where one or several users have read/write access.
 - `User workspace`: Every user gets its own user workspace. This workspace is the default workspace when users log and load data with the Python client. The name of this workspace corresponds to the username.
@@ -42,88 +42,87 @@ rg.init(workspace="my_shared_workspace")
 rg.set_workspace("my_private_workspace")
 ```
 
-### *users.yml*
-
-The above user management model is configured using a YAML file which server maintainers can define before launching a Argilla instance.
-This can be done when launching Argilla from Python or with the provided `docker-compose.yml`. Read below for more details on the different options.
-
 ## Default user
 
-By default, if you don't configure a `users.yml` file, your Argilla instance is pre-configured with the following default user:
+By default, if the Argilla instance has no users, following default admin user will be configured:
 
 - username: `argilla`
 - password: `1234`
 - api_key: `argilla.apikey`
 
-for security reasons we recommend changing at least the password and API key.
+for security reasons we recommend changing at least the password and API key. You can configure
+the default user as follow:
+
+```bash
+python -m argilla.tasks.users.create_default --password changeme --api-key new-api-key
+```
+
 
 :::{note}
 To connect to an old Argilla server using client `>=1.3.0`, you should specify the default user API key `rubrix.apikey`.
 Otherwise, connections will fail with an Unauthorized server error.
 :::
 
-### Override default API key
-
-To override the default API key you can set the following environment variable before launching the server:
-
-```bash
-export ARGILLA_LOCAL_AUTH_DEFAULT_APIKEY=new-apikey
-```
-
-
-### Override default password
-
-To override the password, you must set an environment variable that contains an already hashed password.
-You can use `htpasswd` to generate a hashed password:
-
-```bash
-htpasswd -nbB "" my-new-password
-:$apr1$n0C4S20a$noG.3yWxH1OIKfFITgzl30
-```
-
-Afterwards, set the environment variable omitting the first `:` character (in our case `$apr1$n0C4...`):
-
-```bash
-export ARGILLA_LOCAL_AUTH_DEFAULT_PASSWORD="<generated_user_password>"
-```
-
-Alternatively, you can also generate the hash using passlib's CryptContext: E.g., by running the following in a python console:
-
-```python
-from passlib.context import CryptContext
-print(CryptContext(schemes=["bcrypt"], deprecated="auto").hash('password'))
-```
-
 ## Add new users and workspaces
 
-To configure your Argilla instance for various users, you just need to create a yaml file as follows:
-```yaml
-#.users.yaml
-# Users are provided as a list
-- username: user1
-  hashed_password: <generated-hashed-password> # See the previous section above
-  api_key: "ThisIsTheUser1APIKEY"
-  workspaces: [] # This user will only have her user workspace available
-- username: user2
-  hashed_password: <generated-hashed-password> # See the previous section above
-  api_key: "ThisIsTheUser2APIKEY"
-  workspaces: ['client_projects'] # access to her user workspace and the client_projects workspace
-- username: user3
-  hashed_password: <generated-hashed-password> # See the previous section above
-  api_key: "ThisIsTheUser2APIKEY" # this user can access all workspaces
-- ...
+The above user management model is configured using the Argilla tasks, which server maintainers can define before launching an Argilla instance.
+
+### Prepare database
+First of all, we need to be sure database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed
+
+```bash
+python -m argilla.tasks.database.migrate
 ```
 
-Then point the following environment variable to this yaml file before launching the server:
+_Note: Is important to launch this tasks prior to other database action._
+
+
+### Creating an admin user
+```bash
+python -m argilla.tasks.users.create --role admin
+```
+
+### Creating an annotator user
+```bash
+python -m argilla.tasks.users.create --role annotator
+```
+
+### HOWTO Create a new workspace an assign it to an existing annotator
+
+#### 1. Setup a http client with an admin auth header
+
+```python
+auth_headers = {"X-Argilla-API-Key": "argilla.apikey"}
+http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
+```
+
+#### 2. Call the create workspace endpoint
+
+```pyhton
+workspace = http.post("/api/workspaces", json={"name": "new-workspace"}).json()
+workspace
+```
+
+#### 3. Select which annotators will be linked to then new workspace and link them by using their ids
+```python
+users = http.get("/api/users").json()
+workspace_id = workspace["id"]
+for user in users:
+	if user["role"] == "annotator": # All annotators will be linked to the new workspace
+		user_id = user["id"]
+		response = http.post(f"/api/workspaces/{workspace_id}/users/{user_id}")
+		print(response.json())
+```
+
+
+### HOWTO migrate users from the `users.yaml` file
 
 ```bash
 export ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yaml
+python -m argilla.tasks.users.migrate
 ```
 
-If everything went well, the configured users can now log in and their annotations will be tracked with their usernames.
-
-
-### Using docker-compose
+#### Migrate users with docker-compose
 
 Make sure you create the yaml file above in the same folder as your `docker-compose.yaml`. You can download the `docker-compose` from this [URL](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml):
 
@@ -131,10 +130,10 @@ Then open the provided ``docker-compose.yaml`` and configure your Argilla instan
 
 {{ dockercomposeuseryaml }}
 
-You can reload the *Argilla* service to refresh the container:
+Then, you can run the migrate tasks as follows:
 
 ```bash
-docker-compose up -d argilla
+docker-compose exec argilla pythob -m argilla.tasks.users.migrate
 ```
 
 If everything went well, the configured users can now log in, their annotations will be tracked with their usernames, and they'll have access to the defined workspaces.
