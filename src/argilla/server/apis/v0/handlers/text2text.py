@@ -27,7 +27,6 @@ from argilla.server.apis.v0.models.commons.params import (
 )
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
-    Text2TextDataset,
     Text2TextMetrics,
     Text2TextQuery,
     Text2TextRecord,
@@ -38,11 +37,10 @@ from argilla.server.apis.v0.models.text2text import (
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError
-from argilla.server.helpers import takeuntil
-from argilla.server.responses import StreamingResponseWithErrorHandling
+from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.security.model import User
-from argilla.server.services.datasets import DatasetsService
+from argilla.server.services.datasets import DatasetsService, ServiceBaseDataset
 from argilla.server.services.tasks.text2text import Text2TextService
 from argilla.server.services.tasks.text2text.models import (
     ServiceText2TextQuery,
@@ -56,7 +54,6 @@ def configure_router():
 
     TasksFactory.register_task(
         task_type=TaskType.text2text,
-        dataset_class=Text2TextDataset,
         query_request=Text2TextQuery,
         record_class=ServiceText2TextRecord,
         metrics=Text2TextMetrics,
@@ -79,14 +76,13 @@ def configure_router():
         current_user: User = Security(auth.get_user, scopes=[]),
     ) -> BulkResponse:
         task = task_type
-        owner = current_user.check_workspace(common_params.workspace)
+        workspace = current_user.check_workspace(common_params.workspace)
         try:
             dataset = datasets.find_by_name(
                 current_user,
                 name=name,
                 task=task,
-                workspace=owner,
-                as_dataset_class=TasksFactory.get_task_dataset(task_type),
+                workspace=workspace,
             )
             datasets.update(
                 user=current_user,
@@ -95,10 +91,8 @@ def configure_router():
                 metadata=bulk.metadata,
             )
         except EntityNotFoundError:
-            dataset_class = TasksFactory.get_task_dataset(task)
-            dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
-            dataset.owner = owner
-            datasets.create_dataset(user=current_user, dataset=dataset)
+            dataset = CreateDatasetRequest(name=name, workspace=workspace, task=task, **bulk.dict())
+            dataset = datasets.create_dataset(user=current_user, dataset=dataset)
 
         result = await service.add_records(
             dataset=dataset,
@@ -133,7 +127,6 @@ def configure_router():
             name=name,
             task=task_type,
             workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
         )
         result = service.search(
             dataset=dataset,
@@ -148,97 +141,6 @@ def configure_router():
             total=result.total,
             records=[Text2TextRecord.parse_obj(r) for r in result.records],
             aggregations=Text2TextSearchAggregations.parse_obj(result.metrics) if result.metrics else None,
-        )
-
-    def scan_data_response(
-        data_stream: Iterable[Text2TextRecord],
-        chunk_size: int = 1000,
-        limit: Optional[int] = None,
-    ) -> StreamingResponseWithErrorHandling:
-        """Generate an textual stream data response for a dataset scan"""
-
-        async def stream_generator(stream):
-            """Converts dataset scan into a text stream"""
-
-            def grouper(n, iterable, fillvalue=None):
-                args = [iter(iterable)] * n
-                return itertools.zip_longest(fillvalue=fillvalue, *args)
-
-            if limit:
-                stream = takeuntil(stream, limit=limit)
-
-            for batch in grouper(
-                n=chunk_size,
-                iterable=stream,
-            ):
-                filtered_records = filter(lambda r: r is not None, batch)
-                yield "\n".join(
-                    map(
-                        lambda r: r.json(by_alias=True, exclude_none=True),
-                        filtered_records,
-                    )
-                ) + "\n"
-
-        return StreamingResponseWithErrorHandling(stream_generator(data_stream), media_type="application/json")
-
-    @router.post(
-        path=f"{base_endpoint}/data",
-        deprecated=True,
-        operation_id="stream_data",
-    )
-    async def stream_data(
-        name: str,
-        query: Optional[Text2TextQuery] = None,
-        common_params: CommonTaskHandlerDependencies = Depends(),
-        limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-        service: Text2TextService = Depends(Text2TextService.get_instance),
-        datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
-        id_from: Optional[str] = None,
-    ) -> StreamingResponse:
-        """
-            Creates a data stream over dataset records
-
-        Parameters
-        ----------
-        name
-            The dataset name
-        query:
-            The stream data query
-        common_params:
-            The task common query params
-        limit:
-            The load number of records limit. Optional
-        service:
-            The dataset records service
-        datasets:
-            The datasets service
-        current_user:
-            Request user
-        id_from:
-            If provided, read the samples after this record ID
-
-        """
-        query = query or Text2TextQuery()
-        dataset = datasets.find_by_name(
-            user=current_user,
-            name=name,
-            task=task_type,
-            workspace=common_params.workspace,
-            as_dataset_class=TasksFactory.get_task_dataset(task_type),
-        )
-        data_stream = map(
-            Text2TextRecord.parse_obj,
-            service.read_dataset(
-                dataset,
-                query=ServiceText2TextQuery.parse_obj(query),
-                id_from=id_from,
-                limit=limit,
-            ),
-        )
-        return scan_data_response(
-            data_stream=data_stream,
-            limit=limit,
         )
 
     metrics.configure_router(

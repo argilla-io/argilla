@@ -305,7 +305,7 @@ def test_metrics_without_data(mocked_client, metric, expected_results, monkeypat
     results.visualize()
 
 
-def test_metrics_for_text_classification(mocked_client):
+def test_metrics_for_token_classification(mocked_client):
     dataset = "test_metrics_for_token_classification"
 
     text = "test the f1 metric of the token classification task"

@@ -14,11 +14,11 @@
 
 import httpx
 import pytest
-from _pytest.logging import LogCaptureFixture
 from argilla import app
 from argilla.client.api import active_api
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
+from argilla.server.commons.telemetry import TelemetryClient
 from starlette.testclient import TestClient
 
 from .helpers import SecuredClient
@@ -26,13 +26,15 @@ from .helpers import SecuredClient
 
 @pytest.fixture
 def telemetry_track_data(mocker):
-    client = telemetry._TelemetryClient.get()
-    if client:
-        # Disable sending data for tests
-        client.client = telemetry._configure_analytics(disable_send=True)
-        spy = mocker.spy(client, "track_data")
+    telemetry.telemetry_client = TelemetryClient(disable_send=True)
 
-        return spy
+    return mocker.spy(telemetry.telemetry_client, "track_data")
+
+
+@pytest.fixture(scope="session")
+def test_client():
+    with TestClient(app) as client:
+        yield client
 
 
 @pytest.fixture

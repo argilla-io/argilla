@@ -42,7 +42,7 @@
       <template v-if="!allowToShowAllLabels">
         <base-button
           v-if="visibleLabels.length < filteredLabels.length"
-          class="feedback-interactions__more secondary light"
+          class="feedback-interactions__more secondary text"
           @click="expandLabels()"
           >+{{ filteredLabels.length - visibleLabels.length }}</base-button
         >
@@ -50,7 +50,7 @@
           v-else-if="
             visibleLabels.length > maxVisibleLabels && !allowToShowAllLabels
           "
-          class="feedback-interactions__more secondary light"
+          class="feedback-interactions__more secondary text"
           @click="collapseLabels()"
           >Show less</base-button
         >
@@ -204,10 +204,10 @@ export default {
       });
     },
     annotationLabels() {
-      return this.record.annotation ? this.record.annotation.labels : [];
+      return this.record.currentAnnotation?.labels || [];
     },
     predictionLabels() {
-      return this.record.prediction ? this.record.prediction.labels : [];
+      return this.record.prediction?.labels || [];
     },
     allowToShowAllLabels() {
       return this.paginationSize === 1 || false;
@@ -229,7 +229,11 @@ export default {
       this.$emit("reset", this.record);
     },
     annotate() {
-      this.$emit("validate", { labels: this.selectedLabels });
+      if (this.isMultiLabel) {
+        this.$emit("update-labels", this.selectedLabels);
+      } else {
+        this.$emit("validate", this.selectedLabels);
+      }
     },
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
@@ -249,7 +253,7 @@ export default {
   max-width: 238px;
 }
 .annotation-area {
-  margin-top: 2em;
+  margin-top: $base-space * 4;
 }
 .feedback-interactions {
   margin: 0 auto 0 auto;

@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 
 from pydantic import BaseSettings, Field, validator
 
-from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
+from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH, DEFAULT_TELEMETRY_KEY
 
 
 class ApiSettings(BaseSettings):
@@ -120,7 +120,7 @@ class ApiSettings(BaseSettings):
 
     enable_telemetry: bool = True
 
-    telemetry_key: Optional[str] = None
+    telemetry_key: str = DEFAULT_TELEMETRY_KEY
 
     @property
     def dataset_index_name(self) -> str:

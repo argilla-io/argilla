@@ -12,16 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import math
 import warnings
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
 from argilla.client.apis import AbstractApi, api_compatibility
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
+    ApiCompatibilityError,
     ForbiddenApiError,
     NotFoundApiError,
 )
@@ -101,8 +103,6 @@ class Datasets(AbstractApi):
 
     __SETTINGS_MIN_API_VERSION__ = "0.15"
 
-    DEFAULT_SCAN_SIZE = 250
-
     class _DatasetApiModel(BaseModel):
         name: str
         task: TaskType
@@ -121,29 +121,36 @@ class Datasets(AbstractApi):
         dataset = get_dataset(self.http_client, name=name).parsed
         return self._DatasetApiModel.parse_obj(dataset)
 
-    def create(self, name: str, settings: Settings):
+    def create(self, name: str, workspace: str, settings: Settings):
         task = (
             TaskType.text_classification
             if isinstance(settings, TextClassificationSettings)
             else TaskType.token_classification
         )
 
-        with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-            dataset = self._DatasetApiModel(name=name, task=task)
-            self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
-            self.__save_settings__(dataset, settings=settings)
+        try:
+            with api_compatibility(self, min_version="1.4.0"):
+                dataset = self._DatasetApiModel(name=name, task=task, workspace=workspace)
+                self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
+                self.__save_settings__(dataset, settings=settings)
+        except ApiCompatibilityError:
+            with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
+                dataset = self._DatasetApiModel(name=name, task=task)
+                self.http_client.post(f"{self._API_PREFIX}?workspace={workspace}", json=dataset.dict())
+                self.__save_settings__(dataset, settings=settings)
 
-    def configure(self, name: str, settings: Settings):
+    def configure(self, name: str, workspace: str, settings: Settings):
         """
         Configures dataset settings. If dataset does not exist, a new one will be created.
         Pass only settings that want to configure
 
         Args:
             name: The dataset name
+            workspace: The dataset workspace
             settings: The dataset settings
         """
         try:
-            self.create(name=name, settings=settings)
+            self.create(name=name, workspace=workspace, settings=settings)
         except AlreadyExistsApiError:
             ds = self.find_by_name(name)
             self.__save_settings__(dataset=ds, settings=settings)
@@ -153,7 +160,9 @@ class Datasets(AbstractApi):
         name: str,
         projection: Optional[Set[str]] = None,
         limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
+        batch_size: int = 250,
         **query,
     ) -> Iterable[dict]:
         """
@@ -163,52 +172,67 @@ class Datasets(AbstractApi):
             name: the dataset
             query: the search query
             projection: a subset of record fields to retrieve. If not provided,
+                 only id's will be returned
+            sort: The fields on which to sort [(<field_name>, 'asc|decs')].
             limit: The number of records to retrieve
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
-            only id's will be returned
+            batch_size: If provided, load `batch_size` samples per request. A lower batch
+                size may help avoid timeouts.
 
         Returns:
-
             An iterable of raw object containing per-record info
-
         """
 
-        url = f"{self._API_PREFIX}/{name}/records/:search?limit={self.DEFAULT_SCAN_SIZE}"
-        query = self._parse_query(query=query)
+        if limit and limit < 0:
+            raise ValueError("The scan limit must be non-negative.")
 
-        if limit == 0:
-            limit = None
+        limit = limit if limit else math.inf
+        url = f"{self._API_PREFIX}/{name}/records/:search?limit={{limit}}"
+        query = self._parse_query(query=query)
 
         request = {
             "fields": list(projection) if projection else ["id"],
             "query": query,
         }
 
-        if id_from:
+        if sort is not None:
+            try:
+                if isinstance(sort, list):
+                    assert all([(isinstance(item, tuple)) and (item[-1] in ["asc", "desc"]) for item in sort])
+                else:
+                    raise Exception()
+            except Exception:
+                raise ValueError("sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]")
+            request["sort_by"] = [{"id": item[0], "order": item[-1]} for item in sort]
+
+        elif id_from:
+            # TODO: Show message since sort + next_id is not compatible since fixes a sort by id
             request["next_idx"] = id_from
 
-        yield_fields = 0
         with api_compatibility(self, min_version="1.2.0"):
+            request_limit = min(limit, batch_size)
             response = self.http_client.post(
-                url,
+                url.format(limit=request_limit),
                 json=request,
             )
 
             while response.get("records"):
-                for record in response["records"]:
-                    yield record
-                    yield_fields += 1
-                    if limit and limit <= yield_fields:
-                        return
+                yield from response["records"]
+                limit -= request_limit
+                if limit <= 0:
+                    return
 
-                next_idx = response.get("next_idx")
-                if next_idx:
-                    response = self.http_client.post(
-                        path=url,
-                        json={**request, "next_idx": next_idx},
-                    )
+                next_request_params = {k: response[k] for k in ["next_idx", "next_page_cfg"] if response.get(k)}
+                if not next_request_params:
+                    return
+
+                request_limit = min(limit, batch_size)
+                response = self.http_client.post(
+                    path=url.format(limit=request_limit),
+                    json={**request, **next_request_params},
+                )
 
     def update_record(
         self,

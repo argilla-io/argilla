@@ -18,12 +18,12 @@ from fastapi import Header, Path, Query
 
 from argilla._constants import (
     _OLD_WORKSPACE_HEADER_NAME,
-    DATASET_NAME_REGEX_PATTERN,
+    ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
 )
 from argilla.server.security.model import WORKSPACE_NAME_PATTERN
 
-DATASET_NAME_PATH_PARAM = Path(..., regex=DATASET_NAME_REGEX_PATTERN, description="The dataset name")
+DATASET_NAME_PATH_PARAM = Path(..., regex=ES_INDEX_REGEX_PATTERN, description="The dataset name")
 
 
 @dataclass
