@@ -21,7 +21,7 @@
 
 <script>
 export default {
-  methods: {},
+  name: "BaseSpinnerComponent",
 };
 </script>
 

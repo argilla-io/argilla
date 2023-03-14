@@ -28,7 +28,7 @@ export default {
 <style lang="scss" scoped>
 .layout {
   display: grid;
-  grid-template-columns: 100px 1fr 1fr 1fr 100px;
+  grid-template-columns: 56px 1fr 1fr 1fr 56px;
   grid-template-rows: 0 100px 1fr 1fr 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;

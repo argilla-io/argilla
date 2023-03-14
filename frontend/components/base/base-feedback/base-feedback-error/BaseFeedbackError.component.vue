@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="feedback-wrapper">
     <p class="message">{{ message }}</p>
     <div class="buttons-area" v-if="isButtonLabels">
       <div class="button" v-for="{ label, value } in buttonLabels" :key="value">
@@ -37,10 +37,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wrapper {
+.feedback-wrapper {
   display: inline-flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
   gap: $base-space * 2;
   padding: $base-space;

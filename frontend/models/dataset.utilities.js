@@ -1,3 +1,4 @@
+import { ObservationDataset } from "@/models/Dataset";
 import {
   getTokenClassificationDatasetById,
   getTokenClassificationDatasetWithViewSettingsById,
@@ -10,6 +11,10 @@ import {
   getText2TextDatasetById,
   getText2TextDatasetWithViewSettingsById,
 } from "@/models/text2text.queries";
+
+const getDatasetTaskById = (datasetId) => {
+  return ObservationDataset.query().whereId(datasetId).first()?.task || null;
+};
 
 const getDatasetFromORM = (
   datasetId,
@@ -48,4 +53,4 @@ const getTaskDatasetById = (datasetId, datasetTask, isWithViewSettings) => {
   return datasetById;
 };
 
-export { getDatasetFromORM };
+export { getDatasetFromORM, getDatasetTaskById };

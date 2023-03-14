@@ -1,7 +1,7 @@
 <template>
   <div class="card" :class="[cardClasses]">
     <div class="card__content">
-      <h3 v-if="title" class="--body1 --semibold card__title">{{ title }}</h3>
+      <h3 v-if="title" class="--body1 --light card__title" v-html="title" />
       <h4 v-if="subtitle" class="--body2 --semibold card__subtitle">
         {{ subtitle }}
       </h4>

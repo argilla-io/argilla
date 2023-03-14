@@ -67,7 +67,7 @@ export default {
     loading: Boolean,
     disabled: Boolean,
     centered: Boolean,
-    to: String,
+    to: { type: String | Object },
   },
   computed: {
     newRel() {

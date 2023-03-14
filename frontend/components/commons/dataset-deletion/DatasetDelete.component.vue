@@ -64,7 +64,7 @@ export default {
       return this.dataset?.name;
     },
     datasetDeleteTitle() {
-      return `Delete ${this.datasetName}`;
+      return `Delete <strong>${this.datasetName}</strong>`;
     },
     modalTitle() {
       return `Delete confirmation`;

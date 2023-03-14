@@ -16,18 +16,31 @@
   -->
 
 <template>
-  <div v-if="numberOfLabels" class="wrapper">
-    <entity-label
-      v-for="(label, index) in labels"
-      :label="label.text"
-      :shortcut="label.shortcut"
-      :key="index"
-      :color="`color_${label.color_id % $entitiesMaxColors}`"
-    />
+  <div class="wrapper">
+    <div v-if="numberOfLabels" class="wrapper-labels">
+      <entity-label
+        v-for="{ text, shortcut, id, color_id } in filteredLabels"
+        class="container"
+        :label="text"
+        :shortcut="shortcut"
+        :key="id"
+        :color="`color_${color_id % $entitiesMaxColors}`"
+      />
+      <BaseButton
+        id="showLessMoreButtonId"
+        v-if="showLessMoreButton"
+        class="secondary text"
+        @on-click="$emit('on-toggle-show-less-more-labels')"
+      >
+        {{ titleShowLessMoreButton }}
+      </BaseButton>
+    </div>
   </div>
 </template>
 
 <script>
+import { PROPERTIES } from "./editionLabel.properties";
+
 export default {
   name: "TokenClassificationGlobalLabelsComponent",
   props: {
@@ -35,13 +48,42 @@ export default {
       type: Array,
       required: true,
     },
+    showAllLabels: {
+      type: Boolean,
+      default: () => true,
+    },
   },
   computed: {
     numberOfLabels() {
       return this.labels.length;
     },
-    isCollapsable() {
-      return this.numberOfLabels > this.MAX_LABELS_NUMBER;
+    diffNumberOfLabelAndMax() {
+      return this.numberOfLabels - PROPERTIES.MAX_LABELS_TO_SHOW;
+    },
+    isDiffInferiorOrEqualToOffset() {
+      return Math.abs(this.diffNumberOfLabelAndMax) <= PROPERTIES.OFFSET;
+    },
+    maxNumberOfLabelToShow() {
+      if (this.showAllLabels || this.isDiffInferiorOrEqualToOffset)
+        return this.numberOfLabels;
+      return PROPERTIES.MAX_LABELS_TO_SHOW;
+    },
+    showLessMoreButton() {
+      return (
+        this.numberOfLabels > PROPERTIES.MAX_LABELS_TO_SHOW &&
+        !this.isDiffInferiorOrEqualToOffset
+      );
+    },
+    filteredLabels() {
+      return this.labels.filter(
+        (label, index) => index < this.maxNumberOfLabelToShow
+      );
+    },
+    titleShowLessMoreButton() {
+      if (this.showAllLabels) {
+        return `Show less`;
+      }
+      return `+${this.numberOfLabels - PROPERTIES.MAX_LABELS_TO_SHOW}`;
     },
   },
 };
@@ -49,15 +91,18 @@ export default {
 
 <style lang="scss" scoped>
 .wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.wrapper-labels {
   @extend %hide-scrollbar;
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
+  align-items: center;
   gap: 8px;
-  max-height: 189px;
-  max-width: 600px;
-  overflow: auto;
-  scroll-behavior: auto;
   background: transparent;
 }
 </style>

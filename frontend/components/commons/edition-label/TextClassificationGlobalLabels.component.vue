@@ -1,18 +1,65 @@
 <template>
   <div class="wrapper">
-    <div class="container" v-for="label in labels" :key="label.key">
-      <div class="label-text" v-html="label.text" />
+    <div class="container" v-for="{ id, text } in filteredLabels" :key="id">
+      <div class="label-text" v-html="text" />
     </div>
+    <BaseButton
+      id="showLessMoreButtonId"
+      v-if="showLessMoreButton"
+      class="secondary text"
+      @on-click="$emit('on-toggle-show-less-more-labels')"
+    >
+      {{ titleShowLessMoreButton }}
+    </BaseButton>
   </div>
 </template>
 
 <script>
+import { PROPERTIES } from "./editionLabel.properties";
+
 export default {
   name: "TextClassificationGlobalLabelsComponent",
   props: {
     labels: {
       type: Array,
       required: true,
+    },
+    showAllLabels: {
+      type: Boolean,
+      default: () => true,
+    },
+  },
+  computed: {
+    numberOfLabels() {
+      return this.labels.length;
+    },
+    diffNumberOfLabelAndMax() {
+      return this.numberOfLabels - PROPERTIES.MAX_LABELS_TO_SHOW;
+    },
+    isDiffInferiorOrEqualToOffset() {
+      return Math.abs(this.diffNumberOfLabelAndMax) <= PROPERTIES.OFFSET;
+    },
+    maxNumberOfLabelToShow() {
+      if (this.showAllLabels || this.isDiffInferiorOrEqualToOffset)
+        return this.numberOfLabels;
+      return PROPERTIES.MAX_LABELS_TO_SHOW;
+    },
+    showLessMoreButton() {
+      return (
+        this.numberOfLabels > PROPERTIES.MAX_LABELS_TO_SHOW &&
+        !this.isDiffInferiorOrEqualToOffset
+      );
+    },
+    filteredLabels() {
+      return this.labels.filter(
+        (label, index) => index < this.maxNumberOfLabelToShow
+      );
+    },
+    titleShowLessMoreButton() {
+      if (this.showAllLabels) {
+        return `Show less`;
+      }
+      return `+${this.numberOfLabels - PROPERTIES.MAX_LABELS_TO_SHOW}`;
     },
   },
 };
@@ -23,10 +70,7 @@ export default {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 8px;
-  max-height: 189px;
-  max-width: 600px;
-  overflow: auto;
+  gap: $base-space;
   scroll-behavior: auto;
   background: transparent;
   .container {

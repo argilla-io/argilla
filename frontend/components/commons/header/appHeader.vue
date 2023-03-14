@@ -27,27 +27,11 @@
         :copy-button="copyButton"
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
-
-      <BaseButton
-        class="button-settings"
-        v-if="datasetName"
-        data-title="Dataset settings"
-        :to="datasetSettingsPageUrl"
-      >
-        <i
-          class="icon-wrapper"
-          v-badge="{
-            showBadge:
-              isNoLabelInGlobalLabelModel ||
-              isAnyLabelsInGlobalLabelsModelNotSavedInBack,
-            verticalPosition: 'top',
-            horizontalPosition: 'right',
-            borderColor: '#212121',
-          }"
-        >
-          <svgicon name="settings" width="22" height="22" color="white" />
-        </i>
-      </BaseButton>
+      <DatasetSettingsIcon
+        v-if="datasetId && datasetName"
+        :datasetId="datasetId"
+        @click-settings-icon="goToSettings()"
+      />
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
@@ -114,13 +98,16 @@ export default {
   },
   computed: {
     dataset() {
-      //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
+      //TODO - when refactor of filter part from header, remove this computed/and get only what is necessary as props
       return this.datasetId && this.datasetTask
         ? getDatasetFromORM(this.datasetId, this.datasetTask, true)
         : null;
     },
     currentTaskHeader() {
       return this.datasetTask && `${this.datasetTask}Header`;
+    },
+    workspace() {
+      return this.$route.params.workspace;
     },
     viewSettings() {
       return DatasetViewSettings.query().whereId(this.datasetName).first();
@@ -193,6 +180,14 @@ export default {
     },
     searchRecords(query) {
       this.$emit("on-search-or-on-filter-records", query);
+    },
+    goToSettings() {
+      const currentRoute = this.$route.path;
+      const newRoute = `/datasets/${this.workspace}/${this.datasetName}/settings`;
+      const allowNavigate = currentRoute !== newRoute;
+      if (this.datasetName && allowNavigate) {
+        this.$router.push(newRoute);
+      }
     },
   },
 };

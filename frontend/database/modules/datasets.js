@@ -17,10 +17,7 @@
 import _ from "lodash";
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
-import {
-  updateLoadingState,
-  getShortcutChars,
-} from "@/models/viewSettings.queries";
+import { getShortcutChars } from "@/models/viewSettings.queries";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
@@ -746,6 +743,7 @@ const actions = {
           message: `The labels <b>"${newLabels}"</b> already exist in the list of labels`,
           type: "info",
         });
+        throw new Error({ response: TYPE_OF_FEEDBACK.LABEL_ALREADY_EXIST });
       }
     } else {
       console.error(
@@ -764,7 +762,7 @@ const actions = {
         data
       );
 
-      message = "The Labels are updated!";
+      message = "The labels are updated!";
       typeOfNotification = "success";
     } catch (err) {
       const { status } = err.response;
@@ -1076,17 +1074,13 @@ const fetchLabelsFromSettings = async ({ name, task }) => {
 };
 
 const formatLabelsAndInitGlobalLabelsORM = async (dataset) => {
-  const { name: datasetName } = dataset;
   try {
-    updateLoadingState(datasetName, true);
     const { labelsToInsertInORM, isLabelSavedInLabelSchema } =
       await factoryLabelsToInsertInGlobalModelORM(dataset);
 
     initGlobalLabels(dataset, labelsToInsertInORM, isLabelSavedInLabelSchema);
   } catch (err) {
     console.log(err);
-  } finally {
-    updateLoadingState(datasetName, false);
   }
 };
 
@@ -1172,13 +1166,19 @@ const checkIfSomeNewLabelNotSavedInBack = (datasetId, newLabels) => {
 };
 
 const validateStatusForSettings = (status) => {
-  if (status >= 200 && status <= 400) return true;
-  else if (status === 404) return true;
+  switch (true) {
+    case status >= 200 && status < 400:
+    case status === 404:
+      return true;
+    default:
+      return false;
+  }
 };
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   LABEL_SCHEMA_IS_EMPTY: "LABEL_SCHEMA_IS_EMPTY",
   NOT_ALLOWED_TO_UPDATE_LABELS: "NOT_ALLOWED_TO_UPDATE_LABELS",
+  LABEL_ALREADY_EXIST: "LABEL_ALREADY_EXIST",
 });
 
 const arePendingRecords = (datasetName) => {

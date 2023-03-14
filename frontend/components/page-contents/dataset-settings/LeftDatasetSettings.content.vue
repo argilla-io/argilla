@@ -23,8 +23,10 @@
       v-if="isTaskTokenClassification || isTaskTextClassification"
     >
       <EditionLabelComponent
+        class="labels-edition-component__content"
         :datasetId="datasetId"
         :datasetTask="datasetTask"
+        :isLoading="isLoading"
       />
     </div>
     <div class="delete-dataset-component" v-if="datasetTask">
@@ -78,15 +80,26 @@ export default {
     settingsDescription() {
       return "Soon you will be able to edit your information";
     },
+    isLoading() {
+      return this.$fetchState.pending;
+    },
   },
   async fetch() {
     //  Fetch the record data and initialize the corresponding data models and fetch labels
     await this.fetchByName(this.datasetName);
   },
+  watch: {
+    isLoading(loadingState) {
+      this.onEmitLoadingStateByBusEvent(loadingState);
+    },
+  },
   methods: {
     ...mapActions({
       fetchByName: "entities/datasets/fetchByName",
     }),
+    onEmitLoadingStateByBusEvent(loadingState) {
+      this.$root.$emit("is-loading-value", loadingState);
+    },
   },
 };
 </script>
@@ -116,6 +129,9 @@ export default {
 .labels-edition-component {
   min-height: 15em;
   padding-bottom: $base-space * 4;
+  &__content {
+    max-width: calc(100% - 150px);
+  }
 }
 .dataset-name {
   @include font-size(16px);
@@ -123,7 +139,7 @@ export default {
 .dataset-task {
   color: $black-54;
   border: 1px solid $black-37;
-  border-radius: $border-radius;
+  border-radius: $border-radius-m;
   padding: calc($base-space / 2);
   @include font-size(12px);
   @include line-height(12px);

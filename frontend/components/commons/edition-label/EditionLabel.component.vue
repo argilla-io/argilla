@@ -4,23 +4,35 @@
       <h2 class="--heading5 --semibold description__title" v-html="title" />
     </div>
     <div class="content">
+      <BaseSpinner v-if="isLoading" />
+
       <BaseFeedbackComponent
-        v-if="feedbackInputIfThereIsLabelsNotSavedInBack"
+        v-if="!numberOfLabels && !isLoading"
+        :feedbackInput="inputForEmptyLabelsFeedback"
+        class="feedback-area"
+      />
+
+      <BaseFeedbackComponent
+        v-if="feedbackInputIfThereIsLabelsNotSavedInBack && !isLoading"
         :feedbackInput="feedbackInputIfThereIsLabelsNotSavedInBack"
         @on-click="onSaveLabelsNotPersisted"
         class="feedback-area"
       />
 
-      <BaseSpinner v-if="isLoading" />
-
       <TokenClassificationGlobalLabelsComponent
-        v-if="isTaskTokenClassification && !isLoading"
+        v-if="isTaskTokenClassification && numberOfLabels && !isLoading"
         :labels="labels"
+        :showAllLabels="showAllLabels"
+        @on-toggle-show-less-more-labels="showAllLabels = !showAllLabels"
       />
+
       <TextClassificationGlobalLabelsComponent
-        v-if="isTaskTextClassification && !isLoading"
+        v-if="isTaskTextClassification && numberOfLabels && !isLoading"
         :labels="labels"
+        :showAllLabels="showAllLabels"
+        @on-toggle-show-less-more-labels="showAllLabels = !showAllLabels"
       />
+
       <div class="buttons-area">
         <CreateNewAction
           text="+ Create label"
@@ -40,7 +52,6 @@ import {
   getLabelsNotSavedInBackByDatasetId,
   isExistAnyLabelsNotSavedInBackByDatasetId,
 } from "@/models/globalLabel.queries";
-import { getLoadingValue } from "@/models/viewSettings.queries";
 
 export default {
   name: "EditionLabelComponent",
@@ -57,6 +68,10 @@ export default {
       type: String,
       required: true,
     },
+    isLoading: {
+      type: Boolean,
+      default: () => true,
+    },
   },
   data() {
     return {
@@ -71,6 +86,12 @@ export default {
         buttonLabels: [{ label: "Save schema", value: "SAVE_SCHEMA" }],
         feedbackType: "ERROR",
       },
+      inputForEmptyLabelsFeedback: {
+        message:
+          "You still have no labels in your dataset, start by creating some",
+        feedbackType: "ERROR",
+      },
+      showAllLabels: false,
     };
   },
   computed: {
@@ -79,9 +100,6 @@ export default {
     },
     datasetName() {
       return this.dataset?.name;
-    },
-    isLoading() {
-      return getLoadingValue(this.datasetName)?.loading ?? false;
     },
     isTaskTokenClassification() {
       return this.datasetTask === "TokenClassification";
@@ -95,6 +113,9 @@ export default {
         this.sortBy,
         this.isSortAsc
       );
+    },
+    numberOfLabels() {
+      return this.labels.length;
     },
     labelsInGlobalLabelsNotSavedInBack() {
       return getLabelsNotSavedInBackByDatasetId(this.datasetId);
@@ -124,22 +145,35 @@ export default {
         newLabelsString,
         this.characterToSeparateLabels
       );
-      await this.onAddNewLabelsInDataset({
-        datasetId: this.datasetId,
-        datasetTask: this.datasetTask,
-        newLabels,
-      });
+      try {
+        await this.onAddNewLabelsInDataset({
+          datasetId: this.datasetId,
+          datasetTask: this.datasetTask,
+          newLabels,
+        });
+        this.toggleShowAllLabels(true);
+      } catch (err) {
+        console.log(err);
+      }
     },
     async onSaveLabelsNotPersisted() {
       const newLabels = this.labelsTextNotSavedInBack;
-      await this.onAddNewLabelsInDataset({
-        datasetId: this.datasetId,
-        datasetTask: this.datasetTask,
-        newLabels,
-      });
+      try {
+        await this.onAddNewLabelsInDataset({
+          datasetId: this.datasetId,
+          datasetTask: this.datasetTask,
+          newLabels,
+        });
+        this.toggleShowAllLabels(true);
+      } catch (err) {
+        console.log(err);
+      }
     },
     splitTrimArrayString(labels, splitCharacter = null) {
       return labels.split(splitCharacter).map((item) => item.trim());
+    },
+    toggleShowAllLabels(trueOrFalse) {
+      this.showAllLabels = trueOrFalse;
     },
   },
 };
