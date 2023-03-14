@@ -776,7 +776,7 @@ class DatasetForTextClassification(DatasetBase):
     def _prepare_for_training_with_spacy(self, nlp: "spacy.Language", records: List[Record]) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
-        db = DocBin()
+        db = DocBin(store_user_data=True)
         all_labels = self.__all_labels__()
 
         # Creating the DocBin object as in https://spacy.io/usage/training#training-data
@@ -1005,7 +1005,7 @@ class DatasetForTokenClassification(DatasetBase):
     def _prepare_for_training_with_spacy(self, nlp: "spacy.Language", records: List[Record]) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
-        db = DocBin()
+        db = DocBin(store_user_data=True)
 
         # Creating the DocBin object as in https://spacy.io/usage/training#training-data
         for record in records:
