@@ -14,8 +14,10 @@
 
 import asyncio
 import logging
+import math
 import os
 import re
+import sys
 import warnings
 from asyncio import Future
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
@@ -50,7 +52,6 @@ from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import async_bulk
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
-    ApiCompatibilityError,
     InputValueError,
     NotFoundApiError,
 )
@@ -69,7 +70,6 @@ from argilla.client.sdk.text_classification.models import (
     LabelingRule,
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
-    TextClassificationQuery,
 )
 from argilla.client.sdk.text_classification.models import (
     TextClassificationRecord as SdkTextClassificationRecord,
@@ -77,7 +77,6 @@ from argilla.client.sdk.text_classification.models import (
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
-    TokenClassificationQuery,
 )
 from argilla.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
@@ -391,6 +390,18 @@ class Argilla:
         else:
             raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
 
+        # divide records in chunks of chunk size based on their byte size
+        batch_size = int(batch_size / (len(records) / batch_size)) + 1
+        n_batches = math.ceil(len(records) / batch_size)
+        rec_size = [sys.getsizeof(rec.json()) for rec in records]
+        records = [rec for _, rec in sorted(zip(rec_size, records), key=lambda pair: pair[0])]
+        records_new = dict.fromkeys(range(n_batches + 1), [])
+        while records:
+            for i in records_new:
+                records_new[i].append(records.pop(0))
+        records = [item for sublist in records_new.values() for item in sublist]
+
+        # log records
         processed, failed = 0, 0
         with Progress() as progress_bar:
             task = progress_bar.add_task("Logging...", total=len(records), visible=verbose)
