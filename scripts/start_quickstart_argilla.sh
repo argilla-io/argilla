@@ -26,12 +26,17 @@ cat >"$HOME"/users.yml <<EOF
   workspaces: ["team"]
 EOF
 
-# Start Elasticsearch
 echo "Starting Elasticsearch"
 elasticsearch 1>/dev/null 2>/dev/null &
 
 echo "Waiting for elasticsearch to start"
 sleep 30
+
+echo "Running database migrations"
+python3.9 -m argilla.tasks.database.migrate
+
+echo "Migrating users to database"
+python3.9 -m argilla.tasks.users.migrate || true
 
 # Load data
 python3.9 /load_data.py "$TEAM_API_KEY" "$LOAD_DATASETS" &
