@@ -28,11 +28,13 @@ $palettes: (
     100: #212121,
     200: #4d4d4d,
     300: #686a6d,
+    400: #838589,
     600: #e6e6e6,
     700: #f5f5f5,
     800: #fafafa,
   ),
   blue: (
+    100: #52a3ed,
     500: #3e5cc9,
   ),
   purple: (
@@ -92,7 +94,7 @@ $black-4: rgba(0, 0, 0, 0.04);
 //-----------
 $error: palette(pink);
 $danger: palette(red);
-$warning: palette(orange-red-crayola);
+$warning: palette(apricot, dark);
 $success: palette(green);
 $info: palette(grey, 600);
 

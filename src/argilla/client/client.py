@@ -152,8 +152,7 @@ class Argilla:
         )
 
         self._user: User = users_api.whoami(client=self._client)
-        if workspace is not None:
-            self.set_workspace(workspace)
+        self.set_workspace(workspace or self._user.username)
 
         self._agent = _ArgillaLogAgent(self)
 
@@ -216,12 +215,11 @@ class Argilla:
             )
 
         if workspace != self.get_workspace():
-            if workspace == self._user.username:
-                self._client.headers.pop(WORKSPACE_HEADER_NAME, workspace)
-            elif self._user.workspaces is not None and workspace not in self._user.workspaces:
+            if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
+                self._client.headers[WORKSPACE_HEADER_NAME] = workspace
+                self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
+            else:
                 raise Exception(f"Wrong provided workspace {workspace}")
-            self._client.headers[WORKSPACE_HEADER_NAME] = workspace
-            self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
 
     def get_workspace(self) -> str:
         """Returns the name of the active workspace.
@@ -229,7 +227,7 @@ class Argilla:
         Returns:
             The name of the active workspace as a string.
         """
-        return self._client.headers.get(WORKSPACE_HEADER_NAME, self._user.username)
+        return self._client.headers.get(WORKSPACE_HEADER_NAME)
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
@@ -473,9 +471,11 @@ class Argilla:
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         batch_size: int = 250,
         as_pandas=None,
+        fields: Optional[List[str]] = None,
     ) -> Dataset:
         """Loads a argilla dataset.
 
@@ -486,11 +486,14 @@ class Argilla:
             vector: Vector configuration for a semantic search
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
+            sort: The fields on which to sort [(<field_name>, 'asc|decs')].
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
             as_pandas: DEPRECATED! To get a pandas DataFrame do
                 ``rg.load('my_dataset').to_pandas()``.
+            fields: If provided, only the given fields will be retrieved.
+                ``rg.load('my_dataset', fields=['text'])``
 
         Returns:
             A argilla dataset.
@@ -512,46 +515,17 @@ class Argilla:
                 "If you want a pandas DataFrame do `rg.load('my_dataset').to_pandas()`.",
             )
 
-        try:
-            return self._load_records_new_fashion(
-                name=name,
-                query=query,
-                vector=vector,
-                ids=ids,
-                limit=limit,
-                id_from=id_from,
-                batch_size=batch_size,
-            )
-        except ApiCompatibilityError as err:  # Api backward compatibility
-            from argilla import __version__ as version
-
-            warnings.warn(
-                message=(
-                    f"Using python client argilla=={version},"
-                    f" however deployed server version is {err.api_version}."
-                    " This might lead to compatibility issues.\n"
-                    f" Preferably, update your server version to {version}"
-                    " or downgrade your Python API at the loss"
-                    " of functionality and robustness via\n"
-                    f"`pip install argilla=={err.api_version}`"
-                ),
-                category=UserWarning,
-            )
-            if batch_size is not None:
-                warnings.warn(
-                    message="The `batch_size` parameter is not supported"
-                    f" on server version {err.api_version}. Consider"
-                    f" updating your server version to {version} to"
-                    " take advantage of this functionality."
-                )
-
-            return self._load_records_old_fashion(
-                name=name,
-                query=query,
-                ids=ids,
-                limit=limit,
-                id_from=id_from,
-            )
+        return self._load_records_internal(
+            name=name,
+            query=query,
+            vector=vector,
+            ids=ids,
+            limit=limit,
+            sort=sort,
+            id_from=id_from,
+            fields=fields,
+            batch_size=batch_size,
+        )
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
@@ -645,88 +619,25 @@ class Argilla:
 
         return LabelingRuleMetricsSummary.parse_obj(response.parsed)
 
-    def _load_records_old_fashion(
-        self,
-        name: str,
-        query: Optional[str] = None,
-        ids: Optional[List[Union[str, int]]] = None,
-        limit: Optional[int] = None,
-        id_from: Optional[str] = None,
-    ) -> Dataset:
-        from argilla.client.sdk.text2text import api as text2text_api
-        from argilla.client.sdk.text2text.models import Text2TextQuery
-        from argilla.client.sdk.text_classification import (
-            api as text_classification_api,
-        )
-        from argilla.client.sdk.token_classification import (
-            api as token_classification_api,
-        )
-
-        response = datasets_api.get_dataset(client=self._client, name=name)
-        task = response.parsed.task
-
-        task_config = {
-            TaskType.text_classification: (
-                text_classification_api.data,
-                TextClassificationQuery,
-                DatasetForTextClassification,
-            ),
-            TaskType.token_classification: (
-                token_classification_api.data,
-                TokenClassificationQuery,
-                DatasetForTokenClassification,
-            ),
-            TaskType.text2text: (
-                text2text_api.data,
-                Text2TextQuery,
-                DatasetForText2Text,
-            ),
-        }
-
-        try:
-            get_dataset_data, request_class, dataset_class = task_config[task]
-        except KeyError:
-            raise ValueError(
-                f"Load method not supported for the '{task}' task. Supported tasks: "
-                f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
-            )
-        response = get_dataset_data(
-            client=self._client,
-            name=name,
-            request=request_class(ids=ids, query_text=query),
-            limit=limit,
-            id_from=id_from,
-        )
-
-        records = [sdk_record.to_client() for sdk_record in response.parsed]
-        return dataset_class(self.__sort_records_by_id__(records))
-
-    def _load_records_new_fashion(
+    def _load_records_internal(
         self,
         name: str,
         query: Optional[str] = None,
         vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
+        fields: Optional[List[str]] = None,
         batch_size: int = 250,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
         task = dataset.task
 
         task_config = {
-            TaskType.text_classification: (
-                SdkTextClassificationRecord,
-                DatasetForTextClassification,
-            ),
-            TaskType.token_classification: (
-                SdkTokenClassificationRecord,
-                DatasetForTokenClassification,
-            ),
-            TaskType.text2text: (
-                SdkText2TextRecord,
-                DatasetForText2Text,
-            ),
+            TaskType.text_classification: (SdkTextClassificationRecord, DatasetForTextClassification),
+            TaskType.token_classification: (SdkTokenClassificationRecord, DatasetForTokenClassification),
+            TaskType.text2text: (SdkText2TextRecord, DatasetForText2Text),
         }
 
         try:
@@ -738,10 +649,10 @@ class Argilla:
             )
 
         if vector:
-            vector_search = VectorSearch(
-                name=vector[0],
-                value=vector[1],
-            )
+            if sort is not None:
+                _LOGGER.warning("Results are sorted by vector similarity, so 'sort' parameter is ignored.")
+
+            vector_search = VectorSearch(name=vector[0], value=vector[1])
             results = self.search.search_records(
                 name=name,
                 task=task,
@@ -750,12 +661,17 @@ class Argilla:
                 query_text=query,
                 vector=vector_search,
             )
+
             return dataset_class(results.records)
+
+        if fields:
+            fields.extend(["id", "text", "tokens", "inputs"])
 
         records = self.datasets.scan(
             name=name,
-            projection={"*"},
+            projection=set(fields or "*"),
             limit=limit,
+            sort=sort,
             id_from=id_from,
             batch_size=batch_size,
             # Query
@@ -763,12 +679,4 @@ class Argilla:
             ids=ids,
         )
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
-        return dataset_class(self.__sort_records_by_id__(records))
-
-    def __sort_records_by_id__(self, records: list) -> list:
-        try:
-            records_sorted_by_id = sorted(records, key=lambda x: x.id)
-        # record ids can be a mix of int/str -> sort all as str type
-        except TypeError:
-            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
-        return records_sorted_by_id
+        return dataset_class(records)

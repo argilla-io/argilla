@@ -14,6 +14,7 @@
 #  limitations under the License.
 import concurrent.futures
 import datetime
+import re
 from time import sleep
 from typing import Any, Iterable
 
@@ -22,6 +23,7 @@ import datasets
 import httpx
 import pandas as pd
 import pytest
+from argilla import TextClassificationRecord
 from argilla._constants import (
     _OLD_WORKSPACE_HEADER_NAME,
     DEFAULT_API_KEY,
@@ -59,7 +61,7 @@ def mock_response_200(monkeypatch):
     """
 
     def mock_get(*args, **kwargs):
-        return User(username="booohh")
+        return User(username="booohh", workspaces=["mock-workspace"])
 
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
@@ -105,28 +107,25 @@ def test_init_correct(mock_response_200):
     It checks if the _client created is a argillaClient object.
     """
 
+    client = api.active_client()
+
     assert api.active_api().http_client == AuthenticatedClient(
         base_url="http://localhost:6900",
         token=DEFAULT_API_KEY,
         timeout=60.0,
+        headers={WORKSPACE_HEADER_NAME: client.user.username, _OLD_WORKSPACE_HEADER_NAME: client.user.username},
     )
 
-    assert api.active_api().user == User(username="booohh")
+    url = "mock_url"
+    api_key = "mock_api_key"
+    workspace_name = client.user.workspaces[0]
 
-    api.init(
-        api_url="mock_url",
-        api_key="mock_key",
-        workspace="mock_ws",
-        timeout=42,
-    )
+    api.init(api_url=url, api_key=api_key, workspace=workspace_name, timeout=42)
     assert api.active_api().http_client == AuthenticatedClient(
-        base_url="mock_url",
-        token="mock_key",
+        base_url=url,
+        token=api_key,
         timeout=42,
-        headers={
-            WORKSPACE_HEADER_NAME: "mock_ws",
-            _OLD_WORKSPACE_HEADER_NAME: "mock_ws",
-        },
+        headers={WORKSPACE_HEADER_NAME: workspace_name, _OLD_WORKSPACE_HEADER_NAME: workspace_name},
     )
 
 
@@ -135,19 +134,20 @@ def test_init_environment_url(mock_response_200, monkeypatch):
 
     It checks the url in the environment variable gets passed to client.
     """
-    monkeypatch.setenv("ARGILLA_API_URL", "mock_url")
-    monkeypatch.setenv("ARGILLA_API_KEY", "mock_key")
-    monkeypatch.setenv("ARGILLA_WORKSPACE", "mock_workspace")
-    api.init()
+    workspace_name = "mock-workspace"
+    url = "mock_url"
+    api_key = "mock_api_key"
 
+    monkeypatch.setenv("ARGILLA_API_URL", url)
+    monkeypatch.setenv("ARGILLA_API_KEY", api_key)
+    monkeypatch.setenv("ARGILLA_WORKSPACE", workspace_name)
+
+    api.init()
     assert api.active_api()._client == AuthenticatedClient(
-        base_url="mock_url",
-        token="mock_key",
+        base_url=url,
+        token=api_key,
         timeout=60,
-        headers={
-            WORKSPACE_HEADER_NAME: "mock_workspace",
-            _OLD_WORKSPACE_HEADER_NAME: "mock_workspace",
-        },
+        headers={WORKSPACE_HEADER_NAME: workspace_name, _OLD_WORKSPACE_HEADER_NAME: workspace_name},
     )
 
 
@@ -160,14 +160,12 @@ def test_trailing_slash(mock_response_200):
     assert api.active_api()._client.base_url == "http://mock.com"
 
 
-def test_log_something(monkeypatch, mocked_client):
+def test_log_something(mocked_client):
     dataset_name = "test-dataset"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
 
-    response = api.log(
-        name=dataset_name,
-        records=rg.TextClassificationRecord(inputs={"text": "This is a test"}),
-    )
+    api.init()
+    response = api.log(name=dataset_name, records=rg.TextClassificationRecord(inputs={"text": "This is a test"}))
 
     assert response.processed == 1
     assert response.failed == 0
@@ -181,14 +179,11 @@ def test_log_something(monkeypatch, mocked_client):
     assert results.records[0].inputs["text"] == "This is a test"
 
 
-def test_load_empty_string(monkeypatch, mocked_client):
+def test_load_empty_string(mocked_client):
     dataset_name = "test-dataset"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
 
-    api.log(
-        name=dataset_name,
-        records=rg.TextClassificationRecord(inputs={"text": "This is a test"}),
-    )
+    api.log(name=dataset_name, records=rg.TextClassificationRecord(inputs={"text": "This is a test"}))
     assert len(api.load(name=dataset_name, query="")) == 1
     assert len(api.load(name=dataset_name, query="  ")) == 1
 
@@ -287,10 +282,7 @@ def test_log_background(mocked_client):
     assert dataset[0].text == sample_text
 
 
-def test_log_background_with_error(
-    mocked_client: SecuredClient,
-    monkeypatch: Any,
-):
+def test_log_background_with_error(mocked_client: SecuredClient, monkeypatch: Any):
     dataset_name = "test_log_background_with_error"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
 
@@ -298,19 +290,11 @@ def test_log_background_with_error(
     sample_text = "Sample text for testing"
 
     def raise_http_error(*args, **kwargs):
-        raise httpx.ConnectError(
-            "Mock error",
-            request=None,
-        )
+        raise httpx.ConnectError("Mock error", request=None)
 
     monkeypatch.setattr(httpx.AsyncClient, "post", raise_http_error)
 
-    future = api.log(
-        rg.TextClassificationRecord(text=sample_text),
-        name=dataset_name,
-        background=True,
-    )
-
+    future = api.log(rg.TextClassificationRecord(text=sample_text), name=dataset_name, background=True)
     with pytest.raises(BaseClientError):
         try:
             future.result()
@@ -353,7 +337,7 @@ def test_delete_with_errors(mocked_client, monkeypatch, status, error_type):
         ("text2text_records", rg.DatasetForText2Text),
     ],
 )
-def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_class):
+def test_general_log_load(mocked_client, request, records, dataset_class):
     dataset_names = [
         f"test_general_log_load_{dataset_class.__name__.lower()}_" + input_type
         for input_type in ["single", "list", "dataset"]
@@ -395,7 +379,7 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
         ("singlelabel_textclassification_records", rg.DatasetForTextClassification),
     ],
 )
-def test_log_load_with_workspace(mocked_client, monkeypatch, request, records, dataset_class):
+def test_log_load_with_workspace(mocked_client, request, records, dataset_class):
     dataset_names = [
         f"test_general_log_load_{dataset_class.__name__.lower()}_" + input_type
         for input_type in ["single", "list", "dataset"]
@@ -631,6 +615,25 @@ def test_load_with_query(mocked_client, supported_vector_search):
     assert ds.id.iloc[0] == 1
 
 
+def test_load_with_sort(mocked_client, supported_vector_search):
+    dataset = "test_load_with_sort"
+    mocked_client.delete(f"/api/datasets/{dataset}")
+    sleep(1)
+
+    expected_data = 4
+    api.log([TextClassificationRecord(text=text) for text in ["This is my text"] * expected_data], name=dataset)
+    with pytest.raises(
+        ValueError, match=re.escape("sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]")
+    ):
+        api.load(name=dataset, sort=[("event_timestamp", "ascc")])
+
+    ds = api.load(name=dataset, sort=[("event_timestamp", "asc")])
+    assert all([(ds[idx].event_timestamp <= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
+
+    ds = api.load(name=dataset, sort=[("event_timestamp", "desc")])
+    assert all([(ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
+
+
 def test_load_as_pandas(mocked_client, supported_vector_search):
     dataset = "test_load_as_pandas"
     mocked_client.delete(f"/api/datasets/{dataset}")
@@ -755,7 +758,7 @@ def test_load_sort(mocked_client):
     assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
     ds = api.load(name=dataset, ids=[1, 2, 11])
     df = ds.to_pandas()
-    assert list(df.id) == [1, 2, 11]
+    assert list(df.id) == [1, 11, 2]
     ds = api.load(name=dataset, ids=["1str", "2str", "11str"])
     df = ds.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]

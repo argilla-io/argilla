@@ -43,7 +43,7 @@ export default {
   width: 100%;
   background: white;
   border: 1px solid palette(grey, 600);
-  margin-bottom: $base-space-between-records;
+  margin-top: $base-space-between-records;
   border-radius: $border-radius-m;
 }
 </style>

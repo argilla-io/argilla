@@ -220,9 +220,11 @@ def load(
     vector: Optional[Tuple[str, List[float]]] = None,
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
+    sort: Optional[List[Tuple[str, str]]] = None,
     id_from: Optional[str] = None,
     batch_size: int = 250,
     as_pandas=None,
+    fields: Optional[List[str]] = None,
 ) -> Dataset:
     """Loads a argilla dataset.
 
@@ -235,6 +237,7 @@ def load(
         vector: Vector configuration for a semantic search
         ids: If provided, load dataset records with given ids.
         limit: The number of records to retrieve.
+        sort: The fields on which to sort [(<field_name>, 'asc|decs')].
         id_from: If provided, starts gathering the records starting from that Record.
             As the Records returned with the load method are sorted by ID, ´id_from´
             can be used to load using batches.
@@ -242,6 +245,8 @@ def load(
             size may help avoid timeouts.
         as_pandas: DEPRECATED! To get a pandas DataFrame do
             ``rg.load('my_dataset').to_pandas()``.
+        fields: A list of fields to retrieve. If not provided, all fields will be retrieved.
+            ``rg.load('my_dataset', fields=['id', 'text'])``
 
     Returns:
         A argilla dataset.
@@ -271,9 +276,11 @@ def load(
         vector=vector,
         ids=ids,
         limit=limit,
+        sort=sort,
         id_from=id_from,
         batch_size=batch_size,
         as_pandas=as_pandas,
+        fields=fields,
     )
 
 

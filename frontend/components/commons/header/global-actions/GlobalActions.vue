@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-if="annotationEnabled" class="container">
+  <div v-if="showGlobalActions" class="container">
     <div class="global-actions">
       <validate-discard-action
         :datasetId="datasetId"
@@ -26,6 +26,8 @@
         :isMultiLabel="isMultiLabel"
         @discard-records="onDiscard"
         @validate-records="onValidate"
+        @clear-records="onClear"
+        @reset-records="onReset"
         @on-select-labels="onSelectLabels($event)"
       />
     </div>
@@ -33,7 +35,7 @@
 </template>
 
 <script>
-import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
+import { getViewSettingsWithPaginationByDatasetName } from "@/models/viewSettings.queries";
 export default {
   props: {
     datasetId: {
@@ -63,10 +65,16 @@ export default {
   },
   computed: {
     viewSettings() {
-      return getViewSettingsByDatasetName(this.datasetName);
+      return getViewSettingsWithPaginationByDatasetName(this.datasetName);
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
+    },
+    paginationSizeIsOne() {
+      return this.viewSettings.pagination.size === 1;
+    },
+    showGlobalActions() {
+      return this.annotationEnabled && !this.paginationSizeIsOne;
     },
   },
   methods: {
@@ -75,6 +83,12 @@ export default {
     },
     onDiscard($event) {
       this.$emit("discard-records", $event);
+    },
+    onClear($event) {
+      this.$emit("clear-records", $event);
+    },
+    onReset($event) {
+      this.$emit("reset-records", $event);
     },
     onSelectLabels($event) {
       this.$emit("on-select-labels", $event);
@@ -95,13 +109,13 @@ export default {
 .global-actions {
   display: flex;
   align-items: center;
+  min-height: $base-space * 5;
   width: 100%;
   text-align: left;
-  padding: 1em $base-space * 2;
+  padding: calc($base-space / 2) $base-space * 2;
   background: palette(white);
   border-radius: $border-radius-m;
   position: relative;
   box-shadow: $shadow-300;
-  margin-bottom: $base-space * 2;
 }
 </style>

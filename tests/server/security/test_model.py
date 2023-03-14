@@ -116,8 +116,5 @@ def test_check_workspaces_with_default(workspaces):
     ],
 )
 def test_check_workspace_without_workspace(user):
-    with pytest.raises(BadRequestError):
-        user.check_workspace("")
-
-    with pytest.raises(BadRequestError):
-        user.check_workspace(None)
+    assert user.check_workspace("") == user.username
+    assert user.check_workspace(None) == user.username

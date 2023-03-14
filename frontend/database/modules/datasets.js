@@ -220,7 +220,7 @@ function _normalizeSearchQuery({ query, dataset }) {
     : { ...dataset.query, ...query, metadata };
 }
 
-async function _updateViewSettings({ id, data }) {
+async function updateViewSettings({ id, data }) {
   /**
    * Wraps view settings updates
    */
@@ -306,7 +306,7 @@ async function _paginate({ dataset, size, page }) {
   const pagination = new Pagination({ size, page });
 
   try {
-    await _updateViewSettings({ id: dataset.name, data: { loading: true } });
+    await updateViewSettings({ id: dataset.name, data: { loading: true } });
     const results = await _callSearchApi({
       dataset,
       query: dataset.query,
@@ -316,7 +316,7 @@ async function _paginate({ dataset, size, page }) {
     });
     return await _updateTaskDataset({ dataset, data: { results } });
   } finally {
-    const { viewMode } = await _updateViewSettings({
+    const { viewMode } = await updateViewSettings({
       id: dataset.name,
       data: { loading: false },
     });
@@ -356,10 +356,10 @@ async function _search({ dataset, query, sort, size }) {
   sort = sort || dataset.sort || [];
   size = size || Pagination.find(dataset.name).size;
   try {
-    await _updateViewSettings({ id: dataset.name, data: { loading: true } });
+    await updateViewSettings({ id: dataset.name, data: { loading: true } });
     await _querySearch({ dataset, query, sort, size });
   } finally {
-    await _updateViewSettings({ id: dataset.name, data: { loading: false } });
+    await updateViewSettings({ id: dataset.name, data: { loading: false } });
   }
 
   const viewSettings = DatasetViewSettings.find(dataset.name);
@@ -417,6 +417,13 @@ async function _updateDatasetRecords({
   }
   let aggregations = {};
   const entity = dataset.getTaskDatasetClass();
+  const arePendingRecords = records.some(
+    (record) => record.status === "Edited"
+  );
+  await updateViewSettings({
+    id: dataset.name,
+    data: { arePendingRecords },
+  });
   const updatedDataset = await entity.update({
     where: dataset.id,
     data: {
@@ -489,6 +496,26 @@ async function _updatePagination({ id, size, page }) {
   return pagination;
 }
 
+async function chooseContinueOrCancel(action, dataset, query, sort, size) {
+  const notificationAction = async () => {
+    await action(dataset, query, sort, size);
+    await updateViewSettings({
+      id: dataset.name,
+      data: { arePendingRecords: false },
+    });
+  };
+  const notificationSettings = {
+    message: "Pending actions will be lost when the page is refreshed",
+    type: "warning",
+    numberOfChars: 20000,
+    buttonText: "Ok, got it!",
+    async onClick() {
+      notificationAction();
+    },
+  };
+  return await Notification.dispatch("notify", notificationSettings);
+}
+
 const getters = {
   findByName: () => (name) => {
     const workspace = currentWorkspace($nuxt.$route);
@@ -518,25 +545,78 @@ const actions = {
       ...record,
       selected: false,
       status: "Discarded",
+      originStatus: null,
     }));
-    await _updateDatasetRecords({
+
+    let message = "";
+    let numberOfChars = 0;
+    let typeOfNotification = "";
+    try {
+      await _updateDatasetRecords({
+        dataset,
+        records: newRecords,
+        persistBackend: true,
+      });
+
+      message =
+        newRecords.length > 1
+          ? `${newRecords.length} records are discarded`
+          : `1 record is discarded`;
+
+      numberOfChars = 30;
+      typeOfNotification = "success";
+    } catch (err) {
+      console.log(err);
+      message = `${newRecords.length} record(s) could not have been discarded`;
+      numberOfChars = 43;
+      typeOfNotification = "error";
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        numberOfChars,
+        type: typeOfNotification,
+      });
+    }
+  },
+  async resetRecords(_, { dataset, records }) {
+    const newRecords = records.map((record) => ({
+      ...record,
+      selected: false,
+      status: record.originStatus,
+    }));
+    return _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
     });
   },
-  async resetRecord(_, { dataset, record }) {
-    return await _updateDatasetRecords({
-      dataset,
-      records: [
-        {
-          ...record,
-          selected: false,
-          status: "Default",
-        },
-      ],
-      persistBackend: true,
-    });
+  async changeStatusToDefault(_, { dataset, records }) {
+    const newRecords = records.map((record) => ({
+      ...record,
+      selected: false,
+      status: "Default",
+    }));
+    const [currentStatus] = records.map((record) =>
+      record.status.toLowerCase()
+    );
+    let message = "";
+    let typeOfNotification = "success";
+    try {
+      await _updateDatasetRecords({
+        dataset,
+        records: newRecords,
+        persistBackend: true,
+      });
+      message = `1 record is un${currentStatus}`;
+    } catch (err) {
+      message = `1 record could not be un${currentStatus}`;
+      typeOfNotification = "error";
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        type: typeOfNotification,
+      });
+    }
   },
   async resetAnnotations(_, { dataset, records }) {
     const newRecords = records.map((record) => ({
@@ -552,20 +632,44 @@ const actions = {
     });
   },
   async validateAnnotations(_, { dataset, records, agent }) {
-    const newRecords = records.map((record) => ({
-      ...record,
-      annotation: {
-        ...record.annotation,
-        agent,
-      },
-      selected: false,
-      status: "Validated",
-    }));
-    return _updateDatasetRecords({
-      dataset,
-      records: newRecords,
-      persistBackend: true,
-    });
+    const numberOfRecords = records.length;
+    let message = "";
+    let numberOfChars = 0;
+    let typeOfNotification = "";
+    try {
+      const newRecords = records.map((record) => ({
+        ...record,
+        annotation: {
+          ...record.annotation,
+          agent,
+        },
+        selected: false,
+        status: "Validated",
+        originStatus: null,
+      }));
+
+      message =
+        numberOfRecords > 1
+          ? `${numberOfRecords} records are validated`
+          : `1 record is validated`;
+      numberOfChars = 25;
+      typeOfNotification = "success";
+      return _updateDatasetRecords({
+        dataset,
+        records: newRecords,
+        persistBackend: true,
+      });
+    } catch (err) {
+      console.log(err);
+      message = `${numberOfRecords} record(s) could not have been validated`;
+      typeOfNotification = "error";
+    } finally {
+      Notification.dispatch("notify", {
+        message,
+        numberOfChars,
+        type: typeOfNotification,
+      });
+    }
   },
   async setUserData(_, { dataset, data }) {
     const metadata = {
@@ -710,19 +814,25 @@ const actions = {
   },
 
   async search(_, { dataset, query, sort, size }) {
-    const searchResponse = await _search({
-      dataset,
-      query,
-      sort,
-      size,
-    });
-    const records = searchResponse.results?.records;
-    initVectorModel(dataset.id, records);
-    return searchResponse;
+    const onSearch = async (dataset, query, sort, size) => {
+      const searchResponse = await _search({
+        dataset,
+        query,
+        sort,
+        size,
+      });
+      const records = searchResponse.results?.records;
+      initVectorModel(dataset.id, records);
+      return searchResponse;
+    };
+    if (arePendingRecords(dataset.name)) {
+      return await chooseContinueOrCancel(onSearch, dataset, query, sort, size);
+    }
+    await onSearch(dataset, query, sort, size);
   },
 
   async changeViewMode(_, { dataset, value }) {
-    const settings = await _updateViewSettings({
+    const settings = await updateViewSettings({
       id: dataset.name,
       data: { viewMode: value, visibleRulesList: false },
     });
@@ -741,10 +851,15 @@ const actions = {
   },
 
   async paginate(_, { dataset, size, page }) {
-    const datasetPaginate = await _paginate({ dataset, size, page });
-
-    const records = datasetPaginate.results?.records;
-    initVectorModel(dataset.id, records);
+    const onPaginate = async (dataset) => {
+      const datasetPaginate = await _paginate({ dataset, size, page });
+      const records = datasetPaginate.results?.records;
+      initVectorModel(dataset.id, records);
+    };
+    if (arePendingRecords(dataset.name)) {
+      return await chooseContinueOrCancel(onPaginate, dataset);
+    }
+    await onPaginate(dataset);
   },
 
   async resetSearch(_, { dataset, size }) {
@@ -765,17 +880,23 @@ const actions = {
   },
 
   async refresh(_, { dataset }) {
-    const pagination = Pagination.find(dataset.name);
-    const paginatedDataset = await _paginate({
-      dataset,
-      size: pagination.size,
-      page: pagination.page,
-    });
-    await _refreshDatasetAggregations({ dataset: paginatedDataset });
-    await _fetchAnnotationProgress(paginatedDataset);
+    const onRefresh = async (dataset) => {
+      const pagination = Pagination.find(dataset.name);
+      const paginatedDataset = await _paginate({
+        dataset,
+        size: pagination.size,
+        page: pagination.page,
+      });
+      await _refreshDatasetAggregations({ dataset: paginatedDataset });
+      await _fetchAnnotationProgress(paginatedDataset);
 
-    const records = paginatedDataset.results?.records;
-    initVectorModel(dataset.id, records);
+      const records = paginatedDataset.results?.records;
+      initVectorModel(dataset.id, records);
+    };
+    if (arePendingRecords(dataset.name)) {
+      return await chooseContinueOrCancel(onRefresh, dataset);
+    }
+    await onRefresh(dataset);
   },
 };
 
@@ -934,6 +1055,8 @@ const checkIfSomeNewLabelNotInGlobalLabels = (datasetId, newLabels) => {
     isNewLabelNotInGlobalLabelsByItem.some((value) => value);
 
   return isSomeNewLabelNotInGlobalLabels;
+const arePendingRecords = (datasetName) => {
+  return DatasetViewSettings.find(datasetName).arePendingRecords;
 };
 
 export default {

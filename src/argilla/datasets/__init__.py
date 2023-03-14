@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Optional
 
 from argilla.client import api
 from argilla.client.apis.datasets import (
@@ -22,7 +23,7 @@ from argilla.client.apis.datasets import (
 __all__ = [TextClassificationSettings, TokenClassificationSettings, Settings]
 
 
-def configure_dataset(name: str, settings: Settings) -> None:
+def configure_dataset(name: str, settings: Settings, workspace: Optional[str] = None) -> None:
     """
     Configures a dataset with a set of configured labels. If dataset does not
     exist yet, an empty dataset will be created.
@@ -32,7 +33,8 @@ def configure_dataset(name: str, settings: Settings) -> None:
     Args:
         name: The dataset name
         settings: The dataset settings
+        workspace: The workspace name where the dataset will belongs to
     """
     active_api = api.active_api()
     datasets = active_api.datasets
-    datasets.configure(name, settings=settings)
+    datasets.configure(name, workspace=workspace or active_api.get_workspace(), settings=settings)

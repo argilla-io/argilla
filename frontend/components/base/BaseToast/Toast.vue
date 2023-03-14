@@ -26,12 +26,16 @@
       class="toast"
       :class="[`toast-${type}`, `is-${position}`]"
       @mouseover="toggleTimer(true)"
+      @mouseleave="toggleTimer(false)"
     >
       <div class="toast-icon"></div>
       <p class="toast-text" v-html="message"></p>
-      <span v-if="buttonText" class="toast__button" @click="whenClicked">{{
-        buttonText
-      }}</span>
+      <base-button
+        v-if="buttonText"
+        class="primary small toast__button"
+        @click="whenClicked"
+        >{{ buttonText }}
+      </base-button>
       <span class="toast__close" @click="close()"></span>
     </div>
   </transition>
@@ -83,7 +87,7 @@ export default {
     },
     onClick: {
       type: Function,
-      default: () => {},
+      default: async () => {},
     },
     queue: Boolean,
     pauseOnHover: {
@@ -205,7 +209,7 @@ export default {
       this.isActive = true;
       this.timer = new Timer(this.close, this.duration);
     },
-    whenClicked(...arg) {
+    async whenClicked(...arg) {
       if (!this.dismissible) return;
       this.onClick.apply(null, arg);
       this.close();
@@ -247,7 +251,7 @@ $toast-colors: map-merge(
   // Colors
   @each $color, $value in $toast-colors {
     .toast-#{$color} {
-      border: 2px solid $value;
+      border: 1px solid $value;
     }
   }
 
@@ -303,9 +307,7 @@ $toast-colors: map-merge(
     }
   }
   &__button {
-    color: palette(blue, 300);
     margin: 0 3em;
-    cursor: pointer;
   }
   &__close {
     margin-right: 1em;
