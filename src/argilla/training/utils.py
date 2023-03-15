@@ -16,6 +16,15 @@ import inspect
 
 
 def get_default_args(func):
+    """
+    It takes a function and returns a dictionary of the default arguments
+
+    Args:
+      func: The function you want to get the default arguments from.
+
+    Returns:
+      A dictionary of the default arguments for the function.
+    """
     signature = inspect.signature(func)
     default_args = {k: v.default for k, v in signature.parameters.items() if v.default is not inspect.Parameter.empty}
     required_args = func.__code__.co_varnames
@@ -31,6 +40,16 @@ def filter_allowed_args(
     func,
     **kwargs,
 ):
+    """
+    It takes a function and a dictionary of arguments, and returns a dictionary of arguments that are
+    allowed by the function
+
+    Args:
+      func: The function to filter the arguments for.
+
+    Returns:
+      A dictionary of the arguments that are allowed in the function.
+    """
     allowed_args = {key: val for key, val in kwargs.items() if key in func.__code__.co_varnames}
     if "self" in allowed_args:
         del allowed_args["self"]
