@@ -11,9 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import argilla as rg
+import pytest
+from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.commons.models import TaskType
+from argilla.server.models import User
+from starlette.testclient import TestClient
+
+from tests.factories import AnnotatorFactory, WorkspaceFactory
 
 
 def create_dataset(client, name: str):
@@ -124,6 +129,98 @@ def log_some_data(mocked_client, name):
             ]
         },
     )
+
+
+# TODO: These tests are the same for token an text classification. We will move them to a common test_dataset_settings
+#  module where settings will be tested in a per-task fashion.
+@pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
+def test_save_settings_as_annotator(test_client: TestClient, argilla_auth_header: dict, task: TaskType):
+    dataset_name = "test_save_settings_as_annotator"
+    workspace_name = "workspace-a"
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build(name=workspace_name)])
+
+    test_client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=argilla_auth_header)
+
+    response = test_client.post(
+        "/api/datasets",
+        json={"name": dataset_name, "task": task, "workspace": workspace_name},
+        headers=argilla_auth_header,
+    )
+    assert response.status_code == 200
+
+    response = test_client.put(
+        f"/api/datasets/{dataset_name}/{task}/settings?workspace={workspace_name}",
+        json={"label_schema": {"labels": ["Label1", "Label2"]}},
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {
+        "detail": {
+            "code": "argilla.api.errors::ForbiddenOperationError",
+            "params": {"detail": "You don't have the necessary permissions to " "save settings for this dataset. "},
+        }
+    }
+
+
+@pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
+def test_delete_settings_as_annotator(test_client: TestClient, argilla_auth_header: dict, task: TaskType):
+    dataset_name = "test_delete_settings_as_annotator"
+    workspace_name = "workspace-a"
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build(name=workspace_name)])
+
+    test_client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=argilla_auth_header)
+
+    response = test_client.post(
+        "/api/datasets",
+        json={"name": dataset_name, "task": task, "workspace": workspace_name},
+        headers=argilla_auth_header,
+    )
+    assert response.status_code == 200
+
+    response = test_client.delete(
+        f"/api/datasets/{dataset_name}/{task}/settings?workspace={workspace_name}",
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {
+        "detail": {
+            "code": "argilla.api.errors::ForbiddenOperationError",
+            "params": {"detail": "You don't have the necessary permissions to " "delete settings for this dataset. "},
+        }
+    }
+
+
+@pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
+def test_get_settings_as_annotator(test_client: TestClient, argilla_auth_header: dict, task: TaskType):
+    dataset_name = "test_get_settings_as_annotator"
+    workspace_name = "workspace-a"
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build(name=workspace_name)])
+
+    test_client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=argilla_auth_header)
+
+    response = test_client.post(
+        "/api/datasets",
+        json={"name": dataset_name, "task": task, "workspace": workspace_name},
+        headers=argilla_auth_header,
+    )
+    assert response.status_code == 200
+
+    response = test_client.put(
+        f"/api/datasets/{dataset_name}/{task}/settings?workspace={workspace_name}",
+        json={"label_schema": {"labels": ["Label1", "Label2"]}},
+        headers=argilla_auth_header,
+    )
+
+    stored_settings = response.json()
+    response = test_client.get(
+        f"/api/datasets/{dataset_name}/{task}/settings?workspace={workspace_name}",
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == stored_settings
 
 
 def fetch_settings(mocked_client, name):
