@@ -103,7 +103,7 @@ class DatasetPolicy:
         return lambda actor: actor.is_admin or is_get_allowed(actor) and cls.create(actor)
 
 
-class TaskDatasetSettingsPolicy:
+class DatasetSettingsPolicy:
     @classmethod
     def list(cls, dataset: Dataset) -> PolicyAction:
         return DatasetPolicy.get(dataset)

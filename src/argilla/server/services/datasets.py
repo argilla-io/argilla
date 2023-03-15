@@ -32,7 +32,7 @@ from argilla.server.errors import (
 from argilla.server.models import User, Workspace
 from argilla.server.policies import (
     DatasetPolicy,
-    TaskDatasetSettingsPolicy,
+    DatasetSettingsPolicy,
     is_authorized,
 )
 from argilla.server.schemas.datasets import CreateDatasetRequest, Dataset
@@ -227,10 +227,8 @@ class DatasetsService:
         if not settings:
             raise EntityNotFoundError(name=dataset.name, type=class_type)
 
-        if not is_authorized(user, TaskDatasetSettingsPolicy.list(dataset)):
-            raise ForbiddenOperationError(
-                "You don't have the necessary permissions to list settings for this dataset."
-            )
+        if not is_authorized(user, DatasetSettingsPolicy.list(dataset)):
+            raise ForbiddenOperationError("You don't have the necessary permissions to list settings for this dataset.")
         return class_type.parse_obj(settings.dict())
 
     def raw_dataset_update(self, dataset):
@@ -239,16 +237,14 @@ class DatasetsService:
     async def save_settings(
         self, user: User, dataset: ServiceDataset, settings: ServiceDatasetSettings
     ) -> ServiceDatasetSettings:
-        if not is_authorized(user, TaskDatasetSettingsPolicy.save(dataset)):
-            raise ForbiddenOperationError(
-                "You don't have the necessary permissions to save settings for this dataset."
-            )
+        if not is_authorized(user, DatasetSettingsPolicy.save(dataset)):
+            raise ForbiddenOperationError("You don't have the necessary permissions to save settings for this dataset.")
 
         self.__dao__.save_settings(dataset=dataset, settings=settings)
         return settings
 
     async def delete_settings(self, user: User, dataset: ServiceDataset) -> None:
-        if not is_authorized(user, TaskDatasetSettingsPolicy.delete(dataset)):
+        if not is_authorized(user, DatasetSettingsPolicy.delete(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to delete settings for this dataset."
             )
