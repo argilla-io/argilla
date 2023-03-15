@@ -13,71 +13,84 @@
 #  limitations under the License.
 
 import json
+from typing import List, Union
 
-from argilla.utils.dependency import requires_version
+from datasets import DatasetDict
 
 
 class ArgillaSetFitTrainer(object):
-    @requires_version("setfit", "0.6")
-    @requires_version("torch")
-    def __init__(self, logger, dataset, device, multi_label: bool = False, split_applied=False):
-        self.model_name = "all-MiniLM-L6-v2"
-        self.num_epoch = 1
-        self.device = device
-        self.setfit_kwargs = {}
-
-        self._logger = logger
-        if split_applied:
+    # @require_version("setfit", "0.6")
+    def __init__(self, dataset, device, record_class, multi_label: bool = False):
+        self._record_class = record_class
+        if isinstance(dataset, DatasetDict):
             self._train_dataset = dataset["train"]
-            self._test_dataset = dataset["test"]
+            self._eval_dataset = dataset["test"]
         else:
-            self._train_dataset = dataset["train"]
-            self._test_dataset = dataset["test"]
+            self._train_dataset = dataset
+            self._eval_dataset = None
         if multi_label:
-            self._multi_target_strategy = "one-vs-rest"
-            self._column_mapping = {"text": "text", "label": "label"}
-        else:
-            self._multi_target_strategy = "one-vs-one"
+            self.multi_target_strategy = "one-vs-rest"
             self._column_mapping = {"text": "text", "binarized_label": "label"}
+        else:
+            self.multi_target_strategy = None
+            self._column_mapping = {"text": "text", "label": "label"}
+
+        self._id2label = dict(enumerate(self._train_dataset.features["label"].names))
+        self._label2id = {v: k for k, v in self._id2label.items()}
+
+        self.setfit_kwargs = {
+            "pretrained_model_name_or_path": "all-MiniLM-L6-v2",
+            "num_epochs": 1,
+            "device": device,
+            "multi_target_strategy": self.multi_target_strategy,
+        }
 
     def update_config(
         self,
-        model_name: str = None,
-        num_epoch: int = None,
-        device: str = None,
-        multi_target_strategy: str = None,
         **setfit_kwargs,
     ):
-        if model_name:
-            self.model_name = model_name
-        if num_epoch:
-            self.num_epoch = num_epoch
-        if device:
-            self.device = device
-        if multi_target_strategy:
-            self._multi_target_strategy = multi_target_strategy
+        """These configs correspond to `SetFitTrainer.__init__` and `SetFitModel.from_pretrained`"""
         self.setfit_kwargs.update(setfit_kwargs)
 
-    @requires_version("setfit", "0.6")
-    def train(self):
+    # @require_version("setfit", "0.6")
+    def train(self, path: str = None):
         from setfit import SetFitModel, SetFitTrainer
 
         self._model = SetFitModel.from_pretrained(
-            pretrained_model_name_or_path=self.model_name,
-            multi_target_strategy=self._multi_target_strategy,
-            device=self._device,
-        )
-        self.__trainer = SetFitTrainer(
-            self._model,
-            train_dataset=self._train_dataset,
-            test_dataset=self._test_dataset,
-            num_epochs=self._num_epoch,
-            use_amp=True,
-            column_mapping=self._column_mapping,
             **self.setfit_kwargs,
         )
+        self.__trainer = SetFitTrainer(
+            model=self._model,
+            train_dataset=self._train_dataset,
+            eval_dataset=self._eval_dataset,
+            column_mapping=self._column_mapping,
+            **{
+                key: val
+                for key, val in self.setfit_kwargs.items()
+                if key in SetFitTrainer.__init__.__code__.co_varnames
+            },
+        )
         self.__trainer.train()
-        self.metrics = self.__trainer.evaluate()
+        self._metrics = self.__trainer.evaluate()
+
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+        str_input = False
+        if isinstance(text, str):
+            text = [text]
+            str_input = True
+
+        predictions = self._model(text)
+
+        formatted_prediction = []
+        for val, pred in zip(text, predictions):
+            pred = self._id2label[int(pred)]
+            if as_argilla_records:
+                pred = self._record_class(text=val, prediction=[(pred, 1)])
+            formatted_prediction.append(pred)
+
+        if str_input:
+            formatted_prediction = formatted_prediction[0]
+        return formatted_prediction
 
     def save(self, path: str):
         """
@@ -90,11 +103,13 @@ class ArgillaSetFitTrainer(object):
 
         self._model.save_pretrained(path)
 
-        id2label = dict(enumerate(self.dataset.features["label"][0].names))
-        label2id = {v: k for k, v in id2label.items()}
-
         # store dict as json
         with open(path + "/label2id.json", "w") as f:
-            json.dump(label2id, f)
+            json.dump(self._label2id, f)
         with open(path + "/id2label.json", "w") as f:
-            json.dump(id2label, f)
+            json.dump(self._id2label, f)
+
+    def get_relevant_args():
+        from setfit import SetFitTrainer
+
+        SetFitTrainer.__init__.func_code.co_varnames

@@ -13,90 +13,123 @@
 #  limitations under the License.
 
 import logging
+from typing import List, Union
 
 import argilla as rg
 from argilla.training.setfit import ArgillaSetFitTrainer
 
 
 class ArgillaBaseTrainer(object):
-    logger = logging.getLogger("argilla.training")
+    _logger = logging.getLogger("argilla.training")
 
-    def __init__(self, name: str, framework: str, query: str = None, train_size: float = None, *args, **kwargs):
-        self.name = name
+    def __init__(
+        self, name: str, framework: str, query: str = None, train_size: float = None, seed: int = None, *args, **kwargs
+    ):
         self.device = "cpu"
-        self.multi_label = False
-        self.split_applied = False
-        if train_size:
-            self.train_size = train_size
-            self.split_applied = True
 
-        self.rg_dataset_snapshot = rg.load(name=self.name, query="status: Validated", limit=1)
-        assert len(self.rg_dataset) > 0, "Dataset must have at least one Validated record"
+        self._name = name
+        self._query = query
+        self._multi_label = False
+        self._split_applied = False
+        self._seed = seed
+
+        if train_size:
+            self._train_size = train_size
+            self._split_applied = True
+
+        if query is None:
+            self._query = "status: Validated"
+
+        self.rg_dataset_snapshot = rg.load(name=self._name, query=self._query, limit=1)
+        assert len(self.rg_dataset_snapshot) > 0, "Dataset must have at least one Validated record"
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
-            self.rg_dataset_type = rg.DatasetForTextClassification
-            self.required_fields = ["id", "text", "inputs", "annotation"]
+            self._rg_dataset_type = rg.DatasetForTextClassification
+            self._required_fields = ["id", "text", "inputs", "annotation"]
             if self.rg_dataset_snapshot[0].multi_label:
-                self.multi_label = True
+                self._multi_label = True
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForTokenClassification):
-            self.rg_dataset_type = rg.DatasetForTokenClassification
-            self.required_fields = ["id", "text", "tokens", "ner_tags"]
+            self._rg_dataset_type = rg.DatasetForTokenClassification
+            self._required_fields = ["id", "text", "tokens", "ner_tags"]
 
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForText2Text):
-            self.rg_dataset_type = rg.DatasetForText2Text
-            self.required_fields = ["id", "text", "annotation"]
+            self._rg_dataset_type = rg.DatasetForText2Text
+            self._required_fields = ["id", "text", "annotation"]
         else:
             raise NotImplementedError(f"Dataset type {type(self.rg_dataset_snapshot)} is not supported.")
 
-        self.dataset_full = rg.load(name=self.name, query="status: Validated", fields=self.required_fields, **kwargs)
+        self.dataset_full = rg.load(name=self._name, query=self._query, fields=self._required_fields, **kwargs)
         self.dataset_full_prepared = self.dataset_full.prepare_for_training(
-            framework=framework, train_size=self.train_size
+            framework=framework, train_size=self._train_size, seed=self._seed
         )
-
         if framework in ["transformers", "setfit"]:
             import torch
 
             if torch.backends.mps.is_available():
-                self._device = "mps"
+                self.device = "mps"
             elif torch.cuda.is_available():
-                self._device = "cuda"
+                self.device = "cuda"
             else:
-                self._device = "cpu"
+                self.device = "cpu"
 
         if framework == "setfit":
-            assert self.rg_dataset_type == rg.DatasetForTextClassification, "SetFit supports only text classification"
+            assert self._rg_dataset_type == rg.DatasetForTextClassification, "SetFit supports only text classification"
             self._trainer = ArgillaSetFitTrainer(
-                self.logger, dataset=self.dataset_full_prepared, multi_label=self.multi_label, device=self._device
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                multi_label=self._multi_label,
+                device=self.device,
             )
         else:
             raise NotImplementedError(f"Framework {framework} is not supported")
 
     def __repr__(self) -> str:
         return f"""
-            Created a {self._trainer.__class__} trainer with decen parameters.
-            1.
+            ArgillaBaseTrainer info:
             _________________________________________________________________
             These baseline params are fixed:
-                dataset: {self.name}
-                multi_label: {self.multi_label}
-                required_fields: {self.required_fields}
-                train_size: {self.train_size*len(self.dataset_full)}
-            2.
+                dataset: {self._name}
+                task: {self._rg_dataset_type.__name__}
+                multi_label: {self._multi_label}
+                required_fields: {self._required_fields}
+                train_size: {self._train_size}
+
+            {self._trainer.__trainer.__class__} info:
             _________________________________________________________________
-            The {self._trainer.__trainer.__class__} parameters are configurable via `trainer.update_config()`:
+            The parameters are configurable via `trainer.update_config()`:
                 {self._trainer.__trainer.config.__doc__}
-            3.
+
+            Using the trainer:
             _________________________________________________________________
-            Use `trainer.train()` to train to start training.
-            4.
-            _________________________________________________________________
-            Use trainer.save(path) to save the model.
+            `trainer.train()` to train to start training.
+            `trainer.predict()` to make predictions.
+            `trainer.save(path)` to save the model.
         """
 
     def update_config(self, *args, **kwargs):
+        """
+        It updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
+        """
         self._trainer.update_config(*args, **kwargs)
 
-    def train(self, path):
-        self._trainer.train()
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+        """
+        `predict` takes a string or list of strings and returns a list of dictionaries, each dictionary
+        containing the text, the predicted label, and the confidence score
+
+        Args:
+          text (Union[List[str], str]): The text to be classified.
+          as_argilla_records (bool): If True, the output will be a list of ArgillaRecord objects. If
+        True, the output will be a list of Argilla records. Defaults to True.
+
+        Returns:
+          A list of predictions or argilla records.
+        """
+        return self._trainer.predict(text, as_argilla_records)
+
+    def train(self, path: str = None):
+        self._trainer.train(path)
+        if path is not None:
+            self._trainer.save(path)
 
     def save(self, path: str):
         self._trainer.save(path)
