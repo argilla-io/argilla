@@ -229,7 +229,7 @@ class DatasetsService:
 
         if not is_authorized(user, TaskDatasetSettingsPolicy.list(dataset)):
             raise ForbiddenOperationError(
-                "You don't have the necessary permissions to list settings for this dataset. "
+                "You don't have the necessary permissions to list settings for this dataset."
             )
         return class_type.parse_obj(settings.dict())
 
@@ -241,7 +241,7 @@ class DatasetsService:
     ) -> ServiceDatasetSettings:
         if not is_authorized(user, TaskDatasetSettingsPolicy.save(dataset)):
             raise ForbiddenOperationError(
-                "You don't have the necessary permissions to save settings for this dataset. "
+                "You don't have the necessary permissions to save settings for this dataset."
             )
 
         self.__dao__.save_settings(dataset=dataset, settings=settings)
@@ -250,7 +250,7 @@ class DatasetsService:
     async def delete_settings(self, user: User, dataset: ServiceDataset) -> None:
         if not is_authorized(user, TaskDatasetSettingsPolicy.delete(dataset)):
             raise ForbiddenOperationError(
-                "You don't have the necessary permissions to delete settings for this dataset. "
+                "You don't have the necessary permissions to delete settings for this dataset."
             )
 
         self.__dao__.delete_settings(dataset=dataset)
