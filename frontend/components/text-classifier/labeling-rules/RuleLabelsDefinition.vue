@@ -105,6 +105,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    labelsFromORM: {
+      type: Array,
+      required: true,
+    },
   },
   data: () => {
     return {
@@ -172,7 +176,7 @@ export default {
       return this.dataset.query.text;
     },
     labels() {
-      return this.dataset.labels.map((l) => ({ class: l, selected: false }));
+      return this.labelsFromORM.map((l) => ({ class: l, selected: false }));
     },
     filteredLabels() {
       return this.labels.filter((label) =>

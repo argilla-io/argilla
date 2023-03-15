@@ -6,6 +6,7 @@
           v-if="!query"
           :datasetId="dataset.id"
           :datasetTask="dataset.task"
+          :labelsFromORM="globalLabelsFromORM"
         />
         <rule-labels-definition
           v-else
@@ -13,6 +14,7 @@
           :isSaved="saved"
           @save-rule="saveRule"
           @update-rule="updateCurrentRule"
+          :labelsFromORM="globalLabelsFromORM"
         >
         </rule-labels-definition>
       </div>
@@ -35,6 +37,7 @@
 <script>
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
+import { getAllLabelsTextSavedInBackByDatasetId } from "@/models/globalLabel.queries";
 
 export default {
   props: {
@@ -104,6 +107,9 @@ export default {
     },
     rulesMetrics() {
       return this.dataset.labelingRulesMetrics;
+    },
+    globalLabelsFromORM() {
+      return getAllLabelsTextSavedInBackByDatasetId(this.dataset.id);
     },
   },
   methods: {

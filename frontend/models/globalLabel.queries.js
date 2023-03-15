@@ -24,12 +24,39 @@ const getAllLabelsByDatasetId = (datasetId, sortBy = "order", asc = true) => {
   return labels;
 };
 
+const getAllLabelsSavedInBackByDatasetId = (
+  datasetId,
+  sortBy = "order",
+  asc = true
+) => {
+  const directionSort = asc ? "asc" : "desc";
+  const joinedDatasetId = formatDatasetIdForGlobalLabelModel(datasetId);
+  const labels = GlobalLabelModel.query()
+    .where("dataset_id", joinedDatasetId)
+    .where("is_saved_in_back", true)
+    .orderBy(sortBy, directionSort)
+    .get();
+
+  return labels;
+};
+
 const getAllLabelsTextByDatasetId = (
   datasetId,
   sortBy = "order",
   asc = true
 ) => {
   return getAllLabelsByDatasetId(datasetId, sortBy, asc).reduce(
+    (acc, curr) => acc.concat(curr.text),
+    []
+  );
+};
+
+const getAllLabelsTextSavedInBackByDatasetId = (
+  datasetId,
+  sortBy = "order",
+  asc = true
+) => {
+  return getAllLabelsSavedInBackByDatasetId(datasetId, sortBy, asc).reduce(
     (acc, curr) => acc.concat(curr.text),
     []
   );
@@ -126,6 +153,7 @@ const getTotalLabelsInGlobalLabel = (datasetId) => {
 export {
   getAllLabelsByDatasetId,
   getLabelsNotSavedInBackByDatasetId,
+  getAllLabelsTextSavedInBackByDatasetId,
   isExistAnyLabelsNotSavedInBackByDatasetId,
   upsertLabelsInGlobalLabelModel,
   deleteAllGlobalLabelModel,
