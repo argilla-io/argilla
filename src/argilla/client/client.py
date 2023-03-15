@@ -419,7 +419,8 @@ class Argilla:
             workspace = self.get_workspace()
             if not workspace:  # Just for backward comp. with datasets with no workspaces
                 workspace = "-"
-            rprint(f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}")
+            url = f"{self._client.base_url}/datasets/{workspace}/{name}"
+            rprint(f"{processed} records logged to [link={url}]{url}[/link]")
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
