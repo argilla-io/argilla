@@ -400,6 +400,8 @@ class DatasetBase:
              'label': ClassLabel(num_classes=1, names=['SPAM'])}
 
         """
+        if train_size is None:
+            train_size = 1
         if test_size is None:
             test_size = 1 - train_size
 
@@ -722,7 +724,7 @@ class DatasetForTextClassification(DatasetBase):
 
         ds_dict = {**{key: [] for key in inputs_keys}, "label": []}
         for rec in self._records:
-            if rec.annotation is None:
+            if rec.annotation is None or rec.annotation == []:
                 continue
             for key in inputs_keys:
                 ds_dict[key].append(rec.inputs.get(key))
@@ -758,7 +760,6 @@ class DatasetForTextClassification(DatasetBase):
             ds = datasets.Dataset.from_dict(
                 {
                     "text": ds["text"],
-                    "context": ds_dict["context"],
                     "label": labels,
                     "binarized_label": binarized_labels,
                 },

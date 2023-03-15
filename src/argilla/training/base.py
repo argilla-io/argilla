@@ -40,17 +40,17 @@ class ArgillaBaseTrainer(object):
         self._name = name
         self._multi_label = False
         self._split_applied = False
+        self._train_size = train_size
         self._seed = seed
 
         if train_size:
-            self._train_size = train_size
             self._split_applied = True
 
         self.rg_dataset_snapshot = rg.load(name=self._name, limit=1)
         assert len(self.rg_dataset_snapshot) > 0, "Dataset must have at least one Validated record"
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
-            self._required_fields = ["id", "text", "inputs", "annotation"]
+            self._required_fields = ["id", "text", "inputs", "annotation", "multi_label"]
             if self.rg_dataset_snapshot[0].multi_label:
                 self._multi_label = True
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForTokenClassification):
@@ -88,7 +88,7 @@ class ArgillaBaseTrainer(object):
             )
         else:
             raise NotImplementedError(f"Framework {framework} is not supported")
-        self._logger.error(self)
+        self._logger.warning(self)
 
     def __repr__(self) -> str:
         """

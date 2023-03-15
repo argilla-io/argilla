@@ -25,14 +25,19 @@ class ArgillaSetFitTrainer(object):
     def __init__(self, dataset, device, record_class, multi_label: bool = False, seed: int = None):
         from setfit import SetFitModel, SetFitTrainer
 
+        if seed is None:
+            seed = 42
         self._seed = seed
         self._record_class = record_class
+        self._multi_label = multi_label
+
         if isinstance(dataset, DatasetDict):
             self._train_dataset = dataset["train"]
             self._eval_dataset = dataset["test"]
         else:
             self._train_dataset = dataset
             self._eval_dataset = None
+
         if multi_label:
             self.multi_target_strategy = "one-vs-rest"
             self._column_mapping = {"text": "text", "binarized_label": "label"}
@@ -40,7 +45,10 @@ class ArgillaSetFitTrainer(object):
             self.multi_target_strategy = None
             self._column_mapping = {"text": "text", "label": "label"}
 
-        self._id2label = dict(enumerate(self._train_dataset.features["label"].names))
+        if self._multi_label:
+            self._id2label = dict(enumerate(self._train_dataset.features["label"][0].names))
+        else:
+            self._id2label = dict(enumerate(self._train_dataset.features["label"].names))
         self._label2id = {v: k for k, v in self._id2label.items()}
 
         self.setfit_model_kwargs = get_default_args(SetFitModel.from_pretrained)
@@ -117,9 +125,14 @@ class ArgillaSetFitTrainer(object):
 
         formatted_prediction = []
         for val, pred in zip(text, predictions):
-            pred = self._id2label[int(pred)]
-            if as_argilla_records:
-                pred = self._record_class(text=val, prediction=[(pred, 1)])
+            if self._multi_label:
+                pred = [self._id2label[idx] for idx, p in enumerate(pred) if p == 1]
+                if as_argilla_records:
+                    pred = self._record_class(text=val, prediction=[(p, 1) for p in pred])
+            else:
+                pred = self._id2label[int(pred)]
+                if as_argilla_records:
+                    pred = self._record_class(text=val, prediction=[(pred, 1)])
             formatted_prediction.append(pred)
 
         if str_input:
