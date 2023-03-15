@@ -101,6 +101,9 @@ export default {
       this.$root.$emit("is-loading-value", loadingState);
     },
   },
+  destroyed() {
+    this.$root.$off("is-loading-value");
+  },
 };
 </script>
 

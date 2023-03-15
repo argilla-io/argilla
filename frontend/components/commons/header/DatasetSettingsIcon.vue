@@ -1,7 +1,6 @@
 <template>
   <BaseIconWithBadge
     class="button-settings"
-    :key="showBadge && !isLoading"
     tooltip="Dataset settings"
     :show-badge="showBadge"
     badge-vertical-position="top"
@@ -28,7 +27,7 @@ export default {
   },
   data() {
     return {
-      isLoading: true,
+      isLoading: false,
     };
   },
   computed: {
@@ -48,6 +47,9 @@ export default {
       return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
     },
     showBadge() {
+      if (this.isLoading) {
+        return false;
+      }
       return (
         (this.isNoLabelInGlobalLabelModel ||
           this.isAnyLabelsInGlobalLabelsModelNotSavedInBack) &&
@@ -67,6 +69,9 @@ export default {
         this.isLoading = loadingState;
       });
     },
+  },
+  destroyed() {
+    this.$root.$off("is-loading-value");
   },
 };
 </script>

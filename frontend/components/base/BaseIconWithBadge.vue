@@ -5,6 +5,7 @@
     @on-click="onClickIcon"
   >
     <i
+      :key="showBadge"
       class="icon-wrapper"
       v-badge="{
         showBadge: showBadge,
@@ -32,7 +33,7 @@ export default {
     },
     showBadge: {
       type: Boolean,
-      required: true,
+      default: false,
     },
     badgeVerticalPosition: {
       type: String,
