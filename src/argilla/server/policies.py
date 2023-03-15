@@ -81,7 +81,7 @@ class DatasetPolicy:
     @classmethod
     def update(cls, dataset: Dataset) -> PolicyAction:
         is_get_allowed = cls.get(dataset)
-        return lambda actor: actor.is_admin or (is_get_allowed(actor) and actor.username == dataset.created_by)
+        return lambda actor: actor.is_admin or is_get_allowed(actor)
 
     @classmethod
     def delete(cls, dataset: Dataset) -> PolicyAction:
@@ -95,7 +95,8 @@ class DatasetPolicy:
 
     @classmethod
     def close(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin
+        is_get_allowed = cls.get(dataset)
+        return lambda actor: actor.is_admin or (is_get_allowed(actor) and actor.username == dataset.created_by)
 
     @classmethod
     def copy(cls, dataset: Dataset) -> PolicyAction:
