@@ -69,6 +69,10 @@ def create(
 ):
     """Creates a new user in the Argilla database with provided parameters"""
     with SessionLocal() as session:
+        if accounts.get_user_by_username(session, username):
+            click.echo(f"User {username!r} already exists in database. Skipping...")
+            return
+
         user_create = UserCreateWithWorkspaces(
             first_name=first_name,
             last_name=last_name,
@@ -91,7 +95,7 @@ def create(
         session.commit()
         session.refresh(user)
 
-        click.echo("User succesfully created:")
+        click.echo("User successfully created:")
         click.echo(f"• first_name: {user.first_name!r}")
         if user.last_name:
             click.echo(f"• last_name: {user.last_name!r}")
