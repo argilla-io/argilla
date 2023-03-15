@@ -14,9 +14,9 @@
 
 from typing import List, Optional
 
+import click
 import yaml
 from pydantic import BaseModel, constr
-from rich import print
 from sqlalchemy.orm import Session
 
 from argilla.server.database import SessionLocal
@@ -46,16 +46,16 @@ class UsersMigrator:
             self._users = yaml.safe_load(users_file.read())
 
     def migrate(self):
-        print(f"Starting users migration process using file {self._users_filename!r}")
+        click.echo(f"Starting users migration process using file {self._users_filename!r}")
 
         with SessionLocal() as session, session.begin():
             for user in self._users:
                 self._migrate_user(session, user)
 
-            print(f"Users migration process successfully finished")
+            click.echo(f"Users migration process successfully finished")
 
     def _migrate_user(self, session: Session, user: dict):
-        print(f"Migrating User with username {user['username']!r}")
+        click.echo(f"Migrating User with username {user['username']!r}")
 
         user_create = self._build_user_create(user)
 
@@ -100,5 +100,11 @@ class UsersMigrator:
         return session.query(Workspace).filter_by(name=workspace_name).first() or Workspace(name=workspace_name)
 
 
-if __name__ == "__main__":
+@click.command()
+def migrate():
+    """Migrate users defined in YAML file to database."""
     UsersMigrator(settings.users_db_file).migrate()
+
+
+if __name__ == "__main__":
+    migrate()
