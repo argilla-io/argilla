@@ -7,15 +7,9 @@
       <BaseSpinner v-if="isLoading" />
 
       <BaseFeedbackComponent
-        v-if="!numberOfLabels && !isLoading"
-        :feedbackInput="inputForEmptyLabelsFeedback"
-        class="feedback-area"
-      />
-
-      <BaseFeedbackComponent
-        v-if="feedbackInputIfThereIsLabelsNotSavedInBack && !isLoading"
-        :feedbackInput="feedbackInputIfThereIsLabelsNotSavedInBack"
-        @on-click="onSaveLabelsNotPersisted"
+        v-if="isFeedbackVisible && !isLoading"
+        :feedbackInput="feedbackInput"
+        @on-click="feedbackAction"
         class="feedback-area"
       />
 
@@ -80,7 +74,7 @@ export default {
       allowAddNewLabel: true,
       characterToSeparateLabels: null,
       saveLabelsButtonLabel: "Save labels",
-      inputForFeedbackComponent: {
+      inputForSaveSchemaFeedback: {
         message:
           "Action needed: Add or save labels to validate the annotation schema",
         buttonLabels: [{ label: "Save labels", value: "SAVE_LABEL_SCHEMA" }],
@@ -129,9 +123,30 @@ export default {
     isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
       return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
     },
+    feedbackInput() {
+      if (this.isFeedbackVisible) {
+        return (
+          this.feedbackInputIfThereIsLabelsNotSavedInBack ||
+          this.feedbackInputIfThereAreNotLabels
+        );
+      }
+      return null;
+    },
+    isFeedbackVisible() {
+      return (
+        this.feedbackInputIfThereIsLabelsNotSavedInBack ||
+        this.feedbackInputIfThereAreNotLabels
+      );
+    },
     feedbackInputIfThereIsLabelsNotSavedInBack() {
       if (this.isAnyLabelsInGlobalLabelsModelNotSavedInBack) {
-        return this.inputForFeedbackComponent;
+        return this.inputForSaveSchemaFeedback;
+      }
+      return null;
+    },
+    feedbackInputIfThereAreNotLabels() {
+      if (!this.numberOfLabels) {
+        return this.inputForEmptyLabelsFeedback;
       }
       return null;
     },
@@ -174,6 +189,12 @@ export default {
     },
     toggleShowAllLabels(trueOrFalse) {
       this.showAllLabels = trueOrFalse;
+    },
+    feedbackAction() {
+      if (this.isAnyLabelsInGlobalLabelsModelNotSavedInBack) {
+        return this.onSaveLabelsNotPersisted();
+      }
+      return null;
     },
   },
 };
