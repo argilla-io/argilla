@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import inspect
 import logging
 from typing import List, Union
 
@@ -81,9 +82,11 @@ class ArgillaBaseTrainer(object):
             )
         else:
             raise NotImplementedError(f"Framework {framework} is not supported")
+        self._logger.error(self)
 
     def __repr__(self) -> str:
-        return f"""
+        return inspect.cleandoc(
+            f"""
             ArgillaBaseTrainer info:
             _________________________________________________________________
             These baseline params are fixed:
@@ -93,17 +96,17 @@ class ArgillaBaseTrainer(object):
                 required_fields: {self._required_fields}
                 train_size: {self._train_size}
 
-            {self._trainer.__trainer.__class__} info:
+            {self._trainer.__class__} info:
             _________________________________________________________________
             The parameters are configurable via `trainer.update_config()`:
-                {self._trainer.__trainer.config.__doc__}
+                {self._trainer}
 
             Using the trainer:
             _________________________________________________________________
-            `trainer.train()` to train to start training.
-            `trainer.predict()` to make predictions.
-            `trainer.save(path)` to save the model.
-        """
+            `trainer.train(path)` to train to start training. `path` is the path to save the model automatically.
+            `trainer.predict(text, as_argilla_records=True)` to make predictions.
+            `trainer.save(path)` to save the model manually."""
+        )
 
     def update_config(self, *args, **kwargs):
         """

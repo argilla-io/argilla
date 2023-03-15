@@ -17,10 +17,14 @@ from typing import List, Union
 
 from datasets import DatasetDict
 
+from argilla.training.utils import filter_allowed_args, get_default_args
+
 
 class ArgillaSetFitTrainer(object):
     # @require_version("setfit", "0.6")
     def __init__(self, dataset, device, record_class, multi_label: bool = False):
+        from setfit import SetFitModel, SetFitTrainer
+
         self._record_class = record_class
         if isinstance(dataset, DatasetDict):
             self._train_dataset = dataset["train"]
@@ -38,38 +42,48 @@ class ArgillaSetFitTrainer(object):
         self._id2label = dict(enumerate(self._train_dataset.features["label"].names))
         self._label2id = {v: k for k, v in self._id2label.items()}
 
-        self.setfit_kwargs = {
-            "pretrained_model_name_or_path": "all-MiniLM-L6-v2",
-            "num_epochs": 1,
-            "device": device,
-            "multi_target_strategy": self.multi_target_strategy,
-        }
+        self.setfit_model_kwargs = get_default_args(SetFitModel.from_pretrained)
+        self.setfit_model_kwargs["pretrained_model_name_or_path"] = "all-MiniLM-L6-v2"
+        self.setfit_model_kwargs["multi_target_strategy"] = self.multi_target_strategy
+        self.setfit_model_kwargs["device"] = device
+
+        self.setfit_trainer_kwargs = get_default_args(SetFitTrainer.__init__)
+        self.setfit_trainer_kwargs["column_mapping"] = self._column_mapping
+        self.setfit_trainer_kwargs["train_dataset"] = self._train_dataset
+        self.setfit_trainer_kwargs["eval_dataset"] = self._eval_dataset
 
     def update_config(
         self,
         **setfit_kwargs,
     ):
         """These configs correspond to `SetFitTrainer.__init__` and `SetFitModel.from_pretrained`"""
-        self.setfit_kwargs.update(setfit_kwargs)
+        from setfit import SetFitModel, SetFitTrainer
+
+        self.setfit_model_kwargs.update(setfit_kwargs)
+        self.setfit_model_kwargs = filter_allowed_args(SetFitModel.from_pretrained, self.setfit_model_kwargs)
+
+        self.setfit_trainer_kwargs.update(setfit_kwargs)
+        self.setfit_trainer_kwargs = filter_allowed_args(SetFitTrainer.__init__, self.setfit_trainer_kwargs)
+
+    def __repr__(self):
+        formatted_string = []
+        arg_dict = {
+            "'SetFitModel'": self.setfit_model_kwargs,
+            "'SetFitTrainer'": self.setfit_trainer_kwargs,
+        }
+        for arg_dict_key, arg_dict_single in arg_dict.items():
+            formatted_string.append(arg_dict_key)
+            for key, val in arg_dict_single.items():
+                formatted_string.append(f"{key}: {val}")
+        return "\n".join(formatted_string)
 
     # @require_version("setfit", "0.6")
     def train(self, path: str = None):
         from setfit import SetFitModel, SetFitTrainer
 
-        self._model = SetFitModel.from_pretrained(
-            **self.setfit_kwargs,
-        )
-        self.__trainer = SetFitTrainer(
-            model=self._model,
-            train_dataset=self._train_dataset,
-            eval_dataset=self._eval_dataset,
-            column_mapping=self._column_mapping,
-            **{
-                key: val
-                for key, val in self.setfit_kwargs.items()
-                if key in SetFitTrainer.__init__.__code__.co_varnames
-            },
-        )
+        self._model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
+        self.setfit_trainer_kwargs["model"] = self._model
+        self.__trainer = SetFitTrainer(**self.setfit_trainer_kwargs)
         self.__trainer.train()
         self._metrics = self.__trainer.evaluate()
 
@@ -108,8 +122,3 @@ class ArgillaSetFitTrainer(object):
             json.dump(self._label2id, f)
         with open(path + "/id2label.json", "w") as f:
             json.dump(self._id2label, f)
-
-    def get_relevant_args():
-        from setfit import SetFitTrainer
-
-        SetFitTrainer.__init__.func_code.co_varnames
