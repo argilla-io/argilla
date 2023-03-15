@@ -37,7 +37,7 @@
 <script>
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
-import { getAllLabelsTextSavedInBackByDatasetId } from "@/models/globalLabel.queries";
+import { getAllLabelsTextByDatasetId } from "@/models/globalLabel.queries";
 
 export default {
   props: {
@@ -109,7 +109,7 @@ export default {
       return this.dataset.labelingRulesMetrics;
     },
     globalLabelsFromORM() {
-      return getAllLabelsTextSavedInBackByDatasetId(this.dataset.id);
+      return getAllLabelsTextByDatasetId(this.dataset.id);
     },
   },
   methods: {
