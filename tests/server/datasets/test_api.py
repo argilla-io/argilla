@@ -88,7 +88,7 @@ def test_delete_dataset_with_missing_workspace(test_client: TestClient, argilla_
     assert response.json() == {
         "detail": {
             "code": "argilla.api.errors::MissingInputParamError",
-            "params": {"message": "A workspace must be provided!"},
+            "params": {"message": "A workspace must be provided"},
         }
     }
 
