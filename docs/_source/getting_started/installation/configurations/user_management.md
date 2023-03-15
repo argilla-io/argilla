@@ -8,9 +8,9 @@ Let's first describe Argilla's user management model:
 
 ### `User`
 
-A Argilla user is defined by the following fields:
+An Argilla user is defined by the following fields:
 
-- `username`: The username to use for login into the Webapp.
+- `username`: The username used as login for Argilla's Webapp.
 - `first_name`: The user's first name
 - `last_name` (optional): The user's last name
 - `role`: The user's role in Argilla. Available roles are: "admin" and "annotator". Only "admin" users can create and delete workspaces and datasets
@@ -19,7 +19,7 @@ A Argilla user is defined by the following fields:
 
 ### `Workspace`
 
-A workspace is a Argilla "space" where users can collaborate, both using the Webapp and the Python client:
+A workspace is a "space" inside your Argilla instance where users can collaborate. It is accessible through the UI and the Python client:
 
 - `Team workspace`: Where one or several users have read/write access.
 - `User workspace`: Every user gets its own user workspace. This workspace is the default workspace when users log and load data with the Python client. The name of this workspace corresponds to the username.
@@ -44,17 +44,17 @@ rg.set_workspace("my_private_workspace")
 
 ## Default user
 
-By default, if the Argilla instance has no users, following default admin user will be configured:
+By default, if the Argilla instance has no users, the following default admin user will be configured:
 
 - username: `argilla`
 - password: `1234`
 - api_key: `argilla.apikey`
 
-for security reasons we recommend changing at least the password and API key. You can configure
-the default user as follow:
+For security reasons, we recommend changing at least the password and the API key. You can configure
+the default user as follows:
 
 ```bash
-python -m argilla.tasks.users.create_default --password changeme --api-key new-api-key
+python -m argilla.tasks.users.create_default --password newpassword --api-key new-api-key
 ```
 
 
@@ -67,14 +67,16 @@ Otherwise, connections will fail with an Unauthorized server error.
 
 The above user management model is configured using the Argilla tasks, which server maintainers can define before launching an Argilla instance.
 
-### Prepare database
-First of all, we need to be sure database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed
+### Prepare the database
+First of all, you need to make sure that database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed.
 
 ```bash
 python -m argilla.tasks.database.migrate
 ```
 
-_Note: Is important to launch this tasks prior to other database action._
+:::{note}
+It is important to launch this task prior to any other database action.
+:::
 
 
 ### Creating an admin user
@@ -98,7 +100,7 @@ http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 
 #### 2. Call the create workspace endpoint
 
-```pyhton
+```python
 workspace = http.post("/api/workspaces", json={"name": "new-workspace"}).json()
 workspace
 ```
@@ -133,7 +135,7 @@ Then open the provided ``docker-compose.yaml`` and configure your Argilla instan
 Then, you can run the migrate tasks as follows:
 
 ```bash
-docker-compose exec argilla pythob -m argilla.tasks.users.migrate
+docker-compose exec argilla python -m argilla.tasks.users.migrate
 ```
 
 If everything went well, the configured users can now log in, their annotations will be tracked with their usernames, and they'll have access to the defined workspaces.
