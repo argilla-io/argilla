@@ -11,6 +11,6 @@ SetFit is an efficient and prompt-free framework for few-shot fine-tuning of Sen
 ```
 ```{include} /_static/tutorials/training-textclassification-setfit-sentiment/modal.md
 ```
-```{include} /_static/tutorials/model-comparison-for-text-classification/modal.md
+```{include} /_static/tutorials/monitoring-textclassification-setfit-explainability/modal.md
 ```
 ````
