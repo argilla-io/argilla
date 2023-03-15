@@ -73,14 +73,14 @@ class User(BaseModel):
     """Base user model"""
 
     id: UUID
+    first_name: str
+    last_name: Optional[str]
+    full_name: Optional[str]
     username: str = Field()
     role: UserRole
-    full_name: Optional[str] = None
-
     superuser: Optional[bool]
     workspaces: Optional[List[str]]
     api_key: str
-
     inserted_at: datetime
     updated_at: datetime
 
