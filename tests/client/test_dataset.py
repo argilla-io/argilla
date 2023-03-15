@@ -252,6 +252,7 @@ class TestDatasetForTextClassification:
             "status",
             "event_timestamp",
             "metrics",
+            "projection",
         ]
         assert dataset_ds.features["prediction"] == [
             {
@@ -540,6 +541,7 @@ class TestDatasetForTokenClassification:
             "status",
             "event_timestamp",
             "metrics",
+            "projection",
         ]
         assert dataset_ds.features["prediction"] == [
             {
@@ -802,6 +804,7 @@ class TestDatasetForText2Text:
             "status",
             "event_timestamp",
             "metrics",
+            "projection",
         ]
         assert dataset_ds.features["prediction"] == [
             {
