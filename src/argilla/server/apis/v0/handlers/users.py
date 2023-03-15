@@ -16,6 +16,7 @@
 from typing import List
 from uuid import UUID
 
+import sqlalchemy.exc
 from fastapi import APIRouter, Depends, Request, Security
 from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
@@ -24,7 +25,7 @@ from argilla.server import models
 from argilla.server.commons import telemetry
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
-from argilla.server.errors import EntityNotFoundError
+from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import UserPolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import User, UserCreate
@@ -89,7 +90,10 @@ def create_user(
 ):
     authorize(current_user, UserPolicy.create)
 
-    user = accounts.create_user(db, user_create)
+    try:
+        user = accounts.create_user(db, user_create)
+    except sqlalchemy.exc.IntegrityError:
+        raise EntityAlreadyExistsError(name=user_create.username, type=User)
 
     return User.from_orm(user)
 

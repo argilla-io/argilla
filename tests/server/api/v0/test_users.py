@@ -151,6 +151,16 @@ def test_create_user_as_annotator(client: TestClient, db: Session):
     assert db.query(User).count() == 1
 
 
+def test_create_user_with_duplicated_username(client: TestClient, db: Session, admin_auth_header: dict):
+    UserFactory.create(username="username")
+    user = {"first_name": "first-name", "username": "username", "password": "12345678"}
+
+    response = client.post("/api/users", headers=admin_auth_header, json=user)
+
+    assert response.status_code == 409
+    assert db.query(User).count() == 2
+
+
 def test_create_user_with_invalid_min_length_first_name(client: TestClient, db: Session, admin_auth_header: dict):
     user = {"first_name": "", "username": "username", "password": "12345678"}
 

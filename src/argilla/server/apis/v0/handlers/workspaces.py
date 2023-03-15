@@ -15,13 +15,14 @@
 from typing import List
 from uuid import UUID
 
+import sqlalchemy.exc
 from fastapi import APIRouter, Depends, Security
 from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
-from argilla.server.errors import EntityNotFoundError
+from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import WorkspacePolicy, WorkspaceUserPolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import (
@@ -52,7 +53,10 @@ def create_workspace(
 ):
     authorize(current_user, WorkspacePolicy.create)
 
-    workspace = accounts.create_workspace(db, workspace_create)
+    try:
+        workspace = accounts.create_workspace(db, workspace_create)
+    except sqlalchemy.exc.IntegrityError:
+        raise EntityAlreadyExistsError(name=workspace_create.name, type=Workspace)
 
     return Workspace.from_orm(workspace)
 
@@ -106,7 +110,12 @@ def create_workspace_user(
     if not user:
         raise EntityNotFoundError(name=str(user_id), type=User)
 
-    workspace_user = accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace_id, user_id=user_id))
+    try:
+        workspace_user = accounts.create_workspace_user(
+            db, WorkspaceUserCreate(workspace_id=workspace_id, user_id=user_id)
+        )
+    except sqlalchemy.exc.IntegrityError:
+        raise EntityAlreadyExistsError(name=str(user_id), type=User)
 
     return User.from_orm(workspace_user.user)
 

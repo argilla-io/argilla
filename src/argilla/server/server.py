@@ -77,8 +77,8 @@ def configure_middleware(app: FastAPI):
 
 def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers"""
-    api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(UnauthorizedError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(ForbiddenOperationError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(EntityAlreadyExistsError)(APIErrorHandler.common_exception_handler)
