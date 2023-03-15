@@ -23,13 +23,21 @@ from argilla.training.setfit import ArgillaSetFitTrainer
 class ArgillaBaseTrainer(object):
     _logger = logging.getLogger("argilla.training")
 
-    def __init__(
-        self, name: str, framework: str, query: str = None, train_size: float = None, seed: int = None, *args, **kwargs
-    ):
+    def __init__(self, name: str, framework: str, train_size: float = None, seed: int = None, **load_kwargs):
+        """
+        `__init__` is a function that initializes the class
+
+        Args:
+          name (str): the name of the dataset you want to load.
+          framework (str): the framework to use for training. Currently, only "setfit" is supported.
+          query (str): a query to filter the dataset.
+          train_size (float): the size of the training set. If not specified, the entire dataset will be
+        used for training.
+          seed (int): int = None,
+        """
         self.device = "cpu"
 
         self._name = name
-        self._query = query
         self._multi_label = False
         self._split_applied = False
         self._seed = seed
@@ -38,10 +46,7 @@ class ArgillaBaseTrainer(object):
             self._train_size = train_size
             self._split_applied = True
 
-        if query is None:
-            self._query = "status: Validated"
-
-        self.rg_dataset_snapshot = rg.load(name=self._name, query=self._query, limit=1)
+        self.rg_dataset_snapshot = rg.load(name=self._name, limit=1)
         assert len(self.rg_dataset_snapshot) > 0, "Dataset must have at least one Validated record"
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
@@ -58,7 +63,7 @@ class ArgillaBaseTrainer(object):
         else:
             raise NotImplementedError(f"Dataset type {type(self.rg_dataset_snapshot)} is not supported.")
 
-        self.dataset_full = rg.load(name=self._name, query=self._query, fields=self._required_fields, **kwargs)
+        self.dataset_full = rg.load(name=self._name, fields=self._required_fields, **load_kwargs)
         self.dataset_full_prepared = self.dataset_full.prepare_for_training(
             framework=framework, train_size=self._train_size, seed=self._seed
         )
@@ -79,12 +84,19 @@ class ArgillaBaseTrainer(object):
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
                 device=self.device,
+                seed=self._seed,
             )
         else:
             raise NotImplementedError(f"Framework {framework} is not supported")
         self._logger.error(self)
 
     def __repr__(self) -> str:
+        """
+        `trainer.__repr__()` prints out the trainer's parameters and a summary of how to use the trainer
+
+        Returns:
+          The trainer object.
+        """
         return inspect.cleandoc(
             f"""
             ArgillaBaseTrainer info:
@@ -130,9 +142,22 @@ class ArgillaBaseTrainer(object):
         return self._trainer.predict(text, as_argilla_records)
 
     def train(self, path: str = None):
-        self._trainer.train(path)
+        """
+        > The function `train` takes in a path to a file and trains the model. If a path is provided,
+        the model is saved to that path
+
+        Args:
+          path (str): The path to the model file.
+        """
+        self._trainer.train()
         if path is not None:
             self._trainer.save(path)
 
     def save(self, path: str):
+        """
+        It saves the model to the path specified
+
+        Args:
+          path (str): The path to the directory where the model will be saved.
+        """
         self._trainer.save(path)

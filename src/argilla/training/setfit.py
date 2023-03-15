@@ -22,9 +22,10 @@ from argilla.training.utils import filter_allowed_args, get_default_args
 
 class ArgillaSetFitTrainer(object):
     # @require_version("setfit", "0.6")
-    def __init__(self, dataset, device, record_class, multi_label: bool = False):
+    def __init__(self, dataset, device, record_class, multi_label: bool = False, seed: int = None):
         from setfit import SetFitModel, SetFitTrainer
 
+        self._seed = seed
         self._record_class = record_class
         if isinstance(dataset, DatasetDict):
             self._train_dataset = dataset["train"]
@@ -51,12 +52,16 @@ class ArgillaSetFitTrainer(object):
         self.setfit_trainer_kwargs["column_mapping"] = self._column_mapping
         self.setfit_trainer_kwargs["train_dataset"] = self._train_dataset
         self.setfit_trainer_kwargs["eval_dataset"] = self._eval_dataset
+        self.setfit_trainer_kwargs["seed"] = self._seed
 
     def update_config(
         self,
         **setfit_kwargs,
     ):
-        """These configs correspond to `SetFitTrainer.__init__` and `SetFitModel.from_pretrained`"""
+        """
+        It updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
+        arguments passed to the `update_config` function
+        """
         from setfit import SetFitModel, SetFitTrainer
 
         self.setfit_model_kwargs.update(setfit_kwargs)
@@ -78,7 +83,11 @@ class ArgillaSetFitTrainer(object):
         return "\n".join(formatted_string)
 
     # @require_version("setfit", "0.6")
-    def train(self, path: str = None):
+    def train(self):
+        """
+        We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
+        the model, and then train the model
+        """
         from setfit import SetFitModel, SetFitTrainer
 
         self._model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
@@ -88,6 +97,17 @@ class ArgillaSetFitTrainer(object):
         self._metrics = self.__trainer.evaluate()
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+        """
+        The function takes in a list of strings and returns a list of predictions
+
+        Args:
+          text (Union[List[str], str]): The text to be classified.
+          as_argilla_records (bool): If True, the prediction will be returned as an Argilla record. If
+        False, the prediction will be returned as a string. Defaults to True
+
+        Returns:
+          A list of predictions
+        """
         str_input = False
         if isinstance(text, str):
             text = [text]
