@@ -59,6 +59,24 @@ def admin(db):
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    return user
+
+
+@pytest.fixture(scope="function")
+def annotator(db):
+    user = User(
+        first_name="Annotator",
+        username="annotator",
+        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+        api_key="annotator.apikey",
+        role=UserRole.annotator,
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
     return user
 
 
