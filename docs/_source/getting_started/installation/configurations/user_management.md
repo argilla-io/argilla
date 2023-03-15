@@ -15,14 +15,13 @@ An Argilla user is defined by the following fields:
 - `last_name` (optional): The user's last name
 - `role`: The user's role in Argilla. Available roles are: "admin" and "annotator". Only "admin" users can create and delete workspaces and datasets
 - `workspaces` : The workspaces where the user has read and write access (both from the Webapp and the Python client). If this field is not defined the user will be a super-user and have access to all datasets in the instance. If this field is set to an empty list `[]` the user will only have access to her user workspace. Read more about workspaces and users below.
-- `api_key`: The API key to interact with Argilla API, mainly through the Python client but also via HTTP for advanced users.
+- `api_key`: The API key to interact with Argilla API, mainly through the Python client but also via HTTP for advanced users. It is automatically generated when a user is created.
 
 ### `Workspace`
 
-A workspace is a "space" inside your Argilla instance where users can collaborate. It is accessible through the UI and the Python client:
+A workspace is a "space" inside your Argilla instance where authorized users can collaborate. It is accessible through the UI and the Python client:
 
-- `Team workspace`: Where one or several users have read/write access.
-- `User workspace`: Every user gets its own user workspace. This workspace is the default workspace when users log and load data with the Python client. The name of this workspace corresponds to the username.
+- `Workspace`: Where one or several users have read/write access.
 
 A user is given access to a workspace by including the name of the workspace in the list of workspaces defined by the `workspaces` field. **Users with no defined workspaces field are super-users** and have access and right to all datasets.
 
@@ -50,7 +49,9 @@ By default, if the Argilla instance has no users, the following default admin us
 - password: `1234`
 - api_key: `argilla.apikey`
 
-For security reasons, we recommend changing at least the password and the API key. You can configure
+For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command or with the equivalent Python code:
+
+--> TBD
 the default user as follows:
 
 ```bash
@@ -81,7 +82,9 @@ It is important to launch this task prior to any other database action.
 
 ### Creating an admin user
 ```bash
-python -m argilla.tasks.users.create --role admin
+python -m argilla.tasks.users.create --role admin --first-name Hulio --last-name Ramos --username hurra --password abcde123
+
+--> Add also python code snippet
 ```
 
 ### Creating an annotator user
