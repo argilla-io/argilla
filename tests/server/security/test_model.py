@@ -11,38 +11,41 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import uuid
-from datetime import datetime
-
 import pytest
-from argilla.server.models import UserRole
 from argilla.server.security.model import User, UserCreate, WorkspaceCreate
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
+
+from tests.factories import UserFactory, WorkspaceFactory
 
 
-@pytest.mark.parametrize("wrong_name", ["user name", "user/name", "user.name", "UserName", "userName"])
-def test_username_validator(wrong_name):
+@pytest.mark.parametrize("invalid_name", ["work space", "work/space", "work.space", "_", "-"])
+def test_workspace_create_invalid_name(invalid_name):
     with pytest.raises(ValidationError):
-        UserCreate(username=wrong_name, password="12345678", first_name="Test")
+        WorkspaceCreate(name=invalid_name)
 
 
-@pytest.mark.parametrize("wrong_workspace", ["work space", "work/space", "work.space", "_", "-"])
-def test_workspace_validator(wrong_workspace):
+@pytest.mark.parametrize("invalid_username", ["user name", "user/name", "user.name", "UserName", "userName"])
+def test_user_create_invalid_username(invalid_username):
     with pytest.raises(ValidationError):
-        WorkspaceCreate(name=wrong_workspace)
+        UserCreate(first_name="first-name", username=invalid_username, password="12345678")
 
 
-def test_workspaces_with_default():
-    expected_workspaces = ["user", "ws1"]
-    user = User(
-        id=uuid.uuid4(),
-        username="user",
-        role=UserRole.annotator,
-        workspaces=expected_workspaces,
-        api_key="api-key",
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
+def test_user_full_name(db: Session):
+    user = UserFactory.create(first_name="first-name", last_name="last-name")
+
+    assert User.from_orm(user).full_name == "first-name last-name"
+
+
+def test_user_full_name_without_last_name(db: Session):
+    user = UserFactory.create(first_name="first-name", last_name=None)
+
+    assert User.from_orm(user).full_name == "first-name"
+
+
+def test_user_workspaces(db: Session):
+    user = UserFactory.create(
+        workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
     )
-    assert len(user.workspaces) == len(expected_workspaces)
-    for ws in expected_workspaces:
-        assert ws in user.workspaces
+
+    assert User.from_orm(user).workspaces == ["workspace-a", "workspace-b"]
