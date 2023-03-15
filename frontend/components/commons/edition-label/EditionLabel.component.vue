@@ -83,7 +83,7 @@ export default {
       inputForFeedbackComponent: {
         message:
           "Action needed: Add or save labels to validate the annotation schema",
-        buttonLabels: [{ label: "Save schema", value: "SAVE_SCHEMA" }],
+        buttonLabels: [{ label: "Save labels", value: "SAVE_LABEL_SCHEMA" }],
         feedbackType: "ERROR",
       },
       inputForEmptyLabelsFeedback: {
