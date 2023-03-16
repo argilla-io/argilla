@@ -158,7 +158,7 @@ def test_save_settings_as_annotator(test_client: TestClient, argilla_auth_header
     assert response.json() == {
         "detail": {
             "code": "argilla.api.errors::ForbiddenOperationError",
-            "params": {"detail": "You don't have the necessary permissions to " "save settings for this dataset. "},
+            "params": {"detail": "You don't have the necessary permissions to " "save settings for this dataset."},
         }
     }
 
@@ -187,7 +187,7 @@ def test_delete_settings_as_annotator(test_client: TestClient, argilla_auth_head
     assert response.json() == {
         "detail": {
             "code": "argilla.api.errors::ForbiddenOperationError",
-            "params": {"detail": "You don't have the necessary permissions to " "delete settings for this dataset. "},
+            "params": {"detail": "You don't have the necessary permissions to " "delete settings for this dataset."},
         }
     }
 
