@@ -14,6 +14,7 @@
 #  limitations under the License.
 import datetime
 import json
+import uuid
 from typing import Any, Optional
 
 import numpy
@@ -26,6 +27,8 @@ from argilla.client.models import (
     _Validators,
 )
 from pydantic import ValidationError
+
+id = uuid.uuid4()
 
 
 @pytest.mark.parametrize(
@@ -48,13 +51,13 @@ def test_text_classification_record(annotation, status, expected_status):
 
 def test_text_classification_input_string():
     event_timestamp = datetime.datetime.now()
-    assert TextClassificationRecord(text="A text", event_timestamp=event_timestamp) == TextClassificationRecord(
-        inputs=dict(text="A text"), event_timestamp=event_timestamp
+    assert TextClassificationRecord(id=id, text="A text", event_timestamp=event_timestamp) == TextClassificationRecord(
+        id=id, inputs=dict(text="A text"), event_timestamp=event_timestamp
     )
 
     assert TextClassificationRecord(
-        inputs=["A text", "another text"], event_timestamp=event_timestamp
-    ) == TextClassificationRecord(inputs=dict(text=["A text", "another text"]), event_timestamp=event_timestamp)
+        id=id, inputs=["A text", "another text"], event_timestamp=event_timestamp
+    ) == TextClassificationRecord(id=id, inputs=dict(text=["A text", "another text"]), event_timestamp=event_timestamp)
 
 
 def test_text_classification_text_inputs():
@@ -71,17 +74,17 @@ def test_text_classification_text_inputs():
         TextClassificationRecord(inputs="mock")
 
     event_timestamp = datetime.datetime.now()
-    assert TextClassificationRecord(text="mock", event_timestamp=event_timestamp) == TextClassificationRecord(
-        inputs={"text": "mock"}, event_timestamp=event_timestamp
-    )
-
-    assert TextClassificationRecord(inputs=["mock"], event_timestamp=event_timestamp) == TextClassificationRecord(
-        inputs={"text": ["mock"]}, event_timestamp=event_timestamp
+    assert TextClassificationRecord(id=id, text="mock", event_timestamp=event_timestamp) == TextClassificationRecord(
+        id=id, inputs={"text": "mock"}, event_timestamp=event_timestamp
     )
 
     assert TextClassificationRecord(
-        text="mock", inputs={"text": "mock"}, event_timestamp=event_timestamp
-    ) == TextClassificationRecord(inputs={"text": "mock"}, event_timestamp=event_timestamp)
+        id=id, inputs=["mock"], event_timestamp=event_timestamp
+    ) == TextClassificationRecord(id=id, inputs={"text": ["mock"]}, event_timestamp=event_timestamp)
+
+    assert TextClassificationRecord(
+        id=id, text="mock", inputs={"text": "mock"}, event_timestamp=event_timestamp
+    ) == TextClassificationRecord(id=id, inputs={"text": "mock"}, event_timestamp=event_timestamp)
 
     rec = TextClassificationRecord(text="mock")
     with pytest.raises(AttributeError, match="You cannot assign a new value to `text`"):
@@ -210,7 +213,7 @@ def test_metadata_values_length():
 def test_model_serialization_with_numpy_nan():
     record = Text2TextRecord(text="My name is Sarah and I love my dog.", metadata={"nan": numpy.nan})
 
-    json_record = json.loads(record.json())
+    json.loads(record.json())
 
 
 def test_warning_when_only_agent():
@@ -240,6 +243,14 @@ def test_none_to_datetime():
 
     record = MockRecord()
     assert isinstance(record.event_timestamp, datetime.datetime)
+
+
+def test_none_id_to_uid():
+    class MockRecord(_Validators):
+        id: Optional[str] = None
+
+    record = MockRecord()
+    assert isinstance(record.id, str)
 
 
 def test_nat_to_none_to_datetime():
