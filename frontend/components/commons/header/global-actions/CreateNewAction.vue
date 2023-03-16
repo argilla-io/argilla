@@ -19,7 +19,7 @@
   <div class="new-label__container">
     <base-button
       v-if="!showLabelCreation"
-      class="new-label__main-button primary light small"
+      class="new-label__main-button secondary text"
       @click="openLabelCreation()"
       >{{ text }}</base-button
     >
@@ -117,9 +117,6 @@ export default {
   &__container {
     text-align: right;
     position: relative;
-    margin-right: 0;
-    margin-left: auto;
-    width: 180px;
   }
 }
 </style>

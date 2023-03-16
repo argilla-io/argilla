@@ -24,7 +24,7 @@
     :disabled="disabled"
     :target="target"
     :rel="newRel"
-    @click="$emit('click', $event)"
+    @click="onClick"
   >
     <slot />
   </a>
@@ -35,7 +35,7 @@
     :to="to"
     :loading="loading"
     :disabled="disabled"
-    @click="$emit('click', $event)"
+    @click="onClick"
   >
     <slot />
   </nuxt-link>
@@ -47,7 +47,7 @@
     :loading="loading"
     :type="type"
     :disabled="disabled"
-    @click="$emit('click', $event)"
+    @click="onClick"
   >
     <slot />
   </button>
@@ -55,7 +55,7 @@
 
 <script>
 export default {
-  name: "ReButton",
+  name: "BaseButton",
   props: {
     href: String,
     target: String,
@@ -67,7 +67,7 @@ export default {
     loading: Boolean,
     disabled: Boolean,
     centered: Boolean,
-    to: String,
+    to: { type: String | Object },
   },
   computed: {
     newRel() {
@@ -83,6 +83,13 @@ export default {
         loading: this.loading,
         centered: this.centered,
       };
+    },
+  },
+  methods: {
+    onClick($event) {
+      //FIXME - replace "click" event by "on-click"
+      this.$emit("click", $event);
+      this.$emit("on-click", $event);
     },
   },
 };
@@ -179,15 +186,15 @@ export default {
 }
 
 .secondary {
-  background-color: palette(grey, 200);
-  color: palette(white);
+  background-color: palette(grey, 600);
+  color: palette(grey, 200);
   .svg-icon {
-    fill: palette(white);
+    fill: palette(grey, 200);
   }
   &:hover,
   &:active,
   &.active {
-    background-color: darken(palette(grey, 200), 5%);
+    background-color: darken(palette(grey, 600), 5%);
   }
   &.outline {
     background: none;
@@ -206,13 +213,67 @@ export default {
       fill: $black-54;
     }
   }
+
   &.text {
-    background: none;
-    color: $black-54;
     padding-left: 0;
     padding-right: 0;
+    background: none;
+    color: $black-54;
     &:hover {
+      background: none;
       color: $black-87;
+    }
+  }
+  &.link {
+    background: none;
+    color: $black-54;
+    padding: 0;
+    &:hover {
+      text-decoration: underline;
+      background: none;
+    }
+  }
+}
+.--danger {
+  background-color: $danger;
+  color: palette(white);
+  .svg-icon {
+    fill: palette(white);
+  }
+  &:hover,
+  &:active,
+  &.active {
+    background-color: darken($danger, 10%);
+  }
+  &.outline {
+    background: none;
+    border: 1px solid $danger;
+    color: $danger;
+    .svg-icon {
+      fill: $danger;
+    }
+    &:hover,
+    &:active,
+    &.active {
+      color: $danger;
+      border-color: $danger;
+    }
+  }
+  &.light {
+    background: lighten($black-4, 50%);
+    color: $danger;
+    &:hover,
+    &:active,
+    &.active {
+      background: $black-4;
+    }
+  }
+  &.link {
+    background: none;
+    color: $danger;
+    &:hover {
+      text-decoration: underline;
+      background: none;
     }
   }
 }

@@ -46,6 +46,7 @@ export default class DatasetViewSettings extends Model {
   static fields() {
     return {
       id: this.string(null),
+      shortcut_chars: this.attr("1234567890QWERTYUIOPASDFGHJKLZXCVBNM"),
       pagination: this.hasOne(Pagination, "id"),
       viewMode: this.string("annotate"),
       loading: this.boolean(false),

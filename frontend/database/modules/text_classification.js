@@ -15,18 +15,9 @@
  * limitations under the License.
  */
 
-import { ObservationDataset } from "@/models/Dataset";
-
 const getters = {};
 
-const actions = {
-  async setLabels(_, { dataset, labels }) {
-    return await ObservationDataset.dispatch("setUserData", {
-      dataset,
-      data: { labels },
-    });
-  },
-};
+const actions = {};
 
 export default {
   getters,

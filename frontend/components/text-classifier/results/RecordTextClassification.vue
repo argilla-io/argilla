@@ -21,7 +21,7 @@
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="interactionsEnabled"
-        :inputLabels="datasetLabels"
+        :inputLabels="listOfTexts"
         :datasetName="datasetName"
         :isMultiLabel="isMultiLabel"
         :paginationSize="paginationSize"
@@ -62,6 +62,7 @@
 import { mapActions } from "vuex";
 import { TextClassificationRecord } from "@/models/TextClassification";
 import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
+import { getAllLabelsTextByDatasetId } from "@/models/globalLabel.queries";
 
 export default {
   props: {
@@ -81,10 +82,6 @@ export default {
       type: String,
       required: true,
     },
-    datasetLabels: {
-      type: Array,
-      required: true,
-    },
     record: {
       type: TextClassificationRecord,
       required: true,
@@ -95,6 +92,9 @@ export default {
     },
   },
   computed: {
+    listOfTexts() {
+      return getAllLabelsTextByDatasetId(this.datasetId);
+    },
     interactionsEnabled() {
       return this.annotationEnabled && !this.isReferenceRecord;
     },

@@ -22,6 +22,7 @@ from argilla.server.apis.v0.models.commons.params import (
     CommonTaskHandlerDependencies,
 )
 from argilla.server.apis.v0.models.dataset_settings import TokenClassificationSettings
+from argilla.server.apis.v0.validators.commons import validate_is_super_user
 from argilla.server.apis.v0.validators.token_classification import DatasetValidator
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
@@ -62,10 +63,8 @@ def configure_router(router: APIRouter):
         )
         return settings
 
-    @deprecate_endpoint(
-        path=base_endpoint,
-        new_path=new_base_endpoint,
-        router_method=router.put,
+    @router.patch(
+        path=new_base_endpoint,
         name=f"save_dataset_settings_for_{task}",
         operation_id=f"save_dataset_settings_for_{task}",
         description=f"Save the {task} dataset settings",
@@ -97,6 +96,26 @@ def configure_router(router: APIRouter):
 
         return settings
 
+    # TODO: This will be remove in next iteration
+    router.put(
+        path=base_endpoint,
+        name=f"old_save_dataset_settings_for_{task}",
+        operation_id=f"old_save_dataset_settings_for_{task}",
+        description=f"Save the {task} dataset settings",
+        deprecated=True,
+        response_model_exclude_none=True,
+        response_model=TokenClassificationSettings,
+    )(save_settings)
+    router.put(
+        path=new_base_endpoint,
+        name=f"new_save_dataset_settings_for_{task}_put",
+        operation_id=f"new_save_dataset_settings_for_{task}_put",
+        description=f"Save the {task} dataset settings",
+        deprecated=True,
+        response_model_exclude_none=True,
+        response_model=TokenClassificationSettings,
+    )(save_settings)
+
     @deprecate_endpoint(
         path=base_endpoint,
         new_path=new_base_endpoint,
@@ -117,9 +136,7 @@ def configure_router(router: APIRouter):
             task=task,
             workspace=ws_params.workspace,
         )
-        await datasets.delete_settings(
-            user=current_user,
-            dataset=found_ds,
-        )
+
+        await datasets.delete_settings(user=current_user, dataset=found_ds)
 
     return router

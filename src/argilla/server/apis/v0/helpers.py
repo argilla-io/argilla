@@ -12,10 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Callable
+from typing import Callable, Optional
 
 
-def deprecate_endpoint(path: str, new_path: str, router_method: Callable, *args, **kwargs):
+def deprecate_endpoint(
+    path: str, new_path: str, router_method: Callable, old_router_method: Optional[Callable] = None, *args, **kwargs
+):
     """
     Helper decorator to deprecate a `path` endpoint adding the `new_path` endpoint.
 
@@ -30,7 +32,9 @@ def deprecate_endpoint(path: str, new_path: str, router_method: Callable, *args,
         if operation_id:
             operation_id_old = f"{operation_id}_old"
 
-        router_method(
+        old_router_method_ = old_router_method or router_method
+
+        old_router_method_(
             path=path,
             *args,
             deprecated=True,
