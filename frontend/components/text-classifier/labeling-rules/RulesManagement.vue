@@ -1,7 +1,6 @@
 <template>
   <div v-if="isVisible" class="rules-management">
-    <base-loading v-if="$fetchState.pending" />
-    <div v-else-if="!$fetchState.error">
+    <div>
       <div class="rules-management__header">
         <p class="rules-management__title">
           Rules
