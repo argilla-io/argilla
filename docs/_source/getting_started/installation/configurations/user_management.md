@@ -90,8 +90,6 @@ It is important to launch this task prior to any other database action.
 ```bash
 python -m argilla.tasks.users.create --help
 ```
-```bash
-# Output
 Usage: python -m argilla.tasks.users.create [OPTIONS]
 
   Creates a new user in the Argilla database with provided parameters
