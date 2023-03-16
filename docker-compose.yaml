@@ -20,7 +20,9 @@ services:
     networks:
       - argilla
     volumes:
-      - data:/var/lib/argilla
+      # ARGILLA_HOME_PATH is used to define where Argilla will save it's application data.
+      # If you change ARGILLA_HOME_PATH value please copy that same value to argilladata volume too.
+      - argilladata:/var/lib/argilla
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
     environment:
@@ -55,5 +57,5 @@ networks:
   argilla:
     driver: bridge
 volumes:
-  data:
+  argilladata:
   elasticdata:
