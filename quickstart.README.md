@@ -117,7 +117,7 @@ This will run the latest quickstart docker image with 2 users `argilla` and `tea
   a custom username you can use your own username to login into the app.
 - `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key
-  i.e. `admin.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
+  i.e. `team.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
   variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
 - `ADMIN_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default
   password is `11223344`. By setting up a custom password you can use your own password to login into the app.
