@@ -14,7 +14,7 @@ class Rule extends Model {
       dataset_name: this.attr(null),
       description: this.attr(""),
       author: this.attr(null),
-      create_at: this.attr(null),
+      created_at: this.attr(null),
       labels: this.attr([]),
       labelling_function: this.attr(null), // this is only for token classification
       is_saved_in_dataset: this.boolean(true),
