@@ -2,8 +2,6 @@
 
 set -e
 
-whoami
-
 echo "Starting Elasticsearch"
 elasticsearch 1>/dev/null 2>/dev/null &
 
@@ -20,8 +18,7 @@ python3.9 -m argilla.tasks.users.create \
   --password "$ADMIN_PASSWORD" \
   --api-key "$ADMIN_API_KEY" \
   --role admin \
-  --workspace "$ARGILLA_WORKSPACE" \
-  || true
+  --workspace "$ARGILLA_WORKSPACE"
 
 echo "Creating annotator user"
 python3.9 -m argilla.tasks.users.create \
@@ -29,8 +26,7 @@ python3.9 -m argilla.tasks.users.create \
   --username "$ANNOTATOR_USERNAME" \
   --password "$ANNOTATOR_PASSWORD" \
   --role annotator \
-  --workspace "$ARGILLA_WORKSPACE" \
-  || true
+  --workspace "$ARGILLA_WORKSPACE"
 
 # Load data
 python3.9 /load_data.py "$ADMIN_API_KEY" "$LOAD_DATASETS" &
