@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
-from argilla.server.errors import EntityNotFoundError
+from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import WorkspacePolicy, WorkspaceUserPolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import (
@@ -51,6 +51,9 @@ def create_workspace(
     current_user: User = Security(auth.get_current_user),
 ):
     authorize(current_user, WorkspacePolicy.create)
+
+    if accounts.get_workspace_by_name(db, workspace_create.name):
+        raise EntityAlreadyExistsError(name=workspace_create.name, type=Workspace)
 
     workspace = accounts.create_workspace(db, workspace_create)
 
@@ -105,6 +108,9 @@ def create_workspace_user(
     user = accounts.get_user_by_id(db, user_id)
     if not user:
         raise EntityNotFoundError(name=str(user_id), type=User)
+
+    if accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id):
+        raise EntityAlreadyExistsError(name=str(user_id), type=User)
 
     workspace_user = accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace_id, user_id=user_id))
 
