@@ -21,7 +21,7 @@ An Argilla user is defined by the following fields:
 
 A workspace is a "space" inside your Argilla instance where authorized users can collaborate. It is accessible through the UI and the Python client.
 
-You can assign users to workspaces when you create a new user, or by using the proper API endpoint. "Admin" users can access to ALL defined workspaces
+You can assign users to workspaces when you create a new user, or by using the proper API endpoint. "Admin" users have access to ALL defined workspaces.
 
 
 ### Python client
@@ -99,13 +99,20 @@ Usage: python -m argilla.tasks.users.create [OPTIONS]
 Options:
   --first-name TEXT
   --last-name TEXT
-  --username TEXT           A lowercase string without spaces allowing
-                            letters, numbers, dashes and underscores.
-  --role [admin|annotator]  A role for the user.  [default:
-                            UserRole.annotator]
-  --password TEXT           A password with a minimum length of 8 characters.
+  --username TEXT           Username as a lowercase string without spaces
+                            allowing letters, numbers, dashes and underscores.
+
+  --role [admin|annotator]  Role for the user.  [default: annotator]
+  --password TEXT           Password as a string with a minimum length of 8
+                            characters.
+
+  --api-key TEXT            API key as a string with a minimum length of 8
+                            characters. If not specified a secure random API
+                            key will be generated
+
   --workspace TEXT          A workspace that the user will be a member of (can
                             be used multiple times).
+
   --help                    Show this message and exit.
 ```
 
@@ -222,7 +229,7 @@ users = http.get("/api/users").json()
 #  'updated_at': '2023-03-16T11:17:35.462774'}]
 ````
 
-## Delete an user
+## Delete a user
 
 ```python
 http.delete("/api/users/75190fff-d4b9-4625-b7d3-4cfe3c659054").json()
@@ -238,9 +245,9 @@ http.delete("/api/users/75190fff-d4b9-4625-b7d3-4cfe3c659054").json()
 ```
 
 
-## HOWTO migrate users from the `users.yaml` file
+## Migrate users from the `users.yaml` file
 
-Given the following users yaml file
+The migration tasks can create users and workspaces automatically from a yaml file with the following format: 
 ````yaml
 - username: john
   full_name: John Doe
@@ -265,14 +272,10 @@ Given the following users yaml file
   workspaces: [argilla, team, latam]
   disabled: False
 
-````
 
-The migration tasks will create users and workspaces properly.
+The user role will be computed depending on how workspaces are setup for each user. If no `workspace` attribute is defined, the user will be considered an `admin`. Otherwise, the assigned user role will be `annotator`. 
 
-The user role will be computed depending
-on how workspaces are setup for each user. If no `workspace` attribute is defined, user will be
-considered as an `admin`. Otherwise, the assigned user role will be `annotator`. Also, and for each user
-too, one extra workspace with the same name as the username will be created.
+The task will also create an extra workspace for each user named after their username.
 
 
 ```bash
