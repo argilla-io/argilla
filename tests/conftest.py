@@ -25,6 +25,7 @@ from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 from starlette.testclient import TestClient
 
+from .factories import AnnotatorFactory
 from .helpers import SecuredClient
 
 
@@ -59,7 +60,13 @@ def admin(db):
     db.add(user)
     db.commit()
     db.refresh(user)
+
     return user
+
+
+@pytest.fixture(scope="function")
+def annotator(db):
+    return AnnotatorFactory.create(first_name="Annotator", username="annotator", api_key="annotator.apikey")
 
 
 @pytest.fixture
