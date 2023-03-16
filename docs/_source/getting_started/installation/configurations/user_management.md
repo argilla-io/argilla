@@ -21,7 +21,6 @@ An Argilla user is defined by the following fields:
 
 A workspace is a "space" inside your Argilla instance where authorized users can collaborate. It is accessible through the UI and the Python client.
 
-
 You can assign users to workspaces when you create a new user, or by using the proper API endpoint. "Admin" users can access to ALL defined workspaces
 
 
@@ -50,7 +49,12 @@ By default, if the Argilla instance has no users, the following default admin us
 
 For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
 ```bash
-python -m argilla.tasks.users.create_default --password newpassword --api-key new-api-key
+&>python -m argilla.tasks.users.create_default --password newpassword --api-key new-api-key
+User with default credentials succesfully created:
+• username: 'argilla'
+• password: 'newpassword'
+• api_key:  'new-api-key'
+```
 
 :::{note}
 To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`.
@@ -65,7 +69,12 @@ The above user management model is configured using the Argilla tasks, which ser
 First of all, you need to make sure that database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed.
 
 ```bash
-python -m argilla.tasks.database.migrate
+&>python -m argilla.tasks.database.migrate
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 74694870197c, create users table
+INFO  [alembic.runtime.migration] Running upgrade 74694870197c -> 82a5a88a3fa5, create workspaces table
+INFO  [alembic.runtime.migration] Running upgrade 82a5a88a3fa5 -> 1769ee58fbb4, create workspaces_users table
 ```
 
 :::{note}
@@ -74,15 +83,53 @@ It is important to launch this task prior to any other database action.
 
 
 ### Creating an admin user
+**CLI:**
 ```bash
 python -m argilla.tasks.users.create --role admin --first-name Hulio --last-name Ramos --username hurra --password abcde123
+```
 
---> Add also python code snippet
+**Python:**
+```python
+auth_headers = {"X-Argilla-API-Key": "argilla.apikey"}
+http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
+
+response = http.post("/api/users", json={"role": "admin", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"})
+repsonse.json()
+>>> {"id": "3ccc8776-8d91-4a72-90e6-e587b91b4cb9", "role: "admin", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"}
 ```
 
 ### Creating an annotator user
+**CLI:**
 ```bash
 python -m argilla.tasks.users.create --role annotator --first-name Hulio --last-name Ramos --username hurra --password abcde123
+```
+
+**Python:**
+```python
+auth_headers = {"X-Argilla-API-Key": "argilla.apikey"}
+http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
+
+response = http.post("/api/users", json={"role": "annotator", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"})
+repsonse.json()
+>>> {"id": "69a0d5d1-c6eb-4f4e-9685-cfa20da7de5f", "role": "annotator", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"}
+```
+
+### Delete an user
+```python
+auth_headers = {"X-Argilla-API-Key": "argilla.apikey"}
+http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
+
+# Getting users
+users = http.get("/api/users").json()
+>>> [
+>>>   {"id": "69a0d5d1-c6eb-4f4e-9685-cfa20da7de5f", "role": "annotator", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"}, 
+>>>   {"id": "3ccc8776-8d91-4a72-90e6-e587b91b4cb9", "role: "admin", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"}
+>>> ]
+
+response = http.delete(f"/api/users/69a0d5d1-c6eb-4f4e-9685-cfa20da7de5f")
+repsonse.json()
+>>> {"id": "69a0d5d1-c6eb-4f4e-9685-cfa20da7de5f", "role": "annotator", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"}
+
 ```
 
 ### HOWTO Create a new workspace an assign it to an existing annotator
@@ -99,7 +146,7 @@ http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 ```python
 workspace = http.post("/api/workspaces", json={"name": "new-workspace"}).json()
 workspace
-#  >>> { "id": "cc88ec50-f61d-4646-809e-7a03c8835df5", "name": "new-workspace"}
+>>> { "id": "cc88ec50-f61d-4646-809e-7a03c8835df5", "name": "new-workspace"}
 ```
 
 #### 3. Assign users to new workspace
