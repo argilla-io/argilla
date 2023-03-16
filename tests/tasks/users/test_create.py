@@ -18,7 +18,7 @@ from argilla.tasks.users.create import create
 from click.testing import CliRunner
 from sqlalchemy.orm import Session
 
-from tests.factories import WorkspaceFactory
+from tests.factories import UserFactory, WorkspaceFactory
 
 
 def test_create(db: Session):
@@ -172,3 +172,11 @@ def test_create_with_invalid_workspaces(db: Session):
     assert result.exit_code == 1
     assert db.query(User).count() == 0
     assert db.query(Workspace).count() == 0
+
+
+def test_create_with_existing_username(db: Session):
+    UserFactory.create(username="username")
+
+    result = CliRunner().invoke(create, "--first-name first-name --username username --role admin --password 12345678")
+    assert result.exit_code == 0
+    assert "username" in result.output
