@@ -14,16 +14,21 @@
 
 import os
 
-import pytest
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
-from argilla.tasks.users.migrate import UsersMigrator
-from pydantic import ValidationError
+from argilla.server.security.auth_provider.local.settings import settings
+from argilla.tasks.users.migrate import migrate
+from click.testing import CliRunner
 from sqlalchemy.orm import Session
 
 
-def test_users_migrator(db: Session):
-    UsersMigrator(os.path.join(os.path.dirname(__file__), "test_user_files", "users.yml")).migrate()
+def test_migrate(monkeypatch, db: Session):
+    monkeypatch.setattr(
+        settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users.yml")
+    )
 
+    result = CliRunner().invoke(migrate)
+
+    assert result.exit_code == 0
     assert db.query(User).count() == 5
     assert db.query(Workspace).count() == 9
     assert db.query(WorkspaceUser).count() == 11
@@ -69,9 +74,14 @@ def test_users_migrator(db: Session):
     assert [ws.name for ws in user.workspaces] == ["sanchez"]
 
 
-def test_users_migrator_with_one_user_file(db: Session):
-    UsersMigrator(os.path.join(os.path.dirname(__file__), "test_user_files", "users_one.yml")).migrate()
+def test_migrate_with_one_user_file(monkeypatch, db: Session):
+    monkeypatch.setattr(
+        settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users_one.yml")
+    )
 
+    result = CliRunner().invoke(migrate)
+
+    assert result.exit_code == 0
     assert db.query(User).count() == 1
     assert db.query(Workspace).count() == 3
     assert db.query(WorkspaceUser).count() == 3
@@ -85,30 +95,40 @@ def test_users_migrator_with_one_user_file(db: Session):
     assert [ws.name for ws in user.workspaces] == ["john", "argilla", "team"]
 
 
-def test_users_migrator_with_invalid_user(db: Session):
-    with pytest.raises(ValidationError):
-        UsersMigrator(os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_user.yml")).migrate()
+def test_migrate_with_invalid_user(monkeypatch, db: Session):
+    monkeypatch.setattr(
+        settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_user.yml")
+    )
 
+    result = CliRunner().invoke(migrate)
+
+    assert result.exit_code == 1
     assert db.query(User).count() == 0
     assert db.query(Workspace).count() == 0
     assert db.query(WorkspaceUser).count() == 0
 
 
-def test_users_migrator_with_invalid_workspace(db: Session):
-    with pytest.raises(ValidationError):
-        UsersMigrator(
-            os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_workspace.yml")
-        ).migrate()
+def test_migrate_with_invalid_workspace(monkeypatch, db: Session):
+    monkeypatch.setattr(
+        settings,
+        "users_db_file",
+        os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_workspace.yml"),
+    )
 
+    result = CliRunner().invoke(migrate)
+
+    assert result.exit_code == 1
     assert db.query(User).count() == 0
     assert db.query(Workspace).count() == 0
     assert db.query(WorkspaceUser).count() == 0
 
 
-def test_users_migrator_with_nonexistent_file(db: Session):
-    with pytest.raises(FileNotFoundError):
-        UsersMigrator("nonexistent.yml").migrate()
+def test_migrate_with_nonexistent_file(monkeypatch, db: Session):
+    monkeypatch.setattr(settings, "users_db_file", "nonexistent.yml")
 
+    result = CliRunner().invoke(migrate)
+
+    assert result.exit_code == 1
     assert db.query(User).count() == 0
     assert db.query(Workspace).count() == 0
     assert db.query(WorkspaceUser).count() == 0
