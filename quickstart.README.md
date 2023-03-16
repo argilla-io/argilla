@@ -23,7 +23,7 @@
 
 
 > 🆕 🔥 Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces (
-> login:`argilla`, password:`11223344`)
+> login:`argilla`, password:`12345678`)
 
 > 🆕 🔥 Since `1.2.0` Argilla supports vector search for finding the most similar records to a given one. This feature
 > uses vector or semantic search combined with more traditional search (keyword and filter based). Learn more on
@@ -113,18 +113,18 @@ This will run the latest quickstart docker image with 2 users `argilla` and `tea
 
 ### Environment Variables
 
-- `ADMIN_USERNAME`: The admin username to login in Argilla. The default admin username is `admin`. By setting up
+- `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
   a custom username you can use your own username to login into the app.
 - `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key
-  i.e. `team.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
+  i.e. `admin.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
   variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
 - `ADMIN_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default
-  password is `11223344`. By setting up a custom password you can use your own password to login into the app.
+  password is `12345678`. By setting up a custom password you can use your own password to login into the app.
 - `ANNOTATOR_USERNAME`: The annotator username to login in Argilla. The default annotator username is `argilla`. By setting up
   a custom username you can use your own username to login into the app.
 - `ANNOTATOR_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password
-  is `11223344`. By setting up a custom password you can use your own password to login into the app.
+  is `12345678`. By setting up a custom password you can use your own password to login into the app.
 - `LOAD_DATASETS`: This variables will allow you to load sample datasets. The default value will be `full`. The
   supported values for this variable is as follows:
     1. `single`: Load single datasets for TextClassification task.
