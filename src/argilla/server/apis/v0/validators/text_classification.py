@@ -12,25 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional, Set, Type
+from typing import List, Optional, Set
 
 from fastapi import Depends
 
 from argilla.server.apis.v0.models.dataset_settings import TextClassificationSettings
-from argilla.server.commons.models import TaskType
 from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.models import User
 from argilla.server.schemas.datasets import Dataset
-from argilla.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
-from argilla.server.services.tasks.text_classification.metrics import DatasetLabels
-
-__svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(
-    f"{TaskType.text_classification}_DatasetSettings",
-    (ServiceBaseDatasetSettings, TextClassificationSettings),
-    {},
-)
-
+from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.metrics import MetricsService
+from argilla.server.services.tasks.text_classification.metrics import DatasetLabels
 from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationRecord,
 )
@@ -80,7 +72,7 @@ class DatasetValidator:
     ):
         try:
             settings: TextClassificationSettings = await self.__datasets__.get_settings(
-                user=user, dataset=dataset, class_type=__svc_settings_class__
+                user=user, dataset=dataset, class_type=TextClassificationSettings
             )
             if settings and settings.label_schema:
                 label_schema = set([label.name for label in settings.label_schema.labels])

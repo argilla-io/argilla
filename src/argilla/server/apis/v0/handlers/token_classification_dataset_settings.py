@@ -26,13 +26,7 @@ from argilla.server.apis.v0.validators.token_classification import DatasetValida
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
 from argilla.server.security import auth
-from argilla.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
-
-__svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(
-    f"{TaskType.token_classification}_DatasetSettings",
-    (ServiceBaseDatasetSettings, TokenClassificationSettings),
-    {},
-)
+from argilla.server.services.datasets import DatasetsService
 
 
 def configure_router(router: APIRouter):
@@ -63,8 +57,10 @@ def configure_router(router: APIRouter):
             task=task,
         )
 
-        settings = await datasets.get_settings(user=current_user, dataset=found_ds, class_type=__svc_settings_class__)
-        return TokenClassificationSettings.parse_obj(settings)
+        settings = await datasets.get_settings(
+            user=current_user, dataset=found_ds, class_type=TokenClassificationSettings
+        )
+        return settings
 
     @deprecate_endpoint(
         path=base_endpoint,
@@ -90,13 +86,16 @@ def configure_router(router: APIRouter):
             task=task,
             workspace=ws_params.workspace,
         )
+
         await validator.validate_dataset_settings(user=current_user, dataset=found_ds, settings=request)
+
         settings = await datasets.save_settings(
             user=current_user,
             dataset=found_ds,
-            settings=__svc_settings_class__.parse_obj(request.dict()),
+            settings=TokenClassificationSettings.parse_obj(request.dict()),
         )
-        return TokenClassificationSettings.parse_obj(settings)
+
+        return settings
 
     @deprecate_endpoint(
         path=base_endpoint,

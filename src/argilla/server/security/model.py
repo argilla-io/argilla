@@ -62,7 +62,7 @@ class UserCreate(BaseModel):
 class UserGetter(GetterDict):
     def get(self, key: str, default: Any = None) -> Any:
         if key == "full_name":
-            return f"{self._obj.first_name} {self._obj.last_name}"
+            return f"{self._obj.first_name} {self._obj.last_name}" if self._obj.last_name else self._obj.first_name
         elif key == "workspaces":
             return [workspace.name for workspace in self._obj.workspaces]
         else:
