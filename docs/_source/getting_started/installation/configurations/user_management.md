@@ -122,7 +122,7 @@ http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 # Getting users
 users = http.get("/api/users").json()
 >>> [
->>>   {"id": "69a0d5d1-c6eb-4f4e-9685-cfa20da7de5f", "role": "annotator", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"}, 
+>>>   {"id": "69a0d5d1-c6eb-4f4e-9685-cfa20da7de5f", "role": "annotator", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"},
 >>>   {"id": "3ccc8776-8d91-4a72-90e6-e587b91b4cb9", "role: "admin", "first_name": "Hulio", "last_name": "Ramos", "username": "Hulio", "password": "abcde123"}
 >>> ]
 
