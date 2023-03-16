@@ -53,7 +53,7 @@ For security reasons, we recommend changing at least the password and the API ke
 python -m argilla.tasks.users.create_default --password newpassword --api-key new-api-key
 
 :::{note}
-To connect to an old Argilla server using client `>=1.3.0`, you should specify the default user API key `rubrix.apikey`.
+To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`.
 Otherwise, connections will fail with an Unauthorized server error.
 :::
 
