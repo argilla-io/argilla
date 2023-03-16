@@ -56,8 +56,10 @@ export default {
     };
   },
   async fetch() {
-    await this.dataset.refreshRules();
-
+    // FIXME - fetch dataset seems obsolete and duplicate from fetchByName
+    // if (!this.rules) {
+    //   await this.dataset.refreshRules();
+    // }
     if (!this.hasMetrics) {
       await this.dataset.refreshRulesMetrics();
     }
@@ -110,9 +112,6 @@ export default {
     globalLabelsFromORM() {
       return getAllLabelsTextByDatasetId(this.dataset.id);
     },
-  },
-  mounted() {
-    console.log("rule def is rendered");
   },
   methods: {
     async updateCurrentRule({ query, labels }) {
