@@ -27,6 +27,11 @@
         :copy-button="copyButton"
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
+      <DatasetSettingsIcon
+        v-if="datasetId && datasetName"
+        :datasetId="datasetId"
+        @click-settings-icon="goToSettings()"
+      />
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
@@ -51,6 +56,10 @@
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Vector as VectorModel } from "@/models/Vector";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import {
+  isExistAnyLabelsNotSavedInBackByDatasetId,
+  getTotalLabelsInGlobalLabel,
+} from "@/models/globalLabel.queries";
 export default {
   data() {
     return {
@@ -89,13 +98,16 @@ export default {
   },
   computed: {
     dataset() {
-      //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
+      //TODO - when refactor of filter part from header, remove this computed/and get only what is necessary as props
       return this.datasetId && this.datasetTask
         ? getDatasetFromORM(this.datasetId, this.datasetTask, true)
         : null;
     },
     currentTaskHeader() {
       return this.datasetTask && `${this.datasetTask}Header`;
+    },
+    workspace() {
+      return this.$route.params.workspace;
     },
     viewSettings() {
       return DatasetViewSettings.query().whereId(this.datasetName).first();
@@ -113,6 +125,20 @@ export default {
         .where("dataset_id", this.datasetId.join("."))
         .where("is_active", true)
         .exists();
+    },
+    datasetSettingsPageUrl() {
+      if (this.datasetName) {
+        const { fullPath } = this.$route;
+        const datasetSettingsPageUrl = fullPath.replace("?", "/settings?");
+        return datasetSettingsPageUrl;
+      }
+      return null;
+    },
+    isNoLabelInGlobalLabelModel() {
+      return !getTotalLabelsInGlobalLabel(this.datasetId);
+    },
+    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
+      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
     },
   },
   mounted() {
@@ -155,6 +181,14 @@ export default {
     searchRecords(query) {
       this.$emit("on-search-or-on-filter-records", query);
     },
+    goToSettings() {
+      const currentRoute = this.$route.path;
+      const newRoute = `/datasets/${this.workspace}/${this.datasetName}/settings`;
+      const allowNavigate = currentRoute !== newRoute;
+      if (this.datasetName && allowNavigate) {
+        this.$router.push(newRoute);
+      }
+    },
   },
 };
 </script>
@@ -176,6 +210,19 @@ export default {
   }
   &:not(.sticky) {
     position: relative;
+  }
+}
+
+.button-settings {
+  margin-right: $base-space;
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @extend %has-tooltip--bottom;
+    &:before,
+    &:after {
+      margin-top: calc($base-space/2);
+    }
   }
 }
 </style>
