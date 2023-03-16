@@ -26,4 +26,6 @@ class Rule extends Model {
 
 const getRuleModelPrimaryKey = ({ query, owner, name }) => [query, owner, name];
 
-export { Rule, getRuleModelPrimaryKey };
+const formatDatasetIdForRuleModel = (dataset_id) => dataset_id.join(".");
+
+export { Rule, getRuleModelPrimaryKey, formatDatasetIdForRuleModel };
