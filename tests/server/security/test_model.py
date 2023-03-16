@@ -31,6 +31,18 @@ def test_user_create_invalid_username(invalid_username):
         UserCreate(first_name="first-name", username=invalid_username, password="12345678")
 
 
+def test_user_first_name(db: Session):
+    user = UserFactory.create(first_name="first-name")
+
+    assert User.from_orm(user).first_name == "first-name"
+
+
+def test_user_last_name(db: Session):
+    user = UserFactory.create(last_name="last-name")
+
+    assert User.from_orm(user).last_name == "last-name"
+
+
 def test_user_full_name(db: Session):
     user = UserFactory.create(first_name="first-name", last_name="last-name")
 
