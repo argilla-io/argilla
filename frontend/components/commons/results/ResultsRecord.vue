@@ -153,6 +153,7 @@ export default {
     formattedVectors() {
       const formattedVectors = this.vectors.map(
         ({ vector_name, dataset_id, record_id }) => {
+          console.log(vector_name, dataset_id, record_id);
           return {
             vectorId: getVectorModelPrimaryKey({
               vector_name,

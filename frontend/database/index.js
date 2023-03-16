@@ -28,6 +28,7 @@ import { TokenClassificationDataset } from "@/models/TokenClassification";
 import { GlobalLabel } from "@/models/GlobalLabel.model";
 import { Vector } from "@/models/Vector";
 import { RefRecord } from "@/models/RefRecord";
+import { Rule } from "@/models/rule-model/Rule.model";
 
 import info from "@/database/modules/info";
 import datasets from "@/database/modules/datasets";
@@ -51,5 +52,6 @@ database.register(TokenClassificationDataset, token_classification);
 database.register(GlobalLabel);
 database.register(Vector);
 database.register(RefRecord);
+database.register(Rule);
 
 export default database;
