@@ -23,8 +23,8 @@ from datasets import load_dataset
 
 
 class LoadDatasets:
-    def __init__(self, api_key, workspace="team"):
-        rg.init(api_key=api_key, workspace=workspace)
+    def __init__(self, api_key: str):
+        rg.init(api_key=api_key)
 
     @staticmethod
     def load_sst_sentiment_explainability():
