@@ -13,115 +13,211 @@
 #  limitations under the License.
 
 from argilla.server.contexts import accounts
-from argilla.server.models import User, UserRole
+from argilla.server.models import User, UserRole, Workspace
 from argilla.tasks.users.create import create
 from click.testing import CliRunner
 from sqlalchemy.orm import Session
 
+from tests.factories import UserFactory, WorkspaceFactory
 
-def test_create_passing_all_params(db: Session):
-    username = "test-user"
-    first_name = "First"
-    role = UserRole.admin
-    password = "12345678"
 
-    cli_params = f"--first-name {first_name} --username {username} --role {role} --password {password}"
-    CliRunner().invoke(create, cli_params)
+def test_create(db: Session):
+    result = CliRunner().invoke(
+        create,
+        "--first-name first-name --username username --role admin --password 12345678 --workspace workspace",
+    )
 
-    user = db.query(User).filter_by(username=username).first()
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 1
+
+    user = db.query(User).filter_by(username="username").first()
     assert user
-    assert user.first_name == first_name
-    assert user.role == role
-    assert accounts.verify_password(password, user.password_hash)
-
-
-def test_create_with_input_role(db: Session):
-    username = "test-user"
-    role = UserRole.admin
-
-    cli_params = f"--username {username} --password 12345678 --first-name First"
-    CliRunner().invoke(create, cli_params, input=f"{role}\n")
-
-    user = db.query(User).filter_by(username=username).first()
-    assert user
-    assert user.role == role
-
-
-def test_create_with_input_password(db: Session):
-    username = "test-user"
-    password = "12345678"
-
-    cli_params = f"--username {username} --role admin --first-name First"
-    CliRunner().invoke(create, cli_params, input=f"{password}\n{password}\n")
-
-    user = db.query(User).filter_by(username=username).first()
-    assert user
-    assert accounts.verify_password(password, user.password_hash)
+    assert user.first_name == "first-name"
+    assert user.username == "username"
+    assert user.role == UserRole.admin
+    assert accounts.verify_password("12345678", user.password_hash)
+    assert user.api_key
+    assert [ws.name for ws in user.workspaces] == ["workspace"]
 
 
 def test_create_with_default_role(db: Session):
-    username = "test-user"
-    password = "12345678"
+    result = CliRunner().invoke(
+        create,
+        "--first-name first-name --username username --password 12345678",
+        input="\n",
+    )
 
-    cli_params = f"--username {username} --password {password} --first-name First"
-    CliRunner().invoke(create, cli_params, input=f"\n")
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
 
-    user = db.query(User).filter_by(username=username).first()
+    user = db.query(User).filter_by(username="username").first()
     assert user
     assert user.role == UserRole.annotator
 
 
-def test_create_with_input_username(db: Session):
-    username = "test-user"
-    password = "12345678"
-
-    cli_params = f"--password {password} --first-name First"
-    CliRunner().invoke(create, cli_params, input=f"{username}\n")
-
-    assert db.query(User).filter_by(username=username).first()
-
-
-def test_create_with_last_name(db: Session):
-    username = "test-user"
-    password = "12345678"
-    last_name = "Last"
-
-    cli_params = f"--username {username} --password {password} --role admin --first-name First --last-name {last_name}"
-    CliRunner().invoke(create, cli_params)
-
-    user = db.query(User).filter_by(username=username).first()
-    assert user
-    assert user.last_name == last_name
-
-
-def test_create_with_invalid_username(db: Session):
-    username = "Invalid-Username"
-    password = "12345678"
-
-    runner = CliRunner()
-    cli_params = f"--username {username} --password {password} --role admin --first-name First"
-    result = runner.invoke(create, cli_params)
-
-    assert db.query(User).filter_by(username=username).first() is None
-    assert str(result.exception) == (
-        "1 validation error for UserCreate\n"
-        "username\n"
-        '  string does not match regex "^(?!-|_)[a-z0-9-_]+$" '
-        "(type=value_error.str.regex; pattern=^(?!-|_)[a-z0-9-_]+$)"
+def test_create_with_input_role(db: Session):
+    result = CliRunner().invoke(
+        create,
+        "--first-name first-name --username username --password 12345678",
+        input="admin\n",
     )
+
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
+
+    user = db.query(User).filter_by(username="username").first()
+    assert user
+    assert user.role == UserRole.admin
+
+
+def test_create_with_input_password(db: Session):
+    result = CliRunner().invoke(
+        create,
+        "--first-name first-name --username username --role admin",
+        input="12345678\n12345678\n",
+    )
+
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
+
+    user = db.query(User).filter_by(username="username").first()
+    assert user
+    assert accounts.verify_password("12345678", user.password_hash)
 
 
 def test_create_with_invalid_password(db: Session):
-    username = "username"
-    password = "11"
+    result = CliRunner().invoke(create, "--first-name first-name --username username --password 1234 --role admin")
 
-    cli_params = f"--username {username} --password {password} --role admin --first-name First"
-    result = CliRunner().invoke(create, cli_params)
+    assert result.exit_code == 1
+    assert db.query(User).count() == 0
+    assert db.query(Workspace).count() == 0
 
-    assert db.query(User).filter_by(username=username).first() is None
-    assert str(result.exception) == (
-        "1 validation error for UserCreate\n"
-        "password\n"
-        "  ensure this value has at least 8 characters "
-        "(type=value_error.any_str.min_length; limit_value=8)"
+
+def test_create_with_input_username(db: Session):
+    result = CliRunner().invoke(create, "--first-name first-name --password 12345678", input="username\n")
+
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
+
+    assert db.query(User).filter_by(username="username").first()
+
+
+def test_create_with_invalid_username(db: Session):
+    result = CliRunner().invoke(
+        create, "--first-name first-name --username Invalid-Username --password 12345678 --role admin"
     )
+
+    assert result.exit_code == 1
+    assert db.query(User).count() == 0
+    assert db.query(Workspace).count() == 0
+
+
+def test_create_with_existing_username(db: Session):
+    UserFactory.create(username="username")
+
+    result = CliRunner().invoke(create, "--first-name first-name --username username --role admin --password 12345678")
+
+    assert result.exit_code == 0
+    assert "username" in result.output
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
+
+
+def test_create_with_last_name(db: Session):
+    result = CliRunner().invoke(
+        create, "--first-name first-name --last-name last-name --username username --password 12345678 --role admin"
+    )
+
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
+
+    user = db.query(User).filter_by(username="username").first()
+    assert user
+    assert user.last_name == "last-name"
+
+
+def test_create_with_api_key(db: Session):
+    result = CliRunner().invoke(
+        create, "--first-name first-name --username username --role admin --password 12345678 --api-key abcdefgh"
+    )
+
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
+
+    user = db.query(User).filter_by(username="username").first()
+    assert user
+    assert user.api_key == "abcdefgh"
+
+
+def test_create_with_invalid_api_key(db: Session):
+    result = CliRunner().invoke(
+        create, "--first-name first-name --username username --role admin --password 12345678 --api-key abc"
+    )
+
+    assert result.exit_code == 1
+    assert db.query(User).count() == 0
+    assert db.query(Workspace).count() == 0
+
+
+def test_create_with_existing_api_key(db: Session):
+    UserFactory.create(api_key="abcdefgh")
+
+    result = CliRunner().invoke(
+        create, "--first-name first-name --username username --role admin --password 12345678 --api-key abcdefgh"
+    )
+
+    assert result.exit_code == 0
+    assert "abcdefgh" in result.output
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
+
+
+def test_create_with_multiple_workspaces(db: Session):
+    result = CliRunner().invoke(
+        create,
+        "--first-name first-name --username username --role admin --password 12345678 --workspace workspace-a --workspace workspace-b",
+    )
+
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 2
+
+    user = db.query(User).filter_by(username="username").first()
+    assert user
+    assert [ws.name for ws in user.workspaces] == ["workspace-a", "workspace-b"]
+
+
+def test_create_with_existent_workspaces(db: Session):
+    WorkspaceFactory.create(name="workspace-a")
+    WorkspaceFactory.create(name="workspace-b")
+
+    result = CliRunner().invoke(
+        create,
+        "--first-name first-name --username username --role admin --password 12345678 --workspace workspace-a --workspace workspace-b --workspace workspace-c",
+    )
+
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 3
+
+    user = db.query(User).filter_by(username="username").first()
+    assert user
+    assert [ws.name for ws in user.workspaces] == ["workspace-a", "workspace-b", "workspace-c"]
+
+
+def test_create_with_invalid_workspaces(db: Session):
+    result = CliRunner().invoke(
+        create,
+        "--first-name first-name --username username --role admin --password 12345678 --workspace workspace-a --workspace 'invalid workspace' --workspace workspace-c",
+    )
+
+    assert result.exit_code == 1
+    assert db.query(User).count() == 0
+    assert db.query(Workspace).count() == 0

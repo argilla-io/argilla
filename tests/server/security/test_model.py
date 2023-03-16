@@ -49,8 +49,9 @@ def test_user_full_name(db: Session):
     assert User.from_orm(user).full_name == "first-name last-name"
 
 
-def test_user_full_name_without_last_name(db: Session):
-    user = UserFactory.create(first_name="first-name", last_name=None)
+@pytest.mark.parametrize("last_name", [None, ""])
+def test_user_full_name_without_last_name(db: Session, last_name):
+    user = UserFactory.create(first_name="first-name", last_name=last_name)
 
     assert User.from_orm(user).full_name == "first-name"
 

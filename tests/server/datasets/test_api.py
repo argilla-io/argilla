@@ -262,6 +262,75 @@ def test_update_dataset(test_client: TestClient, argilla_user: User, argilla_aut
     assert ds.metadata["new"] == "value"
 
 
+def test_update_dataset_by_annotator(
+    test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str, annotator: User
+):
+    workspace_name = argilla_user.username
+
+    for workspace in argilla_user.workspaces:
+        if workspace.name == workspace_name:
+            WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=annotator.id)
+            break
+
+    create_mock_dataset(test_client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=workspace_name)
+
+    response = test_client.patch(
+        f"/api/datasets/{dataset_name}?workspace={workspace_name}",
+        json={"metadata": {"new": "metadata"}},
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+    )
+
+    assert response.status_code == 200
+
+
+def test_update_dataset_by_annotator_without_permissions(
+    test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str, annotator: User
+):
+    create_mock_dataset(
+        test_client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username
+    )
+
+    response = test_client.patch(
+        f"/api/datasets/{dataset_name}?workspace={argilla_user.username}",
+        json={"metadata": {"new": "metadata"}},
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+    )
+
+    assert response.status_code == 403
+
+
+def test_update_dataset_by_annotator_without_changes(
+    test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str, annotator: User
+):
+    for workspace in argilla_user.workspaces:
+        WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=annotator.id)
+
+    create_mock_dataset(
+        test_client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username
+    )
+
+    response = test_client.get(
+        f"/api/datasets/{dataset_name}?workspace={argilla_user.username}", headers=argilla_auth_header
+    )
+    assert response.status_code == 200
+
+    created_dataset = response.json()
+    created_dataset.pop("last_updated")
+
+    response = test_client.patch(
+        f"/api/datasets/{dataset_name}?workspace={argilla_user.username}",
+        json={},
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+    )
+
+    assert response.status_code == 200
+
+    updated_dataset = response.json()
+    updated_dataset.pop("last_updated")
+
+    assert updated_dataset == created_dataset
+
+
 def test_open_and_close_dataset(
     test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str
 ):

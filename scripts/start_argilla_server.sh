@@ -5,7 +5,7 @@ set -e
 python -m argilla.tasks.database.migrate
 
 # Create default user
-python -m argilla.tasks.users.create_default --quiet
+python -m argilla.tasks.users.create_default --password $ADMIN_PASSWORD --api-key $ADMIN_API_KEY
 
 # Run argilla-server (See https://www.uvicorn.org/settings/#settings)
 #
