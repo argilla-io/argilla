@@ -938,9 +938,6 @@ const actions = {
 };
 
 const fetchByNameForTextClassification = async (dataset) => {
-  //TODO - remove this function from this file  && put rules in dedicated ORM table
-  await fetchAllRulesAndInsertRulesInTextClassificationORM(dataset);
-
   await formatLabelsAndInitGlobalLabelsORM(dataset);
 
   await _updateAnnotationProgress({
@@ -1133,12 +1130,6 @@ const factoryAggregationLabelsForGlobalLabelsModel = (
       return { id: label, name: label };
     }) ?? []
   );
-};
-
-const fetchAllRulesAndInsertRulesInTextClassificationORM = async (dataset) => {
-  if (!dataset.labelingRules) {
-    await dataset.refreshRules();
-  }
 };
 
 const checkIfSomeNewLabelNotInGlobalLabels = (datasetId, newLabels) => {

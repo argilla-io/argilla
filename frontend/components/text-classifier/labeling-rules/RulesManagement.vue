@@ -82,11 +82,6 @@ export default {
       },
     };
   },
-  async fetch() {
-    if (!this.rules) {
-      await this.dataset.refreshRules();
-    }
-  },
   computed: {
     dataset() {
       return getDatasetFromORM(this.datasetId, this.datasetTask);
