@@ -37,9 +37,9 @@
 //    @include font-size(14px)
 //  }
 @mixin font-size($size) {
-  $units: 'px' !default;
+  $units: "px" !default;
   $units: unit($size);
-  @if ($units== '%') {
+  @if ($units== "%") {
     font-size: $size;
   } @else {
     @if unitless($size) {
@@ -48,6 +48,21 @@
     }
     font-size: $size;
     font-size: calculateRem($size);
+  }
+}
+
+@mixin line-height($size) {
+  $units: "px" !default;
+  $units: unit($size);
+  @if ($units== "%") {
+    line-height: $size;
+  } @else {
+    @if unitless($size) {
+      @warn "Assuming #{$size} to be in pixels";
+      $size: 1px * $size;
+    }
+    line-height: $size;
+    line-height: calculateRem($size);
   }
 }
 
@@ -83,7 +98,7 @@
   overflow: hidden;
   &::before {
     display: block;
-    content: '';
+    content: "";
     width: 100%;
     padding-top: ($height / $width) * 100%;
   } // > .#{element} {
@@ -108,7 +123,7 @@
   position: relative;
   &::before {
     display: block;
-    content: '';
+    content: "";
     width: 100%;
     padding-top: ($height / $width) * 100%;
   }
@@ -185,7 +200,7 @@
 @mixin style($fSize, $color: palette(black), $font: $ff) {
   // $units: "px" !default;
   $units: unit($fSize); // @debug $units;
-  @if $units== 'rem' {
+  @if $units== "rem" {
     font-size: $fSize;
   } @else {
     @if unitless($fSize) {
@@ -204,7 +219,7 @@
 /// @param {Color} $color [currentcolor] - Triangle color
 /// @param {Length} $size [1em] - Triangle size
 @mixin triangle($direction, $sizeH, $sizeV, $color) {
-  content: '';
+  content: "";
   display: block;
   width: 0;
   height: 0;
@@ -246,7 +261,7 @@
 // vertical align
 @mixin ghostVerticalAlign() {
   &:before {
-    content: '';
+    content: "";
     display: inline-block;
     vertical-align: middle;
     height: 100%;

@@ -48,7 +48,7 @@ $tooltip-border-radius: $border-radius-s;
     transform: translateX(50%);
   }
   &:before {
-    right: calc(50% - $tooltip-triangle-size/2);
+    right: calc(50% - $tooltip-triangle-size);
     top: 100%;
     @include triangle(
       top,

@@ -194,6 +194,7 @@
 import "assets/icons/trash-empty";
 import "assets/icons/refresh";
 import "assets/icons/copy";
+import "assets/icons/settings";
 import "assets/icons/link";
 import "assets/icons/sort";
 export default {
@@ -506,7 +507,7 @@ export default {
     right: 2em;
     &__button {
       position: relative;
-      margin-left: 2em;
+      margin-left: 1em;
       padding: 0 !important;
       display: inline-block;
       .svg-icon {
