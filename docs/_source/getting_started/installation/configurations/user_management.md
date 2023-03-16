@@ -11,19 +11,18 @@ Let's first describe Argilla's user management model:
 An Argilla user is defined by the following fields:
 
 - `username`: The username used as login for Argilla's Webapp.
-- `first_name`: The user's first name
-- `last_name` (optional): The user's last name
-- `role`: The user's role in Argilla. Available roles are: "admin" and "annotator". Only "admin" users can create and delete workspaces and datasets
-- `workspaces` : The workspaces where the user has read and write access (both from the Webapp and the Python client). If this field is not defined the user will be a super-user and have access to all datasets in the instance. If this field is set to an empty list `[]` the user will only have access to her user workspace. Read more about workspaces and users below.
+- `first_name`: The user's first name.
+- `last_name` (optional): The user's last name.
+- `role`: The user's role in Argilla. Available roles are: "admin" and "annotator". Only "admin" users can create and delete workspaces and datasets, and change the dataset settings, like the labeling schema.
+- `workspaces`: The workspaces where the user has read and write access (both from the UI and the Python client). Read more about workspaces and users below.
 - `api_key`: The API key to interact with Argilla API, mainly through the Python client but also via HTTP for advanced users. It is automatically generated when a user is created.
 
 ### `Workspace`
 
-A workspace is a "space" inside your Argilla instance where authorized users can collaborate. It is accessible through the UI and the Python client:
+A workspace is a "space" inside your Argilla instance where authorized users can collaborate. It is accessible through the UI and the Python client.
 
-- `Workspace`: Where one or several users have read/write access.
 
-A user is given access to a workspace by including the name of the workspace in the list of workspaces defined by the `workspaces` field. **Users with no defined workspaces field are super-users** and have access and right to all datasets.
+You can assign users to workspaces when you create a new user, or by using the proper API endpoint. "Admin" users can access to ALL defined workspaces
 
 
 ### Python client
@@ -49,15 +48,9 @@ By default, if the Argilla instance has no users, the following default admin us
 - password: `1234`
 - api_key: `argilla.apikey`
 
-For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command or with the equivalent Python code:
-
---> TBD
-the default user as follows:
-
+For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
 ```bash
 python -m argilla.tasks.users.create_default --password newpassword --api-key new-api-key
-```
-
 
 :::{note}
 To connect to an old Argilla server using client `>=1.3.0`, you should specify the default user API key `rubrix.apikey`.
@@ -89,7 +82,7 @@ python -m argilla.tasks.users.create --role admin --first-name Hulio --last-name
 
 ### Creating an annotator user
 ```bash
-python -m argilla.tasks.users.create --role annotator
+python -m argilla.tasks.users.create --role annotator --first-name Hulio --last-name Ramos --username hurra --password abcde123
 ```
 
 ### HOWTO Create a new workspace an assign it to an existing annotator
@@ -106,9 +99,10 @@ http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 ```python
 workspace = http.post("/api/workspaces", json={"name": "new-workspace"}).json()
 workspace
+#  >>> { "id": "cc88ec50-f61d-4646-809e-7a03c8835df5", "name": "new-workspace"}
 ```
 
-#### 3. Select which annotators will be linked to then new workspace and link them by using their ids
+#### 3. Assign users to new workspace
 ```python
 users = http.get("/api/users").json()
 workspace_id = workspace["id"]
