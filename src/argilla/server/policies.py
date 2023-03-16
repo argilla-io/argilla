@@ -104,6 +104,20 @@ class DatasetPolicy:
         return lambda actor: actor.is_admin or is_get_allowed(actor) and cls.create(actor)
 
 
+class DatasetSettingsPolicy:
+    @classmethod
+    def list(cls, dataset: Dataset) -> PolicyAction:
+        return DatasetPolicy.get(dataset)
+
+    @classmethod
+    def save(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.is_admin
+
+    @classmethod
+    def delete(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.is_admin
+
+
 def authorize(actor: User, policy_action: PolicyAction) -> None:
     if not is_authorized(actor, policy_action):
         raise ForbiddenOperationError()
