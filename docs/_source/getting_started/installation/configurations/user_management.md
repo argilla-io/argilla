@@ -346,18 +346,39 @@ http.get("/api/workspaces").json()
 ````
 
 
-### Migrate users with docker-compose
+### Migrate users with Docker Compose
 
-Make sure you create the yaml file above in the same folder as your `docker-compose.yaml`. You can download the `docker-compose` from this [URL](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml):
+Make sure you create the YAML file above in the same folder as your `docker-compose.yaml`. You can download the `docker-compose.yaml` file from this [URL](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml):
 
-Then open the provided ``docker-compose.yaml`` and configure your Argilla instance as follows:
+Then open the provided `docker-compose.yaml` file and modify your Argilla instance as follows:
 
-{{ dockercomposeuseryaml }}
+```diff
+  argilla:
+    image: argilla/argilla-server:latest
+    restart: unless-stopped
+    ports:
+      - "6900:6900"
+    environment:
+      ARGILLA_HOME_PATH: /var/lib/argilla
+      ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
++     ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /var/lib/argilla-migrate/users.yaml
+    networks:
+      - argilla
+    volumes:
+      - argilladata:/var/lib/argilla
++     - ${PWD}/users.yaml:/var/lib/argilla-migrate/users.yaml
+```
 
-Then, you can run the migrate tasks as follows:
+After that change you can start the containers with:
 
 ```bash
-docker-compose exec argilla python -m argilla.tasks.users.migrate
+docker compose up
+```
+
+And after running the containers you can run the task to migrate the users as follows:
+
+```bash
+docker compose exec argilla python -m argilla.tasks.users.migrate
 ```
 
 If everything went well, the configured users can now log in, their annotations will be tracked with their usernames, and they'll have access to the defined workspaces.
