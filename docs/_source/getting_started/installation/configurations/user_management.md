@@ -70,6 +70,9 @@ First of all, you need to make sure that database tables and models are up-to-da
 
 ```bash
 python -m argilla.tasks.database.migrate
+```
+```bash
+# Output
 INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
 INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.runtime.migration] Running upgrade  -> 74694870197c, create users table
@@ -86,6 +89,9 @@ It is important to launch this task prior to any other database action.
 
 ```bash
 python -m argilla.tasks.users.create --help
+```
+```bash
+# Output
 Usage: python -m argilla.tasks.users.create [OPTIONS]
 
   Creates a new user in the Argilla database with provided parameters
@@ -108,7 +114,9 @@ Options:
 **CLI:**
 ```bash
 python -m argilla.tasks.users.create --role admin --first-name Hulio --last-name Ramos --username hurra --password abcde123
-
+```
+```bash
+# Output
 User succesfully created:
 • first_name: 'Hulio'
 • last_name: 'Ramos'
@@ -139,6 +147,9 @@ repsonse.json()
 **CLI:**
 ```bash
 python -m argilla.tasks.users.create --role annotator --first-name Nick --last-name Name --username nick --password 11223344 --workspace ws
+```
+```bash
+# Output
 User successfully created:
 • first_name: 'Nick'
 • last_name: 'Name'
@@ -189,7 +200,7 @@ http.post(f"/api/workspaces/{workspace['id']}/users/user['id]")
 # 'updated_at': '2023-03-16T11:17:35.462774'}
 ```
 
-### List Argilla users
+## Listing Argilla users
 
 ````python
 users = http.get("/api/users").json()
@@ -211,7 +222,7 @@ users = http.get("/api/users").json()
 #  'updated_at': '2023-03-16T11:17:35.462774'}]
 ````
 
-### Delete an user
+## Delete an user
 
 ```python
 http.delete("/api/users/75190fff-d4b9-4625-b7d3-4cfe3c659054").json()
@@ -227,7 +238,7 @@ http.delete("/api/users/75190fff-d4b9-4625-b7d3-4cfe3c659054").json()
 ```
 
 
-### HOWTO migrate users from the `users.yaml` file
+## HOWTO migrate users from the `users.yaml` file
 
 Given the following users yaml file
 ````yaml
@@ -267,12 +278,16 @@ too, one extra workspace with the same name as the username will be created.
 ```bash
 export ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yml
 python -m argilla.tasks.users.migrate
+```
+```bash
+# Output
 Starting users migration process using file '.users.yml'
 Migrating User with username 'john'
 Migrating User with username 'tanya'
 Migrating User with username 'daisy'
 Users migration process successfully finished
 ```
+
 ````python
 
 http.get("/api/users").json()
@@ -330,7 +345,7 @@ http.get("/api/workspaces").json()
 ````
 
 
-#### Migrate users with docker-compose
+### Migrate users with docker-compose
 
 Make sure you create the yaml file above in the same folder as your `docker-compose.yaml`. You can download the `docker-compose` from this [URL](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml):
 
