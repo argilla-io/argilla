@@ -102,6 +102,8 @@
 
 <script>
 import "assets/icons/sort";
+import { isAnyRuleByDatasetId } from "@/models/rule-model/rule.queries";
+
 export default {
   props: {
     dataset: {
@@ -185,10 +187,19 @@ export default {
     isMultiLabel() {
       return this.dataset.isMultiLabel;
     },
+    datasetName() {
+      return this.dataset?.name;
+    },
+    datasetWorkspace() {
+      return this.dataset?.workspace;
+    },
+    isDatasetContainsRules() {
+      const { datasetName, datasetWorkspace } = this;
+      return isAnyRuleByDatasetId({ datasetName, datasetWorkspace });
+    },
     showUncoveredByRulesFilter() {
       return (
-        this.dataset.rules &&
-        this.dataset.rules.length &&
+        this.isDatasetContainsRules &&
         this.dataset.task === "TextClassification"
       );
     },
