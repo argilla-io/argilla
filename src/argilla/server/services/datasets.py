@@ -120,9 +120,6 @@ class DatasetsService:
         tags: Dict[str, str],
         metadata: Dict[str, Any],
     ) -> Dataset:
-        if not (tags or metadata):
-            return dataset
-
         found = self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.workspace)
 
         if not is_authorized(user, DatasetPolicy.update(found)):

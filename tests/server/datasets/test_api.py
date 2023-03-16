@@ -315,6 +315,7 @@ def test_update_dataset_by_annotator_without_changes(
     assert response.status_code == 200
 
     created_dataset = response.json()
+    created_dataset.pop("last_updated")
 
     response = test_client.patch(
         f"/api/datasets/{dataset_name}?workspace={argilla_user.username}",
@@ -323,7 +324,11 @@ def test_update_dataset_by_annotator_without_changes(
     )
 
     assert response.status_code == 200
-    assert response.json() == created_dataset
+
+    updated_dataset = response.json()
+    updated_dataset.pop("last_updated")
+
+    assert updated_dataset == created_dataset
 
 
 def test_open_and_close_dataset(
