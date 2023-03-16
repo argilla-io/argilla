@@ -247,7 +247,7 @@ http.delete("/api/users/75190fff-d4b9-4625-b7d3-4cfe3c659054").json()
 
 ## Migrate users from the `users.yaml` file
 
-The migration tasks can create users and workspaces automatically from a yaml file with the following format: 
+The migration tasks can create users and workspaces automatically from a yaml file with the following format:
 ````yaml
 - username: john
   full_name: John Doe
@@ -273,7 +273,7 @@ The migration tasks can create users and workspaces automatically from a yaml fi
   disabled: False
 
 
-The user role will be computed depending on how workspaces are setup for each user. If no `workspace` attribute is defined, the user will be considered an `admin`. Otherwise, the assigned user role will be `annotator`. 
+The user role will be computed depending on how workspaces are setup for each user. If no `workspace` attribute is defined, the user will be considered an `admin`. Otherwise, the assigned user role will be `annotator`.
 
 The task will also create an extra workspace for each user named after their username.
 
