@@ -55,13 +55,6 @@
           <ul>
             <li v-for="item in filteredResults" :key="String(item.id)">
               <div class="table-info__item">
-                <base-checkbox
-                  v-if="globalActions"
-                  v-model="item.selectedRecord"
-                  class="list__item__checkbox"
-                  :value="item.name"
-                  @change="onCheckboxChanged($event, item.id)"
-                />
                 <span
                   v-for="(column, idx) in columns"
                   :key="idx"
@@ -358,26 +351,6 @@ export default {
         const rec = r;
         rec.selectedRecord = value;
       });
-      this.selectedItems = this.filteredResults.filter(
-        (f) => f.selectedRecord === true
-      );
-    },
-    onCheckboxChanged(value, id) {
-      this.filteredResults.forEach((r) => {
-        if (r.id === id) {
-          const rec = r;
-          rec.selectedRecord = value;
-        }
-      });
-      if (
-        this.filteredResults.some(
-          (f) => f.selectedRecord === false || undefined
-        )
-      ) {
-        this.allRecordsSelected = false;
-      } else {
-        this.allRecordsSelected = true;
-      }
       this.selectedItems = this.filteredResults.filter(
         (f) => f.selectedRecord === true
       );
