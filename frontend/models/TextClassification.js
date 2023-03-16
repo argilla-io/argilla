@@ -15,7 +15,15 @@
  * limitations under the License.
  */
 
-import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
+import {
+  ObservationDataset,
+  USER_DATA_METADATA_KEY,
+  getDatasetModelPrimaryKey,
+} from "./Dataset";
+import {
+  upsertRulesInRuleModel,
+  deleteAllRuleModel,
+} from "./rule-model/rule.queries";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 import _ from "lodash";
 
@@ -180,6 +188,7 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   async _fetchAllRules() {
+    console.log("fetchAllRules");
     const { response } = await TextClassificationDataset.api().get(
       `/datasets/${this.task}/${this.name}/labeling/rules`
     );
@@ -299,6 +308,12 @@ class TextClassificationDataset extends ObservationDataset {
 
   async refreshRules() {
     const rules = await this._fetchAllRules();
+
+    const isRulesAnArray = Array.isArray(rules);
+
+    if (isRulesAnArray) {
+      await initRuleModel(rules, this);
+    }
     await TextClassificationDataset.insertOrUpdate({
       data: {
         workspace: this.workspace,
@@ -478,6 +493,33 @@ ObservationDataset.registerTaskDataset(
   "TextClassification",
   TextClassificationDataset
 );
+
+const initRuleModel = async (rules, { workspace, name }) => {
+  deleteAllRuleModel();
+  console.log(rules);
+  const formattedRules = rulesFactoryForRuleModel(rules, {
+    workspace,
+    name,
+  });
+
+  await upsertRulesInRuleModel(formattedRules);
+};
+
+const rulesFactoryForRuleModel = (rules, { workspace, name }) => {
+  const datasetId = getDatasetModelPrimaryKey({ workspace, name }).join(".");
+
+  const formattedRules = rules.map((rule) => {
+    return {
+      dataset_id: datasetId,
+      dataset_workspace: workspace,
+      dataset_name: name,
+      is_saved_in_dataset: true,
+      ...rule,
+    };
+  });
+
+  return formattedRules;
+};
 
 export {
   TextClassificationDataset,

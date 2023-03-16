@@ -78,7 +78,9 @@ class ObservationDataset extends Model {
       // relationships
       // This will be normalized in a future PR using also workspace for relational ids
       viewSettings: this.hasOne(DatasetViewSettings, "id", "name"),
-      rules: this.hasMany(Rule, "dataset_id"),
+      // TODO - when rules attribute will remove from dataset model, 
+      //  refactore the name "global_rules" by "rules" 
+      global_rules: this.hasMany(Rule, "dataset_id"),
     };
   }
 }

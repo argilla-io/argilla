@@ -56,9 +56,8 @@ export default {
     };
   },
   async fetch() {
-    if (!this.rules) {
-      await this.dataset.refreshRules();
-    }
+    await this.dataset.refreshRules();
+
     if (!this.hasMetrics) {
       await this.dataset.refreshRulesMetrics();
     }
@@ -111,6 +110,9 @@ export default {
     globalLabelsFromORM() {
       return getAllLabelsTextByDatasetId(this.dataset.id);
     },
+  },
+  mounted() {
+    console.log("rule def is rendered");
   },
   methods: {
     async updateCurrentRule({ query, labels }) {
