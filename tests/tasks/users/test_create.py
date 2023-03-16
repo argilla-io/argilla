@@ -37,6 +37,7 @@ def test_create(db: Session):
     assert user.username == "username"
     assert user.role == UserRole.admin
     assert accounts.verify_password("12345678", user.password_hash)
+    assert user.api_key
     assert [ws.name for ws in user.workspaces] == ["workspace"]
 
 
@@ -116,6 +117,17 @@ def test_create_with_invalid_username(db: Session):
     assert db.query(Workspace).count() == 0
 
 
+def test_create_with_existing_username(db: Session):
+    UserFactory.create(username="username")
+
+    result = CliRunner().invoke(create, "--first-name first-name --username username --role admin --password 12345678")
+
+    assert result.exit_code == 0
+    assert "username" in result.output
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
+
+
 def test_create_with_last_name(db: Session):
     result = CliRunner().invoke(
         create, "--first-name first-name --last-name last-name --username username --password 12345678 --role admin"
@@ -128,6 +140,43 @@ def test_create_with_last_name(db: Session):
     user = db.query(User).filter_by(username="username").first()
     assert user
     assert user.last_name == "last-name"
+
+
+def test_create_with_api_key(db: Session):
+    result = CliRunner().invoke(
+        create, "--first-name first-name --username username --role admin --password 12345678 --api-key abcdefgh"
+    )
+
+    assert result.exit_code == 0
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
+
+    user = db.query(User).filter_by(username="username").first()
+    assert user
+    assert user.api_key == "abcdefgh"
+
+
+def test_create_with_invalid_api_key(db: Session):
+    result = CliRunner().invoke(
+        create, "--first-name first-name --username username --role admin --password 12345678 --api-key abc"
+    )
+
+    assert result.exit_code == 1
+    assert db.query(User).count() == 0
+    assert db.query(Workspace).count() == 0
+
+
+def test_create_with_existing_api_key(db: Session):
+    UserFactory.create(api_key="abcdefgh")
+
+    result = CliRunner().invoke(
+        create, "--first-name first-name --username username --role admin --password 12345678 --api-key abcdefgh"
+    )
+
+    assert result.exit_code == 0
+    assert "abcdefgh" in result.output
+    assert db.query(User).count() == 1
+    assert db.query(Workspace).count() == 0
 
 
 def test_create_with_multiple_workspaces(db: Session):
@@ -172,11 +221,3 @@ def test_create_with_invalid_workspaces(db: Session):
     assert result.exit_code == 1
     assert db.query(User).count() == 0
     assert db.query(Workspace).count() == 0
-
-
-def test_create_with_existing_username(db: Session):
-    UserFactory.create(username="username")
-
-    result = CliRunner().invoke(create, "--first-name first-name --username username --role admin --password 12345678")
-    assert result.exit_code == 0
-    assert "username" in result.output
