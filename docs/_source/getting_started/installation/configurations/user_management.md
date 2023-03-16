@@ -23,7 +23,7 @@ A workspace is a "space" inside your Argilla instance where authorized users can
 
 You can assign users to workspaces when you create a new user, or by using the proper API endpoint. "Admin" users have access to ALL defined workspaces.
 
-
+The Python client gives developers the ability to log, load, and copy datasets from and to different workspaces.
 ### Python client
 
 The Python client gives developers the ability to log, load, and copy datasets from and to different workspace. Check out the [Python Reference](../reference/python/python_client.rst) for the parameter and methods related to workspaces.
