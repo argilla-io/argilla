@@ -18,12 +18,12 @@
 <template>
   <sidebar-progress :dataset="dataset">
     <ul v-if="annotationsProgress" class="metrics__list">
-      <li v-for="(counter, label) in getInfo" :key="label">
+      <li v-for="(counter, label) in annotations" :key="label">
         <template v-if="counter > 0">
           <entity-label
             :label="label"
             :color="`color_${
-              entities.filter((e) => e.text === label)[0].colorId %
+              labels.filter((e) => e.text === label)[0].color_id %
               $entitiesMaxColors
             }`"
           />
@@ -38,24 +38,33 @@
 
 <script>
 import { AnnotationProgress } from "@/models/AnnotationProgress";
+import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
+
 export default {
   props: {
     dataset: {
       type: Object,
       required: true,
     },
+    datasetId: {
+      type: Array,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
-    getInfo() {
+    annotationsProgress() {
+      return AnnotationProgress.find(this.datasetName);
+    },
+    annotations() {
       return this.annotationsProgress.annotatedAs;
     },
-    annotationsProgress() {
-      return AnnotationProgress.find(this.dataset.name);
-    },
-    entities() {
-      return this.dataset.entities;
+    labels() {
+      return getAllLabelsByDatasetId(this.datasetId);
     },
   },
 };
 </script>
-<style lang="scss" scoped></style>

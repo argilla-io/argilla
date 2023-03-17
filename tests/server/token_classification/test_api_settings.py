@@ -11,8 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import argilla as rg
+import pytest
+from argilla.client.sdk.commons.errors import ForbiddenApiError
+from argilla.server.apis.v0.models.dataset_settings import TextClassificationSettings
 from argilla.server.commons.models import TaskType
 
 

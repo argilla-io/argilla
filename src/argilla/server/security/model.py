@@ -62,7 +62,7 @@ class UserCreate(BaseModel):
 class UserGetter(GetterDict):
     def get(self, key: str, default: Any = None) -> Any:
         if key == "full_name":
-            return f"{self._obj.first_name} {self._obj.last_name}"
+            return f"{self._obj.first_name} {self._obj.last_name}" if self._obj.last_name else self._obj.first_name
         elif key == "workspaces":
             return [workspace.name for workspace in self._obj.workspaces]
         else:
@@ -73,14 +73,14 @@ class User(BaseModel):
     """Base user model"""
 
     id: UUID
+    first_name: str
+    last_name: Optional[str]
+    full_name: Optional[str] = Field(description="Deprecated. Use `first_name` and `last_name` instead")
     username: str = Field()
     role: UserRole
-    full_name: Optional[str] = None
-
     superuser: Optional[bool]
     workspaces: Optional[List[str]]
     api_key: str
-
     inserted_at: datetime
     updated_at: datetime
 

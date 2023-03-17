@@ -83,6 +83,15 @@ def test_create_workspace_as_annotator(client: TestClient, db: Session):
     assert db.query(Workspace).count() == 0
 
 
+def test_create_workspace_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
+    WorkspaceFactory.create(name="workspace")
+
+    response = client.post("/api/workspaces", headers=admin_auth_header, json={"name": "workspace"})
+
+    assert response.status_code == 409
+    assert db.query(Workspace).count() == 1
+
+
 def test_create_workspace_with_invalid_min_length_name(client: TestClient, db: Session, admin_auth_header: dict):
     response = client.post("/api/workspaces", headers=admin_auth_header, json={"name": ""})
 
@@ -203,6 +212,18 @@ def test_create_workspace_user_with_nonexistent_user_id(client: TestClient, db: 
 
     assert response.status_code == 404
     assert db.query(WorkspaceUser).count() == 0
+
+
+def test_create_workspace_user_with_existent_workspace_id_and_user_id(
+    client: TestClient, db: Session, admin: User, admin_auth_header: dict
+):
+    workspace = WorkspaceFactory.create()
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=admin.id)
+
+    response = client.post(f"/api/workspaces/{workspace.id}/users/{admin.id}", headers=admin_auth_header)
+
+    assert response.status_code == 409
+    assert db.query(WorkspaceUser).count() == 1
 
 
 def test_delete_workspace_user(client: TestClient, db: Session, admin_auth_header: dict):

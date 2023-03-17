@@ -15,6 +15,7 @@
 from typing import List, Optional
 
 import click
+from pydantic import constr
 from sqlalchemy.orm import Session
 
 from argilla.server.contexts import accounts
@@ -26,8 +27,11 @@ from argilla.server.security.model import (
     WorkspaceCreate,
 )
 
+USER_API_KEY_MIN_LENGTH = 8
 
-class UserCreateWithWorkspaces(UserCreate):
+
+class UserCreateForTask(UserCreate):
+    api_key: Optional[constr(min_length=USER_API_KEY_MIN_LENGTH)]
     workspaces: Optional[List[WorkspaceCreate]]
 
 
@@ -41,7 +45,7 @@ def _get_or_new_workspace(session: Session, workspace_name: str):
 @click.option(
     "--username",
     prompt=True,
-    help="A lowercase string without spaces allowing letters, numbers, dashes and underscores.",
+    help="Username as a lowercase string without spaces allowing letters, numbers, dashes and underscores.",
 )
 @click.option(
     "--role",
@@ -49,12 +53,16 @@ def _get_or_new_workspace(session: Session, workspace_name: str):
     type=click.Choice(UserRole.__members__, case_sensitive=False),
     default=UserRole.annotator,
     show_default=True,
-    help="A role for the user.",
+    help="Role for the user.",
 )
 @click.password_option(
     "--password",
     prompt=f"Password (min. {USER_PASSWORD_MIN_LENGTH} characters)",
-    help=f"A password with a minimum length of {USER_PASSWORD_MIN_LENGTH} characters.",
+    help=f"Password as a string with a minimum length of {USER_PASSWORD_MIN_LENGTH} characters.",
+)
+@click.option(
+    "--api-key",
+    help=f"API key as a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters. If not specified a secure random API key will be generated",
 )
 @click.option(
     "--workspace", multiple=True, help="A workspace that the user will be a member of (can be used multiple times)."
@@ -65,20 +73,26 @@ def create(
     role: UserRole,
     password: str,
     last_name: Optional[str],
+    api_key: Optional[str],
     workspace: Optional[List[str]],
 ):
     """Creates a new user in the Argilla database with provided parameters"""
     with SessionLocal() as session:
         if accounts.get_user_by_username(session, username):
-            click.echo(f"User {username!r} already exists in database. Skipping...")
+            click.echo(f"User with username {username!r} already exists in database. Skipping...")
             return
 
-        user_create = UserCreateWithWorkspaces(
+        if accounts.get_user_by_api_key(session, api_key):
+            click.echo(f"User with api_key {api_key!r} already exists in database. Skipping...")
+            return
+
+        user_create = UserCreateForTask(
             first_name=first_name,
             last_name=last_name,
             username=username,
             role=role,
             password=password,
+            api_key=api_key,
             workspaces=[WorkspaceCreate(name=workspace_name) for workspace_name in workspace],
         )
 
@@ -88,6 +102,7 @@ def create(
             username=user_create.username,
             role=user_create.role,
             password_hash=accounts.hash_password(user_create.password),
+            api_key=user_create.api_key,
             workspaces=[_get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
         )
 

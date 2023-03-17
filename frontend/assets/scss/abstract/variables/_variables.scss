@@ -63,6 +63,9 @@ $palettes: (
   green: (
     base: #60a018,
   ),
+  red: (
+    base: #cf3832,
+  ),
 );
 
 // Colours
@@ -90,6 +93,7 @@ $black-4: rgba(0, 0, 0, 0.04);
 // States
 //-----------
 $error: palette(pink);
+$danger: palette(red);
 $warning: palette(apricot, dark);
 $success: palette(green);
 $info: palette(grey, 600);

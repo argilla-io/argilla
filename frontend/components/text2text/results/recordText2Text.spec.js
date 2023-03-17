@@ -4,7 +4,7 @@ import RecordText2TextComponent from "./RecordText2Text";
 let wrapper = null;
 
 const options = {
-  stubs: ["text-2-text-list", "record-string-text-2-text", "Text2TextList"],
+  stubs: ["record-string-text-2-text", "Text2TextList"],
   propsData: {
     datasetId: ["workspace", "name"],
     datasetName: "name",

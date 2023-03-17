@@ -11,7 +11,7 @@
               'suggestion',
               activeEntity === -1 ? 'active' : null,
             ]"
-            :color="`color_${suggestedEntity.colorId % $entitiesMaxColors}`"
+            :color="`color_${suggestedEntity.color_id % $entitiesMaxColors}`"
           />
         </li>
         <li
@@ -26,7 +26,7 @@
               'suggestion',
               activeEntity === -1 ? 'active' : null,
             ]"
-            :color="`color_${lastSelectedEntity.colorId % $entitiesMaxColors}`"
+            :color="`color_${lastSelectedEntity.color_id % $entitiesMaxColors}`"
           />
         </li>
         <li
@@ -38,12 +38,12 @@
         >
           <entity-label
             :label="entity.text"
-            :shortcut="activeEntity === index ? 'enter' : entity.shortCut"
+            :shortcut="activeEntity === index ? 'enter' : entity.shortcut"
             :class="[
               'entities__selector__option',
               activeEntity === index ? 'active' : null,
             ]"
-            :color="`color_${entity.colorId % $entitiesMaxColors}`"
+            :color="`color_${entity.color_id % $entitiesMaxColors}`"
           />
         </li>
       </ul>
@@ -156,7 +156,7 @@ export default {
               element[0].offsetTop - element[0].offsetHeight - 8;
           }
         } else {
-          const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
+          const entity = this.formattedEntities.find((t) => t.shortcut === cmd);
           if (entity) {
             this.selectEntity(entity);
           }

@@ -24,7 +24,7 @@ from argilla.server import models
 from argilla.server.commons import telemetry
 from argilla.server.contexts import accounts
 from argilla.server.database import get_db
-from argilla.server.errors import EntityNotFoundError
+from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import UserPolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import User, UserCreate
@@ -88,6 +88,9 @@ def create_user(
     current_user: models.User = Security(auth.get_current_user),
 ):
     authorize(current_user, UserPolicy.create)
+
+    if accounts.get_user_by_username(db, user_create.username):
+        raise EntityAlreadyExistsError(name=user_create.username, type=User)
 
     user = accounts.create_user(db, user_create)
 

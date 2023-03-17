@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { ObservationDataset } from "@/models/Dataset";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
 
 async function _updateLastSelectedEntity({ id, lastSelectedEntity }) {
@@ -28,12 +27,6 @@ async function _updateLastSelectedEntity({ id, lastSelectedEntity }) {
 const getters = {};
 
 const actions = {
-  async setEntities(_, { dataset, entities }) {
-    return await ObservationDataset.dispatch("setUserData", {
-      dataset,
-      data: { entities },
-    });
-  },
   async updateLastSelectedEntity(_, { dataset, lastSelectedEntity }) {
     await _updateLastSelectedEntity({
       id: dataset.id,
