@@ -275,8 +275,8 @@ export default {
     display: flex;
     justify-content: flex-start;
     img {
-      max-width: 20em;
       max-height: 20em;
+      margin-bottom: 1em;
     }
   }
   &--left {
