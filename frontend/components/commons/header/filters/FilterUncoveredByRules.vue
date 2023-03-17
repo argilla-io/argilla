@@ -23,7 +23,6 @@ export default {
   },
   methods: {
     async changeUncoveredByRules() {
-      const rulesId = this.dataset.rules.map((r) => r.query);
       this.$emit("apply", this.filter, !this.filter.selected ? rulesId : []);
     },
   },
