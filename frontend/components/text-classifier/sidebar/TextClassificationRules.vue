@@ -67,8 +67,8 @@
     <div class="metrics__info">
       <p class="metrics__info__name">Total rules</p>
       <transition name="fade" mode="out-in" appear
-        ><span :key="dataset.rules.length" class="metrics__info__counter">{{
-          dataset.rules.length
+        ><span :key="rules.length" class="metrics__info__counter">{{
+          rules.length
         }}</span></transition
       >
     </div>
@@ -89,6 +89,8 @@
 </template>
 
 <script>
+import { getAllRulesByDatasetId } from "@/models/rule-model/rule.queries";
+
 export default {
   // TODO clean and typify
   props: {
@@ -96,9 +98,6 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  data: () => {
-    return {};
   },
   computed: {
     tooltip() {
@@ -111,6 +110,12 @@ export default {
           "Number of labels the rule predicted correctly/incorrectly with respect to the annotations",
       };
     },
+    isRulesInDataset() {
+      return isAnyRuleByDatasetId(this.dataset.id);
+    },
+    rules() {
+      return getAllRulesByDatasetId(this.dataset.id);
+    },
     ruleMetrics() {
       return this.dataset.getCurrentLabelingRuleMetrics() || {};
     },
@@ -118,8 +123,7 @@ export default {
       return this.dataset.labelingRulesOveralMetrics || {};
     },
     labels() {
-      const labelsInRules =
-        this.dataset.rules.flatMap((rule) => rule.labels) || [];
+      const labelsInRules = this.rules.flatMap((rule) => rule.labels) || [];
       const availableLabels = this.dataset.labels.map((label) => {
         return {
           label: label,
