@@ -762,3 +762,33 @@ def test_load_sort(mocked_client):
     ds = api.load(name=dataset, ids=["1str", "2str", "11str"])
     df = ds.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]
+
+
+@pytest.mark.parametrize(
+    ("records", "required_fields"),
+    [
+        ([rg.TextClassificationRecord(text="test text")], ("inputs",)),
+        ([rg.TokenClassificationRecord(text="test text", tokens="test text".split())], ("text", "tokens")),
+        ([rg.Text2TextRecord(text="test text")], ("text",)),
+    ],
+)
+def test_load_projection(api: Argilla, records, required_fields):
+    dataset = "test_load_sort"
+
+    for record in records:
+        record.metadata = {"a": "one value", "other": "other value"}
+
+    api.delete(dataset)
+    api.log(records, name=dataset)
+
+    ds = api.load(name=dataset, fields=["metadata.a"])
+    assert len(ds) > 0
+
+    for record in ds:
+        data = record.dict()
+
+        assert "a" in record.metadata and "other" not in record.metadata
+        assert record.id is not None
+
+        for field in required_fields:
+            assert data[field]
