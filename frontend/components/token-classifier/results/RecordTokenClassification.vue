@@ -308,7 +308,7 @@ export default {
   .record--image-area {
     margin-bottom: 1em;
     img {
-      max-height: 20em;
+      min-height: 20em;
     }
   }
 }

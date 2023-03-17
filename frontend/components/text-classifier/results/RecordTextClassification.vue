@@ -276,7 +276,7 @@ export default {
     justify-content: flex-start;
     margin-bottom: 1em;
     img {
-      max-height: 20em;
+      min-height: 20em;
     }
   }
   &--left {
