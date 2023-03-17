@@ -372,13 +372,13 @@ Then open the provided `docker-compose.yaml` file and modify your Argilla instan
 After that change you can start the containers with:
 
 ```bash
-docker compose up
+docker-compose up
 ```
 
 And after running the containers you can run the task to migrate the users as follows:
 
 ```bash
-docker compose exec argilla python -m argilla.tasks.users.migrate
+docker-compose exec argilla python -m argilla.tasks.users.migrate
 ```
 
 If everything went well, the configured users can now log in, their annotations will be tracked with their usernames, and they'll have access to the defined workspaces.
