@@ -18,6 +18,9 @@
 <template>
   <div class="record" v-if="record">
     <div class="record--left">
+      <div class="record--image-area" v-if="isRecordContainsImage">
+        <img :src="metadata._image_url" alt="image of the record" />
+      </div>
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="interactionsEnabled"
@@ -92,6 +95,12 @@ export default {
     },
   },
   computed: {
+    metadata() {
+      return this.record?.metadata ?? {};
+    },
+    isRecordContainsImage() {
+      return "_image_url" in this.metadata;
+    },
     listOfTexts() {
       return getAllLabelsTextByDatasetId(this.datasetId);
     },
@@ -262,6 +271,14 @@ export default {
 <style scoped lang="scss">
 .record {
   display: flex;
+  &--image-area {
+    display: flex;
+    justify-content: flex-start;
+    img {
+      max-width: 20em;
+      max-height: 20em;
+    }
+  }
   &--left {
     width: 100%;
     padding: $base-space * 4 20px 20px 20px;
