@@ -102,7 +102,7 @@
 
 <script>
 import "assets/icons/sort";
-import { isAnyRuleByDatasetId } from "@/models/rule-model/rule.queries";
+import { isAnyRuleByDatasetNameAndWorkspace } from "@/models/rule-model/rule.queries";
 
 export default {
   props: {
@@ -195,7 +195,7 @@ export default {
     },
     isDatasetContainsRules() {
       const { datasetName, datasetWorkspace } = this;
-      return isAnyRuleByDatasetId({ datasetName, datasetWorkspace });
+      return isAnyRuleByDatasetNameAndWorkspace({ datasetName, datasetWorkspace });
     },
     showUncoveredByRulesFilter() {
       return (
