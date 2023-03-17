@@ -100,9 +100,9 @@ export default {
     hasMetrics() {
       return this.overalMetrics && this.rulesMetrics;
     },
-    rules() {
-      return this.dataset.labelingRules;
-    },
+    // rules() {
+    //   return this.dataset.labelingRules;
+    // },
     overalMetrics() {
       return this.dataset.labelingRulesOveralMetrics;
     },
