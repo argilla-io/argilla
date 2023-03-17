@@ -636,13 +636,21 @@ class Argilla:
         task = dataset.task
 
         task_config = {
-            TaskType.text_classification: (SdkTextClassificationRecord, DatasetForTextClassification),
-            TaskType.token_classification: (SdkTokenClassificationRecord, DatasetForTokenClassification),
-            TaskType.text2text: (SdkText2TextRecord, DatasetForText2Text),
+            TaskType.text_classification: (
+                SdkTextClassificationRecord,
+                DatasetForTextClassification,
+                {"id", "inputs", "multi_label"},
+            ),
+            TaskType.token_classification: (
+                SdkTokenClassificationRecord,
+                DatasetForTokenClassification,
+                {"id", "text", "tokens"},
+            ),
+            TaskType.text2text: (SdkText2TextRecord, DatasetForText2Text, {"id", "text"}),
         }
 
         try:
-            sdk_record_class, dataset_class = task_config[task]
+            sdk_record_class, dataset_class, required_fields = task_config[task]
         except KeyError:
             raise ValueError(
                 f"Load method not supported for the '{task}' task. Supported Tasks: "
@@ -665,12 +673,11 @@ class Argilla:
 
             return dataset_class(results.records)
 
-        if fields:
-            fields.extend(["id", "text", "tokens", "inputs"])
+        fields_set = required_fields.union(set(fields)) if fields else set("*")
 
         records = self.datasets.scan(
             name=name,
-            projection=set(fields or "*"),
+            projection=fields_set,
             limit=limit,
             sort=sort,
             id_from=id_from,
