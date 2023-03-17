@@ -18,6 +18,9 @@
 <template>
   <div class="record">
     <div class="content">
+      <div class="record--image-area" v-if="isRecordContainsImage">
+        <img :src="metadata._image_url" alt="image of the record" />
+      </div>
       <div class="origins">
         <text-spans-static
           v-if="record.prediction"
@@ -102,6 +105,12 @@ export default {
     };
   },
   computed: {
+    metadata() {
+      return this.record?.metadata ?? {};
+    },
+    isRecordContainsImage() {
+      return "_image_url" in this.metadata;
+    },
     interactionsEnabled() {
       return this.annotationEnabled && !this.isReferenceRecord;
     },
@@ -295,6 +304,12 @@ export default {
   white-space: pre-line;
   &__input {
     padding-right: 200px;
+  }
+  .record--image-area {
+    margin-bottom: 1em;
+    img {
+      max-height: 20em;
+    }
   }
 }
 
