@@ -274,9 +274,9 @@ export default {
   &--image-area {
     display: flex;
     justify-content: flex-start;
+    margin-bottom: 1em;
     img {
       max-height: 20em;
-      margin-bottom: 1em;
     }
   }
   &--left {
