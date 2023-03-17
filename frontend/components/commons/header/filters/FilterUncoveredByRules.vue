@@ -10,6 +10,8 @@
 
 <script>
 import { TextClassificationDataset } from "@/models/TextClassification";
+import { getQueryRuleArrayByDatasetNameAndWorkspace } from "@/models/rule-model/rule.queries";
+
 export default {
   props: {
     dataset: {
@@ -21,9 +23,28 @@ export default {
       required: true,
     },
   },
+  computed: {
+    datasetName() {
+      return this.dataset.name;
+    },
+    datasetWorkspace() {
+      return this.dataset.workspace;
+    },
+    queriesFromRules() {
+      const { datasetName, datasetWorkspace } = this;
+      return getQueryRuleArrayByDatasetNameAndWorkspace({
+        datasetName,
+        datasetWorkspace,
+      });
+    },
+  },
   methods: {
     async changeUncoveredByRules() {
-      this.$emit("apply", this.filter, !this.filter.selected ? rulesId : []);
+      this.$emit(
+        "apply",
+        this.filter,
+        !this.filter.selected ? this.queriesFromRules : []
+      );
     },
   },
 };
