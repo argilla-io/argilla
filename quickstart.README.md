@@ -109,7 +109,7 @@ To get started you just need to run the docker image with following command:
 ```
 
 This will run the latest quickstart docker image with 2 users `argilla` and `team`. The password for these users is
-`1234` . You can also configure these [environment variables](#environment-variables) as per you needs.
+`12345678`. You can also configure these [environment variables](#environment-variables) as per you needs.
 
 ### Environment Variables
 

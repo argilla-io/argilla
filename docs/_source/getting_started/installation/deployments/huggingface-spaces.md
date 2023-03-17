@@ -30,7 +30,7 @@ You'll see the `Building` status and once it becomes `Running` your space is rea
 
 
 :::{tip}
-You'll see the login screen where you need to use either argilla or team with the default passwords (1234). Remember you can change the passwords using secret variables. If you get a 500 error when introducing the credentials, make sure you have correctly introduce the password.
+You'll see the login screen where you need to use either admin or argilla with the default passwords (12345678). Remember you can change the passwords using secret environment variables. If you get a 500 error when introducing the credentials, make sure you have correctly introduce the password.
 :::
 
 <div class="flex justify-center">
@@ -133,23 +133,28 @@ The Space template provides a way to set up different **optional settings** focu
 
 To set up these secrets, you can go to the Settings tab on your created Space. Make sure to save these values somewhere for later use.
 
-The template space has two users: `team` and `argilla`. The username `team` corresponds to the root user, who can upload datasets and access any workspace within your Argilla Space. The username `argilla` is a normal user with access to the `team` workspace and its own workspace called `argilla`.
+The template space has two users: `admin` and `argilla`. The username `admin` corresponds to the root user, who can upload datasets and access any workspace within your Argilla Space. The username `argilla` is a normal user with access to the `argilla` workspace.
 
 Currently, these user names can't be configured. The passwords and API keys to upload, read, update, and delete datasets can be configured using the following secrets:
 
-- `ARGILLA_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model predictions, etc.). If you don't set this variable, the library and your app will use the default API key. If you want to secure your Space for reading and writing data, we recommend you to set up this variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
-
-- `ARGILLA_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password is `1234`. By setting up a custom password you can use your own password to login into the app.
-
-- `TEAM_API_KEY`: This sets the root user's API key. The API key you choose can be any string of your choice and you can check an online generator if you like.
-
-- `TEAM_PASSWORD`: This sets a custom password for login into the app with the `team` username. The default password is `1234`. By setting up a custom password you can use your own password to login into the app.
+- `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
+  a custom username you can use your own username to login into the app.
+- `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
+  predictions, etc.). If you don't set this variable, the library and your app will use the default API key
+  i.e. `admin.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
+  variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
+- `ADMIN_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default
+  password is `12345678`. By setting up a custom password you can use your own password to login into the app.
+- `ANNOTATOR_USERNAME`: The annotator username to login in Argilla. The default annotator username is `argilla`. By setting up
+  a custom username you can use your own username to login into the app.
+- `ANNOTATOR_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password
+  is `12345678`. By setting up a custom password you can use your own password to login into the app.
 
 The combination of these secret variables gives you the following setup options:
 
-1. *I want to avoid that anyone without the API keys can add, delete, or update datasets using the Python client*: You need to setup `ARGILLA_API_KEY` and `TEAM_API_KEY`.
-2. *Additionally, I want to avoid that the `argilla` username can delete datasets from the UI*: You need to setup `TEAM_PASSWORD` and use `TEAM_API_KEY` with the Python Client. This option might be interesting if you want to control dataset management but want anyone to browse your datasets using the `argilla` user.
-3. *Additionally, I want to avoid that anyone without password can browse my datasets with the `argilla` user*: You need to setup `ARGILLA_PASSWORD`. In this case, you can use `ARGILLA_API_KEY` and/or `TEAM_API_KEY` with the Python Client depending on your needs for dataset deletion rights.
+1. *I want to avoid that anyone without the API keys can add, delete, or update datasets using the Python client*: You need to setup `ADMIN_PASSWORD` and `ADMIN_API_KEY`.
+2. *Additionally, I want to avoid that the `argilla` username can delete datasets from the UI*: You need to setup `ANNOTATOR_PASSWORD` and use the `argilla` generated API key with the Python Client (check your Space logs). This option might be interesting if you want to control dataset management but want anyone to browse your datasets using the `argilla` user.
+3. *Additionally, I want to avoid that anyone without password can browse my datasets with the `argilla` user*: You need to setup `ANNOTATOR_PASSWORD`. In this case, you can use the `argilla` generated API key and/or `ADMIN_API_KEY` values with the Python Client depending on your needs for dataset deletion rights.
 
 Additionally, the `LOAD_DATASETS` will let you configure the sample datasets that will be pre-loaded. The default value is `single` and the supported values for this variable are:
     1. `single`: Load single datasets for TextClassification task.
