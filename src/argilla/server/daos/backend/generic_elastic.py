@@ -51,6 +51,8 @@ from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.errors.task_errors import MetadataLimitExceededError
 from argilla.server.settings import settings
 
+NON_SEARCHABLE_PREFIX = "_"
+
 
 def dataset_records_index(dataset_id: str) -> str:
     index_mame_template = settings.dataset_records_index_name
@@ -329,7 +331,7 @@ class GenericElasticEngineBackend(LoggingMixin):
 
         index_mappings = {}
         for field, value in metadata_values.items():
-            if field.startswith("_"):  # "hidden" field won't be searchable, used just to put some info there.
+            if field.startswith(NON_SEARCHABLE_PREFIX):
                 index_mappings[f"metadata.{field}"] = mappings.non_searchable_text_field()
             elif detect_nested_type(value):
                 index_mappings[f"metadata.{field}"] = mappings.nested_field()
