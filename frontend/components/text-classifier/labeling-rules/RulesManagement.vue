@@ -46,6 +46,7 @@
 import "assets/icons/unavailable";
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { getAllRulesByDatasetId } from "@/models/rule-model/rule.queries";
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 
 export default {
@@ -142,7 +143,7 @@ export default {
       ];
     },
     rules() {
-      return this.dataset.labelingRules;
+      return getAllRulesByDatasetId(this.datasetId);
     },
     perRuleMetrics() {
       return this.dataset.labelingRulesMetrics;
