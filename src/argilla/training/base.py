@@ -133,8 +133,7 @@ class ArgillaBaseTrainer(object):
 
         Args:
           text (Union[List[str], str]): The text to be classified.
-          as_argilla_records (bool): If True, the output will be a list of ArgillaRecord objects. If
-        True, the output will be a list of Argilla records. Defaults to True.
+          as_argilla_records (bool): If True, the output will be a list of Argilla records instead of dictionaries. Defaults to True.
 
         Returns:
           A list of predictions or argilla records.
