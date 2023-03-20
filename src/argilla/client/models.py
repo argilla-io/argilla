@@ -238,7 +238,9 @@ class TextClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
-    projection: Optional[bool] = None  # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
+    projection: Optional[bool] = None  Field(
+        default=None, exclude=True
+    )  # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
 
     @root_validator
     def _check_text_and_inputs(cls, values):
@@ -552,7 +554,9 @@ class Text2TextRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
-    projection: Optional[bool] = None  # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
+    projection: Optional[bool] = None  Field(
+        default=None, exclude=True
+    )  # TODO: remove after https://github.com/argilla-io/argilla/issues/2535
 
     @validator("prediction")
     def prediction_as_tuples(cls, prediction: Optional[List[Union[str, Tuple[str, float]]]]):
