@@ -101,7 +101,7 @@ class DatasetsDAO:
             id=dataset.id,
             document=self._dataset_to_es_doc(dataset),
         )
-        self._es.create_dataset(
+        self._es.create_dataset_index(
             id=dataset.id,
             task=dataset.task,
             force_recreate=True,
@@ -205,7 +205,7 @@ class DatasetsDAO:
         if not settings.vectors:
             return
         vectors_cfg = {k: v.dim if isinstance(v, EmbeddingsConfig) else int(v) for k, v in settings.vectors.items()}
-        self._es.create_dataset(
+        self._es.create_dataset_index(
             id=dataset.id,
             task=dataset.task,
             vectors_cfg=vectors_cfg,

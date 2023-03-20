@@ -96,12 +96,12 @@ class DatasetRecordsDAO:
         vectors_configuration = {}
         for record in records:
             metadata_values.update(record.metadata or {})
+
             db_record = record_class.parse_obj(record)
             db_record.last_updated = now
-            record_dict = db_record.dict(
-                exclude_none=False,
-                exclude=set(exclude_fields),
-            )
+
+            record_dict = db_record.dict(exclude_none=True, exclude=set(exclude_fields))
+
             if record.vectors is not None:
                 # TODO: Create embeddings config by settings
                 for (
@@ -109,19 +109,21 @@ class DatasetRecordsDAO:
                     vector_data_mapping,
                 ) in record.vectors.items():
                     vector_dimension = vectors_configuration.get(vector_name, None)
+
                     if vector_dimension is None:
                         dimension = len(vector_data_mapping.value)
                         vectors_configuration[vector_name] = dimension
+
             documents.append(record_dict)
 
-        self._es.create_dataset(
+        self._es.create_dataset_index(
             id=dataset.id,
             task=dataset.task,
             metadata_values=metadata_values,
             vectors_cfg=vectors_configuration,
         )
 
-        return self._es.add_dataset_documents(
+        return self._es.add_dataset_records(
             id=dataset.id,
             documents=documents,
         )
