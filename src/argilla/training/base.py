@@ -150,7 +150,7 @@ class ArgillaBaseTrainer(object):
         """
         self._trainer.train()
         if path is not None:
-            self._trainer.save(path)
+            self.save(path)
 
     def save(self, path: str):
         """
