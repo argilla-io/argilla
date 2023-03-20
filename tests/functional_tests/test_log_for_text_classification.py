@@ -312,16 +312,8 @@ def test_log_with_bulk_error(mocked_client):
     try:
         rg.log(
             [
-                rg.TextClassificationRecord(
-                    id=0,
-                    text="This is an special text",
-                    metadata={"key": 1},
-                ),
-                rg.TextClassificationRecord(
-                    id=1,
-                    text="This is an special text",
-                    metadata={"key": "wrong-value"},
-                ),
+                rg.TextClassificationRecord(id=0, text="This is an special text", metadata={"key": 1}),
+                rg.TextClassificationRecord(id=1, text="This is an special text", metadata={"key": "wrong-value"}),
             ],
             name=dataset,
         )
