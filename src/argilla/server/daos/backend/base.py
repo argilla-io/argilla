@@ -91,11 +91,12 @@ class BackendErrorHandler(ABC):
                 except bulk_error as ex:
                     errors = [
                         WrongLogDataError.Error(
-                            reason=error_info.get("reason"),
-                            caused_by=error_info.get("caused_by"),
+                            reason=action_error.get("error").get("reason"),
+                            caused_by=action_error.get("error").get("caused_by"),
                         )
                         for error in ex.errors
-                        for error_info in [error.get("index", {}).get("error", {})]
+                        for action_error in error.values()
+                        if action_error.get("error")
                     ]
                     raise WrongLogDataError(errors=errors)
                 except not_found_error as ex:
