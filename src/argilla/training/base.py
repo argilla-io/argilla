@@ -136,7 +136,7 @@ class ArgillaBaseTrainer(object):
           as_argilla_records (bool): If True, the output will be a list of Argilla records instead of dictionaries. Defaults to True.
 
         Returns:
-          A list of predictions or argilla records.
+          A list of predictions or Argilla records.
         """
         return self._trainer.predict(text, as_argilla_records)
 
