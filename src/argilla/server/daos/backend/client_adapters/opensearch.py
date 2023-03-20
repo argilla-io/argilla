@@ -561,23 +561,15 @@ class OpenSearchClient(IClientAdapter):
         return len(failed)
 
     @staticmethod
-    def _doc2bulk_action(
-        index: str,
-        doc: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        def get_id(r):
-            return r.get("id")
+    def _doc2bulk_action(index: str, doc: Dict[str, Any]) -> Dict[str, Any]:
+        doc_id = doc.get("id")
 
-        data = {
-            "_op_type": "index",
-            "_index": index,
-            "_routing": None,  # TODO(@frascuchon): Use a sharding routing
-            **doc,
-        }
+        data = (
+            {"_index": index, "_op_type": "index", **doc}
+            if doc_id is None
+            else {"_index": index, "_id": doc_id, "_op_type": "update", "doc_as_upsert": True, "doc": doc}
+        )
 
-        id = get_id(doc)
-        if id is not None:
-            data["_id"] = id
         return data
 
     def upsert_index_document(
