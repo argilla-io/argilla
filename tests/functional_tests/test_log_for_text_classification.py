@@ -306,6 +306,37 @@ def test_dynamics_metadata(mocked_client):
     )
 
 
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_loading_with_projection_and_log(mocked_client):
+    dataset = "test_loading_with_projection_and_log"
+
+    rg.delete(dataset)
+
+    rg.log(
+        rg.TextClassificationRecord(text="This is a text", vectors={"v1": [1.5] * 100}, metadata={"a": "value"}),
+        name=dataset,
+    )
+
+    ds = rg.load(dataset, fields=["text"])
+
+    for record in ds:
+        assert not record.vectors
+        assert not record.metadata
+
+        record.vectors = {"v2": [2.0] * 50}
+        record.metadata = {"b": "value"}
+
+    rg.log(ds, name=dataset)
+
+    ds = rg.load(dataset)
+    for record in ds:
+        assert "v1" in record.vectors and "v2" in record.vectors
+        assert "a" in record.metadata and "b" in record.metadata
+
+
 def test_log_with_bulk_error(mocked_client):
     dataset = "test_log_with_bulk_error"
     rg.delete(dataset)
