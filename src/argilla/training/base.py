@@ -129,7 +129,7 @@ class ArgillaBaseTrainer(object):
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         """
         `predict` takes a string or list of strings and returns a list of dictionaries, each dictionary
-        containing the text, the predicted label, and the confidence score
+        containing the text, the predicted label, and the confidence score.
 
         Args:
           text (Union[List[str], str]): The text to be classified.
