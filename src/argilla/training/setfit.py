@@ -67,8 +67,8 @@ class ArgillaSetFitTrainer(object):
         **setfit_kwargs,
     ):
         """
-        It updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
-        arguments passed to the `update_config` function
+        Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
+        arguments passed to the `update_config` function.
         """
         from setfit import SetFitModel, SetFitTrainer
 
