@@ -639,14 +639,14 @@ class Argilla:
             TaskType.text_classification: (
                 SdkTextClassificationRecord,
                 DatasetForTextClassification,
-                {"id", "inputs", "multi_label"},
+                {"id", "event_timestamp", "status", "inputs", "multi_label"},
             ),
             TaskType.token_classification: (
                 SdkTokenClassificationRecord,
                 DatasetForTokenClassification,
-                {"id", "text", "tokens"},
+                {"id", "event_timestamp", "status", "text", "tokens"},
             ),
-            TaskType.text2text: (SdkText2TextRecord, DatasetForText2Text, {"id", "text"}),
+            TaskType.text2text: (SdkText2TextRecord, DatasetForText2Text, {"id", "event_timestamp", "status", "text"}),
         }
 
         try:
@@ -686,5 +686,6 @@ class Argilla:
             query_text=query,
             ids=ids,
         )
+
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
         return dataset_class(records)

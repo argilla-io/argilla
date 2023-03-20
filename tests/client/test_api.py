@@ -767,8 +767,11 @@ def test_load_sort(mocked_client):
 @pytest.mark.parametrize(
     ("records", "required_fields"),
     [
-        ([rg.TextClassificationRecord(text="test text")], ("inputs",)),
-        ([rg.TokenClassificationRecord(text="test text", tokens="test text".split())], ("text", "tokens")),
+        ([rg.TextClassificationRecord(text="test text", status="Discarded")], ("inputs",)),
+        (
+            [rg.TokenClassificationRecord(text="test text", status="Validated", tokens="test text".split())],
+            ("text", "tokens"),
+        ),
         ([rg.Text2TextRecord(text="test text")], ("text",)),
     ],
 )
@@ -784,11 +787,14 @@ def test_load_projection(api: Argilla, records, required_fields):
     ds = api.load(name=dataset, fields=["metadata.a"])
     assert len(ds) > 0
 
-    for record in ds:
+    for record, expected_record in zip(ds, records):
         data = record.dict()
 
         assert "a" in record.metadata and "other" not in record.metadata
+
         assert record.id is not None
+        assert record.event_timestamp == expected_record.event_timestamp
+        assert record.status == expected_record.status
 
         for field in required_fields:
             assert data[field]
