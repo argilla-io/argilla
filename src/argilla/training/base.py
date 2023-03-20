@@ -142,8 +142,8 @@ class ArgillaBaseTrainer(object):
 
     def train(self, path: str = None):
         """
-        > The function `train` takes in a path to a file and trains the model. If a path is provided,
-        the model is saved to that path
+        `train` takes in a path to a file and trains the model. If a path is provided,
+        the model is saved to that path.
 
         Args:
           path (str): The path to the model file.
