@@ -22,7 +22,8 @@ from argilla.training.utils import filter_allowed_args, get_default_args
 
 class ArgillaSetFitTrainer(object):
     # @require_version("setfit", "0.6")
-    def __init__(self, dataset, device, record_class, multi_label: bool = False, seed: int = None):
+    def __init__(self, dataset, record_class, multi_label: bool = False, seed: int = None):
+        import torch
         from setfit import SetFitModel, SetFitTrainer
 
         if seed is None:
@@ -51,10 +52,18 @@ class ArgillaSetFitTrainer(object):
             self._id2label = dict(enumerate(self._train_dataset.features["label"].names))
         self._label2id = {v: k for k, v in self._id2label.items()}
 
+        self.device = "cpu"
+        if torch.backends.mps.is_available():
+            self.device = "mps"
+        elif torch.cuda.is_available():
+            self.device = "cuda"
+        else:
+            self.device = "cpu"
+
         self.setfit_model_kwargs = get_default_args(SetFitModel.from_pretrained)
         self.setfit_model_kwargs["pretrained_model_name_or_path"] = "all-MiniLM-L6-v2"
         self.setfit_model_kwargs["multi_target_strategy"] = self.multi_target_strategy
-        self.setfit_model_kwargs["device"] = device
+        self.setfit_model_kwargs["device"] = self.device
 
         self.setfit_trainer_kwargs = get_default_args(SetFitTrainer.__init__)
         self.setfit_trainer_kwargs["column_mapping"] = self._column_mapping
@@ -102,7 +111,10 @@ class ArgillaSetFitTrainer(object):
         self.setfit_trainer_kwargs["model"] = self._model
         self.__trainer = SetFitTrainer(**self.setfit_trainer_kwargs)
         self.__trainer.train()
-        self._metrics = self.__trainer.evaluate()
+        if self._eval_dataset:
+            self._metrics = self.__trainer.evaluate()
+        else:
+            self._metrics = None
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         """

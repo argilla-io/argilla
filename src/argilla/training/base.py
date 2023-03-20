@@ -20,7 +20,7 @@ import argilla as rg
 from argilla.training.setfit import ArgillaSetFitTrainer
 
 
-class ArgillaBaseTrainer(object):
+class ArgillaTrainer(object):
     _logger = logging.getLogger("argilla.training")
 
     def __init__(self, name: str, framework: str, train_size: float = None, seed: int = None, **load_kwargs):
@@ -35,8 +35,6 @@ class ArgillaBaseTrainer(object):
         used for training.
           seed (int): int = None,
         """
-        self.device = "cpu"
-
         self._name = name
         self._multi_label = False
         self._split_applied = False
@@ -47,7 +45,9 @@ class ArgillaBaseTrainer(object):
             self._split_applied = True
 
         self.rg_dataset_snapshot = rg.load(name=self._name, limit=1)
-        assert len(self.rg_dataset_snapshot) > 0, "Dataset must have at least one Validated record"
+        if not len(self.rg_dataset_snapshot) > 0:
+            raise ValueError(f"Dataset {self._name} is empty")
+
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
             self._required_fields = ["id", "text", "inputs", "annotation", "multi_label"]
@@ -67,15 +67,6 @@ class ArgillaBaseTrainer(object):
         self.dataset_full_prepared = self.dataset_full.prepare_for_training(
             framework=framework, train_size=self._train_size, seed=self._seed
         )
-        if framework in ["transformers", "setfit"]:
-            import torch
-
-            if torch.backends.mps.is_available():
-                self.device = "mps"
-            elif torch.cuda.is_available():
-                self.device = "cuda"
-            else:
-                self.device = "cpu"
 
         if framework == "setfit":
             assert self._rg_dataset_type == rg.DatasetForTextClassification, "SetFit supports only text classification"
@@ -83,11 +74,11 @@ class ArgillaBaseTrainer(object):
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
-                device=self.device,
                 seed=self._seed,
             )
         else:
             raise NotImplementedError(f"Framework {framework} is not supported")
+
         self._logger.warning(self)
 
     def __repr__(self) -> str:
