@@ -154,7 +154,7 @@ class ArgillaBaseTrainer(object):
 
     def save(self, path: str):
         """
-        It saves the model to the path specified
+        Saves the model to the specified path.
 
         Args:
           path (str): The path to the directory where the model will be saved.
