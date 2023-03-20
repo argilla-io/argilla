@@ -238,14 +238,7 @@ class GenericElasticEngineBackend(LoggingMixin):
     def open(self, id: str):
         self.client.open_index(dataset_records_index(id))
 
-    def get_metadata_mappings(self, id: str):
-        records_index = dataset_records_index(id)
-        return self.client.get_property_type(
-            index=records_index,
-            property_name="metadata",
-        )
-
-    def create_dataset(
+    def create_dataset_index(
         self,
         id: str,
         task: TaskType,
@@ -511,7 +504,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             property=field,
         )
 
-    def add_dataset_documents(
+    def add_dataset_records(
         self,
         id: str,
         documents: List[dict],
