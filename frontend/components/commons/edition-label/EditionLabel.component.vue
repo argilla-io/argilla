@@ -75,8 +75,7 @@ export default {
       characterToSeparateLabels: null,
       saveLabelsButtonLabel: "Save labels",
       inputForSaveSchemaFeedback: {
-        message:
-          `Action needed: Add or save labels to validate the annotation schema. Learn more in the
+        message: `Action needed: Add or save labels to validate the annotation schema. Learn more in the
             <a target='_blank' href='https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#Define-a-labeling-schema'>
               docs</a>.
           `,
