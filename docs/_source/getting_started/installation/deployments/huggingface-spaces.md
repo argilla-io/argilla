@@ -138,7 +138,7 @@ The template space has two users: `admin` and `argilla`. The username `admin` co
 Currently, these user names can't be configured. The passwords and API keys to upload, read, update, and delete datasets can be configured using the following secrets:
 
 - `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
-  a custom username you can use your own username to login into the app.
+  a custom username you can use your own username to log in to the app.
 - `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key
   i.e. `admin.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
