@@ -393,13 +393,18 @@ class Argilla:
         # divide records in chunks of chunk size based on their byte size
         batch_size = int(batch_size / (len(records) / batch_size)) + 1
         n_batches = math.ceil(len(records) / batch_size)
-        rec_size = [sys.getsizeof(rec.json()) for rec in records]
-        records = [rec for _, rec in sorted(zip(rec_size, records), key=lambda pair: pair[0])]
-        records_new = dict.fromkeys(range(n_batches + 1), [])
-        while records:
-            for i in records_new:
-                records_new[i].append(records.pop(0))
-        records = [item for sublist in records_new.values() for item in sublist]
+        
+        if n_batches > 1:
+            rec_size = [sys.getsizeof(rec.json()) for rec in records]
+            records = [rec for _, rec in sorted(zip(rec_size, records), key=lambda pair: pair[0])]
+            
+            records_new = dict.fromkeys(range(n_batches), [])
+            for idx, record in enumerate(records):
+                records_new[idx % n_batches].append(record)
+            
+            records = []
+            for batch_list in records_new.values():
+                records.extend(batch_list)
 
         # log records
         processed, failed = 0, 0
