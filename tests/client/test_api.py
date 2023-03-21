@@ -522,34 +522,42 @@ def test_dataset_copy_to_another_workspace(mocked_client):
 
 def test_update_record(mocked_client):
     dataset = "test_update_record"
-    expected_inputs = ["This is a text"]
-
     mocked_client.delete(f"/api/datasets/{dataset}")
 
-    record = rg.TextClassificationRecord(id=0, inputs=expected_inputs, annotation_agent="test", annotation=["T"])
-    api.log(record, name=dataset)
+    expected_inputs = ["This is a text"]
+    record = rg.TextClassificationRecord(
+        id=0,
+        inputs=expected_inputs,
+        annotation_agent="test",
+        annotation=["T"],
+    )
+    api.log(
+        record,
+        name=dataset,
+    )
 
     df = api.load(name=dataset)
     df = df.to_pandas()
     records = df.to_dict(orient="records")
-
     assert len(records) == 1
     assert records[0]["annotation"] == "T"
-
     # This record will replace the old one
-    record = rg.TextClassificationRecord(id=0, inputs=expected_inputs, metadata={"b": "bowler"})
+    record = rg.TextClassificationRecord(
+        id=0,
+        inputs=expected_inputs,
+    )
 
-    api.log(record, name=dataset)
+    api.log(
+        record,
+        name=dataset,
+    )
 
     df = api.load(name=dataset)
     df = df.to_pandas()
     records = df.to_dict(orient="records")
-
     assert len(records) == 1
-
-    assert records[0]["annotation"] is not None
-    assert records[0]["annotation_agent"] is not None
-    assert "b" in records[0]["metadata"]
+    assert records[0]["annotation"] is None
+    assert records[0]["annotation_agent"] is None
 
 
 def test_text_classifier_with_inputs_list(mocked_client):
