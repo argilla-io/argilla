@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from fastapi import APIRouter, Depends, Security
 from pydantic import BaseModel
@@ -22,12 +22,22 @@ from argilla.server.apis.v0.models.text2text import Text2TextRecord
 from argilla.server.apis.v0.models.text_classification import TextClassificationRecord
 from argilla.server.apis.v0.models.token_classification import TokenClassificationRecord
 from argilla.server.commons.config import TasksFactory
-from argilla.server.commons.models import TaskStatus
+from argilla.server.commons.models import TaskStatus, TaskType
+from argilla.server.daos.backend import GenericElasticEngineBackend
+from argilla.server.errors import EntityNotFoundError
+from argilla.server.schemas.datasets import Dataset
 from argilla.server.security import auth
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
+from argilla.server.services.tasks.text2text.models import ServiceText2TextRecord
+from argilla.server.services.tasks.text_classification.model import (
+    ServiceTextClassificationRecord,
+)
+from argilla.server.services.tasks.token_classification.model import (
+    ServiceTokenClassificationRecord,
+)
 
 
 def configure_router(router: APIRouter):
@@ -74,6 +84,57 @@ def configure_router(router: APIRouter):
             metadata=request.metadata,
             status=request.status,
         )
+
+    class PartialRecord(BaseModel):
+        id: str
+        data: dict
+
+    class BatchUpdateRecords(BaseModel):
+        records: List[PartialRecord]
+
+    class BatchUpdateResult(BaseModel):
+        updated: int
+        not_found_ids: List[str]
+
+    @router.post("/{dataset_id}/records/:batch-update")
+    async def batch_update_dataset_records(
+        dataset_id: str,
+        request: BatchUpdateRecords,
+        engine: GenericElasticEngineBackend = Depends(GenericElasticEngineBackend.get_instance),
+        storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
+    ) -> BatchUpdateResult:
+        dataset = engine.find_dataset(id=dataset_id)
+        if not dataset:
+            raise EntityNotFoundError(name=dataset_id, type="Dataset")
+
+        dataset = Dataset.parse_obj(dataset)
+        if dataset.task == TaskType.text_classification:
+            record_class = ServiceTextClassificationRecord
+        elif dataset.task == TaskType.token_classification:
+            record_class = ServiceTokenClassificationRecord
+        elif dataset.task == TaskType.text2text:
+            record_class = ServiceText2TextRecord
+        else:
+            raise ValueError(f"Task {dataset.task} not supported")
+
+        stored_records = engine.find_record_by_ids(dataset_id, [record.id for record in request.records])
+
+        records_update = []
+        records_not_found = []
+
+        for stored_record, partial_record in zip(stored_records, request.records):
+            record_id, record = stored_record
+
+            if record is None:
+                records_not_found.append(record_id)
+                continue
+
+            record = record_class.parse_obj({**record, **partial_record.data})
+            records_update.append(record)
+
+        await storage.store_records(dataset=dataset, records=records_update, record_type=record_class)
+
+        return BatchUpdateResult(updated=len(records_update), not_found_ids=records_not_found)
 
 
 router = APIRouter(tags=["records"], prefix="/datasets")
