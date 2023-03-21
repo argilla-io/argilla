@@ -16,7 +16,9 @@
       <a class="user__link" href="#" @click.prevent="logout">
         <svgicon width="16" heigth="16" name="log-out"></svgicon> Log out
       </a>
-      <span class="copyright">© 2022 Argilla ({{ appVersion }})</span>
+      <span class="copyright"
+        >© {{ currentYear }} Argilla ({{ appVersion }})</span
+      >
     </div>
   </div>
 </template>
@@ -35,6 +37,12 @@ export default {
   computed: {
     user() {
       return this.$auth.user;
+    },
+    currentYear() {
+      return this.currentDate.getFullYear();
+    },
+    currentDate() {
+      return new Date();
     },
   },
   async fetch() {
