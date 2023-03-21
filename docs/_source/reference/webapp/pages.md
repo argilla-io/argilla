@@ -78,6 +78,10 @@ When in [Annotate mode](#modes) predictions and annotations share the same label
 
 A text classification dataset can support either single-label or multi-label classification - in other words, records are either annotated with one or multiple labels.
 
+```{note}
+If the record has multiple inputs, these will appear in alphabetical order.
+```
+
 #### Token classification
 
 In this task annotations are given as colored highlights in the input text, while predictions are indicated by underlines.
