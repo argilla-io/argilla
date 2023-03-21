@@ -579,7 +579,7 @@ class OpenSearchClient(IClientAdapter):
             else {"_index": index, "_id": doc_id, "_op_type": "update", "doc_as_upsert": True, "doc": doc}
         )
 
-        if not upsert and doc_id:
+        if not upsert and doc_id is not None:
             data["_id"] = doc_id
 
         return data
