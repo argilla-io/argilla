@@ -39,4 +39,6 @@
 ```
 ```{include} /_static/tutorials/training-textclassification-modal-activelearning/modal.md
 ```
+```{include} /_static/tutorials/monitoring-textclassification-setfit-explainability/modal.md
+```
 ````
