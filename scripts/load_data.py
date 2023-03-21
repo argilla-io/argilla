@@ -57,7 +57,7 @@ class LoadDatasets:
         print("Loading News-text-summarization dataset")
 
         # Load dataset from hub
-        dataset = load_dataset("argilla/news-summary", split="train").select(range(100))
+        dataset = load_dataset("argilla/news-summary", split="train")
         dataset_rg = rg.read_datasets(dataset, task="Text2Text")
 
         # Log the dataset
