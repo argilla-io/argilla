@@ -15,53 +15,22 @@
 import json
 from typing import List, Union
 
-from datasets import DatasetDict
-
+from argilla.training.transformers import ArgillaTransformersTrainer
 from argilla.training.utils import filter_allowed_args, get_default_args
 
 
-class ArgillaSetFitTrainer(object):
+class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     # @require_version("setfit", "0.6")
-    def __init__(self, dataset, record_class, multi_label: bool = False, seed: int = None):
-        import torch
+    def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
+        if model is None:
+            model = "all-MiniLM-L6-v2"
+        super.__init__(dataset=dataset, record_class=record_class, multi_label=multi_label, model=model, seed=seed)
+
+    def init_args(self):
         from setfit import SetFitModel, SetFitTrainer
 
-        if seed is None:
-            seed = 42
-        self._seed = seed
-        self._record_class = record_class
-        self._multi_label = multi_label
-
-        if isinstance(dataset, DatasetDict):
-            self._train_dataset = dataset["train"]
-            self._eval_dataset = dataset["test"]
-        else:
-            self._train_dataset = dataset
-            self._eval_dataset = None
-
-        if multi_label:
-            self.multi_target_strategy = "one-vs-rest"
-            self._column_mapping = {"text": "text", "binarized_label": "label"}
-        else:
-            self.multi_target_strategy = None
-            self._column_mapping = {"text": "text", "label": "label"}
-
-        if self._multi_label:
-            self._id2label = dict(enumerate(self._train_dataset.features["label"][0].names))
-        else:
-            self._id2label = dict(enumerate(self._train_dataset.features["label"].names))
-        self._label2id = {v: k for k, v in self._id2label.items()}
-
-        self.device = "cpu"
-        if torch.backends.mps.is_available():
-            self.device = "mps"
-        elif torch.cuda.is_available():
-            self.device = "cuda"
-        else:
-            self.device = "cpu"
-
         self.setfit_model_kwargs = get_default_args(SetFitModel.from_pretrained)
-        self.setfit_model_kwargs["pretrained_model_name_or_path"] = "all-MiniLM-L6-v2"
+        self.setfit_model_kwargs["pretrained_model_name_or_path"] = self.model
         self.setfit_model_kwargs["multi_target_strategy"] = self.multi_target_strategy
         self.setfit_model_kwargs["device"] = self.device
 

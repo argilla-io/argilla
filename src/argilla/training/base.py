@@ -18,12 +18,15 @@ from typing import List, Union
 
 import argilla as rg
 from argilla.training.setfit import ArgillaSetFitTrainer
+from argilla.training.transformers import ArgillaTransformersTrainer
 
 
 class ArgillaTrainer(object):
     _logger = logging.getLogger("argilla.training")
 
-    def __init__(self, name: str, framework: str, train_size: float = None, seed: int = None, **load_kwargs):
+    def __init__(
+        self, name: str, framework: str, model: str = None, train_size: float = None, seed: int = None, **load_kwargs
+    ):
         """
         `__init__` is a function that initializes the class
 
@@ -31,15 +34,18 @@ class ArgillaTrainer(object):
           name (str): the name of the dataset you want to load.
           framework (str): the framework to use for training. Currently, only "setfit" is supported.
           query (str): a query to filter the dataset.
+          model (str): name or path to the baseline model to be used. If not specified will set to a good default per framework.
           train_size (float): the size of the training set. If not specified, the entire dataset will be
         used for training.
           seed (int): int = None,
+          **load_kwargs: arguments for the rg.load() function.
         """
         self._name = name
         self._multi_label = False
         self._split_applied = False
         self._train_size = train_size
-        self._seed = seed
+        self._seed = seed  # split is used for train-test-split and should therefore be fixed
+        self.model = model
 
         if train_size:
             self._split_applied = True
@@ -69,15 +75,27 @@ class ArgillaTrainer(object):
         )
 
         if framework == "setfit":
-            assert self._rg_dataset_type == rg.DatasetForTextClassification, "SetFit supports only text classification"
+            if self._rg_dataset_type != rg.DatasetForTextClassification():
+                raise NotImplementedError("SetFit only support TextClassification.")
             self._trainer = ArgillaSetFitTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
                 seed=self._seed,
+                model=self.model,
+            )
+        elif framework == "transformers":
+            if self._rg_dataset_type not in [rg.DatasetForTokenClassification, rg.DatasetForTextClassification]:
+                raise NotImplementedError("Argilla.training does not support Text2Text tasks yet.")
+            self._trainer = ArgillaTransformersTrainer(
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                multi_label=self._multi_label,
+                seed=self._seed,
+                model=self.model,
             )
         else:
-            raise NotImplementedError(f"Framework {framework} is not supported")
+            raise NotImplementedError(f"Framework {framework} is not supported.")
 
         self._logger.warning(self)
 
@@ -98,6 +116,7 @@ class ArgillaTrainer(object):
                 multi_label: {self._multi_label}
                 required_fields: {self._required_fields}
                 train_size: {self._train_size}
+                seed: {self._seed}
 
             {self._trainer.__class__} info:
             _________________________________________________________________
