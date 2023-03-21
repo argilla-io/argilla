@@ -30,7 +30,7 @@ You'll see the `Building` status and once it becomes `Running` your space is rea
 
 
 :::{tip}
-You'll see the login screen where you need to use either admin or argilla with the default passwords (12345678). Remember you can change the passwords using secret environment variables. If you get a 500 error when introducing the credentials, make sure you have correctly introduce the password.
+You'll see the login screen where you need to use either admin or argilla with the default passwords (12345678). Remember you can change the passwords using secret environment variables. If you get a 500 error when introducing the credentials, make sure you have introduced the correct password.
 :::
 
 <div class="flex justify-center">
