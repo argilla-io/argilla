@@ -12,7 +12,12 @@
             :key="metric"
             v-if="currentMetric === metric"
           >
-            <component :is="componentName(metric)" :dataset="dataset" />
+            <component
+              :is="componentName(metric)"
+              :dataset="dataset"
+              :datasetId="dataset.id"
+              :datasetName="dataset.name"
+            />
           </div>
         </span>
       </transition>

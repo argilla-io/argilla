@@ -55,7 +55,7 @@
             :is-prediction="activeTab === 'predicted_mentions'"
             :label="key"
             :color="`color_${
-              entities.filter((e) => e.text === key)[0].colorId %
+              labels.filter((e) => e.text === key)[0].color_id %
               $entitiesMaxColors
             }`"
           />
@@ -65,7 +65,7 @@
                 ? 0
                 : currentMentionsLength
             "
-            :entities="entities"
+            :entities="labels"
             :k="key"
             :object="filteredMentions"
             @limit="onShowMore(key)"
@@ -75,7 +75,10 @@
     </div>
   </div>
 </template>
+
 <script>
+import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
+
 export default {
   props: {
     dataset: {
@@ -107,8 +110,8 @@ export default {
     existMentions() {
       return Object.keys(this.filteredMentions).length;
     },
-    entities() {
-      return this.dataset.entities;
+    labels() {
+      return getAllLabelsByDatasetId(this.dataset.id);
     },
     query() {
       return this.dataset.query;

@@ -25,18 +25,16 @@
       :enableSimilaritySearch="enableSimilaritySearch"
       @search-records="searchRecords"
     />
-    <entities-header :dataset="dataset" />
+    <entities-header :labels="labels" />
     <global-actions
       :datasetId="datasetId"
       :datasetName="datasetName"
       :datasetTask="datasetTask"
       :datasetVisibleRecords="dataset.visibleRecords"
-      :isCreationLabel="allowLabelCreation"
       @discard-records="onDiscard"
       @validate-records="onValidate"
       @clear-records="onClear"
       @reset-records="onReset"
-      @new-label="onNewLabel"
     />
   </div>
 </template>
@@ -44,6 +42,11 @@
 <script>
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import {
+  getAllLabelsByDatasetId,
+  getAllLabelsTextByDatasetId,
+} from "@/models/globalLabel.queries";
+
 export default {
   props: {
     datasetId: {
@@ -63,13 +66,30 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      isSortAsc: true,
+      sortBy: "order",
+    };
+  },
   computed: {
     dataset() {
       //TODO when refactor of filter part from header, remove this computed/and get only what is necessary as props
       return getDatasetFromORM(this.datasetId, this.datasetTask, true);
     },
-    allowLabelCreation() {
-      return !this.dataset.settings.label_schema;
+    labels() {
+      return getAllLabelsByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
+    },
+    listOfTexts() {
+      return getAllLabelsTextByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
     },
   },
   methods: {
@@ -130,14 +150,6 @@ export default {
       await this.resetRecords({
         dataset: this.dataset,
         records: restartedRecords,
-      });
-    },
-    async onNewLabel(label) {
-      await this.dataset.$dispatch("setEntities", {
-        dataset: this.dataset,
-        entities: [
-          ...new Set([...this.dataset.entities.map((ent) => ent.text), label]),
-        ],
       });
     },
     searchRecords(query) {
