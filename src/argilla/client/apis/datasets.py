@@ -102,7 +102,7 @@ class Datasets(AbstractApi):
     _API_PREFIX = "/api/datasets"
 
     class _DatasetApiModel(BaseModel):
-        id: str
+        id: Optional[str]
         name: str
         task: TaskType
         owner: Optional[str] = None
