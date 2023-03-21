@@ -18,6 +18,7 @@ import pytest
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.search.model import BaseRecordsQuery
+from argilla.server.errors import InvalidTextSearchError
 
 
 @pytest.fixture(scope="session")
@@ -76,3 +77,20 @@ def test_non_searchable_fields_are_present_in_documents(engine: GenericElasticEn
     total, results = engine.search_records(dataset_id, size=5)
     assert total == 100
     assert results == documents[:5]
+
+
+def test_non_searchable_fields_cannot_be_used_for_search(engine: GenericElasticEngineBackend, dataset_id: str):
+    engine.create_dataset(
+        id=dataset_id,
+        task=TaskType.text_classification,
+        metadata_values={"a": "value", "other": "value", "_this": "is non searchable"},
+        force_recreate=True,
+    )
+    documents = [{"id": f"{i:03d}", "text": "This is my text", "metadata": {"_this": "value"}} for i in range(0, 100)]
+
+    assert engine.add_dataset_documents(dataset_id, documents=documents) == 0
+
+    with pytest.raises(
+        InvalidTextSearchError, match=r"Cannot search on field \[metadata._this\] since it is not indexed"
+    ):
+        engine.search_records(id=dataset_id, query=BaseRecordsQuery(query_text="metadata._this:value"))
