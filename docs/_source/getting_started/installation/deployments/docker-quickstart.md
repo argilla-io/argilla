@@ -17,7 +17,7 @@ Apple Silicon M1/M2 users might have issues with this deployment. To resolve thi
 
 </div>
 
-This will run the latest quickstart docker image with 2 users `admin` and `argilla`. The password for these users is `12345678`. You can also configure these [environment variables](#environment-variables) as per you needs.
+This will run the latest quickstart docker image with 2 users `admin` and `argilla`. The password for these users is `12345678`. You can also configure these [environment variables](#environment-variables) as per your needs.
 
 ## Environment Variables
 
