@@ -69,7 +69,7 @@ You can create your first dataset by logging it into Argilla using your endpoint
 import argilla as rg
 
 # connect to your app endpoint (uses default team API key)
-rg.init(api_url="[your_space_url]", api_key="team.apikey")
+rg.init(api_url="[your_space_url]", api_key="admin.apikey")
 
 # transform dataset into Argilla's format and log it
 rg.log(rg.read_datasets(dataset, task="TextClassification"), name="bankingapp_sentiment")
