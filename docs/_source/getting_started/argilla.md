@@ -19,7 +19,7 @@ Deploy your own Argilla Server on Spaces with a few clicks:
 
 🆕 Use embeddings to find the most similar records with the UI. This feature uses vector search combined with traditional search (keyword and filter based).
 
-Get started: [Semantic Search Deep-dive guide](../guides/features/semantic-search.ipynb)
+Get started: [Semantic Search Deep-dive guide](../guides/label_records_with_semanticsearch.ipynb)
 
 ```
 
