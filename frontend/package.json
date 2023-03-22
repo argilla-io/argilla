@@ -33,7 +33,6 @@
     "@vuex-orm/plugin-axios": "^0.9.3",
     "core-js": "^3.6.5",
     "js-base64": "^3.7.2",
-    "json-server": "^0.17.3",
     "moment-timezone": "^0.5.33",
     "nuxt": "^2.15.8",
     "nuxt-highlightjs": "^1.0.2",
