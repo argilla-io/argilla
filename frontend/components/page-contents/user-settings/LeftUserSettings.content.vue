@@ -5,6 +5,9 @@
     </div>
 
     <div class="left-content" v-if="user">
+      <div class="left-content-item edition-user-info-component">
+        <EditionUserInfoComponent :userInfo="user" />
+      </div>
       <div class="left-content-item user-token-component">
         <UserTokenComponent :userToken="user.api_key" />
       </div>
