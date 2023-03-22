@@ -1,0 +1,25 @@
+{
+  "me": {
+    "id": "UUID",
+    "first_name": "Daboudi",
+    "last_name": "Dabouda",
+    "full_name": "Daboudi DABOUDA",
+    "username": "DDabouda",
+    "role": "Admin",
+    "superuser": true,
+    "workspaces": [
+      "david",
+      "no-workspaces",
+      "recognai",
+      "amelie",
+      "francisco",
+      "my-workspace",
+      "daniel",
+      "leire",
+      "empty"
+    ],
+    "api_key": "01245844212354",
+    "inserted_at": 1679477884212,
+    "updated_at": 1679477884212
+  }
+}
