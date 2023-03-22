@@ -96,6 +96,13 @@ If your intention is to only store metadata with records and not use it for sear
 the metadata field with a leading underscore. For instance, if you use `metadata._my_hidden_field`, the field will be
 accessible at the record level, but it won't be used in searches.
 
+```{hint}
+You can use this field to add an image to your record by pointing to its URL like so:
+`metadata = {"_image_url": "https://..."}`
+
+Note that the URL cannot exceed the metadata length limit.
+```
+
 ## Vector fields
 
 It is also possible to query the presense of vector field. Imagine you only want to include records with `vectors={"vector_1": vector_1}`. You can then define a query `vectors.vector_1: *`.
