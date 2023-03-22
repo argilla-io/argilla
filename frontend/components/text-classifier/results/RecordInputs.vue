@@ -69,7 +69,7 @@ export default {
       return this.record.explanation;
     },
     visibleRecordHeight() {
-      return this.$mq === "lg" ? 468 : 260;
+      return this.$mq === "lg" ? 468 : 240;
     },
     toggleCollapseRecordText() {
       return (
@@ -106,7 +106,7 @@ export default {
   display: block;
   &__collapsed {
     .record__content {
-      max-height: 260px;
+      max-height: 240px;
       overflow: hidden;
       @include media(">xxl") {
         max-height: 468px;
