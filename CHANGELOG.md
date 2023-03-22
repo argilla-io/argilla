@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add new page and components for dataset settings. Closes [#2442](https://github.com/argilla-io/argilla/issues/2003)
 - Add ability to show image in records (for TokenClassification and TextClassification) if an URL is passed in metadata with the key \_image_url
 - Non-searchable fields support in metadata. [#2570](https://github.com/argilla-io/argilla/pull/2570)
+- Add record ID references to the prepare for training methods. Closes [#2483](https://github.com/argilla-io/argilla/issues/2483)
+- Add tutorial on Image Classification. [#2420](https://github.com/argilla-io/argilla/pull/2420)
 
 ### Changed
 
