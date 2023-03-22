@@ -31,8 +31,8 @@ export default {
   },
   created() {
     this.title = "Personal access tokens";
-    this.description = `Personal access tokens allow you to access your own data via the API. 
-                            Do not give out your personal access tokens to anybody who do you 
+    this.description = `Personal access tokens allow you to access your own data via the API.
+                            Do not give out your personal access tokens to anybody who do you
                         don't want to access your files.`;
   },
 };
