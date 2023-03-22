@@ -16,6 +16,7 @@
 """
 This module configures the global fastapi application
 """
+import contextlib
 import glob
 import inspect
 import logging
@@ -30,16 +31,28 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from pydantic import ConfigError
+from pydantic import ConfigError, ValidationError
 
 from argilla import __version__ as argilla_version
+from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.logging import configure_logging
 from argilla.server import helpers
+from argilla.server.contexts import accounts
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.errors import APIErrorHandler, EntityNotFoundError
+from argilla.server.database import get_db
+from argilla.server.errors import (
+    APIErrorHandler,
+    ClosedDatasetError,
+    EntityAlreadyExistsError,
+    EntityNotFoundError,
+    ForbiddenOperationError,
+    MissingInputParamError,
+    UnauthorizedError,
+)
+from argilla.server.models import User
 from argilla.server.routes import api_router
 from argilla.server.security import auth
 from argilla.server.settings import settings
@@ -64,8 +77,14 @@ def configure_middleware(app: FastAPI):
 
 def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers"""
-    api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(UnauthorizedError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ForbiddenOperationError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(EntityAlreadyExistsError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ClosedDatasetError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ValidationError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(MissingInputParamError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
 
 
@@ -169,7 +188,7 @@ def configure_app_logging(app: FastAPI):
     app.on_event("startup")(configure_logging)
 
 
-def configure_telemetry(app):
+def configure_telemetry(app: FastAPI):
     message = "\n"
     message += inspect.cleandoc(
         """
@@ -191,6 +210,27 @@ def configure_telemetry(app):
     async def check_telemetry():
         if settings.enable_telemetry:
             print(message, flush=True)
+
+
+def configure_database(app: FastAPI):
+    get_db_wrapper = contextlib.contextmanager(get_db)
+
+    def _user_has_default_credentials(user: User):
+        return user.api_key == DEFAULT_API_KEY or accounts.verify_password(DEFAULT_PASSWORD, user.password_hash)
+
+    def _log_default_user_warning():
+        _LOGGER.warning(
+            f"User {DEFAULT_USERNAME!r} with default credentials has been found in the database. "
+            "If you are using argilla in a production environment this can be a serious security problem. "
+            f"We recommend that you create a new admin user and then delete the default {DEFAULT_USERNAME!r} one."
+        )
+
+    @app.on_event("startup")
+    async def log_default_user_warning_if_present():
+        with get_db_wrapper() as db:
+            default_user = accounts.get_user_by_username(db, DEFAULT_USERNAME)
+            if default_user and _user_has_default_credentials(default_user):
+                _log_default_user_warning()
 
 
 argilla_app = FastAPI(
@@ -218,6 +258,7 @@ app = FastAPI(docs_url=None)
 app.mount(settings.base_url, argilla_app)
 
 configure_app_logging(app)
+configure_database(app)
 configure_storage(app)
 configure_telemetry(app)
 

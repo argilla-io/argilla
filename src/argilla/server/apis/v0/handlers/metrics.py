@@ -22,8 +22,8 @@ from pydantic import BaseModel, Field
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.commons.config import TaskConfig, TasksFactory
+from argilla.server.models import User
 from argilla.server.security import auth
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.metrics import MetricsService
 
@@ -73,7 +73,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
     def get_dataset_metrics(
         name: str,
         request_deps: CommonTaskHandlerDependencies = Depends(),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
     ) -> List[MetricInfo]:
         dataset = datasets.find_by_name(
@@ -101,7 +101,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
         query: cfg.query,
         metric_params: MetricSummaryParams = Depends(),
         request_deps: CommonTaskHandlerDependencies = Depends(),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
     ):

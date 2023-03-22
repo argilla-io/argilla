@@ -21,7 +21,7 @@ from argilla._constants import (
     ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
 )
-from argilla.server.security.model import WORKSPACE_NAME_PATTERN
+from argilla.server.errors import BadRequestError, MissingInputParamError
 
 DATASET_NAME_PATH_PARAM = Path(..., regex=ES_INDEX_REGEX_PATTERN, description="The dataset name")
 
@@ -35,30 +35,29 @@ class RequestPagination:
 
 
 @dataclass
-class CommonTaskHandlerDependencies:
+class OptionalWorkspaceRequestDependency:
     """Common task query dependencies"""
 
-    # TODO(@frascuchon): we could include the request user and parametrize the action scopes
-    #   Depends(CommonTaskHandlerDependencies.create(scopes=[...])
+    _description = (
+        "The workspace where dataset belongs to. A valid workspace name should be provided. "
+        "If not provided, the request will raise a 400 response error."
+    )
 
-    __workspace_header__: str = Header(None, alias=WORKSPACE_HEADER_NAME)
-    __old_workspace_header__: str = Header(
-        None,
-        alias=_OLD_WORKSPACE_HEADER_NAME,
-        description="This is for backward comp. with old clients",
-    )
-    __workspace_param__: str = Query(
-        None,
-        alias="workspace",
-        description="The workspace where dataset belongs to. If not provided default user team will be used",
-    )
+    __workspace_header__: str = Header(None, alias=WORKSPACE_HEADER_NAME, deprecated=True, description=_description)
+
+    __workspace_param__: str = Query(None, alias="workspace", description=_description)
 
     @property
     def workspace(self) -> str:
         """Return read workspace. Query param prior to header param"""
-        workspace = self.__workspace_param__ or self.__workspace_header__ or self.__old_workspace_header__
-        if workspace:
-            assert WORKSPACE_NAME_PATTERN.match(workspace), (
-                "Wrong workspace format. " f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
-            )
+        return self.__workspace_param__ or self.__workspace_header__
+
+
+@dataclass
+class CommonTaskHandlerDependencies(OptionalWorkspaceRequestDependency):
+    @property
+    def workspace(self) -> str:
+        workspace = super().workspace
+        if not workspace:
+            raise MissingInputParamError("A workspace must be provided")
         return workspace

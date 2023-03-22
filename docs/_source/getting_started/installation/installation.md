@@ -28,7 +28,7 @@ Note
 Check the [setup and installation section](./installation/installation.md) for further options and configurations regarding Elasticsearch and Opensearch.
 </div>
 
-Now you can launch Elasticsearch or Opensearch using `docker compose` as follows:
+Now you can launch Elasticsearch or Opensearch using `docker-compose` as follows:
 
 ### Opensearch
 You can launch Opensearch with Docker as follows:
