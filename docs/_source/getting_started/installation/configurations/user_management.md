@@ -24,6 +24,7 @@ A workspace is a "space" inside your Argilla instance where authorized users can
 You can assign users to workspaces when you create a new user, or by using the proper API endpoint. "Admin" users have access to ALL defined workspaces.
 
 The Python client gives developers the ability to log, load, and copy datasets from and to different workspaces.
+
 ### Python client
 
 The Python client gives developers the ability to log, load, and copy datasets from and to different workspace. Check out the [Python Reference](../reference/python/python_client.rst) for the parameter and methods related to workspaces.
@@ -48,8 +49,9 @@ By default, if the Argilla instance has no users, the following default admin us
 - api_key: `argilla.apikey`
 
 For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
+
 ```bash
-python -m argilla.tasks.users.create_default --password newpassword --api-key new-api-key
+python -m argilla.tasks.users.create_default --password new-password --api-key new-api-key
 User with default credentials succesfully created:
 • username: 'argilla'
 • password: 'newpassword'
@@ -66,13 +68,14 @@ Otherwise, connections will fail with an Unauthorized server error.
 The above user management model is configured using the Argilla tasks, which server maintainers can define before launching an Argilla instance.
 
 ### Prepare the database
+
 First of all, you need to make sure that database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed.
 
 ```bash
 python -m argilla.tasks.database.migrate
 ```
-```bash
-# Output
+
+```
 INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
 INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 INFO  [alembic.runtime.migration] Running upgrade  -> 74694870197c, create users table
@@ -84,11 +87,12 @@ INFO  [alembic.runtime.migration] Running upgrade 82a5a88a3fa5 -> 1769ee58fbb4, 
 It is important to launch this task prior to any other database action.
 :::
 
-
 ### Creating users
 
 ```bash
 python -m argilla.tasks.users.create --help
+```
+
 ```
 Usage: python -m argilla.tasks.users.create [OPTIONS]
 
@@ -117,11 +121,12 @@ Options:
 #### Creating an admin user
 
 **CLI:**
+
 ```bash
 python -m argilla.tasks.users.create --role admin --first-name Hulio --last-name Ramos --username hurra --password abcde123
 ```
-```bash
-# Output
+
+```
 User succesfully created:
 • first_name: 'Hulio'
 • last_name: 'Ramos'
@@ -132,6 +137,7 @@ User succesfully created:
 ```
 
 **Python:**
+
 ```python
 auth_headers = {"X-Argilla-API-Key": "argilla.apikey"}
 http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
@@ -149,12 +155,14 @@ repsonse.json()
 ```
 
 #### Creating an annotator user assigned to a workspace
+
 **CLI:**
+
 ```bash
 python -m argilla.tasks.users.create --role annotator --first-name Nick --last-name Name --username nick --password 11223344 --workspace ws
 ```
-```bash
-# Output
+
+```
 User successfully created:
 • first_name: 'Nick'
 • last_name: 'Name'
@@ -166,8 +174,8 @@ User successfully created:
 
 The workspace `ws` is automatically created and assigned to the user.
 
-
 **Python:**
+
 ```python
 import httpx
 
@@ -239,14 +247,13 @@ http.delete("/api/users/75190fff-d4b9-4625-b7d3-4cfe3c659054").json()
 # 'api_key': 'SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM',
 # 'inserted_at': '2023-03-16T11:17:35.462774',
 # 'updated_at': '2023-03-16T11:17:35.462774'}
-
 ```
-
 
 ## Migrate users from the `users.yaml` file
 
 The migration tasks can create users and workspaces automatically from a yaml file with the following format:
-````yaml
+
+```yaml
 - username: john
   full_name: John Doe
   email: john@argilla.io
@@ -269,19 +276,18 @@ The migration tasks can create users and workspaces automatically from a yaml fi
   hashed_password: $2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG
   workspaces: [argilla, team, latam]
   disabled: False
-
+```
 
 The user role will be computed depending on how workspaces are setup for each user. If no `workspace` attribute is defined, the user will be considered an `admin`. Otherwise, the assigned user role will be `annotator`.
 
 The task will also create an extra workspace for each user named after their username.
 
-
 ```bash
 export ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yml
 python -m argilla.tasks.users.migrate
 ```
-```bash
-# Output
+
+```
 Starting users migration process using file '.users.yml'
 Migrating User with username 'john'
 Migrating User with username 'tanya'
@@ -289,8 +295,7 @@ Migrating User with username 'daisy'
 Users migration process successfully finished
 ```
 
-````python
-
+```python
 http.get("/api/users").json()
 # [{'id': '8e4da958-1dba-44d9-82f3-ea2ec3beecdf',
 #  'username': 'john',
@@ -342,9 +347,7 @@ http.get("/api/workspaces").json()
 #  'name': 'latam',
 #  'inserted_at': '2023-03-16T11:31:12.991047',
 #  'updated_at': '2023-03-16T11:31:12.991047'}]
-
-````
-
+```
 
 ### Migrate users with Docker Compose
 
