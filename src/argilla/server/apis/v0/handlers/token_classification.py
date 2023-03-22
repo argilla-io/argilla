@@ -40,9 +40,9 @@ from argilla.server.apis.v0.validators.token_classification import DatasetValida
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError
+from argilla.server.models import User
 from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService, ServiceBaseDataset
 from argilla.server.services.tasks.token_classification import (
     TokenClassificationService,
@@ -83,10 +83,10 @@ def configure_router():
         service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user, scopes=[]),
     ) -> BulkResponse:
         task = task_type
-        workspace = current_user.check_workspace(common_params.workspace)
+        workspace = common_params.workspace
         try:
             dataset = datasets.find_by_name(
                 current_user,
@@ -139,7 +139,7 @@ def configure_router():
         pagination: RequestPagination = Depends(),
         service: TokenClassificationService = Depends(TokenClassificationService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user, scopes=[]),
     ) -> TokenClassificationSearchResults:
         search = search or TokenClassificationSearchRequest()
         query = search.query or TokenClassificationQuery()

@@ -53,7 +53,7 @@ def test_init(mocked_client):
     user = the_api.http_client.get("/api/me")
     assert user["username"] == "argilla"
 
-    api.init(api_key="rubrix.apikey")
+    api.init(api_key="argilla.apikey")
     the_api = active_api()
     user = the_api.http_client.get("/api/me")
     assert user["username"] == "argilla"

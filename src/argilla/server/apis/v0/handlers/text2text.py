@@ -37,9 +37,9 @@ from argilla.server.apis.v0.models.text2text import (
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError
+from argilla.server.models import User
 from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService, ServiceBaseDataset
 from argilla.server.services.tasks.text2text import Text2TextService
 from argilla.server.services.tasks.text2text.models import (
@@ -73,10 +73,10 @@ def configure_router():
         common_params: CommonTaskHandlerDependencies = Depends(),
         service: Text2TextService = Depends(Text2TextService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> BulkResponse:
         task = task_type
-        workspace = current_user.check_workspace(common_params.workspace)
+        workspace = common_params.workspace
         try:
             dataset = datasets.find_by_name(
                 current_user,
@@ -118,7 +118,7 @@ def configure_router():
         pagination: RequestPagination = Depends(),
         service: Text2TextService = Depends(Text2TextService.get_instance),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> Text2TextSearchResults:
         search = search or Text2TextSearchRequest()
         query = search.query or Text2TextQuery()
