@@ -13,6 +13,9 @@
       >
         <svgicon width="16" height="16" name="external"></svgicon> View docs
       </a>
+      <NuxtLink class="user__link" :to="{ name: 'user-settings' }">
+        My settings
+      </NuxtLink>
       <a class="user__link" href="#" @click.prevent="logout">
         <svgicon width="16" heigth="16" name="log-out"></svgicon> Log out
       </a>
