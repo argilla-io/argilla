@@ -87,7 +87,7 @@ This means you cannot search for single words in them, and capitalization and pu
 You can, however, use wild cards.
 
 ```{warning}
-The metadata field has by deafult a maximum length of 128 characters and a field limit of 50. If you wish to change these values, you can do so by setting your own `ARGILLA_METADATA_FIELD_LENGTH` and `ARGILLA_METADATA_FIELDS_LIMIT` in your environment variables. Learn more [here](../getting_started/installation/configurations/server_configuration.md#environment-variables)
+The metadata field has by default a maximum length of 128 characters and a field limit of 50. If you wish to change these values, you can do so by setting your own `ARGILLA_METADATA_FIELD_LENGTH` in the server environment variables. Learn more [here](../getting_started/installation/configurations/server_configuration.md#environment-variables)
 ```
 
 ### Non-searchable metadata fields
