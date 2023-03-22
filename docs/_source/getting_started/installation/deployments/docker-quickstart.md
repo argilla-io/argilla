@@ -37,4 +37,4 @@ This will run the latest quickstart docker image with 2 users `admin` and `argil
   supported values for this variable is as follows:
     1. `single`: Load single datasets for TextClassification task.
     2. `full`: Load all the sample datasets for NLP tasks (TokenClassification, TextClassification, Text2Text)
-    3. `none`: No datasets being loaded.
+    3. `none`: No datasets are loaded.
