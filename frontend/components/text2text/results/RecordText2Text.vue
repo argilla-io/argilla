@@ -19,7 +19,7 @@
   <div class="record">
     <record-string-text-2-text
       :record="record"
-      :toggleCollapseRecordText="paginationSizeIsOne"
+      :disabled-collapsable-text="paginationSizeIsOne"
     />
     <div>
       <Text2TextList
