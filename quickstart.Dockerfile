@@ -1,6 +1,6 @@
 FROM docker.elastic.co/elasticsearch/elasticsearch:8.5.3
 
-# Environment variable
+# Environment variables
 ENV ADMIN_USERNAME=admin
 ENV ADMIN_PASSWORD=12345678
 ENV ADMIN_API_KEY=admin.apikey
@@ -22,7 +22,6 @@ USER root
 COPY scripts/start_quickstart_argilla.sh /
 COPY scripts/load_data.py /
 COPY dist/*.whl /packages/
-
 
 # Install packages
 RUN apt update && \
