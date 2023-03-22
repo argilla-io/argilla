@@ -86,6 +86,10 @@ Metadata are indexed as keywords.
 This means you cannot search for single words in them, and capitalization and punctuations are taken into account.
 You can, however, use wild cards.
 
+```{warning}
+The metadata field has a maximum default length of 50 fields and 128 characters. If you wish to change these values, you can do so by setting your own `ARGILLA_METADATA_FIELD_LENGTH` and `ARGILLA_METADATA_FIELDS_LIMIT` in your environment variables. Learn more [here](../getting_started/installation/configurations/server_configuration.md#environment-variables)
+```
+
 ### Non-searchable metadata fields
 
 If your intention is to only store metadata with records and not use it for searches, you can achieve this by defining
