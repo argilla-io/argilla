@@ -21,7 +21,10 @@
       <div class="record--image-area" v-if="isRecordContainsImage">
         <img :src="metadata._image_url" alt="image of the record" />
       </div>
-      <record-inputs :record="record" />
+      <record-inputs
+        :record="record"
+        :disabled-collapsable-text="paginationSizeIsOne"
+      />
       <classifier-annotation-area
         v-if="interactionsEnabled"
         :inputLabels="listOfTexts"
@@ -120,6 +123,9 @@ export default {
           this.record.prediction ||
           this.isMultiLabel)
       );
+    },
+    paginationSizeIsOne() {
+      return this.viewSettings?.pagination?.size === 1;
     },
     paginationSize() {
       return this.viewSettings?.pagination?.size;

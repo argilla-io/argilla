@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0](https://github.com/recognai/rubrix/compare/v1.4.0...v1.5.0) - 2023-03-21
+
 ### Added
 
 - Add the fields to retrieve when loading the data from argilla. `rg.load` takes too long because of the vector field, even when users don't need it. Closes [#2398](https://github.com/argilla-io/argilla/issues/2398)
@@ -14,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add ability to show image in records (for TokenClassification and TextClassification) if an URL is passed in metadata with the key \_image_url
 - Non-searchable fields support in metadata. [#2570](https://github.com/argilla-io/argilla/pull/2570)
 - add user settings page [#2496](https://github.com/argilla-io/argilla/issues/2496)
+- Add record ID references to the prepare for training methods. Closes [#2483](https://github.com/argilla-io/argilla/issues/2483)
+- Add tutorial on Image Classification. [#2420](https://github.com/argilla-io/argilla/pull/2420)
 
 ### Changed
 
@@ -21,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The shortcuts improvement for labels [#2339](https://github.com/argilla-io/argilla/pull/2339) have been moved to the vuex ORM in dataset settings feature [#2444](https://github.com/argilla-io/argilla/commit/eb37c3bcff3ad253481d6a10f8abb093384f2dcb)
 - Update "Define a labeling schema" section in docs.
 - The record inputs are sorted alphabetically in UI by default. [#2581](https://github.com/argilla-io/argilla/pull/2581)
+- The record inputs are fully visible when pagination size is one and the height of collapsed area size is bigger for laptop screen. [#2587](https://github.com/argilla-io/argilla/pull/2587/files)
 
 ### Fixes
 
