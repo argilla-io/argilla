@@ -56,7 +56,10 @@ export default {
   }),
   computed: {
     data() {
-      return this.record.inputs;
+      const entries = Object.entries(this.record.inputs);
+      entries.sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+
+      return Object.fromEntries(entries);
     },
     explanation() {
       return this.record.explanation;

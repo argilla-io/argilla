@@ -1,4 +1,4 @@
-```{grid-item-card} 🕵️‍♀️ Compare two Text Classification zero-shot models using Argilla
+```{grid-item-card} 🥇 Compare Text Classification Models
 :img-top: /_static/tutorials/monitoring-textclassification-setfit-explainability/f1-score-for-zero-shot-model.png
 :link: ../../tutorials/notebooks/monitoring-textclassification-setfit-explainability.html
 
