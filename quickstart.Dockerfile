@@ -1,6 +1,5 @@
 FROM docker.elastic.co/elasticsearch/elasticsearch:8.5.3
 
-# Environment variables
 ENV ADMIN_USERNAME=admin
 ENV ADMIN_PASSWORD=12345678
 ENV ADMIN_API_KEY=admin.apikey
@@ -8,7 +7,7 @@ ENV ADMIN_API_KEY=admin.apikey
 ENV ANNOTATOR_USERNAME=argilla
 ENV ANNOTATOR_PASSWORD=12345678
 
-ENV ARGILLA_WORKSPACE=$ANNOTATOR_USERNAME
+ENV ARGILLA_WORKSPACE=$ADMIN_USERNAME
 ENV LOAD_DATASETS=full
 ENV UVICORN_PORT=6900
 
@@ -23,7 +22,6 @@ COPY scripts/start_quickstart_argilla.sh /
 COPY scripts/load_data.py /
 COPY dist/*.whl /packages/
 
-# Install packages
 RUN apt update && \
     apt -y install curl python3.9 python3.9-dev python3.9-distutils gcc gnupg apache2-utils sudo openssl systemctl && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
