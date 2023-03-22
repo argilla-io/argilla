@@ -108,7 +108,7 @@ To get started you just need to run the docker image with following command:
   docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
 ```
 
-This will run the latest quickstart docker image with 2 users `argilla` and `team`. The password for these users is
+This will run the latest quickstart docker image with 2 users `admin` and `argilla`. The password for these users is
 `12345678`. You can also configure these [environment variables](#environment-variables) as per you needs.
 
 ### Environment Variables
