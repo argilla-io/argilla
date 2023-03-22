@@ -20,4 +20,7 @@ Are you unsure about what these techniques entail, take a look at our [terminolo
 ```{grid-item-card} 🔫 Few-shot classification
 :link: ./few_shot.html
 ```
+```{grid-item-card} 🔦 Semantic Search
+:link: ./semantic_search.html
+```
 ````
