@@ -5,7 +5,7 @@
     "last_name": "Dabouda",
     "full_name": "Daboudi DABOUDA",
     "username": "DDabouda",
-    "role": "Admin",
+    "role": "admin",
     "superuser": true,
     "workspaces": [
       "david",
