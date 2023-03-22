@@ -1,6 +1,8 @@
 <template>
   <HeaderAndTopAndTwoColumns>
-    <template v-slot:header></template>
+    <template v-slot:header>
+      <HeaderUserSettingsContent />
+    </template>
     <template v-slot:top></template>
     <template v-slot:left></template>
     <template v-slot:right>
