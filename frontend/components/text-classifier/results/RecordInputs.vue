@@ -73,12 +73,12 @@ export default {
     },
     toggleCollapseRecordText() {
       return (
-        !this.paginationSizeIsOne &&
+        !this.disabledCollapsableText &&
         this.scrollHeight >= this.visibleRecordHeight
       );
     },
     isRecordTextExpanded() {
-      return this.showFullRecord || this.paginationSizeIsOne;
+      return this.showFullRecord || this.disabledCollapsableText;
     },
   },
   updated() {
