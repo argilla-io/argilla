@@ -30,7 +30,7 @@ You'll see the `Building` status and once it becomes `Running` your space is rea
 
 
 :::{tip}
-You'll see the login screen where you need to use either admin or argilla with the default passwords (12345678). Remember you can change the passwords using secret environment variables. If you get a 500 error when introducing the credentials, make sure you have introduced the correct password.
+You'll see the login screen where you need to use either `admin` or `argilla` with the default passwords (12345678). Remember you can change the passwords using secret environment variables. If you get a 500 error when introducing the credentials, make sure you have introduced the correct password.
 :::
 
 <div class="flex justify-center">
@@ -135,7 +135,7 @@ To set up these secrets, you can go to the Settings tab on your created Space. M
 
 The template space has two users: `admin` and `argilla`. The username `admin` corresponds to the root user, who can upload datasets and access any workspace within your Argilla Space. The username `argilla` is a normal user with access to the `argilla` workspace.
 
-Currently, these user names can't be configured. The passwords and API keys to upload, read, update, and delete datasets can be configured using the following secrets:
+The usernames, passwords, and API keys to upload, read, update, and delete datasets can be configured using the following secrets:
 
 - `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
   a custom username you can use your own username to log in to the app.
