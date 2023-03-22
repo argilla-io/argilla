@@ -23,7 +23,7 @@
       </div>
       <record-inputs
         :record="record"
-        :disabled-collapsable-text="paginationSizeIsOne"
+        :toggleCollapseRecordText="paginationSizeIsOne"
       />
       <classifier-annotation-area
         v-if="interactionsEnabled"

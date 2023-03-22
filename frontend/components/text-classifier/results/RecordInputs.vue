@@ -34,7 +34,7 @@
       </span>
     </div>
     <base-button
-      v-if="isCollapsableRecordText"
+      v-if="toggleCollapseRecordText"
       class="secondary text record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Full record" : "Show less" }}
@@ -71,7 +71,7 @@ export default {
     visibleRecordHeight() {
       return this.$mq === "lg" ? 468 : 260;
     },
-    isCollapsableRecordText() {
+    toggleCollapseRecordText() {
       return (
         !this.disabledCollapsableText &&
         this.scrollHeight >= this.visibleRecordHeight

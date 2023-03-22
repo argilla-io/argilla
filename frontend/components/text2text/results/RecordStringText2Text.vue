@@ -23,7 +23,7 @@
     <span class="record__content" v-html="$highlightKeywords(text, keywords)">
     </span>
     <base-button
-      v-if="isCollapsableRecordText"
+      v-if="toggleCollapseRecordText"
       class="secondary text record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Full record" : "Show less" }}
@@ -59,7 +59,7 @@ export default {
     isRecordTextExpanded() {
       return this.showFullRecord || this.disabledCollapsableText;
     },
-    isCollapsableRecordText() {
+    toggleCollapseRecordText() {
       return (
         !this.disabledCollapsableText &&
         this.scrollHeight >= this.visibleRecordHeight
