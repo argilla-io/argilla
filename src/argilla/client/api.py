@@ -224,7 +224,6 @@ def load(
     id_from: Optional[str] = None,
     batch_size: int = 250,
     as_pandas=None,
-    fields: Optional[List[str]] = None,
 ) -> Dataset:
     """Loads a argilla dataset.
 
@@ -245,8 +244,6 @@ def load(
             size may help avoid timeouts.
         as_pandas: DEPRECATED! To get a pandas DataFrame do
             ``rg.load('my_dataset').to_pandas()``.
-        fields: A list of fields to retrieve. If not provided, all fields will be retrieved.
-            ``rg.load('my_dataset', fields=['id', 'text'])``
 
     Returns:
         A argilla dataset.
@@ -280,7 +277,6 @@ def load(
         id_from=id_from,
         batch_size=batch_size,
         as_pandas=as_pandas,
-        fields=fields,
     )
 
 

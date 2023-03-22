@@ -86,11 +86,22 @@ Metadata are indexed as keywords.
 This means you cannot search for single words in them, and capitalization and punctuations are taken into account.
 You can, however, use wild cards.
 
+```{warning}
+The metadata field has by default a maximum length of 128 characters and a field limit of 50. If you wish to change these values, you can do so by setting your own `ARGILLA_METADATA_FIELD_LENGTH` in the server environment variables. Learn more [here](../getting_started/installation/configurations/server_configuration.md#environment-variables)
+```
+
 ### Non-searchable metadata fields
 
 If your intention is to only store metadata with records and not use it for searches, you can achieve this by defining
 the metadata field with a leading underscore. For instance, if you use `metadata._my_hidden_field`, the field will be
 accessible at the record level, but it won't be used in searches.
+
+```{hint}
+You can use this field to add an image to your record by pointing to its URL like so:
+`metadata = {"_image_url": "https://..."}`
+
+Note that the URL cannot exceed the metadata length limit.
+```
 
 ## Vector fields
 
