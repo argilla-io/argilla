@@ -22,7 +22,7 @@ This will run the latest quickstart docker image with 2 users `admin` and `argil
 ## Environment Variables
 
 - `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
-  a custom username you can use your own username to login into the app.
+  a custom username you can use your own username to log in to the app.
 - `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key
   i.e. `admin.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
