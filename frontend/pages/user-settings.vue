@@ -6,7 +6,9 @@
     <template v-slot:top>
       <TopUserSettingsContent />
     </template>
-    <template v-slot:left></template>
+    <template v-slot:left>
+      <LeftUserSettingsContent />
+    </template>
     <template v-slot:right>
       <div class="right-content"></div>
     </template>
