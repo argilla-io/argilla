@@ -12,4 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .api_responses import *
+from argilla.server.errors import ForbiddenOperationError
+from argilla.server.security.model import User
+
+
+def validate_is_super_user(user: User, message: str = None):
+    """Common validation to ensure the current user is a admin/superuser"""
+    if not user.is_superuser():
+        raise ForbiddenOperationError(message or "Only admin users can apply this change")

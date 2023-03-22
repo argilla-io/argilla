@@ -99,6 +99,10 @@ class mappings:
     def decimal_field():
         return {"type": "float"}
 
+    @staticmethod
+    def non_searchable_text_field():
+        return {"type": "text", "index": False}
+
     @classmethod
     def dynamic_field(cls):
         return {"dynamic": True, "type": "object"}

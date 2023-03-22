@@ -1,4 +1,3 @@
-(pages)=
 # Pages
 
 ## Home page
@@ -79,6 +78,10 @@ When in [Annotate mode](#modes) predictions and annotations share the same label
 
 A text classification dataset can support either single-label or multi-label classification - in other words, records are either annotated with one or multiple labels.
 
+```{note}
+If the record has multiple inputs, these will appear in alphabetical order.
+```
+
 #### Token classification
 
 In this task annotations are given as colored highlights in the input text, while predictions are indicated by underlines.
@@ -124,3 +127,21 @@ You can find more information about each metric in our dedicated [metrics guide]
 
 This button allows you to refresh the list of the record cards with respect to the activated filters.
 For example, if you are annotating and use the [Status filter](./features.md) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.
+
+
+## Dataset settings
+![Dataset page](../../_static/reference/webapp/pages-dataset_settings.png)
+
+You can access this page by clicking on the settings icon next to the user icon inside of the Dataset view.
+
+In this page, you will be able to access the settings of a specific dataset and make modifications.
+
+### Description and annotation guidelines
+
+Soon you will be able to edit this information.
+
+### Labels
+Here you can [define your labeling schema](../../guides/log_load_and_prepare_data.ipynb#update-a-dataset) for this dataset, see the current one and add new labels to it.
+
+### Danger zone
+In this area, you will find a button to delete the current dataset.

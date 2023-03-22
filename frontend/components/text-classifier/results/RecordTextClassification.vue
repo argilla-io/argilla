@@ -18,10 +18,16 @@
 <template>
   <div class="record" v-if="record">
     <div class="record--left">
-      <record-inputs :record="record" />
+      <div class="record--image-area" v-if="isRecordContainsImage">
+        <img :src="metadata._image_url" alt="image of the record" />
+      </div>
+      <record-inputs
+        :record="record"
+        :disabled-collapsable-text="paginationSizeIsOne"
+      />
       <classifier-annotation-area
         v-if="interactionsEnabled"
-        :inputLabels="datasetLabels"
+        :inputLabels="listOfTexts"
         :datasetName="datasetName"
         :isMultiLabel="isMultiLabel"
         :paginationSize="paginationSize"
@@ -62,6 +68,7 @@
 import { mapActions } from "vuex";
 import { TextClassificationRecord } from "@/models/TextClassification";
 import { getTextClassificationDatasetById } from "@/models/textClassification.queries";
+import { getAllLabelsTextByDatasetId } from "@/models/globalLabel.queries";
 
 export default {
   props: {
@@ -81,10 +88,6 @@ export default {
       type: String,
       required: true,
     },
-    datasetLabels: {
-      type: Array,
-      required: true,
-    },
     record: {
       type: TextClassificationRecord,
       required: true,
@@ -95,6 +98,15 @@ export default {
     },
   },
   computed: {
+    metadata() {
+      return this.record?.metadata ?? {};
+    },
+    isRecordContainsImage() {
+      return "_image_url" in this.metadata;
+    },
+    listOfTexts() {
+      return getAllLabelsTextByDatasetId(this.datasetId);
+    },
     interactionsEnabled() {
       return this.annotationEnabled && !this.isReferenceRecord;
     },
@@ -111,6 +123,9 @@ export default {
           this.record.prediction ||
           this.isMultiLabel)
       );
+    },
+    paginationSizeIsOne() {
+      return this.viewSettings?.pagination?.size === 1;
     },
     paginationSize() {
       return this.viewSettings?.pagination?.size;
@@ -262,6 +277,15 @@ export default {
 <style scoped lang="scss">
 .record {
   display: flex;
+  &--image-area {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 1em;
+    min-height: 20em;
+    img {
+      max-height: 20em;
+    }
+  }
   &--left {
     width: 100%;
     padding: $base-space * 4 20px 20px 20px;

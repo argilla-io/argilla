@@ -18,6 +18,9 @@
 <template>
   <div class="record">
     <div class="content">
+      <div class="record--image-area" v-if="isRecordContainsImage">
+        <img :src="metadata._image_url" alt="image of the record" />
+      </div>
       <div class="origins">
         <text-spans-static
           v-if="record.prediction"
@@ -26,7 +29,7 @@
           origin="prediction"
           class="prediction"
           :datasetName="datasetName"
-          :datasetEntities="datasetEntities"
+          :datasetEntities="labels"
           :datasetQuery="datasetQuery"
           :record="record"
           :visualTokens="visualTokens"
@@ -39,7 +42,7 @@
           class="annotation"
           :datasetId="datasetId"
           :datasetName="datasetName"
-          :datasetEntities="datasetEntities"
+          :datasetEntities="labels"
           :datasetLastSelectedEntity="datasetLastSelectedEntity"
           :record="record"
           :visualTokens="visualTokens"
@@ -62,6 +65,7 @@
 import { indexOf, length } from "stringz";
 import { mapActions } from "vuex";
 import { getTokenClassificationDatasetById } from "@/models/tokenClassification.queries";
+import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
 
 export default {
   props: {
@@ -71,10 +75,6 @@ export default {
     },
     datasetName: {
       type: String,
-      required: true,
-    },
-    datasetEntities: {
-      type: Array,
       required: true,
     },
     datasetQuery: {
@@ -98,12 +98,31 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      isSortAsc: true,
+      sortBy: "order",
+    };
+  },
   computed: {
+    metadata() {
+      return this.record?.metadata ?? {};
+    },
+    isRecordContainsImage() {
+      return "_image_url" in this.metadata;
+    },
     interactionsEnabled() {
       return this.annotationEnabled && !this.isReferenceRecord;
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
+    },
+    labels() {
+      return getAllLabelsByDatasetId(
+        this.datasetId,
+        this.sortBy,
+        this.isSortAsc
+      );
     },
     visualTokens() {
       // This is used for both, annotation ad exploration components
@@ -285,6 +304,13 @@ export default {
   white-space: pre-line;
   &__input {
     padding-right: 200px;
+  }
+  .record--image-area {
+    margin-bottom: 1em;
+    min-height: 20em;
+    img {
+      max-height: 20em;
+    }
   }
 }
 

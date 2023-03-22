@@ -15,4 +15,6 @@ These tutorials show you how Argilla can help you to monitor your model predicti
 ```
 ```{include} /_static/tutorials/monitoring-textclassification-transformers-explainability/modal.md
 ```
+```{include} /_static/tutorials/monitoring-textclassification-setfit-explainability/modal.md
+```
 ````

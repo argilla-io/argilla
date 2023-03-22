@@ -22,6 +22,7 @@ from argilla.server.apis.v0.models.commons.params import (
     CommonTaskHandlerDependencies,
 )
 from argilla.server.apis.v0.models.dataset_settings import TextClassificationSettings
+from argilla.server.apis.v0.validators.commons import validate_is_super_user
 from argilla.server.apis.v0.validators.text_classification import DatasetValidator
 from argilla.server.commons.models import TaskType
 from argilla.server.security import auth
@@ -69,7 +70,8 @@ def configure_router(router: APIRouter):
     @deprecate_endpoint(
         path=base_endpoint,
         new_path=new_base_endpoint,
-        router_method=router.put,
+        router_method=router.patch,
+        old_router_method=router.put,
         name=f"save_dataset_settings_for_{task}",
         operation_id=f"save_dataset_settings_for_{task}",
         description=f"Save the {task} dataset settings",
@@ -118,6 +120,10 @@ def configure_router(router: APIRouter):
             task=task,
             workspace=ws_params.workspace,
         )
+        validate_is_super_user(
+            user, message=f"Cannot delete settings for dataset {found_ds.id}. Only admins can apply this change"
+        )
+
         await datasets.delete_settings(
             user=user,
             dataset=found_ds,
