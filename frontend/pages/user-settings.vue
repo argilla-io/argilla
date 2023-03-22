@@ -3,7 +3,9 @@
     <template v-slot:header>
       <HeaderUserSettingsContent />
     </template>
-    <template v-slot:top></template>
+    <template v-slot:top>
+      <TopUserSettingsContent />
+    </template>
     <template v-slot:left></template>
     <template v-slot:right>
       <div class="right-content"></div>
