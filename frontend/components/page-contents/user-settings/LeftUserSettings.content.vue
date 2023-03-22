@@ -1,8 +1,6 @@
 <template>
   <div class="wrapper">
-    <div class="loading-state" v-if="$fetchState.pending">
-      Fetching user info
-    </div>
+    <BaseSpinner v-if="$fetchState.pending" />
 
     <div class="left-content" v-if="user">
       <div class="left-content-item edition-user-info-component">
@@ -16,7 +14,7 @@
 </template>
 
 <script>
-// import { ObservationDataset } from "@/models/Dataset";
+import { ObservationDataset } from "@/models/Dataset";
 
 export default {
   name: "LeftUserSettingsContent",
@@ -30,22 +28,9 @@ export default {
   },
   methods: {
     async fetchUserInfo() {
-      // fetch original data
-      //   try {
-      //     const { response } = await ObservationDataset.api().get("me");
-      //     console.log(response.data);
-      //   } catch (err) {
-      //     console.log(err);
-      //   }
-
-      // fetch mocking data
-      let user = null;
       try {
-        const data = await fetch("http://localhost:4000/me");
-        if (data.ok) {
-          user = await data.json();
-          this.user = user;
-        }
+        const { response } = await ObservationDataset.api().get("me");
+        this.user = response.data;
       } catch (err) {
         console.log(err);
       }
