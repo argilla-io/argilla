@@ -333,7 +333,7 @@ jobs:
 
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
-        if: ${{ github.event_name == 'release' }} && env.IS_DEPLOYABLE == 'true'
+        if: github.event_name == 'release' && env.IS_DEPLOYABLE == 'true'
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
