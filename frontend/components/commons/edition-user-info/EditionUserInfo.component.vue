@@ -1,11 +1,9 @@
 <template>
   <div class="edition-user-info">
     <div class="form-group role-and-username">
-      <span v-circle v-text="userNameFirstChar" />
-      <div class="user-role">
-        <span v-text="userRole" />
-      </div>
-      <span class="user-username" v-text="userInfoCloned.username" />
+      <span v-circle v-html="userNameFirstChar" />
+      <div class="user-role" v-text="userRole" />
+      <span class="user-username" v-html="userInfoCloned.username" />
     </div>
 
     <div class="form-group user-first_name">
@@ -63,29 +61,27 @@ export default {
 .form-group {
   min-height: 5em;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  &:last-child {
+    border: 0;
+  }
 }
 
 .user-role {
-  display: inline-block;
-  text-align: center;
-
-  span {
-    border: 1px solid rgba(0, 0, 0, 0.37);
-    border-radius: 10px;
-    color: rgba(0, 0, 0, 0.6);
-    font-size: 12px;
-    font-size: 0.75rem;
-    line-height: 12px;
-    line-height: 0.75rem;
-    padding: 4px;
-  }
+  border: 1px solid rgba(0, 0, 0, 0.37);
+  border-radius: 10px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  font-size: 0.75rem;
+  line-height: 12px;
+  line-height: 0.75rem;
+  padding: 4px;
 }
 
 .role-and-username {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 50px;
+  gap: $base-space * 5;
 }
 
 .user-first_name {
