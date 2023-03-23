@@ -106,7 +106,7 @@ $buttonSize: 34px;
   display: flex;
   gap: 25px;
   padding: 0.5em 1.5em 1.5em 1.5em;
-  border-bottom: 1px solid white;
+  border-bottom: 1px solid palette(grey, 400);
   .right-head {
     flex: 1;
     display: flex;
@@ -179,7 +179,7 @@ $buttonSize: 34px;
     }
   }
   &__link:not(:last-child) {
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid palette(grey, 400);
   }
 }
 
