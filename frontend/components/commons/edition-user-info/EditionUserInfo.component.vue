@@ -2,31 +2,29 @@
   <div class="edition-user-info">
     <div class="form-group role-and-username">
       <span v-circle v-html="userNameFirstChar" />
-      <div class="user-role">
-        <span v-html="userRole" />
-      </div>
+      <div class="user-role" v-text="userRole" />
       <span class="user-username" v-html="userInfoCloned.username" />
     </div>
 
     <div class="form-group user-first_name">
       <h2
         class="user-token-item --heading5 --semibold description__title"
-        v-html="'Name'"
+        v-text="'Name'"
       />
       <p
         class="user-token-item --body1 description__text"
-        v-html="userInfoCloned.first_name"
+        v-text="userInfoCloned.first_name"
       />
     </div>
 
     <div class="form-group user-last_name" v-if="userInfoCloned.last_name">
       <h2
         class="user-token-item --heading5 --semibold description__title"
-        v-html="'Surname'"
+        v-text="'Surname'"
       />
       <p
         class="user-token-item --body1 description__text"
-        v-html="userInfoCloned.last_name"
+        v-text="userInfoCloned.last_name"
       />
     </div>
   </div>
@@ -63,30 +61,27 @@ export default {
 .form-group {
   min-height: 5em;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  &:last-child {
+    border: 0;
+  }
 }
 
 .user-role {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  span {
-    border: 1px solid rgba(0, 0, 0, 0.37);
-    border-radius: 10px;
-    color: rgba(0, 0, 0, 0.6);
-    font-size: 12px;
-    font-size: 0.75rem;
-    line-height: 12px;
-    line-height: 0.75rem;
-    padding: 4px;
-  }
+  border: 1px solid rgba(0, 0, 0, 0.37);
+  border-radius: 10px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  font-size: 0.75rem;
+  line-height: 12px;
+  line-height: 0.75rem;
+  padding: 4px;
 }
 
 .role-and-username {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 50px;
+  gap: $base-space * 5;
 }
 
 .user-first_name {
