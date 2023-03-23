@@ -1,30 +1,28 @@
 <template>
   <div class="edition-user-info">
-    <div class="form-group role-and-username">
-      <span v-circle v-html="userNameFirstChar" />
+    <div class="form-group circle-and-role">
+      <span v-circle="{ size: 'MEDIUM' }" v-html="userNameFirstChar" />
       <div class="user-role" v-text="userRole" />
-      <span class="user-username" v-html="userInfoCloned.username" />
     </div>
 
     <div class="form-group user-first_name">
       <h2
-        class="user-token-item --heading5 --semibold description__title"
-        v-text="'Name'"
+        class="--heading5 --semibold description__title"
+        v-text="'Username'"
       />
-      <p
-        class="user-token-item --body1 description__text"
-        v-text="userInfoCloned.first_name"
-      />
+      <p class="--body1 description__text" v-text="userInfoCloned.username" />
     </div>
 
-    <div class="form-group user-last_name" v-if="userInfoCloned.last_name">
-      <h2
-        class="user-token-item --heading5 --semibold description__title"
-        v-text="'Surname'"
-      />
+    <div class="form-group user-first_name">
+      <h2 class="--heading5 --semibold description__title" v-text="'Name'" />
+      <p class="--body1 description__text" v-text="userInfoCloned.first_name" />
+    </div>
+
+    <div class="form-group user-last_name">
+      <h2 class="--heading5 --semibold description__title" v-text="'Surname'" />
       <p
-        class="user-token-item --body1 description__text"
-        v-text="userInfoCloned.last_name"
+        class="--body1 description__text"
+        v-text="userInfoCloned.last_name ?? '-'"
       />
     </div>
   </div>
@@ -60,9 +58,11 @@ export default {
 <style lang="scss" scoped>
 .form-group {
   padding: $base-space * 3 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   &:last-child {
     border: 0;
+  }
+  &:not(:first-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -77,7 +77,7 @@ export default {
   padding: 4px;
 }
 
-.role-and-username {
+.circle-and-role {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
