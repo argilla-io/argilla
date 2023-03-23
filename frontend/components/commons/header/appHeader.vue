@@ -27,11 +27,15 @@
         :copy-button="copyButton"
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
-      <DatasetSettingsIcon
-        v-if="datasetId && datasetName"
-        :datasetId="datasetId"
-        @click-settings-icon="goToSettings()"
-      />
+      <template v-if="datasetId && datasetName">
+        <base-button class="button-train small" @on-click="onClickTrain">
+          <svgicon name="code" width="20" height="20" />Train
+        </base-button>
+        <DatasetSettingsIcon
+          :datasetId="datasetId"
+          @click-settings-icon="goToSettings()"
+        />
+      </template>
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
@@ -53,6 +57,7 @@
 </template>
 
 <script>
+import "assets/icons/code";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Vector as VectorModel } from "@/models/Vector";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
@@ -181,6 +186,9 @@ export default {
     searchRecords(query) {
       this.$emit("on-search-or-on-filter-records", query);
     },
+    onClickTrain() {
+      this.$emit("on-click-train");
+    },
     goToSettings() {
       const currentRoute = this.$route.path;
       const newRoute = `/datasets/${this.workspace}/${this.datasetName}/settings`;
@@ -223,6 +231,17 @@ export default {
     &:after {
       margin-top: calc($base-space/2);
     }
+  }
+}
+.button-train {
+  background: palette(white);
+  color: $primary-color;
+  margin-right: $base-space;
+  &:hover {
+    background: palette(grey, 600);
+  }
+  svg {
+    fill: $primary-color;
   }
 }
 </style>
