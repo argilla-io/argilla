@@ -1,32 +1,32 @@
 <template>
   <div class="edition-user-info">
     <div class="form-group role-and-username">
-      <span v-circle v-html="userNameFirstChar" />
+      <span v-circle v-text="userNameFirstChar" />
       <div class="user-role">
-        <span v-html="userRole" />
+        <span v-text="userRole" />
       </div>
-      <span class="user-username" v-html="userInfoCloned.username" />
+      <span class="user-username" v-text="userInfoCloned.username" />
     </div>
 
     <div class="form-group user-first_name">
       <h2
         class="user-token-item --heading5 --semibold description__title"
-        v-html="'Name'"
+        v-text="'Name'"
       />
       <p
         class="user-token-item --body1 description__text"
-        v-html="userInfoCloned.first_name"
+        v-text="userInfoCloned.first_name"
       />
     </div>
 
     <div class="form-group user-last_name" v-if="userInfoCloned.last_name">
       <h2
         class="user-token-item --heading5 --semibold description__title"
-        v-html="'Surname'"
+        v-text="'Surname'"
       />
       <p
         class="user-token-item --body1 description__text"
-        v-html="userInfoCloned.last_name"
+        v-text="userInfoCloned.last_name"
       />
     </div>
   </div>

@@ -1,6 +1,6 @@
 <template>
   <div class="top-content">
-    <h1 v-html="title" />
+    <h1 v-text="title" />
     <BaseButton :to="goToDatasetsPage" class="secondary text">
       <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
       {{ nameOfDatasetsPage }}
