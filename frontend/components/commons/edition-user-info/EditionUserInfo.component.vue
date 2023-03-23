@@ -1,7 +1,7 @@
 <template>
   <div class="edition-user-info">
     <div class="form-group role-and-username">
-      <span v-circle v-html="firstNameFirstChar" />
+      <span v-circle v-html="userNameFirstChar" />
       <div class="user-role">
         <span v-html="userRole" />
       </div>
@@ -46,11 +46,11 @@ export default {
     this.userInfoCloned = cloneDeep(this.userInfo);
   },
   computed: {
-    firstName() {
-      return this.userInfoCloned.first_name;
+    userName() {
+      return this.userInfoCloned.username;
     },
-    firstNameFirstChar() {
-      return this.firstName.slice(0, 2);
+    userNameFirstChar() {
+      return this.userName.slice(0, 2);
     },
     userRole() {
       return this.$options.filters.capitalize(this.userInfoCloned.role);
