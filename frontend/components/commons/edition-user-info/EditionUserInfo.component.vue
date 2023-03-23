@@ -59,7 +59,7 @@ export default {
 
 <style lang="scss" scoped>
 .form-group {
-  min-height: 5em;
+  padding: $base-space * 3 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   &:last-child {
     border: 0;
@@ -92,5 +92,17 @@ export default {
 .user-last_name {
   display: flex;
   flex-direction: column;
+}
+.user-username {
+  @include font-size(16px);
+}
+.description {
+  &__title {
+    margin-top: 0;
+    margin-bottom: $base-space;
+  }
+  &__text {
+    margin: 0;
+  }
 }
 </style>

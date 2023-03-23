@@ -12,13 +12,15 @@
     <span class="user-token-value" v-text="userToken" />
 
     <div class="user-token-button">
-      <BaseButton
-        title="Copy to clipboard"
-        class="secondary small"
-        @click.prevent="$copyToClipboard(userToken)"
-      >
-        Copy token
-      </BaseButton>
+      <base-action-tooltip tooltip="Copied">
+        <BaseButton
+          title="Copy to clipboard"
+          class="secondary small"
+          @click.prevent="$copyToClipboard(userToken)"
+        >
+          Copy token
+        </BaseButton>
+      </base-action-tooltip>
     </div>
   </div>
 </template>
@@ -50,16 +52,18 @@ export default {
     "c d";
   grid-template-columns: 1fr 120px;
   grid-template-rows: auto auto 1fr;
-  grid-gap: 5px;
-  margin-bottom: 2em;
+  grid-gap: $base-space;
+  padding: $base-space * 3 0;
 }
 
 .user-token-title {
   grid-area: a;
+  margin: 0;
 }
 .user-token-description {
   grid-area: b;
   color: $black-37;
+  margin-top: 0;
 }
 .user-token-value {
   grid-area: c;
@@ -67,5 +71,6 @@ export default {
 }
 .user-token-button {
   grid-area: d;
+  margin-left: auto;
 }
 </style>
