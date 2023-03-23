@@ -16,7 +16,6 @@ cat >"$HOME"/users.yml <<EOF
   full_name: Team
   email: team@argilla.io
   hashed_password: $team_password
-  workspaces: []
 
 - username: "argilla"
   api_key: $ARGILLA_API_KEY
