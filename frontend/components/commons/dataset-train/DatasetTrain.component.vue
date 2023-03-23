@@ -7,7 +7,7 @@
       @change-tab="getSelectedLibrary"
     />
     <transition v-if="snippet" name="fade" mode="out-in" appear>
-      <div class="snippet">
+      <div class="snippet" :key="visibleTab.id">
         <h1 v-if="snippetAttributes.title" class="snippet__title --heading4">
           {{ snippetAttributes.title }}
         </h1>
@@ -17,7 +17,7 @@
         >
           {{ snippetAttributes.description }}
         </h2>
-        <div class="snippet__code" v-if="snippet.html">
+        <!-- <div class="snippet__code" v-if="snippet.html">
           <div v-highlight v-html="snippet.html"></div>
           <base-action-tooltip tooltip="Copied">
             <base-button
@@ -28,7 +28,7 @@
               Copy
             </base-button>
           </base-action-tooltip>
-        </div>
+        </div> -->
         <base-code
           v-if="snippet.html"
           :code="parseHtml(snippet.html)"
@@ -72,18 +72,28 @@ export default {
         this.getLibrary("AutoTrain"),
       ];
     },
+    task() {
+      switch (this.datasetTask) {
+        case "TextClassification":
+          return "text-classification";
+        case "TokenClassification":
+          return "token-classification";
+        case "Text2Text":
+          return "text-generation";
+      }
+    },
     visibleTab() {
       return this.selectedComponent || this.snippetsTabs[0];
     },
     snippet() {
       try {
-        return require(`../../../../docs/_source/_common/snippets/training/TextClassification/${this.visibleTab.id}.md`);
-      } catch (e) {
+        return require(`../../../../docs/_source/_common/snippets/training/${this.task}/${this.visibleTab.id}.md`);
+      } catch {
         return null;
       }
     },
     snippetAttributes() {
-      return this.snippet.attributes;
+      return this.snippet?.attributes;
     },
   },
   methods: {
