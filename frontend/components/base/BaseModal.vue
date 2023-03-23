@@ -22,12 +22,19 @@
         <div
           class="modal-container"
           :class="modalClass"
-          v-click-outside="onClickOutside"
+          v-click-outside="close"
         >
           <p v-if="modalTitle" class="modal__title">
             {{ modalTitle }}
           </p>
           <slot />
+          <base-button
+            class="button-close-modal"
+            @on-click="close"
+            v-if="allowClose"
+          >
+            <svgicon name="close" width="20" height="20" />
+          </base-button>
         </div>
       </div>
     </div>
@@ -49,6 +56,10 @@ export default {
     modalVisible: {
       type: Boolean,
       default: true,
+    },
+    allowClose: {
+      type: Boolean,
+      default: false,
     },
     modalClass: {
       type: String,
@@ -80,7 +91,7 @@ export default {
     },
   },
   methods: {
-    onClickOutside() {
+    close() {
       this.$emit("close-modal");
     },
   },
@@ -121,6 +132,11 @@ export default {
       margin-right: 6em;
     }
   }
+
+  &.modal-top-center {
+    align-items: flex-start;
+    padding-top: 5em;
+  }
   &.modal-center {
     align-items: center;
   }
@@ -138,6 +154,12 @@ export default {
   transition: $swift-ease-in-out;
   text-align: left;
   pointer-events: all;
+}
+.button-close-modal {
+  position: absolute;
+  right: $base-space * 2;
+  top: $base-space * 2;
+  padding: 0;
 }
 .modal-primary {
   box-shadow: $shadow;
@@ -157,6 +179,15 @@ export default {
 }
 
 .modal-table {
+  box-shadow: $shadow;
+  border-radius: $border-radius;
+  max-width: none;
+  :deep(.modal__text) {
+    margin-bottom: 2em;
+  }
+}
+
+.modal-auto {
   box-shadow: $shadow;
   border-radius: $border-radius;
   max-width: none;
