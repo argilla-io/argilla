@@ -2,16 +2,31 @@
   <div>
     <base-tabs
       class="train__tabs"
-      :tabs="snippets"
+      :tabs="snippetsTabs"
       :active-tab="visibleTab"
       @change-tab="getSelectedHelpComponent"
     />
-    <template v-if="currentSnippet">
-      <transition name="fade" mode="out-in" appear>
-        <div v-highlight v-html="currentSnippet.html"></div>
-        <base-code :code="currentSnippet.html"></base-code>
-      </transition>
-    </template>
+    <transition v-if="snippet" name="fade" mode="out-in" appear>
+      <div class="snippet">
+        <h1 v-if="snippetAttributes.title" class="snippet__title --heading3">
+          {{ snippetAttributes.title }}
+        </h1>
+        <h2
+          v-if="snippetAttributes.description"
+          class="snippet__description --body2"
+        >
+          {{ snippetAttributes.description }}
+        </h2>
+        <base-code v-if="snippet.html" :code="snippet.html"></base-code>
+        <base-button
+          v-if="snippetAttributes.buttonLink"
+          class="snippet__button primary"
+          :href="snippetAttributes.buttonLink"
+          target="_blank"
+          >{{ snippetAttributes.buttonText }}</base-button
+        >
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -29,7 +44,7 @@ export default {
     };
   },
   computed: {
-    snippets() {
+    snippetsTabs() {
       switch (this.datasetTask) {
         case "TextClassification":
           return [
@@ -93,18 +108,34 @@ export default {
       }
     },
     visibleTab() {
-      return this.selectedComponent || this.snippets[0];
+      return this.selectedComponent || this.snippetsTabs[0];
     },
-    currentSnippet() {
+    snippet() {
       return require(`../../../../docs/_source/_common/snippets/training/TextClassification/${this.visibleTab.id}.md`);
+    },
+    snippetAttributes() {
+      return this.snippet.attributes;
     },
   },
   methods: {
     getSelectedHelpComponent(id) {
-      this.selectedComponent = this.snippets.find(
+      this.selectedComponent = this.snippetsTabs.find(
         (snippet) => snippet.id === id
       );
     },
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.snippet {
+  margin-top: $base-space * 5;
+  max-width: 1000px;
+  &__description {
+    font-weight: normal;
+  }
+  &__button {
+    display: inline-flex;
+  }
+}
+</style>

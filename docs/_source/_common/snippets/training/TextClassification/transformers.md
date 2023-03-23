@@ -1,11 +1,9 @@
 ---
 title: spaCy
-description: Lorem ipsum
-documentationLink: https://docs.argilla.io/en/latest/guides/
-task: TextClassification
+description: In aliquet velit eget nisl euismod ultricies. Nam pretium tortor eu pretium lobortis. Proin imperdiet ante erat. Vestibulum vitae faucibus felis, et posuere felis. Sed pharetra congue tristique
+buttonText: Button text
+buttonLink: https://docs.argilla.io/en/latest/guides/
 ---
-
-# header
 
 ```python
 import spacy
