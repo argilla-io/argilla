@@ -63,6 +63,9 @@ export default {
 .form-group {
   min-height: 5em;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  &:last-child {
+    border: 0;
+  }
 }
 
 .user-role {
