@@ -1,7 +1,7 @@
 <template>
   <div class="code">
     <pre>
-      <code v-highlight class="python" v-html="code"></code>
+      <code v-highlight class="python">{{ code }}</code>
     </pre>
     <base-action-tooltip class="code__button" tooltip="Copied">
       <a href="#" @click.prevent="copy(code)">
