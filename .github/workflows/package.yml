@@ -333,12 +333,13 @@ jobs:
 
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
+        if: github.event_name == 'release' && env.IS_DEPLOYABLE == 'true'
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
           repository: ${{ matrix.image }}
           readme-filepath: ${{ matrix.readme }}
-        if: env.IS_DEPLOYABLE == 'true'
+
 
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
