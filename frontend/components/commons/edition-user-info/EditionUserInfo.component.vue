@@ -66,9 +66,8 @@ export default {
 }
 
 .user-role {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
+  text-align: center;
 
   span {
     border: 1px solid rgba(0, 0, 0, 0.37);
