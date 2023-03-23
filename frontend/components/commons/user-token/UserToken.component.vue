@@ -1,14 +1,17 @@
 <template>
   <div class="user-token">
     <h2
-      class="user-token-item --heading5 --semibold description__title"
-      v-html="title"
+      class="user-token-title --heading5 --semibold description__title"
+      v-text="title"
     />
-    <p class="user-token-item --body1 description__text" v-html="description" />
+    <p
+      class="user-token-description --body1 description__text"
+      v-text="description"
+    />
 
-    <div class="user-token-item token-and-copy-button">
-      <span v-html="userToken" />
+    <span class="user-token-value" v-text="userToken" />
 
+    <div class="user-token-button">
       <BaseButton
         title="Copy to clipboard"
         class="secondary small"
@@ -40,20 +43,29 @@ export default {
 
 <style lang="scss" scoped>
 .user-token {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 16px;
-  _text {
-    color: $black-37;
-  }
-  .user-token-item:not(:last-child) {
-    width: 80%;
-  }
+  display: grid;
+  grid-template-areas:
+    "a ."
+    "b ."
+    "c d";
+  grid-template-columns: 1fr 120px;
+  grid-template-rows: auto auto 1fr;
+  grid-gap: 5px;
+  margin-bottom: 2em;
 }
-.token-and-copy-button {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+
+.user-token-title {
+  grid-area: a;
+}
+.user-token-description {
+  grid-area: b;
+  color: $black-37;
+}
+.user-token-value {
+  grid-area: c;
+  word-break: break-word;
+}
+.user-token-button {
+  grid-area: d;
 }
 </style>
