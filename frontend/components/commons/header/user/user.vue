@@ -4,21 +4,36 @@
       {{ firstChar(user.username) }}
     </a>
     <div v-if="visibleSelector && user" class="user__content">
-      <p class="user__name">{{ user.username }}</p>
-      <p class="user__mail">{{ user.email }}</p>
-      <a
-        class="user__link"
-        href="https://docs.argilla.io/en/latest/"
-        target="_blank"
-      >
-        <svgicon width="16" height="16" name="external"></svgicon> View docs
-      </a>
-      <NuxtLink class="user__link" :to="{ name: 'user-settings' }">
-        My settings
-      </NuxtLink>
-      <a class="user__link" href="#" @click.prevent="logout">
-        <svgicon width="16" heigth="16" name="log-out"></svgicon> Log out
-      </a>
+      <div class="head">
+        <div class="left-head">
+          <span v-circle v-text="firstChar(user.username)" />
+        </div>
+        <div class="right-head">
+          <div class="item">
+            <span v-text="user.username" />
+          </div>
+          <div class="item" v-if="user.email">
+            <span v-text="user.email" />
+          </div>
+        </div>
+      </div>
+      <div class="">
+        <NuxtLink class="user__link" :to="{ name: 'user-settings' }">
+          My settings
+        </NuxtLink>
+        <a
+          class="user__link"
+          href="https://docs.argilla.io/en/latest/"
+          target="_blank"
+          v-text="'View docs'"
+        />
+        <a
+          class="user__link"
+          href="#"
+          @click.prevent="logout"
+          v-text="'Log out'"
+        />
+      </div>
       <span class="copyright"
         >© {{ currentYear }} Argilla ({{ appVersion }})</span
       >
@@ -86,6 +101,20 @@ $buttonSize: 34px;
   font-weight: 500;
   @include font-size(16px);
 }
+
+.head {
+  display: flex;
+  gap: 25px;
+  padding: 0.5em 1.5em 1.5em 1.5em;
+  border-bottom: 1px solid white;
+  .right-head {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
 .user {
   position: relative;
   z-index: 3;
@@ -136,8 +165,8 @@ $buttonSize: 34px;
   }
   &__link {
     display: flex;
-    align-items: center;
-    margin: 0.5em 1.5em 1.5em 1.5em;
+    flex-direction: column;
+    padding: 1.5em 1.5em 1.5em 1.5em;
     color: palette(white);
     &:hover {
       color: darken(palette(white), 10%);
@@ -145,17 +174,20 @@ $buttonSize: 34px;
         fill: darken(palette(white), 10%);
       }
     }
-    .svg-icon {
-      margin-right: 0.5em;
+    a {
+      color: palette(white);
     }
   }
+  &__link:not(:last-child) {
+    border-bottom: 1px solid white;
+  }
 }
+
 .copyright {
   display: block;
   @include font-size(11px);
   font-weight: 400;
   line-height: 1em;
-  margin-top: 1.5em;
   padding: 1em;
   background: $black-54;
   text-align: right;
