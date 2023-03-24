@@ -139,7 +139,7 @@ export default {
 .small {
   @include font-size(13px);
   line-height: 13px;
-  padding: 9px 18px;
+  padding: $base-space;
 }
 .primary {
   background-color: $primary-color;
@@ -289,7 +289,6 @@ export default {
 }
 .clear {
   background: none;
-  padding: $base-space;
   height: 30px;
   &:hover,
   &:active,

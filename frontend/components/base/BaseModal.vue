@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <transition v-if="modalVisible" name="fade" appear>
+  <transition v-if="modalVisible" name="modal" appear>
     <div class="modal-mask" :class="modalMaskClass">
       <div class="modal-wrapper" :class="modalPosition">
         <div
@@ -109,7 +109,7 @@ export default {
   display: table;
   transition: opacity 0.3s ease;
   cursor: default;
-  background: $black-10;
+  background: $black-20;
   &:not(.prevent-scroll) {
     pointer-events: none;
   }
@@ -215,16 +215,13 @@ export default {
   margin-top: 0;
 }
 
-.modal-enter {
-  opacity: 0;
-}
-
+.modal-enter,
 .modal-leave-active {
   opacity: 0;
 }
 
 .modal-enter .modal-container,
 .modal-leave-active .modal-container {
-  transform: scale(0.9);
+  transform: scale(0.99);
 }
 </style>

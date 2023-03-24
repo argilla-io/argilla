@@ -237,7 +237,7 @@ export default {
   }
 }
 .button-train {
-  background: palette(white);
+  background: palette(grey, 700);
   color: $primary-color;
   margin-right: $base-space;
   &:hover {
