@@ -158,15 +158,15 @@ $buttonSize: 34px;
     display: flex;
     flex-direction: column;
     padding: $base-space * 2 $base-space * 2 $base-space * 2 $base-space * 2;
-    color: palette(white);
-    &:hover {
-      color: darken(palette(white), 10%);
-      .svg-icon {
-        fill: darken(palette(white), 10%);
-      }
-    }
+    color: darken(palette(white), 10%);
     a {
+      color: darken(palette(white), 10%);
+    }
+    &:hover {
       color: palette(white);
+      .svg-icon {
+        color: palette(white);
+      }
     }
   }
   &__link:not(:last-child) {
