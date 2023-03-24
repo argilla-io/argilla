@@ -28,7 +28,11 @@
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
       <template v-if="datasetId && datasetName">
-        <base-button class="button-train small" @on-click="onClickTrain">
+        <base-button
+          v-if="isAdminRole"
+          class="button-train small"
+          @on-click="onClickTrain"
+        >
           <svgicon name="code" width="20" height="20" />Train
         </base-button>
         <DatasetSettingsIcon
@@ -116,6 +120,9 @@ export default {
     },
     viewSettings() {
       return DatasetViewSettings.query().whereId(this.datasetName).first();
+    },
+    isAdminRole() {
+      return this.$auth.user.role === "admin";
     },
     globalHeaderHeight() {
       if (this.sticky && this.dataset) {
