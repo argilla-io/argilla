@@ -30,8 +30,10 @@ class ArgillaSpaCyTrainer:
             rg.TextClassificationRecord, rg.TokenClassificationRecord, rg.Text2TextRecord
         ] = rg.DatasetForTokenClassification._RECORD_TYPE,
         model: Optional[str] = None,
-        use_gpu: bool = True,
+        gpu_id: Optional[int] = -1,
     ) -> None:
+        import spacy
+
         self._train_dataset, self._valid_dataset = (
             dataset if isinstance(dataset, tuple) and len(dataset) > 1 else (dataset, None)
         )
@@ -49,7 +51,7 @@ class ArgillaSpaCyTrainer:
         else:
             raise NotImplementedError("`rg.TextClassificationRecord` and `rg.Text2TextRecord` are not supported yet.")
 
-        self.use_gpu = use_gpu
+        self.gpu_id = gpu_id if spacy.prefer_gpu(gpu_id) else -1
 
     def train(self) -> None:
         import tempfile
