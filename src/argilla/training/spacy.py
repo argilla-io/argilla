@@ -12,29 +12,34 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+import sys
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import argilla as rg
 
 if TYPE_CHECKING:
-    from spacy.tokens import DocBin
+    import spacy
 
 
 class ArgillaSpaCyTrainer:
     def __init__(
         self,
-        dataset: Dict[str, "DocBin"],
+        dataset: Union["spacy.tokens.DocBin", Tuple["spacy.tokens.DocBin", "spacy.tokens.DocBin"]],
         record_class: Union[
             rg.TextClassificationRecord, rg.TokenClassificationRecord, rg.Text2TextRecord
         ] = rg.DatasetForTokenClassification._RECORD_TYPE,
         model: Optional[str] = None,
+        use_gpu: bool = True,
     ) -> None:
         self._train_dataset, self._valid_dataset = (
-            dataset if isinstance(dataset, tuple) and len(dataset) == 2 else (dataset, None)
+            dataset if isinstance(dataset, tuple) and len(dataset) > 1 else (dataset, None)
         )
-        self._train_dataset_path = self._train_dataset.to_disk("./train.spacy")
+        self._train_dataset_path = "./train.spacy"
+        self._train_dataset.to_disk(self._train_dataset_path)
         if self._valid_dataset:
-            self._valid_dataset = self._valid_dataset.to_disk("./valid.spacy")
+            self._valid_dataset_path = "./valid.spacy"
+            self._valid_dataset.to_disk(self._valid_dataset_path)
 
         self.model = model  #  or "en_core_web_trf"
 
@@ -44,32 +49,37 @@ class ArgillaSpaCyTrainer:
         else:
             raise NotImplementedError("`rg.TextClassificationRecord` and `rg.Text2TextRecord` are not supported yet.")
 
+        self.use_gpu = use_gpu
+
     def train(self) -> None:
-        import spacy
+        import tempfile
+
         from spacy.cli.init_config import init_config
-        from spacy.cli.train import train as spacy_train
+        from spacy.training.initialize import init_nlp
+        from spacy.training.loop import train as train_nlp
+        from spacy.util import load_config
 
-        config_path = "train.cfg"
-        init_config(
-            lang="en",
-            pipeline=["ner"],
-        ).to_disk(config_path)
-
-        output_model_path = "ner"
-        spacy_train(
-            config_path,
-            output_path=output_model_path,
-            overrides={
-                "paths.train": "train.spacy",
-                "paths.dev": "valid.spacy",
+        with tempfile.NamedTemporaryFile(suffix=".cfg", delete=True) as temp_file:
+            config_file = temp_file.name
+            init_config(
+                lang="en",
+                pipeline=["ner"],
+            ).to_disk(config_file)
+            overrides = {
+                "paths.train": self._train_dataset_path,
+                "paths.dev": self._valid_dataset_path,
                 "paths.vectors": self.model,
-                "training.max_steps": 50,
-            },
-        )
-        self._model = spacy.load(f"{output_model_path}/model-best")
+                "training.max_epochs": 2,  # TODO
+            }
+            config = load_config(config_file, overrides=overrides, interpolate=False)
+        nlp = init_nlp(config, use_gpu=self.use_gpu)
+        self._model, _ = train_nlp(nlp, use_gpu=self.use_gpu, stdout=sys.stdout, stderr=sys.stderr)
 
     def save(self, path: str) -> None:
-        pass
+        path = Path(path) if isinstance(path, str) else path
+        if path and not path.exists():
+            path.mkdir(parents=True)
+        self._model.to_disk(path)
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         if isinstance(text, str):
