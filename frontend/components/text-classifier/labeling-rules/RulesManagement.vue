@@ -22,13 +22,24 @@
         placeholder="Search rule by name"
         @input="onSearch"
       />
+
+      <BaseFeedbackComponent
+        v-if="areMetricsInPending"
+        :feedbackInput="{
+          feedbackType: 'ERROR',
+          message: 'The metrics of the rules are in pending',
+        }"
+        :isLoading="areMetricsInPending"
+        class="feedback-area"
+      />
+
       <base-table-info
         class="rules-management__table"
         :data="formattedRules"
         :sorted-order="sortedOrder"
         :sorted-by-field="sortedByField"
         :columns="tableColumns"
-        :actions="actions"
+        :actions="areMetricsInPending ? [] : actions"
         :query-search="querySearch"
         :global-actions="false"
         search-on="query"
@@ -70,7 +81,6 @@ export default {
     return {
       querySearch: undefined,
       visibleModalId: undefined,
-      isLoading: undefined,
       sortedOrder: "desc",
       sortedByField: "created_at",
       actions: [{ name: "delete", icon: "trash-empty", title: "Delete rule" }],
@@ -181,6 +191,12 @@ export default {
         text: `You are about to delete the rule <strong>"${this.visibleModalId}"</strong> from your dataset. This action cannot be undone.`,
       };
     },
+    areMetricsInPending() {
+      return (
+        this.rules?.length !== 0 &&
+        this.rules.length !== Object.keys(this.perRuleMetrics || {})?.length
+      );
+    },
   },
   methods: {
     ...mapActions({
@@ -191,7 +207,7 @@ export default {
       const metrics = _.isNil(this.perRuleMetrics)
         ? null
         : this.perRuleMetrics[rule.query];
-      
+
       if (!metrics) {
         return {};
       }
