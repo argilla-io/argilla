@@ -10,13 +10,16 @@ services:
     environment:
       ARGILLA_HOME_PATH: /var/lib/argilla
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
-      # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
-      # ARGILLA_ENABLE_TELEMETRY: 0
+      # ARGILLA_ENABLE_TELEMETRY: 0 # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
 
       # Set user configuration https://docs.argilla.io/en/latest/getting_started/installation/user_management.html
       # ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
       # volumes:
       #- ${PWD}/.users.yaml:/config/.users.yaml
+
+      # DEFAULT_USER_ENABLED: false # Uncomment this line to disable the creation of the default user
+      # DEFAULT_USER_PASSWORD: custom-password # Uncomment this line to set a custom password for the default user
+      # DEFAULT_USER_API_KEY: custom-api-key # Uncomment this line to set a custom api-key for the default user
     networks:
       - argilla
     volumes:
