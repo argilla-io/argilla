@@ -28,11 +28,7 @@
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
       <template v-if="datasetId && datasetName">
-        <base-button
-          v-if="!isAdminRole"
-          class="button-train small"
-          @on-click="onClickTrain"
-        >
+        <base-button class="button-train small" @on-click="onClickTrain">
           <svgicon name="code" width="20" height="20" />Train
         </base-button>
         <DatasetSettingsIcon
