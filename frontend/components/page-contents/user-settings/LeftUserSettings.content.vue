@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <BaseSpinner v-if="$fetchState.pending" />
+    <BaseSpinner v-if="!user" />
 
     <div class="left-content" v-if="user">
       <div class="left-content-item edition-user-info-component">
@@ -14,26 +14,11 @@
 </template>
 
 <script>
-import { ObservationDataset } from "@/models/Dataset";
-
 export default {
   name: "LeftUserSettingsContent",
-  data() {
-    return {
-      user: null,
-    };
-  },
-  async fetch() {
-    await this.fetchUserInfo();
-  },
-  methods: {
-    async fetchUserInfo() {
-      try {
-        const { response } = await ObservationDataset.api().get("me");
-        this.user = response.data;
-      } catch (err) {
-        console.log(err);
-      }
+  computed: {
+    user() {
+      return this.$auth.user;
     },
   },
 };
