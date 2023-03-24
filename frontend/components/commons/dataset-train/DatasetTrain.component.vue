@@ -120,6 +120,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.train {
+  &__tabs {
+    margin: 0 -2.5em 2em;
+    padding: 0 2.5em;
+  }
+}
 .snippet {
   margin-top: $base-space * 3;
   :deep(code) {
