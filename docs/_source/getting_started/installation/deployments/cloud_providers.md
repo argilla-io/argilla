@@ -1,7 +1,23 @@
 
-# Cloud Providers
+# Cloud Providers and Kubernetes
 
-This guide explains how to deploy the Argilla Server on different cloud providers.
+This guide explains how to deploy the Argilla Server on different cloud providers and Kubernetes.
+
+## Kubernetes
+
+The [Kubernetes (k8s) folder](https://github.com/argilla-io/argilla/tree/main/k8s) in the repo holds several files for a minimal config on deploying Argilla to Kubernetes. These files also contain some resource requirement recommendations for hosting. For a more robust config, we recommend using [Helm](#helm-charts) charts.
+
+- [argilla-server-deployment.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/argilla-server-deployment.yaml): deploy main Argilla server,
+- [argilla-server-hpa.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/argilla-server-hpa.yaml): scaler to scale the server from 1 to 3 pods.
+- [argilla-server-ingress.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/argilla-server-ingress.yaml): server ingress config.
+- [argilla-server-service.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/argilla-server-service.yaml): server service config.
+- [elasticsearch-deployment.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/elasticsearch-deployment.yaml): a minimal Elastic Search config.
+- [elasticsearch-pvc.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/elasticsearch-pvc.yaml): a persistent volume claim to dynamically scale and retain data.
+- [elasticsearch-service.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/elasticsearch-service.yaml): a Elastic service config.
+
+### Helm charts
+
+For a more robust and modern set-up, we recommend using [official Kubernetes helm charts](https://github.com/elastic/helm-charts) in combination with the Argilla server Kubernetes `yaml`. Argilla itself doesn't have any helm support but it can still be used together with Helm-deployed ElasticSearch by setting the `ARGILLA_ELASTICSEARCH` environment variable to the endpoint where ElasticSearch is hosted.
 
 (deploy-to-aws-instance-using-docker-machine)=
 ## Amazon Web Services (AWS)
