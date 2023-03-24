@@ -23,7 +23,6 @@
           <template #button-bottom>
             <base-button
               class="rule__button primary light"
-              :disabled="isLoading"
               @click="showRulesList"
               >Manage rules</base-button
             >

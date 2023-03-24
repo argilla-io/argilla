@@ -43,8 +43,10 @@
     </div>
   </div>
 </template>
+
 <script>
 import "assets/icons/unavailable";
+import _ from "lodash";
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
@@ -186,7 +188,10 @@ export default {
     }),
 
     metricsForRule(rule) {
-      const metrics = this.perRuleMetrics[rule.query];
+      const metrics = _.isNil(this.perRuleMetrics)
+        ? null
+        : this.perRuleMetrics[rule.query];
+      
       if (!metrics) {
         return {};
       }
