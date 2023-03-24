@@ -3,6 +3,7 @@
     id="baseFeedBackId"
     v-if="isFeedbackError"
     :message="feedbackInput.message"
+    :isLoading="isLoading"
     :buttonLabels="feedbackInput.buttonLabels"
     @on-click="onClick"
   />
@@ -23,6 +24,10 @@ export default {
     feedbackInput: {
       type: Object,
       required: true,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
