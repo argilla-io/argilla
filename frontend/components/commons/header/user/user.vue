@@ -105,8 +105,8 @@ $buttonSize: 34px;
 .head {
   display: flex;
   gap: 25px;
-  padding: 0.5em 1.5em 1.5em 1.5em;
-  border-bottom: 1px solid palette(grey, 400);
+  padding: $base-space $base-space * 2 $base-space * 2 $base-space * 2;
+  border-bottom: 1px solid palette(grey, 200);
   .right-head {
     flex: 1;
     display: flex;
@@ -136,7 +136,7 @@ $buttonSize: 34px;
     position: absolute;
     top: 3.8em;
     right: -0.5em;
-    padding-top: 1.5em;
+    padding-top: $base-space * 2;
     background: palette(grey, 100);
     border-radius: $border-radius;
     @include font-size(14px);
@@ -154,19 +154,10 @@ $buttonSize: 34px;
       text-decoration: none;
     }
   }
-  &__name {
-    @include font-size(16px);
-    margin: 0 1.5em 0.3em 1.5em;
-    font-weight: 600;
-  }
-  &__mail {
-    margin: 0 1.5em 2em 1.5em;
-    color: palette(apricot);
-  }
   &__link {
     display: flex;
     flex-direction: column;
-    padding: 1.5em 1.5em 1.5em 1.5em;
+    padding: $base-space * 2 $base-space * 2 $base-space * 2 $base-space * 2;
     color: palette(white);
     &:hover {
       color: darken(palette(white), 10%);
@@ -179,7 +170,7 @@ $buttonSize: 34px;
     }
   }
   &__link:not(:last-child) {
-    border-bottom: 1px solid palette(grey, 400);
+    border-bottom: 1px solid palette(grey, 200);
   }
 }
 
