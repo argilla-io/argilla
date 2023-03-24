@@ -30,9 +30,11 @@ class ArgillaSpaCyTrainer:
             rg.TextClassificationRecord, rg.TokenClassificationRecord, rg.Text2TextRecord
         ] = rg.DatasetForTokenClassification._RECORD_TYPE,
         model: Optional[str] = None,
+        language: Optional[str] = None,
         gpu_id: Optional[int] = -1,
     ) -> None:
         import spacy
+        from spacy.cli.init_config import init_config
 
         self._train_dataset, self._valid_dataset = (
             dataset if isinstance(dataset, tuple) and len(dataset) > 1 else (dataset, None)
@@ -51,37 +53,35 @@ class ArgillaSpaCyTrainer:
         else:
             raise NotImplementedError("`rg.TextClassificationRecord` and `rg.Text2TextRecord` are not supported yet.")
 
+        self.language = language or "en"
         self.gpu_id = gpu_id if spacy.prefer_gpu(gpu_id) else -1
 
-    def train(self) -> None:
-        import tempfile
+        self.config = init_config(
+            lang="en",
+            pipeline=["ner"],
+        )
+        self.config["paths"]["train"] = self._train_dataset_path
+        self.config["paths"]["dev"] = self._valid_dataset_path or self._train_dataset_path
+        self.config["paths"]["vectors"] = self.model
 
-        from spacy.cli.init_config import init_config
+    def update_config(
+        self,
+        **spacy_training_config,
+    ) -> None:
+        self.config["training"].update(spacy_training_config)
+
+    def train(self) -> None:
         from spacy.training.initialize import init_nlp
         from spacy.training.loop import train as train_nlp
-        from spacy.util import load_config
 
-        with tempfile.NamedTemporaryFile(suffix=".cfg", delete=True) as temp_file:
-            config_file = temp_file.name
-            init_config(
-                lang="en",
-                pipeline=["ner"],
-            ).to_disk(config_file)
-            overrides = {
-                "paths.train": self._train_dataset_path,
-                "paths.dev": self._valid_dataset_path,
-                "paths.vectors": self.model,
-                "training.max_epochs": 2,  # TODO
-            }
-            config = load_config(config_file, overrides=overrides, interpolate=False)
-        nlp = init_nlp(config, use_gpu=self.use_gpu)
-        self._model, _ = train_nlp(nlp, use_gpu=self.use_gpu, stdout=sys.stdout, stderr=sys.stderr)
+        self._nlp = init_nlp(self.config, use_gpu=self.gpu_id)
+        self._nlp, _ = train_nlp(self._nlp, use_gpu=self.gpu_id, stdout=sys.stdout, stderr=sys.stderr)
 
     def save(self, path: str) -> None:
         path = Path(path) if isinstance(path, str) else path
         if path and not path.exists():
             path.mkdir(parents=True)
-        self._model.to_disk(path)
+        self._nlp.to_disk(path)
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         if isinstance(text, str):
@@ -89,7 +89,7 @@ class ArgillaSpaCyTrainer:
 
         preds = []
         for t in text:
-            doc = self._model(t)
+            doc = self._nlp(t)
             entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
             pred = {
                 "text": t,
