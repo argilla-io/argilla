@@ -58,10 +58,7 @@ export default {
 <style lang="scss" scoped>
 .form-group {
   padding: $base-space * 3 0;
-  &:last-child {
-    border: 0;
-  }
-  &:not(:first-child) {
+  &:not(:first-child):not(:last-child) {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
 }
