@@ -29,7 +29,7 @@
       />
       <template v-if="datasetId && datasetName">
         <base-button
-          v-if="isAdminRole"
+          v-if="!isAdminRole"
           class="button-train small"
           @on-click="onClickTrain"
         >
