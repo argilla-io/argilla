@@ -191,7 +191,7 @@ export default {
       const metrics = _.isNil(this.perRuleMetrics)
         ? null
         : this.perRuleMetrics[rule.query];
-      
+
       if (!metrics) {
         return {};
       }
