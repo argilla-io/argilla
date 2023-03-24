@@ -91,9 +91,11 @@ export default {
   display: flex;
   flex-direction: column;
 }
+
 .user-username {
   @include font-size(16px);
 }
+
 .description {
   &__title {
     margin-top: 0;
