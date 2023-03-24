@@ -78,7 +78,8 @@ export default {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: $base-space * 5;
+  gap: $base-space * 2;
+  padding-bottom: 0;
 }
 
 .user-first_name {
