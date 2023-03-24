@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add new page and components for dataset settings. Closes [#2442](https://github.com/argilla-io/argilla/issues/2003)
 - `ARGILLA_HOME_PATH` new environment variable ([#2564]).
 - `ARGILLA_DATABASE_URL` new environment variable ([#2564]).
-- `id`, `first_name`, `last_name`, `inserted_at` and `updated_at` new user fields ([#2564]).
+- Basic support for user roles with `admin` and `annotator` ([#2564]).
+- `id`, `first_name`, `last_name`, `role`, `inserted_at` and `updated_at` new user fields ([#2564]).
 - `/api/users` new endpoint to list and create users ([#2564]).
 - `/api/users/{user_id}` new endpoint to delete users ([#2564]).
 - `/api/workspaces` new endpoint to list and create workspaces ([#2564]).
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `argilla.tasks.users.create` new task to create a user ([#2564]).
 - `argilla.tasks.users.create_default` new task to create a user with default credentials ([#2564]).
 - `argilla.tasks.database.migrate` new task to execute database migrations ([#2564]).
+- `release.Dockerfile` and `quickstart.Dockerfile` now creates a default `argilladata` volume to persist data ([#2564]).
 
 ### Changed
 
@@ -32,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ARGILLA_USERS_DB_FILE` environment variable now it's only used to migrate users from YAML file to database ([#2564]).
 - `full_name` user field is now deprecated and `first_name` and `last_name` should be used instead ([#2564]).
 - `password` user field now requires a minimum of `8` and a maximum of `100` characters in size ([#2564]).
+- `quickstart.Dockerfile` image default users from `team` and `argilla` to `admin` and `annotator` including new passwords and API keys ([#2564]).
+- Datasets to be managed only by users with `admin` role ([#2564]).
 
 ### Fixes
 
@@ -44,5 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove the previous way to add labels through the dataset page. Now labels can be added only through dataset settings page.
 - `email` user field ([#2564]).
 - `disabled` user field ([#2564]).
+- Support for private workspaces ([#2564]).
+- `ARGILLA_LOCAL_AUTH_DEFAULT_APIKEY` and `ARGILLA_LOCAL_AUTH_DEFAULT_PASSWORD` environment variables. Use `argilla.tasks.users.create_default` instead ([#2564]).
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
