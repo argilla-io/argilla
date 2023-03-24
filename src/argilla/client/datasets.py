@@ -433,7 +433,7 @@ class DatasetBase:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
         elif framework is Framework.SPACY and lang is None:
             raise ValueError(
-                "Please provide a spacy language model to prepare the" " dataset for training with the spacy framework."
+                "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
             )
         elif framework in [Framework.SPACY, Framework.SPARK_NLP]:
             if train_size and test_size:
