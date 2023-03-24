@@ -154,7 +154,7 @@ If you are happy with the metrics and/or the matching record list, you can save 
 In this way it will be stored as part of the current dataset and can be accessed via the [manage rules](#manage-rules) button.
 
 ```{hint}
-If you want to add labels to the available list of labels, you can switch to the [Annotation mode](annotate_records.md) and create labels there.
+If you want to add labels to the available list of labels, you can go to your [Dataset Settings page](pages.md#dataset-settings) and create new labels there.
 ```
 
 ### Rule Metrics
