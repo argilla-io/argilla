@@ -175,6 +175,16 @@ export default {
       background: $black-4;
     }
   }
+  &.text {
+    padding-left: 0;
+    padding-right: 0;
+    background: none;
+    color: $primary-color;
+    &:hover {
+      background: none;
+      color: darken($primary-color, 10%);
+    }
+  }
   &.link {
     background: none;
     color: $primary-color;

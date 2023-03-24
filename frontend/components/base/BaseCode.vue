@@ -31,9 +31,12 @@ export default {
 <style lang="scss" scoped>
 .code {
   position: relative;
+  :deep(pre) {
+    white-space: pre-line;
+  }
   &__button {
     position: absolute;
-    bottom: 4em;
+    bottom: 2.5em;
     right: 1em;
     svg {
       fill: palette(white);

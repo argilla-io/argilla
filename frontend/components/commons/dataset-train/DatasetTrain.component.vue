@@ -8,7 +8,7 @@
     />
     <transition v-if="snippet" name="fade" mode="out-in" appear>
       <div class="snippet" :key="visibleTab.id">
-        <h1 v-if="snippetAttributes.title" class="snippet__title --heading4">
+        <h1 v-if="snippetAttributes.title" class="snippet__title --heading5">
           {{ snippetAttributes.title }}
         </h1>
         <h2
@@ -35,7 +35,7 @@
         ></base-code>
         <base-button
           v-if="snippetAttributes.buttonLink"
-          class="snippet__button primary small"
+          class="snippet__button primary small text"
           :href="snippetAttributes.buttonLink"
           target="_blank"
           >{{ snippetAttributes.buttonText }}</base-button
@@ -122,9 +122,6 @@ export default {
 <style lang="scss" scoped>
 .snippet {
   margin-top: $base-space * 3;
-  :deep(pre) {
-    white-space: pre-line;
-  }
   :deep(code) {
     border-radius: $border-radius;
   }

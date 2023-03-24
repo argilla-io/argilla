@@ -120,6 +120,7 @@ $buttonSize: 34px;
     }
     a {
       text-decoration: none;
+      border-top: 1px solid palette(grey, 200);
     }
   }
   &__name {
