@@ -18,12 +18,12 @@
 <template>
   <div
     ref="list"
-    :class="showFullRecord ? 'record__expanded' : 'record__collapsed'"
+    :class="isRecordTextExpanded ? 'record__expanded' : 'record__collapsed'"
   >
     <span class="record__content" v-html="$highlightKeywords(text, keywords)">
     </span>
     <base-button
-      v-if="scrollHeight >= visibleRecordHeight"
+      v-if="toggleCollapseRecordText"
       class="secondary text record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Full record" : "Show less" }}
@@ -35,6 +35,10 @@ export default {
   props: {
     record: {
       type: Object,
+      required: true,
+    },
+    disabledCollapsableText: {
+      type: Boolean,
       required: true,
     },
   },
@@ -50,7 +54,16 @@ export default {
       return this.record.search_keywords;
     },
     visibleRecordHeight() {
-      return this.$mq === "lg" ? 570 : 260;
+      return this.$mq === "lg" ? 570 : 310;
+    },
+    isRecordTextExpanded() {
+      return this.showFullRecord || this.disabledCollapsableText;
+    },
+    toggleCollapseRecordText() {
+      return (
+        !this.disabledCollapsableText &&
+        this.scrollHeight >= this.visibleRecordHeight
+      );
     },
   },
   updated() {
@@ -62,8 +75,7 @@ export default {
   methods: {
     calculateScrollHeight() {
       if (this.$refs.list) {
-        const padding = 2;
-        this.scrollHeight = this.$refs.list.clientHeight + padding;
+        this.scrollHeight = this.$refs.list.clientHeight;
       }
     },
   },
@@ -73,7 +85,7 @@ export default {
 .record {
   &__collapsed {
     .record__content {
-      max-height: 260px;
+      max-height: 310px;
       overflow: hidden;
       @include media(">xxl") {
         max-height: 570px;
