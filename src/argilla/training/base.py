@@ -26,7 +26,7 @@ class ArgillaTrainer(object):
     _logger = logging.getLogger("argilla.training")
 
     def __init__(
-        self, name: str, framework: str, model: str = None, train_size: float = None, seed: int = None, **load_kwargs
+        self, name: str, framework: str, model: str = None, train_size: float = None, seed: int = None, **load_kwargs: dict,
     ):
         """
         `__init__` is a function that initializes the class
