@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict, List, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import argilla as rg
 
@@ -46,8 +46,8 @@ class ArgillaSpaCyTrainer:
 
     def train(self) -> None:
         import spacy
-        from spacy.cli.train import train as spacy_train
         from spacy.cli.init_config import init_config
+        from spacy.cli.train import train as spacy_train
 
         config_path = "train.cfg"
         init_config(

@@ -18,15 +18,21 @@ from typing import List, Union
 
 import argilla as rg
 from argilla.training.setfit import ArgillaSetFitTrainer
-from argilla.training.transformers import ArgillaTransformersTrainer
 from argilla.training.spacy import ArgillaSpaCyTrainer
+from argilla.training.transformers import ArgillaTransformersTrainer
 
 
 class ArgillaTrainer(object):
     _logger = logging.getLogger("argilla.training")
 
     def __init__(
-        self, name: str, framework: str, model: str = None, train_size: float = None, seed: int = None, **load_kwargs: dict,
+        self,
+        name: str,
+        framework: str,
+        model: str = None,
+        train_size: float = None,
+        seed: int = None,
+        **load_kwargs: dict,
     ):
         """
         `__init__` is a function that initializes the class
@@ -72,12 +78,18 @@ class ArgillaTrainer(object):
         self.dataset_full = rg.load(name=self._name, fields=self._required_fields, **load_kwargs)
         if framework == "spacy":
             import spacy
+
             self.dataset_full_prepared = self.dataset_full.prepare_for_training(
-                framework=framework, train_size=self._train_size, seed=self._seed, lang=spacy.blank("en"),
+                framework=framework,
+                train_size=self._train_size,
+                seed=self._seed,
+                lang=spacy.blank("en"),
             )
         else:
             self.dataset_full_prepared = self.dataset_full.prepare_for_training(
-                framework=framework, train_size=self._train_size, seed=self._seed,
+                framework=framework,
+                train_size=self._train_size,
+                seed=self._seed,
             )
 
         if framework == "setfit":
@@ -102,7 +114,9 @@ class ArgillaTrainer(object):
             )
         elif framework == "spacy":
             if self._rg_dataset_type != rg.DatasetForTokenClassification:
-                raise NotImplementedError("`argilla.training` does not support `TextClassification` nor `Text2Text` tasks yet.")
+                raise NotImplementedError(
+                    "`argilla.training` does not support `TextClassification` nor `Text2Text` tasks yet."
+                )
             self._trainer = ArgillaSpaCyTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
