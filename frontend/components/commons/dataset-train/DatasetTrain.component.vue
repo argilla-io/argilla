@@ -33,13 +33,16 @@
           v-if="snippet.html"
           :code="parseHtml(snippet.html)"
         ></base-code>
-        <base-button
-          v-if="snippetAttributes.buttonLink"
-          class="snippet__button primary small text"
-          :href="snippetAttributes.buttonLink"
-          target="_blank"
-          >{{ snippetAttributes.buttonText }}</base-button
-        >
+        <div class="library__buttons" v-if="snippetAttributes.links">
+          <base-button
+            v-for="(button, index) in snippetAttributes.links"
+            :key="index"
+            class="library__button primary small text"
+            :href="button.linkLink"
+            target="_blank"
+            >{{ button.linkText }}</base-button
+          >
+        </div>
       </div>
     </transition>
   </div>
@@ -141,6 +144,13 @@ export default {
   }
   &__description {
     font-weight: normal;
+  }
+}
+.library {
+  &__buttons {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space;
   }
   &__button {
     display: inline-flex;

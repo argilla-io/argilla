@@ -1,8 +1,11 @@
 ---
 title: This is how to train your Text Classifier dataset using Transformers
 description: In aliquet velit eget nisl euismod ultricies. Nam pretium tortor eu pretium lobortis.
-buttonText: Learn more in the docs
-buttonLink: https://docs.argilla.io/en/latest/guides/
+links:
+  - linkText: Learn more in the docs
+    linkLink: https://docs.argilla.io/en/latest/guides/
+  - linkText: Other link
+    linkLink: https://docs.argilla.io/en/latest/guides/
 ---
 
 ```python
