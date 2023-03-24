@@ -124,7 +124,7 @@ export default {
 
 <style lang="scss" scoped>
 .train {
-  &__tabs {
+  &__tabs.tabs {
     margin: 0 -2.5em 2em;
     padding: 0 2.5em;
   }
