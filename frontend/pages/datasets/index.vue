@@ -74,7 +74,7 @@ export default {
   layout: "app",
   data: () => ({
     querySearch: undefined,
-    breadcrumbs: [{ action: "clearFilters", name: "Datasets" }],
+    breadcrumbs: [{ action: "clearFilters", name: "Home" }],
     tableColumns: [
       { name: "Name", field: "name", class: "table-info__title", type: "link" },
       {
