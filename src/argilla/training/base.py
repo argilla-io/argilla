@@ -61,8 +61,7 @@ class ArgillaTrainer(object):
                 self._multi_label = True
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForTokenClassification):
             self._rg_dataset_type = rg.DatasetForTokenClassification
-            self._required_fields = ["id", "text", "tokens", "ner_tags"]
-
+            self._required_fields = ["id", "text", "tokens", "annotation"]
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForText2Text):
             self._rg_dataset_type = rg.DatasetForText2Text
             self._required_fields = ["id", "text", "annotation"]
