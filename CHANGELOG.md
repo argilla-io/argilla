@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixes
+
+- Copying datasets between workspaces with proper owner/workspace info. Closes [#2562](https://github.com/argilla-io/argilla/issues/2562)
+
 ## [1.5.0](https://github.com/recognai/rubrix/compare/v1.4.0...v1.5.0) - 2023-03-21
 
 ### Added
