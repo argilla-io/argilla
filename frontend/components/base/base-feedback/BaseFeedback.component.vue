@@ -7,7 +7,7 @@
     :buttonLabels="feedbackInput.buttonLabels"
     @on-click="onClick"
   />
-  <div v-else>{{ feedbackType }}</div>
+  <div v-else>{{ feedbackInput.message }}</div>
 </template>
 
 <script>

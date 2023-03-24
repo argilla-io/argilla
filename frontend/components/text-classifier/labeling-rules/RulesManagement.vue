@@ -25,10 +25,7 @@
 
       <BaseFeedbackComponent
         v-if="areMetricsInPending"
-        :feedbackInput="{
-          feedbackType: 'ERROR',
-          message: 'The metrics of the rules are in pending',
-        }"
+        :feedbackInput="feedbackInputInMetricsPendingState"
         :isLoading="areMetricsInPending"
         class="feedback-area"
       />
@@ -83,6 +80,10 @@ export default {
       visibleModalId: undefined,
       sortedOrder: "desc",
       sortedByField: "created_at",
+      feedbackInputInMetricsPendingState: {
+        message: "Calculating rule metrics",
+        feedbackType: "ERROR",
+      },
       actions: [{ name: "delete", icon: "trash-empty", title: "Delete rule" }],
       noDataInfo: {
         title: "0 rules defined",
