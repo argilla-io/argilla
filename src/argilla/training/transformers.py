@@ -203,8 +203,8 @@ class ArgillaTransformersTrainer(object):
                 metrics = f1.compute(predictions=predictions, references=labels, average="micro")
                 # f1 per label
                 per_label_metric = f1.compute(predictions=predictions, references=labels, average=None)
-                for label, f1 in zip(self._label_list, per_label_metric["f1"]):
-                    metrics[f"f1_{label}"] = f1
+                for label, f1_score in zip(self._label_list, per_label_metric["f1"]):
+                    metrics[f"f1_{label}"] = f1_score
 
                 return metrics
 
