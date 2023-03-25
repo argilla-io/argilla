@@ -13,6 +13,9 @@
 #  limitations under the License.
 
 import inspect
+from typing import Dict
+
+args_to_remove = ["self", "cls", "model_args", "args", "kwargs", "model_kwargs"]
 
 
 def get_default_args(func):
@@ -31,8 +34,10 @@ def get_default_args(func):
     for arg in required_args:
         if arg not in default_args:
             default_args[arg] = None
-    if "self" in default_args:
-        del default_args["self"]
+    for key in args_to_remove:
+        if key in default_args:
+            del default_args[key]
+
     return default_args
 
 
@@ -51,6 +56,28 @@ def filter_allowed_args(
       A dictionary of the arguments that are allowed in the function.
     """
     allowed_args = {key: val for key, val in kwargs.items() if key in func.__code__.co_varnames}
-    if "self" in allowed_args:
-        del allowed_args["self"]
+    for key in args_to_remove:
+        if key in allowed_args:
+            del allowed_args[key]
     return allowed_args
+
+
+def _apply_column_mapping(dataset: "Dataset", column_mapping: Dict[str, str]) -> "Dataset":
+    """
+    Applies the provided column mapping to the dataset, renaming columns accordingly.
+    Extra features not in the column mapping are prefixed with `"feat_"`.
+    """
+    dataset = dataset.rename_columns(
+        {
+            **column_mapping,
+            **{col: f"feat_{col}" for col in dataset.column_names if col not in column_mapping},
+        }
+    )
+    dset_format = dataset.format
+    dataset = dataset.with_format(
+        type=dset_format["type"],
+        columns=dataset.column_names,
+        output_all_columns=dset_format["output_all_columns"],
+        **dset_format["format_kwargs"],
+    )
+    return dataset

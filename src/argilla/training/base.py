@@ -158,9 +158,7 @@ class ArgillaTrainer(object):
         Args:
           path (str): The path to the model file.
         """
-        self._trainer.train()
-        if path is not None:
-            self.save(path)
+        self._trainer.train(path)
 
     def save(self, path: str):
         """

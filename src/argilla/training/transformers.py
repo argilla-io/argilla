@@ -18,7 +18,7 @@ from typing import List, Union
 from datasets import DatasetDict
 
 import argilla as rg
-from argilla.training.utils import filter_allowed_args, get_default_args
+from argilla.training.utils import _apply_column_mapping, get_default_args
 
 
 class ArgillaTransformersTrainer(object):
@@ -39,7 +39,9 @@ class ArgillaTransformersTrainer(object):
         self._seed = seed
 
         if model is None:
-            self.model = "distilbert-base-uncased-finetuned-sst-2-english"
+            self.model = "microsoft/deberta-v3-base"
+        else:
+            self.model = model
 
         self._record_class = record_class
         self._multi_label = multi_label
@@ -58,14 +60,19 @@ class ArgillaTransformersTrainer(object):
             else:
                 self.multi_target_strategy = None
                 self._column_mapping = {"text": "text", "label": "label"}
-
             if self._multi_label:
                 self._id2label = dict(enumerate(self._train_dataset.features["label"][0].names))
+                self._label_list = self._train_dataset.features["label"][0].names
             else:
                 self._id2label = dict(enumerate(self._train_dataset.features["label"].names))
+                self._label_list = self._train_dataset.features["label"].names
             self._label2id = {v: k for k, v in self._id2label.items()}
+
         elif self._record_class == rg.TokenClassificationRecord:
             self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
+            self._id2label = dict(enumerate(self._label_list))
+            self._label2id = {v: k for k, v in self._id2label.items()}
+            self._label_list = self._train_dataset.features["ner_tags"].feature.names
             raise NotImplementedError("rg.TokenClassificationRecord")
         else:
             raise NotImplementedError("rg.Text2TextRecord are not supported")
@@ -76,22 +83,30 @@ class ArgillaTransformersTrainer(object):
         from transformers import (
             AutoModelForSequenceClassification,
             AutoModelForTokenClassification,
-            AutoTokenizer,
             TrainingArguments,
         )
 
-        self.tokenizer_kwargs = get_default_args(AutoTokenizer.from_pretrained)
-        self.tokenizer_kwargs = self.model
+        # self.tokenizer_kwargs = get_default_args(AutoTokenizer.from_pretrained)
 
         if self._record_class == rg.TextClassificationRecord:
             self._model_class = AutoModelForSequenceClassification
-            self.model_kwargs = get_default_args(AutoModelForSequenceClassification.from_pretrained)
+            if self._multi_label:
+                self._train_dataset = _apply_column_mapping(self._train_dataset, self._column_mapping)
+                if self._eval_dataset is not None:
+                    self._eval_dataset = _apply_column_mapping(self._eval_dataset, self._column_mapping)
+            # self.model_kwargs = get_default_args(AutoModelForSequenceClassification.from_pretrained)
         elif self._record_class == rg.TokenClassificationRecord:
             self._model_class = AutoModelForTokenClassification
-            self.model_kwargs = get_default_args(AutoModelForTokenClassification.from_pretrained)
+            # self.model_kwargs = get_default_args(AutoModelForTokenClassification.from_pretrained)
         else:
             raise NotImplementedError("rg.Text2TextRecords are not supported yet.")
-        self.model_kwargs["model"] = self.model
+        self.model_kwargs = {}
+        self.model_kwargs["pretrained_model_name_or_path"] = self.model
+        self.model_kwargs["num_labels"] = len(self._label_list)
+        self.model_kwargs["id2label"] = self._id2label
+        self.model_kwargs["label2id"] = self._label2id
+        if self._multi_label:
+            self.model_kwargs["problem_type"] = "multi_label_classification"
 
         self.trainer_kwargs = get_default_args(TrainingArguments.__init__)
         self.trainer_kwargs["evaluation_strategy"] = "epoch"
@@ -99,24 +114,21 @@ class ArgillaTransformersTrainer(object):
 
     def update_config(
         self,
-        **setfit_kwargs,
+        **kwargs,
     ):
         """
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
-        from setfit import SetFitModel, SetFitTrainer
 
-        self.tokenizer_kwargs.update(setfit_kwargs)
-        self.tokenizer_kwargs = filter_allowed_args(SetFitModel.from_pretrained, self.tokenizer_kwargs)
+        # self.tokenizer_kwargs.update(setfit_kwargs)
+        # self.tokenizer_kwargs = filter_allowed_args(SetFitModel.from_pretrained, self.tokenizer_kwargs)
 
-        self.model_kwargs.update(setfit_kwargs)
-        self.model_kwargs = filter_allowed_args(SetFitTrainer.__init__, self.setfit_trainer_kwargs)
+        pass
 
     def __repr__(self):
         formatted_string = []
         arg_dict = {
-            "'AutoTokenizer'": self.tokenizer_kwargs,
             "'AutoModel'": self.model_kwargs,
             "'Trainer'": self.trainer_kwargs,
         }
@@ -126,41 +138,156 @@ class ArgillaTransformersTrainer(object):
                 formatted_string.append(f"{key}: {val}")
         return "\n".join(formatted_string)
 
+    def preprocess_datasets(self):
+        from transformers import (
+            DataCollatorForTokenClassification,
+        )
+
+        def text_classification_preprocess_function(examples):
+            tokens = self._tokenizer(examples["text"], truncation=True, padding=True, max_length=512)
+            return tokens
+
+        def token_classification_preprocess_function(examples):
+            tokenized_inputs = self._tokenizer(
+                examples["tokens"], truncation=True, padding=True, is_split_into_words=True, max_length=512
+            )
+
+            labels = []
+            for i, label in enumerate(examples["ner_tags"]):
+                word_ids = tokenized_inputs.word_ids(batch_index=i)  # Map tokens to their respective word.
+                previous_word_idx = None
+                label_ids = []
+                for word_idx in word_ids:  # Set the special tokens to -100.
+                    if word_idx is None:
+                        label_ids.append(-100)
+                    elif word_idx != previous_word_idx:  # Only label the first token of a given word.
+                        label_ids.append(label[word_idx])
+                    else:
+                        label_ids.append(-100)
+                    previous_word_idx = word_idx
+                labels.append(label_ids)
+
+            tokenized_inputs["labels"] = labels
+            return tokenized_inputs
+
+        # set correct tokenization
+        if self._record_class == rg.TextClassificationRecord:
+            preprocess_function = text_classification_preprocess_function
+            self._data_collator = None
+        elif self._record_class == rg.TokenClassificationRecord:
+            preprocess_function = token_classification_preprocess_function
+            self._data_collator = DataCollatorForTokenClassification(tokenizer=self._tokenizer, max_length=512)
+        else:
+            raise NotImplementedError("")
+
+        self._tokenized_train_dataset = self._train_dataset.map(preprocess_function, batched=True)
+        if self._eval_dataset is not None:
+            self._tokenized_eval_dataset = self._eval_dataset.map(preprocess_function, batched=True)
+
+    def compute_metrics(self):
+        import evaluate
+        import numpy as np
+
+        func = None
+        if self._record_class == rg.TextClassificationRecord:
+            accuracy = evaluate.load("accuracy")
+            f1 = evaluate.load("f1", config_name="multilabel")
+
+            def compute_metrics_text_classification_multi_label(eval_pred):
+                logits, labels = eval_pred
+
+                # apply sigmoid
+                predictions = (1.0 / (1 + np.exp(-logits))) > 0.5
+
+                # f1 micro averaged
+                metrics = f1.compute(predictions=predictions, references=labels, average="micro")
+                # f1 per label
+                per_label_metric = f1.compute(predictions=predictions, references=labels, average=None)
+                for label, f1 in zip(self._label_list, per_label_metric["f1"]):
+                    metrics[f"f1_{label}"] = f1
+
+                return metrics
+
+            def compute_metrics_text_classification(eval_pred):
+                predictions, labels = eval_pred
+                predictions = np.argmax(predictions, axis=1)
+                return accuracy.compute(predictions=predictions, references=labels)
+
+            if self._multi_label:
+                func = compute_metrics_text_classification_multi_label
+            else:
+                func = compute_metrics_text_classification
+
+        elif self._record_class == rg.TokenClassificationRecord:
+            seqeval = evaluate.load("seqeval")
+
+            def compute_metrics(p):
+                predictions, labels = p
+                predictions = np.argmax(predictions, axis=2)
+
+                true_predictions = [
+                    [self._label_list[p] for (p, l) in zip(prediction, label) if l != -100]
+                    for prediction, label in zip(predictions, labels)
+                ]
+                true_labels = [
+                    [self._label_list[l] for (p, l) in zip(prediction, label) if l != -100]
+                    for prediction, label in zip(predictions, labels)
+                ]
+
+                results = seqeval.compute(predictions=true_predictions, references=true_labels)
+                return {
+                    "precision": results["overall_precision"],
+                    "recall": results["overall_recall"],
+                    "f1": results["overall_f1"],
+                    "accuracy": results["overall_accuracy"],
+                }
+
+            func = compute_metrics
+        else:
+            raise NotImplementedError("")
+        return func
+
     # @require_version("setfit", "0.6")
-    def train(self):
+    def train(self, path: str = None):
         """
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
         the model, and then train the model
         """
-        import numpy as np
-        from datasets import load_metric
-        from transformers import AutoTokenizer, Trainer, TrainingArguments, pipeline
+        from transformers import (
+            AutoTokenizer,
+            Trainer,
+            TrainingArguments,
+            pipeline,
+        )
 
-        self._tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_kwargs)
+        # check required path argument
+        if path is not None:
+            self.trainer_kwargs["output_dir"] = path
+        else:
+            raise ValueError("You must specify a path to save the model to use `trainer.train(path=<my_path>).")
+
+        # prepare data
+        self._tokenizer = AutoTokenizer.from_pretrained(self.model_kwargs.get("pretrained_model_name_or_path"))
+        self.preprocess_datasets()
+
+        # load model
         self._model = self._model_class.from_pretrained(**self.model_kwargs)
+
+        # get metrics function
+        compute_metrics = self.compute_metrics()
+
+        # set trainer
         self._training_args = TrainingArguments(**self.trainer_kwargs)
-
-        def tokenize_function(examples):
-            return self._tokenizer(examples["text"], padding="max_length", truncation=True)
-
-        metric = load_metric("accuracy")
-
-        def compute_metrics(eval_pred):
-            logits, labels = eval_pred
-            predictions = np.argmax(logits, axis=-1)
-            return metric.compute(predictions=predictions, references=labels)
-
-        self._tokenized_train_dataset = self._train_dataset.map(tokenize_function, batched=True)
-        self._tokenized_eval_dataset = self._eval_dataset.map(tokenize_function, batched=True)
-
         self.__trainer = Trainer(
             args=self._training_args,
             model=self._model,
             train_dataset=self._tokenized_train_dataset,
             eval_dataset=self._tokenized_eval_dataset,
             compute_metrics=compute_metrics,
+            data_collator=self._data_collator,
         )
 
+        #  train
         self.__trainer.train()
         if self._tokenized_eval_dataset:
             self._metrics = self.__trainer.evaluate()
