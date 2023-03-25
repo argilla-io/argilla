@@ -37,15 +37,16 @@ def test_retrieve_ownered_dataset_for_no_owner_user():
 
 def test_list_datasets_by_task():
     dataset = "test_list_datasets_by_task"
+    workspace_name = "other"
 
-    all_datasets = dao.list_datasets()
+    all_datasets = dao.list_datasets(workspaces=[workspace_name])
     for ds in all_datasets:
         dao.delete_dataset(ds)
 
     created_text = dao.create_dataset(
         BaseDatasetDB(
             name=dataset + "_text",
-            workspace="other",
+            workspace=workspace_name,
             task=TaskType.text_classification,
         ),
     )
@@ -53,19 +54,20 @@ def test_list_datasets_by_task():
     created_token = dao.create_dataset(
         BaseDatasetDB(
             name=dataset + "_token",
-            workspace="other",
+            workspace=workspace_name,
             task=TaskType.token_classification,
         ),
     )
 
-    datasets = dao.list_datasets(
-        task2dataset_map={created_text.task: BaseDatasetDB},
-    )
+    assert len(dao.list_datasets()) == 0
+    assert len(dao.list_datasets(workspaces=[workspace_name])) == 2
+
+    datasets = dao.list_datasets(workspaces=[workspace_name], task2dataset_map={created_text.task: BaseDatasetDB})
 
     assert len(datasets) == 1
     assert datasets[0].name == created_text.name
 
-    datasets = dao.list_datasets(task2dataset_map={created_token.task: BaseDatasetDB})
+    datasets = dao.list_datasets(workspaces=[workspace_name], task2dataset_map={created_token.task: BaseDatasetDB})
 
     assert len(datasets) == 1
     assert datasets[0].name == created_token.name

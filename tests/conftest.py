@@ -15,13 +15,102 @@
 import httpx
 import pytest
 from argilla import app
+from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import active_api
+from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
+from argilla.server.database import SessionLocal
+from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 from starlette.testclient import TestClient
 
+from .factories import AnnotatorFactory
 from .helpers import SecuredClient
+
+
+@pytest.fixture(scope="session")
+def client():
+    with TestClient(app) as c:
+        yield c
+
+
+@pytest.fixture(scope="function")
+def db():
+    session = SessionLocal()
+    # test_seeds(session)  # without a session, rollback is not working when some error occurs in a test
+
+    yield session
+
+    session.query(User).delete()
+    session.query(Workspace).delete()
+    session.query(WorkspaceUser).delete()
+    session.commit()
+
+
+@pytest.fixture(scope="function")
+def admin(db):
+    user = User(
+        first_name="Admin",
+        username="admin",
+        role=UserRole.admin,
+        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+        api_key="admin.apikey",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
+@pytest.fixture(scope="function")
+def annotator(db):
+    return AnnotatorFactory.create(first_name="Annotator", username="annotator", api_key="annotator.apikey")
+
+
+@pytest.fixture
+def mock_user(db):
+    user = User(
+        first_name="Mock",
+        username="mock-user",
+        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+        api_key="mock-user.apikey",
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
+@pytest.fixture(scope="function")
+def admin_auth_header(db, admin):
+    return {API_KEY_HEADER_NAME: admin.api_key}
+
+
+@pytest.fixture(scope="function")
+def argilla_auth_header(db, argilla_user):
+    return {API_KEY_HEADER_NAME: argilla_user.api_key}
+
+
+@pytest.fixture
+def argilla_user(db):
+    user = User(
+        first_name="Argilla",
+        username="argilla",
+        role=UserRole.admin,
+        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
+        api_key=DEFAULT_API_KEY,
+        workspaces=[Workspace(name="argilla")],
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
 
 
 @pytest.fixture
@@ -38,9 +127,16 @@ def test_client():
 
 
 @pytest.fixture
+def api():
+    return Argilla()
+
+
+@pytest.fixture
 def mocked_client(
+    db,
     monkeypatch,
     telemetry_track_data,
+    argilla_user,
 ) -> SecuredClient:
     with TestClient(app, raise_server_exceptions=False) as _client:
         client_ = SecuredClient(_client)

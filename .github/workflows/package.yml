@@ -19,6 +19,11 @@ on:
       - "feature/**"
       - "feat/**"
 
+env:
+  # Increase this value to reset cache if etc/example-environment.yml has not changed
+  CACHE_NUMBER:  5
+  ALEMBIC_CONFIG: src/argilla/alembic.ini
+
 jobs:
   test-elastic:
     name: Tests ElasticSearch
@@ -71,9 +76,6 @@ jobs:
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
-        env:
-          # Increase this value to reset cache if etc/example-environment.yml has not changed
-          CACHE_NUMBER: 2
 
       - name: Update environment
         if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
@@ -82,9 +84,6 @@ jobs:
       - name: Cache pip 👜
         uses: actions/cache@v2
         if: steps.filter.outputs.python_code == 'true'
-        env:
-          # Increase this value to reset cache if pyproject.toml has not changed
-          CACHE_NUMBER: 0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
@@ -98,6 +97,8 @@ jobs:
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
         run: |
+          pip install -e ".[server,listeners]"
+          alembic upgrade head
           pytest --cov=argilla --cov-report=xml
           pip install "spacy<3.0" && python -m spacy download en_core_web_sm
           pytest tests/monitoring/test_spacy_monitoring.py
@@ -115,6 +116,7 @@ jobs:
   test-opensearch:
     name: Test OpenSearch
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         version: [ 1.3, 2.3 ]
@@ -161,9 +163,6 @@ jobs:
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
-        env:
-          # Increase this value to reset cache if etc/example-environment.yml has not changed
-          CACHE_NUMBER: 2
 
       - name: Update environment
         if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
@@ -172,9 +171,6 @@ jobs:
       - name: Cache pip 👜
         uses: actions/cache@v2
         if: steps.filter.outputs.python_code == 'true'
-        env:
-          # Increase this value to reset cache if pyproject.toml has not changed
-          CACHE_NUMBER: 0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
@@ -188,6 +184,8 @@ jobs:
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
         run: |
+          pip install -e ".[server,listeners]"
+          alembic upgrade head
           pytest --cov=argilla --cov-report=xml
           pip install "spacy<3.0" && python -m spacy download en_core_web_sm
           pytest tests/monitoring/test_spacy_monitoring.py

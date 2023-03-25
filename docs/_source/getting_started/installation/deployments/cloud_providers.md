@@ -125,10 +125,10 @@ docker context use default
 
 ### 4. Deploy the Argilla Server
 
-To deploy the Argilla Server, you can use the Docker Compose file provided in the [Argilla repository](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml) and the `docker compose up` command:
+To deploy the Argilla Server, you can use the Docker Compose file provided in the [Argilla repository](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml) and the `docker-compose up` command:
 
 ```bash
-wget -O docker-compose.yml https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml && docker-compose up -d
+wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml && docker-compose up -d
 ```
 
 This guide is adapted from this [blog post by Ben Burtenshaw](https://medium.com/@ben.burtenshaw/zero-to-demo-on-azure-with-docker-compose-and-container-instances-4e83b78003b). There's also an official [tutorial](https://learn.microsoft.com/en-us/azure/container-instances/tutorial-docker-compose) on Microsoft Learn.
@@ -138,4 +138,3 @@ This guide is adapted from this [blog post by Ben Burtenshaw](https://medium.com
 Coming soon!
 
 > 🚒 **If you'd like support with this and/or want to contribute this gude, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
-
