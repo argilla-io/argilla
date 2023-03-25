@@ -1,26 +1,24 @@
 ---
-title: Transformers
-description: The ArgillaTransformersTrainer leverages the features of transformers to train programmatically with an integration with Argilla.
+title: spaCy
+description: The ArgillaSpacyTrainer leverages the features of spaCy to train programmatically with an integration with Argilla.
 links:
   - linkText: Learn more in the docs
     linkLink: https://docs.argilla.io/en/latest/guides/
-  - linkText: Other link
-    linkLink: https://docs.argilla.io/en/latest/guides/
+  - linkText: Check the spaCy training docs
+    linkLink: https://spacy.io/usage/training
 ---
 
 *code snippet*
-
 ```python
 from argilla.training import ArgillaTrainer
 
-trainer = ArgillaTrainer(name="<my_dataset_name>", framework="transformers", train_size=0.8)
+trainer = ArgillaTrainer(name="<my_dataset_name>", framework="spacy", train_size=0.8)
 trainer.update_config(max_epochs=10)
-trainer.train(path="text-classification")
+trainer.train(path="token-classification")
 records = trainer.predict("I live in Barcelona.", as_argilla_records=True)
 ```
 
 *config options*
-
 ```bash
 [training]
 dev_corpus = "corpora.dev"

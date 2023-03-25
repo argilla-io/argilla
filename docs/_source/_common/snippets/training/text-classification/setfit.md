@@ -1,11 +1,11 @@
 ---
-title: Transformers
-description: The ArgillaTransformersTrainer leverages the features of transformers to train programmatically with an integration with Argilla.
+title: SetFit
+description: The ArgillaSetFitTrainer leverages the features of SetFit to train programmatically with an integration with Argilla.
 links:
-  - linkText: Learn more in the docs
+  - linkText: Learn more in the Argilla docs
     linkLink: https://docs.argilla.io/en/latest/guides/
-  - linkText: Other link
-    linkLink: https://docs.argilla.io/en/latest/guides/
+  - linkText: Check the SetFit training docs
+    linkLink: https://github.com/huggingface/setfit
 ---
 
 *code snippet*
