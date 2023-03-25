@@ -1,19 +1,18 @@
 ---
 title: Transformers
-description: The ArgillaTransformersTrainer leverages the features of transformers to train programmatically with an integration with Argilla.
+description: The ArgillaTransformersTrainer leverages the features of transformers to train programmatically with Argilla.
 links:
-  - linkText: Learn more in the docs
+  - linkText: Argilla docs
     linkLink: https://docs.argilla.io/en/latest/guides/
-  - linkText: Other link
-    linkLink: https://docs.argilla.io/en/latest/guides/
+  - linkText: Transformers docs
+    linkLink: https://spacy.io/usage/training
 ---
 
 ```python
-import spacy
-import argilla as rg
+from argilla.training import ArgillaTrainer
 
-nlp = spacy.load("en_core_web_sm")
-nlp = rg.monitor(nlp, dataset="nlp_monitoring_spacy")
-
-dataset.map(lambda example: {"prediction": nlp(example["text"])})
+trainer = ArgillaTrainer(name="<my_dataset_name>", framework="spark-nlp", train_size=0.8)
+trainer.update_config(max_epochs=10)
+trainer.train(path="token-classification")
+records = trainer.predict("I live in Barcelona.", as_argilla_records=True)
 ```

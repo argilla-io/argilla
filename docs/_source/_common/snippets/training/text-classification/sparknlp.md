@@ -1,10 +1,10 @@
 ---
 title: Spark NLP
-description: The ArgillaSpacyTrainer leverages the features of spaCy to train programmatically with an integration with Argilla.
+description: The ArgillaSparkNLPTrainer leverages the features of Spark NLP to train programmatically with Argilla.
 links:
-  - linkText: Learn more in the Argilla docs
+  - linkText: Argilla docs
     linkLink: https://docs.argilla.io/en/latest/guides/
-  - linkText: Check the spaCy training docs
+  - linkText: Spark NLP docs
     linkLink: https://spacy.io/usage/training
 ---
 
@@ -13,7 +13,7 @@ links:
 ```python
 from argilla.training import ArgillaTrainer
 
-trainer = ArgillaTrainer(name="<my_dataset_name>", framework="spacy", train_size=0.8)
+trainer = ArgillaTrainer(name="<my_dataset_name>", framework="spark-nlp", train_size=0.8)
 trainer.update_config(max_epochs=10)
 trainer.train(path="text-classification")
 records = trainer.predict("I live in Barcelona.", as_argilla_records=True)

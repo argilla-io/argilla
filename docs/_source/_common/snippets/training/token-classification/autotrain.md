@@ -1,6 +1,6 @@
 ---
 title: AutoTrain (no-code)
-description: Use Argilla Datasets and Hugging Face AutoTrain with just a few clicks, empowering you to train NLP models easily without writing a single line of code.
+description: Use Argilla, Datasets and Hugging Face AutoTrain with just a few clicks, empowering you to train NLP models easily without writing a single line of code.
 links:
   - linkText: Tutorial
     linkLink: https://www.argilla.io/blog/argilla-meets-autotrain/
@@ -13,9 +13,9 @@ links:
 ```python
 from argilla.training import ArgillaTrainer
 
-trainer = ArgillaTrainer(name="<my_dataset_name>", framework="transformers", train_size=0.8)
+trainer = ArgillaTrainer(name="<my_dataset_name>", framework="autotrain", train_size=0.8)
 trainer.update_config(max_epochs=10)
-trainer.train(path="text-classification")
+trainer.train(path="token-classification")
 records = trainer.predict("I live in Barcelona.", as_argilla_records=True)
 ```
 

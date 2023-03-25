@@ -1,10 +1,10 @@
 ---
 title: spaCy
-description: The ArgillaSpacyTrainer leverages the features of spaCy to train programmatically with an integration with Argilla.
+description: The ArgillaSpacyTrainer leverages the features of spaCy to train programmatically with Argilla.
 links:
-  - linkText: Learn more in the docs
+  - linkText: Argilla docs
     linkLink: https://docs.argilla.io/en/latest/guides/
-  - linkText: Check the spaCy training docs
+  - linkText: spaCy docs
     linkLink: https://spacy.io/usage/training
 ---
 

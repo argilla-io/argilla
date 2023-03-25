@@ -1,11 +1,11 @@
 ---
 title: Transformers
-description: The ArgillaTransformersTrainer leverages the features of transformers to train programmatically with an integration with Argilla.
+description: The ArgillaTransformersTrainer leverages the features of transformers to train programmatically with Argilla.
 links:
-  - linkText: Learn more in the docs
+  - linkText: Argilla docs
     linkLink: https://docs.argilla.io/en/latest/guides/
-  - linkText: Other link
-    linkLink: https://docs.argilla.io/en/latest/guides/
+  - linkText: Transformers docs
+    linkLink: https://spacy.io/usage/training
 ---
 
 *code snippet*

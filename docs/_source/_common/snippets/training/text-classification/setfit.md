@@ -1,10 +1,10 @@
 ---
 title: SetFit
-description: The ArgillaSetFitTrainer leverages the features of SetFit to train programmatically with an integration with Argilla.
+description: The ArgillaSetFitTrainer leverages the features of SetFit to train programmatically with Argilla.
 links:
-  - linkText: Learn more in the Argilla docs
+  - linkText: Argilla docs
     linkLink: https://docs.argilla.io/en/latest/guides/
-  - linkText: Check the SetFit training docs
+  - linkText: SetFit docs
     linkLink: https://github.com/huggingface/setfit
 ---
 
@@ -13,7 +13,7 @@ links:
 ```python
 from argilla.training import ArgillaTrainer
 
-trainer = ArgillaTrainer(name="<my_dataset_name>", framework="transformers", train_size=0.8)
+trainer = ArgillaTrainer(name="<my_dataset_name>", framework="setfit", train_size=0.8)
 trainer.update_config(max_epochs=10)
 trainer.train(path="text-classification")
 records = trainer.predict("I live in Barcelona.", as_argilla_records=True)
