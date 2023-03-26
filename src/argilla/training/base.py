@@ -121,6 +121,8 @@ class ArgillaTrainer(object):
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 model=self.model,
+                multi_label=self._multi_label,
+                seed=self._seed,
             )
         else:
             raise NotImplementedError(f"Framework {framework} is not supported.")

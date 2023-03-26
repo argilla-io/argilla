@@ -31,6 +31,8 @@ class ArgillaSpaCyTrainer:
             rg.TextClassificationRecord, rg.TokenClassificationRecord, rg.Text2TextRecord
         ] = rg.DatasetForTokenClassification._RECORD_TYPE,
         model: Optional[str] = None,
+        seed: Optional[int] = None,
+        multi_label: bool = False,
         language: Optional[str] = None,
         gpu_id: Optional[int] = -1,
     ) -> None:
