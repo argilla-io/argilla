@@ -65,7 +65,15 @@ class ArgillaSpaCyTrainer:
         )
         self.config["paths"]["train"] = self._train_dataset_path
         self.config["paths"]["dev"] = self._valid_dataset_path or self._train_dataset_path
-        self.config["paths"]["vectors"] = self.model
+
+    def __repr__(self) -> None:
+        formatted_string = []
+        formatted_string.append("`ArgillaSpaCyTrainer`")
+        for key, val in self.config["training"].items():
+            if isinstance(val, dict):
+                continue
+            formatted_string.append(f"{key}: {val}")
+        return "\n".join(formatted_string)
 
     def update_config(
         self,
