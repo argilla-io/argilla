@@ -69,7 +69,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         return "\n".join(formatted_string)
 
     # @require_version("setfit", "0.6")
-    def train(self):
+    def train(self, path: str = None):
         """
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
         the model, and then train the model
@@ -84,6 +84,9 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             self._metrics = self.__trainer.evaluate()
         else:
             self._metrics = None
+
+        if path is not None:
+            self.save(path)
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         """
