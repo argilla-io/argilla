@@ -113,10 +113,8 @@ class ArgillaTrainer(object):
                 model=self.model,
             )
         elif framework == "spacy":
-            if self._rg_dataset_type != rg.DatasetForTokenClassification:
-                raise NotImplementedError(
-                    "`argilla.training` does not support `TextClassification` nor `Text2Text` tasks yet."
-                )
+            if self._rg_dataset_type == rg.DatasetForText2Text:
+                raise NotImplementedError("`argilla.training` does not support `Text2Text` tasks yet.")
             self._trainer = ArgillaSpaCyTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
