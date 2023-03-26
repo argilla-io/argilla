@@ -88,6 +88,8 @@ class ArgillaTrainer(object):
             raise NotImplementedError(f"Dataset type {type(self.rg_dataset_snapshot)} is not supported.")
 
         self.dataset_full = rg.load(name=self._name, fields=self._required_fields, **load_kwargs)
+
+        framework = Framework(framework)
         if framework is Framework.SPACY:
             import spacy
 
