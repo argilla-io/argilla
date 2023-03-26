@@ -65,14 +65,14 @@ class ArgillaSpaCyTrainer:
         import spacy
         from spacy.cli.init_config import init_config
 
-        self._train_dataset, self._valid_dataset = (
+        self._train_dataset, self._dev_dataset = (
             dataset if isinstance(dataset, tuple) and len(dataset) > 1 else (dataset, None)
         )
         self._train_dataset_path = "./train.spacy"
         self._train_dataset.to_disk(self._train_dataset_path)
-        if self._valid_dataset:
-            self._valid_dataset_path = "./valid.spacy"
-            self._valid_dataset.to_disk(self._valid_dataset_path)
+        if self._dev_dataset:
+            self._dev_dataset_path = "./dev.spacy"
+            self._dev_dataset.to_disk(self._dev_dataset_path)
 
         self._multi_label = multi_label
 
@@ -103,7 +103,7 @@ class ArgillaSpaCyTrainer:
             pipeline=[self._pipeline_name],
         )
         self.config["paths"]["train"] = self._train_dataset_path
-        self.config["paths"]["dev"] = self._valid_dataset_path or self._train_dataset_path
+        self.config["paths"]["dev"] = self._dev_dataset_path or self._train_dataset_path
         self.config["paths"]["vectors"] = model
         self.config["system"]["seed"] = seed or 42
 
