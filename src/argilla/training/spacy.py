@@ -87,7 +87,12 @@ class ArgillaSpaCyTrainer:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
         self.language = language or "en"
-        self.gpu_id = gpu_id if spacy.prefer_gpu(gpu_id) else -1
+        self.gpu_id = gpu_id
+        if self.gpu_id != -1:
+            try:
+                spacy.prefer_gpu(self.gpu_id)
+            except:
+                self.gpu_id = -1
 
         self.config = init_config(
             lang=self.language,
