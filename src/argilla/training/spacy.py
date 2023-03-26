@@ -81,8 +81,12 @@ class ArgillaSpaCyTrainer:
             self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
             self._pipeline_name = "ner"
         elif self._record_class == rg.TextClassificationRecord:
-            self._column_mapping = {"text": "text", "label": "label"}
-            self._pipeline_name = "textcat_multilabel" if self._multi_label else "textcat"
+            if self._multi_label:
+                self._column_mapping = {"text": "text", "binarized_label": "label"}
+                self._pipeline_name = "textcat_multilabel"
+            else:
+                self._column_mapping = {"text": "text", "label": "label"}
+                self._pipeline_name = "textcat"
         else:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
