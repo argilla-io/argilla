@@ -96,7 +96,7 @@ class ArgillaSpaCyTrainer:
         self.config["paths"]["train"] = self._train_dataset_path
         self.config["paths"]["dev"] = self._valid_dataset_path or self._train_dataset_path
         self.config["paths"]["vectors"] = model
-        self.config["system"]["seed"] = seed
+        self.config["system"]["seed"] = seed or 42
 
     def __repr__(self) -> None:
         """Return the string representation of the `ArgillaSpaCyTrainer` object containing
