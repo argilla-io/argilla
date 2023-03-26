@@ -14,7 +14,8 @@
 
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import Any, Dict, TYPE_CHECKING, List, Optional, Tuple, Union
+from pydantic import BaseModel
 
 import argilla as rg
 
@@ -83,7 +84,7 @@ class ArgillaSpaCyTrainer:
             path.mkdir(parents=True)
         self._nlp.to_disk(path)
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True) -> Union[List[Dict[str, Any]], List[BaseModel]]:
         if isinstance(text, str):
             text = [text]
 
