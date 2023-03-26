@@ -14,12 +14,16 @@
 
 import inspect
 import logging
-from typing import List, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
+from argilla.client.models import Framework
 from argilla.training.setfit import ArgillaSetFitTrainer
 from argilla.training.spacy import ArgillaSpaCyTrainer
 from argilla.training.transformers import ArgillaTransformersTrainer
+
+if TYPE_CHECKING:
+    import spacy
 
 
 class ArgillaTrainer(object):
@@ -29,23 +33,31 @@ class ArgillaTrainer(object):
         self,
         name: str,
         framework: str,
-        model: str = None,
-        train_size: float = None,
-        seed: int = None,
-        **load_kwargs: dict,
+        lang: Optional["spacy.Language"] = None,
+        model: Optional[str] = None,
+        train_size: Optional[float] = None,
+        seed: Optional[int] = None,
+        **load_kwargs: Optional[dict],
     ):
         """
         `__init__` is a function that initializes the class
 
         Args:
-          name (str): the name of the dataset you want to load.
-          framework (str): the framework to use for training. Currently, only "setfit" is supported.
-          query (str): a query to filter the dataset.
-          model (str): name or path to the baseline model to be used. If not specified will set to a good default per framework.
-          train_size (float): the size of the training set. If not specified, the entire dataset will be
-        used for training.
-          seed (int): int = None,
-          **load_kwargs: arguments for the rg.load() function.
+            name (str): the name of the dataset you want to load.
+            framework (str):
+                the framework to use for training. Currently, only "transformers", "setfit", and "spacy"
+                are supported.
+            lang (spacy.Language):
+                the spaCy language model to use for training, just required when `framework="spacy"`.
+                Defaults to None, but it will be set to `spacy.blank("en")` if not specified.
+            model (str):
+                name or path to the baseline model to be used. If not specified will set to a good default
+                per framework, if applicable. Defaults to None.
+            train_size (float):
+                the size of the training set. If not specified, the entire dataset will be used for training,
+                which may be an issue if `framework="spacy"` as it requires a validation set. Defaults to None.
+            seed (int): the random seed to ensure reproducibility. Defaults to None.
+            **load_kwargs: arguments for the rg.load() function.
         """
         self._name = name
         self._multi_label = False
@@ -76,14 +88,14 @@ class ArgillaTrainer(object):
             raise NotImplementedError(f"Dataset type {type(self.rg_dataset_snapshot)} is not supported.")
 
         self.dataset_full = rg.load(name=self._name, fields=self._required_fields, **load_kwargs)
-        if framework == "spacy":
+        if framework is Framework.SPACY:
             import spacy
 
             self.dataset_full_prepared = self.dataset_full.prepare_for_training(
                 framework=framework,
                 train_size=self._train_size,
                 seed=self._seed,
-                lang=spacy.blank("en"),
+                lang=spacy.blank("en") if lang is None else lang,
             )
         else:
             self.dataset_full_prepared = self.dataset_full.prepare_for_training(
@@ -92,9 +104,9 @@ class ArgillaTrainer(object):
                 seed=self._seed,
             )
 
-        if framework == "setfit":
+        if framework is Framework.SETFIT:
             if self._rg_dataset_type != rg.DatasetForTextClassification():
-                raise NotImplementedError("SetFit only support TextClassification.")
+                raise NotImplementedError(f"{Framework.SETFIT} only support `TextClassification` tasks.")
             self._trainer = ArgillaSetFitTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
@@ -102,9 +114,9 @@ class ArgillaTrainer(object):
                 seed=self._seed,
                 model=self.model,
             )
-        elif framework == "transformers":
+        elif framework is Framework.TRANSFORMERS:
             if self._rg_dataset_type not in [rg.DatasetForTokenClassification, rg.DatasetForTextClassification]:
-                raise NotImplementedError("Argilla.training does not support Text2Text tasks yet.")
+                raise NotImplementedError("`argilla.training` does not support `Text2Text` tasks yet.")
             self._trainer = ArgillaTransformersTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
@@ -112,7 +124,7 @@ class ArgillaTrainer(object):
                 seed=self._seed,
                 model=self.model,
             )
-        elif framework == "spacy":
+        elif framework is Framework.SPACY:
             if self._rg_dataset_type == rg.DatasetForText2Text:
                 raise NotImplementedError("`argilla.training` does not support `Text2Text` tasks yet.")
             self._trainer = ArgillaSpaCyTrainer(
