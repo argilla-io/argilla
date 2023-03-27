@@ -761,7 +761,7 @@ class OpenSearchClient(IClientAdapter):
             **document["_source"],
             "id": document["_id"],
         }
-
+        data["score"] = document.get("_score", None)
         if add_sort_info and "sort" in document:
             data["sort"] = document["sort"]
 
