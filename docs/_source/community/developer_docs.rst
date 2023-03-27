@@ -68,11 +68,11 @@ Building the documentation
 --------------------------
 
 To build the documentation, make sure you set up your system for *Argilla* development.
-Then go to the `docs` folder in your cloned repo and execute the ``make`` command:
+Then go to the `docs/_source` folder in your cloned repo and execute the ``make html`` command:
 
 .. code-block:: bash
 
-    cd docs
+    cd docs/_source
     make html
 
 This will create a ``_build/html`` folder in which you can find the ``index.html`` file of the documentation.

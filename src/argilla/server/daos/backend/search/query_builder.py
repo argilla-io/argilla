@@ -105,9 +105,11 @@ class EsQueryBuilder:
         query_filters = []
         if query.workspaces:
             query_filters.append(
-                filters.terms_filter(
-                    "owner.keyword",  # This will be moved to "workspace.keyword"
-                    query.workspaces,
+                filters.boolean_filter(
+                    should_filters=[
+                        filters.terms_filter("owner.keyword", query.workspaces),  # backward comp.
+                        filters.terms_filter("workspace.keyword", query.workspaces),
+                    ]
                 )
             )
 

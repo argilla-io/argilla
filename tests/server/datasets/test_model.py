@@ -81,3 +81,18 @@ def test_accept_create_dataset_without_created_by():
 
     assert ds
     assert ds.created_by is None
+
+
+def test_change_workspace_by_setting():
+    dataset = BaseDatasetDB(
+        name="a-dataset",
+        task=TaskType.text_classification,
+        workspace="workspace_name",
+        created_at=datetime.datetime.utcnow(),
+        last_updated=datetime.datetime.utcnow(),
+    )
+
+    assert dataset.workspace == dataset.owner
+    dataset.workspace = "another_workspace"
+
+    assert dataset.workspace == dataset.owner
