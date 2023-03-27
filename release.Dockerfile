@@ -2,8 +2,9 @@ FROM python:3.9-slim
 
 # Environment Variables
 ENV ARGILLA_HOME_PATH=/var/lib/argilla
-ENV ADMIN_PASSWORD=1234
-ENV ADMIN_API_KEY=argilla.apikey
+ENV DEFAULT_USER_ENABLED=true
+ENV DEFAULT_USER_PASSWORD=1234
+ENV DEFAULT_USER_API_KEY=argilla.apikey
 ENV USERS_DB=/config/.users.yml
 ENV UVICORN_PORT=6900
 
