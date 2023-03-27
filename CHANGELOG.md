@@ -72,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Allow URL to be clickable in Jupyter notebook again. Closes [#2527](https://github.com/argilla-io/argilla/issues/2527)
+- Adding new rules was sometimes broken [#2561](https://github.com/argilla-io/argilla/issues/2561). The correction have been done in this issue [#2117](https://github.com/argilla-io/argilla/issues/2117)
 
 ### Removed
 
