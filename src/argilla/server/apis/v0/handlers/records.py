@@ -26,8 +26,8 @@ from argilla.server.apis.v0.models.text_classification import (
 )
 from argilla.server.apis.v0.models.token_classification import TokenClassificationRecord
 from argilla.server.commons.config import TasksFactory
+from argilla.server.models import User
 from argilla.server.security import auth
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
@@ -53,7 +53,7 @@ def configure_router(router: APIRouter):
         request_deps: CommonTaskHandlerDependencies = Depends(),
         service: DatasetsService = Depends(DatasetsService.get_instance),
         search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ) -> RecordType:
         found = service.find_by_name(
             user=current_user,
@@ -85,7 +85,7 @@ def configure_router(router: APIRouter):
         request_deps: CommonTaskHandlerDependencies = Depends(),
         service: DatasetsService = Depends(DatasetsService.get_instance),
         storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
-        current_user: User = Security(auth.get_user, scopes=[]),
+        current_user: User = Security(auth.get_current_user),
     ):
         found = service.find_by_name(
             user=current_user,

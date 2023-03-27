@@ -791,7 +791,7 @@ const actions = {
       await ObservationDataset.api().delete(url, {
         delete: [workspace, datasetName],
       });
-      message = `${datasetName} have been deleted`;
+      message = `${datasetName} has been deleted`;
       typeOfNotification = "success";
     } catch ({ response }) {
       let { status } = response;

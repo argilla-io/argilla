@@ -1,2 +1,3 @@
+include src/argilla/alembic.ini
 graft src/argilla/server/static
 prune docs

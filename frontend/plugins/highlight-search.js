@@ -40,8 +40,7 @@ export default (context, inject) => {
   }
 
   function createPattern(value) {
-    const pattern = "[^A-Za-zÀ-ÿ\u00f1\u00d10-9_@./#&+-]";
-    return `(${pattern})${escapeRegExp(value)}(${pattern})`;
+    return `([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${escapeRegExp(value)}`;
   }
 
   const escapeRegExp = function (text) {

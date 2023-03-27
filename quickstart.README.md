@@ -23,7 +23,7 @@
 
 
 > 🆕 🔥 Play with Argilla UI with this [live-demo](https://argilla-live-demo.hf.space) powered by Hugging Face Spaces (
-> login:`argilla`, password:`1234`)
+> login:`argilla`, password:`12345678`)
 
 > 🆕 🔥 Since `1.2.0` Argilla supports vector search for finding the most similar records to a given one. This feature
 > uses vector or semantic search combined with more traditional search (keyword and filter based). Learn more on
@@ -108,21 +108,24 @@ To get started you just need to run the docker image with following command:
   docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
 ```
 
-This will run the latest quickstart docker image with 2 users `argilla` and `team`. The password for these users is
-`1234` . You can also configure these [environment variables](#environment-variables) as per you needs.
+This will run the latest quickstart docker image with 2 users `admin` and `argilla`. The password for these users is
+`12345678`. You can also configure these [environment variables](#environment-variables) as per you needs.
 
 ### Environment Variables
 
-- `ARGILLA_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
+- `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
+  a custom username you can use your own username to login into the app.
+- `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key
-  i.e. `argilla.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
+  i.e. `admin.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
   variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
-- `ARGILLA_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default
-  password is `1234`. By setting up a custom password you can use your own password to login into the app.
-- `TEAM_API_KEY`: This sets the root user's API key. The API key you choose can be any string of your choice and you can
-  check an online generator if you like. The default api key is `team.apikey`.
-- `TEAM_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password
-  is `1234`. By setting up a custom password you can use your own password to login into the app.
+- `ADMIN_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default
+  password is `12345678`. By setting up a custom password you can use your own password to login into the app.
+- `ANNOTATOR_USERNAME`: The annotator username to login in Argilla. The default annotator username is `argilla`. By setting up
+  a custom username you can use your own username to login into the app.
+- `ANNOTATOR_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password
+  is `12345678`. By setting up a custom password you can use your own password to login into the app.
+- `ARGILLA_WORKSPACE`: The name of a workspace that will be created and used by default for admin and annotator users. The default value will be the one defined by `ADMIN_USERNAME` environment variable.
 - `LOAD_DATASETS`: This variables will allow you to load sample datasets. The default value will be `full`. The
   supported values for this variable is as follows:
     1. `single`: Load single datasets for TextClassification task.

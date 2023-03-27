@@ -49,9 +49,9 @@ Within Elastic, it is possible to create snapshots of a running cluster. We high
 
 ### Mount back-up volume
 
-When deploying Elastic, we need to define a `path.repo` via setting this as an environment variable in your `docker-compose.yml` or by setting this in your `elasticsearch.yml`, and passing this as config. Additionally, we need to pass the same `path.repo` to a mounted volume. By default, we set this `elasticdata:/usr/share/elasticsearch/backups` because the `elasticsearch` user needs to have full permisions to act on the repo. Hence, setting the volume to something different might require some additional permission configurations. Note that the `minimum_master_nodes` need to be explicitly set when bound on a public IP.
+When deploying Elastic, we need to define a `path.repo` via setting this as an environment variable in your `docker-compose.yaml` or by setting this in your `elasticsearch.yml`, and passing this as config. Additionally, we need to pass the same `path.repo` to a mounted volume. By default, we set this `elasticdata:/usr/share/elasticsearch/backups` because the `elasticsearch` user needs to have full permisions to act on the repo. Hence, setting the volume to something different might require some additional permission configurations. Note that the `minimum_master_nodes` need to be explicitly set when bound on a public IP.
 
-#### `docker-compose.yml`
+#### `docker-compose.yaml`
 
 ```yaml
 elasticsearch:
