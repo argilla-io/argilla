@@ -128,6 +128,50 @@ def test_similarity_search_in_python_client(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
+def test_similarity_search_returns_score_in_python_client(
+    mocked_client: SecuredClient,
+):
+    dataset_name = "test_similarity_search_in_python_client_2"
+    text = "This is a text"
+    rg.delete(dataset_name)
+    rg.log(
+        rg.TextClassificationRecord(
+            id=0,
+            inputs=text,
+            vectors={"vinter": [0, 0, 0, 0]},
+        ),
+        name=dataset_name,
+    )
+    rg.log(
+        rg.TextClassificationRecord(
+            id=1,
+            inputs=text,
+            vectors={"vinter": [1, 1, 1, 1]},
+        ),
+        name=dataset_name,
+    )
+    rg.log(
+        rg.TextClassificationRecord(
+            id=2,
+            inputs=text,
+            vectors={"vinter": [2, 2, 2, 2]},
+        ),
+        name=dataset_name,
+    )
+    records_scores = rg.load_similar(dataset_name, vector=("vinter", [1, 1, 1, 1]))
+    scores = [score for _, score in records_scores]
+    records = [record for record, _ in records_scores]
+    assert all(map(lambda x: isinstance(x, float), scores))
+    assert all(map(lambda x: isinstance(x, rg.TextClassificationRecord), records))
+    assert scores[0] == 1.0
+    assert scores[1] == 0.2
+    assert scores[2] == 0.2
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
 def test_log_data_with_vectors_and_update_ok(
     mocked_client: SecuredClient,
 ):
