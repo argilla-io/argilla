@@ -75,7 +75,6 @@ export default {
       // This is a fast and ugly solution that needs to be refactored.
       handler: async function (newValue) {
         if (newValue !== this.currentRule?.query) {
-          console.log(this.query);
           this.saved = false;
           const rule = this.dataset.findRuleByQuery(newValue, undefined);
           await this.dataset.setCurrentLabelingRule(
