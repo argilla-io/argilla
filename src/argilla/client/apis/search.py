@@ -34,6 +34,7 @@ class SearchResults:
     total: int
 
     records: List[Record]
+    scores: List[float]
 
 
 class Search(AbstractApi):
@@ -81,4 +82,5 @@ class Search(AbstractApi):
         return SearchResults(
             total=response["total"],
             records=[record_class.parse_obj(r).to_client() for r in response["records"]],
+            scores=response["scores"],
         )
