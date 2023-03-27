@@ -111,11 +111,15 @@ class ArgillaSpaCyTrainer:
         """Return the string representation of the `ArgillaSpaCyTrainer` object containing
         just the args that can be updated via `update_config`."""
         formatted_string = []
-        formatted_string.append("`ArgillaSpaCyTrainer`")
+        formatted_string.append(
+            "WARNING:`ArgillaSpaCyTrainer.update_config` just supports the update of the `training` "
+            "args defined in the `config.yaml` file for the sake of simplicity."
+        )
+        formatted_string.append("\n\t\t`ArgillaSpaCyTrainer`")
         for key, val in self.config["training"].items():
             if isinstance(val, dict):
                 continue
-            formatted_string.append(f"{key}: {val}")
+            formatted_string.append(f"\t\t\t{key}: {val}")
         return "\n".join(formatted_string)
 
     def update_config(
