@@ -512,17 +512,71 @@ class Argilla:
                 " version. Please adapt your code accordingly. ",
                 "If you want a pandas DataFrame do `rg.load('my_dataset').to_pandas()`.",
             )
+        dataset = self.datasets.find_by_name(name=name)
+        if vector:
+            records, _ = self._search_records_internal(
+                name=name,
+                task=dataset.task,
+                query=query,
+                vector=vector,
+                limit=limit,
+                sort=sort,
+            )
+        else:
+            records = self._load_records_internal(
+                name=name,
+                query=query,
+                task=dataset.task,
+                ids=ids,
+                limit=limit,
+                sort=sort,
+                id_from=id_from,
+                batch_size=batch_size,
+            )
+        return records
 
-        return self._load_records_internal(
+    def load_similar(
+        self,
+        name: str,
+        workspace: Optional[str] = None,
+        query: Optional[str] = None,
+        vector: Optional[Tuple[str, List[float]]] = None,
+        limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
+    ) -> Dataset:
+        """Loads a argilla dataset of similar records to a vector.
+
+        Args:
+            name: The dataset name.
+            query: An ElasticSearch query with the `query string
+                syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
+            vector: Vector configuration for a semantic search
+            ids: If provided, load dataset records with given ids.
+            limit: The number of records to retrieve.
+            sort: The fields on which to sort [(<field_name>, 'asc|decs')].
+            id_from: If provided, starts gathering the records starting from that Record.
+                As the Records returned with the load method are sorted by ID, ´id_from´
+                can be used to load using batches.
+            as_pandas: DEPRECATED! To get a pandas DataFrame do
+                ``rg.load('my_dataset').to_pandas()``.
+
+        Returns:
+            A argilla dataset.
+
+        """
+        if workspace is not None:
+            self.set_workspace(workspace)
+        dataset = self.datasets.find_by_name(name=name)
+        records, scores = self._search_records_internal(
             name=name,
+            task=dataset.task,
             query=query,
             vector=vector,
-            ids=ids,
             limit=limit,
             sort=sort,
-            id_from=id_from,
-            batch_size=batch_size,
         )
+        records_and_scores = list(zip(records, scores))
+        return records_and_scores
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
@@ -619,47 +673,14 @@ class Argilla:
     def _load_records_internal(
         self,
         name: str,
+        task: TaskType,
         query: Optional[str] = None,
-        vector: Optional[Tuple[str, List[float]]] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         batch_size: int = 250,
     ) -> Dataset:
-        dataset = self.datasets.find_by_name(name=name)
-        task = dataset.task
-
-        task_config = {
-            TaskType.text_classification: (SdkTextClassificationRecord, DatasetForTextClassification),
-            TaskType.token_classification: (SdkTokenClassificationRecord, DatasetForTokenClassification),
-            TaskType.text2text: (SdkText2TextRecord, DatasetForText2Text),
-        }
-
-        try:
-            sdk_record_class, dataset_class = task_config[task]
-        except KeyError:
-            raise ValueError(
-                f"Load method not supported for the '{task}' task. Supported Tasks: "
-                f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
-            )
-
-        if vector:
-            if sort is not None:
-                _LOGGER.warning("Results are sorted by vector similarity, so 'sort' parameter is ignored.")
-
-            vector_search = VectorSearch(name=vector[0], value=vector[1])
-            results = self.search.search_records(
-                name=name,
-                task=task,
-                size=limit or 100,
-                # query args
-                query_text=query,
-                vector=vector_search,
-            )
-
-            return dataset_class(results.records)
-
         records = self.datasets.scan(
             name=name,
             projection={"*"},
@@ -671,5 +692,49 @@ class Argilla:
             query_text=query,
             ids=ids,
         )
+        sdk_record_class, dataset_class = self._get_task_sdk_classes(task)
         records = [sdk_record_class.parse_obj(r).to_client() for r in records]
-        return dataset_class(records)
+        records = dataset_class(records)
+        return records
+
+    def _search_records_internal(
+        self,
+        name: str,
+        task: TaskType,
+        query: Optional[str] = None,
+        vector: Optional[Tuple[str, List[float]]] = None,
+        limit: Optional[int] = None,
+        sort: Optional[List[Tuple[str, str]]] = None,
+    ) -> Dataset:
+        """Search for records and return the results and similarity scores."""
+        if sort is not None:
+            _LOGGER.warning("Results are sorted by vector similarity, so 'sort' parameter is ignored.")
+        vector_search = VectorSearch(name=vector[0], value=vector[1])
+        # TODO: we only need this if we support search in `load`
+        _, dataset_class = self._get_task_sdk_classes(task)
+        results = self.search.search_records(
+            name=name,
+            task=task,
+            size=limit or 100,
+            query_text=query,
+            vector=vector_search,
+        )
+        # TODO: we only need this if we support search in `load`
+        records = dataset_class(results.records)
+        return records, results.scores
+
+    def _get_task_sdk_classes(self, task: TaskType):
+        """Get the SDK classes for the given task type"""
+        task_config = {
+            TaskType.text_classification: (SdkTextClassificationRecord, DatasetForTextClassification),
+            TaskType.token_classification: (SdkTokenClassificationRecord, DatasetForTokenClassification),
+            TaskType.text2text: (SdkText2TextRecord, DatasetForText2Text),
+        }
+        try:
+            sdk_record_class, dataset_class = task_config[task]
+        except KeyError:
+            raise ValueError(
+                f"Load method not supported for the '{task}' task. Supported Tasks: "
+                f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
+            )
+        return sdk_record_class, dataset_class  #
