@@ -163,6 +163,7 @@ def configure_router():
             total=results.total,
             records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
             aggregations=TokenClassificationAggregations.parse_obj(results.metrics) if results.metrics else None,
+            scores=results.scores,
         )
 
     token_classification_dataset_settings.configure_router(router)

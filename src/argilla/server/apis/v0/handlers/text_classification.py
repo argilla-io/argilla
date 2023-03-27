@@ -192,6 +192,7 @@ def configure_router():
             total=result.total,
             records=result.records,
             aggregations=TextClassificationSearchAggregations.parse_obj(result.metrics) if result.metrics else None,
+            scores=result.scores,
         )
 
     @deprecate_endpoint(

@@ -103,6 +103,7 @@ class SearchRecordsService:
             total=results.total,
             records=[record_type.parse_obj(r) for r in results.records],
             metrics=metrics_results if metrics_results else {},
+            scores=[r.get("score", 0.0) for r in results.records],
         )
 
     async def find_record_by_id(

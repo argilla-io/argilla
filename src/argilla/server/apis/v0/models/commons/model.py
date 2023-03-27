@@ -71,3 +71,4 @@ class BaseSearchResults(GenericModel, Generic[_Record, ServiceSearchResultsAggre
     total: int = 0
     records: List[_Record] = Field(default_factory=list)
     aggregations: ServiceSearchResultsAggregations = None
+    scores: List[float] = Field(default_factory=list)
