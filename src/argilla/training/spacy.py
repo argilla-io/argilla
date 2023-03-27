@@ -183,12 +183,11 @@ class ArgillaSpaCyTrainer:
             str_input = True
 
         formatted_prediction = []
-        for t in text:
-            doc = self._nlp(t)
+        for doc in self._nlp.pipe(text):
             if self._pipeline_name == "ner":
                 entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
                 pred = {
-                    "text": t,
+                    "text": doc.text,
                     "tokens": [t.text for t in doc],
                     "prediction": entities,
                 }
@@ -196,7 +195,7 @@ class ArgillaSpaCyTrainer:
                     pred = self._record_class(**pred)
             elif self._pipeline_name in ["textcat", "textcat_multilabel"]:
                 pred = {
-                    "text": t,
+                    "text": doc.text,
                     "prediction": [(k, v) for k, v in doc.cats.items()],
                 }
                 if as_argilla_records:
