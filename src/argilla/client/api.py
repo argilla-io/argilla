@@ -280,6 +280,65 @@ def load(
     )
 
 
+def load_similar(
+    name: str,
+    workspace: Optional[str] = None,
+    query: Optional[str] = None,
+    vector: Optional[Tuple[str, List[float]]] = None,
+    limit: Optional[int] = None,
+    sort: Optional[List[Tuple[str, str]]] = None,
+) -> Dataset:
+    """Loads a argilla dataset.
+
+    Args:
+        name: The dataset name.
+        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
+            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
+        query: An ElasticSearch query with the `query string
+            syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
+        vector: Vector configuration for a semantic search
+        ids: If provided, load dataset records with given ids.
+        limit: The number of records to retrieve.
+        sort: The fields on which to sort [(<field_name>, 'asc|decs')].
+        id_from: If provided, starts gathering the records starting from that Record.
+            As the Records returned with the load method are sorted by ID, ´id_from´
+            can be used to load using batches.
+        batch_size: If provided, load `batch_size` samples per request. A lower batch
+            size may help avoid timeouts.
+        as_pandas: DEPRECATED! To get a pandas DataFrame do
+            ``rg.load('my_dataset').to_pandas()``.
+
+    Returns:
+        A argilla dataset.
+
+    Examples:
+        **Basic Loading: load the samples sorted by their ID**
+
+        >>> import argilla as rg
+        >>> dataset = rg.load(name="example-dataset")
+
+        **Iterate over a large dataset:**
+            When dealing with a large dataset you might want to load it in batches to optimize memory consumption
+            and avoid network timeouts. To that end, a simple batch-iteration over the whole database can be done
+            employing the `from_id` parameter. This parameter will act as a delimiter, retrieving the N items after
+            the given id, where N is determined by the `limit` parameter. **NOTE** If
+            no `limit` is given the whole dataset after that ID will be retrieved.
+
+        >>> import argilla as rg
+        >>> dataset_batch_1 = rg.load(name="example-dataset", limit=1000)
+        >>> dataset_batch_2 = rg.load(name="example-dataset", limit=1000, id_from=dataset_batch_1[-1].id)
+
+    """
+    return ArgillaSingleton.get().load_similar(
+        name=name,
+        workspace=workspace,
+        query=query,
+        vector=vector,
+        limit=limit,
+        sort=sort,
+    )
+
+
 def copy(
     dataset: str,
     name_of_copy: str,

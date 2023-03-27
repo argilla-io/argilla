@@ -82,6 +82,7 @@ _import_structure = {
         "get_workspace",
         "init",
         "load",
+        "load_similar",
         "log",
         "log_async",
         "set_workspace",
