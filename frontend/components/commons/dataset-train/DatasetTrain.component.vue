@@ -1,50 +1,44 @@
 <template>
-  <div class="snippet__container">
-    <base-tabs
-      class="train__tabs"
-      :tabs="snippetsTabs"
-      :active-tab="visibleTab"
-      @change-tab="getSelectedLibrary"
-    />
-    <transition v-if="snippet" name="fade" mode="out-in" appear>
-      <div class="snippet" :key="visibleTab.id">
-        <h1 v-if="snippetAttributes.title" class="snippet__title --heading5">
-          {{ snippetAttributes.title }}
-        </h1>
-        <h2
-          v-if="snippetAttributes.description"
-          class="snippet__description --body2"
-        >
-          {{ snippetAttributes.description }}
-        </h2>
-        <!-- <div class="snippet__code" v-if="snippet.html">
-          <div v-highlight v-html="snippet.html"></div>
-          <base-action-tooltip tooltip="Copied">
-            <base-button
-              class="secondary small"
-              @on-click="copyCode(snippet.html)"
-            >
-              <svgicon name="copy" width="16" height="16" />
-              Copy
-            </base-button>
-          </base-action-tooltip>
-        </div> -->
-        <base-code
-          v-if="snippet.html"
-          :code="parseHtml(snippet.html)"
-        ></base-code>
-        <div class="library__buttons" v-if="snippetAttributes.links">
-          <base-button
-            v-for="(button, index) in snippetAttributes.links"
-            :key="index"
-            class="library__button primary small text"
-            :href="button.linkLink"
-            target="_blank"
-            >{{ button.linkText }}</base-button
+  <div class="train">
+    <div
+      v-if="!$fetchState.pending && !$fetchState.error"
+      class="snippet__container"
+    >
+      <base-tabs
+        class="train__tabs"
+        :tabs="snippetsTabs"
+        :active-tab="visibleTab"
+        @change-tab="getSelectedLibrary"
+      />
+      <transition v-if="snippet" name="fade" mode="out-in" appear>
+        {{ visibleTab }}
+        <div class="snippet" :key="visibleTab.id" v-if="visibleTab">
+          <h1 v-if="snippetAttributes.title" class="snippet__title --heading5">
+            {{ snippetAttributes.title }}
+          </h1>
+          <h2
+            v-if="snippetAttributes.description"
+            class="snippet__description --body2"
           >
+            {{ snippetAttributes.description }}
+          </h2>
+          <base-code
+            v-if="snippet.html"
+            :code="parseHtml(snippet.html)"
+          ></base-code>
+          <div class="library__buttons" v-if="snippetAttributes.links">
+            <base-button
+              v-for="(button, index) in snippetAttributes.links"
+              :key="index"
+              class="library__button primary small text"
+              :href="button.linkLink"
+              target="_blank"
+              >{{ button.linkText }}</base-button
+            >
+          </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
   </div>
 </template>
 
@@ -59,21 +53,26 @@ export default {
   data() {
     return {
       selectedComponent: null,
+      currentTaskLibraries: [],
     };
+  },
+  async fetch() {
+    const libraries = require.context(
+      `../../../../docs/_source/_common/snippets/training`,
+      true,
+      /^[^_]+\.md$/,
+      "lazy"
+    );
+    this.getCurrentTaskLibraries(libraries).forEach(async (library) => {
+      const newLib = await libraries(library);
+      this.currentTaskLibraries.push(newLib);
+    });
   },
   computed: {
     snippetsTabs() {
-      return [
-        this.getLibrary("Transformers"),
-        ...((this.datasetTask !== "Text2Text" && [this.getLibrary("Spacy")]) ||
-          []),
-        ...((this.datasetTask === "TextClassification" && [
-          this.getLibrary("Setfit"),
-        ]) ||
-          []),
-        this.getLibrary("Spark-nlp"),
-        this.getLibrary("AutoTrain"),
-      ];
+      return this.currentTaskLibraries.map((library) => {
+        return this.getLibrary(library?.attributes?.title);
+      });
     },
     task() {
       switch (this.datasetTask) {
@@ -82,24 +81,27 @@ export default {
         case "TokenClassification":
           return "token-classification";
         case "Text2Text":
-          return "text-generation";
+          return "text2text";
       }
+    },
+    snippet() {
+      return (
+        this.currentTaskLibraries.find(
+          (library) => library.attributes.title === this.visibleTab.name
+        ) || {}
+      );
     },
     visibleTab() {
       return this.selectedComponent || this.snippetsTabs[0];
-    },
-    snippet() {
-      try {
-        return require(`../../../../docs/_source/_common/snippets/training/${this.task}/${this.visibleTab.id}.md`);
-      } catch {
-        return null;
-      }
     },
     snippetAttributes() {
       return this.snippet?.attributes;
     },
   },
   methods: {
+    getCurrentTaskLibraries(libraries) {
+      return libraries.keys().filter((library) => library.includes(this.task));
+    },
     getSelectedLibrary(id) {
       this.selectedComponent = this.snippetsTabs.find(
         (snippet) => snippet.id === id
@@ -114,7 +116,7 @@ export default {
     },
     getLibrary(name) {
       return {
-        id: name.toLowerCase(),
+        id: name.trim().toLowerCase(),
         name,
       };
     },
@@ -124,13 +126,18 @@ export default {
 
 <style lang="scss" scoped>
 .train {
+  min-width: 800px;
   &__tabs.tabs {
     margin: 0 -2.5em 2em;
     padding: 0 2.5em;
   }
 }
 .snippet {
-  margin-top: $base-space * 3;
+  margin: 0 -2.5em;
+  padding: 0 2.5em;
+  max-height: calc(100vh - 240px);
+  overflow: auto;
+  @extend %hide-scrollbar;
   :deep(code) {
     border-radius: $border-radius;
   }

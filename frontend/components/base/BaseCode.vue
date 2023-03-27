@@ -63,6 +63,16 @@ export default {
     color: #3ef070;
     font-weight: bold;
   }
+  .hljs-deletion,
+  .hljs-number,
+  .hljs-quote,
+  .hljs-selector-class,
+  .hljs-selector-id,
+  .hljs-string,
+  .hljs-template-tag,
+  .hljs-type {
+    color: #febf96;
+  }
   .hljs-string,
   .hljs-title,
   .hljs-name,
