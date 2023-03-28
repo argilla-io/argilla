@@ -761,7 +761,6 @@ class DatasetForTextClassification(DatasetBase):
                 {
                     "id": ds["id"],
                     "text": ds["text"],
-                    "context": ds_dict["context"],
                     "label": labels,
                     "binarized_label": binarized_labels,
                 },
