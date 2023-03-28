@@ -58,7 +58,17 @@ Run database migrations executing the following task:
 
     python -m argilla.tasks.database.migrate
 
-If you want to run the web app now, simply execute:
+The default SQLite database will be created at `~/.argilla/argilla.db`. This can be changed setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
+
+If required you can create your first Argilla user with the following task:
+
+.. code-block:: bash
+
+    python -m argilla.tasks.users.create
+
+This task will ask you for the required information to create your user, including `username`, `password` and so on.
+
+Finally to run the web app now simply execute:
 
 .. code-block:: bash
 
