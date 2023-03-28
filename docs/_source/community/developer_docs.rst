@@ -31,7 +31,6 @@ Now go ahead and create a new conda environment in which the development will ta
     conda env create -f environment_dev.yml
     conda activate argilla
 
-
 In the new environment *Argilla* will already be installed in `editable mode <https://pip.pypa.io/en/stable/cli/pip_install/#install-editable>`_ with all its server dependencies.
 
 To keep a consistent code format, we use `pre-commit <https://pre-commit.com/>`_ hooks.
@@ -41,19 +40,23 @@ You can install them by simply running:
 
     pre-commit install
 
-Install the `commit-msg` hook if you want to check your commit messages in your
-contributions:
+Install the `commit-msg` hook if you want to check your commit messages in your contributions:
 
 .. code-block:: bash
 
     pre-commit install --hook-type commit-msg
 
-
-The last step is to build the static UI files in case you want to work on the UI:
+Build the static UI files in case you want to work on the UI:
 
 .. code-block:: bash
 
     bash scripts/build_frontend.sh
+
+Run database migrations executing the following task:
+
+.. code-block:: bash
+
+    python -m argilla.tasks.database.migrate
 
 If you want to run the web app now, simply execute:
 
@@ -62,7 +65,6 @@ If you want to run the web app now, simply execute:
     python -m argilla
 
 Congrats, you are ready to take *Argilla* to the next level 🚀
-
 
 Building the documentation
 --------------------------
