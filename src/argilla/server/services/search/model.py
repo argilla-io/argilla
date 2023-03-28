@@ -68,7 +68,7 @@ class ServiceSearchResults(BaseModel):
     total: int
     records: List[ServiceRecord]
     metrics: Dict[str, Any] = Field(default_factory=dict)
-    scores: List[Union[float, None]] = Field(default_factory=list)
+    scores: Union[List[float], None] = None
 
 
 ServiceRecordsQuery = TypeVar("ServiceRecordsQuery", bound=ServiceBaseRecordsQuery)

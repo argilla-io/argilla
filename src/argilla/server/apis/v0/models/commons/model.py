@@ -17,7 +17,7 @@
 Common model for task definitions
 """
 
-from typing import Any, Dict, Generic, List, TypeVar
+from typing import Any, Dict, Generic, List, TypeVar, Union
 
 from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
@@ -71,4 +71,4 @@ class BaseSearchResults(GenericModel, Generic[_Record, ServiceSearchResultsAggre
     total: int = 0
     records: List[_Record] = Field(default_factory=list)
     aggregations: ServiceSearchResultsAggregations = None
-    scores: List[float] = Field(default_factory=list)
+    scores: Union[List[float], None] = None

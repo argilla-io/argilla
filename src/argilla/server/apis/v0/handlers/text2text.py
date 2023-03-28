@@ -141,7 +141,7 @@ def configure_router():
             total=result.total,
             records=[Text2TextRecord.parse_obj(r) for r in result.records],
             aggregations=Text2TextSearchAggregations.parse_obj(result.metrics) if result.metrics else None,
-            scores=result.scores,
+            scores=result.scores if any(result.scores) else None,
         )
 
     metrics.configure_router(

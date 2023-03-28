@@ -99,11 +99,13 @@ class SearchRecordsService:
                 self.__LOGGER__.warning("Cannot compute metric [%s]. Error: %s", metric.id, ex)
                 metrics_results[metric.id] = {}
 
+        similarity_scores = [r.get("score", 0.0) for r in results.records]
+
         return ServiceSearchResults(
             total=results.total,
             records=[record_type.parse_obj(r) for r in results.records],
             metrics=metrics_results if metrics_results else {},
-            scores=[r.get("score", 0.0) for r in results.records],
+            scores=similarity_scores if any(similarity_scores) else None,
         )
 
     async def find_record_by_id(
