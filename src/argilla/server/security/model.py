@@ -78,7 +78,6 @@ class User(BaseModel):
     full_name: Optional[str] = Field(description="Deprecated. Use `first_name` and `last_name` instead")
     username: str = Field()
     role: UserRole
-    superuser: Optional[bool]
     workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime
