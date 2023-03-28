@@ -40,7 +40,7 @@ export default {
     },
     breadcrumbs() {
       return [
-        { link: { name: "datasets" }, name: "Datasets" },
+        { link: { name: "datasets" }, name: "Home" },
         {
           link: { path: `/datasets?workspace=${this.workspace}` },
           name: this.workspace,
