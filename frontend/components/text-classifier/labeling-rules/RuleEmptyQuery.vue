@@ -18,20 +18,24 @@
 <template>
   <div v-if="dataset" class="rule-labels-definition">
     <div class="rule__labels" v-if="labels.length">
-      <classifier-annotation-button
-        v-for="label in visibleLabels"
-        :id="label.class"
-        :key="`${label.class}`"
-        :label="label"
-        class="non-reactive label-button"
-        :data-title="label.class"
-        :value="label.class"
-      >
-      </classifier-annotation-button>
-      <p class="help-message">Introduce a query to define a rule.</p>
-      <p v-if="!areAnnotationsInDataset" class="help-message">
-        {{ messageNotAnnotation }}
-      </p>
+      <div class="buttons">
+        <classifier-annotation-button
+          v-for="label in visibleLabels"
+          :id="label.class"
+          :key="`${label.class}`"
+          :label="label"
+          class="non-reactive label-button"
+          :data-title="label.class"
+          :value="label.class"
+        >
+        </classifier-annotation-button>
+      </div>
+      <div class="feedback">
+        <p class="--body1 help-message">Introduce a query to define a rule.</p>
+        <p v-if="!areAnnotationsInDataset" class="--body1 help-message">
+          {{ messageNotAnnotation }}
+        </p>
+      </div>
     </div>
     <div v-else>
       <BaseFeedbackComponent
@@ -39,7 +43,7 @@
         @on-click="goToSettings"
         class="feedback-area"
       />
-      <p class="help-message">
+      <p class="--body1 help-message">
         {{ messageNotLabels }}
       </p>
     </div>
@@ -170,8 +174,8 @@ export default {
   @extend %item;
 }
 .help-message {
-  color: $black-37;
   max-width: 480px;
+  color: $black-37;
 }
 .label-button {
   margin: 5px;
@@ -184,9 +188,19 @@ export default {
 }
 .rule {
   &__labels {
-    margin-bottom: 1em;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     margin-left: -5px;
     margin-right: -5px;
+  }
+}
+.buttons {
+  flex: 1;
+}
+.feedback {
+  p {
+    margin-bottom: 0;
   }
 }
 </style>
