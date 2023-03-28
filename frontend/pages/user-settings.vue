@@ -1,13 +1,13 @@
 <template>
   <HeaderAndTopAndTwoColumns>
     <template v-slot:header>
-      <HeaderComponent />
+      <HeaderUserSettingsContent />
     </template>
     <template v-slot:top>
-      <TopDatasetSettingsContent />
+      <TopUserSettingsContent />
     </template>
     <template v-slot:left>
-      <LeftDatasetSettingsContent />
+      <LeftUserSettingsContent />
     </template>
     <template v-slot:right>
       <div class="right-content"></div>
@@ -19,7 +19,7 @@
 import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
 
 export default {
-  name: "SettingsPage",
+  name: "UserSettingsPage",
   components: {
     HeaderAndTopAndTwoColumns,
   },

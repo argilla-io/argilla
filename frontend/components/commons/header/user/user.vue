@@ -4,18 +4,36 @@
       {{ firstChar(user.username) }}
     </a>
     <div v-if="visibleSelector && user" class="user__content">
-      <p class="user__name">{{ user.username }}</p>
-      <p class="user__mail">{{ user.email }}</p>
-      <a
-        class="user__link"
-        href="https://docs.argilla.io/en/latest/"
-        target="_blank"
-      >
-        <svgicon width="16" height="16" name="external"></svgicon> View docs
-      </a>
-      <a class="user__link" href="#" @click.prevent="logout">
-        <svgicon width="16" heigth="16" name="log-out"></svgicon> Log out
-      </a>
+      <div class="head">
+        <div class="left-head">
+          <span v-circle v-text="firstChar(user.username)" />
+        </div>
+        <div class="right-head">
+          <div class="item">
+            <span v-text="user.username" />
+          </div>
+          <div class="item" v-if="user.email">
+            <span v-text="user.email" />
+          </div>
+        </div>
+      </div>
+      <div class="">
+        <NuxtLink class="user__link" :to="{ name: 'user-settings' }">
+          My settings
+        </NuxtLink>
+        <a
+          class="user__link"
+          href="https://docs.argilla.io/en/latest/"
+          target="_blank"
+          v-text="'View docs'"
+        />
+        <a
+          class="user__link"
+          href="#"
+          @click.prevent="logout"
+          v-text="'Log out'"
+        />
+      </div>
       <span class="copyright"
         >© {{ currentYear }} Argilla ({{ appVersion }})</span
       >
@@ -83,6 +101,20 @@ $buttonSize: 34px;
   font-weight: 500;
   @include font-size(16px);
 }
+
+.head {
+  display: flex;
+  gap: 25px;
+  padding: $base-space $base-space * 2 $base-space * 2 $base-space * 2;
+  border-bottom: 1px solid palette(grey, 200);
+  .right-head {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
 .user {
   position: relative;
   z-index: 3;
@@ -104,7 +136,7 @@ $buttonSize: 34px;
     position: absolute;
     top: 3.8em;
     right: -0.5em;
-    padding-top: 1.5em;
+    padding-top: $base-space * 2;
     background: palette(grey, 100);
     border-radius: $border-radius;
     @include font-size(14px);
@@ -122,37 +154,31 @@ $buttonSize: 34px;
       text-decoration: none;
     }
   }
-  &__name {
-    @include font-size(16px);
-    margin: 0 1.5em 0.3em 1.5em;
-    font-weight: 600;
-  }
-  &__mail {
-    margin: 0 1.5em 2em 1.5em;
-    color: palette(apricot);
-  }
   &__link {
     display: flex;
-    align-items: center;
-    margin: 0.5em 1.5em 1.5em 1.5em;
-    color: palette(white);
-    &:hover {
+    flex-direction: column;
+    padding: $base-space * 2 $base-space * 2 $base-space * 2 $base-space * 2;
+    color: darken(palette(white), 10%);
+    a {
       color: darken(palette(white), 10%);
+    }
+    &:hover {
+      color: palette(white);
       .svg-icon {
-        fill: darken(palette(white), 10%);
+        color: palette(white);
       }
     }
-    .svg-icon {
-      margin-right: 0.5em;
-    }
+  }
+  &__link:not(:last-child) {
+    border-bottom: 1px solid palette(grey, 200);
   }
 }
+
 .copyright {
   display: block;
   @include font-size(11px);
   font-weight: 400;
   line-height: 1em;
-  margin-top: 1.5em;
   padding: 1em;
   background: $black-54;
   text-align: right;
