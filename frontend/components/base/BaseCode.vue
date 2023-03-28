@@ -31,19 +31,25 @@ export default {
 <style lang="scss" scoped>
 .code {
   position: relative;
+  white-space: normal;
   :deep(pre) {
+    white-space: normal;
+  }
+  :deep(code) {
     white-space: pre-line;
   }
   &__button {
     position: absolute;
-    bottom: 2.5em;
+    bottom: 1em;
     right: 1em;
     svg {
       fill: palette(white);
     }
   }
 }
+
 .hljs {
+  position: relative;
   font-family: monospace, serif;
   margin: 0;
   background-color: #333346;
@@ -51,8 +57,8 @@ export default {
   padding: 2em !important;
   border-radius: $border-radius;
   text-align: left;
-  font-weight: 600;
-  @include font-size(12px);
+  font-weight: 500;
+  @include font-size(13px);
 }
 :deep() {
   .hljs-keyword,
