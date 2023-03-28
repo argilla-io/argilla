@@ -67,12 +67,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update "Define a labeling schema" section in docs.
 - The record inputs are sorted alphabetically in UI by default. [#2581](https://github.com/argilla-io/argilla/pull/2581)
 - The record inputs are fully visible when pagination size is one and the height of collapsed area size is bigger for laptop screen. [#2587](https://github.com/argilla-io/argilla/pull/2587/files)
-- the list of rules is now accessible while metrics are computed [#2117](https://github.com/argilla-io/argilla/issues/2117)
+- the list of rules is now accessible while metrics are computed Closes[#2117](https://github.com/argilla-io/argilla/issues/2117)
 
 ### Fixes
 
 - Allow URL to be clickable in Jupyter notebook again. Closes [#2527](https://github.com/argilla-io/argilla/issues/2527)
-- Adding new rules was sometimes broken [#2561](https://github.com/argilla-io/argilla/issues/2561). The correction have been done in this issue [#2117](https://github.com/argilla-io/argilla/issues/2117)
+- Adding new rules was sometimes broken Closes[#2561](https://github.com/argilla-io/argilla/issues/2561). The correction have been done in this issue [#2117](https://github.com/argilla-io/argilla/issues/2117)
 
 ### Removed
 
