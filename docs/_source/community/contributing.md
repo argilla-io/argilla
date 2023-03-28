@@ -12,7 +12,7 @@ To get an overview of the project, read the [README](https://github.com/argilla-
 
 - [Finding good first issue](https://github.com/argilla-io/argilla/labels/good%20first%20issue)
 - [Find and review pull requests](https://github.com/argilla-io/argilla/pulls)
-- [Setting up the Argilla developer environment](./developer_docs.rst)
+- [Setting up the Argilla developer environment](./developer_docs.md)
 - [Write a tutorial](https://github.com/argilla-io/argilla/issues/2030)
 - [Schedule a meeting with our developer advocate](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m)
 
@@ -43,7 +43,7 @@ You can contribute to the docs by
 - Including missing parts, examples, improving the writing, fixing typos, etc.
 
 For contributing to the docs, here are two references:
-1. [How to locally build the docs](./developer_docs.rst)
+1. [How to locally build the docs](./developer_docs.md)
 2. [A template for tutorials](https://github.com/argilla-io/argilla/blob/develop/docs/_source/tutorials/notebooks/template.ipynb)
 
 
@@ -59,7 +59,7 @@ Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?
 
 - Create [a fork](https://github.com/argilla-io/argilla/fork) of our `development` branch.
   - Note, for updates solely to the documentation, you are allowed to work in the `main` branch.
-- To start working on code changes, we suggest, you take a look at our tutorial on setting up the [development environment](./developer_docs.rst).
+- To start working on code changes, we suggest, you take a look at our tutorial on setting up the [development environment](./developer_docs.md).
 - Work on your awesome contribution and adhere to our formatting guidelines.
   - Don´t forget to also check if:
     - Your update requires updates to our docs.
