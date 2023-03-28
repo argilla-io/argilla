@@ -343,6 +343,7 @@ export default {
     padding: 0;
   }
   &__info {
+    margin-bottom: 0;
     color: $black-54;
   }
   &__records {
