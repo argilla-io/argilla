@@ -73,11 +73,25 @@
         @on-click="goToSettings"
         class="feedback-area"
       />
-      <p class="help-message">
+      <p class="--body1 help-message">
         {{ messageNotLabels }}
       </p>
     </div>
-    <p class="rule__info" v-if="ruleInfo">{{ ruleInfo }}</p>
+
+    <template v-if="ruleInfo">
+      <p class="rule__info" v-if="isSaved">{{ ruleInfo }}</p>
+
+      <BaseFeedbackComponent
+        class="rule__info"
+        v-if="!isSaved && selectedLabels && queryWithLabelsIsStored"
+        :feedbackInput="{
+          ...inputForFeedbackComponentQueryAlreadyExist,
+          message: ruleInfo,
+        }"
+        @on-click="feedbackAction"
+      />
+    </template>
+
     <base-button
       v-else
       :disabled="!selectedLabelsVModel.length"
@@ -115,6 +129,11 @@ export default {
       searchText: "",
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
       selectedLabelsVModel: [],
+      inputForFeedbackComponentQueryAlreadyExist: {
+        message: "",
+        buttonLabels: null,
+        feedbackType: "ERROR",
+      },
       inputForFeedbackComponent: {
         message: "Action needed: Create labels in the dataset settings",
         buttonLabels: [{ label: "Create labels", value: "CREATE_LABELS" }],
@@ -144,8 +163,7 @@ export default {
         return this.selectedLabelsVModel;
       }
     },
-
-    ruleInfo() {
+    queryWithLabelsIsStored() {
       // TODO: We can improve this
       const storedRule =
         this.currentRule &&
@@ -155,10 +173,13 @@ export default {
         _.sortBy(storedRuleLabels),
         _.sortBy(this.selectedLabels)
       );
+      return queryWithLabelsIsStored;
+    },
+    ruleInfo() {
       if (this.isSaved) {
         return "The rule was saved";
       }
-      if (this.selectedLabels && queryWithLabelsIsStored) {
+      if (this.selectedLabels && this.queryWithLabelsIsStored) {
         return `This query with ${
           this.selectedLabels.length > 1 ? "these labels" : "this label"
         } is already saved as rule`;
@@ -322,8 +343,6 @@ export default {
     padding: 0;
   }
   &__info {
-    margin-bottom: 0;
-    margin-top: auto;
     color: $black-54;
   }
   &__records {
@@ -369,6 +388,7 @@ export default {
     }
   }
   &__labels {
+    flex: 1;
     margin-bottom: 1em;
     margin-left: -5px;
     margin-right: -5px;
