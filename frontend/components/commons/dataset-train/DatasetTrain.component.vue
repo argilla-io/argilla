@@ -89,7 +89,7 @@ export default {
       const preBlocks = docElement.getElementsByTagName("pre");
       for (let i = 0; i < preBlocks.length; i++) {
         const code = preBlocks[i].innerText;
-        preBlocks[i].innerHTML = `<base-code code= \'${code}\'></base-code>`;
+        preBlocks[i].innerHTML = `<base-code code='${code}'></base-code>`;
       }
       const html = docElement.getElementsByTagName("body")[0].innerHTML;
       return `<div>${html}</div>`;
@@ -127,7 +127,9 @@ export default {
           /^[^_]+\.md$/,
           "lazy"
         );
-      } catch (e) {}
+      } catch (e) {
+        console.log(e);
+      }
       return libraries;
     },
   },
