@@ -3,10 +3,11 @@
     id="baseFeedBackId"
     v-if="isFeedbackError"
     :message="feedbackInput.message"
+    :isLoading="isLoading"
     :buttonLabels="feedbackInput.buttonLabels"
     @on-click="onClick"
   />
-  <div v-else>{{ feedbackType }}</div>
+  <div v-else>{{ feedbackInput.message }}</div>
 </template>
 
 <script>
@@ -23,6 +24,10 @@ export default {
     feedbackInput: {
       type: Object,
       required: true,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
