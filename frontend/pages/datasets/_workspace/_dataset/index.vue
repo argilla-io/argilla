@@ -94,7 +94,7 @@ export default {
     }),
     breadcrumbs() {
       return [
-        { link: { path: "/datasets" }, name: "Home" },
+        { link: { name: "datasets" }, name: "Home" },
         {
           link: { path: `/datasets?workspace=${this.workspace}` },
           name: this.workspace,
