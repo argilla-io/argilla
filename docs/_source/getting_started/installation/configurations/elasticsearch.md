@@ -41,7 +41,7 @@ and then provide the analyzer name using the specific environment variable.
 
 ## Reindex data
 
-Sometimes updates require reindexing our dataset metrics and Elasticsearch, therefore we devised some [short documentation](../../guides/features/datasets) to show you how to do this from our Python client.
+Sometimes updates require reindexing our dataset metrics and Elasticsearch, therefore we devised some [short documentation](../../guides/log_load_and_prepare_data) to show you how to do this from our Python client.
 
 ## Backups using snapshots
 
@@ -49,9 +49,9 @@ Within Elastic, it is possible to create snapshots of a running cluster. We high
 
 ### Mount back-up volume
 
-When deploying Elastic, we need to define a `path.repo` via setting this as an environment variable in your `docker-compose.yml` or by setting this in your `elasticsearch.yml`, and passing this as config. Additionally, we need to pass the same `path.repo` to a mounted volume. By default, we set this `elasticdata:/usr/share/elasticsearch/backups` because the `elasticsearch` user needs to have full permisions to act on the repo. Hence, setting the volume to something different might require some additional permission configurations. Note that the `minimum_master_nodes` need to be explicitly set when bound on a public IP.
+When deploying Elastic, we need to define a `path.repo` via setting this as an environment variable in your `docker-compose.yaml` or by setting this in your `elasticsearch.yml`, and passing this as config. Additionally, we need to pass the same `path.repo` to a mounted volume. By default, we set this `elasticdata:/usr/share/elasticsearch/backups` because the `elasticsearch` user needs to have full permisions to act on the repo. Hence, setting the volume to something different might require some additional permission configurations. Note that the `minimum_master_nodes` need to be explicitly set when bound on a public IP.
 
-#### `docker-compose.yml`
+#### `docker-compose.yaml`
 
 ```yaml
 elasticsearch:
@@ -93,7 +93,7 @@ Within our designated `path.repo`, we can now create a snapshot repository, whic
 
 Go to your Kibana `host:p/app/management/data/snapshot_restore/repositories`, on localhost go [here](http://localhost:5601/app/management/data/snapshot_restore/repositories). Press `Register a repository` and set the repo name to whatever you like, in our example we will use `argilla-kibana`. Additionally, we will choose the default option of using a shared file system.
 
-![add repo](../../_static/images/installation/elastic_snapshots/add_repo.png)
+![add repo](../../../../../../_static/images/installation/elastic_snapshots/add_repo.png)
 
 Next, we need to fill out the `path.repo` and set it to `/usr/share/elasticsearch/backups`. Additionally we can pass some configuration to reduce the load on the cluster caused by backups by defining chunking and byte processing sizes, but for this toy example we will leave them empty.
 #### cURL
@@ -117,7 +117,7 @@ Next, we can verify the creation of the back-up.
 curl -X GET "localhost:9200/_snapshot/argilla-curl?pretty"
 ```
 
-![add repo success](../../_static/images/installation/elastic_snapshots/add_repo_succes.png)
+![add repo success](../../../../../../_static/images/installation/elastic_snapshots/add_repo_succes.png)
 
 ### Create snapshot policy
 
@@ -127,7 +127,7 @@ Now we have defined wehere snapshot are going to be stored, we can continue with
 
 Go to your Kibana `host:ip/app/management/data/snapshot_restore/add_policy`, on localhost go [here](http://localhost:5601/app/management/data/snapshot_restore/add_policy). Press `Create a policy` and set the repo name to whatever you like, in our example we will use `argilla-kibana-policy` and execute it on the `argilla-kibana` repo. Also, there are some config options about retention, snapshot naming and scheduling, that we will not discuss in-depth, but underneath you can find a minimal example.
 
-![add policy](../../_static/images/installation/elastic_snapshots/add_policy.png)
+![add policy](../../../../../../_static/images/installation/elastic_snapshots/add_policy.png)
 #### cURL
 
 If you Elastic IP is public, it is possible to directly use a `cURL` to create a repo. If not, we first need to `SSH` into the cluster before calling the `cURL` command. In our example we will define an `argilla-curl-policy` and execute it on the `argilla-curl` repo.
@@ -150,4 +150,4 @@ curl -X PUT "localhost:9200/_slm/policy/argilla-curl-policy?pretty" -H 'Content-
 '
 ```
 
-![add policy success](../../_static/images/installation/elastic_snapshots/add_policy_succes.png)
+![add policy success](../../../../../../_static/images/installation/elastic_snapshots/add_policy_succes.png)

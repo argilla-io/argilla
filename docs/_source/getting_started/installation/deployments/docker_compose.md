@@ -17,13 +17,13 @@ mkdir argilla && cd argilla
 and launch the docker-contained web app with the following command:
 
 ```bash
-wget -O docker-compose.yml https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml && docker-compose up -d
+wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml && docker-compose up -d
 ```
 :::{warning}
 Latest versions of docker should be executed without the dash '-', e.g:
 
 ```bash
-docker compose up -d
+docker-compose up -d
 ```
 :::
 
@@ -40,7 +40,7 @@ you will lose all your datasets in Argilla!
 :::{tip}
 Instead, execute
 ```bash
-docker compose stop
+docker-compose stop
 ```
 :::
 
@@ -53,7 +53,7 @@ By default, telemetry is enabled. This helps us to improve our product. For more
 To avoid losing all the data when the docker-compose/server goes down, you can add some persistence by mounting a
 volume in the docker compose.
 
-To this end, **modify the elasticsearch service and create a new volume** in the docker-compse.yml file:
+To this end, **modify the elasticsearch service and create a new volume** in the `docker-compose.yaml` file:
 
 ```yaml
 services:

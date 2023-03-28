@@ -13,12 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-DEFAULT_MAX_KEYWORD_LENGTH = 128
-
-
 API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
 WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
-DEFAULT_API_KEY = "argilla.apikey"  # Keep the same api key for now
+
+DEFAULT_USERNAME = "argilla"
+DEFAULT_PASSWORD = "1234"
+DEFAULT_API_KEY = "argilla.apikey"
+DEFAULT_MAX_KEYWORD_LENGTH = 128
+DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
 
 # TODO: This constant will be drop out with issue
 #  https://github.com/argilla-io/argilla/issues/2251 fix
@@ -27,6 +29,3 @@ _OLD_API_KEY_HEADER_NAME = "X-Rubrix-Api-Key"
 _OLD_WORKSPACE_HEADER_NAME = "X-Rubrix-Workspace"
 
 ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
-
-
-DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
