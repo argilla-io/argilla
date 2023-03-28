@@ -1,11 +1,9 @@
 <template>
-  <div class="train">
-    <div
-      v-if="!$fetchState.pending && !$fetchState.error"
-      class="snippet__container"
-    >
+  <div class="training-snippets">
+    <base-spinner v-if="$fetchState.pending" />
+    <div v-else-if="!$fetchState.error" class="snippet__container">
       <base-tabs
-        class="train__tabs"
+        class="training-snippets__tabs"
         :tabs="snippetsTabs"
         :active-tab="visibleTab"
         @change-tab="getSelectedLibrary"
@@ -22,10 +20,7 @@
           >
             {{ snippetAttributes.description }}
           </h2>
-          <base-code
-            v-if="snippet.html"
-            :code="parseHtml(snippet.html)"
-          ></base-code>
+          <BaseRenderHtml v-if="parsedSnippet" :html="parsedSnippet" />
           <div class="library__buttons" v-if="snippetAttributes.links">
             <base-button
               v-for="(button, index) in snippetAttributes.links"
@@ -57,12 +52,7 @@ export default {
     };
   },
   async fetch() {
-    const libraries = require.context(
-      `../../../../docs/_source/_common/snippets/training`,
-      true,
-      /^[^_]+\.md$/,
-      "lazy"
-    );
+    const libraries = this.getLibraries();
     this.getCurrentTaskLibraries(libraries).forEach(async (library) => {
       const newLib = await libraries(library);
       this.currentTaskLibraries.push(newLib);
@@ -91,6 +81,19 @@ export default {
         ) || {}
       );
     },
+    parsedSnippet() {
+      const docElement = new DOMParser().parseFromString(
+        this.snippet.html,
+        "text/html"
+      ).documentElement;
+      const preBlocks = docElement.getElementsByTagName("pre");
+      for (let i = 0; i < preBlocks.length; i++) {
+        const code = preBlocks[i].innerText;
+        preBlocks[i].innerHTML = `<base-code code= \'${code}\'></base-code>`;
+      }
+      const html = docElement.getElementsByTagName("body")[0].innerHTML;
+      return `<div>${html}</div>`;
+    },
     visibleTab() {
       return this.selectedComponent || this.snippetsTabs[0];
     },
@@ -100,19 +103,14 @@ export default {
   },
   methods: {
     getCurrentTaskLibraries(libraries) {
-      return libraries.keys().filter((library) => library.includes(this.task));
+      return (
+        libraries?.keys().filter((library) => library.includes(this.task)) || []
+      );
     },
     getSelectedLibrary(id) {
       this.selectedComponent = this.snippetsTabs.find(
         (snippet) => snippet.id === id
       );
-    },
-    parseHtml(snippet) {
-      const snippetCode = new DOMParser().parseFromString(snippet, "text/html");
-      return snippetCode.body.textContent;
-    },
-    copyCode(snippet) {
-      this.$copyToClipboard(this.parseHtml(snippet));
     },
     getLibrary(name) {
       return {
@@ -120,27 +118,37 @@ export default {
         name,
       };
     },
+    getLibraries() {
+      let libraries = null;
+      try {
+        libraries = require.context(
+          `../../../../docs/_source/_common/snippets/training`,
+          true,
+          /^[^_]+\.md$/,
+          "lazy"
+        );
+      } catch (e) {}
+      return libraries;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.train {
+.training-snippets {
   min-width: 800px;
   &__tabs.tabs {
     margin: 0 -2.5em 2em;
     padding: 0 2.5em;
   }
 }
+
 .snippet {
   margin: 0 -2.5em;
   padding: 0 2.5em;
   max-height: calc(100vh - 240px);
   overflow: auto;
   @extend %hide-scrollbar;
-  :deep(code) {
-    border-radius: $border-radius;
-  }
   &__container {
     width: 800px;
   }
@@ -151,6 +159,10 @@ export default {
   }
   &__description {
     font-weight: normal;
+    margin-bottom: $base-space * 2;
+  }
+  :deep(em) {
+    color: $black-54;
   }
 }
 .library {
