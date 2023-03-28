@@ -28,10 +28,10 @@
         :value="label.class"
       >
       </classifier-annotation-button>
+      <p class="help-message">Introduce a query to define a rule.</p>
       <p v-if="!areAnnotationsInDataset" class="help-message">
         {{ messageNotAnnotation }}
       </p>
-      <p class="help-message">Introduce a query to define a rule.</p>
     </div>
     <div v-else>
       <BaseFeedbackComponent
