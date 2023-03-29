@@ -250,7 +250,7 @@ $header-button-color: #262a2e;
   @include font-size(14px);
   box-shadow: $shadow-200;
   &:hover {
-    background: darken($header-button-color, 3%);
+    background: lighten($header-button-color, 3%);
   }
   svg {
     fill: palette(white);

@@ -22,7 +22,7 @@
           </h2>
           <BaseRenderHtml v-if="parsedSnippet" :html="parsedSnippet" />
           <div class="library__buttons" v-if="snippetAttributes.links">
-            <em class="library__section__title">Links</em>
+            <p class="library__section__title">Links</p>
             <base-button
               v-for="(button, index) in snippetAttributes.links"
               :key="index"
@@ -100,17 +100,22 @@ export default {
         preBlocks[i].innerHTML = `<base-code code='${code}'></base-code>`;
       }
       const html = docElement.getElementsByTagName("body")[0].innerHTML;
-      const htmlWithDatsetVariable = html.replace(
-        "<my_dataset_name>",
-        this.datasetName
-      );
-      return `<div>${htmlWithDatsetVariable}</div>`;
+      const htmlWithVariables = html
+        .replace("<my_dataset_name>", this.datasetName)
+        .replace("<my_workspace_name>", this.workspaceName);
+      return `<div>${htmlWithVariables}</div>`;
     },
     visibleTab() {
       return this.selectedComponent || this.snippetsTabs[0];
     },
     snippetAttributes() {
       return this.snippet?.attributes;
+    },
+    workspaceName() {
+      return this.$route.params.workspace;
+    },
+    datasetName() {
+      return this.$route.params.dataset;
     },
   },
   methods: {
@@ -184,14 +189,19 @@ export default {
     display: flex;
     flex-direction: column;
     gap: $base-space;
-    margin-top: $base-space * 4;
+    margin-top: $base-space * 3;
   }
   &__button {
     display: inline-flex;
+    padding: 0;
+    @include line-height(16px);
   }
   &__section {
     &__title {
-      margin-bottom: $base-space * 2;
+      margin-bottom: $base-space;
+      color: $black-54;
+      font-weight: 600;
+      @include font-size(15px);
     }
   }
 }
