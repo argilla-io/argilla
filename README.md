@@ -178,7 +178,7 @@ You can choose one of many amazing frameworks to train your model, like [transfo
 Check out our [deep dives](https://docs.argilla.io/en/latest/guides/guides.html) and our [tutorials](https://docs.argilla.io/en/latest/tutorials/tutorials.html) on how Argilla integrates with these frameworks.
 
 
-If you want to train a Hugging Face transformer or spaCy NER model, we provide a neat shortcut to [prepare your dataset for training](https://docs.argilla.io/en/latest/guides/features/datasets.html#Prepare-dataset-for-training).
+If you want to train a Hugging Face transformer or spaCy NER model, we provide a neat shortcut to [prepare your dataset for training](https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html?highlight=prepare%20dataset#Prepare-dataset-for-training).
 ### Can Argilla share the Elasticsearch Instance/cluster?
 Yes, you can use the same Elasticsearch instance/cluster for Argilla and other applications.
 You only need to perform some configuration, check the Advanced installation guide in the docs.
