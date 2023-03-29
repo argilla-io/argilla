@@ -29,7 +29,7 @@
       />
       <template v-if="datasetId && datasetName">
         <base-button
-          class="button-train small"
+          class="header__button small"
           @on-click="onClickTrain"
           v-if="isAdminRole"
         >
@@ -209,6 +209,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$header-button-color: #262a2e;
 .header {
   opacity: 1;
   position: relative;
@@ -240,15 +241,19 @@ export default {
     }
   }
 }
-.button-train {
-  background: palette(grey, 700);
-  color: $primary-color;
+.header__button {
+  background: $header-button-color;
+  color: palette(white);
   margin-right: $base-space;
+  padding: 10px 12px 10px 10px;
+  font-weight: 600;
+  @include font-size(14px);
+  box-shadow: $shadow-200;
   &:hover {
-    background: palette(grey, 600);
+    background: darken($header-button-color, 3%);
   }
   svg {
-    fill: $primary-color;
+    fill: palette(white);
   }
 }
 </style>
