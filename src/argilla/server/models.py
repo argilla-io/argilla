@@ -34,9 +34,29 @@ def default_inserted_at(context):
     return context.get_current_parameters()["inserted_at"]
 
 
+class DatasetStatus(str, Enum):
+    draft = "draft"
+    ready = "ready"
+
+
 class UserRole(str, Enum):
     admin = "admin"
     annotator = "annotator"
+
+
+class Dataset(Base):
+    __tablename__ = "datasets"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    name: Mapped[str]
+    guidelines: Mapped[Optional[str]]
+    status: Mapped[DatasetStatus] = mapped_column(default=DatasetStatus.draft)
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, status={self.status.value!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
 
 
 class WorkspaceUser(Base):
