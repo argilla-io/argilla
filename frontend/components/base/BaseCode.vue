@@ -40,7 +40,7 @@ export default {
   }
   &__button {
     position: absolute;
-    bottom: 1em;
+    top: 1em;
     right: 1em;
     svg {
       fill: palette(white);
