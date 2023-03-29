@@ -3,6 +3,7 @@
     <base-spinner v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error" class="snippet__container">
       <base-tabs
+        v-if="snippetsTabs"
         class="training-snippets__tabs"
         :tabs="sortedSnippetsTabs"
         :active-tab="visibleTab"
@@ -60,13 +61,16 @@ export default {
     });
   },
   computed: {
+    sortedSnippetsTabs() {
+      return this.snippetsTabs.sort();
+    },
+    visibleTab() {
+      return this.selectedComponent || this.snippetsTabs[0] || null;
+    },
     snippetsTabs() {
       return this.currentTaskLibraries.map((library) => {
         return this.getLibrary(library?.attributes?.title);
       });
-    },
-    sortedSnippetsTabs() {
-      return this.snippetsTabs.sort();
     },
     task() {
       switch (this.datasetTask) {
@@ -77,13 +81,6 @@ export default {
         case "Text2Text":
           return "text2text";
       }
-    },
-    snippet() {
-      return (
-        this.currentTaskLibraries.find(
-          (library) => library.attributes.title === this.visibleTab.name
-        ) || {}
-      );
     },
     parsedSnippet() {
       const docElement = new DOMParser().parseFromString(
@@ -101,11 +98,15 @@ export default {
         .replace("<my_workspace_name>", this.workspaceName);
       return `<div>${htmlWithVariables}</div>`;
     },
-    visibleTab() {
-      return this.selectedComponent || this.snippetsTabs[0];
-    },
     snippetAttributes() {
       return this.snippet?.attributes;
+    },
+    snippet() {
+      return (
+        this.currentTaskLibraries.find(
+          (library) => library.attributes.title === this.visibleTab.name
+        ) || {}
+      );
     },
     workspaceName() {
       return this.$route.params.workspace;
