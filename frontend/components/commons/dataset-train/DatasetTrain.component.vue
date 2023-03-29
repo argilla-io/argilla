@@ -4,7 +4,7 @@
     <div v-else-if="!$fetchState.error" class="snippet__container">
       <base-tabs
         class="training-snippets__tabs"
-        :tabs="snippetsTabs"
+        :tabs="sortedSnippetsTabs"
         :active-tab="visibleTab"
         @change-tab="getSelectedLibrary"
       />
@@ -22,6 +22,7 @@
           </h2>
           <BaseRenderHtml v-if="parsedSnippet" :html="parsedSnippet" />
           <div class="library__buttons" v-if="snippetAttributes.links">
+            <em class="library__section__title">Links</em>
             <base-button
               v-for="(button, index) in snippetAttributes.links"
               :key="index"
@@ -44,6 +45,10 @@ export default {
       type: String,
       required: true,
     },
+    datasetName: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -63,6 +68,9 @@ export default {
       return this.currentTaskLibraries.map((library) => {
         return this.getLibrary(library?.attributes?.title);
       });
+    },
+    sortedSnippetsTabs() {
+      return this.snippetsTabs.sort();
     },
     task() {
       switch (this.datasetTask) {
@@ -92,7 +100,11 @@ export default {
         preBlocks[i].innerHTML = `<base-code code='${code}'></base-code>`;
       }
       const html = docElement.getElementsByTagName("body")[0].innerHTML;
-      return `<div>${html}</div>`;
+      const htmlWithDatsetVariable = html.replace(
+        "<my_dataset_name>",
+        this.datasetName
+      );
+      return `<div>${htmlWithDatsetVariable}</div>`;
     },
     visibleTab() {
       return this.selectedComponent || this.snippetsTabs[0];
@@ -172,9 +184,15 @@ export default {
     display: flex;
     flex-direction: column;
     gap: $base-space;
+    margin-top: $base-space * 4;
   }
   &__button {
     display: inline-flex;
+  }
+  &__section {
+    &__title {
+      margin-bottom: $base-space * 2;
+    }
   }
 }
 </style>
