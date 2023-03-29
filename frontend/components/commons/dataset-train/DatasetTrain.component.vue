@@ -45,10 +45,6 @@ export default {
       type: String,
       required: true,
     },
-    datasetName: {
-      type: String,
-      required: true,
-    },
   },
   data() {
     return {
