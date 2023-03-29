@@ -55,10 +55,7 @@
       allow-close
       @close-modal="showTrainModal(false)"
     >
-      <DatasetTrainComponent
-        :datasetName="datasetName"
-        :datasetTask="dataset.task"
-      />
+      <DatasetTrainComponent :datasetTask="dataset.task" />
     </base-modal>
   </div>
 </template>
