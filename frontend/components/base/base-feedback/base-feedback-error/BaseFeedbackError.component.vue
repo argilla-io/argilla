@@ -8,6 +8,7 @@
         </BaseButton>
       </div>
     </div>
+    <BaseSpinner v-if="isLoading" />
   </div>
 </template>
 
@@ -21,6 +22,10 @@ export default {
     },
     buttonLabels: {
       type: Array | null,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
