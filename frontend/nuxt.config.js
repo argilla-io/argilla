@@ -68,6 +68,7 @@ export default {
     { src: "~/plugins/filters.js" },
     { src: "~/plugins/variables.js" },
     { src: "~/plugins/custom-directives/badge.directive.js" },
+    { src: "~/plugins/custom-directives/circle.directive.js" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
