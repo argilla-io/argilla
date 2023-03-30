@@ -1,18 +1,18 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-## [1.5.1](https://github.com/recognai/rubrix/compare/v1.5.0...v1.5.1) - 2023-03-27
+## [1.5.1](https://github.com/recognai/rubrix/compare/v1.5.0...v1.5.1) - 2023-03-30
 
 ### Fixes
 
 - Copying datasets between workspaces with proper owner/workspace info. Closes [#2562](https://github.com/argilla-io/argilla/issues/2562)
+- Copy dataset with empty workspace to the default user workspace [905d4de](https://github.com/recognai/argilla/commit/905d4deaa769bfc9bbc022cd2dc75c7435cfe865)
 - Using elasticsearch config to request backend version. Closes [#2311](https://github.com/argilla-io/argilla/issues/2311)
+- Remove sorting by score in labels. Closes [#2622](https://github.com/argilla-io/argilla/issues/2622)
+
+### Changed
+
+- Update field name in metadata for image url. See [#2609](https://github.com/argilla-io/argilla/pull/2609)
+
 
 ## [1.5.0](https://github.com/recognai/rubrix/compare/v1.4.0...v1.5.0) - 2023-03-21
 
