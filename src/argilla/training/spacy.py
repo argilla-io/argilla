@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import logging
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
@@ -25,6 +26,8 @@ if TYPE_CHECKING:
 
 
 class ArgillaSpaCyTrainer:
+    _logger = logging.getLogger("argilla.training.ArgillaSetFitTrainer")
+
     def __init__(
         self,
         dataset: Union["spacy.tokens.DocBin", Tuple["spacy.tokens.DocBin", "spacy.tokens.DocBin"]],
@@ -107,6 +110,13 @@ class ArgillaSpaCyTrainer:
         self.config["paths"]["vectors"] = model
         self.config["system"]["seed"] = seed or 42
 
+        self._nlp = None
+
+    def _init_model(self):
+        from spacy.training.initialize import init_nlp
+
+        self._nlp = init_nlp(self.config, use_gpu=self.gpu_id)
+
     def __repr__(self) -> None:
         """Return the string representation of the `ArgillaSpaCyTrainer` object containing
         just the args that can be updated via `update_config`."""
@@ -177,6 +187,10 @@ class ArgillaSpaCyTrainer:
             Either a `dict`, `BaseModel` (if `as_argilla_records` is True) or a `List[dict]`,
             `List[BaseModel]` (if `as_argilla_records` is True) with the predictions.
         """
+        if self._nlp is None:
+            self._logger.info("Using model without fine-tuning.")
+            self._init_model()
+
         str_input = False
         if isinstance(text, str):
             text = [text]
@@ -184,23 +198,24 @@ class ArgillaSpaCyTrainer:
 
         formatted_prediction = []
         for doc in self._nlp.pipe(text):
-            if self._pipeline_name == "ner":
-                entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
-                pred = {
-                    "text": doc.text,
-                    "tokens": [t.text for t in doc],
-                    "prediction": entities,
-                }
-                if as_argilla_records:
+            if as_argilla_records:
+                if self._pipeline_name == "ner":
+                    entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
+                    pred = {
+                        "text": doc.text,
+                        "tokens": [t.text for t in doc],
+                        "prediction": entities,
+                    }
                     pred = self._record_class(**pred)
-            elif self._pipeline_name in ["textcat", "textcat_multilabel"]:
-                pred = {
-                    "text": doc.text,
-                    "prediction": [(k, v) for k, v in doc.cats.items()],
-                }
-                if as_argilla_records:
+                elif self._pipeline_name in ["textcat", "textcat_multilabel"]:
+                    pred = {
+                        "text": doc.text,
+                        "prediction": [(k, v) for k, v in doc.cats.items()],
+                    }
                     pred = self._record_class(**pred, multi_label=self._multi_label)
-            formatted_prediction.append(pred)
+                formatted_prediction.append(pred)
+            else:
+                formatted_prediction.append(doc)
 
         if str_input:
             formatted_prediction = formatted_prediction[0]

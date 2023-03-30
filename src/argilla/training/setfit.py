@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import json
+import logging
 from typing import List, Union
 
 from argilla.training.transformers import ArgillaTransformersTrainer
@@ -20,6 +21,8 @@ from argilla.training.utils import filter_allowed_args, get_default_args
 
 
 class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
+    _logger = logging.getLogger("argilla.training.ArgillaSetFitTrainer")
+
     # @require_version("setfit", "0.6")
     def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
         if model is None:
@@ -39,6 +42,8 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         self.setfit_trainer_kwargs["train_dataset"] = self._train_dataset
         self.setfit_trainer_kwargs["eval_dataset"] = self._eval_dataset
         self.setfit_trainer_kwargs["seed"] = self._seed
+
+        self._model = None
 
     def update_config(
         self,
@@ -88,6 +93,11 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         if path is not None:
             self.save(path)
 
+    def init_model(self):
+        from setfit import SetFitModel
+
+        self._model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
+
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         """
         The function takes in a list of strings and returns a list of predictions
@@ -100,6 +110,10 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         Returns:
           A list of predictions
         """
+        if self._model is None:
+            self._logger.info("Using model without fine-tuning.")
+            self.init_model()
+
         str_input = False
         if isinstance(text, str):
             text = [text]

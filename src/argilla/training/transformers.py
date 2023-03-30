@@ -12,16 +12,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import json
+import logging
 from typing import List, Union
 
 from datasets import DatasetDict
 
 import argilla as rg
-from argilla.training.utils import _apply_column_mapping, get_default_args
+from argilla.training.utils import (
+    _apply_column_mapping,
+    filter_allowed_args,
+    get_default_args,
+)
 
 
 class ArgillaTransformersTrainer(object):
+    _logger = logging.getLogger("argilla.training.ArgillaTransformersTrainer")
+
     # @require_version("setfit", "0.6")
     def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
         import torch
@@ -112,6 +118,40 @@ class ArgillaTransformersTrainer(object):
         self.trainer_kwargs["evaluation_strategy"] = "epoch"
         self.trainer_kwargs["logging_steps"] = 30
 
+        self._pipeline = None
+
+    def init_model(self):
+        from transformers import AutoTokenizer
+
+        self._tokenizer = AutoTokenizer.from_pretrained(self.model_kwargs.get("pretrained_model_name_or_path"))
+        self._model = self._model_class.from_pretrained(**self.model_kwargs)
+
+    def init_pipeline(self):
+        import os
+
+        from transformers import pipeline
+
+        os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
+        if self._record_class == rg.TextClassificationRecord:
+            self._pipeline = pipeline(
+                task="text-classification",
+                model=self._model,
+                tokenizer=self._tokenizer,
+                top_k=None,
+                return_all_scores=True
+                # device=device,
+            )
+        elif self._record_class == rg.TokenClassificationRecord:
+            self._pipeline = pipeline(
+                task="token-classification",
+                model=self._model,
+                tokenizer=self._tokenizer,
+                # device=device,
+            )
+        else:
+            raise NotImplementedError("This is not implemented.")
+
     def update_config(
         self,
         **kwargs,
@@ -120,11 +160,10 @@ class ArgillaTransformersTrainer(object):
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
+        from transformers import TrainingArguments
 
-        # self.tokenizer_kwargs.update(setfit_kwargs)
-        # self.tokenizer_kwargs = filter_allowed_args(SetFitModel.from_pretrained, self.tokenizer_kwargs)
-
-        pass
+        self.trainer_kwargs.update(kwargs)
+        self.trainer_kwargs = filter_allowed_args(TrainingArguments.__init__, **self.trainer_kwargs)
 
     def __repr__(self):
         formatted_string = []
@@ -254,10 +293,8 @@ class ArgillaTransformersTrainer(object):
         the model, and then train the model
         """
         from transformers import (
-            AutoTokenizer,
             Trainer,
             TrainingArguments,
-            pipeline,
         )
 
         # check required path argument
@@ -267,11 +304,8 @@ class ArgillaTransformersTrainer(object):
             raise ValueError("You must specify a path to save the model to use `trainer.train(path=<my_path>).")
 
         # prepare data
-        self._tokenizer = AutoTokenizer.from_pretrained(self.model_kwargs.get("pretrained_model_name_or_path"))
+        self.init_model()
         self.preprocess_datasets()
-
-        # load model
-        self._model = self._model_class.from_pretrained(**self.model_kwargs)
 
         # get metrics function
         compute_metrics = self.compute_metrics()
@@ -294,7 +328,9 @@ class ArgillaTransformersTrainer(object):
         else:
             self._metrics = None
 
-        self._pipeline = pipeline(model=self._model.to(self.device), tokenizer=self._tokenizer)
+        self.save(path)
+
+        self.init_pipeline()
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         """
@@ -308,27 +344,39 @@ class ArgillaTransformersTrainer(object):
         Returns:
           A list of predictions
         """
+        if self._pipeline is None:
+            self._logger.info("Using model without fine-tuning.")
+            self.init_model()
+            self.init_pipeline()
+
+        predictions = self._pipeline(text)
+
         str_input = False
         if isinstance(text, str):
             text = [text]
             str_input = True
 
-        predictions = self._model(text)
-
-        formatted_prediction = []
-        for val, pred in zip(text, predictions):
-            if self._multi_label:
-                pred = [self._id2label[idx] for idx, p in enumerate(pred) if p == 1]
-                if as_argilla_records:
-                    pred = self._record_class(text=val, prediction=[(p, 1) for p in pred])
-            else:
-                pred = self._id2label[int(pred)]
-                if as_argilla_records:
-                    pred = self._record_class(text=val, prediction=[(pred, 1)])
-            formatted_prediction.append(pred)
+        if as_argilla_records:
+            formatted_prediction = []
+            for val, pred in zip(text, predictions):
+                if self._record_class == rg.TextClassificationRecord:
+                    formatted_prediction.append(
+                        self._record_class(
+                            text=val,
+                            prediction=[(entry["label"], entry["score"]) for entry in pred],
+                            multi_label=self._multi_label,
+                        )
+                    )
+                elif self._record_class == rg.TokenClassificationRecord:
+                    pass
+                else:
+                    raise NotImplementedError("This is not implemented yet.")
+        else:
+            formatted_prediction = predictions
 
         if str_input:
             formatted_prediction = formatted_prediction[0]
+
         return formatted_prediction
 
     def save(self, path: str):
@@ -339,11 +387,5 @@ class ArgillaTransformersTrainer(object):
         Args:
           path (str): the path to save the model to
         """
-
         self._model.save_pretrained(path)
-
-        # store dict as json
-        with open(path + "/label2id.json", "w") as f:
-            json.dump(self._label2id, f)
-        with open(path + "/id2label.json", "w") as f:
-            json.dump(self._id2label, f)
+        self._tokenizer.save_pretrained(path)
