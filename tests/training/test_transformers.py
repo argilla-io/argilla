@@ -15,7 +15,7 @@
 import argilla as rg
 from argilla.training import ArgillaTrainer
 
-FRAMEWORK = "transformerss"
+FRAMEWORK = "transformers"
 MODEL = "prajjwal1/bert-tiny"
 
 

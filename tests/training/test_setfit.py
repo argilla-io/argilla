@@ -15,7 +15,7 @@ import argilla as rg
 from argilla.training import ArgillaTrainer
 
 FRAMEWORK = "setfit"
-MODEL = None  # defaults to fastest model
+MODEL = "all-MiniLM-L6-v2"
 
 
 def test_update_config(dataset_text_classification):
