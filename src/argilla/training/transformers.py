@@ -138,12 +138,9 @@ class ArgillaTransformersTrainer(object):
 
         if self.device == "cuda":
             device = 0
-        elif self.device == "mps":
-            device = "mps"
         else:
             device = -1
 
-        self._model = self._model.to(device)
         if self._record_class == rg.TextClassificationRecord:
             self._pipeline = pipeline(
                 task="text-classification",
