@@ -10,20 +10,17 @@
         class="--heading5 --semibold description__title"
         v-text="'Username'"
       />
-      <p class="--body1 description__text" v-text="userInfoCloned.username" />
+      <p class="--body1 description__text" v-text="username" />
     </div>
 
     <div class="form-group user-first_name">
       <h2 class="--heading5 --semibold description__title" v-text="'Name'" />
-      <p class="--body1 description__text" v-text="userInfoCloned.first_name" />
+      <p class="--body1 description__text" v-text="firstName" />
     </div>
 
     <div class="form-group user-last_name">
       <h2 class="--heading5 --semibold description__title" v-text="'Surname'" />
-      <p
-        class="--body1 description__text"
-        v-text="userInfoCloned.last_name ?? '-'"
-      />
+      <p class="--body1 description__text" v-text="lastName" />
     </div>
   </div>
 </template>
@@ -40,6 +37,9 @@ export default {
   },
   created() {
     this.userInfoCloned = cloneDeep(this.userInfo);
+    this.username = this.userInfoCloned.username;
+    this.firstName = this.userInfoCloned.first_name;
+    this.lastName = this.userInfoCloned.last_name ?? "-";
   },
   computed: {
     userName() {
