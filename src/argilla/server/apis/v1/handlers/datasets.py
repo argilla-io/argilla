@@ -24,10 +24,10 @@ from argilla.server.schemas.v1.datasets import Dataset
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
-router = APIRouter()
+router = APIRouter(tags=["datasets"])
 
 
-@router.get("/", response_model=List[Dataset])
+@router.get("/datasets", response_model=List[Dataset])
 def list_datasets(*, db: Session = Depends(get_db), current_user: User = Security(auth.get_current_user)):
     authorize(current_user, DatasetPolicyV1.list)
 

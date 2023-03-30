@@ -57,4 +57,4 @@ for router in [
     api_router.include_router(router, dependencies=dependencies)
 
 # API v1
-api_router.include_router(datasets_v1.router, prefix="/v1/datasets", tags=["datasets"])
+api_router.include_router(datasets_v1.router, prefix="/v1")

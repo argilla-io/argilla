@@ -18,13 +18,36 @@ from tests.factories import DatasetFactory
 
 
 def test_list_datasets(client: TestClient, admin_auth_header: dict):
-    DatasetFactory.create(name="dataset-a")
-    DatasetFactory.create(name="dataset-b")
-    DatasetFactory.create(name="dataset-c")
+    dataset_a = DatasetFactory.create(name="dataset-a")
+    dataset_b = DatasetFactory.create(name="dataset-b", guidelines="guidelines")
+    dataset_c = DatasetFactory.create(name="dataset-c")
 
     response = client.get("/api/v1/datasets", headers=admin_auth_header)
 
     assert response.status_code == 200
-
-    response_body = response.json()
-    assert [dataset["name"] for dataset in response_body] == ["dataset-a", "dataset-b", "dataset-c"]
+    assert response.json() == [
+        {
+            "id": str(dataset_a.id),
+            "name": "dataset-a",
+            "guidelines": None,
+            "workspace_id": str(dataset_a.workspace_id),
+            "inserted_at": dataset_a.inserted_at.isoformat(),
+            "updated_at": dataset_a.updated_at.isoformat(),
+        },
+        {
+            "id": str(dataset_b.id),
+            "name": "dataset-b",
+            "guidelines": "guidelines",
+            "workspace_id": str(dataset_b.workspace_id),
+            "inserted_at": dataset_b.inserted_at.isoformat(),
+            "updated_at": dataset_b.updated_at.isoformat(),
+        },
+        {
+            "id": str(dataset_c.id),
+            "name": "dataset-c",
+            "guidelines": None,
+            "workspace_id": str(dataset_c.workspace_id),
+            "inserted_at": dataset_c.inserted_at.isoformat(),
+            "updated_at": dataset_c.updated_at.isoformat(),
+        },
+    ]
