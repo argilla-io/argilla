@@ -98,12 +98,6 @@ export default {
       default: false,
     },
   },
-  data() {
-    return {
-      isSortAsc: true,
-      sortBy: "order",
-    };
-  },
   computed: {
     metadata() {
       return this.record?.metadata ?? {};
@@ -124,49 +118,6 @@ export default {
         this.isSortAsc
       );
     },
-    // visualTokens() {
-    //   // This is used for both, annotation ad exploration components
-    //   const emojiRegex =
-    //     /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
-    //   const recordHasEmoji = emojiRegex.test(this.record.text);
-    //   const searchKeywordsSpans = this.$keywordsSpans(
-    //     this.record.text,
-    //     this.record.search_keywords
-    //   );
-
-    //   const { visualTokens } = this.record.tokens.reduce(
-    //     ({ visualTokens, startPosition }, token, index) => {
-    //       const start = recordHasEmoji
-    //         ? indexOf(this.record.text, token, startPosition)
-    //         : this.record.text.indexOf(token, startPosition);
-    //       const end = start + (recordHasEmoji ? length(token) : token.length);
-    //       const nextStart = recordHasEmoji
-    //         ? indexOf(this.record.text, this.record.tokens[index + 1], end)
-    //         : this.record.text.indexOf(this.record.tokens[index + 1], end);
-    //       const charsBetweenTokens = this.record.text.slice(end, nextStart);
-    //       let highlighted = false;
-    //       for (let highlight of searchKeywordsSpans) {
-    //         if (highlight.start <= start && highlight.end >= end) {
-    //           highlighted = true;
-    //           break;
-    //         }
-    //       }
-    //       return {
-    //         visualTokens: [
-    //           ...visualTokens,
-    //           { start, end, highlighted, text: token, charsBetweenTokens },
-    //         ],
-    //         startPosition: end,
-    //       };
-    //     },
-    //     {
-    //       visualTokens: [],
-    //       startPosition: 0,
-    //     }
-    //   );
-
-    //   return visualTokens;
-    // },
     tokenClassifierActionButtons() {
       return [
         {
@@ -198,6 +149,8 @@ export default {
   },
   created() {
     this.visualTokens = this.factoryVisualTokens();
+    this.isSortAsc = true;
+    this.sortBy = "order";
   },
   methods: {
     ...mapActions({
