@@ -18,10 +18,16 @@ from typing import List, Union
 
 from argilla.training.transformers import ArgillaTransformersTrainer
 from argilla.training.utils import filter_allowed_args, get_default_args
+from argilla.utils.dependency import require_version
 
 
 class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     _logger = logging.getLogger("ArgillaTransformersTrainer")
+
+    require_version("torch")
+    require_version("datasets")
+    require_version("transformers")
+    require_version("setfit")
 
     def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
         if model is None:
@@ -136,7 +142,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             formatted_prediction = formatted_prediction[0]
         return formatted_prediction
 
-    def save(self, path: str):
+    def save(self, output_dir: str):
         """
         The function saves the model to the path specified, and also saves the label2id and id2label
         dictionaries to the same path
@@ -145,10 +151,10 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
           path (str): the path to save the model to
         """
 
-        self._model.save_pretrained(path)
+        self._model.save_pretrained(output_dir)
 
         # store dict as json
-        with open(path + "/label2id.json", "w") as f:
+        with open(output_dir + "/label2id.json", "w") as f:
             json.dump(self._label2id, f)
-        with open(path + "/id2label.json", "w") as f:
+        with open(output_dir + "/id2label.json", "w") as f:
             json.dump(self._id2label, f)

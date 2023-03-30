@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from pydantic import BaseModel
 
 import argilla as rg
+from argilla.utils.dependency import require_version
 
 if TYPE_CHECKING:
     import spacy
@@ -27,6 +28,11 @@ if TYPE_CHECKING:
 
 class ArgillaSpaCyTrainer:
     _logger = logging.getLogger("ArgillaSpaCyTrainer")
+
+    require_version("torch")
+    require_version("datasets")
+    require_version("transformers")
+    require_version("spacy")
 
     def __init__(
         self,
@@ -161,16 +167,16 @@ class ArgillaSpaCyTrainer:
         if path:
             self.save(path)
 
-    def save(self, path: str) -> None:
+    def save(self, output_dir: str) -> None:
         """Save the trained pipeline to disk.
 
         Args:
-            path: A `str` with the path to save the pipeline.
+            output_dir: A `str` with the path to save the pipeline.
         """
-        path = Path(path) if isinstance(path, str) else path
-        if path and not path.exists():
-            path.mkdir(parents=True)
-        self._nlp.to_disk(path)
+        output_dir = Path(output_dir) if isinstance(output_dir, str) else output_dir
+        if output_dir and not output_dir.exists():
+            output_dir.mkdir(parents=True)
+        self._nlp.to_disk(output_dir)
 
     def predict(
         self, text: Union[List[str], str], as_argilla_records: bool = True
@@ -197,8 +203,9 @@ class ArgillaSpaCyTrainer:
             str_input = True
 
         formatted_prediction = []
-        for doc in self._nlp.pipe(text):
-            if as_argilla_records:
+        docs = self._nlp.pipe(text)
+        if as_argilla_records:
+            for doc in docs:
                 if self._pipeline_name == "ner":
                     entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
                     pred = {
@@ -214,9 +221,9 @@ class ArgillaSpaCyTrainer:
                     }
                     pred = self._record_class(**pred, multi_label=self._multi_label)
                 formatted_prediction.append(pred)
-            else:
-                formatted_prediction.append(doc)
+        else:
+            formatted_prediction = docs
 
         if str_input:
-            formatted_prediction = formatted_prediction[0]
+            formatted_prediction = list(formatted_prediction)[0]
         return formatted_prediction

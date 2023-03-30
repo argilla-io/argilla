@@ -196,21 +196,21 @@ class ArgillaTrainer(object):
         """
         return self._trainer.predict(text, as_argilla_records)
 
-    def train(self, path: str = None):
+    def train(self, output_dir: str = None):
         """
         `train` takes in a path to a file and trains the model. If a path is provided,
         the model is saved to that path.
 
         Args:
-          path (str): The path to the model file.
+          output_dir (str): The path to the model file.
         """
-        self._trainer.train(path)
+        self._trainer.train(output_dir)
 
-    def save(self, path: str):
+    def save(self, output_dir: str):
         """
         Saves the model to the specified path.
 
         Args:
-          path (str): The path to the directory where the model will be saved.
+          output_dir (str): The path to the directory where the model will be saved.
         """
-        self._trainer.save(path)
+        self._trainer.save(output_dir)

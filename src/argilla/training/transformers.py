@@ -23,10 +23,17 @@ from argilla.training.utils import (
     filter_allowed_args,
     get_default_args,
 )
+from argilla.utils.dependency import require_version
 
 
 class ArgillaTransformersTrainer(object):
     _logger = logging.getLogger("ArgillaTransformersTrainer")
+
+    require_version("torch")
+    require_version("datasets")
+    require_version("transformers")
+    require_version("evaluate")
+    require_version("seqeval")
 
     def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
         import torch
@@ -129,6 +136,14 @@ class ArgillaTransformersTrainer(object):
     def init_pipeline(self):
         from transformers import pipeline
 
+        if self.device == "cuda":
+            device = 0
+        elif self.device == "mps":
+            device = "mps"
+        else:
+            device = -1
+
+        self._model = self._model.to(device)
         if self._record_class == rg.TextClassificationRecord:
             self._pipeline = pipeline(
                 task="text-classification",
@@ -136,10 +151,15 @@ class ArgillaTransformersTrainer(object):
                 tokenizer=self._tokenizer,
                 top_k=None,
                 return_all_scores=True,
+                device=device,
             )
         elif self._record_class == rg.TokenClassificationRecord:
             self._pipeline = pipeline(
-                task="token-classification", model=self._model, tokenizer=self._tokenizer, aggregation_strategy="first"
+                task="token-classification",
+                model=self._model,
+                tokenizer=self._tokenizer,
+                aggregation_strategy="first",
+                device=device,
             )
         else:
             raise NotImplementedError("This is not implemented.")
@@ -279,7 +299,7 @@ class ArgillaTransformersTrainer(object):
         return func
 
     # @require_version("setfit", "0.6")
-    def train(self, path: str = None):
+    def train(self, output_dir: str = None):
         """
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
         the model, and then train the model
@@ -290,8 +310,8 @@ class ArgillaTransformersTrainer(object):
         )
 
         # check required path argument
-        if path is not None:
-            self.trainer_kwargs["output_dir"] = path
+        if output_dir is not None:
+            self.trainer_kwargs["output_dir"] = output_dir
         else:
             raise ValueError("You must specify a path to save the model to use `trainer.train(path=<my_path>).")
 
@@ -320,7 +340,7 @@ class ArgillaTransformersTrainer(object):
         else:
             self._metrics = None
 
-        self.save(path)
+        self.save(output_dir)
 
         self.init_pipeline()
 
@@ -386,13 +406,13 @@ class ArgillaTransformersTrainer(object):
 
         return formatted_prediction
 
-    def save(self, path: str):
+    def save(self, output_dir: str):
         """
         The function saves the model to the path specified, and also saves the label2id and id2label
         dictionaries to the same path
 
         Args:
-          path (str): the path to save the model to
+          output_dir (str): the path to save the model to
         """
-        self._model.save_pretrained(path)
-        self._tokenizer.save_pretrained(path)
+        self._model.save_pretrained(output_dir)
+        self._tokenizer.save_pretrained(output_dir)
