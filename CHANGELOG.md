@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Allow URL to be clickable in Jupyter notebook again. Closes [#2527](https://github.com/argilla-io/argilla/issues/2527)
+- Remove sorting by score in labels, keeping natural sorting [#2623](https://github.com/argilla-io/argilla/pull/2623)
 
 ### Removed
 
