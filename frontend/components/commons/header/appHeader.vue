@@ -27,11 +27,19 @@
         :copy-button="copyButton"
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
-      <DatasetSettingsIcon
-        v-if="datasetId && datasetName"
-        :datasetId="datasetId"
-        @click-settings-icon="goToSettings()"
-      />
+      <template v-if="datasetId && datasetName">
+        <base-button
+          class="header__button small"
+          @on-click="onClickTrain"
+          v-if="isAdminRole"
+        >
+          <svgicon name="code" width="20" height="20" />Train
+        </base-button>
+        <DatasetSettingsIcon
+          :datasetId="datasetId"
+          @click-settings-icon="goToSettings()"
+        />
+      </template>
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
@@ -53,6 +61,7 @@
 </template>
 
 <script>
+import "assets/icons/code";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Vector as VectorModel } from "@/models/Vector";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
@@ -111,6 +120,9 @@ export default {
     },
     viewSettings() {
       return DatasetViewSettings.query().whereId(this.datasetName).first();
+    },
+    isAdminRole() {
+      return this.$auth.user.role === "admin";
     },
     globalHeaderHeight() {
       if (this.sticky && this.dataset) {
@@ -181,6 +193,9 @@ export default {
     searchRecords(query) {
       this.$emit("on-search-or-on-filter-records", query);
     },
+    onClickTrain() {
+      this.$emit("on-click-train");
+    },
     goToSettings() {
       const currentRoute = this.$route.path;
       const newRoute = `/datasets/${this.workspace}/${this.datasetName}/settings`;
@@ -194,6 +209,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$header-button-color: #262a2e;
 .header {
   opacity: 1;
   position: relative;
@@ -223,6 +239,21 @@ export default {
     &:after {
       margin-top: calc($base-space/2);
     }
+  }
+}
+.header__button {
+  background: $header-button-color;
+  color: palette(white);
+  margin-right: $base-space;
+  padding: 10px 12px 10px 10px;
+  font-weight: 600;
+  @include font-size(14px);
+  box-shadow: $shadow-200;
+  &:hover {
+    background: lighten($header-button-color, 3%);
+  }
+  svg {
+    fill: palette(white);
   }
 }
 </style>
