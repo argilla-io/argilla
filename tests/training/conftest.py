@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import argilla
+import argilla as rg
 import pytest
 
 
@@ -41,16 +42,13 @@ def dataset_token_classification(mocked_client):
 def dataset_text_classification(mocked_client):
     from datasets import load_dataset
 
-    dataset = "gutenberg_spacy_ner"
+    dataset = "banking_sentiment_setfit"
 
     dataset_ds = load_dataset(
-        "argilla/gutenberg_spacy-ner",
+        f"argilla/{dataset}",
         split="train[:100]",
-        # This revision does not includes the vectors info, so tests will pass
-        revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
-
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = [rg.TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
 
     argilla.delete(dataset)
     argilla.log(name=dataset, records=dataset_rb)
@@ -62,18 +60,33 @@ def dataset_text_classification(mocked_client):
 def dataset_text_classification_multi_label(mocked_client):
     from datasets import load_dataset
 
-    dataset = "gutenberg_spacy_ner"
+    dataset = "research_titles_multi_label"
 
-    dataset_ds = load_dataset(
-        "argilla/gutenberg_spacy-ner",
-        split="train[:100]",
-        # This revision does not includes the vectors info, so tests will pass
-        revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
-    )
+    dataset_ds = load_dataset("argilla/research_titles_multi-label")
 
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = argilla.read_datasets(dataset_ds, task="TextClassification")
+
+    dataset_rb = [rec for rec in dataset_rb if rec.annotation]
 
     argilla.delete(dataset)
     argilla.log(name=dataset, records=dataset_rb)
+
+    return dataset
+
+
+@pytest.fixture
+def dataset_text2text(mocked_client):
+    from datasets import load_dataset
+
+    dataset = "news_summary"
+
+    dataset_ds = load_dataset("argilla/news-summary", split="train[:100]")
+
+    records = []
+    for entry in dataset_ds:
+        records.append(rg.Text2TextRecord(text=entry["text"], annotation=entry["prediction"][0]["text"]))
+
+    argilla.delete(dataset)
+    argilla.log(name=dataset, records=records)
 
     return dataset

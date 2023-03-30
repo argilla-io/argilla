@@ -88,6 +88,7 @@ class ArgillaTrainer(object):
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForText2Text):
             self._rg_dataset_type = rg.DatasetForText2Text
             self._required_fields = ["id", "text", "annotation"]
+            raise NotImplementedError("`argilla.training` does not support `Text2Text` tasks yet.")
         else:
             raise NotImplementedError(f"Dataset type {type(self.rg_dataset_snapshot)} is not supported.")
 
@@ -121,8 +122,6 @@ class ArgillaTrainer(object):
                 model=self.model,
             )
         elif framework is Framework.TRANSFORMERS:
-            if self._rg_dataset_type not in [rg.DatasetForTokenClassification, rg.DatasetForTextClassification]:
-                raise NotImplementedError("`argilla.training` does not support `Text2Text` tasks yet.")
             self._trainer = ArgillaTransformersTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
@@ -131,8 +130,6 @@ class ArgillaTrainer(object):
                 model=self.model,
             )
         elif framework is Framework.SPACY:
-            if self._rg_dataset_type == rg.DatasetForText2Text:
-                raise NotImplementedError("`argilla.training` does not support `Text2Text` tasks yet.")
             self._trainer = ArgillaSpaCyTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
