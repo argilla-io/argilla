@@ -171,7 +171,7 @@ class DatasetsService:
         return copy_dataset
 
     def _validate_copy_dataset(self, name: str, workspace: str):
-        found = self.__dao__.find_by_name(name=name, owner=workspace)
+        found = self.__dao__.find_by_name(name=name, workspace=workspace)
         if found:
             raise EntityAlreadyExistsError(name=found.name, type=found.__class__, workspace=workspace)
 
