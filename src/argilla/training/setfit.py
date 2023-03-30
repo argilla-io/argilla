@@ -21,7 +21,7 @@ from argilla.training.utils import filter_allowed_args, get_default_args
 
 
 class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
-    _logger = logging.getLogger("argilla.training.ArgillaSetFitTrainer")
+    _logger = logging.getLogger("ArgillaTransformersTrainer")
 
     # @require_version("setfit", "0.6")
     def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
@@ -111,7 +111,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
           A list of predictions
         """
         if self._model is None:
-            self._logger.info("Using model without fine-tuning.")
+            self._logger.warn("Using model without fine-tuning.")
             self.init_model()
 
         str_input = False

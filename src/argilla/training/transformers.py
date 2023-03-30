@@ -26,7 +26,7 @@ from argilla.training.utils import (
 
 
 class ArgillaTransformersTrainer(object):
-    _logger = logging.getLogger("argilla.training.ArgillaTransformersTrainer")
+    _logger = logging.getLogger("ArgillaTransformersTrainer")
 
     # @require_version("setfit", "0.6")
     def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
@@ -76,10 +76,9 @@ class ArgillaTransformersTrainer(object):
 
         elif self._record_class == rg.TokenClassificationRecord:
             self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
+            self._label_list = self._train_dataset.features["ner_tags"].feature.names
             self._id2label = dict(enumerate(self._label_list))
             self._label2id = {v: k for k, v in self._id2label.items()}
-            self._label_list = self._train_dataset.features["ner_tags"].feature.names
-            raise NotImplementedError("rg.TokenClassificationRecord")
         else:
             raise NotImplementedError("rg.Text2TextRecord are not supported")
 
@@ -100,10 +99,8 @@ class ArgillaTransformersTrainer(object):
                 self._train_dataset = _apply_column_mapping(self._train_dataset, self._column_mapping)
                 if self._eval_dataset is not None:
                     self._eval_dataset = _apply_column_mapping(self._eval_dataset, self._column_mapping)
-            # self.model_kwargs = get_default_args(AutoModelForSequenceClassification.from_pretrained)
         elif self._record_class == rg.TokenClassificationRecord:
             self._model_class = AutoModelForTokenClassification
-            # self.model_kwargs = get_default_args(AutoModelForTokenClassification.from_pretrained)
         else:
             raise NotImplementedError("rg.Text2TextRecords are not supported yet.")
         self.model_kwargs = {}
@@ -120,18 +117,18 @@ class ArgillaTransformersTrainer(object):
 
         self._pipeline = None
 
-    def init_model(self):
+    def init_model(self, new: bool = False):
         from transformers import AutoTokenizer
 
         self._tokenizer = AutoTokenizer.from_pretrained(self.model_kwargs.get("pretrained_model_name_or_path"))
-        self._model = self._model_class.from_pretrained(**self.model_kwargs)
+        if new:
+            model_kwargs = self.model_kwargs
+        else:
+            model_kwargs = {"pretrained_model_name_or_path": self.model_kwargs.get("pretrained_model_name_or_path")}
+        self._model = self._model_class.from_pretrained(**model_kwargs)
 
     def init_pipeline(self):
-        import os
-
         from transformers import pipeline
-
-        os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
         if self._record_class == rg.TextClassificationRecord:
             self._pipeline = pipeline(
@@ -139,15 +136,11 @@ class ArgillaTransformersTrainer(object):
                 model=self._model,
                 tokenizer=self._tokenizer,
                 top_k=None,
-                return_all_scores=True
-                # device=device,
+                return_all_scores=True,
             )
         elif self._record_class == rg.TokenClassificationRecord:
             self._pipeline = pipeline(
-                task="token-classification",
-                model=self._model,
-                tokenizer=self._tokenizer,
-                # device=device,
+                task="token-classification", model=self._model, tokenizer=self._tokenizer, aggregation_strategy="first"
             )
         else:
             raise NotImplementedError("This is not implemented.")
@@ -183,12 +176,12 @@ class ArgillaTransformersTrainer(object):
         )
 
         def text_classification_preprocess_function(examples):
-            tokens = self._tokenizer(examples["text"], truncation=True, padding=True, max_length=512)
+            tokens = self._tokenizer(examples["text"], truncation=True, padding="max_length", max_length=512)
             return tokens
 
         def token_classification_preprocess_function(examples):
             tokenized_inputs = self._tokenizer(
-                examples["tokens"], truncation=True, padding=True, is_split_into_words=True, max_length=512
+                examples["tokens"], truncation=True, padding="max_length", is_split_into_words=True, max_length=512
             )
 
             labels = []
@@ -258,6 +251,8 @@ class ArgillaTransformersTrainer(object):
                 func = compute_metrics_text_classification
 
         elif self._record_class == rg.TokenClassificationRecord:
+            import seqeval as _  # noqa
+
             seqeval = evaluate.load("seqeval")
 
             def compute_metrics(p):
@@ -283,7 +278,7 @@ class ArgillaTransformersTrainer(object):
 
             func = compute_metrics
         else:
-            raise NotImplementedError("")
+            raise NotImplementedError("Text2Text is not implemented.")
         return func
 
     # @require_version("setfit", "0.6")
@@ -304,7 +299,7 @@ class ArgillaTransformersTrainer(object):
             raise ValueError("You must specify a path to save the model to use `trainer.train(path=<my_path>).")
 
         # prepare data
-        self.init_model()
+        self.init_model(new=True)
         self.preprocess_datasets()
 
         # get metrics function
@@ -345,19 +340,20 @@ class ArgillaTransformersTrainer(object):
           A list of predictions
         """
         if self._pipeline is None:
-            self._logger.info("Using model without fine-tuning.")
-            self.init_model()
+            self._logger.warn("Using model without fine-tuning.")
+            self.init_model(new=False)
             self.init_pipeline()
-
-        predictions = self._pipeline(text)
 
         str_input = False
         if isinstance(text, str):
             text = [text]
             str_input = True
 
+        predictions = self._pipeline(text)
+
         if as_argilla_records:
             formatted_prediction = []
+
             for val, pred in zip(text, predictions):
                 if self._record_class == rg.TextClassificationRecord:
                     formatted_prediction.append(
@@ -368,7 +364,21 @@ class ArgillaTransformersTrainer(object):
                         )
                     )
                 elif self._record_class == rg.TokenClassificationRecord:
-                    pass
+                    _pred = [(value["entity_group"], value["start"], value["end"]) for value in pred]
+                    encoding = self._pipeline.tokenizer(val)
+                    word_ids = sorted(set(encoding.word_ids()) - {None})
+                    tokens = []
+                    for word_id in word_ids:
+                        char_span = encoding.word_to_chars(word_id)
+                        tokens.append(val[char_span.start : char_span.end].lstrip().rstrip())
+                    formatted_prediction.append(
+                        self._record_class(
+                            text=val,
+                            tokens=tokens,
+                            prediction=_pred,
+                        )
+                    )
+
                 else:
                     raise NotImplementedError("This is not implemented yet.")
         else:

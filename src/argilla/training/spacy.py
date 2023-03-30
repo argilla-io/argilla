@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 class ArgillaSpaCyTrainer:
-    _logger = logging.getLogger("argilla.training.ArgillaSetFitTrainer")
+    _logger = logging.getLogger("ArgillaSpaCyTrainer")
 
     def __init__(
         self,
@@ -188,7 +188,7 @@ class ArgillaSpaCyTrainer:
             `List[BaseModel]` (if `as_argilla_records` is True) with the predictions.
         """
         if self._nlp is None:
-            self._logger.info("Using model without fine-tuning.")
+            self._logger.warn("Using model without fine-tuning.")
             self._init_model()
 
         str_input = False

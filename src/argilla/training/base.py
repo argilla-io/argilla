@@ -14,6 +14,7 @@
 
 import inspect
 import logging
+import os
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
@@ -22,17 +23,20 @@ from argilla.training.setfit import ArgillaSetFitTrainer
 from argilla.training.spacy import ArgillaSpaCyTrainer
 from argilla.training.transformers import ArgillaTransformersTrainer
 
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
 if TYPE_CHECKING:
     import spacy
 
 
 class ArgillaTrainer(object):
-    _logger = logging.getLogger("argilla.training")
+    _logger = logging.getLogger("ArgillaTrainer")
 
     def __init__(
         self,
         name: str,
         framework: str,
+        workspace: str = None,
         lang: Optional["spacy.Language"] = None,
         model: Optional[str] = None,
         train_size: Optional[float] = None,
@@ -69,7 +73,7 @@ class ArgillaTrainer(object):
         if train_size:
             self._split_applied = True
 
-        self.rg_dataset_snapshot = rg.load(name=self._name, limit=1)
+        self.rg_dataset_snapshot = rg.load(name=self._name, limit=1, workspace=workspace)
         if not len(self.rg_dataset_snapshot) > 0:
             raise ValueError(f"Dataset {self._name} is empty")
 
@@ -80,7 +84,7 @@ class ArgillaTrainer(object):
                 self._multi_label = True
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForTokenClassification):
             self._rg_dataset_type = rg.DatasetForTokenClassification
-            self._required_fields = ["id", "text", "tokens", "annotation"]
+            self._required_fields = ["id", "text", "tokens", "annotation", "ner_tags"]
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForText2Text):
             self._rg_dataset_type = rg.DatasetForText2Text
             self._required_fields = ["id", "text", "annotation"]
