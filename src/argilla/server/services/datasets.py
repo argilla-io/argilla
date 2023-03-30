@@ -143,15 +143,14 @@ class DatasetsService:
         dataset_workspace = copy_workspace or dataset.workspace
         dataset_workspace = user.check_workspace(dataset_workspace)
 
-        self._validate_create_dataset(
-            name=copy_name,
-            workspace=dataset_workspace,
-            user=user,
-        )
+        self._validate_copy_dataset(name=copy_name, workspace=dataset_workspace)
 
         copy_dataset = dataset.copy()
+
         copy_dataset.name = copy_name
         copy_dataset.workspace = dataset_workspace
+        copy_dataset.owner = dataset_workspace
+        copy_dataset.created_by = user.username
 
         date_now = datetime.utcnow()
 
@@ -172,16 +171,10 @@ class DatasetsService:
 
         return copy_dataset
 
-    def _validate_create_dataset(self, name: str, workspace: str, user: User):
-        try:
-            found = self.find_by_name(user=user, name=name, workspace=workspace)
-            raise EntityAlreadyExistsError(
-                name=found.name,
-                type=found.__class__,
-                workspace=workspace,
-            )
-        except (EntityNotFoundError, ForbiddenOperationError):
-            pass
+    def _validate_copy_dataset(self, name: str, workspace: str):
+        found = self.__dao__.find_by_name(name=name, owner=workspace)
+        if found:
+            raise EntityAlreadyExistsError(name=found.name, type=found.__class__, workspace=workspace)
 
     async def get_settings(
         self,
