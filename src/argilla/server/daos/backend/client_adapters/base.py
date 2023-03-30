@@ -215,26 +215,6 @@ class IClientAdapter(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def is_read_only_index(self, index: str) -> bool:
-        pass
-
-    @abstractmethod
-    def enable_read_only_index(self, index: str):
-        pass
-
-    @abstractmethod
-    def disable_read_only_index(self, index: str):
-        pass
-
-    @abstractmethod
-    def set_index_settings(
-        self,
-        index: str,
-        settings: Dict[str, Any],
-    ):
-        pass
-
-    @abstractmethod
     def set_index_mappings(
         self,
         index: str,

@@ -73,7 +73,7 @@ class ElasticsearchClient(OpenSearchClient):
             properties=vector_mappings,
         )
 
-    def reindex(
+    def _reindex(
         self,
         *,
         source_index: str,
