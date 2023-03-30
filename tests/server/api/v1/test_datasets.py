@@ -12,9 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from argilla._constants import API_KEY_HEADER_NAME
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
-from tests.factories import DatasetFactory
+from tests.factories import (
+    AnnotatorFactory,
+    DatasetFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 
 def test_list_datasets(client: TestClient, admin_auth_header: dict):
@@ -51,3 +58,24 @@ def test_list_datasets(client: TestClient, admin_auth_header: dict):
             "updated_at": dataset_c.updated_at.isoformat(),
         },
     ]
+
+
+def test_list_datasets_without_authentication(client: TestClient):
+    response = client.get("/api/v1/datasets")
+
+    assert response.status_code == 401
+
+
+def test_list_datasets_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    workspace = WorkspaceFactory.create()
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=annotator.id)
+
+    DatasetFactory.create(name="dataset-a", workspace=workspace)
+    DatasetFactory.create(name="dataset-b", workspace=workspace)
+    DatasetFactory.create(name="dataset-c")
+
+    response = client.get("/api/v1/datasets", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 200
+    assert [dataset["name"] for dataset in response.json()] == ["dataset-a", "dataset-b"]

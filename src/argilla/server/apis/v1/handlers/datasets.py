@@ -31,4 +31,7 @@ router = APIRouter(tags=["datasets"])
 def list_datasets(*, db: Session = Depends(get_db), current_user: User = Security(auth.get_current_user)):
     authorize(current_user, DatasetPolicyV1.list)
 
-    return datasets.list_datasets(db)
+    if current_user.is_admin:
+        return datasets.list_datasets(db)
+    else:
+        return current_user.datasets

@@ -18,7 +18,7 @@ from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, Text
+from sqlalchemy import ForeignKey, Text, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
@@ -107,6 +107,16 @@ class User(Base):
 
     workspaces: Mapped[List["Workspace"]] = relationship(
         secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
+    )
+    datasets: Mapped[List["Dataset"]] = relationship(
+        secondary="workspaces_users",
+        primaryjoin=id == WorkspaceUser.user_id,
+        secondaryjoin=and_(
+            Workspace.id == Dataset.workspace_id,
+            WorkspaceUser.workspace_id == Workspace.id,
+        ),
+        viewonly=True,
+        order_by=Dataset.inserted_at.asc(),
     )
 
     @property
