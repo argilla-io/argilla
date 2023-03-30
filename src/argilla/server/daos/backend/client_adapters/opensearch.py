@@ -150,7 +150,7 @@ class OpenSearchClient(IClientAdapter):
                 refresh="wait_for",
             )
 
-    def reindex(
+    def _reindex(
         self,
         *,
         source_index: str,
@@ -401,30 +401,30 @@ class OpenSearchClient(IClientAdapter):
         override: bool = True,
         reindex: bool = False,
     ):
-        if reindex:
-            return self.reindex(
-                source_index=source_index,
-                target_index=target_index,
-            )
 
-        is_source_read_only_index = self.is_read_only_index(index=source_index)
+        source_index = self._get_original_index_name(source_index)
+
+        if reindex:
+            return self._reindex(source_index=source_index, target_index=target_index)
+
+        is_source_read_only_index = self._is_read_only_index(index=source_index)
+
         try:
             if not is_source_read_only_index:
-                self.enable_read_only_index(index=source_index)
+                self._enable_or_disable_read_only_index(
+                    index=source_index, read_only=True
+                )
+
             if override:
                 self.delete_index(index=target_index)
-            self._clone_index(
-                index_from=source_index,
-                index_to=target_index,
-            )
+
+            self._clone_index(index_from=source_index, index_to=target_index)
         finally:
             self._enable_or_disable_read_only_index(
-                index=source_index,
-                read_only=is_source_read_only_index,
+                index=source_index, read_only=is_source_read_only_index
             )
             self._enable_or_disable_read_only_index(
-                index=target_index,
-                read_only=is_source_read_only_index,
+                index=target_index, read_only=is_source_read_only_index
             )
 
     def _clone_index(
@@ -682,7 +682,7 @@ class OpenSearchClient(IClientAdapter):
                 wait_for_active_shards=self.index_shards,
             )
 
-    def is_read_only_index(self, index: str) -> bool:
+    def _is_read_only_index(self, index: str) -> bool:
         with self.error_handling(index=index):
             response = self.__client__.indices.get_settings(
                 index=index,
@@ -690,23 +690,10 @@ class OpenSearchClient(IClientAdapter):
                 allow_no_indices=True,
                 flat_settings=True,
             )
-            return (
-                response[index]["settings"]["index.blocks.write"] == "true"
-                if response
-                else False
-            )
+            if not response:
+                return False
 
-    def enable_read_only_index(self, index: str):
-        return self._enable_or_disable_read_only_index(
-            index=index,
-            read_only=True,
-        )
-
-    def disable_read_only_index(self, index: str):
-        return self._enable_or_disable_read_only_index(
-            index=index,
-            read_only=False,
-        )
+            return response[index]["settings"]["index.blocks.write"] == "true"
 
     def set_index_settings(
         self,
@@ -817,3 +804,9 @@ class OpenSearchClient(IClientAdapter):
             size=size,
         )
         return results
+
+    def _get_original_index_name(self, source_index_or_alias: str):
+        response = self.__client__.indices.get(index=source_index_or_alias)
+        # The response contains a single key with the original index name (if we provided an alias)
+        for index_name in response:
+            return index_name
