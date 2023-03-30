@@ -45,9 +45,12 @@ class Dataset(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str]
     guidelines: Mapped[Optional[str]]
+    workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id"))
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+
+    workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
 
     def __repr__(self):
         return f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
@@ -79,6 +82,7 @@ class Workspace(Base):
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
+    datasets: Mapped[List["Dataset"]] = relationship(back_populates="workspace", order_by=Dataset.inserted_at.asc())
     users: Mapped[List["User"]] = relationship(
         secondary="workspaces_users", back_populates="workspaces", order_by=WorkspaceUser.inserted_at.asc()
     )

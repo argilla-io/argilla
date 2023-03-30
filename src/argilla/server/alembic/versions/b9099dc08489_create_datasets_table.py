@@ -33,10 +33,14 @@ def upgrade() -> None:
     op.create_table(
         "datasets",
         sa.Column("id", sa.Uuid, primary_key=True),
-        sa.Column("name", sa.String, nullable=False, index=True),  # TODO: Should the name of a dataset be unique?.
-        sa.Column("guidelines", sa.Text),  # TODO: I understand the guidelines are optional.
+        sa.Column("name", sa.String, nullable=False, index=True),
+        sa.Column("guidelines", sa.Text),
+        sa.Column(
+            "workspace_id", sa.Uuid, sa.ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False, index=True
+        ),
         sa.Column("inserted_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
+        sa.UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),
     )
 
 
