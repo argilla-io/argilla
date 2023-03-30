@@ -28,7 +28,6 @@ from argilla.training.utils import (
 class ArgillaTransformersTrainer(object):
     _logger = logging.getLogger("ArgillaTransformersTrainer")
 
-    # @require_version("setfit", "0.6")
     def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
         import torch
 

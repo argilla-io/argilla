@@ -23,7 +23,6 @@ from argilla.training.utils import filter_allowed_args, get_default_args
 class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     _logger = logging.getLogger("ArgillaTransformersTrainer")
 
-    # @require_version("setfit", "0.6")
     def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
         if model is None:
             model = "all-MiniLM-L6-v2"

@@ -720,14 +720,11 @@ class DatasetForTextClassification(DatasetBase):
     ):
         import datasets
 
-        inputs_keys = {key: None for rec in self._records for key in rec.inputs if rec.annotation is not None}.keys()
-
-        ds_dict = {**{key: [] for key in inputs_keys}, "label": []}
+        ds_dict = {"text": [], "label": []}
         for rec in self._records:
             if rec.annotation is None or rec.annotation == []:
                 continue
-            for key in inputs_keys:
-                ds_dict[key].append(rec.inputs.get(key))
+            ds_dict["text"].append(rec.text)
             ds_dict["label"].append(rec.annotation)
 
         if self._records[0].multi_label:
@@ -743,7 +740,7 @@ class DatasetForTextClassification(DatasetBase):
         )
 
         feature_dict = {
-            **{key: datasets.Value("string") for key in inputs_keys},
+            "text": datasets.Value("string"),
             "label": [class_label] if self._records[0].multi_label else class_label,
         }
 
