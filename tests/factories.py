@@ -15,37 +15,41 @@
 import factory
 from argilla.server.database import SessionLocal
 from argilla.server.models import Dataset, User, UserRole, Workspace, WorkspaceUser
+from sqlalchemy import orm
 
-
-class Dataset(factory.alchemy.SQLAlchemyModelFactory):
-    class Meta:
-        model = Dataset
-        sqlalchemy_session = SessionLocal()
-        sqlalchemy_session_persistence = "commit"
-
-    name = factory.Sequence(lambda n: f"dataset-{n}")
+Session = orm.scoped_session(SessionLocal)
 
 
 class WorkspaceUserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = WorkspaceUser
-        sqlalchemy_session = SessionLocal()
+        sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
 
 
 class WorkspaceFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Workspace
-        sqlalchemy_session = SessionLocal()
+        sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
 
     name = factory.Sequence(lambda n: f"workspace-{n}")
 
 
+class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Dataset
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    name = factory.Sequence(lambda n: f"dataset-{n}")
+    workspace = factory.SubFactory(WorkspaceFactory)
+
+
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = User
-        sqlalchemy_session = SessionLocal()
+        sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
 
     first_name = factory.Faker("first_name")
