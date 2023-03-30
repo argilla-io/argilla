@@ -250,8 +250,6 @@ class ArgillaTransformersTrainer(object):
                 func = compute_metrics_text_classification
 
         elif self._record_class == rg.TokenClassificationRecord:
-            import seqeval as _  # noqa
-
             seqeval = evaluate.load("seqeval")
 
             def compute_metrics(p):
