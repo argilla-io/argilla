@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Copying datasets between workspaces with proper owner/workspace info. Closes [#2562](https://github.com/argilla-io/argilla/issues/2562)
 - Using elasticsearch config to request backend version. Closes [#2311](https://github.com/argilla-io/argilla/issues/2311)
+- Overlapping causes by emoji difference of length in back and front. Closes [#2353](https://github.com/argilla-io/argilla/issues/2353)
 
 
 ### Removed
