@@ -35,7 +35,6 @@ def upgrade() -> None:
         sa.Column("id", sa.Uuid, primary_key=True),
         sa.Column("name", sa.String, nullable=False, index=True),  # TODO: Should the name of a dataset be unique?.
         sa.Column("guidelines", sa.Text),  # TODO: I understand the guidelines are optional.
-        sa.Column("status", sa.String, nullable=False, index=True),
         sa.Column("inserted_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
     )
