@@ -19,12 +19,12 @@
   <ul class="tabs">
     <li class="tab">
       <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        :class="['tab__button', getTabClass(tab)]"
-        @click="changeTab(tab.id)"
+        v-for="{ id, name } in tabs"
+        :key="id"
+        :class="['tab__button', getTabClass(id)]"
+        @click="changeTab(id)"
       >
-        <span>{{ tab.name }}</span>
+        <span>{{ name }}</span>
       </button>
     </li>
   </ul>
@@ -45,8 +45,8 @@ export default {
     changeTab(id) {
       this.$emit("change-tab", id);
     },
-    getTabClass(tab) {
-      return this.activeTab.id === tab.id || this.tabs.length === 1
+    getTabClass(id) {
+      return this.activeTab.id === id || this.tabs.length === 1
         ? "--active"
         : null;
     },

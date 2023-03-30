@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 describe("BaseTabs", () => {
-  it("on click first tab emit change-tab event with first tab id", async () => {
+  it("emit change-tab event with first tab id on click in the first tab", async () => {
     const button = wrapper.findAll(".tab__button").at(0);
     button.trigger("click");
     await wrapper.vm.$nextTick();

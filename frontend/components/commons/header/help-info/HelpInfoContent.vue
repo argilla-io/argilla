@@ -1,6 +1,6 @@
 <template>
   <div class="help-info__content" v-if="helpContents">
-    <base-tabs
+    <BaseTabs
       class="help-info__tabs"
       :tabs="helpContents"
       :active-tab="visibleTab"

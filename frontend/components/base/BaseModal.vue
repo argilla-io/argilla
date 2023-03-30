@@ -22,19 +22,19 @@
         <div
           class="modal-container"
           :class="modalClass"
-          v-click-outside="close"
+          v-click-outside="closeModal"
         >
           <p v-if="modalTitle" class="modal__title">
             {{ modalTitle }}
           </p>
           <slot />
-          <base-button
+          <BaseButton
             class="button-close-modal"
-            @on-click="close"
+            @on-click="closeModal"
             v-if="allowClose"
           >
             <svgicon name="close" width="20" height="20" />
-          </base-button>
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -91,7 +91,7 @@ export default {
     },
   },
   methods: {
-    close() {
+    closeModal() {
       this.$emit("close-modal");
     },
   },

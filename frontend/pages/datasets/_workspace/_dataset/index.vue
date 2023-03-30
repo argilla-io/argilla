@@ -46,7 +46,7 @@
       :datasetTask="dataset.task"
       @search-records="searchRecords"
     />
-    <base-modal
+    <BaseModal
       :modal-custom="true"
       :prevent-body-scroll="true"
       modal-class="modal-auto"
@@ -56,7 +56,7 @@
       @close-modal="showTrainModal(false)"
     >
       <DatasetTrainComponent :datasetTask="dataset.task" />
-    </base-modal>
+    </BaseModal>
   </div>
 </template>
 

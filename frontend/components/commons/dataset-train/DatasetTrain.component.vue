@@ -2,7 +2,7 @@
   <div class="training-snippets">
     <base-spinner v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error" class="snippet__container">
-      <base-tabs
+      <BaseTabs
         v-if="snippetsTabs"
         class="training-snippets__tabs"
         :tabs="sortedSnippetsTabs"
@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { cloneDeep } from "lodash";
 export default {
   props: {
     datasetTask: {
@@ -60,6 +61,9 @@ export default {
       this.currentTaskLibraries.push(newLib);
     });
   },
+  created() {
+    this.datasetTaskCloned = cloneDeep(this.datasetTask);
+  },
   computed: {
     sortedSnippetsTabs() {
       return this.snippetsTabs.sort();
@@ -73,7 +77,7 @@ export default {
       });
     },
     task() {
-      switch (this.datasetTask) {
+      switch (this.datasetTaskCloned) {
         case "TextClassification":
           return "text-classification";
         case "TokenClassification":
