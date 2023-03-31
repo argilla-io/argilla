@@ -174,7 +174,7 @@ export default {
     },
     ruleInfo() {
       if (this.isSaved) {
-        return "The rule was saved";
+        return "Rule saved";
       }
       if (this.selectedLabels && this.queryWithLabelsIsStored) {
         return `This query with ${
