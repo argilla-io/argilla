@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `/api/v1/datasets` new endpoint to list datasets ([#2615]).
+
+[#2615]: https://github.com/argilla-io/argilla/issues/2615
+
+## [Unreleased]
+
+### Added
+
 - `ARGILLA_HOME_PATH` new environment variable ([#2564]).
 - `ARGILLA_DATABASE_URL` new environment variable ([#2564]).
 - Basic support for user roles with `admin` and `annotator` ([#2564]).
@@ -37,7 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Copying datasets between workspaces with proper owner/workspace info. Closes [#2562](https://github.com/argilla-io/argilla/issues/2562)
 - Using elasticsearch config to request backend version. Closes [#2311](https://github.com/argilla-io/argilla/issues/2311)
 
-
 ### Removed
 
 - `email` user field ([#2564]).
@@ -46,7 +53,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ARGILLA_LOCAL_AUTH_DEFAULT_APIKEY` and `ARGILLA_LOCAL_AUTH_DEFAULT_PASSWORD` environment variables. Use `python -m argilla.tasks.users.create_default` instead ([#2564]).
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
-
 
 ## [1.5.0](https://github.com/recognai/rubrix/compare/v1.4.0...v1.5.0) - 2023-03-21
 

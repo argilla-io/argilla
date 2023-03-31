@@ -33,6 +33,7 @@ from argilla.server.apis.v0.handlers import (
     users,
     workspaces,
 )
+from argilla.server.apis.v1.handlers import datasets as datasets_v1
 from argilla.server.errors.base_errors import __ALL__
 
 api_router = APIRouter(responses={error.HTTP_STATUS: error.api_documentation() for error in __ALL__})
@@ -54,3 +55,6 @@ for router in [
     text2text.router,
 ]:
     api_router.include_router(router, dependencies=dependencies)
+
+# API v1
+api_router.include_router(datasets_v1.router, prefix="/v1")
