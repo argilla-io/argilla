@@ -855,6 +855,10 @@ div[class*="tuto-section-"] {
 #libraries .sd-card-body {
   background: #ff7f71;
   color: #ffffff;
+  border-radius: 5px;
+}
+#libraries .sd-card:hover .sd-card-body {
+  background: #ff675f;
 }
 .tuto-list .sd-card-body, .tuto-section-2 .sd-card-body {
   background: var(--color-tuto-card-bg);
