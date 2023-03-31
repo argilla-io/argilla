@@ -95,11 +95,8 @@ export default {
     query() {
       return this.dataset.query.text;
     },
-    sortedLabels() {
-      return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
-    },
     filteredLabels() {
-      return this.sortedLabels.filter((label) =>
+      return this.labels.filter((label) =>
         label.class.toLowerCase().match(this.searchText)
       );
     },

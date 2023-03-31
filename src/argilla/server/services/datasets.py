@@ -200,6 +200,7 @@ class DatasetsService:
         dataset_copy = dataset.copy()
         dataset_copy.name = copy_name
         dataset_copy.workspace = target_workspace_name
+        dataset_copy.created_by = user.username
 
         date_now = datetime.utcnow()
 
