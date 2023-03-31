@@ -12,9 +12,33 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import UUID
+
 from argilla.server.models import Dataset
+from argilla.server.schemas.v1.datasets import DatasetCreate
 from sqlalchemy.orm import Session
+
+
+def get_dataset_by_name_and_workspace_id(db: Session, name: str, workspace_id: UUID):
+    return db.query(Dataset).filter_by(name=name, workspace_id=workspace_id).first()
 
 
 def list_datasets(db: Session):
     return db.query(Dataset).order_by(Dataset.inserted_at.asc()).all()
+
+
+def create_dataset(db: Session, dataset_create: DatasetCreate):
+    # TODO: We need to create the dataset index on ElasticSearch?
+    # - We should do it inside a database transaction.
+
+    dataset = Dataset(
+        name=dataset_create.name,
+        guidelines=dataset_create.guidelines,
+        workspace_id=dataset_create.workspace_id,
+    )
+
+    db.add(dataset)
+    db.commit()
+    db.refresh(dataset)
+
+    return dataset

@@ -12,7 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
+from uuid import UUID
+
 from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.models import Dataset
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -79,3 +83,53 @@ def test_list_datasets_as_annotator(client: TestClient, db: Session):
 
     assert response.status_code == 200
     assert [dataset["name"] for dataset in response.json()] == ["dataset-a", "dataset-b"]
+
+
+def test_create_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+    workspace = WorkspaceFactory.create()
+    dataset_json = {"name": "name", "guidelines": "guidelines", "workspace_id": str(workspace.id)}
+
+    response = client.post("/api/v1/datasets", headers=admin_auth_header, json=dataset_json)
+
+    assert response.status_code == 200
+    assert db.query(Dataset).count() == 1
+
+    response_body = response.json()
+    assert db.get(Dataset, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "name": "name",
+        "guidelines": "guidelines",
+        "workspace_id": str(workspace.id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
+
+
+def test_create_dataset_without_authentication(client: TestClient, db: Session):
+    dataset_json = {"name": "name", "workspace_id": str(WorkspaceFactory.create().id)}
+
+    response = client.post("/api/v1/datasets", json=dataset_json)
+
+    assert response.status_code == 401
+    assert db.query(Dataset).count() == 0
+
+
+def test_create_dataset_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    dataset_json = {"name": "name", "workspace_id": str(WorkspaceFactory.create().id)}
+
+    response = client.post("/api/v1/datasets", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=dataset_json)
+
+    assert response.status_code == 403
+    assert db.query(Dataset).count() == 0
+
+
+def test_create_dataset_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(name="name")
+    dataset_json = {"name": "name", "workspace_id": str(dataset.workspace_id)}
+
+    response = client.post("/api/v1/datasets", headers=admin_auth_header, json=dataset_json)
+
+    assert response.status_code == 409
+    assert db.query(Dataset).count() == 1
