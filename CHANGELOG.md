@@ -13,7 +13,6 @@
 
 - Update field name in metadata for image url. See [#2609](https://github.com/argilla-io/argilla/pull/2609)
 
-
 ## [1.5.0](https://github.com/recognai/rubrix/compare/v1.4.0...v1.5.0) - 2023-03-21
 
 ### Added
@@ -32,6 +31,7 @@
 - Update "Define a labeling schema" section in docs.
 - The record inputs are sorted alphabetically in UI by default. [#2581](https://github.com/argilla-io/argilla/pull/2581)
 - The record inputs are fully visible when pagination size is one and the height of collapsed area size is bigger for laptop screen. [#2587](https://github.com/argilla-io/argilla/pull/2587/files)
+- Improvements in tutorial doc cards. [#2216](https://github.com/argilla-io/argilla/issues/2216)
 
 ### Fixes
 
