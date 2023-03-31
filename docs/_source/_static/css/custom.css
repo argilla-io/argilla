@@ -803,7 +803,7 @@ div[class*="tuto-section-"] {
   background: var(--color-card-bg-hover);
 }
 
-.tuto-list .sd-card:hover .sd-card-body {
+.tuto-list .sd-card:hover .sd-card-body, .tuto-section-2 .sd-card:hover .sd-card-body {
   background: var(--color-tuto-card-bg-hover);
 }
 
@@ -849,11 +849,14 @@ div[class*="tuto-section-"] {
   padding-bottom: 2em;
 }
 
-.tuto-list .sd-card {
+.tuto-list .sd-card, .tuto-section-2 .sd-card {
   background: var(--color-tuto-card-bg);
 }
-
-.tuto-list .sd-card-body {
+#libraries .sd-card-body {
+  background: #ff7f71;
+  color: #ffffff;
+}
+.tuto-list .sd-card-body, .tuto-section-2 .sd-card-body {
   background: var(--color-tuto-card-bg);
   color: var(--color-tuto-card-text);
   border-top-right-radius: 0;
@@ -864,11 +867,11 @@ div[class*="tuto-section-"] {
   padding-bottom: 1rem;
 }
 
-.tuto-list .sd-card-img-top {
+.tuto-list .sd-card-img-top, .tuto-section-2 .sd-card-img-top {
   box-shadow: 0 3px 8px rgb(0 0 0 / 50%);
 }
 
-.tuto-list .sd-card-body .sd-card-title {
+.tuto-list .sd-card-body .sd-card-title, .tuto-section-2s .sd-card-body .sd-card-title {
   text-align: left;
 }
 
