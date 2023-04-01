@@ -535,7 +535,7 @@ class Argilla:
             )
         return records
 
-    def load_similar(
+    def query(
         self,
         name: str,
         workspace: Optional[str] = None,
