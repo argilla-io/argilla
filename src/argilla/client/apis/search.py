@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from argilla.client.apis import AbstractApi
 from argilla.client.models import Record
@@ -34,7 +34,7 @@ class SearchResults:
     total: int
 
     records: List[Record]
-    scores: List[float]
+    scores: Optional[List[float]] = None
 
 
 class Search(AbstractApi):
@@ -82,5 +82,5 @@ class Search(AbstractApi):
         return SearchResults(
             total=response["total"],
             records=[record_class.parse_obj(r).to_client() for r in response["records"]],
-            scores=response["scores"],
+            scores=response["scores"] if "scores" in response else None,
         )
