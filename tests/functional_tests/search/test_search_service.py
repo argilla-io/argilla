@@ -136,8 +136,4 @@ def test_failing_metrics(service, mocked_client):
         record_type=TextClassificationRecord,
     )
 
-    assert results.dict() == {
-        "metrics": {"missing-metric": {}},
-        "records": [],
-        "total": 1,
-    }
+    assert results.dict() == {"metrics": {"missing-metric": {}}, "records": [], "total": 1, "scores": None}

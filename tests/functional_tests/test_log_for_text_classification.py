@@ -128,7 +128,7 @@ def test_similarity_search_in_python_client(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_similarity_search_returns_score_in_python_client(
+def test_similarity_search_query_records_in_python_client(
     mocked_client: SecuredClient,
 ):
     dataset_name = "test_similarity_search_in_python_client_2"
@@ -158,7 +158,7 @@ def test_similarity_search_returns_score_in_python_client(
         ),
         name=dataset_name,
     )
-    records_scores = rg.load_similar(dataset_name, vector=("vinter", [1, 1, 1, 1]))
+    records_scores = rg.query(dataset_name, vector=("vinter", [1, 1, 1, 1]))
     scores = [score for _, score in records_scores]
     records = [record for record, _ in records_scores]
     assert all(map(lambda x: isinstance(x, float), scores))
