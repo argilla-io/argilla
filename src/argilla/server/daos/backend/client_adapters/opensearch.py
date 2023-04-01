@@ -761,10 +761,10 @@ class OpenSearchClient(IClientAdapter):
             **document["_source"],
             "id": document["_id"],
         }
-        data["score"] = document.get("_score", None)
+        if "_score" in document and document["_score"] is not None:
+            data["score"] = document.get("_score")
         if add_sort_info and "sort" in document:
             data["sort"] = document["sort"]
-
         if highlight:
             keywords = highlight.parse_highligth_results(
                 doc=document,

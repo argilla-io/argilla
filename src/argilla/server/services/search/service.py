@@ -99,7 +99,7 @@ class SearchRecordsService:
                 self.__LOGGER__.warning("Cannot compute metric [%s]. Error: %s", metric.id, ex)
                 metrics_results[metric.id] = {}
 
-        similarity_scores = [r.get("score", 0.0) for r in results.records]
+        similarity_scores = [r.pop("score", 0.0) for r in results.records]
 
         return ServiceSearchResults(
             total=results.total,

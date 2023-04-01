@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, TypeVar, Union
+from typing import Any, Dict, List, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -68,7 +68,7 @@ class ServiceSearchResults(BaseModel):
     total: int
     records: List[ServiceRecord]
     metrics: Dict[str, Any] = Field(default_factory=dict)
-    scores: Union[List[float], None] = None
+    scores: Optional[List[float]] = None
 
 
 ServiceRecordsQuery = TypeVar("ServiceRecordsQuery", bound=ServiceBaseRecordsQuery)
