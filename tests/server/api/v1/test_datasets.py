@@ -24,7 +24,6 @@ from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
     WorkspaceFactory,
-    WorkspaceUserFactory,
 )
 
 
@@ -71,9 +70,8 @@ def test_list_datasets_without_authentication(client: TestClient):
 
 
 def test_list_datasets_as_annotator(client: TestClient, db: Session):
-    annotator = AnnotatorFactory.create()
     workspace = WorkspaceFactory.create()
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=annotator.id)
+    annotator = AnnotatorFactory.create(workspaces=[workspace])
 
     DatasetFactory.create(name="dataset-a", workspace=workspace)
     DatasetFactory.create(name="dataset-b", workspace=workspace)
@@ -85,13 +83,64 @@ def test_list_datasets_as_annotator(client: TestClient, db: Session):
     assert [dataset["name"] for dataset in response.json()] == ["dataset-a", "dataset-b"]
 
 
+def test_get_dataset(client: TestClient, admin_auth_header: dict):
+    dataset = DatasetFactory.create(name="dataset")
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(dataset.id),
+        "name": "dataset",
+        "guidelines": None,
+        "workspace_id": str(dataset.workspace_id),
+        "inserted_at": dataset.inserted_at.isoformat(),
+        "updated_at": dataset.updated_at.isoformat(),
+    }
+
+
+def test_get_dataset_without_authentication(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}")
+
+    assert response.status_code == 401
+
+
+def test_get_dataset_as_annotator(client: TestClient, db: Session):
+    dataset = DatasetFactory.create(name="dataset")
+    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 200
+    assert response.json()["name"] == "dataset"
+
+
+def test_get_dataset_as_annotator_from_different_workspace(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
+
+
+def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+    DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{uuid4()}", headers=admin_auth_header)
+
+    assert response.status_code == 404
+
+
 def test_create_dataset(client: TestClient, db: Session, admin_auth_header: dict):
     workspace = WorkspaceFactory.create()
     dataset_json = {"name": "name", "guidelines": "guidelines", "workspace_id": str(workspace.id)}
 
     response = client.post("/api/v1/datasets", headers=admin_auth_header, json=dataset_json)
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert db.query(Dataset).count() == 1
 
     response_body = response.json()

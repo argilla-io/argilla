@@ -14,6 +14,9 @@
 
 from typing import Callable
 
+from sqlalchemy.orm.session import Session
+
+from argilla.server.contexts import accounts
 from argilla.server.errors import ForbiddenOperationError
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 from argilla.server.schemas.datasets import Dataset
@@ -106,16 +109,27 @@ class DatasetPolicy:
 
 class DatasetPolicyV1:
     @classmethod
-    def list(cls, user: User) -> bool:
+    def list(cls, actor: User) -> bool:
         return True
 
     @classmethod
-    def create(cls, user: User) -> bool:
-        return user.is_admin
+    def get(cls, dataset: Dataset) -> bool:
+        return lambda actor: bool(
+            actor.is_admin
+            or accounts.get_workspace_user_by_workspace_id_and_user_id(
+                Session.object_session(actor),
+                dataset.workspace_id,
+                actor.id,
+            )
+        )
 
     @classmethod
-    def delete(cls, user: User) -> bool:
-        return user.is_admin
+    def create(cls, actor: User) -> bool:
+        return actor.is_admin
+
+    @classmethod
+    def delete(cls, actor: User) -> bool:
+        return actor.is_admin
 
 
 class DatasetSettingsPolicy:
