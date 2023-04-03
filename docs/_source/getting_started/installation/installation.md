@@ -17,7 +17,7 @@ Then you can install Argilla with `pip`:
 {{ '```bash\npip install "argilla[server]{}"\n```'.format(pipversion) }}
 
 ## 2. Install Elasticsearch or Opensearch
-You need to launch Argilla's database. Argilla supports to backend databases: Elasticsearch and Opensearch.
+You need to launch Argilla's database. Argilla supports two backend databases: Elasticsearch and Opensearch.
 
 If you don’t have Elasticsearch (ES) or Opensearch running we recommend you to install [Docker Desktop](https://www.docker.com/products/docker-desktop/) for your plattform.
 
