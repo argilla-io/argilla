@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+
+- `rg.log` accepts a `num_thread` argument to run data logging request concurrently. See [#2458](https://github.com/argilla-io/argilla/issues/2458)
+
+## Changed
+
+- The `rg.log_async` is new deprecated and will be removed in next minor release.
+- The `rg.log` will compute all batches and raise an error for all failed batches.
+
+
+
 ## [1.6.0-dev](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
 
 ### Added
