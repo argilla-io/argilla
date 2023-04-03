@@ -76,20 +76,17 @@ class ArgillaTrainer(object):
 
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
-            self._required_fields = ["id", "text", "inputs", "annotation", "multi_label"]
             if self.rg_dataset_snapshot[0].multi_label:
                 self._multi_label = True
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForTokenClassification):
             self._rg_dataset_type = rg.DatasetForTokenClassification
-            self._required_fields = ["id", "text", "tokens", "annotation", "ner_tags"]
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForText2Text):
             self._rg_dataset_type = rg.DatasetForText2Text
-            self._required_fields = ["id", "text", "annotation"]
             raise NotImplementedError("`argilla.training` does not support `Text2Text` tasks yet.")
         else:
             raise NotImplementedError(f"Dataset type {type(self.rg_dataset_snapshot)} is not supported.")
 
-        self.dataset_full = rg.load(name=self._name, fields=self._required_fields, **load_kwargs)
+        self.dataset_full = rg.load(name=self._name, **load_kwargs)
 
         framework = Framework(framework)
         if framework is Framework.SPACY:
@@ -160,7 +157,6 @@ class ArgillaTrainer(object):
                 dataset: {self._name}
                 task: {self._rg_dataset_type.__name__}
                 multi_label: {self._multi_label}
-                required_fields: {self._required_fields}
                 train_size: {self._train_size}
                 seed: {self._seed}
 
