@@ -20,12 +20,12 @@ from argilla.training import ArgillaTrainer
 def test_wrong_framework(dataset_text_classification):
     framework = "mock"
     with pytest.raises(NotImplementedError, match=f"Framework {framework} is not supported."):
-        ArgillaTrainer(dataset=dataset_text_classification, framework=framework)
+        ArgillaTrainer(dataset_text_classification, framework=framework)
 
 
-@pytest.mark.parameterize(["spacy", "transformers", "setfit"])
+@pytest.mark.parametrize("framework", ["spacy", "transformers", "setfit"])
 def test_base_text_classification_without_split(framework, dataset_text_classification):
-    trainer = ArgillaTrainer(dataset=dataset_text_classification, framework=framework)
+    trainer = ArgillaTrainer(dataset_text_classification, framework=framework)
     assert trainer._split_applied is False
     assert trainer._multi_label is False
     assert trainer._trainer._eval_dataset is None
@@ -34,9 +34,9 @@ def test_base_text_classification_without_split(framework, dataset_text_classifi
     assert trainer._trainer.record_class == rg.TextClassificationRecord
 
 
-@pytest.mark.parameterize(["spacy", "transformers", "setfit"])
+@pytest.mark.parametrize("framework", ["spacy", "transformers", "setfit"])
 def test_base_text_classification_with_split(framework, dataset_text_classification):
-    trainer = ArgillaTrainer(dataset=dataset_text_classification, framework=framework, train_size=0.8)
+    trainer = ArgillaTrainer(dataset_text_classification, framework=framework, train_size=0.8)
     assert trainer._split_applied is True
     assert trainer._multi_label is False
     assert trainer._trainer._eval_dataset is not None
@@ -45,10 +45,10 @@ def test_base_text_classification_with_split(framework, dataset_text_classificat
     assert trainer._trainer.record_class == rg.TextClassificationRecord
 
 
-@pytest.mark.parameterize(["spacy", "transformers", "setfit"])
-def test_base_token_classification(framework, dataset_text_classification):
+@pytest.mark.parametrize("framework", ["spacy", "transformers", "setfit"])
+def test_base_token_classification(framework, dataset_token_classification):
     def _init_trainer(_framework):
-        trainer = ArgillaTrainer(dataset=dataset_text_classification, framework=_framework)
+        trainer = ArgillaTrainer(dataset_token_classification, framework=_framework)
         assert trainer._split_applied is False
         assert trainer._multi_label is False
         assert trainer._trainer._eval_dataset is None
@@ -63,7 +63,7 @@ def test_base_token_classification(framework, dataset_text_classification):
         _init_trainer(framework)
 
 
-@pytest.mark.parameterize(["spacy", "transformers", "setfit"])
+@pytest.mark.parametrize("framework", ["spacy", "transformers", "setfit"])
 def test_base_text2text(framework, dataset_text2text):
     with pytest.raises(NotImplementedError, match="`argilla.training` does not support `Text2Text` tasks yet."):
-        ArgillaTrainer(dataset=dataset_text2text, framework=framework)
+        ArgillaTrainer(dataset_text2text, framework=framework)
