@@ -296,7 +296,7 @@ def test_log_background_with_error(mocked_client: SecuredClient, monkeypatch: An
     def raise_http_error(*args, **kwargs):
         raise httpx.ConnectError("Mock error", request=None)
 
-    monkeypatch.setattr(httpx.AsyncClient, "post", raise_http_error)
+    monkeypatch.setattr(api.active_client().http_client, "post", raise_http_error)
 
     future = api.log(rg.TextClassificationRecord(text=sample_text), name=dataset_name, background=True)
     with pytest.raises(BaseClientError):
