@@ -12,12 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import asyncio
+
 import logging
 import os
 import re
 import warnings
 from asyncio import Future
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from rich import print as rprint
@@ -47,10 +48,10 @@ from argilla.client.models import (
     TokenClassificationRecord,
 )
 from argilla.client.sdk.client import AuthenticatedClient
-from argilla.client.sdk.commons.api import async_bulk
+from argilla.client.sdk.commons.api import bulk
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
-    ApiCompatibilityError,
+    BaseClientError,
     InputValueError,
     NotFoundApiError,
 )
@@ -87,24 +88,6 @@ from argilla.client.sdk.users.models import User
 from argilla.utils import setup_loop_in_thread
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class _ArgillaLogAgent:
-    def __init__(self, api: "Argilla"):
-        self.__api__ = api
-        self.__loop__, self.__thread__ = setup_loop_in_thread()
-
-    @staticmethod
-    async def __log_internal__(api: "Argilla", *args, **kwargs):
-        try:
-            return await api.log_async(*args, **kwargs)
-        except Exception as ex:
-            dataset = kwargs["name"]
-            _LOGGER.error(f"\nCannot log data in dataset '{dataset}'\nError: {type(ex).__name__}\nDetails: {ex}")
-            raise ex
-
-    def log(self, *args, **kwargs) -> Future:
-        return asyncio.run_coroutine_threadsafe(self.__log_internal__(self.__api__, *args, **kwargs), self.__loop__)
 
 
 class Argilla:
@@ -154,13 +137,9 @@ class Argilla:
         self._user: User = users_api.whoami(client=self._client)
         self.set_workspace(workspace or self._user.username)
 
-        self._agent = _ArgillaLogAgent(self)
-
     def __del__(self):
         if hasattr(self, "_client"):
             del self._client
-        if hasattr(self, "_agent"):
-            del self._agent
 
     @property
     def client(self) -> AuthenticatedClient:
@@ -241,10 +220,7 @@ class Argilla:
         datasets_api.copy_dataset(
             client=self._client,
             name=dataset,
-            json_body=CopyDatasetRequest(
-                name=name_of_copy,
-                target_workspace=workspace,
-            ),
+            json_body=CopyDatasetRequest(name=name_of_copy, target_workspace=workspace),
         )
 
     def delete(self, name: str, workspace: Optional[str] = None):
@@ -265,10 +241,11 @@ class Argilla:
         workspace: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        batch_size: int = 500,
+        batch_size: int = 100,
         verbose: bool = True,
         background: bool = False,
         chunk_size: Optional[int] = None,
+        num_threads: int = 1,
     ) -> Union[BulkResponse, Future]:
         """Logs Records to argilla.
 
@@ -285,6 +262,7 @@ class Argilla:
                 an ``asyncio.Future`` object. You probably want to set ``verbose`` to False
                 in that case.
             chunk_size: DEPRECATED! Use `batch_size` instead.
+            num_threads: If > 1, will use num_thread to log batches, sending data concurrently. Default `1`.
 
         Returns:
             Summary of the response from the REST API.
@@ -292,52 +270,26 @@ class Argilla:
             will be returned instead.
 
         """
+
+        if background:
+            executor = ThreadPoolExecutor(max_workers=1)
+
+            return executor.submit(
+                self.log,
+                records=records,
+                name=name,
+                workspace=workspace,
+                tags=tags,
+                metadata=metadata,
+                batch_size=batch_size,
+                verbose=verbose,
+                chunk_size=chunk_size,
+                num_threads=num_threads,
+            )
+
         if workspace is not None:
             self.set_workspace(workspace)
 
-        future = self._agent.log(
-            records=records,
-            name=name,
-            tags=tags,
-            metadata=metadata,
-            batch_size=batch_size,
-            verbose=verbose,
-            chunk_size=chunk_size,
-        )
-        if background:
-            return future
-
-        try:
-            return future.result()
-        finally:
-            future.cancel()
-
-    async def log_async(
-        self,
-        records: Union[Record, Iterable[Record], Dataset],
-        name: str,
-        workspace: Optional[str] = None,
-        tags: Optional[Dict[str, str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        batch_size: int = 500,
-        verbose: bool = True,
-        chunk_size: Optional[int] = None,
-    ) -> BulkResponse:
-        """Logs Records to argilla with asyncio.
-
-        Args:
-            records: The record, an iterable of records, or a dataset to log.
-            name: The dataset name.
-            tags: A dictionary of tags related to the dataset.
-            metadata: A dictionary of extra info for the dataset.
-            batch_size: The batch size for a data bulk.
-            verbose: If True, shows a progress bar and prints out a quick summary at the end.
-            chunk_size: DEPRECATED! Use `batch_size` instead.
-
-        Returns:
-            Summary of the response from the REST API
-
-        """
         tags = tags or {}
         metadata = metadata or {}
 
@@ -391,27 +343,56 @@ class Argilla:
         else:
             raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
 
-        processed, failed = 0, 0
         with Progress() as progress_bar:
             task = progress_bar.add_task("Logging...", total=len(records), visible=verbose)
 
-            for i in range(0, len(records), batch_size):
-                batch = records[i : i + batch_size]
+            batches = [records[i : i + batch_size] for i in range(0, len(records), batch_size)]
 
-                response = await async_bulk(
-                    client=self._client,
-                    name=name,
-                    json_body=bulk_class(
-                        tags=tags,
-                        metadata=metadata,
-                        records=[creation_class.from_client(r) for r in batch],
-                    ),
-                )
+            def log_batch(batch_info: Tuple[int, list]) -> Union[Tuple[bool, int, int], Tuple[bool, Exception, int]]:
+                batch_id, batch = batch_info
 
-                processed += response.parsed.processed
-                failed += response.parsed.failed
+                try:
+                    bulk_result = bulk(
+                        client=self._client,
+                        name=name,
+                        json_body=bulk_class(
+                            tags=tags,
+                            metadata=metadata,
+                            records=[creation_class.from_client(r) for r in batch],
+                        ),
+                    )
 
-                progress_bar.update(task, advance=len(batch))
+                    return False, bulk_result.processed, bulk_result.failed
+                except Exception as ex:
+                    _LOGGER.warning(f"Error processing batch {batch_id}: Error: {ex}")
+                    return True, ex, batch_id
+                finally:
+                    progress_bar.update(task, advance=len(batch))
+
+            if num_threads > 1:
+                with ThreadPoolExecutor(max_workers=num_threads) as executor:
+                    results = list(executor.map(log_batch, enumerate(batches)))
+            else:
+                results = list(map(log_batch, enumerate(batches)))
+
+            processed, failed = 0, 0
+            errors_in_batch = []
+            for has_error, *result_info in results:
+                if has_error:
+                    exception, batch_id = result_info
+                    errors_in_batch.append((exception, batch_id))
+                else:
+                    processed_batch, failed_batch = result_info
+                    processed += processed_batch
+                    failed += failed_batch
+
+        if errors_in_batch:
+            if len(errors_in_batch) == 1:
+                error, _ = errors_in_batch[0]
+                raise error
+
+            message = [f"Batch {batch_id}: {error}" for error, batch_id in errors_in_batch]
+            raise BaseClientError(f"Errors found to batch data: {message}")
 
         # TODO: improve logging policy in library
         if verbose:
@@ -424,6 +405,53 @@ class Argilla:
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
+
+    async def log_async(
+        self,
+        records: Union[Record, Iterable[Record], Dataset],
+        name: str,
+        workspace: Optional[str] = None,
+        tags: Optional[Dict[str, str]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        batch_size: int = 100,
+        verbose: bool = True,
+        chunk_size: Optional[int] = None,
+        num_threads: int = 1,
+    ) -> BulkResponse:
+        """Logs Records to argilla with asyncio.
+
+        Args:
+            records: The record, an iterable of records, or a dataset to log.
+            name: The dataset name.
+            tags: A dictionary of tags related to the dataset.
+            metadata: A dictionary of extra info for the dataset.
+            batch_size: The batch size for a data bulk.
+            verbose: If True, shows a progress bar and prints out a quick summary at the end.
+            chunk_size: DEPRECATED! Use `batch_size` instead.
+            num_threads: If > 1, will use num_thread to log batches, sending data concurrently. Default `1`.
+
+        Returns:
+            Summary of the response from the REST API
+
+        """
+
+        warnings.warn(
+            "`log_async` is deprecated and will be removed in next release. "
+            "Please, use `log` with `background=True` instead",
+            DeprecationWarning,
+        )
+
+        return self.log(
+            records=records,
+            name=name,
+            workspace=workspace,
+            tags=tags,
+            metadata=metadata,
+            batch_size=batch_size,
+            verbose=verbose,
+            chunk_size=chunk_size,
+            num_threads=num_threads,
+        )
 
     def delete_records(
         self,

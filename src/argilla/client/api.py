@@ -112,10 +112,11 @@ def log(
     workspace: Optional[str] = None,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
-    batch_size: int = 500,
+    batch_size: int = 100,
     verbose: bool = True,
     background: bool = False,
     chunk_size: Optional[int] = None,
+    num_threads: int = 1,
 ) -> Union[BulkResponse, Future]:
     """Logs Records to argilla.
 
@@ -133,6 +134,7 @@ def log(
         background: If True, we will NOT wait for the logging process to finish and return an ``asyncio.Future``
             object. You probably want to set ``verbose`` to False in that case.
         chunk_size: DEPRECATED! Use `batch_size` instead.
+        num_threads: If > 1, will use num_thread to log batches, sending data concurrently. Default to `1`.
 
     Returns:
         Summary of the response from the REST API.
@@ -162,6 +164,7 @@ def log(
         verbose=verbose,
         background=background,
         chunk_size=chunk_size,
+        num_threads=num_threads,
     )
 
 
@@ -171,7 +174,7 @@ async def log_async(
     workspace: Optional[str] = None,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
-    batch_size: int = 500,
+    batch_size: int = 100,
     verbose: bool = True,
     chunk_size: Optional[int] = None,
 ) -> BulkResponse:
