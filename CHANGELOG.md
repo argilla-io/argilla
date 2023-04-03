@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- `rg.log` accepts a `num_thread` argument to run data logging request concurrently. See [#2458](https://github.com/argilla-io/argilla/issues/2458)
+- `rg.log` accepts a `num_thread` argument to run data logging request concurrently. See [#2458](https://github.com/argilla-io/argilla/issues/2458) and [#2533](https://github.com/argilla-io/argilla/issues/2533)
 
 ## Changed
 
