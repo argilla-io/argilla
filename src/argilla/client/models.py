@@ -16,9 +16,9 @@
 """
 This module contains the data models for the interface
 """
-
 import datetime
 import logging
+import uuid
 import warnings
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -78,6 +78,12 @@ class _Validators(BaseModel):
     def _none_to_empty_dict(cls, v):
         if v is None:
             return {}
+        return v
+
+    @validator("id", check_fields=False, always=True)
+    def _none_to_generated_uid64(cls, v):
+        if v is None:
+            return str(uuid.uuid4())
         return v
 
     @validator("prediction_agent", check_fields=False)

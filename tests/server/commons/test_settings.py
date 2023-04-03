@@ -15,7 +15,7 @@
 import os
 
 import pytest
-from argilla.server.settings import ApiSettings
+from argilla.server.settings import Settings
 from pydantic import ValidationError
 
 
@@ -23,12 +23,12 @@ from pydantic import ValidationError
 def test_wrong_settings_namespace(bad_namespace):
     os.environ["ARGILLA_NAMESPACE"] = bad_namespace
     with pytest.raises(ValidationError):
-        ApiSettings()
+        Settings()
 
 
 def test_settings_namespace():
     os.environ["ARGILLA_NAMESPACE"] = "namespace"
-    settings = ApiSettings()
+    settings = Settings()
 
     assert settings.namespace == "namespace"
     assert settings.dataset_index_name == "namespace.ar.datasets"

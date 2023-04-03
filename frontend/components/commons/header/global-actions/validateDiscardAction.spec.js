@@ -3,7 +3,12 @@ import ValidateDiscardActionComponent from "./ValidateDiscardAction";
 
 let wrapper = null;
 const options = {
-  stubs: ["base-checkbox", "annotation-label-selector", "base-button"],
+  stubs: [
+    "base-checkbox",
+    "annotation-label-selector",
+    "base-button",
+    "TextClassificationBulkAnnotationComponent",
+  ],
   directives: {
     badge() {
       /* stub */

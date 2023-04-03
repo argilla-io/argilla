@@ -42,7 +42,7 @@
       :datasetLastSelectedEntity="datasetLastSelectedEntity"
       :suggestedLabel="suggestedLabel"
       :token="token"
-      :formattedEntities="formattedEntities"
+      :formattedEntities="datasetEntities"
       :showEntitiesSelector="showEntitiesSelector"
       v-if="showEntitiesSelector"
       @selectEntity="onSelectEntity"
@@ -101,21 +101,9 @@ export default {
   }),
   computed: {
     tag_color() {
-      return this.datasetEntities.filter(
+      return this.datasetEntities?.filter(
         (entity) => entity.text === this.token.entity.label
-      )[0].colorId;
-    },
-    filteredEntities() {
-      return this.datasetEntities
-        .filter((entity) => entity.text)
-        .sort((a, b) => a.text.localeCompare(b.text));
-    },
-    formattedEntities() {
-      const characters = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM".split("");
-      return this.filteredEntities.map((ent, index) => ({
-        ...ent,
-        shortCut: characters[index],
-      }));
+      )[0]?.color_id;
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
@@ -143,8 +131,8 @@ export default {
     endSelection() {
       if (this.annotationEnabled) {
         this.$emit("endSelection", this.spanId);
-        if (this.formattedEntities.length == 1) {
-          this.onSelectEntity(this.formattedEntities[0].text);
+        if (this.datasetEntities.length == 1) {
+          this.onSelectEntity(this.datasetEntities[0].text);
         } else {
           this.showEntitiesSelector = true;
         }

@@ -6,6 +6,7 @@
           v-if="!query"
           :datasetId="dataset.id"
           :datasetTask="dataset.task"
+          :labelsFromORM="globalLabelsFromORM"
         />
         <rule-labels-definition
           v-else
@@ -13,6 +14,7 @@
           :isSaved="saved"
           @save-rule="saveRule"
           @update-rule="updateCurrentRule"
+          :labelsFromORM="globalLabelsFromORM"
         >
         </rule-labels-definition>
       </div>
@@ -21,7 +23,6 @@
           <template #button-bottom>
             <base-button
               class="rule__button primary light"
-              :disabled="isLoading"
               @click="showRulesList"
               >Manage rules</base-button
             >
@@ -35,6 +36,7 @@
 <script>
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
+import { getAllLabelsTextByDatasetId } from "@/models/globalLabel.queries";
 
 export default {
   props: {
@@ -59,6 +61,7 @@ export default {
     if (!this.hasMetrics) {
       await this.dataset.refreshRulesMetrics();
     }
+
     if (!this.currentRule && this.query) {
       const rule = this.dataset.findRuleByQuery(this.query, undefined);
       await this.dataset.setCurrentLabelingRule(
@@ -67,14 +70,21 @@ export default {
     }
   },
   watch: {
-    async query(newValue) {
-      this.saved = false;
-      const rule = this.dataset.findRuleByQuery(newValue, undefined);
-      await this.dataset.setCurrentLabelingRule(
-        rule
-          ? rule
-          : { query: newValue, labels: (this.currentRule || {}).labels }
-      );
+    query: {
+      // FIXME - the deep true is here only to 'ensure' that when query change the currentLabelling is update.
+      // This is a fast and ugly solution that needs to be refactored.
+      handler: async function (newValue) {
+        if (newValue !== this.currentRule?.query) {
+          this.saved = false;
+          const rule = this.dataset.findRuleByQuery(newValue, undefined);
+          await this.dataset.setCurrentLabelingRule(
+            rule
+              ? rule
+              : { query: newValue, labels: (this.currentRule || {}).labels }
+          );
+        }
+      },
+      deep: true,
     },
   },
   computed: {
@@ -104,6 +114,9 @@ export default {
     },
     rulesMetrics() {
       return this.dataset.labelingRulesMetrics;
+    },
+    globalLabelsFromORM() {
+      return getAllLabelsTextByDatasetId(this.dataset.id);
     },
   },
   methods: {

@@ -36,6 +36,9 @@ class BaseDatasetDB(BaseModel):
     )
     last_updated: datetime = None
 
+    class Config:
+        validate_assignment = True
+
     @root_validator(pre=True)
     def set_defaults(cls, values):
         workspace = values.get("workspace") or values.get("owner")

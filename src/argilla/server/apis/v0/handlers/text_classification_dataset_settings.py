@@ -22,17 +22,12 @@ from argilla.server.apis.v0.models.commons.params import (
     CommonTaskHandlerDependencies,
 )
 from argilla.server.apis.v0.models.dataset_settings import TextClassificationSettings
+from argilla.server.apis.v0.validators.commons import validate_is_super_user
 from argilla.server.apis.v0.validators.text_classification import DatasetValidator
 from argilla.server.commons.models import TaskType
+from argilla.server.models import User
 from argilla.server.security import auth
-from argilla.server.security.model import User
-from argilla.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
-
-__svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(
-    f"{TaskType.text_classification}_DatasetSettings",
-    (ServiceBaseDatasetSettings, TextClassificationSettings),
-    {},
-)
+from argilla.server.services.datasets import DatasetsService
 
 
 def configure_router(router: APIRouter):
@@ -54,22 +49,22 @@ def configure_router(router: APIRouter):
         name: str = DATASET_NAME_PATH_PARAM,
         ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        user: User = Security(auth.get_user, scopes=["read:dataset.settings"]),
+        current_user: User = Security(auth.get_current_user),
     ) -> TextClassificationSettings:
         found_ds = datasets.find_by_name(
-            user=user,
+            user=current_user,
             name=name,
             workspace=ws_params.workspace,
             task=task,
         )
 
-        settings = await datasets.get_settings(user=user, dataset=found_ds, class_type=__svc_settings_class__)
-        return TextClassificationSettings.parse_obj(settings)
+        settings = await datasets.get_settings(
+            user=current_user, dataset=found_ds, class_type=TextClassificationSettings
+        )
+        return settings
 
-    @deprecate_endpoint(
-        path=base_endpoint,
-        new_path=new_base_endpoint,
-        router_method=router.put,
+    @router.patch(
+        path=new_base_endpoint,
         name=f"save_dataset_settings_for_{task}",
         operation_id=f"save_dataset_settings_for_{task}",
         description=f"Save the {task} dataset settings",
@@ -82,21 +77,41 @@ def configure_router(router: APIRouter):
         ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
-        user: User = Security(auth.get_user, scopes=["write:dataset.settings"]),
+        current_user: User = Security(auth.get_current_user),
     ) -> TextClassificationSettings:
         found_ds = datasets.find_by_name(
-            user=user,
+            user=current_user,
             name=name,
             task=task,
             workspace=ws_params.workspace,
         )
-        await validator.validate_dataset_settings(user=user, dataset=found_ds, settings=request)
+        await validator.validate_dataset_settings(user=current_user, dataset=found_ds, settings=request)
         settings = await datasets.save_settings(
-            user=user,
+            user=current_user,
             dataset=found_ds,
-            settings=__svc_settings_class__.parse_obj(request.dict()),
+            settings=TextClassificationSettings.parse_obj(request.dict()),
         )
-        return TextClassificationSettings.parse_obj(settings)
+        return settings
+
+    # TODO: This will be remove in next iteration
+    router.put(
+        path=base_endpoint,
+        name=f"old_save_dataset_settings_for_{task}",
+        operation_id=f"old_save_dataset_settings_for_{task}",
+        description=f"Save the {task} dataset settings",
+        deprecated=True,
+        response_model_exclude_none=True,
+        response_model=TextClassificationSettings,
+    )(save_settings)
+    router.put(
+        path=new_base_endpoint,
+        name=f"new_save_dataset_settings_for_{task}_put",
+        operation_id=f"new_save_dataset_settings_for_{task}_put",
+        description=f"Save the {task} dataset settings",
+        deprecated=True,
+        response_model_exclude_none=True,
+        response_model=TextClassificationSettings,
+    )(save_settings)
 
     @deprecate_endpoint(
         path=base_endpoint,
@@ -110,7 +125,7 @@ def configure_router(router: APIRouter):
         name: str = DATASET_NAME_PATH_PARAM,
         ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        user: User = Security(auth.get_user, scopes=["delete:dataset.settings"]),
+        user: User = Security(auth.get_current_user),
     ) -> None:
         found_ds = datasets.find_by_name(
             user=user,
@@ -118,6 +133,7 @@ def configure_router(router: APIRouter):
             task=task,
             workspace=ws_params.workspace,
         )
+
         await datasets.delete_settings(
             user=user,
             dataset=found_ds,

@@ -138,3 +138,6 @@ package-lock.json
 
 # App generated files
 src/**/server/static/
+
+# Old users db file
+.users.yml

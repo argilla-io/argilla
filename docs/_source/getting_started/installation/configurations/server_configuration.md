@@ -32,6 +32,10 @@ You can set following environment variables to further configure your server and
 
 ### Server
 
+- `ARGILLA_HOME_PATH`: The directory where Argilla will store all the files needed to run. If the path doesn't exists it will be automatically created (Default: `~/.argilla`).
+
+- `ARGILLA_DATABASE_URL`: A URL string that contains the necessary information to connect to a database. Argilla uses SQLite by default, PostgreSQL is also officially supported (Default: `sqlite:///$ARGILLA_HOME_PATH/argilla.db?check_same_thread=False`).
+
 - `ARGILLA_ELASTICSEARCH`: URL of the connection endpoint of the Elasticsearch instance (Default: `http://localhost:9200`).
 
 - `ARGILLA_ELASTICSEARCH_SSL_VERIFY`: If "False", disables SSL certificate verification when connection to the Elasticsearch backend.

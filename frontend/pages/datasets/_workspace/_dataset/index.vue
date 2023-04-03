@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <base-loading v-if="$fetchState.pending" />
+  <base-loading v-if="isLoading" />
   <div
     :class="[
       'app',
@@ -77,7 +77,7 @@ export default {
     }),
     breadcrumbs() {
       return [
-        { link: { path: "/datasets" }, name: "Datasets" },
+        { link: { name: "datasets" }, name: "Home" },
         {
           link: { path: `/datasets?workspace=${this.workspace}` },
           name: this.workspace,
@@ -87,6 +87,9 @@ export default {
           name: this.dataset ? this.dataset.name : undefined,
         },
       ];
+    },
+    isLoading() {
+      return this.$fetchState.pending;
     },
     dataset() {
       // This computed data makes that store updates could be shown here
@@ -118,12 +121,19 @@ export default {
       return this.viewSettings.viewMode === "annotate";
     },
   },
-
+  watch: {
+    isLoading(loadingState) {
+      this.onEmitLoadingStateByBusEvent(loadingState);
+    },
+  },
   methods: {
     ...mapActions({
       fetchByName: "entities/datasets/fetchByName",
       search: "entities/datasets/search",
     }),
+    onEmitLoadingStateByBusEvent(loadingState) {
+      this.$root.$emit("is-loading-value", loadingState);
+    },
     async searchRecords({ query, sort, vector, recordId }) {
       if (vector || "vector" in query) {
         await this.syncRecordVectorInfo(vector, recordId);
@@ -253,6 +263,9 @@ export default {
         );
       }
     },
+  },
+  destroyed() {
+    this.$root.$off("is-loading-value");
   },
 };
 </script>

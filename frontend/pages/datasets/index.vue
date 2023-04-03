@@ -46,15 +46,12 @@
               :columns="tableColumns"
               :query-search="querySearch"
               :global-actions="false"
-              :visible-modal-id="datasetCompositeId"
-              :delete-modal-content="deleteConfirmationContent"
               :empty-search-info="emptySearchInfo"
               :active-filters="activeFilters"
               search-on="name"
               @sort-column="onSortColumns"
               @onActionClicked="onActionClicked"
               @filter-applied="onColumnFilterApplied"
-              @close-modal="closeModal"
             />
           </div>
         </div>
@@ -77,7 +74,7 @@ export default {
   layout: "app",
   data: () => ({
     querySearch: undefined,
-    breadcrumbs: [{ action: "clearFilters", name: "Datasets" }],
+    breadcrumbs: [{ action: "clearFilters", name: "Home" }],
     tableColumns: [
       { name: "Name", field: "name", class: "table-info__title", type: "link" },
       {
@@ -117,7 +114,12 @@ export default {
       },
     ],
     actions: [
-      { name: "delete", icon: "trash-empty", title: "Delete dataset" },
+      {
+        name: "go-to-settings",
+        icon: "settings",
+        title: "Go to dataset settings",
+        tooltip: "Dataset settings",
+      },
       {
         name: "copy",
         icon: "link",
@@ -131,7 +133,6 @@ export default {
     externalLinks: [],
     sortedOrder: "desc",
     sortedByField: "last_updated",
-    datasetCompositeId: undefined,
   }),
   async fetch() {
     await this.fetchDatasets();
@@ -195,26 +196,10 @@ export default {
       this.$route.query.workspace;
       return currentWorkspace(this.$route);
     },
-    deleteConfirmationContent() {
-      const [workspace, name] = this.datasetCompositeId || [];
-      const content = {
-        title: "Delete confirmation",
-        text: `You are about to delete: <strong>${name}</strong> from workspace <strong>${workspace}</strong>. This action cannot be undone`,
-      };
-
-      if (workspace === this.workspace) {
-        content.text = content.text.replace(
-          ` from workspace <strong>${workspace}</strong>`,
-          ""
-        );
-      }
-      return content;
-    },
   },
   methods: {
     ...mapActions({
       fetchDatasets: "entities/datasets/fetchAll",
-      _deleteDataset: "entities/datasets/deleteDataset",
     }),
     onColumnFilterApplied({ column, values }) {
       if (column === "workspace") {
@@ -251,8 +236,8 @@ export default {
     },
     onActionClicked(action, dataset) {
       switch (action) {
-        case "delete":
-          this.showConfirmDatasetDeletion(dataset);
+        case "go-to-settings":
+          this.goToSetting(dataset);
           break;
         case "copy":
           this.copyUrl(dataset);
@@ -260,15 +245,18 @@ export default {
         case "copy-name":
           this.copyName(dataset.name);
           break;
-        case "confirm-delete":
-          this.deleteDataset(dataset);
-          break;
         default:
           console.warn(action);
       }
     },
     onSearch(event) {
       this.querySearch = event;
+    },
+    goToSetting(dataset) {
+      const { workspace, name } = dataset;
+      this.$router.push({
+        path: `/datasets/${workspace}/${name}/settings`,
+      });
     },
     copyName(id) {
       this.copy(id);
@@ -280,22 +268,9 @@ export default {
     copy(id) {
       this.$copyToClipboard(id);
     },
-    showConfirmDatasetDeletion(dataset) {
-      this.datasetCompositeId = dataset.id;
-    },
-    deleteDataset(dataset) {
-      this._deleteDataset({
-        workspace: dataset.workspace,
-        name: dataset.name,
-      });
-      this.closeModal();
-    },
     onSortColumns(by, order) {
       this.sortedByField = by;
       this.sortedOrder = order;
-    },
-    closeModal() {
-      this.datasetCompositeId = undefined;
     },
     async clearFilters() {
       if (this.$refs.table) {

@@ -67,18 +67,31 @@
         >Show less</base-button
       >
     </div>
-    <div v-else class="empty-labels">
-      <p>This doesn't have any labels yet.</p>
-      <p>
-        To create new rules you need al least two labels. It's highly
-        recommended to also annotate some records with these labels. Go to the
-        annotation mode to
-        <a href="#" @click.prevent="changeToAnnotationViewMode"
-          >create the labels and annotate some records</a
-        >.
+    <div v-else>
+      <BaseFeedbackComponent
+        :feedbackInput="inputForFeedbackComponent"
+        @on-click="goToSettings"
+        class="feedback-area"
+      />
+      <p class="--body1 help-message">
+        {{ messageNotLabels }}
       </p>
     </div>
-    <p class="rule__info" v-if="ruleInfo">{{ ruleInfo }}</p>
+
+    <template v-if="ruleInfo">
+      <p class="rule__info" v-if="isSaved">{{ ruleInfo }}</p>
+
+      <BaseFeedbackComponent
+        class="rule__info"
+        v-if="!isSaved && selectedLabels && queryWithLabelsIsStored"
+        :feedbackInput="{
+          ...inputForFeedbackComponentQueryAlreadyExist,
+          message: ruleInfo,
+        }"
+        @on-click="feedbackAction"
+      />
+    </template>
+
     <base-button
       v-else
       :disabled="!selectedLabelsVModel.length"
@@ -106,12 +119,28 @@ export default {
       type: Boolean,
       default: false,
     },
+    labelsFromORM: {
+      type: Array,
+      required: true,
+    },
   },
   data: () => {
     return {
       searchText: "",
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
       selectedLabelsVModel: [],
+      inputForFeedbackComponentQueryAlreadyExist: {
+        message: "",
+        buttonLabels: null,
+        feedbackType: "ERROR",
+      },
+      inputForFeedbackComponent: {
+        message: "Action needed: Create labels in the dataset settings",
+        buttonLabels: [{ label: "Create labels", value: "CREATE_LABELS" }],
+        feedbackType: "ERROR",
+      },
+      messageNotLabels:
+        "To create new rules, you need al least two labels. We highly recommended starting by annotating some records with these labels.",
     };
   },
   computed: {
@@ -134,8 +163,7 @@ export default {
         return this.selectedLabelsVModel;
       }
     },
-
-    ruleInfo() {
+    queryWithLabelsIsStored() {
       // TODO: We can improve this
       const storedRule =
         this.currentRule &&
@@ -145,10 +173,13 @@ export default {
         _.sortBy(storedRuleLabels),
         _.sortBy(this.selectedLabels)
       );
+      return queryWithLabelsIsStored;
+    },
+    ruleInfo() {
       if (this.isSaved) {
         return "The rule was saved";
       }
-      if (this.selectedLabels && queryWithLabelsIsStored) {
+      if (this.selectedLabels && this.queryWithLabelsIsStored) {
         return `This query with ${
           this.selectedLabels.length > 1 ? "these labels" : "this label"
         } is already saved as rule`;
@@ -166,7 +197,7 @@ export default {
       return this.dataset.query.text;
     },
     labels() {
-      return this.dataset.labels.map((l) => ({ class: l, selected: false }));
+      return this.labelsFromORM.map((l) => ({ class: l, selected: false }));
     },
     filteredLabels() {
       return this.labels.filter((label) =>
@@ -192,6 +223,12 @@ export default {
           }
         }
       });
+    },
+    datasetName() {
+      return this.$route.params.dataset;
+    },
+    datasetWorkspace() {
+      return this.$route.params.workspace;
     },
   },
   watch: {
@@ -239,6 +276,15 @@ export default {
         value: "annotate",
       });
     },
+    goToSettings() {
+      this.$router.push({
+        name: "datasets-workspace-dataset-settings",
+        params: {
+          dataset: this.datasetName,
+          workspace: this.datasetWorkspace,
+        },
+      });
+    },
   },
 };
 </script>
@@ -273,12 +319,9 @@ export default {
 .label-button {
   @extend %item;
 }
-.empty-labels {
-  a {
-    outline: none;
-    color: $primary-color;
-    text-decoration: none;
-  }
+.help-message {
+  color: $black-37;
+  max-width: 480px;
 }
 .label-button {
   margin: 5px;
@@ -301,7 +344,6 @@ export default {
   }
   &__info {
     margin-bottom: 0;
-    margin-top: auto;
     color: $black-54;
   }
   &__records {
@@ -347,6 +389,7 @@ export default {
     }
   }
   &__labels {
+    flex: 1;
     margin-bottom: 1em;
     margin-left: -5px;
     margin-right: -5px;
