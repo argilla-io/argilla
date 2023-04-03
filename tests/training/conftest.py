@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla
 import argilla as rg
 import pytest
 
@@ -30,10 +29,10 @@ def dataset_token_classification(mocked_client):
         revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
 
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = rg.read_datasets(dataset_ds, task="TokenClassification")
 
-    argilla.delete(dataset)
-    argilla.log(name=dataset, records=dataset_rb)
+    rg.delete(dataset)
+    rg.log(name=dataset, records=dataset_rb)
 
     return dataset
 
@@ -50,8 +49,8 @@ def dataset_text_classification(mocked_client):
     )
     dataset_rb = [rg.TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
 
-    argilla.delete(dataset)
-    argilla.log(name=dataset, records=dataset_rb)
+    rg.delete(dataset)
+    rg.log(name=dataset, records=dataset_rb)
 
     return dataset
 
@@ -64,12 +63,12 @@ def dataset_text_classification_multi_label(mocked_client):
 
     dataset_ds = load_dataset("argilla/research_titles_multi-label")
 
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TextClassification")
+    dataset_rb = rg.read_datasets(dataset_ds, task="TextClassification")
 
     dataset_rb = [rec for rec in dataset_rb if rec.annotation]
 
-    argilla.delete(dataset)
-    argilla.log(name=dataset, records=dataset_rb)
+    rg.delete(dataset)
+    rg.log(name=dataset, records=dataset_rb)
 
     return dataset
 
@@ -86,7 +85,7 @@ def dataset_text2text(mocked_client):
     for entry in dataset_ds:
         records.append(rg.Text2TextRecord(text=entry["text"], annotation=entry["prediction"][0]["text"]))
 
-    argilla.delete(dataset)
-    argilla.log(name=dataset, records=records)
+    rg.delete(dataset)
+    rg.log(name=dataset, records=records)
 
     return dataset
