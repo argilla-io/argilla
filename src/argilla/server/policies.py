@@ -113,6 +113,10 @@ class DatasetPolicyV1:
     def create(cls, user: User) -> bool:
         return user.is_admin
 
+    @classmethod
+    def delete(cls, user: User) -> bool:
+        return user.is_admin
+
 
 class DatasetSettingsPolicy:
     @classmethod
