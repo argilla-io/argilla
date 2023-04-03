@@ -44,7 +44,7 @@ class ArgillaTrainer(object):
         **load_kwargs: Optional[dict],
     ):
         """
-        `__init__` is a function that initializes the class
+        Initialize an Argilla Trainer.
 
         Args:
             name (str): the name of the dataset you want to load.
