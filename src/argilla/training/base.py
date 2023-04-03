@@ -19,9 +19,6 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
 from argilla.client.models import Framework
-from argilla.training.setfit import ArgillaSetFitTrainer
-from argilla.training.spacy import ArgillaSpaCyTrainer
-from argilla.training.transformers import ArgillaTransformersTrainer
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -114,6 +111,8 @@ class ArgillaTrainer(object):
         if framework is Framework.SETFIT:
             if self._rg_dataset_type != rg.DatasetForTextClassification():
                 raise NotImplementedError(f"{Framework.SETFIT} only support `TextClassification` tasks.")
+            from argilla.training.setfit import ArgillaSetFitTrainer
+
             self._trainer = ArgillaSetFitTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
@@ -122,6 +121,8 @@ class ArgillaTrainer(object):
                 model=self.model,
             )
         elif framework is Framework.TRANSFORMERS:
+            from argilla.training.transformers import ArgillaTransformersTrainer
+
             self._trainer = ArgillaTransformersTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
@@ -130,6 +131,8 @@ class ArgillaTrainer(object):
                 model=self.model,
             )
         elif framework is Framework.SPACY:
+            from argilla.training.spacy import ArgillaSpaCyTrainer
+
             self._trainer = ArgillaSpaCyTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
