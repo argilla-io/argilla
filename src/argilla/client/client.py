@@ -21,6 +21,8 @@ from asyncio import Future
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+import backoff
+import httpx
 from rich import print as rprint
 from rich.progress import Progress
 
@@ -103,7 +105,7 @@ class Argilla:
         api_url: Optional[str] = None,
         api_key: Optional[str] = None,
         workspace: Optional[str] = None,
-        timeout: int = 60,
+        timeout: int = 120,
         extra_headers: Optional[Dict[str, str]] = None,
     ):
         """
@@ -246,6 +248,7 @@ class Argilla:
         background: bool = False,
         chunk_size: Optional[int] = None,
         num_threads: int = 1,
+        max_retries: int = 3,
     ) -> Union[BulkResponse, Future]:
         """Logs Records to argilla.
 
@@ -263,6 +266,8 @@ class Argilla:
                 in that case.
             chunk_size: DEPRECATED! Use `batch_size` instead.
             num_threads: If > 1, will use num_thread to log batches, sending data concurrently. Default `1`.
+            max_retries: Number of retries when logging a batch of records if a `httpx.TransportError` occurs.
+                Default `3`
 
         Returns:
             Summary of the response from the REST API.
@@ -348,26 +353,25 @@ class Argilla:
 
             batches = [records[i : i + batch_size] for i in range(0, len(records), batch_size)]
 
-            def log_batch(batch_info: Tuple[int, list]) -> Union[Tuple[bool, int, int], Tuple[bool, Exception, int]]:
+            @backoff.on_exception(
+                backoff.expo,
+                exception=httpx.TransportError,
+                max_tries=max_retries,
+                backoff_log_level=logging.DEBUG,
+            )
+            def log_batch(batch_info: Tuple[int, list]) -> Union[Tuple[int, int]]:
                 batch_id, batch = batch_info
 
-                try:
-                    bulk_result = bulk(
-                        client=self._client,
-                        name=name,
-                        json_body=bulk_class(
-                            tags=tags,
-                            metadata=metadata,
-                            records=[creation_class.from_client(r) for r in batch],
-                        ),
-                    )
+                bulk_result = bulk(
+                    client=self._client,
+                    name=name,
+                    json_body=bulk_class(
+                        tags=tags, metadata=metadata, records=[creation_class.from_client(r) for r in batch]
+                    ),
+                )
 
-                    return False, bulk_result.processed, bulk_result.failed
-                except Exception as ex:
-                    _LOGGER.warning(f"Error processing batch {batch_id}: Error: {ex}")
-                    return True, ex, batch_id
-                finally:
-                    progress_bar.update(task, advance=len(batch))
+                progress_bar.update(task, advance=len(batch))
+                return bulk_result.processed, bulk_result.failed
 
             if num_threads > 1:
                 with ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -376,23 +380,9 @@ class Argilla:
                 results = list(map(log_batch, enumerate(batches)))
 
             processed, failed = 0, 0
-            errors_in_batch = []
-            for has_error, *result_info in results:
-                if has_error:
-                    exception, batch_id = result_info
-                    errors_in_batch.append((exception, batch_id))
-                else:
-                    processed_batch, failed_batch = result_info
-                    processed += processed_batch
-                    failed += failed_batch
-
-        if errors_in_batch:
-            if len(errors_in_batch) == 1:
-                error, _ = errors_in_batch[0]
-                raise error
-
-            message = [f"Batch {batch_id}: {error}" for error, batch_id in errors_in_batch]
-            raise BaseClientError(f"Errors found to batch data: {message}")
+            for processed_batch, failed_batch in results:
+                processed += processed_batch
+                failed += failed_batch
 
         # TODO: improve logging policy in library
         if verbose:
