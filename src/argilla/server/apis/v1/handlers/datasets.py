@@ -19,8 +19,9 @@ from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
+from argilla.server.errors import EntityAlreadyExistsError
 from argilla.server.policies import DatasetPolicyV1, authorize
-from argilla.server.schemas.v1.datasets import Dataset
+from argilla.server.schemas.v1.datasets import Dataset, DatasetCreate
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
@@ -35,3 +36,18 @@ def list_datasets(*, db: Session = Depends(get_db), current_user: User = Securit
         return datasets.list_datasets(db)
     else:
         return current_user.datasets
+
+
+@router.post("/datasets", response_model=Dataset)
+def create_dataset(
+    *,
+    db: Session = Depends(get_db),
+    dataset_create: DatasetCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, DatasetPolicyV1.create)
+
+    if datasets.get_dataset_by_name_and_workspace_id(db, dataset_create.name, dataset_create.workspace_id):
+        raise EntityAlreadyExistsError(name=dataset_create.name, type=Dataset)
+
+    return datasets.create_dataset(db, dataset_create)

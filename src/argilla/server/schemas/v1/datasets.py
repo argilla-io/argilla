@@ -29,3 +29,9 @@ class Dataset(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class DatasetCreate(BaseModel):
+    name: str
+    guidelines: Optional[str]
+    workspace_id: UUID
