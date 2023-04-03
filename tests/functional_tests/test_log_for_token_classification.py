@@ -11,7 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import argilla
 import pytest
 from argilla import TokenClassificationRecord
@@ -19,6 +18,7 @@ from argilla.client import api
 from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
+from datasets import load_dataset
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient
@@ -570,3 +570,18 @@ def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient, api):
 
     assert len(ds) == 5
     assert ds[0].id == 3
+
+
+def test_logging_data_with_concurrency(mocked_client):
+    from datasets import load_dataset
+
+    dataset = "test_logging_data_with_concurrency"
+    dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
+
+    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+
+    api.delete(dataset)
+    api.log(name=dataset, records=dataset_rb, batch_size=int(len(dataset_ds) / 4), num_threads=4)
+
+    ds = api.load(name=dataset)
+    assert len(dataset_ds) == len(ds)
