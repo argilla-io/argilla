@@ -13,13 +13,14 @@
 #  limitations under the License.
 
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Security
 from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
-from argilla.server.errors import EntityAlreadyExistsError
+from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import Dataset, DatasetCreate
 from argilla.server.security import auth
@@ -51,3 +52,21 @@ def create_dataset(
         raise EntityAlreadyExistsError(name=dataset_create.name, type=Dataset)
 
     return datasets.create_dataset(db, dataset_create)
+
+
+@router.delete("/datasets/{dataset_id}", response_model=Dataset)
+def delete_dataset(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, DatasetPolicyV1.delete)
+
+    dataset = datasets.get_dataset_by_id(db, dataset_id)
+    if not dataset:
+        raise EntityNotFoundError(name=str(dataset_id), type=Dataset)
+
+    datasets.delete_dataset(db, dataset)
+
+    return dataset

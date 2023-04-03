@@ -19,6 +19,10 @@ from argilla.server.schemas.v1.datasets import DatasetCreate
 from sqlalchemy.orm import Session
 
 
+def get_dataset_by_id(db: Session, dataset_id: UUID):
+    return db.get(Dataset, dataset_id)
+
+
 def get_dataset_by_name_and_workspace_id(db: Session, name: str, workspace_id: UUID):
     return db.query(Dataset).filter_by(name=name, workspace_id=workspace_id).first()
 
@@ -28,9 +32,6 @@ def list_datasets(db: Session):
 
 
 def create_dataset(db: Session, dataset_create: DatasetCreate):
-    # TODO: We need to create the dataset index on ElasticSearch?
-    # - We should do it inside a database transaction.
-
     dataset = Dataset(
         name=dataset_create.name,
         guidelines=dataset_create.guidelines,
@@ -40,5 +41,12 @@ def create_dataset(db: Session, dataset_create: DatasetCreate):
     db.add(dataset)
     db.commit()
     db.refresh(dataset)
+
+    return dataset
+
+
+def delete_dataset(db: Session, dataset: Dataset):
+    db.delete(dataset)
+    db.commit()
 
     return dataset

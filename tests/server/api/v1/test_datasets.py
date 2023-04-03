@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import Dataset
@@ -132,4 +132,41 @@ def test_create_dataset_with_existent_name(client: TestClient, db: Session, admi
     response = client.post("/api/v1/datasets", headers=admin_auth_header, json=dataset_json)
 
     assert response.status_code == 409
+    assert db.query(Dataset).count() == 1
+
+
+def test_delete_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+
+    response = client.delete(f"/api/v1/datasets/{dataset.id}", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert db.query(Dataset).count() == 0
+
+
+def test_delete_dataset_without_authentication(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+
+    response = client.delete(f"/api/v1/datasets/{dataset.id}")
+
+    assert response.status_code == 401
+    assert db.query(Dataset).count() == 1
+
+
+def test_delete_dataset_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    dataset = DatasetFactory.create()
+
+    response = client.delete(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
+    assert db.query(Dataset).count() == 1
+
+
+def test_delete_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+    DatasetFactory.create()
+
+    response = client.delete(f"/api/v1/datasets/{uuid4()}", headers=admin_auth_header)
+
+    assert response.status_code == 404
     assert db.query(Dataset).count() == 1
