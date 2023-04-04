@@ -15,8 +15,8 @@ from argilla.training import ArgillaTrainer
 
 trainer = ArgillaTrainer(name="<my_dataset_name>", framework="spark-nlp", train_size=0.8)
 trainer.update_config(max_epochs=10)
-trainer.train(path="text-classification")
-records = trainer.predict("I live in Barcelona.", as_argilla_records=True)
+trainer.train(path="text2text")
+records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
 ```
 
 *config options*

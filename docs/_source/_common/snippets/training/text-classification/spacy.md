@@ -11,18 +11,24 @@ links:
 *code snippet*
 
 ```python
+import argilla as rg
 from argilla.training import ArgillaTrainer
 
-trainer = ArgillaTrainer(name="<my_dataset_name>", framework="spacy", train_size=0.8)
+trainer = ArgillaTrainer(
+    name="<my_dataset_name>",
+    workspace="<my_workspace_name>",
+    framework="spacy",
+    train_size=0.8
+)
 trainer.update_config(max_epochs=10)
-trainer.train(path="text-classification")
-records = trainer.predict("I live in Barcelona.", as_argilla_records=True)
+trainer.train(output_dir="text-classification")
+records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
+rg.log(records=records, name="<my_dataset_name>", workspace="<my_workspace_name>")
 ```
 
-*config options*
+*`trainer.update_config(**kwargs)`*
 
 ```bash
-[training]
 dev_corpus = "corpora.dev"
 train_corpus = "corpora.train"
 seed = ${system.seed}

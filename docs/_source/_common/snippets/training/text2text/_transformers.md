@@ -8,11 +8,18 @@ links:
     linkLink: https://spacy.io/usage/training
 ---
 
-```python
-from argilla.training import ArgillaTrainer
+*`trainer.update_config(**kwargs)`*
 
-trainer = ArgillaTrainer(name="<my_dataset_name>", framework="transformers", train_size=0.8)
-trainer.update_config(max_epochs=10)
-trainer.train(path="text2text")
-records = trainer.predict("I live in Barcelona.", as_argilla_records=True)
+```bash
+# `AutoModelForTextClassification`
+pretrained_model_name_or_path = "distilbert-base-uncased"
+force_download = false
+resume_download = false
+proxies = none
+token = none
+cache_dir = none
+local_files_only = false
+
+# `TrainingArguments`
+learning_rate
 ```

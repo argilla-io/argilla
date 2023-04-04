@@ -13,28 +13,40 @@ links:
 ```python
 from argilla.training import ArgillaTrainer
 
-trainer = ArgillaTrainer(name="<my_dataset_name>", framework="setfit", train_size=0.8)
+trainer = ArgillaTrainer(
+    name="<my_dataset_name>",
+    workspace="<my_workspace_name>",
+    framework="setfit",
+    train_size=0.8
+)
 trainer.update_config(max_epochs=10)
 trainer.train(path="text-classification")
-records = trainer.predict("I live in Barcelona.", as_argilla_records=True)
+records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
+rg.log(records=records, name="<my_dataset_name>", workspace="<my_workspace_name>")
 ```
 
-*config options*
+*`trainer.update_config(**kwargs)`*
 
 ```bash
-[training]
-dev_corpus = "corpora.dev"
-train_corpus = "corpora.train"
-seed = ${system.seed}
-gpu_allocator = ${system.gpu_allocator}
-dropout = 0.1
-accumulate_gradient = 1
-patience = 1600
-max_epochs = 0
-max_steps = 20000
-eval_frequency = 200
-frozen_components = []
-annotating_components = []
-before_to_disk = null
-before_update = null
+# `setfit.SetFitModel`
+pretrained_model_name_or_path = "all-MiniLM-L6-v2"
+force_download = false
+resume_download = false
+proxies = none
+token = none
+cache_dir = none
+local_files_only = false
+
+# `setfit.SetFitTrainer`
+metric = "accuracy"
+num_iterations = 20
+num_epochs = 1
+learning_rate = 2e-5
+batch_size = 16
+seed = 42
+use_amp = true
+warmup_proportion = 0.1
+distance_metric = `BatchHardTripletLossDistanceFunction.cosine_distance`
+margin = 0.25
+samples_per_label = 2
 ```
