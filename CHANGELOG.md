@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Datasets to be managed only by users with `admin` role ([#2564]).
 - The list of rules is now accessible while metrics are computed. Closes[#2117](https://github.com/argilla-io/argilla/issues/2117)
 - Style updates for weak labelling and adding feedback toast when delete rules. See [#2626](https://github.com/argilla-io/argilla/pull/2626)
-- Update messages. See [#2648](https://github.com/argilla-io/argilla/pull/2648)
+- Update messages for weak labelling and rule management toast. See [#2648](https://github.com/argilla-io/argilla/pull/2648)
 
 ### Removed
 
