@@ -18,11 +18,10 @@ from typing import Optional
 from fastapi import Depends
 from fastapi.security import APIKeyHeader, SecurityScopes
 
-from argilla._constants import _OLD_API_KEY_HEADER_NAME, API_KEY_HEADER_NAME
+from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import User
 
 api_key_header = APIKeyHeader(name=API_KEY_HEADER_NAME, auto_error=False)
-old_api_key_header = APIKeyHeader(name=_OLD_API_KEY_HEADER_NAME, auto_error=False)
 
 
 class AuthProvider:
