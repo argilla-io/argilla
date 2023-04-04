@@ -134,6 +134,7 @@ class ArgillaTransformersTrainer(object):
         self._model = self._model_class.from_pretrained(**model_kwargs)
 
     def init_pipeline(self):
+        import transformers
         from transformers import pipeline
 
         if self.device == "cuda":
@@ -142,13 +143,16 @@ class ArgillaTransformersTrainer(object):
             device = -1
 
         if self._record_class == rg.TextClassificationRecord:
+            if transformers.__version__ >= "4.20.0":
+                kwargs = {"top_k": None}
+            else:
+                kwargs = {"return_all_scores": True}
             self._pipeline = pipeline(
                 task="text-classification",
                 model=self._model,
                 tokenizer=self._tokenizer,
-                top_k=None,
-                return_all_scores=True,
                 device=device,
+                **kwargs,
             )
         elif self._record_class == rg.TokenClassificationRecord:
             self._pipeline = pipeline(

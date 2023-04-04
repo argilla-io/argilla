@@ -150,7 +150,8 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         Args:
           path (str): the path to save the model to
         """
-
+        if not isinstance(output_dir, str):
+            output_dir = str(output_dir)
         self._model.save_pretrained(output_dir)
 
         # store dict as json

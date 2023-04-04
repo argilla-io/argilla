@@ -11,11 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import shutil
-from pathlib import Path
 
 import argilla as rg
 from argilla.training import ArgillaTrainer
+
+from .helpers import cleanup
 
 FRAMEWORK = "setfit"
 MODEL = "all-MiniLM-L6-v2"
@@ -33,41 +33,25 @@ def test_setfit_train(dataset_text_classification):
     trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
     output_dir = "tmp_setfit_train"
     trainer.update_config(num_epochs=1, num_iterations=1)
-    try:
-        trainer.train(output_dir)
-        assert Path(output_dir).exists()
-    finally:
-        shutil.rmtree(output_dir)
+    cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
     assert isinstance(record, rg.TextClassificationRecord)
     assert record.multi_label is False
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert not isinstance(not_record, rg.TextClassificationRecord)
-    try:
-        trainer.save(output_dir)
-        assert Path(output_dir).exists()
-    finally:
-        shutil.rmtree(output_dir)
+    cleanup(trainer, output_dir, train=False)
 
 
 def test_setfit_train_multi_label(dataset_text_classification_multi_label):
     trainer = ArgillaTrainer(
         name=dataset_text_classification_multi_label, model=MODEL, train_size=0.5, framework=FRAMEWORK
     )
-    output_dir = "tmp_setfit_train"
+    output_dir = "tmp_setfit_train_multi_label"
     trainer.update_config(num_epochs=1, num_iterations=1)
-    try:
-        trainer.train(output_dir)
-        assert Path(output_dir).exists()
-    finally:
-        shutil.rmtree(output_dir)
+    cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
     assert isinstance(record, rg.TextClassificationRecord)
     assert record.multi_label is True
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert not isinstance(not_record, rg.TextClassificationRecord)
-    try:
-        trainer.save(output_dir)
-        assert Path(output_dir).exists()
-    finally:
-        shutil.rmtree(output_dir)
+    cleanup(trainer, output_dir, train=False)
