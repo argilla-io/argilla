@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `argilla.tasks.database.migrate` new task to execute database migrations ([#2564]).
 - `release.Dockerfile` and `quickstart.Dockerfile` now creates a default `argilladata` volume to persist data ([#2564]).
 - Add user settings page. Closes [#2496](https://github.com/argilla-io/argilla/issues/2496)
+- Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
 
 ### Changed
 
