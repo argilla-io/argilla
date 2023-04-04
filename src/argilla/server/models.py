@@ -50,9 +50,9 @@ class Annotation(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str]
     title: Mapped[str] = mapped_column(Text)
-    type: Mapped[Optional[AnnotationType]] = mapped_column(default=AnnotationType.text)
-    required: Mapped[Optional[bool]] = mapped_column(default=False)
-    settings: Mapped[Optional[dict]] = mapped_column(JSON, default={})
+    type: Mapped[AnnotationType] = mapped_column(default=AnnotationType.text)
+    required: Mapped[bool] = mapped_column(default=False)
+    settings: Mapped[dict] = mapped_column(JSON, default={})
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
