@@ -17,6 +17,7 @@
 
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
+import { Notification } from "@/models/Notifications";
 import _ from "lodash";
 
 class TextClassificationRecord extends BaseRecord {
@@ -424,29 +425,45 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   async deleteLabelingRule({ query }) {
-    await this._deleteRule({ query });
+    let message = "";
+    let typeOfToast = "";
+    try {
+      await this._deleteRule({ query });
+      message = `Rule '${query}' is deleted`;
+      typeOfToast = "success";
 
-    const currentRule = this.getCurrentLabelingRule();
-    if (query === (currentRule || {}).query) {
-      await this.clearCurrentLabelingRule();
+      const currentRule = this.getCurrentLabelingRule();
+      if (query === (currentRule || {}).query) {
+        await this.clearCurrentLabelingRule();
+      }
+
+      const rules = this.rules.filter((r) => r.query !== query);
+      const perRuleQueryMetrics = { ...this.perRuleQueryMetrics };
+      delete perRuleQueryMetrics[query];
+      const overalMetrics = await this._fetchOveralMetrics(
+        Object.values(perRuleQueryMetrics)
+      );
+
+      await TextClassificationDataset.insertOrUpdate({
+        data: {
+          workspace: this.workspace,
+          name: this.name,
+          rules,
+          perRuleQueryMetrics,
+          rulesOveralMetrics: overalMetrics,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      message = `Rule '${query}' can't be delete`;
+      typeOfToast = "error";
+    } finally {
+      Notification.dispatch("notify", {
+        message: message,
+        numberOfChars: message.length,
+        type: typeOfToast,
+      });
     }
-
-    const rules = this.rules.filter((r) => r.query !== query);
-    const perRuleQueryMetrics = { ...this.perRuleQueryMetrics };
-    delete perRuleQueryMetrics[query];
-    const overalMetrics = await this._fetchOveralMetrics(
-      Object.values(perRuleQueryMetrics)
-    );
-
-    await TextClassificationDataset.insertOrUpdate({
-      data: {
-        workspace: this.workspace,
-        name: this.name,
-        rules,
-        perRuleQueryMetrics,
-        rulesOveralMetrics: overalMetrics,
-      },
-    });
   }
 
   async clearCurrentLabelingRule() {
