@@ -722,9 +722,17 @@ class DatasetForTextClassification(DatasetBase):
 
         ds_dict = {"id": [], "text": [], "label": []}
         for rec in self._records:
-            if rec.annotation is None or rec.annotation == []:
+            if rec.annotation is None:
                 continue
-            ds_dict["text"].append(rec.text)
+
+            if rec.text is not None:
+                text = rec.text
+            elif rec.text is None and "text" in rec.inputs:
+                text = rec.inputs["text"]
+            else:
+                text = " ".join(rec.inputs.values())
+
+            ds_dict["text"].append(text)
             ds_dict["label"].append(rec.annotation)
             ds_dict["id"].append(str(rec.id))
 
@@ -741,8 +749,8 @@ class DatasetForTextClassification(DatasetBase):
         )
 
         feature_dict = {
-            "text": datasets.Value("string"),
             "id": datasets.Value("string"),
+            "text": datasets.Value("string"),
             "label": [class_label] if self._records[0].multi_label else class_label,
         }
 
