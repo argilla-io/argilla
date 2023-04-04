@@ -22,10 +22,4 @@ DEFAULT_API_KEY = "argilla.apikey"
 DEFAULT_MAX_KEYWORD_LENGTH = 128
 DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
 
-# TODO: This constant will be drop out with issue
-#  https://github.com/argilla-io/argilla/issues/2251 fix
-_OLD_DEFAULT_API_KEY = "rubrix.apikey"
-_OLD_API_KEY_HEADER_NAME = "X-Rubrix-Api-Key"
-_OLD_WORKSPACE_HEADER_NAME = "X-Rubrix-Workspace"
-
 ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
