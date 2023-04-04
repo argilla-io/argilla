@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.6.0-dev](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
+## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
 
 ### Added
 
@@ -44,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `disabled` user field ([#2564]).
 - Support for private workspaces ([#2564]).
 - `ARGILLA_LOCAL_AUTH_DEFAULT_APIKEY` and `ARGILLA_LOCAL_AUTH_DEFAULT_PASSWORD` environment variables. Use `python -m argilla.tasks.users.create_default` instead ([#2564]).
+- The old headers for `API Key` and `workspace` from python client
+- The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
 
