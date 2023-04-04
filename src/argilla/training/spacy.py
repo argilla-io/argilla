@@ -74,15 +74,6 @@ class ArgillaSpaCyTrainer:
         import spacy
         from spacy.cli.init_config import init_config
 
-        self._train_dataset, self._dev_dataset = (
-            dataset if isinstance(dataset, tuple) and len(dataset) > 1 else (dataset, None)
-        )
-        self._train_dataset_path = "./train.spacy"
-        self._train_dataset.to_disk(self._train_dataset_path)
-        if self._dev_dataset:
-            self._dev_dataset_path = "./dev.spacy"
-            self._dev_dataset.to_disk(self._dev_dataset_path)
-
         self._multi_label = multi_label
 
         self._record_class = record_class
@@ -98,6 +89,12 @@ class ArgillaSpaCyTrainer:
                 self._pipeline_name = "textcat"
         else:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
+
+        self._train_dataset, self._dev_dataset = (
+            dataset if isinstance(dataset, tuple) and len(dataset) > 1 else (dataset, None)
+        )
+        self._train_dataset_path = "./train.spacy"
+        self._dev_dataset_path = "./dev.spacy" if self._dev_dataset else None
 
         self.language = language or "en"
         self.gpu_id = gpu_id
@@ -161,6 +158,17 @@ class ArgillaSpaCyTrainer:
         """
         from spacy.training.initialize import init_nlp
         from spacy.training.loop import train as train_nlp
+
+        self._logger.warn(
+            "Note that the spaCy training is expected to be used through the CLI rather than "
+            "programatically, so the dataset needs to be dumped into the disk and then "
+            "loaded from disk. More information at https://spacy.io/usage/training#api"
+        )
+        self._logger.info(f"Dumping the train dataset to {self._train_dataset_path}")
+        self._train_dataset.to_disk(self._train_dataset_path)
+        if self._dev_dataset:
+            self._logger.info(f"Dumping the dev dataset to {self._dev_dataset_path}")
+            self._dev_dataset.to_disk(self._dev_dataset_path)
 
         self._nlp = init_nlp(self.config, use_gpu=self.gpu_id)
         self._nlp, _ = train_nlp(self._nlp, use_gpu=self.gpu_id, stdout=sys.stdout, stderr=sys.stderr)
