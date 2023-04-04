@@ -46,6 +46,7 @@ dependencies:
       - spacy==3.5.0
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
       - transformers[torch]~=4.18.0
+      - evaluate
       - rich==13.0.1
       # install Argilla in editable mode
       - -e .[server,listeners]
