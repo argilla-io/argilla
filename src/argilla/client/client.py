@@ -374,7 +374,7 @@ class Argilla:
                 progress_bar.update(task, advance=len(batch))
                 return bulk_result.processed, bulk_result.failed
 
-            if num_threads > 1:
+            if num_threads >= 1:
                 with ThreadPoolExecutor(max_workers=num_threads) as executor:
                     results = list(executor.map(log_batch, enumerate(batches)))
             else:
