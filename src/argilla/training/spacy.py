@@ -160,7 +160,7 @@ class ArgillaSpaCyTrainer:
         from spacy.training.loop import train as train_nlp
 
         self._logger.warn(
-            "Note that the spaCy training is expected to be used through the CLI not "
+            "Note that the spaCy training is expected to be used through the CLI rather than "
             "programatically, so the dataset needs to be dumped into the disk and then "
             "loaded from disk. More information at https://spacy.io/usage/training#api"
         )
