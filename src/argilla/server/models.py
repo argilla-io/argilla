@@ -36,7 +36,7 @@ def default_inserted_at(context):
 
 class AnnotationType(str, Enum):
     text = "text"
-    single_label = "single_label"
+    rating = "rating"
 
 
 class UserRole(str, Enum):
