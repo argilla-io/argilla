@@ -32,7 +32,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
         if model is None:
             model = "all-MiniLM-L6-v2"
-        super.__init__(dataset=dataset, record_class=record_class, multi_label=multi_label, model=model, seed=seed)
+        super().__init__(dataset=dataset, record_class=record_class, multi_label=multi_label, model=model, seed=seed)
 
     def init_args(self):
         from setfit import SetFitModel, SetFitTrainer
@@ -58,13 +58,12 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
-        from setfit import SetFitModel, SetFitTrainer
+        from setfit import SetFitTrainer
 
         self.setfit_model_kwargs.update(setfit_kwargs)
-        self.setfit_model_kwargs = filter_allowed_args(SetFitModel.from_pretrained, self.setfit_model_kwargs)
 
         self.setfit_trainer_kwargs.update(setfit_kwargs)
-        self.setfit_trainer_kwargs = filter_allowed_args(SetFitTrainer.__init__, self.setfit_trainer_kwargs)
+        self.setfit_trainer_kwargs = filter_allowed_args(SetFitTrainer.__init__, **self.setfit_trainer_kwargs)
 
     def __repr__(self):
         formatted_string = []
@@ -78,7 +77,6 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
                 formatted_string.append(f"{key}: {val}")
         return "\n".join(formatted_string)
 
-    # @require_version("setfit", "0.6")
     def train(self, path: str = None):
         """
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
@@ -131,7 +129,9 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             if self._multi_label:
                 pred = [self._id2label[idx] for idx, p in enumerate(pred) if p == 1]
                 if as_argilla_records:
-                    pred = self._record_class(text=val, prediction=[(p, 1) for p in pred])
+                    pred = self._record_class(
+                        text=val, prediction=[(p, 1) for p in pred], multi_label=self._multi_label
+                    )
             else:
                 pred = self._id2label[int(pred)]
                 if as_argilla_records:

@@ -39,7 +39,7 @@ class ArgillaTrainer(object):
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
         **load_kwargs: Optional[dict],
-    ):
+    ) -> None:
         """
         Initialize an Argilla Trainer.
 
@@ -76,8 +76,7 @@ class ArgillaTrainer(object):
 
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
-            if self.rg_dataset_snapshot[0].multi_label:
-                self._multi_label = True
+            self._multi_label = self.rg_dataset_snapshot[0].multi_label
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForTokenClassification):
             self._rg_dataset_type = rg.DatasetForTokenClassification
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForText2Text):
@@ -106,8 +105,8 @@ class ArgillaTrainer(object):
             )
 
         if framework is Framework.SETFIT:
-            if self._rg_dataset_type != rg.DatasetForTextClassification():
-                raise NotImplementedError(f"{Framework.SETFIT} only support `TextClassification` tasks.")
+            if self._rg_dataset_type is not rg.DatasetForTextClassification:
+                raise NotImplementedError(f"{Framework.SETFIT} only supports `TextClassification` tasks.")
             from argilla.training.setfit import ArgillaSetFitTrainer
 
             self._trainer = ArgillaSetFitTrainer(
@@ -137,8 +136,6 @@ class ArgillaTrainer(object):
                 multi_label=self._multi_label,
                 seed=self._seed,
             )
-        else:
-            raise NotImplementedError(f"Framework {framework} is not supported.")
 
         self._logger.warning(self)
 
@@ -149,28 +146,26 @@ class ArgillaTrainer(object):
         Returns:
           The trainer object.
         """
-        return inspect.cleandoc(
-            f"""
-            ArgillaBaseTrainer info:
-            _________________________________________________________________
-            These baseline params are fixed:
-                dataset: {self._name}
-                task: {self._rg_dataset_type.__name__}
-                multi_label: {self._multi_label}
-                train_size: {self._train_size}
-                seed: {self._seed}
+        return f"""\
+ArgillaBaseTrainer info:
+_________________________________________________________________
+These baseline params are fixed:
+    dataset: {self._name}
+    task: {self._rg_dataset_type.__name__}
+    multi_label: {self._multi_label}
+    train_size: {self._train_size}
+    seed: {self._seed}
 
-            {self._trainer.__class__} info:
-            _________________________________________________________________
-            The parameters are configurable via `trainer.update_config()`:
-                {self._trainer}
+{self._trainer.__class__} info:
+_________________________________________________________________
+The parameters are configurable via `trainer.update_config()`:
+    {self._trainer}
 
-            Using the trainer:
-            _________________________________________________________________
-            `trainer.train(path)` to train to start training. `path` is the path to save the model automatically.
-            `trainer.predict(text, as_argilla_records=True)` to make predictions.
-            `trainer.save(path)` to save the model manually."""
-        )
+Using the trainer:
+_________________________________________________________________
+`trainer.train(output_dir)` to train to start training. `output_dir` is the directory to save the model automatically.
+`trainer.predict(text, as_argilla_records=True)` to make predictions.
+`trainer.save(output_dir)` to save the model manually."""
 
     def update_config(self, *args, **kwargs):
         """

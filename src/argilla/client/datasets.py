@@ -180,7 +180,7 @@ class DatasetBase:
         import datasets
 
         if isinstance(dataset, datasets.DatasetDict):
-            raise ValueError("`datasets.DatasetDict` are not supported. Please, select the dataset" " split before.")
+            raise ValueError("`datasets.DatasetDict` are not supported. Please, select the dataset split before.")
 
         # clean column mappings
         column_mapping = {key: val for key, val in column_mapping.items() if val is not None}

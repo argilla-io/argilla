@@ -90,11 +90,11 @@ class ArgillaSpaCyTrainer:
         else:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
-        self._train_dataset, self._dev_dataset = (
+        self._train_dataset, self._eval_dataset = (
             dataset if isinstance(dataset, tuple) and len(dataset) > 1 else (dataset, None)
         )
         self._train_dataset_path = "./train.spacy"
-        self._dev_dataset_path = "./dev.spacy" if self._dev_dataset else None
+        self._eval_dataset_path = "./dev.spacy" if self._eval_dataset else None
 
         self.language = language or "en"
         self.gpu_id = gpu_id
@@ -109,7 +109,7 @@ class ArgillaSpaCyTrainer:
             pipeline=[self._pipeline_name],
         )
         self.config["paths"]["train"] = self._train_dataset_path
-        self.config["paths"]["dev"] = self._dev_dataset_path or self._train_dataset_path
+        self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
         self.config["paths"]["vectors"] = model
         self.config["system"]["seed"] = seed or 42
 
@@ -125,8 +125,8 @@ class ArgillaSpaCyTrainer:
         just the args that can be updated via `update_config`."""
         formatted_string = []
         formatted_string.append(
-            "WARNING:`ArgillaSpaCyTrainer.update_config` just supports the update of the `training` "
-            "args defined in the `config.yaml` file for the sake of simplicity."
+            "WARNING:`ArgillaSpaCyTrainer.update_config` only supports the update of the `training` "
+            "arguments defined in the `config.yaml`."
         )
         formatted_string.append("\n\t\t`ArgillaSpaCyTrainer`")
         for key, val in self.config["training"].items():
@@ -166,9 +166,9 @@ class ArgillaSpaCyTrainer:
         )
         self._logger.info(f"Dumping the train dataset to {self._train_dataset_path}")
         self._train_dataset.to_disk(self._train_dataset_path)
-        if self._dev_dataset:
-            self._logger.info(f"Dumping the dev dataset to {self._dev_dataset_path}")
-            self._dev_dataset.to_disk(self._dev_dataset_path)
+        if self._eval_dataset:
+            self._logger.info(f"Dumping the dev dataset to {self._eval_dataset_path}")
+            self._eval_dataset.to_disk(self._eval_dataset_path)
 
         self._nlp = init_nlp(self.config, use_gpu=self.gpu_id)
         self._nlp, _ = train_nlp(self._nlp, use_gpu=self.gpu_id, stdout=sys.stdout, stderr=sys.stderr)

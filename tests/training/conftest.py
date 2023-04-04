@@ -30,6 +30,13 @@ def dataset_token_classification(mocked_client):
     )
 
     dataset_rb = rg.read_datasets(dataset_ds, task="TokenClassification")
+    # Set annotations, required for training tests
+    for rec in dataset_rb:
+        # Strip off "score"
+        rec.annotation = [prediction[:3] for prediction in rec.prediction]
+        rec.annotation_agent = rec.prediction_agent
+        rec.prediction = []
+        rec.prediction_agent = None
 
     rg.delete(dataset)
     rg.log(name=dataset, records=dataset_rb)
@@ -61,7 +68,7 @@ def dataset_text_classification_multi_label(mocked_client):
 
     dataset = "research_titles_multi_label"
 
-    dataset_ds = load_dataset("argilla/research_titles_multi-label")
+    dataset_ds = load_dataset("argilla/research_titles_multi-label", split="train[:100]")
 
     dataset_rb = rg.read_datasets(dataset_ds, task="TextClassification")
 

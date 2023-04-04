@@ -19,7 +19,7 @@ from argilla.training import ArgillaTrainer
 
 def test_wrong_framework(dataset_text_classification):
     framework = "mock"
-    with pytest.raises(NotImplementedError, match=f"Framework {framework} is not supported."):
+    with pytest.raises(ValueError, match=f"{framework!r} is not a valid framework."):
         ArgillaTrainer(dataset_text_classification, framework=framework)
 
 
@@ -29,9 +29,8 @@ def test_base_text_classification_without_split(framework, dataset_text_classifi
     assert trainer._split_applied is False
     assert trainer._multi_label is False
     assert trainer._trainer._eval_dataset is None
-    assert trainer._required_fields == ["id", "text", "inputs", "annotation", "multi_label"]
     assert trainer._rg_dataset_type == rg.DatasetForTextClassification
-    assert trainer._trainer.record_class == rg.TextClassificationRecord
+    assert trainer._trainer._record_class == rg.TextClassificationRecord
 
 
 @pytest.mark.parametrize("framework", ["spacy", "transformers", "setfit"])
@@ -40,24 +39,22 @@ def test_base_text_classification_with_split(framework, dataset_text_classificat
     assert trainer._split_applied is True
     assert trainer._multi_label is False
     assert trainer._trainer._eval_dataset is not None
-    assert trainer._required_fields == ["id", "text", "inputs", "annotation", "multi_label"]
     assert trainer._rg_dataset_type == rg.DatasetForTextClassification
-    assert trainer._trainer.record_class == rg.TextClassificationRecord
+    assert trainer._trainer._record_class == rg.TextClassificationRecord
 
 
 @pytest.mark.parametrize("framework", ["spacy", "transformers", "setfit"])
 def test_base_token_classification(framework, dataset_token_classification):
-    def _init_trainer(_framework):
+    def _init_trainer(_framework) -> None:
         trainer = ArgillaTrainer(dataset_token_classification, framework=_framework)
         assert trainer._split_applied is False
         assert trainer._multi_label is False
         assert trainer._trainer._eval_dataset is None
-        assert trainer._required_fields == ["id", "text", "tokens", "annotation", "ner_tags"]
-        assert trainer._rg_dataset_type == rg.DatasetForTokenClassification()
-        assert trainer._trainer.record_class == rg.TokenClassificationRecord()
+        assert trainer._rg_dataset_type is rg.DatasetForTokenClassification
+        assert trainer._trainer._record_class is rg.TokenClassificationRecord
 
     if framework == "setfit":
-        with pytest.raises(NotImplementedError, match=f"{framework} only support `TextClassification` tasks."):
+        with pytest.raises(NotImplementedError, match=f"{framework} only supports `TextClassification` tasks."):
             _init_trainer(framework)
     else:
         _init_trainer(framework)
