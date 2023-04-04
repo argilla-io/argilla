@@ -118,7 +118,7 @@ class ArgillaTransformersTrainer(object):
             self.model_kwargs["problem_type"] = "multi_label_classification"
 
         self.trainer_kwargs = get_default_args(TrainingArguments.__init__)
-        self.trainer_kwargs["evaluation_strategy"] = "epoch"
+        self.trainer_kwargs["evaluation_strategy"] = "no" if self._eval_dataset is None else "epoch"
         self.trainer_kwargs["logging_steps"] = 30
 
         self._pipeline = None
@@ -231,6 +231,8 @@ class ArgillaTransformersTrainer(object):
         self._tokenized_train_dataset = self._train_dataset.map(preprocess_function, batched=True)
         if self._eval_dataset is not None:
             self._tokenized_eval_dataset = self._eval_dataset.map(preprocess_function, batched=True)
+        else:
+            self._tokenized_eval_dataset = None
 
     def compute_metrics(self):
         import evaluate

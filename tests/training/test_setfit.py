@@ -35,6 +35,7 @@ def test_setfit_train(dataset_text_classification):
     trainer.update_config(num_epochs=1, num_iterations=1)
     try:
         trainer.train(output_dir)
+        assert Path(output_dir).exists()
     finally:
         shutil.rmtree(output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
@@ -57,6 +58,7 @@ def test_setfit_train_multi_label(dataset_text_classification_multi_label):
     trainer.update_config(num_epochs=1, num_iterations=1)
     try:
         trainer.train(output_dir)
+        assert Path(output_dir).exists()
     finally:
         shutil.rmtree(output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
