@@ -77,7 +77,7 @@ export default {
         feedbackType: "ERROR",
       },
       messageNotLabels: `To create new rules, you need al least two labels.
-       <br/>We highly recommended starting by annotating some records with these labels.`,
+       <br/>We highly recommend starting by annotating some records with these labels.`,
       messageNotAnnotation:
         "We highly recommended starting by annotating some records with these labels.",
     };
