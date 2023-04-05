@@ -28,7 +28,11 @@ from argilla.server.daos.backend import query_helpers
 from argilla.server.daos.backend.base import BackendErrorHandler, IndexNotFoundError
 from argilla.server.daos.backend.client_adapters.base import IClientAdapter
 from argilla.server.daos.backend.metrics.base import ElasticsearchMetric
-from argilla.server.daos.backend.search.model import BaseQuery, SortConfig
+from argilla.server.daos.backend.search.model import (
+    BaseQuery,
+    SortableField,
+    SortConfig,
+)
 from argilla.server.daos.backend.search.query_builder import (
     HighlightParser,
     OpenSearchQueryBuilder,
@@ -541,6 +545,7 @@ class OpenSearchClient(IClientAdapter):
                         "settings": settings or {},
                         "mappings": mappings or {},
                     },
+                    ignore=400,
                 )
 
     def index_documents(
