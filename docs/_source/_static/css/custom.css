@@ -145,7 +145,7 @@ h2 {
   background: linear-gradient(-45deg, #c13030, #e25a55);
 }
 
-.code {
+.code pre code.python.hljs.language-python {
 	white-space: break-spaces;
 }
 
