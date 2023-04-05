@@ -14,8 +14,8 @@
 
 from uuid import UUID
 
-from argilla.server.models import Dataset
-from argilla.server.schemas.v1.datasets import DatasetCreate
+from argilla.server.models import Annotation, Dataset
+from argilla.server.schemas.v1.datasets import AnnotationCreate, DatasetCreate
 from sqlalchemy.orm import Session
 
 
@@ -50,3 +50,24 @@ def delete_dataset(db: Session, dataset: Dataset):
     db.commit()
 
     return dataset
+
+
+def get_annotation_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
+    return db.query(Annotation).filter_by(name=name, dataset_id=dataset_id).first()
+
+
+def create_annotation(db: Session, dataset: Dataset, annotation_create: AnnotationCreate):
+    annotation = Annotation(
+        name=annotation_create.name,
+        title=annotation_create.title,
+        type=annotation_create.type,
+        required=annotation_create.required,
+        settings=annotation_create.settings,
+        dataset_id=dataset.id,
+    )
+
+    db.add(annotation)
+    db.commit()
+    db.refresh(annotation)
+
+    return annotation
