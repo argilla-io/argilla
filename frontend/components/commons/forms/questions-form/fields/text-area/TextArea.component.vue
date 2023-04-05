@@ -23,12 +23,7 @@
         :defaultText="initialOutputs.text"
         :placeholder="initialOutputs.placeholder"
         :isShortcutToSave="false"
-        @change-text="
-          $emit('on-change-text-area', {
-            text: $event,
-            placeholder: initialOutputs.placeholder,
-          })
-        "
+        @change-text="onChangeTextArea"
       />
     </div>
   </div>
@@ -67,6 +62,19 @@ export default {
     colorHighlight: {
       type: String,
       default: () => "black",
+    },
+  },
+  methods: {
+    onChangeTextArea(newText) {
+      this.$emit("on-change-text-area", {
+        text: newText,
+        placeholder: this.initialOutputs?.placeholder ?? "",
+      });
+
+      const isAnyText = newText?.length;
+      if (this.isRequired) {
+        this.$emit("on-error", !isAnyText);
+      }
     },
   },
 };

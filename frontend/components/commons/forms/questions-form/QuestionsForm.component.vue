@@ -8,10 +8,11 @@
         :isRequired="input.required"
         :isIcon="!!input.tooltipMessage"
         :tooltipMessage="input.tooltipMessage"
-        colorHighlight="red"
+        :colorHighlight="colorAsterisk"
         @on-change-text-area="
           onChange({ newOutputs: $event, idComponent: input.id })
         "
+        @on-error="onError"
       />
 
       <SingleLabelComponent
@@ -21,10 +22,11 @@
         :isRequired="input.required"
         :isIcon="!!input.tooltipMessage"
         :tooltipMessage="input.tooltipMessage"
-        colorHighlight="red"
-        @on-change-rating="
+        :colorHighlight="colorAsterisk"
+        @on-change-single-label="
           onChange({ newOutputs: $event, idComponent: input.id })
         "
+        @on-error="onError"
       />
 
       <RatingComponent
@@ -34,29 +36,34 @@
         :isRequired="input.required"
         :isIcon="!!input.tooltipMessage"
         :tooltipMessage="input.tooltipMessage"
-        colorHighlight="red"
+        :colorHighlight="colorAsterisk"
         @on-change-rating="
           onChange({ newOutputs: $event, idComponent: input.id })
         "
+        @on-error="onError"
       />
     </div>
-
-    <div class="buttons-area">
-      <BaseButton
-        type="reset"
-        class="primary outline small"
-        @on-click="onReset"
-        :disabled="isFormUntouched"
-      >
-        <span v-text="'Reset'" />
-      </BaseButton>
-      <BaseButton
-        type="submit"
-        class="primary small"
-        :disabled="isFormUntouched"
-      >
-        <span v-text="'Validate'" />
-      </BaseButton>
+    <div class="footer-form">
+      <div class="error-message" v-if="isError">
+        <i v-text="formOnErrorMessage" />
+      </div>
+      <div class="buttons-area">
+        <BaseButton
+          type="reset"
+          class="primary outline small"
+          @on-click="onReset"
+          :disabled="isFormUntouched"
+        >
+          <span v-text="'Reset'" />
+        </BaseButton>
+        <BaseButton
+          type="submit"
+          class="primary small"
+          :disabled="isFormUntouched || isError"
+        >
+          <span v-text="'Validate'" />
+        </BaseButton>
+      </div>
     </div>
     {{ inputs }}
   </form>
@@ -78,10 +85,14 @@ export default {
     return {
       inputs: [],
       renderForm: 0,
+      colorAsterisk: "black",
+      isError: false,
     };
   },
   created() {
     this.PROPERTIES = PROPERTIES;
+    this.formOnErrorMessage =
+      "One of the required field is not answered. Please, answer before validate";
     this.onReset();
   },
   computed: {
@@ -105,6 +116,15 @@ export default {
       this.inputs = cloneDeep(this.initialInputs);
       this.renderForm++;
     },
+    onError(isError) {
+      if (isError) {
+        this.colorAsterisk = "red";
+        this.isError = true;
+      } else {
+        this.colorAsterisk = "black";
+        this.isError = false;
+      }
+    },
   },
 };
 </script>
@@ -119,9 +139,19 @@ form {
   padding: $base-space * 4;
 }
 
+.footer-form {
+  display: flex;
+  flex-direction: column;
+  gap: $base-space * 2;
+}
+
 .buttons-area {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.error-message {
+  color: $danger;
 }
 </style>

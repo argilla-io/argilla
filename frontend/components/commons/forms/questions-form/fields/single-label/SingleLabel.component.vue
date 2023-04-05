@@ -6,7 +6,7 @@
     :isIcon="tooltipMessage"
     :tooltipMessage="tooltipMessage"
     :colorHighlight="colorHighlight"
-    @on-change="$emit('on-change-rating', $event)"
+    @on-change="onChangeSingleLabel"
   />
 </template>
 
@@ -37,6 +37,20 @@ export default {
     colorHighlight: {
       type: String,
       default: () => "black",
+    },
+  },
+  methods: {
+    onChangeSingleLabel(newOutputs) {
+      this.$emit("on-change-single-label", newOutputs);
+      const isAnySingleLabelSelected =
+        this.isAnySingleLabelSelected(newOutputs);
+
+      if (this.isRequired) {
+        this.$emit("on-error", !isAnySingleLabelSelected);
+      }
+    },
+    isAnySingleLabelSelected(outputs) {
+      return outputs.some((output) => output.value);
     },
   },
 };

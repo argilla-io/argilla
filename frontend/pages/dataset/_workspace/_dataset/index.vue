@@ -28,6 +28,7 @@ export default {
       //     { id: 2, value: false, text: "No" },
       //   ],
       //   default: null,
+      //   required: true,
       //   componentType: "SINGLE_LABEL",
       // },
       // {
@@ -110,7 +111,7 @@ export default {
         question: "Comment",
         outputs: { text: "dadadadda", placeholder: "this is the placeholder" },
         default: null,
-        required: true,
+        required: false,
         tooltipMessage: "This is a tooltip",
         componentType: "FREE_TEXT",
       },

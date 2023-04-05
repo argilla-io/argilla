@@ -8,7 +8,7 @@
     :tooltipMessage="tooltipMessage"
     backgroundColor="#d8d8fa"
     borderColor="#aaaadd"
-    @on-change="$emit('on-change-rating', $event)"
+    @on-change="onChangeRating"
   />
 </template>
 
@@ -39,6 +39,19 @@ export default {
     colorHighlight: {
       type: String,
       default: () => "black",
+    },
+  },
+  methods: {
+    onChangeRating(newOutputs) {
+      this.$emit("on-change-rating", newOutputs);
+      const isAnyRatingSelected = this.isAnyRatingSelected(newOutputs);
+
+      if (this.isRequired) {
+        this.$emit("on-error", !isAnyRatingSelected);
+      }
+    },
+    isAnyRatingSelected(outputs) {
+      return outputs.some((output) => output.value);
     },
   },
 };
