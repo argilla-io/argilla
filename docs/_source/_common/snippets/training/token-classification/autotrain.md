@@ -7,3 +7,5 @@ links:
   - linkText: AutoTrain UI
     linkLink: https://argilla-argilla-streamlit-customs.hf.space/autotrain-project
 ---
+
+This is a no-code solution so take a look at the Tutorial and AutoTrain UI links underneath.
