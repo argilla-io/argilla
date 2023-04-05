@@ -12,6 +12,6 @@ links:
 
 Take a look at the Tutorial and AutoTrain UI.
 
-*config options*
+*update training config*
 
 N.A.

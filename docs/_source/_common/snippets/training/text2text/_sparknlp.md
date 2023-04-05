@@ -3,7 +3,7 @@ title: Spark NLP
 description: The ArgillaSparkNLPTrainer leverages the features of Spark NLP to train programmatically with Argilla.
 links:
   - linkText: Argilla docs
-    linkLink: https://docs.argilla.io/en/latest/guides/
+    linkLink: https://docs.argilla.io/en/latest/guides/train_a_model.html
   - linkText: Spark NLP docs
     linkLink: https://spacy.io/usage/training
 ---
