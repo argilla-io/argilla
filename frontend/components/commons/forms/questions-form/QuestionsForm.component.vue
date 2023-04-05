@@ -1,22 +1,44 @@
 <template>
   <form>
     <div class="form-group" v-for="input in inputs" :key="input.key">
-      <RatingComponent
-        v-if="input.componentType === 'RATING'"
+      <TextAreaComponent
+        v-if="input.componentType === PROPERTIES.FREE_TEXT"
+        :title="input.question"
+        @on-change-text-area="
+          onChange({ newOutputs: $event, idComponent: input.id })
+        "
+      />
+
+      <SingleLabelComponent
+        v-if="input.componentType === PROPERTIES.SINGLE_LABEL"
         :title="input.question"
         :initialOutputs="input.outputs"
         :isRequired="input.required"
-        colorHighlight="'blue'"
+        colorHighlight="red"
+        @on-change-rating="
+          onChange({ newOutputs: $event, idComponent: input.id })
+        "
+      />
+
+      <RatingComponent
+        v-if="input.componentType === PROPERTIES.RATING"
+        :title="input.question"
+        :initialOutputs="input.outputs"
+        :isRequired="input.required"
+        colorHighlight="red"
         @on-change-rating="
           onChange({ newOutputs: $event, idComponent: input.id })
         "
       />
     </div>
+    {{ inputs }}
   </form>
 </template>
 
 <script>
 import { cloneDeep } from "lodash";
+import { PROPERTIES } from "./questionsForm.properties";
+
 export default {
   name: "QuestionsFormComponent",
   props: {
@@ -29,6 +51,9 @@ export default {
     return {
       inputs: cloneDeep(this.initialInput),
     };
+  },
+  created() {
+    this.PROPERTIES = PROPERTIES;
   },
   methods: {
     onChange({ newOutputs, idComponent }) {
