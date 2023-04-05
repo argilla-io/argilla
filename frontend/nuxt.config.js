@@ -122,6 +122,15 @@ export default {
     cssSourceMap: false,
     extend(config) {
       config.resolve.alias["vue"] = "vue/dist/vue.common";
+      config.module.rules.push({
+        test: /\.md$/,
+        loader: "frontmatter-markdown-loader",
+        options: {
+          vue: {
+            root: "markdown-body",
+          },
+        },
+      });
     },
     babel: {
       plugins: [["@babel/plugin-proposal-private-methods", { loose: true }]],
