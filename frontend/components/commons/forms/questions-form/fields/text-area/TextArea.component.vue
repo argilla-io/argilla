@@ -73,6 +73,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $base-space;
+}
 .title-area {
   display: flex;
   align-items: center;
@@ -81,10 +86,10 @@ export default {
 }
 
 .container {
-  width: calc(100% - 200px);
   padding: $base-space;
   border: 1px solid $black-20;
   border-radius: $border-radius-s;
+  min-height: 10em;
   &.--focused {
     border-color: $primary-color;
   }
