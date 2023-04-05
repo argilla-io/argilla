@@ -20,7 +20,7 @@ trainer = ArgillaTrainer(
     train_size=0.8
 )
 trainer.update_config(max_epochs=10)
-trainer.train(path="token-classification")
+trainer.train(output_dir="token-classification")
 records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
 rg.log(records=records, name="<my_dataset_name>", workspace="<my_workspace_name>")
 ```
