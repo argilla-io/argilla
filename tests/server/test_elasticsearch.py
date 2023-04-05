@@ -44,7 +44,7 @@ def elasticsearch(es_config):
 
 def test_create_index_for_dataset(search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch):
     dataset = DatasetFactory.create()
-    index_name = search_engine.create_records_index(dataset)
+    index_name = search_engine.create_dataset_index(dataset)
 
     assert elasticsearch.indices.exists(index=index_name)
 
@@ -68,7 +68,7 @@ def test_create_index_for_dataset_with_annotations(
 
     dataset = DatasetFactory.create(annotations=text_annotations + rating_annotations)
 
-    index_name = search_engine.create_records_index(dataset)
+    index_name = search_engine.create_dataset_index(dataset)
 
     assert elasticsearch.indices.exists(index=index_name)
 

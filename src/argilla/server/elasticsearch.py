@@ -26,7 +26,7 @@ class ElasticSearchEngine:
     def __post_init__(self):
         self._client = ElasticsearchClient(vector_search_supported=False, index_shards=1, config_backend=self.config)
 
-    def create_records_index(self, dataset: Dataset) -> str:
+    def create_dataset_index(self, dataset: Dataset) -> str:
         fields = {}
 
         for annotation in dataset.annotations:
@@ -45,14 +45,11 @@ class ElasticSearchEngine:
         return index_name
 
     def _field_mapping_for_annotation(self, annotation_task: Annotation):
-        mapping = {}
         if annotation_task.type == AnnotationType.rating:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
-            mapping.update({"type": "integer"})
+            return {"type": "integer"}
         elif annotation_task.type == AnnotationType.text:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
-            mapping.update({"type": "text"})
+            return {"type": "text"}
         else:
             raise ValueError(f"Annotation of type {annotation_task.type} cannot be processed")
-
-        return mapping
