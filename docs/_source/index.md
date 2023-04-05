@@ -20,6 +20,7 @@
 
    guides/how_to
    guides/log_load_and_prepare_data
+   guides/train_a_model
    guides/query_datasets
    guides/measure_datasets_with_metrics
    guides/log_model_explanations
