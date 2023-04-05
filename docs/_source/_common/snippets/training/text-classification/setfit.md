@@ -3,7 +3,7 @@ title: SetFit
 description: The ArgillaSetFitTrainer leverages the features of SetFit to train programmatically with Argilla.
 links:
   - linkText: Argilla docs
-    linkLink: https://docs.argilla.io/en/latest/guides/train_a_model.htmltrain_a_model.html
+    linkLink: https://docs.argilla.io/en/latest/guides/train_a_model.html
   - linkText: SetFit docs
     linkLink: https://github.com/huggingface/setfit
 ---
