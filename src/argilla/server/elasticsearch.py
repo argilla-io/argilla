@@ -13,9 +13,10 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from argilla.server.daos.backend.client_adapters import ElasticsearchClient
+from elasticsearch import Elasticsearch
+
 from argilla.server.models import Annotation, AnnotationType, Dataset
 
 
@@ -24,7 +25,7 @@ class ElasticSearchEngine:
     config: Dict[str, Any]
 
     def __post_init__(self):
-        self._client = ElasticsearchClient(vector_search_supported=False, index_shards=1, config_backend=self.config)
+        self._client = Elasticsearch(**self.config)
 
     def create_dataset_index(self, dataset: Dataset) -> str:
         fields = {}
@@ -40,7 +41,7 @@ class ElasticSearchEngine:
         }
 
         index_name = f"rg.{dataset.id}"
-        self._client.create_index(index_name, mappings=mappings)
+        self._client.indices.create(index=index_name, body={"mappings": mappings})
 
         return index_name
 
