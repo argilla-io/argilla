@@ -16,13 +16,15 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Dataset
+from argilla.server.models import AnnotationType, Dataset
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
+    RatingAnnotationFactory,
+    TextAnnotationFactory,
     WorkspaceFactory,
 )
 
@@ -130,6 +132,87 @@ def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{uuid4()}", headers=admin_auth_header)
+
+    assert response.status_code == 404
+
+
+def test_get_dataset_annotations(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    text_annotation = TextAnnotationFactory.create(
+        name="text-annotation", title="Text Annotation", required=True, dataset=dataset
+    )
+    rating_annotation = RatingAnnotationFactory.create(
+        name="rating-annotation", title="Rating Annotation", dataset=dataset
+    )
+    TextAnnotationFactory.create()
+    RatingAnnotationFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "id": str(text_annotation.id),
+            "name": "text-annotation",
+            "title": "Text Annotation",
+            "type": AnnotationType.text.value,
+            "required": True,
+            "settings": {},
+            "inserted_at": text_annotation.inserted_at.isoformat(),
+            "updated_at": text_annotation.updated_at.isoformat(),
+        },
+        {
+            "id": str(rating_annotation.id),
+            "name": "rating-annotation",
+            "title": "Rating Annotation",
+            "type": AnnotationType.rating.value,
+            "required": False,
+            "settings": {},
+            "inserted_at": rating_annotation.inserted_at.isoformat(),
+            "updated_at": rating_annotation.updated_at.isoformat(),
+        },
+    ]
+
+
+def test_get_dataset_annotations_without_authentication(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/annotations")
+
+    assert response.status_code == 401
+
+
+def test_get_dataset_annotations_as_annotator(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+    TextAnnotationFactory.create(name="text-annotation", dataset=dataset)
+    RatingAnnotationFactory.create(name="rating-annotation", dataset=dataset)
+    TextAnnotationFactory.create()
+    RatingAnnotationFactory.create()
+
+    response = client.get(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
+
+    assert response.status_code == 200
+    assert [annotation["name"] for annotation in response.json()] == ["text-annotation", "rating-annotation"]
+
+
+def test_get_dataset_annotations_as_annotator_from_different_workspace(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+
+    response = client.get(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
+
+    assert response.status_code == 403
+
+
+def test_get_dataset_annotations_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+    DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{uuid4()}/annotations", headers=admin_auth_header)
 
     assert response.status_code == 404
 

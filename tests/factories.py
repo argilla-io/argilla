@@ -16,6 +16,7 @@ import factory
 from argilla.server.database import SessionLocal
 from argilla.server.models import (
     Annotation,
+    AnnotationType,
     Dataset,
     User,
     UserRole,
@@ -62,6 +63,14 @@ class AnnotationFactory(factory.alchemy.SQLAlchemyModelFactory):
     name = factory.Sequence(lambda n: f"annotation-{n}")
     title = "Annotation Title"
     dataset = factory.SubFactory(DatasetFactory)
+
+
+class TextAnnotationFactory(AnnotationFactory):
+    type = AnnotationType.text
+
+
+class RatingAnnotationFactory(AnnotationFactory):
+    type = AnnotationType.rating
 
 
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):

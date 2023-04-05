@@ -21,11 +21,22 @@ from sqlalchemy.orm import Session
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
 from argilla.server.policies import DatasetPolicyV1, authorize
-from argilla.server.schemas.v1.datasets import Dataset, DatasetCreate
+from argilla.server.schemas.v1.datasets import Annotation, Dataset, DatasetCreate
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
 router = APIRouter(tags=["datasets"])
+
+
+def _get_dataset(db: Session, dataset_id: UUID):
+    dataset = datasets.get_dataset_by_id(db, dataset_id)
+    if not dataset:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Dataset with id `{dataset_id}` not found",
+        )
+
+    return dataset
 
 
 @router.get("/datasets", response_model=List[Dataset])
@@ -49,16 +60,25 @@ def get_dataset(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = datasets.get_dataset_by_id(db, dataset_id)
-    if not dataset:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Dataset with id `{dataset_id}` not found",
-        )
+    dataset = _get_dataset(db, dataset_id)
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
     return dataset
+
+
+@router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
+def get_dataset_annotations(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return dataset.annotations
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=Dataset)
@@ -88,12 +108,7 @@ def delete_dataset(
 ):
     authorize(current_user, DatasetPolicyV1.delete)
 
-    dataset = datasets.get_dataset_by_id(db, dataset_id)
-    if not dataset:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Dataset with id `{dataset_id}` not found",
-        )
+    dataset = _get_dataset(db, dataset_id)
 
     datasets.delete_dataset(db, dataset)
 
