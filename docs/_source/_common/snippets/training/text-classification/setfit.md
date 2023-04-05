@@ -22,7 +22,6 @@ trainer = ArgillaTrainer(
 trainer.update_config(num_iterations=10)
 trainer.train(output_dir="text-classification")
 records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
-rg.log(records=records, name="<my_dataset_name>", workspace="<my_workspace_name>")
 ```
 
 *update training config*
