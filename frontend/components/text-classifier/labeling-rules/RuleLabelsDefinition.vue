@@ -137,7 +137,7 @@ export default {
         feedbackType: "ERROR",
       },
       messageNotLabels:
-        "To create new rules, you need al least two labels. <br />We highly recommend starting by annotating some records with these labels.",
+        "To create new rules, you need at least two labels. <br />We highly recommend starting by annotating some records with these labels.",
     };
   },
   computed: {

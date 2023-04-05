@@ -76,7 +76,7 @@ export default {
         buttonLabels: [{ label: "Create labels", value: "CREATE_LABELS" }],
         feedbackType: "ERROR",
       },
-      messageNotLabels: `To create new rules, you need al least two labels.
+      messageNotLabels: `To create new rules, you need at least two labels.
        <br/>We highly recommend starting by annotating some records with these labels.`,
       messageNotAnnotation:
         "We highly recommend starting by annotating some records with these labels.",
