@@ -3,6 +3,8 @@
     :title="title"
     :initialOutputs="initialOutputs"
     :isRequired="isRequired"
+    :isIcon="tooltipMessage"
+    :tooltipMessage="tooltipMessage"
     :colorHighlight="colorHighlight"
     @on-change="$emit('on-change-rating', $event)"
   />
@@ -23,6 +25,14 @@ export default {
     isRequired: {
       type: Boolean,
       default: () => false,
+    },
+    isIcon: {
+      type: Boolean,
+      default: () => false,
+    },
+    tooltipMessage: {
+      type: String,
+      default: () => "",
     },
     colorHighlight: {
       type: String,

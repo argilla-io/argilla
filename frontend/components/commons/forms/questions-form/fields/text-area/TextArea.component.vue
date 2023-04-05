@@ -1,13 +1,19 @@
 <template>
   <div class="wrapper">
-    <div class="title-area">
-      <div class="title-area">
-        <span
-          :key="colorHighlight"
-          v-text="title"
-          v-required-field="isRequired ? { color: colorHighlight } : false"
-        />
-      </div>
+    <div class="title-area --body1">
+      <span
+        :key="colorHighlight"
+        v-text="title"
+        v-required-field="isRequired ? { color: colorHighlight } : false"
+      />
+
+      <TooltipComponent
+        v-if="isIcon"
+        :message="tooltipMessage"
+        direction="bottom"
+      >
+        <svgicon class="icon" name="info" width="22" height="22" />
+      </TooltipComponent>
     </div>
 
     <div class="container">
@@ -50,6 +56,14 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    isIcon: {
+      type: Boolean,
+      default: false,
+    },
+    tooltipMessage: {
+      type: String,
+      default: () => "",
+    },
     colorHighlight: {
       type: String,
       default: () => "black",
@@ -59,6 +73,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.title-area {
+  display: flex;
+  align-items: center;
+  gap: $base-space;
+  color: $black-37;
+}
+
 .container {
   width: calc(100% - 200px);
   padding: $base-space;
@@ -71,5 +92,9 @@ export default {
     border: none;
     padding: 0;
   }
+}
+
+.icon {
+  color: $black-37;
 }
 </style>

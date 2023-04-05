@@ -1,11 +1,18 @@
 <template>
   <div class="wrapper" :style="cssVars">
-    <div class="title-area">
+    <div class="title-area --body1">
       <span
         :key="colorHighlight"
         v-text="title"
         v-required-field="isRequired ? { color: colorHighlight } : false"
       />
+      <TooltipComponent
+        v-if="isIcon"
+        :message="tooltipMessage"
+        direction="bottom"
+      >
+        <svgicon class="icon" name="info" width="22" height="22" />
+      </TooltipComponent>
     </div>
     <div class="container">
       <div class="inputs-area">
@@ -50,6 +57,14 @@ export default {
     isRequired: {
       type: Boolean,
       default: () => false,
+    },
+    isIcon: {
+      type: Boolean,
+      default: () => false,
+    },
+    tooltipMessage: {
+      type: String,
+      default: () => "",
     },
     colorHighlight: {
       type: String,
@@ -104,6 +119,10 @@ export default {
   flex-direction: column;
   gap: $base-space;
   .title-area {
+    display: flex;
+    align-items: center;
+    gap: $base-space;
+    color: $black-37;
   }
   .container {
     display: flex;
@@ -144,5 +163,9 @@ input {
 }
 .cursor-pointer {
   cursor: pointer;
+}
+
+.icon {
+  color: $black-37;
 }
 </style>
