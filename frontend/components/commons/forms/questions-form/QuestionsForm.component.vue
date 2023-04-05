@@ -4,6 +4,9 @@
       <TextAreaComponent
         v-if="input.componentType === PROPERTIES.FREE_TEXT"
         :title="input.question"
+        :initialOutputs="input.outputs"
+        :isRequired="input.required"
+        colorHighlight="red"
         @on-change-text-area="
           onChange({ newOutputs: $event, idComponent: input.id })
         "
