@@ -65,7 +65,6 @@
         </BaseButton>
       </div>
     </div>
-    {{ inputs }}
   </form>
 </template>
 
@@ -114,6 +113,7 @@ export default {
     },
     onReset() {
       this.inputs = cloneDeep(this.initialInputs);
+      this.isError = false;
       this.renderForm++;
     },
     onError(isError) {
