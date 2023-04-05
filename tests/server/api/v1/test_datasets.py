@@ -169,7 +169,7 @@ def test_get_dataset_annotations(client: TestClient, db: Session, admin_auth_hea
             "title": "Rating Annotation",
             "type": AnnotationType.rating.value,
             "required": False,
-            "settings": {},
+            "settings": {"values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]},
             "inserted_at": rating_annotation.inserted_at.isoformat(),
             "updated_at": rating_annotation.updated_at.isoformat(),
         },
