@@ -17,7 +17,7 @@ import random
 import pytest
 from argilla.server.elasticsearch import ElasticSearchEngine
 from argilla.server.models import AnnotationType, Dataset
-from elasticsearch import Elasticsearch
+from elasticsearch import BadRequestError, Elasticsearch
 from sqlalchemy.orm import Session
 
 from tests.factories import AnnotationFactory, DatasetFactory
@@ -80,3 +80,15 @@ def test_create_index_for_dataset_with_annotations(
             **{annotation.name: {"type": "integer"} for annotation in rating_annotations},
         },
     }
+
+
+def test_create_index_with_existing_index(
+    search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch, db: Session
+):
+    dataset = DatasetFactory.create()
+    index_name = search_engine.create_dataset_index(dataset)
+
+    assert elasticsearch.indices.exists(index=index_name)
+
+    with pytest.raises(BadRequestError, match="'resource_already_exists_exception', 'index"):
+        search_engine.create_dataset_index(dataset)
