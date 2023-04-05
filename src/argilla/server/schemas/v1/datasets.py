@@ -18,6 +18,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from argilla.server.models import AnnotationType
+
 
 class Dataset(BaseModel):
     id: UUID
@@ -35,3 +37,17 @@ class DatasetCreate(BaseModel):
     name: str
     guidelines: Optional[str]
     workspace_id: UUID
+
+
+class Annotation(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    type: AnnotationType
+    required: bool
+    settings: dict
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
