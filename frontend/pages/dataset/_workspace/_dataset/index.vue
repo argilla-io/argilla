@@ -3,8 +3,11 @@
     <template v-slot:header>
       <HeaderComponent />
     </template>
-    <template v-slot:center>
-      <QuestionsFormComponent :initialInputs="inputs" />
+    <template v-slot:center
+      ><div class="container">
+        <div class="daboudi"></div>
+        <QuestionsFormComponent :initialInputs="inputs" />
+      </div>
     </template>
   </HeaderAndTopAndOneColumn>
 </template>
@@ -120,4 +123,12 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.container {
+  display: flex;
+}
+.daboudi {
+  flex: 1;
+  background: red;
+}
+</style>
