@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="wrapper">
     <div class="title-area">
       <div class="title-area">
         <span
@@ -9,13 +9,22 @@
         />
       </div>
     </div>
-    <Text2TextContentEditable
-      :annotationEnabled="true"
-      :annotations="[]"
-      :defaultText="''"
-      :placeholder="placeholder"
-      @change-text="$emit('on-change-text-area', $event)"
-    />
+
+    <div class="container">
+      <Text2TextContentEditable
+        :annotationEnabled="true"
+        :annotations="[]"
+        :defaultText="initialOutputs.text"
+        :placeholder="initialOutputs.placeholder"
+        :isShortcutToSave="false"
+        @change-text="
+          $emit('on-change-text-area', {
+            text: $event,
+            placeholder: initialOutputs.placeholder,
+          })
+        "
+      />
+    </div>
   </div>
 </template>
 
@@ -27,9 +36,11 @@ export default {
       type: String,
       required: true,
     },
-    output: {
-      type: String,
-      default: () => "",
+    initialOutputs: {
+      type: Object,
+      default: () => {
+        return { text: "", placeholder: "" };
+      },
     },
     placeholder: {
       type: String,
@@ -47,4 +58,18 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.container {
+  width: calc(100% - 200px);
+  padding: $base-space;
+  border: 1px solid $black-20;
+  border-radius: $border-radius-s;
+  &.--focused {
+    border-color: $primary-color;
+  }
+  .content--exploration-mode & {
+    border: none;
+    padding: 0;
+  }
+}
+</style>
