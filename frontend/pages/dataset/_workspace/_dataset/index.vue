@@ -4,7 +4,7 @@
       <HeaderComponent />
     </template>
     <template v-slot:center>
-      <QuestionsFormComponent :initialInput="inputs" />
+      <QuestionsFormComponent :initialInputs="inputs" />
     </template>
   </HeaderAndTopAndOneColumn>
 </template>
