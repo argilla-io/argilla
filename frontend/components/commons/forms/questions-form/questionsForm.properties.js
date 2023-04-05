@@ -1,0 +1,8 @@
+const PROPERTIES = {
+  FREE_TEXT: "FREE_TEXT",
+  SINGLE_LABEL: "SINGLE_LABEL",
+  RATING: "RATING",
+};
+
+Object.freeze(PROPERTIES);
+export { PROPERTIES };
