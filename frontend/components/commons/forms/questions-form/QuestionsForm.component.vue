@@ -6,6 +6,8 @@
         :title="input.question"
         :initialOutputs="input.outputs"
         :isRequired="input.required"
+        :isIcon="input.tooltipMessage"
+        :tooltipMessage="input.tooltipMessage"
         colorHighlight="red"
         @on-change-text-area="
           onChange({ newOutputs: $event, idComponent: input.id })
@@ -17,6 +19,8 @@
         :title="input.question"
         :initialOutputs="input.outputs"
         :isRequired="input.required"
+        :isIcon="input.tooltipMessage"
+        :tooltipMessage="input.tooltipMessage"
         colorHighlight="red"
         @on-change-rating="
           onChange({ newOutputs: $event, idComponent: input.id })
@@ -28,6 +32,8 @@
         :title="input.question"
         :initialOutputs="input.outputs"
         :isRequired="input.required"
+        :isIcon="input.tooltipMessage"
+        :tooltipMessage="input.tooltipMessage"
         colorHighlight="red"
         @on-change-rating="
           onChange({ newOutputs: $event, idComponent: input.id })

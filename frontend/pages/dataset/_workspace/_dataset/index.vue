@@ -102,13 +102,16 @@ export default {
           { id: "id_6-5", value: true, text: "5" },
         ],
         required: false,
+        tooltipMessage: "This is a tooltipz",
         componentType: "RATING",
       },
       {
         id: "id_7",
         question: "Comment",
-        outputs: null,
+        outputs: { text: "dadadadda", placeholder: "this is the placeholder" },
         default: null,
+        required: true,
+        tooltipMessage: "This is a tooltip",
         componentType: "FREE_TEXT",
       },
     ];
