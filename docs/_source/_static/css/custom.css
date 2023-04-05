@@ -145,6 +145,10 @@ h2 {
   background: linear-gradient(-45deg, #c13030, #e25a55);
 }
 
+.code {
+	white-space: break-spaces;
+}
+
 .content .note .wy-alert-title,
 .content .seealso .wy-alert-title,
 .content .wy-alert-info.attention .wy-alert-title,
