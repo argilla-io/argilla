@@ -23,6 +23,7 @@ from argilla.utils.dependency import require_version
 
 class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     _logger = logging.getLogger("ArgillaTransformersTrainer")
+    _logger.setLevel(logging.INFO)
 
     require_version("torch")
     require_version("datasets")
@@ -90,6 +91,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         self.__trainer.train()
         if self._eval_dataset:
             self._metrics = self.__trainer.evaluate()
+            self._logger.info(self._metrics)
         else:
             self._metrics = None
 

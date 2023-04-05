@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 class ArgillaSpaCyTrainer:
     _logger = logging.getLogger("ArgillaSpaCyTrainer")
+    _logger.setLevel(logging.INFO)
 
     require_version("torch")
     require_version("datasets")

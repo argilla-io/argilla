@@ -28,6 +28,7 @@ from argilla.utils.dependency import require_version
 
 class ArgillaTransformersTrainer(object):
     _logger = logging.getLogger("ArgillaTransformersTrainer")
+    _logger.setLevel(logging.INFO)
 
     require_version("torch")
     require_version("datasets")
@@ -340,6 +341,7 @@ class ArgillaTransformersTrainer(object):
         self.__trainer.train()
         if self._tokenized_eval_dataset:
             self._metrics = self.__trainer.evaluate()
+            self._logger.info(self._metrics)
         else:
             self._metrics = None
 
