@@ -30,9 +30,6 @@ class ArgillaSpaCyTrainer:
     _logger = logging.getLogger("ArgillaSpaCyTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("torch")
-    require_version("datasets")
-    require_version("transformers")
     require_version("spacy")
 
     def __init__(
