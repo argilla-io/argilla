@@ -77,14 +77,14 @@ class ArgillaSpaCyTrainer:
         self._record_class = record_class
         if self._record_class == rg.TokenClassificationRecord:
             self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
-            self._pipeline_name = "ner"
+            self._pipeline = ["ner"]
         elif self._record_class == rg.TextClassificationRecord:
             if self._multi_label:
                 self._column_mapping = {"text": "text", "binarized_label": "label"}
-                self._pipeline_name = "textcat_multilabel"
+                self._pipeline = ["textcat_multilabel"]
             else:
                 self._column_mapping = {"text": "text", "label": "label"}
-                self._pipeline_name = "textcat"
+                self._pipeline = ["textcat"]
         else:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
@@ -95,21 +95,32 @@ class ArgillaSpaCyTrainer:
         self._eval_dataset_path = "./dev.spacy" if self._eval_dataset else None
 
         self.language = language or "en"
+        self.model = model
         self.gpu_id = gpu_id
-        if self.gpu_id != -1:
+        self.use_gpu = self.gpu_id != -1
+        if self.use_gpu:
             try:
+                require_version("spacy-transformers")
                 spacy.prefer_gpu(self.gpu_id)
             except:
                 self.gpu_id = -1
+                self.use_gpu = False
+                if self.model is not None:
+                    self.model = None
 
         self.config = init_config(
             lang=self.language,
-            pipeline=[self._pipeline_name],
+            pipeline=self._pipeline,
+            optimize="accuracy",
+            gpu=self.use_gpu,
         )
         self.config["paths"]["train"] = self._train_dataset_path
         self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
-        self.config["paths"]["vectors"] = model
         self.config["system"]["seed"] = seed or 42
+        if self.use_gpu:
+            self.config["components"]["transformer"]["model"]["name"] = model or "roberta-base"
+        else:
+            self.config["paths"]["vectors"] = model or "en_core_web_lg"
 
         self._nlp = None
 
@@ -212,7 +223,7 @@ class ArgillaSpaCyTrainer:
         docs = self._nlp.pipe(text)
         if as_argilla_records:
             for doc in docs:
-                if self._pipeline_name == "ner":
+                if "ner" in self._pipeline:
                     entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
                     pred = {
                         "text": doc.text,
@@ -220,7 +231,7 @@ class ArgillaSpaCyTrainer:
                         "prediction": entities,
                     }
                     pred = self._record_class(**pred)
-                elif self._pipeline_name in ["textcat", "textcat_multilabel"]:
+                elif any([p in self._pipeline for p in ["textcat", "multilabel_textcat"]]):
                     pred = {
                         "text": doc.text,
                         "prediction": [(k, v) for k, v in doc.cats.items()],
