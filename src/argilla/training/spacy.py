@@ -115,7 +115,7 @@ class ArgillaSpaCyTrainer:
         self.config = init_config(
             lang=self.language,
             pipeline=self._pipeline,
-            optimize="accuracy",
+            optimize="efficiency",
             gpu=self.use_gpu,
         )
         self.config["paths"]["train"] = self._train_dataset_path
