@@ -38,6 +38,7 @@ class ArgillaTrainer(object):
         model: Optional[str] = None,
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
+        gpu_id: Optional[int] = -1,
         **load_kwargs: Optional[dict],
     ) -> None:
         """
@@ -58,6 +59,10 @@ class ArgillaTrainer(object):
                 the size of the training set. If not specified, the entire dataset will be used for training,
                 which may be an issue if `framework="spacy"` as it requires a validation set. Defaults to None.
             seed (int): the random seed to ensure reproducibility. Defaults to None.
+            gpu_id (int):
+                the GPU ID to use when training a SpaCy model. Defaults to -1, which means that the CPU
+                will be used by default. GPU IDs start in 0, which stands for the default GPU in the system,
+                if available.
             **load_kwargs: arguments for the rg.load() function.
         """
         self._name = name
@@ -135,6 +140,7 @@ class ArgillaTrainer(object):
                 model=self.model,
                 multi_label=self._multi_label,
                 seed=self._seed,
+                gpu_id=gpu_id,
             )
 
         self._logger.warning(self)
