@@ -164,7 +164,7 @@ class ArgillaSpaCyTrainer:
         """
         self.config["training"].update(spacy_training_config)
 
-    def train(self, path: Optional[str] = None) -> None:
+    def train(self, output_dir: Optional[str] = None) -> None:
         """Train the pipeline using `spaCy`.
 
         Args:
@@ -186,8 +186,8 @@ class ArgillaSpaCyTrainer:
 
         self._nlp = init_nlp(self.config, use_gpu=self.gpu_id)
         self._nlp, _ = train_nlp(self._nlp, use_gpu=self.gpu_id, stdout=sys.stdout, stderr=sys.stderr)
-        if path:
-            self.save(path)
+        if output_dir:
+            self.save(output_dir)
 
     def save(self, output_dir: str) -> None:
         """Save the trained pipeline to disk.
