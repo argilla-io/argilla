@@ -49,13 +49,17 @@ class ArgillaSpaCyTrainer:
             record_class:
                 A `rg.TextClassificationRecord`, `rg.TokenClassificationRecord`, or `rg.Text2TextRecord`
                 object. Defaults to None.
-            model: A `str` with the `spaCy` model name e.g. "en_core_web_sm". Defaults to None.
+            model:
+                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_lg", or
+                the `spacy-transformers` model name if using the GPU instead e.g. "roberta-base". Defaults to None.
             seed: A `int` with the seed for the random number generator. Defaults to None.
             multi_label: A `bool` indicating whether the task is multi-label or not. Defaults to False.
             language:
                 A `str` with the `spaCy` language code e.g. "en". See all the supported languages and their
                 codes in `spaCy` at https://spacy.io/usage/models#languages. Defaults to None.
-            gpu_id: A `int` with the GPU id. Defaults to -1.
+            gpu_id:
+                the GPU ID to use. Defaults to -1, which means that the CPU will be used by default.
+                GPU IDs start in 0, which stands for the default GPU in the system, if available.
 
         Raises:
             NotImplementedError: If `record_class` is `rg.Text2TextRecord`.
@@ -137,11 +141,11 @@ class ArgillaSpaCyTrainer:
             "WARNING:`ArgillaSpaCyTrainer.update_config` only supports the update of the `training` "
             "arguments defined in the `config.yaml`."
         )
-        formatted_string.append("\n\t\t`ArgillaSpaCyTrainer`")
+        formatted_string.append("\n`ArgillaSpaCyTrainer`")
         for key, val in self.config["training"].items():
             if isinstance(val, dict):
                 continue
-            formatted_string.append(f"\t\t\t{key}: {val}")
+            formatted_string.append(f"\t{key}: {val}")
         return "\n".join(formatted_string)
 
     def update_config(
@@ -152,7 +156,8 @@ class ArgillaSpaCyTrainer:
 
         Disclaimer: currently just the `training` config is supported, but in the future
         we will support all the `spaCy` config values supported for a more precise control
-        over the training process.
+        over the training process. Also note that the arguments may differ between the CPU
+        and GPU training.
 
         Args:
             **spacy_training_config: The `spaCy` training config.
