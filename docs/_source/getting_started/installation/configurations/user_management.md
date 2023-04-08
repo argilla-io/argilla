@@ -52,6 +52,8 @@ For security reasons, we recommend changing at least the password and the API ke
 
 ```bash
 python -m argilla.tasks.users.create_default --password new-password --api-key new-api-key
+```
+```bash
 User with default credentials succesfully created:
 • username: 'argilla'
 • password: 'newpassword'
@@ -144,15 +146,20 @@ http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 
 response = http.post("/api/users", json={"role": "admin", "first_name": "Hulio", "last_name": "Ramos", "username": "hurra", "password": "abcde123"})
 repsonse.json()
-# {'id': '8e62808e-df44-4135-87bd-d022f1d9fcf0',
-# 'username': 'hurra',
-# 'role': 'admin',
-# 'full_name': 'Hulio Ramos',
-# 'workspaces': [],
-# 'api_key': '67Ae7sRYpvu98MqMMkrPNtYx-pyjrRCiyieiwXsE7qP2npG8Eo_8cGpx4EZKJ_APt1FQ7qtX5jcnrUBLq7iW6N5KRhd32pBfHLFHHbnqIK4',
-# 'inserted_at': '2023-03-16T11:11:59.871532',
-# 'updated_at': '2023-03-16T11:11:59.871532'}
 ```
+```json
+{
+   "id":"8e62808e-df44-4135-87bd-d022f1d9fcf0",
+   "username":"hurra",
+   "role":"admin",
+   "full_name":"Hulio Ramos",
+   "workspaces":[],
+   "api_key":"67Ae7sRYpvu98MqMMkrPNtYx-pyjrRCiyieiwXsE7qP2npG8Eo_8cGpx4EZKJ_APt1FQ7qtX5jcnrUBLq7iW6N5KRhd32pBfHLFHHbnqIK4",
+   "inserted_at":"2023-03-16T11:11:59.871532",
+   "updated_at":"2023-03-16T11:11:59.871532"
+}
+```
+
 
 #### Creating an annotator user assigned to a workspace
 
@@ -185,68 +192,101 @@ http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 
 # Create the user
 user = http.post("/api/users", json={"role": "annotator", "first_name": "Nick", "last_name": "Name", "username": "nick", "password": "11223344"}).json()
-# {'id': '75190fff-d4b9-4625-b7d3-4cfe3c659054',
-# 'username': 'nick',
-# 'role': 'annotator',
-# 'full_name': 'Nick Name',
-# 'workspaces': [],
-# 'api_key': 'SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA',
-# 'inserted_at': '2023-03-16T11:17:35.462774',
-# 'updated_at': '2023-03-16T11:17:35.462774'}
-
+```
+```json
+{
+   "id":"75190fff-d4b9-4625-b7d3-4cfe3c659054",
+   "username":"nick",
+   "role":"annotator",
+   "full_name":"Nick Name",
+   "workspaces":[],
+   "api_key":"SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA",
+   "inserted_at":"2023-03-16T11:17:35.462774",
+   "updated_at":"2023-03-16T11:17:35.462774"
+}
+```
+```python
 # Create the workspace
 workspace = http.post("/api/workspaces", json={"name": "ws"}).json()
-# {'id': '1908bd1f-058b-4e01-82d1-3be7dfcc2a70',
-# 'name': 'ws',
-# 'inserted_at': '2023-03-16T11:18:45.506912',
-# 'updated_at': '2023-03-16T11:18:45.506912'}
-
+```
+```json
+{
+   "id":"1908bd1f-058b-4e01-82d1-3be7dfcc2a70",
+   "name":"ws",
+   "inserted_at":"2023-03-16T11:18:45.506912",
+   "updated_at":"2023-03-16T11:18:45.506912"
+}
+```
+```python
 # Assign user to workspace
-http.post(f"/api/workspaces/{workspace['id']}/users/user['id]")
-# {'id': '75190fff-d4b9-4625-b7d3-4cfe3c659054',
-# 'username': 'nick',
-# 'role': 'annotator',
-# 'full_name': 'Nick Name',
-# 'workspaces': ['ws'],
-# 'api_key': 'SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA',
-# 'inserted_at': '2023-03-16T11:17:35.462774',
-# 'updated_at': '2023-03-16T11:17:35.462774'}
+http.post(f"/api/workspaces/{workspace['id']}/users/{user['id']}")
+
+```
+```json
+{
+   "id":"75190fff-d4b9-4625-b7d3-4cfe3c659054",
+   "username":"nick",
+   "role":"annotator",
+   "full_name":"Nick Name",
+   "workspaces":["ws"],
+   "api_key":"SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA",
+   "inserted_at":"2023-03-16T11:17:35.462774",
+   "updated_at":"2023-03-16T11:17:35.462774"
+}
 ```
 
 ## Listing Argilla users
 
 ````python
 users = http.get("/api/users").json()
-# [{'id': '8e62808e-df44-4135-87bd-d022f1d9fcf0',
-#  'username': 'hurra',
-#  'role': 'admin',
-#  'full_name': 'Hulio Ramos',
-#  'workspaces': [],
-#  'api_key': '67Ae7sRYpvu98MqMMkrPNtYx-pyjrRCiyieiwXsE7qP2npG8Eo_8cGpx4EZKJ_APt1FQ7qtX5jcnrUBLq7iW6N5KRhd32pBfHLFHHbnqIK4',
-#  'inserted_at': '2023-03-16T11:11:59.871532',
-#  'updated_at': '2023-03-16T11:11:59.871532'},
-# {'id': '75190fff-d4b9-4625-b7d3-4cfe3c659054',
-#  'username': 'nick',
-#  'role': 'annotator',
-#  'full_name': 'Nick Name',
-#  'workspaces': ['ws2'],
-#  'api_key': 'SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA',
-#  'inserted_at': '2023-03-16T11:17:35.462774',
-#  'updated_at': '2023-03-16T11:17:35.462774'}]
 ````
+```json
+[
+   {
+      "id":"8e62808e-df44-4135-87bd-d022f1d9fcf0",
+      "username":"hurra",
+      "role":"admin",
+      "full_name":"Hulio Ramos",
+      "workspaces":[
+
+      ],
+      "api_key":"67Ae7sRYpvu98MqMMkrPNtYx-pyjrRCiyieiwXsE7qP2npG8Eo_8cGpx4EZKJ_APt1FQ7qtX5jcnrUBLq7iW6N5KRhd32pBfHLFHHbnqIK4",
+      "inserted_at":"2023-03-16T11:11:59.871532",
+      "updated_at":"2023-03-16T11:11:59.871532"
+   },
+   {
+      "id":"75190fff-d4b9-4625-b7d3-4cfe3c659054",
+      "username":"nick",
+      "role":"annotator",
+      "full_name":"Nick Name",
+      "workspaces":[
+         "ws2"
+      ],
+      "api_key":"SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA",
+      "inserted_at":"2023-03-16T11:17:35.462774",
+      "updated_at":"2023-03-16T11:17:35.462774"
+   }
+]
+```
 
 ## Delete a user
 
 ```python
 http.delete("/api/users/75190fff-d4b9-4625-b7d3-4cfe3c659054").json()
-# {'id': '75190fff-d4b9-4625-b7d3-4cfe3c659054',
-# 'username': 'nick2',
-# 'role': 'annotator',
-# 'full_name': 'Nick Name',
-# 'workspaces': ['ws2'],
-# 'api_key': 'SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM',
-# 'inserted_at': '2023-03-16T11:17:35.462774',
-# 'updated_at': '2023-03-16T11:17:35.462774'}
+```
+```json
+{
+   "id":"75190fff-d4b9-4625-b7d3-4cfe3c659054",
+   "username":"nick2",
+   "role":"annotator",
+   "full_name":"Nick Name",
+   "workspaces":[
+      "ws2"
+   ],
+   "api_key":"SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM",
+   "inserted_at":"2023-03-16T11:17:35.462774",
+   "updated_at":"2023-03-16T11:17:35.462774"
+}
 ```
 
 ## Migrate users from the `users.yaml` file
@@ -297,56 +337,97 @@ Users migration process successfully finished
 
 ```python
 http.get("/api/users").json()
-# [{'id': '8e4da958-1dba-44d9-82f3-ea2ec3beecdf',
-#  'username': 'john',
-#  'role': 'admin',
-#  'full_name': 'John Doe None',
-#  'workspaces': ['john'],
-#  'api_key': 'a14427ea-9197-11ec-b909-0242ac120002',
-#  'inserted_at': '2023-03-16T11:31:12.979241',
-#  'updated_at': '2023-03-16T11:31:12.979241'},
-# {'id': '0ed76afb-e9a5-409c-9716-ac7ae919afe8',
-#  'username': 'tanya',
-#  'role': 'annotator',
-#  'full_name': 'Tanya Franklin None',
-#  'workspaces': ['tanya', 'argilla', 'team'],
-#  'api_key': '78a10b53-8db7-4ab5-9e9e-fbd4b7e76551',
-#  'inserted_at': '2023-03-16T11:31:12.986146',
-#  'updated_at': '2023-03-16T11:31:12.986146'},
-# {'id': '944e4f76-6cf9-4242-8568-41b2d683cd9f',
-#  'username': 'daisy',
-#  'role': 'annotator',
-#  'full_name': 'Daisy Gonzalez None',
-#  'workspaces': ['daisy', 'argilla', 'team', 'latam'],
-#  'api_key': 'a8168929-8668-494c-b7a5-98cd35740d9b',
-#  'inserted_at': '2023-03-16T11:31:12.990718',
-#  'updated_at': '2023-03-16T11:31:12.990718'}]
+```
 
+```json
+[
+   {
+      "id":"8e4da958-1dba-44d9-82f3-ea2ec3beecdf",
+      "username":"john",
+      "role":"admin",
+      "full_name":"John Doe None",
+      "workspaces":[
+         "john"
+      ],
+      "api_key":"a14427ea-9197-11ec-b909-0242ac120002",
+      "inserted_at":"2023-03-16T11:31:12.979241",
+      "updated_at":"2023-03-16T11:31:12.979241"
+   },
+   {
+      "id":"0ed76afb-e9a5-409c-9716-ac7ae919afe8",
+      "username":"tanya",
+      "role":"annotator",
+      "full_name":"Tanya Franklin None",
+      "workspaces":[
+         "tanya",
+         "argilla",
+         "team"
+      ],
+      "api_key":"78a10b53-8db7-4ab5-9e9e-fbd4b7e76551",
+      "inserted_at":"2023-03-16T11:31:12.986146",
+      "updated_at":"2023-03-16T11:31:12.986146"
+   },
+   {
+      "id":"944e4f76-6cf9-4242-8568-41b2d683cd9f",
+      "username":"daisy",
+      "role":"annotator",
+      "full_name":"Daisy Gonzalez None",
+      "workspaces":[
+         "daisy",
+         "argilla",
+         "team",
+         "latam"
+      ],
+      "api_key":"a8168929-8668-494c-b7a5-98cd35740d9b",
+      "inserted_at":"2023-03-16T11:31:12.990718",
+      "updated_at":"2023-03-16T11:31:12.990718"
+   }
+]
+```
+
+```python
 http.get("/api/workspaces").json()
-# [{'id': '96169426-c27b-48b7-a386-8f58193f8d64',
-#  'name': 'john',
-#  'inserted_at': '2023-03-16T11:31:12.981784',
-#  'updated_at': '2023-03-16T11:31:12.981784'},
-# {'id': 'adc51bfb-3940-4f3a-ad2a-46bad05ffe90',
-#  'name': 'tanya',
-#  'inserted_at': '2023-03-16T11:31:12.986924',
-#  'updated_at': '2023-03-16T11:31:12.986924'},
-# {'id': '5d2e5fc1-179e-4b6a-8bc0-3eba4e85bba3',
-#  'name': 'argilla',
-#  'inserted_at': '2023-03-16T11:31:12.986941',
-#  'updated_at': '2023-03-16T11:31:12.986941'},
-# {'id': 'abb6f7ca-9585-4499-a23b-4433be8c5a60',
-#  'name': 'team',
-#  'inserted_at': '2023-03-16T11:31:12.986953',
-#  'updated_at': '2023-03-16T11:31:12.986953'},
-# {'id': '3a2acec8-fc61-4704-993b-a8606dacaaf3',
-#  'name': 'daisy',
-#  'inserted_at': '2023-03-16T11:31:12.991027',
-#  'updated_at': '2023-03-16T11:31:12.991027'},
-# {'id': 'bd314fdf-5f20-487a-989a-b628f2e2bbd6',
-#  'name': 'latam',
-#  'inserted_at': '2023-03-16T11:31:12.991047',
-#  'updated_at': '2023-03-16T11:31:12.991047'}]
+```
+
+```json
+[
+   {
+      "id":"96169426-c27b-48b7-a386-8f58193f8d64",
+      "name":"john",
+      "inserted_at":"2023-03-16T11:31:12.981784",
+      "updated_at":"2023-03-16T11:31:12.981784"
+   },
+   {
+      "id":"adc51bfb-3940-4f3a-ad2a-46bad05ffe90",
+      "name":"tanya",
+      "inserted_at":"2023-03-16T11:31:12.986924",
+      "updated_at":"2023-03-16T11:31:12.986924"
+   },
+   {
+      "id":"5d2e5fc1-179e-4b6a-8bc0-3eba4e85bba3",
+      "name":"argilla",
+      "inserted_at":"2023-03-16T11:31:12.986941",
+      "updated_at":"2023-03-16T11:31:12.986941"
+   },
+   {
+      "id":"abb6f7ca-9585-4499-a23b-4433be8c5a60",
+      "name":"team",
+      "inserted_at":"2023-03-16T11:31:12.986953",
+      "updated_at":"2023-03-16T11:31:12.986953"
+   },
+   {
+      "id":"3a2acec8-fc61-4704-993b-a8606dacaaf3",
+      "name":"daisy",
+      "inserted_at":"2023-03-16T11:31:12.991027",
+      "updated_at":"2023-03-16T11:31:12.991027"
+   },
+   {
+      "id":"bd314fdf-5f20-487a-989a-b628f2e2bbd6",
+      "name":"latam",
+      "inserted_at":"2023-03-16T11:31:12.991047",
+      "updated_at":"2023-03-16T11:31:12.991047"
+   }
+]
 ```
 
 ### Migrate users with Docker Compose
