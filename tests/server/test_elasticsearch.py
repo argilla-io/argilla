@@ -38,7 +38,7 @@ def elasticsearch(es_config):
     client = Elasticsearch(**es_config)
     yield client
 
-    for index_info in client.cat.indices(format="json"):
+    for index_info in client.cat.indices(index="ar.*,rg.*", format="json"):
         client.indices.delete(index=index_info["index"])
 
 
