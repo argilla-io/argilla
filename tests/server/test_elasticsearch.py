@@ -16,21 +16,27 @@ import random
 
 import pytest
 from argilla.server.elasticsearch import ElasticSearchEngine
-from argilla.server.models import AnnotationType, Dataset
+from argilla.server.models import AnnotationType
+from argilla.server.settings import settings
 from elasticsearch import BadRequestError, Elasticsearch
+from opensearchpy import OpenSearch
 from sqlalchemy.orm import Session
 
 from tests.factories import AnnotationFactory, DatasetFactory
 
 
+def _running_with_elasticsearch() -> str:
+    open_search = OpenSearch(hosts=settings.elasticsearch)
+
+    info = open_search.info(format="json")
+    version_info = info["version"]
+
+    return "distribution" not in version_info
+
+
 @pytest.fixture(scope="session")
 def es_config():
-    return {"hosts": "http://localhost:9200"}
-
-
-@pytest.fixture(scope="session")
-def search_engine(es_config):
-    return ElasticSearchEngine(config=es_config)
+    return {"hosts": settings.elasticsearch}
 
 
 @pytest.fixture(scope="session")
@@ -42,6 +48,15 @@ def elasticsearch(es_config):
         client.indices.delete(index=index_info["index"])
 
 
+@pytest.fixture(scope="session")
+def search_engine(es_config):
+    return ElasticSearchEngine(config=es_config)
+
+
+@pytest.mark.skipif(
+    condition=not _running_with_elasticsearch(),
+    reason="Test only running with elasticsearch backend",
+)
 def test_create_index_for_dataset(search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch):
     dataset = DatasetFactory.create()
     index_name = search_engine.create_dataset_index(dataset)
@@ -52,6 +67,10 @@ def test_create_index_for_dataset(search_engine: ElasticSearchEngine, elasticsea
     assert index["mappings"] == {"dynamic": "strict"}
 
 
+@pytest.mark.skipif(
+    condition=not _running_with_elasticsearch(),
+    reason="Test only running with elasticsearch backend",
+)
 @pytest.mark.parametrize(
     argnames=("text_ann_size", "rating_ann_size"),
     argvalues=[(random.randint(1, 9), random.randint(1, 9)) for _ in range(1, 5)],
@@ -82,6 +101,10 @@ def test_create_index_for_dataset_with_annotations(
     }
 
 
+@pytest.mark.skipif(
+    condition=not _running_with_elasticsearch(),
+    reason="Test only running with elasticsearch backend",
+)
 def test_create_index_with_existing_index(
     search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch, db: Session
 ):
