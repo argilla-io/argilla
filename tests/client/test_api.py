@@ -525,39 +525,27 @@ def test_update_record(mocked_client):
     mocked_client.delete(f"/api/datasets/{dataset}")
 
     expected_inputs = ["This is a text"]
-    record = rg.TextClassificationRecord(
-        id=0,
-        inputs=expected_inputs,
-        annotation_agent="test",
-        annotation=["T"],
-    )
-    api.log(
-        record,
-        name=dataset,
-    )
+    record = rg.TextClassificationRecord(id=0, inputs=expected_inputs, annotation_agent="test", annotation=["T"])
+    api.log(record, name=dataset)
 
     df = api.load(name=dataset)
     df = df.to_pandas()
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["annotation"] == "T"
-    # This record will replace the old one
-    record = rg.TextClassificationRecord(
-        id=0,
-        inputs=expected_inputs,
-    )
+    # This record will be partially updated
+    record = rg.TextClassificationRecord(id=0, inputs=expected_inputs, metadata={"a": "value"})
 
-    api.log(
-        record,
-        name=dataset,
-    )
+    api.log(record, name=dataset)
 
     df = api.load(name=dataset)
     df = df.to_pandas()
     records = df.to_dict(orient="records")
+
     assert len(records) == 1
-    assert records[0]["annotation"] is None
-    assert records[0]["annotation_agent"] is None
+    assert records[0]["annotation"] == "T"
+    assert records[0]["annotation_agent"] == "test"
+    assert records[0]["metadata"] == {"a": "value"}
 
 
 def test_text_classifier_with_inputs_list(mocked_client):
