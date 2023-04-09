@@ -500,6 +500,10 @@ def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient, api):
     assert ds[0].id == 3
 
 
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
 def test_log_data_with_vectors_and_partial_update_ok(mocked_client: SecuredClient, api):
     dataset = "test_log_data_and_partial_update_ok"
     text = "This is a text"
