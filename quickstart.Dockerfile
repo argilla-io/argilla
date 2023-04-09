@@ -22,15 +22,16 @@ USER root
 
 COPY scripts/start_quickstart_argilla.sh /
 COPY scripts/load_data.py /
+COPY quickstart.requirements.txt /packages/requirements.txt
 COPY dist/*.whl /packages/
 
 RUN apt update && \
     apt install -y curl git python3.9 python3.9-dev python3.9-distutils gcc gnupg apache2-utils sudo openssl systemctl && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python3.9 get-pip.py && \
-    pip3 install datasets \
+    python3.9 get-pip.py \
     # Install Argilla
-    && chmod +x /start_quickstart_argilla.sh && \
+    && pip3 install -r /packages/requirements.txt && \
+    chmod +x /start_quickstart_argilla.sh && \
     for wheel in /packages/*.whl; do pip install "$wheel"[server]; done && \
     rm -rf /packages && \
     rm -rf /var/lib/apt/lists/* \
