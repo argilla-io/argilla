@@ -67,19 +67,17 @@
         >Show less</base-button
       >
     </div>
-    <div v-else>
+    <div class="rule__no-label" v-else>
       <BaseFeedbackComponent
         :feedbackInput="inputForFeedbackComponent"
         @on-click="goToSettings"
         class="feedback-area"
       />
-      <p class="--body1 help-message">
-        {{ messageNotLabels }}
-      </p>
+      <p class="--body1 help-message" v-html="messageNotLabels" />
     </div>
 
     <template v-if="ruleInfo">
-      <p class="rule__info" v-if="isSaved">{{ ruleInfo }}</p>
+      <p class="--body1 rule__info" v-if="isSaved" v-text="ruleInfo" />
 
       <BaseFeedbackComponent
         class="rule__info"
@@ -88,7 +86,6 @@
           ...inputForFeedbackComponentQueryAlreadyExist,
           message: ruleInfo,
         }"
-        @on-click="feedbackAction"
       />
     </template>
 
@@ -140,7 +137,7 @@ export default {
         feedbackType: "ERROR",
       },
       messageNotLabels:
-        "To create new rules, you need al least two labels. We highly recommended starting by annotating some records with these labels.",
+        "To create new rules, you need at least two labels. <br />We highly recommend starting by annotating some records with these labels.",
     };
   },
   computed: {
@@ -177,7 +174,7 @@ export default {
     },
     ruleInfo() {
       if (this.isSaved) {
-        return "The rule was saved";
+        return "Rule saved";
       }
       if (this.selectedLabels && this.queryWithLabelsIsStored) {
         return `This query with ${
@@ -321,7 +318,6 @@ export default {
 }
 .help-message {
   color: $black-37;
-  max-width: 480px;
 }
 .label-button {
   margin: 5px;
@@ -344,7 +340,7 @@ export default {
   }
   &__info {
     margin-bottom: 0;
-    color: $black-54;
+    color: $black-37;
   }
   &__records {
     margin-left: auto;
@@ -391,8 +387,12 @@ export default {
   &__labels {
     flex: 1;
     margin-bottom: 1em;
-    margin-left: -5px;
-    margin-right: -5px;
+  }
+  &__no-label {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
   }
 }
 .searchbar {

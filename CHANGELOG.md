@@ -13,12 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
-- The `rg.log_async` is new deprecated and will be removed in next minor release.
+- The `rg.log_async` is deprecated and will be removed in next minor release.
 - The `rg.log` will compute all batches and raise an error for all failed batches.
 
 
+## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.5.1...v1.6.0)
 
-## [1.6.0-dev](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
 
 ### Added
 
@@ -37,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `argilla.tasks.database.migrate` new task to execute database migrations ([#2564]).
 - `release.Dockerfile` and `quickstart.Dockerfile` now creates a default `argilladata` volume to persist data ([#2564]).
 - Add user settings page. Closes [#2496](https://github.com/argilla-io/argilla/issues/2496)
+- Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
+
+### Fixes
+- Now the `prepare_for_training` method is working when `multi_label=True`. Closes [#2606](https://github.com/argilla-io/argilla/issues/2606)
 
 ### Changed
 
@@ -46,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `quickstart.Dockerfile` image default users from `team` and `argilla` to `admin` and `annotator` including new passwords and API keys ([#2564]).
 - Datasets to be managed only by users with `admin` role ([#2564]).
 - The list of rules is now accessible while metrics are computed. Closes[#2117](https://github.com/argilla-io/argilla/issues/2117)
+- Style updates for weak labelling and adding feedback toast when delete rules. See [#2626](https://github.com/argilla-io/argilla/pull/2626) and [#2648](https://github.com/argilla-io/argilla/pull/2648)
 
 ### Removed
 
@@ -53,6 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `disabled` user field ([#2564]).
 - Support for private workspaces ([#2564]).
 - `ARGILLA_LOCAL_AUTH_DEFAULT_APIKEY` and `ARGILLA_LOCAL_AUTH_DEFAULT_PASSWORD` environment variables. Use `python -m argilla.tasks.users.create_default` instead ([#2564]).
+- The old headers for `API Key` and `workspace` from python client
+- The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
 
@@ -82,6 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-searchable fields support in metadata. [#2570](https://github.com/argilla-io/argilla/pull/2570)
 - Add record ID references to the prepare for training methods. Closes [#2483](https://github.com/argilla-io/argilla/issues/2483)
 - Add tutorial on Image Classification. [#2420](https://github.com/argilla-io/argilla/pull/2420)
+- Add Train button, visible for "admin" role, with code snippets from a selection of libraries. Closes [#2591] (https://github.com/argilla-io/argilla/pull/2591)
 
 ### Changed
 
