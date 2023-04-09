@@ -67,17 +67,28 @@
         >Show less</base-button
       >
     </div>
-    <div v-else>
+    <div class="rule__no-label" v-else>
       <BaseFeedbackComponent
         :feedbackInput="inputForFeedbackComponent"
         @on-click="goToSettings"
         class="feedback-area"
       />
-      <p class="help-message">
-        {{ messageNotLabels }}
-      </p>
+      <p class="--body1 help-message" v-html="messageNotLabels" />
     </div>
-    <p class="rule__info" v-if="ruleInfo">{{ ruleInfo }}</p>
+
+    <template v-if="ruleInfo">
+      <p class="--body1 rule__info" v-if="isSaved" v-text="ruleInfo" />
+
+      <BaseFeedbackComponent
+        class="rule__info"
+        v-if="!isSaved && selectedLabels && queryWithLabelsIsStored"
+        :feedbackInput="{
+          ...inputForFeedbackComponentQueryAlreadyExist,
+          message: ruleInfo,
+        }"
+      />
+    </template>
+
     <base-button
       v-else
       :disabled="!selectedLabelsVModel.length"
@@ -115,13 +126,18 @@ export default {
       searchText: "",
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
       selectedLabelsVModel: [],
+      inputForFeedbackComponentQueryAlreadyExist: {
+        message: "",
+        buttonLabels: null,
+        feedbackType: "ERROR",
+      },
       inputForFeedbackComponent: {
         message: "Action needed: Create labels in the dataset settings",
         buttonLabels: [{ label: "Create labels", value: "CREATE_LABELS" }],
         feedbackType: "ERROR",
       },
       messageNotLabels:
-        "To create new rules, you need al least two labels. We highly recommended starting by annotating some records with these labels.",
+        "To create new rules, you need at least two labels. <br />We highly recommend starting by annotating some records with these labels.",
     };
   },
   computed: {
@@ -144,8 +160,7 @@ export default {
         return this.selectedLabelsVModel;
       }
     },
-
-    ruleInfo() {
+    queryWithLabelsIsStored() {
       // TODO: We can improve this
       const storedRule =
         this.currentRule &&
@@ -155,10 +170,13 @@ export default {
         _.sortBy(storedRuleLabels),
         _.sortBy(this.selectedLabels)
       );
+      return queryWithLabelsIsStored;
+    },
+    ruleInfo() {
       if (this.isSaved) {
-        return "The rule was saved";
+        return "Rule saved";
       }
-      if (this.selectedLabels && queryWithLabelsIsStored) {
+      if (this.selectedLabels && this.queryWithLabelsIsStored) {
         return `This query with ${
           this.selectedLabels.length > 1 ? "these labels" : "this label"
         } is already saved as rule`;
@@ -300,7 +318,6 @@ export default {
 }
 .help-message {
   color: $black-37;
-  max-width: 480px;
 }
 .label-button {
   margin: 5px;
@@ -323,8 +340,7 @@ export default {
   }
   &__info {
     margin-bottom: 0;
-    margin-top: auto;
-    color: $black-54;
+    color: $black-37;
   }
   &__records {
     margin-left: auto;
@@ -369,9 +385,14 @@ export default {
     }
   }
   &__labels {
+    flex: 1;
     margin-bottom: 1em;
-    margin-left: -5px;
-    margin-right: -5px;
+  }
+  &__no-label {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
   }
 }
 .searchbar {

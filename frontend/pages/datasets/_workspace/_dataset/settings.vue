@@ -1,5 +1,8 @@
 <template>
   <HeaderAndTopAndTwoColumns>
+    <template v-slot:header>
+      <HeaderComponent />
+    </template>
     <template v-slot:top>
       <TopDatasetSettingsContent />
     </template>

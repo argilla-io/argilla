@@ -23,8 +23,8 @@ from datasets import load_dataset
 
 
 class LoadDatasets:
-    def __init__(self, api_key, workspace="team"):
-        rg.init(api_key=api_key, workspace=workspace)
+    def __init__(self, api_key: str):
+        rg.init(api_key=api_key)
 
     @staticmethod
     def load_sst_sentiment_explainability():
@@ -57,7 +57,7 @@ class LoadDatasets:
         print("Loading News-text-summarization dataset")
 
         # Load dataset from hub
-        dataset = load_dataset("argilla/news-summary", split="train").select(range(100))
+        dataset = load_dataset("argilla/news-summary", split="train")
         dataset_rg = rg.read_datasets(dataset, task="Text2Text")
 
         # Log the dataset

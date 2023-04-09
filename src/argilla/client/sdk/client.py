@@ -24,7 +24,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-from argilla._constants import _OLD_API_KEY_HEADER_NAME, API_KEY_HEADER_NAME
+from argilla._constants import API_KEY_HEADER_NAME
 from argilla.client.sdk._helpers import build_raw_response
 from argilla.client.sdk.commons.errors import BaseClientError
 
@@ -302,6 +302,5 @@ class AuthenticatedClient(
         return {
             "Authorization": f"Bearer {self.token}",  # Backward compatibility
             API_KEY_HEADER_NAME: self.token,
-            _OLD_API_KEY_HEADER_NAME: self.token,
             **super().get_headers(),
         }

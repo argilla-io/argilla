@@ -22,13 +22,21 @@
         placeholder="Search rule by name"
         @input="onSearch"
       />
+
+      <BaseFeedbackComponent
+        v-if="areMetricsInPending"
+        :feedbackInput="feedbackInputInMetricsPendingState"
+        :isLoading="areMetricsInPending"
+        class="feedback-area"
+      />
+
       <base-table-info
         class="rules-management__table"
         :data="formattedRules"
         :sorted-order="sortedOrder"
         :sorted-by-field="sortedByField"
         :columns="tableColumns"
-        :actions="actions"
+        :actions="areMetricsInPending ? [] : actions"
         :query-search="querySearch"
         :global-actions="false"
         search-on="query"
@@ -43,8 +51,10 @@
     </div>
   </div>
 </template>
+
 <script>
 import "assets/icons/unavailable";
+import _ from "lodash";
 import { mapActions } from "vuex";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
@@ -68,9 +78,12 @@ export default {
     return {
       querySearch: undefined,
       visibleModalId: undefined,
-      isLoading: undefined,
       sortedOrder: "desc",
       sortedByField: "created_at",
+      feedbackInputInMetricsPendingState: {
+        message: "Calculating rule metrics",
+        feedbackType: "ERROR",
+      },
       actions: [{ name: "delete", icon: "trash-empty", title: "Delete rule" }],
       noDataInfo: {
         title: "0 rules defined",
@@ -179,6 +192,12 @@ export default {
         text: `You are about to delete the rule <strong>"${this.visibleModalId}"</strong> from your dataset. This action cannot be undone.`,
       };
     },
+    areMetricsInPending() {
+      return (
+        this.rules?.length !== 0 &&
+        this.rules.length !== Object.keys(this.perRuleMetrics || {})?.length
+      );
+    },
   },
   methods: {
     ...mapActions({
@@ -186,7 +205,10 @@ export default {
     }),
 
     metricsForRule(rule) {
-      const metrics = this.perRuleMetrics[rule.query];
+      const metrics = _.isNil(this.perRuleMetrics)
+        ? null
+        : this.perRuleMetrics[rule.query];
+
       if (!metrics) {
         return {};
       }

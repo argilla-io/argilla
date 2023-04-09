@@ -17,7 +17,10 @@
 
 <template>
   <div class="record">
-    <record-string-text-2-text :record="record" />
+    <record-string-text-2-text
+      :record="record"
+      :disabled-collapsable-text="paginationSizeIsOne"
+    />
     <div>
       <Text2TextList
         ref="list"
@@ -67,6 +70,12 @@ export default {
     },
     annotationEnabled() {
       return this.viewSettings.viewMode === "annotate";
+    },
+    paginationSizeIsOne() {
+      return this.viewSettings?.pagination?.size === 1;
+    },
+    paginationSize() {
+      return this.viewSettings?.pagination?.size;
     },
     predictionSentences() {
       return this.record.prediction?.sentences ?? [];

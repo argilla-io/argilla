@@ -68,6 +68,7 @@ export default {
     { src: "~/plugins/filters.js" },
     { src: "~/plugins/variables.js" },
     { src: "~/plugins/custom-directives/badge.directive.js" },
+    { src: "~/plugins/custom-directives/circle.directive.js" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -121,6 +122,15 @@ export default {
     cssSourceMap: false,
     extend(config) {
       config.resolve.alias["vue"] = "vue/dist/vue.common";
+      config.module.rules.push({
+        test: /\.md$/,
+        loader: "frontmatter-markdown-loader",
+        options: {
+          vue: {
+            root: "markdown-body",
+          },
+        },
+      });
     },
     babel: {
       plugins: [["@babel/plugin-proposal-private-methods", { loose: true }]],

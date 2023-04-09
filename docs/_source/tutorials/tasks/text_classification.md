@@ -3,6 +3,8 @@
 ````{grid} 1 1 2 2
 :class-container: tuto-section-2
 
+```{include} /_static/tutorials/labelling-textclassification-sentencetransformers-semantic/modal.md
+```
 ```{include} /_static/tutorials/labelling-textclassification_setfit_zeroshot/modal.md
 ```
 ```{include} /_static/tutorials/labelling-textclassification-sentence-transformers-semantic/modal.md
@@ -38,5 +40,7 @@
 ```{include} /_static/tutorials/training-textclassification-transformers-pretrained/modal.md
 ```
 ```{include} /_static/tutorials/training-textclassification-modal-activelearning/modal.md
+```
+```{include} /_static/tutorials/monitoring-textclassification-setfit-explainability/modal.md
 ```
 ````

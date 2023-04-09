@@ -43,12 +43,15 @@ from argilla.server.daos.backend.search.model import (
     BackendRecordsQuery,
     BaseDatasetsQuery,
     BaseQuery,
+    BaseRecordsQuery,
     SortableField,
     SortConfig,
 )
 from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.errors.task_errors import MetadataLimitExceededError
 from argilla.server.settings import settings
+
+NON_SEARCHABLE_PREFIX = "_"
 
 
 def dataset_records_index(dataset_id: str) -> str:
@@ -185,8 +188,8 @@ class GenericElasticEngineBackend(LoggingMixin):
     def search_records(
         self,
         id: str,
-        query: BackendRecordsQuery,
-        sort: SortConfig,
+        query: BackendRecordsQuery = BaseRecordsQuery(),
+        sort: SortConfig = SortConfig(),
         record_from: int = 0,
         size: int = 100,
         exclude_fields: List[str] = None,
@@ -300,11 +303,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             vectors=vectors_cfg,
         )
 
-    def _configure_metadata_fields(
-        self,
-        index: str,
-        metadata_values: Dict[str, Any],
-    ):
+    def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
         def check_metadata_length(metadata_length: int = 0):
             if metadata_length > settings.metadata_fields_limit:
                 raise MetadataLimitExceededError(
@@ -329,12 +328,15 @@ class GenericElasticEngineBackend(LoggingMixin):
                 }
             )
         )
-        mappings_ = {}
-        for field, value in metadata_values.items():
-            if detect_nested_type(value):
-                mappings_[f"metadata.{field}"] = mappings.nested_field()
 
-        self.client.set_index_mappings(index, properties=mappings_)
+        index_mappings = {}
+        for field, value in metadata_values.items():
+            if field.startswith(NON_SEARCHABLE_PREFIX):
+                index_mappings[f"metadata.{field}"] = mappings.non_searchable_text_field()
+            elif detect_nested_type(value):
+                index_mappings[f"metadata.{field}"] = mappings.nested_field()
+
+        self.client.set_index_mappings(index, properties=index_mappings)
 
     def delete(self, id: str):
         index = dataset_records_index(id)
@@ -484,12 +486,6 @@ class GenericElasticEngineBackend(LoggingMixin):
         )
         return document
 
-    def compute_argilla_metric(self, metric_id):
-        return self._compute_metric(
-            index=DATASETS_INDEX_NAME,
-            metric_id=metric_id,
-        )
-
     def _compute_metric(
         self,
         index: str,
@@ -502,7 +498,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             index=index,
             metric=metric,
             query=query,
-            params=params,
+            params=params or {},
         )
         return data
 

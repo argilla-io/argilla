@@ -1,6 +1,6 @@
 <template>
   <div class="feedback-wrapper">
-    <p class="message">{{ message }}</p>
+    <p class="message" v-html="message" />
     <div class="buttons-area" v-if="isButtonLabels">
       <div class="button" v-for="{ label, value } in buttonLabels" :key="value">
         <BaseButton class="small" :id="label" @on-click="onClick(value)">
@@ -8,6 +8,7 @@
         </BaseButton>
       </div>
     </div>
+    <BaseSpinner v-if="isLoading" />
   </div>
 </template>
 
@@ -21,6 +22,10 @@ export default {
     },
     buttonLabels: {
       type: Array | null,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
@@ -69,5 +74,9 @@ export default {
   button {
     padding: 6px 12px;
   }
+}
+
+:deep(a:hover) {
+  color: $black-87;
 }
 </style>

@@ -15,6 +15,7 @@ import logging
 from typing import Tuple, Type
 
 import httpx
+from opensearchpy import OpenSearch
 from packaging.version import parse
 
 from argilla.server.daos.backend.base import GenericSearchError
@@ -38,30 +39,24 @@ class ClientAdapterFactory:
         retry_on_timeout: bool = True,
         max_retries: int = 5,
     ) -> IClientAdapter:
-        (
-            client_class,
-            support_vector_search,
-        ) = cls._resolve_client_class_with_vector_support(hosts)
+        client_config = dict(
+            hosts=hosts,
+            verify_certs=ssl_verify,
+            ca_certs=ca_path,
+            retry_on_timeout=retry_on_timeout,
+            max_retries=max_retries,
+        )
+
+        version, distribution = cls._fetch_cluster_version_info(client_config)
+
+        (client_class, support_vector_search) = cls._resolve_client_class_with_vector_support(version, distribution)
 
         return client_class(
-            index_shards=index_shards,
-            vector_search_supported=support_vector_search,
-            config_backend=dict(
-                hosts=hosts,
-                verify_certs=ssl_verify,
-                ca_certs=ca_path,
-                retry_on_timeout=retry_on_timeout,
-                max_retries=max_retries,
-            ),
+            index_shards=index_shards, vector_search_supported=support_vector_search, config_backend=client_config
         )
 
     @classmethod
-    def _resolve_client_class_with_vector_support(
-        cls,
-        hosts: str,
-    ) -> Tuple[Type, bool]:
-        version, distribution = cls._fetch_cluster_version_info(hosts)
-
+    def _resolve_client_class_with_vector_support(cls, version: str, distribution: str) -> Tuple[Type, bool]:
         support_vector_search = True
 
         if distribution == "elasticsearch" and parse("8.5") <= parse(version):
@@ -84,10 +79,12 @@ class ClientAdapterFactory:
         return client_class, support_vector_search
 
     @classmethod
-    def _fetch_cluster_version_info(cls, hosts: str) -> Tuple[str, str]:
+    def _fetch_cluster_version_info(cls, client_config: dict) -> Tuple[str, str]:
         try:
-            response = httpx.get(hosts)
-            data = response.json()
+            # All security config will be used here.
+            # See here https://opensearch.org/docs/latest/clients/index/#legacy-clients
+            client = OpenSearch(**client_config)
+            data = client.info()
 
             version_info = data["version"]
             version: str = version_info["number"]
