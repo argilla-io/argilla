@@ -498,3 +498,49 @@ def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient, api):
 
     assert len(ds) == 5
     assert ds[0].id == 3
+
+
+def test_log_data_with_vectors_and_partial_update_ok(mocked_client: SecuredClient, api):
+    dataset = "test_log_data_and_partial_update_ok"
+    text = "This is a text"
+    expected_n_records = 10
+
+    api.delete(dataset)
+
+    # Logging records with vector info
+
+    records = [
+        argilla.TokenClassificationRecord(id=i, text=text, tokens=text.split(), vectors={"test-vector": [i] * 5})
+        for i in range(0, expected_n_records)
+    ]
+    api.log(records=records, name=dataset)
+
+    ds = api.load(dataset)
+    assert len(ds) == expected_n_records
+    assert all(map(lambda r: "test-vector" in r.vectors, ds))
+
+    # Fetch minimal record info and add a metadata field
+    records_for_update = [
+        TokenClassificationRecord.parse_obj({"metadata": {"a": "value"}, **data})
+        for data in api.datasets.scan(name=dataset, projection={"text", "tokens"})
+    ]
+    api.log(name=dataset, records=records_for_update)
+
+    ds = api.load(dataset)
+    assert len(ds) == expected_n_records
+    assert all(map(lambda r: r.annotation_agent is None, ds))
+    assert all(map(lambda r: "test-vector" in r.vectors, ds))
+    assert all(map(lambda r: r.metadata == {"a": "value"}, ds))
+
+    # Remove the metadata info and add some mock annotations
+    for record in records_for_update:
+        record.metadata = None
+        record.annotation = []
+        record.annotation_agent = "mock_test"
+    api.log(name=dataset, records=records_for_update)
+
+    ds = api.load(dataset)
+    assert len(ds) == expected_n_records
+    assert all(map(lambda r: r.annotation_agent == "mock_test", ds))
+    assert all(map(lambda r: "test-vector" in r.vectors, ds))
+    assert all(map(lambda r: r.metadata == {"a": "value"}, ds))
