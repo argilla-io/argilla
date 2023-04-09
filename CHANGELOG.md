@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- bulk endpoints will upsert data when record `id` is present. See [#2576](https://github.com/argilla-io/argilla/pull/2576)
+- bulk endpoints will upsert data when record `id` is present. Closes [#2535](https://github.com/argilla-io/argilla/issues/2535)
 
 ## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
 
