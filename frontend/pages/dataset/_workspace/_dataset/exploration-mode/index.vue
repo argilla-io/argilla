@@ -1,10 +1,13 @@
 <template>
   <HeaderAndTopAndOneColumn>
     <template v-slot:header>
-      <HeaderComponent />
+      <HeaderFeedbackTaskComponent />
     </template>
-    <template v-slot:center
-      ><div class="container">
+    <template v-slot:sidebar-right>
+      <SidebarFeedbackTaskComponent />
+    </template>
+    <template v-slot:center>
+      <div class="container">
         <div class="daboudi"></div>
         <QuestionsFormComponent :initialInputs="inputs" />
       </div>
