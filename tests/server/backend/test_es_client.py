@@ -25,7 +25,7 @@ def test_copy_index_as_alias(es: GenericElasticEngineBackend):
     es.delete(source_id)
     es.delete(target_id)
 
-    es.create_dataset(id=source_id, task=TaskType.text_classification)
+    es.create_dataset_index(id=source_id, task=TaskType.text_classification)
     es.client.create_index_alias(
         index=dataset_records_index(source_id),
         alias=dataset_records_index(f"{source_id}_alias"),
