@@ -31,6 +31,7 @@
       :datasetName="dataset.name"
       :breadcrumbs="breadcrumbs"
       @on-search-or-on-filter-records="searchRecords"
+      @on-click-train="showTrainModal(true)"
     />
     <error
       v-if="$fetchState.error"
@@ -45,6 +46,17 @@
       :datasetTask="dataset.task"
       @search-records="searchRecords"
     />
+    <BaseModal
+      :modal-custom="true"
+      :prevent-body-scroll="true"
+      modal-class="modal-auto"
+      modal-position="modal-top-center"
+      :modal-visible="visibleTrainModal"
+      allow-close
+      @close-modal="showTrainModal(false)"
+    >
+      <DatasetTrainComponent :datasetTask="dataset.task" />
+    </BaseModal>
   </div>
 </template>
 
@@ -70,6 +82,11 @@ export default {
     if (this.referenceRecordId) {
       await this.searchRecords({ query: this.dataset.query });
     }
+  },
+  data() {
+    return {
+      visibleTrainModal: false,
+    };
   },
   computed: {
     ...mapGetters({
@@ -262,6 +279,9 @@ export default {
           err
         );
       }
+    },
+    showTrainModal(value) {
+      this.visibleTrainModal = value;
     },
   },
   destroyed() {
