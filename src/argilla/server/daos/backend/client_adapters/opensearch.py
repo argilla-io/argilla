@@ -459,19 +459,6 @@ class OpenSearchClient(IClientAdapter):
         except IndexNotFoundError:
             return None
 
-    def list_index_documents_by_id(
-        self, *, index: str, document_ids: List[str], exclude_fields: Optional[Set[str]] = None
-    ) -> List[Tuple[str, Optional[dict]]]:
-        if not document_ids:
-            return []
-        with self.error_handling(index=index):
-            results = self.__client__.mget(
-                index=index,
-                body={"ids": document_ids},
-                _source_excludes=list(exclude_fields) if exclude_fields else None,
-            )
-            return [(result["_id"], result["_source"] if result["found"] else None) for result in results["docs"]]
-
     def create_index_alias(
         self,
         *,
@@ -554,8 +541,8 @@ class OpenSearchClient(IClientAdapter):
                     ignore=400,
                 )
 
-    def index_documents(self, index: str, docs: List[Dict[str, Any]], partial_update: bool = False) -> int:
-        actions = (self._doc2bulk_action(index, doc, upsert=partial_update) for doc in docs)
+    def index_documents(self, index: str, docs: List[Dict[str, Any]]) -> int:
+        actions = (self._doc2bulk_action(index, doc) for doc in docs)
         success, failed = self.bulk(
             index=index,
             actions=actions,
@@ -563,17 +550,14 @@ class OpenSearchClient(IClientAdapter):
         return len(failed)
 
     @staticmethod
-    def _doc2bulk_action(index: str, doc: Dict[str, Any], upsert: bool = False) -> Dict[str, Any]:
+    def _doc2bulk_action(index: str, doc: Dict[str, Any]) -> Dict[str, Any]:
         doc_id = doc.get("id")
 
         data = (
             {"_index": index, "_op_type": "index", **doc}
-            if doc_id is None or not upsert
+            if doc_id is None
             else {"_index": index, "_id": doc_id, "_op_type": "update", "doc_as_upsert": True, "doc": doc}
         )
-
-        if not upsert and doc_id is not None:
-            data["_id"] = doc_id
 
         return data
 
