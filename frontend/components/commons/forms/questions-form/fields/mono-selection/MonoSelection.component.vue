@@ -7,6 +7,7 @@
         v-required-field="isRequired ? { color: colorHighlight } : false"
       />
       <TooltipComponent
+        class="info-icon"
         v-if="isIcon"
         :message="tooltipMessage"
         direction="bottom"
@@ -167,5 +168,14 @@ input {
 
 .icon {
   color: $black-37;
+}
+
+.info-icon {
+  display: flex;
+  flex-basis: 37px;
+}
+
+span {
+  word-break: break-word;
 }
 </style>
