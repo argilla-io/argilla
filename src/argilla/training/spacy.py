@@ -236,12 +236,14 @@ class ArgillaSpaCyTrainer:
                         "prediction": entities,
                     }
                     pred = self._record_class(**pred)
-                elif any([p in self._pipeline for p in ["textcat", "multilabel_textcat"]]):
+                elif any([p in self._pipeline for p in ["textcat", "textcat_multilabel"]]):
                     pred = {
                         "text": doc.text,
                         "prediction": [(k, v) for k, v in doc.cats.items()],
                     }
                     pred = self._record_class(**pred, multi_label=self._multi_label)
+                else:
+                    continue
                 formatted_prediction.append(pred)
         else:
             formatted_prediction = docs
