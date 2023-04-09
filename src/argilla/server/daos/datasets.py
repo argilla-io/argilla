@@ -79,7 +79,9 @@ class DatasetsDAO:
         task2dataset_map: Dict[str, Type[DatasetDB]] = None,
         name: Optional[str] = None,
     ) -> List[DatasetDB]:
-        workspaces = workspaces or []
+        if not workspaces:
+            return []
+
         query = BaseDatasetsQuery(
             workspaces=workspaces,
             tasks=[task for task in task2dataset_map] if task2dataset_map else None,
@@ -118,16 +120,16 @@ class DatasetsDAO:
     def delete_dataset(self, dataset: DatasetDB):
         self._es.delete(dataset.id)
 
+    def find_by_name_and_workspace(self, name: str, workspace: str) -> Optional[DatasetDB]:
+        return self.find_by_name(name=name, workspace=workspace)
+
     def find_by_name(
         self,
         name: str,
         workspace: str,
         as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
     ) -> Optional[DatasetDB]:
-        dataset_id = BaseDatasetDB.build_dataset_id(
-            name=name,
-            workspace=workspace,
-        )
+        dataset_id = BaseDatasetDB.build_dataset_id(name=name, workspace=workspace)
         document = self._es.find_dataset(id=dataset_id)
         if document is None:
             return None
@@ -181,13 +183,13 @@ class DatasetsDAO:
         )
         self._es.copy(id_from=source.id, id_to=target.id)
 
-    def close(self, dataset: DatasetDB):
-        """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
-        self._es.close(dataset.id)
-
     def open(self, dataset: DatasetDB):
         """Make available a dataset"""
         self._es.open(dataset.id)
+
+    def close(self, dataset: DatasetDB):
+        """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
+        self._es.close(dataset.id)
 
     def save_settings(
         self,

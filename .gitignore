@@ -130,9 +130,14 @@ sw.*
 # Vim swap files
 *.swp
 
+# Ruff cache
+.ruff_cache/
 
 yarn.lock
 package-lock.json
 
 # App generated files
 src/**/server/static/
+
+# Old users db file
+.users.yml

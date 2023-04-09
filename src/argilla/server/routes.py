@@ -31,6 +31,7 @@ from argilla.server.apis.v0.handlers import (
     text_classification,
     token_classification,
     users,
+    workspaces,
 )
 from argilla.server.errors.base_errors import __ALL__
 
@@ -41,6 +42,7 @@ dependencies = []
 
 for router in [
     users.router,
+    workspaces.router,
     datasets.router,
     info.router,
     metrics.router,

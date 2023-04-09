@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="header">
-      <HeaderComponent />
+      <slot name="header">here is the header</slot>
     </div>
     <main class="layout">
       <div class="empty-content-left"></div>

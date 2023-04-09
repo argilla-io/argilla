@@ -20,9 +20,9 @@ If you want to run the web app of the master branch **without** docker, we refer
 ```bash
  # get the docker-compose yaml file
  mkdir argilla && cd argilla
- wget -O docker-compose.yml https://raw.githubusercontent.com/argilla-io/argilla/develop/docker-compose.yaml
+ wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/develop/docker-compose.yaml
  # use the master image of the argilla container instead of the latest
- sed -i 's/argilla:latest/argilla:master/' docker-compose.yml
+ sed -i 's/argilla:latest/argilla:master/' docker-compose.yaml
  # start all services
  docker-compose up
  ```

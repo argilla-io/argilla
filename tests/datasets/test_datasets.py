@@ -11,12 +11,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import argilla as rg
 import pytest
 from argilla import TextClassificationSettings, TokenClassificationSettings
 from argilla.client import api
+from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
+from argilla.server.contexts import accounts
+from argilla.server.security.model import WorkspaceUserCreate
+from sqlalchemy.orm import Session
 
 
 @pytest.mark.parametrize(
@@ -65,17 +68,19 @@ def test_list_dataset(mocked_client):
         assert ds["owner"] == ds["workspace"]
 
 
-def test_delete_dataset_by_non_creator(mocked_client):
-    try:
-        dataset = "test_delete_dataset_by_non_creator"
-        workspace = rg.get_workspace()
-        settings = TextClassificationSettings(label_schema={"A", "B", "C"})
+def test_delete_dataset_by_non_creator(mocked_client, mock_user, argilla_user, db: Session):
+    dataset = "test_delete_dataset_by_non_creator"
 
-        rg.delete(dataset)
-        rg.configure_dataset(dataset, settings=settings, workspace=workspace)
+    for workspace in argilla_user.workspaces:
+        accounts.create_workspace_user(db, WorkspaceUserCreate(user_id=mock_user.id, workspace_id=workspace.id))
 
-        mocked_client.change_current_user("mock-user")
-        with pytest.raises(ForbiddenApiError):
-            rg.delete(dataset)
-    finally:
-        mocked_client.reset_default_user()
+    rg = Argilla()
+
+    rg.delete(dataset)
+    rg.datasets.configure(
+        dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}), workspace=rg.get_workspace()
+    )
+
+    api = Argilla(api_key=mock_user.api_key, workspace=rg.get_workspace())
+    with pytest.raises(ForbiddenApiError):
+        api.delete(dataset)

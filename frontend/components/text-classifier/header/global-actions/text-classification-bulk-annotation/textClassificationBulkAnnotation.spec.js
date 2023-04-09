@@ -3,7 +3,10 @@ import TextClassificationBulkAnnotationComponent from "./TextClassificationBulkA
 
 let wrapper = null;
 const options = {
-  stubs: ["BulkAnnotationComponent"],
+  stubs: [
+    "BulkAnnotationComponent",
+    "TextClassificationBulkAnnotationComponent",
+  ],
   propsData: {
     datasetId: ["owner", "name"],
     labels: [

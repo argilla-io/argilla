@@ -31,6 +31,7 @@
 
 # -- Project information -----------------------------------------------------
 import os
+from datetime import datetime
 
 try:
     import argilla as rg
@@ -41,7 +42,7 @@ except ModuleNotFoundError:
 
 
 project = "Argilla"
-copyright = "2022, Argilla.io"
+copyright = f"{datetime.today().year}, Argilla.io"
 author = "Argilla.io"
 
 # Normally the full version, including alpha/beta/rc tags.

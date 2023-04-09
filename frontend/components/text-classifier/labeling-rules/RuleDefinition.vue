@@ -23,7 +23,6 @@
           <template #button-bottom>
             <base-button
               class="rule__button primary light"
-              :disabled="isLoading"
               @click="showRulesList"
               >Manage rules</base-button
             >
@@ -35,6 +34,7 @@
 </template>
 
 <script>
+import { Notification } from "@/models/Notifications";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 import { getAllLabelsTextByDatasetId } from "@/models/globalLabel.queries";
@@ -62,6 +62,7 @@ export default {
     if (!this.hasMetrics) {
       await this.dataset.refreshRulesMetrics();
     }
+
     if (!this.currentRule && this.query) {
       const rule = this.dataset.findRuleByQuery(this.query, undefined);
       await this.dataset.setCurrentLabelingRule(
@@ -70,14 +71,21 @@ export default {
     }
   },
   watch: {
-    async query(newValue) {
-      this.saved = false;
-      const rule = this.dataset.findRuleByQuery(newValue, undefined);
-      await this.dataset.setCurrentLabelingRule(
-        rule
-          ? rule
-          : { query: newValue, labels: (this.currentRule || {}).labels }
-      );
+    query: {
+      // FIXME - the deep true is here only to 'ensure' that when query change the currentLabelling is update.
+      // This is a fast and ugly solution that needs to be refactored.
+      handler: async function (newValue) {
+        if (newValue !== this.currentRule?.query) {
+          this.saved = false;
+          const rule = this.dataset.findRuleByQuery(newValue, undefined);
+          await this.dataset.setCurrentLabelingRule(
+            rule
+              ? rule
+              : { query: newValue, labels: (this.currentRule || {}).labels }
+          );
+        }
+      },
+      deep: true,
     },
   },
   computed: {
@@ -112,6 +120,10 @@ export default {
       return getAllLabelsTextByDatasetId(this.dataset.id);
     },
   },
+  created() {
+    this.TOAST_MESSAGE_ONSAVE_RULE_IN_SUCCESS = "The rule is saved";
+    this.TOAST_MESSAGE_ONSAVE_RULE_IN_ERROR = "The rule could not be saved";
+  },
   methods: {
     async updateCurrentRule({ query, labels }) {
       if (!query) {
@@ -134,8 +146,28 @@ export default {
       await this.viewSettings.enableRulesSummary();
     },
     async saveRule(rule) {
-      await this.dataset.storeLabelingRule(rule);
-      this.saved = true;
+      let message = "";
+      let typeOfToast = "";
+      try {
+        await this.dataset.storeLabelingRule(rule);
+        this.saved = true;
+
+        message = this.TOAST_MESSAGE_ONSAVE_RULE_IN_SUCCESS;
+        typeOfToast = "success";
+      } catch (err) {
+        console.log(err);
+        message = this.TOAST_MESSAGE_ONSAVE_RULE_IN_ERROR;
+        typeOfToast = "error";
+      } finally {
+        this.showToastComponent(message, typeOfToast);
+      }
+    },
+    showToastComponent(message, typeOfToast) {
+      Notification.dispatch("notify", {
+        message: message,
+        numberOfChars: message.length,
+        type: typeOfToast,
+      });
     },
   },
 };
