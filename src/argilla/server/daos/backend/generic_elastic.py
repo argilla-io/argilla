@@ -241,7 +241,7 @@ class GenericElasticEngineBackend(LoggingMixin):
     def open(self, id: str):
         self.client.open_index(dataset_records_index(id))
 
-    def create_dataset_index(
+    def create_dataset(
         self,
         id: str,
         task: TaskType,

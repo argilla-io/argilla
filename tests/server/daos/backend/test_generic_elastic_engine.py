@@ -36,7 +36,7 @@ def dataset_id(engine: GenericElasticEngineBackend):
 
 
 def test_creating_index_with_non_searchable_metadata(engine: GenericElasticEngineBackend, dataset_id: str):
-    engine.create_dataset_index(
+    engine.create_dataset(
         id=dataset_id,
         task=TaskType.text_classification,
         metadata_values={"a": "value", "other": "value", "_this": "is non searchable"},
@@ -49,7 +49,7 @@ def test_creating_index_with_non_searchable_metadata(engine: GenericElasticEngin
 
 
 def test_non_searchable_docs_are_not_present_in_metrics(engine: GenericElasticEngineBackend, dataset_id: str):
-    engine.create_dataset_index(
+    engine.create_dataset(
         id=dataset_id,
         task=TaskType.text_classification,
         metadata_values={"a": "value", "other": "value", "_this": "is non searchable"},
@@ -64,7 +64,7 @@ def test_non_searchable_docs_are_not_present_in_metrics(engine: GenericElasticEn
 
 
 def test_non_searchable_fields_are_present_in_documents(engine: GenericElasticEngineBackend, dataset_id: str):
-    engine.create_dataset_index(
+    engine.create_dataset(
         id=dataset_id,
         task=TaskType.text_classification,
         metadata_values={"a": "value", "other": "value", "_this": "is non searchable"},
@@ -80,7 +80,7 @@ def test_non_searchable_fields_are_present_in_documents(engine: GenericElasticEn
 
 
 def test_non_searchable_fields_cannot_be_used_for_search(engine: GenericElasticEngineBackend, dataset_id: str):
-    engine.create_dataset_index(
+    engine.create_dataset(
         id=dataset_id,
         task=TaskType.text_classification,
         metadata_values={"a": "value", "other": "value", "_this": "is non searchable"},

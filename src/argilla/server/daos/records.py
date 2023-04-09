@@ -116,7 +116,7 @@ class DatasetRecordsDAO:
 
             documents.append(record_dict)
 
-        self._es.create_dataset_index(
+        self._es.create_dataset(
             id=dataset.id,
             task=dataset.task,
             metadata_values=metadata_values,
