@@ -121,12 +121,6 @@ class IClientAdapter(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def list_index_documents_by_id(
-        self, *, index: str, document_ids: List[str], exclude_fields: Optional[Set[str]] = None
-    ) -> List[Tuple[str, Optional[dict]]]:
-        pass
-
-    @abstractmethod
     def create_index_alias(
         self,
         *,
@@ -185,7 +179,7 @@ class IClientAdapter(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def index_documents(self, index: str, docs: List[Dict[str, Any]], partial_update: bool = False) -> int:
+    def index_documents(self, index: str, docs: List[Dict[str, Any]]) -> int:
         pass
 
     @abstractmethod

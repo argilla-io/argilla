@@ -431,15 +431,6 @@ class GenericElasticEngineBackend(LoggingMixin):
             id=record_id,
         )
 
-    def find_record_by_ids(self, dataset_id: str, record_ids: List[str]) -> List[Tuple[str, dict]]:
-        index = dataset_records_index(dataset_id)
-
-        return self.client.list_index_documents_by_id(
-            index=index,
-            document_ids=record_ids,
-            exclude_fields={"vectors.*", "metrics.*"},
-        )
-
     def add_dataset_document(
         self,
         id: str,
@@ -509,7 +500,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             property=field,
         )
 
-    def add_dataset_records(self, id: str, documents: List[dict], partial_update: bool = False) -> int:
+    def add_dataset_records(self, id: str, documents: List[dict]) -> int:
         index = dataset_records_index(id)
 
-        return self.client.index_documents(index=index, docs=documents, partial_update=partial_update)
+        return self.client.index_documents(index=index, docs=documents)
