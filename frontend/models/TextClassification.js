@@ -455,7 +455,7 @@ class TextClassificationDataset extends ObservationDataset {
       });
     } catch (err) {
       console.log(err);
-      message = `Rule '${query}' can't be delete`;
+      message = `Rule '${query}' can't be deleted`;
       typeOfToast = "error";
     } finally {
       Notification.dispatch("notify", {
