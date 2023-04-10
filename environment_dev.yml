@@ -36,7 +36,7 @@ dependencies:
       # extra test dependencies
       - cleanlab~=2.0.0 # With this version, tests are failing
       - datasets>1.17.0,!= 2.3.2 # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
-      - huggingface_hub != 0.5.0 # some backward comp. problems introduced in 0.5.0
+      - huggingface_hub>= 0.5.0, <0.13 # TODO: some backward comp. problems introduced in 0.5.0. 0.13 does not match with setfit
       - flair==0.10
       - faiss-cpu
       - flyingsquid
@@ -46,6 +46,9 @@ dependencies:
       - spacy==3.5.0
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
       - transformers[torch]~=4.18.0
+      - evaluate
+      - seqeval
+      - setfit
       - rich==13.0.1
       # install Argilla in editable mode
       - -e .[server,listeners]

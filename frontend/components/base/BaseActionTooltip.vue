@@ -34,6 +34,8 @@ export default {
 <style scoped lang="scss">
 .tooltip {
   position: absolute;
+  left: 0;
+  top: 100%;
   background: palette(grey, 100);
   display: inline-block;
   border-radius: $border-radius-s;
@@ -42,8 +44,7 @@ export default {
   box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
   padding: 0.1em 0.5em;
   white-space: nowrap;
-  left: 0;
-  top: 100%;
+  font-family: $primary-font-family !important;
   &__container {
     position: relative;
     &.active {

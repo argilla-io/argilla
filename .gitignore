@@ -130,6 +130,9 @@ sw.*
 # Vim swap files
 *.swp
 
+# Ruff cache
+.ruff_cache/
+
 yarn.lock
 package-lock.json
 

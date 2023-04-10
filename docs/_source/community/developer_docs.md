@@ -76,6 +76,24 @@ python -m argilla.tasks.database.migrate
 
 The default SQLite database will be created at `~/.argilla/argilla.db`. This can be changed setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
 
+### Recreating the database
+
+Occasionally, it may be necessary to recreate the database from scratch to ensure a clean state in your development environment. For instance, to run the Argilla test suite or troubleshoot issues that could be related to database inconsistencies.
+
+First you need to delete the Argilla database with the following command:
+
+```sh
+rm ~/.argilla/argilla.db
+```
+
+After deleting the database, you will need to run the database migrate task:
+
+```sh
+python -m argilla.tasks.database.migrate
+```
+
+By following these steps, you'll have a fresh and clean database to work with.
+
 ### Creating your first user
 
 At least one user is required to interact with Argila API and web UI. You can create easily create your user executing the following task:

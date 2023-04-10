@@ -17,7 +17,6 @@ from dataclasses import dataclass
 from fastapi import Header, Path, Query
 
 from argilla._constants import (
-    _OLD_WORKSPACE_HEADER_NAME,
     ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
 )

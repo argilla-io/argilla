@@ -37,15 +37,13 @@
         </p>
       </div>
     </div>
-    <div v-else>
+    <div class="rule__no-label" v-else>
       <BaseFeedbackComponent
         :feedbackInput="inputForFeedbackComponent"
         @on-click="goToSettings"
         class="feedback-area"
       />
-      <p class="--body1 help-message">
-        {{ messageNotLabels }}
-      </p>
+      <p class="--body1 help-message" v-html="messageNotLabels" />
     </div>
   </div>
 </template>
@@ -78,10 +76,10 @@ export default {
         buttonLabels: [{ label: "Create labels", value: "CREATE_LABELS" }],
         feedbackType: "ERROR",
       },
-      messageNotLabels:
-        "To create new rules, you need al least two labels. We highly recommended starting by annotating some records with these labels.",
+      messageNotLabels: `To create new rules, you need at least two labels.
+       <br/>We highly recommend starting by annotating some records with these labels.`,
       messageNotAnnotation:
-        "We highly recommended starting by annotating some records with these labels.",
+        "We highly recommend starting by annotating some records with these labels.",
     };
   },
   computed: {
@@ -171,7 +169,7 @@ export default {
   @extend %item;
 }
 .help-message {
-  max-width: 480px;
+  margin-bottom: 0;
   color: $black-37;
 }
 .label-button {
@@ -188,8 +186,12 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100%;
-    margin-left: -5px;
-    margin-right: -5px;
+  }
+  &__no-label {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
   }
 }
 .buttons {

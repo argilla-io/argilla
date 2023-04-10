@@ -25,7 +25,6 @@ import pandas as pd
 import pytest
 from argilla import TextClassificationRecord
 from argilla._constants import (
-    _OLD_WORKSPACE_HEADER_NAME,
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
 )
@@ -117,7 +116,7 @@ def test_init_correct(mock_response_200):
         base_url="http://localhost:6900",
         token=DEFAULT_API_KEY,
         timeout=60.0,
-        headers={WORKSPACE_HEADER_NAME: client.user.username, _OLD_WORKSPACE_HEADER_NAME: client.user.username},
+        headers={WORKSPACE_HEADER_NAME: client.user.username},
     )
 
     url = "mock_url"
@@ -129,7 +128,7 @@ def test_init_correct(mock_response_200):
         base_url=url,
         token=api_key,
         timeout=42,
-        headers={WORKSPACE_HEADER_NAME: workspace_name, _OLD_WORKSPACE_HEADER_NAME: workspace_name},
+        headers={WORKSPACE_HEADER_NAME: workspace_name},
     )
 
 
@@ -151,7 +150,7 @@ def test_init_environment_url(mock_response_200, monkeypatch):
         base_url=url,
         token=api_key,
         timeout=60,
-        headers={WORKSPACE_HEADER_NAME: workspace_name, _OLD_WORKSPACE_HEADER_NAME: workspace_name},
+        headers={WORKSPACE_HEADER_NAME: workspace_name},
     )
 
 

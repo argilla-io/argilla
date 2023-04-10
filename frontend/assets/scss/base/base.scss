@@ -292,3 +292,7 @@ a {
 .--light {
   font-weight: 300;
 }
+
+.code pre code.python.hljs.language-python {
+	white-space: break-spaces;
+}
