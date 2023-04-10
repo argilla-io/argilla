@@ -1375,8 +1375,24 @@ class DatasetForText2Text(DatasetBase):
         Returns:
             A pd.DataFrame.
         """
+        separator = "\n\n###\n\n"
 
-        raise NotImplementedError
+        jsonl = []
+        for rec in self._records:
+            if rec.annotation is None:
+                continue
+
+            if rec.text is not None:
+                prompt = rec.text
+            elif rec.text is None and "text" in rec.inputs:
+                prompt = rec.inputs["text"]
+            else:
+                prompt = ", ".join(f"{key}: {value}" for key, value in rec.inputs.items())
+            prompt += separator  # needed for better performance
+
+            jsonl.append({"prompt": prompt, "completion": rec.annotation})
+
+        return jsonl
 
 
 Dataset = Union[DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text]
