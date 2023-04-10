@@ -84,7 +84,7 @@ export default {
       {
         id: "id_5",
         question:
-          "Rate the helpfulness of the output (1-not helpful, 5-very helpful):",
+          "Rate the helpfulness of the output (1-not helpful, 7-very helpful):",
         outputs: [
           { id: 1, value: true, text: "1" },
           { id: 2, value: false, text: "2" },
