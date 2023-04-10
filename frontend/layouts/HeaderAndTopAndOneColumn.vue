@@ -48,5 +48,6 @@ export default {
 }
 .center {
   grid-area: 3 / 2 / 6 / 5;
+  overflow-x: hidden;
 }
 </style>

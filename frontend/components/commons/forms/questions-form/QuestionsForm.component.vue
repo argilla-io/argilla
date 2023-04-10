@@ -133,7 +133,7 @@ export default {
 form {
   display: flex;
   flex-direction: column;
-  min-width: 5em;
+  flex-basis: 40em;
   height: fit-content;
   gap: $base-space * 4;
   border: 2px solid #4c4ea3;
