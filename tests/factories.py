@@ -14,7 +14,15 @@
 
 import factory
 from argilla.server.database import SessionLocal
-from argilla.server.models import Dataset, User, UserRole, Workspace, WorkspaceUser
+from argilla.server.models import (
+    Annotation,
+    AnnotationType,
+    Dataset,
+    User,
+    UserRole,
+    Workspace,
+    WorkspaceUser,
+)
 from sqlalchemy import orm
 
 Session = orm.scoped_session(SessionLocal)
@@ -44,6 +52,25 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     name = factory.Sequence(lambda n: f"dataset-{n}")
     workspace = factory.SubFactory(WorkspaceFactory)
+
+
+class AnnotationFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Annotation
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    name = factory.Sequence(lambda n: f"annotation-{n}")
+    title = "Annotation Title"
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class TextAnnotationFactory(AnnotationFactory):
+    type = AnnotationType.text
+
+
+class RatingAnnotationFactory(AnnotationFactory):
+    type = AnnotationType.rating
 
 
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
