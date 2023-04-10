@@ -741,6 +741,11 @@ class DatasetForTextClassification(DatasetBase):
         else:
             labels = {label: None for label in ds_dict["label"]}
 
+        if len(labels) == 1:
+            raise ValueError(
+                "The dataset contains only one labels. Classification datasets should have at least 2 labels."
+            )
+
         class_label = (
             datasets.ClassLabel(names=sorted(labels.keys()))
             if ds_dict["label"]
