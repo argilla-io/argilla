@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
+
 ### Added
 
 - `ARGILLA_HOME_PATH` new environment variable ([#2564]).
@@ -23,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `argilla.tasks.users.create_default` new task to create a user with default credentials ([#2564]).
 - `argilla.tasks.database.migrate` new task to execute database migrations ([#2564]).
 - `release.Dockerfile` and `quickstart.Dockerfile` now creates a default `argilladata` volume to persist data ([#2564]).
+- Add user settings page. Closes [#2496](https://github.com/argilla-io/argilla/issues/2496)
+- Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
+
+### Fixes
+- Now the `prepare_for_training` method is working when `multi_label=True`. Closes [#2606](https://github.com/argilla-io/argilla/issues/2606)
 
 ### Changed
 
@@ -31,12 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `password` user field now requires a minimum of `8` and a maximum of `100` characters in size ([#2564]).
 - `quickstart.Dockerfile` image default users from `team` and `argilla` to `admin` and `annotator` including new passwords and API keys ([#2564]).
 - Datasets to be managed only by users with `admin` role ([#2564]).
-
-### Fixes
-
-- Copying datasets between workspaces with proper owner/workspace info. Closes [#2562](https://github.com/argilla-io/argilla/issues/2562)
-- Using elasticsearch config to request backend version. Closes [#2311](https://github.com/argilla-io/argilla/issues/2311)
-
+- The list of rules is now accessible while metrics are computed. Closes[#2117](https://github.com/argilla-io/argilla/issues/2117)
+- Style updates for weak labelling and adding feedback toast when delete rules. See [#2626](https://github.com/argilla-io/argilla/pull/2626) and [#2648](https://github.com/argilla-io/argilla/pull/2648)
 
 ### Removed
 
@@ -44,11 +47,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `disabled` user field ([#2564]).
 - Support for private workspaces ([#2564]).
 - `ARGILLA_LOCAL_AUTH_DEFAULT_APIKEY` and `ARGILLA_LOCAL_AUTH_DEFAULT_PASSWORD` environment variables. Use `python -m argilla.tasks.users.create_default` instead ([#2564]).
+- The old headers for `API Key` and `workspace` from python client
+- The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
 
 
-## [1.5.0](https://github.com/recognai/rubrix/compare/v1.4.0...v1.5.0) - 2023-03-21
+
+## [1.5.1](https://github.com/argilla-io/argilla/compare/v1.5.0...v1.5.1) - 2023-03-30
+
+### Fixes
+
+- Copying datasets between workspaces with proper owner/workspace info. Closes [#2562](https://github.com/argilla-io/argilla/issues/2562)
+- Copy dataset with empty workspace to the default user workspace [905d4de](https://github.com/recognai/argilla/commit/905d4deaa769bfc9bbc022cd2dc75c7435cfe865)
+- Using elasticsearch config to request backend version. Closes [#2311](https://github.com/argilla-io/argilla/issues/2311)
+- Remove sorting by score in labels. Closes [#2622](https://github.com/argilla-io/argilla/issues/2622)
+
+### Changed
+
+- Update field name in metadata for image url. See [#2609](https://github.com/argilla-io/argilla/pull/2609)
+- Improvements in tutorial doc cards. Closes [#2216](https://github.com/argilla-io/argilla/issues/2216)
+
+## [1.5.0](https://github.com/argilla-io/argilla/compare/v1.4.0...v1.5.0) - 2023-03-21
 
 ### Added
 
@@ -56,9 +76,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add new page and components for dataset settings. Closes [#2442](https://github.com/argilla-io/argilla/issues/2003)
 - Add ability to show image in records (for TokenClassification and TextClassification) if an URL is passed in metadata with the key \_image_url
 - Non-searchable fields support in metadata. [#2570](https://github.com/argilla-io/argilla/pull/2570)
-- Add user settings page. Closes [#2496](https://github.com/argilla-io/argilla/issues/2496)
 - Add record ID references to the prepare for training methods. Closes [#2483](https://github.com/argilla-io/argilla/issues/2483)
 - Add tutorial on Image Classification. [#2420](https://github.com/argilla-io/argilla/pull/2420)
+- Add Train button, visible for "admin" role, with code snippets from a selection of libraries. Closes [#2591] (https://github.com/argilla-io/argilla/pull/2591)
 
 ### Changed
 
@@ -67,12 +87,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update "Define a labeling schema" section in docs.
 - The record inputs are sorted alphabetically in UI by default. [#2581](https://github.com/argilla-io/argilla/pull/2581)
 - The record inputs are fully visible when pagination size is one and the height of collapsed area size is bigger for laptop screen. [#2587](https://github.com/argilla-io/argilla/pull/2587/files)
-- the list of rules is now accessible while metrics are computed Closes[#2117](https://github.com/argilla-io/argilla/issues/2117)
+
 
 ### Fixes
 
 - Allow URL to be clickable in Jupyter notebook again. Closes [#2527](https://github.com/argilla-io/argilla/issues/2527)
-- Adding new rules was sometimes broken Closes[#2561](https://github.com/argilla-io/argilla/issues/2561). The correction have been done in this issue [#2117](https://github.com/argilla-io/argilla/issues/2117)
+
 
 ### Removed
 
