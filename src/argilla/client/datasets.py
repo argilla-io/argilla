@@ -400,6 +400,7 @@ class DatasetBase:
              'label': ClassLabel(num_classes=1, names=['SPAM'])}
 
         """
+
         if train_size is None:
             train_size = 1
         if test_size is None:
@@ -412,6 +413,11 @@ class DatasetBase:
 
         # check if train sizes sum up to 1
         assert (train_size + test_size) == 1, ValueError("`train_size` and `test_size` must sum to 1.")
+
+        if framework == framework.OPENAI:
+            train_size = 1
+            test_size = None
+            _LOGGER.warning("OpenAI does not support train/test split. Setting train_size to 1.")
 
         # check for annotations
         assert any([rec.annotation for rec in self._records]), ValueError("Dataset has no annotations.")
@@ -435,7 +441,7 @@ class DatasetBase:
             raise ValueError(
                 "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
             )
-        elif framework in [Framework.SPACY, Framework.SPARK_NLP]:
+        elif framework in [Framework.SPACY, Framework.SPARK_NLP, Framework.OPENAI]:
             if train_size and test_size:
                 require_version("scikit-learn")
                 from sklearn.model_selection import train_test_split
@@ -458,8 +464,14 @@ class DatasetBase:
             else:
                 if framework is Framework.SPACY:
                     return self._prepare_for_training_with_spacy(nlp=lang, records=shuffled_records)
-                else:
+                elif framework is Framework.SPARK_NLP:
                     return self._prepare_for_training_with_spark_nlp(records=shuffled_records)
+                elif framework is Framework.OPENAI:
+                    return self._prepare_for_training_with_openai(records=shuffled_records)
+                else:
+                    raise NotImplementedError(
+                        f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}"
+                    )
         else:
             raise NotImplementedError(f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}")
 
@@ -491,9 +503,21 @@ class DatasetBase:
 
         raise NotImplementedError
 
-    @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_spark_nlp(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training using the "spark-nlp" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
+        """
+
+        raise NotImplementedError
+
+    @requires_version("openai>0.27")
+    def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "openai" framework.
 
         Args:
             **kwargs: Specific to the task of the dataset.
@@ -832,6 +856,19 @@ class DatasetForTextClassification(DatasetBase):
 
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", label_name])
 
+    @requires_version("openai>0.27")
+    def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "openai" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
+        """
+
+        raise NotImplementedError
+
     def __all_labels__(self):
         all_labels = set()
         for record in self._records:
@@ -1056,6 +1093,19 @@ class DatasetForTokenClassification(DatasetBase):
         ]
 
         return pd.DataFrame(iob_doc_data, columns=["id", "text", "token", "label"])
+
+    @requires_version("openai>0.27")
+    def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "openai" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
+        """
+
+        raise NotImplementedError
 
     def __all_labels__(self):
         all_labels = set()
@@ -1294,6 +1344,19 @@ class DatasetForText2Text(DatasetBase):
             spark_nlp_data.append([record.id, text, record.annotation])
 
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", "target"])
+
+    @requires_version("openai>0.27")
+    def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "openai" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
+        """
+
+        raise NotImplementedError
 
 
 Dataset = Union[DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text]
