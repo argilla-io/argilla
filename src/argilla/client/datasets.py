@@ -513,7 +513,6 @@ class DatasetBase:
 
         raise NotImplementedError
 
-    @requires_version("openai>0.27")
     def _prepare_for_training_with_openai(self, **kwargs) -> "dict":
         """Prepares the dataset for training using the "openai" framework.
 
@@ -854,7 +853,6 @@ class DatasetForTextClassification(DatasetBase):
 
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", label_name])
 
-    @requires_version("openai>0.27")
     def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training using the "openai" framework.
 
@@ -1114,7 +1112,6 @@ class DatasetForTokenClassification(DatasetBase):
 
         return pd.DataFrame(iob_doc_data, columns=["id", "text", "token", "label"])
 
-    @requires_version("openai>0.27")
     def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training using the "openai" framework.
 
@@ -1365,7 +1362,6 @@ class DatasetForText2Text(DatasetBase):
 
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", "target"])
 
-    @requires_version("openai>0.27")
     def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training using the "openai" framework.
 
