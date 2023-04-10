@@ -17,7 +17,10 @@ from uuid import UUID, uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import Annotation, AnnotationType, Dataset
-from argilla.server.schemas.v1.datasets import RATING_MAX_ITEMS, RATING_MIN_ITEMS
+from argilla.server.schemas.v1.datasets import (
+    RATING_OPTIONS_MAX_ITEMS,
+    RATING_OPTIONS_MIN_ITEMS,
+)
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -169,7 +172,20 @@ def test_get_dataset_annotations(client: TestClient, db: Session, admin_auth_hea
             "title": "Rating Annotation",
             "type": AnnotationType.rating.value,
             "required": False,
-            "settings": {"values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]},
+            "settings": {
+                "options": [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                    {"value": 4},
+                    {"value": 5},
+                    {"value": 6},
+                    {"value": 7},
+                    {"value": 8},
+                    {"value": 9},
+                    {"value": 10},
+                ]
+            },
             "inserted_at": rating_annotation.inserted_at.isoformat(),
             "updated_at": rating_annotation.updated_at.isoformat(),
         },
@@ -396,7 +412,20 @@ def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin
         "name": "rating",
         "title": "Rating",
         "type": AnnotationType.rating.value,
-        "settings": {"values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]},
+        "settings": {
+            "options": [
+                {"value": 1},
+                {"value": 2},
+                {"value": 3},
+                {"value": 4},
+                {"value": 5},
+                {"value": 6},
+                {"value": 7},
+                {"value": 8},
+                {"value": 9},
+                {"value": 10},
+            ]
+        },
     }
 
     response = client.post(
@@ -414,7 +443,20 @@ def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin
         "title": "Rating",
         "type": AnnotationType.rating.value,
         "required": False,
-        "settings": {"values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]},
+        "settings": {
+            "options": [
+                {"value": 1},
+                {"value": 2},
+                {"value": 3},
+                {"value": 4},
+                {"value": 5},
+                {"value": 6},
+                {"value": 7},
+                {"value": 8},
+                {"value": 9},
+                {"value": 10},
+            ]
+        },
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -428,7 +470,7 @@ def test_create_dataset_rating_annotation_with_less_values_than_allowed(
         "name": "rating",
         "title": "Rating",
         "type": AnnotationType.rating.value,
-        "settings": {"values": list(range(0, RATING_MIN_ITEMS - 1))},
+        "settings": {"options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
     }
 
     response = client.post(
@@ -447,7 +489,7 @@ def test_create_dataset_rating_annotation_with_more_values_than_allowed(
         "name": "rating",
         "title": "Rating",
         "type": AnnotationType.rating.value,
-        "settings": {"values": list(range(0, RATING_MAX_ITEMS + 1))},
+        "settings": {"options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
     }
 
     response = client.post(
@@ -466,7 +508,35 @@ def test_create_dataset_rating_annotation_with_invalid_settings(
         "name": "rating",
         "title": "Rating",
         "type": AnnotationType.rating.value,
-        "settings": {"invalid": "value"},
+        "settings": {
+            "options": "invalid",
+        },
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
+    )
+
+    assert response.status_code == 422
+    assert db.query(Annotation).count() == 0
+
+
+def test_create_dataset_rating_annotation_with_invalid_settings_options_values(
+    client: TestClient, db: Session, admin_auth_header: dict
+):
+    dataset = DatasetFactory.create()
+    annotation_json = {
+        "name": "rating",
+        "title": "Rating",
+        "type": AnnotationType.rating.value,
+        "settings": {
+            "options": [
+                {"value": "A"},
+                {"value": "B"},
+                {"value": "C"},
+                {"value": "D"},
+            ]
+        },
     }
 
     response = client.post(

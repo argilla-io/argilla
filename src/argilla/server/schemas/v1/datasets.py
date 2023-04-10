@@ -20,8 +20,8 @@ from pydantic import BaseModel, conlist, validator
 
 from argilla.server.models import AnnotationType
 
-RATING_MIN_ITEMS = 2
-RATING_MAX_ITEMS = 100
+RATING_OPTIONS_MIN_ITEMS = 2
+RATING_OPTIONS_MAX_ITEMS = 100
 
 
 class Dataset(BaseModel):
@@ -56,9 +56,16 @@ class Annotation(BaseModel):
         orm_mode = True
 
 
+class RatingAnnotationSettingsOptionCreate(BaseModel):
+    value: int
+
+
 class RatingAnnotationSettingsCreate(BaseModel):
-    # TODO: If pydantic is upgraded (something we should do regularly) we should add `unique_items=True`
-    values: conlist(item_type=Union[int, float, str], min_items=RATING_MIN_ITEMS, max_items=RATING_MAX_ITEMS)
+    options: conlist(
+        item_type=RatingAnnotationSettingsOptionCreate,
+        min_items=RATING_OPTIONS_MIN_ITEMS,
+        max_items=RATING_OPTIONS_MAX_ITEMS,
+    )
 
 
 class AnnotationCreate(BaseModel):
