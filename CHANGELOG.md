@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `/api/v1/datasets` new endpoint to list datasets ([#2615]).
+- `/api/v1/datasets` new endpoint to list and create datasets ([#2615]).
+- `/api/v1/datasets/{dataset_id}` new endpoint to delete datasets ([#2615]).
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
 
