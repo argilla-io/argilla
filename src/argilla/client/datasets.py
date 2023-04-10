@@ -414,11 +414,6 @@ class DatasetBase:
         # check if train sizes sum up to 1
         assert (train_size + test_size) == 1, ValueError("`train_size` and `test_size` must sum to 1.")
 
-        if framework == framework.OPENAI:
-            train_size = 1
-            test_size = None
-            _LOGGER.warning("OpenAI does not support train/test split. Setting train_size to 1.")
-
         # check for annotations
         assert any([rec.annotation for rec in self._records]), ValueError("Dataset has no annotations.")
 
@@ -456,11 +451,14 @@ class DatasetBase:
                     train_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_train)
                     test_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_test)
                     return train_docbin, test_docbin
-                else:
+                elif framework is Framework.SPARK_NLP:
                     train_df = self._prepare_for_training_with_spark_nlp(records_train)
                     test_df = self._prepare_for_training_with_spark_nlp(records_test)
-
                     return train_df, test_df
+                else:
+                    train_jsonl = self._prepare_for_training_with_openai(records=records_train)
+                    test_jsonl = self._prepare_for_training_with_openai(records=records_test)
+                    return train_jsonl, test_jsonl
             else:
                 if framework is Framework.SPACY:
                     return self._prepare_for_training_with_spacy(nlp=lang, records=shuffled_records)
@@ -516,7 +514,7 @@ class DatasetBase:
         raise NotImplementedError
 
     @requires_version("openai>0.27")
-    def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
+    def _prepare_for_training_with_openai(self, **kwargs) -> "dict":
         """Prepares the dataset for training using the "openai" framework.
 
         Args:
@@ -866,8 +864,30 @@ class DatasetForTextClassification(DatasetBase):
         Returns:
             A pd.DataFrame.
         """
+        separator = "\n\n###\n\n"
 
-        raise NotImplementedError
+        jsonl = []
+        for rec in self._records:
+            if rec.annotation is None:
+                continue
+
+            if rec.text is not None:
+                prompt = rec.text
+            elif rec.text is None and "text" in rec.inputs:
+                prompt = rec.inputs["text"]
+            else:
+                prompt = ", ".join(f"{key}: {value}" for key, value in rec.inputs.items())
+            prompt += separator
+
+            if self._records[0].multi_label:
+                completion = ", ".join(rec.annotation)
+            else:
+                completion = rec.annotation
+            completion = " " + completion
+
+            jsonl.append({"prompt": prompt, "completion": completion})
+
+        return jsonl
 
     def __all_labels__(self):
         all_labels = set()
