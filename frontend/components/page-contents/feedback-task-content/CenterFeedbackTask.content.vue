@@ -1,16 +1,7 @@
 <template>
   <div class="wrapper">
-    <div class="container">
-      <div class="record">
-        <div class="item" v-for="field in record.fields" :key="field.title">
-          <div class="title-area --body1">
-            <span v-text="field.title"></span>
-          </div>
-          <div class="content" v-html="field.text" />
-        </div>
-      </div>
-      <QuestionsFormComponent :initialInputs="inputs" />
-    </div>
+    <RecordFeedbackTaskComponent :record="record" />
+    <QuestionsFormComponent :initialInputs="inputs" />
   </div>
 </template>
 
@@ -166,33 +157,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.container {
+.wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 2 * $base-space;
-}
-.record {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: $base-space;
-  padding: 2 * $base-space 4 * $base-space 2 * $base-space 4 * $base-space;
-  background: #fff;
-  border: 1px solid #e6e6e6;
-  border-radius: 8px;
-}
-
-.item {
-  display: flex;
-  flex-direction: column;
-  padding: 2 * $base-space;
-  background: #f5f5f5;
-  border-radius: 8px;
-  .title-area {
-    display: flex;
-    align-items: center;
-    gap: $base-space;
-    color: rgba(0, 0, 0, 0.37);
-  }
 }
 </style>
