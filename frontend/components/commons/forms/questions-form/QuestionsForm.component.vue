@@ -133,6 +133,7 @@ export default {
 form {
   display: flex;
   flex-direction: column;
+  min-width: 5em;
   gap: $base-space * 4;
   border: 2px solid #4c4ea3;
   border-radius: 5px;
