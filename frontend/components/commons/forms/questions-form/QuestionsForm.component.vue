@@ -134,9 +134,10 @@ form {
   display: flex;
   flex-direction: column;
   min-width: 5em;
+  height: fit-content;
   gap: $base-space * 4;
   border: 2px solid #4c4ea3;
-  border-radius: 5px;
+  border-radius: 8px;
   padding: $base-space * 4;
 }
 
@@ -150,6 +151,7 @@ form {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: $base-space * 8;
 }
 
 .error-message {
