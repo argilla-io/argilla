@@ -462,7 +462,7 @@ def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin
     }
 
 
-def test_create_dataset_rating_annotation_with_less_values_than_allowed(
+def test_create_dataset_rating_annotation_with_less_options_than_allowed(
     client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create()
@@ -481,7 +481,7 @@ def test_create_dataset_rating_annotation_with_less_values_than_allowed(
     assert db.query(Annotation).count() == 0
 
 
-def test_create_dataset_rating_annotation_with_more_values_than_allowed(
+def test_create_dataset_rating_annotation_with_more_options_than_allowed(
     client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create()

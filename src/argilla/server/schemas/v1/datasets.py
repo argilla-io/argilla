@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, List, Optional, Union
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, conlist, validator
