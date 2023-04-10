@@ -38,14 +38,18 @@ Vectors = Dict[str, List[float]]
 
 class Framework(Enum):
     TRANSFORMERS = "transformers"
+    SETFIT = "setfit"
     SPACY = "spacy"
     SPARK_NLP = "spark-nlp"
 
     @classmethod
     def _missing_(cls, value):
         raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of" f" {list(cls._value2member_map_.keys())}"
+            f"{value!r} is not a valid {cls.__name__.lower()}, please select one of {list(cls._value2member_map_.keys())}"
         )
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class _Validators(BaseModel):

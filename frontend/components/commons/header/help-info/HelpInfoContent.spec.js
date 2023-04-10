@@ -8,7 +8,7 @@ beforeEach(() => {
 
 const options = {
   selectedComponent: undefined,
-  stubs: ["helpInfoSimilarity", "helpInfoExplain", "base-button"],
+  stubs: ["helpInfoSimilarity", "helpInfoExplain", "base-button", "base-tabs"],
   propsData: {
     helpContents: [
       {
