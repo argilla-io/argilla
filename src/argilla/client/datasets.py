@@ -1121,8 +1121,30 @@ class DatasetForTokenClassification(DatasetBase):
         Returns:
             A pd.DataFrame.
         """
+        separator = "\n\n###\n\n"
 
-        raise NotImplementedError
+        jsonl = []
+        for rec in self._records:
+            if rec.annotation is None:
+                continue
+
+            if rec.text is not None:
+                prompt = rec.text
+            elif rec.text is None and "text" in rec.inputs:
+                prompt = rec.inputs["text"]
+            else:
+                prompt = ", ".join(f"{key}: {value}" for key, value in rec.inputs.items())
+            prompt += separator  # needed for better performance
+
+            if self._records[0].multi_label:
+                completion = ", ".join(rec.annotation)
+            else:
+                completion = rec.annotation
+            completion = " " + completion  # needed for better performance
+
+            jsonl.append({"prompt": prompt, "completion": completion})
+
+        return jsonl
 
     def __all_labels__(self):
         all_labels = set()
@@ -1386,7 +1408,9 @@ class DatasetForText2Text(DatasetBase):
                 prompt = ", ".join(f"{key}: {value}" for key, value in rec.inputs.items())
             prompt += separator  # needed for better performance
 
-            jsonl.append({"prompt": prompt, "completion": rec.annotation})
+            completion = " " + rec.annotation  # needed for better performance
+
+            jsonl.append({"prompt": prompt, "completion": completion})
 
         return jsonl
 
