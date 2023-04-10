@@ -180,7 +180,7 @@ class DatasetBase:
         import datasets
 
         if isinstance(dataset, datasets.DatasetDict):
-            raise ValueError("`datasets.DatasetDict` are not supported. Please, select the dataset" " split before.")
+            raise ValueError("`datasets.DatasetDict` are not supported. Please, select the dataset split before.")
 
         # clean column mappings
         column_mapping = {key: val for key, val in column_mapping.items() if val is not None}
@@ -400,6 +400,8 @@ class DatasetBase:
              'label': ClassLabel(num_classes=1, names=['SPAM'])}
 
         """
+        if train_size is None:
+            train_size = 1
         if test_size is None:
             test_size = 1 - train_size
 
@@ -427,11 +429,11 @@ class DatasetBase:
             test_size = None
 
         # prepare for training for the right method
-        if framework is Framework.TRANSFORMERS:
+        if framework in [Framework.TRANSFORMERS, Framework.SETFIT]:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
         elif framework is Framework.SPACY and lang is None:
             raise ValueError(
-                "Please provide a spacy language model to prepare the" " dataset for training with the spacy framework."
+                "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
             )
         elif framework in [Framework.SPACY, Framework.SPARK_NLP]:
             if train_size and test_size:
@@ -718,14 +720,19 @@ class DatasetForTextClassification(DatasetBase):
     ):
         import datasets
 
-        inputs_keys = {key: None for rec in self._records for key in rec.inputs if rec.annotation is not None}.keys()
-
-        ds_dict = {"id": [], **{key: [] for key in inputs_keys}, "label": []}
+        ds_dict = {"id": [], "text": [], "label": []}
         for rec in self._records:
             if rec.annotation is None:
                 continue
-            for key in inputs_keys:
-                ds_dict[key].append(rec.inputs.get(key))
+
+            if rec.text is not None:
+                text = rec.text
+            elif rec.text is None and "text" in rec.inputs:
+                text = rec.inputs["text"]
+            else:
+                text = " ".join(rec.inputs.values())
+
+            ds_dict["text"].append(text)
             ds_dict["label"].append(rec.annotation)
             ds_dict["id"].append(str(rec.id))
 
@@ -743,7 +750,7 @@ class DatasetForTextClassification(DatasetBase):
 
         feature_dict = {
             "id": datasets.Value("string"),
-            **{key: datasets.Value("string") for key in inputs_keys},
+            "text": datasets.Value("string"),
             "label": [class_label] if self._records[0].multi_label else class_label,
         }
 
@@ -761,7 +768,6 @@ class DatasetForTextClassification(DatasetBase):
                 {
                     "id": ds["id"],
                     "text": ds["text"],
-                    "context": ds_dict["context"],
                     "label": labels,
                     "binarized_label": binarized_labels,
                 },

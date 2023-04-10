@@ -32,7 +32,6 @@ from argilla.server.models import User
 from argilla.server.security.auth_provider.base import (
     AuthProvider,
     api_key_header,
-    old_api_key_header,
 )
 from argilla.server.security.model import Token, User
 
@@ -153,10 +152,8 @@ class LocalAuthProvider(AuthProvider):
         security_scopes: SecurityScopes,
         db: Session = Depends(get_db),
         api_key: Optional[str] = Depends(api_key_header),
-        old_api_key: Optional[str] = Depends(old_api_key_header),
         token: Optional[str] = Depends(_oauth2_scheme),
     ) -> User:
-        api_key = api_key or old_api_key
         user = None
 
         if api_key:

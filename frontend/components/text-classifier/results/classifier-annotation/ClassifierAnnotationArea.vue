@@ -131,7 +131,7 @@ export default {
     shownLabels: {
       get: function () {
         return this.allowToShowAllLabels
-          ? this.sortedLabels.length
+          ? this.labels.length
           : this.idState.shownLabels;
       },
       set: function (newValue) {
@@ -162,12 +162,9 @@ export default {
       });
     },
     filteredLabels() {
-      return this.sortedLabels.filter((label) =>
+      return this.labels.filter((label) =>
         label.class.toLowerCase().match(this.searchText.toLowerCase())
       );
-    },
-    sortedLabels() {
-      return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
     },
     appliedLabels() {
       return this.labels.filter((l) => l.selected).map((label) => label.class);

@@ -9,7 +9,7 @@
       v-text="description"
     />
 
-    <span class="user-token-value" v-text="userToken" />
+    <span class="user-token-value --body1" v-text="'**** **** **** ****'" />
 
     <div class="user-token-button">
       <base-action-tooltip tooltip="Copied">

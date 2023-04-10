@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import { Notification } from "@/models/Notifications";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
 import { getAllLabelsTextByDatasetId } from "@/models/globalLabel.queries";
@@ -119,6 +120,10 @@ export default {
       return getAllLabelsTextByDatasetId(this.dataset.id);
     },
   },
+  created() {
+    this.TOAST_MESSAGE_ONSAVE_RULE_IN_SUCCESS = "The rule is saved";
+    this.TOAST_MESSAGE_ONSAVE_RULE_IN_ERROR = "The rule could not be saved";
+  },
   methods: {
     async updateCurrentRule({ query, labels }) {
       if (!query) {
@@ -141,8 +146,28 @@ export default {
       await this.viewSettings.enableRulesSummary();
     },
     async saveRule(rule) {
-      await this.dataset.storeLabelingRule(rule);
-      this.saved = true;
+      let message = "";
+      let typeOfToast = "";
+      try {
+        await this.dataset.storeLabelingRule(rule);
+        this.saved = true;
+
+        message = this.TOAST_MESSAGE_ONSAVE_RULE_IN_SUCCESS;
+        typeOfToast = "success";
+      } catch (err) {
+        console.log(err);
+        message = this.TOAST_MESSAGE_ONSAVE_RULE_IN_ERROR;
+        typeOfToast = "error";
+      } finally {
+        this.showToastComponent(message, typeOfToast);
+      }
+    },
+    showToastComponent(message, typeOfToast) {
+      Notification.dispatch("notify", {
+        message: message,
+        numberOfChars: message.length,
+        type: typeOfToast,
+      });
     },
   },
 };

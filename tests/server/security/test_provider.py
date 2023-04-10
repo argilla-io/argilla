@@ -28,9 +28,8 @@ security_Scopes = SecurityScopes
 @pytest.mark.asyncio
 async def test_get_user_via_token(db: Session, argilla_user):
     access_token = localAuth._create_access_token(username="argilla")
-    user = localAuth.get_current_user(
-        security_scopes=security_Scopes, db=db, token=access_token, api_key=None, old_api_key=None
-    )
+
+    user = localAuth.get_current_user(security_scopes=security_Scopes, db=db, token=access_token, api_key=None)
     assert user.username == "argilla"
 
 

@@ -3,7 +3,7 @@
 These tutorials show you how Argilla can help you to monitor your model predictions.
 
 ````{grid} 1 1 2 2
-:class-container: tuto-section-2
+:class-container: tuto-section-2 tuto-list
 
 ```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
 ```
