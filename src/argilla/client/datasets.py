@@ -877,13 +877,13 @@ class DatasetForTextClassification(DatasetBase):
                 prompt = rec.inputs["text"]
             else:
                 prompt = ", ".join(f"{key}: {value}" for key, value in rec.inputs.items())
-            prompt += separator
+            prompt += separator  # needed for better performance
 
             if self._records[0].multi_label:
                 completion = ", ".join(rec.annotation)
             else:
                 completion = rec.annotation
-            completion = " " + completion
+            completion = " " + completion  # needed for better performance
 
             jsonl.append({"prompt": prompt, "completion": completion})
 
