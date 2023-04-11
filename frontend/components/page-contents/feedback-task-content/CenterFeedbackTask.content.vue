@@ -10,20 +10,26 @@ export default {
   name: "CenterFeedbackTaskContent",
   created() {
     this.record = {
-      id: "daboudi",
+      id: "record_1",
       fields: [
         {
+          id: "field_1",
           title: "Input",
           text: `
+            <img src="https://robohash.org/B4J.png?set=set4" width="100"/>
+            <img src="https://robohash.org/60S.png?set=set4" width="100"/>
+            <br />
             Lorem ipsum dolor sit amet consectetur adipisicing elit.
             Dolorum ratione quas quis eveniet harum cum, earum a facere
             voluptate fugit nostrum sequi facilis incidunt debitis unde?
             Eos rem debitis velit? Officia magni odit possimus quis nisi.
             Dolore, eaque eligendi! Beatae quos debitis soluta distinctio
             qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium
-            explicabo ab, pariatur id sapiente tenetur.`,
+            explicabo ab, pariatur id sapiente tenetur.
+            `,
         },
         {
+          id: "field_2",
           title: "Outputs",
           text: `
             Lorem ipsum dolor sit amet, consectetur adipisicing elit.

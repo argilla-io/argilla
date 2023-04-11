@@ -1,10 +1,10 @@
 <template>
   <div class="record">
-    <div class="item" v-for="field in record.fields" :key="field.title">
+    <div class="item" v-for="{ id, title, text } in record.fields" :key="id">
       <div class="title-area --body1">
-        <span v-text="field.title"></span>
+        <span v-text="title"></span>
       </div>
-      <div class="content" v-html="field.text" />
+      <div class="content" v-html="text" />
     </div>
   </div>
 </template>
