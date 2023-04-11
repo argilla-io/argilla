@@ -21,7 +21,12 @@ from sqlalchemy.orm import Session
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
 from argilla.server.policies import DatasetPolicyV1, authorize
-from argilla.server.schemas.v1.datasets import Annotation, Dataset, DatasetCreate
+from argilla.server.schemas.v1.datasets import (
+    Annotation,
+    AnnotationCreate,
+    Dataset,
+    DatasetCreate,
+)
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
@@ -97,6 +102,27 @@ def create_dataset(
         )
 
     return datasets.create_dataset(db, dataset_create)
+
+
+@router.post("/datasets/{dataset_id}/annotations", status_code=status.HTTP_201_CREATED, response_model=Annotation)
+def create_dataset_annotation(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    annotation_create: AnnotationCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, DatasetPolicyV1.create)
+
+    dataset = _get_dataset(db, dataset_id)
+
+    if datasets.get_annotation_by_name_and_dataset_id(db, annotation_create.name, dataset_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Annotation with name `{annotation_create.name}` already exists for dataset with id `{dataset_id}`",
+        )
+
+    return datasets.create_annotation(db, dataset, annotation_create)
 
 
 @router.delete("/datasets/{dataset_id}", response_model=Dataset)
