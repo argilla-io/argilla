@@ -12,10 +12,28 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
+
+
+class AnnotationAnswer(BaseModel):
+    value: Any
+
+
+class PredictionAnswer(BaseModel):
+    value: Any
+    score: float = 0.0
+
+
+Annotation = Dict[str, AnnotationAnswer]
+Prediction = Dict[str, PredictionAnswer]
+
+
+class ValidatedAnnotation(BaseModel):
+    reviewer: str
+    annotation: Annotation
 
 
 class Record(BaseModel):
@@ -23,4 +41,10 @@ class Record(BaseModel):
 
     fields: Dict[str, Any]
 
-    annotations: Dict[str, Any]
+    annotations: Optional[Dict[str, Annotation]]
+    predictions: Optional[Dict[str, Prediction]]
+
+    metadata: Optional[Dict[str, Any]]
+    vectors: Optional[Dict[str, List[float]]]
+
+    validated_annotation: Optional[ValidatedAnnotation]
