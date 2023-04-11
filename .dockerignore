@@ -10,5 +10,5 @@
 !scripts/start_quickstart_argilla.sh
 !scripts/load_data.py
 
-#Package dependencies
+# Package dependencies
 !quickstart.requirements.txt
