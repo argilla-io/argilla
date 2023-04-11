@@ -13,9 +13,9 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict
+from typing import Any, Dict, List
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 
 from argilla.server.models import Annotation, AnnotationType, Dataset
 
@@ -28,20 +28,54 @@ class ElasticSearchEngine:
         self._client = Elasticsearch(**self.config)
 
     def create_index(self, dataset: Dataset):
-        fields = {}
+        fields = {
+            "fields": {"dynamic": False, "type": "object"},
+            "annotations": {"dynamic": True, "type": "object"},
+            "predictions": {"dynamic": True, "type": "object"},
+            "metadata": {"dynamic": False, "type": "object"},
+            "vectors": {"dynamic": False, "type": "object"},
+        }
 
+        dynamic_templates = []
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
         for annotation in dataset.annotations:
-            fields[annotation.name] = self._field_mapping_for_annotation(annotation)
+            for field_prefix in ["annotations", "predictions"]:
+                dynamic_templates.extend(
+                    [
+                        {
+                            f"{annotation.name}_{field_prefix}": {
+                                "path_match": f"{field_prefix}.*.{annotation.name}.value",
+                                "mapping": self._field_mapping_for_annotation(annotation),
+                            }
+                        }
+                    ]
+                )
 
-        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
         mappings = {
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
             "dynamic": "strict",
+            "dynamic_templates": dynamic_templates,
             "properties": fields,
         }
 
-        index_name = f"rg.{dataset.id}"
+        index_name = self._index_name_for_dataset(dataset)
         self._client.indices.create(index=index_name, body={"mappings": mappings})
+
+    def add_data_batch(self, dataset: Dataset, batch: List[dict]):
+        index_name = self._index_name_for_dataset(dataset)
+
+        if not self._client.indices.exists(index=index_name):
+            raise RuntimeError(f"Unable to add data batch to {dataset}. The specified index is invalid.")
+
+        bulk_actions = [{"_op_type": "create", "_id": r.pop("id"), "_index": index_name, **r} for r in batch]
+
+        _, errors = helpers.bulk(client=self._client, index=index_name, actions=bulk_actions, raise_on_error=False)
+        if errors:
+            raise RuntimeError(errors)
+
+    @staticmethod
+    def _index_name_for_dataset(dataset):
+        return f"rg.{dataset.id}"
 
     def _field_mapping_for_annotation(self, annotation_task: Annotation):
         if annotation_task.type == AnnotationType.rating:
@@ -49,6 +83,6 @@ class ElasticSearchEngine:
             return {"type": "integer"}
         elif annotation_task.type == AnnotationType.text:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
-            return {"type": "text"}
+            return {"type": "text", "index": False}
         else:
             raise ValueError(f"Annotation of type {annotation_task.type} cannot be processed")

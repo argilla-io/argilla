@@ -11,11 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import uuid
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AnnotationAnswer(BaseModel):
@@ -48,3 +48,15 @@ class Record(BaseModel):
     vectors: Optional[Dict[str, List[float]]]
 
     validated_annotation: Optional[ValidatedAnnotation]
+
+
+class RecordCreate(BaseModel):
+    id: UUID = Field(default_factory=uuid.uuid4)
+
+    fields: Dict[str, Any]
+
+    annotations: Optional[Dict[str, Annotation]]
+    predictions: Optional[Dict[str, Annotation]]
+
+    metadata: Optional[Dict[str, Any]]
+    vectors: Optional[Dict[str, List[float]]]
