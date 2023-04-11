@@ -130,9 +130,9 @@ class ArgillaSpaCyTrainer:
         self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
         self.config["system"]["seed"] = seed or 42
         if self.use_gpu:
-            self.config["components"]["transformer"]["model"]["name"] = model or "roberta-base"
+            self.config["components"]["transformer"]["model"]["name"] = self.model or "roberta-base"
         else:
-            self.config["paths"]["vectors"] = model or "en_core_web_lg"
+            self.config["paths"]["vectors"] = self.model or "en_core_web_lg"
 
         self._nlp = None
 
