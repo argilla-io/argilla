@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, conlist, validator
@@ -42,30 +42,50 @@ class DatasetCreate(BaseModel):
     workspace_id: UUID
 
 
+class RatingAnnotationSettingsOption(BaseModel):
+    value: int
+
+
+class RatingAnnotationSettings(BaseModel):
+    options: conlist(
+        item_type=RatingAnnotationSettingsOption,
+        min_items=RATING_OPTIONS_MIN_ITEMS,
+        max_items=RATING_OPTIONS_MAX_ITEMS,
+    )
+
+
+def _validate_settings(settings: Any, values):
+    if settings and not isinstance(settings, dict):
+        return settings
+
+    type = values.get("type")
+
+    if type == AnnotationType.text:
+        return {}
+    if type == AnnotationType.rating:
+        return RatingAnnotationSettings(**settings)
+    else:
+        return settings
+
+
+class TextAnnotationSettings(BaseModel):
+    pass
+
+
 class Annotation(BaseModel):
     id: UUID
     name: str
     title: str
     type: AnnotationType
     required: bool
-    settings: dict
+    settings: Union[RatingAnnotationSettings, TextAnnotationSettings]
     inserted_at: datetime
     updated_at: datetime
 
+    _validate_settings = validator("settings", pre=True, always=True, allow_reuse=True)(_validate_settings)
+
     class Config:
         orm_mode = True
-
-
-class RatingAnnotationSettingsOptionCreate(BaseModel):
-    value: int
-
-
-class RatingAnnotationSettingsCreate(BaseModel):
-    options: conlist(
-        item_type=RatingAnnotationSettingsOptionCreate,
-        min_items=RATING_OPTIONS_MIN_ITEMS,
-        max_items=RATING_OPTIONS_MAX_ITEMS,
-    )
 
 
 class AnnotationCreate(BaseModel):
@@ -73,15 +93,6 @@ class AnnotationCreate(BaseModel):
     title: str
     type: AnnotationType
     required: Optional[bool]
-    settings: Optional[dict] = {}
+    settings: Optional[Union[RatingAnnotationSettings, TextAnnotationSettings]]
 
-    @validator("settings", always=True)
-    def validate_settings(cls, settings: dict, values):
-        type = values.get("type")
-
-        if type == AnnotationType.text:
-            return {}
-        if type == AnnotationType.rating:
-            return RatingAnnotationSettingsCreate(**settings).dict()
-        else:
-            return settings
+    _validate_settings = validator("settings", pre=True, always=True, allow_reuse=True)(_validate_settings)
