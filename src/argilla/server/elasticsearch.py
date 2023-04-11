@@ -18,6 +18,7 @@ from typing import Any, Dict, List
 from elasticsearch import Elasticsearch, helpers
 
 from argilla.server.models import Annotation, AnnotationType, Dataset
+from argilla.server.schemas.v1.records import RecordCreate
 
 
 @dataclasses.dataclass
@@ -61,13 +62,16 @@ class ElasticSearchEngine:
         index_name = self._index_name_for_dataset(dataset)
         self._client.indices.create(index=index_name, body={"mappings": mappings})
 
-    def add_data_batch(self, dataset: Dataset, batch: List[dict]):
+    def add_data_batch(self, dataset: Dataset, batch: List[RecordCreate]):
         index_name = self._index_name_for_dataset(dataset)
 
         if not self._client.indices.exists(index=index_name):
             raise RuntimeError(f"Unable to add data batch to {dataset}. The specified index is invalid.")
 
-        bulk_actions = [{"_op_type": "create", "_id": r.pop("id"), "_index": index_name, **r} for r in batch]
+        bulk_actions = [
+            {"_op_type": "create", "_id": r.id, "_index": index_name, **r.dict(exclude={"id"}, exclude_none=True)}
+            for r in batch
+        ]
 
         _, errors = helpers.bulk(client=self._client, index=index_name, actions=bulk_actions, raise_on_error=False)
         if errors:

@@ -194,7 +194,7 @@ def test_index_records_for_non_existing_index(
     with pytest.raises(
         RuntimeError, match=r"Unable to add data batch to Dataset\(.*\)\. The specified index is invalid\."
     ):
-        search_engine.add_data_batch(dataset, batch=[r.dict() for r in records])
+        search_engine.add_data_batch(dataset, batch=records)
 
 
 def test_add_records_to_index(search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch, db: Session):
@@ -219,7 +219,7 @@ def test_add_records_to_index(search_engine: ElasticSearchEngine, elasticsearch:
         for idx, text in enumerate(["this is a text"] * 10)
     ]
 
-    search_engine.add_data_batch(dataset, batch=[r.dict() for r in records])
+    search_engine.add_data_batch(dataset, batch=records)
 
     index_name = _index_name_for_dataset(dataset)
 
