@@ -5,6 +5,7 @@ It allows you to perform simple fuzzy searches of words and phrases, or complex 
 
 The same query can be used in the search bar of the Argilla web app, or with the Python client as optional arguments.
 
+To load an Argilla dataset from a query, you can use the `load` function.
 
 ```python
 import argilla as rg
@@ -12,6 +13,11 @@ import argilla as rg
 rg.load("my_dataset", query="text.exact:example")
 ```
 
+To query an Argilla dataset for similar records, and get the records and their similarity score to the query, you can use the `query` function.
+
+```python
+rg.query("my_dataset", query="text.exact:example")
+```
 ## Search fields
 
 An important concept when searching with Elasticsearch is the *field* concept.
@@ -106,6 +112,10 @@ Note that the URL cannot exceed the metadata length limit.
 ## Vector fields
 
 It is also possible to query the presense of vector field. Imagine you only want to include records with `vectors={"vector_1": vector_1}`. You can then define a query `vectors.vector_1: *`.
+
+```python
+rg.query("my_dataset", vectors={"my_vector": [1, 2, 3]})
+```
 ## Filters as query string
 
 Just like the metadata, you can also use the filter fields in you query.

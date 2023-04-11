@@ -15,7 +15,7 @@ Methods
 -------
 
 .. automodule:: argilla
-   :members: init, log, load, copy, delete, set_workspace, get_workspace, delete_records, active_client
+   :members: init, log, load, query, copy, delete, set_workspace, get_workspace, delete_records, active_client
 
 .. _python ref records:
 
