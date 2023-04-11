@@ -104,21 +104,26 @@ class ArgillaSpaCyTrainer:
         self.gpu_id = gpu_id
         self.use_gpu = False
         if self.gpu_id != -1:
+            self.use_gpu = spacy.prefer_gpu(self.gpu_id)
+            if self.use_gpu is False and self.model is not None:
+                self._logger.warn(
+                    "Since the GPU is not available the model will be ignored, "
+                    "and set to `None` so that the default CPU model will be used "
+                    "instead."
+                )
+                self.model = None
+
+        if self.use_gpu:
             try:
                 require_version("spacy-transformers")
-                self.use_gpu = spacy.prefer_gpu(self.gpu_id)
-                if self.use_gpu is False and self.model is not None:
-                    self._logger.warn(
-                        "Since the GPU is not available the model will be ignored, "
-                        "and set to `None` so that the default CPU model will be used "
-                        "instead."
-                    )
-                    self.model = None
             except:
                 self._logger.warn(
                     "`spacy-transformers` is not installed and it's required "
                     "to use the GPU. Falling back to the CPU."
                 )
+            finally:
+                self.use_gpu = False
+                self.gpu_id = -1
 
         self.config = init_config(
             lang=self.language,
