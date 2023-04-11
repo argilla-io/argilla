@@ -17,6 +17,7 @@ from typing import Any, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, conlist, validator
+from pydantic.utils import GetterDict
 
 from argilla.server.models import AnnotationType
 
@@ -54,22 +55,18 @@ class RatingAnnotationSettings(BaseModel):
     )
 
 
-def _validate_settings(settings: Any, values):
-    if settings and not isinstance(settings, dict):
-        return settings
-
-    type = values.get("type")
-
-    if type == AnnotationType.text:
-        return {}
-    if type == AnnotationType.rating:
-        return RatingAnnotationSettings(**settings)
-    else:
-        return settings
-
-
 class TextAnnotationSettings(BaseModel):
     pass
+
+
+class AnnotationGetter(GetterDict):
+    def get(self, key: Any, default: Any = None) -> Any:
+        if key == "settings":
+            if self._obj.type == AnnotationType.text:
+                return TextAnnotationSettings()
+            if self._obj.type == AnnotationType.rating:
+                return RatingAnnotationSettings(**self._obj.settings)
+        return super().get(key, default)
 
 
 class Annotation(BaseModel):
@@ -82,10 +79,9 @@ class Annotation(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    _validate_settings = validator("settings", pre=True, always=True, allow_reuse=True)(_validate_settings)
-
     class Config:
         orm_mode = True
+        getter_dict = AnnotationGetter
 
 
 class AnnotationCreate(BaseModel):
@@ -95,4 +91,16 @@ class AnnotationCreate(BaseModel):
     required: Optional[bool]
     settings: Optional[Union[RatingAnnotationSettings, TextAnnotationSettings]]
 
-    _validate_settings = validator("settings", pre=True, always=True, allow_reuse=True)(_validate_settings)
+    @validator("settings", pre=True, always=True)
+    def validate_settings(cls, settings: Any, values):
+        if settings and not isinstance(settings, dict):
+            return settings
+
+        type = values.get("type")
+
+        if type == AnnotationType.text:
+            return {}
+        if type == AnnotationType.rating:
+            return RatingAnnotationSettings(**settings)
+        else:
+            return settings
