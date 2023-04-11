@@ -863,6 +863,8 @@ class DatasetForTextClassification(DatasetBase):
             A pd.DataFrame.
         """
         separator = "\n\n###\n\n"
+        if len(self._records) <= 100:
+            _LOGGER.warning("OpenAI recommends at least 100 examples for training a classification model.")
 
         jsonl = []
         for rec in self._records:
@@ -1122,7 +1124,11 @@ class DatasetForTokenClassification(DatasetBase):
             A pd.DataFrame.
         """
         separator = "\n\n###\n\n"
+        end_token = " END"
         labels = self.__all_labels__()
+
+        if len(self._records) <= 500:
+            _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
 
         jsonl = []
         for rec in self._records:
@@ -1135,7 +1141,7 @@ class DatasetForTokenClassification(DatasetBase):
             for entity in rec.annotation:
                 completion[entity[0]].append(prompt[entity[1] : entity[2]])
             completion = "\n".join([f"{label}: {values}" for label, values in completion.items()])
-            completion = " " + completion
+            completion = " " + completion + end_token
             jsonl.append({"id": rec.id, "prompt": prompt, "completion": completion})
 
         return jsonl
@@ -1388,6 +1394,9 @@ class DatasetForText2Text(DatasetBase):
             A pd.DataFrame.
         """
         separator = "\n\n###\n\n"
+        end_token = " END"
+        if len(self._records) <= 500:
+            _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
 
         jsonl = []
         for rec in self._records:
@@ -1395,7 +1404,7 @@ class DatasetForText2Text(DatasetBase):
                 continue
 
             prompt = rec.text + separator  # needed for better performance
-            completion = rec.annotation
+            completion = rec.annotation + end_token
 
             jsonl.append({"id": rec.id, "prompt": prompt, "completion": completion})
 

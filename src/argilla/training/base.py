@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import inspect
 import logging
 import os
 from typing import TYPE_CHECKING, List, Optional, Union
@@ -130,6 +129,16 @@ class ArgillaTrainer(object):
             from argilla.training.spacy import ArgillaSpaCyTrainer
 
             self._trainer = ArgillaSpaCyTrainer(
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                model=self.model,
+                multi_label=self._multi_label,
+                seed=self._seed,
+            )
+        elif framework is Framework.OPENAI:
+            from argilla.training.openai import ArgillaOpenAITrainer
+
+            self._trainer = ArgillaOpenAITrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 model=self.model,
