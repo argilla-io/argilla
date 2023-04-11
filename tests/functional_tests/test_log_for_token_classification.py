@@ -572,3 +572,50 @@ def test_log_data_with_vectors_and_update_ok(
 
     assert len(ds) == 5
     assert ds[0].id == 3
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_similarity_search_query_records_in_python_client(
+    mocked_client: SecuredClient,
+):
+    dataset_name = "test_similarity_search_in_python_client_2"
+    text = "This is a text"
+    argilla.delete(dataset_name)
+    argilla.log(
+        argilla.TokenClassificationRecord(
+            id=0,
+            text=text,
+            tokens=text.split(),
+            vectors={"vinter": [0, 0, 0, 0]},
+        ),
+        name=dataset_name,
+    )
+    argilla.log(
+        argilla.TokenClassificationRecord(
+            id=1,
+            text=text,
+            tokens=text.split(),
+            vectors={"vinter": [1, 1, 1, 1]},
+        ),
+        name=dataset_name,
+    )
+    argilla.log(
+        argilla.TokenClassificationRecord(
+            id=2,
+            text=text,
+            tokens=text.split(),
+            vectors={"vinter": [2, 2, 2, 2]},
+        ),
+        name=dataset_name,
+    )
+    records_scores = argilla.query(dataset_name, vector=("vinter", [1, 1, 1, 1]))
+    scores = [score for _, score in records_scores]
+    records = [record for record, _ in records_scores]
+    assert all(map(lambda x: isinstance(x, float), scores))
+    assert all(map(lambda x: isinstance(x, argilla.TokenClassificationRecord), records))
+    assert scores[0] == 1.0
+    assert scores[1] == 0.2
+    assert scores[2] == 0.2
