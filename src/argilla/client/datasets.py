@@ -883,7 +883,7 @@ class DatasetForTextClassification(DatasetBase):
                 completion = rec.annotation
             completion = " " + completion  # needed for better performance
 
-            jsonl.append({"prompt": prompt, "completion": completion})
+            jsonl.append({"id": rec.id, "prompt": prompt, "completion": completion})
 
         return jsonl
 
@@ -1136,7 +1136,7 @@ class DatasetForTokenClassification(DatasetBase):
                 completion[entity[0]].append(prompt[entity[1] : entity[2]])
             completion = "\n".join([f"{label}: {values}" for label, values in completion.items()])
             completion = " " + completion
-            jsonl.append({"prompt": prompt, "completion": completion})
+            jsonl.append({"id": rec.id, "prompt": prompt, "completion": completion})
 
         return jsonl
 
@@ -1395,9 +1395,9 @@ class DatasetForText2Text(DatasetBase):
                 continue
 
             prompt = rec.text + separator  # needed for better performance
-            completion = " " + rec.annotation  # needed for better performance
+            completion = rec.annotation
 
-            jsonl.append({"prompt": prompt, "completion": completion})
+            jsonl.append({"id": rec.id, "prompt": prompt, "completion": completion})
 
         return jsonl
 

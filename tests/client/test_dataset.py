@@ -404,6 +404,22 @@ class TestDatasetForTextClassification:
             "multilabel_textclassification_records",
         ],
     )
+    def test_prepare_for_training_with_openai(self, request, records):
+        records = request.getfixturevalue(records)
+        ds = rg.DatasetForTextClassification(records)
+        jsonl = ds.prepare_for_training(framework="openai", seed=42)
+
+        assert isinstance(jsonl, list)
+        assert isinstance(jsonl[0], dict)
+        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+
+    @pytest.mark.parametrize(
+        "records",
+        [
+            "singlelabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ],
+    )
     def test_prepare_for_training_with_spark_nlp(self, request, records):
         records = request.getfixturevalue(records)
 
@@ -659,6 +675,26 @@ class TestDatasetForTokenClassification:
         _HF_HUB_ACCESS_TOKEN is None,
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
+    def test_prepare_for_training_with_openai(self, request, records):
+        ner_dataset = datasets.load_dataset(
+            # TODO(@frascuchon): Move dataset to the new org
+            "rubrix/gutenberg_spacy-ner",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+        ds: DatasetForTokenClassification = rg.read_datasets(ner_dataset, task="TokenClassification")
+        for r in ds:
+            r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
+        jsonl = ds.prepare_for_training(framework="openai", seed=42)
+
+        assert isinstance(jsonl, list)
+        assert isinstance(jsonl[0], dict)
+        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
     def test_prepare_for_training_with_spark_nlp(self):
         ner_dataset = datasets.load_dataset(
             # TODO(@frascuchon): Move dataset to the new org
@@ -883,6 +919,22 @@ class TestDatasetForText2Text:
         )
         with pytest.raises(NotImplementedError):
             ds.prepare_for_training("spacy", lang=spacy.blank("en"), train_size=1)
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_prepare_for_training_with_openai(self, request, records):
+        ds = rg.DatasetForText2Text(
+            [rg.Text2TextRecord(text="Michael is a professor at Harvard but", annotation=" he used to work at MIT")]
+        )
+
+        jsonl = ds.prepare_for_training(framework="openai", seed=42)
+
+        assert isinstance(jsonl, list)
+        assert isinstance(jsonl[0], dict)
+        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+        assert jsonl[0]["prompt"] == "Michael is a professor at Harvard but"
 
     def test_prepare_for_training_with_spark_nlp(self):
         ds = rg.DatasetForText2Text(
