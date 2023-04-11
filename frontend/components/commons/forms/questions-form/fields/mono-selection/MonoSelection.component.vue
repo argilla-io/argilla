@@ -45,6 +45,8 @@
 
 <script>
 import { cloneDeep } from "lodash";
+import "assets/icons/info";
+
 export default {
   name: "MonoSelectionComponent",
   props: {
