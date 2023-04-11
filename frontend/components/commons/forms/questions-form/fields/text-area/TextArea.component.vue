@@ -30,6 +30,8 @@
 </template>
 
 <script>
+import "assets/icons/info";
+
 export default {
   name: "TextAreaComponent",
   props: {
