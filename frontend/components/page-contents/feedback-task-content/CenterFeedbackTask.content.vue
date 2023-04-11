@@ -16,9 +16,6 @@ export default {
           id: "field_1",
           title: "Input",
           text: `
-            <img src="https://robohash.org/B4J.png?set=set4" width="100"/>
-            <img src="https://robohash.org/60S.png?set=set4" width="100"/>
-            <br />
             Lorem ipsum dolor sit amet consectetur adipisicing elit.
             Dolorum ratione quas quis eveniet harum cum, earum a facere
             voluptate fugit nostrum sequi facilis incidunt debitis unde?
@@ -35,27 +32,27 @@ export default {
             Lorem ipsum dolor sit amet, consectetur adipisicing elit.
             Vitae cupiditate fugit quos officiis expedita, deleniti libero
             inventore fugiat perferendis dolor optio praesentium enim molestiae
-            molestias. <br /><br />Ipsam perferendis aperiam perspiciatis assumenda. Numquam
+            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
             reprehenderit non distinctio repellat adipisci laborum, fugit sint
             labore nulla tempore quam eos iste asperiores eius laudantium vel
             similique officiis sunt vero beatae magni ab dicta! Culpa, qui
-            dolore. <br /><br />Quaerat, repellendus deserunt doloribus laudantium ducimus
-            atque quia rerum ullam. <br /><br />Sit veritatis, quas id sed culpa deleniti
+            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
+            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
             officiis ipsa laudantium, eos qui pariatur iure facere, sequi
-            delectus similique! Commodi, a. <br /><br />Totam illo iure iste voluptate?
+            delectus similique! Commodi, a. Totam illo iure iste voluptate?
             Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
             distinctio qui beatae quaerat, ullam sit voluptas facere repellat
             accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
             Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
             architecto necessitatibus accusamus nesciunt exercitationem neque
             dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
-            non hic necessitatibus. <br /><br />Quibusdam repudiandae odit eaque enim
+            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
             voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
             ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
-            recusandae. <br /><br />Ipsam doloribus esse debitis libero. <br /><br />Quod corporis
+            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
             eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
             quaerat impedit animi porro saepe ipsa molestiae quibusdam
-            suscipit nam. <br /><br />Fuga quo sunt itaque corrupti atque dolores fugit,
+            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
             eligendi voluptate.`,
         },
       ],
