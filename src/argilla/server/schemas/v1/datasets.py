@@ -16,9 +16,12 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, conlist, validator
 
 from argilla.server.models import AnnotationType
+
+RATING_OPTIONS_MIN_ITEMS = 2
+RATING_OPTIONS_MAX_ITEMS = 100
 
 
 class Dataset(BaseModel):
@@ -51,3 +54,34 @@ class Annotation(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class RatingAnnotationSettingsOptionCreate(BaseModel):
+    value: int
+
+
+class RatingAnnotationSettingsCreate(BaseModel):
+    options: conlist(
+        item_type=RatingAnnotationSettingsOptionCreate,
+        min_items=RATING_OPTIONS_MIN_ITEMS,
+        max_items=RATING_OPTIONS_MAX_ITEMS,
+    )
+
+
+class AnnotationCreate(BaseModel):
+    name: str
+    title: str
+    type: AnnotationType
+    required: Optional[bool]
+    settings: Optional[dict] = {}
+
+    @validator("settings", always=True)
+    def validate_settings(cls, settings: dict, values):
+        type = values.get("type")
+
+        if type == AnnotationType.text:
+            return {}
+        if type == AnnotationType.rating:
+            return RatingAnnotationSettingsCreate(**settings).dict()
+        else:
+            return settings
