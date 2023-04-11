@@ -18,7 +18,7 @@ from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, Text, and_
+from sqlalchemy import JSON, ForeignKey, Text, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
@@ -34,9 +34,34 @@ def default_inserted_at(context):
     return context.get_current_parameters()["inserted_at"]
 
 
+class AnnotationType(str, Enum):
+    text = "text"
+    rating = "rating"
+
+
 class UserRole(str, Enum):
     admin = "admin"
     annotator = "annotator"
+
+
+class Annotation(Base):
+    __tablename__ = "annotations"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    name: Mapped[str]
+    title: Mapped[str] = mapped_column(Text)
+    type: Mapped[AnnotationType] = mapped_column(default=AnnotationType.text)
+    required: Mapped[bool] = mapped_column(default=False)
+    settings: Mapped[dict] = mapped_column(JSON, default={})
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+
+    dataset: Mapped["Dataset"] = relationship(back_populates="annotations")
+
+    def __repr__(self):
+        return f"Annotation(id={str(self.id)!r}, name={self.name!r}, type={self.type.value!r}, required={self.required!r}, dataset_id={str(self.dataset_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
 
 
 class Dataset(Base):
@@ -44,16 +69,19 @@ class Dataset(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str]
-    guidelines: Mapped[Optional[str]]
+    guidelines: Mapped[Optional[str]] = mapped_column(Text)
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id"))
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
+    annotations: Mapped[List["Annotation"]] = relationship(
+        back_populates="dataset", order_by=Annotation.inserted_at.asc()
+    )
 
     def __repr__(self):
-        return f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, workspace_id={str(self.workspace_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
 
 
 class WorkspaceUser(Base):

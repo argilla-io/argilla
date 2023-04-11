@@ -24,7 +24,6 @@ from rich import print as rprint
 from rich.progress import Progress
 
 from argilla._constants import (
-    _OLD_WORKSPACE_HEADER_NAME,
     DEFAULT_API_KEY,
     ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
@@ -217,7 +216,6 @@ class Argilla:
         if workspace != self.get_workspace():
             if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
                 self._client.headers[WORKSPACE_HEADER_NAME] = workspace
-                self._client.headers[_OLD_WORKSPACE_HEADER_NAME] = workspace
             else:
                 raise Exception(f"Wrong provided workspace {workspace}")
 

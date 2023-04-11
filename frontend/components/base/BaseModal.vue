@@ -16,18 +16,25 @@
   -->
 
 <template>
-  <transition v-if="modalVisible" name="fade" appear>
+  <transition v-if="modalVisible" name="modal" appear>
     <div class="modal-mask" :class="modalMaskClass">
       <div class="modal-wrapper" :class="modalPosition">
         <div
           class="modal-container"
           :class="modalClass"
-          v-click-outside="onClickOutside"
+          v-click-outside="closeModal"
         >
           <p v-if="modalTitle" class="modal__title">
             {{ modalTitle }}
           </p>
           <slot />
+          <BaseButton
+            class="button-close-modal"
+            @on-click="closeModal"
+            v-if="allowClose"
+          >
+            <svgicon name="close" width="20" height="20" />
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -49,6 +56,10 @@ export default {
     modalVisible: {
       type: Boolean,
       default: true,
+    },
+    allowClose: {
+      type: Boolean,
+      default: false,
     },
     modalClass: {
       type: String,
@@ -80,7 +91,7 @@ export default {
     },
   },
   methods: {
-    onClickOutside() {
+    closeModal() {
       this.$emit("close-modal");
     },
   },
@@ -98,7 +109,7 @@ export default {
   display: table;
   transition: opacity 0.3s ease;
   cursor: default;
-  background: $black-10;
+  background: $black-20;
   &:not(.prevent-scroll) {
     pointer-events: none;
   }
@@ -121,6 +132,11 @@ export default {
       margin-right: 6em;
     }
   }
+
+  &.modal-top-center {
+    align-items: flex-start;
+    padding-top: 5em;
+  }
   &.modal-center {
     align-items: center;
   }
@@ -138,6 +154,12 @@ export default {
   transition: $swift-ease-in-out;
   text-align: left;
   pointer-events: all;
+}
+.button-close-modal {
+  position: absolute;
+  right: $base-space * 2;
+  top: $base-space * 2;
+  padding: 0;
 }
 .modal-primary {
   box-shadow: $shadow;
@@ -165,6 +187,15 @@ export default {
   }
 }
 
+.modal-auto {
+  box-shadow: $shadow;
+  border-radius: $border-radius;
+  max-width: none;
+  :deep(.modal__text) {
+    margin-bottom: 2em;
+  }
+}
+
 :deep(.modal-buttons) {
   display: flex;
   .button {
@@ -184,16 +215,13 @@ export default {
   margin-top: 0;
 }
 
-.modal-enter {
-  opacity: 0;
-}
-
+.modal-enter,
 .modal-leave-active {
   opacity: 0;
 }
 
 .modal-enter .modal-container,
 .modal-leave-active .modal-container {
-  transform: scale(0.9);
+  transform: scale(0.99);
 }
 </style>

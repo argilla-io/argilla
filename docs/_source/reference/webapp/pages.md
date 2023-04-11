@@ -1,3 +1,5 @@
+(pages)=
+
 # Pages
 
 ## Home page
