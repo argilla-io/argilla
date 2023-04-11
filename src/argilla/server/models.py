@@ -39,6 +39,11 @@ class AnnotationType(str, Enum):
     rating = "rating"
 
 
+class DatasetStatus(str, Enum):
+    draft = "draft"
+    ready = "ready"
+
+
 class UserRole(str, Enum):
     admin = "admin"
     annotator = "annotator"
@@ -70,6 +75,7 @@ class Dataset(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str]
     guidelines: Mapped[Optional[str]] = mapped_column(Text)
+    status: Mapped[DatasetStatus] = mapped_column(default=DatasetStatus.draft)
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id"))
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
@@ -80,8 +86,16 @@ class Dataset(Base):
         back_populates="dataset", order_by=Annotation.inserted_at.asc()
     )
 
+    @property
+    def is_draft(self):
+        return self.status == DatasetStatus.draft
+
+    @property
+    def is_ready(self):
+        return self.status == DatasetStatus.ready
+
     def __repr__(self):
-        return f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, workspace_id={str(self.workspace_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, status={self.status.value!r}, workspace_id={str(self.workspace_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
 
 
 class WorkspaceUser(Base):

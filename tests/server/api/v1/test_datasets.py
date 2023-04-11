@@ -16,7 +16,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Annotation, AnnotationType, Dataset
+from argilla.server.models import Annotation, AnnotationType, Dataset, DatasetStatus
 from argilla.server.schemas.v1.datasets import (
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
@@ -37,7 +37,7 @@ from tests.factories import (
 def test_list_datasets(client: TestClient, admin_auth_header: dict):
     dataset_a = DatasetFactory.create(name="dataset-a")
     dataset_b = DatasetFactory.create(name="dataset-b", guidelines="guidelines")
-    dataset_c = DatasetFactory.create(name="dataset-c")
+    dataset_c = DatasetFactory.create(name="dataset-c", status=DatasetStatus.ready)
 
     response = client.get("/api/v1/datasets", headers=admin_auth_header)
 
@@ -47,6 +47,7 @@ def test_list_datasets(client: TestClient, admin_auth_header: dict):
             "id": str(dataset_a.id),
             "name": "dataset-a",
             "guidelines": None,
+            "status": DatasetStatus.draft.value,
             "workspace_id": str(dataset_a.workspace_id),
             "inserted_at": dataset_a.inserted_at.isoformat(),
             "updated_at": dataset_a.updated_at.isoformat(),
@@ -55,6 +56,7 @@ def test_list_datasets(client: TestClient, admin_auth_header: dict):
             "id": str(dataset_b.id),
             "name": "dataset-b",
             "guidelines": "guidelines",
+            "status": DatasetStatus.draft.value,
             "workspace_id": str(dataset_b.workspace_id),
             "inserted_at": dataset_b.inserted_at.isoformat(),
             "updated_at": dataset_b.updated_at.isoformat(),
@@ -63,6 +65,7 @@ def test_list_datasets(client: TestClient, admin_auth_header: dict):
             "id": str(dataset_c.id),
             "name": "dataset-c",
             "guidelines": None,
+            "status": DatasetStatus.ready.value,
             "workspace_id": str(dataset_c.workspace_id),
             "inserted_at": dataset_c.inserted_at.isoformat(),
             "updated_at": dataset_c.updated_at.isoformat(),
@@ -100,6 +103,7 @@ def test_get_dataset(client: TestClient, admin_auth_header: dict):
         "id": str(dataset.id),
         "name": "dataset",
         "guidelines": None,
+        "status": DatasetStatus.draft.value,
         "workspace_id": str(dataset.workspace_id),
         "inserted_at": dataset.inserted_at.isoformat(),
         "updated_at": dataset.updated_at.isoformat(),
@@ -250,6 +254,7 @@ def test_create_dataset(client: TestClient, db: Session, admin_auth_header: dict
         "id": str(UUID(response_body["id"])),
         "name": "name",
         "guidelines": "guidelines",
+        "status": DatasetStatus.draft.value,
         "workspace_id": str(workspace.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
@@ -343,7 +348,7 @@ def test_create_dataset_annotation_as_annotator(client: TestClient, db: Session)
         json=annotation_json,
     )
 
-    response.status_code == 403
+    assert response.status_code == 403
     assert db.query(Annotation).count() == 0
 
 
@@ -357,6 +362,18 @@ def test_create_dataset_annotation_with_existent_name(client: TestClient, db: Se
 
     assert response.status_code == 409
     assert db.query(Annotation).count() == 1
+
+
+def test_create_dataset_annotation_with_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    annotation_json = {"name": "name", "title": "title", "type": AnnotationType.text.value}
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
+    )
+
+    assert response.status_code == 403
+    assert db.query(Annotation).count() == 0
 
 
 def test_create_dataset_annotation_with_nonexistent_dataset_id(
@@ -545,6 +562,69 @@ def test_create_dataset_rating_annotation_with_invalid_settings_options_values(
 
     assert response.status_code == 422
     assert db.query(Annotation).count() == 0
+
+
+def test_publish_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    AnnotationFactory.create(dataset=dataset)
+
+    response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert db.get(Dataset, dataset.id).status == DatasetStatus.ready
+
+    response_body = response.json()
+    assert response_body["status"] == DatasetStatus.ready.value
+
+
+def test_publish_dataset_without_authentication(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    AnnotationFactory.create(dataset=dataset)
+
+    response = client.put(f"/api/v1/datasets/{dataset.id}/publish")
+
+    assert response.status_code == 401
+    assert db.get(Dataset, dataset.id).status == DatasetStatus.draft
+
+
+def test_publish_dataset_as_annotator(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    AnnotationFactory.create(dataset=dataset)
+    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+
+    response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
+    assert db.get(Dataset, dataset.id).status == DatasetStatus.draft
+
+
+def test_publish_dataset_already_published(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    AnnotationFactory.create(dataset=dataset)
+
+    response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
+
+    assert response.status_code == 403
+    assert db.get(Dataset, dataset.id).status == DatasetStatus.ready
+
+
+def test_publish_dataset_without_annotations(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+
+    response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
+
+    assert response.status_code == 403
+    assert db.get(Dataset, dataset.id).status == DatasetStatus.draft
+
+
+def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    AnnotationFactory.create(dataset=dataset)
+
+    response = client.put(f"/api/v1/datasets/{uuid4()}/publish", headers=admin_auth_header)
+
+    assert response.status_code == 404
+    assert db.get(Dataset, dataset.id).status == DatasetStatus.draft
 
 
 def test_delete_dataset(client: TestClient, db: Session, admin_auth_header: dict):

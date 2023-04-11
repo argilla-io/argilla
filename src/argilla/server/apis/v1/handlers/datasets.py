@@ -112,9 +112,9 @@ def create_dataset_annotation(
     annotation_create: AnnotationCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.create)
-
     dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.create_annotation(dataset))
 
     if datasets.get_annotation_by_name_and_dataset_id(db, annotation_create.name, dataset_id):
         raise HTTPException(
@@ -123,6 +123,20 @@ def create_dataset_annotation(
         )
 
     return datasets.create_annotation(db, dataset, annotation_create)
+
+
+@router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
+def publish_dataset(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.publish(dataset))
+
+    return datasets.publish_dataset(db, dataset)
 
 
 @router.delete("/datasets/{dataset_id}", response_model=Dataset)

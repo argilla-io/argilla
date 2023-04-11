@@ -35,6 +35,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Uuid, primary_key=True),
         sa.Column("name", sa.String, nullable=False, index=True),
         sa.Column("guidelines", sa.Text),
+        sa.Column("status", sa.String, nullable=False, index=True),
         sa.Column(
             "workspace_id", sa.Uuid, sa.ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False, index=True
         ),

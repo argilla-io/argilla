@@ -14,8 +14,9 @@
 
 from uuid import UUID
 
-from argilla.server.models import Annotation, Dataset
+from argilla.server.models import Annotation, Dataset, DatasetStatus
 from argilla.server.schemas.v1.datasets import AnnotationCreate, DatasetCreate
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 
@@ -39,6 +40,15 @@ def create_dataset(db: Session, dataset_create: DatasetCreate):
     )
 
     db.add(dataset)
+    db.commit()
+    db.refresh(dataset)
+
+    return dataset
+
+
+def publish_dataset(db: Session, dataset: Dataset):
+    dataset.status = DatasetStatus.ready
+
     db.commit()
     db.refresh(dataset)
 
@@ -71,3 +81,7 @@ def create_annotation(db: Session, dataset: Dataset, annotation_create: Annotati
     db.refresh(annotation)
 
     return annotation
+
+
+def count_annotations_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Annotation.id)).filter_by(dataset_id=dataset_id).scalar()
