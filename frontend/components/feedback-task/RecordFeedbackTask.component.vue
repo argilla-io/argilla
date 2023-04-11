@@ -2,9 +2,9 @@
   <div class="record">
     <div class="item" v-for="{ id, title, text } in record.fields" :key="id">
       <div class="title-area --body1">
-        <span v-text="title"></span>
+        <span v-text="title" />
       </div>
-      <div class="content" v-html="text" />
+      <div class="content" v-text="text" />
     </div>
   </div>
 </template>
