@@ -343,7 +343,7 @@ def test_create_dataset_annotation_as_annotator(client: TestClient, db: Session)
         json=annotation_json,
     )
 
-    response.status_code == 403
+    assert response.status_code == 403
     assert db.query(Annotation).count() == 0
 
 
