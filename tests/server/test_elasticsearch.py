@@ -59,8 +59,9 @@ def search_engine(es_config):
 )
 def test_create_index_for_dataset(search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch):
     dataset = DatasetFactory.create()
-    index_name = search_engine.create_dataset_index(dataset)
+    search_engine.create_index(dataset)
 
+    index_name = f"rg.{dataset.id}"
     assert elasticsearch.indices.exists(index=index_name)
 
     index = elasticsearch.indices.get(index=index_name)[index_name]
@@ -87,8 +88,9 @@ def test_create_index_for_dataset_with_annotations(
 
     dataset = DatasetFactory.create(annotations=text_annotations + rating_annotations)
 
-    index_name = search_engine.create_dataset_index(dataset)
+    search_engine.create_index(dataset)
 
+    index_name = f"rg.{dataset.id}"
     assert elasticsearch.indices.exists(index=index_name)
 
     index = elasticsearch.indices.get(index=index_name)[index_name]
@@ -109,9 +111,10 @@ def test_create_index_with_existing_index(
     search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch, db: Session
 ):
     dataset = DatasetFactory.create()
-    index_name = search_engine.create_dataset_index(dataset)
+    search_engine.create_index(dataset)
 
+    index_name = f"rg.{dataset.id}"
     assert elasticsearch.indices.exists(index=index_name)
 
     with pytest.raises(BadRequestError, match="'resource_already_exists_exception', 'index"):
-        search_engine.create_dataset_index(dataset)
+        search_engine.create_index(dataset)

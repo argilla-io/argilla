@@ -27,7 +27,7 @@ class ElasticSearchEngine:
     def __post_init__(self):
         self._client = Elasticsearch(**self.config)
 
-    def create_dataset_index(self, dataset: Dataset) -> str:
+    def create_index(self, dataset: Dataset):
         fields = {}
 
         for annotation in dataset.annotations:
@@ -42,8 +42,6 @@ class ElasticSearchEngine:
 
         index_name = f"rg.{dataset.id}"
         self._client.indices.create(index=index_name, body={"mappings": mappings})
-
-        return index_name
 
     def _field_mapping_for_annotation(self, annotation_task: Annotation):
         if annotation_task.type == AnnotationType.rating:
