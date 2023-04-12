@@ -2,12 +2,12 @@
   <form @submit.prevent="onSubmit" :key="renderForm">
     <div class="form-group" v-for="input in inputs" :key="input.key">
       <TextAreaComponent
-        v-if="input.componentType === PROPERTIES.FREE_TEXT"
+        v-if="input.component_type === PROPERTIES.FREE_TEXT"
         :title="input.question"
         :initialOutputs="input.outputs[0]"
-        :isRequired="input.required"
-        :isIcon="!!input.tooltipMessage"
-        :tooltipMessage="input.tooltipMessage"
+        :isRequired="input.is_required"
+        :isIcon="!!input.tooltip_message"
+        :tooltipMessage="input.tooltip_message"
         :colorHighlight="colorAsterisk"
         @on-change-text-area="
           onChange({ newOutputs: $event, idComponent: input.id })
@@ -16,12 +16,12 @@
       />
 
       <SingleLabelComponent
-        v-if="input.componentType === PROPERTIES.SINGLE_LABEL"
+        v-if="input.component_type === PROPERTIES.SINGLE_LABEL"
         :title="input.question"
         :initialOutputs="input.outputs"
-        :isRequired="input.required"
-        :isIcon="!!input.tooltipMessage"
-        :tooltipMessage="input.tooltipMessage"
+        :isRequired="input.is_required"
+        :isIcon="!!input.tooltip_message"
+        :tooltipMessage="input.tooltip_message"
         :colorHighlight="colorAsterisk"
         @on-change-single-label="
           onChange({ newOutputs: $event, idComponent: input.id })
@@ -30,12 +30,12 @@
       />
 
       <RatingComponent
-        v-if="input.componentType === PROPERTIES.RATING"
+        v-if="input.component_type === PROPERTIES.RATING"
         :title="input.question"
         :initialOutputs="input.outputs"
-        :isRequired="input.required"
-        :isIcon="!!input.tooltipMessage"
-        :tooltipMessage="input.tooltipMessage"
+        :isRequired="input.is_required"
+        :isIcon="!!input.tooltip_message"
+        :tooltipMessage="input.tooltip_message"
         :colorHighlight="colorAsterisk"
         @on-change-rating="
           onChange({ newOutputs: $event, idComponent: input.id })
