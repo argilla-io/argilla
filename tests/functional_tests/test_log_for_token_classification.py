@@ -524,13 +524,11 @@ def test_log_data_with_vectors_and_partial_update_ok(mocked_client: SecuredClien
     assert all(map(lambda r: "test-vector" in r.vectors, ds))
 
     # Fetch minimal record info and add a metadata field
-    records = api.load(dataset, exclude_vectors=True)
-    assert all(map(lambda r: r.vectors is None, records))
-
-    for record in records:
-        record.metadata = {"a": "value"}
-
-    api.log(name=dataset, records=records)
+    records_for_update = [
+        TokenClassificationRecord.parse_obj({"metadata": {"a": "value"}, **data})
+        for data in api.datasets.scan(name=dataset, projection={"text", "tokens"})
+    ]
+    api.log(name=dataset, records=records_for_update)
 
     ds = api.load(dataset)
     assert len(ds) == expected_n_records
@@ -539,11 +537,11 @@ def test_log_data_with_vectors_and_partial_update_ok(mocked_client: SecuredClien
     assert all(map(lambda r: r.metadata == {"a": "value"}, ds))
 
     # Remove the metadata info and add some mock annotations
-    for record in records:
+    for record in records_for_update:
         record.metadata = None
         record.annotation = []
         record.annotation_agent = "mock_test"
-    api.log(name=dataset, records=records)
+    api.log(name=dataset, records=records_for_update)
 
     ds = api.load(dataset)
     assert len(ds) == expected_n_records
