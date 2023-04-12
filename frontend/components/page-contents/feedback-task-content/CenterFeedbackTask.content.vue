@@ -6,8 +6,16 @@
 </template>
 
 <script>
+import { upsertGlobalQuestion } from "@/models/feedback-task-model/global-question/globalQuestion.queries";
+
 export default {
   name: "CenterFeedbackTaskContent",
+  props: {
+    datasetId: {
+      type: String,
+      required: true,
+    },
+  },
   created() {
     this.record = {
       id: "record_1",
@@ -148,13 +156,26 @@ export default {
       {
         id: "id_7",
         question: "Comment",
-        outputs: { text: "dadadadda", placeholder: "this is the placeholder" },
+        outputs: [
+          { text: "dadadadda", placeholder: "this is the placeholder" },
+        ],
         default: null,
-        required: false,
+        required: true,
         tooltipMessage: "This is a tooltip",
         componentType: "FREE_TEXT",
       },
     ];
+
+    this.inputs.forEach((question, index) => {
+      upsertGlobalQuestion({
+        ...question,
+        dataset_id: this.datasetId,
+        order: index,
+        component_type: question.componentType,
+        is_required: question.required,
+        tooltip_message: question.tooltipMessage,
+      });
+    });
   },
 };
 </script>
