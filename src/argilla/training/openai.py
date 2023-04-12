@@ -59,7 +59,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         training_file: str = None,
         validation_file: str = None,
         model: str = "curie",
-        n_epochs: int = 4,
+        n_epochs: int = None,
         batch_size: int = None,
         learning_rate_multiplier: float = None,
         prompt_loss_weight: float = 0.01,
@@ -74,7 +74,10 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["training_file"] = training_file
         self.model_kwargs["validation_file"] = validation_file
         self.model_kwargs["model"] = model
-        self.model_kwargs["n_epochs"] = n_epochs
+        if isinstance(self._settings, rg.TextClassificationSettings):
+            self.model_kwargs["n_epochs"] = 4
+        else:
+            self.model_kwargs["n_epochs"] = 2
         self.model_kwargs["batch_size"] = batch_size
         self.model_kwargs["learning_rate_multiplier"] = learning_rate_multiplier
         self.model_kwargs["prompt_loss_weight"] = prompt_loss_weight
@@ -84,7 +87,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["classification_betas"] = classification_betas
         self.model_kwargs["suffix"] = suffix
 
-        if isinstance(self._settings, rg.TextClassificationSettings):
+        if isinstance(self._settings, rg.TextClassificationSettings) and self._eval_dataset:
             label_schema = self._settings.label_schema
             if len(label_schema) == 2:
                 self.model_kwargs["classification_positive_class"] = label_schema[0]
@@ -195,8 +198,11 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             text = [text]
             was_string = True
 
+        if isinstance(self._settings, rg.TextClassificationSettings):
+            kwargs = {"logprobs": len(self._settings.label_schema), "max_tokens": 1}
+
         for entry in text:
-            response = openai.Completion.create(model=self._model, prompt=entry + self._separator)
+            response = openai.Completion.create(model=self._model, prompt=entry + self._separator, **kwargs)
             responses.append(response)
 
         if was_string:
