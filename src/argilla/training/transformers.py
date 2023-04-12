@@ -18,6 +18,7 @@ from typing import List, Union
 from datasets import DatasetDict
 
 import argilla as rg
+from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import (
     _apply_column_mapping,
     filter_allowed_args,
@@ -26,7 +27,7 @@ from argilla.training.utils import (
 from argilla.utils.dependency import require_version
 
 
-class ArgillaTransformersTrainer(object):
+class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaTransformersTrainer")
     _logger.setLevel(logging.INFO)
 
@@ -36,8 +37,18 @@ class ArgillaTransformersTrainer(object):
     require_version("evaluate")
     require_version("seqeval")
 
-    def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         import torch
+        from transformers import (
+            AutoModelForSequenceClassification,
+            AutoModelForTokenClassification,
+        )
+
+        self._transformers_model = None
+        self._transformers_tokenizer = None
+        self._pipeline = None
 
         self.device = "cpu"
         if torch.backends.mps.is_available():
@@ -47,23 +58,17 @@ class ArgillaTransformersTrainer(object):
         else:
             self.device = "cpu"
 
-        if seed is None:
-            seed = 42
-        self._seed = seed
+        if self._seed is None:
+            self._seed = 42
 
-        if model is None:
-            self.model = "microsoft/deberta-v3-base"
+        if self._model is None:
+            self._model = "microsoft/deberta-v3-base"
+
+        if isinstance(self._dataset, DatasetDict):
+            self._train_dataset = self._dataset["train"]
+            self._eval_dataset = self._dataset["test"]
         else:
-            self.model = model
-
-        self._record_class = record_class
-        self._multi_label = multi_label
-
-        if isinstance(dataset, DatasetDict):
-            self._train_dataset = dataset["train"]
-            self._eval_dataset = dataset["test"]
-        else:
-            self._train_dataset = dataset
+            self._train_dataset = self._dataset
             self._eval_dataset = None
 
         if self._record_class == rg.TextClassificationRecord:
@@ -81,37 +86,29 @@ class ArgillaTransformersTrainer(object):
                 self._label_list = self._train_dataset.features["label"].names
             self._label2id = {v: k for k, v in self._id2label.items()}
 
-        elif self._record_class == rg.TokenClassificationRecord:
-            self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
-            self._label_list = self._train_dataset.features["ner_tags"].feature.names
-            self._id2label = dict(enumerate(self._label_list))
-            self._label2id = {v: k for k, v in self._id2label.items()}
-        else:
-            raise NotImplementedError("rg.Text2TextRecord are not supported")
-
-        self.init_args()
-
-    def init_args(self):
-        from transformers import (
-            AutoModelForSequenceClassification,
-            AutoModelForTokenClassification,
-            TrainingArguments,
-        )
-
-        # self.tokenizer_kwargs = get_default_args(AutoTokenizer.from_pretrained)
-
-        if self._record_class == rg.TextClassificationRecord:
             self._model_class = AutoModelForSequenceClassification
             if self._multi_label:
                 self._train_dataset = _apply_column_mapping(self._train_dataset, self._column_mapping)
                 if self._eval_dataset is not None:
                     self._eval_dataset = _apply_column_mapping(self._eval_dataset, self._column_mapping)
+
         elif self._record_class == rg.TokenClassificationRecord:
+            self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
+            self._label_list = self._train_dataset.features["ner_tags"].feature.names
+            self._id2label = dict(enumerate(self._label_list))
+            self._label2id = {v: k for k, v in self._id2label.items()}
+
             self._model_class = AutoModelForTokenClassification
         else:
-            raise NotImplementedError("rg.Text2TextRecords are not supported yet.")
+            raise NotImplementedError("rg.Text2TextRecord are not supported")
+
+        self.init_training_args()
+
+    def init_training_args(self):
+        from transformers import TrainingArguments
+
         self.model_kwargs = {}
-        self.model_kwargs["pretrained_model_name_or_path"] = self.model
+        self.model_kwargs["pretrained_model_name_or_path"] = self._model
         self.model_kwargs["num_labels"] = len(self._label_list)
         self.model_kwargs["id2label"] = self._id2label
         self.model_kwargs["label2id"] = self._label2id
@@ -122,17 +119,17 @@ class ArgillaTransformersTrainer(object):
         self.trainer_kwargs["evaluation_strategy"] = "no" if self._eval_dataset is None else "epoch"
         self.trainer_kwargs["logging_steps"] = 30
 
-        self._pipeline = None
-
     def init_model(self, new: bool = False):
         from transformers import AutoTokenizer
 
-        self._tokenizer = AutoTokenizer.from_pretrained(self.model_kwargs.get("pretrained_model_name_or_path"))
+        self._transformers_tokenizer = AutoTokenizer.from_pretrained(
+            self.model_kwargs.get("pretrained_model_name_or_path")
+        )
         if new:
             model_kwargs = self.model_kwargs
         else:
             model_kwargs = {"pretrained_model_name_or_path": self.model_kwargs.get("pretrained_model_name_or_path")}
-        self._model = self._model_class.from_pretrained(**model_kwargs)
+        self._transformers_model = self._model_class.from_pretrained(**model_kwargs)
 
     def init_pipeline(self):
         import transformers
@@ -150,16 +147,16 @@ class ArgillaTransformersTrainer(object):
                 kwargs = {"return_all_scores": True}
             self._pipeline = pipeline(
                 task="text-classification",
-                model=self._model,
-                tokenizer=self._tokenizer,
+                model=self._transformers_tokenizer,
+                tokenizer=self._transformers_tokenizer,
                 device=device,
                 **kwargs,
             )
         elif self._record_class == rg.TokenClassificationRecord:
             self._pipeline = pipeline(
                 task="token-classification",
-                model=self._model,
-                tokenizer=self._tokenizer,
+                model=self._transformers_tokenizer,
+                tokenizer=self._transformers_tokenizer,
                 aggregation_strategy="first",
                 device=device,
             )
@@ -197,11 +194,13 @@ class ArgillaTransformersTrainer(object):
         )
 
         def text_classification_preprocess_function(examples):
-            tokens = self._tokenizer(examples["text"], truncation=True, padding="max_length", max_length=512)
+            tokens = self._transformers_tokenizer(
+                examples["text"], truncation=True, padding="max_length", max_length=512
+            )
             return tokens
 
         def token_classification_preprocess_function(examples):
-            tokenized_inputs = self._tokenizer(
+            tokenized_inputs = self._transformers_tokenizer(
                 examples["tokens"], truncation=True, padding="max_length", is_split_into_words=True, max_length=512
             )
 
@@ -229,7 +228,9 @@ class ArgillaTransformersTrainer(object):
             self._data_collator = None
         elif self._record_class == rg.TokenClassificationRecord:
             preprocess_function = token_classification_preprocess_function
-            self._data_collator = DataCollatorForTokenClassification(tokenizer=self._tokenizer, max_length=512)
+            self._data_collator = DataCollatorForTokenClassification(
+                tokenizer=self._transformers_tokenizer, max_length=512
+            )
         else:
             raise NotImplementedError("")
 
@@ -302,7 +303,6 @@ class ArgillaTransformersTrainer(object):
             raise NotImplementedError("Text2Text is not implemented.")
         return func
 
-    # @require_version("setfit", "0.6")
     def train(self, output_dir: str = None):
         """
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
@@ -328,9 +328,9 @@ class ArgillaTransformersTrainer(object):
 
         # set trainer
         self._training_args = TrainingArguments(**self.trainer_kwargs)
-        self.__trainer = Trainer(
+        self._transformers_trainer = Trainer(
             args=self._training_args,
-            model=self._model,
+            model=self._transformers_model,
             train_dataset=self._tokenized_train_dataset,
             eval_dataset=self._tokenized_eval_dataset,
             compute_metrics=compute_metrics,
@@ -338,9 +338,9 @@ class ArgillaTransformersTrainer(object):
         )
 
         #  train
-        self.__trainer.train()
+        self._transformers_trainer.train()
         if self._tokenized_eval_dataset:
-            self._metrics = self.__trainer.evaluate()
+            self._metrics = self._transformers_trainer.evaluate()
             self._logger.info(self._metrics)
         else:
             self._metrics = None
@@ -419,5 +419,5 @@ class ArgillaTransformersTrainer(object):
         Args:
           output_dir (str): the path to save the model to
         """
-        self._model.save_pretrained(output_dir)
-        self._tokenizer.save_pretrained(output_dir)
+        self._transformers_model.save_pretrained(output_dir)
+        self._transformers_tokenizer.save_pretrained(output_dir)

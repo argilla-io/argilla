@@ -17,6 +17,7 @@ import os
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
+from argilla.client.apis.datasets import Datasets
 from argilla.client.models import Framework
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
@@ -73,6 +74,16 @@ class ArgillaTrainer(object):
         if not len(self.rg_dataset_snapshot) > 0:
             raise ValueError(f"Dataset {self._name} is empty")
 
+        # settings for the dataset
+        authenticated_client = rg.active_client().client
+        datasets_api = Datasets(authenticated_client)
+        self._settings = datasets_api.load_settings(name)
+        if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification) or isinstance(
+            rg.DatasetForTokenClassification
+        ):
+            if self._settings is None:
+                raise ValueError(f"Dataset {self._name} has no settings. Upgrade Argilla server to larger than 1.6.")
+
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
             self._multi_label = self.rg_dataset_snapshot[0].multi_label
@@ -112,6 +123,7 @@ class ArgillaTrainer(object):
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
                 model=self.model,
             )
@@ -122,6 +134,7 @@ class ArgillaTrainer(object):
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
                 model=self.model,
             )
@@ -133,6 +146,7 @@ class ArgillaTrainer(object):
                 dataset=self.dataset_full_prepared,
                 model=self.model,
                 multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
             )
         elif framework is Framework.OPENAI:
@@ -143,6 +157,7 @@ class ArgillaTrainer(object):
                 dataset=self.dataset_full_prepared,
                 model=self.model,
                 multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
             )
 
@@ -214,3 +229,38 @@ _________________________________________________________________
           output_dir (str): The path to the directory where the model will be saved.
         """
         self._trainer.save(output_dir)
+
+
+class ArgillaTrainerSkeleton(object):
+    def __init__(
+        self,
+        dataset,
+        record_class: Union[rg.TokenClassificationRecord, rg.Text2TextRecord, rg.TextClassificationRecord],
+        multi_label: bool = False,
+        settings: Union[
+            rg.TextClassificationSettings, rg.TokenClassificationSettings, rg.TextClassificationSettings
+        ] = None,
+        model: str = None,
+        seed: int = None,
+    ):
+        self._dataset = dataset
+        self._record_class = record_class
+        self._multi_label = multi_label
+        self._settings = settings
+        self._model = model
+        self._seed = seed
+
+    def init_training_args(self):
+        raise NotImplementedError("This method must be implemented by the subclass.")
+
+    def update_config(self, *args, **kwargs):
+        raise NotImplementedError("This method must be implemented by the subclass.")
+
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+        raise NotImplementedError("This method must be implemented by the subclass.")
+
+    def train(self, output_dir: str = None):
+        raise NotImplementedError("This method must be implemented by the subclass.")
+
+    def save(self, output_dir: str):
+        raise NotImplementedError("This method must be implemented by the subclass.")

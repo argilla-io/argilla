@@ -15,18 +15,19 @@
 import logging
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
 import argilla as rg
+from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
 
 if TYPE_CHECKING:
-    import spacy
+    pass
 
 
-class ArgillaSpaCyTrainer:
+class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSpaCyTrainer")
     _logger.setLevel(logging.INFO)
 
@@ -37,13 +38,10 @@ class ArgillaSpaCyTrainer:
 
     def __init__(
         self,
-        dataset: Union["spacy.tokens.DocBin", Tuple["spacy.tokens.DocBin", "spacy.tokens.DocBin"]],
-        record_class: Union[rg.TextClassificationRecord, rg.TokenClassificationRecord, rg.Text2TextRecord, None] = None,
-        model: Optional[str] = None,
-        seed: Optional[int] = None,
-        multi_label: bool = False,
+        *args,
         language: Optional[str] = None,
         gpu_id: Optional[int] = -1,
+        **kwargs,
     ) -> None:
         """Initialize the `ArgillaSpaCyTrainer` class.
 
@@ -72,12 +70,11 @@ class ArgillaSpaCyTrainer:
             >>> trainer.train()
             >>> trainer.save("./model")
         """
+        super().__init__(*args, **kwargs)
         import spacy
-        from spacy.cli.init_config import init_config
 
-        self._multi_label = multi_label
+        self._nlp = None
 
-        self._record_class = record_class
         if self._record_class == rg.TokenClassificationRecord:
             self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
             self._pipeline_name = "ner"
@@ -92,7 +89,7 @@ class ArgillaSpaCyTrainer:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
         self._train_dataset, self._eval_dataset = (
-            dataset if isinstance(dataset, tuple) and len(dataset) > 1 else (dataset, None)
+            self._dataset if isinstance(self._dataset, tuple) and len(self._dataset) > 1 else (self._dataset, None)
         )
         self._train_dataset_path = "./train.spacy"
         self._eval_dataset_path = "./dev.spacy" if self._eval_dataset else None
@@ -102,8 +99,13 @@ class ArgillaSpaCyTrainer:
         if self.gpu_id != -1:
             try:
                 spacy.prefer_gpu(self.gpu_id)
-            except:
+            except Exception:
                 self.gpu_id = -1
+
+        self.init_training_args()
+
+    def init_training_args(self):
+        from spacy.cli.init_config import init_config
 
         self.config = init_config(
             lang=self.language,
@@ -111,10 +113,8 @@ class ArgillaSpaCyTrainer:
         )
         self.config["paths"]["train"] = self._train_dataset_path
         self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
-        self.config["paths"]["vectors"] = model
-        self.config["system"]["seed"] = seed or 42
-
-        self._nlp = None
+        self.config["paths"]["vectors"] = self._model
+        self.config["system"]["seed"] = self._seed or 42
 
     def _init_model(self):
         from spacy.training.initialize import init_nlp

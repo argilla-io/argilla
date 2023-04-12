@@ -22,7 +22,7 @@ from argilla.utils.dependency import require_version
 
 
 class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
-    _logger = logging.getLogger("ArgillaTransformersTrainer")
+    _logger = logging.getLogger("ArgillaSetFitTrainer")
     _logger.setLevel(logging.INFO)
 
     require_version("torch")
@@ -30,12 +30,12 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     require_version("transformers")
     require_version("setfit")
 
-    def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
-        if model is None:
-            model = "all-MiniLM-L6-v2"
-        super().__init__(dataset=dataset, record_class=record_class, multi_label=multi_label, model=model, seed=seed)
+    def __init__(self, *args, **kwargs):
+        if kwargs.get("model") is None and "model" in kwargs:
+            kwargs["model"] = "all-MiniLM-L6-v2"
+        super().__init__(*args, **kwargs)
 
-    def init_args(self):
+    def init_training_args(self):
         from setfit import SetFitModel, SetFitTrainer
 
         self.setfit_model_kwargs = get_default_args(SetFitModel.from_pretrained)
@@ -49,7 +49,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         self.setfit_trainer_kwargs["eval_dataset"] = self._eval_dataset
         self.setfit_trainer_kwargs["seed"] = self._seed
 
-        self._model = None
+        self._setfit_model = None
 
     def update_config(
         self,
@@ -85,8 +85,8 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         """
         from setfit import SetFitModel, SetFitTrainer
 
-        self._model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
-        self.setfit_trainer_kwargs["model"] = self._model
+        self._setfit_model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
+        self.setfit_trainer_kwargs["model"] = self._setfit_model
         self.__trainer = SetFitTrainer(**self.setfit_trainer_kwargs)
         self.__trainer.train()
         if self._eval_dataset:
@@ -101,7 +101,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     def init_model(self):
         from setfit import SetFitModel
 
-        self._model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
+        self._setfit_model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         """
@@ -115,7 +115,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         Returns:
           A list of predictions
         """
-        if self._model is None:
+        if self._setfit_model is None:
             self._logger.warn("Using model without fine-tuning.")
             self.init_model()
 
@@ -124,7 +124,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             text = [text]
             str_input = True
 
-        predictions = self._model(text)
+        predictions = self._setfit_model(text)
 
         formatted_prediction = []
         for val, pred in zip(text, predictions):
@@ -154,7 +154,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         """
         if not isinstance(output_dir, str):
             output_dir = str(output_dir)
-        self._model.save_pretrained(output_dir)
+        self._setfit_model.save_pretrained(output_dir)
 
         # store dict as json
         with open(output_dir + "/label2id.json", "w") as f:

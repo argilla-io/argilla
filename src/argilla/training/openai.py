@@ -15,48 +15,46 @@
 import logging
 from typing import List, Union
 
+import argilla as rg
+from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args
 from argilla.utils.dependency import require_version
 
 
-class ArgillaOpenAITrainer(object):
+class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaOpenAITrainer")
     _logger.setLevel(logging.INFO)
     _separator = "\n\n###\n\n"
 
     require_version("openai")
 
-    def __init__(self, dataset, record_class, multi_label: bool = False, model: str = None, seed: int = None):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         import os
 
-        self.model_kwargs = {}
         self.sleep_timer = 10
         self.device = None
+        self.finetune_id = None
 
-        if seed is not None:
+        if self._seed is not None:
             self._logger.warning("Seed is not supported for OpenAI. Ignoring seed for training.")
 
-        if model is None:
-            self.model = "curie"
-        else:
-            self.model = model
+        if self._model is None:
+            self._model = "curie"
 
         if "OPENAI_API_KEY" not in os.environ:
             raise ValueError("OPENAI_API_KEY not found in environment variables.")
 
-        self._record_class = record_class
-        self._multi_label = multi_label
-
-        if isinstance(dataset, tuple):
-            self._train_dataset = dataset[0]
-            self._eval_dataset = dataset[1]
+        if isinstance(self._dataset, tuple):
+            self._train_dataset = self._dataset[0]
+            self._eval_dataset = self._dataset[1]
         else:
-            self._train_dataset = dataset
+            self._train_dataset = self._dataset
             self._eval_dataset = None
 
-        self._init_args_()
+        self.init_training_args()
 
-    def _init_args_(
+    def init_training_args(
         self,
         training_file: str = None,
         validation_file: str = None,
@@ -71,7 +69,8 @@ class ArgillaOpenAITrainer(object):
         classification_betas: list = None,
         suffix: str = None,
     ):
-        self.finetune_id = None
+        self.model_kwargs = {}
+
         self.model_kwargs["training_file"] = training_file
         self.model_kwargs["validation_file"] = validation_file
         self.model_kwargs["model"] = model
@@ -85,6 +84,18 @@ class ArgillaOpenAITrainer(object):
         self.model_kwargs["classification_betas"] = classification_betas
         self.model_kwargs["suffix"] = suffix
 
+        if self._train_dataset is not None and self.model_kwargs["training_file"] is None:
+            self.model_kwargs["training_file"] = self.upload_dataset_to_openai(self._train_dataset, "data_train.jsonl")
+        if self._eval_dataset is not None and self.model_kwargs["validation_file"] is None:
+            self.model_kwargs["validation_file"] = self.upload_dataset_to_openai(self._eval_dataset, "data_test.jsonl")
+
+        if isinstance(self._settings, rg.TextClassificationSettings):
+            label_schema = self._settings.label_schema
+            if len(label_schema) == 2:
+                self.model_kwargs["classification_positive_class"] = label_schema[0]
+            else:
+                self.model_kwargs["classification_n_classes"] = len(label_schema)
+
     def update_config(
         self,
         **kwargs,
@@ -94,7 +105,7 @@ class ArgillaOpenAITrainer(object):
         arguments passed to the `update_config` function.
         """
         self.model_kwargs.update(kwargs)
-        self.model_kwargs = filter_allowed_args(self._init_args_, **self.model_kwargs)
+        self.model_kwargs = filter_allowed_args(self.init_training_args, **self.model_kwargs)
         keys = []
         for key, value in self.model_kwargs.items():
             if value is None:
@@ -111,9 +122,9 @@ class ArgillaOpenAITrainer(object):
             formatted_string.append(arg_dict_key)
             for key, val in arg_dict_single.items():
                 formatted_string.append(f"{key}: {val}")
-        return "\n https://platform.openai.com/docs/api-reference/fine-tunes" + "\n".join(formatted_string)
+        return "\nhttps://platform.openai.com/docs/api-reference/fine-tune\n" + "\n".join(formatted_string)
 
-    def upload_dataset(self, dataset, file_name):
+    def upload_dataset_to_openai(self, dataset, file_name):
         import json
 
         import openai
@@ -139,18 +150,12 @@ class ArgillaOpenAITrainer(object):
         if output_dir is not None:
             self.model_kwargs["suffix"] = output_dir
 
-        if self._train_dataset is not None and self.model_kwargs["training_file"] is None:
-            self.model_kwargs["training_file"] = self.upload_dataset(self._train_dataset, "data_train.jsonl")
-        if self._eval_dataset is not None and self.model_kwargs["validation_file"] is None:
-            self.model_kwargs["validation_file"] = self.upload_dataset(self._eval_dataset, "data_test.jsonl")
-
         self.update_config()
 
         response = openai.FineTune.create(
             **self.model_kwargs,
         )
         self._logger.info(response)
-        self.model_id = None
         self.finetune_id = response.id
 
     def init_model(self):
@@ -158,12 +163,14 @@ class ArgillaOpenAITrainer(object):
 
         if self.finetune_id is not None:
             response = openai.FineTune.retrieve(self.finetune_id)
-            self.model_id = response.fine_tuned_model
-            if self.model_id is None:
+            potential_model = response.fine_tuned_model
+            if potential_model is None:
                 self._logger.warning("Fine-tuning is still in progress.")
+            else:
+                self._model = potential_model
         else:
-            response = openai.Model.retrieve(self.model)
-            self.model_id = response.id
+            response = openai.Model.retrieve(self._model)
+            self._model = response.id
             self._logger.info(response)
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
@@ -189,7 +196,7 @@ class ArgillaOpenAITrainer(object):
             was_string = True
 
         for entry in text:
-            response = openai.Completion.create(model=self.model, prompt=entry + self._separator)
+            response = openai.Completion.create(model=self._model, prompt=entry + self._separator)
             responses.append(response)
 
         if was_string:
@@ -197,7 +204,7 @@ class ArgillaOpenAITrainer(object):
         else:
             return responses
 
-    def save(self, output_dir: str):
+    def save(self, *arg, **kwargs):
         """
         The function saves the model to the path specified, and also saves the label2id and id2label
         dictionaries to the same path
