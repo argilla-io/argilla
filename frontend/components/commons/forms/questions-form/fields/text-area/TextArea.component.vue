@@ -68,10 +68,13 @@ export default {
   },
   methods: {
     onChangeTextArea(newText) {
-      this.$emit("on-change-text-area", {
-        text: newText,
-        placeholder: this.initialOutputs?.placeholder ?? "",
-      });
+      this.$emit("on-change-text-area", [
+        {
+          text: newText,
+          value: newText,
+          placeholder: this.initialOutputs?.placeholder ?? "",
+        },
+      ]);
 
       const isAnyText = newText?.length;
       if (this.isRequired) {

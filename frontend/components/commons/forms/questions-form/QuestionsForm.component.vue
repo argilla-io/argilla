@@ -4,7 +4,7 @@
       <TextAreaComponent
         v-if="input.componentType === PROPERTIES.FREE_TEXT"
         :title="input.question"
-        :initialOutputs="input.outputs"
+        :initialOutputs="input.outputs[0]"
         :isRequired="input.required"
         :isIcon="!!input.tooltipMessage"
         :tooltipMessage="input.tooltipMessage"
