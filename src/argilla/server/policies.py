@@ -134,12 +134,8 @@ class DatasetPolicyV1:
         return lambda actor: actor.is_admin and dataset.is_draft
 
     @classmethod
-    def publish(cls, dataset: Dataset) -> bool:
-        return lambda actor: (
-            actor.is_admin
-            and dataset.is_draft
-            and datasets.count_annotations_by_dataset_id(Session.object_session(dataset), dataset.id) > 0
-        )
+    def publish(cls, actor: User) -> bool:
+        return actor.is_admin
 
     @classmethod
     def delete(cls, actor: User) -> bool:

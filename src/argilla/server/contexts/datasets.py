@@ -47,6 +47,12 @@ def create_dataset(db: Session, dataset_create: DatasetCreate):
 
 
 def publish_dataset(db: Session, dataset: Dataset):
+    if dataset.is_ready:
+        raise ValueError("Dataset is already published")
+
+    if _count_annotations_by_dataset_id(db, dataset.id) == 0:
+        raise ValueError("Dataset cannot be published without annotations")
+
     dataset.status = DatasetStatus.ready
 
     db.commit()
@@ -83,5 +89,5 @@ def create_annotation(db: Session, dataset: Dataset, annotation_create: Annotati
     return annotation
 
 
-def count_annotations_by_dataset_id(db: Session, dataset_id: UUID):
+def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):
     return db.query(func.count(Annotation.id)).filter_by(dataset_id=dataset_id).scalar()

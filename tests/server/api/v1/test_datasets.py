@@ -604,7 +604,8 @@ def test_publish_dataset_already_published(client: TestClient, db: Session, admi
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
-    assert response.status_code == 403
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Dataset is already published"}
     assert db.get(Dataset, dataset.id).status == DatasetStatus.ready
 
 
@@ -613,7 +614,8 @@ def test_publish_dataset_without_annotations(client: TestClient, db: Session, ad
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
-    assert response.status_code == 403
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Dataset cannot be published without annotations"}
     assert db.get(Dataset, dataset.id).status == DatasetStatus.draft
 
 

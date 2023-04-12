@@ -132,11 +132,16 @@ def publish_dataset(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
+    authorize(current_user, DatasetPolicyV1.publish)
+
     dataset = _get_dataset(db, dataset_id)
 
-    authorize(current_user, DatasetPolicyV1.publish(dataset))
-
-    return datasets.publish_dataset(db, dataset)
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        return datasets.publish_dataset(db, dataset)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
 @router.delete("/datasets/{dataset_id}", response_model=Dataset)
