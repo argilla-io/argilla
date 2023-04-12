@@ -7,6 +7,7 @@
 
 <script>
 import { upsertGlobalQuestions } from "@/models/feedback-task-model/global-question/globalQuestion.queries";
+import { upsertRecords } from "@/models/feedback-task-model/record/record.queries";
 
 export default {
   name: "CenterFeedbackTaskContent",
@@ -65,6 +66,139 @@ export default {
         },
       ],
     };
+
+    this.records = [
+      {
+        id: "record_1",
+        fields: [
+          {
+            id: "field_1",
+            title: "Input",
+            text: `
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            Dolorum ratione quas quis eveniet harum cum, earum a facere
+            voluptate fugit nostrum sequi facilis incidunt debitis unde?
+            Eos rem debitis velit? Officia magni odit possimus quis nisi.
+            Dolore, eaque eligendi! Beatae quos debitis soluta distinctio
+            qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium
+            explicabo ab, pariatur id sapiente tenetur.
+            `,
+          },
+          {
+            id: "field_2",
+            title: "Outputs",
+            text: `
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+            Vitae cupiditate fugit quos officiis expedita, deleniti libero
+            inventore fugiat perferendis dolor optio praesentium enim molestiae
+            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
+            reprehenderit non distinctio repellat adipisci laborum, fugit sint
+            labore nulla tempore quam eos iste asperiores eius laudantium vel
+            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
+            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
+            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
+            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
+            delectus similique! Commodi, a. Totam illo iure iste voluptate?
+            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
+            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
+            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
+            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
+            architecto necessitatibus accusamus nesciunt exercitationem neque
+            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
+            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
+            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
+            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
+            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
+            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
+            quaerat impedit animi porro saepe ipsa molestiae quibusdam
+            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
+            eligendi voluptate.`,
+          },
+        ],
+      },
+      {
+        id: "record_2",
+        fields: [
+          {
+            id: "field_1",
+            title: "Input",
+            text: `
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            Dolorum ratione quas quis eveniet harum cum, earum a facere
+            voluptate fugit nostrum sequi facilis incidunt debitis unde?
+            Eos rem debitis velit? Officia magni odit possimus quis nisi.
+            Dolore, eaque eligendi! Beatae quos debitis soluta distinctio
+            qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium
+            explicabo ab, pariatur id sapiente tenetur.
+            `,
+          },
+          {
+            id: "field_2",
+            title: "Outputs",
+            text: `
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+            Vitae cupiditate fugit quos officiis expedita, deleniti libero
+            inventore fugiat perferendis dolor optio praesentium enim molestiae
+            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
+            reprehenderit non distinctio repellat adipisci laborum, fugit sint
+            labore nulla tempore quam eos iste asperiores eius laudantium vel
+            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
+            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
+            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
+            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
+            delectus similique! Commodi, a. Totam illo iure iste voluptate?
+            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
+            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
+            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
+            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
+            architecto necessitatibus accusamus nesciunt exercitationem neque
+            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
+            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
+            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
+            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
+            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
+            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
+            quaerat impedit animi porro saepe ipsa molestiae quibusdam
+            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
+            eligendi voluptate.`,
+          },
+          {
+            id: "field_3",
+            title: "Second outputs",
+            text: `
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+            Vitae cupiditate fugit quos officiis expedita, deleniti libero
+            inventore fugiat perferendis dolor optio praesentium enim molestiae
+            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
+            reprehenderit non distinctio repellat adipisci laborum, fugit sint
+            labore nulla tempore quam eos iste asperiores eius laudantium vel
+            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
+            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
+            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
+            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
+            delectus similique! Commodi, a. Totam illo iure iste voluptate?
+            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
+            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
+            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
+            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
+            architecto necessitatibus accusamus nesciunt exercitationem neque
+            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
+            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
+            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
+            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
+            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
+            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
+            quaerat impedit animi porro saepe ipsa molestiae quibusdam
+            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
+            eligendi voluptate.`,
+          },
+        ],
+      },
+    ];
+
+    const formattedRecords = this.factoryRecordsForOrm();
+    upsertRecords(formattedRecords);
+
     this.inputs = [
       // {
       //   id: "id_1",
@@ -208,6 +342,16 @@ export default {
     upsertGlobalQuestions(formattedInputs);
   },
   methods: {
+    factoryRecordsForOrm() {
+      return this.records.map((record) => {
+        return {
+          ...record,
+          record_id: record.id,
+          record_fields: record.fields,
+          dataset_id: this.datasetId,
+        };
+      });
+    },
     factoryInputsForOrm() {
       return this.inputs.map((input, index) => {
         return {
