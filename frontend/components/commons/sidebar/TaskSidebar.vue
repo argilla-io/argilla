@@ -1,7 +1,11 @@
 <template>
-  <div class="sidebar__container" v-if="dataset">
+  <div
+    class="sidebar__container"
+    :class="areMetricsVisible ? '--metrics' : null"
+    v-if="dataset"
+  >
     <sidebar-panel
-      :class="[currentTask, currentMetric ? 'visible' : '']"
+      :class="[datasetTask, currentMetric ? 'visible' : '']"
       :dataset="dataset"
       @close-panel="onClosePanel"
     >
@@ -14,23 +18,18 @@
           >
             <component
               :is="componentName(metric)"
-              :dataset="dataset"
               :datasetId="dataset.id"
-              :datasetName="dataset.name"
+              :datasetName="datasetName"
             />
           </div>
         </span>
       </transition>
     </sidebar-panel>
-    <component
-      ref="menu"
-      :is="currentTaskSidebar"
-      :dataset="dataset"
+    <sidebar-menu
       :current-metric="currentMetric"
-      @refresh="onRefresh"
-      @show-metrics="onShowSidebarInfo"
-      @change-view-mode="onChangeViewMode"
-      @set-sidebar-items="onSetSidebarItems"
+      :sidebar-items="sidebarItems"
+      :view-mode="viewMode"
+      @click-sidebar-action="onClickSidebarAction"
     />
   </div>
 </template>
@@ -38,32 +37,53 @@
 <script>
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { getViewSettingsByDatasetName } from "@/models/viewSettings.queries";
+import { getDatasetModelPrimaryKey } from "@/models/Dataset";
+import { getDatasetTaskById } from "@/models/dataset.utilities";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { SIDEBAR_ITEMS } from "./sidebarItems.config";
 import SidebarMenu from "./SidebarMenu";
 import SidebarPanel from "./SidebarPanel";
 export default {
   components: { SidebarMenu, SidebarPanel },
-  props: {
-    dataset: {
-      type: Object,
-      required: true,
-    },
-  },
   data: () => ({
-    sidebarItems: [],
     currentMetric: undefined,
   }),
   computed: {
-    currentTask() {
-      return this.dataset.task;
+    datasetId() {
+      return getDatasetModelPrimaryKey({
+        name: this.datasetName,
+        workspace: this.workspace,
+      });
     },
-    currentTaskSidebar() {
-      return `${this.currentTask}Sidebar`;
+    workspace() {
+      return this.$route.params.workspace;
+    },
+    datasetName() {
+      return this.$route.params.dataset;
+    },
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
+    datasetTask() {
+      return getDatasetTaskById(this.datasetId);
     },
     metricsByViewMode() {
-      return this.sidebarItems.find(
-        (item) => item.id === this.dataset.viewSettings.viewMode
-      ).relatedMetrics;
+      return this.sidebarItems.find((item) => item.id === this.viewMode)
+        .relatedMetrics;
     },
+    viewMode() {
+      return this.viewSettings.viewMode;
+    },
+    areMetricsVisible() {
+      return this.viewSettings.visibleMetrics;
+    },
+    viewSettings() {
+      return getViewSettingsByDatasetName(this.datasetName);
+    },
+  },
+  created() {
+    this.sidebarItems = SIDEBAR_ITEMS[this.datasetTask.toUpperCase()];
   },
   methods: {
     ...mapActions({
@@ -95,7 +115,7 @@ export default {
         this.currentMetric = undefined;
       }
       DatasetViewSettings.update({
-        where: this.dataset.name,
+        where: this.datasetName,
         data: {
           visibleMetrics: this.currentMetric,
         },
@@ -104,14 +124,29 @@ export default {
     onClosePanel() {
       this.currentMetric = undefined;
       DatasetViewSettings.update({
-        where: this.dataset.name,
+        where: this.datasetName,
         data: {
           visibleMetrics: false,
         },
       });
     },
     componentName(metric) {
-      return `${this.currentTask}${this.$options.filters.capitalize(metric)}`;
+      return `${this.datasetTask}${this.$options.filters.capitalize(metric)}`;
+    },
+    onClickSidebarAction(action, value) {
+      switch (action) {
+        case "show-metrics":
+          this.onShowSidebarInfo(value);
+          break;
+        case "change-view-mode":
+          this.onChangeViewMode(value);
+          break;
+        case "refresh":
+          this.onRefresh();
+          break;
+        default:
+          console.warn(`Unknown ${action}`);
+      }
     },
   },
 };
@@ -125,7 +160,7 @@ export default {
     display: flex;
     right: 0;
     pointer-events: none;
-    .--metrics & {
+    &.--metrics {
       pointer-events: all;
     }
   }

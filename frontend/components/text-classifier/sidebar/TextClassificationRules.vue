@@ -89,11 +89,12 @@
 </template>
 
 <script>
+import { getDatasetTaskById } from "@/models/dataset.utilities";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 export default {
-  // TODO clean and typify
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
       required: true,
     },
   },
@@ -101,6 +102,12 @@ export default {
     return {};
   },
   computed: {
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
+    datasetTask() {
+      return getDatasetTaskById(this.datasetId);
+    },
     tooltip() {
       return {
         coverage: "Percentage of records labeled by all rules",

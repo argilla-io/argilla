@@ -59,17 +59,14 @@ import { AnnotationProgress } from "@/models/AnnotationProgress";
 export default {
   // TODO clean and typify
   props: {
-    dataset: {
-      type: Object,
+    datasetName: {
+      type: String,
       required: true,
     },
   },
   computed: {
-    annotationsSum() {
-      return this.dataset.results.aggregations.status.Validated;
-    },
     annotationsProgress() {
-      return AnnotationProgress.find(this.dataset.name);
+      return AnnotationProgress.find(this.datasetName);
     },
     totalValidated() {
       return this.annotationsProgress.validated;
@@ -82,9 +79,6 @@ export default {
     },
     total() {
       return this.annotationsProgress.total;
-    },
-    datasetName() {
-      return this.dataset.name;
     },
     progress() {
       return (

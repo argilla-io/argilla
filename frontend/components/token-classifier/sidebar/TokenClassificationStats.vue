@@ -78,11 +78,13 @@
 
 <script>
 import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
+import { getDatasetTaskById } from "@/models/dataset.utilities";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: Array,
       required: true,
     },
   },
@@ -99,6 +101,12 @@ export default {
     },
   }),
   computed: {
+    dataset() {
+      return getDatasetFromORM(this.datasetId, this.datasetTask);
+    },
+    datasetTask() {
+      return getDatasetTaskById(this.datasetId);
+    },
     options() {
       let options = [];
       options.push({
@@ -111,7 +119,7 @@ export default {
       return Object.keys(this.filteredMentions).length;
     },
     labels() {
-      return getAllLabelsByDatasetId(this.dataset.id);
+      return getAllLabelsByDatasetId(this.datasetId);
     },
     query() {
       return this.dataset.query;

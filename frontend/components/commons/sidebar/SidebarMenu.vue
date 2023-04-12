@@ -39,15 +39,13 @@
 <script>
 export default {
   props: {
-    dataset: {
-      type: Object,
-      requried: false,
-      default: undefined,
-    },
     sidebarItems: {
       type: Array,
     },
     currentMetric: {
+      type: String,
+    },
+    viewMode: {
       type: String,
     },
   },
@@ -59,24 +57,14 @@ export default {
       );
     },
     metricsByViewMode() {
-      return this.sidebarItems.find(
-        (item) => item.id === this.dataset.viewSettings.viewMode
-      ).relatedMetrics;
+      return this.sidebarItems.find((item) => item.id === this.viewMode)
+        .relatedMetrics;
     },
     sidebarGroups() {
       const groups = [
         ...new Set(this.sidebarItems.map((button) => button.group)),
       ];
       return groups;
-    },
-    viewMode() {
-      if (this.isDatasetView) {
-        return this.dataset.viewSettings.viewMode;
-      }
-      return undefined;
-    },
-    isDatasetView() {
-      return this.dataset !== undefined;
     },
   },
   methods: {
@@ -85,8 +73,8 @@ export default {
         (button) => button.group === group
       );
     },
-    onAction(action, id) {
-      this.$emit(action, id);
+    onAction(action, value) {
+      this.$emit("click-sidebar-action", action, value);
     },
   },
 };

@@ -40,12 +40,6 @@ export default {
       animated: false,
     };
   },
-  props: {
-    dataset: {
-      type: Object,
-      required: true,
-    },
-  },
   methods: {
     closePanel() {
       this.$emit("close-panel");

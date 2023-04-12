@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <sidebar-progress :dataset="dataset">
+  <sidebar-progress :dataset-name="datasetName">
     <ul v-if="annotationsProgress" class="metrics__list">
       <li v-for="(counter, label) in getInfo" :key="label">
         <template v-if="counter > 0">
@@ -34,8 +34,8 @@
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetName: {
+      type: String,
       required: true,
     },
   },
@@ -44,7 +44,7 @@ export default {
       return this.annotationsProgress.annotatedAs;
     },
     annotationsProgress() {
-      return AnnotationProgress.find(this.dataset.name);
+      return AnnotationProgress.find(this.datasetName);
     },
   },
 };

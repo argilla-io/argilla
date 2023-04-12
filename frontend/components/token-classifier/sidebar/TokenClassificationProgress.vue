@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <sidebar-progress :dataset="dataset">
+  <sidebar-progress :dataset-name="datasetName">
     <ul v-if="annotationsProgress" class="metrics__list">
       <li v-for="(counter, label) in annotations" :key="label">
         <template v-if="counter > 0">
@@ -42,10 +42,6 @@ import { getAllLabelsByDatasetId } from "@/models/globalLabel.queries";
 
 export default {
   props: {
-    dataset: {
-      type: Object,
-      required: true,
-    },
     datasetId: {
       type: Array,
       required: true,

@@ -16,14 +16,14 @@
   -->
 
 <template>
-  <sidebar-progress :dataset="dataset"> </sidebar-progress>
+  <sidebar-progress :dataset-name="datasetName"> </sidebar-progress>
 </template>
 
 <script>
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetName: {
+      type: String,
       required: true,
     },
   },
