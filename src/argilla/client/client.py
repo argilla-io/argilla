@@ -289,6 +289,7 @@ class Argilla:
                 verbose=verbose,
                 chunk_size=chunk_size,
                 num_threads=num_threads,
+                max_retries=max_retries,
             )
 
         if workspace is not None:
@@ -394,53 +395,6 @@ class Argilla:
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
-
-    async def log_async(
-        self,
-        records: Union[Record, Iterable[Record], Dataset],
-        name: str,
-        workspace: Optional[str] = None,
-        tags: Optional[Dict[str, str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        batch_size: int = 100,
-        verbose: bool = True,
-        chunk_size: Optional[int] = None,
-        num_threads: int = 1,
-    ) -> BulkResponse:
-        """Logs Records to argilla with asyncio.
-
-        Args:
-            records: The record, an iterable of records, or a dataset to log.
-            name: The dataset name.
-            tags: A dictionary of tags related to the dataset.
-            metadata: A dictionary of extra info for the dataset.
-            batch_size: The batch size for a data bulk.
-            verbose: If True, shows a progress bar and prints out a quick summary at the end.
-            chunk_size: DEPRECATED! Use `batch_size` instead.
-            num_threads: If > 1, will use num_thread to log batches, sending data concurrently. Default `1`.
-
-        Returns:
-            Summary of the response from the REST API
-
-        """
-
-        warnings.warn(
-            "`log_async` is deprecated and will be removed in next release. "
-            "Please, use `log` with `background=True` instead",
-            DeprecationWarning,
-        )
-
-        return self.log(
-            records=records,
-            name=name,
-            workspace=workspace,
-            tags=tags,
-            metadata=metadata,
-            batch_size=batch_size,
-            verbose=verbose,
-            chunk_size=chunk_size,
-            num_threads=num_threads,
-        )
 
     def delete_records(
         self,
