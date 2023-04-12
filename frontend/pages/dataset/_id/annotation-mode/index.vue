@@ -19,6 +19,11 @@
 
 <script>
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
+import {
+  upsertFeedbackDataset,
+  getFeedbackDatasetNameById,
+  getFeedbackDatasetWorkspaceNameById,
+} from "@/models/feedback-task-model/feedbackDataset.queries";
 import { Notification } from "@/models/Notifications";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
@@ -31,15 +36,15 @@ export default {
   components: {
     HeaderAndTopAndOneColumn,
   },
-  data() {
-    return {
-      datasetName: null,
-      workspace: null,
-    };
-  },
   computed: {
     datasetId() {
       return this.$route.params.id;
+    },
+    datasetName() {
+      return getFeedbackDatasetNameById(this.datasetId);
+    },
+    workspace() {
+      return getFeedbackDatasetWorkspaceNameById(this.datasetId);
     },
     breadcrumbs() {
       return [
@@ -62,11 +67,13 @@ export default {
     try {
       // 1- fetch dataset info
       const dataset = await this.getDatasetInfo(this.datasetId);
-      this.datasetName = dataset.name;
 
+      // TODO - remove step 2 when workspace name will be include in the getDatasetInfo API call
       // 2- fetch workspace info
       const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
-      this.workspace = workspace;
+
+      // 3- insert in ORM
+      upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
     } catch (err) {
       this.manageErrorIfFetchNotWorking(err);
     }
@@ -101,8 +108,10 @@ export default {
       }
     },
     manageErrorIfFetchNotWorking({ response }) {
+      this.initErrorNotification(response);
       this.$router.push("/");
-
+    },
+    initErrorNotification(response) {
       let message = "";
       switch (response) {
         case TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO:
