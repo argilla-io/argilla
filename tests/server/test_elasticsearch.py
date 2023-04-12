@@ -30,7 +30,6 @@ from tests.factories import (
     TextAnnotationFactory,
 )
 
-
 def _index_name_for_dataset(dataset):
     return f"rg.{dataset.id}"
 
@@ -71,7 +70,7 @@ def test_create_index_for_dataset(search_engine: ElasticSearchEngine, elasticsea
     dataset = DatasetFactory.create()
     search_engine.create_index(dataset)
 
-    index_name = f"rg.{dataset.id}"
+    index_name = _index_name_for_dataset(dataset)
     assert elasticsearch.indices.exists(index=index_name)
 
     index = elasticsearch.indices.get(index=index_name)[index_name]
@@ -103,8 +102,8 @@ def test_create_index_for_dataset_with_annotations(
     text_ann_size: int,
     rating_ann_size: int,
 ):
-    text_annotations = AnnotationFactory.create_batch(size=text_ann_size, type=AnnotationType.text)
-    rating_annotations = AnnotationFactory.create_batch(size=rating_ann_size, type=AnnotationType.rating)
+    text_annotations = TextAnnotationFactory.create_batch(size=text_ann_size)
+    rating_annotations = RatingAnnotationFactory.create_batch(size=rating_ann_size)
 
     dataset = DatasetFactory.create(annotations=text_annotations + rating_annotations)
 

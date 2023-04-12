@@ -82,11 +82,13 @@ class ElasticSearchEngine:
         return f"rg.{dataset.id}"
 
     def _field_mapping_for_annotation(self, annotation_task: Annotation):
-        if annotation_task.type == AnnotationType.rating:
+        settings_type = annotation_task.settings.get("type")
+
+        if settings_type == AnnotationType.rating:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
             return {"type": "integer"}
-        elif annotation_task.type == AnnotationType.text:
+        elif settings_type == AnnotationType.text:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
             return {"type": "text", "index": False}
         else:
-            raise ValueError(f"Annotation of type {annotation_task.type} cannot be processed")
+            raise ValueError(f"Annotation of type {settings_type} cannot be processed")
