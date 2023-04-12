@@ -1,14 +1,14 @@
 <template>
   <BaseTopbarBrand>
     <BaseBreadcrumbs
-      v-if="breadcrumbs"
+      v-if="breadcrumbs.length"
       :breadcrumbs="breadcrumbs"
       :copy-button="copyButton"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
     <DatasetSettingsIcon
-      v-if="datasetId && datasetName"
-      :datasetId="datasetId"
+      v-if="workspace && datasetName"
+      :datasetId="[workspace, datasetName]"
       @click-settings-icon="goToSettings()"
     />
     <user />
@@ -16,44 +16,26 @@
 </template>
 
 <script>
-import { getDatasetModelPrimaryKey } from "@/models/Dataset";
-
 export default {
   name: "HeaderFeedbaskTaskComponent",
+  props: {
+    datasetName: {
+      type: String,
+      required: true,
+    },
+    workspace: {
+      type: String,
+      required: true,
+    },
+    breadcrumbs: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       copyButton: false,
     };
-  },
-  computed: {
-    datasetId() {
-      return getDatasetModelPrimaryKey({
-        name: this.datasetName,
-        workspace: this.workspace,
-      });
-    },
-    workspace() {
-      return this.$route.params.workspace;
-    },
-    datasetName() {
-      return this.$route.params.dataset;
-    },
-    breadcrumbs() {
-      return [
-        { link: { name: "datasets" }, name: "Home" },
-        {
-          link: { path: `/datasets?workspace=${this.workspace}` },
-          name: this.workspace,
-        },
-        {
-          link: {
-            name: null,
-            params: { workspace: this.workspace, dataset: this.datasetName },
-          },
-          name: this.datasetName,
-        },
-      ];
-    },
   },
   methods: {
     goToSettings() {
