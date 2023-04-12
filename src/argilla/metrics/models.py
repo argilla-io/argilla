@@ -29,7 +29,7 @@ class MetricSummary(BaseModel):
         try:
             return self._build_visualization()
         except ModuleNotFoundError:
-            warnings.warn("Please, install plotly in order to use this feature\n" "%>pip install plotly")
+            warnings.warn("Please, install plotly in order to use this feature:\n> pip install plotly", stacklevel=2)
 
     @classmethod
     def new_summary(cls, data: Dict[str, Any], visualization: Callable) -> "MetricSummary":
