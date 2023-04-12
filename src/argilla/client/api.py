@@ -12,7 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 import logging
+import warnings
 from asyncio import Future
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -117,6 +119,7 @@ def log(
     background: bool = False,
     chunk_size: Optional[int] = None,
     num_threads: int = 0,
+    max_retries: int = 3,
 ) -> Union[BulkResponse, Future]:
     """Logs Records to argilla.
 
@@ -136,6 +139,8 @@ def log(
         chunk_size: DEPRECATED! Use `batch_size` instead.
         num_threads: If > 0, will use num_thread separate number threads to batches, sending data concurrently.
                 Default to `0`, which means no threading at all.
+        max_retries: Number of retries when logging a batch of records if a `httpx.TransportError` occurs.
+                Default `3`.
 
     Returns:
         Summary of the response from the REST API.
@@ -166,6 +171,7 @@ def log(
         background=background,
         chunk_size=chunk_size,
         num_threads=num_threads,
+        max_retries=max_retries,
     )
 
 
@@ -205,7 +211,14 @@ async def log_async(
         ...     rg.log_async(my_records, dataset_name), loop
         ... )
     """
-    return await ArgillaSingleton.get().log_async(
+
+    warnings.warn(
+        "`log_async` is deprecated and will be removed in next release. "
+        "Please, use `log` with `background=True` instead",
+        DeprecationWarning,
+    )
+
+    future = ArgillaSingleton.get().log(
         records=records,
         name=name,
         workspace=workspace,
@@ -214,7 +227,10 @@ async def log_async(
         batch_size=batch_size,
         verbose=verbose,
         chunk_size=chunk_size,
+        background=True,
     )
+
+    return await asyncio.wrap_future(future)
 
 
 def load(
