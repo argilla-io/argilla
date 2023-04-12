@@ -1,5 +1,6 @@
 import { Model } from "@vuex-orm/core";
 import { GlobalQuestion } from "../global-question/GlobalQuestion.model";
+import { Record } from "../record/Record.model";
 
 class FeedbackDataset extends Model {
   static entity = "feedbackDatasets";
@@ -16,6 +17,7 @@ class FeedbackDataset extends Model {
 
       // relationships
       global_questions: this.hasMany(GlobalQuestion, "dataset_id"),
+      records: this.hasMany(Record, "dataset_id"),
     };
   }
 }
