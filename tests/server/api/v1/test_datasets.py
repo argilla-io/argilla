@@ -372,7 +372,8 @@ def test_create_dataset_annotation_with_published_dataset(client: TestClient, db
         f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
     )
 
-    assert response.status_code == 403
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Annotation cannot be created for a published dataset"}
     assert db.query(Annotation).count() == 0
 
 

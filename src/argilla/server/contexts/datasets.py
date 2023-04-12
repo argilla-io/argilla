@@ -73,6 +73,9 @@ def get_annotation_by_name_and_dataset_id(db: Session, name: str, dataset_id: UU
 
 
 def create_annotation(db: Session, dataset: Dataset, annotation_create: AnnotationCreate):
+    if dataset.is_ready:
+        raise ValueError("Annotation cannot be created for a published dataset")
+
     annotation = Annotation(
         name=annotation_create.name,
         title=annotation_create.title,

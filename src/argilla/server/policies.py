@@ -130,8 +130,8 @@ class DatasetPolicyV1:
         return actor.is_admin
 
     @classmethod
-    def create_annotation(cls, dataset: Dataset) -> bool:
-        return lambda actor: actor.is_admin and dataset.is_draft
+    def create_annotation(cls, actor: User) -> bool:
+        return actor.is_admin
 
     @classmethod
     def publish(cls, actor: User) -> bool:
