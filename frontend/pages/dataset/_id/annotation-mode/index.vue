@@ -91,7 +91,7 @@ export default {
 
         const { name } = responseWorkspaces?.find(
           (workspace) => workspace.id === workspaceId
-        );
+        ) || { name: null };
 
         return name;
       } catch (err) {
