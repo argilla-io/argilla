@@ -17,7 +17,8 @@
 
 import { Database } from "@vuex-orm/core";
 
-import { FeedbackDataset } from "@/models/feedback-task-model/FeedbackDataset.model";
+import { FeedbackDataset } from "@/models/feedback-task-model/feedback-dataset/FeedbackDataset.model";
+import { GlobalQuestion } from "@/models/feedback-task-model/global-question/GlobalQuestion.model";
 import { Pagination, DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Notification } from "@/models/Notifications";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
@@ -41,6 +42,7 @@ import notifications from "@/database/modules/notifications";
 const database = new Database();
 
 database.register(FeedbackDataset);
+database.register(GlobalQuestion);
 database.register(DatasetViewSettings);
 database.register(Pagination);
 database.register(AnnotationProgress);

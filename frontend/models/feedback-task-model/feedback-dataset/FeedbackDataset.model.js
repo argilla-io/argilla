@@ -1,4 +1,5 @@
 import { Model } from "@vuex-orm/core";
+import { GlobalQuestion } from "../global-question/GlobalQuestion.model";
 
 class FeedbackDataset extends Model {
   static entity = "feedbackDatasets";
@@ -12,6 +13,9 @@ class FeedbackDataset extends Model {
       workspace_name: this.attr(null),
       inserted_at: this.attr(null),
       updated_at: this.attr(null),
+
+      // relationships
+      global_questions: this.hasMany(GlobalQuestion, "dataset_id"),
     };
   }
 }

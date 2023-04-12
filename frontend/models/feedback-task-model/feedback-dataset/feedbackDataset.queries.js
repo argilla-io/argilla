@@ -1,11 +1,11 @@
 import { FeedbackDataset as FeedbackDatasetModel } from "./FeedbackDataset.model";
 
-// upsert
+// UPSERT
 const upsertFeedbackDataset = (feedbackDataset) => {
   FeedbackDatasetModel.insertOrUpdate({ data: feedbackDataset });
 };
 
-// get
+// GET
 const getFeedbackDatasetNameById = (datasetId) => {
   return FeedbackDatasetModel.query().whereId(datasetId).first()?.name || null;
 };
@@ -15,8 +15,6 @@ const getFeedbackDatasetWorkspaceNameById = (datasetId) => {
     null
   );
 };
-
-// delete
 
 export {
   upsertFeedbackDataset,
