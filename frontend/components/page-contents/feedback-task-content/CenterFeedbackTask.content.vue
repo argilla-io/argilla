@@ -1,13 +1,19 @@
 <template>
   <div class="wrapper">
-    <RecordFeedbackTaskComponent :record="record" />
+    <RecordFeedbackTaskComponent v-if="record" :record="record" />
     <QuestionsFormComponent :initialInputs="inputs" />
   </div>
 </template>
 
 <script>
-import { upsertGlobalQuestions } from "@/models/feedback-task-model/global-question/globalQuestion.queries";
-import { upsertRecords } from "@/models/feedback-task-model/record/record.queries";
+import {
+  upsertGlobalQuestions,
+  getQuestionsByDatasetId,
+} from "@/models/feedback-task-model/global-question/globalQuestion.queries";
+import {
+  upsertRecords,
+  getRecordWithFieldsByDatasetId,
+} from "@/models/feedback-task-model/record/record.queries";
 
 export default {
   name: "CenterFeedbackTaskContent",
@@ -16,58 +22,36 @@ export default {
       type: String,
       required: true,
     },
+    orderBy: {
+      type: Object,
+      default: () => {
+        return { orderQuestionBy: "order", ascendent: true };
+      },
+    },
+  },
+  data() {
+    return {
+      recordOffset: 0,
+    };
+  },
+  computed: {
+    record() {
+      return getRecordWithFieldsByDatasetId(
+        this.datasetId,
+        1,
+        this.recordOffset
+      );
+    },
+    inputs() {
+      return getQuestionsByDatasetId(
+        this.datasetId,
+        this.orderBy?.orderQuestionsBy,
+        this.orderBy?.ascendent
+      );
+    },
   },
   created() {
-    this.record = {
-      id: "record_1",
-      fields: [
-        {
-          id: "field_1",
-          title: "Input",
-          text: `
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Dolorum ratione quas quis eveniet harum cum, earum a facere
-            voluptate fugit nostrum sequi facilis incidunt debitis unde?
-            Eos rem debitis velit? Officia magni odit possimus quis nisi.
-            Dolore, eaque eligendi! Beatae quos debitis soluta distinctio
-            qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium
-            explicabo ab, pariatur id sapiente tenetur.
-            `,
-        },
-        {
-          id: "field_2",
-          title: "Outputs",
-          text: `
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Vitae cupiditate fugit quos officiis expedita, deleniti libero
-            inventore fugiat perferendis dolor optio praesentium enim molestiae
-            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
-            reprehenderit non distinctio repellat adipisci laborum, fugit sint
-            labore nulla tempore quam eos iste asperiores eius laudantium vel
-            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
-            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
-            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
-            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
-            delectus similique! Commodi, a. Totam illo iure iste voluptate?
-            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
-            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
-            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
-            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
-            architecto necessitatibus accusamus nesciunt exercitationem neque
-            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
-            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
-            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
-            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
-            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
-            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
-            quaerat impedit animi porro saepe ipsa molestiae quibusdam
-            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
-            eligendi voluptate.`,
-        },
-      ],
-    };
-
-    this.records = [
+    const records = [
       {
         id: "record_1",
         fields: [
@@ -196,10 +180,10 @@ export default {
       },
     ];
 
-    const formattedRecords = this.factoryRecordsForOrm();
+    const formattedRecords = this.factoryRecordsForOrm(records);
     upsertRecords(formattedRecords);
 
-    this.inputs = [
+    const inputs = [
       // {
       //   id: "id_1",
       //   question:
@@ -301,49 +285,13 @@ export default {
       },
     ];
 
-    //     const patati = {
-    //    "name":"Rate the harmlessness of the output (1-very harmful, 5-harmless):",
-    //    "title":"string",
-    //    "type":"rating",
-    //    "required":true,
-    //    "settings":{
-    //       "labels":[
-    //          {
-    //             "tootltip":"lowest value",
-    //             "name":false,
-    //             "text":"1"
-    //          },
-    //          {
-    //             "tooltip": null,
-    //             "name":false,
-    //             "text":"2"
-    //          },
-    //          {
-    //             "tooltip": null,
-    //             "name":false,
-    //             "text":"3"
-    //          },
-    //          {
-    //             "tooltip": null,
-    //             "name":false,
-    //             "text":"4"
-    //          },
-    //          {
-    //             "tootltip":"highest value",
-    //             "name":true,
-    //             "text":"5"
-    //          }
-    //       ]
-    //    }
-    // }
-
-    const formattedInputs = this.factoryInputsForOrm();
+    const formattedInputs = this.factoryInputsForOrm(inputs);
 
     upsertGlobalQuestions(formattedInputs);
   },
   methods: {
-    factoryRecordsForOrm() {
-      return this.records.map((record) => {
+    factoryRecordsForOrm(records) {
+      return records.map((record) => {
         return {
           ...record,
           record_id: record.id,
@@ -352,8 +300,8 @@ export default {
         };
       });
     },
-    factoryInputsForOrm() {
-      return this.inputs.map((input, index) => {
+    factoryInputsForOrm(inputs) {
+      return inputs.map((input, index) => {
         return {
           ...input,
           dataset_id: this.datasetId,
