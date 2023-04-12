@@ -9,4 +9,18 @@ const upsertGlobalQuestions = (globalQuestions) => {
   GlobalQuestionModel.insertOrUpdate({ data: globalQuestions });
 };
 
-export { upsertGlobalQuestion, upsertGlobalQuestions };
+// GET
+const getQuestionsByDatasetId = (
+  datasetId,
+  orderBy = "order",
+  ascendent = true
+) => {
+  const direction = ascendent ? "asc" : "desc";
+
+  return GlobalQuestionModel.query()
+    .where("dataset_id", datasetId)
+    .orderBy(orderBy, direction)
+    .get();
+};
+
+export { upsertGlobalQuestion, upsertGlobalQuestions, getQuestionsByDatasetId };
