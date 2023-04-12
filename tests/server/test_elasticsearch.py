@@ -22,7 +22,12 @@ from elasticsearch import BadRequestError, Elasticsearch
 from opensearchpy import OpenSearch
 from sqlalchemy.orm import Session
 
-from tests.factories import AnnotationFactory, DatasetFactory
+from tests.factories import (
+    AnnotationFactory,
+    DatasetFactory,
+    RatingAnnotationFactory,
+    TextAnnotationFactory,
+)
 
 
 def _running_with_elasticsearch() -> str:
@@ -83,8 +88,8 @@ def test_create_index_for_dataset_with_annotations(
     text_ann_size: int,
     rating_ann_size: int,
 ):
-    text_annotations = AnnotationFactory.create_batch(size=text_ann_size, type=AnnotationType.text)
-    rating_annotations = AnnotationFactory.create_batch(size=rating_ann_size, type=AnnotationType.rating)
+    text_annotations = TextAnnotationFactory.create_batch(size=text_ann_size)
+    rating_annotations = RatingAnnotationFactory.create_batch(size=rating_ann_size)
 
     dataset = DatasetFactory.create(annotations=text_annotations + rating_annotations)
 

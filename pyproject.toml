@@ -33,7 +33,7 @@ dependencies = [
     # pandas -> For data loading
     "pandas >=1.0.0,<2.0.0",
     # Aligned pydantic version with server fastAPI
-    "pydantic >= 1.7.1",
+    "pydantic >= 1.10.7",
     # monitoring
     "wrapt >= 1.13,< 1.15",
     # weaksupervision
