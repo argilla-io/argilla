@@ -13,7 +13,7 @@ class GlobalQuestion extends Model {
       outputs: this.attr([]),
       is_required: this.boolean(false),
       component_type: this.string(null).nullable(),
-      tooltipMessage: this.string(null).nullable(),
+      tooltip_message: this.string(null).nullable(),
     };
   }
 }

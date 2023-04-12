@@ -12,7 +12,7 @@
       <SidebarFeedbackTaskComponent />
     </template>
     <template v-slot:center>
-      <CenterFeedbackTaskContent />
+      <CenterFeedbackTaskContent :datasetId="datasetId" />
     </template>
   </HeaderAndTopAndOneColumn>
 </template>
@@ -23,7 +23,7 @@ import {
   upsertFeedbackDataset,
   getFeedbackDatasetNameById,
   getFeedbackDatasetWorkspaceNameById,
-} from "@/models/feedback-task-model/feedbackDataset.queries";
+} from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import { Notification } from "@/models/Notifications";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
