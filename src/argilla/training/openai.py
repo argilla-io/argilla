@@ -84,11 +84,6 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["classification_betas"] = classification_betas
         self.model_kwargs["suffix"] = suffix
 
-        if self._train_dataset is not None and self.model_kwargs["training_file"] is None:
-            self.model_kwargs["training_file"] = self.upload_dataset_to_openai(self._train_dataset, "data_train.jsonl")
-        if self._eval_dataset is not None and self.model_kwargs["validation_file"] is None:
-            self.model_kwargs["validation_file"] = self.upload_dataset_to_openai(self._eval_dataset, "data_test.jsonl")
-
         if isinstance(self._settings, rg.TextClassificationSettings):
             label_schema = self._settings.label_schema
             if len(label_schema) == 2:
@@ -149,6 +144,11 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
         if output_dir is not None:
             self.model_kwargs["suffix"] = output_dir
+
+        if self._train_dataset is not None and self.model_kwargs["training_file"] is None:
+            self.model_kwargs["training_file"] = self.upload_dataset_to_openai(self._train_dataset, "data_train.jsonl")
+        if self._eval_dataset is not None and self.model_kwargs["validation_file"] is None:
+            self.model_kwargs["validation_file"] = self.upload_dataset_to_openai(self._eval_dataset, "data_test.jsonl")
 
         self.update_config()
 

@@ -196,6 +196,7 @@ _________________________________________________________________
         It updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
         """
         self._trainer.update_config(*args, **kwargs)
+        self._logger.info(self)
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         """
@@ -251,6 +252,9 @@ class ArgillaTrainerSkeleton(object):
         self._seed = seed
 
     def init_training_args(self):
+        raise NotImplementedError("This method must be implemented by the subclass.")
+
+    def init_model(self):
         raise NotImplementedError("This method must be implemented by the subclass.")
 
     def update_config(self, *args, **kwargs):

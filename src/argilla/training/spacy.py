@@ -116,7 +116,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self.config["paths"]["vectors"] = self._model
         self.config["system"]["seed"] = self._seed or 42
 
-    def _init_model(self):
+    def init_model(self):
         from spacy.training.initialize import init_nlp
 
         self._nlp = init_nlp(self.config, use_gpu=self.gpu_id)
@@ -204,7 +204,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         """
         if self._nlp is None:
             self._logger.warn("Using model without fine-tuning.")
-            self._init_model()
+            self.init_model()
 
         str_input = False
         if isinstance(text, str):
