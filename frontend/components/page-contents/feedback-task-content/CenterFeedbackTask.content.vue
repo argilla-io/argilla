@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { upsertGlobalQuestion } from "@/models/feedback-task-model/global-question/globalQuestion.queries";
+import { upsertGlobalQuestions } from "@/models/feedback-task-model/global-question/globalQuestion.queries";
 
 export default {
   name: "CenterFeedbackTaskContent",
@@ -77,6 +77,7 @@ export default {
       //   default: null,
       //   required: true,
       //   componentType: "SINGLE_LABEL",
+      //   tooltipMessage: null,
       // },
       // {
       //   id: "id_2",
@@ -166,16 +167,59 @@ export default {
       },
     ];
 
-    this.inputs.forEach((question, index) => {
-      upsertGlobalQuestion({
-        ...question,
-        dataset_id: this.datasetId,
-        order: index,
-        component_type: question.componentType,
-        is_required: question.required,
-        tooltip_message: question.tooltipMessage,
+    //     const patati = {
+    //    "name":"Rate the harmlessness of the output (1-very harmful, 5-harmless):",
+    //    "title":"string",
+    //    "type":"rating",
+    //    "required":true,
+    //    "settings":{
+    //       "labels":[
+    //          {
+    //             "tootltip":"lowest value",
+    //             "name":false,
+    //             "text":"1"
+    //          },
+    //          {
+    //             "tooltip": null,
+    //             "name":false,
+    //             "text":"2"
+    //          },
+    //          {
+    //             "tooltip": null,
+    //             "name":false,
+    //             "text":"3"
+    //          },
+    //          {
+    //             "tooltip": null,
+    //             "name":false,
+    //             "text":"4"
+    //          },
+    //          {
+    //             "tootltip":"highest value",
+    //             "name":true,
+    //             "text":"5"
+    //          }
+    //       ]
+    //    }
+    // }
+
+    const formattedInputs = this.factoryInputsForOrm();
+
+    upsertGlobalQuestions(formattedInputs);
+  },
+  methods: {
+    factoryInputsForOrm() {
+      return this.inputs.map((input, index) => {
+        return {
+          ...input,
+          dataset_id: this.datasetId,
+          order: index,
+          component_type: input.componentType,
+          is_required: input.required,
+          tooltip_message: input.tooltipMessage,
+        };
       });
-    });
+    },
   },
 };
 </script>

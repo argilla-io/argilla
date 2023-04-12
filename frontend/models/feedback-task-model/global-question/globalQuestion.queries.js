@@ -5,4 +5,8 @@ const upsertGlobalQuestion = (globalQuestion) => {
   GlobalQuestionModel.insertOrUpdate({ data: globalQuestion });
 };
 
-export { upsertGlobalQuestion };
+const upsertGlobalQuestions = (globalQuestions) => {
+  GlobalQuestionModel.insertOrUpdate({ data: globalQuestions });
+};
+
+export { upsertGlobalQuestion, upsertGlobalQuestions };
