@@ -30,6 +30,7 @@ from tests.factories import (
     TextAnnotationFactory,
 )
 
+
 def _index_name_for_dataset(dataset):
     return f"rg.{dataset.id}"
 
