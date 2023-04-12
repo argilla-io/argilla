@@ -1,16 +1,7 @@
 <template>
   <div class="wrapper">
-    <div class="container">
-      <div class="record">
-        <div class="item" v-for="field in record.fields" :key="field.title">
-          <div class="title-area --body1">
-            <span v-text="field.title"></span>
-          </div>
-          <div class="content" v-html="field.text" />
-        </div>
-      </div>
-      <QuestionsFormComponent :initialInputs="inputs" />
-    </div>
+    <RecordFeedbackTaskComponent :record="record" />
+    <QuestionsFormComponent :initialInputs="inputs" />
   </div>
 </template>
 
@@ -19,9 +10,10 @@ export default {
   name: "CenterFeedbackTaskContent",
   created() {
     this.record = {
-      id: "daboudi",
+      id: "record_1",
       fields: [
         {
+          id: "field_1",
           title: "Input",
           text: `
             Lorem ipsum dolor sit amet consectetur adipisicing elit.
@@ -30,35 +22,37 @@ export default {
             Eos rem debitis velit? Officia magni odit possimus quis nisi.
             Dolore, eaque eligendi! Beatae quos debitis soluta distinctio
             qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium
-            explicabo ab, pariatur id sapiente tenetur.`,
+            explicabo ab, pariatur id sapiente tenetur.
+            `,
         },
         {
+          id: "field_2",
           title: "Outputs",
           text: `
             Lorem ipsum dolor sit amet, consectetur adipisicing elit.
             Vitae cupiditate fugit quos officiis expedita, deleniti libero
             inventore fugiat perferendis dolor optio praesentium enim molestiae
-            molestias. <br /><br />Ipsam perferendis aperiam perspiciatis assumenda. Numquam
+            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
             reprehenderit non distinctio repellat adipisci laborum, fugit sint
             labore nulla tempore quam eos iste asperiores eius laudantium vel
             similique officiis sunt vero beatae magni ab dicta! Culpa, qui
-            dolore. <br /><br />Quaerat, repellendus deserunt doloribus laudantium ducimus
-            atque quia rerum ullam. <br /><br />Sit veritatis, quas id sed culpa deleniti
+            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
+            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
             officiis ipsa laudantium, eos qui pariatur iure facere, sequi
-            delectus similique! Commodi, a. <br /><br />Totam illo iure iste voluptate?
+            delectus similique! Commodi, a. Totam illo iure iste voluptate?
             Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
             distinctio qui beatae quaerat, ullam sit voluptas facere repellat
             accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
             Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
             architecto necessitatibus accusamus nesciunt exercitationem neque
             dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
-            non hic necessitatibus. <br /><br />Quibusdam repudiandae odit eaque enim
+            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
             voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
             ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
-            recusandae. <br /><br />Ipsam doloribus esse debitis libero. <br /><br />Quod corporis
+            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
             eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
             quaerat impedit animi porro saepe ipsa molestiae quibusdam
-            suscipit nam. <br /><br />Fuga quo sunt itaque corrupti atque dolores fugit,
+            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
             eligendi voluptate.`,
         },
       ],
@@ -166,33 +160,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.container {
+.wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 2 * $base-space;
-}
-.record {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: $base-space;
-  padding: 2 * $base-space 4 * $base-space 2 * $base-space 4 * $base-space;
-  background: #fff;
-  border: 1px solid #e6e6e6;
-  border-radius: 8px;
-}
-
-.item {
-  display: flex;
-  flex-direction: column;
-  padding: 2 * $base-space;
-  background: #f5f5f5;
-  border-radius: 8px;
-  .title-area {
-    display: flex;
-    align-items: center;
-    gap: $base-space;
-    color: rgba(0, 0, 0, 0.37);
-  }
 }
 </style>

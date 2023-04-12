@@ -114,6 +114,7 @@ export default {
     onReset() {
       this.inputs = cloneDeep(this.initialInputs);
       this.isError = false;
+      this.colorAsterisk = "black";
       this.renderForm++;
     },
     onError(isError) {
