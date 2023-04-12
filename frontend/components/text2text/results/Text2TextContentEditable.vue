@@ -14,7 +14,7 @@
           @blur="setFocus(false)"
         ></p>
       </transition>
-      <span><strong>shift Enter</strong> to save</span>
+      <span v-if="isShortcutToSave"><strong>shift Enter</strong> to save</span>
     </div>
   </span>
 </template>
@@ -36,6 +36,10 @@ export default {
     placeholder: {
       type: String,
       default: "",
+    },
+    isShortcutToSave: {
+      type: Boolean,
+      default: () => true,
     },
   },
   data: () => {
