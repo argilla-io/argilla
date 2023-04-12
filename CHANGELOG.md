@@ -9,16 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- `rg.log` accepts a `num_thread` argument to run data logging request concurrently. See [#2458](https://github.com/argilla-io/argilla/issues/2458) and [#2533](https://github.com/argilla-io/argilla/issues/2533)
+- add `max_retries` and `num_threads` parameters to `rg.log` to run data logging request concurrently with backoff retry policy. See [#2458](https://github.com/argilla-io/argilla/issues/2458) and [#2533](https://github.com/argilla-io/argilla/issues/2533)
 
 ## Changed
 
+- Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
 - The `rg.log_async` is deprecated and will be removed in next minor release.
 - The `rg.log` will compute all batches and raise an error for all failed batches.
 
-
 ## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.5.1...v1.6.0)
-
 
 ### Added
 
