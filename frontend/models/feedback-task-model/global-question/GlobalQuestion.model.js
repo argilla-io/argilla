@@ -2,7 +2,7 @@ import { Model } from "@vuex-orm/core";
 
 class GlobalQuestion extends Model {
   static entity = "globalQuestions";
-  static primaryKey = "question";
+  static primaryKey = ["component_type", "question"];
 
   static fields() {
     return {
