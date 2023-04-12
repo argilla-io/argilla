@@ -66,12 +66,12 @@ class AnnotationFactory(factory.alchemy.SQLAlchemyModelFactory):
 
 
 class TextAnnotationFactory(AnnotationFactory):
-    type = AnnotationType.text
+    settings = {"type": AnnotationType.text.value}
 
 
 class RatingAnnotationFactory(AnnotationFactory):
-    type = AnnotationType.rating
     settings = {
+        "type": AnnotationType.rating.value,
         "options": [
             {"value": 1},
             {"value": 2},
@@ -83,7 +83,7 @@ class RatingAnnotationFactory(AnnotationFactory):
             {"value": 8},
             {"value": 9},
             {"value": 10},
-        ]
+        ],
     }
 
 

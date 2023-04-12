@@ -13,11 +13,11 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Optional, Union
+from typing import Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, conlist, validator
-from pydantic.utils import GetterDict
+from pydantic import BaseModel, Field, conlist
+from typing_extensions import Literal
 
 from argilla.server.models import AnnotationType
 
@@ -43,11 +43,16 @@ class DatasetCreate(BaseModel):
     workspace_id: UUID
 
 
+class TextAnnotationSettings(BaseModel):
+    type: Literal[AnnotationType.text]
+
+
 class RatingAnnotationSettingsOption(BaseModel):
     value: int
 
 
 class RatingAnnotationSettings(BaseModel):
+    type: Literal[AnnotationType.rating]
     options: conlist(
         item_type=RatingAnnotationSettingsOption,
         min_items=RATING_OPTIONS_MIN_ITEMS,
@@ -55,52 +60,21 @@ class RatingAnnotationSettings(BaseModel):
     )
 
 
-class TextAnnotationSettings(BaseModel):
-    pass
-
-
-class AnnotationGetter(GetterDict):
-    def get(self, key: Any, default: Any = None) -> Any:
-        if key == "settings":
-            if self._obj.type == AnnotationType.text:
-                return TextAnnotationSettings()
-            if self._obj.type == AnnotationType.rating:
-                return RatingAnnotationSettings(**self._obj.settings)
-        return super().get(key, default)
-
-
 class Annotation(BaseModel):
     id: UUID
     name: str
     title: str
-    type: AnnotationType
     required: bool
-    settings: Union[RatingAnnotationSettings, TextAnnotationSettings]
+    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
     inserted_at: datetime
     updated_at: datetime
 
     class Config:
         orm_mode = True
-        getter_dict = AnnotationGetter
 
 
 class AnnotationCreate(BaseModel):
     name: str
     title: str
-    type: AnnotationType
     required: Optional[bool]
-    settings: Optional[Union[RatingAnnotationSettings, TextAnnotationSettings]]
-
-    @validator("settings", pre=True, always=True)
-    def validate_settings(cls, settings: Any, values):
-        if settings and not isinstance(settings, dict):
-            return settings
-
-        type = values.get("type")
-
-        if type == AnnotationType.text:
-            return {}
-        if type == AnnotationType.rating:
-            return RatingAnnotationSettings(**settings)
-        else:
-            return settings
+    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
