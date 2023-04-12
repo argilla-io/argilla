@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
 - bulk endpoints will upsert data when record `id` is present. Closes [#2535](https://github.com/argilla-io/argilla/issues/2535)
 
-## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
+## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.5.1...v1.6.0)
 
 ### Added
 
