@@ -6,7 +6,9 @@
     <main class="layout">
       <div class="empty-content-left"></div>
       <div class="sidebar-content-right">
-        <slot name="sidebar-right">here is the sidebar content left</slot>
+        <!-- we can replace with TaskSidebar when new feedback task vuex data is already mounted -->
+        <!-- <TaskSidebar /> -->
+        <SidebarFeedbackTaskComponent />
       </div>
       <div class="top">
         <slot name="top">here is the top content</slot>
@@ -27,12 +29,11 @@ export default {
 <style lang="scss" scoped>
 .layout {
   display: grid;
-  grid-template-columns: 56px 1fr 1fr 1fr 56px;
+  grid-template-columns: 56px 1fr 1fr 1fr 56px $sidebarMenuWidth;
   grid-template-rows: 0 100px 1fr 1fr 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
   height: calc(100vh - $topbarHeight);
-  background: palette(white);
 }
 .header {
   grid-area: 1 / 1 / 2 / 6;
@@ -44,7 +45,8 @@ export default {
   grid-area: 2 / 5 / 6 / 6;
 }
 .top {
-  grid-area: 2 / 2 / 3 / 5;
+  grid-area: 2/2/2/5;
+  background: palette(white);
 }
 .center {
   grid-area: 3 / 2 / 6 / 5;
