@@ -79,9 +79,8 @@ def create_annotation(db: Session, dataset: Dataset, annotation_create: Annotati
     annotation = Annotation(
         name=annotation_create.name,
         title=annotation_create.title,
-        type=annotation_create.type,
         required=annotation_create.required,
-        settings=annotation_create.settings,
+        settings=annotation_create.settings.dict(),
         dataset_id=dataset.id,
     )
 

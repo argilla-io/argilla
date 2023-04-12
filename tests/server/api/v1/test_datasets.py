@@ -47,7 +47,7 @@ def test_list_datasets(client: TestClient, admin_auth_header: dict):
             "id": str(dataset_a.id),
             "name": "dataset-a",
             "guidelines": None,
-            "status": DatasetStatus.draft.value,
+            "status": "draft",
             "workspace_id": str(dataset_a.workspace_id),
             "inserted_at": dataset_a.inserted_at.isoformat(),
             "updated_at": dataset_a.updated_at.isoformat(),
@@ -56,7 +56,7 @@ def test_list_datasets(client: TestClient, admin_auth_header: dict):
             "id": str(dataset_b.id),
             "name": "dataset-b",
             "guidelines": "guidelines",
-            "status": DatasetStatus.draft.value,
+            "status": "draft",
             "workspace_id": str(dataset_b.workspace_id),
             "inserted_at": dataset_b.inserted_at.isoformat(),
             "updated_at": dataset_b.updated_at.isoformat(),
@@ -65,7 +65,7 @@ def test_list_datasets(client: TestClient, admin_auth_header: dict):
             "id": str(dataset_c.id),
             "name": "dataset-c",
             "guidelines": None,
-            "status": DatasetStatus.ready.value,
+            "status": "ready",
             "workspace_id": str(dataset_c.workspace_id),
             "inserted_at": dataset_c.inserted_at.isoformat(),
             "updated_at": dataset_c.updated_at.isoformat(),
@@ -103,7 +103,7 @@ def test_get_dataset(client: TestClient, admin_auth_header: dict):
         "id": str(dataset.id),
         "name": "dataset",
         "guidelines": None,
-        "status": DatasetStatus.draft.value,
+        "status": "draft",
         "workspace_id": str(dataset.workspace_id),
         "inserted_at": dataset.inserted_at.isoformat(),
         "updated_at": dataset.updated_at.isoformat(),
@@ -164,9 +164,8 @@ def test_get_dataset_annotations(client: TestClient, db: Session, admin_auth_hea
             "id": str(text_annotation.id),
             "name": "text-annotation",
             "title": "Text Annotation",
-            "type": AnnotationType.text.value,
             "required": True,
-            "settings": {},
+            "settings": {"type": "text"},
             "inserted_at": text_annotation.inserted_at.isoformat(),
             "updated_at": text_annotation.updated_at.isoformat(),
         },
@@ -174,9 +173,9 @@ def test_get_dataset_annotations(client: TestClient, db: Session, admin_auth_hea
             "id": str(rating_annotation.id),
             "name": "rating-annotation",
             "title": "Rating Annotation",
-            "type": AnnotationType.rating.value,
             "required": False,
             "settings": {
+                "type": "rating",
                 "options": [
                     {"value": 1},
                     {"value": 2},
@@ -188,7 +187,7 @@ def test_get_dataset_annotations(client: TestClient, db: Session, admin_auth_hea
                     {"value": 8},
                     {"value": 9},
                     {"value": 10},
-                ]
+                ],
             },
             "inserted_at": rating_annotation.inserted_at.isoformat(),
             "updated_at": rating_annotation.updated_at.isoformat(),
@@ -254,7 +253,7 @@ def test_create_dataset(client: TestClient, db: Session, admin_auth_header: dict
         "id": str(UUID(response_body["id"])),
         "name": "name",
         "guidelines": "guidelines",
-        "status": DatasetStatus.draft.value,
+        "status": "draft",
         "workspace_id": str(workspace.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
@@ -295,7 +294,7 @@ def test_create_dataset_annotation(client: TestClient, db: Session, admin_auth_h
     annotation_json = {
         "name": "name",
         "title": "title",
-        "type": AnnotationType.text.value,
+        "settings": {"type": "text"},
     }
 
     response = client.post(
@@ -311,9 +310,8 @@ def test_create_dataset_annotation(client: TestClient, db: Session, admin_auth_h
         "id": str(UUID(response_body["id"])),
         "name": "name",
         "title": "title",
-        "type": AnnotationType.text.value,
         "required": False,
-        "settings": {},
+        "settings": {"type": "text"},
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -324,7 +322,7 @@ def test_create_dataset_annotation_without_authentication(client: TestClient, db
     annotation_json = {
         "name": "name",
         "title": "title",
-        "type": AnnotationType.text.value,
+        "settings": {"type": "text"},
     }
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/annotations", json=annotation_json)
@@ -339,7 +337,7 @@ def test_create_dataset_annotation_as_annotator(client: TestClient, db: Session)
     annotation_json = {
         "name": "name",
         "title": "title",
-        "type": AnnotationType.text.value,
+        "settings": {"type": "text"},
     }
 
     response = client.post(
@@ -354,7 +352,11 @@ def test_create_dataset_annotation_as_annotator(client: TestClient, db: Session)
 
 def test_create_dataset_annotation_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
     annotation = AnnotationFactory.create(name="name")
-    annotation_json = {"name": "name", "title": "title", "type": AnnotationType.text.value}
+    annotation_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
 
     response = client.post(
         f"/api/v1/datasets/{annotation.dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
@@ -366,7 +368,11 @@ def test_create_dataset_annotation_with_existent_name(client: TestClient, db: Se
 
 def test_create_dataset_annotation_with_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    annotation_json = {"name": "name", "title": "title", "type": AnnotationType.text.value}
+    annotation_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
 
     response = client.post(
         f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
@@ -384,8 +390,7 @@ def test_create_dataset_annotation_with_nonexistent_dataset_id(
     annotation_json = {
         "name": "text",
         "title": "Text",
-        "type": AnnotationType.text.value,
-        "settings": {"discarded": "values"},
+        "settings": {"type": "text"},
     }
 
     response = client.post(f"/api/v1/datasets/{uuid4()}/annotations", headers=admin_auth_header, json=annotation_json)
@@ -399,8 +404,7 @@ def test_create_dataset_text_annotation(client: TestClient, db: Session, admin_a
     annotation_json = {
         "name": "text",
         "title": "Text",
-        "type": AnnotationType.text.value,
-        "settings": {"discarded": "value"},
+        "settings": {"type": "text", "discarded": "value"},
     }
 
     response = client.post(
@@ -416,9 +420,8 @@ def test_create_dataset_text_annotation(client: TestClient, db: Session, admin_a
         "id": str(UUID(response_body["id"])),
         "name": "text",
         "title": "Text",
-        "type": AnnotationType.text.value,
         "required": False,
-        "settings": {},
+        "settings": {"type": "text"},
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -429,8 +432,8 @@ def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin
     annotation_json = {
         "name": "rating",
         "title": "Rating",
-        "type": AnnotationType.rating.value,
         "settings": {
+            "type": "rating",
             "options": [
                 {"value": 1},
                 {"value": 2},
@@ -442,7 +445,7 @@ def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin
                 {"value": 8},
                 {"value": 9},
                 {"value": 10},
-            ]
+            ],
         },
     }
 
@@ -459,9 +462,9 @@ def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin
         "id": str(UUID(response_body["id"])),
         "name": "rating",
         "title": "Rating",
-        "type": AnnotationType.rating.value,
         "required": False,
         "settings": {
+            "type": "rating",
             "options": [
                 {"value": 1},
                 {"value": 2},
@@ -473,7 +476,7 @@ def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin
                 {"value": 8},
                 {"value": 9},
                 {"value": 10},
-            ]
+            ],
         },
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
@@ -487,8 +490,10 @@ def test_create_dataset_rating_annotation_with_less_options_than_allowed(
     annotation_json = {
         "name": "rating",
         "title": "Rating",
-        "type": AnnotationType.rating.value,
-        "settings": {"options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
+        "settings": {
+            "type": "rating",
+            "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)],
+        },
     }
 
     response = client.post(
@@ -506,8 +511,10 @@ def test_create_dataset_rating_annotation_with_more_options_than_allowed(
     annotation_json = {
         "name": "rating",
         "title": "Rating",
-        "type": AnnotationType.rating.value,
-        "settings": {"options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
+        "settings": {
+            "type": "rating",
+            "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)],
+        },
     }
 
     response = client.post(
@@ -525,8 +532,8 @@ def test_create_dataset_rating_annotation_with_invalid_settings(
     annotation_json = {
         "name": "rating",
         "title": "Rating",
-        "type": AnnotationType.rating.value,
         "settings": {
+            "type": "rating",
             "options": "invalid",
         },
     }
@@ -546,14 +553,14 @@ def test_create_dataset_rating_annotation_with_invalid_settings_options_values(
     annotation_json = {
         "name": "rating",
         "title": "Rating",
-        "type": AnnotationType.rating.value,
         "settings": {
+            "type": "rating",
             "options": [
                 {"value": "A"},
                 {"value": "B"},
                 {"value": "C"},
                 {"value": "D"},
-            ]
+            ],
         },
     }
 
@@ -572,10 +579,10 @@ def test_publish_dataset(client: TestClient, db: Session, admin_auth_header: dic
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
     assert response.status_code == 200
-    assert db.get(Dataset, dataset.id).status == DatasetStatus.ready
+    assert db.get(Dataset, dataset.id).status == "ready"
 
     response_body = response.json()
-    assert response_body["status"] == DatasetStatus.ready.value
+    assert response_body["status"] == "ready"
 
 
 def test_publish_dataset_without_authentication(client: TestClient, db: Session):
@@ -585,7 +592,7 @@ def test_publish_dataset_without_authentication(client: TestClient, db: Session)
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish")
 
     assert response.status_code == 401
-    assert db.get(Dataset, dataset.id).status == DatasetStatus.draft
+    assert db.get(Dataset, dataset.id).status == "draft"
 
 
 def test_publish_dataset_as_annotator(client: TestClient, db: Session):
@@ -596,7 +603,7 @@ def test_publish_dataset_as_annotator(client: TestClient, db: Session):
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 403
-    assert db.get(Dataset, dataset.id).status == DatasetStatus.draft
+    assert db.get(Dataset, dataset.id).status == "draft"
 
 
 def test_publish_dataset_already_published(client: TestClient, db: Session, admin_auth_header: dict):
@@ -607,7 +614,7 @@ def test_publish_dataset_already_published(client: TestClient, db: Session, admi
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Dataset is already published"}
-    assert db.get(Dataset, dataset.id).status == DatasetStatus.ready
+    assert db.get(Dataset, dataset.id).status == "ready"
 
 
 def test_publish_dataset_without_annotations(client: TestClient, db: Session, admin_auth_header: dict):
@@ -617,7 +624,7 @@ def test_publish_dataset_without_annotations(client: TestClient, db: Session, ad
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Dataset cannot be published without annotations"}
-    assert db.get(Dataset, dataset.id).status == DatasetStatus.draft
+    assert db.get(Dataset, dataset.id).status == "draft"
 
 
 def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
@@ -627,7 +634,7 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
     response = client.put(f"/api/v1/datasets/{uuid4()}/publish", headers=admin_auth_header)
 
     assert response.status_code == 404
-    assert db.get(Dataset, dataset.id).status == DatasetStatus.draft
+    assert db.get(Dataset, dataset.id).status == "draft"
 
 
 def test_delete_dataset(client: TestClient, db: Session, admin_auth_header: dict):

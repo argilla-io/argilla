@@ -13,10 +13,11 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, conlist, validator
+from pydantic import BaseModel, Field, conlist
+from typing_extensions import Literal
 
 from argilla.server.models import AnnotationType, DatasetStatus
 
@@ -43,13 +44,29 @@ class DatasetCreate(BaseModel):
     workspace_id: UUID
 
 
+class TextAnnotationSettings(BaseModel):
+    type: Literal[AnnotationType.text]
+
+
+class RatingAnnotationSettingsOption(BaseModel):
+    value: int
+
+
+class RatingAnnotationSettings(BaseModel):
+    type: Literal[AnnotationType.rating]
+    options: conlist(
+        item_type=RatingAnnotationSettingsOption,
+        min_items=RATING_OPTIONS_MIN_ITEMS,
+        max_items=RATING_OPTIONS_MAX_ITEMS,
+    )
+
+
 class Annotation(BaseModel):
     id: UUID
     name: str
     title: str
-    type: AnnotationType
     required: bool
-    settings: dict
+    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
     inserted_at: datetime
     updated_at: datetime
 
@@ -57,32 +74,8 @@ class Annotation(BaseModel):
         orm_mode = True
 
 
-class RatingAnnotationSettingsOptionCreate(BaseModel):
-    value: int
-
-
-class RatingAnnotationSettingsCreate(BaseModel):
-    options: conlist(
-        item_type=RatingAnnotationSettingsOptionCreate,
-        min_items=RATING_OPTIONS_MIN_ITEMS,
-        max_items=RATING_OPTIONS_MAX_ITEMS,
-    )
-
-
 class AnnotationCreate(BaseModel):
     name: str
     title: str
-    type: AnnotationType
     required: Optional[bool]
-    settings: Optional[dict] = {}
-
-    @validator("settings", always=True)
-    def validate_settings(cls, settings: dict, values):
-        type = values.get("type")
-
-        if type == AnnotationType.text:
-            return {}
-        if type == AnnotationType.rating:
-            return RatingAnnotationSettingsCreate(**settings).dict()
-        else:
-            return settings
+    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")

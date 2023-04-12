@@ -5,7 +5,9 @@
     </div>
     <main class="layout">
       <div class="empty-content-left"></div>
-      <div class="empty-content-right"></div>
+      <div class="sidebar-content-right">
+        <slot name="sidebar-right">here is the sidebar content left</slot>
+      </div>
       <div class="top">
         <slot name="top">here is the top content</slot>
       </div>
@@ -38,7 +40,7 @@ export default {
 .empty-content-left {
   grid-area: 2 / 1 / 6 / 2;
 }
-.empty-content-right {
+.sidebar-content-right {
   grid-area: 2 / 5 / 6 / 6;
 }
 .top {
@@ -46,5 +48,6 @@ export default {
 }
 .center {
   grid-area: 3 / 2 / 6 / 5;
+  overflow-x: hidden;
 }
 </style>
