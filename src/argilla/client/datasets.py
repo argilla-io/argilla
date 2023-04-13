@@ -896,6 +896,7 @@ class DatasetForTextClassification(DatasetBase):
             A pd.DataFrame.
         """
         separator = "\n\n###\n\n"
+        whitespace = " "
         self.__all_labels__()  # verify that all labels are strings
 
         if len(self._records) <= len(self._SETTINGS.label_schema) * 100:
@@ -915,14 +916,11 @@ class DatasetForTextClassification(DatasetBase):
             prompt += separator  # needed for better performance
 
             if self._records[0].multi_label:
-                for annotation in rec.annotation:
-                    jsonl.append({"id": rec.id, "prompt": prompt, "completion": self._SETTINGS.label2id[annotation]})
-                completion = ", ".join(rec.annotation)
+                completion = ", ".join([str(self._SETTINGS.label2id[annotation]) for annotation in rec.annotation])
             else:
                 completion = str(self._SETTINGS.label2id[rec.annotation])
-            completion = " " + completion  # needed for better performance
 
-            jsonl.append({"id": rec.id, "prompt": prompt, "completion": completion})
+            jsonl.append({"id": rec.id, "prompt": prompt, "completion": whitespace + completion})
 
         return jsonl
 
@@ -1184,7 +1182,8 @@ class DatasetForTokenClassification(DatasetBase):
         """
         separator = "\n\n###\n\n"
         end_token = " END"
-        labels = self.__all_labels__()
+        whitespace = " "
+        self.__all_labels__()
 
         if len(self._records) <= 500:
             _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
@@ -1196,12 +1195,16 @@ class DatasetForTokenClassification(DatasetBase):
 
             prompt = rec.text + separator  # needed for better performance
 
-            completion = dict.fromkeys(labels, [])
-            for entity in rec.annotation:
-                completion[entity[0]].append(prompt[entity[1] : entity[2]])
-            completion = "\n".join([f"{label}: {values}" for label, values in completion.items()])
-            completion = " " + completion + end_token
-            jsonl.append({"id": rec.id, "prompt": prompt, "completion": completion})
+            completion = {}
+            for label, start, end in rec.annotation:
+                if label not in completion:
+                    completion[label] = []
+                completion[label].append(f"{prompt[start : end]}")
+
+            # TODO: consider alphabetic
+            completion = "{" + ", ".join([f"'{label}': {values}" for label, values in completion.items()]) + "}"
+            completion = completion + end_token
+            jsonl.append({"id": rec.id, "prompt": prompt, "completion": whitespace + completion})
 
         return jsonl
 
@@ -1468,6 +1471,7 @@ class DatasetForText2Text(DatasetBase):
         """
         separator = "\n\n###\n\n"
         end_token = " END"
+        whitespace = " "
         if len(self._records) <= 500:
             _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
 
@@ -1479,7 +1483,7 @@ class DatasetForText2Text(DatasetBase):
             prompt = rec.text + separator  # needed for better performance
             completion = rec.annotation + end_token
 
-            jsonl.append({"id": rec.id, "prompt": prompt, "completion": completion})
+            jsonl.append({"id": rec.id, "prompt": prompt, "completion": whitespace + completion})
 
         return jsonl
 
