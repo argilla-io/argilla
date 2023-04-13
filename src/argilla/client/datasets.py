@@ -938,8 +938,10 @@ class DatasetForTextClassification(DatasetBase):
                 # this is highly unlikely
                 raise TypeError("Record.annotation contains an unsupported type: {}".format(type(record.annotation)))
         all_labels = list(all_labels)
+        all_labels.sort()
+
         _LOGGER.warning(
-            f"""No label schema provided. Using all_labels: TextClassificationSettings({all_labels}). We recommend providing a `TokenClassificationSettings()` or setting it `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
+            f"""No label schema provided. Using all_labels: TextClassificationSettings({all_labels}). We recommend providing a `TextClassificationSettings()` or setting it `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
         )
         return TextClassificationSettings(all_labels)
 
@@ -1215,6 +1217,7 @@ class DatasetForTokenClassification(DatasetBase):
                 for label, _, _ in record.annotation:
                     all_labels.add(label)
         all_labels = list(all_labels)
+        all_labels.sort()
         _LOGGER.warning(
             f"""No label schema provided. Using all_labels: TokenClassificationSettings({all_labels}). We recommend providing a `TokenClassificationSettings()` or setting it `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
         )

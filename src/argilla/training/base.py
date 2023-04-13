@@ -17,8 +17,13 @@ import os
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
-from argilla.client.apis.datasets import Datasets
-from argilla.client.models import Framework
+from argilla.client.models import (
+    Framework,
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenClassificationRecord,
+)
+from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -75,14 +80,7 @@ class ArgillaTrainer(object):
             raise ValueError(f"Dataset {self._name} is empty")
 
         # settings for the dataset
-        authenticated_client = rg.active_client().client
-        datasets_api = Datasets(authenticated_client)
-        self._settings = datasets_api.load_settings(name)
-        if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification) or isinstance(
-            rg.DatasetForTokenClassification
-        ):
-            if self._settings is None:
-                raise ValueError(f"Dataset {self._name} has no settings. Upgrade Argilla server to larger than 1.6.")
+        self._settings = rg.load_dataset_settings(name=self._name, workspace=workspace)
 
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
@@ -236,11 +234,9 @@ class ArgillaTrainerSkeleton(object):
     def __init__(
         self,
         dataset,
-        record_class: Union[rg.TokenClassificationRecord, rg.Text2TextRecord, rg.TextClassificationRecord],
+        record_class: Union[TokenClassificationRecord, Text2TextRecord, TextClassificationRecord],
         multi_label: bool = False,
-        settings: Union[
-            rg.TextClassificationSettings, rg.TokenClassificationSettings, rg.TextClassificationSettings
-        ] = None,
+        settings: Union[TextClassificationSettings, TokenClassificationSettings] = None,
         model: str = None,
         seed: int = None,
     ):

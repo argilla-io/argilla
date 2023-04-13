@@ -33,13 +33,22 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     def __init__(self, *args, **kwargs):
         if kwargs.get("model") is None and "model" in kwargs:
             kwargs["model"] = "all-MiniLM-L6-v2"
+        self.multi_target_strategy = None
+        self._column_mapping = None
         super().__init__(*args, **kwargs)
+        if self._multi_label:
+            self._column_mapping = {"text": "text", "binarized_label": "label"}
+            self.multi_target_strategy = "one-vs-rest"
+        else:
+            self.multi_target_strategy = None
+            self._column_mapping = {"text": "text", "label": "label"}
+        self.init_training_args()
 
     def init_training_args(self):
         from setfit import SetFitModel, SetFitTrainer
 
         self.setfit_model_kwargs = get_default_args(SetFitModel.from_pretrained)
-        self.setfit_model_kwargs["pretrained_model_name_or_path"] = self.model
+        self.setfit_model_kwargs["pretrained_model_name_or_path"] = self._model
         self.setfit_model_kwargs["multi_target_strategy"] = self.multi_target_strategy
         self.setfit_model_kwargs["device"] = self.device
 
@@ -78,7 +87,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
                 formatted_string.append(f"{key}: {val}")
         return "\n".join(formatted_string)
 
-    def train(self, path: str = None):
+    def train(self, output_dir: str = None):
         """
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
         the model, and then train the model
@@ -95,8 +104,8 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         else:
             self._metrics = None
 
-        if path is not None:
-            self.save(path)
+        if output_dir is not None:
+            self.save(output_dir)
 
     def init_model(self):
         from setfit import SetFitModel

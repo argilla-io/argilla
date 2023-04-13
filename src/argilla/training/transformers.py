@@ -73,12 +73,6 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
         if self._record_class == rg.TextClassificationRecord:
             if self._multi_label:
-                self.multi_target_strategy = "one-vs-rest"
-                self._column_mapping = {"text": "text", "binarized_label": "label"}
-            else:
-                self.multi_target_strategy = None
-                self._column_mapping = {"text": "text", "label": "label"}
-            if self._multi_label:
                 self._id2label = dict(enumerate(self._train_dataset.features["label"][0].names))
                 self._label_list = self._train_dataset.features["label"][0].names
             else:
@@ -87,13 +81,8 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             self._label2id = {v: k for k, v in self._id2label.items()}
 
             self._model_class = AutoModelForSequenceClassification
-            if self._multi_label:
-                self._train_dataset = _apply_column_mapping(self._train_dataset, self._column_mapping)
-                if self._eval_dataset is not None:
-                    self._eval_dataset = _apply_column_mapping(self._eval_dataset, self._column_mapping)
 
         elif self._record_class == rg.TokenClassificationRecord:
-            self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
             self._label_list = self._train_dataset.features["ner_tags"].feature.names
             self._id2label = dict(enumerate(self._label_list))
             self._label2id = {v: k for k, v in self._id2label.items()}
@@ -107,6 +96,13 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
     def init_training_args(self):
         from transformers import TrainingArguments
 
+        if self._record_class == rg.TextClassificationRecord:
+            columns_mapping = {"text": "text", "label": "binarized_label"}
+            if self._multi_label:
+                self._train_dataset = _apply_column_mapping(self._train_dataset, columns_mapping)
+                if self._eval_dataset is not None:
+                    self._eval_dataset = _apply_column_mapping(self._eval_dataset, columns_mapping)
+        print(self._train_dataset)
         self.model_kwargs = {}
         self.model_kwargs["pretrained_model_name_or_path"] = self._model
         self.model_kwargs["num_labels"] = len(self._label_list)
@@ -147,7 +143,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 kwargs = {"return_all_scores": True}
             self._pipeline = pipeline(
                 task="text-classification",
-                model=self._transformers_tokenizer,
+                model=self._transformers_model,
                 tokenizer=self._transformers_tokenizer,
                 device=device,
                 **kwargs,
@@ -155,7 +151,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         elif self._record_class == rg.TokenClassificationRecord:
             self._pipeline = pipeline(
                 task="token-classification",
-                model=self._transformers_tokenizer,
+                model=self._transformers_model,
                 tokenizer=self._transformers_tokenizer,
                 aggregation_strategy="first",
                 device=device,
@@ -362,7 +358,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
           A list of predictions
         """
         if self._pipeline is None:
-            self._logger.warn("Using model without fine-tuning.")
+            self._logger.warning("Using model without fine-tuning.")
             self.init_model(new=False)
             self.init_pipeline()
 

@@ -38,8 +38,13 @@ def load_dataset_settings(name: str, workspace: Optional[str] = None) -> Setting
         The dataset settings
     """
     active_api = api.active_api()
+    if workspace is not None:
+        active_api.set_workspace(workspace)
     datasets = active_api.datasets
-    return datasets.load_settings(name, workspace=workspace or active_api.get_workspace()).settings
+    if datasets.load_settings(name) is None:
+        return None
+    else:
+        return datasets.load_settings(name).settings
 
 
 def configure_dataset_settings(name: str, settings: Settings, workspace: Optional[str] = None) -> None:
