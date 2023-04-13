@@ -6,16 +6,17 @@ const upsertRecords = (records) => {
 };
 
 // GET
-const getRecordWithFieldsByDatasetId = (
+const getRecordWithFieldsAndResponsesByDatasetId = (
   datasetId,
   numberOfRecord = 1,
   fromRecord = 0
 ) => {
   return RecordModel.query()
     .with("record_fields")
+    .with("record_responses")
     .where("dataset_id", datasetId)
     .limit(numberOfRecord)
     .offset(fromRecord)
     .first();
 };
-export { upsertRecords, getRecordWithFieldsByDatasetId };
+export { upsertRecords, getRecordWithFieldsAndResponsesByDatasetId };

@@ -1,7 +1,10 @@
 <template>
   <div class="wrapper">
     <RecordFeedbackTaskComponent v-if="record" :record="record" />
-    <QuestionsFormComponent :initialInputs="inputs" />
+    <QuestionsFormComponent
+      v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
+      :initialInputs="questionsWithRecordAnswers"
+    />
   </div>
 </template>
 
@@ -12,8 +15,9 @@ import {
 } from "@/models/feedback-task-model/global-question/globalQuestion.queries";
 import {
   upsertRecords,
-  getRecordWithFieldsByDatasetId,
+  getRecordWithFieldsAndResponsesByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
+import { getRecordResponsesByRecordId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 
 export default {
   name: "CenterFeedbackTaskContent",
@@ -36,13 +40,19 @@ export default {
   },
   computed: {
     record() {
-      return getRecordWithFieldsByDatasetId(
+      return getRecordWithFieldsAndResponsesByDatasetId(
         this.datasetId,
         1,
         this.recordOffset
       );
     },
-    inputs() {
+    recordId() {
+      return this.record.id;
+    },
+    recordResponses() {
+      return getRecordResponsesByRecordId(this.recordId);
+    },
+    questions() {
       return getQuestionsByDatasetId(
         this.datasetId,
         this.orderBy?.orderQuestionsBy,
@@ -50,10 +60,22 @@ export default {
       );
     },
   },
-  created() {
+  async created() {
     const records = [
       {
         id: "record_1",
+        responses: [
+          {
+            record_id: "record_1",
+            question_id: "id_5",
+            outputs: [{ id: 1, value: true, text: "1" }],
+          },
+          {
+            record_id: "record_1",
+            question_id: "id_6",
+            outputs: [{ id: "id_6-5", value: true, text: "5" }],
+          },
+        ],
         fields: [
           {
             id: "field_1",
@@ -102,9 +124,27 @@ export default {
       },
       {
         id: "record_2",
+        responses: [
+          {
+            record_id: "record_2",
+            question_id: "id_6",
+            outputs: [{ id: "id_6-5", value: true, text: "5" }],
+          },
+          {
+            record_id: "record_2",
+            question_id: "id_7",
+            outputs: [
+              {
+                id: "patati",
+                value: "I m blue daboudi dabouda",
+                text: "I m blue daboudi dabouda",
+              },
+            ],
+          },
+        ],
         fields: [
           {
-            id: "field_1",
+            id: "field_3",
             title: "Input",
             text: `
             Lorem ipsum dolor sit amet consectetur adipisicing elit.
@@ -117,7 +157,7 @@ export default {
             `,
           },
           {
-            id: "field_2",
+            id: "field_4",
             title: "Outputs",
             text: `
             Lorem ipsum dolor sit amet, consectetur adipisicing elit.
@@ -147,7 +187,7 @@ export default {
             eligendi voluptate.`,
           },
           {
-            id: "field_3",
+            id: "field_5",
             title: "Second outputs",
             text: `
             Lorem ipsum dolor sit amet, consectetur adipisicing elit.
@@ -246,7 +286,7 @@ export default {
         question:
           "Rate the helpfulness of the output (1-not helpful, 7-very helpful):",
         outputs: [
-          { id: 1, value: true, text: "1" },
+          { id: 1, value: false, text: "1" },
           { id: 2, value: false, text: "2" },
           { id: 3, value: false, text: "3" },
           { id: 4, value: false, text: "4" },
@@ -266,7 +306,7 @@ export default {
           { id: "id_6-2", value: false, text: "2" },
           { id: "id_6-3", value: false, text: "3" },
           { id: "id_6-4", value: false, text: "4" },
-          { id: "id_6-5", value: true, text: "5" },
+          { id: "id_6-5", value: false, text: "5" },
         ],
         required: false,
         tooltipMessage: "This is a tooltipz",
@@ -275,8 +315,13 @@ export default {
       {
         id: "id_7",
         question: "Comment",
+        placeholder: "this is the placeholder",
         outputs: [
-          { text: "dadadadda", placeholder: "this is the placeholder" },
+          {
+            id: "patati",
+            text: "",
+            value: "",
+          },
         ],
         default: null,
         required: true,
@@ -287,7 +332,38 @@ export default {
 
     const formattedInputs = this.factoryInputsForOrm(inputs);
 
-    upsertGlobalQuestions(formattedInputs);
+    await upsertGlobalQuestions(formattedInputs);
+  },
+  beforeMount() {
+    const newOutputsByQuestion = [];
+    this.questions.forEach((question) => {
+      this.recordResponses.forEach((response) => {
+        if (response.question_id === question.id) {
+          const newOutputs = question.outputs.map((output) => {
+            const recordResponseOutputWithSameTextAsInQuestionOutput =
+              response.outputs.find(
+                (responseOutput) => responseOutput.id === output.id
+              );
+
+            if (recordResponseOutputWithSameTextAsInQuestionOutput) {
+              return recordResponseOutputWithSameTextAsInQuestionOutput;
+            }
+            return output;
+          });
+
+          newOutputsByQuestion.push({ question_id: question.id, newOutputs });
+        }
+      });
+    });
+
+    this.questionsWithRecordAnswers = this.questions.map((question) => {
+      const newOutputs =
+        newOutputsByQuestion.find(
+          (recordResponseByQuestion) =>
+            recordResponseByQuestion.question_id === question.id
+        )?.newOutputs || question.outputs;
+      return { ...question, outputs: newOutputs };
+    });
   },
   methods: {
     factoryRecordsForOrm(records) {
@@ -296,6 +372,7 @@ export default {
           ...record,
           record_id: record.id,
           record_fields: record.fields,
+          record_responses: record.responses,
           dataset_id: this.datasetId,
         };
       });
