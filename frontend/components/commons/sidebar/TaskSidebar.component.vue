@@ -4,9 +4,8 @@
     :class="areMetricsVisible ? '--metrics' : null"
     v-if="dataset"
   >
-    <sidebar-panel
+    <BaseSidebarPanel
       :class="[datasetTask, currentMetric ? 'visible' : '']"
-      :dataset="dataset"
       @close-panel="onClosePanel"
     >
       <transition name="fade" appear duration="500">
@@ -24,8 +23,8 @@
           </div>
         </span>
       </transition>
-    </sidebar-panel>
-    <sidebar-menu
+    </BaseSidebarPanel>
+    <BaseSidebarMenu
       :current-metric="currentMetric"
       :sidebar-items="sidebarItems"
       :view-mode="viewMode"
@@ -42,10 +41,10 @@ import { getDatasetModelPrimaryKey } from "@/models/Dataset";
 import { getDatasetTaskById } from "@/models/dataset.utilities";
 import { getDatasetFromORM } from "@/models/dataset.utilities";
 import { SIDEBAR_ITEMS } from "./sidebarItems.config";
-import SidebarMenu from "./SidebarMenu";
-import SidebarPanel from "./SidebarPanel";
+import BaseSidebarMenu from "@/components/base/sidebar/BaseSidebarMenu";
+import BaseSidebarPanel from "@/components/base/sidebar/BaseSidebarPanel";
 export default {
-  components: { SidebarMenu, SidebarPanel },
+  components: { BaseSidebarMenu, BaseSidebarPanel },
   data: () => ({
     currentMetric: undefined,
   }),

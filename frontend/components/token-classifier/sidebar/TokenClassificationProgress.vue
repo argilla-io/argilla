@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <sidebar-progress
+  <BaseSidebarProgress
     v-if="annotationsProgress"
     :total="total"
     :validated="validated"
@@ -38,7 +38,7 @@
         </template>
       </li>
     </ul>
-  </sidebar-progress>
+  </BaseSidebarProgress>
 </template>
 
 <script>

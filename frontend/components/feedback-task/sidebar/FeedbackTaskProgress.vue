@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <SidebarProgress :total="100" :validated="40" :discarded="2" />
+  <BaseSidebarProgress :total="100" :validated="40" :discarded="2" />
 </template>
 
 <script>

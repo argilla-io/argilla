@@ -56,7 +56,7 @@
           </div>
         </div>
       </div>
-      <sidebar-menu
+      <BaseSidebarMenu
         class="home__sidebar"
         @refresh="$fetch"
         :sidebar-items="sidebarItems"

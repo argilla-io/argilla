@@ -43,7 +43,10 @@
       <user />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
-    <task-sidebar v-if="dataset" @view-mode-changed="onViewModeChanged" />
+    <TaskSidebarComponent
+      v-if="dataset"
+      @view-mode-changed="onViewModeChanged"
+    />
     <component
       v-if="dataset"
       :is="currentTaskHeader"

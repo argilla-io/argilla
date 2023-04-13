@@ -16,13 +16,12 @@
   -->
 
 <template>
-  <sidebar-progress
+  <BaseSidebarProgress
     v-if="annotationsProgress"
     :total="total"
     :validated="validated"
     :discarded="discarded"
-  >
-  </sidebar-progress>
+  />
 </template>
 
 <script>
