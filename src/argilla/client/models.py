@@ -40,6 +40,7 @@ class Framework(Enum):
     TRANSFORMERS = "transformers"
     SETFIT = "setfit"
     SPACY = "spacy"
+    SPAN_MARKER = "span_marker"
     SPARK_NLP = "spark-nlp"
     OPENAI = "openai"
 
