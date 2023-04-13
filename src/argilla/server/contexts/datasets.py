@@ -68,6 +68,10 @@ def delete_dataset(db: Session, dataset: Dataset):
     return dataset
 
 
+def get_annotation_by_id(db: Session, annotation_id: UUID):
+    return db.get(Annotation, annotation_id)
+
+
 def get_annotation_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
     return db.query(Annotation).filter_by(name=name, dataset_id=dataset_id).first()
 
@@ -87,6 +91,16 @@ def create_annotation(db: Session, dataset: Dataset, annotation_create: Annotati
     db.add(annotation)
     db.commit()
     db.refresh(annotation)
+
+    return annotation
+
+
+def delete_annotation(db: Session, annotation: Annotation):
+    if annotation.dataset.is_ready:
+        raise ValueError("Annotations cannot be deleted for a published dataset")
+
+    db.delete(annotation)
+    db.commit()
 
     return annotation
 
