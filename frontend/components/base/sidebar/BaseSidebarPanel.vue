@@ -93,7 +93,7 @@ export default {
     display: block;
     position: relative;
     opacity: 0;
-    transition: opacity 0.1s ease-out 0.6s;
+    transition: opacity 0.1s ease-out 0.2s;
     color: $black-54;
   }
   &.visible {

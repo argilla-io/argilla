@@ -19,7 +19,7 @@
   <div class="sidebar">
     <div v-for="group in sidebarGroups" :key="group" class="sidebar__info">
       <p>{{ group }}</p>
-      <sidebar-button
+      <BaseSidebarButton
         v-for="{ id, icon, tooltip, action } in filteredSidebarItemsByGroup(
           group
         )"
