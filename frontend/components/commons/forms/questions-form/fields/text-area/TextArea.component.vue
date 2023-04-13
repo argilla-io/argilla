@@ -21,7 +21,7 @@
         :annotationEnabled="true"
         :annotations="[]"
         :defaultText="initialOutputs.text"
-        :placeholder="initialOutputs.placeholder"
+        :placeholder="placeholder"
         :isShortcutToSave="false"
         @change-text="onChangeTextArea"
       />
@@ -42,7 +42,7 @@ export default {
     initialOutputs: {
       type: Object,
       default: () => {
-        return { text: "", placeholder: "" };
+        return { text: "", value: "" };
       },
     },
     placeholder: {
@@ -72,7 +72,6 @@ export default {
         {
           text: newText,
           value: newText,
-          placeholder: this.initialOutputs?.placeholder ?? "",
         },
       ]);
 
