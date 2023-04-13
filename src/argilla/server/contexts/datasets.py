@@ -14,8 +14,9 @@
 
 from uuid import UUID
 
-from argilla.server.models import Annotation, Dataset
+from argilla.server.models import Annotation, Dataset, DatasetStatus
 from argilla.server.schemas.v1.datasets import AnnotationCreate, DatasetCreate
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 
@@ -45,6 +46,21 @@ def create_dataset(db: Session, dataset_create: DatasetCreate):
     return dataset
 
 
+def publish_dataset(db: Session, dataset: Dataset):
+    if dataset.is_ready:
+        raise ValueError("Dataset is already published")
+
+    if _count_annotations_by_dataset_id(db, dataset.id) == 0:
+        raise ValueError("Dataset cannot be published without annotations")
+
+    dataset.status = DatasetStatus.ready
+
+    db.commit()
+    db.refresh(dataset)
+
+    return dataset
+
+
 def delete_dataset(db: Session, dataset: Dataset):
     db.delete(dataset)
     db.commit()
@@ -57,6 +73,9 @@ def get_annotation_by_name_and_dataset_id(db: Session, name: str, dataset_id: UU
 
 
 def create_annotation(db: Session, dataset: Dataset, annotation_create: AnnotationCreate):
+    if dataset.is_ready:
+        raise ValueError("Annotation cannot be created for a published dataset")
+
     annotation = Annotation(
         name=annotation_create.name,
         title=annotation_create.title,
@@ -70,3 +89,7 @@ def create_annotation(db: Session, dataset: Dataset, annotation_create: Annotati
     db.refresh(annotation)
 
     return annotation
+
+
+def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Annotation.id)).filter_by(dataset_id=dataset_id).scalar()

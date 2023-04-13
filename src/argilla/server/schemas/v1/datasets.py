@@ -19,7 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, conlist
 from typing_extensions import Literal
 
-from argilla.server.models import AnnotationType
+from argilla.server.models import AnnotationType, DatasetStatus
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
@@ -29,6 +29,7 @@ class Dataset(BaseModel):
     id: UUID
     name: str
     guidelines: Optional[str]
+    status: DatasetStatus
     workspace_id: UUID
     inserted_at: datetime
     updated_at: datetime
