@@ -20,6 +20,8 @@ on:
       - "main"
       - "develop"
       - "releases/**"
+      - "feature/**"
+      - "feat/**"
 
 
 env:
