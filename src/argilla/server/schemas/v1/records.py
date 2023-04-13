@@ -15,7 +15,7 @@
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, conlist
 
 
 class AnnotationAnswer(BaseModel):
@@ -48,3 +48,23 @@ class Record(BaseModel):
     vectors: Optional[Dict[str, List[float]]]
 
     validated_annotation: Optional[ValidatedAnnotation]
+
+
+class Response(BaseModel):
+    value: Any
+
+
+class Suggestion(BaseModel):
+    value: Any
+    score: float
+
+
+class RecordCreate(BaseModel):
+    fields: Dict[str, Any]
+    external_id: Optional[str]
+    responses: Optional[Dict[str, Response]]
+    suggestions: Optional[Dict[str, Suggestion]]
+
+
+class RecordsCreate(BaseModel):
+    items: conlist(item_type=RecordCreate, min_items=1, max_items=1000)

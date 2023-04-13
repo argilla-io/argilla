@@ -14,9 +14,10 @@
 
 from uuid import UUID
 
-from argilla.server.models import Annotation, Dataset, DatasetStatus
+from argilla.server.models import Annotation, Dataset, DatasetStatus, Record
 from argilla.server.schemas.v1.datasets import AnnotationCreate, DatasetCreate
-from sqlalchemy import func
+from argilla.server.schemas.v1.records import RecordCreate, RecordsCreate
+from sqlalchemy import exc, func
 from sqlalchemy.orm import Session
 
 
@@ -89,6 +90,34 @@ def create_annotation(db: Session, dataset: Dataset, annotation_create: Annotati
     db.refresh(annotation)
 
     return annotation
+
+
+def create_records(db: Session, dataset: Dataset, records_create: RecordsCreate):
+    # return [create_record(db, dataset, record_create) for record_create in records_create.items]
+
+    # for record_create in records_create.items:
+
+    # errors = []
+
+    if not dataset.is_ready:
+        raise ValueError("Records cannot be created for non published dataset")
+
+    # with db.begin_nested():
+    for record_create in records_create.items:
+        db.add(
+            Record(
+                fields=record_create.fields,
+                # annotations=record_create.annotations,
+                external_id=record_create.external_id,
+                dataset_id=dataset.id,
+            )
+        )
+
+    db.commit()
+    # try:
+    #     with db.begin_nested():
+    #         db.add(Record(fields=record_create.fields, dataset_id=dataset.id))
+    # except exc.IntegrityError:
 
 
 def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):

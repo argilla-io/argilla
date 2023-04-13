@@ -68,6 +68,39 @@ class Annotation(Base):
         return f"Annotation(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, dataset_id={str(self.dataset_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
 
 
+class Record(Base):
+    __tablename__ = "records"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    fields: Mapped[dict] = mapped_column(JSON)
+    external_id: Mapped[Optional[str]]
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+
+    dataset: Mapped["Dataset"] = relationship(back_populates="records")
+    responses: Mapped["Response"] = relationship(back_populates="record")
+
+    def __repr__(self):
+        return f"Record(id={str(self.id)!r}, external_id={self.external_id!r},  dataset_id={str(self.dataset_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+
+
+class Response(Base):
+    __tablename__ = "responses"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    values: Mapped[dict] = mapped_column(JSON)
+    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id"))
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+
+    record = Mapped["Record"] = relationship(back_populates="responses")
+    user = Mapped["User"] = relationship(back_populates="responses")
+
+
 class Dataset(Base):
     __tablename__ = "datasets"
 
@@ -84,6 +117,7 @@ class Dataset(Base):
     annotations: Mapped[List["Annotation"]] = relationship(
         back_populates="dataset", order_by=Annotation.inserted_at.asc()
     )
+    records: Mapped[List["Record"]] = relationship(back_populates="dataset", order_by=Record.inserted_at.asc())
 
     @property
     def is_draft(self):
@@ -149,6 +183,7 @@ class User(Base):
     workspaces: Mapped[List["Workspace"]] = relationship(
         secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
     )
+    responses: Mapped[List["Response"]] = relationship(back_populates="user")
     datasets: Mapped[List["Dataset"]] = relationship(
         secondary="workspaces_users",
         primaryjoin=id == WorkspaceUser.user_id,

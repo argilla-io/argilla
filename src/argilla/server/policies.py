@@ -142,6 +142,12 @@ class DatasetPolicyV1:
         return actor.is_admin
 
 
+class RecordPolicyV1:
+    @classmethod
+    def create(cls, actor: User) -> bool:
+        return actor.is_admin
+
+
 class DatasetSettingsPolicy:
     @classmethod
     def list(cls, dataset: Dataset) -> PolicyAction:

@@ -18,6 +18,7 @@ from argilla.server.models import (
     Annotation,
     AnnotationType,
     Dataset,
+    Record,
     User,
     UserRole,
     Workspace,
@@ -52,6 +53,19 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     name = factory.Sequence(lambda n: f"dataset-{n}")
     workspace = factory.SubFactory(WorkspaceFactory)
+
+
+class RecordFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Record
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    fields = {
+        "text": "This is a text",
+        "sentiment": "neutral",
+    }
+    dataset = factory.SubFactory(DatasetFactory)
 
 
 class AnnotationFactory(factory.alchemy.SQLAlchemyModelFactory):
