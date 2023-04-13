@@ -28,6 +28,7 @@ from argilla.client.models import (
     TokenClassificationRecord,
 )
 from argilla.client.sdk.datasets.models import TaskType
+from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.utils.dependency import require_version, requires_version
 from argilla.utils.span_utils import SpanUtils
 
@@ -55,6 +56,7 @@ class DatasetBase:
     _RECORD_TYPE = None
     # record fields that can hold multiple input columns from a datasets.Dataset or a pandas.DataFrame
     _RECORD_FIELDS_WITH_MULTIPLE_INPUT_COLUMNS = ["inputs", "metadata"]
+    _SETTINGS = None
 
     @classmethod
     def _record_init_args(cls) -> List[str]:
@@ -332,6 +334,7 @@ class DatasetBase:
     def prepare_for_training(
         self,
         framework: Union[Framework, str] = "transformers",
+        settings: Union[TextClassificationSettings, TokenClassificationSettings] = None,
         lang: Optional["spacy.Language"] = None,
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
@@ -400,6 +403,23 @@ class DatasetBase:
              'label': ClassLabel(num_classes=1, names=['SPAM'])}
 
         """
+        if self._RECORD_TYPE == TextClassificationRecord:
+            print("TextClassificationRecord")
+            if settings is None:
+                self._SETTINGS = self._infer_settings_from_records()
+            elif isinstance(settings, TextClassificationSettings):
+                self._SETTINGS = settings
+            else:
+                raise ValueError("settings must be TextClassificationSettings for TextClassificationRecord")
+        elif self._RECORD_TYPE == TokenClassificationRecord:
+            if settings is None:
+                self._SETTINGS = self._infer_settings_from_records()
+            elif isinstance(settings, TokenClassificationSettings):
+                self._SETTINGS = settings
+            else:
+                raise ValueError("settings must be TokenClassificationSettings for TokenClassificationRecord")
+        else:
+            self._SETTINGS = settings
 
         if train_size is None:
             train_size = 1
@@ -525,6 +545,15 @@ class DatasetBase:
 
         raise NotImplementedError
 
+    def _infer_settings_from_records(self) -> Union[TokenClassificationSettings, TextClassificationSettings]:
+        """Infer the settings from the records.
+
+        Returns:
+            A Settings object.
+        """
+
+        raise NotImplementedError
+
 
 def _prepend_docstring(record_type: Type[Record]):
     docstring = f"""This Dataset contains {record_type.__name__} records.
@@ -609,7 +638,7 @@ class DatasetForTextClassification(DatasetBase):
         Examples:
             >>> import datasets
             >>> ds = datasets.Dataset.from_dict({
-            ...     "inputs": ["example"],
+            ...     "inputs": ["exxample"],
             ...     "prediction": [
             ...         [{"label": "LABEL1", "score": 0.9}, {"label": "LABEL2", "score": 0.1}]
             ...     ]
@@ -812,10 +841,12 @@ class DatasetForTextClassification(DatasetBase):
             if record.annotation is None:
                 continue
 
-            if record.text is None:
-                text = ". ".join(record.inputs.values())
-            else:
+            if record.text is not None:
                 text = record.text
+            elif record.text is None and "text" in record.inputs:
+                text = record.inputs["text"]
+            else:
+                text = ", ".join(f"{key}: {value}" for key, value in record.inputs.items())
             doc = nlp.make_doc(text)
             doc.user_data["id"] = record.id
 
@@ -844,10 +875,12 @@ class DatasetForTextClassification(DatasetBase):
                 continue
             if record.id is None:
                 record.id = str(uuid.uuid4())
-            if record.text is None:
-                text = ". ".join(record.inputs.values())
-            else:
+            if record.text is not None:
                 text = record.text
+            elif record.text is None and "text" in record.inputs:
+                text = record.inputs["text"]
+            else:
+                text = ", ".join(f"{key}: {value}" for key, value in record.inputs.items())
 
             spark_nlp_data.append([record.id, text, record.annotation])
 
@@ -863,7 +896,9 @@ class DatasetForTextClassification(DatasetBase):
             A pd.DataFrame.
         """
         separator = "\n\n###\n\n"
-        if len(self._records) <= 100:
+        self.__all_labels__()  # verify that all labels are strings
+
+        if len(self._records) <= len(self._SETTINGS.label_schema) * 100:
             _LOGGER.warning("OpenAI recommends at least 100 examples for training a classification model.")
 
         jsonl = []
@@ -880,16 +915,18 @@ class DatasetForTextClassification(DatasetBase):
             prompt += separator  # needed for better performance
 
             if self._records[0].multi_label:
+                for annotation in rec.annotation:
+                    jsonl.append({"id": rec.id, "prompt": prompt, "completion": self._SETTINGS.label2id[annotation]})
                 completion = ", ".join(rec.annotation)
             else:
-                completion = rec.annotation
+                completion = str(self._SETTINGS.label2id[rec.annotation])
             completion = " " + completion  # needed for better performance
 
             jsonl.append({"id": rec.id, "prompt": prompt, "completion": completion})
 
         return jsonl
 
-    def __all_labels__(self):
+    def _infer_settings_from_records(self) -> TextClassificationSettings:
         all_labels = set()
         for record in self._records:
             if record.annotation is None:
@@ -897,12 +934,34 @@ class DatasetForTextClassification(DatasetBase):
             elif isinstance(record.annotation, str):
                 all_labels.add(record.annotation)
             elif isinstance(record.annotation, list):
-                all_labels.update((tuple(record.annotation)))
+                for label in record.annotation:
+                    all_labels.add(label)
+            else:
+                # this is highly unlikely
+                raise TypeError("Record.annotation contains an unsupported type: {}".format(type(record.annotation)))
+        all_labels = list(all_labels)
+        _LOGGER.warning(
+            f"""No label schema provided. Using all_labels: TextClassificationSettings({all_labels}). We recommend providing a `TokenClassificationSettings()` or setting it `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
+        )
+        return TextClassificationSettings(all_labels)
+
+    def __all_labels__(self):
+        all_labels = self._SETTINGS.label_schema
+        for record in self._records:
+            if record.annotation is None:
+                continue
+            elif isinstance(record.annotation, str):
+                if record.annotation not in all_labels:
+                    raise ValueError(f"Label {record.annotation} is not in the settings.label_schema: {all_labels}.")
+            elif isinstance(record.annotation, list):
+                for label in record.annotation:
+                    if label not in all_labels:
+                        raise ValueError(f"Label {label} is not in the settings.label_schema: {all_labels}.")
             else:
                 # this is highly unlikely
                 raise TypeError("Record.annotation contains an unsupported type: {}".format(type(record.annotation)))
 
-        return list(all_labels)
+        return all_labels
 
 
 @_prepend_docstring(TokenClassificationRecord)
@@ -1146,13 +1205,27 @@ class DatasetForTokenClassification(DatasetBase):
 
         return jsonl
 
-    def __all_labels__(self):
+    def _infer_settings_from_records(self) -> TokenClassificationSettings:
         all_labels = set()
         for record in self._records:
             if record.annotation:
-                all_labels.update([label for label, _, _ in record.annotation])
+                for label, _, _ in record.annotation:
+                    all_labels.add(label)
+        all_labels = list(all_labels)
+        _LOGGER.warning(
+            f"""No label schema provided. Using all_labels: TokenClassificationSettings({all_labels}). We recommend providing a `TokenClassificationSettings()` or setting it `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
+        )
+        return TokenClassificationSettings(all_labels)
 
-        return list(all_labels)
+    def __all_labels__(self) -> List[str]:
+        all_labels = self._SETTINGS.label_schema
+        for record in self._records:
+            if record.annotation:
+                for label, _, _ in record.annotation:
+                    if label not in all_labels:
+                        raise ValueError(f"Label {label} is not in the settings.label_schema: {all_labels}.")
+
+        return all_labels
 
     def __only_annotations__(self, data) -> bool:
         return data["annotation"] is not None

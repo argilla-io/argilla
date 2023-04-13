@@ -28,6 +28,7 @@ from argilla.client.datasets import (
     WrongRecordTypeError,
 )
 from argilla.client.models import TextClassificationRecord
+from argilla.datasets import TextClassificationSettings
 
 _HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
 
@@ -198,21 +199,22 @@ class TestDatasetBase:
     def test_prepare_for_training_train_test_splits(self, monkeypatch, singlelabel_textclassification_records):
         monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
         temp_records = copy.deepcopy(singlelabel_textclassification_records)
+        settings = TextClassificationSettings(["a", "b", "c"])
         ds = DatasetBase(temp_records)
 
         with pytest.raises(
             AssertionError,
             match="`train_size` and `test_size` must be larger than 0.",
         ):
-            ds.prepare_for_training(train_size=-1)
+            ds.prepare_for_training(train_size=-1, settings=settings)
 
         with pytest.raises(AssertionError, match="`train_size` and `test_size` must sum to 1."):
-            ds.prepare_for_training(test_size=0.1, train_size=0.6)
+            ds.prepare_for_training(test_size=0.1, train_size=0.6, settings=settings)
 
         for rec in ds:
             rec.annotation = None
         with pytest.raises(AssertionError, match="Dataset has no annotations."):
-            ds.prepare_for_training()
+            ds.prepare_for_training(settings=settings)
 
 
 class TestDatasetForTextClassification:
