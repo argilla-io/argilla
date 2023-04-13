@@ -1,6 +1,6 @@
 import { Model } from "@vuex-orm/core";
 import { RecordField } from "../record-field/RecordField.model";
-import { FieldRecord as FieldRecordPivot } from "../pivot-table/FieldRecord.pivot";
+import { RecordResponse as RecordResponseModel } from "../record-response/RecordResponse.model";
 
 class Record extends Model {
   static entity = "records";
@@ -12,12 +12,8 @@ class Record extends Model {
       dataset_id: this.attr(null),
 
       // relationships
-      record_fields: this.belongsToMany(
-        RecordField,
-        FieldRecordPivot,
-        "record_id",
-        "record_field_id"
-      ),
+      record_responses: this.hasMany(RecordResponseModel, "record_id"),
+      record_fields: this.hasMany(RecordField, "record_id"),
     };
   }
 }
