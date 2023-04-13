@@ -14,9 +14,11 @@
 
 from uuid import UUID
 
-from argilla.server.models import Annotation, Dataset, DatasetStatus, Record
+from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
 from argilla.server.schemas.v1.datasets import AnnotationCreate, DatasetCreate
 from argilla.server.schemas.v1.records import RecordCreate, RecordsCreate
+from argilla.server.schemas.v1.records import Response as ResponseSchema
+from argilla.server.security.model import User
 from sqlalchemy import exc, func
 from sqlalchemy.orm import Session
 
@@ -92,7 +94,11 @@ def create_annotation(db: Session, dataset: Dataset, annotation_create: Annotati
     return annotation
 
 
-def create_records(db: Session, dataset: Dataset, records_create: RecordsCreate):
+def get_record_by_id(db: Session, record_id: UUID):
+    return db.get(Record, record_id)
+
+
+def create_records(db: Session, dataset: Dataset, user: User, records_create: RecordsCreate):
     # return [create_record(db, dataset, record_create) for record_create in records_create.items]
 
     # for record_create in records_create.items:
@@ -104,12 +110,17 @@ def create_records(db: Session, dataset: Dataset, records_create: RecordsCreate)
 
     # with db.begin_nested():
     for record_create in records_create.items:
+        user_response = None
+        if record_create.response:
+            user_response = Response(values={k: v.dict() for k, v in record_create.response.items()}, user_id=user.id)
+
         db.add(
             Record(
                 fields=record_create.fields,
                 # annotations=record_create.annotations,
                 external_id=record_create.external_id,
                 dataset_id=dataset.id,
+                responses=user_response,
             )
         )
 
@@ -118,6 +129,11 @@ def create_records(db: Session, dataset: Dataset, records_create: RecordsCreate)
     #     with db.begin_nested():
     #         db.add(Record(fields=record_create.fields, dataset_id=dataset.id))
     # except exc.IntegrityError:
+
+
+def update_response(db: Session, record: Record, response: ResponseSchema):
+    db.query(Response)
+    return None
 
 
 def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):

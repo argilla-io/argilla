@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
 from argilla.server.policies import RecordPolicyV1, authorize
-from argilla.server.schemas.v1.records import RecordsCreate
+from argilla.server.schemas.v1.records import RecordsCreate, Response
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
@@ -50,4 +50,24 @@ def create_records(
 
     dataset = _get_dataset(db, dataset_id)
 
-    datasets.create_records(db, dataset, records_create)
+    datasets.create_records(db, dataset, current_user, records_create)
+
+
+@router.put("/records/{record_id}/responses", response_model=Response)
+def update_record_responses(
+    *,
+    db: Session = Depends(get_db),
+    record_id: UUID,
+    response: Response,
+    current_user: User = Security(auth.get_current_user),
+):
+    record = datasets.get_record_by_id(db, record_id)
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Record with id `{record_id}` not found",
+        )
+
+    authorize(current_user, RecordPolicyV1.update_response(record))
+
+    datasets.update_response(db, record, response)

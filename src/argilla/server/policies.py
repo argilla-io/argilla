@@ -16,10 +16,16 @@ from typing import Callable
 
 from sqlalchemy.orm.session import Session
 
-from argilla.server.contexts import accounts, datasets
+from argilla.server.contexts import accounts
 from argilla.server.errors import ForbiddenOperationError
-from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
-from argilla.server.schemas.datasets import Dataset
+from argilla.server.models import (
+    Dataset,
+    Record,
+    User,
+    UserRole,
+    Workspace,
+    WorkspaceUser,
+)
 
 PolicyAction = Callable[[User], bool]
 
@@ -113,7 +119,7 @@ class DatasetPolicyV1:
         return True
 
     @classmethod
-    def get(cls, dataset: Dataset) -> bool:
+    def get(cls, dataset: Dataset) -> PolicyAction:
         return lambda actor: (
             actor.is_admin
             or bool(
@@ -146,6 +152,19 @@ class RecordPolicyV1:
     @classmethod
     def create(cls, actor: User) -> bool:
         return actor.is_admin
+
+    @classmethod
+    def update_response(cls, record: Record) -> PolicyAction:
+        return lambda actor: (
+            actor.is_admin
+            or bool(
+                accounts.get_workspace_user_by_workspace_id_and_user_id(
+                    Session.object_session(actor),
+                    record.dataset.workspace_id,
+                    actor.id,
+                )
+            )
+        )
 
 
 class DatasetSettingsPolicy:

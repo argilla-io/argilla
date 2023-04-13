@@ -25,7 +25,11 @@ def test_create_records(client: TestClient, db: Session, admin_auth_header: dict
         "items": [
             {"fields": {"input": "input-a", "output": "output-a"}, "external_id": "a"},
             {"fields": {"input": "input-b", "output": "output-b"}, "external_id": "b"},
-            {"fields": {"input": "input-c", "output": "output-c"}, "external_id": "c"},
+            {
+                "fields": {"input": "input-c", "output": "output-c"},
+                "external_id": "c",
+                "responses": {"question": {"value": True}},
+            },
         ]
     }
 
