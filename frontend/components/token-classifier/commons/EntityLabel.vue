@@ -51,7 +51,6 @@ export default {
   position: relative;
   display: inline-flex;
   align-items: center;
-  max-height: 28px;
   font-weight: 500;
   color: $black-87;
   @include font-size(13px);
