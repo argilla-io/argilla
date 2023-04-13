@@ -3,24 +3,18 @@
     class="sidebar-button"
     :class="sidebarButtonClass"
     :data-title="tooltip"
-    @click="$emit('button-action', id)"
+    @click="onButtonClick"
   >
     <svgicon :name="icon"></svgicon>
   </button>
 </template>
 
 <script>
-import "assets/icons/refresh";
-import "assets/icons/exploration";
-import "assets/icons/hand-labeling";
-import "assets/icons/weak-labeling";
-import "assets/icons/progress";
-import "assets/icons/stats";
 export default {
   props: {
-    activeView: {
-      type: Array,
-      default: () => [],
+    isButtonActive: {
+      type: Boolean,
+      default: false,
     },
     tooltip: {
       type: String,
@@ -39,9 +33,6 @@ export default {
     },
   },
   computed: {
-    isActive() {
-      return this.activeView.includes(this.id);
-    },
     sidebarButtonClass() {
       return [this.buttonTypeClass, this.buttonStateClass];
     },
@@ -49,7 +40,12 @@ export default {
       return this.buttonType?.toLowerCase();
     },
     buttonStateClass() {
-      return this.isActive ? "active" : null;
+      return this.isButtonActive ? "active" : null;
+    },
+  },
+  methods: {
+    onButtonClick() {
+      this.$emit("on-button-action", this.id);
     },
   },
 };
@@ -61,7 +57,7 @@ export default {
   width: 100%;
   display: flex;
   margin-bottom: 0.5em;
-  &.mode {
+  &.non-expandable {
     &:hover {
       .svg-icon {
         background: palette(grey, 600);
@@ -70,13 +66,13 @@ export default {
     }
   }
   &.active {
-    &.mode {
+    &.non-expandable {
       .svg-icon {
         background: palette(grey, 600);
         border-radius: $border-radius;
       }
     }
-    &.metrics {
+    &.expandable {
       position: relative;
       .svg-icon {
         animation: move-horizontal 0.2s ease-in-out 0.2s;
@@ -90,6 +86,10 @@ export default {
   &:hover {
     cursor: pointer;
   }
+}
+button[data-title] {
+  position: relative;
+  @extend %has-tooltip--left;
 }
 .svg-icon {
   display: block;
