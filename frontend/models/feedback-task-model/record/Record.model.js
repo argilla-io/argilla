@@ -1,5 +1,5 @@
 import { Model } from "@vuex-orm/core";
-import { RecordField } from "../record-field/RecordField.model";
+import { RecordField as RecordFieldModel } from "../record-field/RecordField.model";
 import { RecordResponse as RecordResponseModel } from "../record-response/RecordResponse.model";
 
 class Record extends Model {
@@ -13,7 +13,7 @@ class Record extends Model {
 
       // relationships
       record_responses: this.hasMany(RecordResponseModel, "record_id"),
-      record_fields: this.hasMany(RecordField, "record_id"),
+      record_fields: this.hasMany(RecordFieldModel, "record_id"),
     };
   }
 }
