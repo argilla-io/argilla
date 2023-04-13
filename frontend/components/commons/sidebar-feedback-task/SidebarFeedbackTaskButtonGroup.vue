@@ -49,7 +49,6 @@ export default {
   },
   methods: {
     checkIfButtonIsActive(id) {
-      console.log(id);
       return this.activeButtons.includes(id);
     },
     onAction(action, id) {
@@ -72,5 +71,3 @@ export default {
   }
 }
 </style>
-
-

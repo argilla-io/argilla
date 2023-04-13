@@ -98,4 +98,3 @@ $sidebar-button-size: 45px;
   }
 }
 </style>
-

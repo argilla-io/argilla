@@ -69,7 +69,6 @@ export default {
   },
   methods: {
     onClickSidebarAction(action, info) {
-      console.log(action, info);
       switch (action) {
         case "show-metrics":
           this.showMetrics(info);
