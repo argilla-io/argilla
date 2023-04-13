@@ -16,8 +16,13 @@
   -->
 
 <template>
-  <sidebar-progress :dataset-name="datasetName">
-    <ul v-if="annotationsProgress" class="metrics__list">
+  <sidebar-progress
+    v-if="annotationsProgress"
+    :total="total"
+    :validated="validated"
+    :discarded="discarded"
+  >
+    <ul class="metrics__list">
       <li v-for="(counter, label) in annotations" :key="label">
         <template v-if="counter > 0">
           <entity-label
@@ -52,14 +57,23 @@ export default {
     },
   },
   computed: {
-    annotationsProgress() {
-      return AnnotationProgress.find(this.datasetName);
+    labels() {
+      return getAllLabelsByDatasetId(this.datasetId);
+    },
+    total() {
+      return this.annotationsProgress.total;
+    },
+    validated() {
+      return this.annotationsProgress.validated;
+    },
+    discarded() {
+      return this.annotationsProgress.discarded;
     },
     annotations() {
       return this.annotationsProgress.annotatedAs;
     },
-    labels() {
-      return getAllLabelsByDatasetId(this.datasetId);
+    annotationsProgress() {
+      return AnnotationProgress.find(this.datasetName);
     },
   },
 };

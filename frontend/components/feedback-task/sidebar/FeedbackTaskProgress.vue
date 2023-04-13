@@ -16,37 +16,16 @@
   -->
 
 <template>
-  <sidebar-progress :dataset-name="datasetName">
-    <ul v-if="annotationsProgress" class="metrics__list">
-      <li v-for="(counter, label) in getInfo" :key="label">
-        <template v-if="counter > 0">
-          <label class="metrics__list__name">{{ label }}</label>
-          <span class="metrics__list__counter">{{
-            counter | formatNumber
-          }}</span>
-        </template>
-      </li>
-    </ul>
-  </sidebar-progress>
+  <SidebarProgress :total="100" :validated="40" :discarded="2" />
 </template>
 
 <script>
-import { AnnotationProgress } from "@/models/AnnotationProgress";
 export default {
-  props: {
-    datasetName: {
-      type: String,
-      required: true,
-    },
-  },
-  computed: {
-    getInfo() {
-      return this.annotationsProgress.annotatedAs;
-    },
-    annotationsProgress() {
-      return AnnotationProgress.find(this.datasetName);
-    },
-  },
+  data: () => ({
+    total: 100,
+    validated: 30,
+    discarded: 10,
+  }),
 };
 </script>
 <style lang="scss" scoped></style>

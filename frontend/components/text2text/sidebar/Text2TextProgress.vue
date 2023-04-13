@@ -16,15 +16,36 @@
   -->
 
 <template>
-  <sidebar-progress :dataset-name="datasetName"> </sidebar-progress>
+  <sidebar-progress
+    v-if="annotationsProgress"
+    :total="total"
+    :validated="validated"
+    :discarded="discarded"
+  >
+  </sidebar-progress>
 </template>
 
 <script>
+import { AnnotationProgress } from "@/models/AnnotationProgress";
 export default {
   props: {
     datasetName: {
       type: String,
       required: true,
+    },
+  },
+  computed: {
+    total() {
+      return this.annotationsProgress.total;
+    },
+    validated() {
+      return this.annotationsProgress.validated;
+    },
+    discarded() {
+      return this.annotationsProgress.discarded;
+    },
+    annotationsProgress() {
+      return AnnotationProgress.find(this.datasetName);
     },
   },
 };

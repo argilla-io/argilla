@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-if="annotationsProgress">
+  <div>
     <p class="metrics__title">Progress</p>
     <div class="metrics__info">
       <p class="metrics__info__name">Total</p>
@@ -24,13 +24,13 @@
     </div>
     <div class="metrics__numbers">
       <span>{{ totalAnnotated | formatNumber }}</span
-      >/{{ total | formatNumber }}
+      >/{{ progressTotal | formatNumber }}
     </div>
     <base-progress
       re-mode="determinate"
       :multiple="true"
-      :progress="(totalValidated * 100) / total"
-      :progress-secondary="(totalDiscarded * 100) / total"
+      :progress="(totalValidated * 100) / progressTotal"
+      :progress-secondary="(totalDiscarded * 100) / progressTotal"
     ></base-progress>
     <div class="scroll">
       <ul class="metrics__list">
@@ -55,34 +55,38 @@
 </template>
 
 <script>
-import { AnnotationProgress } from "@/models/AnnotationProgress";
 export default {
-  // TODO clean and typify
   props: {
-    datasetName: {
-      type: String,
+    total: {
+      type: Number,
+      required: true,
+    },
+    validated: {
+      type: Number,
+      required: true,
+    },
+    discarded: {
+      type: Number,
       required: true,
     },
   },
   computed: {
-    annotationsProgress() {
-      return AnnotationProgress.find(this.datasetName);
-    },
     totalValidated() {
-      return this.annotationsProgress.validated;
+      return this.validated;
     },
     totalDiscarded() {
-      return this.annotationsProgress.discarded;
+      return this.discarded;
     },
     totalAnnotated() {
       return this.totalValidated + this.totalDiscarded;
     },
-    total() {
-      return this.annotationsProgress.total;
+    progressTotal() {
+      return this.total;
     },
     progress() {
       return (
-        ((this.totalValidated || 0) + (this.totalDiscarded || 0)) / this.total
+        ((this.totalValidated || 0) + (this.totalDiscarded || 0)) /
+        this.progressTotal
       );
     },
   },
