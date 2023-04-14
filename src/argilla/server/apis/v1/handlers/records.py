@@ -49,8 +49,8 @@ def list_records(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
-    limit: int = Query(default=50, lte=1000),
     offset: int = 0,
+    limit: int = Query(default=50, lte=1000),
     include: Optional[List[RecordInclude]] = Query(None),
     current_user: User = Security(auth.get_current_user),
 ):
@@ -58,7 +58,7 @@ def list_records(
 
     authorize(current_user, RecordPolicyV1.get(dataset))
 
-    records = datasets.list_records(db, dataset, limit=limit, offset=offset)
+    records = datasets.list_records(db, dataset, offset=offset, limit=limit)
 
     for record in records:
         record_schema = Record(id=record.id, fields=record.fields)
@@ -102,6 +102,7 @@ def update_record_responses(
         )
 
     authorize(current_user, RecordPolicyV1.update_response(record))
+
     datasets.create_or_update_response(db, record, current_user, response_create_or_update=response)
 
     return response

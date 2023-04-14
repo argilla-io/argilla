@@ -112,8 +112,8 @@ def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
-def list_records(db: Session, dataset: Dataset, limit: int, offset: int = 0):
-    return db.query(Record).filter_by(dataset_id=dataset.id).limit(limit).offset(offset).all()
+def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = 50):
+    return db.query(Record).filter_by(dataset_id=dataset.id).offset(offset).limit(limit).all()
 
 
 def create_records(db: Session, dataset: Dataset, user: User, records_create: RecordsCreate):
