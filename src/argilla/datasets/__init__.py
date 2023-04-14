@@ -41,10 +41,11 @@ def load_dataset_settings(name: str, workspace: Optional[str] = None) -> Setting
     if workspace is not None:
         active_api.set_workspace(workspace)
     datasets = active_api.datasets
-    if datasets.load_settings(name) is None:
+    settings = datasets.load_settings(name)
+    if settings is None:
         return None
     else:
-        return datasets.load_settings(name).settings
+        return settings
 
 
 def configure_dataset_settings(name: str, settings: Settings, workspace: Optional[str] = None) -> None:

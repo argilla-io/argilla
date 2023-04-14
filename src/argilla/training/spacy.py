@@ -15,16 +15,13 @@
 import logging
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
 import argilla as rg
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
-
-if TYPE_CHECKING:
-    pass
 
 
 class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
@@ -99,7 +96,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         if self.gpu_id != -1:
             try:
                 spacy.prefer_gpu(self.gpu_id)
-            except Exception:
+            except ValueError:
                 self.gpu_id = -1
 
         self.init_training_args()

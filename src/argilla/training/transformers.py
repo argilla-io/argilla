@@ -55,8 +55,6 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             self.device = "mps"
         elif torch.cuda.is_available():
             self.device = "cuda"
-        else:
-            self.device = "cpu"
 
         if self._seed is None:
             self._seed = 42
@@ -100,9 +98,10 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             columns_mapping = {"text": "text", "label": "binarized_label"}
             if self._multi_label:
                 self._train_dataset = _apply_column_mapping(self._train_dataset, columns_mapping)
+
                 if self._eval_dataset is not None:
                     self._eval_dataset = _apply_column_mapping(self._eval_dataset, columns_mapping)
-        print(self._train_dataset)
+
         self.model_kwargs = {}
         self.model_kwargs["pretrained_model_name_or_path"] = self._model
         self.model_kwargs["num_labels"] = len(self._label_list)
@@ -159,18 +158,14 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         else:
             raise NotImplementedError("This is not implemented.")
 
-    def update_config(
-        self,
-        **kwargs,
-    ):
+    def update_config(self, **kwargs):
         """
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
         from transformers import TrainingArguments
 
-        self.trainer_kwargs.update(kwargs)
-        self.trainer_kwargs = filter_allowed_args(TrainingArguments.__init__, **self.trainer_kwargs)
+        self.trainer_kwargs.update(filter_allowed_args(TrainingArguments.__init__, **kwargs))
 
     def __repr__(self):
         formatted_string = []
@@ -190,14 +185,13 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         )
 
         def text_classification_preprocess_function(examples):
-            tokens = self._transformers_tokenizer(
-                examples["text"], truncation=True, padding="max_length", max_length=512
-            )
+            tokens = self._transformers_tokenizer(examples["text"], padding=True, truncation=True)
+
             return tokens
 
         def token_classification_preprocess_function(examples):
             tokenized_inputs = self._transformers_tokenizer(
-                examples["tokens"], truncation=True, padding="max_length", is_split_into_words=True, max_length=512
+                examples["tokens"], padding=True, is_split_into_words=True, truncation=True
             )
 
             labels = []
@@ -224,9 +218,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             self._data_collator = None
         elif self._record_class == rg.TokenClassificationRecord:
             preprocess_function = token_classification_preprocess_function
-            self._data_collator = DataCollatorForTokenClassification(
-                tokenizer=self._transformers_tokenizer, max_length=512
-            )
+            self._data_collator = DataCollatorForTokenClassification(tokenizer=self._transformers_tokenizer)
         else:
             raise NotImplementedError("")
 
@@ -247,7 +239,6 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
             def compute_metrics_text_classification_multi_label(eval_pred):
                 logits, labels = eval_pred
-
                 # apply sigmoid
                 predictions = (1.0 / (1 + np.exp(-logits))) > 0.5
 
@@ -299,7 +290,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             raise NotImplementedError("Text2Text is not implemented.")
         return func
 
-    def train(self, output_dir: str = None):
+    def train(self, output_dir: str):
         """
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
         the model, and then train the model
@@ -310,10 +301,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         )
 
         # check required path argument
-        if output_dir is not None:
-            self.trainer_kwargs["output_dir"] = output_dir
-        else:
-            raise ValueError("You must specify a path to save the model to use `trainer.train(path=<my_path>).")
+        self.trainer_kwargs["output_dir"] = output_dir
 
         # prepare data
         self.init_model(new=True)

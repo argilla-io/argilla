@@ -15,7 +15,7 @@
 import logging
 from typing import List, Union
 
-import argilla as rg
+from argilla.datasets import TextClassificationSettings
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args
 from argilla.utils.dependency import require_version
@@ -61,8 +61,8 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         model: str = "curie",
         n_epochs: int = None,
         batch_size: int = None,
-        learning_rate_multiplier: float = None,
-        prompt_loss_weight: float = 0.01,
+        learning_rate_multiplier: float = 0.1,
+        prompt_loss_weight: float = 0.1,
         compute_classification_metrics: bool = False,
         classification_n_classes: int = None,
         classification_positive_class: str = None,
@@ -74,7 +74,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["training_file"] = training_file
         self.model_kwargs["validation_file"] = validation_file
         self.model_kwargs["model"] = model
-        if isinstance(self._settings, rg.TextClassificationSettings):
+        if isinstance(self._settings, TextClassificationSettings):
             self.model_kwargs["n_epochs"] = 4
         else:
             self.model_kwargs["n_epochs"] = 2
@@ -87,19 +87,21 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["classification_betas"] = classification_betas
         self.model_kwargs["suffix"] = suffix
 
-        if isinstance(self._settings, rg.TextClassificationSettings) and self._eval_dataset:
+        if isinstance(self._settings, TextClassificationSettings) and self._eval_dataset:
             label_schema = self._settings.label_schema
             if len(label_schema) == 2:
                 self.model_kwargs["classification_positive_class"] = label_schema[0]
+                self.model_kwargs["compute_classification_metrics"] = True
             else:
                 self.model_kwargs["classification_n_classes"] = len(label_schema)
+                self.model_kwargs["compute_classification_metrics"] = True
 
     def update_config(
         self,
         **kwargs,
     ):
         """
-        Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
+        Updates the `model_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
         self.model_kwargs.update(kwargs)
@@ -139,8 +141,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
     def train(self, output_dir: str = None):
         """
-        We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
-        the model, and then train the model
+        We create a openai.FineTune object from a pretrained model, and send data to finetune it.
         """
 
         import openai
@@ -198,11 +199,12 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             text = [text]
             was_string = True
 
-        if isinstance(self._settings, rg.TextClassificationSettings):
+        if isinstance(self._settings, TextClassificationSettings):
             kwargs = {"logprobs": len(self._settings.label_schema), "max_tokens": 1}
 
         for entry in text:
-            response = openai.Completion.create(model=self._model, prompt=entry + self._separator, **kwargs)
+            prompt = entry + self._separator
+            response = openai.Completion.create(model=self._model, prompt=prompt, **kwargs)
             responses.append(response)
 
         if was_string:
