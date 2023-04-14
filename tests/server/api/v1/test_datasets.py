@@ -15,15 +15,18 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
+import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import Annotation, Dataset, DatasetStatus
 from argilla.server.schemas.v1.datasets import (
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
 )
+from elasticsearch8 import Elasticsearch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from tests.conftest import is_running_elasticsearch
 from tests.factories import (
     AnnotationFactory,
     AnnotatorFactory,
@@ -572,9 +575,18 @@ def test_create_dataset_rating_annotation_with_invalid_settings_options_values(
     assert db.query(Annotation).count() == 0
 
 
-def test_publish_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.skipif(
+    condition=not is_running_elasticsearch(),
+    reason="Test only running with elasticsearch backend",
+)
+def test_publish_dataset(
+    client: TestClient,
+    db: Session,
+    elasticsearch: Elasticsearch,
+    admin_auth_header: dict,
+):
     dataset = DatasetFactory.create()
-    AnnotationFactory.create(dataset=dataset)
+    RatingAnnotationFactory.create(dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
@@ -583,6 +595,25 @@ def test_publish_dataset(client: TestClient, db: Session, admin_auth_header: dic
 
     response_body = response.json()
     assert response_body["status"] == "ready"
+
+    assert elasticsearch.indices.exists(index=f"rg.{dataset.id}")
+
+
+def test_publish_dataset_with_error_on_index_creation(
+    client: TestClient,
+    db: Session,
+    elasticsearch: Elasticsearch,
+    admin_auth_header: dict,
+):
+    dataset = DatasetFactory.create()
+    AnnotationFactory.create(dataset=dataset)
+
+    response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
+
+    assert response.status_code == 422
+    assert db.get(Dataset, dataset.id).status == "draft"
+
+    assert not elasticsearch.indices.exists(index=f"rg.{dataset.id}")
 
 
 def test_publish_dataset_without_authentication(client: TestClient, db: Session):
