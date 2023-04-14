@@ -23,6 +23,9 @@ from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
+from argilla.server.settings import settings
+from elasticsearch8 import Elasticsearch
+from opensearchpy import OpenSearch
 from starlette.testclient import TestClient
 
 from .factories import AnnotatorFactory
@@ -46,6 +49,29 @@ def db():
     session.query(Workspace).delete()
     session.query(WorkspaceUser).delete()
     session.commit()
+
+
+def is_running_elasticsearch() -> bool:
+    open_search = OpenSearch(hosts=settings.elasticsearch)
+
+    info = open_search.info(format="json")
+    version_info = info["version"]
+
+    return "distribution" not in version_info
+
+
+@pytest.fixture(scope="session")
+def es_config():
+    return {"hosts": settings.elasticsearch}
+
+
+@pytest.fixture(scope="session")
+def elasticsearch(es_config):
+    client = Elasticsearch(**es_config)
+    yield client
+
+    for index_info in client.cat.indices(index="ar.*,rg.*", format="json"):
+        client.indices.delete(index=index_info["index"])
 
 
 @pytest.fixture(scope="function")
