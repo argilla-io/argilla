@@ -64,6 +64,7 @@ export default {
     const records = [
       {
         id: "record_1",
+        recordStatus: "discard",
         responses: [
           {
             record_id: "record_1",
@@ -371,9 +372,10 @@ export default {
         return {
           ...record,
           record_id: record.id,
+          dataset_id: this.datasetId,
+          record_status: record.recordStatus,
           record_fields: record.fields,
           record_responses: record.responses,
-          dataset_id: this.datasetId,
         };
       });
     },

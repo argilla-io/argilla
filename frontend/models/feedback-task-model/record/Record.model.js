@@ -10,10 +10,19 @@ class Record extends Model {
     return {
       id: this.uid(),
       dataset_id: this.attr(null),
+      record_status: this.string(null).nullable(),
 
       // relationships
       record_responses: this.hasMany(RecordResponseModel, "record_id"),
       record_fields: this.hasMany(RecordFieldModel, "record_id"),
+    };
+  }
+
+  static mutators() {
+    return {
+      record_status(value) {
+        return value && value.toUpperCase();
+      },
     };
   }
 }
