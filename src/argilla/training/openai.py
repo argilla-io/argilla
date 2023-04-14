@@ -16,6 +16,7 @@ import logging
 from typing import List, Union
 
 import argilla as rg
+from argilla.datasets import TextClassificationSettings
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args
 from argilla.utils.dependency import require_version
@@ -74,7 +75,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["training_file"] = training_file
         self.model_kwargs["validation_file"] = validation_file
         self.model_kwargs["model"] = model
-        if isinstance(self._settings, rg.TextClassificationSettings):
+        if isinstance(self._settings, TextClassificationSettings):
             self.model_kwargs["n_epochs"] = 4
         else:
             self.model_kwargs["n_epochs"] = 2
@@ -87,7 +88,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["classification_betas"] = classification_betas
         self.model_kwargs["suffix"] = suffix
 
-        if isinstance(self._settings, rg.TextClassificationSettings) and self._eval_dataset:
+        if isinstance(self._settings, TextClassificationSettings) and self._eval_dataset:
             label_schema = self._settings.label_schema
             if len(label_schema) == 2:
                 self.model_kwargs["classification_positive_class"] = label_schema[0]
