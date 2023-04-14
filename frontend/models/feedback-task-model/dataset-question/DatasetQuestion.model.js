@@ -10,7 +10,7 @@ class DatasetQuestion extends Model {
       dataset_id: this.attr(null),
       order: this.number(0),
       question: this.string(""),
-      outputs: this.attr([]),
+      options: this.attr([]),
       placeholder: this.string(null).nullable(),
       is_required: this.boolean(false),
       component_type: this.string(null).nullable(),

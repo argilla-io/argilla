@@ -7,7 +7,7 @@ class RecordResponse extends Model {
   static fields() {
     return {
       id: this.uid(),
-      outputs: this.attr([]),
+      options: this.attr([]),
       question_id: this.attr(null),
       record_id: this.attr(null),
       user_id: this.attr(null),

@@ -20,7 +20,7 @@
       <Text2TextContentEditable
         :annotationEnabled="true"
         :annotations="[]"
-        :defaultText="initialOutputs.text"
+        :defaultText="initialOptions.text"
         :placeholder="placeholder"
         :isShortcutToSave="false"
         @change-text="onChangeTextArea"
@@ -39,7 +39,7 @@ export default {
       type: String,
       required: true,
     },
-    initialOutputs: {
+    initialOptions: {
       type: Object,
       default: () => {
         return { text: "", value: "" };

@@ -48,12 +48,12 @@ export default {
           {
             record_id: "record_1",
             question_id: "id_5",
-            outputs: [{ id: 1, value: true, text: "1" }],
+            options: [{ id: 1, value: true, text: "1" }],
           },
           {
             record_id: "record_1",
             question_id: "id_6",
-            outputs: [{ id: "id_6-5", value: true, text: "5" }],
+            options: [{ id: "id_6-5", value: true, text: "5" }],
           },
         ],
         fields: [
@@ -72,7 +72,7 @@ export default {
           },
           {
             id: "field_2",
-            title: "Outputs",
+            title: "Output",
             text: `
             Lorem ipsum dolor sit amet, consectetur adipisicing elit.
             Vitae cupiditate fugit quos officiis expedita, deleniti libero
@@ -108,12 +108,12 @@ export default {
           {
             record_id: "record_2",
             question_id: "id_6",
-            outputs: [{ id: "id_6-5", value: true, text: "5" }],
+            options: [{ id: "id_6-5", value: true, text: "5" }],
           },
           {
             record_id: "record_2",
             question_id: "id_7",
-            outputs: [
+            options: [
               {
                 id: "patati",
                 value: "I m blue daboudi dabouda",
@@ -138,7 +138,7 @@ export default {
           },
           {
             id: "field_4",
-            title: "Outputs",
+            title: "Output",
             text: `
             Lorem ipsum dolor sit amet, consectetur adipisicing elit.
             Vitae cupiditate fugit quos officiis expedita, deleniti libero
@@ -168,7 +168,7 @@ export default {
           },
           {
             id: "field_5",
-            title: "Second outputs",
+            title: "Second options",
             text: `
             Lorem ipsum dolor sit amet, consectetur adipisicing elit.
             Vitae cupiditate fugit quos officiis expedita, deleniti libero
@@ -204,7 +204,7 @@ export default {
       //   id: "id_1",
       //   question:
       //     "Are the instruction and input adequate for the capabilities of this model?",
-      //   outputs: [
+      //   options: [
       //     { id: 1, value: true, text: "Yes" },
       //     { id: 2, value: false, text: "No" },
       //   ],
@@ -216,7 +216,7 @@ export default {
       // {
       //   id: "id_2",
       //   question: "Does the output contain hallucinated or untruthful facts?",
-      //   outputs: [
+      //   options: [
       //     { id: 1, value: true, text: "Yes" },
       //     { id: 2, value: false, text: "No" },
       //   ],
@@ -227,7 +227,7 @@ export default {
       //   id: "id_3",
       //   question:
       //     "Select any labels that apply to the content found in the text:",
-      //   outputs: [
+      //   options: [
       //     { id: 1, text: "Not English", label: "Not English" },
       //     { id: 2, text: "Not Appropriate", label: "Not Appropriate" },
       //     { id: 3, text: "Contains PII", label: "Contains PII" },
@@ -247,7 +247,7 @@ export default {
       // {
       //   id: "id_4",
       //   question: "Rate the overall quality of the output",
-      //   outputs: [
+      //   options: [
       //     { id: 1, value: 1, text: "1" },
       //     { id: 2, value: 2, text: "2" },
       //     { id: 3, value: 3, text: "3" },
@@ -261,7 +261,7 @@ export default {
         id: "id_5",
         question:
           "Rate the helpfulness of the output (1-not helpful, 7-very helpful):",
-        outputs: [
+        options: [
           { id: 1, value: false, text: "1" },
           { id: 2, value: false, text: "2" },
           { id: 3, value: false, text: "3" },
@@ -277,7 +277,7 @@ export default {
         id: "id_6",
         question:
           "Rate the harmlessness of the output (1-very harmful, 5-harmless):",
-        outputs: [
+        options: [
           { id: "id_6-1", value: false, text: "1" },
           { id: "id_6-2", value: false, text: "2" },
           { id: "id_6-3", value: false, text: "3" },
@@ -292,7 +292,7 @@ export default {
         id: "id_7",
         question: "Comment",
         placeholder: "this is the placeholder",
-        outputs: [
+        options: [
           {
             id: "patati",
             text: "",
@@ -334,32 +334,32 @@ export default {
       );
 
       // COMPUTE questions with responses from record
-      const newOutputsByQuestion = this.factoryNewOutputsByQuestion();
+      const newOptionsByQuestion = this.factoryNewOptionsByQuestion();
       this.questionsWithRecordAnswers =
-        this.factoryQuestionsWithRecordAnswer(newOutputsByQuestion);
+        this.factoryQuestionsWithRecordAnswer(newOptionsByQuestion);
     }
   },
   methods: {
-    factoryQuestionsWithRecordAnswer(newOutputsByQuestion) {
+    factoryQuestionsWithRecordAnswer(newOptionsByQuestion) {
       const questionsWithRecordAnswers = this.questions.map((question) => {
-        const newOutputs =
-          newOutputsByQuestion.find(
+        const newOptions =
+          newOptionsByQuestion.find(
             (recordResponseByQuestion) =>
               recordResponseByQuestion.question_id === question.id
-          )?.newOutputs || question.outputs;
-        return { ...question, outputs: newOutputs };
+          )?.newOptions || question.options;
+        return { ...question, options: newOptions };
       });
 
       return questionsWithRecordAnswers;
     },
-    factoryNewOutputsByQuestion() {
-      const newOutputsByQuestion = [];
+    factoryNewOptionsByQuestion() {
+      const newOptionsByQuestion = [];
       this.questions.forEach((question) => {
         this.recordResponses.forEach((response) => {
           if (response.question_id === question.id) {
-            const newOutputs = question.outputs.map((output) => {
+            const newOptions = question.options.map((output) => {
               const recordResponseOutputWithSameTextAsInQuestionOutput =
-                response.outputs.find(
+                response.options.find(
                   (responseOutput) => responseOutput.id === output.id
                 );
 
@@ -369,12 +369,12 @@ export default {
               return output;
             });
 
-            newOutputsByQuestion.push({ question_id: question.id, newOutputs });
+            newOptionsByQuestion.push({ question_id: question.id, newOptions });
           }
         });
       });
 
-      return newOutputsByQuestion;
+      return newOptionsByQuestion;
     },
     factoryRecordsForOrm(records) {
       return records.map((record) => {
