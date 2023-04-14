@@ -34,10 +34,11 @@ def upgrade() -> None:
         "records",
         sa.Column("id", sa.Uuid, primary_key=True),
         sa.Column("fields", sa.JSON, nullable=False),
-        sa.Column("external_id", sa.String, unique=True, index=True),
+        sa.Column("external_id", sa.String, index=True),
         sa.Column("dataset_id", sa.Uuid, sa.ForeignKey("datasets.id", ondelete="CASCADE"), nullable=False, index=True),
         sa.Column("inserted_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
+        sa.UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),
     )
 
 
