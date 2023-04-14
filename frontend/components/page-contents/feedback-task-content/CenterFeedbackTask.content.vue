@@ -60,7 +60,7 @@ export default {
       );
     },
   },
-  async created() {
+  created() {
     const records = [
       {
         id: "record_1",
@@ -220,10 +220,6 @@ export default {
         ],
       },
     ];
-
-    const formattedRecords = this.factoryRecordsForOrm(records);
-    upsertRecords(formattedRecords);
-
     const inputs = [
       // {
       //   id: "id_1",
@@ -331,42 +327,54 @@ export default {
       },
     ];
 
+    const formattedRecords = this.factoryRecordsForOrm(records);
     const formattedInputs = this.factoryInputsForOrm(inputs);
 
-    await upsertGlobalQuestions(formattedInputs);
+    upsertRecords(formattedRecords);
+    upsertGlobalQuestions(formattedInputs);
+    const newOutputsByQuestion = this.factoryNewOutputsByQuestion();
+
+    this.questionsWithRecordAnswers =
+      this.factoryQuestionsWithRecordAnswer(newOutputsByQuestion);
   },
-  beforeMount() {
-    const newOutputsByQuestion = [];
-    this.questions.forEach((question) => {
-      this.recordResponses.forEach((response) => {
-        if (response.question_id === question.id) {
-          const newOutputs = question.outputs.map((output) => {
-            const recordResponseOutputWithSameTextAsInQuestionOutput =
-              response.outputs.find(
-                (responseOutput) => responseOutput.id === output.id
-              );
-
-            if (recordResponseOutputWithSameTextAsInQuestionOutput) {
-              return recordResponseOutputWithSameTextAsInQuestionOutput;
-            }
-            return output;
-          });
-
-          newOutputsByQuestion.push({ question_id: question.id, newOutputs });
-        }
-      });
-    });
-
-    this.questionsWithRecordAnswers = this.questions.map((question) => {
-      const newOutputs =
-        newOutputsByQuestion.find(
-          (recordResponseByQuestion) =>
-            recordResponseByQuestion.question_id === question.id
-        )?.newOutputs || question.outputs;
-      return { ...question, outputs: newOutputs };
-    });
-  },
+  beforeMount() {},
   methods: {
+    factoryQuestionsWithRecordAnswer(newOutputsByQuestion) {
+      const questionsWithRecordAnswers = this.questions.map((question) => {
+        const newOutputs =
+          newOutputsByQuestion.find(
+            (recordResponseByQuestion) =>
+              recordResponseByQuestion.question_id === question.id
+          )?.newOutputs || question.outputs;
+        return { ...question, outputs: newOutputs };
+      });
+
+      return questionsWithRecordAnswers;
+    },
+    factoryNewOutputsByQuestion() {
+      const newOutputsByQuestion = [];
+      this.questions.forEach((question) => {
+        this.recordResponses.forEach((response) => {
+          if (response.question_id === question.id) {
+            const newOutputs = question.outputs.map((output) => {
+              const recordResponseOutputWithSameTextAsInQuestionOutput =
+                response.outputs.find(
+                  (responseOutput) => responseOutput.id === output.id
+                );
+
+              if (recordResponseOutputWithSameTextAsInQuestionOutput) {
+                return recordResponseOutputWithSameTextAsInQuestionOutput;
+              }
+              return output;
+            });
+
+            newOutputsByQuestion.push({ question_id: question.id, newOutputs });
+          }
+        });
+      });
+
+      return newOutputsByQuestion;
+    },
     factoryRecordsForOrm(records) {
       return records.map((record) => {
         return {
