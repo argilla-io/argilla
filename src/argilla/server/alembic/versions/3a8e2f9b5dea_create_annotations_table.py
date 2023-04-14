@@ -36,7 +36,6 @@ def upgrade() -> None:
         sa.Column("id", sa.Uuid, primary_key=True),
         sa.Column("name", sa.String, nullable=False, index=True),
         sa.Column("title", sa.Text, nullable=False),
-        sa.Column("type", sa.String, nullable=False, index=True),
         sa.Column("required", sa.Boolean, nullable=False, server_default=expression.false()),
         sa.Column("settings", sa.JSON, nullable=False),
         sa.Column("dataset_id", sa.Uuid, sa.ForeignKey("datasets.id", ondelete="CASCADE"), nullable=False, index=True),

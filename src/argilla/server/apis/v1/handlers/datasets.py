@@ -112,7 +112,7 @@ def create_dataset_annotation(
     annotation_create: AnnotationCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.create)
+    authorize(current_user, DatasetPolicyV1.create_annotation)
 
     dataset = _get_dataset(db, dataset_id)
 
@@ -122,7 +122,31 @@ def create_dataset_annotation(
             detail=f"Annotation with name `{annotation_create.name}` already exists for dataset with id `{dataset_id}`",
         )
 
-    return datasets.create_annotation(db, dataset, annotation_create)
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        return datasets.create_annotation(db, dataset, annotation_create)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
+def publish_dataset(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, DatasetPolicyV1.publish)
+
+    dataset = _get_dataset(db, dataset_id)
+
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        return datasets.publish_dataset(db, dataset)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
 @router.delete("/datasets/{dataset_id}", response_model=Dataset)
