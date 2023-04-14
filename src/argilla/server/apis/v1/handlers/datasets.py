@@ -130,6 +130,21 @@ def create_dataset_annotation(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
+@router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
+def create_records(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    records_create: RecordsCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, RecordPolicyV1.create)
+
+    dataset = _get_dataset(db, dataset_id)
+
+    datasets.create_records(db, dataset, current_user, records_create)
+
+
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
 def publish_dataset(
     *,

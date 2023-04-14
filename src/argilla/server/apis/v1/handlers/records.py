@@ -71,21 +71,6 @@ def list_records(
     return RecordsList(total=0, items=records)
 
 
-@router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
-def create_records(
-    *,
-    db: Session = Depends(get_db),
-    dataset_id: UUID,
-    records_create: RecordsCreate,
-    current_user: User = Security(auth.get_current_user),
-):
-    authorize(current_user, RecordPolicyV1.create)
-
-    dataset = _get_dataset(db, dataset_id)
-
-    datasets.create_records(db, dataset, current_user, records_create)
-
-
 @router.put("/records/{record_id}/responses", response_model=Response)
 def update_record_responses(
     *,
