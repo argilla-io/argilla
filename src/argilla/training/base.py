@@ -14,6 +14,7 @@
 
 import logging
 import os
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
@@ -230,7 +231,7 @@ _________________________________________________________________
         self._trainer.save(output_dir)
 
 
-class ArgillaTrainerSkeleton(object):
+class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
         dataset,
@@ -247,20 +248,26 @@ class ArgillaTrainerSkeleton(object):
         self._model = model
         self._seed = seed
 
+    @abstractmethod
     def init_training_args(self):
-        raise NotImplementedError("This method must be implemented by the subclass.")
+        pass
 
+    @abstractmethod
     def init_model(self):
-        raise NotImplementedError("This method must be implemented by the subclass.")
+        pass
 
+    @abstractmethod
     def update_config(self, *args, **kwargs):
-        raise NotImplementedError("This method must be implemented by the subclass.")
+        pass
 
+    @abstractmethod
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
-        raise NotImplementedError("This method must be implemented by the subclass.")
+        pass
 
+    @abstractmethod
     def train(self, output_dir: str = None):
-        raise NotImplementedError("This method must be implemented by the subclass.")
+        pass
 
+    @abstractmethod
     def save(self, output_dir: str):
-        raise NotImplementedError("This method must be implemented by the subclass.")
+        pass

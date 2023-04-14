@@ -99,7 +99,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         **kwargs,
     ):
         """
-        Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
+        Updates the `model_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
         self.model_kwargs.update(kwargs)
@@ -139,8 +139,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
     def train(self, output_dir: str = None):
         """
-        We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
-        the model, and then train the model
+        We create a openai.FineTune object from a pretrained model, and send data to finetune it.
         """
 
         import openai

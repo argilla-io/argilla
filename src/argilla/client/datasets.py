@@ -404,7 +404,6 @@ class DatasetBase:
 
         """
         if self._RECORD_TYPE == TextClassificationRecord:
-            print("TextClassificationRecord")
             if settings is None:
                 self._SETTINGS = self._infer_settings_from_records()
             elif isinstance(settings, TextClassificationSettings):
@@ -488,7 +487,7 @@ class DatasetBase:
                     return self._prepare_for_training_with_openai(records=shuffled_records)
                 else:
                     raise NotImplementedError(
-                        f"Framework {framework} is not supported. Choose from: {list(Framework)}"
+                        f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
                     )
         else:
             raise NotImplementedError(f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}")
@@ -638,7 +637,7 @@ class DatasetForTextClassification(DatasetBase):
         Examples:
             >>> import datasets
             >>> ds = datasets.Dataset.from_dict({
-            ...     "inputs": ["exxample"],
+            ...     "inputs": ["example"],
             ...     "prediction": [
             ...         [{"label": "LABEL1", "score": 0.9}, {"label": "LABEL2", "score": 0.1}]
             ...     ]
@@ -833,7 +832,7 @@ class DatasetForTextClassification(DatasetBase):
         from spacy.tokens import DocBin
 
         db = DocBin(store_user_data=True)
-        all_labels = self.__all_labels__()
+        all_labels = self._verify_all_labels()
 
         # Creating the DocBin object as in https://spacy.io/usage/training#training-data
 
@@ -897,7 +896,7 @@ class DatasetForTextClassification(DatasetBase):
         """
         separator = "\n\n###\n\n"
         whitespace = " "
-        self.__all_labels__()  # verify that all labels are strings
+        self._verify_all_labels()  # verify that all labels are strings
 
         if len(self._records) <= len(self._SETTINGS.label_schema) * 100:
             _LOGGER.warning("OpenAI recommends at least 100 examples per class for training a classification model.")
@@ -945,7 +944,7 @@ class DatasetForTextClassification(DatasetBase):
         )
         return TextClassificationSettings(all_labels)
 
-    def __all_labels__(self):
+    def _verify_all_labels(self):
         all_labels = self._SETTINGS.label_schema
         for record in self._records:
             if record.annotation is None:
@@ -1102,7 +1101,7 @@ class DatasetForTokenClassification(DatasetBase):
             return datasets.Dataset.from_dict({})
 
         class_tags = ["O"]
-        class_tags.extend([f"{pre}-{label}" for label in sorted(self.__all_labels__()) for pre in ["B", "I"]])
+        class_tags.extend([f"{pre}-{label}" for label in sorted(self._verify_all_labels()) for pre in ["B", "I"]])
         class_tags = datasets.ClassLabel(names=class_tags)
 
         def spans2iob(example):
@@ -1185,7 +1184,7 @@ class DatasetForTokenClassification(DatasetBase):
         separator = "\n\n###\n\n"
         end_token = " END"
         whitespace = " "
-        self.__all_labels__()
+        self._verify_all_labels()
 
         if len(self._records) <= 500:
             _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
@@ -1223,7 +1222,7 @@ class DatasetForTokenClassification(DatasetBase):
         )
         return TokenClassificationSettings(all_labels)
 
-    def __all_labels__(self) -> List[str]:
+    def _verify_all_labels(self) -> List[str]:
         all_labels = self._SETTINGS.label_schema
         for record in self._records:
             if record.annotation:

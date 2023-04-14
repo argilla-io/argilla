@@ -100,7 +100,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 self._train_dataset = _apply_column_mapping(self._train_dataset, columns_mapping)
                 if self._eval_dataset is not None:
                     self._eval_dataset = _apply_column_mapping(self._eval_dataset, columns_mapping)
-        print(self._train_dataset)
+
         self.model_kwargs = {}
         self.model_kwargs["pretrained_model_name_or_path"] = self._model
         self.model_kwargs["num_labels"] = len(self._label_list)
@@ -157,18 +157,14 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         else:
             raise NotImplementedError("This is not implemented.")
 
-    def update_config(
-        self,
-        **kwargs,
-    ):
+    def update_config(self, **kwargs):
         """
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
         from transformers import TrainingArguments
 
-        self.trainer_kwargs.update(kwargs)
-        self.trainer_kwargs = filter_allowed_args(TrainingArguments.__init__, **self.trainer_kwargs)
+        self.trainer_kwargs.update(filter_allowed_args(TrainingArguments.__init__, **kwargs))
 
     def __repr__(self):
         formatted_string = []
@@ -188,14 +184,12 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         )
 
         def text_classification_preprocess_function(examples):
-            tokens = self._transformers_tokenizer(
-                examples["text"], truncation=True, padding="max_length", max_length=512
-            )
+            tokens = self._transformers_tokenizer(examples["text"], truncation=True, padding="max_length")
             return tokens
 
         def token_classification_preprocess_function(examples):
             tokenized_inputs = self._transformers_tokenizer(
-                examples["tokens"], truncation=True, padding="max_length", is_split_into_words=True, max_length=512
+                examples["tokens"], truncation=True, padding="max_length", is_split_into_words=True
             )
 
             labels = []
