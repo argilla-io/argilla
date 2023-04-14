@@ -15,7 +15,6 @@
 import logging
 from typing import List, Union
 
-import argilla as rg
 from argilla.datasets import TextClassificationSettings
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args
@@ -62,8 +61,8 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         model: str = "curie",
         n_epochs: int = None,
         batch_size: int = None,
-        learning_rate_multiplier: float = None,
-        prompt_loss_weight: float = 0.01,
+        learning_rate_multiplier: float = 0.1,
+        prompt_loss_weight: float = 0.1,
         compute_classification_metrics: bool = False,
         classification_n_classes: int = None,
         classification_positive_class: str = None,
@@ -92,8 +91,10 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             label_schema = self._settings.label_schema
             if len(label_schema) == 2:
                 self.model_kwargs["classification_positive_class"] = label_schema[0]
+                self.model_kwargs["compute_classification_metrics"] = True
             else:
                 self.model_kwargs["classification_n_classes"] = len(label_schema)
+                self.model_kwargs["compute_classification_metrics"] = True
 
     def update_config(
         self,
@@ -198,11 +199,12 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             text = [text]
             was_string = True
 
-        if isinstance(self._settings, rg.TextClassificationSettings):
+        if isinstance(self._settings, TextClassificationSettings):
             kwargs = {"logprobs": len(self._settings.label_schema), "max_tokens": 1}
 
         for entry in text:
-            response = openai.Completion.create(model=self._model, prompt=entry + self._separator, **kwargs)
+            prompt = entry + self._separator
+            response = openai.Completion.create(model=self._model, prompt=prompt, **kwargs)
             responses.append(response)
 
         if was_string:
