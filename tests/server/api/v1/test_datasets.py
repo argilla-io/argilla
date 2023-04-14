@@ -16,7 +16,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Annotation, AnnotationType, Dataset, DatasetStatus
+from argilla.server.models import Annotation, Dataset, DatasetStatus
 from argilla.server.schemas.v1.datasets import (
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
