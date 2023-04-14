@@ -10,6 +10,7 @@ class RecordResponse extends Model {
       outputs: this.attr([]),
       question_id: this.attr(null),
       record_id: this.attr(null),
+      user_id: this.attr(null),
     };
   }
 }
