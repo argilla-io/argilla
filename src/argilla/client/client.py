@@ -437,7 +437,7 @@ class Argilla:
         Args:
             name: The dataset name.
             query: An ElasticSearch query with the `query string syntax
-                <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
+                <https://docs.argilla.io/en/latest/guides/query_datasets.html>`_
             ids: If provided, deletes dataset records with given ids.
             discard_only: If `True`, matched records won't be deleted. Instead, they will be marked as `Discarded`
             discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.
