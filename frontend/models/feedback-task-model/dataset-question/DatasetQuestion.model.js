@@ -1,7 +1,7 @@
 import { Model } from "@vuex-orm/core";
 
-class GlobalQuestion extends Model {
-  static entity = "globalQuestions";
+class DatasetQuestion extends Model {
+  static entity = "datasetQuestions";
   static primaryKey = ["component_type", "question"];
 
   static fields() {
@@ -19,4 +19,4 @@ class GlobalQuestion extends Model {
   }
 }
 
-export { GlobalQuestion };
+export { DatasetQuestion };

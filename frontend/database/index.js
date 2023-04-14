@@ -18,7 +18,7 @@
 import { Database } from "@vuex-orm/core";
 
 import { FeedbackDataset } from "@/models/feedback-task-model/feedback-dataset/FeedbackDataset.model";
-import { GlobalQuestion } from "@/models/feedback-task-model/global-question/GlobalQuestion.model";
+import { DatasetQuestion } from "@/models/feedback-task-model/dataset-question/DatasetQuestion.model";
 import { Record } from "@/models/feedback-task-model/record/Record.model";
 import { RecordField } from "@/models/feedback-task-model/record-field/RecordField.model";
 import { RecordResponse } from "@/models/feedback-task-model/record-response/RecordResponse.model";
@@ -45,7 +45,7 @@ import notifications from "@/database/modules/notifications";
 const database = new Database();
 
 database.register(FeedbackDataset);
-database.register(GlobalQuestion);
+database.register(DatasetQuestion);
 database.register(Record);
 database.register(RecordField);
 database.register(RecordResponse);

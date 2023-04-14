@@ -10,9 +10,9 @@
 
 <script>
 import {
-  upsertGlobalQuestions,
+  upsertDatasetQuestions,
   getQuestionsByDatasetId,
-} from "@/models/feedback-task-model/global-question/globalQuestion.queries";
+} from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import {
   upsertRecords,
   getRecordWithFieldsByDatasetId,
@@ -312,7 +312,7 @@ export default {
 
     // UPSERT records and questions in ORM
     upsertRecords(formattedRecords);
-    upsertGlobalQuestions(formattedQuestions);
+    upsertDatasetQuestions(formattedQuestions);
 
     // RETRIEVES records from ORM
     this.record = getRecordWithFieldsByDatasetId(
