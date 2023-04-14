@@ -14,6 +14,7 @@
 
 from uuid import UUID
 
+from argilla.server.elasticsearch import ElasticSearchEngine
 from argilla.server.models import Annotation, Dataset, DatasetStatus
 from argilla.server.schemas.v1.datasets import AnnotationCreate, DatasetCreate
 from sqlalchemy import func
@@ -46,19 +47,24 @@ def create_dataset(db: Session, dataset_create: DatasetCreate):
     return dataset
 
 
-def publish_dataset(db: Session, dataset: Dataset):
+async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, dataset: Dataset):
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
 
     if _count_annotations_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without annotations")
 
-    dataset.status = DatasetStatus.ready
+    try:
+        dataset.status = DatasetStatus.ready
+        await search_engine.create_index(dataset)
 
-    db.commit()
-    db.refresh(dataset)
+        db.commit()
+        db.refresh(dataset)
 
-    return dataset
+        return dataset
+    except:
+        db.rollback()
+        raise
 
 
 def delete_dataset(db: Session, dataset: Dataset):
