@@ -33,6 +33,7 @@ from argilla.server.apis.v0.handlers import (
     users,
     workspaces,
 )
+from argilla.server.apis.v1.handlers import annotations as annotations_v1
 from argilla.server.apis.v1.handlers import datasets as datasets_v1
 from argilla.server.apis.v1.handlers import records as records_v1
 from argilla.server.errors.base_errors import __ALL__
@@ -59,4 +60,5 @@ for router in [
 
 # API v1
 api_router.include_router(datasets_v1.router, prefix="/v1")
+api_router.include_router(annotations_v1.router, prefix="/v1")
 api_router.include_router(records_v1.router, prefix="/v1")

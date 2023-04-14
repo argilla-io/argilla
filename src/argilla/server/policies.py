@@ -148,6 +148,12 @@ class DatasetPolicyV1:
         return actor.is_admin
 
 
+class AnnotationPolicyV1:
+    @classmethod
+    def delete(cls, actor: User) -> bool:
+        return actor.is_admin
+
+
 class RecordPolicyV1:
     @classmethod
     def create(cls, actor: User) -> bool:
