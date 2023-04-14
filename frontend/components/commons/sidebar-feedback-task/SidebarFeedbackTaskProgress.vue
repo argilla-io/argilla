@@ -124,4 +124,51 @@ export default {
     background: #a1a2cc;
   }
 }
+:deep() {
+  .metrics__title {
+    margin-top: 0;
+    margin-bottom: $base-space * 4;
+    @include font-size(18px);
+    font-weight: 600;
+  }
+  .metrics__subtitle {
+    @include font-size(15px);
+    font-weight: 600;
+  }
+  .metrics__info {
+    margin-top: 0;
+    margin-bottom: $base-space;
+    display: flex;
+    &__name {
+      margin: 0;
+    }
+    &__counter {
+      margin: 0 0 0 auto;
+    }
+    & + .re-progress__container {
+      margin-top: -$base-space;
+    }
+  }
+  .metrics__list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: $base-space * 3;
+    li {
+      display: flex;
+      align-items: center;
+      margin-bottom: $base-space;
+      @include font-size(13px);
+    }
+    &__name {
+      display: block;
+      width: calc(100% - 40px);
+      hyphens: auto;
+      word-break: break-word;
+    }
+    &__counter {
+      margin-right: 0;
+      margin-left: auto;
+    }
+  }
+}
 </style>
