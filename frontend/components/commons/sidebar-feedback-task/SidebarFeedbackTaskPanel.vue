@@ -16,8 +16,8 @@
   -->
 
 <template>
-  <aside class="sidebar" :class="visiblePanel ? 'visible' : null">
-    <div class="sidebar__wrapper">
+  <transition name="show-panel">
+    <aside class="sidebar" v-if="visiblePanel">
       <div class="sidebar__content">
         <a
           href="#"
@@ -28,14 +28,11 @@
           ><svgicon name="chevron-right" width="12" height="12"></svgicon
         ></a>
         <transition name="fade" appear duration="500">
-          <component
-            v-if="getProgressComponentName"
-            :is="getProgressComponentName"
-          />
+          <slot></slot>
         </transition>
       </div>
-    </div>
-  </aside>
+    </aside>
+  </transition>
 </template>
 <script>
 import "assets/icons/chevron-right";
@@ -48,18 +45,6 @@ export default {
   props: {
     visiblePanel: {
       type: String,
-    },
-    sidebarItems: {
-      type: Array,
-      required: true,
-    },
-  },
-  computed: {
-    getProgressComponentName() {
-      return (
-        this.sidebarItems.find((item) => item.id === this.visiblePanel)
-          ?.component || null
-      );
     },
   },
   methods: {
@@ -76,11 +61,12 @@ export default {
   width: $sidebarPanelWidth;
   position: relative;
   top: 0;
-  right: -$sidebarPanelWidth + 1px;
+  right: 0;
   background: palette(grey, 700);
   padding: 1em 1.5em;
-  transition: right 0.25s linear 0.2s;
   border-left: 1px solid palette(grey, 600);
+  overflow: visible;
+  pointer-events: all;
   &:hover {
     #{$this}__close-button:not(.zoom-out) {
       opacity: 1;
@@ -114,24 +100,7 @@ export default {
   &__content {
     display: block;
     position: relative;
-    opacity: 0;
-    transition: opacity 0.1s ease-out 0.6s;
     color: $black-54;
-  }
-  &.visible {
-    overflow: visible;
-    right: 0;
-    transition: right 0.25s linear;
-    pointer-events: all;
-    .sidebar__content {
-      transition: opacity 0.1s ease-in-out 0.2s;
-      opacity: 1;
-    }
-  }
-  @include media(">desktop") {
-    margin-left: 1em;
-    display: block !important;
-    right: -$sidebarPanelWidth + 1px;
   }
   &__content {
     @include font-size(13px);
@@ -139,55 +108,42 @@ export default {
       padding-top: 0;
     }
   }
-  :deep() {
-    .metrics__title {
-      margin-top: 0;
-      margin-bottom: $base-space * 4;
-      @include font-size(18px);
-      font-weight: 600;
-    }
-    .metrics__subtitle {
-      @include font-size(15px);
-      font-weight: 600;
-    }
-    .metrics__info {
-      margin-top: 0;
-      margin-bottom: $base-space;
-      display: flex;
-      &__name {
-        margin: 0;
-      }
-      &__counter {
-        margin: 0 0 0 auto;
-      }
-      & + .re-progress__container {
-        margin-top: -$base-space;
-      }
-    }
-    .metrics__list {
-      list-style: none;
-      padding-left: 0;
-      margin-bottom: $base-space * 3;
-      li {
-        display: flex;
-        align-items: center;
-        margin-bottom: $base-space;
-        @include font-size(13px);
-      }
-      &__name {
-        display: block;
-        width: calc(100% - 40px);
-        hyphens: auto;
-        word-break: break-word;
-      }
-      &__counter {
-        margin-right: 0;
-        margin-left: auto;
-      }
-    }
-  }
 }
 
+.show-panel-enter-active {
+  animation: slide 0.4s ease-out;
+}
+.show-panel-leave-active {
+  animation: slide 0.4s reverse ease-in;
+}
+.show-panel-enter-active {
+  .sidebar__content {
+    opacity: 0;
+    animation: fade 0.2s ease-out 0.3s;
+  }
+}
+.show-panel-leave-active {
+  .sidebar__content {
+    opacity: 0;
+    animation: fade 0.1s reverse ease-in;
+  }
+}
+@keyframes slide {
+  0% {
+    right: -$sidebarPanelWidth + 1px;
+  }
+  100% {
+    right: 0;
+  }
+}
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 @keyframes zoom-out {
   0% {
     transform: scale(1);
