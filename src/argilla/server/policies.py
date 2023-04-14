@@ -166,6 +166,19 @@ class RecordPolicyV1:
             )
         )
 
+    @classmethod
+    def get(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: (
+            actor.is_admin
+            or bool(
+                accounts.get_workspace_user_by_workspace_id_and_user_id(
+                    Session.object_session(actor),
+                    dataset.workspace_id,
+                    actor.id,
+                )
+            )
+        )
+
 
 class DatasetSettingsPolicy:
     @classmethod

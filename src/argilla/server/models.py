@@ -80,10 +80,13 @@ class Record(Base):
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="records")
-    response: Mapped["Response"] = relationship(back_populates="record")
+    responses: Mapped[List["Response"]] = relationship(back_populates="record")
 
     def __repr__(self):
-        return f"Record(id={str(self.id)!r}, external_id={self.external_id!r},  dataset_id={str(self.dataset_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r},"
+            f" inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class Response(Base):
@@ -99,6 +102,12 @@ class Response(Base):
 
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
+
+    def __repr__(self):
+        return (
+            f"Response(id={str(self.id)!r}, record_id={self.record_id!r}, user_id={str(self.user_id)!r},"
+            " inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class Dataset(Base):

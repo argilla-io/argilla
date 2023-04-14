@@ -19,6 +19,7 @@ from argilla.server.models import (
     AnnotationType,
     Dataset,
     Record,
+    Response,
     User,
     UserRole,
     Workspace,
@@ -66,6 +67,19 @@ class RecordFactory(factory.alchemy.SQLAlchemyModelFactory):
         "sentiment": "neutral",
     }
     dataset = factory.SubFactory(DatasetFactory)
+
+
+class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Response
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    values = {
+        "question": {"value": "LABEL"},
+        "comment": {"value": "The comment value"},
+    }
+    record = factory.SubFactory(RecordFactory)
 
 
 class AnnotationFactory(factory.alchemy.SQLAlchemyModelFactory):

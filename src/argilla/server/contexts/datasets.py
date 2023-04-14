@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from typing import List, Optional
 from uuid import UUID
 
 from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
@@ -98,6 +98,10 @@ def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
+def list_records(db: Session, dataset: Dataset, limit: int, offset: int = 0):
+    return db.query(Record).filter_by(dataset_id=dataset.id).limit(limit).offset(offset).all()
+
+
 def create_records(db: Session, dataset: Dataset, user: User, records_create: RecordsCreate):
     # return [create_record(db, dataset, record_create) for record_create in records_create.items]
 
@@ -108,22 +112,22 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
     if not dataset.is_ready:
         raise ValueError("Records cannot be created for non published dataset")
 
-    # with db.begin_nested():
+    records = []
     for record_create in records_create.items:
-        user_response = None
+        responses = []
         if record_create.response:
-            user_response = Response(values={k: v.dict() for k, v in record_create.response.items()}, user_id=user.id)
+            responses.append(Response(values={k: v.dict() for k, v in record_create.response.items()}, user_id=user.id))
 
-        db.add(
+        records.append(
             Record(
                 fields=record_create.fields,
-                # annotations=record_create.annotations,
                 external_id=record_create.external_id,
                 dataset_id=dataset.id,
-                responses=user_response,
+                responses=responses,
             )
         )
 
+    db.add_all(records)
     db.commit()
     # try:
     #     with db.begin_nested():
@@ -131,9 +135,21 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
     # except exc.IntegrityError:
 
 
-def update_response(db: Session, record: Record, response: ResponseSchema):
-    db.query(Response)
-    return None
+def create_or_update_response(db: Session, record: Record, user: User, response_create_or_update: ResponseSchema):
+    response = db.query(Response).filter_by(record_id=record.id, user_id=user.id).first()
+
+    values = {k: v.dict() for k, v in response_create_or_update.items()}
+
+    if response:
+        response.values = values
+    else:
+        response = Response(record_id=record.id, user_id=user.id, values=values)
+        db.add(response)
+
+    db.commit()
+    db.refresh(response)
+
+    return response
 
 
 def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):

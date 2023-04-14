@@ -11,7 +11,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import json
+from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
@@ -31,44 +32,43 @@ Annotation = Dict[str, AnnotationAnswer]
 Prediction = Dict[str, PredictionAnswer]
 
 
-class ValidatedAnnotation(BaseModel):
-    reviewer: str
-    annotation: Annotation
+class ResponseItem(BaseModel):
+    value: Any
+
+
+Response = Dict[constr(regex=r"^[a-z\d_-]+$"), ResponseItem]
 
 
 class Record(BaseModel):
     id: UUID
 
     fields: Dict[str, Any]
-
-    annotations: Optional[Dict[str, Annotation]]
-    predictions: Optional[Dict[str, Prediction]]
+    responses: Optional[Dict[str, Response]]
 
     metadata: Optional[Dict[str, Any]]
     vectors: Optional[Dict[str, List[float]]]
 
-    validated_annotation: Optional[ValidatedAnnotation]
-
-
-class Answer(BaseModel):
-    value: Any
-
-
-class Suggest(BaseModel):
-    value: Any
-    score: float
-
-
-Response = Dict[constr(regex=r"^[a-z\d_-]+$"), Answer]
-Suggestion = Dict[constr(regex=r"^[a-z\d_-]+$"), Suggest]
+    class Config:
+        orm_mode = True
 
 
 class RecordCreate(BaseModel):
     fields: Dict[str, Any]
     external_id: Optional[str]
     response: Optional[Response]
-    suggestion: Optional[Suggestion]
 
 
 class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=1, max_items=1000)
+
+
+class RecordInclude(str, Enum):
+    responses = "responses"
+    suggestions = "suggestions"
+    vectors = "vectors"
+    metadata = "metadata"
+
+
+class RecordsList(BaseModel):
+    total: int
+    items: List[Record]

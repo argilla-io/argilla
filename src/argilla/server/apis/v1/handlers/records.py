@@ -11,16 +11,22 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
 from argilla.server.policies import RecordPolicyV1, authorize
-from argilla.server.schemas.v1.records import RecordsCreate, Response
+from argilla.server.schemas.v1.records import (
+    Record,
+    RecordInclude,
+    RecordsCreate,
+    RecordsList,
+    Response,
+)
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
@@ -36,6 +42,33 @@ def _get_dataset(db: Session, dataset_id: UUID):
         )
 
     return dataset
+
+
+@router.get("/datasets/{dataset_id}/records", response_model=RecordsList)
+def list_records(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    limit: int = Query(default=50, lte=1000),
+    offset: int = 0,
+    include: Optional[List[RecordInclude]] = Query(None),
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, RecordPolicyV1.get(dataset))
+
+    records = datasets.list_records(db, dataset, limit=limit, offset=offset)
+
+    for record in records:
+        record_schema = Record(id=record.id, fields=record.fields)
+        if RecordInclude.responses in include:
+            # TODO: Move this to context, please
+            response = db.query(Response).filter_by(record_id=record.id, user_id=current_user.id).first()
+            if response:
+                record_schema.responses = {current_user.username: response.values}
+
+    return RecordsList(total=0, items=records)
 
 
 @router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
@@ -69,5 +102,6 @@ def update_record_responses(
         )
 
     authorize(current_user, RecordPolicyV1.update_response(record))
+    datasets.create_or_update_response(db, record, current_user, response_create_or_update=response)
 
-    datasets.update_response(db, record, response)
+    return response
