@@ -2,9 +2,10 @@
   <div class="sidebar__container">
     <SidebarFeedbackTaskPanel
       :visible-panel="currentMetric"
-      :sidebar-items="sidebarItems"
       @close-panel="closePanel"
-    />
+    >
+      <component v-if="getProgressComponentName" :is="getProgressComponentName"
+    /></SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
       @on-click-sidebar-action="onClickSidebarAction"
       :sidebar-items="sidebarItems"
@@ -20,6 +21,14 @@ export default {
     currentMetric: null,
     currentMode: "annotate",
   }),
+  computed: {
+    getProgressComponentName() {
+      return (
+        this.sidebarItems.find((item) => item.id === this.currentMetric)
+          ?.component || null
+      );
+    },
+  },
   created() {
     this.sidebarItems = [
       {
