@@ -490,7 +490,9 @@ class DatasetBase:
                         f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
                     )
         else:
-            raise NotImplementedError(f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}")
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
+            )
 
     @requires_version("spacy")
     def _prepare_for_training_with_spacy(

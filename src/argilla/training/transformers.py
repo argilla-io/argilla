@@ -98,6 +98,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             columns_mapping = {"text": "text", "label": "binarized_label"}
             if self._multi_label:
                 self._train_dataset = _apply_column_mapping(self._train_dataset, columns_mapping)
+
                 if self._eval_dataset is not None:
                     self._eval_dataset = _apply_column_mapping(self._eval_dataset, columns_mapping)
 
@@ -184,12 +185,13 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         )
 
         def text_classification_preprocess_function(examples):
-            tokens = self._transformers_tokenizer(examples["text"], truncation=True, padding="max_length")
+            tokens = self._transformers_tokenizer(examples["text"], padding=True, truncation=True)
+
             return tokens
 
         def token_classification_preprocess_function(examples):
             tokenized_inputs = self._transformers_tokenizer(
-                examples["tokens"], truncation=True, padding="max_length", is_split_into_words=True
+                examples["tokens"], padding=True, is_split_into_words=True, truncation=True
             )
 
             labels = []
@@ -216,9 +218,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             self._data_collator = None
         elif self._record_class == rg.TokenClassificationRecord:
             preprocess_function = token_classification_preprocess_function
-            self._data_collator = DataCollatorForTokenClassification(
-                tokenizer=self._transformers_tokenizer, max_length=512
-            )
+            self._data_collator = DataCollatorForTokenClassification(tokenizer=self._transformers_tokenizer)
         else:
             raise NotImplementedError("")
 
@@ -239,7 +239,6 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
             def compute_metrics_text_classification_multi_label(eval_pred):
                 logits, labels = eval_pred
-
                 # apply sigmoid
                 predictions = (1.0 / (1 + np.exp(-logits))) > 0.5
 
@@ -302,10 +301,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         )
 
         # check required path argument
-        if output_dir is not None:
-            self.trainer_kwargs["output_dir"] = output_dir
-        else:
-            raise ValueError("You must specify a path to save the model to use `trainer.train(path=<my_path>).")
+        self.trainer_kwargs["output_dir"] = output_dir
 
         # prepare data
         self.init_model(new=True)
