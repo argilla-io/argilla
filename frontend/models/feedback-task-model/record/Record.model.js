@@ -4,7 +4,6 @@ import { RecordResponse as RecordResponseModel } from "../record-response/Record
 
 class Record extends Model {
   static entity = "records";
-  static primaryKey = ["record_id", "dataset_id"];
 
   static fields() {
     return {
