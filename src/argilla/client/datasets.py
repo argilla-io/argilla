@@ -1302,7 +1302,7 @@ Dataset = Union[DatasetForTextClassification, DatasetForTokenClassification, Dat
 def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType], **kwargs) -> Dataset:
     """Reads a datasets Dataset and returns a argilla Dataset
 
-    Columns not supported by the :module:`Record <argilla.client.models>` instance corresponding
+    Columns not supported by the :mod:`Record <argilla.client.models>` instance corresponding
     with the task are ignored.
 
     Args:
@@ -1362,7 +1362,7 @@ def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType], **kwa
 def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
     """Reads a pandas DataFrame and returns a argilla Dataset
 
-    Columns not supported by the :module:`Record <argilla.client.models>` instance corresponding
+    Columns not supported by the :mod:`Record <argilla.client.models>` instance corresponding
     with the task are ignored.
 
     Args:
