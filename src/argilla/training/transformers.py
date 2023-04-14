@@ -55,8 +55,6 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             self.device = "mps"
         elif torch.cuda.is_available():
             self.device = "cuda"
-        else:
-            self.device = "cpu"
 
         if self._seed is None:
             self._seed = 42
@@ -299,7 +297,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             raise NotImplementedError("Text2Text is not implemented.")
         return func
 
-    def train(self, output_dir: str = None):
+    def train(self, output_dir: str):
         """
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
         the model, and then train the model

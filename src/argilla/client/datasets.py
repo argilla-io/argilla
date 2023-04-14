@@ -488,7 +488,7 @@ class DatasetBase:
                     return self._prepare_for_training_with_openai(records=shuffled_records)
                 else:
                     raise NotImplementedError(
-                        f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}"
+                        f"Framework {framework} is not supported. Choose from: {list(Framework)}"
                     )
         else:
             raise NotImplementedError(f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}")
@@ -900,7 +900,7 @@ class DatasetForTextClassification(DatasetBase):
         self.__all_labels__()  # verify that all labels are strings
 
         if len(self._records) <= len(self._SETTINGS.label_schema) * 100:
-            _LOGGER.warning("OpenAI recommends at least 100 examples for training a classification model.")
+            _LOGGER.warning("OpenAI recommends at least 100 examples per class for training a classification model.")
 
         jsonl = []
         for rec in self._records:
@@ -941,7 +941,7 @@ class DatasetForTextClassification(DatasetBase):
         all_labels.sort()
 
         _LOGGER.warning(
-            f"""No label schema provided. Using all_labels: TextClassificationSettings({all_labels}). We recommend providing a `TextClassificationSettings()` or setting it `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
+            f"""No label schema provided. Using all_labels: TextClassificationSettings({all_labels}). We recommend providing a `TextClassificationSettings()` or setting `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
         )
         return TextClassificationSettings(all_labels)
 
@@ -1219,7 +1219,7 @@ class DatasetForTokenClassification(DatasetBase):
         all_labels = list(all_labels)
         all_labels.sort()
         _LOGGER.warning(
-            f"""No label schema provided. Using all_labels: TokenClassificationSettings({all_labels}). We recommend providing a `TokenClassificationSettings()` or setting it `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
+            f"""No label schema provided. Using all_labels: TokenClassificationSettings({all_labels}). We recommend providing a `TokenClassificationSettings()` or setting `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
         )
         return TokenClassificationSettings(all_labels)
 
