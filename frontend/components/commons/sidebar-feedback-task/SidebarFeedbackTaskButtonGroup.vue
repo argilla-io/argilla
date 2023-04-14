@@ -17,7 +17,7 @@
 
 <template>
   <span class="sidebar__info">
-    <p>{{ groupName }}</p>
+    <p class="sidebar__info__title">{{ groupName }}</p>
     <SidebarFeedbackTaskButton
       v-for="{ id, icon, tooltip, action, type } in groupItems"
       :id="id"
@@ -62,7 +62,7 @@ export default {
 .sidebar {
   &__info {
     position: relative;
-    p {
+    &__title {
       text-align: center;
       font-weight: 600;
       @include font-size(12px);
