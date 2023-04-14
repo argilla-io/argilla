@@ -15,8 +15,9 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
+import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Annotation, Dataset, DatasetStatus
+from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
 from argilla.server.schemas.v1.datasets import (
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
@@ -29,6 +30,7 @@ from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
     RatingAnnotationFactory,
+    RecordFactory,
     TextAnnotationFactory,
     WorkspaceFactory,
 )
@@ -91,6 +93,80 @@ def test_list_datasets_as_annotator(client: TestClient, db: Session):
 
     assert response.status_code == 200
     assert [dataset["name"] for dataset in response.json()] == ["dataset-a", "dataset-b"]
+
+
+def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+    record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
+    record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "id": str(record_a.id),
+                "fields": {"record_a": "value_a"},
+                "external_id": record_a.external_id,
+                "dataset_id": str(dataset.id),
+                "inserted_at": record_a.inserted_at.isoformat(),
+                "updated_at": record_a.updated_at.isoformat(),
+            },
+            {
+                "id": str(record_b.id),
+                "fields": {"record_b": "value_b"},
+                "external_id": record_b.external_id,
+                "dataset_id": str(dataset.id),
+                "inserted_at": record_b.inserted_at.isoformat(),
+                "updated_at": record_b.updated_at.isoformat(),
+            },
+            {
+                "id": str(record_c.id),
+                "fields": {"record_c": "value_c"},
+                "external_id": record_c.external_id,
+                "dataset_id": str(dataset.id),
+                "inserted_at": record_c.inserted_at.isoformat(),
+                "updated_at": record_c.updated_at.isoformat(),
+            },
+        ]
+    }
+
+
+@pytest.mark.skip(reason="todo")
+def test_list_dataset_records_with_offset(client: TestClient, admin_auth_header: dict):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_list_dataset_records_with_limit(client: TestClient, admin_auth_header: dict):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_auth_header: dict):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_list_dataset_records_without_authentication(client: TestClient):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_list_dataset_records_as_annotator(client: TestClient, db: Session):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_list_dataset_records_as_annotator_from_different_workspace(client: TestClient, db: Session):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_list_dataset_records_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+    pass
 
 
 def test_get_dataset(client: TestClient, admin_auth_header: dict):
@@ -570,6 +646,76 @@ def test_create_dataset_rating_annotation_with_invalid_settings_options_values(
 
     assert response.status_code == 422
     assert db.query(Annotation).count() == 0
+
+
+def test_create_dataset_records(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "external_id": "1",
+                "response": {
+                    "values": {"output_ok": "yes"},
+                },
+            },
+            {
+                "fields": {"input": "Say Hello", "output": "Hi"},
+                "external_id": "2",
+                "response": {
+                    "values": {"output_ok": "no"},
+                },
+            },
+            {
+                "fields": {"input": "Say Hello", "output": "Hello World"},
+                "external_id": "3",
+                "response": {
+                    "values": {"output_ok": "no"},
+                },
+            },
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 204
+    assert db.query(Record).count() == 3
+    assert db.query(Response).count() == 3
+
+
+@pytest.mark.skip(reason="todo")
+def test_create_dataset_records_without_authentication(client: TestClient, db: Session):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_create_dataset_records_with_less_items_than_allowed(client: TestClient, db: Session, admin_auth_header: dict):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_create_dataset_records_with_more_items_than_allowed(client: TestClient, db: Session, admin_auth_header: dict):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_create_dataset_records_with_duplicated_external_id(client: TestClient, db: Session, admin_auth_header: dict):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_create_dataset_records_with_invalid_records(client: TestClient, db: Session, admin_auth_header: dict):
+    pass
 
 
 def test_publish_dataset(client: TestClient, db: Session, admin_auth_header: dict):

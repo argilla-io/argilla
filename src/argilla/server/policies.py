@@ -140,6 +140,10 @@ class DatasetPolicyV1:
         return actor.is_admin
 
     @classmethod
+    def create_records(cls, actor: User) -> bool:
+        return actor.is_admin
+
+    @classmethod
     def publish(cls, actor: User) -> bool:
         return actor.is_admin
 
@@ -155,10 +159,6 @@ class AnnotationPolicyV1:
 
 
 class RecordPolicyV1:
-    @classmethod
-    def create(cls, actor: User) -> bool:
-        return actor.is_admin
-
     @classmethod
     def update_response(cls, record: Record) -> PolicyAction:
         return lambda actor: (
