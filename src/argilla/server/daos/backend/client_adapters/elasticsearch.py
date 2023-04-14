@@ -15,22 +15,23 @@
 import dataclasses
 from typing import Any, Dict, Iterable, Optional, Tuple
 
-import elasticsearch
-from elasticsearch import Elasticsearch, NotFoundError, RequestError, helpers
-from elasticsearch.helpers import BulkIndexError
-from packaging.version import parse
+import elasticsearch8
 
 from argilla.server.daos.backend.base import BackendErrorHandler
 from argilla.server.daos.backend.client_adapters.opensearch import OpenSearchClient
 from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 
-ES_CLIENT_VERSION: str = elasticsearch.__versionstr__
+ES_CLIENT_VERSION: str = elasticsearch8.__versionstr__
 
-if parse(elasticsearch.__versionstr__) >= parse("8.0"):
-    from elasticsearch import ApiError, ElasticsearchWarning
-else:
-    from elasticsearch.exceptions import ElasticsearchException as ApiError
-    from elasticsearch.exceptions import ElasticsearchWarning
+from elasticsearch8 import (
+    ApiError,
+    Elasticsearch,
+    ElasticsearchWarning,
+    NotFoundError,
+    RequestError,
+    helpers,
+)
+from elasticsearch8.helpers import BulkIndexError
 
 
 @dataclasses.dataclass
