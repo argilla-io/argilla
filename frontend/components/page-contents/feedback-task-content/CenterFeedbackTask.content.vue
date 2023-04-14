@@ -15,7 +15,7 @@ import {
 } from "@/models/feedback-task-model/global-question/globalQuestion.queries";
 import {
   upsertRecords,
-  getRecordWithFieldsAndResponsesByDatasetId,
+  getRecordWithFieldsByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
 import { getRecordResponsesByRecordId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 
@@ -38,29 +38,8 @@ export default {
       recordOffset: 0,
     };
   },
-  computed: {
-    record() {
-      return getRecordWithFieldsAndResponsesByDatasetId(
-        this.datasetId,
-        1,
-        this.recordOffset
-      );
-    },
-    recordId() {
-      return this.record.id;
-    },
-    recordResponses() {
-      return getRecordResponsesByRecordId(this.recordId);
-    },
-    questions() {
-      return getQuestionsByDatasetId(
-        this.datasetId,
-        this.orderBy?.orderQuestionsBy,
-        this.orderBy?.ascendent
-      );
-    },
-  },
   created() {
+    // TODO - INITIALS records and inputs, will be replaced by API values
     const records = [
       {
         id: "record_1",
@@ -327,17 +306,39 @@ export default {
       },
     ];
 
+    // FORMAT records and questions in good orm shapes
     const formattedRecords = this.factoryRecordsForOrm(records);
-    const formattedInputs = this.factoryInputsForOrm(inputs);
+    const formattedQuestions = this.factoryQuestionsForOrm(inputs);
 
+    // UPSERT records and questions in ORM
     upsertRecords(formattedRecords);
-    upsertGlobalQuestions(formattedInputs);
-    const newOutputsByQuestion = this.factoryNewOutputsByQuestion();
+    upsertGlobalQuestions(formattedQuestions);
 
-    this.questionsWithRecordAnswers =
-      this.factoryQuestionsWithRecordAnswer(newOutputsByQuestion);
+    // RETRIEVES records from ORM
+    this.record = getRecordWithFieldsByDatasetId(
+      this.datasetId,
+      1,
+      this.recordOffset
+    );
+
+    this.questionsWithRecordAnswers = null;
+    if (this.record) {
+      this.recordResponses = getRecordResponsesByRecordId(this.record.id);
+
+      // COMPUTE QUESTIONS
+      // INIT questions with record response answers
+      this.questions = getQuestionsByDatasetId(
+        this.datasetId,
+        this.orderBy?.orderQuestionsBy,
+        this.orderBy?.ascendent
+      );
+
+      // COMPUTE questions with responses from record
+      const newOutputsByQuestion = this.factoryNewOutputsByQuestion();
+      this.questionsWithRecordAnswers =
+        this.factoryQuestionsWithRecordAnswer(newOutputsByQuestion);
+    }
   },
-  beforeMount() {},
   methods: {
     factoryQuestionsWithRecordAnswer(newOutputsByQuestion) {
       const questionsWithRecordAnswers = this.questions.map((question) => {
@@ -387,15 +388,15 @@ export default {
         };
       });
     },
-    factoryInputsForOrm(inputs) {
-      return inputs.map((input, index) => {
+    factoryQuestionsForOrm(initialQuestions) {
+      return initialQuestions.map((question, index) => {
         return {
-          ...input,
+          ...question,
           dataset_id: this.datasetId,
           order: index,
-          component_type: input.componentType,
-          is_required: input.required,
-          tooltip_message: input.tooltipMessage,
+          component_type: question.componentType,
+          is_required: question.required,
+          tooltip_message: question.tooltipMessage,
         };
       });
     },
