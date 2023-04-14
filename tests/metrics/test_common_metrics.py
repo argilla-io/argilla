@@ -23,9 +23,8 @@ def gutenberg_spacy_ner(mocked_client):
     from datasets import load_dataset
 
     dataset = "gutenberg_spacy_ner"
-    # TODO(@frascuchon): Move dataset to new organization
     dataset_ds = load_dataset(
-        "rubrix/gutenberg_spacy-ner",
+        "argilla/gutenberg_spacy-ner",
         split="train",
     )
 
