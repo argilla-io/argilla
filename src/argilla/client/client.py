@@ -473,8 +473,8 @@ class Argilla:
         sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         batch_size: int = 250,
-        exclude_vectors: bool = False,
-        exclude_metrics: bool = False,
+        include_vectors: bool = True,
+        include_metrics: bool = True,
         as_pandas=None,
     ) -> Dataset:
         """Loads a argilla dataset.
@@ -492,10 +492,10 @@ class Argilla:
                 can be used to load using batches.
             batch_size: If provided, load `batch_size` samples per request. A lower batch
                 size may help avoid timeouts.
-            exclude_vectors: When set to `True`, indicates that the record data will be retrieved excluding its vectors,
-                if any. By default, this parameter is set to `False`, meaning that vector data will be included.
-            exclude_metrics: When set to `True`, indicates that the record data will be retrieved excluding its metrics.
-                By default, this parameter is set to `False`, meaning that metrics will be included.
+            include_vectors: When set to `False`, indicates that the record data will be retrieved excluding its vectors,
+                if any. By default, this parameter is set to `True`, meaning that vector data will be included.
+            include_metrics: When set to `False`, indicates that the record data will be retrieved excluding its metrics.
+                By default, this parameter is set to `True`, meaning that metrics will be included.
             as_pandas: DEPRECATED! To get a pandas DataFrame do
                 ``rg.load('my_dataset').to_pandas()``.
 
@@ -529,8 +529,8 @@ class Argilla:
             sort=sort,
             id_from=id_from,
             batch_size=batch_size,
-            exclude_vectors=exclude_vectors,
-            exclude_metrics=exclude_metrics,
+            include_vectors=include_vectors,
+            include_metrics=include_metrics,
         )
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
@@ -635,8 +635,8 @@ class Argilla:
         sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         batch_size: int = 250,
-        exclude_vectors: bool = False,
-        exclude_metrics: bool = False,
+        include_vectors: bool = True,
+        include_metrics: bool = True,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
         task = dataset.task
@@ -659,7 +659,7 @@ class Argilla:
             if sort is not None:
                 _LOGGER.warning("Results are sorted by vector similarity, so 'sort' parameter is ignored.")
 
-            if exclude_metrics or exclude_vectors:
+            if not (include_metrics and include_vectors):
                 _LOGGER.warning(
                     "Metrics and vectors cannot be excluded when using vector search. These parameters will be ignored."
                 )
@@ -690,10 +690,10 @@ class Argilla:
             "tokens",
         }
 
-        if not exclude_vectors:
+        if include_vectors:
             all_supported_fields.add("vectors.*")
 
-        if not exclude_metrics:
+        if include_metrics:
             all_supported_fields.add("metrics.*")
 
         records = self.datasets.scan(

@@ -223,8 +223,8 @@ def load(
     sort: Optional[List[Tuple[str, str]]] = None,
     id_from: Optional[str] = None,
     batch_size: int = 250,
-    exclude_vectors: bool = False,
-    exclude_metrics: bool = False,
+    include_vectors: bool = True,
+    include_metrics: bool = True,
     as_pandas=None,
 ) -> Dataset:
     """Loads a argilla dataset.
@@ -244,10 +244,10 @@ def load(
             can be used to load using batches.
         batch_size: If provided, load `batch_size` samples per request. A lower batch
             size may help avoid timeouts.
-        exclude_vectors: When set to `True`, indicates that records will be retrieved excluding their vectors,
-            if any. By default, this parameter is set to `False`, meaning that vectors will be included.
-        exclude_metrics: When set to `True`, indicates that records will be retrieved excluding their metrics.
-            By default, this parameter is set to `False`, meaning that metrics will be included.
+        include_vectors: When set to `False`, indicates that records will be retrieved excluding their vectors,
+            if any. By default, this parameter is set to `True`, meaning that vectors will be included.
+        include_metrics: When set to `False`, indicates that records will be retrieved excluding their metrics.
+            By default, this parameter is set to `True`, meaning that metrics will be included.
         as_pandas: DEPRECATED! To get a pandas DataFrame do
             ``rg.load('my_dataset').to_pandas()``.
 
@@ -283,8 +283,8 @@ def load(
         sort=sort,
         id_from=id_from,
         batch_size=batch_size,
-        exclude_metrics=exclude_metrics,
-        exclude_vectors=exclude_vectors,
+        include_metrics=include_metrics,
+        include_vectors=include_vectors,
         as_pandas=as_pandas,
     )
 
