@@ -490,14 +490,14 @@ class Argilla:
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
-            as_pandas: DEPRECATED! To get a pandas DataFrame do
-                ``rg.load('my_dataset').to_pandas()``.
             batch_size: If provided, load `batch_size` samples per request. A lower batch
                 size may help avoid timeouts.
             exclude_vectors: When set to `True`, indicates that the record data will be retrieved excluding its vectors,
                 if any. By default, this parameter is set to `False`, meaning that vector data will be included.
             exclude_metrics: When set to `True`, indicates that the record data will be retrieved excluding its metrics.
                 By default, this parameter is set to `False`, meaning that metrics will be included.
+            as_pandas: DEPRECATED! To get a pandas DataFrame do
+                ``rg.load('my_dataset').to_pandas()``.
 
 
         Returns:
@@ -661,7 +661,7 @@ class Argilla:
 
             if exclude_metrics or exclude_vectors:
                 _LOGGER.warning(
-                    "Metrics and vectors cannot be excluded when using vector search. Those params will be ignored"
+                    "Metrics and vectors cannot be excluded when using vector search. These parameters will be ignored."
                 )
 
             vector_search = VectorSearch(name=vector[0], value=vector[1])
