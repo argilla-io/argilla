@@ -2,11 +2,11 @@ import { Model } from "@vuex-orm/core";
 
 class DatasetQuestion extends Model {
   static entity = "datasetQuestions";
-  static primaryKey = ["component_type", "question"];
 
   static fields() {
     return {
       id: this.uid(),
+      name: this.attr(null),
       dataset_id: this.attr(null),
       order: this.number(0),
       question: this.string(""),

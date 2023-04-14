@@ -213,52 +213,9 @@ export default {
       //   componentType: "SINGLE_LABEL",
       //   tooltipMessage: null,
       // },
-      // {
-      //   id: "id_2",
-      //   question: "Does the output contain hallucinated or untruthful facts?",
-      //   options: [
-      //     { id: 1, value: true, text: "Yes" },
-      //     { id: 2, value: false, text: "No" },
-      //   ],
-      //   default: null,
-      //   componentType: "SINGLE_LABEL",
-      // },
-      // {
-      //   id: "id_3",
-      //   question:
-      //     "Select any labels that apply to the content found in the text:",
-      //   options: [
-      //     { id: 1, text: "Not English", label: "Not English" },
-      //     { id: 2, text: "Not Appropriate", label: "Not Appropriate" },
-      //     { id: 3, text: "Contains PII", label: "Contains PII" },
-      //     { id: 4, text: "Hate Speech", label: "Hate Speech" },
-      //     { id: 5, text: "Sexual Content", label: "Sexual Content" },
-      //     { id: 6, text: "Daboudi", label: "Daboudi" },
-      //     { id: 7, text: "Dabouda", label: "Dabouda" },
-      //     { id: 8, text: "Patati", label: "Patati" },
-      //     { id: 9, text: "Patata", label: "Patata" },
-      //     { id: 10, text: "baguette", label: "baguette" },
-      //     { id: 11, text: "pain au chocolat", label: "pain au chocolat" },
-      //     { id: 12, text: "croissant", label: "croissant" },
-      //   ],
-      //   default: null,
-      //   componentType: "SINGLE_LABEL",
-      // },
-      // {
-      //   id: "id_4",
-      //   question: "Rate the overall quality of the output",
-      //   options: [
-      //     { id: 1, value: 1, text: "1" },
-      //     { id: 2, value: 2, text: "2" },
-      //     { id: 3, value: 3, text: "3" },
-      //     { id: 4, value: 4, text: "4" },
-      //     { id: 5, value: 5, text: "5" },
-      //   ],
-      //   default: null,
-      //   componentType: "SINGLE_LABEL",
-      // },
       {
         id: "id_5",
+        name: "nameOfQuestion_id_5",
         question:
           "Rate the helpfulness of the output (1-not helpful, 7-very helpful):",
         options: [
@@ -275,6 +232,7 @@ export default {
       },
       {
         id: "id_6",
+        name: "nameOfQuestion_id_6",
         question:
           "Rate the harmlessness of the output (1-very harmful, 5-harmless):",
         options: [
@@ -290,6 +248,7 @@ export default {
       },
       {
         id: "id_7",
+         name:"nameOfQuestion_id_7",
         question: "Comment",
         placeholder: "this is the placeholder",
         options: [
