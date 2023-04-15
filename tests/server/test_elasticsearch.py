@@ -16,7 +16,7 @@ import random
 
 import pytest
 from argilla.server.elasticsearch import ElasticSearchEngine
-from elasticsearch import BadRequestError, Elasticsearch
+from elasticsearch8 import BadRequestError, Elasticsearch
 from sqlalchemy.orm import Session
 
 from tests.conftest import is_running_elasticsearch
