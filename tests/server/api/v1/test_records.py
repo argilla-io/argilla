@@ -15,11 +15,11 @@
 from datetime import datetime
 from uuid import UUID
 
-from argilla.server.models import Response
+from argilla.server.models import Response, User
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from tests.factories import RecordFactory
+from tests.factories import RecordFactory, ResponseFactory
 
 
 # TODO: Rest of tests for create record reponse
@@ -48,3 +48,19 @@ def test_create_record_response(client: TestClient, db: Session, admin_auth_head
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
+
+
+def test_create_record_response_already_created(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    record = RecordFactory.create()
+    ResponseFactory.create(record=record, user=admin)
+    response_json = {
+        "values": {
+            "input_ok": "yes",
+            "output_ok": "yes",
+        },
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 409
+    assert db.query(Response).count() == 1

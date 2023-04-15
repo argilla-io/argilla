@@ -26,7 +26,6 @@ from argilla.server.security import auth
 router = APIRouter(tags=["records"])
 
 
-# TODO: Returns 409 when a response exists for the same record and user?
 @router.post("/records/{record_id}/responses", status_code=status.HTTP_201_CREATED, response_model=Response)
 def create_record_response(
     *,
@@ -35,6 +34,8 @@ def create_record_response(
     response_create: ResponseCreate,
     current_user: User = Security(auth.get_current_user),
 ):
+    # TODO: Add authorize
+
     record = datasets.get_record_by_id(db, record_id)
     if not record:
         raise HTTPException(
@@ -42,6 +43,10 @@ def create_record_response(
             detail=f"Record with id `{record_id}` not found",
         )
 
-    # TODO: Add authorize
+    if datasets.get_response_by_record_id_and_user_id(db, record_id, current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Response already exists for record with id `{record_id}` and by user with id `{current_user.id}`",
+        )
 
     return datasets.create_response(db, record, current_user, response_create)
