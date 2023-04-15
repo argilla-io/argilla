@@ -599,6 +599,7 @@ def test_publish_dataset(
     assert elasticsearch.indices.exists(index=f"rg.{dataset.id}")
 
 
+@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
 def test_publish_dataset_with_error_on_index_creation(
     client: TestClient,
     db: Session,
