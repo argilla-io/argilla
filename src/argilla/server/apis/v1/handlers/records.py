@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
 from argilla.server.models import User
+from argilla.server.policies import RecordPolicyV1, authorize
 from argilla.server.schemas.v1.records import Response, ResponseCreate
 from argilla.server.security import auth
 
@@ -34,14 +35,14 @@ def create_record_response(
     response_create: ResponseCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    # TODO: Add authorize
-
     record = datasets.get_record_by_id(db, record_id)
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Record with id `{record_id}` not found",
         )
+
+    authorize(current_user, RecordPolicyV1.create_response(record))
 
     if datasets.get_response_by_record_id_and_user_id(db, record_id, current_user.id):
         raise HTTPException(

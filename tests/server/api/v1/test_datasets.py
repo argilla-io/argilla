@@ -694,7 +694,7 @@ def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
 
 
 @pytest.mark.skip(reason="todo")
-def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_dataset_records_with_non_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
     pass
 
 
@@ -715,6 +715,11 @@ def test_create_dataset_records_with_duplicated_external_id(client: TestClient, 
 
 @pytest.mark.skip(reason="todo")
 def test_create_dataset_records_with_invalid_records(client: TestClient, db: Session, admin_auth_header: dict):
+    pass
+
+
+@pytest.mark.skip(reason="todo")
+def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
     pass
 
 

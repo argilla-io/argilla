@@ -13,16 +13,21 @@
 #  limitations under the License.
 
 from datetime import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
+from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import Response, User
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from tests.factories import RecordFactory, ResponseFactory
+from tests.factories import (
+    AnnotatorFactory,
+    RecordFactory,
+    ResponseFactory,
+    WorkspaceFactory,
+)
 
 
-# TODO: Rest of tests for create record reponse
 def test_create_record_response(client: TestClient, db: Session, admin_auth_header: dict):
     record = RecordFactory.create()
     response_json = {
@@ -50,6 +55,57 @@ def test_create_record_response(client: TestClient, db: Session, admin_auth_head
     }
 
 
+def test_create_record_response_without_authentication(client: TestClient, db: Session):
+    record = RecordFactory.create()
+    response_json = {
+        "values": {
+            "input_ok": "yes",
+            "output_ok": "yes",
+        },
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", json=response_json)
+
+    assert response.status_code == 401
+    assert db.query(Response).count() == 0
+
+
+def test_create_record_response_as_annotator(client: TestClient, db: Session):
+    record = RecordFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[record.dataset.workspace])
+    response_json = {
+        "values": {
+            "input_ok": "yes",
+            "output_ok": "yes",
+        },
+    }
+
+    response = client.post(
+        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=response_json
+    )
+
+    assert response.status_code == 201
+    assert db.query(Response).count() == 1
+
+
+def test_create_record_response_as_annotator_from_different_workspace(client: TestClient, db: Session):
+    record = RecordFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    response_json = {
+        "values": {
+            "input_ok": "yes",
+            "output_ok": "yes",
+        },
+    }
+
+    response = client.post(
+        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=response_json
+    )
+
+    assert response.status_code == 403
+    assert db.query(Response).count() == 0
+
+
 def test_create_record_response_already_created(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
     record = RecordFactory.create()
     ResponseFactory.create(record=record, user=admin)
@@ -64,3 +120,28 @@ def test_create_record_response_already_created(client: TestClient, db: Session,
 
     assert response.status_code == 409
     assert db.query(Response).count() == 1
+
+
+def test_create_record_response_with_invalid_values(client: TestClient, db: Session, admin_auth_header: dict):
+    record = RecordFactory.create()
+    response_json = {"values": "invalid"}
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 422
+    assert db.query(Response).count() == 0
+
+
+def test_create_record_response_with_nonexistent_record_id(client: TestClient, db: Session, admin_auth_header: dict):
+    RecordFactory.create()
+    response_json = {
+        "values": {
+            "input_ok": "yes",
+            "output_ok": "yes",
+        },
+    }
+
+    response = client.post(f"/api/v1/records/{uuid4()}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 404
+    assert db.query(Response).count() == 0
