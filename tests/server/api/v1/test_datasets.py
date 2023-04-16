@@ -31,6 +31,7 @@ from tests.factories import (
     DatasetFactory,
     RatingAnnotationFactory,
     RecordFactory,
+    ResponseFactory,
     TextAnnotationFactory,
     WorkspaceFactory,
 )
@@ -101,6 +102,14 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
+    response_b = ResponseFactory.create(
+        values={
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "false"},
+        },
+        record=record_b,
+    )
+
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header)
 
     assert response.status_code == 200
@@ -110,7 +119,7 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
                 "id": str(record_a.id),
                 "fields": {"record_a": "value_a"},
                 "external_id": record_a.external_id,
-                "dataset_id": str(dataset.id),
+                "responses": [],
                 "inserted_at": record_a.inserted_at.isoformat(),
                 "updated_at": record_a.updated_at.isoformat(),
             },
@@ -118,7 +127,17 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
                 "id": str(record_b.id),
                 "fields": {"record_b": "value_b"},
                 "external_id": record_b.external_id,
-                "dataset_id": str(dataset.id),
+                "responses": [
+                    {
+                        "id": str(response_b.id),
+                        "values": {
+                            "input_ok": {"value": "yes"},
+                            "output_ok": {"value": "false"},
+                        },
+                        "inserted_at": response_b.inserted_at.isoformat(),
+                        "updated_at": response_b.updated_at.isoformat(),
+                    },
+                ],
                 "inserted_at": record_b.inserted_at.isoformat(),
                 "updated_at": record_b.updated_at.isoformat(),
             },
@@ -126,7 +145,7 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
                 "id": str(record_c.id),
                 "fields": {"record_c": "value_c"},
                 "external_id": record_c.external_id,
-                "dataset_id": str(dataset.id),
+                "responses": [],
                 "inserted_at": record_c.inserted_at.isoformat(),
                 "updated_at": record_c.updated_at.isoformat(),
             },

@@ -81,11 +81,21 @@ class AnnotationCreate(BaseModel):
     settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
 
 
+class Response(BaseModel):
+    id: UUID
+    values: Dict[str, Any]
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
 class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
     external_id: Optional[str]
-    dataset_id: UUID  # TODO: Maybe delete this field because we are returning records for a specific dataset (same that with Annotation schema)
+    responses: List[Response]
     inserted_at: datetime
     updated_at: datetime
 

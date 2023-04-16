@@ -23,7 +23,7 @@ from argilla.server.schemas.v1.datasets import (
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.security.model import User
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 
 def get_dataset_by_id(db: Session, dataset_id: UUID):
@@ -118,6 +118,7 @@ def get_record_by_id(db: Session, record_id: UUID):
 def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = 20):
     return (
         db.query(Record)
+        .options(joinedload(Record.responses))
         .filter_by(dataset_id=dataset.id)
         .order_by(Record.inserted_at.asc())
         .offset(offset)
