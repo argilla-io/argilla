@@ -24,6 +24,9 @@ from argilla.server.models import AnnotationType, DatasetStatus
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
 
+RECORDS_CREATE_MIN_ITEMS = 1
+RECORDS_CREATE_MAX_ITEMS = 1000
+
 
 class Dataset(BaseModel):
     id: UUID
@@ -118,5 +121,4 @@ class RecordCreate(BaseModel):
 
 
 class RecordsCreate(BaseModel):
-    # TODO: Set min and max items as constants
-    items: conlist(item_type=RecordCreate, min_items=1, max_items=1000)
+    items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
