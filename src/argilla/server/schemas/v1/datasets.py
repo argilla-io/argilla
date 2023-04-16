@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, conlist
@@ -79,3 +79,34 @@ class AnnotationCreate(BaseModel):
     title: str
     required: Optional[bool]
     settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
+
+
+class Record(BaseModel):
+    id: UUID
+    fields: Dict[str, Any]
+    external_id: Optional[str]
+    dataset_id: UUID  # TODO: Maybe delete this field because we are returning records for a specific dataset (same that with Annotation schema)
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class Records(BaseModel):
+    items: List[Record]
+
+
+class ResponseCreate(BaseModel):
+    values: Dict[str, Any]
+
+
+class RecordCreate(BaseModel):
+    fields: Dict[str, Any]
+    external_id: Optional[str]
+    response: Optional[ResponseCreate]
+
+
+class RecordsCreate(BaseModel):
+    # TODO: Set min and max items as constants
+    items: conlist(item_type=RecordCreate, min_items=1, max_items=1000)

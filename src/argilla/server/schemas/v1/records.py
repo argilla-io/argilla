@@ -12,39 +12,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Dict
 from uuid import UUID
 
 from pydantic import BaseModel
 
 
-class AnnotationAnswer(BaseModel):
-    value: Any
-
-
-class PredictionAnswer(BaseModel):
-    value: Any
-    score: float = 0.0
-
-
-Annotation = Dict[str, AnnotationAnswer]
-Prediction = Dict[str, PredictionAnswer]
-
-
-class ValidatedAnnotation(BaseModel):
-    reviewer: str
-    annotation: Annotation
-
-
-class Record(BaseModel):
+class Response(BaseModel):
     id: UUID
+    values: Dict[str, Any]
+    inserted_at: datetime
+    updated_at: datetime
 
-    fields: Dict[str, Any]
+    class Config:
+        orm_mode = True
 
-    annotations: Optional[Dict[str, Annotation]]
-    predictions: Optional[Dict[str, Prediction]]
 
-    metadata: Optional[Dict[str, Any]]
-    vectors: Optional[Dict[str, List[float]]]
-
-    validated_annotation: Optional[ValidatedAnnotation]
+class ResponseCreate(BaseModel):
+    values: Dict[str, Any]

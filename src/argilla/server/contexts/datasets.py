@@ -11,12 +11,18 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from typing import List, Optional
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
-from argilla.server.models import Annotation, Dataset, DatasetStatus
-from argilla.server.schemas.v1.datasets import AnnotationCreate, DatasetCreate
+from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
+from argilla.server.schemas.v1.datasets import (
+    AnnotationCreate,
+    DatasetCreate,
+    RecordsCreate,
+)
+from argilla.server.schemas.v1.records import ResponseCreate
+from argilla.server.security.model import User
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -109,6 +115,60 @@ def delete_annotation(db: Session, annotation: Annotation):
     db.commit()
 
     return annotation
+
+
+def get_record_by_id(db: Session, record_id: UUID):
+    return db.get(Record, record_id)
+
+
+def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = 20):
+    return (
+        db.query(Record)
+        .filter_by(dataset_id=dataset.id)
+        .order_by(Record.inserted_at.asc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+
+def create_records(db: Session, dataset: Dataset, user: User, records_create: RecordsCreate):
+    if not dataset.is_ready:
+        raise ValueError("Records cannot be created for a non published dataset")
+
+    records = []
+    for record_create in records_create.items:
+        record = Record(
+            fields=record_create.fields,
+            external_id=record_create.external_id,
+            dataset_id=dataset.id,
+        )
+
+        if record_create.response:
+            record.responses = [Response(values=record_create.response.values, user_id=user.id)]
+
+        records.append(record)
+
+    db.add_all(records)
+    db.commit()
+
+
+def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):
+    return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
+
+
+def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):
+    response = Response(
+        values=response_create.values,
+        record_id=record.id,
+        user_id=user.id,
+    )
+
+    db.add(response)
+    db.commit()
+    db.refresh(response)
+
+    return response
 
 
 def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):

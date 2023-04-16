@@ -15,7 +15,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
@@ -27,6 +27,8 @@ from argilla.server.schemas.v1.datasets import (
     AnnotationCreate,
     Dataset,
     DatasetCreate,
+    Records,
+    RecordsCreate,
 )
 from argilla.server.security import auth
 from argilla.server.security.model import User
@@ -59,6 +61,26 @@ def list_datasets(
         return current_user.datasets
 
 
+# TODO: Add changes to support include parameter for relationships.
+# - If current user is not an admin responses should include only the responses of the current user. (add context function)
+# - Add tests for relationships include too.
+# - Add tests for relationships as an annotator and as admin.
+@router.get("/datasets/{dataset_id}/records", response_model=Records)
+def list_dataset_records(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    offset: int = 0,
+    limit: int = Query(default=50, lte=1000),
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return Records(items=datasets.list_records(db, dataset, offset=offset, limit=limit))
+
+
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
 def get_dataset(
     *,
@@ -73,6 +95,8 @@ def get_dataset(
     return dataset
 
 
+# TODO: Change this to list_dataset_annotations and move it before list_dataset_records.
+# - Change tests names too.
 @router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
 def get_dataset_annotations(
     *,
@@ -129,6 +153,22 @@ def create_dataset_annotation(
         return datasets.create_annotation(db, dataset, annotation_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+# TODO: Returns 409 when external_id already exists?
+@router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
+def create_dataset_records(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    records_create: RecordsCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, DatasetPolicyV1.create_records)
+
+    dataset = _get_dataset(db, dataset_id)
+
+    datasets.create_records(db, dataset, current_user, records_create)
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
