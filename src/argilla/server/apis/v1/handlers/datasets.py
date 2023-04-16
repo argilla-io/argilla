@@ -32,6 +32,9 @@ from argilla.server.schemas.v1.datasets import (
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
+LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
+LIST_DATASET_RECORDS_LIMIT_LTE = 1000
+
 router = APIRouter(tags=["datasets"])
 
 
@@ -60,24 +63,23 @@ def list_datasets(
         return current_user.datasets
 
 
-# TODO: Add changes to support include parameter for relationships.
-# - If current user is not an admin responses should include only the responses of the current user. (add context function)
-# - Add tests for relationships include too.
-# - Add tests for relationships as an annotator and as admin.
 @router.get("/datasets/{dataset_id}/records", response_model=Records)
 def list_dataset_records(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
     offset: int = 0,
-    limit: int = Query(default=50, lte=1000),
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = _get_dataset(db, dataset_id)
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    return Records(items=datasets.list_records(db, dataset, offset=offset, limit=limit))
+    if current_user.is_admin:
+        return Records(items=datasets.list_records(db, dataset, offset=offset, limit=limit))
+    else:
+        return Records(items=datasets.list_records_for_user(db, dataset, current_user, offset=offset, limit=limit))
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
