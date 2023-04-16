@@ -44,9 +44,6 @@ class ElasticSearchEngine:
         index_name = f"rg.{dataset.id}"
         await self.client.indices.create(index=index_name, mappings=mappings)
 
-    def close(self):
-        self.client.close()
-
     def _field_mapping_for_annotation(self, annotation_task: Annotation):
         settings_type = annotation_task.settings.get("type")
 
@@ -60,7 +57,7 @@ class ElasticSearchEngine:
             raise ValueError(f"ES mappings for Annotation of type {settings_type} cannot be generated")
 
 
-def get_engine():
+async def get_engine():
     config = dict(
         hosts=settings.elasticsearch,
         verify_certs=settings.elasticsearch_ssl_verify,
@@ -72,4 +69,4 @@ def get_engine():
     try:
         yield search_engine
     finally:
-        search_engine.close()
+        await search_engine.client.close()

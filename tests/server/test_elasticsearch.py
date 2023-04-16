@@ -15,8 +15,9 @@
 import random
 
 import pytest
+import pytest_asyncio
 from argilla.server.elasticsearch import ElasticSearchEngine
-from elasticsearch import BadRequestError, Elasticsearch
+from elasticsearch8 import BadRequestError, Elasticsearch
 from sqlalchemy.orm import Session
 
 from tests.conftest import is_running_elasticsearch
@@ -27,14 +28,17 @@ from tests.factories import (
 )
 
 
-@pytest.fixture(scope="session")
-def search_engine(es_config):
-    return ElasticSearchEngine(config=es_config)
+@pytest_asyncio.fixture()
+async def search_engine(es_config):
+    engine = ElasticSearchEngine(config=es_config)
+    yield engine
+
+    await engine.client.close()
 
 
 @pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
 @pytest.mark.asyncio
-class ElasticSearchEngineTestSuite:
+class TestSuiteElasticSearchEngine:
     async def test_create_index_for_dataset(self, search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch):
         dataset = DatasetFactory.create()
         await search_engine.create_index(dataset)
