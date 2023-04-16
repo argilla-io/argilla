@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+###  Added
+
+- `rg.load` accepts `exclude_vectors` and `exclude_metrics` when loading data. Closes [#2398](https://github.com/argilla-io/argilla/issues/2398)
+
 ### Changed
 
 - Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
@@ -93,12 +97,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The record inputs are sorted alphabetically in UI by default. [#2581](https://github.com/argilla-io/argilla/pull/2581)
 - The record inputs are fully visible when pagination size is one and the height of collapsed area size is bigger for laptop screen. [#2587](https://github.com/argilla-io/argilla/pull/2587/files)
 
-
-
 ### Fixes
 
 - Allow URL to be clickable in Jupyter notebook again. Closes [#2527](https://github.com/argilla-io/argilla/issues/2527)
-
 
 ### Removed
 
