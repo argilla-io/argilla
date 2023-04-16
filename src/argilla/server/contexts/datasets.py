@@ -132,7 +132,9 @@ def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = 20
     )
 
 
-def create_records(db: Session, dataset: Dataset, user: User, records_create: RecordsCreate):
+async def create_records(
+    db: Session, search_engine: ElasticSearchEngine, dataset: Dataset, user: User, records_create: RecordsCreate
+):
     if not dataset.is_ready:
         raise ValueError("Records cannot be created for a non published dataset")
 
@@ -149,8 +151,17 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
 
         records.append(record)
 
-    db.add_all(records)
-    db.commit()
+    try:
+        db.add_all(records)
+        db.commit()
+
+        for record in records:
+            db.expire(record)
+
+        await search_engine.add_records(dataset, records)
+    except:
+        db.rollback()
+        raise
 
 
 def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):

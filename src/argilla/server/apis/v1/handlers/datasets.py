@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
 from argilla.server.elasticsearch import ElasticSearchEngine, get_engine
+from argilla.server.models import User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
     Annotation,
@@ -31,7 +32,6 @@ from argilla.server.schemas.v1.datasets import (
     RecordsCreate,
 )
 from argilla.server.security import auth
-from argilla.server.security.model import User
 
 router = APIRouter(tags=["datasets"])
 
@@ -157,9 +157,10 @@ def create_dataset_annotation(
 
 # TODO: Returns 409 when external_id already exists?
 @router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
-def create_dataset_records(
+async def create_dataset_records(
     *,
     db: Session = Depends(get_db),
+    search_engine: ElasticSearchEngine = Depends(get_engine),
     dataset_id: UUID,
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
@@ -168,7 +169,7 @@ def create_dataset_records(
 
     dataset = _get_dataset(db, dataset_id)
 
-    datasets.create_records(db, dataset, current_user, records_create)
+    await datasets.create_records(db, search_engine, dataset=dataset, user=current_user, records_create=records_create)
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)

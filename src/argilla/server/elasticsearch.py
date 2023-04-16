@@ -13,12 +13,32 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict
+from typing import Any, Dict, Iterable, List, Optional
 
 from elasticsearch8 import AsyncElasticsearch as AsyncElasticsearch8x
+from elasticsearch8 import helpers
+from pydantic import BaseModel
+from pydantic.utils import GetterDict
 
-from argilla.server.models import Annotation, AnnotationType, Dataset
+from argilla.server.models import Annotation, AnnotationType, Dataset, Record
 from argilla.server.settings import settings
+
+
+class ElasticSearchRecordGetter(GetterDict):
+    def get(self, key: Any, default: Any = None) -> Any:
+        if key == "responses":
+            return {response.user.username: response.values for response in self._obj.responses}
+        return super().get(key, default)
+
+
+class ElasticSearchRecord(BaseModel):
+    fields: Dict[str, Any]
+
+    responses: Optional[Dict[str, Dict[str, Any]]]
+
+    class Config:
+        orm_mode = True
+        getter_dict = ElasticSearchRecordGetter
 
 
 @dataclasses.dataclass
@@ -29,23 +49,58 @@ class ElasticSearchEngine:
         self.client = AsyncElasticsearch8x(**self.config)
 
     async def create_index(self, dataset: Dataset):
-        fields = {}
+        fields = {
+            "fields": {"dynamic": True, "type": "object"},
+            "responses": {"dynamic": True, "type": "object"},
+        }
 
-        for annotation in dataset.annotations:
-            fields[annotation.name] = self._field_mapping_for_annotation(annotation)
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
+        dynamic_templates = [
+            {
+                f"{annotation.name}_responses": {
+                    "path_match": f"responses.*.{annotation.name}",
+                    "mapping": self._field_mapping_for_annotation(annotation),
+                }
+            }
+            for annotation in dataset.annotations
+        ]
 
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
         mappings = {
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
             "dynamic": "strict",
+            "dynamic_templates": dynamic_templates,
             "properties": fields,
         }
 
-        index_name = f"rg.{dataset.id}"
+        index_name = self._index_name_for_dataset(dataset)
         await self.client.indices.create(index=index_name, mappings=mappings)
 
-    def close(self):
-        self.client.close()
+    async def add_records(self, dataset: Dataset, records: Iterable[Record]):
+        index_name = self._index_name_for_dataset(dataset)
+
+        if not await self.client.indices.exists(index=index_name):
+            raise RuntimeError(
+                f"Unable to add data records to index for dataset {dataset.id}. The specified index is invalid."
+            )
+
+        bulk_actions = [
+            {
+                "_op_type": "index",  # If document exist, we update source with latest version
+                "_id": record.id,
+                "_index": index_name,
+                **ElasticSearchRecord.from_orm(record).dict(),
+            }
+            for record in records
+        ]
+
+        _, errors = await helpers.async_bulk(client=self.client, actions=bulk_actions, raise_on_error=False)
+        if errors:
+            raise RuntimeError(errors)
+
+    @staticmethod
+    def _index_name_for_dataset(dataset: Dataset):
+        return f"rg.{dataset.id}"
 
     def _field_mapping_for_annotation(self, annotation_task: Annotation):
         settings_type = annotation_task.settings.get("type")
@@ -60,7 +115,7 @@ class ElasticSearchEngine:
             raise ValueError(f"ES mappings for Annotation of type {settings_type} cannot be generated")
 
 
-def get_engine():
+async def get_engine():
     config = dict(
         hosts=settings.elasticsearch,
         verify_certs=settings.elasticsearch_ssl_verify,
@@ -72,4 +127,4 @@ def get_engine():
     try:
         yield search_engine
     finally:
-        search_engine.close()
+        await search_engine.client.close()

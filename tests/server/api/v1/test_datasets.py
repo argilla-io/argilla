@@ -17,6 +17,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.elasticsearch import ElasticSearchEngine
 from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
 from argilla.server.schemas.v1.datasets import (
     RATING_OPTIONS_MAX_ITEMS,
@@ -650,8 +651,19 @@ def test_create_dataset_rating_annotation_with_invalid_settings_options_values(
     assert db.query(Annotation).count() == 0
 
 
-def test_create_dataset_records(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
+@pytest.mark.asyncio
+async def test_create_dataset_records(
+    client: TestClient,
+    search_engine: ElasticSearchEngine,
+    elasticsearch: Elasticsearch,
+    db: Session,
+    admin_auth_header: dict,
+):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    # Prepare dataset and es index
+    await search_engine.create_index(dataset)
+
     records_json = {
         "items": [
             {
@@ -683,6 +695,26 @@ def test_create_dataset_records(client: TestClient, db: Session, admin_auth_head
     assert response.status_code == 204
     assert db.query(Record).count() == 3
     assert db.query(Response).count() == 3
+
+    index_name = f"rg.{dataset.id}"
+
+    assert elasticsearch.indices.exists(index=index_name)
+
+    elasticsearch.indices.refresh(index=index_name)
+    assert [hit["_source"] for hit in elasticsearch.search(index=index_name)["hits"]["hits"]] == [
+        {
+            "fields": {"input": "Say Hello", "ouput": "Hello"},
+            "responses": {"admin": {"output_ok": "yes"}},
+        },
+        {
+            "fields": {"input": "Say Hello", "output": "Hi"},
+            "responses": {"admin": {"output_ok": "no"}},
+        },
+        {
+            "fields": {"input": "Say Hello", "output": "Hello World"},
+            "responses": {"admin": {"output_ok": "no"}},
+        },
+    ]
 
 
 @pytest.mark.skip(reason="todo")
@@ -725,10 +757,7 @@ def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, 
     pass
 
 
-@pytest.mark.skipif(
-    condition=not is_running_elasticsearch(),
-    reason="Test only running with elasticsearch backend",
-)
+@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
 def test_publish_dataset(
     client: TestClient,
     db: Session,

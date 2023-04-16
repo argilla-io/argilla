@@ -15,6 +15,7 @@
 import random
 
 import pytest
+import pytest_asyncio
 from argilla.server.elasticsearch import ElasticSearchEngine
 from elasticsearch8 import BadRequestError, Elasticsearch
 from sqlalchemy.orm import Session
@@ -27,14 +28,9 @@ from tests.factories import (
 )
 
 
-@pytest.fixture(scope="session")
-def search_engine(es_config):
-    return ElasticSearchEngine(config=es_config)
-
-
-@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
 @pytest.mark.asyncio
-class ElasticSearchEngineTestSuite:
+@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
+class TestSuiteElasticSearchEngine:
     async def test_create_index_for_dataset(self, search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch):
         dataset = DatasetFactory.create()
         await search_engine.create_index(dataset)
@@ -43,7 +39,14 @@ class ElasticSearchEngineTestSuite:
         assert elasticsearch.indices.exists(index=index_name)
 
         index = elasticsearch.indices.get(index=index_name)[index_name]
-        assert index["mappings"] == {"dynamic": "strict"}
+        assert index["mappings"] == {
+            "dynamic": "strict",
+            "dynamic_templates": [],
+            "properties": {
+                "fields": {"dynamic": "true", "type": "object"},
+                "responses": {"dynamic": "true", "type": "object"},
+            },
+        }
 
     @pytest.mark.parametrize(
         argnames=("text_ann_size", "rating_ann_size"),
@@ -71,9 +74,35 @@ class ElasticSearchEngineTestSuite:
         assert index["mappings"] == {
             "dynamic": "strict",
             "properties": {
-                **{annotation.name: {"type": "text"} for annotation in text_annotations},
-                **{annotation.name: {"type": "integer"} for annotation in rating_annotations},
+                "fields": {"dynamic": "true", "type": "object"},
+                "responses": {"dynamic": "true", "type": "object"},
             },
+            "dynamic_templates": [
+                *[
+                    config
+                    for annotation in text_annotations
+                    for config in [
+                        {
+                            f"{annotation.name}_responses": {
+                                "mapping": {"type": "text"},
+                                "path_match": f"responses.*.{annotation.name}",
+                            }
+                        },
+                    ]
+                ],
+                *[
+                    config
+                    for annotation in rating_annotations
+                    for config in [
+                        {
+                            f"{annotation.name}_responses": {
+                                "mapping": {"type": "integer"},
+                                "path_match": f"responses.*.{annotation.name}",
+                            }
+                        },
+                    ]
+                ],
+            ],
         }
 
     async def test_create_index_with_existing_index(
