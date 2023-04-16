@@ -63,6 +63,20 @@ def list_datasets(
         return current_user.datasets
 
 
+@router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
+def list_dataset_annotations(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return dataset.annotations
+
+
 @router.get("/datasets/{dataset_id}/records", response_model=Records)
 def list_dataset_records(
     *,
@@ -94,22 +108,6 @@ def get_dataset(
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
     return dataset
-
-
-# TODO: Change this to list_dataset_annotations and move it before list_dataset_records.
-# - Change tests names too.
-@router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
-def get_dataset_annotations(
-    *,
-    db: Session = Depends(get_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
-):
-    dataset = _get_dataset(db, dataset_id)
-
-    authorize(current_user, DatasetPolicyV1.get(dataset))
-
-    return dataset.annotations
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=Dataset)

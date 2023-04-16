@@ -103,6 +103,99 @@ def test_list_datasets_as_annotator(client: TestClient, db: Session):
     assert [dataset["name"] for dataset in response.json()] == ["dataset-a", "dataset-b"]
 
 
+def test_list_dataset_annotations(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    text_annotation = TextAnnotationFactory.create(
+        name="text-annotation", title="Text Annotation", required=True, dataset=dataset
+    )
+    rating_annotation = RatingAnnotationFactory.create(
+        name="rating-annotation", title="Rating Annotation", dataset=dataset
+    )
+    TextAnnotationFactory.create()
+    RatingAnnotationFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "id": str(text_annotation.id),
+            "name": "text-annotation",
+            "title": "Text Annotation",
+            "required": True,
+            "settings": {"type": "text"},
+            "inserted_at": text_annotation.inserted_at.isoformat(),
+            "updated_at": text_annotation.updated_at.isoformat(),
+        },
+        {
+            "id": str(rating_annotation.id),
+            "name": "rating-annotation",
+            "title": "Rating Annotation",
+            "required": False,
+            "settings": {
+                "type": "rating",
+                "options": [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                    {"value": 4},
+                    {"value": 5},
+                    {"value": 6},
+                    {"value": 7},
+                    {"value": 8},
+                    {"value": 9},
+                    {"value": 10},
+                ],
+            },
+            "inserted_at": rating_annotation.inserted_at.isoformat(),
+            "updated_at": rating_annotation.updated_at.isoformat(),
+        },
+    ]
+
+
+def test_list_dataset_annotations_without_authentication(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/annotations")
+
+    assert response.status_code == 401
+
+
+def test_list_dataset_annotations_as_annotator(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+    TextAnnotationFactory.create(name="text-annotation", dataset=dataset)
+    RatingAnnotationFactory.create(name="rating-annotation", dataset=dataset)
+    TextAnnotationFactory.create()
+    RatingAnnotationFactory.create()
+
+    response = client.get(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
+
+    assert response.status_code == 200
+    assert [annotation["name"] for annotation in response.json()] == ["text-annotation", "rating-annotation"]
+
+
+def test_list_dataset_annotations_as_annotator_from_different_workspace(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+
+    response = client.get(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
+
+    assert response.status_code == 403
+
+
+def test_list_dataset_annotations_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+    DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{uuid4()}/annotations", headers=admin_auth_header)
+
+    assert response.status_code == 404
+
+
 def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -356,99 +449,6 @@ def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{uuid4()}", headers=admin_auth_header)
-
-    assert response.status_code == 404
-
-
-def test_get_dataset_annotations(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    text_annotation = TextAnnotationFactory.create(
-        name="text-annotation", title="Text Annotation", required=True, dataset=dataset
-    )
-    rating_annotation = RatingAnnotationFactory.create(
-        name="rating-annotation", title="Rating Annotation", dataset=dataset
-    )
-    TextAnnotationFactory.create()
-    RatingAnnotationFactory.create()
-
-    response = client.get(f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header)
-
-    assert response.status_code == 200
-    assert response.json() == [
-        {
-            "id": str(text_annotation.id),
-            "name": "text-annotation",
-            "title": "Text Annotation",
-            "required": True,
-            "settings": {"type": "text"},
-            "inserted_at": text_annotation.inserted_at.isoformat(),
-            "updated_at": text_annotation.updated_at.isoformat(),
-        },
-        {
-            "id": str(rating_annotation.id),
-            "name": "rating-annotation",
-            "title": "Rating Annotation",
-            "required": False,
-            "settings": {
-                "type": "rating",
-                "options": [
-                    {"value": 1},
-                    {"value": 2},
-                    {"value": 3},
-                    {"value": 4},
-                    {"value": 5},
-                    {"value": 6},
-                    {"value": 7},
-                    {"value": 8},
-                    {"value": 9},
-                    {"value": 10},
-                ],
-            },
-            "inserted_at": rating_annotation.inserted_at.isoformat(),
-            "updated_at": rating_annotation.updated_at.isoformat(),
-        },
-    ]
-
-
-def test_get_dataset_annotations_without_authentication(client: TestClient, db: Session):
-    dataset = DatasetFactory.create()
-
-    response = client.get(f"/api/v1/datasets/{dataset.id}/annotations")
-
-    assert response.status_code == 401
-
-
-def test_get_dataset_annotations_as_annotator(client: TestClient, db: Session):
-    dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
-    TextAnnotationFactory.create(name="text-annotation", dataset=dataset)
-    RatingAnnotationFactory.create(name="rating-annotation", dataset=dataset)
-    TextAnnotationFactory.create()
-    RatingAnnotationFactory.create()
-
-    response = client.get(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers={API_KEY_HEADER_NAME: annotator.api_key}
-    )
-
-    assert response.status_code == 200
-    assert [annotation["name"] for annotation in response.json()] == ["text-annotation", "rating-annotation"]
-
-
-def test_get_dataset_annotations_as_annotator_from_different_workspace(client: TestClient, db: Session):
-    dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
-
-    response = client.get(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers={API_KEY_HEADER_NAME: annotator.api_key}
-    )
-
-    assert response.status_code == 403
-
-
-def test_get_dataset_annotations_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
-    DatasetFactory.create()
-
-    response = client.get(f"/api/v1/datasets/{uuid4()}/annotations", headers=admin_auth_header)
 
     assert response.status_code == 404
 
