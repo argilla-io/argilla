@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- added `settings` param to `prepare_for_training` ([#2689])
+- added `prepare_for_training` for `openai` ([#2658])
+- added `ArgillaOpenAITrainer` ([#2659])
+- `argilla.training` bugfixes and unification ([#2665])
+
 ## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
 
 ### Added

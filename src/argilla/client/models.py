@@ -41,6 +41,7 @@ class Framework(Enum):
     SETFIT = "setfit"
     SPACY = "spacy"
     SPARK_NLP = "spark-nlp"
+    OPENAI = "openai"
 
     @classmethod
     def _missing_(cls, value):

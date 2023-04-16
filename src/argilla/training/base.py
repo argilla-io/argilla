@@ -12,13 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import inspect
 import logging
 import os
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
-from argilla.client.models import Framework
+from argilla.client.models import (
+    Framework,
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenClassificationRecord,
+)
+from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -79,6 +85,9 @@ class ArgillaTrainer(object):
         if not len(self.rg_dataset_snapshot) > 0:
             raise ValueError(f"Dataset {self._name} is empty")
 
+        # settings for the dataset
+        self._settings = rg.load_dataset_settings(name=self._name, workspace=workspace)
+
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
             self._multi_label = self.rg_dataset_snapshot[0].multi_label
@@ -118,6 +127,7 @@ class ArgillaTrainer(object):
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
                 model=self.model,
             )
@@ -128,6 +138,7 @@ class ArgillaTrainer(object):
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
                 model=self.model,
             )
@@ -139,6 +150,18 @@ class ArgillaTrainer(object):
                 dataset=self.dataset_full_prepared,
                 model=self.model,
                 multi_label=self._multi_label,
+                settings=self._settings,
+                seed=self._seed,
+            )
+        elif framework is Framework.OPENAI:
+            from argilla.training.openai import ArgillaOpenAITrainer
+
+            self._trainer = ArgillaOpenAITrainer(
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                model=self.model,
+                multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
                 gpu_id=gpu_id,
             )
@@ -178,6 +201,7 @@ _________________________________________________________________
         It updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
         """
         self._trainer.update_config(*args, **kwargs)
+        self._logger.info(self)
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
         """
@@ -211,3 +235,45 @@ _________________________________________________________________
           output_dir (str): The path to the directory where the model will be saved.
         """
         self._trainer.save(output_dir)
+
+
+class ArgillaTrainerSkeleton(ABC):
+    def __init__(
+        self,
+        dataset,
+        record_class: Union[TokenClassificationRecord, Text2TextRecord, TextClassificationRecord],
+        multi_label: bool = False,
+        settings: Union[TextClassificationSettings, TokenClassificationSettings] = None,
+        model: str = None,
+        seed: int = None,
+    ):
+        self._dataset = dataset
+        self._record_class = record_class
+        self._multi_label = multi_label
+        self._settings = settings
+        self._model = model
+        self._seed = seed
+
+    @abstractmethod
+    def init_training_args(self):
+        pass
+
+    @abstractmethod
+    def init_model(self):
+        pass
+
+    @abstractmethod
+    def update_config(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+        pass
+
+    @abstractmethod
+    def train(self, output_dir: str = None):
+        pass
+
+    @abstractmethod
+    def save(self, output_dir: str):
+        pass
