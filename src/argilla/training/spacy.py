@@ -35,7 +35,12 @@ class ArgillaSpaCyTrainer:
     def __init__(
         self,
         dataset: Union["spacy.tokens.DocBin", Tuple["spacy.tokens.DocBin", "spacy.tokens.DocBin"]],
-        record_class: Union[rg.TextClassificationRecord, rg.TokenClassificationRecord, rg.Text2TextRecord, None] = None,
+        record_class: Union[
+            rg.TextClassificationRecord,
+            rg.TokenClassificationRecord,
+            rg.Text2TextRecord,
+            None,
+        ] = None,
         model: Optional[str] = None,
         seed: Optional[int] = None,
         multi_label: bool = False,
@@ -80,7 +85,11 @@ class ArgillaSpaCyTrainer:
 
         self._record_class = record_class
         if self._record_class == rg.TokenClassificationRecord:
-            self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
+            self._column_mapping = {
+                "text": "text",
+                "token": "tokens",
+                "ner_tags": "ner_tags",
+            }
             self._pipeline = ["ner"]
         elif self._record_class == rg.TextClassificationRecord:
             if self._multi_label:
@@ -105,39 +114,69 @@ class ArgillaSpaCyTrainer:
         self.use_gpu = False
         if self.gpu_id != -1:
             self.use_gpu = spacy.prefer_gpu(self.gpu_id)
-            if self.use_gpu is False and self.model is not None:
-                self._logger.warn(
-                    "Since the GPU is not available the model will be ignored, "
-                    "and set to `None` so that the default CPU model will be used "
-                    "instead."
-                )
-                self.model = None
 
         if self.use_gpu:
             try:
-                require_version("spacy-transformers")
+                require_version("torch")
+                has_torch = True
             except:
-                self._logger.warn(
-                    "`spacy-transformers` is not installed and it's required "
-                    "to use the GPU. Falling back to the CPU."
+                has_torch = False
+
+            try:
+                require_version("tensorflow")
+                has_tensorflow = True
+            except:
+                has_tensorflow = False
+
+            if not has_torch and not has_tensorflow:
+                self._logger(
+                    "Either `torch` or `tensorflow` need to be installed to use the"
+                    " GPU, since any of those is required as the GPU allocator. Falling"
+                    " back to the CPU."
                 )
-            finally:
                 self.use_gpu = False
                 self.gpu_id = -1
+
+            try:
+                require_version("spacy-transformers")
+                has_spacy_transformers = True
+            except:
+                self._logger.warn(
+                    "`spacy-transformers` is not installed and it's recommended to train a model using the GPU."
+                )
+                has_spacy_transformers = False
 
         self.config = init_config(
             lang=self.language,
             pipeline=self._pipeline,
             optimize="efficiency",
-            gpu=self.use_gpu,
+            gpu=True if self.use_gpu and has_spacy_transformers else False,
         )
+
         self.config["paths"]["train"] = self._train_dataset_path
         self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
         self.config["system"]["seed"] = seed or 42
-        if self.use_gpu:
-            self.config["components"]["transformer"]["model"]["name"] = self.model or "roberta-base"
+        if has_spacy_transformers:
+            if not self.model:
+                self._logger.warn(
+                    "`model` is not specified and it's recommended to specify the"
+                    " `spacy-transformers` model to use. Using `roberta-base` as the"
+                    " default model instead."
+                )
+                self.model = "roberta-base"
+            self.config["components"]["transformer"]["model"]["name"] = self.model
         else:
-            self.config["paths"]["vectors"] = self.model or "en_core_web_lg"
+            if not self.model:
+                self._logger.warn(
+                    "`model` is not specified and it's recommended to specify the"
+                    " `spaCy` model to use. Using `en_core_web_lg` as the default model"
+                    " instead."
+                )
+                self.model = "en_core_web_lg"
+            self.config["paths"]["vectors"] = self.model
+            if self.use_gpu and not has_spacy_transformers:
+                self.config["system"]["gpu_allocator"] = "pytorch"
+                self.config["nlp"]["batch_size"] = 128
 
         self._nlp = None
 
@@ -151,8 +190,8 @@ class ArgillaSpaCyTrainer:
         just the args that can be updated via `update_config`."""
         formatted_string = []
         formatted_string.append(
-            "WARNING:`ArgillaSpaCyTrainer.update_config` only supports the update of the `training` "
-            "arguments defined in the `config.yaml`."
+            "WARNING:`ArgillaSpaCyTrainer.update_config` only supports the update of"
+            " the `training` arguments defined in the `config.yaml`."
         )
         formatted_string.append("\n`ArgillaSpaCyTrainer`")
         for key, val in self.config["training"].items():
@@ -187,9 +226,10 @@ class ArgillaSpaCyTrainer:
         from spacy.training.loop import train as train_nlp
 
         self._logger.warn(
-            "Note that the spaCy training is expected to be used through the CLI rather than "
-            "programatically, so the dataset needs to be dumped into the disk and then "
-            "loaded from disk. More information at https://spacy.io/usage/training#api"
+            "Note that the spaCy training is expected to be used through the CLI rather"
+            " than programatically, so the dataset needs to be dumped into the disk and"
+            " then loaded from disk. More information at"
+            " https://spacy.io/usage/training#api"
         )
         self._logger.info(f"Dumping the train dataset to {self._train_dataset_path}")
         self._train_dataset.to_disk(self._train_dataset_path)
