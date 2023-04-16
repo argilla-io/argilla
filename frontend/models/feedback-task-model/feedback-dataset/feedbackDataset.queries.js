@@ -15,9 +15,13 @@ const getFeedbackDatasetWorkspaceNameById = (datasetId) => {
     null
   );
 };
+const getTotalRecordByDatasetId = (datasetId) => {
+  return FeedbackDatasetModel.query().whereId(datasetId).first()?.total_records;
+};
 
 export {
   upsertFeedbackDataset,
   getFeedbackDatasetNameById,
   getFeedbackDatasetWorkspaceNameById,
+  getTotalRecordByDatasetId,
 };
