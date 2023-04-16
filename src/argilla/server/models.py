@@ -65,7 +65,11 @@ class Annotation(Base):
     dataset: Mapped["Dataset"] = relationship(back_populates="annotations")
 
     def __repr__(self):
-        return f"Annotation(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, dataset_id={str(self.dataset_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"Annotation(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
+            f"dataset_id={str(self.dataset_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class Response(Base):
@@ -137,7 +141,11 @@ class Dataset(Base):
         return self.status == DatasetStatus.ready
 
     def __repr__(self):
-        return f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, status={self.status.value!r}, workspace_id={str(self.workspace_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, "
+            f"status={self.status.value!r}, workspace_id={str(self.workspace_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class WorkspaceUser(Base):
@@ -154,7 +162,11 @@ class WorkspaceUser(Base):
     user: Mapped["User"] = relationship(viewonly=True)
 
     def __repr__(self):
-        return f"WorkspaceUser(id={str(self.id)!r}, workspace_id={str(self.workspace_id)!r}, user_id={str(self.user_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"WorkspaceUser(id={str(self.id)!r}, workspace_id={str(self.workspace_id)!r}, "
+            f"user_id={str(self.user_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class Workspace(Base):
@@ -172,7 +184,10 @@ class Workspace(Base):
     )
 
     def __repr__(self):
-        return f"Workspace(id={str(self.id)!r}, name={self.name!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"Workspace(id={str(self.id)!r}, name={self.name!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class User(Base):
@@ -213,4 +228,8 @@ class User(Base):
         return self.role == UserRole.annotator
 
     def __repr__(self):
-        return f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, username={self.username!r}, role={self.role.value!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, "
+            f"username={self.username!r}, role={self.role.value!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
