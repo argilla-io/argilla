@@ -1,7 +1,7 @@
 <template>
   <PaginationComponent
     v-if="totalRecord"
-    :totalItems="10"
+    :totalItems="totalRecord"
     @on-paginate="onPaginate"
   />
 </template>
@@ -23,8 +23,14 @@ export default {
   },
   methods: {
     onPaginate(currentPage) {
-      console.log(currentPage);
+      this.onEmitCurrentPageByBusEvent(currentPage);
     },
+    onEmitCurrentPageByBusEvent(currentPage) {
+      this.$root.$emit("current-page", currentPage);
+    },
+  },
+  destroyed() {
+    this.$root.$off("current-page");
   },
 };
 </script>

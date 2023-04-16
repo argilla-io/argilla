@@ -1,6 +1,6 @@
 <template>
   <div class="pagination-component">
-    <div class="left-area">{{ currentPage }} {{ totalPages }}</div>
+    <div class="left-area"></div>
 
     <div class="center-area">
       <button
