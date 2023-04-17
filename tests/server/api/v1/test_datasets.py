@@ -1043,7 +1043,7 @@ def test_publish_dataset_with_error_on_index_creation(
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create()
-    AnnotationFactory.create(dataset=dataset)
+    AnnotationFactory.create(settings={"type": "invalid"}, dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
