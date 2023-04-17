@@ -61,13 +61,13 @@ def is_running_elasticsearch() -> bool:
 
 
 @pytest.fixture(scope="session")
-def es_config():
+def elasticsearch_config():
     return {"hosts": settings.elasticsearch}
 
 
 @pytest.fixture(scope="session")
-def elasticsearch(es_config):
-    client = Elasticsearch(**es_config)
+def elasticsearch(elasticsearch_config):
+    client = Elasticsearch(**elasticsearch_config)
     yield client
 
     for index_info in client.cat.indices(index="ar.*,rg.*", format="json"):

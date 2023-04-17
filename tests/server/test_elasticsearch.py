@@ -29,8 +29,8 @@ from tests.factories import (
 
 
 @pytest_asyncio.fixture()
-async def search_engine(es_config):
-    engine = ElasticSearchEngine(config=es_config)
+async def search_engine(elasticsearch_config):
+    engine = ElasticSearchEngine(config=elasticsearch_config)
     yield engine
 
     await engine.client.close()
