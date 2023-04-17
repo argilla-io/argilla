@@ -87,8 +87,8 @@ export default {
     };
   },
   methods: {
-    onClickSidebarAction(action) {
-      switch (action) {
+    onClickSidebarAction(group, info) {
+      switch (group) {
         case "metrics":
           this.toggleMetrics(info);
           break;
@@ -99,7 +99,7 @@ export default {
           console.log("refresh dataset");
           break;
         default:
-          console.warn(action);
+          console.warn(info);
       }
     },
     toggleMetrics(panelContent) {
