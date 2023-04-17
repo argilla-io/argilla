@@ -37,7 +37,7 @@ export default {
           {
             record_id: "record_1",
             question_id: "id_6",
-            options: [{ id: "id_6-5", value: true, text: "5" }],
+            options: [{ id: "id_6-4", value: true, text: "4" }],
           },
         ],
         fields: [
@@ -257,13 +257,13 @@ export default {
     upsertRecords(formattedRecords);
     upsertDatasetQuestions(formattedQuestions);
 
-    this.onBusEventIsLoadingLabels()
+    this.onBusEventIsLoadingLabels();
   },
   methods: {
     onBusEventIsLoadingLabels() {
       this.$root.$on("current-page", (currentPage) => {
-        //NOTE - the pagination start at 1 but the record start at 1 => there is an offset of 1 to remove 
-        this.currentPage = currentPage-1;
+        //NOTE - the pagination start at 1 but the record start at 1 => there is an offset of 1 to remove
+        this.currentPage = currentPage - 1;
       });
     },
     factoryRecordsForOrm(records) {

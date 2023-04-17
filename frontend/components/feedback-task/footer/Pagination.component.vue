@@ -6,7 +6,7 @@
       <button
         class="button"
         @click="onClickPrev"
-        v-text="'<Prev'"
+        v-text="prevButtonMessage"
         :disabled="currentPage === 1"
       />
 
@@ -21,7 +21,7 @@
 
       <button
         @click="onClickNext"
-        v-text="'Next>'"
+        v-text="nextButtonMessage"
         :disabled="currentPage >= totalPages"
       />
     </div>
@@ -43,6 +43,14 @@ export default {
     numberOfItemsByPage: {
       type: Number,
       default: () => 1,
+    },
+    nextButtonMessage: {
+      type: String,
+      default: () => "Next >",
+    },
+    prevButtonMessage: {
+      type: String,
+      default: () => "< Prev",
     },
   },
   data() {
