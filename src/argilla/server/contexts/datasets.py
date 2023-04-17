@@ -120,20 +120,6 @@ def get_record_by_id(db: Session, record_id: UUID):
 def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = LIST_RECORDS_LIMIT):
     return (
         db.query(Record)
-        .options(joinedload(Record.responses))
-        .filter(Record.dataset_id == dataset.id)
-        .order_by(Record.inserted_at.asc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
-
-
-def list_records_for_user(db: Session, dataset: Dataset, user: User, offset: int = 0, limit: int = LIST_RECORDS_LIMIT):
-    return (
-        db.query(Record)
-        .outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user.id))
-        .options(contains_eager(Record.responses))
         .filter(Record.dataset_id == dataset.id)
         .order_by(Record.inserted_at.asc())
         .offset(offset)

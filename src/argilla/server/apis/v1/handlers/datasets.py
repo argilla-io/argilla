@@ -90,10 +90,7 @@ def list_dataset_records(
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    if current_user.is_admin:
-        return Records(items=datasets.list_records(db, dataset, offset=offset, limit=limit))
-    else:
-        return Records(items=datasets.list_records_for_user(db, dataset, current_user, offset=offset, limit=limit))
+    return Records(items=datasets.list_records(db, dataset, offset=offset, limit=limit))
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
