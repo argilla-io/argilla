@@ -16,11 +16,12 @@
   -->
 
 <template>
-  <div class="sidebar" :class="expandedComponent ? '--expanded' : null">
+  <div class="sidebar" :class="expandedComponent && '--expanded'">
     <SidebarFeedbackTaskButtonGroup
       v-for="group in sidebarGroups"
       :key="group"
-      :groupName="group"
+      :group-name="group"
+      :group-button-type="getButtonType(group)"
       :groupItems="filteredSidebarItemsByGroup(group)"
       :active-buttons="activeButtons"
       @on-click-sidebar-action="onClickSidebarAction"
@@ -32,7 +33,7 @@
 export default {
   props: {
     sidebarItems: {
-      type: Array,
+      type: Object,
       required: true,
     },
     activeButtons: {
@@ -46,18 +47,18 @@ export default {
   },
   computed: {
     sidebarGroups() {
-      const groups = [
-        ...new Set(this.sidebarItems.map((button) => button.group)),
-      ];
-      return groups;
+      return Object.keys(this.sidebarItems);
     },
   },
   methods: {
     filteredSidebarItemsByGroup(group) {
-      return this.sidebarItems.filter((button) => button.group === group);
+      return this.sidebarItems[group].buttons;
     },
-    onClickSidebarAction(action, id) {
-      this.$emit("on-click-sidebar-action", action, id);
+    getButtonType(group) {
+      return this.sidebarItems[group].buttonType;
+    },
+    onClickSidebarAction(group, id) {
+      this.$emit("on-click-sidebar-action", group, id);
     },
   },
 };

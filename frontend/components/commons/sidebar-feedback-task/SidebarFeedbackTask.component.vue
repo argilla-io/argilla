@@ -1,9 +1,6 @@
 <template>
   <div class="sidebar__container">
-    <SidebarFeedbackTaskPanel
-      :visible-panel="currentMetric"
-      @close-panel="closePanel"
-    >
+    <SidebarFeedbackTaskPanel v-if="isPanelVisible" @close-panel="closePanel">
       <component v-if="getProgressComponentName" :is="getProgressComponentName"
     /></SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
@@ -24,65 +21,78 @@ export default {
   computed: {
     getProgressComponentName() {
       return (
-        this.sidebarItems.find((item) => item.id === this.currentMetric)
-          ?.component || null
+        this.sidebarItems.metrics.buttons.find(
+          ({ id }) => id === this.currentMetric
+        )?.component || null
       );
+    },
+    isPanelVisible() {
+      return !!this.currentMetric;
     },
   },
   created() {
-    this.sidebarItems = [
-      {
-        id: "annotate",
-        tooltip: "Hand labeling",
-        icon: "hand-labeling",
-        group: "Mode",
-        action: "change-view-mode",
-        type: "non-expandable",
-        relatedMetrics: ["progress", "stats"],
+    this.sidebarItems = {
+      mode: {
+        buttonType: "non-expandable",
+        buttons: [
+          {
+            id: "annotate",
+            tooltip: "Hand labeling",
+            icon: "hand-labeling",
+            action: "change-view-mode",
+            relatedMetrics: ["progress", "stats"],
+          },
+          {
+            id: "explore",
+            tooltip: "Exploration",
+            icon: "exploration",
+            action: "change-view-mode",
+            relatedMetrics: ["progress", "stats"],
+          },
+        ],
       },
-      {
-        id: "explore",
-        tooltip: "Exploration",
-        icon: "exploration",
-        group: "Mode",
-        action: "change-view-mode",
-        type: "non-expandable",
-        relatedMetrics: ["progress", "stats"],
+      metrics: {
+        buttonType: "expandable",
+        buttons: [
+          {
+            id: "progress",
+            tooltip: "Progress",
+            icon: "progress",
+            action: "show-metrics",
+            type: "expandable",
+            component: "FeedbackTaskProgress",
+          },
+          {
+            id: "stats",
+            tooltip: "Stats",
+            icon: "stats",
+            action: "show-metrics",
+            type: "expandable",
+          },
+        ],
       },
-      {
-        id: "progress",
-        tooltip: "Progress",
-        icon: "progress",
-        action: "show-metrics",
-        group: "Metrics",
-        type: "expandable",
-        component: "FeedbackTaskProgress",
+      refresh: {
+        buttonType: "non-expandable",
+        buttons: [
+          {
+            id: "refresh",
+            tooltip: "Refresh",
+            icon: "refresh",
+            group: "Refresh",
+            type: "non-expandable",
+            action: "refresh",
+          },
+        ],
       },
-      {
-        id: "stats",
-        tooltip: "Stats",
-        icon: "stats",
-        action: "show-metrics",
-        type: "expandable",
-        group: "Metrics",
-      },
-      {
-        id: "refresh",
-        tooltip: "Refresh",
-        icon: "refresh",
-        group: "Refresh",
-        type: "non-expandable",
-        action: "refresh",
-      },
-    ];
+    };
   },
   methods: {
-    onClickSidebarAction(action, info) {
+    onClickSidebarAction(action) {
       switch (action) {
-        case "show-metrics":
-          this.showMetrics(info);
+        case "metrics":
+          this.toggleMetrics(info);
           break;
-        case "change-view-mode":
+        case "mode":
           console.log("change-view-mode", info);
           break;
         case "refresh":
@@ -92,8 +102,9 @@ export default {
           console.warn(action);
       }
     },
-    showMetrics(info) {
-      this.currentMetric = this.currentMetric !== info ? info : null;
+    toggleMetrics(panelContent) {
+      this.currentMetric =
+        this.currentMetric !== panelContent ? panelContent : null;
     },
     closePanel() {
       this.currentMetric = null;
@@ -105,10 +116,10 @@ export default {
 <style lang="scss" scoped>
 .sidebar {
   &__container {
-    z-index: 1;
     position: fixed;
     display: flex;
     right: 0;
+    z-index: 1;
     pointer-events: none;
   }
 }

@@ -37,7 +37,7 @@ export default {
       return [this.buttonTypeClass, this.buttonStateClass];
     },
     buttonTypeClass() {
-      return this.buttonType?.toLowerCase();
+      return this.buttonType;
     },
     buttonStateClass() {
       return this.isButtonActive ? "active" : null;

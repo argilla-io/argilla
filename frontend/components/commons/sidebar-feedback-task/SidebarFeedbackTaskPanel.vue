@@ -16,17 +16,16 @@
   -->
 
 <template>
-  <transition name="show-panel">
-    <aside class="sidebar" v-if="visiblePanel">
+  <transition name="show-panel" appear>
+    <aside class="sidebar">
       <div class="sidebar__content">
-        <a
-          href="#"
+        <base-button
           @click.prevent="closePanel"
           :class="{ 'zoom-out': animated }"
           @animationend="animated = false"
           class="sidebar__close-button"
           ><svgicon name="chevron-right" width="12" height="12"></svgicon
-        ></a>
+        ></base-button>
         <transition name="fade" appear duration="500">
           <slot></slot>
         </transition>
@@ -41,11 +40,6 @@ export default {
     return {
       animated: false,
     };
-  },
-  props: {
-    visiblePanel: {
-      type: String,
-    },
   },
   methods: {
     closePanel() {
@@ -78,17 +72,18 @@ export default {
     position: absolute;
     left: -2.5em;
     top: 1px;
-    border-radius: $border-radius-s;
-    background: palette(grey, 600);
     display: flex;
+    overflow: hidden;
     align-items: center;
     justify-content: center;
     width: 20px;
     height: 20px;
-    transform: scale(0);
-    overflow: hidden;
+    padding: 0;
+    background: palette(grey, 600);
     opacity: 0;
     outline: 0;
+    border-radius: $border-radius-s;
+    transform: scale(0);
     &.zoom-out {
       opacity: 1;
       animation: zoom-out 0.3s ease-out forwards;

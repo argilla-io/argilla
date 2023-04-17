@@ -17,16 +17,16 @@
 
 <template>
   <span class="sidebar__info">
-    <p class="sidebar__info__title">{{ groupName }}</p>
+    <p class="sidebar__info__title" v-text="groupName"></p>
     <SidebarFeedbackTaskButton
-      v-for="{ id, icon, tooltip, action, type } in groupItems"
+      v-for="{ id, icon, tooltip } in groupItems"
       :id="id"
       :key="id"
       :icon="icon"
       :tooltip="tooltip"
-      :button-type="type"
+      :button-type="groupButtonType"
       :is-button-active="checkIfButtonIsActive(id)"
-      @on-button-action="onAction(action, id)"
+      @on-button-action="onAction(id)"
     />
   </span>
 </template>
@@ -42,6 +42,10 @@ export default {
       type: String,
       required: true,
     },
+    groupButtonType: {
+      type: String,
+      required: true,
+    },
     activeButtons: {
       type: Array,
       required: true,
@@ -51,8 +55,8 @@ export default {
     checkIfButtonIsActive(id) {
       return this.activeButtons.includes(id);
     },
-    onAction(action, id) {
-      this.$emit("on-click-sidebar-action", action, id);
+    onAction(id) {
+      this.$emit("on-click-sidebar-action", this.groupName, id);
     },
   },
 };
@@ -63,10 +67,11 @@ export default {
   &__info {
     position: relative;
     &__title {
+      margin-bottom: 0.5em;
       text-align: center;
       font-weight: 600;
       @include font-size(12px);
-      margin-bottom: 0.5em;
+      text-transform: capitalize;
     }
   }
 }
