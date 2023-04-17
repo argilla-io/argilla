@@ -244,9 +244,9 @@ class Argilla:
         batch_size: int = 100,
         verbose: bool = True,
         background: bool = False,
-        chunk_size: Optional[int] = None,
         num_threads: int = 0,
         max_retries: int = 3,
+        chunk_size: Optional[int] = None,
     ) -> Union[BulkResponse, Future]:
         """Logs Records to argilla.
 
@@ -262,11 +262,11 @@ class Argilla:
             background: If True, we will NOT wait for the logging process to finish and return
                 an ``asyncio.Future`` object. You probably want to set ``verbose`` to False
                 in that case.
-            chunk_size: DEPRECATED! Use `batch_size` instead.
             num_threads: If > 0, will use num_thread separate number threads to batches, sending data concurrently.
                 Default to `0`, which means no threading at all.
             max_retries: Number of retries when logging a batch of records if a `httpx.TransportError` occurs.
                 Default `3`
+            chunk_size: DEPRECATED! Use `batch_size` instead.
 
         Returns:
             Summary of the response from the REST API.
