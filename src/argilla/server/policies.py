@@ -60,6 +60,21 @@ class WorkspacePolicy:
         return lambda actor: actor.role == UserRole.admin
 
 
+class WorkspacePolicyV1:
+    @classmethod
+    def get(cls, workspace: Workspace) -> PolicyAction:
+        return lambda actor: (
+            actor.is_admin
+            or bool(
+                accounts.get_workspace_user_by_workspace_id_and_user_id(
+                    Session.object_session(actor),
+                    workspace.id,
+                    actor.id,
+                )
+            )
+        )
+
+
 class UserPolicy:
     @classmethod
     def list(cls, actor: User) -> bool:
