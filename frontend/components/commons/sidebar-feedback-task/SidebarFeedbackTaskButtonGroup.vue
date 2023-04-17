@@ -18,7 +18,7 @@
 <template>
   <span class="sidebar__info">
     <p class="sidebar__info__title" v-text="groupName"></p>
-    <SidebarFeedbackTaskButton
+    <IconButton
       v-for="{ id, icon, tooltip } in groupItems"
       :id="id"
       :key="id"

@@ -1,24 +1,28 @@
 <template>
-  <button
-    class="sidebar-button"
+  <BaseButton
+    class="icon-button"
     :class="sidebarButtonClass"
     :data-title="tooltip"
-    @click="onButtonClick"
+    @on-click="onClickIcon"
   >
-    <svgicon :name="icon"></svgicon>
-  </button>
+    <i
+      :key="showBadge"
+      class="icon-button__icon"
+      v-badge="{
+        showBadge: showBadge,
+        verticalPosition: badgeVerticalPosition,
+        horizontalPosition: badgeHorizontalPosition,
+        borderColor: badgeBorderColor,
+      }"
+    >
+      <svgicon :name="icon" :width="iconSize" :height="iconSize" />
+    </i>
+  </BaseButton>
 </template>
 
 <script>
 export default {
   props: {
-    isButtonActive: {
-      type: Boolean,
-      default: false,
-    },
-    tooltip: {
-      type: String,
-    },
     id: {
       type: String,
       required: true,
@@ -27,9 +31,32 @@ export default {
       type: String,
       required: true,
     },
+    iconSize: {
+      type: String,
+      default: "28",
+    },
+    tooltip: {
+      type: String,
+    },
+    showBadge: {
+      type: Boolean,
+      default: false,
+    },
+    badgeVerticalPosition: {
+      type: String,
+    },
+    badgeHorizontalPosition: {
+      type: String,
+    },
+    badgeBorderColor: {
+      type: String,
+    },
     buttonType: {
       type: String,
-      required: true,
+    },
+    isButtonActive: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
@@ -44,19 +71,32 @@ export default {
     },
   },
   methods: {
-    onButtonClick() {
+    onClickIcon() {
       this.$emit("on-button-action", this.id);
     },
   },
 };
 </script>
 
-<style lang="scss" scoped>
-.sidebar-button {
+<style scoped lang="scss">
+.icon-button {
   @include resetButtonStyles();
   width: 100%;
   display: flex;
   margin-bottom: 0.5em;
+  padding: 0;
+  overflow: visible;
+  border-radius: 0;
+  &__icon {
+    display: block;
+    text-align: center;
+    margin: auto;
+    box-sizing: content-box;
+    .svg-icon {
+      padding: 0.5em;
+      fill: palette(grey, 100);
+    }
+  }
   &.non-expandable {
     &:hover {
       .svg-icon {
@@ -74,6 +114,7 @@ export default {
     }
     &.expandable {
       position: relative;
+      transition: none;
       .svg-icon {
         animation: move-horizontal 0.2s ease-in-out 0.2s;
         animation-fill-mode: backwards;
@@ -83,23 +124,6 @@ export default {
       }
     }
   }
-  &:hover {
-    cursor: pointer;
-  }
-}
-button[data-title] {
-  position: relative;
-  @extend %has-tooltip--left;
-}
-.svg-icon {
-  display: block;
-  text-align: center;
-  margin: auto;
-  width: 28px;
-  height: 28px;
-  fill: palette(grey, 100);
-  padding: 0.5em;
-  box-sizing: content-box;
 }
 
 @keyframes move-horizontal {
@@ -109,5 +133,9 @@ button[data-title] {
   100% {
     transform: translateX(0);
   }
+}
+.icon-button[data-title] {
+  position: relative;
+  @extend %has-tooltip--left;
 }
 </style>
