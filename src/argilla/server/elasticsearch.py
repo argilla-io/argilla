@@ -57,7 +57,7 @@ class ElasticSearchEngine:
             raise ValueError(f"ES mappings for Annotation of type {settings_type} cannot be generated")
 
 
-async def get_engine():
+async def get_search_engine():
     config = dict(
         hosts=settings.elasticsearch,
         verify_certs=settings.elasticsearch_ssl_verify,

@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
-from argilla.server.elasticsearch import ElasticSearchEngine, get_engine
+from argilla.server.elasticsearch import ElasticSearchEngine, get_search_engine
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
     Annotation,
@@ -179,7 +179,7 @@ def create_dataset_records(
 async def publish_dataset(
     *,
     db: Session = Depends(get_db),
-    search_engine: ElasticSearchEngine = Depends(get_engine),
+    search_engine: ElasticSearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
