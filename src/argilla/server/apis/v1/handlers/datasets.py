@@ -154,7 +154,6 @@ def create_dataset_annotation(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
-# TODO: Returns 409 when external_id already exists?
 @router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
 def create_dataset_records(
     *,
@@ -167,7 +166,12 @@ def create_dataset_records(
 
     dataset = _get_dataset(db, dataset_id)
 
-    datasets.create_records(db, dataset, current_user, records_create)
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        datasets.create_records(db, dataset, current_user, records_create)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)

@@ -28,6 +28,8 @@ from argilla.server.models import (
 from argilla.server.schemas.v1.datasets import (
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
+    RECORDS_CREATE_MAX_ITEMS,
+    RECORDS_CREATE_MIN_ITEMS,
 )
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -287,24 +289,56 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
     }
 
 
-@pytest.mark.skip(reason="todo")
 def test_list_dataset_records_with_offset(client: TestClient, admin_auth_header: dict):
-    pass
+    dataset = DatasetFactory.create()
+    RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+    RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
+    record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, params={"offset": 2})
+
+    assert response.status_code == 200
+
+    response_body = response.json()
+    assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
 
-@pytest.mark.skip(reason="todo")
 def test_list_dataset_records_with_limit(client: TestClient, admin_auth_header: dict):
-    pass
+    dataset = DatasetFactory.create()
+    record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+    RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
+    RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, params={"limit": 1})
+
+    assert response.status_code == 200
+
+    response_body = response.json()
+    assert [item["id"] for item in response_body["items"]] == [str(record_a.id)]
 
 
-@pytest.mark.skip(reason="todo")
 def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_auth_header: dict):
-    pass
+    dataset = DatasetFactory.create()
+    RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+    record_c = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
+    RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+
+    response = client.get(
+        f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, params={"offset": 1, "limit": 1}
+    )
+
+    assert response.status_code == 200
+
+    response_body = response.json()
+    assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
 
-@pytest.mark.skip(reason="todo")
 def test_list_dataset_records_without_authentication(client: TestClient):
-    pass
+    dataset = DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/records")
+
+    assert response.status_code == 401
 
 
 def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: Session):
@@ -391,14 +425,21 @@ def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: 
     }
 
 
-@pytest.mark.skip(reason="todo")
 def test_list_dataset_records_as_annotator_from_different_workspace(client: TestClient, db: Session):
-    pass
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
 
 
-@pytest.mark.skip(reason="todo")
 def test_list_dataset_records_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
-    pass
+    DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{uuid4()}/records", headers=admin_auth_header)
+
+    assert response.status_code == 404
 
 
 def test_get_dataset(client: TestClient, admin_auth_header: dict):
@@ -795,21 +836,23 @@ def test_create_dataset_records(client: TestClient, db: Session, admin_auth_head
                 "fields": {"input": "Say Hello", "ouput": "Hello"},
                 "external_id": "1",
                 "response": {
-                    "values": {"output_ok": "yes"},
+                    "values": {
+                        "input_ok": "yes",
+                        "output_ok": "yes",
+                    },
                 },
             },
             {
                 "fields": {"input": "Say Hello", "output": "Hi"},
-                "external_id": "2",
-                "response": {
-                    "values": {"output_ok": "no"},
-                },
             },
             {
-                "fields": {"input": "Say Hello", "output": "Hello World"},
+                "fields": {"input": "Say Pello", "output": "Hello World"},
                 "external_id": "3",
                 "response": {
-                    "values": {"output_ok": "no"},
+                    "values": {
+                        "input_ok": "no",
+                        "output_ok": "no",
+                    },
                 },
             },
         ]
@@ -819,47 +862,154 @@ def test_create_dataset_records(client: TestClient, db: Session, admin_auth_head
 
     assert response.status_code == 204
     assert db.query(Record).count() == 3
-    assert db.query(Response).count() == 3
+    assert db.query(Response).count() == 2
 
 
-@pytest.mark.skip(reason="todo")
 def test_create_dataset_records_without_authentication(client: TestClient, db: Session):
-    pass
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "external_id": "1",
+                "response": {
+                    "values": {
+                        "input_ok": "yes",
+                        "output_ok": "yes",
+                    },
+                },
+            },
+        ],
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", json=records_json)
+
+    assert response.status_code == 401
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
 
 
-@pytest.mark.skip(reason="todo")
 def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
-    pass
+    annotator = AnnotatorFactory.create()
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "external_id": "1",
+                "response": {
+                    "values": {
+                        "input_ok": "yes",
+                        "output_ok": "yes",
+                    },
+                },
+            },
+        ],
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=records_json
+    )
+
+    assert response.status_code == 403
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
 
 
-@pytest.mark.skip(reason="todo")
 def test_create_dataset_records_with_non_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
-    pass
+    dataset = DatasetFactory.create(status=DatasetStatus.draft)
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "external_id": "1",
+                "response": {
+                    "values": {
+                        "input_ok": "yes",
+                        "output_ok": "yes",
+                    },
+                },
+            },
+        ],
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Records cannot be created for a non published dataset"}
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
 
 
-@pytest.mark.skip(reason="todo")
 def test_create_dataset_records_with_less_items_than_allowed(client: TestClient, db: Session, admin_auth_header: dict):
-    pass
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "external_id": str(external_id),
+            }
+            for external_id in range(0, RECORDS_CREATE_MIN_ITEMS - 1)
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
 
 
-@pytest.mark.skip(reason="todo")
 def test_create_dataset_records_with_more_items_than_allowed(client: TestClient, db: Session, admin_auth_header: dict):
-    pass
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "external_id": str(external_id),
+            }
+            for external_id in range(0, RECORDS_CREATE_MAX_ITEMS + 1)
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
 
 
-@pytest.mark.skip(reason="todo")
-def test_create_dataset_records_with_duplicated_external_id(client: TestClient, db: Session, admin_auth_header: dict):
-    pass
-
-
-@pytest.mark.skip(reason="todo")
 def test_create_dataset_records_with_invalid_records(client: TestClient, db: Session, admin_auth_header: dict):
-    pass
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    records_json = {
+        "items": [
+            {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 1},
+            {"fields": "invalid", "external_id": 2},
+            {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 3},
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
 
 
-@pytest.mark.skip(reason="todo")
 def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
-    pass
+    DatasetFactory.create()
+    records_json = {
+        "items": [
+            {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 1},
+            {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 2},
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{uuid4()}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 404
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
 
 
 def test_publish_dataset(client: TestClient, db: Session, admin_auth_header: dict):
