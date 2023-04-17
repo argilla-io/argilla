@@ -32,8 +32,8 @@ def test_create_record_response(client: TestClient, db: Session, admin_auth_head
     record = RecordFactory.create()
     response_json = {
         "values": {
-            "input_ok": "yes",
-            "output_ok": "yes",
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
         },
     }
 
@@ -47,8 +47,8 @@ def test_create_record_response(client: TestClient, db: Session, admin_auth_head
     assert response_body == {
         "id": str(UUID(response_body["id"])),
         "values": {
-            "input_ok": "yes",
-            "output_ok": "yes",
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
         },
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
@@ -59,8 +59,8 @@ def test_create_record_response_without_authentication(client: TestClient, db: S
     record = RecordFactory.create()
     response_json = {
         "values": {
-            "input_ok": "yes",
-            "output_ok": "yes",
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
         },
     }
 
@@ -75,8 +75,8 @@ def test_create_record_response_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create(workspaces=[record.dataset.workspace])
     response_json = {
         "values": {
-            "input_ok": "yes",
-            "output_ok": "yes",
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
         },
     }
 
@@ -93,8 +93,8 @@ def test_create_record_response_as_annotator_from_different_workspace(client: Te
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
     response_json = {
         "values": {
-            "input_ok": "yes",
-            "output_ok": "yes",
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
         },
     }
 
@@ -111,8 +111,8 @@ def test_create_record_response_already_created(client: TestClient, db: Session,
     ResponseFactory.create(record=record, user=admin)
     response_json = {
         "values": {
-            "input_ok": "yes",
-            "output_ok": "yes",
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
         },
     }
 
@@ -136,8 +136,8 @@ def test_create_record_response_with_nonexistent_record_id(client: TestClient, d
     RecordFactory.create()
     response_json = {
         "values": {
-            "input_ok": "yes",
-            "output_ok": "yes",
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
         },
     }
 
