@@ -72,7 +72,7 @@ export default {
         ],
       },
       refresh: {
-        buttonType: "non-expandable",
+        buttonType: "default",
         buttons: [
           {
             id: "refresh",
