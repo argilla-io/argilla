@@ -15,7 +15,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
@@ -26,9 +26,14 @@ from argilla.server.schemas.v1.datasets import (
     AnnotationCreate,
     Dataset,
     DatasetCreate,
+    Records,
+    RecordsCreate,
 )
 from argilla.server.security import auth
 from argilla.server.security.model import User
+
+LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
+LIST_DATASET_RECORDS_LIMIT_LTE = 1000
 
 router = APIRouter(tags=["datasets"])
 
@@ -58,6 +63,39 @@ def list_datasets(
         return current_user.datasets
 
 
+@router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
+def list_dataset_annotations(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return dataset.annotations
+
+
+@router.get("/datasets/{dataset_id}/records", response_model=Records)
+def list_dataset_records(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    offset: int = 0,
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    if current_user.is_admin:
+        return Records(items=datasets.list_records(db, dataset, offset=offset, limit=limit))
+    else:
+        return Records(items=datasets.list_records_for_user(db, dataset, current_user, offset=offset, limit=limit))
+
+
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
 def get_dataset(
     *,
@@ -70,20 +108,6 @@ def get_dataset(
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
     return dataset
-
-
-@router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
-def get_dataset_annotations(
-    *,
-    db: Session = Depends(get_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
-):
-    dataset = _get_dataset(db, dataset_id)
-
-    authorize(current_user, DatasetPolicyV1.get(dataset))
-
-    return dataset.annotations
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=Dataset)
@@ -126,6 +150,26 @@ def create_dataset_annotation(
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
         return datasets.create_annotation(db, dataset, annotation_create)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
+def create_dataset_records(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    records_create: RecordsCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, DatasetPolicyV1.create_records)
+
+    dataset = _get_dataset(db, dataset_id)
+
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        datasets.create_records(db, dataset, current_user, records_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
