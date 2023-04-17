@@ -27,266 +27,7 @@ export default {
     };
   },
   async created() {
-    // TODO - INITIALS records and inputs, will be replaced by API values
-    const records = [
-      {
-        id: "record_1",
-        recordStatus: "discard",
-        responses: [
-          {
-            record_id: "record_1",
-            question_id: "id_5",
-            options: [{ id: 1, value: true, text: "1" }],
-          },
-          {
-            record_id: "record_1",
-            question_id: "id_6",
-            options: [{ id: "id_6-4", value: true, text: "4" }],
-          },
-        ],
-        fields: [
-          {
-            id: "field_1",
-            title: "Input",
-            text: `
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Dolorum ratione quas quis eveniet harum cum, earum a facere
-            voluptate fugit nostrum sequi facilis incidunt debitis unde?
-            Eos rem debitis velit? Officia magni odit possimus quis nisi.
-            Dolore, eaque eligendi! Beatae quos debitis soluta distinctio
-            qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium
-            explicabo ab, pariatur id sapiente tenetur.
-            `,
-          },
-          {
-            id: "field_2",
-            title: "Output",
-            text: `
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Vitae cupiditate fugit quos officiis expedita, deleniti libero
-            inventore fugiat perferendis dolor optio praesentium enim molestiae
-            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
-            reprehenderit non distinctio repellat adipisci laborum, fugit sint
-            labore nulla tempore quam eos iste asperiores eius laudantium vel
-            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
-            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
-            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
-            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
-            delectus similique! Commodi, a. Totam illo iure iste voluptate?
-            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
-            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
-            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
-            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
-            architecto necessitatibus accusamus nesciunt exercitationem neque
-            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
-            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
-            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
-            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
-            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
-            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
-            quaerat impedit animi porro saepe ipsa molestiae quibusdam
-            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
-            eligendi voluptate.`,
-          },
-        ],
-      },
-      {
-        id: "record_2",
-        responses: [
-          {
-            record_id: "record_2",
-            question_id: "id_6",
-            options: [{ id: "id_6-5", value: true, text: "5" }],
-          },
-          {
-            record_id: "record_2",
-            question_id: "id_7",
-            options: [
-              {
-                id: "patati",
-                value: "I m blue daboudi dabouda",
-                text: "I m blue daboudi dabouda",
-              },
-            ],
-          },
-        ],
-        fields: [
-          {
-            id: "field_3",
-            title: "Input",
-            text: `
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Dolorum ratione quas quis eveniet harum cum, earum a facere
-            voluptate fugit nostrum sequi facilis incidunt debitis unde?
-            Eos rem debitis velit? Officia magni odit possimus quis nisi.
-            Dolore, eaque eligendi! Beatae quos debitis soluta distinctio
-            qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium
-            explicabo ab, pariatur id sapiente tenetur.
-            `,
-          },
-          {
-            id: "field_4",
-            title: "Output",
-            text: `
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Vitae cupiditate fugit quos officiis expedita, deleniti libero
-            inventore fugiat perferendis dolor optio praesentium enim molestiae
-            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
-            reprehenderit non distinctio repellat adipisci laborum, fugit sint
-            labore nulla tempore quam eos iste asperiores eius laudantium vel
-            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
-            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
-            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
-            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
-            delectus similique! Commodi, a. Totam illo iure iste voluptate?
-            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
-            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
-            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
-            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
-            architecto necessitatibus accusamus nesciunt exercitationem neque
-            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
-            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
-            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
-            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
-            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
-            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
-            quaerat impedit animi porro saepe ipsa molestiae quibusdam
-            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
-            eligendi voluptate.`,
-          },
-          {
-            id: "field_5",
-            title: "Second options",
-            text: `
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Vitae cupiditate fugit quos officiis expedita, deleniti libero
-            inventore fugiat perferendis dolor optio praesentium enim molestiae
-            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
-            reprehenderit non distinctio repellat adipisci laborum, fugit sint
-            labore nulla tempore quam eos iste asperiores eius laudantium vel
-            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
-            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
-            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
-            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
-            delectus similique! Commodi, a. Totam illo iure iste voluptate?
-            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
-            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
-            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
-            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
-            architecto necessitatibus accusamus nesciunt exercitationem neque
-            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
-            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
-            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
-            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
-            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
-            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
-            quaerat impedit animi porro saepe ipsa molestiae quibusdam
-            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
-            eligendi voluptate.`,
-          },
-        ],
-      },
-      {
-        id: "record_3",
-        responses: [
-          {
-            record_id: "record_3",
-            question_id: "id_6",
-            options: [{ id: "id_6-1", value: true, text: "1" }],
-          },
-          {
-            record_id: "record_3",
-            question_id: "id_7",
-            options: [
-              {
-                id: "patato",
-                value: "Tell me why",
-                text: "Tell me why",
-              },
-            ],
-          },
-        ],
-        fields: [
-          {
-            id: "field_6",
-            title: "Prompt",
-            text: `This is a prompt`,
-          },
-          {
-            id: "field_7",
-            title: "Output",
-            text: `
-           Outputs of the prompt`,
-          },
-        ],
-      },
-      {
-        id: "record_4",
-        responses: [
-          {
-            record_id: "record_4",
-            question_id: "id_6",
-            options: [{ id: "id_6-3", value: true, text: "3" }],
-          },
-          {
-            record_id: "record_4",
-            question_id: "id_7",
-            options: [
-              {
-                id: "scatman",
-                value: "Scatman babidibabidibou",
-                text: "Scatman babidibabidibou",
-              },
-            ],
-          },
-        ],
-        fields: [
-          {
-            id: "field_8",
-            title: "Prompt",
-            text: `This is another prompt`,
-          },
-          {
-            id: "field_9",
-            title: "Output",
-            text: `Outputs of another prompt`,
-          },
-        ],
-      },
-      {
-        id: "record_5",
-        responses: [
-          {
-            record_id: "record_5",
-            question_id: "id_6",
-            options: [{ id: "id_6-1", value: true, text: "1" }],
-          },
-          {
-            record_id: "record_5",
-            question_id: "id_8",
-            options: [
-              {
-                id: "patato",
-                value: "Ce rêve bleu",
-                text: "Ce rêve bleu",
-              },
-            ],
-          },
-        ],
-        fields: [
-          {
-            id: "field_10",
-            title: "Field 1",
-            text: "This is a field",
-          },
-          {
-            id: "field_11",
-            title: "Output",
-            text: "This is an output",
-          },
-        ],
-      },
-    ];
+    // TODO - INITIAL inputs, will be replaced by API values
     const inputs = [
       // {
       //   id: "id_1",
@@ -353,51 +94,19 @@ export default {
       },
     ];
 
-    // FORMAT records and questions in good orm shapes
-    // const formattedRecords = this.factoryRecordsForOrm(records);
+    // FORMAT questions in good orm shapes
     const formattedQuestions = this.factoryQuestionsForOrm(inputs);
 
     // UPSERT records and questions in ORM
-    // upsertRecords(formattedRecords);
     upsertDatasetQuestions(formattedQuestions);
 
     this.onBusEventIsLoadingLabels();
-
-    // //test
-    // console.log(
-    //   this.currentPage,
-    //   getRecordWithFieldsByDatasetId(this.datasetId, 1, this.currentPage + 1),
-    //   getRecordWithFieldsByDatasetId(this.datasetId, 1, 4 + 1)
-    // );
-
-    // const isDataForNextPage = !!getRecordWithFieldsByDatasetId(
-    //   this.datasetId,
-    //   1,
-    //   this.currentPage + 1
-    // );
-
-    // if (!isDataForNextPage) {
-    //   console.log("call api");
-    // }
   },
-  // async beforeUpdate() {
-  //   //test
-  //   const isDataForNextPage = isNil(
-  //     getRecordWithFieldsByDatasetId(this.datasetId, 1, this.currentPage + 1)
-  //   );
-
-  //   if (isDataForNextPage) {
-  //     console.log("call api");
-  //     const records = await this.getRecords(this.datasetId, 5);
-  //     const formattedRecords = this.factoryRecordsForOrm(records);
-  //     upsertRecords(formattedRecords);
-  //   }
-  // },
   watch: {
     currentPage: {
       immediate: true,
 
-      async handler(newValue, oldValue) {
+      async handler(newCurrentPage) {
         const isDataForNextPage = isNil(
           getRecordWithFieldsByDatasetId(
             this.datasetId,
@@ -405,36 +114,15 @@ export default {
             this.currentPage + 1
           )
         );
-        console.log(
-          getRecordWithFieldsByDatasetId(
-            this.datasetId,
-            1,
-            this.currentPage + 1
-          )
-        );
+
         if (isDataForNextPage) {
-          console.log("call api");
-          const records = await this.getRecords(this.datasetId, newValue);
+          const records = await this.getRecords(this.datasetId, newCurrentPage);
           const formattedRecords = this.factoryRecordsForOrm(records);
           upsertRecords(formattedRecords);
         }
       },
     },
   },
-  // watch: {
-  //   async currentPage(newValue, oldValue) {
-  //     const isDataForNextPage = isNil(
-  //       getRecordWithFieldsByDatasetId(this.datasetId, 1, this.currentPage + 1)
-  //     );
-
-  //     if (isDataForNextPage) {
-  //       console.log("call api");
-  //       const records = await this.getRecords(this.datasetId, 5);
-  //       const formattedRecords = this.factoryRecordsForOrm(records);
-  //       upsertRecords(formattedRecords);
-  //     }
-  //   },
-  // },
   methods: {
     onBusEventIsLoadingLabels() {
       this.$root.$on("current-page", (currentPage) => {
