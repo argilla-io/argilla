@@ -11,7 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Optional
 from uuid import UUID
 
 from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
@@ -22,8 +21,8 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.security.model import User
-from sqlalchemy import and_, func
-from sqlalchemy.orm import Session, contains_eager, joinedload
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 LIST_RECORDS_LIMIT = 20
 
