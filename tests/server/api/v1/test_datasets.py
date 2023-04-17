@@ -200,32 +200,13 @@ def test_list_dataset_annotations_with_nonexistent_dataset_id(client: TestClient
 
 def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
     dataset = DatasetFactory.create()
+
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
-    response_a = ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        record=record_a,
-    )
-
-    response_b_1 = ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-    )
-    response_b_2 = ResponseFactory.create(
-        values={
-            "input_ok": {"value": "no"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-    )
+    ResponseFactory.create(values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}, record=record_a)
+    ResponseFactory.create(values={"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}}, record=record_b)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header)
 
@@ -236,17 +217,6 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
                 "id": str(record_a.id),
                 "fields": {"record_a": "value_a"},
                 "external_id": record_a.external_id,
-                "responses": [
-                    {
-                        "id": str(response_a.id),
-                        "values": {
-                            "input_ok": {"value": "yes"},
-                            "output_ok": {"value": "yes"},
-                        },
-                        "inserted_at": response_a.inserted_at.isoformat(),
-                        "updated_at": response_a.updated_at.isoformat(),
-                    },
-                ],
                 "inserted_at": record_a.inserted_at.isoformat(),
                 "updated_at": record_a.updated_at.isoformat(),
             },
@@ -254,26 +224,6 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
                 "id": str(record_b.id),
                 "fields": {"record_b": "value_b"},
                 "external_id": record_b.external_id,
-                "responses": [
-                    {
-                        "id": str(response_b_1.id),
-                        "values": {
-                            "input_ok": {"value": "yes"},
-                            "output_ok": {"value": "no"},
-                        },
-                        "inserted_at": response_b_1.inserted_at.isoformat(),
-                        "updated_at": response_b_1.updated_at.isoformat(),
-                    },
-                    {
-                        "id": str(response_b_2.id),
-                        "values": {
-                            "input_ok": {"value": "no"},
-                            "output_ok": {"value": "no"},
-                        },
-                        "inserted_at": response_b_2.inserted_at.isoformat(),
-                        "updated_at": response_b_2.updated_at.isoformat(),
-                    },
-                ],
                 "inserted_at": record_b.inserted_at.isoformat(),
                 "updated_at": record_b.updated_at.isoformat(),
             },
@@ -281,7 +231,6 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
                 "id": str(record_c.id),
                 "fields": {"record_c": "value_c"},
                 "external_id": record_c.external_id,
-                "responses": [],
                 "inserted_at": record_c.inserted_at.isoformat(),
                 "updated_at": record_c.updated_at.isoformat(),
             },
@@ -345,42 +294,21 @@ def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: 
     workspace = WorkspaceFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[workspace])
     dataset = DatasetFactory.create(workspace=workspace)
+
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
-    response_a_admin = ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        record=record_a,
-        user=admin,
+    ResponseFactory.create(
+        values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}, record=record_a, user=admin
     )
-
-    response_b_admin = ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-        user=admin,
+    ResponseFactory.create(
+        values={"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}}, record=record_b, user=admin
     )
-    response_b_annotator = ResponseFactory.create(
-        values={
-            "input_ok": {"value": "no"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-        user=annotator,
+    ResponseFactory.create(
+        values={"input_ok": {"value": "no"}, "output_ok": {"value": "no"}}, record=record_b, user=annotator
     )
-    response_b_other = ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        record=record_b,
-    )
+    ResponseFactory.create(values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}, record=record_b)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
@@ -391,7 +319,6 @@ def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: 
                 "id": str(record_a.id),
                 "fields": {"record_a": "value_a"},
                 "external_id": record_a.external_id,
-                "responses": [],
                 "inserted_at": record_a.inserted_at.isoformat(),
                 "updated_at": record_a.updated_at.isoformat(),
             },
@@ -399,17 +326,6 @@ def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: 
                 "id": str(record_b.id),
                 "fields": {"record_b": "value_b"},
                 "external_id": record_b.external_id,
-                "responses": [
-                    {
-                        "id": str(response_b_annotator.id),
-                        "values": {
-                            "input_ok": {"value": "no"},
-                            "output_ok": {"value": "no"},
-                        },
-                        "inserted_at": response_b_annotator.inserted_at.isoformat(),
-                        "updated_at": response_b_annotator.updated_at.isoformat(),
-                    },
-                ],
                 "inserted_at": record_b.inserted_at.isoformat(),
                 "updated_at": record_b.updated_at.isoformat(),
             },
@@ -417,7 +333,6 @@ def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: 
                 "id": str(record_c.id),
                 "fields": {"record_c": "value_c"},
                 "external_id": record_c.external_id,
-                "responses": [],
                 "inserted_at": record_c.inserted_at.isoformat(),
                 "updated_at": record_c.updated_at.isoformat(),
             },
