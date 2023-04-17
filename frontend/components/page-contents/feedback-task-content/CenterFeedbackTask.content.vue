@@ -182,6 +182,73 @@ export default {
           },
         ],
       },
+      {
+        id: "record_3",
+        responses: [
+          {
+            record_id: "record_3",
+            question_id: "id_6",
+            options: [{ id: "id_6-1", value: true, text: "1" }],
+          },
+          {
+            record_id: "record_3",
+            question_id: "id_7",
+            options: [
+              {
+                id: "patato",
+                value: "Tell me why",
+                text: "Tell me why",
+              },
+            ],
+          },
+        ],
+        fields: [
+          {
+            id: "field_6",
+            title: "Prompt",
+            text: `This is a prompt`,
+          },
+          {
+            id: "field_7",
+            title: "Output",
+            text: `
+           Outputs of the prompt`,
+          },
+        ],
+      },
+      {
+        id: "record_4",
+        responses: [
+          {
+            record_id: "record_4",
+            question_id: "id_6",
+            options: [{ id: "id_6-3", value: true, text: "3" }],
+          },
+          {
+            record_id: "record_4",
+            question_id: "id_7",
+            options: [
+              {
+                id: "scatman",
+                value: "Scatman babidibabidibou",
+                text: "Scatman babidibabidibou",
+              },
+            ],
+          },
+        ],
+        fields: [
+          {
+            id: "field_8",
+            title: "Prompt",
+            text: `This is another prompt`,
+          },
+          {
+            id: "field_9",
+            title: "Output",
+            text: `Outputs of another prompt`,
+          },
+        ],
+      },
     ];
     const inputs = [
       // {
