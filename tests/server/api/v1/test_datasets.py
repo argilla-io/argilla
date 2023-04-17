@@ -200,13 +200,9 @@ def test_list_dataset_annotations_with_nonexistent_dataset_id(client: TestClient
 
 def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
-
-    ResponseFactory.create(values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}, record=record_a)
-    ResponseFactory.create(values={"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}}, record=record_b)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header)
 
@@ -294,21 +290,9 @@ def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: 
     workspace = WorkspaceFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[workspace])
     dataset = DatasetFactory.create(workspace=workspace)
-
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
-
-    ResponseFactory.create(
-        values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}, record=record_a, user=admin
-    )
-    ResponseFactory.create(
-        values={"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}}, record=record_b, user=admin
-    )
-    ResponseFactory.create(
-        values={"input_ok": {"value": "no"}, "output_ok": {"value": "no"}}, record=record_b, user=annotator
-    )
-    ResponseFactory.create(values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}, record=record_b)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
