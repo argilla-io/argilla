@@ -292,9 +292,6 @@ class Argilla:
                 max_retries=max_retries,
             )
 
-        if workspace is not None:
-            self.set_workspace(workspace)
-
         tags = tags or {}
         metadata = metadata or {}
 
