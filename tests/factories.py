@@ -18,6 +18,8 @@ from argilla.server.models import (
     Annotation,
     AnnotationType,
     Dataset,
+    Record,
+    Response,
     User,
     UserRole,
     Workspace,
@@ -44,6 +46,26 @@ class WorkspaceFactory(factory.alchemy.SQLAlchemyModelFactory):
     name = factory.Sequence(lambda n: f"workspace-{n}")
 
 
+class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = User
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    first_name = factory.Faker("first_name")
+    username = factory.Sequence(lambda n: f"username-{n}")
+    api_key = factory.Sequence(lambda n: f"api-key-{n}")
+    password_hash = "$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw."
+
+
+class AdminFactory(UserFactory):
+    role = UserRole.admin
+
+
+class AnnotatorFactory(UserFactory):
+    role = UserRole.annotator
+
+
 class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Dataset
@@ -52,6 +74,34 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     name = factory.Sequence(lambda n: f"dataset-{n}")
     workspace = factory.SubFactory(WorkspaceFactory)
+
+
+class RecordFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Record
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    fields = {
+        "text": "This is a text",
+        "sentiment": "neutral",
+    }
+    external_id = factory.Sequence(lambda n: f"external-id-{n}")
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Response
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    values = {
+        "question_a": {"value": "Question a response"},
+        "question_b": {"value": "Question b response"},
+    }
+    record = factory.SubFactory(RecordFactory)
+    user = factory.SubFactory(UserFactory)
 
 
 class AnnotationFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -85,23 +135,3 @@ class RatingAnnotationFactory(AnnotationFactory):
             {"value": 10},
         ],
     }
-
-
-class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
-    class Meta:
-        model = User
-        sqlalchemy_session = Session
-        sqlalchemy_session_persistence = "commit"
-
-    first_name = factory.Faker("first_name")
-    username = factory.Sequence(lambda n: f"username-{n}")
-    api_key = factory.Sequence(lambda n: f"api-key-{n}")
-    password_hash = "$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw."
-
-
-class AdminFactory(UserFactory):
-    role = UserRole.admin
-
-
-class AnnotatorFactory(UserFactory):
-    role = UserRole.annotator

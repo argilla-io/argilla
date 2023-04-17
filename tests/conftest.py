@@ -28,7 +28,7 @@ from elasticsearch8 import Elasticsearch
 from opensearchpy import OpenSearch
 from starlette.testclient import TestClient
 
-from .factories import AnnotatorFactory
+from .factories import AdminFactory, AnnotatorFactory
 from .helpers import SecuredClient
 
 
@@ -76,18 +76,7 @@ def elasticsearch(es_config):
 
 @pytest.fixture(scope="function")
 def admin(db):
-    user = User(
-        first_name="Admin",
-        username="admin",
-        role=UserRole.admin,
-        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
-        api_key="admin.apikey",
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
+    return AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
 
 
 @pytest.fixture(scope="function")
