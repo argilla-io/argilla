@@ -432,9 +432,8 @@ class TestDatasetForTextClassification:
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
     def test_from_dataset_with_non_argilla_format_multilabel(self):
-        # TODO(@frascuchon): Move dataset to the new org
         ds = datasets.load_dataset(
-            "rubrix/go_emotions_test_100",
+            "argilla/_go_emotions_test_100",
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
@@ -474,8 +473,7 @@ class TestDatasetForTextClassification:
     )
     def test_from_dataset_with_non_argilla_format(self):
         ds = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/app_reviews_train_100",
+            "argilla/_app_reviews_train_100",
             split="train",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
@@ -608,15 +606,13 @@ class TestDatasetForTokenClassification:
         dataset_ds = rg.DatasetForTokenClassification(tokenclassification_records).to_datasets()
         _push_to_hub_with_retries(
             dataset_ds,
-            # TODO(@frascuchon): Move dataset to the new org
-            repo_id="rubrix/_test_token_classification_records",
+            repo_id="argilla/_test_token_classification_records",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
         sleep(1)
         dataset_ds = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/_test_token_classification_records",
+            "argilla/_test_token_classification_records",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -629,8 +625,7 @@ class TestDatasetForTokenClassification:
     )
     def test_prepare_for_training_with_spacy(self):
         ner_dataset = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/gutenberg_spacy-ner",
+            "argilla/gutenberg_spacy-ner",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -661,8 +656,7 @@ class TestDatasetForTokenClassification:
     )
     def test_prepare_for_training_with_spark_nlp(self):
         ner_dataset = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/gutenberg_spacy-ner",
+            "argilla/gutenberg_spacy-ner",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -686,8 +680,7 @@ class TestDatasetForTokenClassification:
     )
     def test_prepare_for_training(self):
         ner_dataset = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/gutenberg_spacy-ner",
+            "argilla/gutenberg_spacy-ner",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -750,8 +743,7 @@ class TestDatasetForTokenClassification:
     )
     def test_from_dataset_with_non_argilla_format(self):
         ds = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/wikiann_es_test_100",
+            "argilla/_wikiann_es_test_100",
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
@@ -899,14 +891,13 @@ class TestDatasetForText2Text:
         dataset_ds = rg.DatasetForText2Text(text2text_records).to_datasets()
         _push_to_hub_with_retries(
             dataset_ds,
-            # TODO(@frascuchon): Move dataset to the new org
-            repo_id="rubrix/_test_text2text_records",
+            repo_id="argilla/_test_text2text_records",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
         sleep(1)
         dataset_ds = datasets.load_dataset(
-            "rubrix/_test_text2text_records",
+            "argilla/_test_text2text_records",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -919,7 +910,7 @@ class TestDatasetForText2Text:
     )
     def test_from_dataset_with_non_argilla_format(self):
         ds = datasets.load_dataset(
-            "rubrix/big_patent_a_test_100",
+            "argilla/_big_patent_a_test_100",
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )

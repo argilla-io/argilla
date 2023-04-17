@@ -406,7 +406,7 @@ class Argilla:
         Args:
             name: The dataset name.
             query: An ElasticSearch query with the `query string syntax
-                <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
+                <https://docs.argilla.io/en/latest/guides/query_datasets.html>`_
             ids: If provided, deletes dataset records with given ids.
             discard_only: If `True`, matched records won't be deleted. Instead, they will be marked as `Discarded`
             discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.
@@ -442,6 +442,8 @@ class Argilla:
         sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         batch_size: int = 250,
+        include_vectors: bool = True,
+        include_metrics: bool = True,
         as_pandas=None,
     ) -> Dataset:
         """Loads a argilla dataset.
@@ -457,8 +459,15 @@ class Argilla:
             id_from: If provided, starts gathering the records starting from that Record.
                 As the Records returned with the load method are sorted by ID, ´id_from´
                 can be used to load using batches.
+            batch_size: If provided, load `batch_size` samples per request. A lower batch
+                size may help avoid timeouts.
+            include_vectors: When set to `False`, indicates that the record data will be retrieved excluding its vectors,
+                if any. By default, this parameter is set to `True`, meaning that vector data will be included.
+            include_metrics: When set to `False`, indicates that the record data will be retrieved excluding its metrics.
+                By default, this parameter is set to `True`, meaning that metrics will be included.
             as_pandas: DEPRECATED! To get a pandas DataFrame do
                 ``rg.load('my_dataset').to_pandas()``.
+
 
         Returns:
             A argilla dataset.
@@ -489,6 +498,8 @@ class Argilla:
             sort=sort,
             id_from=id_from,
             batch_size=batch_size,
+            include_vectors=include_vectors,
+            include_metrics=include_metrics,
         )
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
@@ -593,6 +604,8 @@ class Argilla:
         sort: Optional[List[Tuple[str, str]]] = None,
         id_from: Optional[str] = None,
         batch_size: int = 250,
+        include_vectors: bool = True,
+        include_metrics: bool = True,
     ) -> Dataset:
         dataset = self.datasets.find_by_name(name=name)
         task = dataset.task
@@ -615,6 +628,11 @@ class Argilla:
             if sort is not None:
                 _LOGGER.warning("Results are sorted by vector similarity, so 'sort' parameter is ignored.")
 
+            if not (include_metrics and include_vectors):
+                _LOGGER.warning(
+                    "Metrics and vectors cannot be excluded when using vector search. These parameters will be ignored."
+                )
+
             vector_search = VectorSearch(name=vector[0], value=vector[1])
             results = self.search.search_records(
                 name=name,
@@ -627,9 +645,29 @@ class Argilla:
 
             return dataset_class(results.records)
 
+        all_supported_fields = {
+            "metadata.*",
+            "status",
+            "event_timestamp",
+            "annotation*",
+            "prediction*",
+            "search_keywords",
+            "inputs.*",
+            "multi_label",
+            "explanation*",
+            "text",
+            "tokens",
+        }
+
+        if include_vectors:
+            all_supported_fields.add("vectors.*")
+
+        if include_metrics:
+            all_supported_fields.add("metrics.*")
+
         records = self.datasets.scan(
             name=name,
-            projection={"*"},
+            projection=all_supported_fields,
             limit=limit,
             sort=sort,
             id_from=id_from,
