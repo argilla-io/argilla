@@ -13,6 +13,7 @@
         verticalPosition: badgeVerticalPosition,
         horizontalPosition: badgeHorizontalPosition,
         borderColor: badgeBorderColor,
+        size: badgeSize,
       }"
     >
       <svgicon :name="icon" :width="iconSize" :height="iconSize" />
@@ -44,9 +45,15 @@ export default {
     },
     badgeVerticalPosition: {
       type: String,
+      default: "top",
     },
     badgeHorizontalPosition: {
       type: String,
+      default: "right",
+    },
+    badgeSize: {
+      type: String,
+      default: "8px",
     },
     badgeBorderColor: {
       type: String,
