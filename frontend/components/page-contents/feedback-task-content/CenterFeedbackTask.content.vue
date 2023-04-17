@@ -7,8 +7,12 @@
 </template>
 
 <script>
+import { isNil } from "lodash";
 import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import { upsertRecords } from "@/models/feedback-task-model/record/record.queries";
+import {
+  upsertRecords,
+  getRecordWithFieldsByDatasetId,
+} from "@/models/feedback-task-model/record/record.queries";
 export default {
   name: "CenterFeedbackTaskContent",
   props: {
@@ -22,7 +26,7 @@ export default {
       currentPage: 0,
     };
   },
-  created() {
+  async created() {
     // TODO - INITIALS records and inputs, will be replaced by API values
     const records = [
       {
@@ -249,6 +253,39 @@ export default {
           },
         ],
       },
+      {
+        id: "record_5",
+        responses: [
+          {
+            record_id: "record_5",
+            question_id: "id_6",
+            options: [{ id: "id_6-1", value: true, text: "1" }],
+          },
+          {
+            record_id: "record_5",
+            question_id: "id_8",
+            options: [
+              {
+                id: "patato",
+                value: "Ce rêve bleu",
+                text: "Ce rêve bleu",
+              },
+            ],
+          },
+        ],
+        fields: [
+          {
+            id: "field_10",
+            title: "Field 1",
+            text: "This is a field",
+          },
+          {
+            id: "field_11",
+            title: "Output",
+            text: "This is an output",
+          },
+        ],
+      },
     ];
     const inputs = [
       // {
@@ -317,15 +354,87 @@ export default {
     ];
 
     // FORMAT records and questions in good orm shapes
-    const formattedRecords = this.factoryRecordsForOrm(records);
+    // const formattedRecords = this.factoryRecordsForOrm(records);
     const formattedQuestions = this.factoryQuestionsForOrm(inputs);
 
     // UPSERT records and questions in ORM
-    upsertRecords(formattedRecords);
+    // upsertRecords(formattedRecords);
     upsertDatasetQuestions(formattedQuestions);
 
     this.onBusEventIsLoadingLabels();
+
+    // //test
+    // console.log(
+    //   this.currentPage,
+    //   getRecordWithFieldsByDatasetId(this.datasetId, 1, this.currentPage + 1),
+    //   getRecordWithFieldsByDatasetId(this.datasetId, 1, 4 + 1)
+    // );
+
+    // const isDataForNextPage = !!getRecordWithFieldsByDatasetId(
+    //   this.datasetId,
+    //   1,
+    //   this.currentPage + 1
+    // );
+
+    // if (!isDataForNextPage) {
+    //   console.log("call api");
+    // }
   },
+  // async beforeUpdate() {
+  //   //test
+  //   const isDataForNextPage = isNil(
+  //     getRecordWithFieldsByDatasetId(this.datasetId, 1, this.currentPage + 1)
+  //   );
+
+  //   if (isDataForNextPage) {
+  //     console.log("call api");
+  //     const records = await this.getRecords(this.datasetId, 5);
+  //     const formattedRecords = this.factoryRecordsForOrm(records);
+  //     upsertRecords(formattedRecords);
+  //   }
+  // },
+  watch: {
+    currentPage: {
+      immediate: true,
+
+      async handler(newValue, oldValue) {
+        const isDataForNextPage = isNil(
+          getRecordWithFieldsByDatasetId(
+            this.datasetId,
+            1,
+            this.currentPage + 1
+          )
+        );
+        console.log(
+          getRecordWithFieldsByDatasetId(
+            this.datasetId,
+            1,
+            this.currentPage + 1
+          )
+        );
+        if (isDataForNextPage) {
+          console.log("call api");
+          const records = await this.getRecords(this.datasetId, newValue);
+          const formattedRecords = this.factoryRecordsForOrm(records);
+          upsertRecords(formattedRecords);
+        }
+      },
+    },
+  },
+  // watch: {
+  //   async currentPage(newValue, oldValue) {
+  //     const isDataForNextPage = isNil(
+  //       getRecordWithFieldsByDatasetId(this.datasetId, 1, this.currentPage + 1)
+  //     );
+
+  //     if (isDataForNextPage) {
+  //       console.log("call api");
+  //       const records = await this.getRecords(this.datasetId, 5);
+  //       const formattedRecords = this.factoryRecordsForOrm(records);
+  //       upsertRecords(formattedRecords);
+  //     }
+  //   },
+  // },
   methods: {
     onBusEventIsLoadingLabels() {
       this.$root.$on("current-page", (currentPage) => {
@@ -356,6 +465,21 @@ export default {
           tooltip_message: question.tooltipMessage,
         };
       });
+    },
+    async getRecords(datasetId, currentPage, numberOfRecordsToFetch = 5) {
+      try {
+        // TODO - replace call to api to get record with response and field
+        const response = await fetch(
+          `http://localhost:8000/records?_start=${currentPage}&_limit=${numberOfRecordsToFetch}`
+        );
+        const record = await response.json();
+
+        return record;
+      } catch (err) {
+        throw {
+          response: "ERROR_FETCHING_RECORDS",
+        };
+      }
     },
   },
   destroyed() {

@@ -31,31 +31,31 @@ export default {
       required: true,
     },
   },
-  created() {
-    // RETRIEVES records from ORM
-    this.record = getRecordWithFieldsByDatasetId(
-      this.datasetId,
-      1,
-      this.recordOffset
-    );
-
-    this.questionsWithRecordAnswers = null;
-    if (this.record) {
-      this.recordResponses = getRecordResponsesByRecordId(this.record.id);
-
-      // COMPUTE QUESTIONS
-      // INIT questions with record response answers
-      this.questions = getQuestionsByDatasetId(
+  computed: {
+    record() {
+      return getRecordWithFieldsByDatasetId(
         this.datasetId,
-        this.orderBy?.orderQuestionsBy,
-        this.orderBy?.ascendent
+        1,
+        this.recordOffset
       );
-
-      // COMPUTE questions with responses from record
-      const newOptionsByQuestion = this.factoryNewOptionsByQuestion();
-      this.questionsWithRecordAnswers =
-        this.factoryQuestionsWithRecordAnswer(newOptionsByQuestion);
-    }
+    },
+    recordResponses() {
+      if (this.record) return getRecordResponsesByRecordId(this.record.id);
+    },
+    questions() {
+      if (this.record)
+        return getQuestionsByDatasetId(
+          this.datasetId,
+          this.orderBy?.orderQuestionsBy,
+          this.orderBy?.ascendent
+        );
+    },
+    questionsWithRecordAnswers() {
+      if (this.record) {
+        const newOptionsByQuestion = this.factoryNewOptionsByQuestion();
+        return this.factoryQuestionsWithRecordAnswer(newOptionsByQuestion);
+      }
+    },
   },
   methods: {
     factoryQuestionsWithRecordAnswer(newOptionsByQuestion) {
