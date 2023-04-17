@@ -11,16 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from time import sleep
 
 import pytest
 from argilla.client.api import active_api
 from argilla.client.sdk.commons.errors import NotFoundApiError
 
 
-def test_partial_update_with_not_found(
-    mocked_client,
-    gutenberg_spacy_ner,
-):
+def test_partial_update_with_not_found(mocked_client, gutenberg_spacy_ner):
     with pytest.raises(NotFoundApiError):
         active_api().datasets.update_record(
             name=gutenberg_spacy_ner,
@@ -29,10 +27,7 @@ def test_partial_update_with_not_found(
         )
 
 
-def test_partial_record_update(
-    mocked_client,
-    gutenberg_spacy_ner,
-):
+def test_partial_record_update(mocked_client, gutenberg_spacy_ner):
     expected_id = "00c27206-da48-4fc3-aab7-4b730628f8ac"
 
     record = record_data_by_id(
@@ -73,11 +68,7 @@ def test_partial_record_update(
     }
 
 
-def record_data_by_id(
-    *,
-    dataset: str,
-    record_id: str,
-):
+def record_data_by_id(*, dataset: str, record_id: str):
     data = active_api().datasets.scan(
         name=dataset,
         query=f"id: {record_id}",

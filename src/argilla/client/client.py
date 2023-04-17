@@ -345,6 +345,7 @@ class Argilla:
         else:
             raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
 
+        results = []
         with Progress() as progress_bar:
             task = progress_bar.add_task("Logging...", total=len(records), visible=verbose)
 
@@ -372,14 +373,12 @@ class Argilla:
 
             if num_threads >= 1:
                 with ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    results = list(executor.map(log_batch, enumerate(batches)))
+                    results.extend(list(executor.map(log_batch, enumerate(batches))))
             else:
-                results = list(map(log_batch, enumerate(batches)))
+                results.extend(list(map(log_batch, enumerate(batches))))
 
-            processed, failed = 0, 0
-            for processed_batch, failed_batch in results:
-                processed += processed_batch
-                failed += failed_batch
+        processed_batches, failed_batches = zip(*results)
+        processed, failed = sum(processed_batches), sum(failed_batches)
 
         # TODO: improve logging policy in library
         if verbose:

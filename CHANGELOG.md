@@ -14,12 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 - Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
+- bulk endpoints will upsert data when record `id` is present. Closes [#2535](https://github.com/argilla-io/argilla/issues/2535)
 - The `rg.log` computes all batches and raise an error for all failed batches.
 - The `rg.log` default batch size is now 100.
 
 ## Deprecated
 
 - The `rg.log_async` function is deprecated and will be removed in next minor release.
+
 
 ## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.5.1...v1.6.0)
 
