@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
+from argilla.server.elasticsearch import ElasticSearchEngine, get_search_engine
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
     Annotation,
@@ -175,9 +176,10 @@ def create_dataset_records(
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
-def publish_dataset(
+async def publish_dataset(
     *,
     db: Session = Depends(get_db),
+    search_engine: ElasticSearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -188,7 +190,7 @@ def publish_dataset(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        return datasets.publish_dataset(db, dataset)
+        return await datasets.publish_dataset(db, search_engine, dataset)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 

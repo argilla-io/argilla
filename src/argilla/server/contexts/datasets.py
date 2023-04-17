@@ -11,9 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Optional
 from uuid import UUID
 
+from argilla.server.elasticsearch import ElasticSearchEngine
 from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
 from argilla.server.schemas.v1.datasets import (
     AnnotationCreate,
@@ -54,19 +54,27 @@ def create_dataset(db: Session, dataset_create: DatasetCreate):
     return dataset
 
 
-def publish_dataset(db: Session, dataset: Dataset):
+async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, dataset: Dataset):
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
 
     if _count_annotations_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without annotations")
 
-    dataset.status = DatasetStatus.ready
+    try:
+        dataset.status = DatasetStatus.ready
+        await search_engine.create_index(dataset)
+        # TODO: DB rollback is executed if some problem is found creating the index. If the error
+        #  is raised from the commit statement, index creation should be reverted
+        #  We need a way to commit the dataset status before creating the index, and rollback the status
+        #  if something went wrong with index creation
+        db.commit()
+        db.refresh(dataset)
 
-    db.commit()
-    db.refresh(dataset)
-
-    return dataset
+        return dataset
+    except:
+        db.rollback()
+        raise
 
 
 def delete_dataset(db: Session, dataset: Dataset):
