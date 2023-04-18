@@ -1,6 +1,10 @@
 <template>
   <div class="record">
-    <div class="item" v-for="{ id, title, text } in record.fields" :key="id">
+    <div
+      class="item"
+      v-for="{ id, title, text } in record.record_fields"
+      :key="id"
+    >
       <div class="title-area --body1">
         <span v-text="title" />
       </div>

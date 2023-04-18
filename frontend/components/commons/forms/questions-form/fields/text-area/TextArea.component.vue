@@ -20,8 +20,8 @@
       <Text2TextContentEditable
         :annotationEnabled="true"
         :annotations="[]"
-        :defaultText="initialOutputs.text"
-        :placeholder="initialOutputs.placeholder"
+        :defaultText="initialOptions.text"
+        :placeholder="placeholder"
         :isShortcutToSave="false"
         @change-text="onChangeTextArea"
       />
@@ -39,10 +39,10 @@ export default {
       type: String,
       required: true,
     },
-    initialOutputs: {
+    initialOptions: {
       type: Object,
       default: () => {
-        return { text: "", placeholder: "" };
+        return { text: "", value: "" };
       },
     },
     placeholder: {
@@ -68,10 +68,12 @@ export default {
   },
   methods: {
     onChangeTextArea(newText) {
-      this.$emit("on-change-text-area", {
-        text: newText,
-        placeholder: this.initialOutputs?.placeholder ?? "",
-      });
+      this.$emit("on-change-text-area", [
+        {
+          text: newText,
+          value: newText,
+        },
+      ]);
 
       const isAnyText = newText?.length;
       if (this.isRequired) {
