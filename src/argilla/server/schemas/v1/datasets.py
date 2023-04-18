@@ -98,7 +98,6 @@ class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
     external_id: Optional[str]
-    responses: List[Response]
     inserted_at: datetime
     updated_at: datetime
 
