@@ -13,6 +13,11 @@ import {
   upsertRecords,
   getRecordWithFieldsByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
+
+const TYPE_OF_FEEDBACK = Object.freeze({
+  ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
+});
+
 export default {
   name: "CenterFeedbackTaskContent",
   props: {
@@ -165,7 +170,7 @@ export default {
         return record;
       } catch (err) {
         throw {
-          response: "ERROR_FETCHING_RECORDS",
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
         };
       }
     },
