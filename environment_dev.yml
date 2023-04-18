@@ -49,6 +49,7 @@ dependencies:
       - evaluate
       - seqeval
       - setfit
+      - span_marker
       - rich==13.0.1
       # install Argilla in editable mode
       - -e .[server,listeners]
