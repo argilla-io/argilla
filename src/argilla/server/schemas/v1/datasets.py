@@ -41,6 +41,10 @@ class Dataset(BaseModel):
         orm_mode = True
 
 
+class Datasets(BaseModel):
+    items: List[Dataset]
+
+
 class DatasetCreate(BaseModel):
     name: str
     guidelines: Optional[str]

@@ -56,35 +56,37 @@ def test_list_datasets(client: TestClient, admin_auth_header: dict):
     response = client.get("/api/v1/datasets", headers=admin_auth_header)
 
     assert response.status_code == 200
-    assert response.json() == [
-        {
-            "id": str(dataset_a.id),
-            "name": "dataset-a",
-            "guidelines": None,
-            "status": "draft",
-            "workspace_id": str(dataset_a.workspace_id),
-            "inserted_at": dataset_a.inserted_at.isoformat(),
-            "updated_at": dataset_a.updated_at.isoformat(),
-        },
-        {
-            "id": str(dataset_b.id),
-            "name": "dataset-b",
-            "guidelines": "guidelines",
-            "status": "draft",
-            "workspace_id": str(dataset_b.workspace_id),
-            "inserted_at": dataset_b.inserted_at.isoformat(),
-            "updated_at": dataset_b.updated_at.isoformat(),
-        },
-        {
-            "id": str(dataset_c.id),
-            "name": "dataset-c",
-            "guidelines": None,
-            "status": "ready",
-            "workspace_id": str(dataset_c.workspace_id),
-            "inserted_at": dataset_c.inserted_at.isoformat(),
-            "updated_at": dataset_c.updated_at.isoformat(),
-        },
-    ]
+    assert response.json() == {
+        "items": [
+            {
+                "id": str(dataset_a.id),
+                "name": "dataset-a",
+                "guidelines": None,
+                "status": "draft",
+                "workspace_id": str(dataset_a.workspace_id),
+                "inserted_at": dataset_a.inserted_at.isoformat(),
+                "updated_at": dataset_a.updated_at.isoformat(),
+            },
+            {
+                "id": str(dataset_b.id),
+                "name": "dataset-b",
+                "guidelines": "guidelines",
+                "status": "draft",
+                "workspace_id": str(dataset_b.workspace_id),
+                "inserted_at": dataset_b.inserted_at.isoformat(),
+                "updated_at": dataset_b.updated_at.isoformat(),
+            },
+            {
+                "id": str(dataset_c.id),
+                "name": "dataset-c",
+                "guidelines": None,
+                "status": "ready",
+                "workspace_id": str(dataset_c.workspace_id),
+                "inserted_at": dataset_c.inserted_at.isoformat(),
+                "updated_at": dataset_c.updated_at.isoformat(),
+            },
+        ]
+    }
 
 
 def test_list_datasets_without_authentication(client: TestClient):
@@ -104,7 +106,9 @@ def test_list_datasets_as_annotator(client: TestClient, db: Session):
     response = client.get("/api/v1/datasets", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 200
-    assert [dataset["name"] for dataset in response.json()] == ["dataset-a", "dataset-b"]
+
+    response_body = response.json()
+    assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a", "dataset-b"]
 
 
 def test_list_dataset_annotations(client: TestClient, db: Session, admin_auth_header: dict):

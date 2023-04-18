@@ -27,6 +27,7 @@ from argilla.server.schemas.v1.datasets import (
     AnnotationCreate,
     Dataset,
     DatasetCreate,
+    Datasets,
     Records,
     RecordsCreate,
 )
@@ -50,7 +51,7 @@ def _get_dataset(db: Session, dataset_id: UUID):
     return dataset
 
 
-@router.get("/datasets", response_model=List[Dataset])
+@router.get("/datasets", response_model=Datasets)
 def list_datasets(
     *,
     db: Session = Depends(get_db),
@@ -59,9 +60,9 @@ def list_datasets(
     authorize(current_user, DatasetPolicyV1.list)
 
     if current_user.is_admin:
-        return datasets.list_datasets(db)
+        return Datasets(items=datasets.list_datasets(db))
     else:
-        return current_user.datasets
+        return Datasets(items=current_user.datasets)
 
 
 @router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
