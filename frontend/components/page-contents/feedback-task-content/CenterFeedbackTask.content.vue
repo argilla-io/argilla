@@ -82,7 +82,7 @@ export default {
         placeholder: "this is the placeholder",
         options: [
           {
-            id: "patati",
+            id: "id_text_area_option",
             text: "",
             value: "",
           },
@@ -108,16 +108,15 @@ export default {
 
       async handler(newCurrentPage) {
         const isDataForNextPage = isNil(
-          getRecordWithFieldsByDatasetId(
-            this.datasetId,
-            1,
-            this.currentPage + 1
-          )
+          getRecordWithFieldsByDatasetId(this.datasetId, 1, newCurrentPage)
         );
 
         if (isDataForNextPage) {
           const records = await this.getRecords(this.datasetId, newCurrentPage);
-          const formattedRecords = this.factoryRecordsForOrm(records);
+          const formattedRecords = this.factoryRecordsForOrm(
+            records,
+            newCurrentPage
+          );
           upsertRecords(formattedRecords);
         }
       },
@@ -130,11 +129,12 @@ export default {
         this.currentPage = currentPage - 1;
       });
     },
-    factoryRecordsForOrm(records) {
-      return records.map((record) => {
+    factoryRecordsForOrm(records, offset = 0) {
+      return records.map((record, index) => {
         return {
           ...record,
           record_id: record.id,
+          record_index: index + offset,
           dataset_id: this.datasetId,
           record_status: record.recordStatus,
           record_fields: record.fields,
