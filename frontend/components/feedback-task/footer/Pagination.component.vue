@@ -10,14 +10,16 @@
         :disabled="currentPage === 1"
       />
 
-      <button
-        v-for="page in totalPages"
-        :key="page"
-        @click="onClickNumber(page)"
-        :disabled="isCurrentPage(page)"
-      >
-        <span v-text="page" />
-      </button>
+      <div class="page-number-area" v-if="showPageNumber">
+        <button
+          v-for="page in totalPages"
+          :key="page"
+          @click="onClickNumber(page)"
+          :disabled="isCurrentPage(page)"
+        >
+          <span v-text="page" />
+        </button>
+      </div>
 
       <button
         @click="onClickNext"
@@ -51,6 +53,10 @@ export default {
     prevButtonMessage: {
       type: String,
       default: () => "< Prev",
+    },
+    showPageNumber: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
