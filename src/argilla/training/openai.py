@@ -75,9 +75,9 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["validation_file"] = validation_file
         self.model_kwargs["model"] = model
         if isinstance(self._settings, TextClassificationSettings):
-            self.model_kwargs["n_epochs"] = 4
+            self.model_kwargs["n_epochs"] = n_epochs or 4
         else:
-            self.model_kwargs["n_epochs"] = 2
+            self.model_kwargs["n_epochs"] = n_epochs or 2
         self.model_kwargs["batch_size"] = batch_size
         self.model_kwargs["learning_rate_multiplier"] = learning_rate_multiplier
         self.model_kwargs["prompt_loss_weight"] = prompt_loss_weight
