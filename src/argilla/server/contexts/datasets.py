@@ -21,6 +21,7 @@ from argilla.server.schemas.v1.datasets import (
     RecordsCreate,
 )
 from argilla.server.schemas.v1.records import ResponseCreate
+from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.security.model import User
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -157,6 +158,10 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
     db.commit()
 
 
+def get_response_by_id(db: Session, response_id: UUID):
+    return db.get(Response, response_id)
+
+
 def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):
     return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
 
@@ -169,6 +174,15 @@ def create_response(db: Session, record: Record, user: User, response_create: Re
     )
 
     db.add(response)
+    db.commit()
+    db.refresh(response)
+
+    return response
+
+
+def update_response(db: Session, response: Response, response_update: ResponseUpdate):
+    response.values = response_update.values
+
     db.commit()
     db.refresh(response)
 
