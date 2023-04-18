@@ -161,6 +161,10 @@ def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id:
     return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
 
 
+def list_responses_by_record_id(db: Session, record_id: UUID):
+    return db.query(Response).filter_by(record_id=record_id).all()
+
+
 def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):
     response = Response(
         values=response_create.values,
