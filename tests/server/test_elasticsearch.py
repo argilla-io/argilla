@@ -15,111 +15,79 @@
 import random
 
 import pytest
+import pytest_asyncio
 from argilla.server.elasticsearch import ElasticSearchEngine
-from argilla.server.models import AnnotationType
-from argilla.server.settings import settings
-from elasticsearch import BadRequestError, Elasticsearch
-from opensearchpy import OpenSearch
+from elasticsearch8 import BadRequestError, Elasticsearch
 from sqlalchemy.orm import Session
 
+from tests.conftest import is_running_elasticsearch
 from tests.factories import (
-    AnnotationFactory,
     DatasetFactory,
     RatingAnnotationFactory,
     TextAnnotationFactory,
 )
 
 
-def _running_with_elasticsearch() -> str:
-    open_search = OpenSearch(hosts=settings.elasticsearch)
+@pytest_asyncio.fixture()
+async def search_engine(elasticsearch_config):
+    engine = ElasticSearchEngine(config=elasticsearch_config)
+    yield engine
 
-    info = open_search.info(format="json")
-    version_info = info["version"]
-
-    return "distribution" not in version_info
-
-
-@pytest.fixture(scope="session")
-def es_config():
-    return {"hosts": settings.elasticsearch}
+    await engine.client.close()
 
 
-@pytest.fixture(scope="session")
-def elasticsearch(es_config):
-    client = Elasticsearch(**es_config)
-    yield client
+@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
+@pytest.mark.asyncio
+class TestSuiteElasticSearchEngine:
+    async def test_create_index_for_dataset(self, search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch):
+        dataset = DatasetFactory.create()
+        await search_engine.create_index(dataset)
 
-    for index_info in client.cat.indices(index="ar.*,rg.*", format="json"):
-        client.indices.delete(index=index_info["index"])
+        index_name = f"rg.{dataset.id}"
+        assert elasticsearch.indices.exists(index=index_name)
 
+        index = elasticsearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"] == {"dynamic": "strict"}
 
-@pytest.fixture(scope="session")
-def search_engine(es_config):
-    return ElasticSearchEngine(config=es_config)
+    @pytest.mark.parametrize(
+        argnames=("text_ann_size", "rating_ann_size"),
+        argvalues=[(random.randint(1, 9), random.randint(1, 9)) for _ in range(1, 5)],
+    )
+    async def test_create_index_for_dataset_with_annotations(
+        self,
+        search_engine: ElasticSearchEngine,
+        elasticsearch: Elasticsearch,
+        db: Session,
+        text_ann_size: int,
+        rating_ann_size: int,
+    ):
+        text_annotations = TextAnnotationFactory.create_batch(size=text_ann_size)
+        rating_annotations = RatingAnnotationFactory.create_batch(size=rating_ann_size)
 
+        dataset = DatasetFactory.create(annotations=text_annotations + rating_annotations)
 
-@pytest.mark.skipif(
-    condition=not _running_with_elasticsearch(),
-    reason="Test only running with elasticsearch backend",
-)
-def test_create_index_for_dataset(search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch):
-    dataset = DatasetFactory.create()
-    search_engine.create_index(dataset)
+        await search_engine.create_index(dataset)
 
-    index_name = f"rg.{dataset.id}"
-    assert elasticsearch.indices.exists(index=index_name)
+        index_name = f"rg.{dataset.id}"
+        assert elasticsearch.indices.exists(index=index_name)
 
-    index = elasticsearch.indices.get(index=index_name)[index_name]
-    assert index["mappings"] == {"dynamic": "strict"}
+        index = elasticsearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"] == {
+            "dynamic": "strict",
+            "properties": {
+                **{annotation.name: {"type": "text"} for annotation in text_annotations},
+                **{annotation.name: {"type": "integer"} for annotation in rating_annotations},
+            },
+        }
 
+    async def test_create_index_with_existing_index(
+        self, search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch, db: Session
+    ):
+        dataset = DatasetFactory.create()
+        await search_engine.create_index(dataset)
 
-@pytest.mark.skipif(
-    condition=not _running_with_elasticsearch(),
-    reason="Test only running with elasticsearch backend",
-)
-@pytest.mark.parametrize(
-    argnames=("text_ann_size", "rating_ann_size"),
-    argvalues=[(random.randint(1, 9), random.randint(1, 9)) for _ in range(1, 5)],
-)
-def test_create_index_for_dataset_with_annotations(
-    search_engine: ElasticSearchEngine,
-    elasticsearch: Elasticsearch,
-    db: Session,
-    text_ann_size: int,
-    rating_ann_size: int,
-):
-    text_annotations = TextAnnotationFactory.create_batch(size=text_ann_size)
-    rating_annotations = RatingAnnotationFactory.create_batch(size=rating_ann_size)
+        index_name = f"rg.{dataset.id}"
+        assert elasticsearch.indices.exists(index=index_name)
 
-    dataset = DatasetFactory.create(annotations=text_annotations + rating_annotations)
-
-    search_engine.create_index(dataset)
-
-    index_name = f"rg.{dataset.id}"
-    assert elasticsearch.indices.exists(index=index_name)
-
-    index = elasticsearch.indices.get(index=index_name)[index_name]
-    assert index["mappings"] == {
-        "dynamic": "strict",
-        "properties": {
-            **{annotation.name: {"type": "text"} for annotation in text_annotations},
-            **{annotation.name: {"type": "integer"} for annotation in rating_annotations},
-        },
-    }
-
-
-@pytest.mark.skipif(
-    condition=not _running_with_elasticsearch(),
-    reason="Test only running with elasticsearch backend",
-)
-def test_create_index_with_existing_index(
-    search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch, db: Session
-):
-    dataset = DatasetFactory.create()
-    search_engine.create_index(dataset)
-
-    index_name = f"rg.{dataset.id}"
-    assert elasticsearch.indices.exists(index=index_name)
-
-    with pytest.raises(BadRequestError, match="'resource_already_exists_exception', 'index"):
-        search_engine.create_index(dataset)
+        with pytest.raises(BadRequestError, match="'resource_already_exists_exception', 'index"):
+            await search_engine.create_index(dataset)

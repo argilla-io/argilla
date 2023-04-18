@@ -23,9 +23,12 @@ from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
+from argilla.server.settings import settings
+from elasticsearch8 import Elasticsearch
+from opensearchpy import OpenSearch
 from starlette.testclient import TestClient
 
-from .factories import AnnotatorFactory
+from .factories import AdminFactory, AnnotatorFactory
 from .helpers import SecuredClient
 
 
@@ -48,20 +51,32 @@ def db():
     session.commit()
 
 
+def is_running_elasticsearch() -> bool:
+    open_search = OpenSearch(hosts=settings.elasticsearch)
+
+    info = open_search.info(format="json")
+    version_info = info["version"]
+
+    return "distribution" not in version_info
+
+
+@pytest.fixture(scope="session")
+def elasticsearch_config():
+    return {"hosts": settings.elasticsearch}
+
+
+@pytest.fixture(scope="session")
+def elasticsearch(elasticsearch_config):
+    client = Elasticsearch(**elasticsearch_config)
+    yield client
+
+    for index_info in client.cat.indices(index="ar.*,rg.*", format="json"):
+        client.indices.delete(index=index_info["index"])
+
+
 @pytest.fixture(scope="function")
 def admin(db):
-    user = User(
-        first_name="Admin",
-        username="admin",
-        role=UserRole.admin,
-        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
-        api_key="admin.apikey",
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
+    return AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
 
 
 @pytest.fixture(scope="function")

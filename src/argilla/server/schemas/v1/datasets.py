@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, conlist
@@ -23,6 +23,9 @@ from argilla.server.models import AnnotationType, DatasetStatus
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
+
+RECORDS_CREATE_MIN_ITEMS = 1
+RECORDS_CREATE_MAX_ITEMS = 1000
 
 
 class Dataset(BaseModel):
@@ -79,3 +82,42 @@ class AnnotationCreate(BaseModel):
     title: str
     required: Optional[bool]
     settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
+
+
+class Response(BaseModel):
+    id: UUID
+    values: Dict[str, Any]
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class Record(BaseModel):
+    id: UUID
+    fields: Dict[str, Any]
+    external_id: Optional[str]
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class Records(BaseModel):
+    items: List[Record]
+
+
+class ResponseCreate(BaseModel):
+    values: Dict[str, Any]
+
+
+class RecordCreate(BaseModel):
+    fields: Dict[str, Any]
+    external_id: Optional[str]
+    response: Optional[ResponseCreate]
+
+
+class RecordsCreate(BaseModel):
+    items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)

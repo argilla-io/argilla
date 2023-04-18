@@ -65,7 +65,53 @@ class Annotation(Base):
     dataset: Mapped["Dataset"] = relationship(back_populates="annotations")
 
     def __repr__(self):
-        return f"Annotation(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, dataset_id={str(self.dataset_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"Annotation(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
+            f"dataset_id={str(self.dataset_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
+
+
+class Response(Base):
+    __tablename__ = "responses"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    values: Mapped[dict] = mapped_column(JSON)
+    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id"))
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+
+    record: Mapped["Record"] = relationship(back_populates="responses")
+    user: Mapped["User"] = relationship(back_populates="responses")
+
+    def __repr__(self):
+        return (
+            f"Response(id={str(self.id)!r}, record_id={str(self.record_id)!r}, user_id={str(self.user_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
+
+
+class Record(Base):
+    __tablename__ = "records"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    fields: Mapped[dict] = mapped_column(JSON)
+    external_id: Mapped[Optional[str]]
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+
+    dataset: Mapped["Dataset"] = relationship(back_populates="records")
+    responses: Mapped[List["Response"]] = relationship(back_populates="record", order_by=Response.inserted_at.asc())
+
+    def __repr__(self):
+        return (
+            f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class Dataset(Base):
@@ -84,6 +130,7 @@ class Dataset(Base):
     annotations: Mapped[List["Annotation"]] = relationship(
         back_populates="dataset", order_by=Annotation.inserted_at.asc()
     )
+    records: Mapped[List["Record"]] = relationship(back_populates="dataset", order_by=Record.inserted_at.asc())
 
     @property
     def is_draft(self):
@@ -94,7 +141,11 @@ class Dataset(Base):
         return self.status == DatasetStatus.ready
 
     def __repr__(self):
-        return f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, status={self.status.value!r}, workspace_id={str(self.workspace_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, "
+            f"status={self.status.value!r}, workspace_id={str(self.workspace_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class WorkspaceUser(Base):
@@ -111,7 +162,11 @@ class WorkspaceUser(Base):
     user: Mapped["User"] = relationship(viewonly=True)
 
     def __repr__(self):
-        return f"WorkspaceUser(id={str(self.id)!r}, workspace_id={str(self.workspace_id)!r}, user_id={str(self.user_id)!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"WorkspaceUser(id={str(self.id)!r}, workspace_id={str(self.workspace_id)!r}, "
+            f"user_id={str(self.user_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class Workspace(Base):
@@ -129,7 +184,10 @@ class Workspace(Base):
     )
 
     def __repr__(self):
-        return f"Workspace(id={str(self.id)!r}, name={self.name!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"Workspace(id={str(self.id)!r}, name={self.name!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class User(Base):
@@ -149,6 +207,7 @@ class User(Base):
     workspaces: Mapped[List["Workspace"]] = relationship(
         secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
     )
+    responses: Mapped[List["Response"]] = relationship(back_populates="user")
     datasets: Mapped[List["Dataset"]] = relationship(
         secondary="workspaces_users",
         primaryjoin=id == WorkspaceUser.user_id,
@@ -169,4 +228,8 @@ class User(Base):
         return self.role == UserRole.annotator
 
     def __repr__(self):
-        return f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, username={self.username!r}, role={self.role.value!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        return (
+            f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, "
+            f"username={self.username!r}, role={self.role.value!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
