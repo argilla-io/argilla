@@ -35,7 +35,6 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         *args,
         language: Optional[str] = None,
         gpu_id: Optional[int] = -1,
-        **kwargs,
     ) -> None:
         """Initialize the `ArgillaSpaCyTrainer` class.
 
@@ -68,7 +67,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             >>> trainer.train()
             >>> trainer.save("./model")
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(*args)
         import spacy
 
         self._nlp = None
@@ -97,7 +96,6 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self._eval_dataset_path = "./dev.spacy" if self._eval_dataset else None
 
         self.language = language or "en"
-        self.model = model
 
         self.gpu_id = gpu_id
         self.use_gpu = False
@@ -126,14 +124,14 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
                 self.use_gpu = False
                 self.gpu_id = -1
 
-            try:
-                require_version("spacy-transformers")
-                has_spacy_transformers = True
-            except:
-                self._logger.warn(
-                    "`spacy-transformers` is not installed and it's recommended to train a model using the GPU."
-                )
-                has_spacy_transformers = False
+        try:
+            require_version("spacy-transformers")
+            self.has_spacy_transformers = True
+        except:
+            self._logger.warn(
+                "`spacy-transformers` is not installed and it's recommended to train a model using the GPU."
+            )
+            self.has_spacy_transformers = False
 
         self.init_training_args()
 
@@ -144,31 +142,31 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             lang=self.language,
             pipeline=self._pipeline,
             optimize="efficiency",
-            gpu=True if self.use_gpu and has_spacy_transformers else False,
+            gpu=True if self.use_gpu and self.has_spacy_transformers else False,
         )
 
         self.config["paths"]["train"] = self._train_dataset_path
         self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
-        self.config["system"]["seed"] = seed or 42
-        if has_spacy_transformers:
-            if not self.model:
+        self.config["system"]["seed"] = self._seed or 42
+        if self.has_spacy_transformers:
+            if not self._model:
                 self._logger.warn(
                     "`model` is not specified and it's recommended to specify the"
                     " `spacy-transformers` model to use. Using `roberta-base` as the"
                     " default model instead."
                 )
-                self.model = "roberta-base"
-            self.config["components"]["transformer"]["model"]["name"] = self.model
+                self._model = "roberta-base"
+            self.config["components"]["transformer"]["model"]["name"] = self._model
         else:
-            if not self.model:
+            if not self._model:
                 self._logger.warn(
                     "`model` is not specified and it's recommended to specify the"
                     " `spaCy` model to use. Using `en_core_web_lg` as the default model"
                     " instead."
                 )
-                self.model = "en_core_web_lg"
-            self.config["paths"]["vectors"] = self.model
-            if self.use_gpu and not has_spacy_transformers:
+                self._model = "en_core_web_lg"
+            self.config["paths"]["vectors"] = self._model
+            if self.use_gpu and not self.has_spacy_transformers:
                 self.config["system"]["gpu_allocator"] = "pytorch"
                 self.config["nlp"]["batch_size"] = 128
 
