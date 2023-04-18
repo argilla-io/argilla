@@ -52,6 +52,8 @@ def test_update_response(client: TestClient, db: Session, admin_auth_header: dic
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "record_id": str(response.record_id),
+        "user_id": str(response.user_id),
         "inserted_at": response.inserted_at.isoformat(),
         "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
     }
@@ -113,6 +115,8 @@ def test_update_response_as_annotator(client: TestClient, db: Session):
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "record_id": str(response.record_id),
+        "user_id": str(response.user_id),
         "inserted_at": response.inserted_at.isoformat(),
         "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
     }

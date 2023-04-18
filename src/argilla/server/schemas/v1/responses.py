@@ -22,6 +22,8 @@ from pydantic import BaseModel
 class Response(BaseModel):
     id: UUID
     values: Dict[str, Any]
+    record_id: UUID
+    user_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
