@@ -5,17 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+<!--
+These are the section headers that we use:
+* "Added" for new features.
+* "Changed" for changes in existing functionality.
+* "Deprecated" for soon-to-be removed features.
+* "Removed" for now removed features.
+* "Fixed" for any bug fixes.
+* "Security" in case of vulnerabilities.
+-->
+
 ## [Unreleased]
 
-### Added
+###  Added
 
-- added `settings` param to `prepare_for_training` ([#2689])
-- added `prepare_for_training` for `openai` ([#2658])
-- added `ArgillaOpenAITrainer` ([#2659])
+- `rg.load` accepts `exclude_vectors` and `exclude_metrics` when loading data. Closes [#2398](https://github.com/argilla-io/argilla/issues/2398)
+- Added `settings` param to `prepare_for_training` ([#2689])
+- Added `prepare_for_training` for `openai` ([#2658])
+- Added `ArgillaOpenAITrainer` ([#2659])
+- Added `ArgillaSpanMarkerTrainer` for Named Entity Recognition ([#2693](https://github.com/argilla-io/argilla/pull/2693))
+
+### Changed
+
+- Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
+- bulk endpoints will upsert data when record `id` is present. Closes [#2535](https://github.com/argilla-io/argilla/issues/2535)
+
+### Fixed
+
 - `argilla.training` bugfixes and unification ([#2665])
-- Added `ArgillaSpanMarkerTrainer` for Named Entity Recognition ([#2693])
 
-## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
+## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.5.1...v1.6.0)
 
 ### Added
 
@@ -96,11 +115,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The record inputs are sorted alphabetically in UI by default. [#2581](https://github.com/argilla-io/argilla/pull/2581)
 - The record inputs are fully visible when pagination size is one and the height of collapsed area size is bigger for laptop screen. [#2587](https://github.com/argilla-io/argilla/pull/2587/files)
 
-
 ### Fixes
 
 - Allow URL to be clickable in Jupyter notebook again. Closes [#2527](https://github.com/argilla-io/argilla/issues/2527)
-
 
 ### Removed
 
