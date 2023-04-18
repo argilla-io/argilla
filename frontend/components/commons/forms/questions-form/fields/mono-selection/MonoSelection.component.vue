@@ -17,25 +17,25 @@
     </div>
     <div class="container">
       <div class="inputs-area">
-        <div class="input-button" v-for="output in outputs" :key="output.id">
+        <div class="input-button" v-for="option in options" :key="option.id">
           <input
             type="checkbox"
-            :name="output.text"
-            :id="output.id"
-            v-model="output.value"
+            :name="option.text"
+            :id="option.id"
+            v-model="option.value"
             @change="
               onSelect({
-                id: output.id,
-                text: output.text,
-                value: output.value,
+                id: option.id,
+                text: option.text,
+                value: option.value,
               })
             "
           />
           <label
             class="label-text cursor-pointer"
-            :class="{ 'label-active': output.value }"
-            :for="output.id"
-            v-text="output.text"
+            :class="{ 'label-active': option.value }"
+            :for="option.id"
+            v-text="option.text"
           />
         </div>
       </div>
@@ -53,7 +53,7 @@ export default {
     title: {
       type: String,
     },
-    initialOutputs: {
+    initialOptions: {
       type: Array,
       required: true,
     },
@@ -85,7 +85,7 @@ export default {
   data() {
     return {
       showAllLabels: true,
-      outputs: cloneDeep(this.initialOutputs),
+      options: cloneDeep(this.initialOptions),
     };
   },
   computed: {
@@ -98,16 +98,16 @@ export default {
   },
   methods: {
     onSelect({ id, value }) {
-      this.outputs.map((output) => {
-        if (output.id === id) {
-          output.value = value;
+      this.options.map((option) => {
+        if (option.id === id) {
+          option.value = value;
         } else {
-          output.value = false;
+          option.value = false;
         }
-        return output;
+        return option;
       });
 
-      this.$emit("on-change", this.outputs);
+      this.$emit("on-change", this.options);
     },
     toggleShowAllLabels() {
       this.showAllLabels = !this.showAllLabels;

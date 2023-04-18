@@ -15,7 +15,6 @@
 import random
 
 import pytest
-import pytest_asyncio
 from argilla.server.elasticsearch import ElasticSearchEngine
 from elasticsearch8 import BadRequestError, Elasticsearch
 from sqlalchemy.orm import Session

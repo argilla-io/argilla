@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
-from argilla.server.elasticsearch import ElasticSearchEngine, get_engine
+from argilla.server.elasticsearch import ElasticSearchEngine, get_search_engine
 from argilla.server.models import User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
@@ -32,6 +32,9 @@ from argilla.server.schemas.v1.datasets import (
     RecordsCreate,
 )
 from argilla.server.security import auth
+
+LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
+LIST_DATASET_RECORDS_LIMIT_LTE = 1000
 
 router = APIRouter(tags=["datasets"])
 
@@ -61,17 +64,27 @@ def list_datasets(
         return current_user.datasets
 
 
-# TODO: Add changes to support include parameter for relationships.
-# - If current user is not an admin responses should include only the responses of the current user. (add context function)
-# - Add tests for relationships include too.
-# - Add tests for relationships as an annotator and as admin.
+@router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
+def list_dataset_annotations(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return dataset.annotations
+
+
 @router.get("/datasets/{dataset_id}/records", response_model=Records)
 def list_dataset_records(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
     offset: int = 0,
-    limit: int = Query(default=50, lte=1000),
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = _get_dataset(db, dataset_id)
@@ -93,22 +106,6 @@ def get_dataset(
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
     return dataset
-
-
-# TODO: Change this to list_dataset_annotations and move it before list_dataset_records.
-# - Change tests names too.
-@router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
-def get_dataset_annotations(
-    *,
-    db: Session = Depends(get_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
-):
-    dataset = _get_dataset(db, dataset_id)
-
-    authorize(current_user, DatasetPolicyV1.get(dataset))
-
-    return dataset.annotations
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=Dataset)
@@ -155,12 +152,11 @@ def create_dataset_annotation(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
-# TODO: Returns 409 when external_id already exists?
 @router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
 async def create_dataset_records(
     *,
     db: Session = Depends(get_db),
-    search_engine: ElasticSearchEngine = Depends(get_engine),
+    search_engine: ElasticSearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
@@ -169,14 +165,21 @@ async def create_dataset_records(
 
     dataset = _get_dataset(db, dataset_id)
 
-    await datasets.create_records(db, search_engine, dataset=dataset, user=current_user, records_create=records_create)
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        await datasets.create_records(
+            db, search_engine, dataset=dataset, user=current_user, records_create=records_create
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
 async def publish_dataset(
     *,
     db: Session = Depends(get_db),
-    search_engine: ElasticSearchEngine = Depends(get_engine),
+    search_engine: ElasticSearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):

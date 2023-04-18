@@ -1,7 +1,7 @@
 <template>
   <MonoSelectionComponent
     :title="title"
-    :initialOutputs="initialOutputs"
+    :initialOptions="initialOptions"
     :isRequired="isRequired"
     :colorHighlight="colorHighlight"
     :isIcon="isIcon"
@@ -20,7 +20,7 @@ export default {
       type: String,
       required: true,
     },
-    initialOutputs: {
+    initialOptions: {
       type: Array,
       required: true,
     },
@@ -42,16 +42,16 @@ export default {
     },
   },
   methods: {
-    onChangeRating(newOutputs) {
-      this.$emit("on-change-rating", newOutputs);
-      const isAnyRatingSelected = this.isAnyRatingSelected(newOutputs);
+    onChangeRating(newOptions) {
+      this.$emit("on-change-rating", newOptions);
+      const isAnyRatingSelected = this.isAnyRatingSelected(newOptions);
 
       if (this.isRequired) {
         this.$emit("on-error", !isAnyRatingSelected);
       }
     },
-    isAnyRatingSelected(outputs) {
-      return outputs.some((output) => output.value);
+    isAnyRatingSelected(options) {
+      return options.some((option) => option.value);
     },
   },
 };

@@ -2,43 +2,44 @@
   <form @submit.prevent="onSubmit" :key="renderForm">
     <div class="form-group" v-for="input in inputs" :key="input.key">
       <TextAreaComponent
-        v-if="input.componentType === PROPERTIES.FREE_TEXT"
+        v-if="input.component_type === PROPERTIES.FREE_TEXT"
         :title="input.question"
-        :initialOutputs="input.outputs"
-        :isRequired="input.required"
-        :isIcon="!!input.tooltipMessage"
-        :tooltipMessage="input.tooltipMessage"
+        :placeholder="input.placeholder"
+        :initialOptions="input.options[0]"
+        :isRequired="input.is_required"
+        :isIcon="!!input.tooltip_message"
+        :tooltipMessage="input.tooltip_message"
         :colorHighlight="colorAsterisk"
         @on-change-text-area="
-          onChange({ newOutputs: $event, idComponent: input.id })
+          onChange({ newOptions: $event, idComponent: input.id })
         "
         @on-error="onError"
       />
 
       <SingleLabelComponent
-        v-if="input.componentType === PROPERTIES.SINGLE_LABEL"
+        v-if="input.component_type === PROPERTIES.SINGLE_LABEL"
         :title="input.question"
-        :initialOutputs="input.outputs"
-        :isRequired="input.required"
-        :isIcon="!!input.tooltipMessage"
-        :tooltipMessage="input.tooltipMessage"
+        :initialOptions="input.options"
+        :isRequired="input.is_required"
+        :isIcon="!!input.tooltip_message"
+        :tooltipMessage="input.tooltip_message"
         :colorHighlight="colorAsterisk"
         @on-change-single-label="
-          onChange({ newOutputs: $event, idComponent: input.id })
+          onChange({ newOptions: $event, idComponent: input.id })
         "
         @on-error="onError"
       />
 
       <RatingComponent
-        v-if="input.componentType === PROPERTIES.RATING"
+        v-if="input.component_type === PROPERTIES.RATING"
         :title="input.question"
-        :initialOutputs="input.outputs"
-        :isRequired="input.required"
-        :isIcon="!!input.tooltipMessage"
-        :tooltipMessage="input.tooltipMessage"
+        :initialOptions="input.options"
+        :isRequired="input.is_required"
+        :isIcon="!!input.tooltip_message"
+        :tooltipMessage="input.tooltip_message"
         :colorHighlight="colorAsterisk"
         @on-change-rating="
-          onChange({ newOutputs: $event, idComponent: input.id })
+          onChange({ newOptions: $event, idComponent: input.id })
         "
         @on-error="onError"
       />
@@ -100,10 +101,10 @@ export default {
     },
   },
   methods: {
-    onChange({ newOutputs, idComponent }) {
+    onChange({ newOptions, idComponent }) {
       this.inputs = this.inputs.map((input) => {
         if (input.id === idComponent) {
-          input.outputs = newOutputs;
+          input.options = newOptions;
         }
         return input;
       });

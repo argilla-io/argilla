@@ -11,7 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Optional
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
@@ -25,6 +24,8 @@ from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.security.model import User
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+
+LIST_RECORDS_LIMIT = 20
 
 
 def get_dataset_by_id(db: Session, dataset_id: UUID):
@@ -63,7 +64,10 @@ async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, datas
     try:
         dataset.status = DatasetStatus.ready
         await search_engine.create_index(dataset)
-
+        # TODO: DB rollback is executed if some problem is found creating the index. If the error
+        #  is raised from the commit statement, index creation should be reverted
+        #  We need a way to commit the dataset status before creating the index, and rollback the status
+        #  if something went wrong with index creation
         db.commit()
         db.refresh(dataset)
 
@@ -121,10 +125,10 @@ def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
-def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = 20):
+def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = LIST_RECORDS_LIMIT):
     return (
         db.query(Record)
-        .filter_by(dataset_id=dataset.id)
+        .filter(Record.dataset_id == dataset.id)
         .order_by(Record.inserted_at.asc())
         .offset(offset)
         .limit(limit)
@@ -133,7 +137,11 @@ def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = 20
 
 
 async def create_records(
-    db: Session, search_engine: ElasticSearchEngine, dataset: Dataset, user: User, records_create: RecordsCreate
+    db: Session,
+    search_engine: ElasticSearchEngine,
+    dataset: Dataset,
+    user: User,
+    records_create: RecordsCreate,
 ):
     if not dataset.is_ready:
         raise ValueError("Records cannot be created for a non published dataset")

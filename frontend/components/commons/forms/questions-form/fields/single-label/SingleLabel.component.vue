@@ -1,7 +1,7 @@
 <template>
   <MonoSelectionComponent
     :title="title"
-    :initialOutputs="initialOutputs"
+    :initialOptions="initialOptions"
     :isRequired="isRequired"
     :isIcon="tooltipMessage"
     :tooltipMessage="tooltipMessage"
@@ -18,7 +18,7 @@ export default {
       type: String,
       required: true,
     },
-    initialOutputs: {
+    initialOptions: {
       type: Array,
       required: true,
     },
@@ -40,17 +40,17 @@ export default {
     },
   },
   methods: {
-    onChangeSingleLabel(newOutputs) {
-      this.$emit("on-change-single-label", newOutputs);
+    onChangeSingleLabel(newOptions) {
+      this.$emit("on-change-single-label", newOptions);
       const isAnySingleLabelSelected =
-        this.isAnySingleLabelSelected(newOutputs);
+        this.isAnySingleLabelSelected(newOptions);
 
       if (this.isRequired) {
         this.$emit("on-error", !isAnySingleLabelSelected);
       }
     },
-    isAnySingleLabelSelected(outputs) {
-      return outputs.some((output) => output.value);
+    isAnySingleLabelSelected(options) {
+      return options.some((option) => option.value);
     },
   },
 };
