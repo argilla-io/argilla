@@ -81,6 +81,10 @@ class Annotation(BaseModel):
         orm_mode = True
 
 
+class Annotations(BaseModel):
+    items: List[Annotation]
+
+
 class AnnotationCreate(BaseModel):
     name: str
     title: str

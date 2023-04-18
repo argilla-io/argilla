@@ -42,7 +42,6 @@ from tests.factories import (
     DatasetFactory,
     RatingAnnotationFactory,
     RecordFactory,
-    ResponseFactory,
     TextAnnotationFactory,
     WorkspaceFactory,
 )
@@ -125,40 +124,42 @@ def test_list_dataset_annotations(client: TestClient, db: Session, admin_auth_he
     response = client.get(f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header)
 
     assert response.status_code == 200
-    assert response.json() == [
-        {
-            "id": str(text_annotation.id),
-            "name": "text-annotation",
-            "title": "Text Annotation",
-            "required": True,
-            "settings": {"type": "text"},
-            "inserted_at": text_annotation.inserted_at.isoformat(),
-            "updated_at": text_annotation.updated_at.isoformat(),
-        },
-        {
-            "id": str(rating_annotation.id),
-            "name": "rating-annotation",
-            "title": "Rating Annotation",
-            "required": False,
-            "settings": {
-                "type": "rating",
-                "options": [
-                    {"value": 1},
-                    {"value": 2},
-                    {"value": 3},
-                    {"value": 4},
-                    {"value": 5},
-                    {"value": 6},
-                    {"value": 7},
-                    {"value": 8},
-                    {"value": 9},
-                    {"value": 10},
-                ],
+    assert response.json() == {
+        "items": [
+            {
+                "id": str(text_annotation.id),
+                "name": "text-annotation",
+                "title": "Text Annotation",
+                "required": True,
+                "settings": {"type": "text"},
+                "inserted_at": text_annotation.inserted_at.isoformat(),
+                "updated_at": text_annotation.updated_at.isoformat(),
             },
-            "inserted_at": rating_annotation.inserted_at.isoformat(),
-            "updated_at": rating_annotation.updated_at.isoformat(),
-        },
-    ]
+            {
+                "id": str(rating_annotation.id),
+                "name": "rating-annotation",
+                "title": "Rating Annotation",
+                "required": False,
+                "settings": {
+                    "type": "rating",
+                    "options": [
+                        {"value": 1},
+                        {"value": 2},
+                        {"value": 3},
+                        {"value": 4},
+                        {"value": 5},
+                        {"value": 6},
+                        {"value": 7},
+                        {"value": 8},
+                        {"value": 9},
+                        {"value": 10},
+                    ],
+                },
+                "inserted_at": rating_annotation.inserted_at.isoformat(),
+                "updated_at": rating_annotation.updated_at.isoformat(),
+            },
+        ]
+    }
 
 
 def test_list_dataset_annotations_without_authentication(client: TestClient, db: Session):
@@ -182,7 +183,9 @@ def test_list_dataset_annotations_as_annotator(client: TestClient, db: Session):
     )
 
     assert response.status_code == 200
-    assert [annotation["name"] for annotation in response.json()] == ["text-annotation", "rating-annotation"]
+
+    response_body = response.json()
+    assert [annotation["name"] for annotation in response_body["items"]] == ["text-annotation", "rating-annotation"]
 
 
 def test_list_dataset_annotations_as_annotator_from_different_workspace(client: TestClient, db: Session):

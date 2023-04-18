@@ -25,6 +25,7 @@ from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
     Annotation,
     AnnotationCreate,
+    Annotations,
     Dataset,
     DatasetCreate,
     Datasets,
@@ -65,7 +66,7 @@ def list_datasets(
         return Datasets(items=current_user.datasets)
 
 
-@router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
+@router.get("/datasets/{dataset_id}/annotations", response_model=Annotations)
 def list_dataset_annotations(
     *,
     db: Session = Depends(get_db),
@@ -76,7 +77,7 @@ def list_dataset_annotations(
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    return dataset.annotations
+    return Annotations(items=dataset.annotations)
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records)
