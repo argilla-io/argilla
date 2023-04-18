@@ -15,6 +15,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
+import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import (
     Annotation,
