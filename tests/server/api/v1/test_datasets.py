@@ -738,8 +738,8 @@ def test_create_dataset_records(client: TestClient, db: Session, admin_auth_head
                 "external_id": "1",
                 "response": {
                     "values": {
-                        "input_ok": "yes",
-                        "output_ok": "yes",
+                        "input_ok": {"value": "yes"},
+                        "output_ok": {"value": "yes"},
                     },
                 },
             },
@@ -751,8 +751,8 @@ def test_create_dataset_records(client: TestClient, db: Session, admin_auth_head
                 "external_id": "3",
                 "response": {
                     "values": {
-                        "input_ok": "no",
-                        "output_ok": "no",
+                        "input_ok": {"value": "no"},
+                        "output_ok": {"value": "no"},
                     },
                 },
             },
@@ -775,8 +775,8 @@ def test_create_dataset_records_without_authentication(client: TestClient, db: S
                 "external_id": "1",
                 "response": {
                     "values": {
-                        "input_ok": "yes",
-                        "output_ok": "yes",
+                        "input_ok": {"value": "yes"},
+                        "output_ok": {"value": "yes"},
                     },
                 },
             },
@@ -800,8 +800,8 @@ def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
                 "external_id": "1",
                 "response": {
                     "values": {
-                        "input_ok": "yes",
-                        "output_ok": "yes",
+                        "input_ok": {"value": "yes"},
+                        "output_ok": {"value": "yes"},
                     },
                 },
             },
@@ -826,8 +826,8 @@ def test_create_dataset_records_with_non_published_dataset(client: TestClient, d
                 "external_id": "1",
                 "response": {
                     "values": {
-                        "input_ok": "yes",
-                        "output_ok": "yes",
+                        "input_ok": {"value": "yes"},
+                        "output_ok": {"value": "yes"},
                     },
                 },
             },
