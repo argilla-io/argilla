@@ -32,9 +32,10 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
 
     def __init__(
         self,
-        *args,
         language: Optional[str] = None,
         gpu_id: Optional[int] = -1,
+        *args,
+        **kwargs,
     ) -> None:
         """Initialize the `ArgillaSpaCyTrainer` class.
 
@@ -67,7 +68,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             >>> trainer.train()
             >>> trainer.save("./model")
         """
-        super().__init__(*args)
+        super().__init__(*args, **kwargs)
         import spacy
 
         self._nlp = None
