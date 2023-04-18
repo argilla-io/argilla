@@ -14,7 +14,7 @@
         v-for="page in totalPages"
         :key="page"
         @click="onClickNumber(page)"
-        :disabled="currentPage === page"
+        :disabled="isCurrentPage(page)"
       >
         <span v-text="page" />
       </button>
@@ -64,11 +64,19 @@ export default {
     },
     totalOfRecordMessage() {
       return `${this.currentPage} of ${this.totalItems} records`;
-      return `N - N-1 of ${this.totalItems} records`;
     },
   },
-  updated() {
-    this.emitCurrentPage();
+  watch: {
+    currentPage: {
+      immediate: true,
+      handler(newCurrentPage) {
+        this.emitCurrentPage();
+        this.updateUrlParams(newCurrentPage);
+      },
+    },
+  },
+  mounted() {
+    this.currentPage = this.$route.query?._page || 1;
   },
   methods: {
     onClickPrev() {
@@ -82,6 +90,15 @@ export default {
     },
     emitCurrentPage() {
       this.$emit("on-paginate", this.currentPage);
+    },
+    isCurrentPage(page) {
+      return +this.currentPage === +page;
+    },
+    updateUrlParams(currentPage) {
+      this.$router.push({
+        path: this.$route.path,
+        query: { _page: currentPage },
+      });
     },
   },
 };
