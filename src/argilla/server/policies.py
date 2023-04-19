@@ -194,6 +194,10 @@ class ResponsePolicyV1:
     def update(cls, response: Response) -> PolicyAction:
         return lambda actor: actor.is_admin or actor.id == response.user_id
 
+    @classmethod
+    def delete(cls, response: Response) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.id == response.user_id
+
 
 class DatasetSettingsPolicy:
     @classmethod

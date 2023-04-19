@@ -169,3 +169,50 @@ def test_update_response_with_nonexistent_response_id(client: TestClient, db: Se
         "input_ok": {"value": "no"},
         "output_ok": {"value": "no"},
     }
+
+
+def test_delete_response(client: TestClient, db: Session, admin_auth_header: dict):
+    response = ResponseFactory.create()
+
+    resp = client.delete(f"/api/v1/responses/{response.id}", headers=admin_auth_header)
+
+    assert resp.status_code == 200
+    assert db.query(Response).count() == 0
+
+
+def test_delete_response_without_authentication(client: TestClient, db: Session):
+    response = ResponseFactory.create()
+
+    resp = client.delete(f"/api/v1/responses/{response.id}")
+
+    assert resp.status_code == 401
+    assert db.query(Response).count() == 1
+
+
+def test_delete_response_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    response = ResponseFactory.create(user=annotator)
+
+    resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert resp.status_code == 200
+    assert db.query(Response).count() == 0
+
+
+def test_delete_response_as_annotator_for_different_user_response(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    response = ResponseFactory.create()
+
+    resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert resp.status_code == 403
+    assert db.query(Response).count() == 1
+
+
+def test_delete_response_with_nonexistent_response_id(client: TestClient, db: Session, admin_auth_header: dict):
+    ResponseFactory.create()
+
+    resp = client.delete(f"/api/v1/responses/{uuid4()}", headers=admin_auth_header)
+
+    assert resp.status_code == 404
+    assert db.query(Response).count() == 1
