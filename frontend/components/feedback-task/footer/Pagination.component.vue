@@ -82,7 +82,7 @@ export default {
     },
   },
   mounted() {
-    this.currentPage = this.$route.query?._page || 1;
+    this.currentPage = parseFloat(this.$route.query?._page) || 1;
   },
   methods: {
     onClickPrev() {
