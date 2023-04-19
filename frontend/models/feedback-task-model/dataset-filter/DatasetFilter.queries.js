@@ -2,7 +2,6 @@ import { DatasetFilter as DatasetFilterModel } from "./DatasetFilter.model";
 
 // UPSERT
 const upsertDatasetFilters = (globalFilters) => {
-  console.log("vvvv", globalFilters);
   DatasetFilterModel.insertOrUpdate({ data: globalFilters });
 };
 
