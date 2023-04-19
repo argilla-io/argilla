@@ -45,6 +45,10 @@ export default {
         return { text: "", value: "" };
       },
     },
+    optionId: {
+      type: String,
+      default: () => "optionId",
+    },
     placeholder: {
       type: String,
       default: () => "",
@@ -70,8 +74,9 @@ export default {
     onChangeTextArea(newText) {
       this.$emit("on-change-text-area", [
         {
+          id: this.optionId,
           text: newText,
-          value: newText,
+          value: newText.length ? newText : null,
         },
       ]);
 
