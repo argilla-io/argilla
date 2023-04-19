@@ -12,6 +12,7 @@ class DatasetFilter extends Model {
       options: this.attr([]),
       placeholder: this.string(null).nullable(),
       component_type: this.string(null).nullable(),
+      group_id: this.string(null).nullable(),
     };
   }
 }
