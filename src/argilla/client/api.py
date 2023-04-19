@@ -223,6 +223,8 @@ def load(
     sort: Optional[List[Tuple[str, str]]] = None,
     id_from: Optional[str] = None,
     batch_size: int = 250,
+    include_vectors: bool = True,
+    include_metrics: bool = True,
     as_pandas=None,
 ) -> Dataset:
     """Loads a argilla dataset.
@@ -242,8 +244,13 @@ def load(
             can be used to load using batches.
         batch_size: If provided, load `batch_size` samples per request. A lower batch
             size may help avoid timeouts.
+        include_vectors: When set to `False`, indicates that records will be retrieved excluding their vectors,
+            if any. By default, this parameter is set to `True`, meaning that vectors will be included.
+        include_metrics: When set to `False`, indicates that records will be retrieved excluding their metrics.
+            By default, this parameter is set to `True`, meaning that metrics will be included.
         as_pandas: DEPRECATED! To get a pandas DataFrame do
             ``rg.load('my_dataset').to_pandas()``.
+
 
     Returns:
         A argilla dataset.
@@ -276,6 +283,8 @@ def load(
         sort=sort,
         id_from=id_from,
         batch_size=batch_size,
+        include_metrics=include_metrics,
+        include_vectors=include_vectors,
         as_pandas=as_pandas,
     )
 
@@ -336,7 +345,7 @@ def delete_records(
         workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
             env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         query: An ElasticSearch query with the `query string syntax
-            <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
+            <https://docs.argilla.io/en/latest/guides/query_datasets.html>`_
         ids: If provided, deletes dataset records with given ids.
         discard_only: If `True`, matched records won't be deleted. Instead, they will be marked as `Discarded`
         discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.
