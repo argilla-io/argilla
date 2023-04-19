@@ -126,15 +126,19 @@ def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
-def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = LIST_RECORDS_LIMIT):
+def list_records_by_dataset_id(db: Session, dataset_id: UUID, offset: int = 0, limit: int = LIST_RECORDS_LIMIT):
     return (
         db.query(Record)
-        .filter(Record.dataset_id == dataset.id)
+        .filter_by(dataset_id=dataset_id)
         .order_by(Record.inserted_at.asc())
         .offset(offset)
         .limit(limit)
         .all()
     )
+
+
+def count_records_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Record.id)).filter_by(dataset_id=dataset_id).scalar()
 
 
 def create_records(db: Session, dataset: Dataset, user: User, records_create: RecordsCreate):
