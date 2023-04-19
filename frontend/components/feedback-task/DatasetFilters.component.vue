@@ -1,7 +1,11 @@
 <template>
   <div class="filters">
-    <span v-for="id in Object.keys(this.filters)" :key="id">
-      <SearchBar
+    <span
+      class="filters__component"
+      v-for="id in Object.keys(this.filters)"
+      :key="id"
+    >
+      <SearchBarBase
         v-if="getComponentType(id) === 'searchBar'"
         :current-search-text="getFilterById(id).value"
         @on-search-text="onSearch(id, $event)"
@@ -22,9 +26,6 @@ export default {
       type: String,
       required: true,
     },
-    filters: {
-      type: Object,
-    },
   },
   computed: {
     filtersFromVuex() {
@@ -32,6 +33,18 @@ export default {
     },
   },
   created() {
+    this.filters = {
+      searchText: {
+        id: "searchText",
+        name: "Search",
+        componentType: "searchBar",
+        name: "search text",
+        placeholder: "Introduce your query",
+        value: "",
+        options: [],
+        group_id: null,
+      },
+    };
     const formattedFilters = this.factoryFiltersForOrm(this.filters);
     upsertDatasetFilters(formattedFilters);
   },
@@ -71,5 +84,8 @@ export default {
   gap: $base-space * 2;
   align-items: center;
   padding: $base-space * 2 0;
+  &__component {
+    flex: 1;
+  }
 }
 </style>

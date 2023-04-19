@@ -16,17 +16,27 @@
   -->
 
 <template>
-  <form class="searchbar__form" @submit.prevent="searchText(query)">
+  <form @submit.prevent="searchText(query)">
     <div class="searchbar" :class="{ active: query }" :style="searchBarStyles">
-      <svgicon v-if="!query" name="search" width="20" height="20" />
+      <BaseIcon
+        v-if="!query"
+        icon-name="search"
+        icon-width="20"
+        icon-height="20"
+      />
       <BaseButton
         v-else
         class="searchbar__button"
         @click="removeCurrentSearchText()"
       >
-        <svgicon name="close" width="20" height="20" />
+        <BaseIcon
+          class="searchbar__button__icon"
+          icon-name="close"
+          icon-width="20"
+          icon-height="20"
+        />
       </BaseButton>
-      <label class="searchbar__label" for="query" v-text="accesibleText" />
+      <label class="searchbar__label" for="query" v-text="description" />
       <input
         ref="input"
         class="searchbar__input"
@@ -42,9 +52,6 @@
 </template>
 
 <script>
-import "assets/icons/close";
-import "assets/icons/search";
-
 export default {
   props: {
     currentSearchText: {
@@ -55,7 +62,7 @@ export default {
       type: String,
       default: "Introduce your text:",
     },
-    accesibleText: {
+    description: {
       type: String,
       default: "Introduce your text",
     },
@@ -65,17 +72,9 @@ export default {
     },
   },
   data: () => ({
-    text: "",
+    query: "",
   }),
   computed: {
-    query: {
-      get() {
-        return this.text || this.currentSearchText;
-      },
-      set(val) {
-        this.text = val;
-      },
-    },
     searchBarStyles() {
       return { backgroundColor: this.bgColor };
     },
@@ -90,6 +89,9 @@ export default {
       this.$emit("on-search-text", "");
     },
   },
+  created() {
+    this.query = this.currentSearchText;
+  },
 };
 </script>
 
@@ -98,6 +100,7 @@ export default {
   display: flex;
   align-items: center;
   gap: $base-space;
+  max-width: 50vw;
   padding: $base-space * 1.4;
   background: palette(white);
   border-radius: $border-radius-s;
@@ -107,17 +110,15 @@ export default {
     box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
   }
-  &__form {
-    width: 100%;
-  }
   &__button.button {
+    display: flex;
     padding: 0;
     &:hover {
-      .svg-icon {
-        fill: $black-87;
-      }
+      background: $black-4;
     }
-    .svg-icon {
+  }
+  &__button {
+    &__icon {
       padding: calc($base-space / 2);
     }
   }
@@ -126,12 +127,12 @@ export default {
   }
   &__input {
     width: 100%;
+    height: 1rem;
+    padding: 0;
     border: none;
     outline: 0;
     background: none;
-  }
-  .svg-icon {
-    fill: $black-54;
+    line-height: 1rem;
   }
 }
 </style>
