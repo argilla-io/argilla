@@ -70,3 +70,9 @@ def test_train_tokencat(dataset_token_classification):
     assert not isinstance(not_record, rg.TokenClassificationRecord)
     cleanup(trainer, output_dir, train=False)
     cleanup_spacy_config(trainer)
+
+
+def test_init_with_gpu_id(dataset_text_classification):
+    trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK, gpu_id=0)
+    expected_use_gpu = trainer._trainer.gpu_id >= 0
+    assert trainer._trainer.use_gpu is expected_use_gpu
