@@ -45,8 +45,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
                 A `rg.TextClassificationRecord`, `rg.TokenClassificationRecord`, or `rg.Text2TextRecord`
                 object. Defaults to None.
             model:
-                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_lg", or
-                the `spacy-transformers` model name if using the GPU instead e.g. "roberta-base". Defaults to None.
+                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_lg". Defaults to None.
             seed: A `int` with the seed for the random number generator. Defaults to None.
             multi_label: A `bool` indicating whether the task is multi-label or not. Defaults to False.
             language:
@@ -106,17 +105,17 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         if self.use_gpu:
             try:
                 require_version("torch")
-                has_torch = True
+                self.has_torch = True
             except:
-                has_torch = False
+                self.has_torch = False
 
             try:
                 require_version("tensorflow")
-                has_tensorflow = True
+                self.has_tensorflow = True
             except:
-                has_tensorflow = False
+                self.has_tensorflow = False
 
-            if not has_torch and not has_tensorflow:
+            if not self.has_torch and not self.has_tensorflow:
                 self._logger(
                     "Either `torch` or `tensorflow` need to be installed to use the"
                     " GPU, since any of those is required as the GPU allocator. Falling"
@@ -124,15 +123,6 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
                 )
                 self.use_gpu = False
                 self.gpu_id = -1
-
-        try:
-            require_version("spacy-transformers")
-            self.has_spacy_transformers = True
-        except:
-            self._logger.warn(
-                "`spacy-transformers` is not installed and it's recommended to train a model using the GPU."
-            )
-            self.has_spacy_transformers = False
 
         self.init_training_args()
 
@@ -143,33 +133,24 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             lang=self.language,
             pipeline=self._pipeline,
             optimize="efficiency",
-            gpu=True if self.use_gpu and self.has_spacy_transformers else False,
         )
 
         self.config["paths"]["train"] = self._train_dataset_path
         self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
         self.config["system"]["seed"] = self._seed or 42
-        if self.has_spacy_transformers:
-            if not self._model:
-                self._logger.warn(
-                    "`model` is not specified and it's recommended to specify the"
-                    " `spacy-transformers` model to use. Using `roberta-base` as the"
-                    " default model instead."
-                )
-                self._model = "roberta-base"
-            self.config["components"]["transformer"]["model"]["name"] = self._model
-        else:
-            if not self._model:
-                self._logger.warn(
-                    "`model` is not specified and it's recommended to specify the"
-                    " `spaCy` model to use. Using `en_core_web_lg` as the default model"
-                    " instead."
-                )
-                self._model = "en_core_web_lg"
-            self.config["paths"]["vectors"] = self._model
-            if self.use_gpu and not self.has_spacy_transformers:
-                self.config["system"]["gpu_allocator"] = "pytorch"
-                self.config["nlp"]["batch_size"] = 128
+        if not self._model:
+            self._logger.warn(
+                "`model` is not specified and it's recommended to specify the"
+                " `spaCy` model to use. Using `en_core_web_lg` as the default model"
+                " instead."
+            )
+            self._model = "en_core_web_lg"
+        self.config["paths"]["vectors"] = self._model
+        if self.use_gpu:
+            self.config["system"]["gpu_allocator"] = (
+                "pytorch" if self.has_torch else "tensorflow" if self.has_tensorflow else None
+            )
+            self.config["nlp"]["batch_size"] = 128
 
         self._nlp = None
 
