@@ -2,7 +2,7 @@
   <div class="filters">
     <span v-for="id in Object.keys(this.filters)" :key="id">
       <SearchBar
-        v-if="hasComponentsType(id)"
+        v-if="getComponentType(id) === 'searchBar'"
         :current-search-text="getFilterById(id).value"
         @on-search-text="onSearch(id, $event)"
         :placeholder="getFilterById(id).placeholder"
@@ -45,7 +45,7 @@ export default {
     getFilterById(filterId) {
       return this.filtersFromVuex.find((filter) => filter.id === filterId);
     },
-    hasComponentsType(id) {
+    getComponentType(id) {
       return this.filters[id].componentType;
     },
     factoryFiltersForOrm(initialFilters) {
