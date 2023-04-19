@@ -1,7 +1,7 @@
 <template>
   <PaginationComponent
     v-if="totalRecord"
-    :showPageNumber="true"
+    :showPageNumber="false"
     :totalItems="totalRecord"
     @on-paginate="onPaginate"
   />
