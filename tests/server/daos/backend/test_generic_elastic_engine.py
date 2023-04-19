@@ -57,7 +57,7 @@ def test_non_searchable_docs_are_not_present_in_metrics(engine: GenericElasticEn
     )
 
     docs = [{"text": "This is my text", "metadata": {"_this": "value"}}] * 100
-    assert engine.add_dataset_documents(dataset_id, documents=docs) == 0
+    assert engine.add_dataset_records(dataset_id, documents=docs) == 0
 
     metric_results = engine.compute_metric(dataset_id, metric_id="metadata")
     assert metric_results == {}
@@ -72,7 +72,7 @@ def test_non_searchable_fields_are_present_in_documents(engine: GenericElasticEn
     )
     documents = [{"id": f"{i:03d}", "text": "This is my text", "metadata": {"_this": "value"}} for i in range(0, 100)]
 
-    assert engine.add_dataset_documents(dataset_id, documents=documents) == 0
+    assert engine.add_dataset_records(dataset_id, documents=documents) == 0
 
     total, results = engine.search_records(dataset_id, size=5)
     assert total == 100
@@ -88,7 +88,7 @@ def test_non_searchable_fields_cannot_be_used_for_search(engine: GenericElasticE
     )
     documents = [{"id": f"{i:03d}", "text": "This is my text", "metadata": {"_this": "value"}} for i in range(0, 100)]
 
-    assert engine.add_dataset_documents(dataset_id, documents=documents) == 0
+    assert engine.add_dataset_records(dataset_id, documents=documents) == 0
 
     with pytest.raises(
         InvalidTextSearchError, match=r"Cannot search on field \[metadata._this\] since it is not indexed"

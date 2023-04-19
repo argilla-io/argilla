@@ -166,13 +166,10 @@ def test_log_record_that_makes_me_cry(mocked_client):
         "text_length": 137,
         "tokens": [
             {
-                "capitalness": None,
                 "char_end": 0,
                 "char_start": 0,
-                "custom": None,
                 "idx": 0,
                 "length": 1,
-                "score": None,
                 "tag": "O",
                 "value": "'",
             },
@@ -180,10 +177,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "FIRST",
                 "char_end": 6,
                 "char_start": 1,
-                "custom": None,
                 "idx": 1,
                 "length": 6,
-                "score": None,
                 "tag": "O",
                 "value": "Secret",
             },
@@ -191,21 +186,16 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "FIRST",
                 "char_end": 12,
                 "char_start": 8,
-                "custom": None,
                 "idx": 2,
                 "length": 5,
-                "score": None,
                 "tag": "O",
                 "value": "Story",
             },
             {
-                "capitalness": None,
                 "char_end": 14,
                 "char_start": 14,
-                "custom": None,
                 "idx": 3,
                 "length": 1,
-                "score": None,
                 "tag": "O",
                 "value": ":",
             },
@@ -213,10 +203,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "FIRST",
                 "char_end": 21,
                 "char_start": 16,
-                "custom": None,
                 "idx": 4,
                 "length": 6,
-                "score": None,
                 "tag": "O",
                 "value": "Última",
             },
@@ -224,21 +212,16 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "LOWER",
                 "char_end": 26,
                 "char_start": 23,
-                "custom": None,
                 "idx": 5,
                 "length": 4,
-                "score": None,
                 "tag": "O",
                 "value": "hora",
             },
             {
-                "capitalness": None,
                 "char_end": 27,
                 "char_start": 27,
-                "custom": None,
                 "idx": 6,
                 "length": 1,
-                "score": None,
                 "tag": "O",
                 "value": "'",
             },
@@ -246,10 +229,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "LOWER",
                 "char_end": 34,
                 "char_start": 29,
-                "custom": None,
                 "idx": 7,
                 "length": 6,
-                "score": None,
                 "tag": "O",
                 "value": "debuta",
             },
@@ -257,10 +238,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "LOWER",
                 "char_end": 38,
                 "char_start": 36,
-                "custom": None,
                 "idx": 8,
                 "length": 3,
-                "score": None,
                 "tag": "O",
                 "value": "con",
             },
@@ -268,10 +247,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "LOWER",
                 "char_end": 41,
                 "char_start": 40,
-                "custom": None,
                 "idx": 9,
                 "length": 2,
-                "score": None,
                 "tag": "O",
                 "value": "un",
             },
@@ -279,21 +256,16 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "LOWER",
                 "char_end": 47,
                 "char_start": 43,
-                "custom": None,
                 "idx": 10,
                 "length": 5,
-                "score": None,
                 "tag": "O",
                 "value": "pobre",
             },
             {
-                "capitalness": None,
                 "char_end": 52,
                 "char_start": 49,
-                "custom": None,
                 "idx": 11,
                 "length": 4,
-                "score": None,
                 "tag": "O",
                 "value": "8.7%",
             },
@@ -301,10 +273,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "LOWER",
                 "char_end": 55,
                 "char_start": 54,
-                "custom": None,
                 "idx": 12,
                 "length": 2,
-                "score": None,
                 "tag": "O",
                 "value": "en",
             },
@@ -312,10 +282,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "LOWER",
                 "char_end": 58,
                 "char_start": 57,
-                "custom": None,
                 "idx": 13,
                 "length": 2,
-                "score": None,
                 "tag": "O",
                 "value": "el",
             },
@@ -323,10 +291,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "LOWER",
                 "char_end": 65,
                 "char_start": 60,
-                "custom": None,
                 "idx": 14,
                 "length": 6,
-                "score": None,
                 "tag": "B-ENG",
                 "value": "access",
             },
@@ -334,10 +300,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "LOWER",
                 "char_end": 68,
                 "char_start": 67,
-                "custom": None,
                 "idx": 15,
                 "length": 2,
-                "score": None,
                 "tag": "O",
                 "value": "de",
             },
@@ -345,32 +309,24 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "FIRST",
                 "char_end": 78,
                 "char_start": 70,
-                "custom": None,
                 "idx": 16,
                 "length": 9,
-                "score": None,
                 "tag": "O",
                 "value": "Telecinco",
             },
             {
-                "capitalness": None,
                 "char_end": 80,
                 "char_start": 79,
-                "custom": None,
                 "idx": 17,
                 "length": 2,
-                "score": None,
                 "tag": "O",
                 "value": "..",
             },
             {
-                "capitalness": None,
                 "char_end": 82,
                 "char_start": 82,
-                "custom": None,
                 "idx": 18,
                 "length": 1,
-                "score": None,
                 "tag": "O",
                 "value": ".",
             },
@@ -378,10 +334,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "UPPER",
                 "char_end": 92,
                 "char_start": 84,
-                "custom": None,
                 "idx": 19,
                 "length": 9,
-                "score": None,
                 "tag": "O",
                 "value": "PROGRAMAS",
             },
@@ -389,10 +343,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "UPPER",
                 "char_end": 96,
                 "char_start": 94,
-                "custom": None,
                 "idx": 20,
                 "length": 3,
-                "score": None,
                 "tag": "O",
                 "value": "CON",
             },
@@ -400,10 +352,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "UPPER",
                 "char_end": 102,
                 "char_start": 98,
-                "custom": None,
                 "idx": 21,
                 "length": 5,
-                "score": None,
                 "tag": "O",
                 "value": "MEJOR",
             },
@@ -411,10 +361,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "UPPER",
                 "char_end": 108,
                 "char_start": 104,
-                "custom": None,
                 "idx": 22,
                 "length": 5,
-                "score": None,
                 "tag": "O",
                 "value": "CUOTA",
             },
@@ -422,10 +370,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "UPPER",
                 "char_end": 112,
                 "char_start": 110,
-                "custom": None,
                 "idx": 23,
                 "length": 3,
-                "score": None,
                 "tag": "O",
                 "value": "DEL",
             },
@@ -433,21 +379,16 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "UPPER",
                 "char_end": 118,
                 "char_start": 114,
-                "custom": None,
                 "idx": 24,
                 "length": 5,
-                "score": None,
                 "tag": "O",
                 "value": "LUNES",
             },
             {
-                "capitalness": None,
                 "char_end": 120,
                 "char_start": 120,
-                "custom": None,
                 "idx": 25,
                 "length": 1,
-                "score": None,
                 "tag": "O",
                 "value": "(",
             },
@@ -455,10 +396,8 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "UPPER",
                 "char_end": 123,
                 "char_start": 121,
-                "custom": None,
                 "idx": 26,
                 "length": 3,
-                "score": None,
                 "tag": "O",
                 "value": "POR",
             },
@@ -466,43 +405,32 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "capitalness": "UPPER",
                 "char_end": 131,
                 "char_start": 125,
-                "custom": None,
                 "idx": 27,
                 "length": 7,
-                "score": None,
                 "tag": "O",
                 "value": "CADENAS",
             },
             {
-                "capitalness": None,
                 "char_end": 132,
                 "char_start": 132,
-                "custom": None,
                 "idx": 28,
                 "length": 1,
-                "score": None,
                 "tag": "O",
                 "value": ")",
             },
             {
-                "capitalness": None,
                 "char_end": 133,
                 "char_start": 133,
-                "custom": None,
                 "idx": 29,
                 "length": 1,
-                "score": None,
                 "tag": "O",
                 "value": ".",
             },
             {
-                "capitalness": None,
                 "char_end": 135,
                 "char_start": 135,
-                "custom": None,
                 "idx": 30,
                 "length": 1,
-                "score": None,
                 "tag": "O",
                 "value": ".",
             },
@@ -515,8 +443,12 @@ def test_search_keywords(mocked_client, api):
     dataset = "test_search_keywords"
     from datasets import load_dataset
 
-    # TODO(@frascuchon): Move dataset to new organization
-    dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
+    dataset_ds = load_dataset(
+        "argilla/gutenberg_spacy-ner",
+        split="train",
+        # This revision does not includes the vectors info, so tests will pass
+        revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
+    )
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
     api.delete(dataset)
@@ -570,3 +502,53 @@ def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient, api):
 
     assert len(ds) == 5
     assert ds[0].id == 3
+
+
+@pytest.mark.skipif(
+    condition=not SUPPORTED_VECTOR_SEARCH,
+    reason="Vector search not supported",
+)
+def test_log_data_with_vectors_and_partial_update_ok(mocked_client: SecuredClient, api):
+    dataset = "test_log_data_and_partial_update_ok"
+    text = "This is a text"
+    expected_n_records = 10
+
+    api.delete(dataset)
+
+    # Logging records with vector info
+
+    records = [
+        argilla.TokenClassificationRecord(id=i, text=text, tokens=text.split(), vectors={"test-vector": [i] * 5})
+        for i in range(0, expected_n_records)
+    ]
+    api.log(records=records, name=dataset)
+
+    ds = api.load(dataset)
+    assert len(ds) == expected_n_records
+    assert all(map(lambda r: "test-vector" in r.vectors, ds))
+
+    # Fetch minimal record info and add a metadata field
+    records_for_update = [
+        TokenClassificationRecord.parse_obj({"metadata": {"a": "value"}, **data})
+        for data in api.datasets.scan(name=dataset, projection={"text", "tokens"})
+    ]
+    api.log(name=dataset, records=records_for_update)
+
+    ds = api.load(dataset)
+    assert len(ds) == expected_n_records
+    assert all(map(lambda r: r.annotation_agent is None, ds))
+    assert all(map(lambda r: "test-vector" in r.vectors, ds))
+    assert all(map(lambda r: r.metadata == {"a": "value"}, ds))
+
+    # Remove the metadata info and add some mock annotations
+    for record in records_for_update:
+        record.metadata = None
+        record.annotation = []
+        record.annotation_agent = "mock_test"
+    api.log(name=dataset, records=records_for_update)
+
+    ds = api.load(dataset)
+    assert len(ds) == expected_n_records
+    assert all(map(lambda r: r.annotation_agent == "mock_test", ds))
+    assert all(map(lambda r: "test-vector" in r.vectors, ds))
+    assert all(map(lambda r: r.metadata == {"a": "value"}, ds))
