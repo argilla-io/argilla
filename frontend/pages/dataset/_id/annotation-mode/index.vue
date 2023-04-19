@@ -12,7 +12,7 @@
       <SidebarFeedbackTaskComponent />
     </template>
     <template v-slot:top>
-      <DatasetFilters :datasetId="datasetId" :filters="filters" />
+      <DatasetFiltersComponent :datasetId="datasetId" />
     </template>
     <template v-slot:center>
       <CenterFeedbackTaskContent :datasetId="datasetId" />
@@ -80,15 +80,6 @@ export default {
     } catch (err) {
       this.manageErrorIfFetchNotWorking(err);
     }
-  },
-  created() {
-    this.filters = {
-      searchText: {
-        id: "searchText",
-        componentType: "searchBar",
-        placeholder: "Introduce your query",
-      },
-    };
   },
   methods: {
     async getDatasetInfo(datasetId) {
