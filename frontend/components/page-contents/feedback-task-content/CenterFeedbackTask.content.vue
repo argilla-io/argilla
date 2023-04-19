@@ -248,7 +248,7 @@ export default {
       },
       {
         id: "id_7",
-         name:"nameOfQuestion_id_7",
+        name: "nameOfQuestion_id_7",
         question: "Comment",
         placeholder: "this is the placeholder",
         options: [
