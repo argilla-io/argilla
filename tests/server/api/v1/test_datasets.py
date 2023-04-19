@@ -205,7 +205,8 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
-    RecordFactory.create_batch(size=2)
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header)
 
@@ -244,7 +245,8 @@ def test_list_dataset_records_with_offset(client: TestClient, admin_auth_header:
     RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
-    RecordFactory.create_batch(size=2)
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, params={"offset": 2})
 
@@ -261,7 +263,8 @@ def test_list_dataset_records_with_limit(client: TestClient, admin_auth_header: 
     RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
-    RecordFactory.create_batch(size=2)
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, params={"limit": 1})
 
@@ -278,7 +281,8 @@ def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_au
     record_c = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
-    RecordFactory.create_batch(size=2)
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
 
     response = client.get(
         f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, params={"offset": 1, "limit": 1}
@@ -307,7 +311,8 @@ def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: 
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
-    RecordFactory.create_batch(size=2)
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
