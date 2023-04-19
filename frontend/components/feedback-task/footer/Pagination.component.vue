@@ -1,6 +1,6 @@
 <template>
   <div class="pagination-component">
-    <div class="left-area"></div>
+    <div class="number-of-records-by-page-area"></div>
 
     <div class="center-area">
       <button
@@ -28,7 +28,7 @@
       />
     </div>
 
-    <div class="right-area">
+    <div class="total-records-area">
       <span v-text="totalOfRecordMessage" />
     </div>
   </div>
@@ -120,8 +120,8 @@ export default {
   border-top: 1px solid #e6e6e6;
 }
 
-.left-area {
-  grid-area: left;
+.number-of-records-by-page-area {
+  grid-area: right;
 }
 .center-area {
   grid-area: center;
@@ -130,8 +130,8 @@ export default {
   align-items: center;
 }
 
-.right-area {
-  grid-area: right;
+.total-records-area {
+  grid-area: left;
   display: flex;
   justify-content: center;
   align-items: center;
