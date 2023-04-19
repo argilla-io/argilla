@@ -49,7 +49,7 @@ export default {
       return this.filters[id].componentType;
     },
     factoryFiltersForOrm(initialFilters) {
-      return Object.keys(initialFilters).map((filter, index) => {
+      return Object.keys(initialFilters).map((filter) => {
         return {
           dataset_id: this.datasetId,
           id: this.filters[filter].id,
