@@ -63,8 +63,7 @@ async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, datas
 
     try:
         dataset.status = DatasetStatus.ready
-        # TODO: This statement is failing in dev. I will uncomment once I resolve the problem
-        # await search_engine.create_index(dataset)
+        await search_engine.create_index(dataset)
         # TODO: DB rollback is executed if some problem is found creating the index. If the error
         #  is raised from the commit statement, index creation should be reverted
         #  We need a way to commit the dataset status before creating the index, and rollback the status
