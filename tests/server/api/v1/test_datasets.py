@@ -507,6 +507,25 @@ def test_create_dataset_annotation_as_annotator(client: TestClient, db: Session)
     assert db.query(Annotation).count() == 0
 
 
+@pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
+def test_create_dataset_annotation_with_invalid_name(
+    client: TestClient, db: Session, admin_auth_header: dict, invalid_name: str
+):
+    dataset = DatasetFactory.create()
+    annotation_json = {
+        "name": invalid_name,
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
+    )
+
+    assert response.status_code == 422
+    assert db.query(Annotation).count() == 0
+
+
 def test_create_dataset_annotation_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
     annotation = AnnotationFactory.create(name="name")
     annotation_json = {
