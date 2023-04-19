@@ -38,7 +38,6 @@ export default {
         id: "searchText",
         name: "Search",
         componentType: "searchBar",
-        name: "search text",
         placeholder: "Introduce your query",
         value: "",
         options: [],
