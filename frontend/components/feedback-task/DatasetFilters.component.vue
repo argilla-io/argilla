@@ -21,6 +21,7 @@ import {
   getFiltersByDatasetId,
 } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
 export default {
+  name: "DatasetFiltersComponent",
   props: {
     datasetId: {
       type: String,
