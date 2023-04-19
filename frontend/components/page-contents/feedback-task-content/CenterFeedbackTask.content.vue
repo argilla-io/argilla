@@ -105,7 +105,7 @@ export default {
     // UPSERT records and questions in ORM
     upsertDatasetQuestions(formattedQuestions);
 
-    this.onBusEventIsLoadingLabels();
+    this.onBusEventCurrentPage();
   },
   watch: {
     currentPage: {
@@ -128,7 +128,7 @@ export default {
     },
   },
   methods: {
-    onBusEventIsLoadingLabels() {
+    onBusEventCurrentPage() {
       this.$root.$on("current-page", (currentPage) => {
         //NOTE - the pagination start at 1 but the record start at 1 => there is an offset of 1 to remove
         this.currentPage = currentPage - 1;
