@@ -797,6 +797,34 @@ async def test_create_dataset_records(
     ]
 
 
+@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
+@pytest.mark.asyncio
+async def test_create_dataset_records_with_index_error(
+    client: TestClient,
+    elasticsearch: Elasticsearch,
+    db: Session,
+    admin_auth_header: dict,
+):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+
+    records_json = {
+        "items": [
+            {"fields": {"input": "Say Hello", "output": "Hello"}},
+            {"fields": {"input": "Say Hello", "output": "Hi"}},
+            {"fields": {"input": "Say Pello", "output": "Hello World"}},
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422
+    assert db.query(Record).count() == 0
+
+    index_name = f"rg.{dataset.id}"
+
+    assert not elasticsearch.indices.exists(index=index_name)
+
+
 def test_create_dataset_records_without_authentication(client: TestClient, db: Session):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     records_json = {

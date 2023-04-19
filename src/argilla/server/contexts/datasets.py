@@ -161,14 +161,16 @@ async def create_records(
 
     try:
         db.add_all(records)
-        db.commit()
 
-        for record in records:
-            db.expire(record)
+        db.commit()
+        db.expire_all()
 
         await search_engine.add_records(dataset, records)
     except:
-        db.rollback()
+        # savepoint.rollback()
+        for record in records:
+            db.delete(record)
+        db.commit()
         raise
 
 

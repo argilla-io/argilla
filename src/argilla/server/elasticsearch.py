@@ -80,7 +80,7 @@ class ElasticSearchEngine:
         index_name = self._index_name_for_dataset(dataset)
 
         if not await self.client.indices.exists(index=index_name):
-            raise RuntimeError(
+            raise ValueError(
                 f"Unable to add data records to index for dataset {dataset.id}. The specified index is invalid."
             )
 
