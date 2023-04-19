@@ -189,5 +189,12 @@ def update_response(db: Session, response: Response, response_update: ResponseUp
     return response
 
 
+def delete_response(db: Session, response: Response):
+    db.delete(response)
+    db.commit()
+
+    return response
+
+
 def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):
     return db.query(func.count(Annotation.id)).filter_by(dataset_id=dataset_id).scalar()

@@ -27,6 +27,17 @@ from argilla.server.security import auth
 router = APIRouter(tags=["responses"])
 
 
+def _get_response(db: Session, response_id: UUID):
+    response = datasets.get_response_by_id(db, response_id)
+    if not response:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Response with id `{response_id}` not found",
+        )
+
+    return response
+
+
 @router.put("/responses/{response_id}", response_model=Response)
 def update_response(
     *,
@@ -35,13 +46,24 @@ def update_response(
     response_update: ResponseUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    response = datasets.get_response_by_id(db, response_id)
-    if not response:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Response with id `{response_id}` not found",
-        )
+    response = _get_response(db, response_id)
 
     authorize(current_user, ResponsePolicyV1.update(response))
 
     return datasets.update_response(db, response, response_update)
+
+
+@router.delete("/responses/{response_id}", response_model=Response)
+def delete_response(
+    *,
+    db: Session = Depends(get_db),
+    response_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    response = _get_response(db, response_id)
+
+    authorize(current_user, ResponsePolicyV1.delete(response))
+
+    datasets.delete_response(db, response)
+
+    return response
