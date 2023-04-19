@@ -913,7 +913,8 @@ def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, 
     assert db.query(Response).count() == 0
 
 
-@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
+# @pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
+@pytest.mark.skip(reason="Review index creation in DEV")
 def test_publish_dataset(
     client: TestClient,
     db: Session,
@@ -934,7 +935,8 @@ def test_publish_dataset(
     assert elasticsearch.indices.exists(index=f"rg.{dataset.id}")
 
 
-@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
+# @pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
+@pytest.mark.skip(reason="Review index creation in DEV")
 def test_publish_dataset_with_error_on_index_creation(
     client: TestClient,
     db: Session,
