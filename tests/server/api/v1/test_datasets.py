@@ -26,6 +26,7 @@ from argilla.server.models import (
     User,
 )
 from argilla.server.schemas.v1.datasets import (
+    ANNOTATION_CREATE_NAME_MAX_LENGTH,
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
@@ -523,6 +524,41 @@ def test_create_dataset_annotation_as_annotator(client: TestClient, db: Session)
     )
 
     assert response.status_code == 403
+    assert db.query(Annotation).count() == 0
+
+
+@pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
+def test_create_dataset_annotation_with_invalid_name(
+    client: TestClient, db: Session, admin_auth_header: dict, invalid_name: str
+):
+    dataset = DatasetFactory.create()
+    annotation_json = {
+        "name": invalid_name,
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
+    )
+
+    assert response.status_code == 422
+    assert db.query(Annotation).count() == 0
+
+
+def test_create_annotation_with_invalid_max_length_name(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    annotation_json = {
+        "name": "a" * (ANNOTATION_CREATE_NAME_MAX_LENGTH + 1),
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
+    )
+
+    assert response.status_code == 422
     assert db.query(Annotation).count() == 0
 
 
