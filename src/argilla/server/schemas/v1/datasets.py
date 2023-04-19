@@ -16,10 +16,15 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, conlist
+from pydantic import BaseModel, Field, conlist, constr
 from typing_extensions import Literal
 
 from argilla.server.models import AnnotationType, DatasetStatus
+
+ANNOTATION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+
+ANNOTATION_CREATE_NAME_MIN_LENGTH = 1
+ANNOTATION_CREATE_NAME_MAX_LENGTH = 200
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
@@ -78,7 +83,11 @@ class Annotation(BaseModel):
 
 
 class AnnotationCreate(BaseModel):
-    name: str
+    name: constr(
+        regex=ANNOTATION_CREATE_NAME_REGEX,
+        min_length=ANNOTATION_CREATE_NAME_MIN_LENGTH,
+        max_length=ANNOTATION_CREATE_NAME_MAX_LENGTH,
+    )
     title: str
     required: Optional[bool]
     settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
@@ -107,6 +116,7 @@ class Record(BaseModel):
 
 class Records(BaseModel):
     items: List[Record]
+    total: int
 
 
 class ResponseCreate(BaseModel):

@@ -26,6 +26,7 @@ from argilla.server.models import (
     User,
 )
 from argilla.server.schemas.v1.datasets import (
+    ANNOTATION_CREATE_NAME_MAX_LENGTH,
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
@@ -42,7 +43,6 @@ from tests.factories import (
     DatasetFactory,
     RatingAnnotationFactory,
     RecordFactory,
-    ResponseFactory,
     TextAnnotationFactory,
     WorkspaceFactory,
 )
@@ -206,6 +206,9 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
+
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header)
 
     assert response.status_code == 200
@@ -232,7 +235,8 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
                 "inserted_at": record_c.inserted_at.isoformat(),
                 "updated_at": record_c.updated_at.isoformat(),
             },
-        ]
+        ],
+        "total": 3,
     }
 
 
@@ -242,12 +246,16 @@ def test_list_dataset_records_with_offset(client: TestClient, admin_auth_header:
     RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
+
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, params={"offset": 2})
 
     assert response.status_code == 200
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
+    assert response_body["total"] == 3
 
 
 def test_list_dataset_records_with_limit(client: TestClient, admin_auth_header: dict):
@@ -256,12 +264,16 @@ def test_list_dataset_records_with_limit(client: TestClient, admin_auth_header: 
     RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
+
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, params={"limit": 1})
 
     assert response.status_code == 200
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_a.id)]
+    assert response_body["total"] == 3
 
 
 def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_auth_header: dict):
@@ -269,6 +281,9 @@ def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_au
     RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
 
     response = client.get(
         f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, params={"offset": 1, "limit": 1}
@@ -278,6 +293,7 @@ def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_au
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
+    assert response_body["total"] == 3
 
 
 def test_list_dataset_records_without_authentication(client: TestClient):
@@ -295,6 +311,9 @@ def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: 
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
@@ -322,7 +341,8 @@ def test_list_dataset_records_as_annotator(client: TestClient, admin: User, db: 
                 "inserted_at": record_c.inserted_at.isoformat(),
                 "updated_at": record_c.updated_at.isoformat(),
             },
-        ]
+        ],
+        "total": 3,
     }
 
 
@@ -504,6 +524,41 @@ def test_create_dataset_annotation_as_annotator(client: TestClient, db: Session)
     )
 
     assert response.status_code == 403
+    assert db.query(Annotation).count() == 0
+
+
+@pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
+def test_create_dataset_annotation_with_invalid_name(
+    client: TestClient, db: Session, admin_auth_header: dict, invalid_name: str
+):
+    dataset = DatasetFactory.create()
+    annotation_json = {
+        "name": invalid_name,
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
+    )
+
+    assert response.status_code == 422
+    assert db.query(Annotation).count() == 0
+
+
+def test_create_annotation_with_invalid_max_length_name(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    annotation_json = {
+        "name": "a" * (ANNOTATION_CREATE_NAME_MAX_LENGTH + 1),
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
+    )
+
+    assert response.status_code == 422
     assert db.query(Annotation).count() == 0
 
 
@@ -738,8 +793,8 @@ def test_create_dataset_records(client: TestClient, db: Session, admin_auth_head
                 "external_id": "1",
                 "response": {
                     "values": {
-                        "input_ok": "yes",
-                        "output_ok": "yes",
+                        "input_ok": {"value": "yes"},
+                        "output_ok": {"value": "yes"},
                     },
                 },
             },
@@ -751,8 +806,8 @@ def test_create_dataset_records(client: TestClient, db: Session, admin_auth_head
                 "external_id": "3",
                 "response": {
                     "values": {
-                        "input_ok": "no",
-                        "output_ok": "no",
+                        "input_ok": {"value": "no"},
+                        "output_ok": {"value": "no"},
                     },
                 },
             },
@@ -775,8 +830,8 @@ def test_create_dataset_records_without_authentication(client: TestClient, db: S
                 "external_id": "1",
                 "response": {
                     "values": {
-                        "input_ok": "yes",
-                        "output_ok": "yes",
+                        "input_ok": {"value": "yes"},
+                        "output_ok": {"value": "yes"},
                     },
                 },
             },
@@ -800,8 +855,8 @@ def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
                 "external_id": "1",
                 "response": {
                     "values": {
-                        "input_ok": "yes",
-                        "output_ok": "yes",
+                        "input_ok": {"value": "yes"},
+                        "output_ok": {"value": "yes"},
                     },
                 },
             },
@@ -826,8 +881,8 @@ def test_create_dataset_records_with_non_published_dataset(client: TestClient, d
                 "external_id": "1",
                 "response": {
                     "values": {
-                        "input_ok": "yes",
-                        "output_ok": "yes",
+                        "input_ok": {"value": "yes"},
+                        "output_ok": {"value": "yes"},
                     },
                 },
             },

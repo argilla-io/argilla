@@ -91,7 +91,10 @@ def list_dataset_records(
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    return Records(items=datasets.list_records(db, dataset, offset=offset, limit=limit))
+    return Records(
+        items=datasets.list_records_by_dataset_id(db, dataset_id, offset=offset, limit=limit),
+        total=datasets.count_records_by_dataset_id(db, dataset_id),
+    )
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)

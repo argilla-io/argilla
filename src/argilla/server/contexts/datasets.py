@@ -21,6 +21,7 @@ from argilla.server.schemas.v1.datasets import (
     RecordsCreate,
 )
 from argilla.server.schemas.v1.records import ResponseCreate
+from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.security.model import User
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -125,15 +126,19 @@ def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
-def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = LIST_RECORDS_LIMIT):
+def list_records_by_dataset_id(db: Session, dataset_id: UUID, offset: int = 0, limit: int = LIST_RECORDS_LIMIT):
     return (
         db.query(Record)
-        .filter(Record.dataset_id == dataset.id)
+        .filter_by(dataset_id=dataset_id)
         .order_by(Record.inserted_at.asc())
         .offset(offset)
         .limit(limit)
         .all()
     )
+
+
+def count_records_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Record.id)).filter_by(dataset_id=dataset_id).scalar()
 
 
 def create_records(db: Session, dataset: Dataset, user: User, records_create: RecordsCreate):
@@ -157,6 +162,10 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
     db.commit()
 
 
+def get_response_by_id(db: Session, response_id: UUID):
+    return db.get(Response, response_id)
+
+
 def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):
     return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
 
@@ -171,6 +180,22 @@ def create_response(db: Session, record: Record, user: User, response_create: Re
     db.add(response)
     db.commit()
     db.refresh(response)
+
+    return response
+
+
+def update_response(db: Session, response: Response, response_update: ResponseUpdate):
+    response.values = response_update.values
+
+    db.commit()
+    db.refresh(response)
+
+    return response
+
+
+def delete_response(db: Session, response: Response):
+    db.delete(response)
+    db.commit()
 
     return response
 

@@ -21,6 +21,7 @@ from argilla.server.errors import ForbiddenOperationError
 from argilla.server.models import (
     Dataset,
     Record,
+    Response,
     User,
     UserRole,
     Workspace,
@@ -186,6 +187,16 @@ class RecordPolicyV1:
                 )
             )
         )
+
+
+class ResponsePolicyV1:
+    @classmethod
+    def update(cls, response: Response) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.id == response.user_id
+
+    @classmethod
+    def delete(cls, response: Response) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.id == response.user_id
 
 
 class DatasetSettingsPolicy:
