@@ -6,7 +6,7 @@
       :key="id"
     >
       <SearchBarBase
-        v-if="getComponentType(id) === 'searchBar'"
+        v-if="getFilterById(id).component_type === 'searchBar'"
         :current-search-text="getFilterById(id).value"
         @on-search-text="onSearch(id, $event)"
         :placeholder="getFilterById(id).placeholder"
@@ -39,9 +39,6 @@ export default {
         name: "Search",
         componentType: "searchBar",
         placeholder: "Introduce your query",
-        value: "",
-        options: [],
-        group_id: null,
       },
     };
     const formattedFilters = this.factoryFiltersForOrm(this.filters);
@@ -57,9 +54,6 @@ export default {
     getFilterById(filterId) {
       return this.filtersFromVuex.find((filter) => filter.id === filterId);
     },
-    getComponentType(id) {
-      return this.filters[id].componentType;
-    },
     factoryFiltersForOrm(initialFilters) {
       return Object.keys(initialFilters).map((filter) => {
         return {
@@ -70,6 +64,7 @@ export default {
           value: this.filters[filter].value,
           options: this.filters[filter].options,
           placeholder: this.filters[filter].placeholder,
+          group_id: this.filters[filter].groupId,
         };
       });
     },
