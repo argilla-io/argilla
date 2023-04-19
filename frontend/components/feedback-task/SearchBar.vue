@@ -28,12 +28,14 @@
       </BaseButton>
       <label class="searchbar__label" for="query" v-text="accesibleText" />
       <input
+        ref="input"
         class="searchbar__input"
         type="text"
         name="query"
         id="query"
         v-model="query"
         :placeholder="placeholder"
+        autocomplete="off"
       />
     </div>
   </form>
@@ -80,6 +82,7 @@ export default {
   },
   methods: {
     searchText(query) {
+      this.$refs.input.blur();
       this.$emit("on-search-text", query);
     },
     removeCurrentSearchText() {
