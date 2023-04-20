@@ -189,6 +189,7 @@ export default {
       });
     },
     formattedFeedbackTaskDatasets() {
+      // TODO - when workspace object will be include in the API call, replace line197 by the workspace
       return getAllFeedbackDatasets().map((dataset) => {
         return {
           ...dataset,
@@ -232,8 +233,6 @@ export default {
       return _tags;
     },
     workspace() {
-      // THIS IS WRONG !!!
-      this.$route.query.workspace;
       return currentWorkspace(this.$route);
     },
   },
