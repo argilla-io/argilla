@@ -57,7 +57,7 @@ export default {
 
       async handler(newCurrentPage) {
         const isDataForNextPage = isNil(
-          getRecordWithFieldsByDatasetId(this.datasetId, 1, newCurrentPage)
+          getRecordWithFieldsByDatasetId(this.datasetId, newCurrentPage)
         );
 
         if (isDataForNextPage) {
@@ -121,7 +121,8 @@ export default {
           index
         ) => {
           const componentTypeFromBack = questionSettings.type.toLowerCase();
-          const componentType = CORRESPONDING_COMPONENT_TYPE_FROM_API[componentTypeFromBack];
+          const componentType =
+            CORRESPONDING_COMPONENT_TYPE_FROM_API[componentTypeFromBack];
 
           const formattedOptions = this.formatOptionsFromQuestionApi(
             questionSettings.options,

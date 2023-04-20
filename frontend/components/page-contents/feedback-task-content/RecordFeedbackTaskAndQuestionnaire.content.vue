@@ -35,7 +35,6 @@ export default {
     record() {
       return getRecordWithFieldsByDatasetId(
         this.datasetId,
-        1,
         this.recordOffset
       );
     },
