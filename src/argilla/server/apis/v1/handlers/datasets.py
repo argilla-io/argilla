@@ -16,7 +16,6 @@ from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
-from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
@@ -104,7 +103,7 @@ def list_dataset_records(
         )
 
     return Records(
-        items=[parse_obj_as(Record, record.__dict__) for record in records],
+        items=[record.__dict__ for record in records],
         total=datasets.count_records_by_dataset_id(db, dataset_id),
     )
 
