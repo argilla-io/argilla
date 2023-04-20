@@ -152,6 +152,7 @@ class ArgillaTrainer(object):
                 multi_label=self._multi_label,
                 settings=self._settings,
                 seed=self._seed,
+                gpu_id=gpu_id,
             )
         elif framework is Framework.OPENAI:
             from argilla.training.openai import ArgillaOpenAITrainer
@@ -163,7 +164,6 @@ class ArgillaTrainer(object):
                 multi_label=self._multi_label,
                 settings=self._settings,
                 seed=self._seed,
-                gpu_id=gpu_id,
             )
 
         self._logger.warning(self)
@@ -246,6 +246,8 @@ class ArgillaTrainerSkeleton(ABC):
         settings: Union[TextClassificationSettings, TokenClassificationSettings] = None,
         model: str = None,
         seed: int = None,
+        *arg,
+        **kwargs,
     ):
         self._dataset = dataset
         self._record_class = record_class

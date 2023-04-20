@@ -42,8 +42,9 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         if self._model is None:
             self._model = "curie"
 
-        if "OPENAI_API_KEY" not in os.environ:
-            raise ValueError("OPENAI_API_KEY not found in environment variables.")
+        key = "OPENAI_API_KEY"
+        if key not in os.environ:
+            raise ValueError(f"{key} not found in environment variables.")
 
         if isinstance(self._dataset, tuple):
             self._train_dataset = self._dataset[0]
@@ -159,6 +160,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         response = openai.FineTune.create(
             **self.model_kwargs,
         )
+
         self._logger.info(response)
         self.finetune_id = response.id
 
@@ -203,7 +205,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             kwargs = {"logprobs": len(self._settings.label_schema), "max_tokens": 1}
 
         for entry in text:
-            prompt = entry + self._separator
+            prompt = f"{entry.strip()}{self._separator}"
             response = openai.Completion.create(model=self._model, prompt=prompt, **kwargs)
             responses.append(response)
 
