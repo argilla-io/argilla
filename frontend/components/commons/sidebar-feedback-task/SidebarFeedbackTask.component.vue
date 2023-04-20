@@ -42,13 +42,6 @@ export default {
             action: "change-view-mode",
             relatedMetrics: ["progress", "stats"],
           },
-          {
-            id: "explore",
-            tooltip: "Exploration",
-            icon: "exploration",
-            action: "change-view-mode",
-            relatedMetrics: ["progress", "stats"],
-          },
         ],
       },
       metrics: {
@@ -61,13 +54,6 @@ export default {
             action: "show-metrics",
             type: "expandable",
             component: "FeedbackTaskProgress",
-          },
-          {
-            id: "stats",
-            tooltip: "Stats",
-            icon: "stats",
-            action: "show-metrics",
-            type: "expandable",
           },
         ],
       },

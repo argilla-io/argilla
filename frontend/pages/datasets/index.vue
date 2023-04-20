@@ -66,10 +66,20 @@
 </template>
 
 <script>
+import {
+  getAllFeedbackDatasets,
+  upsertFeedbackDataset,
+} from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { upsertDataset } from "@/models/dataset.utilities";
 import { ObservationDataset } from "@/models/Dataset";
 import { mapActions } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
+
+const TYPE_OF_FEEDBACK = Object.freeze({
+  ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
+});
+
 export default {
   layout: "app",
   data: () => ({
@@ -135,7 +145,17 @@ export default {
     sortedByField: "last_updated",
   }),
   async fetch() {
-    await this.fetchDatasets();
+    // FETCH old list of datasets (Text2Text, TextClassification, TokenClassification)
+    const oldDatasets = await this.fetchDatasets();
+
+    // FETCH new FeedbackTask list
+    const feedbackTaskDatasets = await this.fetchFeedbackDatasets();
+
+    // UPSERT old dataset (Text2Text, TextClassification, TokenClassification) into the old orm
+    upsertDataset(oldDatasets);
+
+    // UPSERT FeedbackDataset into the new orm for this task
+    upsertFeedbackDataset(feedbackTaskDatasets);
   },
   computed: {
     activeFilters() {
@@ -159,14 +179,35 @@ export default {
         },
       ];
     },
-    datasets() {
+    formattedOldDatasets() {
       return ObservationDataset.all().map((dataset) => {
         return {
           ...dataset,
           id: dataset.id,
-          link: this.datasetWorkspace(dataset),
+          link: this.factoryLinkForOldDatasets(dataset),
         };
       });
+    },
+    formattedFeedbackTaskDatasets() {
+      // TODO - when workspace object will be include in the API call, replace line197 by the workspace
+      return getAllFeedbackDatasets().map((dataset) => {
+        return {
+          ...dataset,
+          id: dataset.id,
+          workspace: "",
+          tags: dataset?.tags ?? {},
+          task: "FeedbackTask",
+          created_at: dataset.inserted_at,
+          updated_at: dataset.updated_at,
+          link: this.factoryLinkForFeedbackDataset(dataset),
+        };
+      });
+    },
+    datasets() {
+      return [
+        ...this.formattedFeedbackTaskDatasets,
+        ...this.formattedOldDatasets,
+      ];
     },
     workspaces() {
       let _workspaces = this.$route.query.workspace;
@@ -192,8 +233,6 @@ export default {
       return _tags;
     },
     workspace() {
-      // THIS IS WRONG !!!
-      this.$route.query.workspace;
       return currentWorkspace(this.$route);
     },
   },
@@ -201,6 +240,17 @@ export default {
     ...mapActions({
       fetchDatasets: "entities/datasets/fetchAll",
     }),
+    async fetchFeedbackDatasets() {
+      try {
+        const { data } = await this.$axios.get("/v1/datasets");
+
+        return data;
+      } catch (err) {
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_FEEDBACK_DATASETS,
+        };
+      }
+    },
     onColumnFilterApplied({ column, values }) {
       if (column === "workspace") {
         if (values !== this.workspaces) {
@@ -227,12 +277,22 @@ export default {
         }
       }
     },
-    datasetWorkspace(dataset) {
-      var workspace = dataset.workspace;
-      if (workspace === null || workspace === "null") {
-        workspace = this.workspace;
-      }
-      return `/datasets/${workspace}/${dataset.name}`;
+    factoryLinkForOldDatasets({ name, workspace }) {
+      return {
+        name: "datasets-workspace-dataset",
+        params: {
+          dataset: name,
+          workspace: workspace || this.workspace,
+        },
+      };
+    },
+    factoryLinkForFeedbackDataset({ id }) {
+      return {
+        name: "dataset-id-annotation-mode",
+        params: {
+          id,
+        },
+      };
     },
     onActionClicked(action, dataset) {
       switch (action) {

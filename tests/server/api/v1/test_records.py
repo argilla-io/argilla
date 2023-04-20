@@ -28,7 +28,7 @@ from tests.factories import (
 )
 
 
-def test_create_record_response(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_record_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
     record = RecordFactory.create()
     response_json = {
         "values": {
@@ -50,6 +50,7 @@ def test_create_record_response(client: TestClient, db: Session, admin_auth_head
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "user_id": str(admin.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -86,6 +87,18 @@ def test_create_record_response_as_annotator(client: TestClient, db: Session):
 
     assert response.status_code == 201
     assert db.query(Response).count() == 1
+
+    response_body = response.json()
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "values": {
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        "user_id": str(annotator.id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
 
 
 def test_create_record_response_as_annotator_from_different_workspace(client: TestClient, db: Session):
@@ -145,3 +158,72 @@ def test_create_record_response_with_nonexistent_record_id(client: TestClient, d
 
     assert response.status_code == 404
     assert db.query(Response).count() == 0
+
+
+def test_list_record_responses(client: TestClient, db: Session, admin_auth_header: dict):
+    record = RecordFactory.create()
+    response_a = ResponseFactory.create(record=record)
+    response_b = ResponseFactory.create(record=record)
+
+    response = client.get(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "id": str(response_a.id),
+                "values": response_a.values,
+                "user_id": str(response_a.user_id),
+                "inserted_at": response_a.inserted_at.isoformat(),
+                "updated_at": response_a.updated_at.isoformat(),
+            },
+            {
+                "id": str(response_b.id),
+                "values": response_b.values,
+                "user_id": str(response_b.user.id),
+                "inserted_at": response_b.inserted_at.isoformat(),
+                "updated_at": response_b.updated_at.isoformat(),
+            },
+        ]
+    }
+
+
+def test_list_record_responses_as_annotator(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    record = RecordFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[record.dataset.workspace])
+    response_a = ResponseFactory.create(record=record, user=annotator)
+    ResponseFactory.create(record=record, user=admin)
+    ResponseFactory.create(record=record)
+
+    response = client.get(f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "id": str(response_a.id),
+                "values": response_a.values,
+                "user_id": str(response_a.user_id),
+                "inserted_at": response_a.inserted_at.isoformat(),
+                "updated_at": response_a.updated_at.isoformat(),
+            }
+        ]
+    }
+
+
+def test_list_record_responses_as_annotator_from_different_workspace(client: TestClient, db: Session):
+    record = RecordFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+
+    response = client.get(f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
+
+
+def test_list_record_responses_with_nonexistent_record_id(client: TestClient, db: Session, admin_auth_header: dict):
+    record = RecordFactory.create()
+    ResponseFactory.create(record=record)
+
+    response = client.get(f"/api/v1/records/{uuid4()}/responses", headers=admin_auth_header)
+
+    assert response.status_code == 404

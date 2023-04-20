@@ -13,6 +13,9 @@ const updateTotalRecordsByDatasetId = (datasetId, totalRecords) => {
 };
 
 // GET
+const getAllFeedbackDatasets = () => {
+  return FeedbackDatasetModel.all();
+};
 const getFeedbackDatasetNameById = (datasetId) => {
   return FeedbackDatasetModel.query().whereId(datasetId).first()?.name || null;
 };
@@ -29,6 +32,7 @@ const getTotalRecordByDatasetId = (datasetId) => {
 export {
   upsertFeedbackDataset,
   updateTotalRecordsByDatasetId,
+  getAllFeedbackDatasets,
   getFeedbackDatasetNameById,
   getFeedbackDatasetWorkspaceNameById,
   getTotalRecordByDatasetId,

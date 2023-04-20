@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import logging
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
@@ -27,6 +28,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 LIST_RECORDS_LIMIT = 20
+
+_LOGGER = logging.getLogger("argilla.server")
 
 
 def get_dataset_by_id(db: Session, dataset_id: UUID):
@@ -62,21 +65,18 @@ async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, datas
     if _count_annotations_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without annotations")
 
-    try:
-        dataset.status = DatasetStatus.ready
-        # TODO: This statement is failing in dev. I will uncomment once I resolve the problem
-        # await search_engine.create_index(dataset)
-        # TODO: DB rollback is executed if some problem is found creating the index. If the error
-        #  is raised from the commit statement, index creation should be reverted
-        #  We need a way to commit the dataset status before creating the index, and rollback the status
-        #  if something went wrong with index creation
-        db.commit()
-        db.refresh(dataset)
+    dataset.status = DatasetStatus.ready
+    db.commit()
+    db.refresh(dataset)
 
-        return dataset
-    except:
-        db.rollback()
-        raise
+    try:
+        # TODO: search engine operations won't raise errors for now.
+        #  In a next step, this action must be required to fully publish the dataset
+        await search_engine.create_index(dataset)
+    except Exception as ex:
+        _LOGGER.error(f"Search index cannot be created: {ex}")
+
+    return dataset
 
 
 def delete_dataset(db: Session, dataset: Dataset):
@@ -169,6 +169,10 @@ def get_response_by_id(db: Session, response_id: UUID):
 
 def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):
     return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
+
+
+def list_responses_by_record_id(db: Session, record_id: UUID):
+    return db.query(Response).filter_by(record_id=record_id).order_by(Response.inserted_at.asc()).all()
 
 
 def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):
