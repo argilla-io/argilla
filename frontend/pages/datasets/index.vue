@@ -66,10 +66,17 @@
 </template>
 
 <script>
+import { upsertFeedbackDataset } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { upsertDataset } from "@/models/dataset.utilities";
 import { ObservationDataset } from "@/models/Dataset";
 import { mapActions } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
+
+const TYPE_OF_FEEDBACK = Object.freeze({
+  ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
+});
+
 export default {
   layout: "app",
   data: () => ({
@@ -135,7 +142,19 @@ export default {
     sortedByField: "last_updated",
   }),
   async fetch() {
-    await this.fetchDatasets();
+    // FETCH old list of datasets (Text2Text, TextClassification, TokenClassification)
+    const oldDatasets = await this.fetchDatasets();
+
+    // FETCH new FeedbackTask list
+    const feedbackTaskDatasets = await this.fetchFeedbackDatasets();
+    const formattedFeedbackDatasetsObj =
+      this.factoryFeedbackTaskDatasetsForOldDatasetsOrm(feedbackTaskDatasets);
+
+    // UPSERT all kinds of dataset (Text2Text, TextClassification, TokenClassification AND FeedbackDataset) into the old orm
+    upsertDataset([...oldDatasets, ...formattedFeedbackDatasetsObj]);
+    
+    // UPSERT FeedbackDataset into the new orm for this task
+    upsertFeedbackDataset(feedbackTaskDatasets);
   },
   computed: {
     activeFilters() {
@@ -201,6 +220,33 @@ export default {
     ...mapActions({
       fetchDatasets: "entities/datasets/fetchAll",
     }),
+    async fetchFeedbackDatasets() {
+      try {
+        const { data } = await this.$axios.get("/v1/datasets");
+
+        return data;
+      } catch (err) {
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_FEEDBACK_DATASETS,
+        };
+      }
+    },
+    factoryFeedbackTaskDatasetsForOldDatasetsOrm(feedbackTaskDatasets) {
+      const formattedDatasetsObj = feedbackTaskDatasets.map((feedbackTask) => {
+        return {
+          ...feedbackTask,
+          task: "FeedbackTask",
+          created_at: feedbackTask.inserted_at,
+          last_updated: feedbackTask.updated_at,
+          workspace: feedbackTask.id,
+          metadata: feedbackTask.metadata ?? {},
+          tags: feedbackTask.tags ?? [],
+          viewSettings: {},
+        };
+      });
+
+      return formattedDatasetsObj;
+    },
     onColumnFilterApplied({ column, values }) {
       if (column === "workspace") {
         if (values !== this.workspaces) {
@@ -233,12 +279,16 @@ export default {
       if (workspace === null || workspace === "null") {
         datasetWorkspace = this.workspace;
       }
+
+      // NOTE - construct the object for route for feedback task
       const feedbackTaskPath = {
         name: "dataset-id-annotation-mode",
         params: {
           id: datasetWorkspace,
         },
       };
+
+      // NOTE - construct the object for route for previous task
       const path = {
         name: "datasets-workspace-dataset",
         params: {

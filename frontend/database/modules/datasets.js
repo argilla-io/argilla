@@ -33,7 +33,7 @@ import {
   isLabelTextExistInGlobalLabel,
   isLabelTextExistInGlobalLabelAndSavedInBack,
 } from "@/models/globalLabel.queries";
-import { getDatasetFromORM, upsertDataset } from "@/models/dataset.utilities";
+import { getDatasetFromORM } from "@/models/dataset.utilities";
 
 const isObject = (obj) => obj && typeof obj === "object";
 
@@ -818,28 +818,9 @@ const actions = {
     /**
      * Fetch all observation datasets from backend
      */
-    const previousDatasets = await ObservationDataset.api().get("/datasets/", {
-      persistBy: "create",
-    });
+    const { data } = await this.$axios.get("/datasets/");
 
-    const feedbackTaskDatasets = await this.$axios.get("v1/datasets");
-    const formattedDatasetsObj = feedbackTaskDatasets.data.map(
-      (feedbackTask) => {
-        return {
-          ...feedbackTask,
-          task: "FeedbackTask",
-          created_at: feedbackTask.inserted_at,
-          last_updated: feedbackTask.updated_at,
-          workspace: feedbackTask.id,
-          metadata: feedbackTask.metadata ?? {},
-          tags: feedbackTask.tags ?? [],
-          viewSettings: {},
-        };
-      }
-    );
-    upsertDataset(formattedDatasetsObj);
-
-    return previousDatasets;
+    return data;
   },
   async fetchByName(_, name) {
     /**
