@@ -228,11 +228,25 @@ export default {
       }
     },
     datasetWorkspace(dataset) {
-      var workspace = dataset.workspace;
+      const { name, workspace, task } = dataset;
+      let datasetWorkspace = workspace;
       if (workspace === null || workspace === "null") {
-        workspace = this.workspace;
+        datasetWorkspace = this.workspace;
       }
-      return `/datasets/${workspace}/${dataset.name}`;
+      const feedbackTaskPath = {
+        name: "dataset-id-annotation-mode",
+        params: {
+          id: datasetWorkspace,
+        },
+      };
+      const path = {
+        name: "datasets-workspace-dataset",
+        params: {
+          dataset: name,
+          workspace: datasetWorkspace,
+        },
+      };
+      return task === "FeedbackTask" ? feedbackTaskPath : path;
     },
     onActionClicked(action, dataset) {
       switch (action) {

@@ -830,7 +830,7 @@ const actions = {
           task: "FeedbackTask",
           created_at: feedbackTask.inserted_at,
           last_updated: feedbackTask.updated_at,
-          workspace: feedbackTask.workspace_id,
+          workspace: feedbackTask.id,
           metadata: feedbackTask.metadata ?? {},
           tags: feedbackTask.tags ?? [],
           viewSettings: {},
