@@ -83,7 +83,10 @@ export default {
     factoryRecordsForOrm(records, offset = 0) {
       return records.map((record, index) => {
         const recordId = record.id ?? `record_${index}`;
-        const recordFields = this.factoryRecordFieldsForOrm(record.fields);
+        const recordFields = this.factoryRecordFieldsForOrm(
+          record.fields,
+          recordId
+        );
 
         const recordResponses = this.factoryRecordResponsesForOrm(
           record.response?.values ?? {},
@@ -199,13 +202,16 @@ export default {
 
       return frontComponentType;
     },
-    factoryRecordFieldsForOrm(fieldsObj) {
+    factoryRecordFieldsForOrm(fieldsObj, recordId) {
       const fields = Object.entries(fieldsObj).map(
-        ([fieldKey, fieldValues]) => {
-          return { name: fieldKey, ...fieldValues };
+        ([fieldKey, fieldValue], index) => {
+          return {
+            id: `${recordId}_${index}`,
+            title: fieldKey,
+            text: fieldValue,
+          };
         }
       );
-
       return fields;
     },
     factoryRecordResponsesForOrm(
@@ -244,56 +250,6 @@ export default {
         const { data } = await this.$axios.get(
           `/v1/datasets/${datasetId}/records?include=responses&offset=${currentPage}&limit=${numberOfRecordsToFetch}`
         );
-
-        // FIXME - next two lines (data.items = ... and data.total = ...) are temporary until we received the list of records from back
-        data.items = [
-          {
-            id: "record_0",
-            fields: {
-              field_1: {
-                title: "Input",
-                text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum ratione quas quis eveniet harum cum, earum a facere voluptate fugit nostrum sequi facilis incidunt debitis unde? Eos rem debitis velit? Officia magni odit possimus quis nisi. Dolore, eaque eligendi! Beatae quos debitis soluta distinctio qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium explicabo ab, pariatur id sapiente tenetur. ",
-              },
-              field_2: {
-                title: "Output",
-                text: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vitae cupiditate fugit quos officiis expedita, deleniti libero inventore fugiat perferendis dolor optio praesentium enim molestiae molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam reprehenderit non distinctio repellat adipisci laborum, fugit sint labore nulla tempore quam eos iste asperiores eius laudantium vel similique officiis sunt vero beatae magni ab dicta! Culpa, qui dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti officiis ipsa laudantium, eos qui pariatur iure facere, sequi delectus similique! Commodi, a. Totam illo iure iste voluptate? Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati distinctio qui beatae quaerat, ullam sit voluptas facere repellat accusamus dolorem iure aliquam fugit veritatis nesciunt modi. Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus architecto necessitatibus accusamus nesciunt exercitationem neque dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus non hic necessitatibus. Quibusdam repudiandae odit eaque enim voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis ad suscipit reiciendis dolor omnis corrupti quos porro aliquid recusandae. Ipsam doloribus esse debitis libero. Quod corporis eveniet cupiditate aliquid, iure sed dignissimos repellat architecto quaerat impedit animi porro saepe ipsa molestiae quibusdam suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit, eligendi voluptate.",
-              },
-            },
-            external_id: "string",
-            response: {
-              values: {
-                "question-01": {
-                  value: 2,
-                },
-                comment: {
-                  value: "I'm blue daboudi dabouda",
-                },
-              },
-            },
-          },
-          {
-            id: "record_1",
-            fields: {
-              field_1: {
-                title: "Input",
-                text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum ratione quas quis eveniet harum cum, earum a facere voluptate fugit nostrum sequi facilis incidunt debitis unde? Eos rem debitis velit? Officia magni odit possimus quis nisi. Dolore, eaque eligendi! Beatae quos debitis soluta distinctio qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium explicabo ab, pariatur id sapiente tenetur. ",
-              },
-            },
-            external_id: "string",
-            response: {
-              values: {
-                "question-01": {
-                  value: 2,
-                },
-                comment: {
-                  value: "I'm blue daboudi dabouda",
-                },
-              },
-            },
-          },
-        ];
-
-        data.total = data.items.length;
 
         return data;
       } catch (err) {
