@@ -33,6 +33,7 @@ def _get_record(db: Session, record_id: UUID):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Record with id `{record_id}` not found",
         )
+
     return record
 
 

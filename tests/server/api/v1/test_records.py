@@ -172,17 +172,17 @@ def test_list_record_responses(client: TestClient, db: Session, admin: User, adm
         "items": [
             {
                 "id": str(response_a.id),
-                "inserted_at": response_a.inserted_at.isoformat(),
-                "updated_at": response_a.updated_at.isoformat(),
                 "values": response_a.values,
                 "user_id": str(response_a.user_id),
+                "inserted_at": response_a.inserted_at.isoformat(),
+                "updated_at": response_a.updated_at.isoformat(),
             },
             {
                 "id": str(response_b.id),
-                "inserted_at": response_b.inserted_at.isoformat(),
-                "updated_at": response_b.updated_at.isoformat(),
                 "values": response_b.values,
                 "user_id": str(response_b.user.id),
+                "inserted_at": response_b.inserted_at.isoformat(),
+                "updated_at": response_b.updated_at.isoformat(),
             },
         ]
     }
@@ -202,10 +202,10 @@ def test_list_record_responses_as_annotator(client: TestClient, db: Session, adm
         "items": [
             {
                 "id": str(response_a.id),
-                "inserted_at": response_a.inserted_at.isoformat(),
-                "updated_at": response_a.updated_at.isoformat(),
                 "values": response_a.values,
                 "user_id": str(response_a.user_id),
+                "inserted_at": response_a.inserted_at.isoformat(),
+                "updated_at": response_a.updated_at.isoformat(),
             }
         ]
     }
@@ -221,6 +221,9 @@ def test_list_record_responses_as_annotator_from_different_workspace(client: Tes
 
 
 def test_list_record_responses_with_nonexistent_record_id(client: TestClient, db: Session, admin_auth_header: dict):
+    record = RecordFactory.create()
+    ResponseFactory.create(record=record)
+
     response = client.get(f"/api/v1/records/{uuid4()}/responses", headers=admin_auth_header)
 
     assert response.status_code == 404
