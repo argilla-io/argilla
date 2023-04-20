@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
+from typing import List
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
@@ -19,13 +20,14 @@ from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Re
 from argilla.server.schemas.v1.datasets import (
     AnnotationCreate,
     DatasetCreate,
+    RecordInclude,
     RecordsCreate,
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.security.model import User
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, func
+from sqlalchemy.orm import Session, contains_eager, joinedload
 
 LIST_RECORDS_LIMIT = 20
 
@@ -127,10 +129,40 @@ def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
-def list_records_by_dataset_id(db: Session, dataset_id: UUID, offset: int = 0, limit: int = LIST_RECORDS_LIMIT):
+def list_records_by_dataset_id(
+    db: Session, dataset_id: UUID, include: List[RecordInclude] = [], offset: int = 0, limit: int = LIST_RECORDS_LIMIT
+):
+    query = db.query(Record)
+
+    if RecordInclude.responses in include:
+        query = query.options(joinedload(Record.responses))
+
     return (
-        db.query(Record)
-        .filter_by(dataset_id=dataset_id)
+        query.filter(Record.dataset_id == dataset_id)
+        .order_by(Record.inserted_at.asc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+
+def list_records_by_dataset_id_and_user_id(
+    db: Session,
+    dataset_id: UUID,
+    user_id: UUID,
+    include: List[RecordInclude] = [],
+    offset: int = 0,
+    limit: int = LIST_RECORDS_LIMIT,
+):
+    query = db.query(Record)
+
+    if RecordInclude.responses in include:
+        query = query.outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user_id)).options(
+            contains_eager(Record.responses)
+        )
+
+    return (
+        query.filter(Record.dataset_id == dataset_id)
         .order_by(Record.inserted_at.asc())
         .offset(offset)
         .limit(limit)

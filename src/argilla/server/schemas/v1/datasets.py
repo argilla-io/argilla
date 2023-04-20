@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
@@ -111,10 +112,15 @@ class Response(BaseModel):
         orm_mode = True
 
 
+class RecordInclude(str, Enum):
+    responses = "responses"
+
+
 class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
     external_id: Optional[str]
+    responses: Optional[List[Response]]
     inserted_at: datetime
     updated_at: datetime
 
