@@ -152,7 +152,7 @@ export default {
 
     // UPSERT all kinds of dataset (Text2Text, TextClassification, TokenClassification AND FeedbackDataset) into the old orm
     upsertDataset([...oldDatasets, ...formattedFeedbackDatasetsObj]);
-    
+
     // UPSERT FeedbackDataset into the new orm for this task
     upsertFeedbackDataset(feedbackTaskDatasets);
   },
