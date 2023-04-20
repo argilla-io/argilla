@@ -831,8 +831,8 @@ const actions = {
           created_at: feedbackTask.inserted_at,
           last_updated: feedbackTask.updated_at,
           workspace: feedbackTask.workspace_id,
-          metadata: {},
-          tags: [],
+          metadata: feedbackTask.metadata ?? {},
+          tags: feedbackTask.tags ?? [],
           viewSettings: {},
         };
       }
