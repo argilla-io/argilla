@@ -14,6 +14,7 @@ class FeedbackDataset extends Model {
       workspace_name: this.attr(null),
       inserted_at: this.attr(null),
       updated_at: this.attr(null),
+      total_records: this.number(null).nullable(),
 
       // relationships
       dataset_questions: this.hasMany(DatasetQuestion, "dataset_id"),

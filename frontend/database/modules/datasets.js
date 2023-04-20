@@ -818,10 +818,9 @@ const actions = {
     /**
      * Fetch all observation datasets from backend
      */
+    const { data } = await this.$axios.get("/datasets/");
 
-    return await ObservationDataset.api().get("/datasets/", {
-      persistBy: "create",
-    });
+    return data;
   },
   async fetchByName(_, name) {
     /**

@@ -47,6 +47,10 @@ class Dataset(BaseModel):
         orm_mode = True
 
 
+class Datasets(BaseModel):
+    items: List[Dataset]
+
+
 class DatasetCreate(BaseModel):
     name: str
     guidelines: Optional[str]
@@ -81,6 +85,10 @@ class Annotation(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Annotations(BaseModel):
+    items: List[Annotation]
 
 
 class AnnotationCreate(BaseModel):
