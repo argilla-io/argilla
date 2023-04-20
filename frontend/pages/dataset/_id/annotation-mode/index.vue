@@ -92,13 +92,11 @@ export default {
     },
     async getWorkspaceInfo(workspaceId) {
       try {
-        const { data: responseWorkspaces } = await this.$axios.get(
-          `/workspaces`
+        const { data: responseWorkspace } = await this.$axios.get(
+          `/v1/workspaces/${workspaceId}`
         );
 
-        const { name } = responseWorkspaces?.find(
-          (workspace) => workspace.id === workspaceId
-        ) || { name: null };
+        const { name } = responseWorkspace || { name: null };
 
         return name;
       } catch (err) {
