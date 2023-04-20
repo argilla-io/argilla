@@ -14,6 +14,9 @@
     <template v-slot:center>
       <CenterFeedbackTaskContent :datasetId="datasetId" />
     </template>
+    <template v-slot:footer>
+      <PaginationFeedbackTaskComponent :datasetId="datasetId" />
+    </template>
   </HeaderAndTopAndOneColumn>
 </template>
 

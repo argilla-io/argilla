@@ -1,0 +1,12 @@
+const COMPONENT_TYPE = Object.freeze({
+  FREE_TEXT: "FREE_TEXT",
+  RATING: "RATING",
+  SINGLE_LABEL: "SINGLE_LABEL",
+});
+
+const CORRESPONDING_COMPONENT_TYPE_FROM_API = Object.freeze({
+  text: "FREE_TEXT",
+  rating: "RATING",
+  single_label: "SINGLE_LABEL",
+});
+export { COMPONENT_TYPE, CORRESPONDING_COMPONENT_TYPE_FROM_API };

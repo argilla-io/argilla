@@ -10,6 +10,7 @@ class Record extends Model {
       id: this.uid(),
       dataset_id: this.attr(null),
       record_status: this.string(null).nullable(),
+      record_index: this.number(0),
 
       // relationships
       record_responses: this.hasMany(RecordResponseModel, "record_id"),
