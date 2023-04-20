@@ -41,7 +41,7 @@ export default {
   },
   async fetch() {
     // FETCH questions by dataset
-    const questions = await this.getQuestions(this.datasetId);
+    const { items: questions } = await this.getQuestions(this.datasetId);
 
     // FORMAT questions to have the shape of ORM
     const formattedQuestionsForOrm = this.factoryQuestionsForOrm(questions);
@@ -250,6 +250,7 @@ export default {
         const { data } = await this.$axios.get(
           `/v1/datasets/${datasetId}/annotations`
         );
+
         return data;
       } catch (err) {
         throw {

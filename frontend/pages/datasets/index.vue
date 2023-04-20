@@ -149,7 +149,7 @@ export default {
     const oldDatasets = await this.fetchDatasets();
 
     // FETCH new FeedbackTask list
-    const feedbackTaskDatasets = await this.fetchFeedbackDatasets();
+    const { items: feedbackTaskDatasets } = await this.fetchFeedbackDatasets();
 
     // UPSERT old dataset (Text2Text, TextClassification, TokenClassification) into the old orm
     upsertDataset(oldDatasets);
