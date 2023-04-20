@@ -2,7 +2,7 @@
   <form @submit.prevent="onSubmit" :key="renderForm">
     <div class="form-group" v-for="input in inputs" :key="input.id">
       <TextAreaComponent
-        v-if="input.component_type === PROPERTIES.FREE_TEXT"
+        v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
         :title="input.question"
         :optionId="`${input.id}_0`"
         :placeholder="input.placeholder"
@@ -18,7 +18,7 @@
       />
 
       <SingleLabelComponent
-        v-if="input.component_type === PROPERTIES.SINGLE_LABEL"
+        v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
         :title="input.question"
         :initialOptions="input.options"
         :isRequired="input.is_required"
@@ -32,7 +32,7 @@
       />
 
       <RatingComponent
-        v-if="input.component_type === PROPERTIES.RATING"
+        v-if="input.component_type === COMPONENT_TYPE.RATING"
         :title="input.question"
         :initialOptions="input.options"
         :isRequired="input.is_required"
@@ -72,7 +72,7 @@
 
 <script>
 import { isEqual, cloneDeep } from "lodash";
-import { PROPERTIES } from "./questionsForm.properties";
+import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 
 export default {
   name: "QuestionsFormComponent",
@@ -91,7 +91,7 @@ export default {
     };
   },
   created() {
-    this.PROPERTIES = PROPERTIES;
+    this.COMPONENT_TYPE = COMPONENT_TYPE;
     this.formOnErrorMessage =
       "One of the required field is not answered. Please, answer before validate";
     this.onReset();

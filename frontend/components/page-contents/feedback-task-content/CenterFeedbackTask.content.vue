@@ -16,6 +16,10 @@ import {
   upsertRecords,
   getRecordWithFieldsByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
+import {
+  COMPONENT_TYPE,
+  CORRESPONDING_COMPONENT_TYPE_FROM_API,
+} from "@/components/feedback-task/feedbackTask.properties";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
@@ -116,9 +120,8 @@ export default {
           },
           index
         ) => {
-          const componentType = this.factoryComponentType(
-            questionSettings.type
-          );
+          const componentTypeFromBack = questionSettings.type.toLowerCase();
+          const componentType = CORRESPONDING_COMPONENT_TYPE_FROM_API[componentTypeFromBack];
 
           const formattedOptions = this.formatOptionsFromQuestionApi(
             questionSettings.options,
@@ -149,10 +152,10 @@ export default {
       let defaultValueByComponent = null;
 
       switch (componentType.toUpperCase()) {
-        case "FREE_TEXT":
+        case COMPONENT_TYPE.FREE_TEXT:
           defaultValueByComponent = false;
           break;
-        case "RATING":
+        case COMPONENT_TYPE.RATING:
           defaultValueByComponent = "";
           break;
         default:
@@ -184,23 +187,6 @@ export default {
         value,
         text,
       };
-    },
-    factoryComponentType(componentType) {
-      // Here we translate the name from back to the corresponding component in front
-      let frontComponentType = null;
-
-      switch (componentType.toUpperCase()) {
-        case "TEXT":
-          frontComponentType = "FREE_TEXT";
-          break;
-        case "RATING":
-          frontComponentType = "RATING";
-          break;
-        default:
-          console.log(`the component type ${componentType} is unknown`);
-      }
-
-      return frontComponentType;
     },
     factoryRecordFieldsForOrm(fieldsObj, recordId) {
       const fields = Object.entries(fieldsObj).map(
