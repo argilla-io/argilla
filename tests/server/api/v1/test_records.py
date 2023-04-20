@@ -160,7 +160,7 @@ def test_create_record_response_with_nonexistent_record_id(client: TestClient, d
     assert db.query(Response).count() == 0
 
 
-def test_list_record_responses(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_list_record_responses(client: TestClient, db: Session, admin_auth_header: dict):
     record = RecordFactory.create()
     response_a = ResponseFactory.create(record=record)
     response_b = ResponseFactory.create(record=record)
