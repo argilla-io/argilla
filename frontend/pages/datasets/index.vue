@@ -66,7 +66,10 @@
 </template>
 
 <script>
-import { upsertFeedbackDataset } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import {
+  getAllFeedbackDatasets,
+  upsertFeedbackDataset,
+} from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import { upsertDataset } from "@/models/dataset.utilities";
 import { ObservationDataset } from "@/models/Dataset";
 import { mapActions } from "vuex";
@@ -147,11 +150,9 @@ export default {
 
     // FETCH new FeedbackTask list
     const feedbackTaskDatasets = await this.fetchFeedbackDatasets();
-    const formattedFeedbackDatasetsObj =
-      this.factoryFeedbackTaskDatasetsForOldDatasetsOrm(feedbackTaskDatasets);
 
-    // UPSERT all kinds of dataset (Text2Text, TextClassification, TokenClassification AND FeedbackDataset) into the old orm
-    upsertDataset([...oldDatasets, ...formattedFeedbackDatasetsObj]);
+    // UPSERT old dataset (Text2Text, TextClassification, TokenClassification) into the old orm
+    upsertDataset(oldDatasets);
 
     // UPSERT FeedbackDataset into the new orm for this task
     upsertFeedbackDataset(feedbackTaskDatasets);
@@ -178,14 +179,34 @@ export default {
         },
       ];
     },
-    datasets() {
+    formattedOldDatasets() {
       return ObservationDataset.all().map((dataset) => {
         return {
           ...dataset,
           id: dataset.id,
-          link: this.datasetWorkspace(dataset),
+          link: this.factoryLinkForOldDatasets(dataset),
         };
       });
+    },
+    formattedFeedbackTaskDatasets() {
+      return getAllFeedbackDatasets().map((dataset) => {
+        return {
+          ...dataset,
+          id: dataset.id,
+          workspace: "",
+          tags: dataset?.tags ?? {},
+          task: "FeedbackTask",
+          created_at: dataset.inserted_at,
+          updated_at: dataset.updated_at,
+          link: this.factoryLinkForFeedbackDataset(dataset),
+        };
+      });
+    },
+    datasets() {
+      return [
+        ...this.formattedFeedbackTaskDatasets,
+        ...this.formattedOldDatasets,
+      ];
     },
     workspaces() {
       let _workspaces = this.$route.query.workspace;
@@ -231,22 +252,6 @@ export default {
         };
       }
     },
-    factoryFeedbackTaskDatasetsForOldDatasetsOrm(feedbackTaskDatasets) {
-      const formattedDatasetsObj = feedbackTaskDatasets.map((feedbackTask) => {
-        return {
-          ...feedbackTask,
-          task: "FeedbackTask",
-          created_at: feedbackTask.inserted_at,
-          last_updated: feedbackTask.updated_at,
-          workspace: feedbackTask.id,
-          metadata: feedbackTask.metadata ?? {},
-          tags: feedbackTask.tags ?? [],
-          viewSettings: {},
-        };
-      });
-
-      return formattedDatasetsObj;
-    },
     onColumnFilterApplied({ column, values }) {
       if (column === "workspace") {
         if (values !== this.workspaces) {
@@ -273,30 +278,22 @@ export default {
         }
       }
     },
-    datasetWorkspace(dataset) {
-      const { name, workspace, task } = dataset;
-      let datasetWorkspace = workspace;
-      if (workspace === null || workspace === "null") {
-        datasetWorkspace = this.workspace;
-      }
-
-      // NOTE - construct the object for route for feedback task
-      const feedbackTaskPath = {
-        name: "dataset-id-annotation-mode",
-        params: {
-          id: datasetWorkspace,
-        },
-      };
-
-      // NOTE - construct the object for route for previous task
-      const path = {
+    factoryLinkForOldDatasets({ name, workspace }) {
+      return {
         name: "datasets-workspace-dataset",
         params: {
           dataset: name,
-          workspace: datasetWorkspace,
+          workspace: workspace || this.workspace,
         },
       };
-      return task === "FeedbackTask" ? feedbackTaskPath : path;
+    },
+    factoryLinkForFeedbackDataset({ id }) {
+      return {
+        name: "dataset-id-annotation-mode",
+        params: {
+          id,
+        },
+      };
     },
     onActionClicked(action, dataset) {
       switch (action) {
