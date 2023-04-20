@@ -12,10 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
+from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
@@ -27,6 +28,8 @@ from argilla.server.schemas.v1.datasets import (
     AnnotationCreate,
     Dataset,
     DatasetCreate,
+    Record,
+    RecordInclude,
     Records,
     RecordsCreate,
 )
@@ -78,11 +81,12 @@ def list_dataset_annotations(
     return dataset.annotations
 
 
-@router.get("/datasets/{dataset_id}/records", response_model=Records)
+@router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 def list_dataset_records(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
+    include: Optional[List[RecordInclude]] = Query([]),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -91,8 +95,16 @@ def list_dataset_records(
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
+    records = []
+    if current_user.is_admin:
+        records = datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
+    else:
+        records = datasets.list_records_by_dataset_id_and_user_id(
+            db, dataset_id, current_user.id, include=include, offset=offset, limit=limit
+        )
+
     return Records(
-        items=datasets.list_records_by_dataset_id(db, dataset_id, offset=offset, limit=limit),
+        items=[parse_obj_as(Record, record.__dict__) for record in records],
         total=datasets.count_records_by_dataset_id(db, dataset_id),
     )
 
