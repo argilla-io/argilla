@@ -6,6 +6,9 @@ const upsertFeedbackDataset = (feedbackDataset) => {
 };
 
 // GET
+const getAllFeedbackDatasets = () => {
+  return FeedbackDatasetModel.all();
+};
 const getFeedbackDatasetNameById = (datasetId) => {
   return FeedbackDatasetModel.query().whereId(datasetId).first()?.name || null;
 };
@@ -18,6 +21,7 @@ const getFeedbackDatasetWorkspaceNameById = (datasetId) => {
 
 export {
   upsertFeedbackDataset,
+  getAllFeedbackDatasets,
   getFeedbackDatasetNameById,
   getFeedbackDatasetWorkspaceNameById,
 };
