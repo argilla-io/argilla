@@ -9,6 +9,7 @@ class RecordResponse extends Model {
       id: this.uid(),
       options: this.attr([]),
       question_id: this.attr(null),
+      question_name: this.attr(null),
       record_id: this.attr(null),
       user_id: this.attr(null),
     };
