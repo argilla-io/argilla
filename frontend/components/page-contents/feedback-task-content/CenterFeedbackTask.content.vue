@@ -23,6 +23,7 @@ import {
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
+  ERROR_FETCHING_RECORDSRESPONSES: "ERROR_FETCHING_RECORDSRESPONSES",
   ERROR_FETCHING_QUESTIONS: "ERROR_FETCHING_QUESTIONS",
 });
 
@@ -92,9 +93,9 @@ export default {
           recordId
         );
 
-        const recordResponses = this.factoryRecordResponsesForOrm(
-          record.response?.values ?? {},
-          recordId
+        const recordResponses = this.initRecordsResponses(
+          recordId,
+          record.responses
         );
 
         return {
@@ -143,6 +144,20 @@ export default {
           };
         }
       );
+    },
+    initRecordsResponses(recordId, responses) {
+      const recordResponses = [];
+      responses.forEach((response) => {
+        const formattedResponses = this.factoryRecordResponsesForOrm(
+          response.id,
+          response?.values ?? {},
+          recordId,
+          response.user_id
+        );
+        recordResponses.push(...formattedResponses);
+      });
+
+      return recordResponses;
     },
     formatOptionsFromQuestionApi(options, prefixForIdOfOptions, componentType) {
       // NOTE - the value of the options in questions from API and the value in the DatasetQuestion ORM are different
@@ -202,12 +217,13 @@ export default {
       return fields;
     },
     factoryRecordResponsesForOrm(
+      responseId,
       responsesByQuestions,
       recordId,
       userId = null
     ) {
       const responses = Object.entries(responsesByQuestions).map(
-        ([questionId, responseValues]) => {
+        ([questionName, responseValues]) => {
           const newOptions = Array.isArray(responseValues)
             ? responseValues
             : [responseValues];
@@ -217,12 +233,13 @@ export default {
               index,
               value: option.value,
               text: option.value,
-              prefixForIdOfOptions: questionId,
+              prefixForIdOfOptions: questionName,
             })
           );
 
           return {
-            question_id: questionId,
+            id: responseId,
+            question_name: questionName,
             record_id: recordId,
             options: formattedOptions,
             user_id: userId,
