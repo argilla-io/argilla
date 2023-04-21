@@ -1,9 +1,9 @@
-.. _python_monitoring:
+.. _python_training:
 
-Monitoring
-=======
+Training
+========
 
-Here we describe the available monitors in Argilla:
+Here we describe the available trainers in Argilla:
 
 - Base Trainer: Internal mechanism to handle Trainers
 - SetFit Trainer: Internal mechanism for handling training logic of SetFit models
