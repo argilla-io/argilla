@@ -33,13 +33,17 @@ export default {
   },
   computed: {
     record() {
-      return getRecordWithFieldsByDatasetId(
-        this.datasetId,
-        this.recordOffset
-      );
+      return getRecordWithFieldsByDatasetId(this.datasetId, this.recordOffset);
+    },
+    userId() {
+      return this.$auth.user.id;
     },
     recordResponses() {
-      if (this.record) return getRecordResponsesByRecordId(this.record.id);
+      if (this.record && this.userId)
+        return getRecordResponsesByRecordId({
+          userId: this.userId,
+          recordId: this.record.id,
+        });
     },
     questions() {
       if (this.record)
@@ -62,7 +66,7 @@ export default {
         const newOptions =
           newOptionsByQuestion.find(
             (recordResponseByQuestion) =>
-              recordResponseByQuestion.question_id === question.id
+              recordResponseByQuestion.question_name === question.name
           )?.newOptions || question.options;
         return { ...question, options: newOptions };
       });
@@ -73,7 +77,7 @@ export default {
       const newOptionsByQuestion = [];
       this.questions.forEach((question) => {
         this.recordResponses.forEach((response) => {
-          if (response.question_id === question.id) {
+          if (response.question_name === question.name) {
             const newOptions = question.options.map((output) => {
               const recordResponseOutputWithSameTextAsInQuestionOutput =
                 response.options.find(
@@ -86,7 +90,10 @@ export default {
               return output;
             });
 
-            newOptionsByQuestion.push({ question_id: question.id, newOptions });
+            newOptionsByQuestion.push({
+              question_name: question.name,
+              newOptions,
+            });
           }
         });
       });
