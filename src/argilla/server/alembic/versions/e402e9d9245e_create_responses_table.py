@@ -36,6 +36,7 @@ def upgrade() -> None:
         sa.Column("values", sa.JSON, nullable=False),
         sa.Column("record_id", sa.Uuid, sa.ForeignKey("records.id", ondelete="CASCADE"), nullable=False, index=True),
         sa.Column("user_id", sa.Uuid, sa.ForeignKey("users.id", ondelete="SET NULL"), index=True),
+        sa.Column("status", sa.String, nullable=False, index=True),
         sa.Column("inserted_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
         sa.UniqueConstraint("record_id", "user_id", name="response_record_id_user_id_uq"),

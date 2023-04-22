@@ -49,6 +49,12 @@ class UserRole(str, Enum):
     annotator = "annotator"
 
 
+class ResponseStatus(str, Enum):
+    pending = "pending"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
 class Annotation(Base):
     __tablename__ = "annotations"
 
@@ -79,6 +85,7 @@ class Response(Base):
     values: Mapped[dict] = mapped_column(JSON)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    status: Mapped[ResponseStatus] = mapped_column(default=ResponseStatus.pending, index=True, nullable=False)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
@@ -89,7 +96,7 @@ class Response(Base):
     def __repr__(self):
         return (
             f"Response(id={str(self.id)!r}, record_id={str(self.record_id)!r}, user_id={str(self.user_id)!r}, "
-            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+            f"status={self.status!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 
 
