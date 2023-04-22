@@ -2,7 +2,6 @@ import { Model } from "@vuex-orm/core";
 
 class RecordResponse extends Model {
   static entity = "recordResponses";
-  static primaryKey = ["question_name", "record_id", "user_id"];
 
   static fields() {
     return {
