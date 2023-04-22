@@ -667,6 +667,15 @@ def test_create_dataset_with_existent_name(client: TestClient, db: Session, admi
     assert db.query(Dataset).count() == 1
 
 
+def test_create_dataset_with_nonexistent_workspace_id(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset_json = {"name": "name", "workspace_id": str(uuid4())}
+
+    response = client.post("/api/v1/datasets", headers=admin_auth_header, json=dataset_json)
+
+    assert response.status_code == 404
+    assert db.query(Dataset).count() == 0
+
+
 def test_create_dataset_annotation(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     annotation_json = {
