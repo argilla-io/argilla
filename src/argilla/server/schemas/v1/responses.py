@@ -18,12 +18,15 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from argilla.server.models import ResponseStatus
+
 
 class Response(BaseModel):
     id: UUID
     values: Dict[str, Any]
     record_id: UUID
     user_id: UUID
+    status: ResponseStatus
     inserted_at: datetime
     updated_at: datetime
 
@@ -33,3 +36,7 @@ class Response(BaseModel):
 
 class ResponseUpdate(BaseModel):
     values: Dict[str, Any]
+
+
+class ResponseStatusUpdate(BaseModel):
+    status: ResponseStatus

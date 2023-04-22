@@ -21,7 +21,11 @@ from argilla.server.contexts import datasets
 from argilla.server.database import get_db
 from argilla.server.models import User
 from argilla.server.policies import ResponsePolicyV1, authorize
-from argilla.server.schemas.v1.responses import Response, ResponseUpdate
+from argilla.server.schemas.v1.responses import (
+    Response,
+    ResponseStatusUpdate,
+    ResponseUpdate,
+)
 from argilla.server.security import auth
 
 router = APIRouter(tags=["responses"])
@@ -51,6 +55,21 @@ def update_response(
     authorize(current_user, ResponsePolicyV1.update(response))
 
     return datasets.update_response(db, response, response_update)
+
+
+@router.put("/responses/{response_id}/status", response_model=Response)
+def update_response_status(
+    *,
+    db: Session = Depends(get_db),
+    response_id: UUID,
+    response_status_update: ResponseStatusUpdate,
+    current_user: User = Security(auth.get_current_user),
+):
+    response = _get_response(db, response_id)
+
+    authorize(current_user, ResponsePolicyV1.update(response))
+
+    return datasets.update_response_status(db, response, response_status_update)
 
 
 @router.delete("/responses/{response_id}", response_model=Response)

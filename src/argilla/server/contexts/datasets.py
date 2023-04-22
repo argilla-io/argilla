@@ -24,7 +24,7 @@ from argilla.server.schemas.v1.datasets import (
     RecordsCreate,
 )
 from argilla.server.schemas.v1.records import ResponseCreate
-from argilla.server.schemas.v1.responses import ResponseUpdate
+from argilla.server.schemas.v1.responses import ResponseStatusUpdate, ResponseUpdate
 from argilla.server.security.model import User
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, contains_eager, joinedload
@@ -223,6 +223,15 @@ def create_response(db: Session, record: Record, user: User, response_create: Re
 
 def update_response(db: Session, response: Response, response_update: ResponseUpdate):
     response.values = response_update.values
+
+    db.commit()
+    db.refresh(response)
+
+    return response
+
+
+def update_response_status(db: Session, response: Response, response_status_update: ResponseStatusUpdate):
+    response.status = response_status_update.status
 
     db.commit()
     db.refresh(response)
