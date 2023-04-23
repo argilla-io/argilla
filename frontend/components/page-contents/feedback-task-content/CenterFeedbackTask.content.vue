@@ -116,7 +116,7 @@ export default {
           return this.factoryOption(paramObject);
         });
       }
-      
+
       return [
         this.factoryOption({
           value: "",
