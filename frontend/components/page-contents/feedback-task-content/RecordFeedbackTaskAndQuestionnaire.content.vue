@@ -1,12 +1,12 @@
 <template>
-  <!-- <div class="wrapper">
+  <div class="wrapper" v-if="!$fetchState.pending && !$fetchState.error">
     <RecordFeedbackTaskComponent v-if="record" :record="record" />
     <QuestionsFormComponent
+      :key="recordOffset"
       v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
       :initialInputs="questionsWithRecordAnswers"
     />
-  </div> -->
-  <div class="">{{ recordOffset }}</div>
+  </div>
 </template>
 
 <script>
@@ -17,20 +17,19 @@ import {
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import {
   upsertRecords,
-  getRecordWithFieldsByDatasetId,
+  getRecordWithFieldsAndResponsesByUserId,
   isRecordWithRecordIndexByDatasetIdExists,
 } from "@/models/feedback-task-model/record/record.queries";
-import {
-  upsertRecordResponses,
-  getRecordResponsesByRecordId,
-} from "@/models/feedback-task-model/record-response/recordResponse.queries";
 import {
   updateTotalRecordsByDatasetId,
   getTotalRecordByDatasetId,
 } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
+
 const TYPE_OF_FEEDBACK = Object.freeze({
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
 });
+
 export default {
   name: "RecordFeedbackTaskAndQuestionnaireComponent",
   props: {
@@ -57,7 +56,11 @@ export default {
       return getTotalRecordByDatasetId(this.datasetId);
     },
     record() {
-      return getRecordWithFieldsByDatasetId(this.datasetId, this.recordOffset);
+      return getRecordWithFieldsAndResponsesByUserId(
+        this.datasetId,
+        this.userId,
+        this.recordOffset
+      );
     },
     questions() {
       return getQuestionsByDatasetId(
@@ -66,30 +69,24 @@ export default {
         this.orderBy?.ascendent
       );
     },
-    // recordResponses() {
-    //   if (this.record && this.userId)
-    //     return getRecordResponsesByRecordId({
-    //       userId: this.userId,
-    //       recordId: this.record.id,
-    //     });
-    // },
-    // questionsWithRecordAnswers() {
-    //   if (this.record) {
-    //     const newOptionsByQuestion = this.factoryNewOptionsByQuestion();
-    //     return this.factoryQuestionsWithRecordAnswer(newOptionsByQuestion);
-    //   }
-    // },
+    recordResponsesFromCurrentUser() {
+      return this.record?.record_responses ?? [];
+    },
+    questionsWithRecordAnswers() {
+      return this.questions?.map((question) => {
+        const correspondingResponseOptionsToQuestion =
+          this.recordResponsesFromCurrentUser.find(
+            (recordResponse) => question.name === recordResponse.question_name
+          )?.options;
+        if (correspondingResponseOptionsToQuestion)
+          return {
+            ...question,
+            options: correspondingResponseOptionsToQuestion,
+          };
+        return { ...question };
+      });
+    },
   },
-  // mounted() {
-  //   if (this.record) {
-  //     const newOptionsByQuestion = this.factoryNewOptionsByQuestion();
-  //     console.log("daboudi", newOptionsByQuestion);
-  //     console.log(
-  //       "dabouda",
-  //       this.factoryQuestionsWithRecordAnswer(newOptionsByQuestion)
-  //     );
-  //   }
-  // },
   async fetch() {
     await this.initRecordsInDatabase();
   },
@@ -114,7 +111,7 @@ export default {
       const { items: records, total: totalRecords } = await this.getRecords(
         this.datasetId,
         this.recordOffset,
-        2
+        5
       );
 
       // FORMAT records for orm
@@ -170,7 +167,7 @@ export default {
                   );
 
                 switch (correspondingComponentTypeOfTheAnswer) {
-                  case "RATING":
+                  case COMPONENT_TYPE.RATING:
                     // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
                     formattedOptionsWithRecordResponse =
                       optionsByQuestionName.map(({ id, text, value }) => {
@@ -184,7 +181,7 @@ export default {
                         return { id, text, value };
                       });
                     break;
-                  case "FREE_TEXT":
+                  case COMPONENT_TYPE.FREE_TEXT:
                     formattedOptionsWithRecordResponse = [
                       {
                         id: questionName,
@@ -232,50 +229,6 @@ export default {
       );
       return fields;
     },
-    // factoryQuestionsWithRecordAnswer(newOptionsByQuestion) {
-    //   const questionsWithRecordAnswers = this.questions.map((question) => {
-    //     console.log(question);
-    //     const newOptions =
-    //       newOptionsByQuestion.find(
-    //         (recordResponseByQuestion) =>
-    //           recordResponseByQuestion.question_name === question.name
-    //       )?.newOptions || question.options;
-    //     return { ...question, options: newOptions };
-    //   });
-    //   return questionsWithRecordAnswers;
-    // },
-    // factoryNewOptionsByQuestion() {
-    //   const newOptionsByQuestion = [];
-    //   this.questions.forEach((question) => {
-    //     this.recordResponses.forEach((response) => {
-    //       if (response.question_name === question.name) {
-    //         const newOptions = question.options.map((output) => {
-    //           const recordResponseOutputWithSameTextAsInQuestionOutput =
-    //             response.options.find(
-    //               (responseOutput) => responseOutput.id === output.id
-    //             );
-    //           if (recordResponseOutputWithSameTextAsInQuestionOutput) {
-    //             console.log(
-    //               "ici",
-    //               recordResponseOutputWithSameTextAsInQuestionOutput
-    //             );
-    //             return {
-    //               id: recordResponseOutputWithSameTextAsInQuestionOutput.id,
-    //               value: true,
-    //               text: output.text,
-    //             };
-    //           }
-    //           return output;
-    //         });
-    //         newOptionsByQuestion.push({
-    //           question_name: question.name,
-    //           newOptions,
-    //         });
-    //       }
-    //     });
-    //   });
-    //   return newOptionsByQuestion;
-    // },
   },
 };
 </script>

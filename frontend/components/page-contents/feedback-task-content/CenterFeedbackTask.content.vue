@@ -5,33 +5,16 @@
     :datasetId="datasetId"
     :recordOffset="currentPage - 1"
   />
-  <!-- <RecordFeedbackTaskAndQuestionnaireContent
-    v-else-if="!$fetchState.pending"
-    :datasetId="datasetId"
-    :recordOffset="currentPage"
-    :key="currentPage"
-  /> -->
 </template>
 
 <script>
-import { isNil } from "lodash";
-import { updateTotalRecordsByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
-import {
-  upsertDatasetQuestions,
-  getTypeOfQuestionByDatasetIdAndQuestionName,
-} from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import {
-  upsertRecords,
-  getRecordWithFieldsByDatasetId,
-} from "@/models/feedback-task-model/record/record.queries";
+import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import {
   COMPONENT_TYPE,
   CORRESPONDING_COMPONENT_TYPE_FROM_API,
 } from "@/components/feedback-task/feedbackTask.properties";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
-  ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
-  ERROR_FETCHING_RECORDSRESPONSES: "ERROR_FETCHING_RECORDSRESPONSES",
   ERROR_FETCHING_QUESTIONS: "ERROR_FETCHING_QUESTIONS",
 });
 
@@ -60,62 +43,12 @@ export default {
 
     this.onBusEventCurrentPage();
   },
-  // watch: {
-  //   currentPage: {
-  //     immediate: true,
-  //     async handler(newCurrentPage) {
-  //       console.log(newCurrentPage);
-  //       const isDataForNextPage = isNil(
-  //         getRecordWithFieldsByDatasetId(this.datasetId, newCurrentPage)
-  //       );
-  //       console.log("isnill", isDataForNextPage);
-  //       if (isDataForNextPage) {
-  //         const { items: records, total: totalRecords } = await this.getRecords(
-  //           this.datasetId,
-  //           newCurrentPage
-  //         );
-
-  //         const formattedRecords = this.factoryRecordsForOrm(
-  //           records,
-  //           newCurrentPage
-  //         );
-
-  //         updateTotalRecordsByDatasetId(this.datasetId, totalRecords);
-  //         upsertRecords(formattedRecords);
-  //       }
-  //     },
-  //   },
-  // },
   methods: {
     onBusEventCurrentPage() {
       this.$root.$on("current-page", (currentPage) => {
         this.currentPage = currentPage;
       });
     },
-    // factoryRecordsForOrm(records, offset = 0) {
-    //   return records.map((record, index) => {
-    //     const recordId = record.id ?? `record_${index}`;
-    //     const recordFields = this.factoryRecordFieldsForOrm(
-    //       record.fields,
-    //       recordId
-    //     );
-
-    //     const recordResponses = this.initRecordsResponses(
-    //       recordId,
-    //       record.responses
-    //     );
-
-    //     return {
-    //       ...record,
-    //       record_id: recordId,
-    //       record_index: index + offset,
-    //       dataset_id: this.datasetId,
-    //       record_status: record.recordStatus ?? null,
-    //       record_fields: recordFields,
-    //       record_responses: recordResponses,
-    //     };
-    //   });
-    // },
     factoryQuestionsForOrm(initialQuestions) {
       return initialQuestions.map(
         (
@@ -152,20 +85,6 @@ export default {
         }
       );
     },
-    // initRecordsResponses(recordId, responses) {
-    //   const recordResponses = [];
-    //   responses.forEach((response) => {
-    //     const formattedResponses = this.factoryRecordResponsesForOrm(
-    //       response.id,
-    //       response?.values ?? {},
-    //       recordId,
-    //       response.user_id ?? "daboudi"
-    //     );
-    //     recordResponses.push(...formattedResponses);
-    //   });
-
-    //   return recordResponses;
-    // },
     formatOptionsFromQuestionApi(options, questionName, componentType) {
       // NOTE - the value of the options in questions from API and the value in the DatasetQuestion ORM are different
       // - the value from the options from the questions in API could be anything (string, number, etc.)
@@ -197,7 +116,7 @@ export default {
           return this.factoryOption(paramObject);
         });
       }
-      console.log("patato", options);
+      
       return [
         this.factoryOption({
           value: "",
@@ -212,64 +131,6 @@ export default {
         text,
       };
     },
-    // factoryRecordFieldsForOrm(fieldsObj, recordId) {
-    //   const fields = Object.entries(fieldsObj).map(
-    //     ([fieldKey, fieldValue], index) => {
-    //       return {
-    //         id: `${recordId}_${index}`,
-    //         title: fieldKey,
-    //         text: fieldValue,
-    //       };
-    //     }
-    //   );
-    //   return fields;
-    // },
-    // factoryRecordResponsesForOrm(
-    //   responseId,
-    //   responsesByQuestions,
-    //   recordId,
-    //   userId = null
-    // ) {
-    //   const responses = Object.entries(responsesByQuestions).map(
-    //     ([questionName, responseValues]) => {
-    //       const newOptions = Array.isArray(responseValues)
-    //         ? responseValues
-    //         : [responseValues];
-
-    //       const formattedOptions = newOptions.map((option, index) => {
-    //         return this.factoryOption({
-    //           value: option.value,
-    //           text: option.value,
-    //           prefixId: questionName,
-    //           suffixId: option.value,
-    //         });
-    //       });
-
-    //       return {
-    //         id: responseId,
-    //         question_name: questionName,
-    //         record_id: recordId,
-    //         options: formattedOptions,
-    //         user_id: userId,
-    //       };
-    //     }
-    //   );
-
-    //   return responses;
-    // },
-    // async getRecords(datasetId, currentPage, numberOfRecordsToFetch = 5) {
-    //   try {
-    //     const { data } = await this.$axios.get(
-    //       `/v1/datasets/${datasetId}/records?include=responses&offset=${currentPage}&limit=${numberOfRecordsToFetch}`
-    //     );
-
-    //     return data;
-    //   } catch (err) {
-    //     throw {
-    //       response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
-    //     };
-    //   }
-    // },
     async getQuestions(datasetId) {
       try {
         const { data } = await this.$axios.get(
