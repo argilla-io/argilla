@@ -104,7 +104,7 @@ export default {
       }
 
       if (options) {
-        return options?.map((option, index) => {
+        return options?.map((option) => {
           const optionText = option.text ?? option.value;
           const paramObject = {
             value: defaultValueByComponent,
