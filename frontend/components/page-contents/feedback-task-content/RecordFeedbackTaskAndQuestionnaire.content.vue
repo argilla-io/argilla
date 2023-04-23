@@ -149,62 +149,8 @@ export default {
             recordId
           );
 
-          const formattedRecordResponsesForOrm = [];
-          recordResponses.forEach((responsesByRecordAndUser) => {
-            Object.entries(responsesByRecordAndUser.values).forEach(
-              ([questionName, recordResponseByQuestionName]) => {
-                let formattedOptionsWithRecordResponse = [];
-
-                const optionsByQuestionName =
-                  getOptionsOfQuestionByDatasetIdAndQuestionName(
-                    this.datasetId,
-                    questionName
-                  );
-                const correspondingComponentTypeOfTheAnswer =
-                  getComponentTypeOfQuestionByDatasetIdAndQuestionName(
-                    this.datasetId,
-                    questionName
-                  );
-
-                switch (correspondingComponentTypeOfTheAnswer) {
-                  case COMPONENT_TYPE.RATING:
-                    // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
-                    formattedOptionsWithRecordResponse =
-                      optionsByQuestionName.map(({ id, text, value }) => {
-                        if (text === recordResponseByQuestionName.value) {
-                          return {
-                            id,
-                            text,
-                            value: true,
-                          };
-                        }
-                        return { id, text, value };
-                      });
-                    break;
-                  case COMPONENT_TYPE.FREE_TEXT:
-                    formattedOptionsWithRecordResponse = [
-                      {
-                        id: questionName,
-                        text: recordResponseByQuestionName.value,
-                        value: recordResponseByQuestionName.value,
-                      },
-                    ];
-                    break;
-                  default:
-                    console.log(
-                      `The corresponding component with a question name:'${questionName}' was not found`
-                    );
-                }
-                formattedRecordResponsesForOrm.push({
-                  id: responsesByRecordAndUser.id,
-                  question_name: questionName,
-                  options: formattedOptionsWithRecordResponse,
-                  record_id: recordId,
-                  user_id: responsesByRecordAndUser.user_id ?? null,
-                });
-              }
-            );
-          });
+          const formattedRecordResponsesForOrm =
+            this.factoryRecordResponsesForOrm({ recordId, recordResponses });
 
           return {
             id: recordId,
@@ -228,6 +174,67 @@ export default {
         }
       );
       return fields;
+    },
+    factoryRecordResponsesForOrm({ recordId, recordResponses }) {
+      const formattedRecordResponsesForOrm = [];
+      recordResponses.forEach((responsesByRecordAndUser) => {
+        Object.entries(responsesByRecordAndUser.values).forEach(
+          ([questionName, recordResponseByQuestionName]) => {
+            let formattedOptionsWithRecordResponse = [];
+
+            const optionsByQuestionName =
+              getOptionsOfQuestionByDatasetIdAndQuestionName(
+                this.datasetId,
+                questionName
+              );
+            const correspondingComponentTypeOfTheAnswer =
+              getComponentTypeOfQuestionByDatasetIdAndQuestionName(
+                this.datasetId,
+                questionName
+              );
+
+            switch (correspondingComponentTypeOfTheAnswer) {
+              case COMPONENT_TYPE.RATING:
+                // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
+                formattedOptionsWithRecordResponse = optionsByQuestionName.map(
+                  ({ id, text, value }) => {
+                    if (text === recordResponseByQuestionName.value) {
+                      return {
+                        id,
+                        text,
+                        value: true,
+                      };
+                    }
+                    return { id, text, value };
+                  }
+                );
+                break;
+              case COMPONENT_TYPE.FREE_TEXT:
+                formattedOptionsWithRecordResponse = [
+                  {
+                    id: questionName,
+                    text: recordResponseByQuestionName.value,
+                    value: recordResponseByQuestionName.value,
+                  },
+                ];
+                break;
+              default:
+                console.log(
+                  `The corresponding component with a question name:'${questionName}' was not found`
+                );
+            }
+            formattedRecordResponsesForOrm.push({
+              id: responsesByRecordAndUser.id,
+              question_name: questionName,
+              options: formattedOptionsWithRecordResponse,
+              record_id: recordId,
+              user_id: responsesByRecordAndUser.user_id ?? null,
+            });
+          }
+        );
+      });
+
+      return formattedRecordResponsesForOrm;
     },
   },
 };
