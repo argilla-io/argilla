@@ -105,6 +105,7 @@ class AnnotationCreate(BaseModel):
 class Response(BaseModel):
     id: UUID
     values: Dict[str, Any]
+    user_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
