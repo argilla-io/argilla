@@ -99,6 +99,9 @@ export default {
         case COMPONENT_TYPE.RATING:
           defaultValueByComponent = false;
           break;
+        case COMPONENT_TYPE.SINGLE_LABEL:
+          defaultValueByComponent = false;
+          break;
         default:
           console.log(`the component type ${componentType} is unknown`);
       }

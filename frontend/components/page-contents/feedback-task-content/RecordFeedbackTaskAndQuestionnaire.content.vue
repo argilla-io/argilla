@@ -194,6 +194,7 @@ export default {
               );
 
             switch (correspondingComponentTypeOfTheAnswer) {
+              case COMPONENT_TYPE.SINGLE_LABEL:
               case COMPONENT_TYPE.RATING:
                 // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
                 formattedOptionsWithRecordResponse = optionsByQuestionName.map(
