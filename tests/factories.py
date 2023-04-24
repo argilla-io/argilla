@@ -18,6 +18,8 @@ from argilla.server.models import (
     Annotation,
     AnnotationType,
     Dataset,
+    Field,
+    FieldType,
     Record,
     Response,
     User,
@@ -102,6 +104,21 @@ class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
     }
     record = factory.SubFactory(RecordFactory)
     user = factory.SubFactory(UserFactory)
+
+
+class FieldFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Field
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    name = factory.Sequence(lambda n: f"field-{n}")
+    title = "Field Title"
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class TextFieldFactory(FieldFactory):
+    settings = {"type": FieldType.text.value}
 
 
 class AnnotationFactory(factory.alchemy.SQLAlchemyModelFactory):
