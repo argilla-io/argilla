@@ -174,13 +174,32 @@ def test_update_response_with_nonexistent_response_id(client: TestClient, db: Se
 
 
 def test_update_response_status(client: TestClient, db: Session, admin_auth_header: dict):
-    response = ResponseFactory.create()
+    response = ResponseFactory.create(
+        values={
+            "input_ok": {"value": "no"},
+            "output_ok": {"value": "no"},
+        }
+    )
     response_json = {"status": "submitted"}
 
     resp = client.put(f"/api/v1/responses/{response.id}/status", headers=admin_auth_header, json=response_json)
 
     assert resp.status_code == 200
     assert db.get(Response, response.id).status == "submitted"
+
+    resp_body = resp.json()
+    assert resp_body == {
+        "id": str(response.id),
+        "values": {
+            "input_ok": {"value": "no"},
+            "output_ok": {"value": "no"},
+        },
+        "record_id": str(response.record_id),
+        "user_id": str(response.user_id),
+        "status": ResponseStatus.submitted,
+        "inserted_at": response.inserted_at.isoformat(),
+        "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
+    }
 
 
 def test_update_response_status_without_authentication(client: TestClient, db: Session):
@@ -195,7 +214,9 @@ def test_update_response_status_without_authentication(client: TestClient, db: S
 
 def test_update_response_status_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create()
-    response = ResponseFactory.create(user=annotator)
+    response = ResponseFactory.create(
+        user=annotator, values={"input_ok": {"value": "no"}, "output_ok": {"value": "no"}}
+    )
     response_json = {"status": "submitted"}
 
     resp = client.put(
@@ -204,6 +225,20 @@ def test_update_response_status_as_annotator(client: TestClient, db: Session):
 
     assert resp.status_code == 200
     assert db.get(Response, response.id).status == "submitted"
+
+    resp_body = resp.json()
+    assert resp_body == {
+        "id": str(response.id),
+        "values": {
+            "input_ok": {"value": "no"},
+            "output_ok": {"value": "no"},
+        },
+        "record_id": str(response.record_id),
+        "user_id": str(response.user_id),
+        "status": ResponseStatus.submitted,
+        "inserted_at": response.inserted_at.isoformat(),
+        "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
+    }
 
 
 def test_update_response_status_as_annotator_for_different_user_response(client: TestClient, db: Session):
