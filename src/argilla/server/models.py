@@ -123,7 +123,7 @@ class Response(Base):
     def __repr__(self):
         return (
             f"Response(id={str(self.id)!r}, record_id={str(self.record_id)!r}, user_id={str(self.user_id)!r}, "
-            f"status={self.status!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+            f"status={self.status}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 
 
