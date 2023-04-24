@@ -172,6 +172,12 @@ class DatasetPolicyV1:
         return actor.is_admin
 
 
+class FieldPolicyV1:
+    @classmethod
+    def delete(cls, actor: User) -> bool:
+        return actor.is_admin
+
+
 class AnnotationPolicyV1:
     @classmethod
     def delete(cls, actor: User) -> bool:

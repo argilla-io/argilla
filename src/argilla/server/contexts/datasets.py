@@ -96,6 +96,10 @@ def delete_dataset(db: Session, dataset: Dataset):
     return dataset
 
 
+def get_field_by_id(db: Session, field_id: UUID):
+    return db.get(Field, field_id)
+
+
 def get_field_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
     return db.query(Field).filter_by(name=name, dataset_id=dataset_id).first()
 
@@ -115,6 +119,16 @@ def create_field(db: Session, dataset: Dataset, field_create: FieldCreate):
     db.add(field)
     db.commit()
     db.refresh(field)
+
+    return field
+
+
+def delete_field(db: Session, field: Field):
+    if field.dataset.is_ready:
+        raise ValueError("Fields cannot be deleted for a published dataset")
+
+    db.delete(field)
+    db.commit()
 
     return field
 
