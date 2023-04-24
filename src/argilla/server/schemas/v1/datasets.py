@@ -17,10 +17,11 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, conlist, constr
+from pydantic import BaseModel, conlist, constr
+from pydantic import Field as ModelField
 from typing_extensions import Literal
 
-from argilla.server.models import AnnotationType, DatasetStatus
+from argilla.server.models import AnnotationType, DatasetStatus, FieldType
 
 ANNOTATION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 
@@ -57,6 +58,27 @@ class DatasetCreate(BaseModel):
     workspace_id: UUID
 
 
+class TextFieldSettings(BaseModel):
+    type: Literal[FieldType.text]
+
+
+class Field(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    required: bool
+    settings: TextFieldSettings
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class Fields(BaseModel):
+    items: List[Field]
+
+
 class TextAnnotationSettings(BaseModel):
     type: Literal[AnnotationType.text]
 
@@ -79,7 +101,7 @@ class Annotation(BaseModel):
     name: str
     title: str
     required: bool
-    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
+    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = ModelField(..., discriminator="type")
     inserted_at: datetime
     updated_at: datetime
 
@@ -99,12 +121,13 @@ class AnnotationCreate(BaseModel):
     )
     title: str
     required: Optional[bool]
-    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
+    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = ModelField(..., discriminator="type")
 
 
 class Response(BaseModel):
     id: UUID
     values: Dict[str, Any]
+    user_id: UUID
     inserted_at: datetime
     updated_at: datetime
 

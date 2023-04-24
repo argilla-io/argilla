@@ -46,6 +46,7 @@ from tests.factories import (
     RecordFactory,
     ResponseFactory,
     TextAnnotationFactory,
+    TextFieldFactory,
     WorkspaceFactory,
 )
 
@@ -111,6 +112,83 @@ def test_list_datasets_as_annotator(client: TestClient, db: Session):
 
     response_body = response.json()
     assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a", "dataset-b"]
+
+
+def test_list_dataset_fields(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    text_field_a = TextFieldFactory.create(name="text-field-a", title="Text Field A", required=True, dataset=dataset)
+    text_field_b = TextFieldFactory.create(name="text-field-b", title="Text Field B", dataset=dataset)
+
+    other_dataset = DatasetFactory.create()
+    TextFieldFactory.create_batch(size=2, dataset=other_dataset)
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "id": str(text_field_a.id),
+                "name": "text-field-a",
+                "title": "Text Field A",
+                "required": True,
+                "settings": {"type": "text"},
+                "inserted_at": text_field_a.inserted_at.isoformat(),
+                "updated_at": text_field_a.updated_at.isoformat(),
+            },
+            {
+                "id": str(text_field_b.id),
+                "name": "text-field-b",
+                "title": "Text Field B",
+                "required": False,
+                "settings": {"type": "text"},
+                "inserted_at": text_field_b.inserted_at.isoformat(),
+                "updated_at": text_field_b.updated_at.isoformat(),
+            },
+        ],
+    }
+
+
+def test_list_dataset_fields_without_authentication(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/fields")
+
+    assert response.status_code == 401
+
+
+def test_list_dataset_fields_as_annotator(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+    TextFieldFactory.create(name="text-field-a", dataset=dataset)
+    TextFieldFactory.create(name="text-field-b", dataset=dataset)
+
+    other_dataset = DatasetFactory.create()
+    TextFieldFactory.create_batch(size=2, dataset=other_dataset)
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/fields", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 200
+
+    response_body = response.json()
+    assert [field["name"] for field in response_body["items"]] == ["text-field-a", "text-field-b"]
+
+
+def test_list_dataset_fields_as_annotator_from_different_workspace(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/fields", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
+
+
+def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+    DatasetFactory.create()
+
+    response = client.get(f"/api/v1/datasets/{uuid4()}/fields", headers=admin_auth_header)
+
+    assert response.status_code == 404
 
 
 def test_list_dataset_annotations(client: TestClient, db: Session, admin_auth_header: dict):
@@ -302,6 +380,7 @@ def test_list_dataset_records_with_include_responses(client: TestClient, admin_a
                             "input_ok": {"value": "yes"},
                             "output_ok": {"value": "yes"},
                         },
+                        "user_id": str(response_a.user_id),
                         "inserted_at": response_a.inserted_at.isoformat(),
                         "updated_at": response_a.updated_at.isoformat(),
                     },
@@ -320,6 +399,7 @@ def test_list_dataset_records_with_include_responses(client: TestClient, admin_a
                             "input_ok": {"value": "yes"},
                             "output_ok": {"value": "no"},
                         },
+                        "user_id": str(response_b_1.user_id),
                         "inserted_at": response_b_1.inserted_at.isoformat(),
                         "updated_at": response_b_1.updated_at.isoformat(),
                     },
@@ -329,6 +409,7 @@ def test_list_dataset_records_with_include_responses(client: TestClient, admin_a
                             "input_ok": {"value": "no"},
                             "output_ok": {"value": "no"},
                         },
+                        "user_id": str(response_b_2.user_id),
                         "inserted_at": response_b_2.inserted_at.isoformat(),
                         "updated_at": response_b_2.updated_at.isoformat(),
                     },
@@ -527,6 +608,7 @@ def test_list_dataset_records_as_annotator_with_include_responses(client: TestCl
                             "input_ok": {"value": "no"},
                             "output_ok": {"value": "no"},
                         },
+                        "user_id": str(annotator.id),
                         "inserted_at": response_b_annotator.inserted_at.isoformat(),
                         "updated_at": response_b_annotator.updated_at.isoformat(),
                     },
