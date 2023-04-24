@@ -108,7 +108,7 @@ export default {
           newRecordOffset
         );
       if (isRecordWithRecordOffsetNotExists) {
-        this.initRecordsInDatabase(this.recordOffset - 1);
+        this.initRecordsInDatabase(newRecordOffset);
       }
     },
   },

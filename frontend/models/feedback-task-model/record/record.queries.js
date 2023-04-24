@@ -17,7 +17,7 @@ const getRecordWithFieldsAndResponsesByUserId = (
       query.where("user_id", userId);
     })
     .where("dataset_id", datasetId)
-    .offset(recordIndex)
+    .where("record_index", recordIndex)
     .first();
 };
 
