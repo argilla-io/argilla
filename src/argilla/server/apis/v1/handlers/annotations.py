@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
 from argilla.server.policies import AnnotationPolicyV1, authorize
-from argilla.server.schemas.v1.datasets import Annotation
+from argilla.server.schemas.v1.annotations import Annotation
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
