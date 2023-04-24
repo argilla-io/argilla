@@ -21,9 +21,17 @@ const findRecordResponseByRecordIdByQuestionId = ({ recordId, questionId }) => {
 const upsertRecordResponses = (recordResponses) =>
   RecordResponseModel.insertOrUpdate({ data: recordResponses });
 
+// EXIST
+const isResponsesByUserIdExists = (userId, recordId) =>
+  RecordResponseModel.query()
+    .where("user_id", userId)
+    .where("record_id", recordId)
+    .exists();
+
 export {
   getRecordResponsesByRecordId,
   getRecordResponsesIdByRecordId,
   findRecordResponseByRecordIdByQuestionId,
   upsertRecordResponses,
+  isResponsesByUserIdExists,
 };
