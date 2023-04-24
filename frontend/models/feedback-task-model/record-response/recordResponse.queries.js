@@ -7,6 +7,12 @@ const getRecordResponsesByRecordId = ({ userId, recordId }) => {
     .where("user_id", userId)
     .get();
 };
+const getRecordResponsesIdByRecordId = ({ userId, recordId }) => {
+  return RecordResponseModel.query()
+    .where("record_id", recordId)
+    .where("user_id", userId)
+    .first()?.id;
+};
 const findRecordResponseByRecordIdByQuestionId = ({ recordId, questionId }) => {
   return RecordResponseModel.query().whereId([questionId, recordId]).first();
 };
@@ -17,6 +23,7 @@ const upsertRecordResponses = (recordResponses) =>
 
 export {
   getRecordResponsesByRecordId,
+  getRecordResponsesIdByRecordId,
   findRecordResponseByRecordIdByQuestionId,
   upsertRecordResponses,
 };

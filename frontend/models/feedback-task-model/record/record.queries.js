@@ -28,9 +28,13 @@ const isRecordWithRecordIndexByDatasetIdExists = (datasetId, recordIndex) => {
     .where("record_index", recordIndex)
     .exists();
 };
+const isRecordContainsAnyResponses = (recordId) => {
+  return RecordModel.query().whereId(recordId).has("record_responses").exists();
+};
 
 export {
   upsertRecords,
   getRecordWithFieldsAndResponsesByUserId,
   isRecordWithRecordIndexByDatasetIdExists,
+  isRecordContainsAnyResponses,
 };
