@@ -16,10 +16,18 @@ from typing import List
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
-from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
+from argilla.server.models import (
+    Annotation,
+    Dataset,
+    DatasetStatus,
+    Field,
+    Record,
+    Response,
+)
 from argilla.server.schemas.v1.datasets import (
     AnnotationCreate,
     DatasetCreate,
+    FieldCreate,
     RecordInclude,
     RecordsCreate,
 )
@@ -86,6 +94,29 @@ def delete_dataset(db: Session, dataset: Dataset):
     db.commit()
 
     return dataset
+
+
+def get_field_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
+    return db.query(Field).filter_by(name=name, dataset_id=dataset_id).first()
+
+
+def create_field(db: Session, dataset: Dataset, field_create: FieldCreate):
+    if dataset.is_ready:
+        raise ValueError("Field cannot be created for a published dataset")
+
+    field = Field(
+        name=field_create.name,
+        title=field_create.title,
+        required=field_create.required,
+        settings=field_create.settings.dict(),
+        dataset_id=dataset.id,
+    )
+
+    db.add(field)
+    db.commit()
+    db.refresh(field)
+
+    return field
 
 
 def get_annotation_by_id(db: Session, annotation_id: UUID):

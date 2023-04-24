@@ -152,6 +152,10 @@ class DatasetPolicyV1:
         return actor.is_admin
 
     @classmethod
+    def create_field(cls, actor: User) -> bool:
+        return actor.is_admin
+
+    @classmethod
     def create_annotation(cls, actor: User) -> bool:
         return actor.is_admin
 

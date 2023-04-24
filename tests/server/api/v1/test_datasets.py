@@ -21,12 +21,14 @@ from argilla.server.models import (
     Annotation,
     Dataset,
     DatasetStatus,
+    Field,
     Record,
     Response,
     User,
 )
 from argilla.server.schemas.v1.datasets import (
     ANNOTATION_CREATE_NAME_MAX_LENGTH,
+    FIELD_CREATE_NAME_MAX_LENGTH,
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
@@ -42,6 +44,7 @@ from tests.factories import (
     AnnotationFactory,
     AnnotatorFactory,
     DatasetFactory,
+    FieldFactory,
     RatingAnnotationFactory,
     RecordFactory,
     ResponseFactory,
@@ -749,6 +752,165 @@ def test_create_dataset_with_existent_name(client: TestClient, db: Session, admi
     assert db.query(Dataset).count() == 1
 
 
+def test_create_dataset_field(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 201
+    assert db.query(Field).count() == 1
+
+    response_body = response.json()
+    assert db.get(Field, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "name": "name",
+        "title": "title",
+        "required": False,
+        "settings": {"type": "text"},
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
+
+
+def test_create_dataset_field_without_authentication(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", json=field_json)
+
+    assert response.status_code == 401
+    assert db.query(Field).count() == 0
+
+
+def test_create_dataset_field_as_annotator(client: TestClient, db: Session):
+    annotator = AnnotatorFactory.create()
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/fields",
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+        json=field_json,
+    )
+
+    assert response.status_code == 403
+    assert db.query(Field).count() == 0
+
+
+@pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
+def test_create_dataset_field_with_invalid_name(
+    client: TestClient, db: Session, admin_auth_header: dict, invalid_name: str
+):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": invalid_name,
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert db.query(Field).count() == 0
+
+
+def test_create_dataset_field_with_invalid_max_length_name(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "a" * (FIELD_CREATE_NAME_MAX_LENGTH + 1),
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert db.query(Field).count() == 0
+
+
+def test_create_dataset_field_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
+    field = FieldFactory.create(name="name")
+    field_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{field.dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 409
+    assert db.query(Field).count() == 1
+
+
+def test_create_dataset_field_with_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    field_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Field cannot be created for a published dataset"}
+    assert db.query(Field).count() == 0
+
+
+def test_create_dataset_field_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+    DatasetFactory.create()
+    field_json = {
+        "name": "text",
+        "title": "Text",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{uuid4()}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 404
+    assert db.query(Field).count() == 0
+
+
+def test_create_dataset_text_field(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "text",
+        "title": "Text",
+        "settings": {"type": "text", "discarded": "value"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 201
+    assert db.query(Field).count() == 1
+
+    response_body = response.json()
+    assert db.get(Field, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "name": "text",
+        "title": "Text",
+        "required": False,
+        "settings": {"type": "text"},
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
+
+
 def test_create_dataset_annotation(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     annotation_json = {
@@ -829,7 +991,9 @@ def test_create_dataset_annotation_with_invalid_name(
     assert db.query(Annotation).count() == 0
 
 
-def test_create_annotation_with_invalid_max_length_name(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_dataset_annotation_with_invalid_max_length_name(
+    client: TestClient, db: Session, admin_auth_header: dict
+):
     dataset = DatasetFactory.create()
     annotation_json = {
         "name": "a" * (ANNOTATION_CREATE_NAME_MAX_LENGTH + 1),

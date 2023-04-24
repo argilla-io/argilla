@@ -29,6 +29,8 @@ from argilla.server.schemas.v1.datasets import (
     Dataset,
     DatasetCreate,
     Datasets,
+    Field,
+    FieldCreate,
     Fields,
     RecordInclude,
     Records,
@@ -154,6 +156,32 @@ def create_dataset(
         )
 
     return datasets.create_dataset(db, dataset_create)
+
+
+@router.post("/datasets/{dataset_id}/fields", status_code=status.HTTP_201_CREATED, response_model=Field)
+def create_dataset_field(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    field_create: FieldCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, DatasetPolicyV1.create_field)
+
+    dataset = _get_dataset(db, dataset_id)
+
+    if datasets.get_field_by_name_and_dataset_id(db, field_create.name, dataset_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Field with name `{field_create.name}` already exists for dataset with id `{dataset_id}`",
+        )
+
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        return datasets.create_field(db, dataset, field_create)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
 @router.post("/datasets/{dataset_id}/annotations", status_code=status.HTTP_201_CREATED, response_model=Annotation)
