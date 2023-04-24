@@ -1423,6 +1423,7 @@ def test_publish_dataset(
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
     RatingAnnotationFactory.create(dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
@@ -1444,6 +1445,7 @@ def test_publish_dataset_with_error_on_index_creation(
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
     AnnotationFactory.create(settings={"type": "invalid"}, dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
@@ -1486,8 +1488,20 @@ def test_publish_dataset_already_published(client: TestClient, db: Session, admi
     assert db.get(Dataset, dataset.id).status == "ready"
 
 
+def test_publish_dataset_without_fields(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    RatingAnnotationFactory.create(dataset=dataset)
+
+    response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Dataset cannot be published without fields"}
+    assert db.get(Dataset, dataset.id).status == "draft"
+
+
 def test_publish_dataset_without_annotations(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 

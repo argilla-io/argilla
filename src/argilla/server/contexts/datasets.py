@@ -72,6 +72,9 @@ async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, datas
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
 
+    if _count_fields_by_dataset_id(db, dataset.id) == 0:
+        raise ValueError("Dataset cannot be published without fields")
+
     if _count_annotations_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without annotations")
 
@@ -266,6 +269,10 @@ def delete_response(db: Session, response: Response):
     db.commit()
 
     return response
+
+
+def _count_fields_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Field.id)).filter_by(dataset_id=dataset_id).scalar()
 
 
 def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):
