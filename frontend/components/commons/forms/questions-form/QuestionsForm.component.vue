@@ -74,7 +74,6 @@
 import { isEqual, cloneDeep } from "lodash";
 import { Notification } from "@/models/Notifications";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
-import { isRecordContainsAnyResponsesByUserId } from "@/models/feedback-task-model/record/record.queries";
 import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
@@ -82,6 +81,7 @@ import {
 import {
   getRecordResponsesIdByRecordId,
   upsertRecordResponses,
+  isResponsesByUserIdExists,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 
 const STATUS_RESPONSE = Object.freeze({
@@ -137,7 +137,7 @@ export default {
       });
     },
     async onSubmit() {
-      const createOrUpdateResponse = isRecordContainsAnyResponsesByUserId(
+      const createOrUpdateResponse = isResponsesByUserIdExists(
         this.userId,
         this.recordId
       )
