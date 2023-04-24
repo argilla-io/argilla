@@ -74,7 +74,7 @@
 import { isEqual, cloneDeep } from "lodash";
 import { Notification } from "@/models/Notifications";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
-import { isRecordContainsAnyResponses } from "@/models/feedback-task-model/record/record.queries";
+import { isRecordContainsAnyResponsesByUserId } from "@/models/feedback-task-model/record/record.queries";
 import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
@@ -137,7 +137,10 @@ export default {
       });
     },
     async onSubmit() {
-      const createOrUpdateResponse = isRecordContainsAnyResponses(this.recordId)
+      const createOrUpdateResponse = isRecordContainsAnyResponsesByUserId(
+        this.userId,
+        this.recordId
+      )
         ? STATUS_RESPONSE.UPDATE
         : STATUS_RESPONSE.CREATE;
 
