@@ -72,11 +72,34 @@
 
 <script>
 import { isEqual, cloneDeep } from "lodash";
+import { Notification } from "@/models/Notifications";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
+import { isRecordContainsAnyResponses } from "@/models/feedback-task-model/record/record.queries";
+import {
+  getOptionsOfQuestionByDatasetIdAndQuestionName,
+  getComponentTypeOfQuestionByDatasetIdAndQuestionName,
+} from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
+import {
+  getRecordResponsesIdByRecordId,
+  upsertRecordResponses,
+} from "@/models/feedback-task-model/record-response/recordResponse.queries";
 
+const STATUS_RESPONSE = Object.freeze({
+  UPDATE: "UPDATE",
+  CREATE: "CREATE",
+  UNKNOWN: "UNKNOWN",
+});
 export default {
   name: "QuestionsFormComponent",
   props: {
+    datasetId: {
+      type: String,
+      required: true,
+    },
+    recordId: {
+      type: String,
+      required: true,
+    },
     initialInputs: {
       type: Array,
       required: true,
@@ -97,6 +120,9 @@ export default {
     this.onReset();
   },
   computed: {
+    userId() {
+      return this.$auth.user.id;
+    },
     isFormUntouched() {
       return isEqual(this.initialInputs, this.inputs);
     },
@@ -110,8 +136,63 @@ export default {
         return input;
       });
     },
-    onSubmit() {
-      console.log(this.inputs);
+    async onSubmit() {
+      const createOrUpdateResponse = isRecordContainsAnyResponses(this.recordId)
+        ? STATUS_RESPONSE.UPDATE
+        : STATUS_RESPONSE.CREATE;
+
+      const isSomeRequiredQuestionHaveNoAnswer = this.inputs.some(
+        (input) =>
+          input.is_required &&
+          input.options.every(
+            (option) => !option.value || option.value.length === 0
+          )
+      );
+      if (isSomeRequiredQuestionHaveNoAnswer) {
+        this.isError = true;
+        return;
+      }
+
+      let formattedSelectionOptionObject = {};
+      this.inputs.forEach((input) => {
+        // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
+
+        let selectedOption = null;
+        switch (input.component_type) {
+          case COMPONENT_TYPE.SINGLE_LABEL:
+          case COMPONENT_TYPE.RATING:
+            selectedOption = input.options?.find((option) => option.value);
+            break;
+          case COMPONENT_TYPE.FREE_TEXT:
+            selectedOption = input.options[0];
+            break;
+          default:
+            console.log(
+              `The component type ${input.component_type} is unknown, the response can't be save`
+            );
+        }
+
+        formattedSelectionOptionObject.values = {
+          ...formattedSelectionOptionObject.values,
+          [input.name]: { value: selectedOption.text },
+        };
+      });
+
+      const formattedRequestsToSend = {
+        status: createOrUpdateResponse,
+        responseByQuestionName: formattedSelectionOptionObject,
+        ...(createOrUpdateResponse === STATUS_RESPONSE.UPDATE && {
+          responseId: getRecordResponsesIdByRecordId({
+            userId: this.userId,
+            recordId: this.recordId,
+          }),
+        }),
+        ...(createOrUpdateResponse === STATUS_RESPONSE.CREATE && {
+          recordId: this.recordId,
+        }),
+      };
+
+      await this.createOrUpdateRecordResponses(formattedRequestsToSend);
     },
     onReset() {
       this.inputs = cloneDeep(this.initialInputs);
@@ -127,6 +208,118 @@ export default {
         this.colorAsterisk = "black";
         this.isError = false;
       }
+    },
+    async createOrUpdateRecordResponses({
+      status,
+      responseId,
+      responseByQuestionName,
+    }) {
+      let message = "";
+      let typeOfToast = "successOrError";
+      try {
+        let responseData = null;
+        if (status === STATUS_RESPONSE.UPDATE) {
+          responseData = await this.updateRecordResponses(
+            responseId,
+            responseByQuestionName
+          );
+        } else if (status === STATUS_RESPONSE.CREATE) {
+          responseData = await this.createRecordResponses(
+            this.recordId,
+            responseByQuestionName
+          );
+        }
+
+        message = "Responses to the questions are saved!";
+        typeOfToast = "success";
+
+        const { data: updatedResponses } = responseData;
+        if (updatedResponses) {
+          this.updateResponsesInOrm(updatedResponses);
+        }
+      } catch (err) {
+        console.log(err);
+        message = "There was a problem to save the response";
+        typeOfToast = "error";
+      } finally {
+        this.showNotificationComponent(message, typeOfToast);
+      }
+    },
+    updateResponsesInOrm(responsesFromApi) {
+      const newResponseToUpsertInOrm =
+        this.formatResponsesApiForOrm(responsesFromApi);
+
+      upsertRecordResponses(newResponseToUpsertInOrm);
+    },
+    async updateRecordResponses(responseId, responseByQuestionName) {
+      return await this.$axios.put(
+        `/v1/responses/${responseId}`,
+        JSON.parse(JSON.stringify(responseByQuestionName))
+      );
+    },
+    async createRecordResponses(recordId, responseByQuestionName) {
+      return await this.$axios.post(
+        `/v1/records/${recordId}/responses`,
+        JSON.parse(JSON.stringify(responseByQuestionName))
+      );
+    },
+    formatResponsesApiForOrm(responsesFromApi) {
+      const newResponseToUpsertInOrm = Object.entries(
+        responsesFromApi.values
+      ).map(([questionName, newResponse]) => {
+        const componentType =
+          getComponentTypeOfQuestionByDatasetIdAndQuestionName(
+            this.datasetId,
+            questionName
+          );
+        let formattedOptions = getOptionsOfQuestionByDatasetIdAndQuestionName(
+          this.datasetId,
+          questionName
+        );
+
+        switch (componentType) {
+          case COMPONENT_TYPE.SINGLE_LABEL:
+          case COMPONENT_TYPE.RATING:
+            formattedOptions = formattedOptions.map((option) => {
+              if (option.text === newResponse.value) {
+                return { id: option.id, text: option.text, value: true };
+              }
+              return { id: option.id, text: option.text, value: false };
+            });
+            break;
+          case COMPONENT_TYPE.FREE_TEXT:
+            formattedOptions = [
+              {
+                id: formattedOptions[0].id,
+                text: newResponse.value,
+                value: newResponse.value,
+              },
+            ];
+            break;
+          default:
+            console.log(`The component type ${componentType} is unknown`);
+            return;
+        }
+
+        const formattedResponse = {
+          id: responsesFromApi.id,
+          question_name: questionName,
+          user_id: responsesFromApi.user_id,
+          record_id: responsesFromApi.record_id,
+          options: formattedOptions,
+        };
+
+        return formattedResponse;
+      });
+
+      return newResponseToUpsertInOrm;
+    },
+    showNotificationComponent(message, typeOfToast) {
+      Notification.dispatch("notify", {
+        message,
+        numberOfChars: message.length,
+        type: typeOfToast,
+      });
     },
   },
 };
