@@ -63,7 +63,7 @@
           class="primary small"
           :disabled="isFormUntouched || isError"
         >
-          <span v-text="'Validate'" />
+          <span v-text="'Submit'" />
         </BaseButton>
       </div>
     </div>
