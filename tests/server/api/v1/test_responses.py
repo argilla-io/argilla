@@ -225,6 +225,16 @@ def test_update_response_status_with_nonexistent_response_id(client: TestClient,
     assert resp.status_code == 404
 
 
+def test_update_response_status_with_invalid_status(client: TestClient, db: Session, admin_auth_header: dict):
+    response = ResponseFactory.create()
+    response_json = {"status": "invalid"}
+
+    resp = client.put(f"/api/v1/responses/{response.id}/status", headers=admin_auth_header, json=response_json)
+
+    assert resp.status_code == 422
+    assert db.get(Response, response.id).status == "pending"
+
+
 def test_delete_response(client: TestClient, db: Session, admin_auth_header: dict):
     response = ResponseFactory.create()
 
