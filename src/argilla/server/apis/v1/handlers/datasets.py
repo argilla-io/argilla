@@ -29,6 +29,7 @@ from argilla.server.schemas.v1.datasets import (
     Dataset,
     DatasetCreate,
     Datasets,
+    Fields,
     RecordInclude,
     Records,
     RecordsCreate,
@@ -65,6 +66,20 @@ def list_datasets(
         return Datasets(items=datasets.list_datasets(db))
     else:
         return Datasets(items=current_user.datasets)
+
+
+@router.get("/datasets/{dataset_id}/fields", response_model=Fields)
+def list_dataset_fields(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return Fields(items=dataset.fields)
 
 
 @router.get("/datasets/{dataset_id}/annotations", response_model=Annotations)
