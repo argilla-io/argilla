@@ -961,7 +961,7 @@ def test_create_dataset_question_with_description(client: TestClient, db: Sessio
     assert response_body["description"] == "description"
 
 
-def test_create_dataset_questions_without_authentication(client: TestClient, db: Session):
+def test_create_dataset_question_without_authentication(client: TestClient, db: Session):
     dataset = DatasetFactory.create()
     question_json = {
         "name": "name",
@@ -995,7 +995,7 @@ def test_create_dataset_question_as_annotator(client: TestClient, db: Session):
 
 
 @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
-def test_create_dataset_questions_with_invalid_name(
+def test_create_dataset_question_with_invalid_name(
     client: TestClient, db: Session, admin_auth_header: dict, invalid_name: str
 ):
     dataset = DatasetFactory.create()
