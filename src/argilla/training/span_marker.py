@@ -63,7 +63,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
 
             self._model_class = SpanMarkerModel
         else:
-            raise NotImplementedError("rg.Text2TextRecord are not supported")
+            raise NotImplementedError("rg.Text2TextRecord and rg.TextClassification are not supported.")
 
         self.init_training_args()
 
