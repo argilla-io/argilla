@@ -2,7 +2,7 @@
   <HeaderAndTopAndOneColumn v-if="!$fetchState.pending && !$fetchState.error">
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
-        v-if="datasetName && workspace"
+        :key="datasetName && workspace"
         :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
       />
@@ -28,7 +28,6 @@ import {
   upsertFeedbackDataset,
   getFeedbackDatasetNameById,
   getFeedbackDatasetWorkspaceNameById,
-  isDatasetByIdExists,
 } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import { Notification } from "@/models/Notifications";
 
@@ -71,18 +70,15 @@ export default {
   },
   async fetch() {
     try {
-      const isDatasetStoredInOrm = isDatasetByIdExists(this.datasetId);
-      if (!isDatasetStoredInOrm) {
-        // 1- fetch dataset info
-        const dataset = await this.getDatasetInfo(this.datasetId);
+      // 1- fetch dataset info
+      const dataset = await this.getDatasetInfo(this.datasetId);
 
-        // TODO - remove step 2 when workspace name will be include in the getDatasetInfo API call
-        // 2- fetch workspace info
-        const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
-
-        // 3- insert in ORM
-        upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
-      }
+      // TODO - remove step 2 when workspace name will be include in the getDatasetInfo API call
+      // 2- fetch workspace info
+      const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
+      console.log(workspace);
+      // 3- insert in ORM
+      upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
     } catch (err) {
       this.manageErrorIfFetchNotWorking(err);
     }
