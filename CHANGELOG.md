@@ -23,6 +23,7 @@ These are the section headers that we use:
 - Added `settings` param to `prepare_for_training` ([#2689])
 - Added `prepare_for_training` for `openai` ([#2658])
 - Added `ArgillaOpenAITrainer` ([#2659])
+- Added `ArgillaSpanMarkerTrainer` for Named Entity Recognition ([#2693](https://github.com/argilla-io/argilla/pull/2693))
 
 ### Changed
 

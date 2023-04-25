@@ -45,10 +45,11 @@ dependencies:
       - snorkel>=0.9.7
       - spacy==3.5.0
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
-      - transformers[torch]~=4.18.0
+      - transformers[torch]>=4.19.0
       - evaluate
       - seqeval
       - setfit
+      - span_marker
       - rich==13.0.1
       # install Argilla in editable mode
       - -e .[server,listeners]

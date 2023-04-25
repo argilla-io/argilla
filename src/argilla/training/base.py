@@ -165,6 +165,19 @@ class ArgillaTrainer(object):
                 settings=self._settings,
                 seed=self._seed,
             )
+        elif framework is Framework.SPAN_MARKER:
+            if self._rg_dataset_type is not rg.DatasetForTokenClassification:
+                raise NotImplementedError(f"{Framework.SPAN_MARKER} only supports `TokenClassification` tasks.")
+            from argilla.training.span_marker import ArgillaSpanMarkerTrainer
+
+            self._trainer = ArgillaSpanMarkerTrainer(
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                model=self.model,
+                multi_label=self._multi_label,
+                settings=self._settings,
+                seed=self._seed,
+            )
 
         self._logger.warning(self)
 
