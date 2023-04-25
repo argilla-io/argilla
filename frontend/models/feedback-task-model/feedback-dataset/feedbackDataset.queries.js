@@ -31,6 +31,9 @@ const getTotalRecordByDatasetId = (datasetId) => {
 const getDatasetTaskByDatasetId = (datasetId) => {
   return FeedbackDatasetModel.query().whereId(datasetId).first()?.task;
 };
+const getDatasetGuidelinesByDatasetId = (datasetId) => {
+  return FeedbackDatasetModel.query().whereId(datasetId).first()?.guidelines;
+};
 
 // EXIST
 const isDatasetByIdExists = (datasetId) => {
@@ -42,6 +45,7 @@ export {
   updateTotalRecordsByDatasetId,
   getAllFeedbackDatasets,
   getFeedbackDatasetNameById,
+  getDatasetGuidelinesByDatasetId,
   getDatasetTaskByDatasetId,
   getFeedbackDatasetWorkspaceNameById,
   getTotalRecordByDatasetId,
