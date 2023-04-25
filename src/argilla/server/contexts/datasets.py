@@ -17,17 +17,17 @@ from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
 from argilla.server.models import (
-    Annotation,
     Dataset,
     DatasetStatus,
     Field,
+    Question,
     Record,
     Response,
 )
 from argilla.server.schemas.v1.datasets import (
-    AnnotationCreate,
     DatasetCreate,
     FieldCreate,
+    QuestionCreate,
     RecordInclude,
     RecordsCreate,
 )
@@ -75,8 +75,8 @@ async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, datas
     if _count_fields_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without fields")
 
-    if _count_annotations_by_dataset_id(db, dataset.id) == 0:
-        raise ValueError("Dataset cannot be published without annotations")
+    if _count_questions_by_dataset_id(db, dataset.id) == 0:
+        raise ValueError("Dataset cannot be published without questions")
 
     dataset.status = DatasetStatus.ready
     db.commit()
@@ -136,41 +136,41 @@ def delete_field(db: Session, field: Field):
     return field
 
 
-def get_annotation_by_id(db: Session, annotation_id: UUID):
-    return db.get(Annotation, annotation_id)
+def get_question_by_id(db: Session, question_id: UUID):
+    return db.get(Question, question_id)
 
 
-def get_annotation_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
-    return db.query(Annotation).filter_by(name=name, dataset_id=dataset_id).first()
+def get_question_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
+    return db.query(Question).filter_by(name=name, dataset_id=dataset_id).first()
 
 
-def create_annotation(db: Session, dataset: Dataset, annotation_create: AnnotationCreate):
+def create_question(db: Session, dataset: Dataset, question_create: QuestionCreate):
     if dataset.is_ready:
-        raise ValueError("Annotation cannot be created for a published dataset")
+        raise ValueError("Question cannot be created for a published dataset")
 
-    annotation = Annotation(
-        name=annotation_create.name,
-        title=annotation_create.title,
-        required=annotation_create.required,
-        settings=annotation_create.settings.dict(),
+    question = Question(
+        name=question_create.name,
+        title=question_create.title,
+        required=question_create.required,
+        settings=question_create.settings.dict(),
         dataset_id=dataset.id,
     )
 
-    db.add(annotation)
+    db.add(question)
     db.commit()
-    db.refresh(annotation)
+    db.refresh(question)
 
-    return annotation
+    return question
 
 
-def delete_annotation(db: Session, annotation: Annotation):
-    if annotation.dataset.is_ready:
-        raise ValueError("Annotations cannot be deleted for a published dataset")
+def delete_question(db: Session, question: Question):
+    if question.dataset.is_ready:
+        raise ValueError("Questions cannot be deleted for a published dataset")
 
-    db.delete(annotation)
+    db.delete(question)
     db.commit()
 
-    return annotation
+    return question
 
 
 def get_record_by_id(db: Session, record_id: UUID):
@@ -289,5 +289,5 @@ def _count_fields_by_dataset_id(db: Session, dataset_id: UUID):
     return db.query(func.count(Field.id)).filter_by(dataset_id=dataset_id).scalar()
 
 
-def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):
-    return db.query(func.count(Annotation.id)).filter_by(dataset_id=dataset_id).scalar()
+def _count_questions_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Question.id)).filter_by(dataset_id=dataset_id).scalar()

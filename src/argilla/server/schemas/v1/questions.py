@@ -18,7 +18,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class Annotation(BaseModel):
+class Question(BaseModel):
     id: UUID
     name: str
     title: str

@@ -23,8 +23,8 @@ from sqlalchemy.orm import Session
 from tests.conftest import is_running_elasticsearch
 from tests.factories import (
     DatasetFactory,
-    RatingAnnotationFactory,
-    TextAnnotationFactory,
+    RatingQuestionFactory,
+    TextQuestionFactory,
 )
 
 
@@ -53,7 +53,7 @@ class TestSuiteElasticSearchEngine:
         argnames=("text_ann_size", "rating_ann_size"),
         argvalues=[(random.randint(1, 9), random.randint(1, 9)) for _ in range(1, 5)],
     )
-    async def test_create_index_for_dataset_with_annotations(
+    async def test_create_index_for_dataset_with_questions(
         self,
         search_engine: ElasticSearchEngine,
         elasticsearch: Elasticsearch,
@@ -61,10 +61,10 @@ class TestSuiteElasticSearchEngine:
         text_ann_size: int,
         rating_ann_size: int,
     ):
-        text_annotations = TextAnnotationFactory.create_batch(size=text_ann_size)
-        rating_annotations = RatingAnnotationFactory.create_batch(size=rating_ann_size)
+        text_questions = TextQuestionFactory.create_batch(size=text_ann_size)
+        rating_questions = RatingQuestionFactory.create_batch(size=rating_ann_size)
 
-        dataset = DatasetFactory.create(annotations=text_annotations + rating_annotations)
+        dataset = DatasetFactory.create(questions=text_questions + rating_questions)
 
         await search_engine.create_index(dataset)
 
@@ -75,8 +75,8 @@ class TestSuiteElasticSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "properties": {
-                **{annotation.name: {"type": "text"} for annotation in text_annotations},
-                **{annotation.name: {"type": "integer"} for annotation in rating_annotations},
+                **{question.name: {"type": "text"} for question in text_questions},
+                **{question.name: {"type": "integer"} for question in rating_questions},
             },
         }
 
