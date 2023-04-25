@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -22,6 +23,7 @@ class Question(BaseModel):
     id: UUID
     name: str
     title: str
+    description: Optional[str]
     required: bool
     settings: dict
     dataset_id: UUID
