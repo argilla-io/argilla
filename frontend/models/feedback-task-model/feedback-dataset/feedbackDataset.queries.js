@@ -29,6 +29,11 @@ const getTotalRecordByDatasetId = (datasetId) => {
   return FeedbackDatasetModel.query().whereId(datasetId).first()?.total_records;
 };
 
+// EXIST
+const isDatasetByIdExists = (datasetId) => {
+  return FeedbackDatasetModel.query().whereId(datasetId).exists();
+};
+
 export {
   upsertFeedbackDataset,
   updateTotalRecordsByDatasetId,
@@ -36,4 +41,5 @@ export {
   getFeedbackDatasetNameById,
   getFeedbackDatasetWorkspaceNameById,
   getTotalRecordByDatasetId,
+  isDatasetByIdExists,
 };
