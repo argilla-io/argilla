@@ -35,7 +35,7 @@ export default {
       required: true,
     },
   },
-  created() {
+  beforeMount() {
     const { fullPath } = this.$route;
 
     this.datasetSettingsUrl = `${window.origin}${fullPath}`;
