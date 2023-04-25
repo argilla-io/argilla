@@ -1,7 +1,11 @@
 <template>
   <HeaderAndTopAndTwoColumns v-if="!$fetchState.error && !$fetchState.pending">
     <template v-slot:header>
-      <!-- <HeaderComponent /> -->
+      <HeaderFeedbackTaskComponent
+        v-if="datasetName && workspace"
+        :datasetId="datasetId"
+        :breadcrumbs="breadcrumbs"
+      />
     </template>
     <template v-slot:top>
       <TopDatasetSettingsFeedbackTaskContent :datasetId="datasetId" />
@@ -19,6 +23,8 @@
 import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
 import {
   upsertFeedbackDataset,
+  getFeedbackDatasetNameById,
+  getFeedbackDatasetWorkspaceNameById,
   isDatasetByIdExists,
 } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 
@@ -34,6 +40,32 @@ export default {
   computed: {
     datasetId() {
       return this.$route.params.id;
+    },
+    datasetName() {
+      return getFeedbackDatasetNameById(this.datasetId);
+    },
+    workspace() {
+      return getFeedbackDatasetWorkspaceNameById(this.datasetId);
+    },
+    breadcrumbs() {
+      return [
+        { link: { name: "datasets" }, name: "Home" },
+        {
+          link: { path: `/datasets?workspace=${this.workspace}` },
+          name: this.workspace,
+        },
+        {
+          link: {
+            name: "dataset-id-annotation-mode",
+            params: { id: this.datasetId },
+          },
+          name: this.datasetName,
+        },
+        {
+          link: null,
+          name: "settings",
+        },
+      ];
     },
   },
   async fetch() {
