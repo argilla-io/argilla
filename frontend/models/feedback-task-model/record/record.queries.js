@@ -6,14 +6,31 @@ const upsertRecords = (records) => {
 };
 
 // GET
-const getRecordWithFieldsByDatasetId = (
+const getRecordWithFieldsAndResponsesByUserId = (
   datasetId,
+  userId,
   recordIndex = 0
 ) => {
   return RecordModel.query()
     .with("record_fields")
+    .with("record_responses", (query) => {
+      query.where("user_id", userId);
+    })
     .where("dataset_id", datasetId)
     .offset(recordIndex)
     .first();
 };
-export { upsertRecords, getRecordWithFieldsByDatasetId };
+
+// EXIST
+const isRecordWithRecordIndexByDatasetIdExists = (datasetId, recordIndex) => {
+  return RecordModel.query()
+    .where("dataset_id", datasetId)
+    .where("record_index", recordIndex)
+    .exists();
+};
+
+export {
+  upsertRecords,
+  getRecordWithFieldsAndResponsesByUserId,
+  isRecordWithRecordIndexByDatasetIdExists,
+};
