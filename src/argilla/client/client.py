@@ -357,7 +357,7 @@ class Argilla:
                 max_tries=max_retries,
                 backoff_log_level=logging.DEBUG,
             )
-            def log_batch(batch_info: Tuple[int, list]) -> Union[Tuple[int, int]]:
+            def log_batch(batch_info: Tuple[int, list]) -> Tuple[int, int]:
                 batch_id, batch = batch_info
 
                 bulk_result = bulk(
