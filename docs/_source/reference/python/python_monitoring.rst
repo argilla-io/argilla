@@ -28,5 +28,20 @@ Framework Monitors
 .. automodule:: argilla.monitoring.model_monitor
    :members:
 
+Transformers Monitor
+^^^^^^^^^^^^^^^^^^^^
 
+.. automodule:: argilla.monitoring._transformers
+   :members:
 
+spaCy Monitor
+^^^^^^^^^^^^^
+
+.. automodule:: argilla.monitoring._spacy
+   :members:
+
+Flair Monitor
+^^^^^^^^^^^^^
+
+.. automodule:: argilla.monitoring._flair
+   :members:
