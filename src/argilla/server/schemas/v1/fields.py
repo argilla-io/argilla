@@ -16,6 +16,13 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
+from typing_extensions import Literal
+
+from argilla.server.models import FieldType
+
+
+class TextFieldSettings(BaseModel):
+    type: Literal[FieldType.text]
 
 
 class Field(BaseModel):
@@ -23,7 +30,7 @@ class Field(BaseModel):
     name: str
     title: str
     required: bool
-    settings: dict
+    settings: TextFieldSettings
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime

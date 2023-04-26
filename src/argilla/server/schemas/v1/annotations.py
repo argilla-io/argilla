@@ -13,9 +13,26 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, conlist
+from typing_extensions import Literal
+
+from argilla.server.models import AnnotationType
+
+
+class TextAnnotationSettings(BaseModel):
+    type: Literal[AnnotationType.text]
+
+
+class RatingAnnotationSettingsOption(BaseModel):
+    value: int
+
+
+class RatingAnnotationSettings(BaseModel):
+    type: Literal[AnnotationType.rating]
+    options: conlist(item_type=RatingAnnotationSettingsOption)
 
 
 class Annotation(BaseModel):
@@ -23,7 +40,7 @@ class Annotation(BaseModel):
     name: str
     title: str
     required: bool
-    settings: dict
+    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
