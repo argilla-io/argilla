@@ -24,6 +24,7 @@ export default {
 <style lang="scss" scoped>
 .description {
   &__text {
+    text-transform: capitalize;
     color: $black-37;
   }
 }
