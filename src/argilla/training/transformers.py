@@ -87,7 +87,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
             self._model_class = AutoModelForTokenClassification
         else:
-            raise NotImplementedError("rg.Text2TextRecord are not supported")
+            raise NotImplementedError("rg.Text2TextRecord is not supported.")
 
         self.init_training_args()
 
