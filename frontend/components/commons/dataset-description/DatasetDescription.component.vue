@@ -1,6 +1,6 @@
 <template>
   <div class="description">
-    <h2 class="--heading5 --semibold description__title">{{ title }}</h2>
+    <h2 class="--heading5 --semibold description__title" v-text="title" />
     <p class="--body1 description__text" v-text="datasetDescription" />
   </div>
 </template>
