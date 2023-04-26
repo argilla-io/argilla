@@ -23,8 +23,11 @@ from typing_extensions import Literal
 
 from argilla.server.models import AnnotationType, DatasetStatus, FieldType
 
-ANNOTATION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+FIELD_CREATE_NAME_MIN_LENGTH = 1
+FIELD_CREATE_NAME_MAX_LENGTH = 200
 
+ANNOTATION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 ANNOTATION_CREATE_NAME_MIN_LENGTH = 1
 ANNOTATION_CREATE_NAME_MAX_LENGTH = 200
 
@@ -77,6 +80,17 @@ class Field(BaseModel):
 
 class Fields(BaseModel):
     items: List[Field]
+
+
+class FieldCreate(BaseModel):
+    name: constr(
+        regex=FIELD_CREATE_NAME_REGEX,
+        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
+        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
+    )
+    title: str
+    required: Optional[bool]
+    settings: TextFieldSettings
 
 
 class TextAnnotationSettings(BaseModel):

@@ -16,10 +16,18 @@ from typing import List
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
-from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
+from argilla.server.models import (
+    Annotation,
+    Dataset,
+    DatasetStatus,
+    Field,
+    Record,
+    Response,
+)
 from argilla.server.schemas.v1.datasets import (
     AnnotationCreate,
     DatasetCreate,
+    FieldCreate,
     RecordInclude,
     RecordsCreate,
 )
@@ -64,6 +72,9 @@ async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, datas
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
 
+    if _count_fields_by_dataset_id(db, dataset.id) == 0:
+        raise ValueError("Dataset cannot be published without fields")
+
     if _count_annotations_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without annotations")
 
@@ -86,6 +97,29 @@ def delete_dataset(db: Session, dataset: Dataset):
     db.commit()
 
     return dataset
+
+
+def get_field_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
+    return db.query(Field).filter_by(name=name, dataset_id=dataset_id).first()
+
+
+def create_field(db: Session, dataset: Dataset, field_create: FieldCreate):
+    if dataset.is_ready:
+        raise ValueError("Field cannot be created for a published dataset")
+
+    field = Field(
+        name=field_create.name,
+        title=field_create.title,
+        required=field_create.required,
+        settings=field_create.settings.dict(),
+        dataset_id=dataset.id,
+    )
+
+    db.add(field)
+    db.commit()
+    db.refresh(field)
+
+    return field
 
 
 def get_annotation_by_id(db: Session, annotation_id: UUID):
@@ -235,6 +269,10 @@ def delete_response(db: Session, response: Response):
     db.commit()
 
     return response
+
+
+def _count_fields_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Field.id)).filter_by(dataset_id=dataset_id).scalar()
 
 
 def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):
