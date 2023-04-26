@@ -4,7 +4,7 @@
       <TextAreaComponent
         v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
         :title="input.question"
-        :optionId="`${input.id}_0`"
+        :optionId="`${input.name}_0`"
         :placeholder="input.placeholder"
         :initialOptions="input.options[0]"
         :isRequired="input.is_required"
@@ -103,7 +103,6 @@ export default {
   },
   methods: {
     onChange({ newOptions, idComponent }) {
-      // const newOptionsWithId = [{ ...newOptions[0], id: `${idComponent}_0` }];
       this.inputs = this.inputs.map((input) => {
         if (input.id === idComponent) {
           input.options = newOptions;
