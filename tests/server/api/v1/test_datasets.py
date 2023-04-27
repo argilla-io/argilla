@@ -25,6 +25,7 @@ from argilla.server.models import (
     Record,
     Response,
     User,
+    Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
     FIELD_CREATE_NAME_MAX_LENGTH,
@@ -1522,11 +1523,34 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
 
 def test_delete_dataset(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
+    TextQuestionFactory.create(dataset=dataset)
 
     response = client.delete(f"/api/v1/datasets/{dataset.id}", headers=admin_auth_header)
 
     assert response.status_code == 200
     assert db.query(Dataset).count() == 0
+    assert db.query(Field).count() == 0
+    assert db.query(Question).count() == 0
+    assert db.query(Workspace).count() == 1
+
+
+def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
+    TextQuestionFactory.create(dataset=dataset)
+    record = RecordFactory.create(dataset=dataset)
+    ResponseFactory.create(record=record, user=admin)
+
+    response = client.delete(f"/api/v1/datasets/{dataset.id}", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert db.query(Dataset).count() == 0
+    assert db.query(Field).count() == 0
+    assert db.query(Question).count() == 0
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
+    assert db.query(Workspace).count() == 1
 
 
 def test_delete_dataset_without_authentication(client: TestClient, db: Session):

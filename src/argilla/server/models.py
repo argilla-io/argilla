@@ -155,9 +155,15 @@ class Dataset(Base):
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
-    fields: Mapped[List["Field"]] = relationship(back_populates="dataset", order_by=Field.inserted_at.asc())
-    questions: Mapped[List["Question"]] = relationship(back_populates="dataset", order_by=Question.inserted_at.asc())
-    records: Mapped[List["Record"]] = relationship(back_populates="dataset", order_by=Record.inserted_at.asc())
+    fields: Mapped[List["Field"]] = relationship(
+        back_populates="dataset", passive_deletes=True, order_by=Field.inserted_at.asc()
+    )
+    questions: Mapped[List["Question"]] = relationship(
+        back_populates="dataset", passive_deletes=True, order_by=Question.inserted_at.asc()
+    )
+    records: Mapped[List["Record"]] = relationship(
+        back_populates="dataset", passive_deletes=True, order_by=Record.inserted_at.asc()
+    )
 
     @property
     def is_draft(self):
