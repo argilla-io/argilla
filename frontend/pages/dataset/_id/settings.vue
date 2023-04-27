@@ -1,45 +1,40 @@
 <template>
-  <HeaderAndTopAndOneColumn v-if="!$fetchState.pending && !$fetchState.error">
+  <HeaderAndTopAndTwoColumns v-if="!$fetchState.error && !$fetchState.pending">
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
-        :key="datasetName && workspace"
+        v-if="datasetName && workspace"
         :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
       />
     </template>
-    <template v-slot:sidebar-right>
-      <SidebarFeedbackTaskComponent />
-    </template>
     <template v-slot:top>
-      <div class=""></div>
+      <TopDatasetSettingsFeedbackTaskContent :datasetId="datasetId" />
     </template>
-    <template v-slot:center>
-      <CenterFeedbackTaskContent :datasetId="datasetId" />
+    <template v-slot:left>
+      <LeftDatasetSettingsFeedbackTaskContent :datasetId="datasetId" />
     </template>
-    <template v-slot:footer>
-      <PaginationFeedbackTaskComponent :datasetId="datasetId" />
+    <template v-slot:right>
+      <div class="right-content"></div>
     </template>
-  </HeaderAndTopAndOneColumn>
+  </HeaderAndTopAndTwoColumns>
 </template>
 
 <script>
-import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
+import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
 import {
   upsertFeedbackDataset,
   getFeedbackDatasetNameById,
   getFeedbackDatasetWorkspaceNameById,
 } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
-import { Notification } from "@/models/Notifications";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
   ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
 });
-
 export default {
-  name: "DatasetPage",
+  name: "SettingsPage",
   components: {
-    HeaderAndTopAndOneColumn,
+    HeaderAndTopAndTwoColumns,
   },
   computed: {
     datasetId() {
@@ -60,10 +55,14 @@ export default {
         },
         {
           link: {
-            name: null,
-            params: { workspace: this.workspace, dataset: this.datasetName },
+            name: "dataset-id-annotation-mode",
+            params: { id: this.datasetId },
           },
           name: this.datasetName,
+        },
+        {
+          link: null,
+          name: "settings",
         },
       ];
     },
@@ -73,10 +72,9 @@ export default {
       // 1- fetch dataset info
       const dataset = await this.getDatasetInfo(this.datasetId);
 
-      // TODO - remove step 2 when workspace name will be include in the getDatasetInfo API call
       // 2- fetch workspace info
       const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
-      console.log(workspace);
+
       // 3- insert in ORM
       upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
     } catch (err) {

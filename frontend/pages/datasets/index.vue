@@ -313,10 +313,23 @@ export default {
       this.querySearch = event;
     },
     goToSetting(dataset) {
-      const { workspace, name } = dataset;
-      this.$router.push({
-        path: `/datasets/${workspace}/${name}/settings`,
-      });
+      const { id, workspace, name, task } = dataset;
+      switch (task) {
+        case "TokenClassification":
+        case "TextClassification":
+        case "Text2Text":
+          this.$router.push({
+            path: `/datasets/${workspace}/${name}/settings`,
+          });
+          break;
+        case "FeedbackTask":
+          this.$router.push({
+            path: `/dataset/${id}/settings`,
+          });
+          break;
+        default:
+          console.log(`The task ${task} is unknown`);
+      }
     },
     copyName(id) {
       this.copy(id);

@@ -9,6 +9,7 @@ class FeedbackDataset extends Model {
     return {
       id: this.uid(),
       name: this.string(""),
+      task: this.string("FeedbackTask"),
       guidelines: this.string(""),
       workspace_id: this.attr(null),
       workspace_name: this.attr(null),
