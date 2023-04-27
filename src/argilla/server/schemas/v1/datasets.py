@@ -114,6 +114,7 @@ class Question(BaseModel):
     id: UUID
     name: str
     title: str
+    description: Optional[str]
     required: bool
     settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
     inserted_at: datetime
@@ -134,6 +135,7 @@ class QuestionCreate(BaseModel):
         max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
     )
     title: str
+    description: Optional[str]
     required: Optional[bool]
     settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
 
