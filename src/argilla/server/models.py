@@ -119,6 +119,10 @@ class Response(Base):
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
 
+    @property
+    def is_submitted(self):
+        return self.status == ResponseStatus.submitted
+
     def __repr__(self):
         return (
             f"Response(id={str(self.id)!r}, record_id={str(self.record_id)!r}, user_id={str(self.user_id)!r}, "
