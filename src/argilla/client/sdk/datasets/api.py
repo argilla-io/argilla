@@ -24,7 +24,11 @@ from argilla.client.sdk.commons.models import (
     HTTPValidationError,
     Response,
 )
-from argilla.client.sdk.datasets.models import CopyDatasetRequest, Dataset
+from argilla.client.sdk.datasets.models import (
+    CopyDatasetRequest,
+    Dataset,
+    FeedbackDataset,
+)
 
 
 @lru_cache(maxsize=None)
