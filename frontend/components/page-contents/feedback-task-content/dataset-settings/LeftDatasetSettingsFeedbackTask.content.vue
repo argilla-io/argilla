@@ -18,6 +18,9 @@
     <div class="dataset-description-component left-content-item">
       <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
     </div>
+    <div class="delete-dataset-component" v-if="datasetId">
+      <DatasetDeleteFeedbackTaskComponent :datasetId="datasetId" />
+    </div>
   </div>
 </template>
 
