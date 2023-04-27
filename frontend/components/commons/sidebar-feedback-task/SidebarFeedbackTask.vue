@@ -76,6 +76,7 @@ $sidebar-button-size: 45px;
   min-height: calc(100vh - $topbarHeight);
   min-width: $sidebarMenuWidth;
   background: palette(grey, 700);
+  border-left: 1px solid $black-10;
   box-shadow: none;
   pointer-events: all;
   transition: box-shadow 0.2s ease-in-out 0.4s;

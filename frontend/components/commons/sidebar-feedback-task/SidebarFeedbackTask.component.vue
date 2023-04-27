@@ -91,6 +91,7 @@ export default {
     toggleMetrics(panelContent) {
       this.currentMetric =
         this.currentMetric !== panelContent ? panelContent : null;
+      $nuxt.$emit("on-sidebar-toggle-metrics", !!this.currentMetric);
     },
     closePanel() {
       this.currentMetric = null;
@@ -102,6 +103,7 @@ export default {
 <style lang="scss" scoped>
 .sidebar {
   &__container {
+    position: fixed;
     display: flex;
     right: 0;
     z-index: 1;
