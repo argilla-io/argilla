@@ -208,6 +208,9 @@ class Argilla:
         """
         return self._client.headers.get(WORKSPACE_HEADER_NAME)
 
+    def list_datasets(self) -> list:
+        return datasets_api.list_datasets(client=self._client)
+
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
 

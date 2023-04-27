@@ -108,6 +108,10 @@ def init(
     )
 
 
+def list_datasets():
+    return ArgillaSingleton.get().list_datasets()
+
+
 def log(
     records: Union[Record, Iterable[Record], Dataset],
     name: str,
@@ -213,8 +217,10 @@ async def log_async(
     """
 
     warnings.warn(
-        "`log_async` is deprecated and will be removed in next release. "
-        "Please, use `log` with `background=True` instead",
+        (
+            "`log_async` is deprecated and will be removed in next release. "
+            "Please, use `log` with `background=True` instead"
+        ),
         DeprecationWarning,
     )
 

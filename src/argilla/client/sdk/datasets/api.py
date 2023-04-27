@@ -90,6 +90,29 @@ def delete_dataset(
     return handle_response_error(response, dataset=name)
 
 
+def list_datasets(
+    client: AuthenticatedClient,
+) -> Response[list[FeedbackDataset]]:
+    url = "{}/api/v1/datasets".format(client.base_url)
+
+    response = httpx.get(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    if response.status_code == 200:
+        parsed_response = [FeedbackDataset(**dataset) for dataset in response.json()["items"]]
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)
+
+
 def _build_response(response: httpx.Response, name: str) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
     if response.status_code == 200:
         parsed_response = Dataset(**response.json())
