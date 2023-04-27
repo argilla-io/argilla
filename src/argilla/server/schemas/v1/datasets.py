@@ -21,15 +21,15 @@ from pydantic import BaseModel, conlist, constr
 from pydantic import Field as ModelField
 from typing_extensions import Literal
 
-from argilla.server.models import AnnotationType, DatasetStatus, FieldType
+from argilla.server.models import DatasetStatus, FieldType, QuestionType
 
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1
 FIELD_CREATE_NAME_MAX_LENGTH = 200
 
-ANNOTATION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
-ANNOTATION_CREATE_NAME_MIN_LENGTH = 1
-ANNOTATION_CREATE_NAME_MAX_LENGTH = 200
+QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+QUESTION_CREATE_NAME_MIN_LENGTH = 1
+QUESTION_CREATE_NAME_MAX_LENGTH = 200
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
@@ -93,29 +93,29 @@ class FieldCreate(BaseModel):
     settings: TextFieldSettings
 
 
-class TextAnnotationSettings(BaseModel):
-    type: Literal[AnnotationType.text]
+class TextQuestionSettings(BaseModel):
+    type: Literal[QuestionType.text]
 
 
-class RatingAnnotationSettingsOption(BaseModel):
+class RatingQuestionSettingsOption(BaseModel):
     value: int
 
 
-class RatingAnnotationSettings(BaseModel):
-    type: Literal[AnnotationType.rating]
+class RatingQuestionSettings(BaseModel):
+    type: Literal[QuestionType.rating]
     options: conlist(
-        item_type=RatingAnnotationSettingsOption,
+        item_type=RatingQuestionSettingsOption,
         min_items=RATING_OPTIONS_MIN_ITEMS,
         max_items=RATING_OPTIONS_MAX_ITEMS,
     )
 
 
-class Annotation(BaseModel):
+class Question(BaseModel):
     id: UUID
     name: str
     title: str
     required: bool
-    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = ModelField(..., discriminator="type")
+    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
     inserted_at: datetime
     updated_at: datetime
 
@@ -123,19 +123,19 @@ class Annotation(BaseModel):
         orm_mode = True
 
 
-class Annotations(BaseModel):
-    items: List[Annotation]
+class Questions(BaseModel):
+    items: List[Question]
 
 
-class AnnotationCreate(BaseModel):
+class QuestionCreate(BaseModel):
     name: constr(
-        regex=ANNOTATION_CREATE_NAME_REGEX,
-        min_length=ANNOTATION_CREATE_NAME_MIN_LENGTH,
-        max_length=ANNOTATION_CREATE_NAME_MAX_LENGTH,
+        regex=QUESTION_CREATE_NAME_REGEX,
+        min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
+        max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
     )
     title: str
     required: Optional[bool]
-    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = ModelField(..., discriminator="type")
+    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
 
 
 class Response(BaseModel):

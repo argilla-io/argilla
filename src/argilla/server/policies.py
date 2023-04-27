@@ -156,7 +156,7 @@ class DatasetPolicyV1:
         return actor.is_admin
 
     @classmethod
-    def create_annotation(cls, actor: User) -> bool:
+    def create_question(cls, actor: User) -> bool:
         return actor.is_admin
 
     @classmethod
@@ -178,7 +178,7 @@ class FieldPolicyV1:
         return actor.is_admin
 
 
-class AnnotationPolicyV1:
+class QuestionPolicyV1:
     @classmethod
     def delete(cls, actor: User) -> bool:
         return actor.is_admin

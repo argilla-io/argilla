@@ -35,7 +35,7 @@ https://user-images.githubusercontent.com/1107111/223220683-fbfa63da-367c-4cfa-b
 
 > 🆕 🔥 Deploy [Argilla on Spaces](https://huggingface.co/new-space?template=argilla/argilla-template-space)
 
-> 🆕 🔥 Since `1.2.0` Argilla supports vector search for finding the most similar records to a given one. This feature uses vector or semantic search combined with more traditional search (keyword and filter based). Learn more on this [deep-dive guide](https://docs.argilla.io/en/latest/guides/features/semantic-search.html)
+> 🆕 🔥 Since `1.2.0` Argilla supports vector search for finding the most similar records to a given one. This feature uses vector or semantic search combined with more traditional search (keyword and filter based). Learn more on this [deep-dive guide](https://docs.argilla.io/en/latest/guides/label_records_with_semanticsearch.html)
 
 
 <!-- https://user-images.githubusercontent.com/25269220/200496945-7efb11b8-19f3-4793-bb1d-d42132009cbb.mp4 -->
@@ -71,7 +71,7 @@ https://user-images.githubusercontent.com/1107111/223220683-fbfa63da-367c-4cfa-b
 ### Advanced NLP labeling
 
 - Programmatic labeling using [rules and weak supervision](https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html). Built-in label models (Snorkel, Flyingsquid)
-- [Bulk-labeling](https://docs.argilla.io/en/latest/reference/webapp/features.html#bulk-annotate) and [search-driven annotation](https://docs.argilla.io/en/latest/guides/features/queries.html)
+- [Bulk-labeling](https://docs.argilla.io/en/latest/reference/webapp/features.html#bulk-annotate) and [search-driven annotation](https://docs.argilla.io/en/latest/guides/query_datasets.html)
 - Iterate on training data with any [pre-trained model](https://docs.argilla.io/en/latest/tutorials/libraries/huggingface.html) or [library](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html)
 - Efficiently review and refine annotations in the UI and with Python
 - Use Argilla built-in metrics and methods for [finding label and data errors (e.g., cleanlab)](https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-cleanlab-explainability.html)
