@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from uuid import uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
@@ -23,12 +24,24 @@ from tests.factories import AnnotatorFactory, DatasetFactory, TextAnnotationFact
 
 
 def test_delete_annotation(client: TestClient, db: Session, admin_auth_header: dict):
-    annotation = TextAnnotationFactory.create()
+    annotation = TextAnnotationFactory.create(name="name", title="title")
 
     response = client.delete(f"/api/v1/annotations/{annotation.id}", headers=admin_auth_header)
 
     assert response.status_code == 200
     assert db.query(Annotation).count() == 0
+
+    response_body = response.json()
+    assert response_body == {
+        "id": str(annotation.id),
+        "name": "name",
+        "title": "title",
+        "required": False,
+        "settings": {"type": "text"},
+        "dataset_id": str(annotation.dataset_id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
 
 
 def test_delete_annotation_without_authentication(client: TestClient, db: Session):

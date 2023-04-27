@@ -19,35 +19,35 @@ from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
-from argilla.server.policies import AnnotationPolicyV1, authorize
-from argilla.server.schemas.v1.annotations import Annotation
+from argilla.server.policies import FieldPolicyV1, authorize
+from argilla.server.schemas.v1.fields import Field
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
-router = APIRouter(tags=["annotations"])
+router = APIRouter(tags=["fields"])
 
 
-@router.delete("/annotations/{annotation_id}", response_model=Annotation)
-def delete_annotation(
+@router.delete("/fields/{field_id}", response_model=Field)
+def delete_field(
     *,
     db: Session = Depends(get_db),
-    annotation_id: UUID,
+    field_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, AnnotationPolicyV1.delete)
+    authorize(current_user, FieldPolicyV1.delete)
 
-    annotation = datasets.get_annotation_by_id(db, annotation_id)
-    if not annotation:
+    field = datasets.get_field_by_id(db, field_id)
+    if not field:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Annotation with id `{annotation_id}` not found",
+            detail=f"Field with id `{field_id}` not found",
         )
 
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        datasets.delete_annotation(db, annotation)
+        datasets.delete_field(db, field)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
-    return annotation
+    return field
