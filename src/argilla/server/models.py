@@ -43,6 +43,10 @@ class QuestionType(str, Enum):
     rating = "rating"
 
 
+class ResponseStatus(str, Enum):
+    submitted = "submitted"
+
+
 class DatasetStatus(str, Enum):
     draft = "draft"
     ready = "ready"
@@ -105,6 +109,7 @@ class Response(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     values: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[ResponseStatus] = mapped_column(default=ResponseStatus.submitted)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
@@ -114,10 +119,14 @@ class Response(Base):
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
 
+    @property
+    def is_submitted(self):
+        return self.status == ResponseStatus.submitted
+
     def __repr__(self):
         return (
             f"Response(id={str(self.id)!r}, record_id={str(self.record_id)!r}, user_id={str(self.user_id)!r}, "
-            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+            f"status={self.status.value!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 
 
