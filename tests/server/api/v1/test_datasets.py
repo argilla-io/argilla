@@ -25,6 +25,7 @@ from argilla.server.models import (
     Record,
     Response,
     User,
+    Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
     FIELD_CREATE_NAME_MAX_LENGTH,
@@ -1524,13 +1525,56 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
-def test_delete_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
+    TextQuestionFactory.create(dataset=dataset)
+
+    other_dataset = DatasetFactory.create()
+    other_field = TextFieldFactory.create(dataset=other_dataset)
+    other_question = TextQuestionFactory.create(dataset=other_dataset)
+    other_record = RecordFactory.create(dataset=other_dataset)
+    other_response = ResponseFactory.create(record=other_record, user=admin)
 
     response = client.delete(f"/api/v1/datasets/{dataset.id}", headers=admin_auth_header)
 
     assert response.status_code == 200
-    assert db.query(Dataset).count() == 0
+    assert [dataset.id for dataset in db.query(Dataset).all()] == [other_dataset.id]
+    assert [field.id for field in db.query(Field).all()] == [other_field.id]
+    assert [question.id for question in db.query(Question).all()] == [other_question.id]
+    assert [record.id for record in db.query(Record).all()] == [other_record.id]
+    assert [response.id for response in db.query(Response).all()] == [other_response.id]
+    assert [workspace.id for workspace in db.query(Workspace).order_by(Workspace.inserted_at.asc()).all()] == [
+        dataset.workspace_id,
+        other_dataset.workspace_id,
+    ]
+
+
+def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
+    TextQuestionFactory.create(dataset=dataset)
+    record = RecordFactory.create(dataset=dataset)
+    ResponseFactory.create(record=record, user=admin)
+
+    other_dataset = DatasetFactory.create()
+    other_field = TextFieldFactory.create(dataset=other_dataset)
+    other_question = TextQuestionFactory.create(dataset=other_dataset)
+    other_record = RecordFactory.create(dataset=other_dataset)
+    other_response = ResponseFactory.create(record=other_record, user=admin)
+
+    response = client.delete(f"/api/v1/datasets/{dataset.id}", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert [dataset.id for dataset in db.query(Dataset).all()] == [other_dataset.id]
+    assert [field.id for field in db.query(Field).all()] == [other_field.id]
+    assert [question.id for question in db.query(Question).all()] == [other_question.id]
+    assert [record.id for record in db.query(Record).all()] == [other_record.id]
+    assert [response.id for response in db.query(Response).all()] == [other_response.id]
+    assert [workspace.id for workspace in db.query(Workspace).order_by(Workspace.inserted_at.asc()).all()] == [
+        dataset.workspace_id,
+        other_dataset.workspace_id,
+    ]
 
 
 def test_delete_dataset_without_authentication(client: TestClient, db: Session):
