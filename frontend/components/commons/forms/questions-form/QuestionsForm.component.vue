@@ -59,6 +59,7 @@
           <span v-text="'Reset'" />
         </BaseButton>
         <BaseButton
+          ref="submitButton"
           type="submit"
           class="primary small"
           :disabled="isFormUntouched || isError"
@@ -113,12 +114,6 @@ export default {
       isError: false,
     };
   },
-  created() {
-    this.COMPONENT_TYPE = COMPONENT_TYPE;
-    this.formOnErrorMessage =
-      "One of the required field is not answered. Please, answer before validate";
-    this.onReset();
-  },
   computed: {
     userId() {
       return this.$auth.user.id;
@@ -127,7 +122,33 @@ export default {
       return isEqual(this.initialInputs, this.inputs);
     },
   },
+  created() {
+    this.COMPONENT_TYPE = COMPONENT_TYPE;
+    this.formOnErrorMessage =
+      "One of the required field is not answered. Please, answer before validate";
+    this.onReset();
+
+    document.addEventListener("keydown", this.onPressKeyboardShortCut);
+  },
+  destroyed() {
+    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+  },
   methods: {
+    onPressKeyboardShortCut({ code }) {
+      switch (code) {
+        case "Enter": {
+          const elem = this.$refs.submitButton.$el;
+          elem.click();
+          break;
+        }
+        case "Delete": {
+          console.log("onDiscard");
+          // TODO - when DISCARD feature will be implemented, add a ref in the discard button force a click
+          break;
+        }
+        default:
+      }
+    },
     onChange({ newOptions, idComponent }) {
       this.inputs = this.inputs.map((input) => {
         if (input.id === idComponent) {
