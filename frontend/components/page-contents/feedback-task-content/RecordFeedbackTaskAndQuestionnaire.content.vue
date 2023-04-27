@@ -253,5 +253,6 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 2 * $base-space;
+  height: 100%;
 }
 </style>
