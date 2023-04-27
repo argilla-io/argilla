@@ -49,6 +49,7 @@ from argilla.server.apis.v0.models.text_classification import (
 )
 from argilla.server.contexts import accounts
 from argilla.server.security.model import WorkspaceCreate, WorkspaceUserCreate
+from httpx import ConnectError
 from sqlalchemy.orm import Session
 
 from tests.helpers import SecuredClient
@@ -295,10 +296,10 @@ def test_log_background_with_error(mocked_client: SecuredClient, monkeypatch: An
     def raise_http_error(*args, **kwargs):
         raise httpx.ConnectError("Mock error", request=None)
 
-    monkeypatch.setattr(httpx.AsyncClient, "post", raise_http_error)
+    monkeypatch.setattr(api.active_client().http_client, "post", raise_http_error)
 
     future = api.log(rg.TextClassificationRecord(text=sample_text), name=dataset_name, background=True)
-    with pytest.raises(BaseClientError):
+    with pytest.raises(ConnectError):
         try:
             future.result()
         finally:
