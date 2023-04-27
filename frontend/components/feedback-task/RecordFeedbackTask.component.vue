@@ -8,7 +8,7 @@
       <div class="title-area --body1">
         <span v-text="title" />
       </div>
-      <div class="content" v-text="text" />
+      <div class="content --body1" v-text="text" />
     </div>
   </div>
 </template>
@@ -29,24 +29,26 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: $base-space;
-  padding: 2 * $base-space 4 * $base-space 2 * $base-space 4 * $base-space;
-  background: #fff;
-  border: 1px solid #e6e6e6;
-  border-radius: 8px;
+  height: min-content;
+  gap: $base-space * 2;
+  padding: $base-space * 2;
+  background: palette(white);
+  border: 1px solid palette(grey, 600);
+  border-radius: $border-radius;
 }
 
 .item {
   display: flex;
   flex-direction: column;
+  gap: $base-space;
   padding: 2 * $base-space;
-  background: #f5f5f5;
-  border-radius: 8px;
+  background: $black-4;
+  border-radius: $border-radius;
   .title-area {
     display: flex;
     align-items: center;
     gap: $base-space;
-    color: rgba(0, 0, 0, 0.37);
+    color: $black-37;
   }
 }
 </style>
