@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""create annotations table
+"""create questions table
 
 Revision ID: 3a8e2f9b5dea
 Revises: b9099dc08489
@@ -32,7 +32,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "annotations",
+        "questions",
         sa.Column("id", sa.Uuid, primary_key=True),
         sa.Column("name", sa.String, nullable=False, index=True),
         sa.Column("title", sa.Text, nullable=False),
@@ -41,9 +41,9 @@ def upgrade() -> None:
         sa.Column("dataset_id", sa.Uuid, sa.ForeignKey("datasets.id", ondelete="CASCADE"), nullable=False, index=True),
         sa.Column("inserted_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
-        sa.UniqueConstraint("name", "dataset_id", name="annotation_name_dataset_id_uq"),
+        sa.UniqueConstraint("name", "dataset_id", name="question_name_dataset_id_uq"),
     )
 
 
 def downgrade() -> None:
-    op.drop_table("annotations")
+    op.drop_table("questions")

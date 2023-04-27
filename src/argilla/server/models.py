@@ -38,7 +38,7 @@ class FieldType(str, Enum):
     text = "text"
 
 
-class AnnotationType(str, Enum):
+class QuestionType(str, Enum):
     text = "text"
     rating = "rating"
 
@@ -76,8 +76,8 @@ class Field(Base):
         )
 
 
-class Annotation(Base):
-    __tablename__ = "annotations"
+class Question(Base):
+    __tablename__ = "questions"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str]
@@ -89,11 +89,11 @@ class Annotation(Base):
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
-    dataset: Mapped["Dataset"] = relationship(back_populates="annotations")
+    dataset: Mapped["Dataset"] = relationship(back_populates="questions")
 
     def __repr__(self):
         return (
-            f"Annotation(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
+            f"Question(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
             f"dataset_id={str(self.dataset_id)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
@@ -155,9 +155,7 @@ class Dataset(Base):
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
     fields: Mapped[List["Field"]] = relationship(back_populates="dataset", order_by=Field.inserted_at.asc())
-    annotations: Mapped[List["Annotation"]] = relationship(
-        back_populates="dataset", order_by=Annotation.inserted_at.asc()
-    )
+    questions: Mapped[List["Question"]] = relationship(back_populates="dataset", order_by=Question.inserted_at.asc())
     records: Mapped[List["Record"]] = relationship(back_populates="dataset", order_by=Record.inserted_at.asc())
 
     @property

@@ -23,15 +23,15 @@ from argilla.server.database import get_db
 from argilla.server.elasticsearch import ElasticSearchEngine, get_search_engine
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
-    Annotation,
-    AnnotationCreate,
-    Annotations,
     Dataset,
     DatasetCreate,
     Datasets,
     Field,
     FieldCreate,
     Fields,
+    Question,
+    QuestionCreate,
+    Questions,
     RecordInclude,
     Records,
     RecordsCreate,
@@ -84,8 +84,8 @@ def list_dataset_fields(
     return Fields(items=dataset.fields)
 
 
-@router.get("/datasets/{dataset_id}/annotations", response_model=Annotations)
-def list_dataset_annotations(
+@router.get("/datasets/{dataset_id}/questions", response_model=Questions)
+def list_dataset_questions(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
@@ -95,7 +95,7 @@ def list_dataset_annotations(
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    return Annotations(items=dataset.annotations)
+    return Questions(items=dataset.questions)
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -184,28 +184,28 @@ def create_dataset_field(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
-@router.post("/datasets/{dataset_id}/annotations", status_code=status.HTTP_201_CREATED, response_model=Annotation)
-def create_dataset_annotation(
+@router.post("/datasets/{dataset_id}/questions", status_code=status.HTTP_201_CREATED, response_model=Question)
+def create_dataset_question(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
-    annotation_create: AnnotationCreate,
+    question_create: QuestionCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.create_annotation)
+    authorize(current_user, DatasetPolicyV1.create_question)
 
     dataset = _get_dataset(db, dataset_id)
 
-    if datasets.get_annotation_by_name_and_dataset_id(db, annotation_create.name, dataset_id):
+    if datasets.get_question_by_name_and_dataset_id(db, question_create.name, dataset_id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Annotation with name `{annotation_create.name}` already exists for dataset with id `{dataset_id}`",
+            detail=f"Question with name `{question_create.name}` already exists for dataset with id `{dataset_id}`",
         )
 
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        return datasets.create_annotation(db, dataset, annotation_create)
+        return datasets.create_question(db, dataset, question_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 

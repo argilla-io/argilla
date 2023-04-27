@@ -45,9 +45,9 @@ def test_delete_field(client: TestClient, db: Session, admin_auth_header: dict):
 
 
 def test_delete_field_without_authentication(client: TestClient, db: Session):
-    annotation = TextFieldFactory.create()
+    field = TextFieldFactory.create()
 
-    response = client.delete(f"/api/v1/fields/{annotation.id}")
+    response = client.delete(f"/api/v1/fields/{field.id}")
 
     assert response.status_code == 401
     assert db.query(Field).count() == 1
@@ -73,7 +73,7 @@ def test_delete_field_belonging_to_published_dataset(client: TestClient, db: Ses
     assert db.query(Field).count() == 1
 
 
-def test_delete_field_with_nonexistent_annotation_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_field_with_nonexistent_field_id(client: TestClient, db: Session, admin_auth_header: dict):
     TextFieldFactory.create()
 
     response = client.delete(f"/api/v1/fields/{uuid4()}", headers=admin_auth_header)

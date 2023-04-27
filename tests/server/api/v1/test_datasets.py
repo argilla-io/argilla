@@ -18,17 +18,17 @@ from uuid import UUID, uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import (
-    Annotation,
     Dataset,
     DatasetStatus,
     Field,
+    Question,
     Record,
     Response,
     User,
 )
 from argilla.server.schemas.v1.datasets import (
-    ANNOTATION_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
+    QUESTION_CREATE_NAME_MAX_LENGTH,
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
@@ -41,15 +41,15 @@ from sqlalchemy.orm import Session
 
 from tests.conftest import is_running_elasticsearch
 from tests.factories import (
-    AnnotationFactory,
     AnnotatorFactory,
     DatasetFactory,
     FieldFactory,
-    RatingAnnotationFactory,
+    QuestionFactory,
+    RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
-    TextAnnotationFactory,
     TextFieldFactory,
+    TextQuestionFactory,
     WorkspaceFactory,
 )
 
@@ -194,35 +194,40 @@ def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClient, db:
     assert response.status_code == 404
 
 
-def test_list_dataset_annotations(client: TestClient, db: Session, admin_auth_header: dict):
+def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    text_annotation = TextAnnotationFactory.create(
-        name="text-annotation", title="Text Annotation", required=True, dataset=dataset
+    text_question = TextQuestionFactory.create(
+        name="text-question",
+        title="Text Question",
+        required=True,
+        dataset=dataset,
     )
-    rating_annotation = RatingAnnotationFactory.create(
-        name="rating-annotation", title="Rating Annotation", dataset=dataset
+    rating_question = RatingQuestionFactory.create(
+        name="rating-question",
+        title="Rating Question",
+        dataset=dataset,
     )
-    TextAnnotationFactory.create()
-    RatingAnnotationFactory.create()
+    TextQuestionFactory.create()
+    RatingQuestionFactory.create()
 
-    response = client.get(f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header)
+    response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header)
 
     assert response.status_code == 200
     assert response.json() == {
         "items": [
             {
-                "id": str(text_annotation.id),
-                "name": "text-annotation",
-                "title": "Text Annotation",
+                "id": str(text_question.id),
+                "name": "text-question",
+                "title": "Text Question",
                 "required": True,
                 "settings": {"type": "text"},
-                "inserted_at": text_annotation.inserted_at.isoformat(),
-                "updated_at": text_annotation.updated_at.isoformat(),
+                "inserted_at": text_question.inserted_at.isoformat(),
+                "updated_at": text_question.updated_at.isoformat(),
             },
             {
-                "id": str(rating_annotation.id),
-                "name": "rating-annotation",
-                "title": "Rating Annotation",
+                "id": str(rating_question.id),
+                "name": "rating-question",
+                "title": "Rating Question",
                 "required": False,
                 "settings": {
                     "type": "rating",
@@ -239,54 +244,50 @@ def test_list_dataset_annotations(client: TestClient, db: Session, admin_auth_he
                         {"value": 10},
                     ],
                 },
-                "inserted_at": rating_annotation.inserted_at.isoformat(),
-                "updated_at": rating_annotation.updated_at.isoformat(),
+                "inserted_at": rating_question.inserted_at.isoformat(),
+                "updated_at": rating_question.updated_at.isoformat(),
             },
         ]
     }
 
 
-def test_list_dataset_annotations_without_authentication(client: TestClient, db: Session):
+def test_list_dataset_questions_without_authentication(client: TestClient, db: Session):
     dataset = DatasetFactory.create()
 
-    response = client.get(f"/api/v1/datasets/{dataset.id}/annotations")
+    response = client.get(f"/api/v1/datasets/{dataset.id}/questions")
 
     assert response.status_code == 401
 
 
-def test_list_dataset_annotations_as_annotator(client: TestClient, db: Session):
+def test_list_dataset_questions_as_annotator(client: TestClient, db: Session):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
-    TextAnnotationFactory.create(name="text-annotation", dataset=dataset)
-    RatingAnnotationFactory.create(name="rating-annotation", dataset=dataset)
-    TextAnnotationFactory.create()
-    RatingAnnotationFactory.create()
+    TextQuestionFactory.create(name="text-question", dataset=dataset)
+    RatingQuestionFactory.create(name="rating-question", dataset=dataset)
+    TextQuestionFactory.create()
+    RatingQuestionFactory.create()
 
-    response = client.get(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers={API_KEY_HEADER_NAME: annotator.api_key}
-    )
+    response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 200
 
     response_body = response.json()
-    assert [annotation["name"] for annotation in response_body["items"]] == ["text-annotation", "rating-annotation"]
+    assert [question["name"] for question in response_body["items"]] == ["text-question", "rating-question"]
 
 
-def test_list_dataset_annotations_as_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_list_dataset_questions_as_annotator_from_different_workspace(client: TestClient, db: Session):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
-    response = client.get(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers={API_KEY_HEADER_NAME: annotator.api_key}
-    )
+    response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 403
 
 
-def test_list_dataset_annotations_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_list_dataset_questions_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
     DatasetFactory.create()
 
-    response = client.get(f"/api/v1/datasets/{uuid4()}/annotations", headers=admin_auth_header)
+    response = client.get(f"/api/v1/datasets/{uuid4()}/questions", headers=admin_auth_header)
 
     assert response.status_code == 404
 
@@ -911,23 +912,21 @@ def test_create_dataset_text_field(client: TestClient, db: Session, admin_auth_h
     }
 
 
-def test_create_dataset_annotation(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_dataset_question(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "name",
         "title": "title",
         "settings": {"type": "text"},
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 201
-    assert db.query(Annotation).count() == 1
+    assert db.query(Question).count() == 1
 
     response_body = response.json()
-    assert db.get(Annotation, UUID(response_body["id"]))
+    assert db.get(Question, UUID(response_body["id"]))
     assert response_body == {
         "id": str(UUID(response_body["id"])),
         "name": "name",
@@ -939,142 +938,130 @@ def test_create_dataset_annotation(client: TestClient, db: Session, admin_auth_h
     }
 
 
-def test_create_dataset_annotation_without_authentication(client: TestClient, db: Session):
+def test_create_dataset_questions_without_authentication(client: TestClient, db: Session):
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "name",
         "title": "title",
         "settings": {"type": "text"},
     }
 
-    response = client.post(f"/api/v1/datasets/{dataset.id}/annotations", json=annotation_json)
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", json=question_json)
 
     assert response.status_code == 401
-    assert db.query(Annotation).count() == 0
+    assert db.query(Question).count() == 0
 
 
-def test_create_dataset_annotation_as_annotator(client: TestClient, db: Session):
+def test_create_dataset_question_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create()
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "name",
         "title": "title",
         "settings": {"type": "text"},
     }
 
     response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations",
+        f"/api/v1/datasets/{dataset.id}/questions",
         headers={API_KEY_HEADER_NAME: annotator.api_key},
-        json=annotation_json,
+        json=question_json,
     )
 
     assert response.status_code == 403
-    assert db.query(Annotation).count() == 0
+    assert db.query(Question).count() == 0
 
 
 @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
-def test_create_dataset_annotation_with_invalid_name(
+def test_create_dataset_questions_with_invalid_name(
     client: TestClient, db: Session, admin_auth_header: dict, invalid_name: str
 ):
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": invalid_name,
         "title": "title",
         "settings": {"type": "text"},
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 422
-    assert db.query(Annotation).count() == 0
+    assert db.query(Question).count() == 0
 
 
-def test_create_dataset_annotation_with_invalid_max_length_name(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
+def test_create_dataset_question_with_invalid_max_length_name(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    annotation_json = {
-        "name": "a" * (ANNOTATION_CREATE_NAME_MAX_LENGTH + 1),
+    question_json = {
+        "name": "a" * (QUESTION_CREATE_NAME_MAX_LENGTH + 1),
         "title": "title",
         "settings": {"type": "text"},
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 422
-    assert db.query(Annotation).count() == 0
+    assert db.query(Question).count() == 0
 
 
-def test_create_dataset_annotation_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
-    annotation = AnnotationFactory.create(name="name")
-    annotation_json = {
+def test_create_dataset_question_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
+    question = QuestionFactory.create(name="name")
+    question_json = {
         "name": "name",
         "title": "title",
         "settings": {"type": "text"},
     }
 
     response = client.post(
-        f"/api/v1/datasets/{annotation.dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
+        f"/api/v1/datasets/{question.dataset.id}/questions", headers=admin_auth_header, json=question_json
     )
 
     assert response.status_code == 409
-    assert db.query(Annotation).count() == 1
+    assert db.query(Question).count() == 1
 
 
-def test_create_dataset_annotation_with_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_dataset_question_with_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    annotation_json = {
+    question_json = {
         "name": "name",
         "title": "title",
         "settings": {"type": "text"},
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 422
-    assert response.json() == {"detail": "Annotation cannot be created for a published dataset"}
-    assert db.query(Annotation).count() == 0
+    assert response.json() == {"detail": "Question cannot be created for a published dataset"}
+    assert db.query(Question).count() == 0
 
 
-def test_create_dataset_annotation_with_nonexistent_dataset_id(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
+def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
     DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "text",
         "title": "Text",
         "settings": {"type": "text"},
     }
 
-    response = client.post(f"/api/v1/datasets/{uuid4()}/annotations", headers=admin_auth_header, json=annotation_json)
+    response = client.post(f"/api/v1/datasets/{uuid4()}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 404
-    assert db.query(Annotation).count() == 0
+    assert db.query(Question).count() == 0
 
 
-def test_create_dataset_text_annotation(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_dataset_text_question(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "text",
         "title": "Text",
         "settings": {"type": "text", "discarded": "value"},
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 201
-    assert db.query(Annotation).count() == 1
+    assert db.query(Question).count() == 1
 
     response_body = response.json()
-    assert db.get(Annotation, UUID(response_body["id"]))
+    assert db.get(Question, UUID(response_body["id"]))
     assert response_body == {
         "id": str(UUID(response_body["id"])),
         "name": "text",
@@ -1086,9 +1073,9 @@ def test_create_dataset_text_annotation(client: TestClient, db: Session, admin_a
     }
 
 
-def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_dataset_rating_question(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "rating",
         "title": "Rating",
         "settings": {
@@ -1108,15 +1095,13 @@ def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin
         },
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 201
-    assert db.query(Annotation).count() == 1
+    assert db.query(Question).count() == 1
 
     response_body = response.json()
-    assert db.get(Annotation, UUID(response_body["id"]))
+    assert db.get(Question, UUID(response_body["id"]))
     assert response_body == {
         "id": str(UUID(response_body["id"])),
         "name": "rating",
@@ -1142,11 +1127,11 @@ def test_create_dataset_rating_annotation(client: TestClient, db: Session, admin
     }
 
 
-def test_create_dataset_rating_annotation_with_less_options_than_allowed(
+def test_create_dataset_rating_question_with_less_options_than_allowed(
     client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "rating",
         "title": "Rating",
         "settings": {
@@ -1155,19 +1140,17 @@ def test_create_dataset_rating_annotation_with_less_options_than_allowed(
         },
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 422
-    assert db.query(Annotation).count() == 0
+    assert db.query(Question).count() == 0
 
 
-def test_create_dataset_rating_annotation_with_more_options_than_allowed(
+def test_create_dataset_rating_question_with_more_options_than_allowed(
     client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "rating",
         "title": "Rating",
         "settings": {
@@ -1176,19 +1159,15 @@ def test_create_dataset_rating_annotation_with_more_options_than_allowed(
         },
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 422
-    assert db.query(Annotation).count() == 0
+    assert db.query(Question).count() == 0
 
 
-def test_create_dataset_rating_annotation_with_invalid_settings(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
+def test_create_dataset_rating_question_with_invalid_settings(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "rating",
         "title": "Rating",
         "settings": {
@@ -1197,19 +1176,17 @@ def test_create_dataset_rating_annotation_with_invalid_settings(
         },
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 422
-    assert db.query(Annotation).count() == 0
+    assert db.query(Question).count() == 0
 
 
-def test_create_dataset_rating_annotation_with_invalid_settings_options_values(
+def test_create_dataset_rating_question_with_invalid_settings_options_values(
     client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create()
-    annotation_json = {
+    question_json = {
         "name": "rating",
         "title": "Rating",
         "settings": {
@@ -1223,12 +1200,10 @@ def test_create_dataset_rating_annotation_with_invalid_settings_options_values(
         },
     }
 
-    response = client.post(
-        f"/api/v1/datasets/{dataset.id}/annotations", headers=admin_auth_header, json=annotation_json
-    )
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
     assert response.status_code == 422
-    assert db.query(Annotation).count() == 0
+    assert db.query(Question).count() == 0
 
 
 def test_create_dataset_records(client: TestClient, db: Session, admin_auth_header: dict):
@@ -1424,7 +1399,7 @@ def test_publish_dataset(
 ):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
-    RatingAnnotationFactory.create(dataset=dataset)
+    RatingQuestionFactory.create(dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
@@ -1446,7 +1421,7 @@ def test_publish_dataset_with_error_on_index_creation(
 ):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
-    AnnotationFactory.create(settings={"type": "invalid"}, dataset=dataset)
+    QuestionFactory.create(settings={"type": "invalid"}, dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
@@ -1458,7 +1433,7 @@ def test_publish_dataset_with_error_on_index_creation(
 
 def test_publish_dataset_without_authentication(client: TestClient, db: Session):
     dataset = DatasetFactory.create()
-    AnnotationFactory.create(dataset=dataset)
+    QuestionFactory.create(dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish")
 
@@ -1468,7 +1443,7 @@ def test_publish_dataset_without_authentication(client: TestClient, db: Session)
 
 def test_publish_dataset_as_annotator(client: TestClient, db: Session):
     dataset = DatasetFactory.create()
-    AnnotationFactory.create(dataset=dataset)
+    QuestionFactory.create(dataset=dataset)
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers={API_KEY_HEADER_NAME: annotator.api_key})
@@ -1479,7 +1454,7 @@ def test_publish_dataset_as_annotator(client: TestClient, db: Session):
 
 def test_publish_dataset_already_published(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    AnnotationFactory.create(dataset=dataset)
+    QuestionFactory.create(dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
@@ -1490,7 +1465,7 @@ def test_publish_dataset_already_published(client: TestClient, db: Session, admi
 
 def test_publish_dataset_without_fields(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    RatingAnnotationFactory.create(dataset=dataset)
+    RatingQuestionFactory.create(dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
@@ -1499,20 +1474,20 @@ def test_publish_dataset_without_fields(client: TestClient, db: Session, admin_a
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
-def test_publish_dataset_without_annotations(client: TestClient, db: Session, admin_auth_header: dict):
+def test_publish_dataset_without_questions(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
     assert response.status_code == 422
-    assert response.json() == {"detail": "Dataset cannot be published without annotations"}
+    assert response.json() == {"detail": "Dataset cannot be published without questions"}
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
 def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    AnnotationFactory.create(dataset=dataset)
+    QuestionFactory.create(dataset=dataset)
 
     response = client.put(f"/api/v1/datasets/{uuid4()}/publish", headers=admin_auth_header)
 

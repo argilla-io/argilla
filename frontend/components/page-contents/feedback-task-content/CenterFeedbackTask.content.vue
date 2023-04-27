@@ -139,7 +139,7 @@ export default {
     async getQuestions(datasetId) {
       try {
         const { data } = await this.$axios.get(
-          `/v1/datasets/${datasetId}/annotations`
+          `/v1/datasets/${datasetId}/questions`
         );
 
         return data;
