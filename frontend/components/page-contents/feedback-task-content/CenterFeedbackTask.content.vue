@@ -3,7 +3,7 @@
   <RecordFeedbackTaskAndQuestionnaireContent
     v-else-if="!$fetchState.pending"
     :datasetId="datasetId"
-    :recordOffset="currentPage - 1"
+    :recordOffset="recordOffset"
   />
 </template>
 
@@ -29,6 +29,7 @@ export default {
   data() {
     return {
       currentPage: 1,
+      recordOffset: 0,
     };
   },
   async fetch() {
@@ -47,6 +48,7 @@ export default {
     onBusEventCurrentPage() {
       this.$root.$on("current-page", (currentPage) => {
         this.currentPage = currentPage;
+        this.recordOffset = currentPage - 1;
       });
     },
     factoryQuestionsForOrm(initialQuestions) {

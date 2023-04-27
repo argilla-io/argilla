@@ -1,9 +1,14 @@
 <template>
-  <div class="wrapper" v-if="!$fetchState.pending && !$fetchState.error">
-    <RecordFeedbackTaskComponent v-if="record" :record="record" />
+  <div
+    class="wrapper"
+    v-if="recordId && !$fetchState.pending && !$fetchState.error"
+  >
+    <RecordFeedbackTaskComponent :record="record" />
     <QuestionsFormComponent
       :key="recordOffset"
       v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
+      :datasetId="datasetId"
+      :recordId="recordId"
       :initialInputs="questionsWithRecordAnswers"
     />
   </div>
@@ -62,6 +67,9 @@ export default {
         this.recordOffset
       );
     },
+    recordId() {
+      return this.record?.id;
+    },
     questions() {
       return getQuestionsByDatasetId(
         this.datasetId,
@@ -74,21 +82,23 @@ export default {
     },
     questionsWithRecordAnswers() {
       return this.questions?.map((question) => {
-        const correspondingResponseOptionsToQuestion =
+        const correspondingResponseToQuestion =
           this.recordResponsesFromCurrentUser.find(
             (recordResponse) => question.name === recordResponse.question_name
-          )?.options;
-        if (correspondingResponseOptionsToQuestion)
+          );
+        if (correspondingResponseToQuestion) {
           return {
             ...question,
-            options: correspondingResponseOptionsToQuestion,
+            response_id: correspondingResponseToQuestion.id,
+            options: correspondingResponseToQuestion.options,
           };
-        return { ...question };
+        }
+        return { ...question, response_id: null };
       });
     },
   },
   async fetch() {
-    await this.initRecordsInDatabase();
+    await this.initRecordsInDatabase(this.recordOffset);
   },
   watch: {
     recordOffset(newRecordOffset) {
@@ -97,20 +107,17 @@ export default {
           this.datasetId,
           newRecordOffset
         );
-      if (
-        newRecordOffset < this.totalRecords &&
-        isRecordWithRecordOffsetNotExists
-      ) {
-        this.initRecordsInDatabase();
+      if (isRecordWithRecordOffsetNotExists) {
+        this.initRecordsInDatabase(newRecordOffset);
       }
     },
   },
   methods: {
-    async initRecordsInDatabase() {
+    async initRecordsInDatabase(recordOffset) {
       // FETCH records from recordOffset + 5 next records
       const { items: records, total: totalRecords } = await this.getRecords(
         this.datasetId,
-        this.recordOffset,
+        recordOffset,
         5
       );
 

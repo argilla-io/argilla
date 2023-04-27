@@ -6,11 +6,14 @@
       :copy-button="copyButton"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
-    <DatasetSettingsIcon
-      v-if="workspace && datasetName"
-      :datasetId="[workspace, datasetName]"
-      @click-settings-icon="goToSettings()"
-    />
+    <NuxtLink
+      :to="{ name: 'dataset-id-settings', params: { id: this.datasetId } }"
+    >
+      <DatasetSettingsIconFeedbackTaskComponent
+        v-if="datasetId"
+        :datasetId="datasetId"
+      />
+    </NuxtLink>
     <user />
   </BaseTopbarBrand>
 </template>
@@ -19,11 +22,7 @@
 export default {
   name: "HeaderFeedbaskTaskComponent",
   props: {
-    datasetName: {
-      type: String,
-      required: true,
-    },
-    workspace: {
+    datasetId: {
       type: String,
       required: true,
     },
@@ -36,16 +35,6 @@ export default {
     return {
       copyButton: false,
     };
-  },
-  methods: {
-    goToSettings() {
-      const currentRoute = this.$route.path;
-      const newRoute = `/datasets/${this.workspace}/${this.datasetName}/settings`;
-      const allowNavigate = currentRoute !== newRoute;
-      if (this.datasetName && allowNavigate) {
-        this.$router.push(newRoute);
-      }
-    },
   },
 };
 </script>
