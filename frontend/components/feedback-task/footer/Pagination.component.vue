@@ -83,8 +83,26 @@ export default {
   },
   mounted() {
     this.currentPage = parseFloat(this.$route.query?._page) || 1;
+
+    document.addEventListener("keydown", this.onPressKeyboardShortCut);
+  },
+  destroyed() {
+    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
+    onPressKeyboardShortCut({ code }) {
+      switch (code) {
+        case "ArrowRight": {
+          this.onClickNext();
+          break;
+        }
+        case "ArrowLeft": {
+          this.onClickPrev();
+          break;
+        }
+        default:
+      }
+    },
     onClickPrev() {
       this.currentPage > 1 && this.currentPage--;
     },
