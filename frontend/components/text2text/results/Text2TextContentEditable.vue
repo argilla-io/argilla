@@ -13,7 +13,7 @@
           v-html="editableText"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
-          @keydown.shift.exact="looseFocus"
+          @keydown.shift.enter.exact="looseFocus"
           @keydown.arrow-right.stop=""
           @keydown.arrow-left.stop=""
           @keydown.delete.stop=""
@@ -74,7 +74,7 @@ export default {
     } else {
       this.editableText = this.text;
     }
-    
+
     this.textAreaWrapper = document.getElementById("contentId");
   },
   destroyed() {
