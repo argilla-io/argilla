@@ -62,13 +62,11 @@
           <span v-text="'Reset'" />
         </BaseButton>
 
-        <BaseButton ref="discardButton" type="discard" class="primary small">
-          <span v-text="'Discard'" />
-        </BaseButton>
-
         <BaseButton
           ref="submitButton"
           type="submit"
+          name="submitButton"
+          value="submitButton"
           class="primary small"
           :disabled="isFormUntouched || isError"
         >
@@ -247,10 +245,8 @@ export default {
     onEmitBusEventGoToRecordIndex(typeOfEvent) {
       switch (typeOfEvent) {
         case TYPE_OF_EVENT.ON_SUBMIT:
-          this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
-          break;
         case TYPE_OF_EVENT.ON_DISCARD:
-          this.$root.$emit("go-to-record-index", this.recordIdIndex - 1);
+          this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
           break;
         default:
       }
