@@ -11,7 +11,7 @@
       <SidebarFeedbackTaskComponent />
     </template>
     <template v-slot:top>
-      <div class=""></div>
+      <DatasetFiltersComponent :datasetId="datasetId" />
     </template>
     <template v-slot:center>
       <CenterFeedbackTaskContent :datasetId="datasetId" />
