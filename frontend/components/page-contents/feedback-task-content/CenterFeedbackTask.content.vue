@@ -60,15 +60,17 @@ export default {
     },
     onBusEventRecordIndexToGo() {
       this.$root.$on("go-to-record-index", (recordIndexToGo) => {
-        // NOTE - recordIndex start at 1 / page start at 0
-        const pageToGo = recordIndexToGo + 1;
+        if (recordIndexToGo >= 0) {
+          // NOTE - recordIndex start at 1 / page start at 0
+          const pageToGo = recordIndexToGo + 1;
 
-        if (pageToGo < this.totalRecords) {
-          this.recordOffset = recordIndexToGo;
-          this.currentPage = pageToGo;
-        }
-        if (recordIndexToGo < this.totalRecords) {
-          this.updatePageQueryParam(pageToGo);
+          if (pageToGo < this.totalRecords) {
+            this.recordOffset = recordIndexToGo;
+            this.currentPage = pageToGo;
+          }
+          if (recordIndexToGo < this.totalRecords) {
+            this.updatePageQueryParam(pageToGo);
+          }
         }
       });
     },
