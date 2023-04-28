@@ -49,11 +49,12 @@ export default {
         id: "searchText",
         name: "Search",
         componentType: "searchBar",
+        order: 0,
         placeholder: "Introduce your query",
       },
     };
-    const filterEntries = Object.entries(this.filters);
-    const formattedFilters = this.factoryFiltersForOrm(filterEntries);
+    const filterValues = Object.values(this.filters);
+    const formattedFilters = this.factoryFiltersForOrm(filterValues);
     upsertDatasetFilters(formattedFilters);
   },
   methods: {
@@ -66,16 +67,23 @@ export default {
     getFilterById(filterId) {
       return this.filtersFromVuex.find((filter) => filter.id === filterId);
     },
-    factoryFiltersForOrm(filtersEntries) {
-      return filtersEntries.map(
-        ([
-          _,
-          { id, name, componentType, value, options, placeholder, groupId },
-        ]) => {
+    factoryFiltersForOrm(filterValues) {
+      return filterValues.map(
+        ({
+          id,
+          name,
+          componentType,
+          value,
+          order,
+          options,
+          placeholder,
+          groupId,
+        }) => {
           return {
             dataset_id: this.datasetId,
             id,
             name,
+            order,
             component_type: componentType,
             value,
             options,
