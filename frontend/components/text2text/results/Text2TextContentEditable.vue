@@ -4,6 +4,7 @@
       <transition appear name="fade">
         <p
           ref="text"
+          id="contentId"
           class="content__text"
           :class="textIsEdited ? '--edited-text' : null"
           :contenteditable="annotationEnabled"
@@ -12,7 +13,13 @@
           v-html="editableText"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
-        ></p>
+          @keydown.shift.enter.exact="looseFocus"
+          @keydown.shift.delete.exact="looseFocus"
+          @keydown.arrow-right.stop=""
+          @keydown.arrow-left.stop=""
+          @keydown.delete.exact.stop=""
+          @keydown.enter.exact.stop=""
+        />
       </transition>
       <span v-if="isShortcutToSave"><strong>shift Enter</strong> to save</span>
     </div>
@@ -62,11 +69,14 @@ export default {
     window.addEventListener("keydown", this.keyDown);
     window.addEventListener("keyup", this.keyUp);
     window.addEventListener("paste", this.pastePlainText);
+
     if (this.defaultText) {
       this.editableText = this.defaultText;
     } else {
       this.editableText = this.text;
     }
+
+    this.textAreaWrapper = document.getElementById("contentId");
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
@@ -74,6 +84,9 @@ export default {
     window.removeEventListener("paste", this.pastePlainText);
   },
   methods: {
+    looseFocus() {
+      this.textAreaWrapper.blur();
+    },
     onInputText(event) {
       this.$emit("change-text", event.target.innerText);
     },
