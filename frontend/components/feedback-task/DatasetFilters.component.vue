@@ -69,7 +69,7 @@ export default {
     factoryFiltersForOrm(filtersEntries) {
       return filtersEntries.map(
         ([
-          fileName,
+          _,
           { id, name, componentType, value, options, placeholder, groupId },
         ]) => {
           return {
