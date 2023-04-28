@@ -9,6 +9,7 @@
 
 <script>
 import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
+import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import {
   COMPONENT_TYPE,
   CORRESPONDING_COMPONENT_TYPE_FROM_API,
@@ -45,6 +46,11 @@ export default {
     this.onBusEventCurrentPage();
     this.onBusEventRecordIndexToGo();
   },
+  computed: {
+    totalRecords() {
+      return getTotalRecordByDatasetId(this.datasetId);
+    },
+  },
   methods: {
     onBusEventCurrentPage() {
       this.$root.$on("current-page", (currentPage) => {
@@ -56,8 +62,14 @@ export default {
       this.$root.$on("go-to-record-index", (recordIndexToGo) => {
         // NOTE - recordIndex start at 1 / page start at 0
         const pageToGo = recordIndexToGo + 1;
-        this.$root.$emit("current-page", pageToGo);
-        this.updatePageQueryParam(pageToGo);
+
+        if (pageToGo < this.totalRecords) {
+          this.recordOffset = recordIndexToGo;
+          this.currentPage = pageToGo;
+        }
+        if (recordIndexToGo < this.totalRecords) {
+          this.updatePageQueryParam(pageToGo);
+        }
       });
     },
     updatePageQueryParam(page) {
