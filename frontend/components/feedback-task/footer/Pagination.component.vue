@@ -26,7 +26,7 @@
       <BaseButton
         class="pagination__button"
         @click="onClickNext"
-        :disabled="currentPage === 1"
+        :disabled="currentPage >= totalPages"
         >{{ nextButtonMessage
         }}<svgicon name="chevron-right" width="8" height="8"
       /></BaseButton>
