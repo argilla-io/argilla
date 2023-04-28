@@ -43,6 +43,10 @@ class QuestionType(str, Enum):
     rating = "rating"
 
 
+class ResponseStatus(str, Enum):
+    submitted = "submitted"
+
+
 class DatasetStatus(str, Enum):
     draft = "draft"
     ready = "ready"
@@ -82,6 +86,7 @@ class Question(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str]
     title: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text)
     required: Mapped[bool] = mapped_column(default=False)
     settings: Mapped[dict] = mapped_column(JSON, default={})
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
@@ -104,6 +109,7 @@ class Response(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     values: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[ResponseStatus] = mapped_column(default=ResponseStatus.submitted)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
@@ -113,10 +119,14 @@ class Response(Base):
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
 
+    @property
+    def is_submitted(self):
+        return self.status == ResponseStatus.submitted
+
     def __repr__(self):
         return (
             f"Response(id={str(self.id)!r}, record_id={str(self.record_id)!r}, user_id={str(self.user_id)!r}, "
-            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+            f"status={self.status.value!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 
 
@@ -154,9 +164,15 @@ class Dataset(Base):
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
-    fields: Mapped[List["Field"]] = relationship(back_populates="dataset", order_by=Field.inserted_at.asc())
-    questions: Mapped[List["Question"]] = relationship(back_populates="dataset", order_by=Question.inserted_at.asc())
-    records: Mapped[List["Record"]] = relationship(back_populates="dataset", order_by=Record.inserted_at.asc())
+    fields: Mapped[List["Field"]] = relationship(
+        back_populates="dataset", passive_deletes=True, order_by=Field.inserted_at.asc()
+    )
+    questions: Mapped[List["Question"]] = relationship(
+        back_populates="dataset", passive_deletes=True, order_by=Question.inserted_at.asc()
+    )
+    records: Mapped[List["Record"]] = relationship(
+        back_populates="dataset", passive_deletes=True, order_by=Record.inserted_at.asc()
+    )
 
     @property
     def is_draft(self):

@@ -21,7 +21,7 @@ from pydantic import BaseModel, conlist, constr
 from pydantic import Field as ModelField
 from typing_extensions import Literal
 
-from argilla.server.models import DatasetStatus, FieldType, QuestionType
+from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
 
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1
@@ -114,6 +114,7 @@ class Question(BaseModel):
     id: UUID
     name: str
     title: str
+    description: Optional[str]
     required: bool
     settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
     inserted_at: datetime
@@ -134,6 +135,7 @@ class QuestionCreate(BaseModel):
         max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
     )
     title: str
+    description: Optional[str]
     required: Optional[bool]
     settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
 
@@ -141,6 +143,7 @@ class QuestionCreate(BaseModel):
 class Response(BaseModel):
     id: UUID
     values: Dict[str, Any]
+    status: ResponseStatus
     user_id: UUID
     inserted_at: datetime
     updated_at: datetime

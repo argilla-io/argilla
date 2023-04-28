@@ -151,6 +151,7 @@ def create_question(db: Session, dataset: Dataset, question_create: QuestionCrea
     question = Question(
         name=question_create.name,
         title=question_create.title,
+        description=question_create.description,
         required=question_create.required,
         settings=question_create.settings.dict(),
         dataset_id=dataset.id,

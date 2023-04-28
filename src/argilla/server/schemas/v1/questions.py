@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Union
+from typing import Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, conlist
@@ -39,6 +39,7 @@ class Question(BaseModel):
     id: UUID
     name: str
     title: str
+    description: Optional[str]
     required: bool
     settings: Union[TextQuestionSettings, RatingQuestionSettings] = Field(..., discriminator="type")
     dataset_id: UUID
