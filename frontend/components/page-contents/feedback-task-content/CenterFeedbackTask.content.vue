@@ -43,12 +43,27 @@ export default {
     await upsertDatasetQuestions(formattedQuestionsForOrm);
 
     this.onBusEventCurrentPage();
+    this.onBusEventRecordIndexToGo();
   },
   methods: {
     onBusEventCurrentPage() {
       this.$root.$on("current-page", (currentPage) => {
         this.currentPage = currentPage;
         this.recordOffset = currentPage - 1;
+      });
+    },
+    onBusEventRecordIndexToGo() {
+      this.$root.$on("go-to-record-index", (recordIndexToGo) => {
+        // NOTE - recordIndex start at 1 / page start at 0
+        const pageToGo = recordIndexToGo + 1;
+        this.$root.$emit("current-page", pageToGo);
+        this.updatePageQueryParam(pageToGo);
+      });
+    },
+    updatePageQueryParam(page) {
+      this.$router.push({
+        path: this.$route.path,
+        query: { _page: page },
       });
     },
     factoryQuestionsForOrm(initialQuestions) {
@@ -152,6 +167,7 @@ export default {
   },
   destroyed() {
     this.$root.$off("current-page");
+    this.$root.$off("go-to-record-index");
   },
 };
 </script>
