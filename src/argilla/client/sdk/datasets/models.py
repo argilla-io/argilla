@@ -48,11 +48,13 @@ class Dataset(BaseDatasetModel):
     last_updated: datetime = None
 
 
-class FeedbackDataset(Dataset):
-    task: TaskType = None
-    status: str = None
+class FeedbackDataset(BaseDatasetModel):
+    id: str
     guidelines: str = None
-    description: str = None
+    status: str = None
+    workspace_id: str = None
+    created_at: datetime = None
+    last_updated: datetime = None
 
 
 class CopyDatasetRequest(BaseDatasetModel):
