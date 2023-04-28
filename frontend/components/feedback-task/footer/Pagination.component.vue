@@ -19,17 +19,19 @@
           class="pagination__button"
           @click="onClickNumber(page)"
           :disabled="isCurrentPage(page)"
-          >{{ page }}</BaseButton
         >
+          {{ page }}
+        </BaseButton>
       </div>
 
       <BaseButton
         class="pagination__button"
         @click="onClickNext"
         :disabled="currentPage >= totalPages"
-        >{{ nextButtonMessage
-        }}<svgicon name="chevron-right" width="8" height="8"
-      /></BaseButton>
+      >
+        {{ nextButtonMessage }}
+        <svgicon name="chevron-right" width="8" height="8" />
+      </BaseButton>
     </div>
 
     <div class="total-records-area">
@@ -65,10 +67,23 @@ export default {
   },
   data() {
     return {
-      currentPage: 1,
+      localCurrentPage: 1,
     };
   },
   computed: {
+    currentPage: {
+      get() {
+        return this.localCurrentPage;
+      },
+      set(newCurrentPage) {
+        this.localCurrentPage = +newCurrentPage;
+      },
+    },
+    currentPageFromUrl() {
+      const currentPageFromUrl = parseFloat(this.$route.query?._page) || 1;
+      this.currentPage = currentPageFromUrl;
+      return currentPageFromUrl;
+    },
     totalPages() {
       return Math.ceil(this.totalItems / this.numberOfItemsByPage);
     },
@@ -120,7 +135,7 @@ export default {
       this.$emit("on-paginate", this.currentPage);
     },
     isCurrentPage(page) {
-      return +this.currentPage === +page;
+      return this.currentPage === page;
     },
     updateUrlParams(currentPage) {
       this.$router.push({
