@@ -14,13 +14,21 @@
 
 import typer
 
-from .migrate import migrate_db
+app = typer.Typer(invoke_without_command=True)
 
-app = typer.Typer(help="Holds CLI commands for migrations and database management.", no_args_is_help=True)
 
-app.command(name="migrate", help="Run database migrations to align user config with pre-defined server settings.")(
-    migrate_db
-)
+# using callback to ensure it is used as sole command
+@app.callback(help="Starts the Argilla FastAPI server.", invoke_without_command=True)
+def server(port: int = 6900, host: str = "0.0.0.0", access_log: bool = True):
+    import uvicorn
+
+    uvicorn.run(
+        "argilla:app",
+        port=port,
+        host=host,
+        access_log=access_log,
+    )
+
 
 if __name__ == "__main__":
     app()

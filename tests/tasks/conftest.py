@@ -12,15 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
+import pytest
+from argilla.__main__ import cli_app
+from typer.testing import CliRunner
 
-from .migrate import migrate_db
 
-app = typer.Typer(help="Holds CLI commands for migrations and database management.", no_args_is_help=True)
+@pytest.fixture(scope="session")
+def cli_runner():
+    return CliRunner()
 
-app.command(name="migrate", help="Run database migrations to align user config with pre-defined server settings.")(
-    migrate_db
-)
 
-if __name__ == "__main__":
-    app()
+@pytest.fixture(scope="session")
+def cli():
+    return cli_app
