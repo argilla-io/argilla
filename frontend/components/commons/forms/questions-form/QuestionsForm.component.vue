@@ -1,49 +1,52 @@
 <template>
-  <form @submit.prevent="onSubmit" :key="renderForm">
-    <div class="form-group" v-for="input in inputs" :key="input.id">
-      <TextAreaComponent
-        v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
-        :title="input.question"
-        :optionId="`${input.name}_0`"
-        :placeholder="input.placeholder"
-        :initialOptions="input.options[0]"
-        :isRequired="input.is_required"
-        :isIcon="!!input.tooltip_message"
-        :tooltipMessage="input.tooltip_message"
-        :colorHighlight="colorAsterisk"
-        @on-change-text-area="
-          onChange({ newOptions: $event, idComponent: input.id })
-        "
-        @on-error="onError"
-      />
+  <form class="questions-form" @submit.prevent="onSubmit" :key="renderForm">
+    <div class="questions-form__content">
+      <p class="questions-form__title --body1 --medium">Fill the fields</p>
+      <div class="form-group" v-for="input in inputs" :key="input.id">
+        <TextAreaComponent
+          v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
+          :title="input.question"
+          :optionId="`${input.name}_0`"
+          :placeholder="input.placeholder"
+          :initialOptions="input.options[0]"
+          :isRequired="input.is_required"
+          :isIcon="!!input.tooltip_message"
+          :tooltipMessage="input.tooltip_message"
+          :colorHighlight="colorAsterisk"
+          @on-change-text-area="
+            onChange({ newOptions: $event, idComponent: input.id })
+          "
+          @on-error="onError"
+        />
 
-      <SingleLabelComponent
-        v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
-        :title="input.question"
-        :initialOptions="input.options"
-        :isRequired="input.is_required"
-        :isIcon="!!input.tooltip_message"
-        :tooltipMessage="input.tooltip_message"
-        :colorHighlight="colorAsterisk"
-        @on-change-single-label="
-          onChange({ newOptions: $event, idComponent: input.id })
-        "
-        @on-error="onError"
-      />
+        <SingleLabelComponent
+          v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
+          :title="input.question"
+          :initialOptions="input.options"
+          :isRequired="input.is_required"
+          :isIcon="!!input.tooltip_message"
+          :tooltipMessage="input.tooltip_message"
+          :colorHighlight="colorAsterisk"
+          @on-change-single-label="
+            onChange({ newOptions: $event, idComponent: input.id })
+          "
+          @on-error="onError"
+        />
 
-      <RatingComponent
-        v-if="input.component_type === COMPONENT_TYPE.RATING"
-        :title="input.question"
-        :initialOptions="input.options"
-        :isRequired="input.is_required"
-        :isIcon="!!input.tooltip_message"
-        :tooltipMessage="input.tooltip_message"
-        :colorHighlight="colorAsterisk"
-        @on-change-rating="
-          onChange({ newOptions: $event, idComponent: input.id })
-        "
-        @on-error="onError"
-      />
+        <RatingComponent
+          v-if="input.component_type === COMPONENT_TYPE.RATING"
+          :title="input.question"
+          :initialOptions="input.options"
+          :isRequired="input.is_required"
+          :isIcon="!!input.tooltip_message"
+          :tooltipMessage="input.tooltip_message"
+          :colorHighlight="colorAsterisk"
+          @on-change-rating="
+            onChange({ newOptions: $event, idComponent: input.id })
+          "
+          @on-error="onError"
+        />
+      </div>
     </div>
     <div class="footer-form">
       <div class="error-message" v-if="isError">
@@ -351,15 +354,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-form {
+.questions-form {
   display: flex;
   flex-direction: column;
-  flex-basis: 40em;
-  height: fit-content;
-  gap: $base-space * 4;
-  border: 2px solid #4c4ea3;
-  border-radius: 8px;
-  padding: $base-space * 4;
+  flex-basis: 37em;
+  gap: $base-space * 3;
+  max-width: 100%;
+  height: 100%;
+  justify-content: space-between;
+  padding: $base-space * 3;
+  border: 1px solid $primary-color;
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+  &__title {
+    margin: 0;
+    color: $black-87;
+  }
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space * 2;
+    overflow: auto;
+  }
 }
 
 .footer-form {
@@ -372,7 +388,6 @@ form {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: $base-space * 8;
 }
 
 .error-message {

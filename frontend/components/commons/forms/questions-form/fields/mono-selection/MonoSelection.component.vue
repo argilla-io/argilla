@@ -131,10 +131,10 @@ export default {
     display: flex;
     .inputs-area {
       display: inline-flex;
+      gap: $base-space;
       border-radius: 5em;
       border: 2px solid var(--border-color);
       background: var(--background-color);
-      gap: $base-space;
     }
   }
 }
@@ -144,16 +144,19 @@ export default {
   width: 100%;
   border-radius: 50em;
   height: 40px;
-  background: #f0f0fe;
+  background: palette(purple, 800);
   outline: none;
   padding-left: 16px;
   padding-right: 16px;
   line-height: 40px;
   font-weight: 500;
   overflow: hidden;
-  color: #4c4ea3;
+  color: palette(purple, 200);
   box-shadow: 0;
   transition: all 0.2s ease-in-out;
+  &:not(.label-active):hover {
+    background: darken(palette(purple, 800), 8%);
+  }
 }
 
 input {
