@@ -39,9 +39,7 @@ export default {
     });
   },
   beforeDestroy() {
-    this.$nuxt.$on("on-sidebar-toggle-metrics", () => {
-      this.visibleMetrics = false;
-    });
+    this.$nuxt.$off("on-sidebar-toggle-metrics");
   },
 };
 </script>
