@@ -27,10 +27,20 @@ export default {
       type: String,
       required: true,
     },
+    orderBy: {
+      type: Object,
+      default: () => {
+        return { orderFilterBy: "order", ascendent: true };
+      },
+    },
   },
   computed: {
     filtersFromVuex() {
-      return getFiltersByDatasetId(this.datasetId);
+      return getFiltersByDatasetId(
+        this.datasetId,
+        this.orderBy?.orderFilterBy,
+        this.orderBy?.ascendent
+      );
     },
   },
   created() {
@@ -59,6 +69,7 @@ export default {
     factoryFiltersForOrm(filtersEntries) {
       return filtersEntries.map(
         ([
+          fileName,
           { id, name, componentType, value, options, placeholder, groupId },
         ]) => {
           return {

@@ -6,8 +6,16 @@ const upsertDatasetFilters = (globalFilters) => {
 };
 
 // GET
-const getFiltersByDatasetId = (datasetId) => {
-  return DatasetFilterModel.query().where("dataset_id", datasetId).get();
+const getFiltersByDatasetId = (
+  datasetId,
+  orderBy = "order",
+  ascendent = true
+) => {
+  const direction = ascendent ? "asc" : "desc";
+  return DatasetFilterModel.query()
+    .where("dataset_id", datasetId)
+    .orderBy(orderBy, direction)
+    .get();
 };
 
 export { upsertDatasetFilters, getFiltersByDatasetId };
