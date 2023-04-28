@@ -61,6 +61,11 @@
         >
           <span v-text="'Reset'" />
         </BaseButton>
+
+        <BaseButton ref="discardButton" type="discard" class="primary small">
+          <span v-text="'Discard'" />
+        </BaseButton>
+
         <BaseButton
           ref="submitButton"
           type="submit"
@@ -93,6 +98,10 @@ const STATUS_RESPONSE = Object.freeze({
   UPDATE: "UPDATE",
   CREATE: "CREATE",
   UNKNOWN: "UNKNOWN",
+});
+const TYPE_OF_EVENT = Object.freeze({
+  ON_SUBMIT: "ON_SUBMIT",
+  ON_DISCARD: "ON_DISCARD",
 });
 export default {
   name: "QuestionsFormComponent",
@@ -165,6 +174,10 @@ export default {
         return input;
       });
     },
+    async onDiscard() {
+      console.log("discard");
+      this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+    },
     async onSubmit() {
       const createOrUpdateResponse = isResponsesByUserIdExists(
         this.userId,
@@ -184,7 +197,6 @@ export default {
         this.isError = true;
         return;
       }
-
       let formattedSelectionOptionObject = {};
       this.inputs.forEach((input) => {
         // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
@@ -227,9 +239,20 @@ export default {
       try {
         await this.createOrUpdateRecordResponses(formattedRequestsToSend);
 
-        this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
+        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
       } catch (err) {
         console.log(err);
+      }
+    },
+    onEmitBusEventGoToRecordIndex(typeOfEvent) {
+      switch (typeOfEvent) {
+        case TYPE_OF_EVENT.ON_SUBMIT:
+          this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
+          break;
+        case TYPE_OF_EVENT.ON_DISCARD:
+          this.$root.$emit("go-to-record-index", this.recordIdIndex - 1);
+          break;
+        default:
       }
     },
     onReset() {
