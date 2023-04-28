@@ -228,7 +228,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self._nlp.to_disk(output_dir)
 
     def predict(
-        self, text: Union[List[str], str], as_argilla_records: bool = True
+        self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs
     ) -> Union[Dict[str, Any], List[Dict[str, Any]], BaseModel, List[BaseModel]]:
         """Predict the labels for the given text using the trained pipeline.
 
@@ -252,7 +252,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             str_input = True
 
         formatted_prediction = []
-        docs = self._nlp.pipe(text)
+        docs = self._nlp.pipe(text, **kwargs)
         if as_argilla_records:
             for doc in docs:
                 if "ner" in self._pipeline:

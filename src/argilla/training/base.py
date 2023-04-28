@@ -95,7 +95,6 @@ class ArgillaTrainer(object):
             self._rg_dataset_type = rg.DatasetForTokenClassification
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForText2Text):
             self._rg_dataset_type = rg.DatasetForText2Text
-            raise NotImplementedError("`argilla.training` does not support `Text2Text` tasks yet.")
         else:
             raise NotImplementedError(f"Dataset type {type(self.rg_dataset_snapshot)} is not supported.")
 
@@ -157,6 +156,10 @@ class ArgillaTrainer(object):
         elif framework is Framework.OPENAI:
             from argilla.training.openai import ArgillaOpenAITrainer
 
+            if self._rg_dataset_type is rg.DatasetForTokenClassification:
+                raise NotImplementedError(f"{Framework.OPENAI} does not support `TokenClassification` tasks.")
+            elif self._rg_dataset_type is rg.DatasetForTextClassification and self._multi_label:
+                raise NotImplementedError(f"{Framework.OPENAI} does not support multi-label TextClassification tasks.")
             self._trainer = ArgillaOpenAITrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
@@ -216,7 +219,7 @@ _________________________________________________________________
         self._trainer.update_config(*args, **kwargs)
         self._logger.info(self)
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
         `predict` takes a string or list of strings and returns a list of dictionaries, each dictionary
         containing the text, the predicted label, and the confidence score.
@@ -228,7 +231,7 @@ _________________________________________________________________
         Returns:
           A list of predictions or Argilla records.
         """
-        return self._trainer.predict(text, as_argilla_records)
+        return self._trainer.predict(text=text, as_argilla_records=as_argilla_records, **kwargs)
 
     def train(self, output_dir: str = None):
         """
@@ -282,7 +285,7 @@ class ArgillaTrainerSkeleton(ABC):
         pass
 
     @abstractmethod
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         pass
 
     @abstractmethod

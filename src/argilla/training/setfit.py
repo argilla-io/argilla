@@ -112,7 +112,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
 
         self._setfit_model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
         The function takes in a list of strings and returns a list of predictions
 
@@ -133,7 +133,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             text = [text]
             str_input = True
 
-        predictions = self._setfit_model(text)
+        predictions = self._setfit_model(text, **kwargs)
 
         formatted_prediction = []
         for val, pred in zip(text, predictions):

@@ -57,7 +57,7 @@ class LabelsSchemaSettings(_AbstractSettings):
 
     """
 
-    label_schema: List[str]
+    label_schema: Set[str]
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "LabelsSchemaSettings":
@@ -342,4 +342,6 @@ class Datasets(AbstractApi):
                 response = self.http_client.get(f"{self._API_PREFIX}/{dataset.name}/{dataset.task}/settings")
                 return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)
         except NotFoundApiError:
+            return None
+        except Exception:
             return None

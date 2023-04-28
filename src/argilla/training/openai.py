@@ -13,9 +13,13 @@
 #  limitations under the License.
 
 import logging
+import time
 from typing import List, Union
 
-from argilla.datasets import TextClassificationSettings
+import numpy as np
+
+from argilla._constants import OPENAI_END_TOKEN, OPENAI_SEPARATOR, OPENAI_WHITESPACE
+from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args
 from argilla.utils.dependency import require_version
@@ -24,7 +28,9 @@ from argilla.utils.dependency import require_version
 class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaOpenAITrainer")
     _logger.setLevel(logging.INFO)
-    _separator = "\n\n###\n\n"
+    _separator = OPENAI_SEPARATOR
+    _end_token = OPENAI_END_TOKEN
+    _whitespace = OPENAI_WHITESPACE
 
     require_version("openai")
 
@@ -53,7 +59,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             self._train_dataset = self._dataset
             self._eval_dataset = None
 
-        self.init_training_args()
+        self.init_training_args(model=self._model)
 
     def init_training_args(
         self,
@@ -107,12 +113,16 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         """
         self.model_kwargs.update(kwargs)
         self.model_kwargs = filter_allowed_args(self.init_training_args, **self.model_kwargs)
+
         keys = []
         for key, value in self.model_kwargs.items():
             if value is None:
                 keys.append(key)
         for key in keys:
             del self.model_kwargs[key]
+
+        if "model" in self.model_kwargs:
+            self._model = self.model_kwargs["model"]
 
     def __repr__(self):
         formatted_string = []
@@ -152,7 +162,9 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
         if self._train_dataset is not None and self.model_kwargs["training_file"] is None:
             self.model_kwargs["training_file"] = self.upload_dataset_to_openai(self._train_dataset, "data_train.jsonl")
-        if self._eval_dataset is not None and self.model_kwargs["validation_file"] is None:
+        if (self._eval_dataset is not None and self.model_kwargs["validation_file"] is None) and self.model_kwargs[
+            "compute_classification_metrics"
+        ]:
             self.model_kwargs["validation_file"] = self.upload_dataset_to_openai(self._eval_dataset, "data_test.jsonl")
 
         self.update_config()
@@ -163,6 +175,18 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
         self._logger.info(response)
         self.finetune_id = response.id
+
+        while True:
+            response = openai.FineTune.retrieve(self.finetune_id)
+            self._logger.info(response["events"][-1])
+            if response["status"] == "succeeded":
+                self._model = response["fine_tuned_model"]
+                self._logger.info(f"Fine-tuning completed successfully. Model: {self._model}.")
+                break
+            self._logger.info(
+                f"Waiting for {60} seconds to get recent OpenAI events on finetune ID: {self.finetune_id}."
+            )
+            time.sleep(60)
 
     def init_model(self):
         import openai
@@ -179,7 +203,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             self._model = response.id
             self._logger.info(response)
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
         The function takes in a list of strings and returns a list of predictions
 
@@ -202,11 +226,39 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             was_string = True
 
         if isinstance(self._settings, TextClassificationSettings):
-            kwargs = {"logprobs": len(self._settings.label_schema), "max_tokens": 1}
+            for kwarg in ["logprobs", "max_tokens", "temperature", "n"]:
+                if kwarg in kwargs:
+                    del kwargs[kwarg]
+                    self._logger.warn(f"Argument `{kwarg}` has default value for text classification. Deleting it.")
+            kwargs["logprobs"] = len(self._settings.label_schema)
+            kwargs["max_tokens"] = 1
+            kwargs["temperature"] = 0
+            kwargs["n"] = 1
+        else:
+            if "stop" in kwargs:
+                del kwargs[kwarg]
+            self._logger.warn("Argument `stop` has default value for text classification. Deleting it.")
+            kwargs["stop"] = self._end_token
+            if "logprobs" not in kwargs:
+                kwargs["logprobs"] = 1
 
         for entry in text:
             prompt = f"{entry.strip()}{self._separator}"
             response = openai.Completion.create(model=self._model, prompt=prompt, **kwargs)
+            if isinstance(self._settings, TextClassificationSettings):
+                logprobs = response["choices"][0]["logprobs"]["top_logprobs"][0]
+                keys = [self._settings.id2label[int(key.strip())] for key in list(logprobs.keys())]
+                values = np.exp(list(logprobs.values()))
+                response["choices"][0]["logprobs"]["top_logprobs"][0] = dict(zip(keys, values))
+                if as_argilla_records:
+                    response = self._record_class(text=entry, prediction=list(zip(keys, values)))
+            elif isinstance(self._settings, TokenClassificationSettings):
+                raise NotImplementedError("TokenClassification is not supported yet.")
+            else:
+                if as_argilla_records:
+                    predictions = [choice["text"] for choice in response["choices"]]
+                    response = self._record_class(text=entry, prediction=predictions)
+
             responses.append(response)
 
         if was_string:

@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
 
+from argilla._constants import OPENAI_END_TOKEN, OPENAI_SEPARATOR, OPENAI_WHITESPACE
 from argilla.client.models import (
     Framework,
     Record,
@@ -896,8 +897,8 @@ class DatasetForTextClassification(DatasetBase):
         Returns:
             A pd.DataFrame.
         """
-        separator = "\n\n###\n\n"
-        whitespace = " "
+        separator = OPENAI_SEPARATOR
+        whitespace = OPENAI_WHITESPACE
         self._verify_all_labels()  # verify that all labels are strings
 
         if len(self._records) <= len(self._SETTINGS.label_schema) * 100:
@@ -917,7 +918,7 @@ class DatasetForTextClassification(DatasetBase):
             prompt += separator  # needed for better performance
 
             if self._records[0].multi_label:
-                completion = ", ".join([str(self._SETTINGS.label2id[annotation]) for annotation in rec.annotation])
+                completion = " ".join([str(self._SETTINGS.label2id[annotation]) for annotation in rec.annotation])
             else:
                 completion = str(self._SETTINGS.label2id[rec.annotation])
 
@@ -1183,9 +1184,9 @@ class DatasetForTokenClassification(DatasetBase):
         Returns:
             A pd.DataFrame.
         """
-        separator = "\n\n###\n\n"
-        end_token = " END"
-        whitespace = " "
+        separator = OPENAI_SEPARATOR
+        end_token = OPENAI_END_TOKEN
+        whitespace = OPENAI_WHITESPACE
         self._verify_all_labels()
 
         if len(self._records) <= 500:
@@ -1200,12 +1201,9 @@ class DatasetForTokenClassification(DatasetBase):
 
             completion = {}
             for label, start, end in rec.annotation:
-                if label not in completion:
-                    completion[label] = []
-                completion[label].append(f"{prompt[start : end]}")
+                completion[rec.text[start:end]] = self._SETTINGS.label2id[label]
 
-            # TODO: consider alphabetic
-            completion = "{" + ", ".join([f"'{label}': {values}" for label, values in completion.items()]) + "}"
+            completion = "\n".join([f"- {k} {v}" for k, v in completion.items()])
             completion = completion + end_token
             jsonl.append({"id": rec.id, "prompt": prompt, "completion": whitespace + completion})
 
@@ -1473,9 +1471,9 @@ class DatasetForText2Text(DatasetBase):
         Returns:
             A pd.DataFrame.
         """
-        separator = "\n\n###\n\n"
-        end_token = " END"
-        whitespace = " "
+        separator = OPENAI_SEPARATOR
+        end_token = OPENAI_END_TOKEN
+        whitespace = OPENAI_WHITESPACE
         if len(self._records) <= 500:
             _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
 

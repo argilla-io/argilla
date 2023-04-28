@@ -133,7 +133,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
 
         self.save(output_dir)
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
         The function takes in a list of strings and returns a list of predictions
 
@@ -154,7 +154,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
             text = [text]
             str_input = True
 
-        entities_list = self._span_marker_model.predict(text)
+        entities_list = self._span_marker_model.predict(text, **kwargs)
 
         if as_argilla_records:
             formatted_prediction = []
