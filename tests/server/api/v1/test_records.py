@@ -50,6 +50,7 @@ def test_create_record_response(client: TestClient, db: Session, admin: User, ad
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
         "user_id": str(admin.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
@@ -95,6 +96,7 @@ def test_create_record_response_as_annotator(client: TestClient, db: Session):
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
         "user_id": str(annotator.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
@@ -173,6 +175,7 @@ def test_list_record_responses(client: TestClient, db: Session, admin_auth_heade
             {
                 "id": str(response_a.id),
                 "values": response_a.values,
+                "status": "submitted",
                 "user_id": str(response_a.user_id),
                 "inserted_at": response_a.inserted_at.isoformat(),
                 "updated_at": response_a.updated_at.isoformat(),
@@ -180,6 +183,7 @@ def test_list_record_responses(client: TestClient, db: Session, admin_auth_heade
             {
                 "id": str(response_b.id),
                 "values": response_b.values,
+                "status": "submitted",
                 "user_id": str(response_b.user.id),
                 "inserted_at": response_b.inserted_at.isoformat(),
                 "updated_at": response_b.updated_at.isoformat(),
@@ -203,6 +207,7 @@ def test_list_record_responses_as_annotator(client: TestClient, db: Session, adm
             {
                 "id": str(response_a.id),
                 "values": response_a.values,
+                "status": "submitted",
                 "user_id": str(response_a.user_id),
                 "inserted_at": response_a.inserted_at.isoformat(),
                 "updated_at": response_a.updated_at.isoformat(),

@@ -11,7 +11,7 @@
       <SidebarFeedbackTaskComponent />
     </template>
     <template v-slot:top>
-      <div class=""></div>
+      <DatasetFiltersComponent :datasetId="datasetId" />
     </template>
     <template v-slot:center>
       <CenterFeedbackTaskContent :datasetId="datasetId" />
@@ -76,7 +76,7 @@ export default {
       // TODO - remove step 2 when workspace name will be include in the getDatasetInfo API call
       // 2- fetch workspace info
       const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
-
+      
       // 3- insert in ORM
       upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
     } catch (err) {

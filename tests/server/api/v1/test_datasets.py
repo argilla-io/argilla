@@ -25,6 +25,7 @@ from argilla.server.models import (
     Record,
     Response,
     User,
+    Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
     FIELD_CREATE_NAME_MAX_LENGTH,
@@ -205,6 +206,7 @@ def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_head
     rating_question = RatingQuestionFactory.create(
         name="rating-question",
         title="Rating Question",
+        description="Rating Description",
         dataset=dataset,
     )
     TextQuestionFactory.create()
@@ -219,6 +221,7 @@ def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_head
                 "id": str(text_question.id),
                 "name": "text-question",
                 "title": "Text Question",
+                "description": None,
                 "required": True,
                 "settings": {"type": "text"},
                 "inserted_at": text_question.inserted_at.isoformat(),
@@ -228,6 +231,7 @@ def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_head
                 "id": str(rating_question.id),
                 "name": "rating-question",
                 "title": "Rating Question",
+                "description": "Rating Description",
                 "required": False,
                 "settings": {
                     "type": "rating",
@@ -384,6 +388,7 @@ def test_list_dataset_records_with_include_responses(client: TestClient, admin_a
                             "input_ok": {"value": "yes"},
                             "output_ok": {"value": "yes"},
                         },
+                        "status": "submitted",
                         "user_id": str(response_a.user_id),
                         "inserted_at": response_a.inserted_at.isoformat(),
                         "updated_at": response_a.updated_at.isoformat(),
@@ -403,6 +408,7 @@ def test_list_dataset_records_with_include_responses(client: TestClient, admin_a
                             "input_ok": {"value": "yes"},
                             "output_ok": {"value": "no"},
                         },
+                        "status": "submitted",
                         "user_id": str(response_b_1.user_id),
                         "inserted_at": response_b_1.inserted_at.isoformat(),
                         "updated_at": response_b_1.updated_at.isoformat(),
@@ -413,6 +419,7 @@ def test_list_dataset_records_with_include_responses(client: TestClient, admin_a
                             "input_ok": {"value": "no"},
                             "output_ok": {"value": "no"},
                         },
+                        "status": "submitted",
                         "user_id": str(response_b_2.user_id),
                         "inserted_at": response_b_2.inserted_at.isoformat(),
                         "updated_at": response_b_2.updated_at.isoformat(),
@@ -612,6 +619,7 @@ def test_list_dataset_records_as_annotator_with_include_responses(client: TestCl
                             "input_ok": {"value": "no"},
                             "output_ok": {"value": "no"},
                         },
+                        "status": "submitted",
                         "user_id": str(annotator.id),
                         "inserted_at": response_b_annotator.inserted_at.isoformat(),
                         "updated_at": response_b_annotator.updated_at.isoformat(),
@@ -931,6 +939,7 @@ def test_create_dataset_question(client: TestClient, db: Session, admin_auth_hea
         "id": str(UUID(response_body["id"])),
         "name": "name",
         "title": "title",
+        "description": None,
         "required": False,
         "settings": {"type": "text"},
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
@@ -938,7 +947,26 @@ def test_create_dataset_question(client: TestClient, db: Session, admin_auth_hea
     }
 
 
-def test_create_dataset_questions_without_authentication(client: TestClient, db: Session):
+def test_create_dataset_question_with_description(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    question_json = {
+        "name": "name",
+        "title": "title",
+        "description": "description",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
+
+    assert response.status_code == 201
+    assert db.query(Question).count() == 1
+
+    response_body = response.json()
+    assert db.get(Question, UUID(response_body["id"]))
+    assert response_body["description"] == "description"
+
+
+def test_create_dataset_question_without_authentication(client: TestClient, db: Session):
     dataset = DatasetFactory.create()
     question_json = {
         "name": "name",
@@ -972,7 +1000,7 @@ def test_create_dataset_question_as_annotator(client: TestClient, db: Session):
 
 
 @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
-def test_create_dataset_questions_with_invalid_name(
+def test_create_dataset_question_with_invalid_name(
     client: TestClient, db: Session, admin_auth_header: dict, invalid_name: str
 ):
     dataset = DatasetFactory.create()
@@ -1066,6 +1094,7 @@ def test_create_dataset_text_question(client: TestClient, db: Session, admin_aut
         "id": str(UUID(response_body["id"])),
         "name": "text",
         "title": "Text",
+        "description": None,
         "required": False,
         "settings": {"type": "text"},
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
@@ -1106,6 +1135,7 @@ def test_create_dataset_rating_question(client: TestClient, db: Session, admin_a
         "id": str(UUID(response_body["id"])),
         "name": "rating",
         "title": "Rating",
+        "description": None,
         "required": False,
         "settings": {
             "type": "rating",
@@ -1495,13 +1525,56 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
-def test_delete_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
+    TextQuestionFactory.create(dataset=dataset)
+
+    other_dataset = DatasetFactory.create()
+    other_field = TextFieldFactory.create(dataset=other_dataset)
+    other_question = TextQuestionFactory.create(dataset=other_dataset)
+    other_record = RecordFactory.create(dataset=other_dataset)
+    other_response = ResponseFactory.create(record=other_record, user=admin)
 
     response = client.delete(f"/api/v1/datasets/{dataset.id}", headers=admin_auth_header)
 
     assert response.status_code == 200
-    assert db.query(Dataset).count() == 0
+    assert [dataset.id for dataset in db.query(Dataset).all()] == [other_dataset.id]
+    assert [field.id for field in db.query(Field).all()] == [other_field.id]
+    assert [question.id for question in db.query(Question).all()] == [other_question.id]
+    assert [record.id for record in db.query(Record).all()] == [other_record.id]
+    assert [response.id for response in db.query(Response).all()] == [other_response.id]
+    assert [workspace.id for workspace in db.query(Workspace).order_by(Workspace.inserted_at.asc()).all()] == [
+        dataset.workspace_id,
+        other_dataset.workspace_id,
+    ]
+
+
+def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
+    TextQuestionFactory.create(dataset=dataset)
+    record = RecordFactory.create(dataset=dataset)
+    ResponseFactory.create(record=record, user=admin)
+
+    other_dataset = DatasetFactory.create()
+    other_field = TextFieldFactory.create(dataset=other_dataset)
+    other_question = TextQuestionFactory.create(dataset=other_dataset)
+    other_record = RecordFactory.create(dataset=other_dataset)
+    other_response = ResponseFactory.create(record=other_record, user=admin)
+
+    response = client.delete(f"/api/v1/datasets/{dataset.id}", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert [dataset.id for dataset in db.query(Dataset).all()] == [other_dataset.id]
+    assert [field.id for field in db.query(Field).all()] == [other_field.id]
+    assert [question.id for question in db.query(Question).all()] == [other_question.id]
+    assert [record.id for record in db.query(Record).all()] == [other_record.id]
+    assert [response.id for response in db.query(Response).all()] == [other_response.id]
+    assert [workspace.id for workspace in db.query(Workspace).order_by(Workspace.inserted_at.asc()).all()] == [
+        dataset.workspace_id,
+        other_dataset.workspace_id,
+    ]
 
 
 def test_delete_dataset_without_authentication(client: TestClient, db: Session):

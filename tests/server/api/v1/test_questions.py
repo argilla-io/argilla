@@ -24,7 +24,7 @@ from tests.factories import AnnotatorFactory, DatasetFactory, TextQuestionFactor
 
 
 def test_delete_question(client: TestClient, db: Session, admin_auth_header: dict):
-    question = TextQuestionFactory.create(name="name", title="title")
+    question = TextQuestionFactory.create(name="name", title="title", description="description")
 
     response = client.delete(f"/api/v1/questions/{question.id}", headers=admin_auth_header)
 
@@ -36,6 +36,7 @@ def test_delete_question(client: TestClient, db: Session, admin_auth_header: dic
         "id": str(question.id),
         "name": "name",
         "title": "title",
+        "description": "description",
         "required": False,
         "settings": {"type": "text"},
         "dataset_id": str(question.dataset_id),
