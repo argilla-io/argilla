@@ -8,7 +8,7 @@
       <div class="title-area --body1">
         <span v-text="title" />
       </div>
-      <div class="content --body1" v-text="text" />
+      <div class="record__content --body1" v-text="text" />
     </div>
   </div>
 </template>
@@ -36,6 +36,9 @@ export default {
   background: palette(white);
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius;
+  &__content {
+    white-space: pre-wrap;
+  }
 }
 
 .item {
