@@ -2,9 +2,8 @@
   <HeaderAndTopAndOneColumn v-if="!$fetchState.pending && !$fetchState.error">
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
-        v-if="datasetName && workspace"
-        :datasetName="datasetName"
-        :workspace="workspace"
+        :key="datasetName && workspace"
+        :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
       />
     </template>
@@ -16,6 +15,9 @@
     </template>
     <template v-slot:center>
       <CenterFeedbackTaskContent :datasetId="datasetId" />
+    </template>
+    <template v-slot:footer>
+      <PaginationFeedbackTaskComponent :datasetId="datasetId" />
     </template>
   </HeaderAndTopAndOneColumn>
 </template>
@@ -74,7 +76,6 @@ export default {
       // TODO - remove step 2 when workspace name will be include in the getDatasetInfo API call
       // 2- fetch workspace info
       const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
-
       // 3- insert in ORM
       upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
     } catch (err) {
@@ -95,13 +96,11 @@ export default {
     },
     async getWorkspaceInfo(workspaceId) {
       try {
-        const { data: responseWorkspaces } = await this.$axios.get(
-          `/workspaces`
+        const { data: responseWorkspace } = await this.$axios.get(
+          `/v1/workspaces/${workspaceId}`
         );
 
-        const { name } = responseWorkspaces?.find(
-          (workspace) => workspace.id === workspaceId
-        ) || { name: null };
+        const { name } = responseWorkspace || { name: null };
 
         return name;
       } catch (err) {

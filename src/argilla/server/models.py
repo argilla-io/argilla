@@ -34,7 +34,11 @@ def default_inserted_at(context):
     return context.get_current_parameters()["inserted_at"]
 
 
-class AnnotationType(str, Enum):
+class FieldType(str, Enum):
+    text = "text"
+
+
+class QuestionType(str, Enum):
     text = "text"
     rating = "rating"
 
@@ -49,8 +53,8 @@ class UserRole(str, Enum):
     annotator = "annotator"
 
 
-class Annotation(Base):
-    __tablename__ = "annotations"
+class Field(Base):
+    __tablename__ = "fields"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str]
@@ -62,11 +66,35 @@ class Annotation(Base):
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
-    dataset: Mapped["Dataset"] = relationship(back_populates="annotations")
+    dataset: Mapped["Dataset"] = relationship(back_populates="fields")
 
     def __repr__(self):
         return (
-            f"Annotation(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
+            f"Field(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
+            f"dataset_id={str(self.dataset_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
+
+
+class Question(Base):
+    __tablename__ = "questions"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    name: Mapped[str]
+    title: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text)
+    required: Mapped[bool] = mapped_column(default=False)
+    settings: Mapped[dict] = mapped_column(JSON, default={})
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
+
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+
+    dataset: Mapped["Dataset"] = relationship(back_populates="questions")
+
+    def __repr__(self):
+        return (
+            f"Question(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
             f"dataset_id={str(self.dataset_id)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
@@ -127,9 +155,8 @@ class Dataset(Base):
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
-    annotations: Mapped[List["Annotation"]] = relationship(
-        back_populates="dataset", order_by=Annotation.inserted_at.asc()
-    )
+    fields: Mapped[List["Field"]] = relationship(back_populates="dataset", order_by=Field.inserted_at.asc())
+    questions: Mapped[List["Question"]] = relationship(back_populates="dataset", order_by=Question.inserted_at.asc())
     records: Mapped[List["Record"]] = relationship(back_populates="dataset", order_by=Record.inserted_at.asc())
 
     @property

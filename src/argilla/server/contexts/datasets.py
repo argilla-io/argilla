@@ -11,21 +11,35 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import logging
+from typing import List
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
-from argilla.server.models import Annotation, Dataset, DatasetStatus, Record, Response
+from argilla.server.models import (
+    Dataset,
+    DatasetStatus,
+    Field,
+    Question,
+    Record,
+    Response,
+)
 from argilla.server.schemas.v1.datasets import (
-    AnnotationCreate,
     DatasetCreate,
+    FieldCreate,
+    QuestionCreate,
+    RecordInclude,
     RecordsCreate,
 )
 from argilla.server.schemas.v1.records import ResponseCreate
+from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.security.model import User
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, func
+from sqlalchemy.orm import Session, contains_eager, joinedload
 
 LIST_RECORDS_LIMIT = 20
+
+_LOGGER = logging.getLogger("argilla.server")
 
 
 def get_dataset_by_id(db: Session, dataset_id: UUID):
@@ -58,23 +72,24 @@ async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, datas
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
 
-    if _count_annotations_by_dataset_id(db, dataset.id) == 0:
-        raise ValueError("Dataset cannot be published without annotations")
+    if _count_fields_by_dataset_id(db, dataset.id) == 0:
+        raise ValueError("Dataset cannot be published without fields")
+
+    if _count_questions_by_dataset_id(db, dataset.id) == 0:
+        raise ValueError("Dataset cannot be published without questions")
+
+    dataset.status = DatasetStatus.ready
+    db.commit()
+    db.refresh(dataset)
 
     try:
-        dataset.status = DatasetStatus.ready
+        # TODO: search engine operations won't raise errors for now.
+        #  In a next step, this action must be required to fully publish the dataset
         await search_engine.create_index(dataset)
-        # TODO: DB rollback is executed if some problem is found creating the index. If the error
-        #  is raised from the commit statement, index creation should be reverted
-        #  We need a way to commit the dataset status before creating the index, and rollback the status
-        #  if something went wrong with index creation
-        db.commit()
-        db.refresh(dataset)
+    except Exception as ex:
+        _LOGGER.error(f"Search index cannot be created: {ex}")
 
-        return dataset
-    except:
-        db.rollback()
-        raise
+    return dataset
 
 
 def delete_dataset(db: Session, dataset: Dataset):
@@ -84,56 +99,128 @@ def delete_dataset(db: Session, dataset: Dataset):
     return dataset
 
 
-def get_annotation_by_id(db: Session, annotation_id: UUID):
-    return db.get(Annotation, annotation_id)
+def get_field_by_id(db: Session, field_id: UUID):
+    return db.get(Field, field_id)
 
 
-def get_annotation_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
-    return db.query(Annotation).filter_by(name=name, dataset_id=dataset_id).first()
+def get_field_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
+    return db.query(Field).filter_by(name=name, dataset_id=dataset_id).first()
 
 
-def create_annotation(db: Session, dataset: Dataset, annotation_create: AnnotationCreate):
+def create_field(db: Session, dataset: Dataset, field_create: FieldCreate):
     if dataset.is_ready:
-        raise ValueError("Annotation cannot be created for a published dataset")
+        raise ValueError("Field cannot be created for a published dataset")
 
-    annotation = Annotation(
-        name=annotation_create.name,
-        title=annotation_create.title,
-        required=annotation_create.required,
-        settings=annotation_create.settings.dict(),
+    field = Field(
+        name=field_create.name,
+        title=field_create.title,
+        required=field_create.required,
+        settings=field_create.settings.dict(),
         dataset_id=dataset.id,
     )
 
-    db.add(annotation)
+    db.add(field)
     db.commit()
-    db.refresh(annotation)
+    db.refresh(field)
 
-    return annotation
+    return field
 
 
-def delete_annotation(db: Session, annotation: Annotation):
-    if annotation.dataset.is_ready:
-        raise ValueError("Annotations cannot be deleted for a published dataset")
+def delete_field(db: Session, field: Field):
+    if field.dataset.is_ready:
+        raise ValueError("Fields cannot be deleted for a published dataset")
 
-    db.delete(annotation)
+    db.delete(field)
     db.commit()
 
-    return annotation
+    return field
+
+
+def get_question_by_id(db: Session, question_id: UUID):
+    return db.get(Question, question_id)
+
+
+def get_question_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
+    return db.query(Question).filter_by(name=name, dataset_id=dataset_id).first()
+
+
+def create_question(db: Session, dataset: Dataset, question_create: QuestionCreate):
+    if dataset.is_ready:
+        raise ValueError("Question cannot be created for a published dataset")
+
+    question = Question(
+        name=question_create.name,
+        title=question_create.title,
+        description=question_create.description,
+        required=question_create.required,
+        settings=question_create.settings.dict(),
+        dataset_id=dataset.id,
+    )
+
+    db.add(question)
+    db.commit()
+    db.refresh(question)
+
+    return question
+
+
+def delete_question(db: Session, question: Question):
+    if question.dataset.is_ready:
+        raise ValueError("Questions cannot be deleted for a published dataset")
+
+    db.delete(question)
+    db.commit()
+
+    return question
 
 
 def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
-def list_records(db: Session, dataset: Dataset, offset: int = 0, limit: int = LIST_RECORDS_LIMIT):
+def list_records_by_dataset_id(
+    db: Session, dataset_id: UUID, include: List[RecordInclude] = [], offset: int = 0, limit: int = LIST_RECORDS_LIMIT
+):
+    query = db.query(Record)
+
+    if RecordInclude.responses in include:
+        query = query.options(joinedload(Record.responses))
+
     return (
-        db.query(Record)
-        .filter(Record.dataset_id == dataset.id)
+        query.filter(Record.dataset_id == dataset_id)
         .order_by(Record.inserted_at.asc())
         .offset(offset)
         .limit(limit)
         .all()
     )
+
+
+def list_records_by_dataset_id_and_user_id(
+    db: Session,
+    dataset_id: UUID,
+    user_id: UUID,
+    include: List[RecordInclude] = [],
+    offset: int = 0,
+    limit: int = LIST_RECORDS_LIMIT,
+):
+    query = db.query(Record)
+
+    if RecordInclude.responses in include:
+        query = query.outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user_id)).options(
+            contains_eager(Record.responses)
+        )
+
+    return (
+        query.filter(Record.dataset_id == dataset_id)
+        .order_by(Record.inserted_at.asc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+
+def count_records_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Record.id)).filter_by(dataset_id=dataset_id).scalar()
 
 
 def create_records(db: Session, dataset: Dataset, user: User, records_create: RecordsCreate):
@@ -157,8 +244,16 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
     db.commit()
 
 
+def get_response_by_id(db: Session, response_id: UUID):
+    return db.get(Response, response_id)
+
+
 def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):
     return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
+
+
+def list_responses_by_record_id(db: Session, record_id: UUID):
+    return db.query(Response).filter_by(record_id=record_id).order_by(Response.inserted_at.asc()).all()
 
 
 def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):
@@ -175,5 +270,25 @@ def create_response(db: Session, record: Record, user: User, response_create: Re
     return response
 
 
-def _count_annotations_by_dataset_id(db: Session, dataset_id: UUID):
-    return db.query(func.count(Annotation.id)).filter_by(dataset_id=dataset_id).scalar()
+def update_response(db: Session, response: Response, response_update: ResponseUpdate):
+    response.values = response_update.values
+
+    db.commit()
+    db.refresh(response)
+
+    return response
+
+
+def delete_response(db: Session, response: Response):
+    db.delete(response)
+    db.commit()
+
+    return response
+
+
+def _count_fields_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Field.id)).filter_by(dataset_id=dataset_id).scalar()
+
+
+def _count_questions_by_dataset_id(db: Session, dataset_id: UUID):
+    return db.query(func.count(Question.id)).filter_by(dataset_id=dataset_id).scalar()

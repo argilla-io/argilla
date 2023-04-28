@@ -13,13 +13,23 @@
 #  limitations under the License.
 
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, conlist
+from pydantic import BaseModel, conlist, constr
+from pydantic import Field as ModelField
 from typing_extensions import Literal
 
-from argilla.server.models import AnnotationType, DatasetStatus
+from argilla.server.models import DatasetStatus, FieldType, QuestionType
+
+FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+FIELD_CREATE_NAME_MIN_LENGTH = 1
+FIELD_CREATE_NAME_MAX_LENGTH = 200
+
+QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+QUESTION_CREATE_NAME_MIN_LENGTH = 1
+QUESTION_CREATE_NAME_MAX_LENGTH = 200
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
@@ -41,35 +51,72 @@ class Dataset(BaseModel):
         orm_mode = True
 
 
+class Datasets(BaseModel):
+    items: List[Dataset]
+
+
 class DatasetCreate(BaseModel):
     name: str
     guidelines: Optional[str]
     workspace_id: UUID
 
 
-class TextAnnotationSettings(BaseModel):
-    type: Literal[AnnotationType.text]
+class TextFieldSettings(BaseModel):
+    type: Literal[FieldType.text]
 
 
-class RatingAnnotationSettingsOption(BaseModel):
+class Field(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    required: bool
+    settings: TextFieldSettings
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class Fields(BaseModel):
+    items: List[Field]
+
+
+class FieldCreate(BaseModel):
+    name: constr(
+        regex=FIELD_CREATE_NAME_REGEX,
+        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
+        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
+    )
+    title: str
+    required: Optional[bool]
+    settings: TextFieldSettings
+
+
+class TextQuestionSettings(BaseModel):
+    type: Literal[QuestionType.text]
+
+
+class RatingQuestionSettingsOption(BaseModel):
     value: int
 
 
-class RatingAnnotationSettings(BaseModel):
-    type: Literal[AnnotationType.rating]
+class RatingQuestionSettings(BaseModel):
+    type: Literal[QuestionType.rating]
     options: conlist(
-        item_type=RatingAnnotationSettingsOption,
+        item_type=RatingQuestionSettingsOption,
         min_items=RATING_OPTIONS_MIN_ITEMS,
         max_items=RATING_OPTIONS_MAX_ITEMS,
     )
 
 
-class Annotation(BaseModel):
+class Question(BaseModel):
     id: UUID
     name: str
     title: str
+    description: Optional[str]
     required: bool
-    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
+    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
     inserted_at: datetime
     updated_at: datetime
 
@@ -77,27 +124,42 @@ class Annotation(BaseModel):
         orm_mode = True
 
 
-class AnnotationCreate(BaseModel):
-    name: str
+class Questions(BaseModel):
+    items: List[Question]
+
+
+class QuestionCreate(BaseModel):
+    name: constr(
+        regex=QUESTION_CREATE_NAME_REGEX,
+        min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
+        max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
+    )
     title: str
+    description: Optional[str]
     required: Optional[bool]
-    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
+    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
 
 
 class Response(BaseModel):
     id: UUID
     values: Dict[str, Any]
+    user_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
     class Config:
         orm_mode = True
+
+
+class RecordInclude(str, Enum):
+    responses = "responses"
 
 
 class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
     external_id: Optional[str]
+    responses: Optional[List[Response]]
     inserted_at: datetime
     updated_at: datetime
 
@@ -107,6 +169,7 @@ class Record(BaseModel):
 
 class Records(BaseModel):
     items: List[Record]
+    total: int
 
 
 class ResponseCreate(BaseModel):

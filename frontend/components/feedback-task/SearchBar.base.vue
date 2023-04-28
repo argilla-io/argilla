@@ -43,7 +43,7 @@
         type="text"
         name="query"
         id="query"
-        v-model="query"
+        v-model.lazy="query"
         :placeholder="placeholder"
         autocomplete="off"
       />

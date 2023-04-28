@@ -500,13 +500,7 @@ class GenericElasticEngineBackend(LoggingMixin):
             property=field,
         )
 
-    def add_dataset_documents(
-        self,
-        id: str,
-        documents: List[dict],
-    ) -> int:
+    def add_dataset_records(self, id: str, documents: List[dict]) -> int:
         index = dataset_records_index(id)
-        return self.client.index_documents(
-            index=index,
-            docs=documents,
-        )
+
+        return self.client.index_documents(index=index, docs=documents)

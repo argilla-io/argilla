@@ -8,6 +8,7 @@ class DatasetFilter extends Model {
       id: this.uid(),
       name: this.attr(null),
       dataset_id: this.attr(null),
+      order: this.number(0),
       value: this.attr(null),
       options: this.attr([]),
       placeholder: this.string(null).nullable(),

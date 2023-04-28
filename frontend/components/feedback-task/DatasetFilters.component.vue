@@ -42,7 +42,8 @@ export default {
         placeholder: "Introduce your query",
       },
     };
-    const formattedFilters = this.factoryFiltersForOrm(this.filters);
+    const filterEntries = Object.entries(this.filters);
+    const formattedFilters = this.factoryFiltersForOrm(filterEntries);
     upsertDatasetFilters(formattedFilters);
   },
   methods: {
@@ -55,19 +56,23 @@ export default {
     getFilterById(filterId) {
       return this.filtersFromVuex.find((filter) => filter.id === filterId);
     },
-    factoryFiltersForOrm(initialFilters) {
-      return Object.keys(initialFilters).map((filter) => {
-        return {
-          dataset_id: this.datasetId,
-          id: this.filters[filter].id,
-          name: this.filters[filter].name,
-          component_type: this.filters[filter].componentType,
-          value: this.filters[filter].value,
-          options: this.filters[filter].options,
-          placeholder: this.filters[filter].placeholder,
-          group_id: this.filters[filter].groupId,
-        };
-      });
+    factoryFiltersForOrm(filtersEntries) {
+      return filtersEntries.map(
+        ([
+          { id, name, componentType, value, options, placeholder, groupId },
+        ]) => {
+          return {
+            dataset_id: this.datasetId,
+            id,
+            name,
+            component_type: componentType,
+            value,
+            options,
+            placeholder,
+            group_id: groupId,
+          };
+        }
+      );
     },
   },
 };
