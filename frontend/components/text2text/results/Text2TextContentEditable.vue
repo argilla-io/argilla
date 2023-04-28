@@ -16,8 +16,8 @@
           @keydown.shift.enter.exact="looseFocus"
           @keydown.arrow-right.stop=""
           @keydown.arrow-left.stop=""
-          @keydown.delete.stop=""
-          @keydown.enter.stop=""
+          @keydown.delete.exact.stop=""
+          @keydown.enter.exact.stop=""
         />
       </transition>
       <span v-if="isShortcutToSave"><strong>shift Enter</strong> to save</span>
