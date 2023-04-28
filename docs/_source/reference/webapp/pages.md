@@ -108,8 +108,8 @@ The right sidebar is divided into three sections.
 
 This section of the sidebar lets you switch between the different Argilla modes that are covered extensively in their respective guides:
 
-- **Hand labelling**: this mode lets you conveniently [annotate your data](./features.md#annotate-records)
-- **Weak labelling**: this mode helps you to [define rules](./features.md#weak-labelling) to automatically label your data (Text Classification only)
+- **Hand labeling**: this mode lets you conveniently [annotate your data](./features.md#annotate-records)
+- **Weak labeling**: this mode helps you to [define rules](./features.md#weak-labeling) to automatically label your data (Text Classification only)
 - **Explore**: this mode is for [exploring your dataset](./features.md#explore-records) and gain valuable insights
 
 
