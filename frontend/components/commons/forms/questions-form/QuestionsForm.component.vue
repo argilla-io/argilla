@@ -82,6 +82,7 @@ import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
+import { getRecordIndexByRecordId } from "@/models/feedback-task-model/record/record.queries";
 import {
   getRecordResponsesIdByRecordId,
   upsertRecordResponses,
@@ -120,6 +121,9 @@ export default {
   computed: {
     userId() {
       return this.$auth.user.id;
+    },
+    recordIdIndex() {
+      return getRecordIndexByRecordId(this.recordId);
     },
     isFormUntouched() {
       return isEqual(this.initialInputs, this.inputs);
@@ -220,7 +224,13 @@ export default {
         }),
       };
 
-      await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+      try {
+        await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+
+        this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
+      } catch (err) {
+        console.log(err);
+      }
     },
     onReset() {
       this.inputs = cloneDeep(this.initialInputs);
