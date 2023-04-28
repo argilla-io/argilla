@@ -363,6 +363,7 @@ export default {
   height: 100%;
   justify-content: space-between;
   padding: $base-space * 3;
+  background: palette(white);
   border: 1px solid $primary-color;
   border-radius: $border-radius;
   box-shadow: $shadow;
