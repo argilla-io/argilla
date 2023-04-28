@@ -50,6 +50,7 @@ dependencies:
       - seqeval
       - setfit
       - span_marker
+      - openai
       - rich==13.0.1
       # install Argilla in editable mode
       - -e .[server,listeners]
