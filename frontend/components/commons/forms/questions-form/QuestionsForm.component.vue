@@ -127,7 +127,8 @@ export default {
     this.formOnErrorMessage =
       "One of the required field is not answered. Please, answer before validate";
     this.onReset();
-
+  },
+  mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
