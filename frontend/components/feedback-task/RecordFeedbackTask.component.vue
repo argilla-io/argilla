@@ -29,7 +29,8 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: min-content;
+  height: 100%;
+  overflow: auto;
   gap: $base-space * 2;
   padding: $base-space * 2;
   background: palette(white);
