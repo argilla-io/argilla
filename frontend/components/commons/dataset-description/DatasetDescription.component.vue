@@ -22,6 +22,7 @@ export default {
 <style lang="scss" scoped>
 .description {
   &__text {
+    white-space: pre-wrap;
     color: $black-37;
     &:first-letter {
       text-transform: capitalize;
