@@ -24,11 +24,13 @@ These are the section headers that we use:
 - Added `prepare_for_training` for `openai` ([#2658])
 - Added `ArgillaOpenAITrainer` ([#2659])
 - Added `ArgillaSpanMarkerTrainer` for Named Entity Recognition ([#2693](https://github.com/argilla-io/argilla/pull/2693))
+- Added `ArgillaTrainer` CLI support. Closes ([#2809])
 
 ### Changed
 
 - Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
 - bulk endpoints will upsert data when record `id` is present. Closes [#2535](https://github.com/argilla-io/argilla/issues/2535)
+- moved from `click` to `typer` CLI support. Closses ([#2815])
 
 ### Fixed
 
