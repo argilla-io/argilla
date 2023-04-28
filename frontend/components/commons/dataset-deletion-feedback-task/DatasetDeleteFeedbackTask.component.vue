@@ -38,6 +38,7 @@ import { Notification } from "@/models/Notifications";
 import {
   getFeedbackDatasetNameById,
   getFeedbackDatasetWorkspaceNameById,
+  deleteDatasetById,
 } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import { urlDeleteDatasetV1 } from "/utils/url.properties";
 
@@ -93,6 +94,10 @@ export default {
       const url = urlDeleteDatasetV1(this.datasetId);
       try {
         await this.$axios.delete(url);
+
+        // DELETE dataset from the orm
+        deleteDatasetById(this.datasetId);
+
         message = `${this.datasetName} has been deleted`;
         typeOfNotification = "success";
       } catch ({ response }) {
