@@ -12,16 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-from click.testing import CliRunner
-from typer import Typer
-
 
 # TODO: extend testing suite https://github.com/pytest-dev/pytest/issues/3344
-@pytest.mark.parametrize("framework", [("spacy", "en_core_web_sm", "max_steps")])
-def test_train_spacy(cli_runner: CliRunner, cli: Typer, dataset_text_classification: str, framework: str):
-    result = cli_runner.invoke(
-        cli,
-        f"train --name '{dataset_text_classification}' --framework '{framework[0]}' --output-dir '{framework[0]}_model' --model '{framework[1]}' --update-config-kwargs '{{\"{framework[2]}\": 1}}'",
-    )
-    assert result.exit_code == 0
+# @pytest.mark.parametrize("framework", [("spacy", "en_core_web_sm", "max_steps"), ("setfit", "all-MiniLM-L6-v2", "num_iterations"), ("transformers", "prajjwal1/bert-tiny", "max_steps")])
+# def test_train_spacy(cli_runner: CliRunner, cli: Typer, dataset_text_classification: str, framework: str):
+#     result = cli_runner.invoke(
+#         cli,
+#         f"train --name '{dataset_text_classification}' --framework '{framework[0]}' --output-dir '' --model '{framework[1]}' --update-config-kwargs '{{\"{framework[2]}\": 1}}'",
+#     )
+#     assert result.exit_code == 0

@@ -61,7 +61,10 @@ def train(
         query=query,
     )
     trainer.update_config(**json.loads(update_config_kwargs))
-    trainer.train(output_dir=output_dir)
+    if output_dir:
+        trainer.train(output_dir=output_dir)
+    else:
+        trainer.train()
 
 
 if __name__ == "__main__":
