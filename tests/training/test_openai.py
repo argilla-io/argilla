@@ -19,7 +19,7 @@ from argilla.client.models import Framework
 from argilla.training import ArgillaTrainer
 
 FRAMEWORK = "openai"
-MODEL = "cure"
+MODEL = "curie"
 
 os.environ["OPENAI_API_KEY"] = "1234"
 
