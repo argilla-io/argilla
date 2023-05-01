@@ -17,6 +17,9 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+
+## [1.7.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.7.0)
+
 ### Added
 
 - add `max_retries` and `num_threads` parameters to `rg.log` to run data logging request concurrently with backoff retry policy. See [#2458](https://github.com/argilla-io/argilla/issues/2458) and [#2533](https://github.com/argilla-io/argilla/issues/2533)
