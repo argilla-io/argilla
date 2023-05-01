@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
 class ArgillaTrainer(object):
     _logger = logging.getLogger("ArgillaTrainer")
+    _logger.setLevel(logging.INFO)
 
     def __init__(
         self,
@@ -182,7 +183,7 @@ class ArgillaTrainer(object):
                 seed=self._seed,
             )
 
-        self._logger.warning(self)
+        self._logger.info(self)
 
     def __repr__(self) -> str:
         """
@@ -217,7 +218,11 @@ _________________________________________________________________
         It updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
         """
         self._trainer.update_config(*args, **kwargs)
-        self._logger.info(self)
+        self._logger.info(
+            "Updated parameters:\n"
+            + "_________________________________________________________________\n"
+            + f"{self._trainer}"
+        )
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
