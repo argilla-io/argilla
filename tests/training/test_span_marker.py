@@ -15,9 +15,8 @@
 
 import argilla as rg
 from argilla.training import ArgillaTrainer
-from datasets import DatasetDict
 
-from .helpers import cleanup
+from .helpers import train_with_cleanup
 
 FRAMEWORK = "span_marker"
 MODEL = "prajjwal1/bert-tiny"
@@ -37,24 +36,24 @@ def test_train_tokencat(dataset_token_classification) -> None:
     trainer = ArgillaTrainer(name=dataset_token_classification, model=MODEL, framework=FRAMEWORK)
     trainer.update_config(max_steps=1, num_train_epochs=1)
     output_dir = f"tmp_{FRAMEWORK}_train_tokencat"
-    cleanup(trainer, output_dir)
+    train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
     assert isinstance(record, rg.TokenClassificationRecord)
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert not isinstance(not_record, rg.TokenClassificationRecord)
-    cleanup(trainer, output_dir, train=False)
+    train_with_cleanup(trainer, output_dir, train=False)
 
 
 def test_evaluate_train_test(dataset_token_classification) -> None:
     trainer = ArgillaTrainer(name=dataset_token_classification, model=MODEL, framework=FRAMEWORK, train_size=0.8)
     trainer.update_config(max_steps=1, num_train_epochs=1)
     output_dir = f"tmp_{FRAMEWORK}_train_tokencat"
-    cleanup(trainer, output_dir)
+    train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
     assert isinstance(record, rg.TokenClassificationRecord)
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert not isinstance(not_record, rg.TokenClassificationRecord)
-    cleanup(trainer, output_dir, train=False)
+    train_with_cleanup(trainer, output_dir, train=False)
 
 
 def test_train_no_model(dataset_token_classification) -> None:

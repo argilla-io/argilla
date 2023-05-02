@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import logging
-import time
 from typing import List, Union
 
 import numpy as np
@@ -175,18 +174,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
         self._logger.info(response)
         self.finetune_id = response.id
-
-        while True:
-            response = openai.FineTune.retrieve(self.finetune_id)
-            self._logger.info(response["events"][-1])
-            if response["status"] == "succeeded":
-                self._model = response["fine_tuned_model"]
-                self._logger.info(f"Fine-tuning completed successfully. Model: {self._model}.")
-                break
-            self._logger.info(
-                f"Waiting for {60} seconds to get recent OpenAI events on finetune ID: {self.finetune_id}."
-            )
-            time.sleep(60)
+        self._logger.info(f"Waiting for training. Get info by running: `openai.FineTune.retrieve({self.finetune_id})`.")
 
     def init_model(self):
         import openai
