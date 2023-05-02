@@ -40,6 +40,10 @@ const isDatasetByIdExists = (datasetId) => {
   return FeedbackDatasetModel.query().whereId(datasetId).exists();
 };
 
+// DELETE
+const deleteDatasetById = (datasetId) => {
+  return FeedbackDatasetModel.delete(datasetId);
+};
 export {
   upsertFeedbackDataset,
   updateTotalRecordsByDatasetId,
@@ -50,4 +54,5 @@ export {
   getFeedbackDatasetWorkspaceNameById,
   getTotalRecordByDatasetId,
   isDatasetByIdExists,
+  deleteDatasetById,
 };
