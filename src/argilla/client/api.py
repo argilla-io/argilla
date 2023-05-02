@@ -24,7 +24,6 @@ from argilla.client.models import (  # TODO Remove TextGenerationRecord
     BulkResponse,
     Record,
 )
-from argilla.client.sdk.datasets.models import FeedbackDataset
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -109,7 +108,7 @@ def init(
     )
 
 
-def list_datasets() -> List[FeedbackDataset]:
+def list_datasets() -> list:
     """List the `FeedbackTask` datasets in Argilla.
 
     Returns:
