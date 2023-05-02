@@ -36,7 +36,7 @@ class TaskType(str, Enum):
 class BaseDatasetModel(BaseModel):
     tags: Dict[str, str] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    name: str = Field(regex="^(?!-|_)[a-z0-9-_]+$")
+    name: str = Field(regex="[a-zA-Z0-9-_\s]+$")
 
 
 class Dataset(BaseDatasetModel):
