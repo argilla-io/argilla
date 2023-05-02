@@ -12,8 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 from functools import lru_cache
-from typing import Union
+from typing import List, Union
 
 import httpx
 
@@ -92,7 +93,7 @@ def delete_dataset(
 
 def list_datasets(
     client: AuthenticatedClient,
-) -> Response[list[FeedbackDataset]]:
+) -> Response[List[FeedbackDataset]]:
     url = "{}/api/v1/datasets".format(client.base_url)
 
     response = httpx.get(
