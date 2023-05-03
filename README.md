@@ -45,10 +45,10 @@ https://user-images.githubusercontent.com/25269220/235918158-359726bb-a479-4239-
 <h3>
 <p align="center">
 <a href="https://docs.argilla.io">📄 Documentation</a> | </span>
-<a href="#🚀-quickstart">🚀 Quickstart</a> <span> | </span>
-<a href="#🎼-cheatsheet">🎼 Cheatsheet</a> <span> | </span>
-<a href="#📏-principles">📏 Principles</a> | </span>
-<a href="#🫱🏾‍🫲🏼-contribute">🫱🏾‍🫲🏼 Contribute</a>
+<a href="#quickstart">🚀 Quickstart</a> <span> | </span>
+<a href="#quickstart">🎼 Cheatsheet</a> <span> | </span>
+<a href="#principles">📏 Principles</a> | </span>
+<a href="#contribute">🫱🏾‍🫲🏼 Contribute</a>
 </p>
 </h3>
 
@@ -66,29 +66,29 @@ There are different options to get started:
 
 ## 🎼 Cheatsheet
 
+## 🎼 Cheatsheet
+
 <table>
 <tr>
 <td> <b>Feature</b> </td> <td> <b>Description</b> </td>
 </tr>
 <tr>
 <td>
-
 <a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker-quickstart.html"> Deploy Locally</a>
 </td>
 <td>
 
 ```bash
-docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest # --platform linux/arm64
 ```
-
 </td>
 </tr>
 <tr>
 <td>
-<a href="https://argilla.io/blog/launching-argilla-huggingface-hub/">Deploy on Hugging Face Hub</a>
+<a href="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png">Deploy on Hugging Face</a>
 </td>
 <td>
-<a href="https://argilla.io/blog/launching-argilla-huggingface-hub/"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
+<img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%">
 </td>
 </tr>
 <tr>
@@ -106,8 +106,7 @@ rec = rg.TextClassificationRecord(
 )
 rg.log(records=record, name="news")
 ```
-
-<a href="https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#Argilla-Records"><img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
+<img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%">
 </td>
 </tr>
 <tr>
@@ -121,8 +120,7 @@ import argilla as rg
 
 rg.load(name="news", query="text:spor*")
 ```
-
-<a href="https://docs.argilla.io/en/latest/guides/query_datasets.html"><img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
+<img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
 </td>
 </tr>
 <tr>
@@ -141,14 +139,13 @@ record = rg.TextClassificationRecord(
 rg.log(name="dataset", records=record)
 rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 ```
-
-<a href="https://docs.argilla.io/en/latest/guides/label_records_with_semanticsearch.html"><img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
+<img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%">
 
 </td>
 </tr>
 <tr>
 <td>
-<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html">Weak supervision</a>
+<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html">Weak supvervision</a>
 </td>
 <td>
 
@@ -158,11 +155,10 @@ from argilla.labeling.text_classification import add_rules, Rule
 rule = Rule(query="positive impact", label="optimism")
 add_rules(dataset="go_emotion", rules=[rule])
 ```
-
-<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html"><img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
+<img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%">
 </td>
 </tr>
-<!-- <tr>
+<tr>
 <td>
 <a href="https://argilla.io/blog/introducing-argilla-trainer">Active Learning</a>
 </td>
@@ -174,10 +170,9 @@ from argilla_plugins import classy_learner
 plugin = classy_learner(name="plugin-test")
 plugin.start()
 ```
-
-<video src="https://share.descript.com/view/nvlUjF8tNcZ"/>
+<iframe src="https://share.descript.com/embed/nvlUjF8tNcZ" allowfullscreen="" width="100%" frameborder="0"></iframe>
 </td>
-</tr> -->
+</tr>
 <tr>
 <td>
 <a href="https://argilla.io/blog/introducing-argilla-trainer">Train models</a>
@@ -190,8 +185,7 @@ from argilla.training import ArgillaTrainer
 trainer = ArgillaTrainer(name="news", workspace="recognai", framework="setfit")
 trainer.train()
 ```
-
-<a href="https://argilla.io/blog/introducing-argilla-trainer"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>
+<img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%">
 </td>
 </tr>
 </table>
