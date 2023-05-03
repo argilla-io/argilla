@@ -11,6 +11,11 @@
         @on-search-text="onSearch(id, $event)"
         :placeholder="getFilterById(id).placeholder"
       />
+      <StatusFilter
+        v-if="getFilterById(id).component_type === 'statusSelector'"
+        :options="getFilterById(id).options"
+        v-model="selectedStatus"
+      />
     </span>
   </div>
 </template>
@@ -34,6 +39,11 @@ export default {
       },
     },
   },
+  data: () => {
+    return {
+      selectedStatus: "pending",
+    };
+  },
   computed: {
     filtersFromVuex() {
       return getFiltersByDatasetId(
@@ -51,6 +61,35 @@ export default {
         componentType: "searchBar",
         order: 0,
         placeholder: "Introduce your query",
+      },
+      statusSelector: {
+        id: "statusSelector",
+        name: "Status Selector",
+        componentType: "statusSelector",
+        order: 1,
+        options: [
+          {
+            id: "pending",
+            name: "Pending",
+            color: "#B6B9FF",
+            textColor: "#4C4EA3",
+            bgColor: "#EEEEFF",
+          },
+          {
+            id: "submitted",
+            name: "Submitted",
+            color: "#3E5CC9",
+            textColor: "#3E5CC9",
+            bgColor: "#EBF3FF",
+          },
+          {
+            id: "discarded",
+            name: "Discarded",
+            color: "#B7B7B7",
+            textColor: "#656363",
+            bgColor: "#F2F2F2",
+          },
+        ],
       },
     };
     const filterValues = Object.values(this.filters);
@@ -103,8 +142,5 @@ export default {
   gap: $base-space * 2;
   align-items: center;
   padding: $base-space * 2 0;
-  &__component {
-    flex: 1;
-  }
 }
 </style>
