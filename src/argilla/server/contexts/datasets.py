@@ -178,23 +178,6 @@ def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
-def list_records_by_dataset_id(
-    db: Session, dataset_id: UUID, include: List[RecordInclude] = [], offset: int = 0, limit: int = LIST_RECORDS_LIMIT
-):
-    query = db.query(Record)
-
-    if RecordInclude.responses in include:
-        query = query.options(joinedload(Record.responses))
-
-    return (
-        query.filter(Record.dataset_id == dataset_id)
-        .order_by(Record.inserted_at.asc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
-
-
 def list_records_by_dataset_id_and_user_id(
     db: Session,
     dataset_id: UUID,
@@ -250,10 +233,6 @@ def get_response_by_id(db: Session, response_id: UUID):
 
 def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):
     return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
-
-
-def list_responses_by_record_id(db: Session, record_id: UUID):
-    return db.query(Response).filter_by(record_id=record_id).order_by(Response.inserted_at.asc()).all()
 
 
 def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):

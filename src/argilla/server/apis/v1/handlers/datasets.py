@@ -56,8 +56,8 @@ def _get_dataset(db: Session, dataset_id: UUID):
     return dataset
 
 
-@router.get("/datasets", response_model=Datasets)
-def list_datasets(
+@router.get("/me/datasets", response_model=Datasets)
+def list_current_user_datasets(
     *,
     db: Session = Depends(get_db),
     current_user: User = Security(auth.get_current_user),
@@ -98,8 +98,8 @@ def list_dataset_questions(
     return Questions(items=dataset.questions)
 
 
-@router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
-def list_dataset_records(
+@router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
+def list_current_user_dataset_records(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
@@ -112,13 +112,9 @@ def list_dataset_records(
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    records = []
-    if current_user.is_admin:
-        records = datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
-    else:
-        records = datasets.list_records_by_dataset_id_and_user_id(
-            db, dataset_id, current_user.id, include=include, offset=offset, limit=limit
-        )
+    records = datasets.list_records_by_dataset_id_and_user_id(
+        db, dataset_id, current_user.id, include=include, offset=offset, limit=limit
+    )
 
     return Records(
         items=[record.__dict__ for record in records],
