@@ -58,7 +58,7 @@ def get_dataset(
 def publish_dataset(
     client: AuthenticatedClient,
     id: str,
-) -> Response[FeedbackDataset, ErrorMessage, HTTPValidationError]:
+) -> Response[Union[FeedbackDataset, ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/datasets/{id}/publish".format(client.base_url, id=id)
 
     response = httpx.put(
