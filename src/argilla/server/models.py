@@ -45,6 +45,7 @@ class QuestionType(str, Enum):
 
 class ResponseStatus(str, Enum):
     submitted = "submitted"
+    discarded = "discarded"
 
 
 class DatasetStatus(str, Enum):

@@ -61,6 +61,21 @@ class DatasetCreate(BaseModel):
     workspace_id: UUID
 
 
+class RecordMetrics(BaseModel):
+    count: int
+
+
+class ResponseMetrics(BaseModel):
+    count: int
+    submitted: int
+    discarded: int
+
+
+class Metrics(BaseModel):
+    records: RecordMetrics
+    responses: ResponseMetrics
+
+
 class TextFieldSettings(BaseModel):
     type: Literal[FieldType.text]
 
