@@ -62,7 +62,9 @@ There are two different options to get started:
 <td> Feature </td> <td> Description </td>
 </tr>
 <tr>
-<td> <img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%"> </td>
+<td>
+Create record
+</td>
 <td>
 
 ```python
@@ -79,8 +81,15 @@ rg.log(records=record, name="news")
 </tr>
 <tr>
 <td>
-
-
+Annotate Record
+</td>
+<td>
+<img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%">
+</td>
+</tr>
+<tr>
+<td>
+Train model
 </td>
 <td>
 
