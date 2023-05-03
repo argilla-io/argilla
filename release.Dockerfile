@@ -19,6 +19,8 @@ RUN apt-get update && \
     chmod +x /start_argilla_server.sh && \
     for wheel in /packages/*.whl; do pip install "$wheel"[server,postgresql]; done && \
     apt-get remove -y python-dev libpq-dev gcc && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
     rm -rf /packages
 
 # Create argilla volume
