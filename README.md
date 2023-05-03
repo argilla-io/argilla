@@ -23,6 +23,7 @@
 
 <h2 align="center">Open-source data curation platform for LLMs </h2>
 <br>
+
 https://user-images.githubusercontent.com/25269220/235918158-359726bb-a479-4239-8c6e-c9e4cdb4fcdf.mp4
 
 <p align="center">
@@ -66,6 +67,7 @@ There are two different options to get started:
 </tr>
 <tr>
 <td>
+
 <a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker-quickstart.html"> Deploy Locally</a>
 </td>
 <td>
