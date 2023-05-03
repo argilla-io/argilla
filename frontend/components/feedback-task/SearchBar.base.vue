@@ -16,81 +16,51 @@
   -->
 
 <template>
-  <form @submit.prevent="searchText(query)">
-    <div class="searchbar" :class="{ active: query }" :style="searchBarStyles">
+  <div class="searchbar" :class="{ active: $attrs.value?.length }">
+    <BaseIcon
+      v-if="!$attrs.value?.length"
+      icon-name="search"
+      icon-width="20"
+      icon-height="20"
+    />
+    <BaseButton v-else class="searchbar__button" @click="$emit('input', null)">
       <BaseIcon
-        v-if="!query"
-        icon-name="search"
+        class="searchbar__button__icon"
+        icon-name="close"
         icon-width="20"
         icon-height="20"
       />
-      <BaseButton
-        v-else
-        class="searchbar__button"
-        @click="removeCurrentSearchText()"
-      >
-        <BaseIcon
-          class="searchbar__button__icon"
-          icon-name="close"
-          icon-width="20"
-          icon-height="20"
-        />
-      </BaseButton>
-      <label class="searchbar__label" for="query" v-text="description" />
-      <input
-        ref="input"
-        class="searchbar__input"
-        type="text"
-        name="query"
-        id="query"
-        v-model.lazy="query"
-        :placeholder="placeholder"
-        autocomplete="off"
-      />
-    </div>
-  </form>
+    </BaseButton>
+    <!-- <label class="searchbar__label" for="query" v-text="description" /> -->
+    <input
+      class="searchbar__input"
+      ref="input"
+      type="text"
+      name="query"
+      id="query"
+      :value="$attrs.value"
+      :placeholder="placeholder"
+      @input="$emit('input', $event.target.value)"
+      autocomplete="off"
+    />
+  </div>
 </template>
 
 <script>
 export default {
   props: {
-    currentSearchText: {
-      type: String,
-      default: "",
-    },
     placeholder: {
       type: String,
       default: "Introduce your text:",
     },
-    description: {
-      type: String,
-      default: "Introduce your text",
-    },
+    // description: {
+    //   type: String,
+    //   default: "Introduce your text",
+    // },
     bgColor: {
       type: String,
       default: "#ffffff",
     },
-  },
-  data: () => ({
-    query: "",
-  }),
-  computed: {
-    searchBarStyles() {
-      return { backgroundColor: this.bgColor };
-    },
-  },
-  methods: {
-    searchText(query) {
-      this.$refs.input.blur();
-      this.$emit("on-search-text", query);
-    },
-    removeCurrentSearchText() {
-      this.query = "";
-      this.$emit("on-search-text", "");
-    },
-  },
-  created() {
-    this.query = this.currentSearchText;
   },
 };
 </script>
@@ -122,9 +92,9 @@ export default {
       padding: calc($base-space / 2);
     }
   }
-  &__label {
-    @extend %visuallyhidden;
-  }
+  // &__label {
+  //   @extend %visuallyhidden;
+  // }
   &__input {
     width: 100%;
     height: 1rem;
