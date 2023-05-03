@@ -45,14 +45,16 @@ https://user-images.githubusercontent.com/25269220/235918158-359726bb-a479-4239-
 <h3>
 <p align="center">
 <a href="https://docs.argilla.io">📄 Documentation</a> | </span>
-<a href="#quickstart">🚀 Quickstart</a> <span> | </span>
-<a href="#quickstart">🎼 Cheatsheet</a> <span> | </span>
-<a href="#principles">📏 Principles</a> | </span>
-<a href="#contribute">🫱🏾‍🫲🏼 Contribute</a>
+<a href="#🚀-quickstart">🚀 Quickstart</a> <span> | </span>
+<a href="#🎼-cheatsheet">🎼 Cheatsheet</a> <span> | </span>
+<a href="#📏-principles">📏 Principles</a> | </span>
+<a href="#🫱🏾‍🫲🏼-contribute">🫱🏾‍🫲🏼 Contribute</a>
 </p>
 </h3>
 
 ## 🚀 Quickstart
+
+Argilla is an open-source data curation platform for LLMs. Using Argilla, everyone can build robust LLMs through faster data curation using both human and machine feedback.
 
 Argilla is an open-source data curation platform for LLMs. Using Argilla, everyone can build robust language models through faster data curation using both human and machine feedback. We provide support for each step in the MLOps cycle, from data labeling to model monitoring.
 
@@ -60,11 +62,9 @@ There are different options to get started:
 
 1. Take a look at our [quickstart page](https://docs.argilla.io/en/latest/getting_started/quickstart.html) 🚀
 
-2. Start contributing by looking at our [contributor guidelines](#🫱🏾‍🫲🏼-contribute) 🫱🏾‍🫲🏼
+2. Start contributing by taking a look [here](#🫱🏾‍🫲🏼-contribute) 🫱🏾‍🫲🏼
 
-3. Skip some steps with our [cheatsheet](#🎼-cheatsheet) 🎼
-
-## 🎼 Cheatsheet
+3. Game a little with the [cheatsheet](#🎼-cheatsheet) 🎼
 
 ## 🎼 Cheatsheet
 
@@ -164,7 +164,7 @@ add_rules(dataset="go_emotion", rules=[rule])
 <img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%">
 </td>
 </tr>
-<tr>
+<!-- <tr>
 <td>
 <a href="https://argilla.io/blog/introducing-argilla-trainer">Active Learning</a>
 </td>
@@ -179,7 +179,7 @@ plugin.start()
 
 <video src="https://share.descript.com/view/nvlUjF8tNcZ"/>
 </td>
-</tr>
+</tr> -->
 <tr>
 <td>
 <a href="https://argilla.io/blog/introducing-argilla-trainer">Train models</a>
