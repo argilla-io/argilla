@@ -61,9 +61,12 @@
         >
           <span v-text="'Reset'" />
         </BaseButton>
+
         <BaseButton
           ref="submitButton"
           type="submit"
+          name="submitButton"
+          value="submitButton"
           class="primary small"
           :disabled="isFormUntouched || isError"
         >
@@ -82,6 +85,7 @@ import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
+import { getRecordIndexByRecordId } from "@/models/feedback-task-model/record/record.queries";
 import {
   getRecordResponsesIdByRecordId,
   upsertRecordResponses,
@@ -92,6 +96,10 @@ const STATUS_RESPONSE = Object.freeze({
   UPDATE: "UPDATE",
   CREATE: "CREATE",
   UNKNOWN: "UNKNOWN",
+});
+const TYPE_OF_EVENT = Object.freeze({
+  ON_SUBMIT: "ON_SUBMIT",
+  ON_DISCARD: "ON_DISCARD",
 });
 export default {
   name: "QuestionsFormComponent",
@@ -120,6 +128,9 @@ export default {
   computed: {
     userId() {
       return this.$auth.user.id;
+    },
+    recordIdIndex() {
+      return getRecordIndexByRecordId(this.recordId);
     },
     isFormUntouched() {
       return isEqual(this.initialInputs, this.inputs);
@@ -161,6 +172,10 @@ export default {
         return input;
       });
     },
+    async onDiscard() {
+      console.log("discard");
+      this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+    },
     async onSubmit() {
       const createOrUpdateResponse = isResponsesByUserIdExists(
         this.userId,
@@ -180,7 +195,6 @@ export default {
         this.isError = true;
         return;
       }
-
       let formattedSelectionOptionObject = {};
       this.inputs.forEach((input) => {
         // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
@@ -220,7 +234,22 @@ export default {
         }),
       };
 
-      await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+      try {
+        await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+
+        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    onEmitBusEventGoToRecordIndex(typeOfEvent) {
+      switch (typeOfEvent) {
+        case TYPE_OF_EVENT.ON_SUBMIT:
+        case TYPE_OF_EVENT.ON_DISCARD:
+          this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
+          break;
+        default:
+      }
     },
     onReset() {
       this.inputs = cloneDeep(this.initialInputs);
