@@ -1,17 +1,18 @@
 <template>
   <div class="filters">
-    <span
-      class="filters__component"
-      v-for="id in Object.keys(this.filters)"
-      :key="id"
-    >
-      <SearchBarBase
-        v-if="getFilterById(id).component_type === 'searchBar'"
-        :current-search-text="getFilterById(id).value"
-        @on-search-text="onSearch(id, $event)"
-        :placeholder="getFilterById(id).placeholder"
-      />
-    </span>
+    <form @submit.prevent="onSearch">
+      <span
+        class="filters__component"
+        v-for="filter in clonedFiltersFromOrm"
+        :key="filter.id"
+      >
+        <SearchBarBase
+          v-if="filter.component_type === 'searchBar'"
+          v-model.lazy.trim="filter.value"
+          :placeholder="filter.placeholder"
+        />
+      </span>
+    </form>
   </div>
 </template>
 
@@ -20,6 +21,7 @@ import {
   upsertDatasetFilters,
   getFiltersByDatasetId,
 } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
+
 export default {
   name: "DatasetFiltersComponent",
   props: {
@@ -34,14 +36,10 @@ export default {
       },
     },
   },
-  computed: {
-    filtersFromVuex() {
-      return getFiltersByDatasetId(
-        this.datasetId,
-        this.orderBy?.orderFilterBy,
-        this.orderBy?.ascendent
-      );
-    },
+  data() {
+    return {
+      clonedFiltersFromOrm: null,
+    };
   },
   created() {
     this.filters = {
@@ -51,21 +49,25 @@ export default {
         componentType: "searchBar",
         order: 0,
         placeholder: "Introduce your query",
+        value: "babidibou",
       },
     };
     const filterValues = Object.values(this.filters);
     const formattedFilters = this.factoryFiltersForOrm(filterValues);
     upsertDatasetFilters(formattedFilters);
   },
+  beforeMount() {
+    this.filtersFromOrm = getFiltersByDatasetId(
+      this.datasetId,
+      this.orderBy?.orderFilterBy,
+      this.orderBy?.ascendent
+    );
+
+    this.clonedFiltersFromOrm = structuredClone(this.filtersFromOrm);
+  },
   methods: {
-    onSearch(id, value) {
-      upsertDatasetFilters({
-        id,
-        value,
-      });
-    },
-    getFilterById(filterId) {
-      return this.filtersFromVuex.find((filter) => filter.id === filterId);
+    onSearch() {
+      console.log(this.clonedFiltersFromOrm);
     },
     factoryFiltersForOrm(filterValues) {
       return filterValues.map(
