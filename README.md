@@ -73,6 +73,7 @@ There are two different options to get started:
 ```bash
 docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest # --platform linux/arm64
 ```
+
 </td>
 </tr>
 <tr>
@@ -98,6 +99,7 @@ rec = rg.TextClassificationRecord(
 )
 rg.log(records=record, name="news")
 ```
+
 <img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%">
 </td>
 </tr>
@@ -112,6 +114,7 @@ import argilla as rg
 
 rg.load(name="news", query="text:spor*")
 ```
+
 <img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
 </td>
 </tr>
@@ -131,6 +134,7 @@ record = rg.TextClassificationRecord(
 rg.log(name="dataset", records=record)
 rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 ```
+
 <img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%">
 
 </td>
@@ -147,6 +151,7 @@ from argilla.labeling.text_classification import add_rules, Rule
 rule = Rule(query="positive impact", label="optimism")
 add_rules(dataset="go_emotion", rules=[rule])
 ```
+
 <img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%">
 </td>
 </tr>
@@ -162,6 +167,7 @@ from argilla_plugins import classy_learner
 plugin = classy_learner(name="plugin-test")
 plugin.start()
 ```
+
 <iframe src="https://share.descript.com/embed/nvlUjF8tNcZ" allowfullscreen="" width="100%" frameborder="0"></iframe>
 </td>
 </tr>
@@ -177,6 +183,7 @@ from argilla.training import ArgillaTrainer
 trainer = ArgillaTrainer(name="news", workspace="recognai", framework="setfit")
 trainer.train()
 ```
+
 <img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%">
 </td>
 </tr>
