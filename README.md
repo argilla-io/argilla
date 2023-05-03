@@ -74,6 +74,7 @@ There are different options to get started:
 </tr>
 <tr>
 <td>
+
 <a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker-quickstart.html"> Deploy Locally</a>
 </td>
 <td>
