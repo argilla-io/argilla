@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import warnings
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
 
@@ -160,6 +161,9 @@ class Dataset:
     ) -> None:
         if self.status is DatasetStatus.DRAFT:
             raise ValueError("Cannot add records to a dataset that is in draft status, please publish it first.")
+        if self.schema is None:
+            warnings.warn("Since the `schema` hasn't been defined during the dataset creation, it will be inferred.")
+            self.schema = generate_pydantic_schema(record)
         # # If there are records already logged to Argilla, fetch one and get the schema
         # self.schema = generate_pydantic_schema(self.fetch_one())
         # # If there are no records logged to Argilla, check if `self.schema` has been set
@@ -171,7 +175,7 @@ class Dataset:
             id=self.id,
             record=RecordSchema(fields=self.schema(**record), external_id=external_id, response=response).dict(),
         )
-        if self.__records is not None or self.__records > 0:
+        if self.__records is not None and isinstance(self.__records, list) and len(self.__records) > 0:
             self.records.append(self.schema(**record))
 
     def fetch_one(self) -> Union[Dict[str, Any], List[str, Any]]:
