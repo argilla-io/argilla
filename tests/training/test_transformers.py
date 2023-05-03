@@ -70,3 +70,8 @@ def test_train_tokencat(dataset_token_classification):
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert not isinstance(not_record, rg.TokenClassificationRecord)
     train_with_cleanup(trainer, output_dir, train=False)
+
+
+def test_predict_wo_training(dataset_text_classification):
+    trainer = ArgillaTrainer(name=dataset_text_classification, framework=FRAMEWORK, model="tkuye/tiny-bert-jdc")
+    trainer._trainer.predict("This is a text")

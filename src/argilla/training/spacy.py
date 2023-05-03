@@ -34,6 +34,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self,
         language: Optional[str] = None,
         gpu_id: Optional[int] = -1,
+        model: Optional[str] = None,
         *args,
         **kwargs,
     ) -> None:
@@ -71,6 +72,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         import spacy
 
         self._nlp = None
+        self._model = model
 
         if self._record_class == rg.TokenClassificationRecord:
             self._column_mapping = {
@@ -106,13 +108,13 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             try:
                 require_version("torch")
                 self.has_torch = True
-            except:
+            except Exception:
                 self.has_torch = False
 
             try:
                 require_version("tensorflow")
                 self.has_tensorflow = True
-            except:
+            except Exception:
                 self.has_tensorflow = False
 
             if not self.has_torch and not self.has_tensorflow:
@@ -155,9 +157,9 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self._nlp = None
 
     def init_model(self):
-        from spacy.training.initialize import init_nlp
+        import spacy
 
-        self._nlp = init_nlp(self.config, use_gpu=self.gpu_id)
+        self._nlp = spacy.load(self._model)
 
     def __repr__(self) -> None:
         """Return the string representation of the `ArgillaSpaCyTrainer` object containing

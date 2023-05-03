@@ -28,7 +28,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     require_version("torch")
     require_version("datasets")
     require_version("transformers")
-    require_version("setfit")
+    require_version("setfit>=0.6")
 
     def __init__(self, *args, **kwargs):
         if kwargs.get("model") is None and "model" in kwargs:

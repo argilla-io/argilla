@@ -72,8 +72,30 @@ def test_train_tokencat(dataset_token_classification):
     cleanup_spacy_config(trainer)
 
 
-# TODO: fix test because it only works locally
-# def test_init_with_gpu_id(dataset_text_classification):
-#     trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK, gpu_id=0)
-#     expected_use_gpu = trainer._trainer.gpu_id >= 0
-#     assert trainer._trainer.use_gpu is expected_use_gpu
+def test_init_with_gpu_id(dataset_text_classification):
+    trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK, gpu_id=0)
+    try:
+        import torch  # noqa
+
+        has_torch = True
+    except ImportError:
+        has_torch = False
+
+    try:
+        import tensorflow  # noqa
+
+        has_tensorflow = True
+    except ImportError:
+        has_tensorflow = False
+
+    import spacy
+
+    if not has_torch and not has_tensorflow:
+        assert trainer._trainer.gpu_id == -1
+    else:
+        assert trainer._trainer.use_gpu == spacy.prefer_gpu(0)
+
+
+def test_predict_wo_training(dataset_text_classification):
+    trainer = ArgillaTrainer(name=dataset_text_classification, framework=FRAMEWORK, model=MODEL)
+    trainer._trainer.predict("This is a text")

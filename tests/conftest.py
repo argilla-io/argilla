@@ -18,6 +18,7 @@ import pytest
 from argilla import app
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import active_api
+from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
@@ -203,6 +204,8 @@ def dataset_text_classification(mocked_client):
         split="train[:100]",
     )
     dataset_rb = [rg.TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
+    labels = set([rec.annotation for rec in dataset_rb])
+    rg.configure_dataset(dataset, settings=TextClassificationSettings(label_schema=labels))
 
     rg.delete(dataset)
     rg.log(name=dataset, records=dataset_rb)

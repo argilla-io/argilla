@@ -279,24 +279,36 @@ class ArgillaTrainerSkeleton(ABC):
 
     @abstractmethod
     def init_training_args(self):
-        pass
+        """
+        Initializes the training arguments.
+        """
 
     @abstractmethod
     def init_model(self):
-        pass
+        """
+        Initializes a model.
+        """
 
     @abstractmethod
     def update_config(self, *args, **kwargs):
-        pass
+        """
+        Updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
+        """
 
     @abstractmethod
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
-        pass
+        """
+        Predicts the label of the text.
+        """
 
     @abstractmethod
     def train(self, output_dir: str = None):
-        pass
+        """
+        Trains the model.
+        """
 
     @abstractmethod
     def save(self, output_dir: str):
-        pass
+        """
+        Saves the model to the specified path.
+        """
