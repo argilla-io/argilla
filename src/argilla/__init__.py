@@ -63,6 +63,7 @@ if _TYPE_CHECKING:
         TokenAttributions,
         TokenClassificationRecord,
     )
+    from argilla.client.nightly import Dataset
     from argilla.datasets import (
         TextClassificationSettings,
         TokenClassificationSettings,
@@ -101,6 +102,7 @@ _import_structure = {
         "read_datasets",
         "read_pandas",
     ],
+    "client.nightly": ["Dataset"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [
         "listener",
