@@ -79,11 +79,6 @@ export default {
         this.localCurrentPage = +newCurrentPage;
       },
     },
-    currentPageFromUrl() {
-      const currentPageFromUrl = parseFloat(this.$route.query?._page) || 1;
-      this.currentPage = currentPageFromUrl;
-      return currentPageFromUrl;
-    },
     totalPages() {
       return Math.ceil(this.totalItems / this.numberOfItemsByPage);
     },
@@ -94,7 +89,6 @@ export default {
   watch: {
     localCurrentPage: {
       immediate: true,
-      deep: true,
       handler(newCurrentPage) {
         this.emitCurrentPage();
         this.updateUrlParams(newCurrentPage);
@@ -105,9 +99,12 @@ export default {
     this.currentPage = parseFloat(this.$route.query?._page) || 1;
 
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
+
+    this.onBusEventCurrentPage();
   },
   destroyed() {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+    this.$root.$off("current-page");
   },
   methods: {
     onPressKeyboardShortCut({ code }) {
@@ -122,6 +119,11 @@ export default {
         }
         default:
       }
+    },
+    onBusEventCurrentPage() {
+      this.$root.$on("current-page", (currentPage) => {
+        this.currentPage = currentPage;
+      });
     },
     onClickPrev() {
       this.currentPage > 1 && this.currentPage--;
