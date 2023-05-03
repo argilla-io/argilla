@@ -1,14 +1,15 @@
-.. _python_monitoring:
+.. _python_training:
 
-Monitoring
-=======
+Training
+========
 
-Here we describe the available monitors in Argilla:
+Here we describe the available trainers in Argilla:
 
 - Base Trainer: Internal mechanism to handle Trainers
 - SetFit Trainer: Internal mechanism for handling training logic of SetFit models
-- spaCy Trainer:  Internal mechanism for handling training logic of spaCy models
-- Transformers Trainer:  Internal mechanism for handling training logic of spaCy models
+- spaCy Trainer: Internal mechanism for handling training logic of spaCy models
+- Transformers Trainer: Internal mechanism for handling training logic of Transformers models
+- SpanMarker Trainer: Internal mechanism for handling training logic of SpanMarker models
 
 Base Trainer
 ------------
@@ -17,22 +18,25 @@ Base Trainer
    :members:
 
 SetFit Trainer
-------------------------
+--------------
 
 .. automodule:: argilla.training.setfit
    :members:
 
 spaCy Trainer
-------------------
+-------------
 
 .. automodule:: argilla.training.spacy
    :members:
 
 Transformers Trainer
-------------------
+--------------------
 
 .. automodule:: argilla.training.transformers
    :members:
 
+SpanMarker Trainer
+------------------
 
-
+.. automodule:: argilla.training.span_marker
+   :members:

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import click
+import typer
 
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.server.contexts import accounts
@@ -20,16 +20,16 @@ from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace
 
 
-@click.command()
-@click.option("--api-key", default=DEFAULT_API_KEY, help="API key for the user.")
-@click.option("--password", default=DEFAULT_PASSWORD, help="Password for the user.")
-@click.option("-q", "--quiet", is_flag=True, default=False, help="Run without output.")
-def create_default(api_key: str, password: str, quiet: bool):
+def create_default(
+    api_key: str = typer.Option(default=DEFAULT_API_KEY, help="API key for the user."),
+    password: str = typer.Option(default=DEFAULT_PASSWORD, help="Password for the user."),
+    quiet: bool = typer.Option(is_flag=True, default=False, help="Run without output."),
+):
     """Creates a user with default credentials on database suitable to start experimenting with argilla."""
     with SessionLocal() as session:
         if accounts.get_user_by_username(session, DEFAULT_USERNAME):
             if not quiet:
-                click.echo(f"User with default username already found on database, will not do anything.")
+                typer.echo("User with default username already found on database, will not do anything.")
 
             return
 
@@ -46,10 +46,10 @@ def create_default(api_key: str, password: str, quiet: bool):
         session.commit()
 
         if not quiet:
-            click.echo("User with default credentials succesfully created:")
-            click.echo(f"• username: {DEFAULT_USERNAME!r}")
-            click.echo(f"• password: {password!r}")
-            click.echo(f"• api_key:  {api_key!r}")
+            typer.echo("User with default credentials succesfully created:")
+            typer.echo(f"• username: {DEFAULT_USERNAME!r}")
+            typer.echo(f"• password: {password!r}")
+            typer.echo(f"• api_key:  {api_key!r}")
 
 
 if __name__ == "__main__":

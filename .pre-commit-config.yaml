@@ -23,7 +23,7 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-        additional_dependencies: ["click==8.0.4"]
+        additional_dependencies: ["typer==0.7.0"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.262

@@ -2,11 +2,11 @@
 set -e
 
 # Run database migrations
-python -m argilla.tasks.database.migrate
+python -m argilla database migrate
 
 # Create default user
 if [ "$DEFAULT_USER_ENABLED" = "true" ]; then
-  python -m argilla.tasks.users.create_default --password $DEFAULT_USER_PASSWORD --api-key $DEFAULT_USER_API_KEY
+  python -m argilla users create_default --password $DEFAULT_USER_PASSWORD --api-key $DEFAULT_USER_API_KEY
 fi
 
 # Run argilla-server (See https://www.uvicorn.org/settings/#settings)

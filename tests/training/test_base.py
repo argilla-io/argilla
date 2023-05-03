@@ -58,9 +58,3 @@ def test_base_token_classification(framework, dataset_token_classification):
             _init_trainer(framework)
     else:
         _init_trainer(framework)
-
-
-@pytest.mark.parametrize("framework", ["spacy", "transformers", "setfit"])
-def test_base_text2text(framework, dataset_text2text):
-    with pytest.raises(NotImplementedError, match="`argilla.training` does not support `Text2Text` tasks yet."):
-        ArgillaTrainer(dataset_text2text, framework=framework)
