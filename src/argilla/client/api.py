@@ -108,15 +108,6 @@ def init(
     )
 
 
-def list_datasets() -> list:
-    """List the `FeedbackTask` datasets in Argilla.
-
-    Returns:
-        A list of `FeedbackDataset` objects.
-    """
-    return ArgillaSingleton.get().list_datasets()
-
-
 def log(
     records: Union[Record, Iterable[Record], Dataset],
     name: str,
