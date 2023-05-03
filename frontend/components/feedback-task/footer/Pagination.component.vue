@@ -92,8 +92,9 @@ export default {
     },
   },
   watch: {
-    currentPage: {
+    localCurrentPage: {
       immediate: true,
+      deep: true,
       handler(newCurrentPage) {
         this.emitCurrentPage();
         this.updateUrlParams(newCurrentPage);
