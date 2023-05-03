@@ -177,7 +177,7 @@ plugin = classy_learner(name="plugin-test")
 plugin.start()
 ```
 
-<video src="https://share.descript.com/embed/nvlUjF8tNcZ" width="300" />
+<iframe src="https://share.descript.com/embed/nvlUjF8tNcZ" width="100%" frameborder="0" allowfullscreen></iframe>
 </td>
 </tr>
 <tr>
