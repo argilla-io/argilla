@@ -71,7 +71,7 @@ There are two different options to get started:
 <td>
 
 ```bash
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest # --platform linux/arm64
+docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 ```
 
 </td>
@@ -168,7 +168,7 @@ plugin = classy_learner(name="plugin-test")
 plugin.start()
 ```
 
-<iframe src="https://share.descript.com/embed/nvlUjF8tNcZ" allowfullscreen="" width="100%" frameborder="0"></iframe>
+<video src="https://share.descript.com/embed/nvlUjF8tNcZ" width="300" />
 </td>
 </tr>
 <tr>
