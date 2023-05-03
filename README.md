@@ -43,6 +43,7 @@ https://user-images.githubusercontent.com/25269220/235918158-359726bb-a479-4239-
 <p align="center">
 <a href="https://docs.argilla.io">📄 Documentation</a> | </span>
 <a href="#quickstart">🚀 Quickstart</a> <span> | </span>
+<a href="#quickstart">🎼 Cheatsheet</a> <span> | </span>
 <a href="#principles">📏 Principles</a> | </span>
 <a href="#contribute">🫱🏾‍🫲🏼 Contribute</a>
 </p>
@@ -57,14 +58,34 @@ There are two different options to get started:
 
 2. Start contributing by taking a look [here](#contribute) 🫱🏾‍🫲🏼
 
+## 🎼 Cheatsheet
+
 <table>
 <tr>
-<td> Feature </td> <td> Description </td>
+<td> <b>Feature</b> </td> <td> <b>Description</b> </td>
 </tr>
 <tr>
 <td>
-Create record
+<a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker-quickstart.html"> Deploy Locally</a>
 </td>
+<td>
+
+```bash
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest # --platform linux/arm64
+```
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png">Deploy on Hugging Face</a>
+</td>
+<td>
+<img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%">
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#Argilla-Records">Create Records</a></td>
 <td>
 
 ```python
@@ -77,35 +98,86 @@ rec = rg.TextClassificationRecord(
 )
 rg.log(records=record, name="news")
 ```
-</td>
-</tr>
-<tr>
-<td>
-Annotate Record
-</td>
-<td>
 <img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%">
 </td>
 </tr>
 <tr>
 <td>
-Train model
+<a href="https://docs.argilla.io/en/latest/guides/query_datasets.html">Query datasets</a>
+</td>
+<td>
+
+```python
+import argilla as rg
+
+rg.load(name="news", query="text:spor*")
+```
+<img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://docs.argilla.io/en/latest/guides/label_records_with_semanticsearch.html">Semantic search</a>
+</td>
+<td>
+
+```python
+import argilla as rg
+
+record = rg.TextClassificationRecord(
+    text="Hello world, I am a vector record!",
+    vectors= {"my_vector_name": [0, 42, 1984]}
+)
+rg.log(name="dataset", records=record)
+rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
+```
+<img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%">
+
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html">Weak supvervision</a>
+</td>
+<td>
+
+```python
+from argilla.labeling.text_classification import add_rules, Rule
+
+rule = Rule(query="positive impact", label="optimism")
+add_rules(dataset="go_emotion", rules=[rule])
+```
+<img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%">
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://argilla.io/blog/introducing-argilla-trainer">Active Learning</a>
+</td>
+<td>
+
+```python
+from argilla_plugins import classy_learner
+
+plugin = classy_learner(name="plugin-test")
+plugin.start()
+```
+<iframe src="https://share.descript.com/embed/nvlUjF8tNcZ" allowfullscreen="" width="100%" frameborder="0"></iframe>
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://argilla.io/blog/introducing-argilla-trainer">Train models</a>
 </td>
 <td>
 
 ```python
 from argilla.training import ArgillaTrainer
 
-trainer = ArgillaTrainer(
-    name="news",
-    workspace="recognai",
-    framework="setfit",
-    train_size=0.8
-)
-trainer.update_config(num_iterations=10)
-trainer.train(output_dir="text-classification")
-records = trainer.predict("The ArgillaTrainer is great!")
+trainer = ArgillaTrainer(name="news", workspace="recognai", framework="setfit")
+trainer.train()
 ```
+<img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%">
 </td>
 </tr>
 </table>
