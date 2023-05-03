@@ -58,6 +58,7 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
+from argilla.client.sdk.datasets.v1 import api as datasets_api_v1
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
 from argilla.client.sdk.text2text.models import (
@@ -208,8 +209,20 @@ class Argilla:
         """
         return self._client.headers.get(WORKSPACE_HEADER_NAME)
 
-    def list_datasets(self) -> list:
-        return datasets_api.list_datasets(client=self._client)
+    def list_datasets(self) -> httpx.Response:
+        return datasets_api_v1.list_datasets(client=self._client)
+
+    def get_dataset(self, id: str) -> httpx.Response:
+        return datasets_api_v1.get_dataset(client=self._client, id=id)
+
+    def publish_dataset(self, id: str) -> httpx.Response:
+        return datasets_api_v1.publish_dataset(client=self._client, id=id)
+
+    def get_records(self, id: str, offset: int = 0, limit: int = 50) -> httpx.Response:
+        return datasets_api_v1.get_records(client=self._client, id=id, offset=offset, limit=limit)
+
+    def add_record(self, id: str, record: Dict[str, Any]) -> httpx.Response:
+        return datasets_api_v1.add_record(client=self._client, id=id, record=record)
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata

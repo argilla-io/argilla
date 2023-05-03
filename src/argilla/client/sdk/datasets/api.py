@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from functools import lru_cache
-from typing import List, Union
+from typing import Union
 
 import httpx
 
@@ -28,7 +28,6 @@ from argilla.client.sdk.commons.models import (
 from argilla.client.sdk.datasets.models import (
     CopyDatasetRequest,
     Dataset,
-    FeedbackDataset,
 )
 
 
@@ -89,29 +88,6 @@ def delete_dataset(
             parsed=response.json(),
         )
     return handle_response_error(response, dataset=name)
-
-
-def list_datasets(
-    client: AuthenticatedClient,
-) -> Response[List[FeedbackDataset]]:
-    url = "{}/api/v1/datasets".format(client.base_url)
-
-    response = httpx.get(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
-
-    if response.status_code == 200:
-        parsed_response = [FeedbackDataset(**dataset) for dataset in response.json()["items"]]
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
-    return handle_response_error(response)
 
 
 def _build_response(response: httpx.Response, name: str) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:

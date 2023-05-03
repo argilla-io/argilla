@@ -14,39 +14,21 @@
 #  limitations under the License.
 
 from datetime import datetime
-from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from pydantic import BaseModel, Field
-
-
-class TaskType(str, Enum):
-    text_classification = "TextClassification"
-    token_classification = "TokenClassification"
-    text2text = "Text2Text"
-    multi_task_text_token_classification = "MultitaskTextTokenClassification"
-
-    @classmethod
-    def _missing_(cls, value):
-        raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
-        )
 
 
 class BaseDatasetModel(BaseModel):
     tags: Dict[str, str] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_]+$")
+    name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_ ]+$")
 
 
-class Dataset(BaseDatasetModel):
+class FeedbackDataset(BaseDatasetModel):
     id: str
-    task: TaskType
-    owner: str = None
-    workspace: str = None
+    guidelines: str = None
+    status: str = None
+    workspace_id: str = None
     created_at: datetime = None
     last_updated: datetime = None
-
-
-class CopyDatasetRequest(BaseDatasetModel):
-    target_workspace: Optional[str] = None
