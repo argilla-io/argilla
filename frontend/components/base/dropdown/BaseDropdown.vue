@@ -73,9 +73,6 @@ export default {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 270px;
-    margin-top: 0;
-    padding: $base-space * 3;
     z-index: 3;
     transform: translate(0);
     box-shadow: $shadow;
