@@ -1,5 +1,5 @@
 ```{grid-item-card} 📸 Bulk Labelling Multimodal Data
-:img-top: /_static/tutorials/labelling-textclassification-sentencetransformers-semantic/4.png
+:img-top: /_static/tutorials/labelling-textclassification-sentencetransformers-semantic/argilla_image_cables.png
 :link: ../../tutorials/notebooks/labelling-textclassification-sentencetransformers-semantic.html
 MLOps Steps: Labelling \
 NLP Tasks: TextClassification (images) \
