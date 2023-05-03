@@ -20,6 +20,9 @@ const getRecordWithFieldsAndResponsesByUserId = (
     .where("record_index", recordIndex)
     .first();
 };
+const getRecordIndexByRecordId = (recordId) => {
+  return RecordModel.query().whereId(recordId).first()?.record_index;
+};
 
 // EXIST
 const isRecordWithRecordIndexByDatasetIdExists = (datasetId, recordIndex) => {
@@ -40,6 +43,7 @@ const isRecordContainsAnyResponsesByUserId = (userId, recordId) => {
 export {
   upsertRecords,
   getRecordWithFieldsAndResponsesByUserId,
+  getRecordIndexByRecordId,
   isRecordWithRecordIndexByDatasetIdExists,
   isRecordContainsAnyResponsesByUserId,
 };

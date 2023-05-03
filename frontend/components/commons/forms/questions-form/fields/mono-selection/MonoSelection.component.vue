@@ -4,7 +4,7 @@
       <span
         :key="colorHighlight"
         v-text="title"
-        v-required-field="isRequired ? { color: colorHighlight } : false"
+        v-optional-field="isRequired ? false : true"
       />
       <TooltipComponent
         class="info-icon"

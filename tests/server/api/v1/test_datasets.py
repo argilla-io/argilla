@@ -24,6 +24,7 @@ from argilla.server.models import (
     Question,
     Record,
     Response,
+    ResponseStatus,
     User,
     Workspace,
 )
@@ -697,6 +698,102 @@ def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{uuid4()}", headers=admin_auth_header)
+
+    assert response.status_code == 404
+
+
+def test_get_current_user_dataset_metrics(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    record_a = RecordFactory.create(dataset=dataset)
+    record_b = RecordFactory.create(dataset=dataset)
+    record_c = RecordFactory.create(dataset=dataset)
+    RecordFactory.create_batch(3, dataset=dataset)
+    ResponseFactory.create(record=record_a, user=admin)
+    ResponseFactory.create(record=record_b, user=admin, status=ResponseStatus.discarded)
+    ResponseFactory.create(record=record_c, user=admin, status=ResponseStatus.discarded)
+
+    other_dataset = DatasetFactory.create()
+    other_record_a = RecordFactory.create(dataset=other_dataset)
+    other_record_b = RecordFactory.create(dataset=other_dataset)
+    other_record_c = RecordFactory.create(dataset=other_dataset)
+    RecordFactory.create_batch(2, dataset=other_dataset)
+    ResponseFactory.create(record=other_record_a, user=admin)
+    ResponseFactory.create(record=other_record_b)
+    ResponseFactory.create(record=other_record_c, status=ResponseStatus.discarded)
+
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers=admin_auth_header)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "records": {
+            "count": 6,
+        },
+        "responses": {
+            "count": 3,
+            "submitted": 1,
+            "discarded": 2,
+        },
+    }
+
+
+def test_get_current_user_dataset_metrics_without_authentication(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics")
+
+    assert response.status_code == 401
+
+
+def test_get_current_user_dataset_metrics_as_annotator(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+    record_a = RecordFactory.create(dataset=dataset)
+    record_b = RecordFactory.create(dataset=dataset)
+    record_c = RecordFactory.create(dataset=dataset)
+    RecordFactory.create_batch(2, dataset=dataset)
+    ResponseFactory.create(record=record_a, user=annotator)
+    ResponseFactory.create(record=record_b, user=annotator)
+    ResponseFactory.create(record=record_c, user=annotator, status=ResponseStatus.discarded)
+
+    other_dataset = DatasetFactory.create()
+    other_record_a = RecordFactory.create(dataset=other_dataset)
+    other_record_b = RecordFactory.create(dataset=other_dataset)
+    other_record_c = RecordFactory.create(dataset=other_dataset)
+    RecordFactory.create_batch(3, dataset=other_dataset)
+    ResponseFactory.create(record=other_record_a, user=annotator)
+    ResponseFactory.create(record=other_record_b)
+    ResponseFactory.create(record=other_record_c, status=ResponseStatus.discarded)
+
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "records": {
+            "count": 5,
+        },
+        "responses": {
+            "count": 3,
+            "submitted": 2,
+            "discarded": 1,
+        },
+    }
+
+
+def test_get_current_user_dataset_metrics_annotator_from_different_workspace(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: annotator.api_key})
+
+    assert response.status_code == 403
+
+
+def test_get_current_user_dataset_metrics_with_nonexistent_dataset_id(
+    client: TestClient, db: Session, admin_auth_header: dict
+):
+    DatasetFactory.create()
+
+    response = client.get(f"/api/v1/me/datasets/{uuid4()}/metrics", headers=admin_auth_header)
 
     assert response.status_code == 404
 

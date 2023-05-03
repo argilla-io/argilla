@@ -23,6 +23,7 @@ from argilla.server.models import (
     Question,
     Record,
     Response,
+    ResponseStatus,
 )
 from argilla.server.schemas.v1.datasets import (
     DatasetCreate,
@@ -233,6 +234,37 @@ def get_response_by_id(db: Session, response_id: UUID):
 
 def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):
     return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
+
+
+def list_responses_by_record_id(db: Session, record_id: UUID):
+    return db.query(Response).filter_by(record_id=record_id).order_by(Response.inserted_at.asc()).all()
+
+
+def count_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
+    return (
+        db.query(func.count(Response.id))
+        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
+        .filter(Response.user_id == user_id)
+        .scalar()
+    )
+
+
+def count_submitted_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
+    return (
+        db.query(func.count(Response.id))
+        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
+        .filter(Response.user_id == user_id, Response.status == ResponseStatus.submitted)
+        .scalar()
+    )
+
+
+def count_discarded_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
+    return (
+        db.query(func.count(Response.id))
+        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
+        .filter(Response.user_id == user_id, Response.status == ResponseStatus.discarded)
+        .scalar()
+    )
 
 
 def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):

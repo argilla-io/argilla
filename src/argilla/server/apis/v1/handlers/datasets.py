@@ -29,6 +29,7 @@ from argilla.server.schemas.v1.datasets import (
     Field,
     FieldCreate,
     Fields,
+    Metrics,
     Question,
     QuestionCreate,
     Questions,
@@ -134,6 +135,29 @@ def get_dataset(
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
     return dataset
+
+
+@router.get("/me/datasets/{dataset_id}/metrics", response_model=Metrics)
+def get_current_user_dataset_metrics(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return {
+        "records": {
+            "count": datasets.count_records_by_dataset_id(db, dataset_id),
+        },
+        "responses": {
+            "count": datasets.count_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+            "submitted": datasets.count_submitted_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+            "discarded": datasets.count_discarded_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+        },
+    }
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=Dataset)
