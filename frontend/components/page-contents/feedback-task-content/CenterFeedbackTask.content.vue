@@ -61,7 +61,7 @@ export default {
     onBusEventRecordIndexToGo() {
       this.$root.$on("go-to-record-index", (recordIndexToGo) => {
         if (recordIndexToGo >= 0) {
-          // NOTE - recordIndex start at 1 / page start at 0
+          // NOTE - recordIndex start at 0 / page start at 1
           const pageToGo = recordIndexToGo + 1;
 
           if (pageToGo < this.totalRecords) {
