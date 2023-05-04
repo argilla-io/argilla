@@ -1,5 +1,11 @@
 import { Record as RecordModel } from "./Record.model";
 
+const RECORD_STATUS = Object.freeze({
+  PENDING: "PENDING",
+  DISCARDED: "DISCARDED",
+  SUBMITTED: "SUBMITTED",
+});
+
 // UPSERT
 const upsertRecords = (records) => {
   RecordModel.insertOrUpdate({ data: records });
@@ -49,6 +55,7 @@ const isRecordContainsAnyResponsesByUserId = (userId, recordId) => {
 };
 
 export {
+  RECORD_STATUS,
   upsertRecords,
   getRecordWithFieldsAndResponsesByUserId,
   getRecordIndexByRecordId,
