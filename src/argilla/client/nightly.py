@@ -205,12 +205,24 @@ class Dataset:
             if self.schema is None:
                 self.schema = generate_pydantic_schema(first_batch["items"][0]["fields"])
                 FieldsSchema.__bound__ = self.schema
-            yield [self.schema(**record) for record in first_batch["items"]]
+            batch = [
+                OnlineRecordSchema(
+                    id=record["id"],
+                    fields=self.schema(**record["fields"]),
+                    response=record["response"] if "response" in record else {},
+                    external_id=record["external_id"],
+                    inserted_at=record["inserted_at"],
+                    updated_at=record["inserted_at"],
+                )
+                for record in first_batch["items"]
+            ]
+            self.__records = batch
+            yield batch
             total_batches = first_batch["total"] // batch_size
             current_batch = 1
             with tqdm(initial=current_batch, total=total_batches, desc="Fetching records from Argilla") as pbar:
-                while current_batch < total_batches:
-                    yield [
+                while current_batch <= total_batches:
+                    batch = [
                         OnlineRecordSchema(
                             id=record["id"],
                             fields=self.schema(**record["fields"]),
@@ -219,25 +231,15 @@ class Dataset:
                             inserted_at=record["inserted_at"],
                             updated_at=record["inserted_at"],
                         )
-                        for record in self.client.get_records(
-                            id=self.id, offset=current_batch * batch_size, limit=batch_size
-                        ).parsed["items"]
+                        for record in first_batch["items"]
                     ]
+                    self.__records += batch
+                    yield batch
                     current_batch += 1
                     pbar.update(1)
         else:
-            for batch in self.records[:, batch_size]:
-                yield [
-                    OnlineRecordSchema(
-                        id=record["id"],
-                        fields=self.schema(**record["fields"]),
-                        response=record["response"] if "response" in record else {},
-                        external_id=record["external_id"],
-                        inserted_at=record["inserted_at"],
-                        updated_at=record["inserted_at"],
-                    )
-                    for record in batch
-                ]
+            for batch in self.records[0::batch_size]:
+                yield batch
 
 
 def generate_pydantic_schema(record: Dict[str, Any]) -> BaseModel:
