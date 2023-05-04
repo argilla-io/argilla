@@ -49,26 +49,25 @@
       </div>
     </div>
     <div class="footer-form">
-      <div class="error-message" v-if="isError">
-        <i v-text="formOnErrorMessage" />
+      <div class="footer-form__left-footer">
+        <div class="buttons-area">
+          <BaseButton
+            type="button"
+            class="primary outline small"
+            @click.prevent="onClear"
+          >
+            <span v-text="'Clear'" />
+          </BaseButton>
+        </div>
       </div>
-      <div class="buttons-area">
+      <div class="footer-form__right-area">
         <BaseButton
           type="button"
           class="primary outline small"
-          @click.prevent="onClear"
+          @on-click="onDiscard"
         >
-          <span v-text="'Clear'" />
+          <span v-text="'Discard'" />
         </BaseButton>
-        <BaseButton
-          type="reset"
-          class="primary outline small"
-          @on-click="onReset"
-          :disabled="isFormUntouched"
-        >
-          <span v-text="'Reset'" />
-        </BaseButton>
-
         <BaseButton
           ref="submitButton"
           type="submit"
@@ -443,8 +442,16 @@ export default {
 
 .footer-form {
   display: flex;
-  flex-direction: column;
-  gap: $base-space * 2;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  &__left-area {
+    display: inline-flex;
+  }
+  &__right-area {
+    display: inline-flex;
+    gap: $base-space * 2;
+  }
 }
 
 .buttons-area {
