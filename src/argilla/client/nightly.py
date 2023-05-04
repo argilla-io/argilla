@@ -147,7 +147,6 @@ class Dataset:
                 ) as pbar:
                     while prev_limit < total_records:
                         prev_limit += 1
-                        increment = 1 if prev_limit + 1 < total_records else total_records - prev_limit
                         self.__records += [
                             OnlineRecordSchema(
                                 id=record["id"],
@@ -157,11 +156,11 @@ class Dataset:
                                 inserted_at=record["inserted_at"],
                                 updated_at=record["inserted_at"],
                             )
-                            for record in self.client.get_records(
-                                id=self.id, offset=prev_limit, limit=prev_limit + increment
-                            ).parsed["items"]
+                            for record in self.client.get_records(id=self.id, offset=prev_limit, limit=1).parsed[
+                                "items"
+                            ]
                         ]
-                        pbar.update(increment)
+                        pbar.update(1)
         return self.__records
 
     @property
