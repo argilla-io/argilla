@@ -21,7 +21,9 @@
 </a>
 </p>
 
-<h2 align="center">Open-source data curation platform for LLMs </h2>
+<h2 align="center">Open-source data curation platform for LLMs</h2>
+<h3 align="center">MLOps for NLP: from data labeling to model monitoring</h2>
+
 <br>
 
 https://user-images.githubusercontent.com/25269220/235918158-359726bb-a479-4239-8c6e-c9e4cdb4fcdf.mp4
@@ -52,15 +54,15 @@ https://user-images.githubusercontent.com/25269220/235918158-359726bb-a479-4239-
 
 ## 🚀 Quickstart
 
-Argilla is an open-source data curation platform for LLMs. Using Argilla, everyone can build robust LLMs through faster data curation using both human and machine feedback.
+Argilla is an open-source data curation platform for LLMs. Using Argilla, everyone can build robust LLMs through faster data curation using both human and machine feedback. We provide support for each step in the MLOps cycle, from data labeling to model monitoring.
 
-There are two different options to get started:
+There are different options to get started:
 
 1. Take a look at our [quickstart page](https://docs.argilla.io/en/latest/getting_started/quickstart.html) 🚀
 
-2. Start contributing by taking a look [here](#🫱🏾‍🫲🏼-contribute) 🫱🏾‍🫲🏼
+2. Start contributing by looking at our [contributor guidelines](#🫱🏾‍🫲🏼-contribute) 🫱🏾‍🫲🏼
 
-3. Game a little with the [cheatsheet](#🎼-cheatsheet) 🎼
+3. Skips some steps with our [cheatsheet](#🎼-cheatsheet) 🎼
 
 ## 🎼 Cheatsheet
 
