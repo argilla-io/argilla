@@ -169,7 +169,7 @@ export default {
             id: recordId,
             record_index: index + this.recordOffset,
             dataset_id: this.datasetId,
-            record_status: recordStatus ?? null,
+            record_status: recordStatus ?? "PENDING",
             record_fields: formattedRecordFields,
             record_responses: formattedRecordResponsesForOrm,
           };
