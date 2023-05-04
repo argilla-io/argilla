@@ -87,10 +87,10 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 </tr>
 <tr>
 <td>
-<a href="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png">Deploy on Hugging Face</a>
+<a href="https://argilla.io/blog/launching-argilla-huggingface-hub/">Deploy on Hugging Face Hub</a>
 </td>
 <td>
-<img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%">
+<a href="https://argilla.io/blog/launching-argilla-huggingface-hub/"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
 </td>
 </tr>
 <tr>
@@ -109,7 +109,7 @@ rec = rg.TextClassificationRecord(
 rg.log(records=record, name="news")
 ```
 
-<img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%">
+<a href="https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#Argilla-Records"><img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
 </td>
 </tr>
 <tr>
@@ -124,7 +124,7 @@ import argilla as rg
 rg.load(name="news", query="text:spor*")
 ```
 
-<img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
+<a href="https://docs.argilla.io/en/latest/guides/query_datasets.html"><img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
 </td>
 </tr>
 <tr>
@@ -144,13 +144,13 @@ rg.log(name="dataset", records=record)
 rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 ```
 
-<img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%">
+<a href="https://docs.argilla.io/en/latest/guides/label_records_with_semanticsearch.html"><img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
 
 </td>
 </tr>
 <tr>
 <td>
-<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html">Weak supvervision</a>
+<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html">Weak supervision</a>
 </td>
 <td>
 
@@ -161,7 +161,7 @@ rule = Rule(query="positive impact", label="optimism")
 add_rules(dataset="go_emotion", rules=[rule])
 ```
 
-<img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%">
+<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html"><img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
 </td>
 </tr>
 <!-- <tr>
@@ -193,7 +193,7 @@ trainer = ArgillaTrainer(name="news", workspace="recognai", framework="setfit")
 trainer.train()
 ```
 
-<img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%">
+<a href="https://argilla.io/blog/introducing-argilla-trainer"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>
 </td>
 </tr>
 </table>
