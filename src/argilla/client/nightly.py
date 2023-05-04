@@ -89,6 +89,24 @@ class Dataset:
 
         self.__status = DatasetStatus(dataset.status) or DatasetStatus.DRAFT
 
+    def __repr__(self) -> str:
+        return (
+            f"Dataset(name={self.name}, workspace={self.workspace}, schema={self.schema},"
+            f" description={self.description}, guidelines={self.guidelines}, questions={self.questions},"
+            f" status={self.status})"
+        )
+
+    def __len__(self) -> int:
+        if self.__records is None or len(self.__records) < 1:
+            warnings.warn(
+                "Since no records were provided, those will be fetched automatically from Argilla if available."
+            )
+            self.records
+        return len(self.__records)
+
+    def __getitem__(self, key: Union[slice, int]) -> Union[OnlineRecordSchema, List[OnlineRecordSchema]]:
+        return self.__records[key]
+
     @property
     def status(self) -> DatasetStatus:
         return self.__status
@@ -145,13 +163,6 @@ class Dataset:
     @property
     def questions(self) -> List[QuestionSchema]:
         return self.__questions
-
-    def __repr__(self) -> str:
-        return (
-            f"Dataset(name={self.name}, workspace={self.workspace}, schema={self.schema},"
-            f" description={self.description}, guidelines={self.guidelines}, questions={self.questions},"
-            f" status={self.status})"
-        )
 
     def add_record(
         self,
