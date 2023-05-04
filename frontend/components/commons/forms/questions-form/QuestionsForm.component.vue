@@ -53,6 +53,7 @@
         <div class="buttons-area">
           <BaseButton
             type="button"
+            ref="clearButton"
             class="primary outline small"
             @click.prevent="onClear"
           >
@@ -63,6 +64,7 @@
       <div class="footer-form__right-area">
         <BaseButton
           type="button"
+          ref="discardButton"
           class="primary outline small"
           @on-click="onDiscard"
         >
@@ -156,16 +158,21 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code }) {
+    onPressKeyboardShortCut({ code, ctrlKey }) {
       switch (code) {
         case "Enter": {
           const elem = this.$refs.submitButton.$el;
           elem.click();
           break;
         }
+        case "Space": {
+          const elem = this.$refs.clearButton.$el;
+          ctrlKey && elem.click();
+          break;
+        }
         case "Delete": {
-          console.log("onDiscard");
-          // TODO - when DISCARD feature will be implemented, add a ref in the discard button force a click
+          const elem = this.$refs.discardButton.$el;
+          elem.click();
           break;
         }
         default:
@@ -180,7 +187,6 @@ export default {
       });
     },
     async onDiscard() {
-      console.log("discard");
       this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
     },
     async onSubmit() {
