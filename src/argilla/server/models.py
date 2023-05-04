@@ -109,7 +109,7 @@ class Response(Base):
     __tablename__ = "responses"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    values: Mapped[dict] = mapped_column(JSON)
+    values: Mapped[Optional[dict]] = mapped_column(JSON)
     status: Mapped[ResponseStatus] = mapped_column(default=ResponseStatus.submitted)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))

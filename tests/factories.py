@@ -98,10 +98,6 @@ class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
 
-    values = {
-        "question_a": {"value": "Question a response"},
-        "question_b": {"value": "Question b response"},
-    }
     record = factory.SubFactory(RecordFactory)
     user = factory.SubFactory(UserFactory)
 

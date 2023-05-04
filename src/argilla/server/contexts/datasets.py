@@ -35,6 +35,7 @@ from argilla.server.schemas.v1.datasets import (
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.security.model import User
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, contains_eager, joinedload
 
@@ -220,7 +221,7 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
         )
 
         if record_create.response:
-            record.responses = [Response(values=record_create.response.values, user_id=user.id)]
+            record.responses = [Response(values=jsonable_encoder(record_create.response.values), user_id=user.id)]
 
         records.append(record)
 
@@ -269,7 +270,8 @@ def count_discarded_responses_by_dataset_id_and_user_id(db: Session, dataset_id:
 
 def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):
     response = Response(
-        values=response_create.values,
+        values=jsonable_encoder(response_create.values),
+        status=response_create.status,
         record_id=record.id,
         user_id=user.id,
     )
@@ -282,7 +284,8 @@ def create_response(db: Session, record: Record, user: User, response_create: Re
 
 
 def update_response(db: Session, response: Response, response_update: ResponseUpdate):
-    response.values = response_update.values
+    response.values = jsonable_encoder(response_update.values)
+    response.status = response_update.status
 
     db.commit()
     db.refresh(response)

@@ -35,6 +35,7 @@ def test_create_record_response(client: TestClient, db: Session, admin: User, ad
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
@@ -64,12 +65,106 @@ def test_create_record_response_without_authentication(client: TestClient, db: S
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", json=response_json)
 
     assert response.status_code == 401
     assert db.query(Response).count() == 0
+
+
+def test_create_record_submitted_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    record = RecordFactory.create()
+    response_json = {
+        "values": {
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        "status": "submitted",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 201
+    assert db.query(Response).count() == 1
+
+    response_body = response.json()
+    assert db.get(Response, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "values": {
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        "status": "submitted",
+        "user_id": str(admin.id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
+
+
+def test_create_record_submitted_response_without_values(client: TestClient, db: Session, admin_auth_header: dict):
+    record = RecordFactory.create()
+    response_json = {"status": "submitted"}
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 422
+    assert db.query(Response).count() == 0
+
+
+def test_create_record_discarded_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    record = RecordFactory.create()
+    response_json = {
+        "values": {
+            "input_ok": {"value": "no"},
+            "output_ok": {"value": "no"},
+        },
+        "status": "discarded",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 201
+    assert db.query(Response).count() == 1
+
+    response_body = response.json()
+    assert db.get(Response, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "values": {
+            "input_ok": {"value": "no"},
+            "output_ok": {"value": "no"},
+        },
+        "status": "discarded",
+        "user_id": str(admin.id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
+
+
+def test_create_record_discarded_response_without_values(
+    client: TestClient, db: Session, admin: User, admin_auth_header: dict
+):
+    record = RecordFactory.create()
+    response_json = {"status": "discarded"}
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 201
+    assert db.query(Response).count() == 1
+
+    response_body = response.json()
+    assert db.get(Response, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "values": None,
+        "status": "discarded",
+        "user_id": str(admin.id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
 
 
 def test_create_record_response_as_annotator(client: TestClient, db: Session):
@@ -80,6 +175,7 @@ def test_create_record_response_as_annotator(client: TestClient, db: Session):
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(
@@ -111,6 +207,7 @@ def test_create_record_response_as_annotator_from_different_workspace(client: Te
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(
@@ -129,6 +226,7 @@ def test_create_record_response_already_created(client: TestClient, db: Session,
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
@@ -139,7 +237,26 @@ def test_create_record_response_already_created(client: TestClient, db: Session,
 
 def test_create_record_response_with_invalid_values(client: TestClient, db: Session, admin_auth_header: dict):
     record = RecordFactory.create()
-    response_json = {"values": "invalid"}
+    response_json = {
+        "values": "invalid",
+        "status": "submitted",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 422
+    assert db.query(Response).count() == 0
+
+
+def test_create_record_response_with_invalid_status(client: TestClient, db: Session, admin_auth_header: dict):
+    record = RecordFactory.create()
+    response_json = {
+        "values": {
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        "status": "invalid",
+    }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
 
@@ -154,6 +271,7 @@ def test_create_record_response_with_nonexistent_record_id(client: TestClient, d
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(f"/api/v1/records/{uuid4()}/responses", headers=admin_auth_header, json=response_json)
