@@ -284,7 +284,7 @@ export default {
 
         // NOTE - onClear event => the status change to pending
         await updateRecordStatusByRecordId(this.recordId, "PENDING");
-        
+
         this.onReset();
       } catch (err) {
         console.log(err);
