@@ -96,6 +96,7 @@ import {
 import {
   getRecordIndexByRecordId,
   updateRecordStatusByRecordId,
+  RECORD_STATUS,
 } from "@/models/feedback-task-model/record/record.queries";
 import {
   getRecordResponsesIdByRecordId,
@@ -283,8 +284,11 @@ export default {
         );
 
         // NOTE - onClear event => the status change to pending
-        await updateRecordStatusByRecordId(this.recordId, "PENDING");
-        
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.PENDING
+        );
+
         this.onReset();
       } catch (err) {
         console.log(err);

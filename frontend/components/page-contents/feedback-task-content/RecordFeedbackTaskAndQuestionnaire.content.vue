@@ -21,6 +21,7 @@ import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import {
+  RECORD_STATUS,
   upsertRecords,
   getRecordWithFieldsAndResponsesByUserId,
   isRecordWithRecordIndexByDatasetIdExists,
@@ -169,7 +170,7 @@ export default {
             id: recordId,
             record_index: index + this.recordOffset,
             dataset_id: this.datasetId,
-            record_status: recordStatus ?? "PENDING",
+            record_status: recordStatus ?? RECORD_STATUS.PENDING,
             record_fields: formattedRecordFields,
             record_responses: formattedRecordResponsesForOrm,
           };
