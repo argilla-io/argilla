@@ -115,6 +115,10 @@ class Dataset:
         if self.__status == DatasetStatus.DRAFT:
             self.client.publish_dataset(id=self.id)
             self.__status = DatasetStatus.READY
+        else:
+            warnings.warn(
+                "`Dataset` already published to Argilla, so it cannot be published again, which means that you can only add new records to the `Dataset` with `add_records`."
+            )
 
     @property
     def records(self) -> List[FieldsSchema]:
