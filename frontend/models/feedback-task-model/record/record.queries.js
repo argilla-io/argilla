@@ -5,6 +5,14 @@ const upsertRecords = (records) => {
   RecordModel.insertOrUpdate({ data: records });
 };
 
+// UPDATE
+const updateRecordStatusByRecordId = (recordId, recordStatus) => {
+  RecordModel.update({
+    where: recordId,
+    data: { record_status: recordStatus },
+  });
+};
+
 // GET
 const getRecordWithFieldsAndResponsesByUserId = (
   datasetId,
@@ -44,6 +52,7 @@ export {
   upsertRecords,
   getRecordWithFieldsAndResponsesByUserId,
   getRecordIndexByRecordId,
+  updateRecordStatusByRecordId,
   isRecordWithRecordIndexByDatasetIdExists,
   isRecordContainsAnyResponsesByUserId,
 };
