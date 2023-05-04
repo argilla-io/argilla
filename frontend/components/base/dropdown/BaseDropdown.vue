@@ -21,7 +21,7 @@
       <slot name="dropdown-header" />
     </div>
     <transition appear name="fade">
-      <div v-show="visible" class="dropdown__content">
+      <div v-if="visible" class="dropdown__content">
         <slot name="dropdown-content" />
       </div>
     </transition>
