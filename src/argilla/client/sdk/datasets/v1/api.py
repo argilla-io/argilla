@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from functools import lru_cache
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
 
@@ -28,6 +28,37 @@ from argilla.client.sdk.commons.models import (
 from argilla.client.sdk.datasets.v1.models import (
     FeedbackDataset,
 )
+
+
+def create_dataset(
+    client: AuthenticatedClient,
+    name: str,
+    workspace_id: str,
+    guidelines: Optional[str] = None,
+) -> Response[Union[FeedbackDataset, ErrorMessage, HTTPValidationError]]:
+    url = "{}/api/v1/datasets".format(client.base_url)
+
+    body = {"name": name, "workspace_id": workspace_id}
+    if guidelines is not None:
+        body.update({"guidelines": guidelines})
+
+    response = httpx.post(
+        url=url,
+        json=body,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    if response.status_code == 201:
+        parsed_response = FeedbackDataset(**response.json())
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)
 
 
 @lru_cache(maxsize=None)
