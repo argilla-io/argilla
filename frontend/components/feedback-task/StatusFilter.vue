@@ -16,37 +16,12 @@
   -->
 
 <template>
-  <div v-if="options.length" :style="cssVars">
-    <BaseDropdown :visible="dropdownIsvisible" @visibility="onVisibility">
-      <span slot="dropdown-header">
-        <BaseButton class="selected-option">
-          {{ currentOptionName }}
-          <svgicon name="chevron-down" />
-        </BaseButton>
-      </span>
-      <span slot="dropdown-content">
-        <ul class="options">
-          <li
-            v-for="{ id, name, color, bgColor } in options"
-            class="option"
-            :key="id"
-            :style="{
-              backgroundColor: bgColor,
-            }"
-          >
-            <BaseRadioButton
-              class="option__radio"
-              :color="color"
-              :id="id"
-              :model="id"
-              :value="selectedStatus"
-              @change="changeOption(id)"
-              >{{ name }}</BaseRadioButton
-            >
-          </li>
-        </ul>
-      </span>
-    </BaseDropdown>
+  <div v-if="options.length">
+    <RadioButtonsSelectBase
+      :options="options"
+      :selected-option="selectedOption"
+      @change="changeOption"
+    />
   </div>
 </template>
 
@@ -57,87 +32,25 @@ export default {
       type: Array,
       required: true,
     },
-    selectedStatus: {
+    selectedOption: {
       type: String,
     },
   },
-  data() {
-    return {
-      dropdownIsvisible: false,
-    };
-  },
   model: {
-    prop: "selectedStatus",
+    prop: "selectedOption",
     event: "change",
   },
-  computed: {
-    currentOption() {
-      return this.options.find((opt) => opt.id === this.selectedStatus);
-    },
-    currentOptionId() {
-      return this.currentOption?.id;
-    },
-    currentOptionName() {
-      return this.currentOption?.name;
-    },
-    cssVars() {
-      return {
-        "--selected-option-color": this.currentOption?.color,
-        "--selected-option-text-color": this.currentOption?.textColor,
-      };
-    },
-  },
   methods: {
-    onVisibility(value) {
-      this.dropdownIsvisible = value;
-    },
     changeOption(id) {
       this.$emit("change", id);
+      this.updateRouteQuery(id);
+    },
+    updateRouteQuery(query) {
+      const currentQuery = this.$route.query;
+      this.$router.push({
+        query: { ...currentQuery, _status: query },
+      });
     },
   },
 };
 </script>
-
-<style lang="scss" scoped>
-$selector-width: 160px;
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: calc($base-space / 2);
-  min-width: $selector-width;
-  padding: calc($base-space / 2);
-  margin: 0;
-  list-style: none;
-}
-.option {
-  padding: $base-space;
-  border-radius: $border-radius;
-  &:not(:hover) {
-    background: palette(white) !important;
-    transition: background 0.2s ease-in;
-  }
-  &__radio {
-    margin: 0;
-  }
-}
-.button.selected-option {
-  min-width: $selector-width;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: $base-space + 4px;
-  background: palette(white);
-  color: var(--selected-option-text-color);
-  border: 1px solid var(--selected-option-color);
-  .svg-icon {
-    margin-left: auto;
-  }
-  &:before {
-    content: "";
-    height: $base-space;
-    width: $base-space;
-    background: var(--selected-option-color);
-    border-radius: 50%;
-  }
-}
-</style>

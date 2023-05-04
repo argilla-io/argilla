@@ -41,7 +41,7 @@ export default {
   },
   data: () => {
     return {
-      selectedStatus: "pending",
+      selectedStatus: null,
     };
   },
   computed: {
@@ -92,6 +92,7 @@ export default {
         ],
       },
     };
+    this.selectedStatus = this.$route.query._status || "pending";
     const filterValues = Object.values(this.filters);
     const formattedFilters = this.factoryFiltersForOrm(filterValues);
     upsertDatasetFilters(formattedFilters);
