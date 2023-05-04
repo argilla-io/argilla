@@ -93,7 +93,10 @@ import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import { getRecordIndexByRecordId } from "@/models/feedback-task-model/record/record.queries";
+import {
+  getRecordIndexByRecordId,
+  updateRecordStatusByRecordId,
+} from "@/models/feedback-task-model/record/record.queries";
 import {
   getRecordResponsesIdByRecordId,
   upsertRecordResponses,
@@ -278,6 +281,10 @@ export default {
           this.userId,
           responseData?.data?.id
         );
+
+        // NOTE - onClear event => the status change to pending
+        await updateRecordStatusByRecordId(this.recordId, "PENDING");
+        
         this.onReset();
       } catch (err) {
         console.log(err);
