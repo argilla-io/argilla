@@ -9,7 +9,7 @@ class Record extends Model {
     return {
       id: this.uid(),
       dataset_id: this.attr(null),
-      record_status: this.string(null).nullable(),
+      record_status: this.string("PENDING"),
       record_index: this.number(0),
 
       // relationships
