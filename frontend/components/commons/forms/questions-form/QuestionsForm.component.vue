@@ -317,8 +317,6 @@ export default {
       responseId,
       responseByQuestionName,
     }) {
-      let message = "";
-      let typeOfToast = "successOrError";
       try {
         let responseData = null;
         if (status === STATUS_RESPONSE.UPDATE) {
@@ -333,9 +331,6 @@ export default {
           );
         }
 
-        message = "Responses to the questions are saved!";
-        typeOfToast = "success";
-
         const { data: updatedResponses } = responseData;
 
         if (updatedResponses) {
@@ -346,9 +341,8 @@ export default {
         }
       } catch (err) {
         console.log(err);
-        message = "There was a problem to save the response";
-        typeOfToast = "error";
-      } finally {
+        const message = "There was a problem to save the response";
+        const typeOfToast = "error";
         this.showNotificationComponent(message, typeOfToast);
       }
     },
