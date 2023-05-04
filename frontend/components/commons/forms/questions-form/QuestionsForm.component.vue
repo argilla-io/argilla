@@ -284,10 +284,14 @@ export default {
         );
 
         // NOTE - onClear event => the status change to pending
+<<<<<<< HEAD
         await updateRecordStatusByRecordId(
           this.recordId,
           RECORD_STATUS.PENDING
         );
+=======
+        await updateRecordStatusByRecordId(this.recordId, "PENDING");
+>>>>>>> 3f67c6f4cea934fc7100cab146473c8527b50576
 
         this.onReset();
       } catch (err) {
