@@ -323,7 +323,10 @@ export default {
         const { data: updatedResponses } = responseData;
 
         if (updatedResponses) {
-          this.updateResponsesInOrm(updatedResponses);
+          this.updateResponsesInOrm({
+            record_id: this.recordId,
+            ...updatedResponses,
+          });
         }
       } catch (err) {
         console.log(err);
