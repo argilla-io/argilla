@@ -146,7 +146,7 @@ rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 </tr>
 <tr>
 <td>
-<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html">Weak supvervision</a>
+<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html">Weak supervision</a>
 </td>
 <td>
 
