@@ -107,6 +107,16 @@ class Dataset:
     def __getitem__(self, key: Union[slice, int]) -> Union[OnlineRecordSchema, List[OnlineRecordSchema]]:
         return self.__records[key]
 
+    def __del__(self) -> None:
+        if hasattr(self, "__records"):
+            del self.__records
+
+    def __enter__(self) -> "Dataset":
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.__del__()
+
     @property
     def status(self) -> DatasetStatus:
         return self.__status
