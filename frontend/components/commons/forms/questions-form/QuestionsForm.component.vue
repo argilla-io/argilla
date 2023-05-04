@@ -54,6 +54,13 @@
       </div>
       <div class="buttons-area">
         <BaseButton
+          type="button"
+          class="primary outline small"
+          @click.prevent="onClear"
+        >
+          <span v-text="'Clear'" />
+        </BaseButton>
+        <BaseButton
           type="reset"
           class="primary outline small"
           @on-click="onReset"
@@ -89,6 +96,7 @@ import { getRecordIndexByRecordId } from "@/models/feedback-task-model/record/re
 import {
   getRecordResponsesIdByRecordId,
   upsertRecordResponses,
+  deleteRecordResponsesByUserIdAndResponseId,
   isResponsesByUserIdExists,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 
@@ -251,6 +259,25 @@ export default {
         default:
       }
     },
+    async onClear() {
+      const responseId = getRecordResponsesIdByRecordId({
+        userId: this.userId,
+        recordId: this.recordId,
+      });
+
+      try {
+        const responseData =
+          responseId && (await this.deleteResponsesByResponseId(responseId));
+
+        await deleteRecordResponsesByUserIdAndResponseId(
+          this.userId,
+          responseData?.data?.id
+        );
+        this.onReset();
+      } catch (err) {
+        console.log(err);
+      }
+    },
     onReset() {
       this.inputs = cloneDeep(this.initialInputs);
       this.isError = false;
@@ -265,6 +292,9 @@ export default {
         this.colorAsterisk = "black";
         this.isError = false;
       }
+    },
+    async deleteResponsesByResponseId(responseId) {
+      return await this.$axios.delete(`/v1/responses/${responseId}`);
     },
     async createOrUpdateRecordResponses({
       status,
@@ -291,6 +321,7 @@ export default {
         typeOfToast = "success";
 
         const { data: updatedResponses } = responseData;
+
         if (updatedResponses) {
           this.updateResponsesInOrm(updatedResponses);
         }
@@ -302,11 +333,11 @@ export default {
         this.showNotificationComponent(message, typeOfToast);
       }
     },
-    updateResponsesInOrm(responsesFromApi) {
+    async updateResponsesInOrm(responsesFromApi) {
       const newResponseToUpsertInOrm =
         this.formatResponsesApiForOrm(responsesFromApi);
 
-      upsertRecordResponses(newResponseToUpsertInOrm);
+      await upsertRecordResponses(newResponseToUpsertInOrm);
     },
     async updateRecordResponses(responseId, responseByQuestionName) {
       return await this.$axios.put(

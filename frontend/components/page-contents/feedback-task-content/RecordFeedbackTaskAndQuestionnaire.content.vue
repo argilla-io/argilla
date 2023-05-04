@@ -53,6 +53,11 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      rerenderQuestionnaire: 1,
+    };
+  },
   computed: {
     userId() {
       return this.$auth.user.id;
@@ -111,6 +116,7 @@ export default {
         this.initRecordsInDatabase(newRecordOffset);
       }
     },
+    questions: {},
   },
   methods: {
     async initRecordsInDatabase(recordOffset) {
