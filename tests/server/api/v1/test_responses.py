@@ -16,7 +16,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Response
+from argilla.server.models import Response, ResponseStatus
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -29,12 +29,14 @@ def test_update_response(client: TestClient, db: Session, admin_auth_header: dic
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
         },
+        status="submitted",
     )
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
-        }
+        },
+        "status": "submitted",
     }
 
     resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
@@ -66,12 +68,14 @@ def test_update_response_without_authentication(client: TestClient, db: Session)
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
         },
+        status="submitted",
     )
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
-        }
+        },
+        "status": "submitted",
     }
 
     resp = client.put(f"/api/v1/responses/{response.id}", json=response_json)
@@ -83,6 +87,110 @@ def test_update_response_without_authentication(client: TestClient, db: Session)
     }
 
 
+def test_update_response_from_submitted_to_discarded(client: TestClient, db: Session, admin_auth_header: dict):
+    response = ResponseFactory.create(
+        values={
+            "input_ok": {"value": "no"},
+            "output_ok": {"value": "no"},
+        },
+        status="submitted",
+    )
+    response_json = {
+        "values": {
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        "status": "discarded",
+    }
+
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+
+    assert resp.status_code == 200
+
+    response = db.get(Response, response.id)
+    assert response.values == {
+        "input_ok": {"value": "yes"},
+        "output_ok": {"value": "yes"},
+    }
+    assert response.status == ResponseStatus.discarded
+
+    resp_body = resp.json()
+    assert resp_body == {
+        "id": str(response.id),
+        "values": {
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        "status": "discarded",
+        "record_id": str(response.record_id),
+        "user_id": str(response.user_id),
+        "inserted_at": response.inserted_at.isoformat(),
+        "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
+    }
+
+
+def test_update_response_from_submitted_to_discarded_without_values(
+    client: TestClient, db: Session, admin_auth_header: dict
+):
+    response = ResponseFactory.create(
+        values={
+            "input_ok": {"value": "no"},
+            "output_ok": {"value": "no"},
+        },
+        status="submitted",
+    )
+    response_json = {
+        "status": "discarded",
+    }
+
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+
+    assert resp.status_code == 200
+
+    response = db.get(Response, response.id)
+    assert response.values == None
+    assert response.status == ResponseStatus.discarded
+
+    resp_body = resp.json()
+    assert resp_body == {
+        "id": str(response.id),
+        "values": None,
+        "status": "discarded",
+        "record_id": str(response.record_id),
+        "user_id": str(response.user_id),
+        "inserted_at": response.inserted_at.isoformat(),
+        "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
+    }
+
+
+def test_update_response_from_discarded_to_submitted(client: TestClient, db: Session, admin_auth_header: dict):
+    response = ResponseFactory.create(status="discarded")
+    response_json = {
+        "status": "submitted",
+    }
+
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+
+    assert resp.status_code == 422
+
+
+def test_update_response_from_discarded_to_submitted_without_values(
+    client: TestClient, db: Session, admin_auth_header: dict
+):
+    response = ResponseFactory.create(status="discarded")
+    response_json = {
+        "status": "submitted",
+    }
+
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+
+    assert resp.status_code == 422
+
+    response = db.get(Response, response.id)
+    assert response.values == None
+    assert response.status == ResponseStatus.discarded
+
+
 def test_update_response_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create()
     response = ResponseFactory.create(
@@ -90,13 +198,15 @@ def test_update_response_as_annotator(client: TestClient, db: Session):
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
         },
+        status="submitted",
         user=annotator,
     )
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
-        }
+        },
+        "status": "submitted",
     }
 
     resp = client.put(
@@ -131,12 +241,14 @@ def test_update_response_as_annotator_for_different_user_response(client: TestCl
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
         },
+        status="submitted",
     )
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
-        }
+        },
+        "status": "submitted",
     }
 
     resp = client.put(
@@ -156,12 +268,14 @@ def test_update_response_with_nonexistent_response_id(client: TestClient, db: Se
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
         },
+        status="submitted",
     )
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
-        }
+        },
+        "status": "submitted",
     }
 
     resp = client.put(f"/api/v1/responses/{uuid4()}", headers=admin_auth_header, json=response_json)

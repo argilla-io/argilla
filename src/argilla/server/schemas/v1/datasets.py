@@ -155,9 +155,17 @@ class QuestionCreate(BaseModel):
     settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
 
 
+class ResponseValue(BaseModel):
+    value: Any
+
+
+class ResponseValueCreate(BaseModel):
+    value: Any
+
+
 class Response(BaseModel):
     id: UUID
-    values: Dict[str, Any]
+    values: Optional[Dict[str, ResponseValue]]
     status: ResponseStatus
     user_id: UUID
     inserted_at: datetime
@@ -188,14 +196,20 @@ class Records(BaseModel):
     total: int
 
 
-class ResponseCreate(BaseModel):
-    values: Dict[str, Any]
+class SubmittedResponseCreate(BaseModel):
+    values: Dict[str, ResponseValueCreate]
+    status: Literal[ResponseStatus.submitted]
+
+
+class DiscardedResponseCreate(BaseModel):
+    values: Optional[Dict[str, ResponseValueCreate]]
+    status: Literal[ResponseStatus.discarded]
 
 
 class RecordCreate(BaseModel):
     fields: Dict[str, Any]
     external_id: Optional[str]
-    response: Optional[ResponseCreate]
+    response: Optional[Union[SubmittedResponseCreate, DiscardedResponseCreate]] = ModelField(discriminator="status")
 
 
 class RecordsCreate(BaseModel):

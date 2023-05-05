@@ -33,7 +33,7 @@ def upgrade() -> None:
     op.create_table(
         "responses",
         sa.Column("id", sa.Uuid, primary_key=True),
-        sa.Column("values", sa.JSON, nullable=False),
+        sa.Column("values", sa.JSON),
         sa.Column("status", sa.String, nullable=False, index=True),
         sa.Column("record_id", sa.Uuid, sa.ForeignKey("records.id", ondelete="CASCADE"), nullable=False, index=True),
         sa.Column("user_id", sa.Uuid, sa.ForeignKey("users.id", ondelete="SET NULL"), index=True),
