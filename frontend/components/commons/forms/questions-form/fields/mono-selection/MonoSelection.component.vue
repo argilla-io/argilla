@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper" :style="cssVars">
-    <div class="title-area --body1">
+    <div class="title-area --body2">
       <span
         :key="colorHighlight"
         v-text="title"
@@ -125,7 +125,8 @@ export default {
     display: flex;
     align-items: center;
     gap: $base-space;
-    color: $black-37;
+    color: $black-87;
+    font-weight: 500;
   }
   .container {
     display: flex;
@@ -133,7 +134,7 @@ export default {
       display: inline-flex;
       gap: $base-space;
       border-radius: 5em;
-      border: 2px solid var(--border-color);
+      border: 1px solid var(--border-color);
       background: var(--background-color);
     }
   }
