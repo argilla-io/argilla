@@ -50,16 +50,14 @@
     </div>
     <div class="footer-form">
       <div class="footer-form__left-footer">
-        <div class="buttons-area">
-          <BaseButton
-            type="button"
-            ref="clearButton"
-            class="primary outline small"
-            @click.prevent="onClear"
-          >
-            <span v-text="'Clear'" />
-          </BaseButton>
-        </div>
+        <BaseButton
+          type="button"
+          ref="clearButton"
+          class="primary outline small"
+          @click.prevent="onClear"
+        >
+          <span v-text="'Clear'" />
+        </BaseButton>
       </div>
       <div class="footer-form__right-area">
         <BaseButton
@@ -463,12 +461,6 @@ export default {
     display: inline-flex;
     gap: $base-space * 2;
   }
-}
-
-.buttons-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .error-message {
