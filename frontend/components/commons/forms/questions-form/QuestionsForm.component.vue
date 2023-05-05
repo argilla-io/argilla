@@ -251,7 +251,11 @@ export default {
 
       try {
         await this.createOrUpdateRecordResponses(formattedRequestsToSend);
-
+        // NOTE - onSubmit event => the status change to SUBMITTED
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.SUBMITTED
+        );
         this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
       } catch (err) {
         console.log(err);
@@ -281,7 +285,7 @@ export default {
           responseData?.data?.id
         );
 
-        // NOTE - onClear event => the status change to pending
+        // NOTE - onClear event => the status change to PENDING
         await updateRecordStatusByRecordId(
           this.recordId,
           RECORD_STATUS.PENDING
