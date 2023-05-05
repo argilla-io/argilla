@@ -181,3 +181,97 @@ def add_record(
             headers=response.headers,
         )
     return handle_response_error(response)
+
+
+def get_fields(
+    client: AuthenticatedClient,
+    id: str,
+) -> Response[Union[List[Dict[str, Any]], ErrorMessage, HTTPValidationError]]:
+    url = "{}/api/v1/datasets/{id}/fields".format(client.base_url, id=id)
+
+    response = httpx.get(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    if response.status_code == 200:
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=response.json(),
+        )
+    return handle_response_error(response)
+
+
+def add_field(
+    client: AuthenticatedClient,
+    id: str,
+    field: Dict[str, Any],
+) -> Response:
+    url = "{}/api/v1/datasets/{id}/fields".format(client.base_url, id=id)
+
+    response = httpx.post(
+        url=url,
+        json=field,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    if response.status_code == 201:
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+        )
+    return handle_response_error(response)
+
+
+def get_questions(
+    client: AuthenticatedClient,
+    id: str,
+) -> Response[Union[List[Dict[str, Any]], ErrorMessage, HTTPValidationError]]:
+    url = "{}/api/v1/datasets/{id}/questions".format(client.base_url, id=id)
+
+    response = httpx.get(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    if response.status_code == 200:
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=response.json(),
+        )
+    return handle_response_error(response)
+
+
+def add_question(
+    client: AuthenticatedClient,
+    id: str,
+    question: Dict[str, Any],
+) -> Response:
+    url = "{}/api/v1/datasets/{id}/questions".format(client.base_url, id=id)
+
+    response = httpx.post(
+        url=url,
+        json=question,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    if response.status_code == 201:
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+        )
+    return handle_response_error(response)

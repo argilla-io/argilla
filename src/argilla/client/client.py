@@ -229,6 +229,18 @@ class Argilla:
     def add_record(self, id: str, record: Dict[str, Any]) -> httpx.Response:
         return datasets_api_v1.add_record(client=self._client, id=id, record=record)
 
+    def get_fields(self, id: str) -> httpx.Response:
+        return datasets_api_v1.get_fields(client=self._client, id=id)
+
+    def add_field(self, id: str, field: Dict[str, Any]) -> httpx.Response:
+        return datasets_api_v1.add_field(client=self._client, id=id, field=field)
+
+    def get_questions(self, id: str) -> httpx.Response:
+        return datasets_api_v1.get_questions(client=self._client, id=id)
+
+    def add_question(self, id: str, question: Dict[str, Any]) -> httpx.Response:
+        return datasets_api_v1.add_question(client=self._client, id=id, question=question)
+
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
 
