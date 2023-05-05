@@ -189,7 +189,16 @@ export default {
       });
     },
     async onDiscard() {
-      this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+      try {
+        // TODO - make the call here to discard the record
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.DISCARDED
+        );
+        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+      } catch (err) {
+        console.log(err);
+      }
     },
     async onSubmit() {
       const createOrUpdateResponse = isResponsesByUserIdExists(
