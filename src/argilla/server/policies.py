@@ -186,19 +186,6 @@ class QuestionPolicyV1:
 
 class RecordPolicyV1:
     @classmethod
-    def get(cls, record: Record) -> PolicyAction:
-        return lambda actor: (
-            actor.is_admin
-            or bool(
-                accounts.get_workspace_user_by_workspace_id_and_user_id(
-                    Session.object_session(actor),
-                    record.dataset.workspace_id,
-                    actor.id,
-                )
-            )
-        )
-
-    @classmethod
     def create_response(cls, record: Record) -> PolicyAction:
         return lambda actor: (
             actor.is_admin
