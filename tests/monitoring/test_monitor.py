@@ -31,7 +31,7 @@ def test_monitor_with_non_supported_model():
         warn_text = warning_list[0].message.args[0]
         assert (
             warn_text == "The provided task model is not supported by monitoring module. "
-            "Predictions won't be logged into argilla"
+            "Predictions won't be logged into argilla."
         )
 
 
@@ -53,5 +53,5 @@ def test_monitor_non_supported_huggingface_model():
         warn_text = warning_list[0].message.args[0]
         assert (
             warn_text == "The provided task model is not supported by monitoring module. "
-            "Predictions won't be logged into argilla"
+            "Predictions won't be logged into argilla."
         )

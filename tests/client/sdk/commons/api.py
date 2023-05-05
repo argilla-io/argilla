@@ -48,8 +48,7 @@ def test_textclass_bulk(sdk_client, mocked_client, bulk_textclass_data, monkeypa
     mocked_client.delete(f"/api/datasets/{dataset_name}")
     response = bulk(sdk_client, name=dataset_name, json_body=bulk_textclass_data)
 
-    assert response.status_code == 200
-    assert isinstance(response.parsed, BulkResponse)
+    assert isinstance(response, BulkResponse)
 
 
 def test_tokenclass_bulk(sdk_client, mocked_client, bulk_tokenclass_data, monkeypatch):
@@ -59,8 +58,7 @@ def test_tokenclass_bulk(sdk_client, mocked_client, bulk_tokenclass_data, monkey
     mocked_client.delete(f"/api/datasets/{dataset_name}")
     response = bulk(sdk_client, name=dataset_name, json_body=bulk_tokenclass_data)
 
-    assert response.status_code == 200
-    assert isinstance(response.parsed, BulkResponse)
+    assert isinstance(response, BulkResponse)
 
 
 @pytest.mark.parametrize(

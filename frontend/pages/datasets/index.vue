@@ -70,6 +70,7 @@ import {
   getAllFeedbackDatasets,
   upsertFeedbackDataset,
 } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { URL_GET_WORKSPACES, URL_GET_V1_DATASETS } from "/utils/url.properties";
 import { upsertDataset } from "@/models/dataset.utilities";
 import { ObservationDataset } from "@/models/Dataset";
 import { mapActions } from "vuex";
@@ -78,6 +79,7 @@ import { Base64 } from "js-base64";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
+  ERROR_FETCHING_WORKSPACES: "ERROR_FETCHING_WORKSPACES",
 });
 
 export default {
@@ -151,11 +153,21 @@ export default {
     // FETCH new FeedbackTask list
     const { items: feedbackTaskDatasets } = await this.fetchFeedbackDatasets();
 
+    // TODO - remove next line when workspace will be include in the api endpoint to fetch feedbackTask
+    const workspaces = await this.fetchWorkspaces();
+
+    const feedbackDatasetsWithWorkspaces =
+      this.factoryFeedbackDatasetsWithCorrespondingWorkspaceName(
+        feedbackTaskDatasets,
+        workspaces
+      );
+
     // UPSERT old dataset (Text2Text, TextClassification, TokenClassification) into the old orm
     upsertDataset(oldDatasets);
 
+    // TODO - when workspaces will be include in feedbackDatasets, upsert directly "feedbackTaskDatasets" instead of "feedbackDatasetsWithWorkspaces"
     // UPSERT FeedbackDataset into the new orm for this task
-    upsertFeedbackDataset(feedbackTaskDatasets);
+    upsertFeedbackDataset(feedbackDatasetsWithWorkspaces);
   },
   computed: {
     activeFilters() {
@@ -194,7 +206,7 @@ export default {
         return {
           ...dataset,
           id: dataset.id,
-          workspace: "",
+          workspace: dataset.workspace_name,
           tags: dataset?.tags ?? {},
           task: "FeedbackTask",
           created_at: dataset.inserted_at,
@@ -241,13 +253,26 @@ export default {
       fetchDatasets: "entities/datasets/fetchAll",
     }),
     async fetchFeedbackDatasets() {
+      const url = URL_GET_V1_DATASETS;
       try {
-        const { data } = await this.$axios.get("/v1/datasets");
+        const { data } = await this.$axios.get(url);
 
         return data;
       } catch (err) {
         throw {
           response: TYPE_OF_FEEDBACK.ERROR_FETCHING_FEEDBACK_DATASETS,
+        };
+      }
+    },
+    async fetchWorkspaces() {
+      const url = URL_GET_WORKSPACES;
+      try {
+        const { data } = await this.$axios.get(url);
+
+        return data;
+      } catch (err) {
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACES,
         };
       }
     },
@@ -276,6 +301,21 @@ export default {
           });
         }
       }
+    },
+    factoryFeedbackDatasetsWithCorrespondingWorkspaceName(
+      feedbackDatasets,
+      workspaces
+    ) {
+      const newFeedbackDatasets = feedbackDatasets.map((feedbackDataset) => {
+        return {
+          ...feedbackDataset,
+          workspace_name:
+            workspaces.find(
+              (workspace) => workspace.id === feedbackDataset.workspace_id
+            )?.name || "",
+        };
+      });
+      return newFeedbackDatasets;
     },
     factoryLinkForOldDatasets({ name, workspace }) {
       return {
@@ -313,10 +353,23 @@ export default {
       this.querySearch = event;
     },
     goToSetting(dataset) {
-      const { workspace, name } = dataset;
-      this.$router.push({
-        path: `/datasets/${workspace}/${name}/settings`,
-      });
+      const { id, workspace, name, task } = dataset;
+      switch (task) {
+        case "TokenClassification":
+        case "TextClassification":
+        case "Text2Text":
+          this.$router.push({
+            path: `/datasets/${workspace}/${name}/settings`,
+          });
+          break;
+        case "FeedbackTask":
+          this.$router.push({
+            path: `/dataset/${id}/settings`,
+          });
+          break;
+        default:
+          console.log(`The task ${task} is unknown`);
+      }
     },
     copyName(id) {
       this.copy(id);

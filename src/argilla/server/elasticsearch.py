@@ -17,7 +17,7 @@ from typing import Any, Dict
 
 from elasticsearch8 import AsyncElasticsearch as AsyncElasticsearch8x
 
-from argilla.server.models import Annotation, AnnotationType, Dataset
+from argilla.server.models import Dataset, Question, QuestionType
 from argilla.server.settings import settings
 
 
@@ -31,8 +31,8 @@ class ElasticSearchEngine:
     async def create_index(self, dataset: Dataset):
         fields = {}
 
-        for annotation in dataset.annotations:
-            fields[annotation.name] = self._field_mapping_for_annotation(annotation)
+        for question in dataset.questions:
+            fields[question.name] = self._field_mapping_for_question(question)
 
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
         mappings = {
@@ -44,17 +44,17 @@ class ElasticSearchEngine:
         index_name = f"rg.{dataset.id}"
         await self.client.indices.create(index=index_name, mappings=mappings)
 
-    def _field_mapping_for_annotation(self, annotation_task: Annotation):
-        settings_type = annotation_task.settings.get("type")
+    def _field_mapping_for_question(self, question_task: Question):
+        settings_type = question_task.settings.get("type")
 
-        if settings_type == AnnotationType.rating:
+        if settings_type == QuestionType.rating:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
             return {"type": "integer"}
-        elif settings_type == AnnotationType.text:
+        elif settings_type == QuestionType.text:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
             return {"type": "text"}
         else:
-            raise ValueError(f"ES mappings for Annotation of type {settings_type} cannot be generated")
+            raise ValueError(f"ElasticSearch mappings for Question of type {settings_type} cannot be generated")
 
 
 async def get_search_engine():

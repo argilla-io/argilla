@@ -15,9 +15,11 @@
 import factory
 from argilla.server.database import SessionLocal
 from argilla.server.models import (
-    Annotation,
-    AnnotationType,
     Dataset,
+    Field,
+    FieldType,
+    Question,
+    QuestionType,
     Record,
     Response,
     User,
@@ -104,24 +106,39 @@ class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
     user = factory.SubFactory(UserFactory)
 
 
-class AnnotationFactory(factory.alchemy.SQLAlchemyModelFactory):
+class FieldFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = Annotation
+        model = Field
         sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
 
-    name = factory.Sequence(lambda n: f"annotation-{n}")
-    title = "Annotation Title"
+    name = factory.Sequence(lambda n: f"field-{n}")
+    title = "Field Title"
     dataset = factory.SubFactory(DatasetFactory)
 
 
-class TextAnnotationFactory(AnnotationFactory):
-    settings = {"type": AnnotationType.text.value}
+class TextFieldFactory(FieldFactory):
+    settings = {"type": FieldType.text.value}
 
 
-class RatingAnnotationFactory(AnnotationFactory):
+class QuestionFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Question
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    name = factory.Sequence(lambda n: f"question-{n}")
+    title = "Question Title"
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class TextQuestionFactory(QuestionFactory):
+    settings = {"type": QuestionType.text.value}
+
+
+class RatingQuestionFactory(QuestionFactory):
     settings = {
-        "type": AnnotationType.rating.value,
+        "type": QuestionType.rating.value,
         "options": [
             {"value": 1},
             {"value": 2},

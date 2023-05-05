@@ -2,14 +2,16 @@
   <HeaderAndTopAndOneColumn v-if="!$fetchState.pending && !$fetchState.error">
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
-        v-if="datasetName && workspace"
-        :datasetName="datasetName"
-        :workspace="workspace"
+        :key="datasetName && workspace"
+        :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
       />
     </template>
     <template v-slot:sidebar-right>
       <SidebarFeedbackTaskComponent />
+    </template>
+    <template v-slot:top>
+      <DatasetFiltersComponent :datasetId="datasetId" />
     </template>
     <template v-slot:center>
       <CenterFeedbackTaskContent :datasetId="datasetId" />

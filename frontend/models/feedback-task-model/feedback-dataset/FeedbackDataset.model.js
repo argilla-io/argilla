@@ -1,5 +1,6 @@
 import { Model } from "@vuex-orm/core";
 import { DatasetQuestion } from "../dataset-question/DatasetQuestion.model";
+import { DatasetFilter } from "../dataset-filter/DatasetFilter.model";
 import { Record } from "../record/Record.model";
 
 class FeedbackDataset extends Model {
@@ -9,7 +10,8 @@ class FeedbackDataset extends Model {
     return {
       id: this.uid(),
       name: this.string(""),
-      guidelines: this.string(""),
+      task: this.string("FeedbackTask"),
+      guidelines: this.string(null).nullable(),
       workspace_id: this.attr(null),
       workspace_name: this.attr(null),
       inserted_at: this.attr(null),
@@ -18,6 +20,7 @@ class FeedbackDataset extends Model {
 
       // relationships
       dataset_questions: this.hasMany(DatasetQuestion, "dataset_id"),
+      dataset_filters: this.hasMany(DatasetFilter, "dataset_id"),
       records: this.hasMany(Record, "dataset_id"),
     };
   }

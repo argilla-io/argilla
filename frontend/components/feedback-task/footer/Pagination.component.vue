@@ -1,31 +1,37 @@
 <template>
-  <div class="pagination-component">
+  <div class="pagination">
     <div class="number-of-records-by-page-area"></div>
 
-    <div class="center-area">
-      <button
-        class="button"
+    <div class="pagination__buttons">
+      <BaseButton
+        class="pagination__button"
         @click="onClickPrev"
-        v-text="prevButtonMessage"
         :disabled="currentPage === 1"
-      />
+        ><svgicon name="chevron-left" width="8" height="8" />{{
+          prevButtonMessage
+        }}</BaseButton
+      >
 
-      <div class="page-number-area" v-if="showPageNumber">
-        <button
+      <div class="pagination__page-number-area" v-if="showPageNumber">
+        <BaseButton
           v-for="page in totalPages"
           :key="page"
+          class="pagination__button"
           @click="onClickNumber(page)"
           :disabled="isCurrentPage(page)"
         >
-          <span v-text="page" />
-        </button>
+          {{ page }}
+        </BaseButton>
       </div>
 
-      <button
+      <BaseButton
+        class="pagination__button"
         @click="onClickNext"
-        v-text="nextButtonMessage"
         :disabled="currentPage >= totalPages"
-      />
+      >
+        {{ nextButtonMessage }}
+        <svgicon name="chevron-right" width="8" height="8" />
+      </BaseButton>
     </div>
 
     <div class="total-records-area">
@@ -48,11 +54,11 @@ export default {
     },
     nextButtonMessage: {
       type: String,
-      default: () => "Next >",
+      default: () => "Next",
     },
     prevButtonMessage: {
       type: String,
-      default: () => "< Prev",
+      default: () => "Prev",
     },
     showPageNumber: {
       type: Boolean,
@@ -61,10 +67,18 @@ export default {
   },
   data() {
     return {
-      currentPage: 1,
+      localCurrentPage: 1,
     };
   },
   computed: {
+    currentPage: {
+      get() {
+        return this.localCurrentPage;
+      },
+      set(newCurrentPage) {
+        this.localCurrentPage = +newCurrentPage;
+      },
+    },
     totalPages() {
       return Math.ceil(this.totalItems / this.numberOfItemsByPage);
     },
@@ -73,7 +87,7 @@ export default {
     },
   },
   watch: {
-    currentPage: {
+    localCurrentPage: {
       immediate: true,
       handler(newCurrentPage) {
         this.emitCurrentPage();
@@ -83,8 +97,34 @@ export default {
   },
   mounted() {
     this.currentPage = parseFloat(this.$route.query?._page) || 1;
+
+    document.addEventListener("keydown", this.onPressKeyboardShortCut);
+
+    this.onBusEventCurrentPage();
+  },
+  destroyed() {
+    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+    this.$root.$off("current-page");
   },
   methods: {
+    onPressKeyboardShortCut({ code }) {
+      switch (code) {
+        case "ArrowRight": {
+          this.onClickNext();
+          break;
+        }
+        case "ArrowLeft": {
+          this.onClickPrev();
+          break;
+        }
+        default:
+      }
+    },
+    onBusEventCurrentPage() {
+      this.$root.$on("current-page", (currentPage) => {
+        this.currentPage = currentPage;
+      });
+    },
     onClickPrev() {
       this.currentPage > 1 && this.currentPage--;
     },
@@ -98,7 +138,7 @@ export default {
       this.$emit("on-paginate", this.currentPage);
     },
     isCurrentPage(page) {
-      return +this.currentPage === +page;
+      return this.currentPage === page;
     },
     updateUrlParams(currentPage) {
       this.$router.push({
@@ -111,29 +151,47 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.pagination-component {
+.pagination {
   display: grid;
   grid-template-areas: "left center right";
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 56px;
   background: #fafafa;
-  border-top: 1px solid #e6e6e6;
+  border-top: 1px solid $black-10;
+  &__buttons {
+    grid-area: center;
+    display: flex;
+    gap: $base-space;
+    justify-content: center;
+    align-items: center;
+  }
+  &__page-number-area {
+    display: flex;
+    gap: $base-space;
+  }
+  &__button {
+    min-width: 30px;
+    min-height: 30px;
+    justify-content: center;
+    padding: 0 10px;
+    .pagination__page-number-area & {
+      padding: 5px;
+    }
+    &:hover:not([disabled]) {
+      background: $black-4;
+    }
+  }
 }
 
 .number-of-records-by-page-area {
   grid-area: right;
-}
-.center-area {
-  grid-area: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding-right: $base-space * 7;
 }
 
 .total-records-area {
   grid-area: left;
   display: flex;
-  justify-content: center;
   align-items: center;
+  padding-left: $base-space * 7;
 }
 </style>

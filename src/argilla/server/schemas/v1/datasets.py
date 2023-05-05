@@ -17,15 +17,19 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, conlist, constr
+from pydantic import BaseModel, conlist, constr
+from pydantic import Field as ModelField
 from typing_extensions import Literal
 
-from argilla.server.models import AnnotationType, DatasetStatus
+from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
 
-ANNOTATION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+FIELD_CREATE_NAME_MIN_LENGTH = 1
+FIELD_CREATE_NAME_MAX_LENGTH = 200
 
-ANNOTATION_CREATE_NAME_MIN_LENGTH = 1
-ANNOTATION_CREATE_NAME_MAX_LENGTH = 200
+QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+QUESTION_CREATE_NAME_MIN_LENGTH = 1
+QUESTION_CREATE_NAME_MAX_LENGTH = 200
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
@@ -57,29 +61,31 @@ class DatasetCreate(BaseModel):
     workspace_id: UUID
 
 
-class TextAnnotationSettings(BaseModel):
-    type: Literal[AnnotationType.text]
+class RecordMetrics(BaseModel):
+    count: int
 
 
-class RatingAnnotationSettingsOption(BaseModel):
-    value: int
+class ResponseMetrics(BaseModel):
+    count: int
+    submitted: int
+    discarded: int
 
 
-class RatingAnnotationSettings(BaseModel):
-    type: Literal[AnnotationType.rating]
-    options: conlist(
-        item_type=RatingAnnotationSettingsOption,
-        min_items=RATING_OPTIONS_MIN_ITEMS,
-        max_items=RATING_OPTIONS_MAX_ITEMS,
-    )
+class Metrics(BaseModel):
+    records: RecordMetrics
+    responses: ResponseMetrics
 
 
-class Annotation(BaseModel):
+class TextFieldSettings(BaseModel):
+    type: Literal[FieldType.text]
+
+
+class Field(BaseModel):
     id: UUID
     name: str
     title: str
     required: bool
-    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
+    settings: TextFieldSettings
     inserted_at: datetime
     updated_at: datetime
 
@@ -87,24 +93,73 @@ class Annotation(BaseModel):
         orm_mode = True
 
 
-class Annotations(BaseModel):
-    items: List[Annotation]
+class Fields(BaseModel):
+    items: List[Field]
 
 
-class AnnotationCreate(BaseModel):
+class FieldCreate(BaseModel):
     name: constr(
-        regex=ANNOTATION_CREATE_NAME_REGEX,
-        min_length=ANNOTATION_CREATE_NAME_MIN_LENGTH,
-        max_length=ANNOTATION_CREATE_NAME_MAX_LENGTH,
+        regex=FIELD_CREATE_NAME_REGEX,
+        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
+        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
     )
     title: str
     required: Optional[bool]
-    settings: Union[TextAnnotationSettings, RatingAnnotationSettings] = Field(..., discriminator="type")
+    settings: TextFieldSettings
+
+
+class TextQuestionSettings(BaseModel):
+    type: Literal[QuestionType.text]
+
+
+class RatingQuestionSettingsOption(BaseModel):
+    value: int
+
+
+class RatingQuestionSettings(BaseModel):
+    type: Literal[QuestionType.rating]
+    options: conlist(
+        item_type=RatingQuestionSettingsOption,
+        min_items=RATING_OPTIONS_MIN_ITEMS,
+        max_items=RATING_OPTIONS_MAX_ITEMS,
+    )
+
+
+class Question(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    description: Optional[str]
+    required: bool
+    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class Questions(BaseModel):
+    items: List[Question]
+
+
+class QuestionCreate(BaseModel):
+    name: constr(
+        regex=QUESTION_CREATE_NAME_REGEX,
+        min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
+        max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
+    )
+    title: str
+    description: Optional[str]
+    required: Optional[bool]
+    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
 
 
 class Response(BaseModel):
     id: UUID
     values: Dict[str, Any]
+    status: ResponseStatus
+    user_id: UUID
     inserted_at: datetime
     updated_at: datetime
 

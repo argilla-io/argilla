@@ -18,5 +18,27 @@ const getQuestionsByDatasetId = (
     .orderBy(orderBy, direction)
     .get();
 };
+const getComponentTypeOfQuestionByDatasetIdAndQuestionName = (
+  datasetId,
+  questionName
+) =>
+  DatasetQuestionModel.query()
+    .where("dataset_id", datasetId)
+    .where("name", questionName)
+    .first()?.component_type;
 
-export { upsertDatasetQuestions, getQuestionsByDatasetId };
+const getOptionsOfQuestionByDatasetIdAndQuestionName = (
+  datasetId,
+  questionName
+) =>
+  DatasetQuestionModel.query()
+    .where("dataset_id", datasetId)
+    .where("name", questionName)
+    .first()?.options;
+
+export {
+  upsertDatasetQuestions,
+  getQuestionsByDatasetId,
+  getComponentTypeOfQuestionByDatasetIdAndQuestionName,
+  getOptionsOfQuestionByDatasetIdAndQuestionName,
+};
