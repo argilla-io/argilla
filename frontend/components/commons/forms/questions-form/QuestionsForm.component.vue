@@ -174,7 +174,7 @@ export default {
           ctrlKey && elem.click();
           break;
         }
-        case "Delete": {
+        case "Backspace": {
           const elem = this.$refs.discardButton.$el;
           elem.click();
           break;
