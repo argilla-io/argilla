@@ -8,7 +8,8 @@ Vue.directive("optional-field", {
     if (binding?.value) {
       const text = document.createTextNode(" (optional)");
       const textWrapper = document.createElement("span");
-      textWrapper.style.fontSize = "0.9rem";
+      textWrapper.style.fontSize = "0.8em";
+      textWrapper.style.color = "#969696";
 
       textWrapper.appendChild(text);
       element.appendChild(textWrapper);
