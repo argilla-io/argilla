@@ -74,7 +74,7 @@
           name="submitButton"
           value="submitButton"
           class="primary"
-          :disabled="isFormUntouched || isError"
+          :disabled="isFormUntouched || isSomeRequiredQuestionHaveNoAnswer"
         >
           <span v-text="'Submit'" />
         </BaseButton>
@@ -146,6 +146,15 @@ export default {
     isFormUntouched() {
       return isEqual(this.initialInputs, this.inputs);
     },
+    isSomeRequiredQuestionHaveNoAnswer() {
+      return this.inputs.some(
+        (input) =>
+          input.is_required &&
+          input.options.every(
+            (option) => !option.value || option.value.length === 0
+          )
+      );
+    },
   },
   created() {
     this.COMPONENT_TYPE = COMPONENT_TYPE;
@@ -201,6 +210,7 @@ export default {
       }
     },
     async onSubmit() {
+      // 1 - check if it's a create or update response
       const createOrUpdateResponse = isResponsesByUserIdExists(
         this.userId,
         this.recordId
@@ -208,23 +218,12 @@ export default {
         ? STATUS_RESPONSE.UPDATE
         : STATUS_RESPONSE.CREATE;
 
-      const isSomeRequiredQuestionHaveNoAnswer = this.inputs.some(
-        (input) =>
-          input.is_required &&
-          input.options.every(
-            (option) => !option.value || option.value.length === 0
-          )
-      );
-      if (isSomeRequiredQuestionHaveNoAnswer) {
-        this.isError = true;
-        return;
-      }
+      // 2- init formattedSelectionOptionObject
+      // NOTE - it's important to put the status in this object
       let formattedSelectionOptionObject = {
-        status: "submitted" // TODO: We need to do similar for discard
+        status: "submitted", // TODO: We need to do similar for discard
       };
       this.inputs.forEach((input) => {
-        // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
-
         let selectedOption = null;
         switch (input.component_type) {
           case COMPONENT_TYPE.SINGLE_LABEL:
@@ -240,13 +239,13 @@ export default {
             );
         }
 
-
         formattedSelectionOptionObject.values = {
           ...formattedSelectionOptionObject.values,
           [input.name]: { value: selectedOption.text },
         };
       });
 
+      // 3 - Create the formatted requests to send from the formattedSelectionObject
       const formattedRequestsToSend = {
         status: createOrUpdateResponse,
         responseByQuestionName: formattedSelectionOptionObject,
@@ -261,6 +260,7 @@ export default {
         }),
       };
 
+      // 4- create or update the record responses and emit bus event to change record to show
       try {
         await this.createOrUpdateRecordResponses(formattedRequestsToSend);
         // NOTE - onSubmit event => the status change to SUBMITTED
