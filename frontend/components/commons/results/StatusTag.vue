@@ -23,32 +23,32 @@ export default {
   },
   computed: {
     getStatusInfo() {
-      switch (this.title.toLowerCase()) {
-        case "pending":
+      switch (this.title.toUpperCase()) {
+        case "PENDING":
           return {
             name: "Pending",
             icon: null,
             class: "--pending",
           };
-        case "edited":
+        case "EDITED":
           return {
             name: "Pending",
             icon: "time",
             class: "--edited",
           };
-        case "discarded":
+        case "DISCARDED":
           return {
             name: "Discarded",
             icon: "discard",
             class: "--discarded",
           };
-        case "validated":
+        case "VALIDATED":
           return {
             name: "Validate",
             icon: "validate",
             class: "--validated",
           };
-        case "submitted":
+        case "SUBMITTED":
           return {
             name: "Submitted",
             icon: "validate",
