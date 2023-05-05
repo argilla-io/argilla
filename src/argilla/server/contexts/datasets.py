@@ -179,23 +179,6 @@ def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
-def list_records_by_dataset_id(
-    db: Session, dataset_id: UUID, include: List[RecordInclude] = [], offset: int = 0, limit: int = LIST_RECORDS_LIMIT
-):
-    query = db.query(Record)
-
-    if RecordInclude.responses in include:
-        query = query.options(joinedload(Record.responses))
-
-    return (
-        query.filter(Record.dataset_id == dataset_id)
-        .order_by(Record.inserted_at.asc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
-
-
 def list_records_by_dataset_id_and_user_id(
     db: Session,
     dataset_id: UUID,
