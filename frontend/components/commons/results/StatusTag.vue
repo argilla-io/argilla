@@ -23,40 +23,47 @@ export default {
   },
   computed: {
     getStatusInfo() {
+      let statusInfo = null;
       switch (this.title.toUpperCase()) {
         case "PENDING":
-          return {
+          statusInfo = {
             name: "Pending",
             icon: null,
             class: "--pending",
           };
+          break;
         case "EDITED":
-          return {
+          statusInfo = {
             name: "Pending",
             icon: "time",
             class: "--edited",
           };
+          break;
         case "DISCARDED":
-          return {
+          statusInfo = {
             name: "Discarded",
             icon: "discard",
             class: "--discarded",
           };
+          break;
         case "VALIDATED":
-          return {
+          statusInfo = {
             name: "Validate",
             icon: "validate",
             class: "--validated",
           };
+          break;
         case "SUBMITTED":
-          return {
+          statusInfo = {
             name: "Submitted",
             icon: "validate",
             class: "--submitted",
           };
+          break;
         default:
           console.log(`wrong status: ${this.title}`);
       }
+      return statusInfo;
     },
   },
 };
@@ -81,8 +88,8 @@ export default {
     border: 1px solid #bb720a;
   }
   &.--discarded {
-    background: #70767f;
-    border: 1px solid #70767f;
+    background: #a7a7a7;
+    border: 1px solid #a7a7a7;
   }
   &.--submitted {
     background: $primary-color;
