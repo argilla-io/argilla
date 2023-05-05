@@ -71,23 +71,14 @@ export default {
           {
             id: "pending",
             name: "Pending",
-            color: "#B6B9FF",
-            textColor: "#4C4EA3",
-            bgColor: "#EEEEFF",
           },
           {
             id: "submitted",
             name: "Submitted",
-            color: "#3E5CC9",
-            textColor: "#3E5CC9",
-            bgColor: "#EBF3FF",
           },
           {
             id: "discarded",
             name: "Discarded",
-            color: "#B7B7B7",
-            textColor: "#656363",
-            bgColor: "#F2F2F2",
           },
         ],
       },

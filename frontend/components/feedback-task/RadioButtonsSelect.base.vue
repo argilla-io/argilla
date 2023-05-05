@@ -16,10 +16,10 @@
   -->
 
 <template>
-  <div v-if="options.length" :style="cssVars">
+  <div v-if="options.length">
     <BaseDropdown :visible="dropdownIsvisible" @visibility="onVisibility">
       <span slot="dropdown-header">
-        <BaseButton class="selected-option">
+        <BaseButton class="selected-option" :class="currentOptionId">
           {{ currentOptionName }}
           <svgicon name="chevron-down" />
         </BaseButton>
@@ -27,16 +27,14 @@
       <span slot="dropdown-content">
         <ul class="options">
           <li
-            v-for="{ id, name, color, bgColor } in options"
+            v-for="{ id, name } in options"
             class="option"
+            :class="id"
             :key="id"
-            :style="{
-              backgroundColor: bgColor,
-            }"
           >
             <BaseRadioButton
               class="option__radio"
-              :color="color"
+              :color="getRadioColor(id)"
               :id="id"
               :model="id"
               :value="selectedOption"
@@ -80,12 +78,6 @@ export default {
     currentOptionName() {
       return this.currentOption?.name;
     },
-    cssVars() {
-      return {
-        "--selected-option-color": this.currentOption?.color,
-        "--selected-option-text-color": this.currentOption?.textColor,
-      };
-    },
   },
   methods: {
     onVisibility(value) {
@@ -94,6 +86,17 @@ export default {
     changeOption(id) {
       this.$emit("change", id);
       this.dropdownIsvisible = false;
+    },
+    getRadioColor(status) {
+      switch (status) {
+        case "discarded":
+          return "#B7B7B7";
+        case "pending":
+          return "#B6B9FF";
+        case "submitted":
+          return "#3E5CC9";
+        default:
+      }
     },
   },
 };
@@ -113,9 +116,20 @@ $selector-width: 160px;
 .option {
   padding: $base-space;
   border-radius: $border-radius;
-  &:not(:hover) {
-    background: palette(white) !important;
-    transition: background 0.2s ease-in;
+  &.discarded {
+    &:hover {
+      background: #f2f2f2;
+    }
+  }
+  &.submitted {
+    &:hover {
+      background: #ebf3ff;
+    }
+  }
+  &.pending {
+    &:hover {
+      background: #eeeeff;
+    }
   }
   &__radio {
     margin: 0;
@@ -128,8 +142,27 @@ $selector-width: 160px;
   gap: 12px;
   padding: $base-space + 4px;
   background: palette(white);
-  color: var(--selected-option-text-color);
-  border: 1px solid var(--selected-option-color);
+  &.discarded {
+    color: #656363;
+    border: 1px solid #b7b7b7;
+    &:before {
+      background: #b7b7b7;
+    }
+  }
+  &.submitted {
+    color: #3e5cc9;
+    border: 1px solid #3e5cc9;
+    &:before {
+      background: #3e5cc9;
+    }
+  }
+  &.pending {
+    color: #4c4ea3;
+    border: 1px solid #b6b9ff;
+    &:before {
+      background: #b6b9ff;
+    }
+  }
   .svg-icon {
     margin-left: auto;
   }
@@ -137,7 +170,6 @@ $selector-width: 160px;
     content: "";
     height: $base-space;
     width: $base-space;
-    background: var(--selected-option-color);
     border-radius: 50%;
   }
 }
