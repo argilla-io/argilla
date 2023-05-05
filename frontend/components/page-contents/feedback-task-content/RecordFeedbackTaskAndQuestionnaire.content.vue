@@ -142,9 +142,8 @@ export default {
     },
     async getRecords(datasetId, recordOffset, numberOfRecordsToFetch = 5) {
       try {
-        const { data } = await this.$axios.get(
-          `/v1/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`
-        );
+        const url = `/v1/me/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`;
+        const { data } = await this.$axios.get(url);
         return data;
       } catch (err) {
         throw {

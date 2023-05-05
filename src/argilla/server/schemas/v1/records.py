@@ -35,7 +35,3 @@ class Response(BaseModel):
 
 class ResponseCreate(BaseModel):
     values: Dict[str, Any]
-
-
-class Responses(BaseModel):
-    items: List[Response]
