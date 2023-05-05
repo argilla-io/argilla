@@ -113,7 +113,8 @@ _import_structure = {
     "datasets": [
         "configure_dataset",
         "load_dataset_settings",
-        "configure_dataset_settings" "TextClassificationSettings",
+        "configure_dataset_settings",
+        "TextClassificationSettings",
         "TokenClassificationSettings",
     ],
     "server.app": ["app"],
