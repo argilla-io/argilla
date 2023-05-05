@@ -219,7 +219,9 @@ export default {
         this.isError = true;
         return;
       }
-      let formattedSelectionOptionObject = {};
+      let formattedSelectionOptionObject = {
+        status: "submitted" // TODO: We need to do similar for discard
+      };
       this.inputs.forEach((input) => {
         // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
 
@@ -237,6 +239,7 @@ export default {
               `The component type ${input.component_type} is unknown, the response can't be save`
             );
         }
+
 
         formattedSelectionOptionObject.values = {
           ...formattedSelectionOptionObject.values,
