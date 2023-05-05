@@ -12,7 +12,7 @@ echo "Running database migrations"
 python3.9 -m argilla database migrate
 
 echo "Creating admin user"
-python3.9 -m argillau users create \
+python3.9 -m argilla users create \
   --first-name "Admin" \
   --username "$ADMIN_USERNAME" \
   --password "$ADMIN_PASSWORD" \
