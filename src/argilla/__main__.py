@@ -16,18 +16,14 @@
 
 import typer
 
-import argilla.tasks.database as database
-import argilla.tasks.server as server
-import argilla.tasks.training as training
-import argilla.tasks.users as users
-from argilla.tasks.server import app  # noqa
+from .tasks import database, server, training, users
 
-cli_app = typer.Typer(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
+app = typer.Typer(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
 
-cli_app.add_typer(users.app, name="users")
-cli_app.add_typer(database.app, name="database")
-cli_app.add_typer(training.app, name="train")
-cli_app.add_typer(server.app, name="server")
+app.add_typer(users, name="users")
+app.add_typer(database, name="database")
+app.add_typer(training, name="train")
+app.add_typer(server, name="server")
 
 if __name__ == "__main__":
-    cli_app()
+    app()
