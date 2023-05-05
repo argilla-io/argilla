@@ -11,6 +11,11 @@
         @on-search-text="onSearch(id, $event)"
         :placeholder="getFilterById(id).placeholder"
       />
+      <StatusFilter
+        v-if="getFilterById(id).component_type === 'statusSelector'"
+        :options="getFilterById(id).options"
+        v-model="selectedStatus"
+      />
     </span>
   </div>
 </template>
@@ -34,6 +39,11 @@ export default {
       },
     },
   },
+  data: () => {
+    return {
+      selectedStatus: null,
+    };
+  },
   computed: {
     filtersFromVuex() {
       return getFiltersByDatasetId(
@@ -52,7 +62,28 @@ export default {
         order: 0,
         placeholder: "Introduce your query",
       },
+      statusSelector: {
+        id: "statusSelector",
+        name: "Status Selector",
+        componentType: "statusSelector",
+        order: 1,
+        options: [
+          {
+            id: "pending",
+            name: "Pending",
+          },
+          {
+            id: "submitted",
+            name: "Submitted",
+          },
+          {
+            id: "discarded",
+            name: "Discarded",
+          },
+        ],
+      },
     };
+    this.selectedStatus = this.$route.query._status || "pending";
     const filterValues = Object.values(this.filters);
     const formattedFilters = this.factoryFiltersForOrm(filterValues);
     upsertDatasetFilters(formattedFilters);
@@ -103,8 +134,5 @@ export default {
   gap: $base-space * 2;
   align-items: center;
   padding: $base-space * 2 0;
-  &__component {
-    flex: 1;
-  }
 }
 </style>

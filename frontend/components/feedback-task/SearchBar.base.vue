@@ -98,9 +98,10 @@ export default {
 <style lang="scss" scoped>
 .searchbar {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: $base-space;
-  max-width: 50vw;
+  width: 300px;
   padding: $base-space * 1.4;
   background: palette(white);
   border-radius: $border-radius-s;
