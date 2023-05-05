@@ -137,15 +137,25 @@ export default {
     },
     async getRecords(datasetId, recordOffset, numberOfRecordsToFetch = 5) {
       try {
-        const { data } = await this.$axios.get(
-          `/v1/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`
+        const url = this.urlGetListOfDatasetRecords(
+          datasetId,
+          recordOffset,
+          numberOfRecordsToFetch
         );
+        const { data } = await this.$axios.get(url);
         return data;
       } catch (err) {
         throw {
           response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
         };
       }
+    },
+    urlGetListOfDatasetRecords(
+      datasetId,
+      recordOffset,
+      numberOfRecordsToFetch
+    ) {
+      return `/v1/me/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`;
     },
     factoryRecordsForOrm(records) {
       return records.map(

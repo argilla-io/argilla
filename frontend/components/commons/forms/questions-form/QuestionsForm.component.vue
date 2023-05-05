@@ -370,10 +370,14 @@ export default {
       );
     },
     async createRecordResponses(recordId, responseByQuestionName) {
+      const url = this.urlCreateRecordResponses(recordId);
       return await this.$axios.post(
-        `/v1/records/${recordId}/responses`,
+        url,
         JSON.parse(JSON.stringify(responseByQuestionName))
       );
+    },
+    urlCreateRecordResponses(recordId) {
+      return `/v1/records/${recordId}/responses`;
     },
     formatResponsesApiForOrm(responsesFromApi) {
       const newResponseToUpsertInOrm = Object.entries(

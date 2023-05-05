@@ -40,7 +40,6 @@ import {
   getFeedbackDatasetWorkspaceNameById,
   deleteDatasetById,
 } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
-import { urlDeleteDatasetV1 } from "/utils/url.properties";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   NOT_ALLOWED_TO_DELETE_DATASET: "NOT_ALLOWED_TO_DELETE_DATASET",
@@ -91,7 +90,7 @@ export default {
       let typeOfNotification = "";
       let statusCall = null;
 
-      const url = urlDeleteDatasetV1(this.datasetId);
+      const url = this.urlDeleteDatasetV1(this.datasetId);
       try {
         await this.$axios.delete(url);
 
@@ -116,6 +115,9 @@ export default {
             type: typeOfNotification,
           });
       }
+    },
+    urlDeleteDatasetV1(datasetId) {
+      return `/v1/datasets/${datasetId}`;
     },
     goToDatasetList() {
       this.$router.push("/");
