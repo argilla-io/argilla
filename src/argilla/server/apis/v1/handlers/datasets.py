@@ -134,7 +134,7 @@ def create_dataset(
 
     if not accounts.get_workspace_by_id(db, dataset_create.workspace_id):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Workspace with id `{dataset_create.workspace_id}` not found",
         )
 

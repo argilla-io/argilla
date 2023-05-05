@@ -672,7 +672,7 @@ def test_create_dataset_with_nonexistent_workspace_id(client: TestClient, db: Se
 
     response = client.post("/api/v1/datasets", headers=admin_auth_header, json=dataset_json)
 
-    assert response.status_code == 404
+    assert response.status_code == 422
     assert db.query(Dataset).count() == 0
 
 
