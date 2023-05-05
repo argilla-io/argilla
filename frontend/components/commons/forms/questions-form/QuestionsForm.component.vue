@@ -174,7 +174,7 @@ export default {
           ctrlKey && elem.click();
           break;
         }
-        case "Delete": {
+        case "Backspace": {
           const elem = this.$refs.discardButton.$el;
           elem.click();
           break;
@@ -191,7 +191,16 @@ export default {
       });
     },
     async onDiscard() {
-      this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+      try {
+        // TODO - make the call here to discard the record
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.DISCARDED
+        );
+        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+      } catch (err) {
+        console.log(err);
+      }
     },
     async onSubmit() {
       const createOrUpdateResponse = isResponsesByUserIdExists(
@@ -253,7 +262,11 @@ export default {
 
       try {
         await this.createOrUpdateRecordResponses(formattedRequestsToSend);
-
+        // NOTE - onSubmit event => the status change to SUBMITTED
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.SUBMITTED
+        );
         this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
       } catch (err) {
         console.log(err);
@@ -283,7 +296,7 @@ export default {
           responseData?.data?.id
         );
 
-        // NOTE - onClear event => the status change to pending
+        // NOTE - onClear event => the status change to PENDING
         await updateRecordStatusByRecordId(
           this.recordId,
           RECORD_STATUS.PENDING
@@ -462,12 +475,6 @@ export default {
     display: inline-flex;
     gap: $base-space * 2;
   }
-}
-
-.buttons-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .error-message {

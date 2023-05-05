@@ -52,7 +52,7 @@ export default {
           return {
             name: "Submitted",
             icon: "validate",
-            class: "--validated",
+            class: "--submitted",
           };
         default:
           console.log(`wrong status: ${this.title}`);
