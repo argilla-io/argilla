@@ -1,8 +1,24 @@
 // GET
 const URL_GET_WORKSPACES = `/workspaces`;
 const URL_GET_V1_DATASETS = `/v1/datasets`;
+const urlGetListOfDatasetRecords = (
+  datasetId,
+  recordOffset,
+  numberOfRecordsToFetch
+) =>
+  `/v1/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`;
+
+// POST
+const urlCreateRecordResponses = (recordId) =>
+  `/v1/records/${recordId}/responses`;
 
 // DELETE
 const urlDeleteDatasetV1 = (datasetId) => `/v1/datasets/${datasetId}`;
 
-export { URL_GET_WORKSPACES, URL_GET_V1_DATASETS, urlDeleteDatasetV1 };
+export {
+  URL_GET_WORKSPACES,
+  URL_GET_V1_DATASETS,
+  urlGetListOfDatasetRecords,
+  urlDeleteDatasetV1,
+  urlCreateRecordResponses,
+};
