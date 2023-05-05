@@ -1,20 +1,13 @@
 <template>
-  <span :class="['status-tag', title]">
+  <span :class="['status-tag', getStatusInfo.class]">
     <svgicon
-      :name="
-        title === 'Validated'
-          ? 'validate'
-          : null || title === 'Edited'
-          ? 'time'
-          : null || title === 'Discarded'
-          ? 'discard'
-          : null
-      "
+      v-if="getStatusInfo.icon"
+      :name="getStatusInfo.icon"
       width="14"
       height="14"
       color="#ffffff"
     ></svgicon>
-    {{ title === "Edited" ? "Pending" : title }}
+    {{ getStatusInfo.name }}
   </span>
 </template>
 
@@ -28,25 +21,73 @@ export default {
       type: String,
     },
   },
+  computed: {
+    getStatusInfo() {
+      switch (this.title.toLowerCase()) {
+        case "pending":
+          return {
+            name: "Pending",
+            icon: null,
+            class: "--pending",
+          };
+        case "edited":
+          return {
+            name: "Pending",
+            icon: "time",
+            class: "--edited",
+          };
+        case "discarded":
+          return {
+            name: "Discarded",
+            icon: "discard",
+            class: "--discarded",
+          };
+        case "validated":
+          return {
+            name: "Validate",
+            icon: "validate",
+            class: "--validated",
+          };
+        case "submitted":
+          return {
+            name: "Submitted",
+            icon: "validate",
+            class: "--validated",
+          };
+        default:
+          console.log(`wrong status: ${this.title}`);
+      }
+    },
+  },
 };
 </script>
 
 <style scoped lang="scss">
 .status-tag {
   display: inline-flex;
-  align-items: center;
-  background: palette(green);
-  color: palette(white);
-  border-radius: 50px;
-  padding: 0.2em 1em;
-  @include font-size(12px);
-  font-weight: 600;
   z-index: 0;
-  &.Edited {
+  align-items: center;
+  padding: 0.2em 1em;
+  color: palette(white);
+  @include font-size(13px);
+  border-radius: 50px;
+  font-weight: 600;
+  &.--validated {
+    background: palette(green);
+  }
+  &.--edited {
     background: #bb720a;
   }
-  &.Discarded {
+  &.--discarded {
     background: #70767f;
+  }
+  &.--submitted {
+    background: $primary-color;
+  }
+  &.--pending {
+    background: #eeeeff;
+    border: 1px solid #b6b9ff;
+    color: #4c4ea3;
   }
   .svg-icon {
     margin-right: 0.5em;

@@ -1,5 +1,6 @@
 <template>
   <div class="record">
+    <StatusTag class="record__status" :title="record.record_status" />
     <div
       class="item"
       v-for="{ id, title, text } in record.record_fields"
@@ -36,6 +37,10 @@ export default {
   background: palette(white);
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius;
+  &__status {
+    display: inline-flex;
+    margin-right: auto;
+  }
   &__content {
     white-space: pre-wrap;
   }
@@ -46,7 +51,7 @@ export default {
   flex-direction: column;
   gap: $base-space;
   padding: 2 * $base-space;
-  background: $black-4;
+  background: palette(grey, 800);
   border-radius: $border-radius;
   .title-area {
     display: flex;

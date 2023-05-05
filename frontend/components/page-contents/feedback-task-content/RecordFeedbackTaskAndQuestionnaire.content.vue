@@ -5,6 +5,7 @@
   >
     <RecordFeedbackTaskComponent :record="record" />
     <QuestionsFormComponent
+      :class="`record__question-form --${record.record__status}`"
       :key="recordOffset"
       v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
       :datasetId="datasetId"
@@ -261,5 +262,17 @@ export default {
   flex-wrap: wrap;
   gap: 2 * $base-space;
   height: 100%;
+}
+.record__question-form {
+  border: 1px solid transparent;
+  &.--pending {
+    border-color: transparent;
+  }
+  &.--discarded {
+    border-color: #c3c3c3;
+  }
+  &.--submitted {
+    border-color: $primary-color;
+  }
 }
 </style>
