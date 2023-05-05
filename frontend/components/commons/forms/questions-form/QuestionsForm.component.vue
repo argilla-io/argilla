@@ -50,16 +50,14 @@
     </div>
     <div class="footer-form">
       <div class="footer-form__left-footer">
-        <div class="buttons-area">
-          <BaseButton
-            type="button"
-            ref="clearButton"
-            class="primary text"
-            @click.prevent="onClear"
-          >
-            <span v-text="'Clear'" />
-          </BaseButton>
-        </div>
+        <BaseButton
+          type="button"
+          ref="clearButton"
+          class="primary text"
+          @click.prevent="onClear"
+        >
+          <span v-text="'Clear'" />
+        </BaseButton>
       </div>
       <div class="footer-form__right-area">
         <BaseButton
