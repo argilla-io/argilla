@@ -113,7 +113,7 @@ def publish_dataset(
 def list_datasets(
     client: AuthenticatedClient,
 ) -> Response[Union[List[FeedbackDataset], ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets".format(client.base_url)
+    url = "{}/api/v1/me/datasets".format(client.base_url)
 
     response = httpx.get(
         url=url,
@@ -139,7 +139,7 @@ def get_records(
     offset: int = 0,
     limit: int = 50,
 ) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets/{id}/records".format(client.base_url, id=id)
+    url = "{}/api/v1/me/datasets/{id}/records".format(client.base_url, id=id)
 
     response = httpx.get(
         url=url,
