@@ -154,12 +154,7 @@ export default {
     factoryRecordsForOrm(records) {
       return records.map(
         (
-          {
-            id: recordId,
-            responses: recordResponses,
-            fields: recordFields,
-            recordStatus,
-          },
+          { id: recordId, responses: recordResponses, fields: recordFields },
           index
         ) => {
           const formattedRecordFields = this.factoryRecordFieldsForOrm(
@@ -167,7 +162,8 @@ export default {
             recordId
           );
 
-          const formattedRecordResponsesForOrm =
+          // NOTE - the record status come from the corresponding responses
+          const { formattedRecordResponsesForOrm, recordStatus } =
             this.factoryRecordResponsesForOrm({ recordId, recordResponses });
 
           return {
@@ -195,7 +191,11 @@ export default {
     },
     factoryRecordResponsesForOrm({ recordId, recordResponses }) {
       const formattedRecordResponsesForOrm = [];
+      // NOTE - by default, recordStatus is at "PENDING"
+      let recordStatus = RECORD_STATUS.PENDING;
+
       recordResponses.forEach((responsesByRecordAndUser) => {
+        recordStatus = responsesByRecordAndUser.status ?? RECORD_STATUS.PENDING;
         Object.entries(responsesByRecordAndUser.values).forEach(
           ([questionName, recordResponseByQuestionName]) => {
             let formattedOptionsWithRecordResponse = [];
@@ -253,7 +253,7 @@ export default {
         );
       });
 
-      return formattedRecordResponsesForOrm;
+      return { formattedRecordResponsesForOrm, recordStatus };
     },
   },
 };
