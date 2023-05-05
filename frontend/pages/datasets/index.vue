@@ -70,7 +70,7 @@ import {
   getAllFeedbackDatasets,
   upsertFeedbackDataset,
 } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
-import { URL_GET_WORKSPACES, URL_GET_V1_DATASETS } from "/utils/url.properties";
+import { URL_GET_WORKSPACES } from "/utils/url.properties";
 import { upsertDataset } from "@/models/dataset.utilities";
 import { ObservationDataset } from "@/models/Dataset";
 import { mapActions } from "vuex";
@@ -253,9 +253,8 @@ export default {
       fetchDatasets: "entities/datasets/fetchAll",
     }),
     async fetchFeedbackDatasets() {
-      const url = URL_GET_V1_DATASETS;
       try {
-        const { data } = await this.$axios.get(url);
+        const { data } = await this.$axios.get("/v1/me/datasets");
 
         return data;
       } catch (err) {
