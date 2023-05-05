@@ -5,8 +5,8 @@ dependencies:
   - _openmp_mutex=5.1
   - asttokens=2.0.5
   - backcall=0.2.0
-  - ca-certificates=2022.10.11
-  - certifi=2022.9.24
+  - ca-certificates
+  - certifi
   - decorator=5.1.1
   - executing=0.8.3
   - ipython=8.3.0
@@ -49,8 +49,8 @@ dependencies:
       - bleach==5.0.1
       - charset-normalizer==2.1.0
       - defusedxml==0.7.1
-      - docutils==0.17.1
-      - entrypoints==0.4
+      - docutils==0.18.1
+      - entrypoints==0.
       - fastjsonschema==2.15.3
       - furo==2022.6.4.1
       - h11==0.9.0
@@ -69,8 +69,8 @@ dependencies:
       - markupsafe==2.1.1
       - mdit-py-plugins==0.3.0
       - mdurl==0.1.1
-      - mistune==0.8.4
-      - myst-parser==0.16.1
+      - mistune==0.8.4s
+      - myst-parser==0.18.1
       - nbclient==0.6.6
       - nbconvert==6.5.0
       - nbformat==5.4.0
@@ -94,14 +94,14 @@ dependencies:
       - sniffio==1.2.0
       - snowballstemmer==2.2.0
       - soupsieve==2.3.2.post1
-      - sphinx==4.5.0
-      - sphinx-basic-ng==0.0.1a12
+      - sphinx==5.3.0
+      - sphinx-basic-ng==1.0.0b1
       - sphinx-copybutton==0.5.0
       - sphinx-design==0.2.0
       - sphinx-notfound-page==0.8.3
       - sphinxcontrib-applehelp==1.0.2
       - sphinxcontrib-devhelp==1.0.2
-      - sphinxcontrib-htmlhelp==2.0.0
+      - sphinxcontrib-htmlhelp==2.0.1
       - sphinxcontrib-jsmath==1.0.1
       - sphinxcontrib-qthelp==1.0.3
       - sphinxcontrib-serializinghtml==1.1.5
