@@ -1,12 +1,12 @@
 // GET
 const URL_GET_WORKSPACES = `/workspaces`;
-const URL_GET_V1_DATASETS = `/v1/datasets`;
+const URL_GET_V1_DATASETS = `/v1/me/datasets`;
 const urlGetListOfDatasetRecords = (
   datasetId,
   recordOffset,
   numberOfRecordsToFetch
 ) =>
-  `/v1/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`;
+  `/v1/me/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`;
 
 // POST
 const urlCreateRecordResponses = (recordId) =>
