@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import { urlGetListOfDatasetRecords } from "/utils/url.properties";
 import {
   getQuestionsByDatasetId,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
@@ -137,9 +138,12 @@ export default {
     },
     async getRecords(datasetId, recordOffset, numberOfRecordsToFetch = 5) {
       try {
-        const { data } = await this.$axios.get(
-          `/v1/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`
+        const url = urlGetListOfDatasetRecords(
+          datasetId,
+          recordOffset,
+          numberOfRecordsToFetch
         );
+        const { data } = await this.$axios.get(url);
         return data;
       } catch (err) {
         throw {

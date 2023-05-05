@@ -85,6 +85,7 @@
 
 <script>
 import { isEqual, cloneDeep } from "lodash";
+import { urlCreateRecordResponses } from "/utils/url.properties";
 import { Notification } from "@/models/Notifications";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import {
@@ -370,8 +371,9 @@ export default {
       );
     },
     async createRecordResponses(recordId, responseByQuestionName) {
+      const url = urlCreateRecordResponses(recordId);
       return await this.$axios.post(
-        `/v1/records/${recordId}/responses`,
+        url,
         JSON.parse(JSON.stringify(responseByQuestionName))
       );
     },
