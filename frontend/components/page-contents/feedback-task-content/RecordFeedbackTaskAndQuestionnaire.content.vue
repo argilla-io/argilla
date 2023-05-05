@@ -21,6 +21,7 @@ import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import {
+  RECORD_STATUS,
   upsertRecords,
   getRecordWithFieldsAndResponsesByUserId,
   isRecordWithRecordIndexByDatasetIdExists,
@@ -52,6 +53,11 @@ export default {
       type: Number,
       required: true,
     },
+  },
+  data() {
+    return {
+      rerenderQuestionnaire: 1,
+    };
   },
   computed: {
     userId() {
@@ -111,6 +117,7 @@ export default {
         this.initRecordsInDatabase(newRecordOffset);
       }
     },
+    questions: {},
   },
   methods: {
     async initRecordsInDatabase(recordOffset) {
@@ -130,9 +137,8 @@ export default {
     },
     async getRecords(datasetId, recordOffset, numberOfRecordsToFetch = 5) {
       try {
-        const { data } = await this.$axios.get(
-          `/v1/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`
-        );
+        const url = `/v1/me/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`;
+        const { data } = await this.$axios.get(url);
         return data;
       } catch (err) {
         throw {
@@ -163,7 +169,7 @@ export default {
             id: recordId,
             record_index: index + this.recordOffset,
             dataset_id: this.datasetId,
-            record_status: recordStatus ?? null,
+            record_status: recordStatus ?? RECORD_STATUS.PENDING,
             record_fields: formattedRecordFields,
             record_responses: formattedRecordResponsesForOrm,
           };

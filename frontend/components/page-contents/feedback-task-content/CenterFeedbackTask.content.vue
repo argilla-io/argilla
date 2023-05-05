@@ -64,9 +64,10 @@ export default {
           // NOTE - recordIndex start at 0 / page start at 1
           const pageToGo = recordIndexToGo + 1;
 
-          if (pageToGo < this.totalRecords) {
+          if (this.currentPage < this.totalRecords) {
             this.recordOffset = recordIndexToGo;
             this.currentPage = pageToGo;
+            this.$root.$emit("current-page", this.currentPage);
           }
           if (recordIndexToGo < this.totalRecords) {
             this.updatePageQueryParam(pageToGo);

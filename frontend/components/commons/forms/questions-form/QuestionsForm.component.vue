@@ -49,19 +49,25 @@
       </div>
     </div>
     <div class="footer-form">
-      <div class="error-message" v-if="isError">
-        <i v-text="formOnErrorMessage" />
-      </div>
-      <div class="buttons-area">
+      <div class="footer-form__left-footer">
         <BaseButton
-          type="reset"
+          type="button"
+          ref="clearButton"
           class="primary outline small"
-          @on-click="onReset"
-          :disabled="isFormUntouched"
+          @click.prevent="onClear"
         >
-          <span v-text="'Reset'" />
+          <span v-text="'Clear'" />
         </BaseButton>
-
+      </div>
+      <div class="footer-form__right-area">
+        <BaseButton
+          type="button"
+          ref="discardButton"
+          class="primary outline small"
+          @on-click="onDiscard"
+        >
+          <span v-text="'Discard'" />
+        </BaseButton>
         <BaseButton
           ref="submitButton"
           type="submit"
@@ -85,10 +91,15 @@ import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import { getRecordIndexByRecordId } from "@/models/feedback-task-model/record/record.queries";
+import {
+  getRecordIndexByRecordId,
+  updateRecordStatusByRecordId,
+  RECORD_STATUS,
+} from "@/models/feedback-task-model/record/record.queries";
 import {
   getRecordResponsesIdByRecordId,
   upsertRecordResponses,
+  deleteRecordResponsesByUserIdAndResponseId,
   isResponsesByUserIdExists,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 
@@ -149,16 +160,21 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code }) {
+    onPressKeyboardShortCut({ code, ctrlKey }) {
       switch (code) {
         case "Enter": {
           const elem = this.$refs.submitButton.$el;
           elem.click();
           break;
         }
-        case "Delete": {
-          console.log("onDiscard");
-          // TODO - when DISCARD feature will be implemented, add a ref in the discard button force a click
+        case "Space": {
+          const elem = this.$refs.clearButton.$el;
+          ctrlKey && elem.click();
+          break;
+        }
+        case "Backspace": {
+          const elem = this.$refs.discardButton.$el;
+          elem.click();
           break;
         }
         default:
@@ -173,8 +189,16 @@ export default {
       });
     },
     async onDiscard() {
-      console.log("discard");
-      this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+      try {
+        // TODO - make the call here to discard the record
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.DISCARDED
+        );
+        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+      } catch (err) {
+        console.log(err);
+      }
     },
     async onSubmit() {
       const createOrUpdateResponse = isResponsesByUserIdExists(
@@ -236,7 +260,11 @@ export default {
 
       try {
         await this.createOrUpdateRecordResponses(formattedRequestsToSend);
-
+        // NOTE - onSubmit event => the status change to SUBMITTED
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.SUBMITTED
+        );
         this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
       } catch (err) {
         console.log(err);
@@ -249,6 +277,32 @@ export default {
           this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
           break;
         default:
+      }
+    },
+    async onClear() {
+      const responseId = getRecordResponsesIdByRecordId({
+        userId: this.userId,
+        recordId: this.recordId,
+      });
+
+      try {
+        const responseData =
+          responseId && (await this.deleteResponsesByResponseId(responseId));
+
+        await deleteRecordResponsesByUserIdAndResponseId(
+          this.userId,
+          responseData?.data?.id
+        );
+
+        // NOTE - onClear event => the status change to PENDING
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.PENDING
+        );
+
+        this.onReset();
+      } catch (err) {
+        console.log(err);
       }
     },
     onReset() {
@@ -266,13 +320,14 @@ export default {
         this.isError = false;
       }
     },
+    async deleteResponsesByResponseId(responseId) {
+      return await this.$axios.delete(`/v1/responses/${responseId}`);
+    },
     async createOrUpdateRecordResponses({
       status,
       responseId,
       responseByQuestionName,
     }) {
-      let message = "";
-      let typeOfToast = "successOrError";
       try {
         let responseData = null;
         if (status === STATUS_RESPONSE.UPDATE) {
@@ -287,26 +342,26 @@ export default {
           );
         }
 
-        message = "Responses to the questions are saved!";
-        typeOfToast = "success";
-
         const { data: updatedResponses } = responseData;
+
         if (updatedResponses) {
-          this.updateResponsesInOrm(updatedResponses);
+          this.updateResponsesInOrm({
+            record_id: this.recordId,
+            ...updatedResponses,
+          });
         }
       } catch (err) {
         console.log(err);
-        message = "There was a problem to save the response";
-        typeOfToast = "error";
-      } finally {
+        const message = "There was a problem to save the response";
+        const typeOfToast = "error";
         this.showNotificationComponent(message, typeOfToast);
       }
     },
-    updateResponsesInOrm(responsesFromApi) {
+    async updateResponsesInOrm(responsesFromApi) {
       const newResponseToUpsertInOrm =
         this.formatResponsesApiForOrm(responsesFromApi);
 
-      upsertRecordResponses(newResponseToUpsertInOrm);
+      await upsertRecordResponses(newResponseToUpsertInOrm);
     },
     async updateRecordResponses(responseId, responseByQuestionName) {
       return await this.$axios.put(
@@ -409,14 +464,16 @@ export default {
 
 .footer-form {
   display: flex;
-  flex-direction: column;
-  gap: $base-space * 2;
-}
-
-.buttons-area {
-  display: flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: space-between;
+  align-items: center;
+  &__left-area {
+    display: inline-flex;
+  }
+  &__right-area {
+    display: inline-flex;
+    gap: $base-space * 2;
+  }
 }
 
 .error-message {
