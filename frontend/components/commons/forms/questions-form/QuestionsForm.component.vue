@@ -53,7 +53,7 @@
         <BaseButton
           type="button"
           ref="clearButton"
-          class="primary outline small"
+          class="primary text"
           @click.prevent="onClear"
         >
           <span v-text="'Clear'" />
@@ -63,7 +63,7 @@
         <BaseButton
           type="button"
           ref="discardButton"
-          class="primary outline small"
+          class="primary outline"
           @on-click="onDiscard"
         >
           <span v-text="'Discard'" />
@@ -73,7 +73,7 @@
           type="submit"
           name="submitButton"
           value="submitButton"
-          class="primary small"
+          class="primary"
           :disabled="isFormUntouched || isError"
         >
           <span v-text="'Submit'" />
@@ -445,12 +445,8 @@ export default {
   display: flex;
   flex-direction: column;
   flex-basis: 37em;
-  gap: $base-space * 3;
-  max-width: 100%;
   height: 100%;
   justify-content: space-between;
-  padding: $base-space * 3;
-  border: 1px solid $primary-color;
   border-radius: $border-radius;
   box-shadow: $shadow;
   &__title {
@@ -460,7 +456,8 @@ export default {
   &__content {
     display: flex;
     flex-direction: column;
-    gap: $base-space * 2;
+    gap: 20px;
+    padding: $base-space * 3;
     overflow: auto;
   }
 }
@@ -470,6 +467,8 @@ export default {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  padding: $base-space * 2 $base-space * 3;
+  border-top: 1px solid $black-10;
   &__left-area {
     display: inline-flex;
   }

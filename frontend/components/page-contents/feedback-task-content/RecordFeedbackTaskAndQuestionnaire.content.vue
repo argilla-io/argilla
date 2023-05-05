@@ -5,6 +5,8 @@
   >
     <RecordFeedbackTaskComponent :record="record" />
     <QuestionsFormComponent
+      class="question-form"
+      :class="statusClass"
       :key="recordOffset"
       v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
       :datasetId="datasetId"
@@ -101,6 +103,9 @@ export default {
         }
         return { ...question, response_id: null };
       });
+    },
+    statusClass() {
+      return `--${this.record.record_status.toLowerCase()}`;
     },
   },
   async fetch() {
@@ -260,5 +265,17 @@ export default {
   flex-wrap: wrap;
   gap: 2 * $base-space;
   height: 100%;
+}
+.question-form {
+  border: 1px solid transparent;
+  &.--pending {
+    border-color: transparent;
+  }
+  &.--discarded {
+    border-color: #c3c3c3;
+  }
+  &.--submitted {
+    border-color: $primary-color;
+  }
 }
 </style>
