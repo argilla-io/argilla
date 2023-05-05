@@ -74,15 +74,19 @@ export default {
   font-weight: 600;
   &.--validated {
     background: palette(green);
+    border: 1px solid palette(green);
   }
   &.--edited {
     background: #bb720a;
+    border: 1px solid #bb720a;
   }
   &.--discarded {
     background: #70767f;
+    border: 1px solid #70767f;
   }
   &.--submitted {
     background: $primary-color;
+    border: 1px solid $primary-color;
   }
   &.--pending {
     background: #eeeeff;
