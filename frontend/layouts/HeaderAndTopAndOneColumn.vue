@@ -49,7 +49,7 @@ $gap-width: $base-space * 7;
 .layout {
   display: grid;
   grid-template-columns: $gap-width 1fr $gap-width $sidebarMenuWidth;
-  grid-template-rows: auto 100px minmax(0, 1fr) $base-space * 2 auto;
+  grid-template-rows: auto auto minmax(0, 1fr) $base-space * 2 auto;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
   height: 100vh;
