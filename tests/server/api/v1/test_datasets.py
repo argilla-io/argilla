@@ -501,6 +501,49 @@ def test_list_current_user_dataset_records_with_offset_and_limit(client: TestCli
     assert response_body["total"] == 3
 
 
+@pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted"])
+def test_list_current_user_dataset_records_with_response_status_filter(
+    client: TestClient, admin: User, admin_auth_header: dict, response_status_filter: str
+):
+    dataset = DatasetFactory.create()
+    num_responses_per_status = 10
+    # missing responses
+    RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset)
+    # discarded responses
+    for record in RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset):
+        ResponseFactory.create(record=record, user=admin, status=ResponseStatus.discarded)
+    # submitted responses
+    for record in RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset):
+        ResponseFactory.create(
+            record=record,
+            user=admin,
+            values={
+                "input_ok": {"value": "yes"},
+                "output_ok": {"value": "yes"},
+            },
+            status=ResponseStatus.submitted,
+        )
+
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
+
+    response = client.get(
+        f"/api/v1/me/datasets/{dataset.id}/records?response_status={response_status_filter}&include=responses",
+        headers=admin_auth_header,
+    )
+
+    assert response.status_code == 200
+    response_json = response.json()
+
+    assert response_json["total"] == num_responses_per_status
+    assert len(response_json["items"]) == num_responses_per_status
+
+    if response_status_filter == "missing":
+        assert all([len(record["responses"]) == 0 for record in response_json["items"]])
+    else:
+        assert all([record["responses"][0]["status"] == response_status_filter for record in response_json["items"]])
+
+
 def test_list_current_user_dataset_records_without_authentication(client: TestClient):
     dataset = DatasetFactory.create()
 

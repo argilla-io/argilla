@@ -179,10 +179,18 @@ class RecordInclude(str, Enum):
     responses = "responses"
 
 
+class ResponseStatusFilter(str, Enum):
+    missing = "missing"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
 class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
     external_id: Optional[str]
+    # TODO: move `responses` to `response` since contextualized endpoint will contains only the user response
+    # response: Optional[Response]
     responses: Optional[List[Response]]
     inserted_at: datetime
     updated_at: datetime

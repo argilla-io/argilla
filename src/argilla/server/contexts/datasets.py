@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
@@ -31,13 +31,14 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     RecordInclude,
     RecordsCreate,
+    ResponseStatusFilter,
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.security.model import User
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func
-from sqlalchemy.orm import Session, contains_eager, joinedload
+from sqlalchemy.orm import Session, contains_eager
 
 LIST_RECORDS_LIMIT = 20
 
@@ -185,23 +186,42 @@ def list_records_by_dataset_id_and_user_id(
     dataset_id: UUID,
     user_id: UUID,
     include: List[RecordInclude] = [],
+    response_status: Optional[ResponseStatusFilter] = None,
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ):
     query = db.query(Record)
 
-    if RecordInclude.responses in include:
-        query = query.outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user_id)).options(
-            contains_eager(Record.responses)
+    if response_status == ResponseStatusFilter.missing:
+        query = (
+            query.outerjoin(
+                Response,
+                and_(Response.record_id == Record.id, Response.user_id == user_id),
+            )
+            .options(contains_eager(Record.responses))
+            .filter(and_(Record.dataset_id == dataset_id, Response.status == None))
         )
 
-    return (
-        query.filter(Record.dataset_id == dataset_id)
-        .order_by(Record.inserted_at.asc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    else:
+        if response_status:
+            query = query.join(
+                Response,
+                and_(
+                    Response.record_id == Record.id,
+                    Response.user_id == user_id,
+                    Response.status == ResponseStatus(response_status),
+                ),
+            ).options(contains_eager(Record.responses))
+
+        elif RecordInclude.responses in include:
+            query = query.outerjoin(
+                Response,
+                and_(Response.record_id == Record.id, Response.user_id == user_id),
+            ).options(contains_eager(Record.responses))
+
+        query = query.filter(Record.dataset_id == dataset_id)
+
+    return query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit).all()
 
 
 def count_records_by_dataset_id(db: Session, dataset_id: UUID):
@@ -253,8 +273,15 @@ def count_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, use
 def count_submitted_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
     return (
         db.query(func.count(Response.id))
-        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-        .filter(Response.user_id == user_id, Response.status == ResponseStatus.submitted)
+        .join(
+            Record,
+            and_(
+                Record.id == Response.record_id,
+                Record.dataset_id == dataset_id,
+                Response.status == ResponseStatus.submitted,
+            ),
+        )
+        .filter(Response.user_id == user_id)
         .scalar()
     )
 
@@ -262,8 +289,31 @@ def count_submitted_responses_by_dataset_id_and_user_id(db: Session, dataset_id:
 def count_discarded_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
     return (
         db.query(func.count(Response.id))
-        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-        .filter(Response.user_id == user_id, Response.status == ResponseStatus.discarded)
+        .join(
+            Record,
+            and_(
+                Record.id == Response.record_id,
+                Record.dataset_id == dataset_id,
+                Response.status == ResponseStatus.discarded,
+            ),
+        )
+        .filter(Response.user_id == user_id)
+        .scalar()
+    )
+
+
+def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
+    return (
+        db.query(Record.id)
+        .outerjoin(
+            Response,
+            and_(
+                Response.record_id == Record.id,
+                Response.user_id == user_id,
+            ),
+        )
+        .with_entities(func.count())
+        .filter(and_(Record.dataset_id == dataset_id, Response.status == None))
         .scalar()
     )
 
