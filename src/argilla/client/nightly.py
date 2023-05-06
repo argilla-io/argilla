@@ -210,13 +210,13 @@ class FeedbackDataset:
         self.__del__()
 
     @property
-    def fields(self) -> List[FieldSchema]:
+    def fields(self) -> List[OnlineFieldSchema]:
         if self.__fields is None or len(self.__fields) < 1:
             self.__fields = [OnlineFieldSchema(**field) for field in self.client.get_fields(id=self.id).parsed["items"]]
         return self.__fields
 
     @property
-    def questions(self) -> List[QuestionSchema]:
+    def questions(self) -> List[OnlineQuestionSchema]:
         if self.__questions is None or len(self.__questions) < 1:
             self.__questions = [
                 OnlineQuestionSchema(**question) for question in self.client.get_questions(id=self.id).parsed["items"]
