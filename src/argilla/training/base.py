@@ -73,6 +73,9 @@ class ArgillaTrainer(object):
             **load_kwargs: arguments for the rg.load() function.
         """
         self._name = name
+        if workspace is None:
+            workspace = rg.get_workspace()
+        self._workspace = workspace
         self._multi_label = False
         self._split_applied = False
         self._train_size = train_size
@@ -86,9 +89,6 @@ class ArgillaTrainer(object):
         if not len(self.rg_dataset_snapshot) > 0:
             raise ValueError(f"Dataset {self._name} is empty")
 
-        # settings for the dataset
-        self._settings = rg.load_dataset_settings(name=self._name, workspace=workspace)
-
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
             self._multi_label = self.rg_dataset_snapshot[0].multi_label
@@ -101,12 +101,19 @@ class ArgillaTrainer(object):
 
         self.dataset_full = rg.load(name=self._name, **load_kwargs)
 
+        # settings for the dataset
+        self._settings = rg.load_dataset_settings(name=self._name, workspace=workspace)
+        if self._rg_dataset_type in [rg.DatasetForTextClassification, rg.DatasetForTokenClassification]:
+            if self._settings is None:
+                self._settings = self.dataset_full._infer_settings_from_records()
+
         framework = Framework(framework)
         if framework is Framework.SPACY:
             import spacy
 
             self.dataset_full_prepared = self.dataset_full.prepare_for_training(
                 framework=framework,
+                settings=self._settings,
                 train_size=self._train_size,
                 seed=self._seed,
                 lang=spacy.blank("en") if lang is None else lang,
@@ -114,6 +121,7 @@ class ArgillaTrainer(object):
         else:
             self.dataset_full_prepared = self.dataset_full.prepare_for_training(
                 framework=framework,
+                settings=self._settings,
                 train_size=self._train_size,
                 seed=self._seed,
             )
@@ -124,6 +132,8 @@ class ArgillaTrainer(object):
             from argilla.training.setfit import ArgillaSetFitTrainer
 
             self._trainer = ArgillaSetFitTrainer(
+                name=self._name,
+                workspace=self._workspace,
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
@@ -135,6 +145,23 @@ class ArgillaTrainer(object):
             from argilla.training.transformers import ArgillaTransformersTrainer
 
             self._trainer = ArgillaTransformersTrainer(
+                name=self._name,
+                workspace=self._workspace,
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                multi_label=self._multi_label,
+                settings=self._settings,
+                seed=self._seed,
+                model=self.model,
+            )
+        elif framework is Framework.AUTOTRAIN:
+            if self._rg_dataset_type is not rg.DatasetForTextClassification:
+                raise NotImplementedError(f"{Framework.AUTOTRAIN} only supports `TextClassification` tasks.")
+            from argilla.training.autotrain_advanced import ArgillaAutoTrainTrainer
+
+            self._trainer = ArgillaAutoTrainTrainer(
+                name=self._name,
+                workspace=self._workspace,
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
@@ -146,6 +173,8 @@ class ArgillaTrainer(object):
             from argilla.training.spacy import ArgillaSpaCyTrainer
 
             self._trainer = ArgillaSpaCyTrainer(
+                name=self._name,
+                workspace=self._workspace,
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 model=self.model,
@@ -162,6 +191,8 @@ class ArgillaTrainer(object):
             elif self._rg_dataset_type is rg.DatasetForTextClassification and self._multi_label:
                 raise NotImplementedError(f"{Framework.OPENAI} does not support multi-label TextClassification tasks.")
             self._trainer = ArgillaOpenAITrainer(
+                name=self._name,
+                workspace=self._workspace,
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 model=self.model,
@@ -175,6 +206,8 @@ class ArgillaTrainer(object):
             from argilla.training.span_marker import ArgillaSpanMarkerTrainer
 
             self._trainer = ArgillaSpanMarkerTrainer(
+                name=self._name,
+                workspace=self._workspace,
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 model=self.model,
@@ -261,6 +294,8 @@ _________________________________________________________________
 class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
+        name: str,
+        workspace: str,
         dataset,
         record_class: Union[TokenClassificationRecord, Text2TextRecord, TextClassificationRecord],
         multi_label: bool = False,
@@ -270,6 +305,8 @@ class ArgillaTrainerSkeleton(ABC):
         *arg,
         **kwargs,
     ):
+        self._name = name
+        self._workspace = workspace
         self._dataset = dataset
         self._record_class = record_class
         self._multi_label = multi_label
