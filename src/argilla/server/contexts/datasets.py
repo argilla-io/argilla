@@ -273,15 +273,8 @@ def count_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, use
 def count_submitted_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
     return (
         db.query(func.count(Response.id))
-        .join(
-            Record,
-            and_(
-                Record.id == Response.record_id,
-                Record.dataset_id == dataset_id,
-                Response.status == ResponseStatus.submitted,
-            ),
-        )
-        .filter(Response.user_id == user_id)
+        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
+        .filter(Response.user_id == user_id, Response.status == ResponseStatus.submitted)
         .scalar()
     )
 
@@ -289,15 +282,8 @@ def count_submitted_responses_by_dataset_id_and_user_id(db: Session, dataset_id:
 def count_discarded_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
     return (
         db.query(func.count(Response.id))
-        .join(
-            Record,
-            and_(
-                Record.id == Response.record_id,
-                Record.dataset_id == dataset_id,
-                Response.status == ResponseStatus.discarded,
-            ),
-        )
-        .filter(Response.user_id == user_id)
+        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
+        .filter(Response.user_id == user_id, Response.status == ResponseStatus.discarded)
         .scalar()
     )
 
