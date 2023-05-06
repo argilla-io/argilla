@@ -68,10 +68,9 @@ rg.configure_dataset(name="my_dataset", settings=settings)
 ```
 :::
 
-:::{tab-item} Token Classification
+:::{tab-item} Text2Text
 :sync: text2text
-
-Because we do not
+Because we do not require a labeling schema, we can create a dataset by directly logging records as shown below.
 :::
 
 ::::
