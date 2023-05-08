@@ -24,9 +24,9 @@ def test_workspace_cls_init(mocked_client):
     assert workspace["name"] == "test_workspace"
 
     api.init(api_key="argilla.apikey")
-    workspace = Workspace("test_workspace")
+    workspace = Workspace.from_name("test_workspace")
     assert workspace.name == "test_workspace"
     assert isinstance(workspace.id, str)
 
     with pytest.raises(ValueError):
-        Workspace("this_workspace_does_not_exist")
+        Workspace.from_name("this_workspace_does_not_exist")
