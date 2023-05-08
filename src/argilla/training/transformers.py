@@ -44,6 +44,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         from transformers import (
             AutoModelForSequenceClassification,
             AutoModelForTokenClassification,
+            set_seed,
         )
 
         self._transformers_model = None
@@ -58,6 +59,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
         if self._seed is None:
             self._seed = 42
+        set_seed(self._seed)
 
         if self._model is None:
             self._model = "bert-base-cased"
