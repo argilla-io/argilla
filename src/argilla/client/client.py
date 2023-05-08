@@ -213,6 +213,12 @@ class Argilla:
         return self._client.headers.get(WORKSPACE_HEADER_NAME)
 
     def list_workspaces(self) -> List[WorkspaceModel]:
+        """Lists all the availble workspaces for the current user.
+
+        Returns:
+            A list of `WorkspaceModel` objects, containing the workspace
+            attributes: name, id, created_at, and updated_at.
+        """
         return workspaces_api.list_workspaces(client=self._client).parsed
 
     def list_datasets(self) -> List[FeedbackDatasetModel]:
