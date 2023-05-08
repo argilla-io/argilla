@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import pytest
-from argilla.__main__ import cli_app
+from argilla.__main__ import app
 from typer.testing import CliRunner
 
 
@@ -24,4 +24,4 @@ def cli_runner():
 
 @pytest.fixture(scope="session")
 def cli():
-    return cli_app
+    return app
