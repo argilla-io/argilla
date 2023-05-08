@@ -60,6 +60,9 @@ const isRecordContainsAnyResponsesByUserId = (userId, recordId) => {
     .exists();
 };
 
+// DELETE
+const deleteAllRecords = () => RecordModel.deleteAll();
+
 export {
   RECORD_STATUS,
   upsertRecords,
@@ -69,4 +72,5 @@ export {
   updateRecordStatusByRecordId,
   isRecordWithRecordIndexByDatasetIdExists,
   isRecordContainsAnyResponsesByUserId,
+  deleteAllRecords,
 };
