@@ -59,6 +59,7 @@ from argilla.client.sdk.commons.errors import (
 from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from argilla.client.sdk.datasets.v1 import api as datasets_api_v1
+from argilla.client.sdk.datasets.v1.models import FeedbackDatasetModel, RecordsModel
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
 from argilla.client.sdk.text2text.models import (
@@ -209,34 +210,34 @@ class Argilla:
         """
         return self._client.headers.get(WORKSPACE_HEADER_NAME)
 
-    def list_datasets(self) -> httpx.Response:
-        return datasets_api_v1.list_datasets(client=self._client)
+    def list_datasets(self) -> List[FeedbackDatasetModel]:
+        return datasets_api_v1.list_datasets(client=self._client).parsed
 
     def create_dataset(self, name: str, workspace_id: str, guidelines: Optional[str] = None) -> httpx.Response:
         return datasets_api_v1.create_dataset(
             client=self._client, name=name, workspace_id=workspace_id, guidelines=guidelines
-        )
+        ).parsed
 
-    def get_dataset(self, id: str) -> httpx.Response:
-        return datasets_api_v1.get_dataset(client=self._client, id=id)
+    def get_dataset(self, id: str) -> FeedbackDatasetModel:
+        return datasets_api_v1.get_dataset(client=self._client, id=id).parsed
 
-    def publish_dataset(self, id: str) -> httpx.Response:
-        return datasets_api_v1.publish_dataset(client=self._client, id=id)
+    def publish_dataset(self, id: str) -> FeedbackDatasetModel:
+        return datasets_api_v1.publish_dataset(client=self._client, id=id).parsed
 
-    def get_records(self, id: str, offset: int = 0, limit: int = 50) -> httpx.Response:
-        return datasets_api_v1.get_records(client=self._client, id=id, offset=offset, limit=limit)
+    def get_records(self, id: str, offset: int = 0, limit: int = 50) -> RecordsModel:
+        return datasets_api_v1.get_records(client=self._client, id=id, offset=offset, limit=limit).parsed
 
     def add_record(self, id: str, record: Dict[str, Any]) -> httpx.Response:
         return datasets_api_v1.add_record(client=self._client, id=id, record=record)
 
-    def get_fields(self, id: str) -> httpx.Response:
-        return datasets_api_v1.get_fields(client=self._client, id=id)
+    def get_fields(self, id: str) -> List[Dict[str, Any]]:
+        return datasets_api_v1.get_fields(client=self._client, id=id).parsed
 
     def add_field(self, id: str, field: Dict[str, Any]) -> httpx.Response:
         return datasets_api_v1.add_field(client=self._client, id=id, field=field)
 
-    def get_questions(self, id: str) -> httpx.Response:
-        return datasets_api_v1.get_questions(client=self._client, id=id)
+    def get_questions(self, id: str) -> List[Dict[str, Any]]:
+        return datasets_api_v1.get_questions(client=self._client, id=id).parsed
 
     def add_question(self, id: str, question: Dict[str, Any]) -> httpx.Response:
         return datasets_api_v1.add_question(client=self._client, id=id, question=question)

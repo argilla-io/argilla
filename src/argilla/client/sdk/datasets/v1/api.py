@@ -26,7 +26,8 @@ from argilla.client.sdk.commons.models import (
     Response,
 )
 from argilla.client.sdk.datasets.v1.models import (
-    FeedbackDataset,
+    FeedbackDatasetModel,
+    RecordsModel,
 )
 
 
@@ -35,7 +36,7 @@ def create_dataset(
     name: str,
     workspace_id: str,
     guidelines: Optional[str] = None,
-) -> Response[Union[FeedbackDataset, ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/datasets".format(client.base_url)
 
     body = {"name": name, "workspace_id": workspace_id}
@@ -51,7 +52,7 @@ def create_dataset(
     )
 
     if response.status_code == 201:
-        parsed_response = FeedbackDataset(**response.json())
+        parsed_response = FeedbackDatasetModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -65,7 +66,7 @@ def create_dataset(
 def get_dataset(
     client: AuthenticatedClient,
     id: str,
-) -> Response[Union[FeedbackDataset, ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/datasets/{id}".format(client.base_url, id=id)
 
     response = httpx.get(
@@ -76,7 +77,7 @@ def get_dataset(
     )
 
     if response.status_code == 200:
-        parsed_response = FeedbackDataset(**response.json())
+        parsed_response = FeedbackDatasetModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -89,7 +90,7 @@ def get_dataset(
 def publish_dataset(
     client: AuthenticatedClient,
     id: str,
-) -> Response[Union[FeedbackDataset, ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/datasets/{id}/publish".format(client.base_url, id=id)
 
     response = httpx.put(
@@ -100,7 +101,7 @@ def publish_dataset(
     )
 
     if response.status_code == 200:
-        parsed_response = FeedbackDataset(**response.json())
+        parsed_response = FeedbackDatasetModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -112,7 +113,7 @@ def publish_dataset(
 
 def list_datasets(
     client: AuthenticatedClient,
-) -> Response[Union[List[FeedbackDataset], ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[List[FeedbackDatasetModel], ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/me/datasets".format(client.base_url)
 
     response = httpx.get(
@@ -123,7 +124,7 @@ def list_datasets(
     )
 
     if response.status_code == 200:
-        parsed_response = [FeedbackDataset(**dataset) for dataset in response.json()["items"]]
+        parsed_response = [FeedbackDatasetModel(**dataset) for dataset in response.json()["items"]]
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -138,7 +139,7 @@ def get_records(
     id: str,
     offset: int = 0,
     limit: int = 50,
-) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[RecordsModel, ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/me/datasets/{id}/records".format(client.base_url, id=id)
 
     response = httpx.get(
@@ -150,11 +151,12 @@ def get_records(
     )
 
     if response.status_code == 200:
+        parsed_response = RecordsModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
             headers=response.headers,
-            parsed=response.json(),
+            parsed=parsed_response,
         )
     return handle_response_error(response)
 
@@ -201,7 +203,7 @@ def get_fields(
             status_code=response.status_code,
             content=response.content,
             headers=response.headers,
-            parsed=response.json(),
+            parsed=response.json()["items"],
         )
     return handle_response_error(response)
 
@@ -248,7 +250,7 @@ def get_questions(
             status_code=response.status_code,
             content=response.content,
             headers=response.headers,
-            parsed=response.json(),
+            parsed=response.json()["items"],
         )
     return handle_response_error(response)
 
