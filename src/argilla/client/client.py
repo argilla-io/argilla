@@ -88,6 +88,8 @@ from argilla.client.sdk.token_classification.models import (
 )
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import User
+from argilla.client.sdk.workspaces import api as workspaces_api
+from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.utils import setup_loop_in_thread
 
 _LOGGER = logging.getLogger(__name__)
@@ -209,6 +211,9 @@ class Argilla:
             The name of the active workspace as a string.
         """
         return self._client.headers.get(WORKSPACE_HEADER_NAME)
+
+    def list_workspaces(self) -> List[WorkspaceModel]:
+        return workspaces_api.list_workspaces(client=self._client).parsed
 
     def list_datasets(self) -> List[FeedbackDatasetModel]:
         return datasets_api_v1.list_datasets(client=self._client).parsed
