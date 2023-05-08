@@ -24,6 +24,7 @@ import {
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import {
   RECORD_STATUS,
+  RESPONSE_STATUS_FOR_API,
   upsertRecords,
   getRecordWithFieldsAndResponsesByUserId,
   isRecordWithRecordIndexByDatasetIdExists,
@@ -42,6 +43,10 @@ export default {
   name: "RecordFeedbackTaskAndQuestionnaireComponent",
   props: {
     datasetId: {
+      type: String,
+      required: true,
+    },
+    recordStatusToFilterWith: {
       type: String,
       required: true,
     },
@@ -64,6 +69,25 @@ export default {
   computed: {
     userId() {
       return this.$auth.user.id;
+    },
+    recordStatusFilterValueForGetRecords() {
+      // NOTE - this is only used to fetch record, this is why the return value is in lowercase
+      let paramForUrl = null;
+      switch (this.recordStatusToFilterWith.toUpperCase()) {
+        case RECORD_STATUS.PENDING:
+          paramForUrl = RESPONSE_STATUS_FOR_API.MISSING;
+          break;
+        case RECORD_STATUS.SUBMITTED:
+          paramForUrl = RESPONSE_STATUS_FOR_API.SUBMITTED;
+          break;
+        case RECORD_STATUS.DISCARDED:
+          paramForUrl = RESPONSE_STATUS_FOR_API.DISCARDED;
+          break;
+        default:
+          // NOTE - by default, records with missing responses are fetched
+          paramForUrl = RESPONSE_STATUS_FOR_API.MISSING;
+      }
+      return paramForUrl;
     },
     totalRecords() {
       return getTotalRecordByDatasetId(this.datasetId);
@@ -142,7 +166,7 @@ export default {
     },
     async getRecords(datasetId, recordOffset, numberOfRecordsToFetch = 5) {
       try {
-        const url = `/v1/me/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}`;
+        const url = `/v1/me/datasets/${datasetId}/records?include=responses&offset=${recordOffset}&limit=${numberOfRecordsToFetch}&response_status=${this.recordStatusFilterValueForGetRecords}`;
         const { data } = await this.$axios.get(url);
         return data;
       } catch (err) {
