@@ -21,10 +21,12 @@
 </template>
 
 <script>
+import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import {
   upsertDatasetFilters,
   getFiltersByDatasetId,
 } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
+
 export default {
   name: "DatasetFiltersComponent",
   props: {
@@ -89,7 +91,8 @@ export default {
       },
     };
 
-    this.selectedStatus = this.$route.query._status ?? "pending";
+    this.selectedStatus =
+      this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
     const filterValues = Object.values(this.filters);
     const formattedFilters = this.factoryFiltersForOrm(filterValues);
     upsertDatasetFilters(formattedFilters);
