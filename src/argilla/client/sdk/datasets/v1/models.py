@@ -14,11 +14,11 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from uuid import UUID
 
 class FeedbackDatasetModel(BaseModel):
     id: UUID
@@ -28,3 +28,8 @@ class FeedbackDatasetModel(BaseModel):
     workspace_id: str = None
     created_at: datetime = None
     last_updated: datetime = None
+
+
+class RecordsModel(BaseModel):
+    items: List[Dict[str, Any]]
+    total: int
