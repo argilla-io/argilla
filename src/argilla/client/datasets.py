@@ -453,7 +453,7 @@ class DatasetBase:
             test_size = None
 
         # prepare for training for the right method
-        if framework in [Framework.TRANSFORMERS, Framework.SETFIT, Framework.SPAN_MARKER]:
+        if framework in [Framework.TRANSFORMERS, Framework.SETFIT, Framework.SPAN_MARKER, Framework.PEFT]:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
         elif framework is Framework.SPACY and lang is None:
             raise ValueError(
