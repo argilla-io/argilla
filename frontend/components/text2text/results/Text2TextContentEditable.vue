@@ -15,10 +15,11 @@
           @blur="setFocus(false)"
           @keydown.shift.enter.exact="looseFocus"
           @keydown.shift.backspace.exact="looseFocus"
-          @keydown.ctrl.space.exact="looseFocus"
+          @keydown.ctrl.1.exact="looseFocus"
           @keydown.arrow-right.stop=""
           @keydown.arrow-left.stop=""
           @keydown.delete.exact.stop=""
+          @keydown.d.exact.stop=""
           @keydown.enter.exact.stop=""
         />
       </transition>
