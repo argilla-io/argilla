@@ -47,7 +47,6 @@ export default {
     },
     onBusEventAreResponsesUntouched() {
       this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
-        console.log("are-responses-untouched", areResponsesUntouched);
         this.areResponsesUntouched = areResponsesUntouched;
       });
     },
