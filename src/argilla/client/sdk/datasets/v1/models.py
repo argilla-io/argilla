@@ -18,15 +18,11 @@ from typing import Any, Dict
 
 from pydantic import BaseModel, Field
 
+from uuid import UUID
 
-class BaseDatasetModel(BaseModel):
-    tags: Dict[str, str] = Field(default_factory=dict)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+class FeedbackDatasetModel(BaseModel):
+    id: UUID
     name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_ ]+$")
-
-
-class FeedbackDataset(BaseDatasetModel):
-    id: str
     guidelines: str = None
     status: str = None
     workspace_id: str = None
