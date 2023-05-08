@@ -5,12 +5,13 @@
     <div class="pagination__buttons">
       <BaseButton
         class="pagination__button"
-        @click="onClickPrev"
+        ref="prevButton"
+        @click="onPaginate(onClickPrev)"
         :disabled="currentPage === 1"
-        ><svgicon name="chevron-left" width="8" height="8" />{{
-          prevButtonMessage
-        }}</BaseButton
       >
+        <svgicon name="chevron-left" width="8" height="8" />
+        {{ prevButtonMessage }}
+      </BaseButton>
 
       <div class="pagination__page-number-area" v-if="showPageNumber">
         <BaseButton
@@ -26,7 +27,8 @@
 
       <BaseButton
         class="pagination__button"
-        @click="onClickNext"
+        ref="nextButton"
+        @click="onPaginate(onClickNext)"
         :disabled="currentPage >= totalPages"
       >
         {{ nextButtonMessage }}
@@ -41,6 +43,8 @@
 </template>
 
 <script>
+import { Notification } from "@/models/Notifications";
+
 export default {
   name: "PaginationComponent",
   props: {
@@ -63,6 +67,12 @@ export default {
     showPageNumber: {
       type: Boolean,
       default: false,
+    },
+    notificationParams: {
+      type: Object | null,
+    },
+    conditionToShowNotificationComponentOnPagination: {
+      type: Function | null,
     },
   },
   data() {
@@ -110,19 +120,63 @@ export default {
     onPressKeyboardShortCut({ code }) {
       switch (code) {
         case "ArrowRight": {
-          this.onClickNext();
+          const elem = this.$refs.nextButton.$el;
+          elem.click();
           break;
         }
         case "ArrowLeft": {
-          this.onClickPrev();
+          const elem = this.$refs.prevButton.$el;
+          elem.click();
           break;
         }
         default:
+        // Do nothing => the code is not registered as shortcut
       }
     },
     onBusEventCurrentPage() {
       this.$root.$on("current-page", (currentPage) => {
         this.currentPage = currentPage;
+      });
+    },
+    onPaginate(eventToFire) {
+      if (this.isNotificationComponentForThisPage()) {
+        const { message, buttonMessage, typeOfToast } = this.notificationParams;
+        this.showNotificationBeforePaginate({
+          eventToFire,
+          message,
+          buttonMessage,
+          typeOfToast,
+        });
+      } else {
+        eventToFire();
+      }
+    },
+    isNotificationComponentForThisPage() {
+      if (
+        this.notificationParams &&
+        this.conditionToShowNotificationComponentOnPagination
+      ) {
+        const showNotification =
+          this.conditionToShowNotificationComponentOnPagination();
+
+        return showNotification;
+      }
+      return false;
+    },
+    showNotificationBeforePaginate({
+      eventToFire,
+      message,
+      buttonMessage,
+      typeOfToast,
+    }) {
+      Notification.dispatch("notify", {
+        message: message ?? "",
+        numberOfChars: 20000,
+        type: typeOfToast ?? "warning",
+        buttonText: buttonMessage ?? "",
+        async onClick() {
+          eventToFire();
+        },
       });
     },
     onClickPrev() {

@@ -156,6 +156,11 @@ export default {
       );
     },
   },
+  watch: {
+    isFormUntouched(isFormUntouched) {
+      this.onEmitIsQuestionsFormUntouchedByBusEvent(isFormUntouched);
+    },
+  },
   created() {
     this.COMPONENT_TYPE = COMPONENT_TYPE;
     this.formOnErrorMessage =
@@ -435,6 +440,9 @@ export default {
         numberOfChars: message.length,
         type: typeOfToast,
       });
+    },
+    onEmitIsQuestionsFormUntouchedByBusEvent(isFormUntouched) {
+      this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
   },
 };
