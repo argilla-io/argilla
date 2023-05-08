@@ -89,7 +89,7 @@ export default {
   },
   methods: {
     checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
-      this.$router.query?._status ??
+      this.$route.query?._status ??
         this.$router.push({
           query: {
             ...this.$route.query,
