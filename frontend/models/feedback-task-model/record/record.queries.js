@@ -37,11 +37,12 @@ const getRecordWithFieldsAndResponsesByUserId = (
 const getRecordIndexByRecordId = (recordId) => {
   return RecordModel.query().whereId(recordId).first()?.record_index;
 };
-const getRecordStatusByDatasetIdAndRecordIndex = (datasetId, recordIndex) =>
-  RecordModel.query()
+const getRecordStatusByDatasetIdAndRecordIndex = (datasetId, recordIndex) => {
+  return RecordModel.query()
     .where("dataset_id", datasetId)
     .where("record_index", recordIndex)
     .first()?.record_status;
+};
 
 // EXIST
 const isRecordWithRecordIndexByDatasetIdExists = (datasetId, recordIndex) => {
