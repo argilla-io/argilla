@@ -12,60 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
-
-from argilla.client.models import Framework
-
-app = typer.Typer(no_args_is_help=True)
-
-
-def framework_callback(value: str):
-    try:
-        return Framework(value.lower())
-    except ValueError:
-        raise typer.BadParameter(f"Invalid framework {value}. Choose from {', '.join([f.value for f in Framework])}")
-
-
-# using callback to ensure it is used as sole command
-@app.callback(help="Starts the ArgillaTrainer.", invoke_without_command=True)
-def train(
-    name: str = typer.Option(default=None, help="The name of the dataset to be used for training."),
-    framework: Framework = typer.Option(default=None, help="The framework to be used for training."),
-    workspace: str = typer.Option(default=None, help="The workspace to be used for training."),
-    limit: int = typer.Option(default=None, help="The number of record to be used."),
-    query: str = typer.Option(default=None, help="The query to be used."),
-    model: str = typer.Option(default=None, help="The modelname or path to be used for training."),
-    train_size: float = typer.Option(default=1.0, help="The train split to be used."),
-    seed: int = typer.Option(default=42, help="The random seed number."),
-    device: int = typer.Option(default=-1, help="The GPU id to be used for training."),
-    output_dir: str = typer.Option(default="model", help="Output directory for the saved model."),
-    update_config_kwargs: str = typer.Option(default={}, help="update_config() kwargs to be passed as a dictionary."),
-    api_url: str = typer.Option(default=None, envvar="ARGILLA_API_URL", help="The API url to be used for training."),
-    api_key: str = typer.Option(default=None, envvar="ARGILLA_API_KEY", help="The API key to be used for training."),
-):
-    import json
-
-    import argilla as rg
-    from argilla.training import ArgillaTrainer
-
-    rg.init(api_url=api_url, api_key=api_key)
-    trainer = ArgillaTrainer(
-        name=name,
-        framework=framework,
-        workspace=workspace,
-        model=model,
-        train_size=train_size,
-        seed=seed,
-        gpu_id=device,
-        limit=limit,
-        query=query,
-    )
-    trainer.update_config(**json.loads(update_config_kwargs))
-    if output_dir:
-        trainer.train(output_dir=output_dir)
-    else:
-        trainer.train()
-
+from .__main__ import app
 
 if __name__ == "__main__":
     app()

@@ -12,7 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .__main__ import app
+import typer
+
+from .migrate import migrate_db
+
+app = typer.Typer(help="Holds CLI commands for migrations and database management.", no_args_is_help=True)
+
+app.command(name="migrate", help="Run database migrations to align user config with pre-defined server settings.")(
+    migrate_db
+)
 
 if __name__ == "__main__":
     app()
