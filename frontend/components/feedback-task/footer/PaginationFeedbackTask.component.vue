@@ -62,6 +62,7 @@ export default {
   },
   destroyed() {
     this.$root.$off("current-page");
+    this.$root.$off("are-responses-untouched");
   },
 };
 </script>
