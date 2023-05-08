@@ -13,14 +13,12 @@
 #  limitations under the License.
 
 import logging
-from typing import List, Optional, Union
+from typing import List, Union
 
 import argilla as rg
 from argilla.training.transformers import ArgillaTransformersTrainer
 from argilla.training.utils import (
-    _apply_column_mapping,
     filter_allowed_args,
-    get_default_args,
 )
 from argilla.utils.dependency import require_version
 
@@ -29,48 +27,29 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
     _logger = logging.getLogger("ArgillaTransformersPEFTTrainer")
     _logger.setLevel(logging.INFO)
 
+    import sys
+
+    if sys.version_info[1] < 9 or sys.version_info[0] < 3:
+        raise Exception("Must be using Python 3.9 or higher or PEFT won't work.")
+
     require_version("peft")
 
-    def init_training_args(
-        self,
-        pretrained_model_name_or_path: str,
-        r: int = 8,
-        target_modules: Optional[Union[List[str], str]] = None,
-        lora_alpha: int = 16,
-        lora_dropout: float = 0.1,
-        fan_in_fan_out: bool = False,
-        bias: str = "none",
-        modules_to_save: Optional[List[str]] = None,
-        init_lora_weights: bool = True,
-    ):
-        from transformers import TrainingArguments
-
-        if self._record_class == rg.TextClassificationRecord:
-            columns_mapping = {"text": "text", "label": "binarized_label"}
-            if self._multi_label:
-                self._train_dataset = _apply_column_mapping(self._train_dataset, columns_mapping)
-
-                if self._eval_dataset is not None:
-                    self._eval_dataset = _apply_column_mapping(self._eval_dataset, columns_mapping)
-
-        self.model_kwargs = {}
-
-        self.model_kwargs["pretrained_model_name_or_path"] = pretrained_model_name_or_path
-        self.model_kwargs["num_labels"] = len(self._label_list)
-        self.model_kwargs["id2label"] = self._id2label
-        self.model_kwargs["label2id"] = self._label2id
-        if self._multi_label:
-            self.model_kwargs["problem_type"] = "multi_label_classification"
-
-        self.trainer_kwargs = get_default_args(TrainingArguments.__init__)
-        self.trainer_kwargs["evaluation_strategy"] = "no" if self._eval_dataset is None else "epoch"
-        self.trainer_kwargs["logging_steps"] = 5
-        self.trainer_kwargs["num_train_epochs"] = 1
-        self.trainer_kwargs["num_train_epochs"] = 1
+    def init_training_args(self):
+        super().init_training_args()
+        self.lora_training_args = {
+            "r": 8,
+            "target_modules": None,
+            "lora_alpha": 16,
+            "lora_dropout": 0.1,
+            "fan_in_fan_out": False,
+            "bias": "none",
+            "modules_to_save": None,
+            "init_lora_weights": True,
+        }
 
     def init_model(self, new: bool = False):
-        super().init_model(new=new)
-        from peft import LoraConfig, get_peft_model
+        from peft import LoraConfig, PeftConfig, PeftModel, get_peft_model
+        from transformers import AutoTokenizer
 
         if self._record_class == rg.TextClassificationRecord:
             task_type = "SEQ_CLS"
@@ -79,12 +58,21 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
         else:
             raise NotImplementedError("This is not implemented yet.")
 
-        peft_config = LoraConfig(task_type=task_type, inference_mode=False, r=8, lora_alpha=16, lora_dropout=0.1)
-        model = self._model_class.from_pretrained(**self.model_kwargs, return_dict=True)
-        self._transformers_model = get_peft_model(model, peft_config)
-        self._logger.info(self._transformers_model)
+        try:
+            config = PeftConfig.from_pretrained(self.model_kwargs["pretrained_model_name_or_path"])
+            model = self._model_class.from_pretrained(config.base_model_name_or_path, return_dict=True)
+            self._model_sub_class = model.__class__
+            model = PeftModel.from_pretrained(model, self.model_kwargs["pretrained_model_name_or_path"])
+        except Exception:
+            config = LoraConfig(task_type=task_type, inference_mode=False, r=8, lora_alpha=16, lora_dropout=0.1)
+            model = self._model_class.from_pretrained(**self.model_kwargs, return_dict=True)
+            self._model_sub_class = model.__class__
+            model = get_peft_model(model, config)
+        self._transformers_tokenizer = AutoTokenizer.from_pretrained(config.base_model_name_or_path)
+        self._transformers_model = model
 
     def init_pipeline(self):
+        pass
         import transformers
         from transformers import pipeline
 
@@ -92,6 +80,8 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
             device = 0
         else:
             device = -1
+
+        self._transformers_model.__class__ = self._model_sub_class
 
         if self._record_class == rg.TextClassificationRecord:
             if transformers.__version__ >= "4.20.0":
@@ -137,101 +127,6 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
                 formatted_string.append(f"{key}: {val}")
         return "\n".join(formatted_string)
 
-    # def train(self, output_dir: str):
-    #     """
-    #     We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
-    #     the model, and then train the model
-    #     """
-
-    #     import evaluate
-    #     import torch
-    #     from torch.optim import AdamW
-    #     from torch.utils.data import DataLoader
-    #     from transformers import get_linear_schedule_with_warmup
-
-    #     # prepare data
-    #     self.init_model(new=True)
-    #     self.preprocess_datasets()
-
-    #     self._training_args = TrainingArguments(**self.trainer_kwargs)
-    #     self._transformers_trainer = Trainer(
-    #         args=self._training_args,
-    #         model=self._transformers_model,
-    #         train_dataset=self._tokenized_train_dataset,
-    #         eval_dataset=self._tokenized_eval_dataset,
-    #         compute_metrics=compute_metrics,
-    #         data_collator=self._data_collator,
-    #     )
-
-    #     #  train
-    #     self._transformers_trainer.train()
-    #     if self._tokenized_eval_dataset:
-    #         self._metrics = self._transformers_trainer.evaluate()
-    #         self._logger.info(self._metrics)
-    #     else:
-    #         self._metrics = None
-    #     # # get metrics function
-    #     # def collate_fn(examples):
-    #     #     return self._transformers_tokenizer.pad(examples, padding="longest", return_tensors="pt")
-
-    #     # # Instantiate dataloaders.
-    #     # batch_size = 8
-    #     # train_dataloader = DataLoader(self._tokenized_train_dataset, shuffle=True, batch_size=batch_size, collate_fn=collate_fn)
-    #     # eval_dataloader = DataLoader(self._tokenized_eval_dataset, shuffle=False, batch_size=batch_size, collate_fn=collate_fn)
-
-    #     # for i in train_dataloader:
-    #     #     for key, value in i.items():
-    #     #         print(key, value)
-    #     #     break
-
-    #     # for key, value in self._tokenized_train_dataset[0].items():
-    #     #     print(key, value)
-
-    #     # lr = 3e-4
-    #     # num_epochs = 20
-    #     # optimizer = AdamW(params=self._transformers_model.parameters(), lr=lr)
-
-    #     # # Instantiate scheduler
-    #     # lr_scheduler = get_linear_schedule_with_warmup(
-    #     #     optimizer=optimizer,
-    #     #     num_warmup_steps=0.06 * (len(train_dataloader) * num_epochs),
-    #     #     num_training_steps=(len(train_dataloader) * num_epochs),
-    #     # )
-
-    #     # metric = evaluate.load("accuracy")
-    #     # self._transformers_model.to(self.device)
-    #     # for epoch in range(num_epochs):
-    #     #     self._transformers_model.train()
-    #     #     for _, batch in enumerate(tqdm(train_dataloader)):
-    #     #         batch.to(self.device)
-    #     #         outputs = self._transformers_model(**batch)
-    #     #         loss = outputs.loss
-    #     #         loss.backward()
-    #     #         optimizer.step()
-    #     #         lr_scheduler.step()
-    #     #         optimizer.zero_grad()
-    #     #         print(loss)
-
-    #     #     self._transformers_model.eval()
-    #     #     for _, batch in enumerate(tqdm(eval_dataloader)):
-    #     #         batch.to(self.device)
-    #     #         with torch.no_grad():
-    #     #             outputs = self._transformers_model(**batch)
-    #     #         predictions = outputs.logits.argmax(dim=-1)
-    #     #         predictions, references = predictions, batch["labels"]
-    #     #         metric.add_batch(
-    #     #             predictions=predictions,
-    #     #             references=references,
-    #     #         )
-
-    #     #     # eval_metric = metric.compute()
-    #     #     eval_metric = 0
-    #     #     print(f"epoch {epoch}:", eval_metric)
-
-    #     self.save(output_dir)
-
-    #     self.init_pipeline()
-
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
         The function takes in a list of strings and returns a list of predictions
@@ -244,17 +139,33 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
         Returns:
           A list of predictions
         """
-        if self._pipeline is None:
+        import torch
+
+        if self._transformers_model is None:
             self._logger.warning("Using model without fine-tuning.")
             self.init_model(new=False)
-            self.init_pipeline()
 
         str_input = False
         if isinstance(text, str):
             text = [text]
             str_input = True
 
-        predictions = self._pipeline(text, **kwargs)
+        inputs = self._transformers_tokenizer(text, truncation=True, padding="longest", return_tensors="pt")
+
+        with torch.no_grad():
+            logits = self._transformers_model(**inputs).logits
+
+        if self._record_class == rg.TextClassificationRecord:
+            probabilities = torch.softmax(logits, dim=1)
+            predictions = []
+            for probability in probabilities:
+                prediction = []
+                for label, score in zip(self._id2label.values(), probability):
+                    prediction.append({"label": label, "score": score})
+                predictions.append(prediction)
+        else:
+            tokens = inputs.tokens()
+            predictions = logits.argmax(dim=2)
 
         if as_argilla_records:
             formatted_prediction = []
