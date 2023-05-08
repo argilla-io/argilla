@@ -197,7 +197,7 @@ export default {
     updateUrlParams(currentPage) {
       this.$router.push({
         path: this.$route.path,
-        query: { _page: currentPage },
+        query: { ...this.$route.query, _page: currentPage },
       });
     },
   },
