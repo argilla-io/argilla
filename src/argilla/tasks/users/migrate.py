@@ -106,4 +106,4 @@ def migrate():
 
 
 if __name__ == "__main__":
-    migrate()
+    typer.run(migrate())

@@ -53,4 +53,4 @@ def create_default(
 
 
 if __name__ == "__main__":
-    create_default()
+    typer.run(create_default)

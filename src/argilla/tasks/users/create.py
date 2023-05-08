@@ -17,6 +17,7 @@ from typing import List, Optional
 import typer
 from pydantic import constr
 from sqlalchemy.orm import Session
+from typer import Typer
 
 from argilla.server.contexts import accounts
 from argilla.server.database import SessionLocal
@@ -135,4 +136,6 @@ def create(
 
 
 if __name__ == "__main__":
-    create()
+    app = Typer(add_completion=False)
+    app.command(no_args_is_help=True)(create)
+    app()
