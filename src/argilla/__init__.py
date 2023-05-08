@@ -64,6 +64,7 @@ if _TYPE_CHECKING:
         TokenClassificationRecord,
     )
     from argilla.client.nightly import FeedbackDataset, create_feedback_dataset
+    from argilla.client.workspaces import Workspace
     from argilla.datasets import (
         TextClassificationSettings,
         TokenClassificationSettings,
@@ -103,6 +104,7 @@ _import_structure = {
         "read_pandas",
     ],
     "client.nightly": ["FeedbackDataset", "create_feedback_dataset"],
+    "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [
         "listener",
