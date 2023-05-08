@@ -13,8 +13,6 @@
 
 <script>
 import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
-import { getRecordStatusByDatasetIdAndRecordIndex } from "@/models/feedback-task-model/record/record.queries";
-import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 
 export default {
   name: "PaginationFeedbackTaskComponent",
@@ -30,6 +28,13 @@ export default {
       buttonMessage: "Ok, got it!",
       typeOfToast: "warning",
     };
+
+    this.onBusEventAreResponsesUntouched();
+  },
+  data() {
+    return {
+      areResponsesUntouched: true,
+    };
   },
   computed: {
     totalRecord() {
@@ -40,33 +45,20 @@ export default {
     onPaginate(currentPage) {
       this.onEmitCurrentPageByBusEvent(currentPage);
     },
+    onBusEventAreResponsesUntouched() {
+      this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
+        console.log("are-responses-untouched", areResponsesUntouched);
+        this.areResponsesUntouched = areResponsesUntouched;
+      });
+    },
     onEmitCurrentPageByBusEvent(currentPage) {
       this.$root.$emit("current-page", currentPage);
     },
-    conditionToShowNotificationComponent(currentPage) {
+    conditionToShowNotificationComponent() {
       // NOTE 1 - this method have to be passed to the generic pagination component to keep it 'stupid'
-      // NOTE 2 - this function is only validate if one record is showned
-      // NOTE 3 - record_index start at 0 and page at 1.
-      const recordIndex = currentPage - 1;
-      const recordStatusOfTheCurrentRecord =
-        getRecordStatusByDatasetIdAndRecordIndex(this.datasetId, recordIndex);
+      // NOTE 2 - return true if responses have been touched,return false in other case
 
-      let showNotification = false;
-      switch (recordStatusOfTheCurrentRecord) {
-        case RECORD_STATUS.PENDING:
-          showNotification = true;
-          break;
-        case RECORD_STATUS.SUBMITTED:
-        case RECORD_STATUS.DISCARDED:
-          showNotification = false;
-          break;
-        default:
-          console.log(
-            `The status ${recordStatusOfTheCurrentRecord} is unknown`
-          );
-      }
-
-      return showNotification;
+      return !this.areResponsesUntouched;
     },
   },
   destroyed() {
