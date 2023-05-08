@@ -2,7 +2,7 @@
   <div class="filters">
     <span
       class="filters__component"
-      v-for="id in Object.keys(this.filters)"
+      v-for="{ id } in sortedFiltersValue"
       :key="id"
     >
       <SearchBarBase
@@ -52,6 +52,11 @@ export default {
         this.orderBy?.ascendent
       );
     },
+    sortedFiltersValue() {
+      return Object.values(this.filters).sort((a, b) =>
+        a.order > b.order ? -1 : 1
+      );
+    },
   },
   created() {
     this.filters = {
@@ -83,7 +88,8 @@ export default {
         ],
       },
     };
-    this.selectedStatus = this.$route.query._status || "pending";
+
+    this.selectedStatus = this.$route.query._status ?? "pending";
     const filterValues = Object.values(this.filters);
     const formattedFilters = this.factoryFiltersForOrm(filterValues);
     upsertDatasetFilters(formattedFilters);
