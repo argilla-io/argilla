@@ -36,6 +36,7 @@ from argilla.server.schemas.v1.datasets import (
     RecordInclude,
     Records,
     RecordsCreate,
+    ResponseStatusFilter,
 )
 from argilla.server.security import auth
 from argilla.server.security.model import User
@@ -105,6 +106,7 @@ def list_current_user_dataset_records(
     db: Session = Depends(get_db),
     dataset_id: UUID,
     include: Optional[List[RecordInclude]] = Query([]),
+    response_status: Optional[ResponseStatusFilter] = Query(None),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -114,13 +116,19 @@ def list_current_user_dataset_records(
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
     records = datasets.list_records_by_dataset_id_and_user_id(
-        db, dataset_id, current_user.id, include=include, offset=offset, limit=limit
+        db, dataset_id, current_user.id, include=include, response_status=response_status, offset=offset, limit=limit
     )
 
-    return Records(
-        items=[record.__dict__ for record in records],
-        total=datasets.count_records_by_dataset_id(db, dataset_id),
-    )
+    if response_status == ResponseStatusFilter.missing:
+        total = datasets.count_records_with_missing_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id)
+    elif response_status == ResponseStatusFilter.submitted:
+        total = datasets.count_submitted_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id)
+    elif response_status == ResponseStatusFilter.discarded:
+        total = datasets.count_discarded_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id)
+    else:
+        total = datasets.count_records_by_dataset_id(db, dataset_id)
+
+    return Records(items=[record.__dict__ for record in records], total=total)
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
