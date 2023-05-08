@@ -130,7 +130,7 @@ export default {
           break;
         }
         default:
-          // Do nothing => the code is not registered as shortcut
+        // Do nothing => the code is not registered as shortcut
       }
     },
     onBusEventCurrentPage() {
