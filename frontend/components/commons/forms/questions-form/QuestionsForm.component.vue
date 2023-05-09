@@ -96,6 +96,7 @@ import {
   getRecordIndexByRecordId,
   updateRecordStatusByRecordId,
   RECORD_STATUS,
+  RESPONSE_STATUS_FOR_API,
 } from "@/models/feedback-task-model/record/record.queries";
 import {
   getRecordResponsesIdByRecordId,
@@ -221,7 +222,7 @@ export default {
 
       // 2 - init formattedSelectionOptionObject
       const formattedSelectionObject = this.formatSelectedOptionObject(
-        RECORD_STATUS.DISCARDED.toLowerCase(),
+        RESPONSE_STATUS_FOR_API.DISCARDED,
         !this.isSomeRequiredQuestionHaveNoAnswer
       );
 
@@ -260,7 +261,7 @@ export default {
 
       // 2 - init formattedSelectionOptionObject
       const formattedSelectionObject = this.formatSelectedOptionObject(
-        RECORD_STATUS.SUBMITTED.toLowerCase()
+        RESPONSE_STATUS_FOR_API.SUBMITTED
       );
 
       // 3 - Create the formatted requests to send from the formattedSelectionObject
