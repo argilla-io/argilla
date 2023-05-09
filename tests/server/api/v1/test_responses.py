@@ -16,15 +16,27 @@ from datetime import datetime
 from uuid import uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Response, ResponseStatus
+from argilla.server.models import DatasetStatus, Response, ResponseStatus
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from tests.factories import AnnotatorFactory, ResponseFactory
+from tests.factories import (
+    AnnotatorFactory,
+    DatasetFactory,
+    RecordFactory,
+    ResponseFactory,
+    TextQuestionFactory,
+)
 
 
 def test_update_response(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+    record = RecordFactory.create(dataset=dataset)
+
     response = ResponseFactory.create(
+        record=record,
         values={
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
@@ -88,7 +100,13 @@ def test_update_response_without_authentication(client: TestClient, db: Session)
 
 
 def test_update_response_from_submitted_to_discarded(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+    record = RecordFactory.create(dataset=dataset)
+
     response = ResponseFactory.create(
+        record=record,
         values={
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
@@ -191,9 +209,29 @@ def test_update_response_from_discarded_to_submitted_without_values(
     assert response.status == ResponseStatus.discarded
 
 
+def test_update_response_with_wrong_values(client: TestClient, db: Session, admin_auth_header: dict):
+    response = ResponseFactory.create(status="discarded")
+    response_json = {"status": "submitted", "values": {"wrong_question": {"value": "wrong value"}}}
+
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+
+    assert resp.status_code == 422
+    assert resp.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
+
+    response = db.get(Response, response.id)
+    assert response.values is None
+    assert response.status == ResponseStatus.discarded
+
+
 def test_update_response_as_annotator(client: TestClient, db: Session):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+    record = RecordFactory.create(dataset=dataset)
     annotator = AnnotatorFactory.create()
+
     response = ResponseFactory.create(
+        record=record,
         values={
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},

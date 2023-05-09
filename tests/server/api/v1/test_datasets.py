@@ -1397,6 +1397,9 @@ def test_create_dataset_rating_question_with_invalid_settings_options_values(
 
 def test_create_dataset_records(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
     records_json = {
         "items": [
             {
@@ -1502,6 +1505,9 @@ def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
 
 def test_create_dataset_records_with_submitted_response(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
     records_json = {
         "items": [
             {
@@ -1528,6 +1534,7 @@ def test_create_dataset_records_with_submitted_response_without_values(
     client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+
     records_json = {
         "items": [
             {
@@ -1548,6 +1555,9 @@ def test_create_dataset_records_with_submitted_response_without_values(
 
 def test_create_dataset_records_with_discarded_response(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
     records_json = {
         "items": [
             {
@@ -1567,7 +1577,7 @@ def test_create_dataset_records_with_discarded_response(client: TestClient, db: 
 
     assert response.status_code == 204
     assert db.query(Record).count() == 1
-    assert db.query(Response).count() == 1
+    assert db.query(Response).filter(Response.status == ResponseStatus.discarded).count() == 1
 
 
 def test_create_dataset_records_with_invalid_response_status(client: TestClient, db: Session, admin_auth_header: dict):
