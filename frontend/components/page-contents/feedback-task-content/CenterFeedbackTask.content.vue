@@ -68,12 +68,15 @@ export default {
   watch: {
     async recordStatusFilteringValue(newStatus, oldStatus) {
       // NOTE 1 - each time the filter change, clean records orm && rerender the children component
+      !this.areResponsesUntouched ||
+        (await this.goToFirstPageAndRerenderChildren());
       // NOTE 2 - if responses are untouched, toast is not shown. Else, toast is shown
-
       this.areResponsesUntouched ||
         this.showNotificationBeforeChangeStatus({
-          eventToFireOnClick: this.goToFirstPageAndRerenderChildren,
-          eventToFireOnClose: this.stayOnCurrentPageAndReplaceStatusByOldStatus,
+          eventToFireOnClick: async () =>
+            this.goToFirstPageAndRerenderChildren(),
+          eventToFireOnClose: () =>
+            this.stayOnCurrentPageAndReplaceStatusByOldStatus(oldStatus),
           message: this.toastMessage,
           buttonMessage: this.buttonMessage,
           typeOfToast: this.typeOfToast,
@@ -107,9 +110,9 @@ export default {
         },
       });
     },
-    stayOnCurrentPageAndReplaceStatusByOldStatus() {
+    stayOnCurrentPageAndReplaceStatusByOldStatus(oldStatus) {
       // TODO - go to previous status if user click on close button
-      console.log("on close event");
+      console.log("stayOnCurrentPageAndReplaceStatusByOldStatus", oldStatus);
     },
     async goToFirstPageAndRerenderChildren() {
       await deleteAllRecords();
@@ -135,7 +138,7 @@ export default {
             this.$root.$emit("current-page", this.currentPage);
           }
           if (recordIndexToGo < this.totalRecords) {
-            this.updatePageQueryParam(pageToGo);
+            this.updatePageQueryParam("_page", pageToGo);
           }
         }
       });
@@ -145,10 +148,10 @@ export default {
         this.areResponsesUntouched = areResponsesUntouched;
       });
     },
-    updatePageQueryParam(page) {
+    updatePageQueryParam(param, value) {
       this.$router.push({
         path: this.$route.path,
-        query: { ...this.$route.query, _page: page },
+        query: { ...this.$route.query, [param]: value },
       });
     },
     factoryQuestionsForOrm(initialQuestions) {

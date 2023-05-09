@@ -214,6 +214,7 @@ export default {
       this.close();
     },
     async whenClosed(...arg) {
+      if (!this.dismissible) return;
       this.onClose.apply(null, arg);
       this.close();
     },
