@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { Notification } from "@/models/Notifications";
 import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import {
@@ -38,6 +39,7 @@ export default {
       currentPage: 1,
       recordOffset: 0,
       rerenderChildren: 0,
+      areResponsesUntouched: true,
     };
   },
   async fetch() {
@@ -52,6 +54,7 @@ export default {
 
     this.onBusEventCurrentPage();
     this.onBusEventRecordIndexToGo();
+    this.onBusEventAreResponsesUntouched();
   },
   computed: {
     totalRecords() {
@@ -63,15 +66,57 @@ export default {
     },
   },
   watch: {
-    async recordStatusFilteringValue() {
-      // NOTE - each time the filter change, clean records orm && rerender the children component
+    async recordStatusFilteringValue(newStatus, oldStatus) {
+      // NOTE 1 - each time the filter change, clean records orm && rerender the children component
+      // NOTE 2 - if responses are untouched, toast is not shown. Else, toast is shown
+
+      this.areResponsesUntouched ||
+        this.showNotificationBeforeChangeStatus({
+          eventToFireOnClick: this.goToFirstPageAndRerenderChildren,
+          eventToFireOnClose: this.stayOnCurrentPageAndReplaceStatusByOldStatus,
+          message: this.toastMessage,
+          buttonMessage: this.buttonMessage,
+          typeOfToast: this.typeOfToast,
+        });
+    },
+  },
+  created() {
+    this.toastMessage =
+      "Pending actions will be lost when the page is refreshed";
+    this.buttonMessage = "Ok, got it!";
+    this.typeOfToast = "warning";
+  },
+  methods: {
+    showNotificationBeforeChangeStatus({
+      eventToFireOnClick,
+      eventToFireOnClose,
+      message,
+      buttonMessage,
+      typeOfToast,
+    }) {
+      Notification.dispatch("notify", {
+        message: message ?? "",
+        numberOfChars: 20000,
+        type: typeOfToast ?? "warning",
+        buttonText: buttonMessage ?? "",
+        async onClick() {
+          eventToFireOnClick();
+        },
+        async onClose() {
+          eventToFireOnClose();
+        },
+      });
+    },
+    stayOnCurrentPageAndReplaceStatusByOldStatus() {
+      // TODO - go to previous status if user click on close button
+      console.log("on close event");
+    },
+    async goToFirstPageAndRerenderChildren() {
       await deleteAllRecords();
       // Go to first page on change filter
       this.$root.$emit("current-page", 1);
       this.rerenderChildren++;
     },
-  },
-  methods: {
     onBusEventCurrentPage() {
       this.$root.$on("current-page", (currentPage) => {
         this.currentPage = currentPage;
@@ -93,6 +138,11 @@ export default {
             this.updatePageQueryParam(pageToGo);
           }
         }
+      });
+    },
+    onBusEventAreResponsesUntouched() {
+      this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
+        this.areResponsesUntouched = areResponsesUntouched;
       });
     },
     updatePageQueryParam(page) {
