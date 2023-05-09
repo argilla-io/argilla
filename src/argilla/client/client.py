@@ -59,7 +59,10 @@ from argilla.client.sdk.commons.errors import (
 from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from argilla.client.sdk.datasets.v1 import api as datasets_api_v1
-from argilla.client.sdk.datasets.v1.models import FeedbackDatasetModel, RecordsModel
+from argilla.client.sdk.datasets.v1.models import (
+    FeedbackDatasetModel,
+    FeedbackRecordsModel,
+)
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
 from argilla.client.sdk.text2text.models import (
@@ -238,7 +241,7 @@ class Argilla:
     def publish_dataset(self, id: str) -> FeedbackDatasetModel:
         return datasets_api_v1.publish_dataset(client=self._client, id=id).parsed
 
-    def get_records(self, id: str, offset: int = 0, limit: int = 50) -> RecordsModel:
+    def get_records(self, id: str, offset: int = 0, limit: int = 50) -> FeedbackRecordsModel:
         return datasets_api_v1.get_records(client=self._client, id=id, offset=offset, limit=limit).parsed
 
     def add_record(self, id: str, record: Dict[str, Any]) -> httpx.Response:

@@ -27,7 +27,7 @@ from argilla.client.sdk.commons.models import (
 )
 from argilla.client.sdk.datasets.v1.models import (
     FeedbackDatasetModel,
-    RecordsModel,
+    FeedbackRecordsModel,
 )
 
 
@@ -161,7 +161,7 @@ def get_records(
     id: str,
     offset: int = 0,
     limit: int = 50,
-) -> Response[Union[RecordsModel, ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/me/datasets/{id}/records".format(client.base_url, id=id)
 
     response = httpx.get(
@@ -173,7 +173,7 @@ def get_records(
     )
 
     if response.status_code == 200:
-        parsed_response = RecordsModel(**response.json())
+        parsed_response = FeedbackRecordsModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -234,7 +234,7 @@ def add_field(
     client: AuthenticatedClient,
     id: str,
     field: Dict[str, Any],
-) -> Response:
+) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/datasets/{id}/fields".format(client.base_url, id=id)
 
     response = httpx.post(
@@ -281,7 +281,7 @@ def add_question(
     client: AuthenticatedClient,
     id: str,
     question: Dict[str, Any],
-) -> Response:
+) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/datasets/{id}/questions".format(client.base_url, id=id)
 
     response = httpx.post(
