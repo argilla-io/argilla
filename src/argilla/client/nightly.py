@@ -138,7 +138,6 @@ class FeedbackDataset:
             for dataset in self.client.list_datasets():
                 if dataset.name == name and dataset.workspace_id == workspace.id:
                     self.id = dataset.id
-                    print(dataset.id)
 
             if not hasattr(self, "id"):
                 raise ValueError(f"Dataset with name {name} not found in workspace {workspace}")
