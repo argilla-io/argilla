@@ -65,7 +65,7 @@
           ref="discardButton"
           class="primary outline"
           @on-click="onDiscard"
-          :disabled="recordStatus === 'DISCARDED'"
+          :disabled="isRecordDiscarded"
         >
           <span v-text="'Discard'" />
         </BaseButton>
@@ -159,6 +159,9 @@ export default {
             (option) => !option.value || option.value.length === 0
           )
       );
+    },
+    isRecordDiscarded() {
+      return this.recordStatus === RECORD_STATUS.DISCARDED;
     },
   },
   watch: {
