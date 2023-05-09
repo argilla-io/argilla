@@ -223,7 +223,7 @@ export default {
         ([fieldKey, fieldValue], index) => {
           return {
             id: `${recordId}_${index}`,
-            title: fieldKey,
+            field_name: fieldKey,
             text: fieldValue,
           };
         }

@@ -6,7 +6,7 @@ class RecordField extends Model {
   static fields() {
     return {
       id: this.uid(),
-      title: this.string(null).nullable(),
+      field_name: this.string(null).nullable(),
       text: this.string(null).nullable(),
       record_id: this.attr(null),
     };
