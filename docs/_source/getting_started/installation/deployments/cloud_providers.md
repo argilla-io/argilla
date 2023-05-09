@@ -51,7 +51,7 @@ argilla-aws
 ```
 
 Available Amazon Machine Instance (AMI) depends on region. The provided AMI is available for eu-west regions and is an ubuntu-16.04-server image.
-To find available recent images, go to the [AWS AMI Marketplace](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#LaunchInstances:) and filter by `ubuntu`
+To find available recent images, go to the [AWS AMI Marketplace](https://console.aws.amazon.com/ec2/home), choose "Launch instance". and filter by `ubuntu`
 (don't forget to choose your targeted region).
 
 If you already have multiple instances and VPC in the targeted region, creating a new VPC before creating the Argilla instance is recommended.
