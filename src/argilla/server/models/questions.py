@@ -72,13 +72,12 @@ class RatingQuestionSettings(BaseQuestionSettings):
     )
 
     @property
-    def available_values(self) -> List[int]:
+    def option_values(self) -> List[int]:
         return [option.value for option in self.options]
 
     def check_response(self, response: ResponseValue):
-        rating_values = self.available_values
-        if response.value not in rating_values:
-            raise ValueError(f"{response.value!r} is not a valid option.\nValid options are: {rating_values!r}")
+        if response.value not in self.option_values:
+            raise ValueError(f"{response.value!r} is not a valid option.\nValid options are: {self.option_values!r}")
 
 
 QuestionSettings = Annotated[Union[TextQuestionSettings, RatingQuestionSettings], Field(..., discriminator="type")]
