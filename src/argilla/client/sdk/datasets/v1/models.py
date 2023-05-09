@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -30,6 +30,27 @@ class FeedbackDatasetModel(BaseModel):
     last_updated: datetime = None
 
 
-class RecordsModel(BaseModel):
-    items: List[Dict[str, Any]]
-    total: int
+class FeedbackResponseModel(BaseModel):
+    id: UUID
+    values: Dict[str, Any]
+    status: Literal["submitted", "missing", "discarded"]
+    user_id: UUID
+    inserted_at: datetime
+    updated_at: datetime
+
+
+class FeedbackItemModel(BaseModel):
+    id: UUID
+    fields: Dict[str, Any]
+    external_id: Optional[str] = None
+    responses: List[FeedbackResponseModel] = []
+    inserted_at: datetime
+    updated_at: datetime
+
+
+class FeedbackRecordsModel(BaseModel):
+    items: List[FeedbackItemModel]
+    total: Optional[int] = None
+
+    class Config:
+        fields = {"total": {"exclude": True}}
