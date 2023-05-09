@@ -11,8 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import copy
 import logging
-from typing import List, Optional
+from typing import Dict, List, Optional
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
@@ -21,9 +22,11 @@ from argilla.server.models import (
     DatasetStatus,
     Field,
     Question,
+    QuestionSettingsModel,
     Record,
     Response,
     ResponseStatus,
+    ResponseValue,
 )
 from argilla.server.schemas.v1.datasets import (
     DatasetCreate,
@@ -241,7 +244,15 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
         )
 
         if record_create.response:
-            record.responses = [Response(values=jsonable_encoder(record_create.response.values), user_id=user.id)]
+            record_response = record_create.response
+            validate_response_values(dataset, values=record_response.values, status=record_response.status)
+            record.responses = [
+                Response(
+                    values=jsonable_encoder(record_response.values),
+                    status=record_response.status,
+                    user_id=user.id,
+                )
+            ]
 
         records.append(record)
 
@@ -320,6 +331,8 @@ def create_response(db: Session, record: Record, user: User, response_create: Re
 
 
 def update_response(db: Session, response: Response, response_update: ResponseUpdate):
+    validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
+
     response.values = jsonable_encoder(response_update.values)
     response.status = response_update.status
 
@@ -334,6 +347,25 @@ def delete_response(db: Session, response: Response):
     db.commit()
 
     return response
+
+
+def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue], status: ResponseStatus):
+    if not values and status == ResponseStatus.discarded:
+        return
+
+    values_copy = copy.copy(values or {})
+    for question in dataset.questions:
+        if question.required and status == ResponseStatus.submitted:
+            if question.name not in values:
+                raise ValueError(f"Missing required question: {question.name!r}")
+
+        question_response = values_copy.pop(question.name, None)
+        if question_response:
+            model = QuestionSettingsModel(settings=question.settings)
+            model.settings.check_response(question_response)
+
+    if values_copy:
+        raise ValueError(f"Error: found responses for non configured questions: {list(values_copy.keys())!r}")
 
 
 def _count_fields_by_dataset_id(db: Session, dataset_id: UUID):
