@@ -15,8 +15,8 @@
 from __future__ import annotations
 
 import warnings
-from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
+from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field, create_model, validator
 from tqdm import tqdm
@@ -36,39 +36,25 @@ class RecordSchema(BaseModel):
     external_id: Optional[str] = None
 
 
-class OnlineRecordSchema(RecordSchema):
+class OnlineResponseSchema(BaseModel):
     id: str
-    inserted_at: Optional[str] = None
-    updated_at: Optional[str] = None
+    status: Literal["submitted", "missing", "discarded"]
+    values: Dict[str, Any]
+    user_id: str
+    inserted_at: datetime
+    updated_at: datetime
+
+
+class OnlineRecordSchema(BaseModel):
+    id: str
+    fields: RecordFieldSchema
+    external_id: Optional[str] = None
+    responses: Optional[List[OnlineResponseSchema]] = []
+    inserted_at: datetime
+    updated_at: datetime
 
 
 class FieldSchema(BaseModel):
-    name: str
-    title: str
-    required: bool
-    settings: Dict[str, Any]
-
-
-class OnlineFieldSchema(FieldSchema):
-    id: str
-    inserted_at: Optional[str] = None
-    updated_at: Optional[str] = None
-
-
-class QuestionSchema(BaseModel):
-    name: str
-    title: str
-    required: bool
-    settings: Dict[str, Any]
-
-
-class OnlineQuestionSchema(FieldSchema):
-    id: str
-    inserted_at: Optional[str] = None
-    updated_at: Optional[str] = None
-
-
-class CustomField(BaseModel):
     name: str
     title: Optional[str] = None
     required: Optional[bool] = True
@@ -81,11 +67,17 @@ class CustomField(BaseModel):
         return v
 
 
-class TextField(CustomField):
+class TextField(FieldSchema):
     settings: Dict[str, Any] = Field({"type": "text"}, const=True)
 
 
-class Question(BaseModel):
+class OnlineFieldSchema(FieldSchema):
+    id: str
+    inserted_at: datetime
+    updated_at: datetime
+
+
+class QuestionSchema(BaseModel):
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
@@ -99,11 +91,11 @@ class Question(BaseModel):
         return v
 
 
-class TextQuestion(Question):
+class TextQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "text"}, const=True)
 
 
-class RatingQuestion(Question):
+class RatingQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "rating"})
     values: List[int]
 
@@ -114,47 +106,10 @@ class RatingQuestion(Question):
         return v
 
 
-class DatasetStatus(str, Enum):
-    DRAFT = "draft"
-    READY = "ready"
-
-
-class QuestionSchema(BaseModel):
-    name: str
-    title: str
-    required: bool
-    settings: Dict[str, Any]
-
-
-def create_feedback_dataset(
-    name: str,
-    workspace_id: Optional[str] = None,
-    guidelines: Optional[str] = None,
-    fields: Optional[List[BaseModel]] = None,
-    questions: Optional[List[QuestionSchema]] = None,
-) -> "FeedbackDataset":
-    client = rg.active_client()
-
-    for dataset in client.list_datasets().parsed:
-        if dataset.name == name and dataset.workspace_id == workspace_id:
-            warnings.warn(f"Dataset with name '{name}' already exists, skipping creation.")
-            return FeedbackDataset(id=dataset.id)
-
-    new_dataset = client.create_dataset(name=name, workspace_id=workspace_id, guidelines=guidelines).parsed
-
-    for field in fields:
-        if isinstance(field, dict):
-            field = FieldSchema(**field)
-        client.add_field(id=new_dataset.id, field=field.dict())
-
-    for question in questions:
-        if isinstance(question, dict):
-            question = QuestionSchema(**question)
-        client.add_question(id=new_dataset.id, question=question.dict())
-
-    client.publish_dataset(id=new_dataset.id)
-
-    return FeedbackDataset(id=new_dataset.id)
+class OnlineQuestionSchema(QuestionSchema):
+    id: str
+    inserted_at: datetime
+    updated_at: datetime
 
 
 class FeedbackDataset:
