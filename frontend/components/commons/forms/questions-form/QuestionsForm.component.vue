@@ -221,7 +221,7 @@ export default {
 
       // 2 - init formattedSelectionOptionObject
       const formattedSelectionObject = this.formatSelectedOptionObject(
-        "discarded",
+        RECORD_STATUS.DISCARDED.toLowerCase(),
         !this.isSomeRequiredQuestionHaveNoAnswer
       );
 
@@ -259,8 +259,9 @@ export default {
       // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
 
       // 2 - init formattedSelectionOptionObject
-      const formattedSelectionObject =
-        this.formatSelectedOptionObject("submitted");
+      const formattedSelectionObject = this.formatSelectedOptionObject(
+        RECORD_STATUS.SUBMITTED.toLowerCase()
+      );
 
       // 3 - Create the formatted requests to send from the formattedSelectionObject
       const formattedRequestsToSend = this.formatRequestsToSend(
@@ -390,6 +391,7 @@ export default {
       const formattedRecordResponsesForOrm = [];
       if (responsesFromApi.values) {
         if (Object.keys(responsesFromApi.values).length === 0) {
+          // IF responses.value  is an empty object, init formatted responses with questions data
           this.inputs.forEach(
             ({ question: questionName, options: questionOptions }) => {
               formattedRecordResponsesForOrm.push({
@@ -402,6 +404,7 @@ export default {
             }
           );
         } else {
+          // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
           Object.entries(responsesFromApi.values).map(
             ([questionName, newResponse]) => {
               const componentType =
