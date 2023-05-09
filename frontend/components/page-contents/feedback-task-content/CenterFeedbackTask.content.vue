@@ -11,6 +11,7 @@
 
 <script>
 import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
+import { upsertDatasetFields } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
 import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import {
   RECORD_STATUS,
@@ -18,11 +19,13 @@ import {
 } from "@/models/feedback-task-model/record/record.queries";
 import {
   COMPONENT_TYPE,
-  CORRESPONDING_COMPONENT_TYPE_FROM_API,
+  CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API,
+  CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API,
 } from "@/components/feedback-task/feedbackTask.properties";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   ERROR_FETCHING_QUESTIONS: "ERROR_FETCHING_QUESTIONS",
+  ERROR_FETCHING_FIELDS: "ERROR_FETCHING_FIELDS",
 });
 
 export default {
@@ -41,14 +44,17 @@ export default {
     };
   },
   async fetch() {
-    // FETCH questions by dataset
+    // FETCH questions AND fields by dataset
     const { items: questions } = await this.getQuestions(this.datasetId);
+    const { items: fields } = await this.getFields(this.datasetId);
 
-    // FORMAT questions to have the shape of ORM
+    // FORMAT questions AND fields to have the shape of ORM
     const formattedQuestionsForOrm = this.factoryQuestionsForOrm(questions);
+    const formattedFieldsForOrm = this.factoryFieldsForOrm(fields);
 
     // UPSERT formatted questions in ORM
     await upsertDatasetQuestions(formattedQuestionsForOrm);
+    await upsertDatasetFields(formattedFieldsForOrm);
 
     this.onBusEventCurrentPage();
     this.onBusEventRecordIndexToGo();
@@ -115,13 +121,16 @@ export default {
         ) => {
           const componentTypeFromBack = questionSettings.type.toLowerCase();
           const componentType =
-            CORRESPONDING_COMPONENT_TYPE_FROM_API[componentTypeFromBack];
+            CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API[
+              componentTypeFromBack
+            ];
 
           const formattedOptions = this.formatOptionsFromQuestionApi(
             questionSettings.options,
             questionName,
             componentType
           );
+
           return {
             id: questionId,
             name: questionName,
@@ -133,6 +142,37 @@ export default {
             component_type: componentType,
             placeholder: questionSettings?.placeholder ?? null,
             tooltip_message: questionSettings?.tooltip ?? null,
+          };
+        }
+      );
+    },
+    factoryFieldsForOrm(initialFields) {
+      return initialFields.map(
+        (
+          {
+            id: fieldId,
+            name: fieldName,
+            title: fieldTitle,
+            required: isRequired,
+            settings: fieldSettings,
+          },
+          index
+        ) => {
+          const componentTypeFromBack =
+            fieldSettings?.type?.toLowerCase() ?? null;
+
+          const componentType = componentTypeFromBack
+            ? CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API[componentTypeFromBack]
+            : null;
+
+          return {
+            id: fieldId,
+            name: fieldName,
+            dataset_id: this.datasetId,
+            order: index,
+            field: fieldTitle,
+            is_required: isRequired,
+            component_type: componentType,
           };
         }
       );
@@ -196,6 +236,19 @@ export default {
       } catch (err) {
         throw {
           response: TYPE_OF_FEEDBACK.ERROR_FETCHING_QUESTIONS,
+        };
+      }
+    },
+    async getFields(datasetId) {
+      try {
+        const { data } = await this.$axios.get(
+          `/v1/datasets/${datasetId}/fields`
+        );
+
+        return data;
+      } catch (err) {
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_FIELDS,
         };
       }
     },
