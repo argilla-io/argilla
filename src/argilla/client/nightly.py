@@ -162,7 +162,7 @@ class FeedbackDataset:
         self,
         name: Optional[str] = None,
         *,
-        workspace: Optional[Union[Workspace, str]] = None,
+        workspace: Optional[Union[rg.Workspace, str]] = None,
         id: Optional[str] = None,
     ) -> None:
         self.client: "Argilla" = rg.active_client()
@@ -173,14 +173,30 @@ class FeedbackDataset:
             " exist in advance."
         )
 
-        self.id = id
-        dataset: FeedbackDatasetModel = self.client.get_dataset(id=self.id)
+        if name or (name and workspace):
+            if workspace is None or isinstance(workspace, str):
+                workspace = rg.Workspace.from_name(workspace)
 
-        self.name = dataset.name
-        self.workspace = dataset.workspace_id
-        self.guidelines = dataset.guidelines
+            if not isinstance(workspace, rg.Workspace):
+                raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
+
+            for dataset in self.client.list_datasets():
+                if dataset.name == name and dataset.workspace_id == workspace.id:
+                    self.id = dataset.id
+                    print(dataset.id)
+
+            if not hasattr(self, "id"):
+                raise ValueError(f"Dataset with name {name} not found in workspace {workspace}")
+
+        existing_dataset: FeedbackDatasetModel = self.client.get_dataset(id=id or self.id)
+
+        self.id = existing_dataset.id
+        self.name = existing_dataset.name
+        self.workspace = existing_dataset.workspace_id
+        self.guidelines = existing_dataset.guidelines
 
         self.schema = None
+
         self.__fields = None
         self.__questions = None
         self.__records = None
