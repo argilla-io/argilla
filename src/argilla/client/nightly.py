@@ -151,7 +151,7 @@ class FeedbackDataset:
             return len(self.records)
         return len(self.__records)
 
-    def __getitem__(self, key: Union[slice, int]) -> Union[OnlineRecordSchema, List[OnlineRecordSchema]]:
+    def __getitem__(self, key: Union[slice, int]) -> Union["FeedbackItemModel", List["FeedbackItemModel"]]:
         return self.__records[key]
 
     def __del__(self) -> None:
@@ -177,26 +177,11 @@ class FeedbackDataset:
         return self.__questions
 
     @property
-    def records(self) -> List[RecordFieldSchema]:
+    def records(self) -> List["FeedbackItemModel"]:
+        # TODO: we can use a cache to store the results to `.cache/argilla/datasets/{dataset_id}/records`
         if self.__records is None or len(self.__records) < 1:
             response = self.client.get_records(id=self.id, offset=0, limit=1)
-            if self.schema is None:
-                self.schema = generate_pydantic_schema(response.items[0]["fields"])
-                RecordFieldSchema.__bound__ = self.schema
-            # TODO: we can use a cache to store the results to `.cache/argilla/datasets/{dataset_id}/records`
-            self.__records = [
-                OnlineRecordSchema(
-                    id=record["id"],
-                    fields=self.schema(**record["fields"]),
-                    responses=[OnlineResponseSchema(**response) for response in record["responses"]]
-                    if "responses" in record
-                    else [],
-                    external_id=record["external_id"],
-                    inserted_at=record["inserted_at"],
-                    updated_at=record["inserted_at"],
-                )
-                for record in response.items
-            ]
+            self.__records = response.items
             total_records = response.total
             if total_records > 1:
                 prev_limit = 0
@@ -205,19 +190,7 @@ class FeedbackDataset:
                 ) as pbar:
                     while prev_limit < total_records:
                         prev_limit += 1
-                        self.__records += [
-                            OnlineRecordSchema(
-                                id=record["id"],
-                                fields=self.schema(**record["fields"]),
-                                responses=[OnlineResponseSchema(**response) for response in record["responses"]]
-                                if "responses" in record
-                                else [],
-                                external_id=record["external_id"],
-                                inserted_at=record["inserted_at"],
-                                updated_at=record["inserted_at"],
-                            )
-                            for record in self.client.get_records(id=self.id, offset=prev_limit, limit=1).items
-                        ]
+                        self.__records += self.client.get_records(id=self.id, offset=prev_limit, limit=1).items
                         pbar.update(1)
         return self.__records
 
@@ -244,52 +217,22 @@ class FeedbackDataset:
         if self.__records is not None and isinstance(self.__records, list) and len(self.__records) > 0:
             self.__records.append(self.schema(**record))
 
-    def fetch_one(self) -> Union[Dict[str, Any], List[str, Any]]:
+    def fetch_one(self) -> "FeedbackItemModel":
         if self.__records is None or len(self.__records) < 1:
-            # TODO: handle exception if there are no records
             return self.client.get_records(id=self.id, offset=0, limit=1).items[0]
         return self.__records[0]
 
-    # TODO: we could fetch those on iter, maybe we can create an `streaming` flag or something similar
-    def iter(self, batch_size: int = 32) -> List[BaseModel]:
+    def iter(self, batch_size: int = 32) -> List["FeedbackItemModel"]:
         if self.__records is None or len(self.__records) < 1:
             first_batch = self.client.get_records(id=self.id, offset=0, limit=batch_size)
-            if self.schema is None:
-                self.schema = generate_pydantic_schema(first_batch.items[0]["fields"])
-                RecordFieldSchema.__bound__ = self.schema
-            batch = [
-                OnlineRecordSchema(
-                    id=record["id"],
-                    fields=self.schema(**record["fields"]),
-                    responses=[OnlineResponseSchema(**response) for response in record["responses"]]
-                    if "responses" in record
-                    else [],
-                    external_id=record["external_id"],
-                    inserted_at=record["inserted_at"],
-                    updated_at=record["inserted_at"],
-                )
-                for record in first_batch.items
-            ]
-            self.__records = batch
+            self.__records = first_batch.items
             yield batch
             total_batches = first_batch.total // batch_size
             current_batch = 1
             with tqdm(initial=current_batch, total=total_batches, desc="Fetching records from Argilla") as pbar:
                 while current_batch <= total_batches:
-                    batch = [
-                        OnlineRecordSchema(
-                            id=record["id"],
-                            fields=self.schema(**record["fields"]),
-                            responses=[OnlineResponseSchema(**response) for response in record["responses"]]
-                            if "responses" in record
-                            else [],
-                            external_id=record["external_id"],
-                            inserted_at=record["inserted_at"],
-                            updated_at=record["inserted_at"],
-                        )
-                        for record in first_batch.items
-                    ]
-                    self.__records += batch
+                    batch = self.client.get_records(id=self.id, offset=batch_size, limit=batch_size)
+                    self.__records += batch.items
                     yield batch
                     current_batch += 1
                     pbar.update(1)
