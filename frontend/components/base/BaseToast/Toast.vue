@@ -83,7 +83,7 @@ export default {
     },
     onClose: {
       type: Function,
-      default: () => {},
+      default: async () => {},
     },
     onClick: {
       type: Function,
