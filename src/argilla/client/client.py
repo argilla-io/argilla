@@ -232,6 +232,9 @@ class Argilla:
     def get_dataset(self, id: str) -> FeedbackDatasetModel:
         return datasets_api_v1.get_dataset(client=self._client, id=id).parsed
 
+    def delete_dataset(self, id: str) -> httpx.Response:
+        return datasets_api_v1.delete_dataset(client=self._client, id=id)
+
     def publish_dataset(self, id: str) -> FeedbackDatasetModel:
         return datasets_api_v1.publish_dataset(client=self._client, id=id).parsed
 

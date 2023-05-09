@@ -87,6 +87,28 @@ def get_dataset(
     return handle_response_error(response)
 
 
+def delete_dataset(
+    client: AuthenticatedClient,
+    id: str,
+) -> Response:
+    url = "{}/api/v1/datasets/{id}".format(client.base_url, id=id)
+
+    response = httpx.delete(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    if response.status_code == 200:
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+        )
+    return handle_response_error(response)
+
+
 def publish_dataset(
     client: AuthenticatedClient,
     id: str,
