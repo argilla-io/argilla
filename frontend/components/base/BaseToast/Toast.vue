@@ -36,7 +36,7 @@
         @click="whenClicked"
         >{{ buttonText }}
       </base-button>
-      <span class="toast__close" @click="close()"></span>
+      <span class="toast__close" @click="whenClosed"></span>
     </div>
   </transition>
 </template>
@@ -181,13 +181,12 @@ export default {
         this.parentBottom.childElementCount > 0
       );
     },
-    close(...arg) {
+    close() {
       this.timer.stop();
       clearTimeout(this.queueTimer);
       this.isActive = false;
       // Timeout for the animation complete before destroying
       setTimeout(() => {
-        this.onClose.apply(null, arg);
         this.$destroy();
         removeElement(this.$el);
       }, 150);
@@ -212,6 +211,10 @@ export default {
     async whenClicked(...arg) {
       if (!this.dismissible) return;
       this.onClick.apply(null, arg);
+      this.close();
+    },
+    async whenClosed(...arg) {
+      this.onClose.apply(null, arg);
       this.close();
     },
     toggleTimer(newVal) {
