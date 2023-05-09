@@ -14,7 +14,7 @@ Deploy your own Argilla Server on Spaces with a few clicks:
 ```
 
 
-```{admonition} Semantic Search data labelling 🆕
+```{admonition} Semantic Search data labeling 🆕
 :class: important
 
 🆕 Use embeddings to find the most similar records with the UI. This feature uses vector search combined with traditional search (keyword and filter based).
@@ -39,7 +39,7 @@ Get started: [Semantic Search Deep-dive guide](../guides/label_records_with_sema
 
 ## Use cases
 
-* **Data labelling and curation**: collect labels to start a project from scratch or from existing live models.
+* **Data labeling and curation**: collect labels to start a project from scratch or from existing live models.
 * **Model monitoring and observability:** log and observe predictions of live models.
 * **Evaluation**: easily compute "live" metrics from models in production, and slice evaluation datasets to test your system under specific conditions.
 * **Model debugging**: log predictions during the development process to visually spot issues.
