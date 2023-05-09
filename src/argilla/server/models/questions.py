@@ -17,20 +17,13 @@ from enum import Enum
 from typing import Any, List, Union
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, conlist
+from pydantic import BaseModel, Field
 from sqlalchemy import JSON, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing_extensions import Annotated, Literal
 
 from argilla.client.datasets import Dataset
 from argilla.server.database import Base
-
-QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
-QUESTION_CREATE_NAME_MIN_LENGTH = 1
-QUESTION_CREATE_NAME_MAX_LENGTH = 200
-
-RATING_OPTIONS_MIN_ITEMS = 2
-RATING_OPTIONS_MAX_ITEMS = 100
 
 
 def default_inserted_at(context):
@@ -65,11 +58,7 @@ class RatingQuestionSettingsOption(BaseModel):
 
 class RatingQuestionSettings(BaseQuestionSettings):
     type: Literal[QuestionType.rating]
-    options: conlist(
-        item_type=RatingQuestionSettingsOption,
-        min_items=RATING_OPTIONS_MIN_ITEMS,
-        max_items=RATING_OPTIONS_MAX_ITEMS,
-    )
+    options: List[RatingQuestionSettingsOption]
 
     @property
     def option_values(self) -> List[int]:

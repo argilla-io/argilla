@@ -21,13 +21,7 @@ from pydantic import BaseModel, conlist, constr
 from pydantic import Field as ModelField
 from typing_extensions import Literal
 
-from argilla.server.models import (
-    DatasetStatus,
-    FieldType,
-    QuestionSettings,
-    QuestionType,
-    ResponseStatus,
-)
+from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
 
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1
