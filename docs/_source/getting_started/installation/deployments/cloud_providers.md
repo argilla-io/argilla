@@ -50,7 +50,7 @@ docker-machine create --driver amazonec2 \
 argilla-aws
 ```
 
-Available ami depends on region. The provided ami is available for eu-west regions and is an ubuntu-16.04-server image. 
+Available Amazon Machine Instance (AMI) depends on region. The provided AMI is available for eu-west regions and is an ubuntu-16.04-server image.
 To find available recent images, go to the [AWS AMI Marketplace](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#LaunchInstances:) and filter by `ubuntu`
 (don't forget to choose your targeted region).
 
