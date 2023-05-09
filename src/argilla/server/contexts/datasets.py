@@ -13,7 +13,7 @@
 #  limitations under the License.
 import copy
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
@@ -238,6 +238,8 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
 
     records = []
     for record_create in records_create.items:
+        validate_record_fields(dataset, fields=record_create.fields)
+
         record = Record(
             fields=record_create.fields,
             external_id=record_create.external_id,
@@ -359,7 +361,7 @@ def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue],
     values_copy = copy.copy(values or {})
     for question in dataset.questions:
         if question.required and status == ResponseStatus.submitted:
-            if question.name not in values:
+            if not (question.name in values and values_copy.get(question.name)):
                 raise ValueError(f"Missing required question: {question.name!r}")
 
         question_response = values_copy.pop(question.name, None)
@@ -369,6 +371,22 @@ def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue],
 
     if values_copy:
         raise ValueError(f"Error: found responses for non configured questions: {list(values_copy.keys())!r}")
+
+
+def validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
+    fields_copy = copy.copy(fields or {})
+    for field in dataset.fields:
+        if field.required and not (field.name in fields_copy and fields_copy.get(field.name) is not None):
+            raise ValueError(f"Missing required value for field: {field.name!r}")
+
+        value = fields_copy.pop(field.name, None)
+        if not isinstance(value, str):
+            raise ValueError(
+                f"Wrong value found for field {field.name!r}. Expected {str.__name__!r}, found {type(value).__name__!r}"
+            )
+
+    if fields_copy:
+        raise ValueError(f"Error: found fields values for non configured fields: {list(fields_copy.keys())!r}")
 
 
 def _count_fields_by_dataset_id(db: Session, dataset_id: UUID):
