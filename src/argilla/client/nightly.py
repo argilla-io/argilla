@@ -204,7 +204,9 @@ class FeedbackDataset:
                 OnlineRecordSchema(
                     id=record["id"],
                     fields=self.schema(**record["fields"]),
-                    response=record["response"] if "response" in record else {},
+                    responses=[OnlineResponseSchema(**response) for response in record["responses"]]
+                    if "responses" in record
+                    else [],
                     external_id=record["external_id"],
                     inserted_at=record["inserted_at"],
                     updated_at=record["inserted_at"],
@@ -223,7 +225,9 @@ class FeedbackDataset:
                             OnlineRecordSchema(
                                 id=record["id"],
                                 fields=self.schema(**record["fields"]),
-                                response=record["response"] if "response" in record else {"values": {}},
+                                responses=[OnlineResponseSchema(**response) for response in record["responses"]]
+                                if "responses" in record
+                                else [],
                                 external_id=record["external_id"],
                                 inserted_at=record["inserted_at"],
                                 updated_at=record["inserted_at"],
@@ -273,7 +277,9 @@ class FeedbackDataset:
                 OnlineRecordSchema(
                     id=record["id"],
                     fields=self.schema(**record["fields"]),
-                    response=record["response"] if "response" in record else {},
+                    responses=[OnlineResponseSchema(**response) for response in record["responses"]]
+                    if "responses" in record
+                    else [],
                     external_id=record["external_id"],
                     inserted_at=record["inserted_at"],
                     updated_at=record["inserted_at"],
@@ -290,7 +296,9 @@ class FeedbackDataset:
                         OnlineRecordSchema(
                             id=record["id"],
                             fields=self.schema(**record["fields"]),
-                            response=record["response"] if "response" in record else {},
+                            responses=[OnlineResponseSchema(**response) for response in record["responses"]]
+                            if "responses" in record
+                            else [],
                             external_id=record["external_id"],
                             inserted_at=record["inserted_at"],
                             updated_at=record["inserted_at"],

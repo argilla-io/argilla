@@ -144,7 +144,7 @@ def get_records(
 
     response = httpx.get(
         url=url,
-        params={"offset": offset, "limit": limit},
+        params={"include": "responses", "offset": offset, "limit": limit},
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
