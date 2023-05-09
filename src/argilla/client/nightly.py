@@ -45,13 +45,16 @@ class OnlineResponseSchema(BaseModel):
     updated_at: datetime
 
 
-class OnlineRecordSchema(BaseModel):
-    id: str
-    fields: RecordFieldSchema
+class FeedbackRecord(BaseModel):
+    fields: Dict[str, str]
+    response: Optional[ResponseSchema] = None
     external_id: Optional[str] = None
-    responses: Optional[List[OnlineResponseSchema]] = []
-    inserted_at: datetime
-    updated_at: datetime
+
+    @validator("response", always=True)
+    def response_must_have_values(cls, v):
+        if not v:
+            v = ResponseSchema(values={}, status="submitted")
+        return v
 
 
 class FieldSchema(BaseModel):

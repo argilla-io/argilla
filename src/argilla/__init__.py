@@ -69,6 +69,7 @@ if _TYPE_CHECKING:
         TextField,
         TextQuestion,
         create_feedback_dataset,
+        FeedbackRecord,
     )
     from argilla.client.workspaces import Workspace
     from argilla.datasets import (
@@ -109,7 +110,7 @@ _import_structure = {
         "read_datasets",
         "read_pandas",
     ],
-    "client.nightly": ["FeedbackDataset", "create_feedback_dataset", "TextField", "TextQuestion", "RatingQuestion"],
+    "client.nightly": ["FeedbackDataset", "create_feedback_dataset", "TextField", "TextQuestion", "RatingQuestion", "FeedbackRecord"],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [
