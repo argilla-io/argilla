@@ -312,16 +312,6 @@ class FeedbackDataset:
             for batch in self.records[0::batch_size]:
                 yield batch
 
-    def to_datasets(self) -> "Dataset":
-        # TODO(alvarobartt): add internal method to format as dict, just the records
-        # TODO(alvarobartt): implement this method
-        pass
-
-    def push_to_hub(self) -> None:
-        # TODO(alvarobartt): create dataset card based on metrics, fields, and questions
-        # TODO(alvarobartt): convert `self.records` to `datasets.Dataset` with `to_datasets` before pushing
-        pass
-
 
 def generate_pydantic_schema(record: Dict[str, Any]) -> BaseModel:
     record_schema = {key: (type(value), ...) for key, value in record.items()}
