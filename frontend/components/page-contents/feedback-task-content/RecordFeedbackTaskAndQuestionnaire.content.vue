@@ -6,7 +6,7 @@
   >
     <RecordFeedbackTaskComponent
       v-if="fieldsWithRecordFieldText"
-      :record="record"
+      :recordStatus="record.record_status"
       :fields="fieldsWithRecordFieldText"
     />
     <QuestionsFormComponent

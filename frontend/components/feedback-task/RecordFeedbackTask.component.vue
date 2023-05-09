@@ -1,15 +1,11 @@
 <template>
   <div class="record">
-    <StatusTag class="record__status" :title="record.record_status" />
-    <div
-      class="item"
-      v-for="{ id, title, text } in record.record_fields"
-      :key="id"
-    >
+    <StatusTag class="record__status" :title="recordStatus" />
+    <div class="item" v-for="{ id, title, field_text } in fields" :key="id">
       <div class="title-area --body1">
         <span v-text="title" />
       </div>
-      <div class="record__content --body1" v-text="text" />
+      <div class="record__content --body1" v-text="field_text" />
     </div>
   </div>
 </template>
@@ -17,8 +13,12 @@
 <script>
 export default {
   props: {
-    record: {
-      type: Object,
+    recordStatus: {
+      type: String,
+      required: true,
+    },
+    fields: {
+      type: Array,
       required: true,
     },
   },
