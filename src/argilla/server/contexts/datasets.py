@@ -317,6 +317,8 @@ def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, 
 
 
 def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):
+    validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
+
     response = Response(
         values=jsonable_encoder(response_create.values),
         status=response_create.status,

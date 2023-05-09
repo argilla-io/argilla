@@ -52,8 +52,6 @@ def create_record_response(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        datasets.validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
+        return datasets.create_response(db, record, current_user, response_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
-
-    return datasets.create_response(db, record, current_user, response_create)
