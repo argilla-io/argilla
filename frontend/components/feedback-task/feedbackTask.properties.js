@@ -1,3 +1,4 @@
+// questions
 const COMPONENT_TYPE = Object.freeze({
   FREE_TEXT: "FREE_TEXT",
   RATING: "RATING",
@@ -5,17 +6,23 @@ const COMPONENT_TYPE = Object.freeze({
 });
 
 const CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API = Object.freeze({
-  text: "FREE_TEXT",
-  rating: "RATING",
-  single_label: "SINGLE_LABEL",
+  text: COMPONENT_TYPE.FREE_TEXT,
+  rating: COMPONENT_TYPE.RATING,
+  single_label: COMPONENT_TYPE.SINGLE_LABEL,
+});
+
+// fields
+const FIELD_COMPONENT_TYPE = Object.freeze({
+  TEXT_FIELD: "TEXT_FIELD",
 });
 
 const CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API = Object.freeze({
-  text: "TEXT_FIELD",
+  text: FIELD_COMPONENT_TYPE.TEXT_FIELD,
 });
 
 export {
   COMPONENT_TYPE,
+  FIELD_COMPONENT_TYPE,
   CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API,
   CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API,
 };
