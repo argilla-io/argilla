@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
-WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
+import typer
 
-DEFAULT_USERNAME = "argilla"
-DEFAULT_PASSWORD = "1234"
-DEFAULT_API_KEY = "argilla.apikey"
-DEFAULT_MAX_KEYWORD_LENGTH = 128
-DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+from .migrate import migrate_db
 
-ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
+app = typer.Typer(help="Holds CLI commands for migrations and database management.", no_args_is_help=True)
 
-# contants for prepare_for_training(framework="openai")
-OPENAI_SEPARATOR = "\n\n###\n\n"
-OPENAI_END_TOKEN = " END"
-OPENAI_WHITESPACE = " "
+app.command(name="migrate", help="Run database migrations to align user config with pre-defined server settings.")(
+    migrate_db
+)
+
+if __name__ == "__main__":
+    app()

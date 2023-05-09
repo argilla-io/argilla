@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
-WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
 
-DEFAULT_USERNAME = "argilla"
-DEFAULT_PASSWORD = "1234"
-DEFAULT_API_KEY = "argilla.apikey"
-DEFAULT_MAX_KEYWORD_LENGTH = 128
-DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+import typer
+import uvicorn
 
-ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
+app = typer.Typer(invoke_without_command=True)
 
-# contants for prepare_for_training(framework="openai")
-OPENAI_SEPARATOR = "\n\n###\n\n"
-OPENAI_END_TOKEN = " END"
-OPENAI_WHITESPACE = " "
+
+# using callback to ensure it is used as sole command
+@app.callback(help="Starts the Argilla FastAPI server.", invoke_without_command=True)
+def server(port: int = 6900, host: str = "0.0.0.0", access_log: bool = True):
+    uvicorn.run(
+        "argilla:app",
+        port=port,
+        host=host,
+        access_log=access_log,
+    )
+
+
+if __name__ == "__main__":
+    app()

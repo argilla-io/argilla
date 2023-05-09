@@ -27,18 +27,27 @@ These are the section headers that we use:
 
 - add `max_retries` and `num_threads` parameters to `rg.log` to run data logging request concurrently with backoff retry policy. See [#2458](https://github.com/argilla-io/argilla/issues/2458) and [#2533](https://github.com/argilla-io/argilla/issues/2533)
 - `rg.load` accepts `exclude_vectors` and `exclude_metrics` when loading data. Closes [#2398](https://github.com/argilla-io/argilla/issues/2398)
+- Added `settings` param to `prepare_for_training` ([#2689])
+- Added `prepare_for_training` for `openai` ([#2658])
+- Added `ArgillaOpenAITrainer` ([#2659])
+- Added `ArgillaSpanMarkerTrainer` for Named Entity Recognition ([#2693](https://github.com/argilla-io/argilla/pull/2693))
+- Added `ArgillaTrainer` CLI support. Closes ([#2809])
 
 ### Changed
 
 - Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
 - bulk endpoints will upsert data when record `id` is present. Closes [#2535](https://github.com/argilla-io/argilla/issues/2535)
+- moved from `click` to `typer` CLI support. Closses ([#2815])
+
+### Fixed
+
+- `argilla.training` bugfixes and unification ([#2665])
 - The `rg.log` computes all batches and raise an error for all failed batches.
 - The default batch size for `rg.log` is now 100.
 
 ### Deprecated
 
 - The `rg.log_async` function is deprecated and will be removed in next minor release.
-
 
 ## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.5.1...v1.6.0)
 

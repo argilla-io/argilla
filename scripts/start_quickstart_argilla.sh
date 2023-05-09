@@ -9,10 +9,10 @@ echo "Waiting for elasticsearch to start"
 sleep 30
 
 echo "Running database migrations"
-python3.9 -m argilla.tasks.database.migrate
+python3.9 -m argilla database migrate
 
 echo "Creating admin user"
-python3.9 -m argilla.tasks.users.create \
+python3.9 -m argilla users create \
   --first-name "Admin" \
   --username "$ADMIN_USERNAME" \
   --password "$ADMIN_PASSWORD" \
@@ -21,7 +21,7 @@ python3.9 -m argilla.tasks.users.create \
   --workspace "$ARGILLA_WORKSPACE"
 
 echo "Creating annotator user"
-python3.9 -m argilla.tasks.users.create \
+python3.9 -m argilla users create \
   --first-name "Annotator" \
   --username "$ANNOTATOR_USERNAME" \
   --password "$ANNOTATOR_PASSWORD" \

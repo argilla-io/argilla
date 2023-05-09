@@ -12,13 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import inspect
 import logging
 import os
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
-from argilla.client.models import Framework
+from argilla.client.models import (
+    Framework,
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenClassificationRecord,
+)
+from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -28,6 +34,7 @@ if TYPE_CHECKING:
 
 class ArgillaTrainer(object):
     _logger = logging.getLogger("ArgillaTrainer")
+    _logger.setLevel(logging.INFO)
 
     def __init__(
         self,
@@ -38,6 +45,7 @@ class ArgillaTrainer(object):
         model: Optional[str] = None,
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
+        gpu_id: Optional[int] = -1,
         **load_kwargs: Optional[dict],
     ) -> None:
         """
@@ -58,6 +66,10 @@ class ArgillaTrainer(object):
                 the size of the training set. If not specified, the entire dataset will be used for training,
                 which may be an issue if `framework="spacy"` as it requires a validation set. Defaults to None.
             seed (int): the random seed to ensure reproducibility. Defaults to None.
+            gpu_id (int):
+                the GPU ID to use when training a SpaCy model. Defaults to -1, which means that the CPU
+                will be used by default. GPU IDs start in 0, which stands for the default GPU in the system,
+                if available.
             **load_kwargs: arguments for the rg.load() function.
         """
         self._name = name
@@ -74,6 +86,9 @@ class ArgillaTrainer(object):
         if not len(self.rg_dataset_snapshot) > 0:
             raise ValueError(f"Dataset {self._name} is empty")
 
+        # settings for the dataset
+        self._settings = rg.load_dataset_settings(name=self._name, workspace=workspace)
+
         if isinstance(self.rg_dataset_snapshot, rg.DatasetForTextClassification):
             self._rg_dataset_type = rg.DatasetForTextClassification
             self._multi_label = self.rg_dataset_snapshot[0].multi_label
@@ -81,7 +96,6 @@ class ArgillaTrainer(object):
             self._rg_dataset_type = rg.DatasetForTokenClassification
         elif isinstance(self.rg_dataset_snapshot, rg.DatasetForText2Text):
             self._rg_dataset_type = rg.DatasetForText2Text
-            raise NotImplementedError("`argilla.training` does not support `Text2Text` tasks yet.")
         else:
             raise NotImplementedError(f"Dataset type {type(self.rg_dataset_snapshot)} is not supported.")
 
@@ -113,6 +127,7 @@ class ArgillaTrainer(object):
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
                 model=self.model,
             )
@@ -123,6 +138,7 @@ class ArgillaTrainer(object):
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
                 model=self.model,
             )
@@ -134,10 +150,40 @@ class ArgillaTrainer(object):
                 dataset=self.dataset_full_prepared,
                 model=self.model,
                 multi_label=self._multi_label,
+                settings=self._settings,
+                seed=self._seed,
+                gpu_id=gpu_id,
+            )
+        elif framework is Framework.OPENAI:
+            from argilla.training.openai import ArgillaOpenAITrainer
+
+            if self._rg_dataset_type is rg.DatasetForTokenClassification:
+                raise NotImplementedError(f"{Framework.OPENAI} does not support `TokenClassification` tasks.")
+            elif self._rg_dataset_type is rg.DatasetForTextClassification and self._multi_label:
+                raise NotImplementedError(f"{Framework.OPENAI} does not support multi-label TextClassification tasks.")
+            self._trainer = ArgillaOpenAITrainer(
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                model=self.model,
+                multi_label=self._multi_label,
+                settings=self._settings,
+                seed=self._seed,
+            )
+        elif framework is Framework.SPAN_MARKER:
+            if self._rg_dataset_type is not rg.DatasetForTokenClassification:
+                raise NotImplementedError(f"{Framework.SPAN_MARKER} only supports `TokenClassification` tasks.")
+            from argilla.training.span_marker import ArgillaSpanMarkerTrainer
+
+            self._trainer = ArgillaSpanMarkerTrainer(
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                model=self.model,
+                multi_label=self._multi_label,
+                settings=self._settings,
                 seed=self._seed,
             )
 
-        self._logger.warning(self)
+        self._logger.info(self)
 
     def __repr__(self) -> str:
         """
@@ -172,8 +218,13 @@ _________________________________________________________________
         It updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
         """
         self._trainer.update_config(*args, **kwargs)
+        self._logger.info(
+            "Updated parameters:\n"
+            + "_________________________________________________________________\n"
+            + f"{self._trainer}"
+        )
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
         `predict` takes a string or list of strings and returns a list of dictionaries, each dictionary
         containing the text, the predicted label, and the confidence score.
@@ -185,7 +236,7 @@ _________________________________________________________________
         Returns:
           A list of predictions or Argilla records.
         """
-        return self._trainer.predict(text, as_argilla_records)
+        return self._trainer.predict(text=text, as_argilla_records=as_argilla_records, **kwargs)
 
     def train(self, output_dir: str = None):
         """
@@ -205,3 +256,59 @@ _________________________________________________________________
           output_dir (str): The path to the directory where the model will be saved.
         """
         self._trainer.save(output_dir)
+
+
+class ArgillaTrainerSkeleton(ABC):
+    def __init__(
+        self,
+        dataset,
+        record_class: Union[TokenClassificationRecord, Text2TextRecord, TextClassificationRecord],
+        multi_label: bool = False,
+        settings: Union[TextClassificationSettings, TokenClassificationSettings] = None,
+        model: str = None,
+        seed: int = None,
+        *arg,
+        **kwargs,
+    ):
+        self._dataset = dataset
+        self._record_class = record_class
+        self._multi_label = multi_label
+        self._settings = settings
+        self._model = model
+        self._seed = seed
+
+    @abstractmethod
+    def init_training_args(self):
+        """
+        Initializes the training arguments.
+        """
+
+    @abstractmethod
+    def init_model(self):
+        """
+        Initializes a model.
+        """
+
+    @abstractmethod
+    def update_config(self, *args, **kwargs):
+        """
+        Updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
+        """
+
+    @abstractmethod
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
+        """
+        Predicts the label of the text.
+        """
+
+    @abstractmethod
+    def train(self, output_dir: str = None):
+        """
+        Trains the model.
+        """
+
+    @abstractmethod
+    def save(self, output_dir: str):
+        """
+        Saves the model to the specified path.
+        """

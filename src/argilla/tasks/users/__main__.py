@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
-WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
+import typer
 
-DEFAULT_USERNAME = "argilla"
-DEFAULT_PASSWORD = "1234"
-DEFAULT_API_KEY = "argilla.apikey"
-DEFAULT_MAX_KEYWORD_LENGTH = 128
-DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+from .create import create
+from .create_default import create_default
+from .migrate import migrate
 
-ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
+# from .create import create
 
-# contants for prepare_for_training(framework="openai")
-OPENAI_SEPARATOR = "\n\n###\n\n"
-OPENAI_END_TOKEN = " END"
-OPENAI_WHITESPACE = " "
+app = typer.Typer(help="Holds CLI commands for user and workspace management.", no_args_is_help=True)
+
+app.command(name="create_default", help="Creates default users and workspaces in the Argilla database.")(create_default)
+app.command(name="create", help="Creates a user and add it to the Argilla database.", no_args_is_help=True)(create)
+app.command(name="migrate")(migrate)
+
+
+if __name__ == "__main__":
+    app()
