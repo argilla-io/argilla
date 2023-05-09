@@ -15,8 +15,7 @@
 from __future__ import annotations
 
 import warnings
-from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, create_model, validator
 from tqdm import tqdm
@@ -25,24 +24,19 @@ import argilla as rg
 
 if TYPE_CHECKING:
     from argilla.client.api import Argilla
-    from argilla.client.sdk.datasets.v1.models import FeedbackDatasetModel
-
-RecordFieldSchema = TypeVar("RecordFieldSchema", bound=BaseModel)
-
-
-class RecordSchema(BaseModel):
-    fields: RecordFieldSchema
-    response: Optional[Dict[str, Any]] = {"values": {}, "status": "submitted"}
-    external_id: Optional[str] = None
+    from argilla.client.sdk.datasets.v1.models import (
+        FeedbackDatasetModel,
+        FeedbackItemModel,
+    )
 
 
-class OnlineResponseSchema(BaseModel):
-    id: str
+class ValueSchema(BaseModel):
+    value: Union[str, int]
+
+
+class ResponseSchema(BaseModel):
+    values: Dict[str, ValueSchema]
     status: Literal["submitted", "missing", "discarded"]
-    values: Dict[str, Any]
-    user_id: str
-    inserted_at: datetime
-    updated_at: datetime
 
 
 class FeedbackRecord(BaseModel):
@@ -74,12 +68,6 @@ class TextField(FieldSchema):
     settings: Dict[str, Any] = Field({"type": "text"}, const=True)
 
 
-class OnlineFieldSchema(FieldSchema):
-    id: str
-    inserted_at: datetime
-    updated_at: datetime
-
-
 class QuestionSchema(BaseModel):
     name: str
     title: Optional[str] = None
@@ -107,12 +95,6 @@ class RatingQuestion(QuestionSchema):
         if v:
             values["settings"]["options"] = [{"value": value} for value in v]
         return v
-
-
-class OnlineQuestionSchema(QuestionSchema):
-    id: str
-    inserted_at: datetime
-    updated_at: datetime
 
 
 class FeedbackDataset:
