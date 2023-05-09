@@ -220,61 +220,78 @@ export default {
 
       recordResponses.forEach((responsesByRecordAndUser) => {
         recordStatus = responsesByRecordAndUser.status ?? RECORD_STATUS.PENDING;
-        Object.entries(responsesByRecordAndUser.values).forEach(
-          ([questionName, recordResponseByQuestionName]) => {
-            let formattedOptionsWithRecordResponse = [];
+        if (responsesByRecordAndUser.values) {
+          if (Object.keys(responsesByRecordAndUser.values).length === 0) {
+            // IF responses.value  is an empty object, init formatted responses with questions data
+            this.questions.forEach(
+              ({ name: questionName, options: questionOptions }) => {
+                formattedRecordResponsesForOrm.push({
+                  id: responsesByRecordAndUser.id,
+                  question_name: questionName,
+                  options: questionOptions,
+                  record_id: recordId,
+                  user_id: responsesByRecordAndUser.user_id ?? null,
+                });
+              }
+            );
+          } else {
+            // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
+            Object.entries(responsesByRecordAndUser.values).forEach(
+              ([questionName, recordResponseByQuestionName]) => {
+                let formattedOptionsWithRecordResponse = [];
 
-            const optionsByQuestionName =
-              getOptionsOfQuestionByDatasetIdAndQuestionName(
-                this.datasetId,
-                questionName
-              );
-            const correspondingComponentTypeOfTheAnswer =
-              getComponentTypeOfQuestionByDatasetIdAndQuestionName(
-                this.datasetId,
-                questionName
-              );
+                const optionsByQuestionName =
+                  getOptionsOfQuestionByDatasetIdAndQuestionName(
+                    this.datasetId,
+                    questionName
+                  );
+                const correspondingComponentTypeOfTheAnswer =
+                  getComponentTypeOfQuestionByDatasetIdAndQuestionName(
+                    this.datasetId,
+                    questionName
+                  );
 
-            switch (correspondingComponentTypeOfTheAnswer) {
-              case COMPONENT_TYPE.SINGLE_LABEL:
-              case COMPONENT_TYPE.RATING:
-                // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
-                formattedOptionsWithRecordResponse = optionsByQuestionName.map(
-                  ({ id, text, value }) => {
-                    if (text === recordResponseByQuestionName.value) {
-                      return {
-                        id,
-                        text,
-                        value: true,
-                      };
-                    }
-                    return { id, text, value };
-                  }
-                );
-                break;
-              case COMPONENT_TYPE.FREE_TEXT:
-                formattedOptionsWithRecordResponse = [
-                  {
-                    id: questionName,
-                    text: recordResponseByQuestionName.value,
-                    value: recordResponseByQuestionName.value,
-                  },
-                ];
-                break;
-              default:
-                console.log(
-                  `The corresponding component with a question name:'${questionName}' was not found`
-                );
-            }
-            formattedRecordResponsesForOrm.push({
-              id: responsesByRecordAndUser.id,
-              question_name: questionName,
-              options: formattedOptionsWithRecordResponse,
-              record_id: recordId,
-              user_id: responsesByRecordAndUser.user_id ?? null,
-            });
+                switch (correspondingComponentTypeOfTheAnswer) {
+                  case COMPONENT_TYPE.SINGLE_LABEL:
+                  case COMPONENT_TYPE.RATING:
+                    // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
+                    formattedOptionsWithRecordResponse =
+                      optionsByQuestionName.map(({ id, text, value }) => {
+                        if (text === recordResponseByQuestionName.value) {
+                          return {
+                            id,
+                            text,
+                            value: true,
+                          };
+                        }
+                        return { id, text, value };
+                      });
+                    break;
+                  case COMPONENT_TYPE.FREE_TEXT:
+                    formattedOptionsWithRecordResponse = [
+                      {
+                        id: questionName,
+                        text: recordResponseByQuestionName.value,
+                        value: recordResponseByQuestionName.value,
+                      },
+                    ];
+                    break;
+                  default:
+                    console.log(
+                      `The corresponding component with a question name:'${questionName}' was not found`
+                    );
+                }
+                formattedRecordResponsesForOrm.push({
+                  id: responsesByRecordAndUser.id,
+                  question_name: questionName,
+                  options: formattedOptionsWithRecordResponse,
+                  record_id: recordId,
+                  user_id: responsesByRecordAndUser.user_id ?? null,
+                });
+              }
+            );
           }
-        );
+        }
       });
 
       return { formattedRecordResponsesForOrm, recordStatus };
