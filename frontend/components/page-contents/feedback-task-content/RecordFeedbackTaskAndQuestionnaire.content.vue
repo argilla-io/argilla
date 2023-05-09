@@ -15,6 +15,7 @@
       v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
       :datasetId="datasetId"
       :recordId="recordId"
+      :recordStatus="record.record_status"
       :initialInputs="questionsWithRecordAnswers"
     />
   </div>
@@ -252,7 +253,6 @@ export default {
       const formattedRecordResponsesForOrm = [];
       // NOTE - by default, recordStatus is at "PENDING"
       let recordStatus = RECORD_STATUS.PENDING;
-
       recordResponses.forEach((responsesByRecordAndUser) => {
         recordStatus = responsesByRecordAndUser.status ?? RECORD_STATUS.PENDING;
         if (responsesByRecordAndUser.values) {
