@@ -33,6 +33,10 @@ These are the section headers that we use:
 - Added `ArgillaSpanMarkerTrainer` for Named Entity Recognition ([#2693](https://github.com/argilla-io/argilla/pull/2693))
 - Added `ArgillaTrainer` CLI support. Closes ([#2809])
 
+### Fixes
+
+- fix image alignment on token classification
+
 ### Changed
 
 - Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
