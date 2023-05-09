@@ -25,7 +25,7 @@ import argilla as rg
 
 if TYPE_CHECKING:
     from argilla.client.api import Argilla
-    from argilla.client.sdk.datasets.v1.models import FeedbackDataset
+    from argilla.client.sdk.datasets.v1.models import FeedbackDatasetModel
 
 RecordFieldSchema = TypeVar("RecordFieldSchema", bound=BaseModel)
 
@@ -169,12 +169,12 @@ class FeedbackDataset:
 
         assert name or (name and workspace) or id, (
             "You must provide either the `name` and `workspace` (the latter just if applicable, if not the default"
-            " `workspace` will be used) or the `id`, which is the Argilla ID of the `Dataset`, which implies it must"
+            " `workspace` will be used) or the `id`, which is the Argilla ID of the `rg.FeedbackDataset`, which implies it must"
             " exist in advance."
         )
 
         self.id = id
-        dataset = self.client.get_dataset(id=self.id).parsed
+        dataset: FeedbackDatasetModel = self.client.get_dataset(id=self.id)
 
         self.name = dataset.name
         self.workspace = dataset.workspace_id
@@ -186,7 +186,7 @@ class FeedbackDataset:
         self.__records = None
 
     def __repr__(self) -> str:
-        return f"Dataset(name={self.name}, workspace={self.workspace}, id={self.id})"
+        return f"FeedbackDataset(name={self.name}, workspace={self.workspace}, id={self.id})"
 
     def __len__(self) -> int:
         if self.__records is None or len(self.__records) < 1:
