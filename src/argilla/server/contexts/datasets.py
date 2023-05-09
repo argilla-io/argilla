@@ -22,7 +22,7 @@ from argilla.server.models import (
     DatasetStatus,
     Field,
     Question,
-    QuestionSettingsModel,
+    QuestionSettings,
     Record,
     Response,
     ResponseStatus,
@@ -40,6 +40,7 @@ from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.security.model import User
 from fastapi.encoders import jsonable_encoder
+from pydantic import parse_obj_as
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, contains_eager
 
@@ -361,8 +362,8 @@ def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue],
 
         question_response = values_copy.pop(question.name, None)
         if question_response:
-            model = QuestionSettingsModel(settings=question.settings)
-            model.settings.check_response(question_response)
+            settings = parse_obj_as(QuestionSettings, question.settings)
+            settings.check_response(question_response)
 
     if values_copy:
         raise ValueError(f"Error: found responses for non configured questions: {list(values_copy.keys())!r}")

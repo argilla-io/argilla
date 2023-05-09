@@ -72,10 +72,6 @@ class RatingQuestionSettings(BaseQuestionSettings):
 QuestionSettings = Annotated[Union[TextQuestionSettings, RatingQuestionSettings], Field(..., discriminator="type")]
 
 
-class QuestionSettingsModel(BaseModel):
-    settings: QuestionSettings
-
-
 class Question(Base):
     __tablename__ = "questions"
 
@@ -84,7 +80,7 @@ class Question(Base):
     title: Mapped[str] = mapped_column(Text)
     description: Mapped[str] = mapped_column(Text)
     required: Mapped[bool] = mapped_column(default=False)
-    settings: Mapped[QuestionSettings] = mapped_column(JSON, default={})
+    settings: Mapped[dict] = mapped_column(JSON, default={})
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
