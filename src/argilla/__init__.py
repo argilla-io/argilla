@@ -65,11 +65,11 @@ if _TYPE_CHECKING:
     )
     from argilla.client.nightly import (
         FeedbackDataset,
+        FeedbackRecord,
         RatingQuestion,
         TextField,
         TextQuestion,
         create_feedback_dataset,
-        FeedbackRecord,
     )
     from argilla.client.workspaces import Workspace
     from argilla.datasets import (
@@ -110,7 +110,14 @@ _import_structure = {
         "read_datasets",
         "read_pandas",
     ],
-    "client.nightly": ["FeedbackDataset", "create_feedback_dataset", "TextField", "TextQuestion", "RatingQuestion", "FeedbackRecord"],
+    "client.nightly": [
+        "FeedbackDataset",
+        "create_feedback_dataset",
+        "TextField",
+        "TextQuestion",
+        "RatingQuestion",
+        "FeedbackRecord",
+    ],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [
