@@ -13,9 +13,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import sys
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
+
+if sys.version_info > (3, 7):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 from pydantic import BaseModel, Field
 

@@ -12,11 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import sys
 from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
-from typing_extensions import Literal
+
+if sys.version_info > (3, 7):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 from argilla.server.models import FieldType
 

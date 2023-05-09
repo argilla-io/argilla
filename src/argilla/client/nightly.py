@@ -14,8 +14,14 @@
 
 from __future__ import annotations
 
+import sys
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
+if sys.version_info > (3, 7):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 from pydantic import BaseModel, Field, create_model, validator
 from tqdm import tqdm

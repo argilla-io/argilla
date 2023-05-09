@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import sys
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
@@ -19,7 +20,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, conlist, constr
 from pydantic import Field as ModelField
-from typing_extensions import Literal
+
+if sys.version_info > (3, 7):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
 
