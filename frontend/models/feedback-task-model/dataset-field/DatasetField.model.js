@@ -9,7 +9,7 @@ class DatasetField extends Model {
       name: this.attr(null),
       dataset_id: this.attr(null),
       order: this.number(0),
-      field: this.string(""),
+      title: this.string(""),
       is_required: this.boolean(false),
       component_type: this.string(null).nullable(),
     };

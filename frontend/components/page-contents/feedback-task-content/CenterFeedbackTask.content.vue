@@ -170,7 +170,7 @@ export default {
             name: fieldName,
             dataset_id: this.datasetId,
             order: index,
-            field: fieldTitle,
+            title: fieldTitle,
             is_required: isRequired,
             component_type: componentType,
           };
