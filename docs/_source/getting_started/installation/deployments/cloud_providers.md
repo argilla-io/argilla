@@ -54,7 +54,7 @@ Available Amazon Machine Instance (AMI) depends on region. The provided AMI is a
 To find available recent images, go to the [AWS AMI Marketplace](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#LaunchInstances:) and filter by `ubuntu`
 (don't forget to choose your targeted region).
 
-If you already have multiple instances and VPC in the targeted region, creating a new VPC before creating the argilla instance is recommended.
+If you already have multiple instances and VPC in the targeted region, creating a new VPC before creating the Argilla instance is recommended.
 Add the following parameter to specify the VPC you want to use for the instance:
 
 ```bash
