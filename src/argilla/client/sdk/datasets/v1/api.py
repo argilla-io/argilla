@@ -183,16 +183,16 @@ def get_records(
     return handle_response_error(response)
 
 
-def add_record(
+def add_records(
     client: AuthenticatedClient,
     id: str,
-    record: Dict[str, Any],
-) -> Response:
+    records: Union[Dict[str, Any], List[Dict[str, Any]]],
+) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/datasets/{id}/records".format(client.base_url, id=id)
 
     response = httpx.post(
         url=url,
-        json={"items": [record]},
+        json={"items": [records] if isinstance(records, dict) else records},
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),

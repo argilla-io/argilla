@@ -194,28 +194,37 @@ class FeedbackDataset:
                         pbar.update(1)
         return self.__records
 
-    def add_record(
+    def add_records(
         self,
-        record: Union[RecordFieldSchema, Dict[str, Any]],
-        response: Optional[Dict[str, Any]] = {"values": {}, "status": "submitted"},
-        external_id: Optional[str] = None,
+        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
     ) -> None:
+        if isinstance(records, list):
+            records = [FeedbackRecord(**record) if isinstance(record, dict) else record for record in records]
+        if isinstance(records, dict):
+            records = [FeedbackRecord(**records)]
+        if isinstance(records, FeedbackRecord):
+            records = [records]
+
         if self.schema is None:
             warnings.warn("Since the `schema` hasn't been defined during the dataset creation, it will be inferred.")
-            self.schema = generate_pydantic_schema(record)
+            self.schema = generate_pydantic_schema(records[0].fields)
+
+        for record in records:
+            record.fields = self.schema.parse_obj(record.fields)
+
         # # If there are records already logged to Argilla, fetch one and get the schema
         # self.schema = generate_pydantic_schema(self.fetch_one())
         # # If there are no records logged to Argilla, check if `self.schema` has been set
         # ...
         # # If `self.schema` has not been set, just infer the schema based on the record
         # ...
-        # record = record.dict() if isinstance(record, RecordFieldSchema) else record
-        self.client.add_record(
+        # record = record.dict() if isinstance(record, BaseModel) else record
+        self.client.add_records(
             id=self.id,
-            record=RecordSchema(fields=self.schema(**record), external_id=external_id, response=response).dict(),
+            records=[record.dict() for record in records],
         )
-        if self.__records is not None and isinstance(self.__records, list) and len(self.__records) > 0:
-            self.__records.append(self.schema(**record))
+        # if self.__records is not None and isinstance(self.__records, list) and len(self.__records) > 0:
+        #     self.__records.append(record)
 
     def fetch_one(self) -> "FeedbackItemModel":
         if self.__records is None or len(self.__records) < 1:
@@ -241,9 +250,11 @@ class FeedbackDataset:
                 yield batch
 
 
-def generate_pydantic_schema(record: Dict[str, Any]) -> BaseModel:
-    record_schema = {key: (type(value), ...) for key, value in record.items()}
-    return create_model("RecordFieldSchema", **record_schema)
+def generate_pydantic_schema(
+    fields: Union[BaseModel, Dict[str, Any]], name: Optional[str] = "FieldsSchema"
+) -> BaseModel:
+    fields_schema = {key: (type(value), ...) for key, value in fields.items()}
+    return create_model(name, **fields_schema)
 
 
 def create_feedback_dataset(

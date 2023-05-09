@@ -244,8 +244,8 @@ class Argilla:
     def get_records(self, id: str, offset: int = 0, limit: int = 50) -> FeedbackRecordsModel:
         return datasets_api_v1.get_records(client=self._client, id=id, offset=offset, limit=limit).parsed
 
-    def add_record(self, id: str, record: Dict[str, Any]) -> httpx.Response:
-        return datasets_api_v1.add_record(client=self._client, id=id, record=record)
+    def add_records(self, id: str, records: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
+        return datasets_api_v1.add_records(client=self._client, id=id, records=records)
 
     def get_fields(self, id: str) -> List[Dict[str, Any]]:
         return datasets_api_v1.get_fields(client=self._client, id=id).parsed
