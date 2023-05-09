@@ -1,16 +1,19 @@
 <template>
   <div class="record">
     <StatusTag class="record__status" :title="recordStatus" />
-    <div class="item" v-for="{ id, title, field_text } in fields" :key="id">
-      <div class="title-area --body1">
-        <span v-text="title" />
-      </div>
-      <div class="record__content --body1" v-text="field_text" />
+    <div v-for="{ id, title, field_text, component_type } in fields" :key="id">
+      <TextFieldComponent
+        v-if="component_type === FIELD_COMPONENT_TYPE.TEXT_FIELD"
+        :title="title"
+        :fieldText="field_text"
+      />
     </div>
   </div>
 </template>
 
 <script>
+import { FIELD_COMPONENT_TYPE } from "./feedbackTask.properties";
+
 export default {
   props: {
     recordStatus: {
@@ -21,6 +24,9 @@ export default {
       type: Array,
       required: true,
     },
+  },
+  created() {
+    this.FIELD_COMPONENT_TYPE = FIELD_COMPONENT_TYPE;
   },
 };
 </script>
@@ -40,24 +46,6 @@ export default {
   &__status {
     display: inline-flex;
     margin-right: auto;
-  }
-  &__content {
-    white-space: pre-wrap;
-  }
-}
-
-.item {
-  display: flex;
-  flex-direction: column;
-  gap: $base-space;
-  padding: 2 * $base-space;
-  background: palette(grey, 800);
-  border-radius: $border-radius;
-  .title-area {
-    display: flex;
-    align-items: center;
-    gap: $base-space;
-    color: $black-37;
   }
 }
 </style>
