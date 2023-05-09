@@ -287,7 +287,7 @@ class FeedbackDataset:
             record=RecordSchema(fields=self.schema(**record), external_id=external_id, response=response).dict(),
         )
         if self.__records is not None and isinstance(self.__records, list) and len(self.__records) > 0:
-            self.records.append(self.schema(**record))
+            self.__records.append(self.schema(**record))
 
     def fetch_one(self) -> Union[Dict[str, Any], List[str, Any]]:
         if self.__records is None or len(self.__records) < 1:
