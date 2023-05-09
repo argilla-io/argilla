@@ -19,20 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, conlist
 from typing_extensions import Literal
 
-from argilla.server.models import QuestionType
-
-
-class TextQuestionSettings(BaseModel):
-    type: Literal[QuestionType.text]
-
-
-class RatingQuestionSettingsOption(BaseModel):
-    value: int
-
-
-class RatingQuestionSettings(BaseModel):
-    type: Literal[QuestionType.rating]
-    options: conlist(item_type=RatingQuestionSettingsOption)
+from argilla.server.models import QuestionSettings, QuestionType
 
 
 class Question(BaseModel):
@@ -41,7 +28,7 @@ class Question(BaseModel):
     title: str
     description: Optional[str]
     required: bool
-    settings: Union[TextQuestionSettings, RatingQuestionSettings] = Field(..., discriminator="type")
+    settings: QuestionSettings
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
