@@ -66,6 +66,8 @@ export default {
     async recordStatusFilteringValue() {
       // NOTE - each time the filter change, clean records orm && rerender the children component
       await deleteAllRecords();
+      // Go to first page on change filter
+      this.$root.$emit("current-page", 1);
       this.rerenderChildren++;
     },
   },
@@ -96,7 +98,7 @@ export default {
     updatePageQueryParam(page) {
       this.$router.push({
         path: this.$route.path,
-        query: { _page: page },
+        query: { ...this.$route.query, _page: page },
       });
     },
     factoryQuestionsForOrm(initialQuestions) {
