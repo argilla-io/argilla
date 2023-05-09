@@ -65,6 +65,7 @@
           ref="discardButton"
           class="primary outline"
           @on-click="onDiscard"
+          :disabled="recordStatus === 'DISCARDED'"
         >
           <span v-text="'Discard'" />
         </BaseButton>
@@ -120,6 +121,10 @@ export default {
       required: true,
     },
     recordId: {
+      type: String,
+      required: true,
+    },
+    recordStatus: {
       type: String,
       required: true,
     },
@@ -203,8 +208,30 @@ export default {
       });
     },
     async onDiscard() {
+      // 1 - check if it's a create or update response
+      const createOrUpdateResponse = isResponsesByUserIdExists(
+        this.userId,
+        this.recordId
+      )
+        ? STATUS_RESPONSE.UPDATE
+        : STATUS_RESPONSE.CREATE;
+
+      // 2 - init formattedSelectionOptionObject
+      const formattedSelectionObject = this.formatSelectedOptionObject(
+        "discarded",
+        !this.isSomeRequiredQuestionHaveNoAnswer
+      );
+
+      // 3 - Create the formatted requests to send from the formattedSelectionObject
+      const formattedRequestsToSend = this.formatRequestsToSend(
+        createOrUpdateResponse,
+        formattedSelectionObject
+      );
+
+      // 4 - create or update the record responses and emit bus event to change record to show
       try {
         // TODO - make the call here to discard the record
+        await this.createOrUpdateRecordResponses(formattedRequestsToSend);
         await updateRecordStatusByRecordId(
           this.recordId,
           RECORD_STATUS.DISCARDED
@@ -222,50 +249,23 @@ export default {
       )
         ? STATUS_RESPONSE.UPDATE
         : STATUS_RESPONSE.CREATE;
+      if (this.isSomeRequiredQuestionHaveNoAnswer) {
+        this.isError = true;
+        return;
+      }
+      // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
 
-      // 2- init formattedSelectionOptionObject
-      // NOTE - it's important to put the status in this object
-      let formattedSelectionOptionObject = {
-        status: "submitted", // TODO: We need to do similar for discard
-      };
-      this.inputs.forEach((input) => {
-        let selectedOption = null;
-        switch (input.component_type) {
-          case COMPONENT_TYPE.SINGLE_LABEL:
-          case COMPONENT_TYPE.RATING:
-            selectedOption = input.options?.find((option) => option.value);
-            break;
-          case COMPONENT_TYPE.FREE_TEXT:
-            selectedOption = input.options[0];
-            break;
-          default:
-            console.log(
-              `The component type ${input.component_type} is unknown, the response can't be save`
-            );
-        }
-
-        formattedSelectionOptionObject.values = {
-          ...formattedSelectionOptionObject.values,
-          [input.name]: { value: selectedOption.text },
-        };
-      });
+      // 2 - init formattedSelectionOptionObject
+      const formattedSelectionObject =
+        this.formatSelectedOptionObject("submitted");
 
       // 3 - Create the formatted requests to send from the formattedSelectionObject
-      const formattedRequestsToSend = {
-        status: createOrUpdateResponse,
-        responseByQuestionName: formattedSelectionOptionObject,
-        ...(createOrUpdateResponse === STATUS_RESPONSE.UPDATE && {
-          responseId: getRecordResponsesIdByRecordId({
-            userId: this.userId,
-            recordId: this.recordId,
-          }),
-        }),
-        ...(createOrUpdateResponse === STATUS_RESPONSE.CREATE && {
-          recordId: this.recordId,
-        }),
-      };
+      const formattedRequestsToSend = this.formatRequestsToSend(
+        createOrUpdateResponse,
+        formattedSelectionObject
+      );
 
-      // 4- create or update the record responses and emit bus event to change record to show
+      // 4 - create or update the record responses and emit bus event to change record to show
       try {
         await this.createOrUpdateRecordResponses(formattedRequestsToSend);
         // NOTE - onSubmit event => the status change to SUBMITTED
@@ -384,55 +384,116 @@ export default {
       );
     },
     formatResponsesApiForOrm(responsesFromApi) {
-      const newResponseToUpsertInOrm = Object.entries(
-        responsesFromApi.values
-      ).map(([questionName, newResponse]) => {
-        const componentType =
-          getComponentTypeOfQuestionByDatasetIdAndQuestionName(
-            this.datasetId,
-            questionName
+      const formattedRecordResponsesForOrm = [];
+      if (responsesFromApi.values) {
+        if (Object.keys(responsesFromApi.values).length === 0) {
+          this.inputs.forEach(
+            ({ question: questionName, options: questionOptions }) => {
+              formattedRecordResponsesForOrm.push({
+                id: responsesFromApi.id,
+                question_name: questionName,
+                options: questionOptions,
+                record_id: responsesFromApi.record_id,
+                user_id: responsesFromApi.user_id ?? null,
+              });
+            }
           );
-        let formattedOptions = getOptionsOfQuestionByDatasetIdAndQuestionName(
-          this.datasetId,
-          questionName
-        );
+        } else {
+          Object.entries(responsesFromApi.values).map(
+            ([questionName, newResponse]) => {
+              const componentType =
+                getComponentTypeOfQuestionByDatasetIdAndQuestionName(
+                  this.datasetId,
+                  questionName
+                );
+              let formattedOptions =
+                getOptionsOfQuestionByDatasetIdAndQuestionName(
+                  this.datasetId,
+                  questionName
+                );
 
-        switch (componentType) {
+              switch (componentType) {
+                case COMPONENT_TYPE.SINGLE_LABEL:
+                case COMPONENT_TYPE.RATING:
+                  formattedOptions = formattedOptions.map((option) => {
+                    if (option.text === newResponse.value) {
+                      return { id: option.id, text: option.text, value: true };
+                    }
+                    return { id: option.id, text: option.text, value: false };
+                  });
+                  break;
+                case COMPONENT_TYPE.FREE_TEXT:
+                  formattedOptions = [
+                    {
+                      id: formattedOptions[0].id,
+                      text: newResponse.value,
+                      value: newResponse.value,
+                    },
+                  ];
+                  break;
+                default:
+                  console.log(`The component type ${componentType} is unknown`);
+                  return;
+              }
+
+              formattedRecordResponsesForOrm.push({
+                id: responsesFromApi.id,
+                question_name: questionName,
+                user_id: responsesFromApi.user_id,
+                record_id: responsesFromApi.record_id,
+                options: formattedOptions,
+              });
+            }
+          );
+        }
+      }
+      return formattedRecordResponsesForOrm;
+    },
+    formatSelectedOptionObject(status, isFilled = true) {
+      let selectedOptionObj = {
+        status,
+      };
+      this.inputs.forEach((input) => {
+        // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
+
+        let selectedOption = null;
+        switch (input.component_type) {
           case COMPONENT_TYPE.SINGLE_LABEL:
           case COMPONENT_TYPE.RATING:
-            formattedOptions = formattedOptions.map((option) => {
-              if (option.text === newResponse.value) {
-                return { id: option.id, text: option.text, value: true };
-              }
-              return { id: option.id, text: option.text, value: false };
-            });
+            selectedOption = input.options?.find((option) => option.value);
             break;
           case COMPONENT_TYPE.FREE_TEXT:
-            formattedOptions = [
-              {
-                id: formattedOptions[0].id,
-                text: newResponse.value,
-                value: newResponse.value,
-              },
-            ];
+            selectedOption = input.options[0];
             break;
           default:
-            console.log(`The component type ${componentType} is unknown`);
-            return;
+            console.log(
+              `The component type ${input.component_type} is unknown, the response can't be save`
+            );
         }
-
-        const formattedResponse = {
-          id: responsesFromApi.id,
-          question_name: questionName,
-          user_id: responsesFromApi.user_id,
-          record_id: responsesFromApi.record_id,
-          options: formattedOptions,
+        selectedOptionObj.values = {
+          ...selectedOptionObj.values,
+          ...(isFilled && {
+            [input.name]: { value: selectedOption.text },
+          }),
         };
-
-        return formattedResponse;
       });
-
-      return newResponseToUpsertInOrm;
+      return selectedOptionObj;
+    },
+    formatRequestsToSend(createOrUpdateResponse, obj) {
+      const formattedRequestsToSend = {
+        status: createOrUpdateResponse,
+        responseByQuestionName: obj,
+        ...(createOrUpdateResponse === STATUS_RESPONSE.UPDATE && {
+          responseId: getRecordResponsesIdByRecordId({
+            userId: this.userId,
+            recordId: this.recordId,
+          }),
+        }),
+        ...(createOrUpdateResponse === STATUS_RESPONSE.CREATE && {
+          recordId: this.recordId,
+        }),
+      };
+      return formattedRequestsToSend;
     },
     showNotificationComponent(message, typeOfToast) {
       Notification.dispatch("notify", {
