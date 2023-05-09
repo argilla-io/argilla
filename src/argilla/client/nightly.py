@@ -212,23 +212,21 @@ class FeedbackDataset:
     @property
     def fields(self) -> List[OnlineFieldSchema]:
         if self.__fields is None or len(self.__fields) < 1:
-            self.__fields = [OnlineFieldSchema(**field) for field in self.client.get_fields(id=self.id).parsed["items"]]
+            self.__fields = [OnlineFieldSchema(**field) for field in self.client.get_fields(id=self.id)]
         return self.__fields
 
     @property
     def questions(self) -> List[OnlineQuestionSchema]:
         if self.__questions is None or len(self.__questions) < 1:
-            self.__questions = [
-                OnlineQuestionSchema(**question) for question in self.client.get_questions(id=self.id).parsed["items"]
-            ]
+            self.__questions = [OnlineQuestionSchema(**question) for question in self.client.get_questions(id=self.id)]
         return self.__questions
 
     @property
     def records(self) -> List[RecordFieldSchema]:
         if self.__records is None or len(self.__records) < 1:
-            response = self.client.get_records(id=self.id, offset=0, limit=1).parsed
+            response = self.client.get_records(id=self.id, offset=0, limit=1)
             if self.schema is None:
-                self.schema = generate_pydantic_schema(response["items"][0]["fields"])
+                self.schema = generate_pydantic_schema(response.items[0]["fields"])
                 RecordFieldSchema.__bound__ = self.schema
             # TODO: we can use a cache to store the results to `.cache/argilla/datasets/{dataset_id}/records`
             self.__records = [
@@ -240,9 +238,9 @@ class FeedbackDataset:
                     inserted_at=record["inserted_at"],
                     updated_at=record["inserted_at"],
                 )
-                for record in response["items"]
+                for record in response.items
             ]
-            total_records = response["total"]
+            total_records = response.total
             if total_records > 1:
                 prev_limit = 0
                 with tqdm(
@@ -259,9 +257,7 @@ class FeedbackDataset:
                                 inserted_at=record["inserted_at"],
                                 updated_at=record["inserted_at"],
                             )
-                            for record in self.client.get_records(id=self.id, offset=prev_limit, limit=1).parsed[
-                                "items"
-                            ]
+                            for record in self.client.get_records(id=self.id, offset=prev_limit, limit=1).items
                         ]
                         pbar.update(1)
         return self.__records
@@ -292,15 +288,15 @@ class FeedbackDataset:
     def fetch_one(self) -> Union[Dict[str, Any], List[str, Any]]:
         if self.__records is None or len(self.__records) < 1:
             # TODO: handle exception if there are no records
-            return self.client.get_records(id=self.id, offset=0, limit=1).parsed["items"][0]
+            return self.client.get_records(id=self.id, offset=0, limit=1).items[0]
         return self.__records[0]
 
     # TODO: we could fetch those on iter, maybe we can create an `streaming` flag or something similar
     def iter(self, batch_size: int = 32) -> List[BaseModel]:
         if self.__records is None or len(self.__records) < 1:
-            first_batch = self.client.get_records(id=self.id, offset=0, limit=batch_size).parsed
+            first_batch = self.client.get_records(id=self.id, offset=0, limit=batch_size)
             if self.schema is None:
-                self.schema = generate_pydantic_schema(first_batch["items"][0]["fields"])
+                self.schema = generate_pydantic_schema(first_batch.items[0]["fields"])
                 RecordFieldSchema.__bound__ = self.schema
             batch = [
                 OnlineRecordSchema(
@@ -311,11 +307,11 @@ class FeedbackDataset:
                     inserted_at=record["inserted_at"],
                     updated_at=record["inserted_at"],
                 )
-                for record in first_batch["items"]
+                for record in first_batch.items
             ]
             self.__records = batch
             yield batch
-            total_batches = first_batch["total"] // batch_size
+            total_batches = first_batch.total // batch_size
             current_batch = 1
             with tqdm(initial=current_batch, total=total_batches, desc="Fetching records from Argilla") as pbar:
                 while current_batch <= total_batches:
@@ -328,7 +324,7 @@ class FeedbackDataset:
                             inserted_at=record["inserted_at"],
                             updated_at=record["inserted_at"],
                         )
-                        for record in first_batch["items"]
+                        for record in first_batch.items
                     ]
                     self.__records += batch
                     yield batch
