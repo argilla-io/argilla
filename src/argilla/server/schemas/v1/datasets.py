@@ -25,6 +25,7 @@ from argilla.server.models import (
     DatasetStatus,
     FieldType,
     QuestionSettings,
+    QuestionType,
     ResponseStatus,
 )
 
@@ -113,13 +114,30 @@ class FieldCreate(BaseModel):
     settings: TextFieldSettings
 
 
+class TextQuestionSettings(BaseModel):
+    type: Literal[QuestionType.text]
+
+
+class RatingQuestionSettingsOption(BaseModel):
+    value: int
+
+
+class RatingQuestionSettings(BaseModel):
+    type: Literal[QuestionType.rating]
+    options: conlist(
+        item_type=RatingQuestionSettingsOption,
+        min_items=RATING_OPTIONS_MIN_ITEMS,
+        max_items=RATING_OPTIONS_MAX_ITEMS,
+    )
+
+
 class Question(BaseModel):
     id: UUID
     name: str
     title: str
     description: Optional[str]
     required: bool
-    settings: QuestionSettings
+    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
     inserted_at: datetime
     updated_at: datetime
 
@@ -140,7 +158,7 @@ class QuestionCreate(BaseModel):
     title: str
     description: Optional[str]
     required: Optional[bool]
-    settings: QuestionSettings
+    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
 
 
 class ResponseValue(BaseModel):
