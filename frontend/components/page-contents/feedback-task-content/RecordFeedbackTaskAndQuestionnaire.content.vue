@@ -22,6 +22,7 @@ import {
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
   getOptionsOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
+import { getFieldsByDatasetId } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
 import {
   RECORD_STATUS,
   RESPONSE_STATUS_FOR_API,
@@ -50,10 +51,16 @@ export default {
       type: String,
       required: true,
     },
-    orderBy: {
+    orderQuestions: {
       type: Object,
       default: () => {
-        return { orderQuestionBy: "order", ascendent: true };
+        return { orderQuestionsBy: "order", ascendent: true };
+      },
+    },
+    orderFields: {
+      type: Object,
+      default: () => {
+        return { orderFieldsBy: "order", ascendent: true };
       },
     },
     recordOffset: {
@@ -105,12 +112,22 @@ export default {
     questions() {
       return getQuestionsByDatasetId(
         this.datasetId,
-        this.orderBy?.orderQuestionsBy,
-        this.orderBy?.ascendent
+        this.orderQuestions?.orderQuestionsBy,
+        this.orderQuestions?.ascendent
+      );
+    },
+    fields() {
+      return getFieldsByDatasetId(
+        this.datasetId,
+        this.orderFields?.orderFieldsBy,
+        this.orderFields?.ascendent
       );
     },
     recordResponsesFromCurrentUser() {
       return this.record?.record_responses ?? [];
+    },
+    recordFields() {
+      return this.record?.record_fields ?? [];
     },
     questionsWithRecordAnswers() {
       return this.questions?.map((question) => {
