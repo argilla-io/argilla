@@ -317,3 +317,44 @@ class FeedbackDataset:
 def generate_pydantic_schema(record: Dict[str, Any]) -> BaseModel:
     record_schema = {key: (type(value), ...) for key, value in record.items()}
     return create_model("RecordFieldSchema", **record_schema)
+
+
+def create_feedback_dataset(
+    name: str,
+    workspace: Optional[Union[str, rg.Workspace]] = None,
+    guidelines: Optional[str] = None,
+    fields: Optional[List[FieldSchema]] = None,
+    questions: Optional[List[QuestionSchema]] = None,
+) -> FeedbackDataset:
+    client = rg.active_client()
+
+    if workspace is None or isinstance(workspace, str):
+        workspace = rg.Workspace.from_name(workspace)
+
+    if not isinstance(workspace, rg.Workspace):
+        raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
+
+    for dataset in client.list_datasets():
+        if dataset.name == name and dataset.workspace_id == workspace.id:
+            warnings.warn(
+                f"`rg.FeedbackDataset` with name '{name}' in workspace {workspace.id} already exists, skipping creation."
+            )
+            return FeedbackDataset(id=dataset.id)
+
+    new_dataset: FeedbackDatasetModel = client.create_dataset(
+        name=name, workspace_id=workspace.id, guidelines=guidelines
+    )
+
+    for field in fields:
+        if isinstance(field, dict):
+            field = FieldSchema(**field)
+        client.add_field(id=new_dataset.id, field=field.dict())
+
+    for question in questions:
+        if isinstance(question, dict):
+            question = QuestionSchema(**question)
+        client.add_question(id=new_dataset.id, question=question.dict())
+
+    client.publish_dataset(id=new_dataset.id)
+
+    return FeedbackDataset(id=new_dataset.id)
