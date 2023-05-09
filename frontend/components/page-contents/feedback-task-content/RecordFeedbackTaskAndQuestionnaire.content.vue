@@ -1,13 +1,17 @@
 <template>
   <div
+    :key="recordOffset"
     class="wrapper"
     v-if="recordId && !$fetchState.pending && !$fetchState.error"
   >
-    <RecordFeedbackTaskComponent :record="record" />
+    <RecordFeedbackTaskComponent
+      v-if="fieldsWithRecordFieldText"
+      :record="record"
+      :fields="fieldsWithRecordFieldText"
+    />
     <QuestionsFormComponent
       class="question-form"
       :class="statusClass"
-      :key="recordOffset"
       v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
       :datasetId="datasetId"
       :recordId="recordId"
@@ -143,6 +147,20 @@ export default {
           };
         }
         return { ...question, response_id: null };
+      });
+    },
+    fieldsWithRecordFieldText() {
+      return this.fields?.map((field) => {
+        const correspondingRecordFieldToField = this.recordFields.find(
+          (recordField) => field.name === recordField.field_name
+        );
+
+        if (correspondingRecordFieldToField) {
+          return {
+            ...field,
+            field_text: correspondingRecordFieldToField.text,
+          };
+        }
       });
     },
     statusClass() {
