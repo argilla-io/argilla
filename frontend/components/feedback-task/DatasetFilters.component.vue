@@ -2,7 +2,7 @@
   <div class="filters">
     <span
       class="filters__component"
-      v-for="id in Object.keys(this.filters)"
+      v-for="{ id } in sortedFiltersValue"
       :key="id"
     >
       <SearchBarBase
@@ -21,10 +21,12 @@
 </template>
 
 <script>
+import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import {
   upsertDatasetFilters,
   getFiltersByDatasetId,
 } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
+
 export default {
   name: "DatasetFiltersComponent",
   props: {
@@ -50,6 +52,11 @@ export default {
         this.datasetId,
         this.orderBy?.orderFilterBy,
         this.orderBy?.ascendent
+      );
+    },
+    sortedFiltersValue() {
+      return Object.values(this.filters).sort((a, b) =>
+        a.order > b.order ? -1 : 1
       );
     },
   },
@@ -83,7 +90,9 @@ export default {
         ],
       },
     };
-    this.selectedStatus = this.$route.query._status || "pending";
+
+    this.selectedStatus =
+      this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
     const filterValues = Object.values(this.filters);
     const formattedFilters = this.factoryFiltersForOrm(filterValues);
     upsertDatasetFilters(formattedFilters);

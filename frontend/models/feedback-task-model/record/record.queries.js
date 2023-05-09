@@ -6,6 +6,13 @@ const RECORD_STATUS = Object.freeze({
   SUBMITTED: "SUBMITTED",
 });
 
+// NOTE - IMPORTANT : in the backend, the status are in lowercase
+const RESPONSE_STATUS_FOR_API = Object.freeze({
+  MISSING: "missing",
+  DISCARDED: "discarded",
+  SUBMITTED: "submitted",
+});
+
 // UPSERT
 const upsertRecords = (records) => {
   RecordModel.insertOrUpdate({ data: records });
@@ -60,8 +67,12 @@ const isRecordContainsAnyResponsesByUserId = (userId, recordId) => {
     .exists();
 };
 
+// DELETE
+const deleteAllRecords = () => RecordModel.deleteAll();
+
 export {
   RECORD_STATUS,
+  RESPONSE_STATUS_FOR_API,
   upsertRecords,
   getRecordWithFieldsAndResponsesByUserId,
   getRecordStatusByDatasetIdAndRecordIndex,
@@ -69,4 +80,5 @@ export {
   updateRecordStatusByRecordId,
   isRecordWithRecordIndexByDatasetIdExists,
   isRecordContainsAnyResponsesByUserId,
+  deleteAllRecords,
 };

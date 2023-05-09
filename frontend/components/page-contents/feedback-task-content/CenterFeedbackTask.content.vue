@@ -1,15 +1,21 @@
 <template>
   <BaseLoading v-if="$fetchState.pending" />
   <RecordFeedbackTaskAndQuestionnaireContent
+    :key="rerenderChildren"
     v-else-if="!$fetchState.pending"
     :datasetId="datasetId"
     :recordOffset="recordOffset"
+    :recordStatusToFilterWith="recordStatusFilteringValue"
   />
 </template>
 
 <script>
 import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import {
+  RECORD_STATUS,
+  deleteAllRecords,
+} from "@/models/feedback-task-model/record/record.queries";
 import {
   COMPONENT_TYPE,
   CORRESPONDING_COMPONENT_TYPE_FROM_API,
@@ -31,6 +37,7 @@ export default {
     return {
       currentPage: 1,
       recordOffset: 0,
+      rerenderChildren: 0,
     };
   },
   async fetch() {
@@ -49,6 +56,17 @@ export default {
   computed: {
     totalRecords() {
       return getTotalRecordByDatasetId(this.datasetId);
+    },
+    recordStatusFilteringValue() {
+      const { _status: recordStatus } = this.$route.query;
+      return recordStatus ?? RECORD_STATUS.PENDING.toLowerCase();
+    },
+  },
+  watch: {
+    async recordStatusFilteringValue() {
+      // NOTE - each time the filter change, clean records orm && rerender the children component
+      await deleteAllRecords();
+      this.rerenderChildren++;
     },
   },
   methods: {
