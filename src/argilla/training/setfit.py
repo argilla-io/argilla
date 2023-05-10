@@ -133,20 +133,13 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             text = [text]
             str_input = True
 
-        predictions = self._setfit_model(text, **kwargs)
+        predictions = self._setfit_model.predict_proba(text, **kwargs)
 
         formatted_prediction = []
         for val, pred in zip(text, predictions):
-            if self._multi_label:
-                pred = [self._id2label[idx] for idx, p in enumerate(pred) if p == 1]
-                if as_argilla_records:
-                    pred = self._record_class(
-                        text=val, prediction=[(p, 1) for p in pred], multi_label=self._multi_label
-                    )
-            else:
-                pred = self._id2label[int(pred)]
-                if as_argilla_records:
-                    pred = self._record_class(text=val, prediction=[(pred, 1)])
+            pred = {self._id2label[idx]: float(p) for idx, p in enumerate(pred)}
+            if as_argilla_records:
+                pred = self._record_class(text=val, prediction=[(p, 1) for p in pred], multi_label=self._multi_label)
             formatted_prediction.append(pred)
 
         if str_input:
