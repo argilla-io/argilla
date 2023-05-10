@@ -16,6 +16,7 @@ import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback
 import {
   RECORD_STATUS,
   deleteAllRecords,
+  getRecordStatusByDatasetIdAndRecordIndex,
 } from "@/models/feedback-task-model/record/record.queries";
 import {
   COMPONENT_TYPE,
@@ -64,6 +65,12 @@ export default {
       const { _status: recordStatus } = this.$route.query;
       return recordStatus ?? RECORD_STATUS.PENDING.toLowerCase();
     },
+    getRecordStatus() {
+      return getRecordStatusByDatasetIdAndRecordIndex(
+        this.datasetId,
+        this.recordOffset
+      );
+    },
   },
   watch: {
     async recordStatusFilteringValue(newStatus, oldStatus) {
@@ -72,6 +79,7 @@ export default {
         (await this.goToFirstPageAndRerenderChildren());
       // NOTE 2 - if responses are untouched, toast is not shown. Else, toast is shown
       this.areResponsesUntouched ||
+        this.getRecordStatus.toLowerCase() === newStatus ||
         this.showNotificationBeforeChangeStatus({
           eventToFireOnClick: async () =>
             this.goToFirstPageAndRerenderChildren(),
@@ -113,6 +121,7 @@ export default {
     stayOnCurrentPageAndReplaceStatusByOldStatus(oldStatus) {
       // TODO - go to previous status if user click on close button
       console.log("stayOnCurrentPageAndReplaceStatusByOldStatus", oldStatus);
+      this.updatePageQueryParam("_status", oldStatus);
     },
     async goToFirstPageAndRerenderChildren() {
       await deleteAllRecords();
