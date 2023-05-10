@@ -24,7 +24,10 @@
 
 <script>
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
-import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
+import {
+  RECORD_STATUS,
+  deleteAllRecords,
+} from "@/models/feedback-task-model/record/record.queries";
 import {
   upsertFeedbackDataset,
   getFeedbackDatasetNameById,
@@ -163,17 +166,21 @@ export default {
     },
     async onRefresh() {
       if (this.areResponsesUntouched) {
-        this.$fetch();
+        await this.deleteRecordsAndRefreshDataset();
       } else {
         this.showNotificationBeforeRefresh({
           eventToFireOnClick: async () => {
-            this.$fetch();
+            await this.deleteRecordsAndRefreshDataset();
           },
           message: this.toastMessage,
           buttonMessage: this.buttonMessage,
           typeOfToast: this.typeOfToast,
         });
       }
+    },
+    async deleteRecordsAndRefreshDataset() {
+      await deleteAllRecords();
+      this.$fetch();
     },
     async onBusEventAreResponsesUntouched() {
       this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
@@ -196,6 +203,9 @@ export default {
         },
       });
     },
+  },
+  destroyed() {
+    this.$root.$off("current-page");
   },
 };
 </script>
