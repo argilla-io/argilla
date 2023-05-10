@@ -59,6 +59,14 @@ export default {
         a.order > b.order ? -1 : 1
       );
     },
+    statusFromRoute() {
+      return this.$route.query?._status;
+    },
+  },
+  watch: {
+    statusFromRoute() {
+      this.selectedStatus = this.statusFromRoute;
+    },
   },
   created() {
     this.filters = {

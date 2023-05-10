@@ -10,12 +10,14 @@
 </template>
 
 <script>
+import { Notification } from "@/models/Notifications";
 import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import { upsertDatasetFields } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
 import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import {
   RECORD_STATUS,
   deleteAllRecords,
+  getRecordStatusByDatasetIdAndRecordIndex,
 } from "@/models/feedback-task-model/record/record.queries";
 import {
   COMPONENT_TYPE,
@@ -41,6 +43,7 @@ export default {
       currentPage: 1,
       recordOffset: 0,
       rerenderChildren: 0,
+      areResponsesUntouched: true,
     };
   },
   async fetch() {
@@ -58,6 +61,7 @@ export default {
 
     this.onBusEventCurrentPage();
     this.onBusEventRecordIndexToGo();
+    this.onBusEventAreResponsesUntouched();
   },
   computed: {
     totalRecords() {
@@ -67,17 +71,68 @@ export default {
       const { _status: recordStatus } = this.$route.query;
       return recordStatus ?? RECORD_STATUS.PENDING.toLowerCase();
     },
+    recordStatus() {
+      return getRecordStatusByDatasetIdAndRecordIndex(
+        this.datasetId,
+        this.recordOffset
+      );
+    },
   },
   watch: {
-    async recordStatusFilteringValue() {
-      // NOTE - each time the filter change, clean records orm && rerender the children component
+    async recordStatusFilteringValue(newStatus, oldStatus) {
+      // NOTE 1 - each time the filter change, clean records orm && rerender the children component
+      !this.areResponsesUntouched ||
+        (await this.goToFirstPageAndRerenderChildren());
+      // NOTE 2 - if responses are untouched, toast is not shown. Else, toast is shown
+      this.checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(newStatus) ||
+        this.showNotificationBeforeChangeStatus({
+          eventToFireOnClick: async () =>
+            this.goToFirstPageAndRerenderChildren(),
+          eventToFireOnClose: () =>
+            this.stayOnCurrentPageAndReplaceStatusByOldStatus(oldStatus),
+          message: this.toastMessage,
+          buttonMessage: this.buttonMessage,
+          typeOfToast: this.typeOfToast,
+        });
+    },
+  },
+  created() {
+    this.toastMessage =
+      "Pending actions will be lost when the page is refreshed";
+    this.buttonMessage = "Ok, got it!";
+    this.typeOfToast = "warning";
+  },
+  methods: {
+    showNotificationBeforeChangeStatus({
+      eventToFireOnClick,
+      eventToFireOnClose,
+      message,
+      buttonMessage,
+      typeOfToast,
+    }) {
+      Notification.dispatch("notify", {
+        message: message ?? "",
+        numberOfChars: 20000,
+        type: typeOfToast ?? "warning",
+        buttonText: buttonMessage ?? "",
+        async onClick() {
+          eventToFireOnClick();
+        },
+        async onClose() {
+          eventToFireOnClose();
+        },
+      });
+    },
+    stayOnCurrentPageAndReplaceStatusByOldStatus(oldStatus) {
+      // TODO - go to previous status if user click on close button
+      this.updatePageQueryParam("_status", oldStatus);
+    },
+    async goToFirstPageAndRerenderChildren() {
       await deleteAllRecords();
       // Go to first page on change filter
       this.$root.$emit("current-page", 1);
       this.rerenderChildren++;
     },
-  },
-  methods: {
     onBusEventCurrentPage() {
       this.$root.$on("current-page", (currentPage) => {
         this.currentPage = currentPage;
@@ -96,15 +151,20 @@ export default {
             this.$root.$emit("current-page", this.currentPage);
           }
           if (recordIndexToGo < this.totalRecords) {
-            this.updatePageQueryParam(pageToGo);
+            this.updatePageQueryParam("_page", pageToGo);
           }
         }
       });
     },
-    updatePageQueryParam(page) {
+    onBusEventAreResponsesUntouched() {
+      this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
+        this.areResponsesUntouched = areResponsesUntouched;
+      });
+    },
+    updatePageQueryParam(param, value) {
       this.$router.push({
         path: this.$route.path,
-        query: { ...this.$route.query, _page: page },
+        query: { ...this.$route.query, [param]: value },
       });
     },
     factoryQuestionsForOrm(initialQuestions) {
@@ -238,6 +298,11 @@ export default {
           response: TYPE_OF_FEEDBACK.ERROR_FETCHING_QUESTIONS,
         };
       }
+    },
+    checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(status) {
+      return (
+        this.areResponsesUntouched || this.recordStatus.toLowerCase() === status
+      );
     },
     async getFields(datasetId) {
       try {
