@@ -65,7 +65,7 @@ export default {
       const { _status: recordStatus } = this.$route.query;
       return recordStatus ?? RECORD_STATUS.PENDING.toLowerCase();
     },
-    getRecordStatus() {
+    recordStatus() {
       return getRecordStatusByDatasetIdAndRecordIndex(
         this.datasetId,
         this.recordOffset
@@ -78,8 +78,7 @@ export default {
       !this.areResponsesUntouched ||
         (await this.goToFirstPageAndRerenderChildren());
       // NOTE 2 - if responses are untouched, toast is not shown. Else, toast is shown
-      this.areResponsesUntouched ||
-        this.getRecordStatus.toLowerCase() === newStatus ||
+      this.checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(newStatus) ||
         this.showNotificationBeforeChangeStatus({
           eventToFireOnClick: async () =>
             this.goToFirstPageAndRerenderChildren(),
@@ -259,6 +258,11 @@ export default {
           response: TYPE_OF_FEEDBACK.ERROR_FETCHING_QUESTIONS,
         };
       }
+    },
+    checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(status) {
+      return (
+        this.areResponsesUntouched || this.recordStatus.toLowerCase() === status
+      );
     },
   },
   destroyed() {
