@@ -23,7 +23,7 @@ if sys.version_info > (3, 7):
 else:
     from typing_extensions import Literal
 
-from pydantic import BaseModel, Field, create_model, validator
+from pydantic import BaseModel, Field, StrictInt, StrictStr, create_model, validator
 from tqdm import tqdm
 
 import argilla as rg
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 
 class ValueSchema(BaseModel):
-    value: Union[str, int]
+    value: Union[StrictStr, StrictInt]
 
 
 class ResponseSchema(BaseModel):
