@@ -1,23 +1,30 @@
 <template>
   <div
+    v-if="!$fetchState.pending && !$fetchState.error"
     :key="recordOffset"
     class="wrapper"
-    v-if="recordId && !$fetchState.pending && !$fetchState.error"
   >
-    <RecordFeedbackTaskComponent
-      v-if="fieldsWithRecordFieldText"
-      :recordStatus="record.record_status"
-      :fields="fieldsWithRecordFieldText"
-    />
-    <QuestionsFormComponent
-      class="question-form"
-      :class="statusClass"
-      v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
-      :datasetId="datasetId"
-      :recordId="recordId"
-      :recordStatus="record.record_status"
-      :initialInputs="questionsWithRecordAnswers"
-    />
+    <template v-if="recordId">
+      <RecordFeedbackTaskComponent
+        v-if="fieldsWithRecordFieldText"
+        :recordStatus="record.record_status"
+        :fields="fieldsWithRecordFieldText"
+      />
+      <QuestionsFormComponent
+        class="question-form"
+        :class="statusClass"
+        v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
+        :datasetId="datasetId"
+        :recordId="recordId"
+        :recordStatus="record.record_status"
+        :initialInputs="questionsWithRecordAnswers"
+      />
+    </template>
+    <div v-else class="wrapper--empty">
+      <p class="wrapper__text --heading3">
+        There are no {{ recordStatusToFilterWith }} records
+      </p>
+    </div>
   </div>
 </template>
 
@@ -341,6 +348,15 @@ export default {
   flex-wrap: wrap;
   gap: 2 * $base-space;
   height: 100%;
+  &__text {
+    color: $black-54;
+  }
+  &--empty {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 .question-form {
   border: 1px solid transparent;
