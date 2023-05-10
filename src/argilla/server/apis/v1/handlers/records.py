@@ -49,4 +49,9 @@ def create_record_response(
             detail=f"Response already exists for record with id `{record_id}` and by user with id `{current_user.id}`",
         )
 
-    return datasets.create_response(db, record, current_user, response_create)
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        return datasets.create_response(db, record, current_user, response_create)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))

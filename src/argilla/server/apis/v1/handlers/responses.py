@@ -50,7 +50,12 @@ def update_response(
 
     authorize(current_user, ResponsePolicyV1.update(response))
 
-    return datasets.update_response(db, response, response_update)
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    #   After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        return datasets.update_response(db, response, response_update)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
 @router.delete("/responses/{response_id}", response_model=Response)
