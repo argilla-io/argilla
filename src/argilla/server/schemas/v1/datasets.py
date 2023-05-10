@@ -21,7 +21,7 @@ from uuid import UUID
 from pydantic import BaseModel, conlist, constr
 from pydantic import Field as ModelField
 
-if sys.version_info > (3, 7):
+if sys.version_info >= (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
