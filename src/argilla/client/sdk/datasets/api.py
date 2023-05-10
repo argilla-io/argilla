@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from functools import lru_cache
 from typing import Union
 
 import httpx
@@ -31,7 +30,6 @@ from argilla.client.sdk.datasets.models import (
 )
 
 
-@lru_cache(maxsize=None)
 def get_dataset(
     client: AuthenticatedClient,
     name: str,

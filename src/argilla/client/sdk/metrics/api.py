@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from functools import lru_cache
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
@@ -28,7 +27,6 @@ from argilla.client.sdk.commons.models import (
 from argilla.client.sdk.metrics.models import MetricInfo
 
 
-@lru_cache()
 def get_dataset_metrics(
     client: AuthenticatedClient, name: str, task: str
 ) -> Response[Union[List[MetricInfo], ErrorMessage, HTTPValidationError]]:

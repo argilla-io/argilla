@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from functools import lru_cache
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
@@ -62,7 +61,6 @@ def create_dataset(
     return handle_response_error(response)
 
 
-@lru_cache(maxsize=None)
 def get_dataset(
     client: AuthenticatedClient,
     id: str,
