@@ -120,7 +120,6 @@ export default {
     },
     stayOnCurrentPageAndReplaceStatusByOldStatus(oldStatus) {
       // TODO - go to previous status if user click on close button
-      console.log("stayOnCurrentPageAndReplaceStatusByOldStatus", oldStatus);
       this.updatePageQueryParam("_status", oldStatus);
     },
     async goToFirstPageAndRerenderChildren() {
