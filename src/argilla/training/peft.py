@@ -160,12 +160,14 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
             predictions = []
             for probability in probabilities:
                 prediction = []
-                for label, score in zip(self._id2label.values(), probability):
-                    prediction.append({"label": label, "score": score})
+                for idx, score in enumerate(probability):
+                    prediction.append({"label": self._id2label[idx], "score": score})
                 predictions.append(prediction)
         else:
             tokens = inputs.tokens()
             predictions = logits.argmax(dim=2)
+            for token, prediction in zip(tokens, predictions[0].numpy()):
+                print((token, self._id2label[prediction]))
 
         if as_argilla_records:
             formatted_prediction = []
