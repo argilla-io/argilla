@@ -21,9 +21,7 @@
       />
     </template>
     <div v-else class="wrapper--empty">
-      <p class="wrapper__text --heading3">
-        There are no {{ recordStatusToFilterWith }} records
-      </p>
+      <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
     </div>
   </div>
 </template>
@@ -170,6 +168,9 @@ export default {
           };
         }
       });
+    },
+    noRecordsMessage() {
+      return `There are no ${this.recordStatusToFilterWith} records`;
     },
     statusClass() {
       return `--${this.record.record_status.toLowerCase()}`;
