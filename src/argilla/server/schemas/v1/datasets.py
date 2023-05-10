@@ -66,6 +66,21 @@ class DatasetCreate(BaseModel):
     workspace_id: UUID
 
 
+class RecordMetrics(BaseModel):
+    count: int
+
+
+class ResponseMetrics(BaseModel):
+    count: int
+    submitted: int
+    discarded: int
+
+
+class Metrics(BaseModel):
+    records: RecordMetrics
+    responses: ResponseMetrics
+
+
 class TextFieldSettings(BaseModel):
     type: Literal[FieldType.text]
 
@@ -145,9 +160,17 @@ class QuestionCreate(BaseModel):
     settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
 
 
+class ResponseValue(BaseModel):
+    value: Any
+
+
+class ResponseValueCreate(BaseModel):
+    value: Any
+
+
 class Response(BaseModel):
     id: UUID
-    values: Dict[str, Any]
+    values: Optional[Dict[str, ResponseValue]]
     status: ResponseStatus
     user_id: UUID
     inserted_at: datetime
@@ -161,10 +184,18 @@ class RecordInclude(str, Enum):
     responses = "responses"
 
 
+class ResponseStatusFilter(str, Enum):
+    missing = "missing"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
 class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
     external_id: Optional[str]
+    # TODO: move `responses` to `response` since contextualized endpoint will contains only the user response
+    # response: Optional[Response]
     responses: Optional[List[Response]]
     inserted_at: datetime
     updated_at: datetime
@@ -178,14 +209,20 @@ class Records(BaseModel):
     total: int
 
 
-class ResponseCreate(BaseModel):
-    values: Dict[str, Any]
+class SubmittedResponseCreate(BaseModel):
+    values: Dict[str, ResponseValueCreate]
+    status: Literal[ResponseStatus.submitted]
+
+
+class DiscardedResponseCreate(BaseModel):
+    values: Optional[Dict[str, ResponseValueCreate]]
+    status: Literal[ResponseStatus.discarded]
 
 
 class RecordCreate(BaseModel):
     fields: Dict[str, Any]
     external_id: Optional[str]
-    response: Optional[ResponseCreate]
+    response: Optional[Union[SubmittedResponseCreate, DiscardedResponseCreate]] = ModelField(discriminator="status")
 
 
 class RecordsCreate(BaseModel):

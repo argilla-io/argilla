@@ -22,19 +22,27 @@ from sqlalchemy.orm import Session
 
 from tests.factories import (
     AnnotatorFactory,
+    DatasetFactory,
+    RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
+    TextQuestionFactory,
     WorkspaceFactory,
 )
 
 
 def test_create_record_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
-    record = RecordFactory.create()
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
@@ -57,6 +65,60 @@ def test_create_record_response(client: TestClient, db: Session, admin: User, ad
     }
 
 
+def test_create_record_response_with_extra_question_responses(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset, required=False)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset, required=False)
+
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {
+        "values": {
+            "input_ok": {"value": "yes"},
+            "unknown_question": {"value": "Test"},
+        },
+        "status": "submitted",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Error: found responses for non configured questions: ['unknown_question']"}
+
+
+def test_create_record_response_with_wrong_response_value(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    RatingQuestionFactory.create(name="rating_question", dataset=dataset, required=False)
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {
+        "values": {
+            "rating_question": {"value": "wrong-rating-value"},
+        },
+        "status": "submitted",
+    }
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": "'wrong-rating-value' is not a valid option.\nValid options are: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
+    }
+
+
+def test_create_submitted_record_response_with_missing_required_questions(
+    client: TestClient, db: Session, admin_auth_header: dict
+):
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset, required=True)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset, required=True)
+
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {
+        "values": {"input_ok": {"value": "yes"}},
+        "status": "submitted",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Missing required question: 'output_ok'"}
+
+
 def test_create_record_response_without_authentication(client: TestClient, db: Session):
     record = RecordFactory.create()
     response_json = {
@@ -64,6 +126,7 @@ def test_create_record_response_without_authentication(client: TestClient, db: S
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", json=response_json)
@@ -72,14 +135,135 @@ def test_create_record_response_without_authentication(client: TestClient, db: S
     assert db.query(Response).count() == 0
 
 
-def test_create_record_response_as_annotator(client: TestClient, db: Session):
+def test_create_record_submitted_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {
+        "values": {
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        "status": "submitted",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 201
+    assert db.query(Response).count() == 1
+
+    response_body = response.json()
+    assert db.get(Response, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "values": {
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        "status": "submitted",
+        "user_id": str(admin.id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
+
+
+def test_create_record_submitted_response_without_values(client: TestClient, db: Session, admin_auth_header: dict):
     record = RecordFactory.create()
+    response_json = {"status": "submitted"}
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 422
+    assert db.query(Response).count() == 0
+
+
+def test_create_record_submitted_response_with_wrong_values(client: TestClient, db: Session, admin_auth_header: dict):
+    record = RecordFactory.create()
+    response_json = {"status": "submitted", "values": {"wrong_question": {"value": "wrong value"}}}
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
+    assert db.query(Response).count() == 0
+
+
+def test_create_record_discarded_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {
+        "values": {
+            "input_ok": {"value": "no"},
+            "output_ok": {"value": "no"},
+        },
+        "status": "discarded",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 201
+    assert db.query(Response).count() == 1
+
+    response_body = response.json()
+    assert db.get(Response, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "values": {
+            "input_ok": {"value": "no"},
+            "output_ok": {"value": "no"},
+        },
+        "status": "discarded",
+        "user_id": str(admin.id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
+
+
+def test_create_record_discarded_response_without_values(
+    client: TestClient, db: Session, admin: User, admin_auth_header: dict
+):
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {"status": "discarded"}
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 201
+    assert db.query(Response).count() == 1
+
+    response_body = response.json()
+    assert db.get(Response, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "values": None,
+        "status": "discarded",
+        "user_id": str(admin.id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
+
+
+def test_create_record_response_as_annotator(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
     annotator = AnnotatorFactory.create(workspaces=[record.dataset.workspace])
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(
@@ -111,6 +295,7 @@ def test_create_record_response_as_annotator_from_different_workspace(client: Te
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(
@@ -129,6 +314,7 @@ def test_create_record_response_already_created(client: TestClient, db: Session,
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
@@ -139,7 +325,26 @@ def test_create_record_response_already_created(client: TestClient, db: Session,
 
 def test_create_record_response_with_invalid_values(client: TestClient, db: Session, admin_auth_header: dict):
     record = RecordFactory.create()
-    response_json = {"values": "invalid"}
+    response_json = {
+        "values": "invalid",
+        "status": "submitted",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 422
+    assert db.query(Response).count() == 0
+
+
+def test_create_record_response_with_invalid_status(client: TestClient, db: Session, admin_auth_header: dict):
+    record = RecordFactory.create()
+    response_json = {
+        "values": {
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        "status": "invalid",
+    }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
 
@@ -154,81 +359,10 @@ def test_create_record_response_with_nonexistent_record_id(client: TestClient, d
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
+        "status": "submitted",
     }
 
     response = client.post(f"/api/v1/records/{uuid4()}/responses", headers=admin_auth_header, json=response_json)
 
     assert response.status_code == 404
     assert db.query(Response).count() == 0
-
-
-def test_list_record_responses(client: TestClient, db: Session, admin_auth_header: dict):
-    record = RecordFactory.create()
-    response_a = ResponseFactory.create(record=record)
-    response_b = ResponseFactory.create(record=record)
-
-    response = client.get(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header)
-
-    assert response.status_code == 200
-    assert response.json() == {
-        "items": [
-            {
-                "id": str(response_a.id),
-                "values": response_a.values,
-                "status": "submitted",
-                "user_id": str(response_a.user_id),
-                "inserted_at": response_a.inserted_at.isoformat(),
-                "updated_at": response_a.updated_at.isoformat(),
-            },
-            {
-                "id": str(response_b.id),
-                "values": response_b.values,
-                "status": "submitted",
-                "user_id": str(response_b.user.id),
-                "inserted_at": response_b.inserted_at.isoformat(),
-                "updated_at": response_b.updated_at.isoformat(),
-            },
-        ]
-    }
-
-
-def test_list_record_responses_as_annotator(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
-    record = RecordFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[record.dataset.workspace])
-    response_a = ResponseFactory.create(record=record, user=annotator)
-    ResponseFactory.create(record=record, user=admin)
-    ResponseFactory.create(record=record)
-
-    response = client.get(f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key})
-
-    assert response.status_code == 200
-    assert response.json() == {
-        "items": [
-            {
-                "id": str(response_a.id),
-                "values": response_a.values,
-                "status": "submitted",
-                "user_id": str(response_a.user_id),
-                "inserted_at": response_a.inserted_at.isoformat(),
-                "updated_at": response_a.updated_at.isoformat(),
-            }
-        ]
-    }
-
-
-def test_list_record_responses_as_annotator_from_different_workspace(client: TestClient, db: Session):
-    record = RecordFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
-
-    response = client.get(f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key})
-
-    assert response.status_code == 403
-
-
-def test_list_record_responses_with_nonexistent_record_id(client: TestClient, db: Session, admin_auth_header: dict):
-    record = RecordFactory.create()
-    ResponseFactory.create(record=record)
-
-    response = client.get(f"/api/v1/records/{uuid4()}/responses", headers=admin_auth_header)
-
-    assert response.status_code == 404

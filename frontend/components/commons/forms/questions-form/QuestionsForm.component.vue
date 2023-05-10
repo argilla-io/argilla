@@ -49,23 +49,33 @@
       </div>
     </div>
     <div class="footer-form">
-      <div class="error-message" v-if="isError">
-        <i v-text="formOnErrorMessage" />
-      </div>
-      <div class="buttons-area">
+      <div class="footer-form__left-footer">
         <BaseButton
-          type="reset"
-          class="primary outline small"
-          @on-click="onReset"
-          :disabled="isFormUntouched"
+          type="button"
+          ref="clearButton"
+          class="primary text"
+          @click.prevent="onClear"
         >
-          <span v-text="'Reset'" />
+          <span v-text="'Clear'" />
+        </BaseButton>
+      </div>
+      <div class="footer-form__right-area">
+        <BaseButton
+          type="button"
+          ref="discardButton"
+          class="primary outline"
+          @on-click="onDiscard"
+          :disabled="isRecordDiscarded"
+        >
+          <span v-text="'Discard'" />
         </BaseButton>
         <BaseButton
           ref="submitButton"
           type="submit"
-          class="primary small"
-          :disabled="isFormUntouched || isError"
+          name="submitButton"
+          value="submitButton"
+          class="primary"
+          :disabled="isFormUntouched || isSomeRequiredQuestionHaveNoAnswer"
         >
           <span v-text="'Submit'" />
         </BaseButton>
@@ -83,8 +93,15 @@ import {
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import {
+  getRecordIndexByRecordId,
+  updateRecordStatusByRecordId,
+  RECORD_STATUS,
+  RESPONSE_STATUS_FOR_API,
+} from "@/models/feedback-task-model/record/record.queries";
+import {
   getRecordResponsesIdByRecordId,
   upsertRecordResponses,
+  deleteRecordResponsesByUserIdAndResponseId,
   isResponsesByUserIdExists,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 
@@ -92,6 +109,10 @@ const STATUS_RESPONSE = Object.freeze({
   UPDATE: "UPDATE",
   CREATE: "CREATE",
   UNKNOWN: "UNKNOWN",
+});
+const TYPE_OF_EVENT = Object.freeze({
+  ON_SUBMIT: "ON_SUBMIT",
+  ON_DISCARD: "ON_DISCARD",
 });
 export default {
   name: "QuestionsFormComponent",
@@ -101,6 +122,10 @@ export default {
       required: true,
     },
     recordId: {
+      type: String,
+      required: true,
+    },
+    recordStatus: {
       type: String,
       required: true,
     },
@@ -121,8 +146,28 @@ export default {
     userId() {
       return this.$auth.user.id;
     },
+    recordIdIndex() {
+      return getRecordIndexByRecordId(this.recordId);
+    },
     isFormUntouched() {
       return isEqual(this.initialInputs, this.inputs);
+    },
+    isSomeRequiredQuestionHaveNoAnswer() {
+      return this.inputs.some(
+        (input) =>
+          input.is_required &&
+          input.options.every(
+            (option) => !option.value || option.value.length === 0
+          )
+      );
+    },
+    isRecordDiscarded() {
+      return this.recordStatus === RECORD_STATUS.DISCARDED;
+    },
+  },
+  watch: {
+    isFormUntouched(isFormUntouched) {
+      this.onEmitIsQuestionsFormUntouchedByBusEvent(isFormUntouched);
     },
   },
   created() {
@@ -138,16 +183,21 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code }) {
+    onPressKeyboardShortCut({ code, ctrlKey }) {
       switch (code) {
         case "Enter": {
           const elem = this.$refs.submitButton.$el;
           elem.click();
           break;
         }
-        case "Delete": {
-          console.log("onDiscard");
-          // TODO - when DISCARD feature will be implemented, add a ref in the discard button force a click
+        case "Space": {
+          const elem = this.$refs.clearButton.$el;
+          ctrlKey && elem.click();
+          break;
+        }
+        case "Backspace": {
+          const elem = this.$refs.discardButton.$el;
+          elem.click();
           break;
         }
         default:
@@ -161,7 +211,8 @@ export default {
         return input;
       });
     },
-    async onSubmit() {
+    async onDiscard() {
+      // 1 - check if it's a create or update response
       const createOrUpdateResponse = isResponsesByUserIdExists(
         this.userId,
         this.recordId
@@ -169,19 +220,246 @@ export default {
         ? STATUS_RESPONSE.UPDATE
         : STATUS_RESPONSE.CREATE;
 
-      const isSomeRequiredQuestionHaveNoAnswer = this.inputs.some(
-        (input) =>
-          input.is_required &&
-          input.options.every(
-            (option) => !option.value || option.value.length === 0
-          )
+      // 2 - init formattedSelectionOptionObject
+      const formattedSelectionObject = this.formatSelectedOptionObject(
+        RESPONSE_STATUS_FOR_API.DISCARDED,
+        !this.isSomeRequiredQuestionHaveNoAnswer
       );
-      if (isSomeRequiredQuestionHaveNoAnswer) {
+
+      // 3 - Create the formatted requests to send from the formattedSelectionObject
+      const formattedRequestsToSend = this.formatRequestsToSend(
+        createOrUpdateResponse,
+        formattedSelectionObject
+      );
+
+      // 4 - create or update the record responses and emit bus event to change record to show
+      try {
+        // TODO - make the call here to discard the record
+        await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.DISCARDED
+        );
+        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    async onSubmit() {
+      // 1 - check if it's a create or update response
+      const createOrUpdateResponse = isResponsesByUserIdExists(
+        this.userId,
+        this.recordId
+      )
+        ? STATUS_RESPONSE.UPDATE
+        : STATUS_RESPONSE.CREATE;
+      if (this.isSomeRequiredQuestionHaveNoAnswer) {
         this.isError = true;
         return;
       }
+      // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
 
-      let formattedSelectionOptionObject = {};
+      // 2 - init formattedSelectionOptionObject
+      const formattedSelectionObject = this.formatSelectedOptionObject(
+        RESPONSE_STATUS_FOR_API.SUBMITTED
+      );
+
+      // 3 - Create the formatted requests to send from the formattedSelectionObject
+      const formattedRequestsToSend = this.formatRequestsToSend(
+        createOrUpdateResponse,
+        formattedSelectionObject
+      );
+
+      // 4 - create or update the record responses and emit bus event to change record to show
+      try {
+        await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+        // NOTE - onSubmit event => the status change to SUBMITTED
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.SUBMITTED
+        );
+        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    onEmitBusEventGoToRecordIndex(typeOfEvent) {
+      switch (typeOfEvent) {
+        case TYPE_OF_EVENT.ON_SUBMIT:
+        case TYPE_OF_EVENT.ON_DISCARD:
+          this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
+          break;
+        default:
+      }
+    },
+    async onClear() {
+      const responseId = getRecordResponsesIdByRecordId({
+        userId: this.userId,
+        recordId: this.recordId,
+      });
+
+      try {
+        const responseData =
+          responseId && (await this.deleteResponsesByResponseId(responseId));
+
+        await deleteRecordResponsesByUserIdAndResponseId(
+          this.userId,
+          responseData?.data?.id
+        );
+
+        // NOTE - onClear event => the status change to PENDING
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.PENDING
+        );
+
+        this.onReset();
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    onReset() {
+      this.inputs = cloneDeep(this.initialInputs);
+      this.isError = false;
+      this.colorAsterisk = "black";
+      this.renderForm++;
+    },
+    onError(isError) {
+      if (isError) {
+        this.colorAsterisk = "red";
+        this.isError = true;
+      } else {
+        this.colorAsterisk = "black";
+        this.isError = false;
+      }
+    },
+    async deleteResponsesByResponseId(responseId) {
+      return await this.$axios.delete(`/v1/responses/${responseId}`);
+    },
+    async createOrUpdateRecordResponses({
+      status,
+      responseId,
+      responseByQuestionName,
+    }) {
+      try {
+        let responseData = null;
+        if (status === STATUS_RESPONSE.UPDATE) {
+          responseData = await this.updateRecordResponses(
+            responseId,
+            responseByQuestionName
+          );
+        } else if (status === STATUS_RESPONSE.CREATE) {
+          responseData = await this.createRecordResponses(
+            this.recordId,
+            responseByQuestionName
+          );
+        }
+
+        const { data: updatedResponses } = responseData;
+
+        if (updatedResponses) {
+          this.updateResponsesInOrm({
+            record_id: this.recordId,
+            ...updatedResponses,
+          });
+        }
+      } catch (err) {
+        console.log(err);
+        const message = "There was a problem to save the response";
+        const typeOfToast = "error";
+        this.showNotificationComponent(message, typeOfToast);
+      }
+    },
+    async updateResponsesInOrm(responsesFromApi) {
+      const newResponseToUpsertInOrm =
+        this.formatResponsesApiForOrm(responsesFromApi);
+
+      await upsertRecordResponses(newResponseToUpsertInOrm);
+    },
+    async updateRecordResponses(responseId, responseByQuestionName) {
+      return await this.$axios.put(
+        `/v1/responses/${responseId}`,
+        JSON.parse(JSON.stringify(responseByQuestionName))
+      );
+    },
+    async createRecordResponses(recordId, responseByQuestionName) {
+      return await this.$axios.post(
+        `/v1/records/${recordId}/responses`,
+        JSON.parse(JSON.stringify(responseByQuestionName))
+      );
+    },
+    formatResponsesApiForOrm(responsesFromApi) {
+      const formattedRecordResponsesForOrm = [];
+      if (responsesFromApi.values) {
+        if (Object.keys(responsesFromApi.values).length === 0) {
+          // IF responses.value  is an empty object, init formatted responses with questions data
+          this.inputs.forEach(
+            ({ question: questionName, options: questionOptions }) => {
+              formattedRecordResponsesForOrm.push({
+                id: responsesFromApi.id,
+                question_name: questionName,
+                options: questionOptions,
+                record_id: responsesFromApi.record_id,
+                user_id: responsesFromApi.user_id ?? null,
+              });
+            }
+          );
+        } else {
+          // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
+          Object.entries(responsesFromApi.values).map(
+            ([questionName, newResponse]) => {
+              const componentType =
+                getComponentTypeOfQuestionByDatasetIdAndQuestionName(
+                  this.datasetId,
+                  questionName
+                );
+              let formattedOptions =
+                getOptionsOfQuestionByDatasetIdAndQuestionName(
+                  this.datasetId,
+                  questionName
+                );
+
+              switch (componentType) {
+                case COMPONENT_TYPE.SINGLE_LABEL:
+                case COMPONENT_TYPE.RATING:
+                  formattedOptions = formattedOptions.map((option) => {
+                    if (option.text === newResponse.value) {
+                      return { id: option.id, text: option.text, value: true };
+                    }
+                    return { id: option.id, text: option.text, value: false };
+                  });
+                  break;
+                case COMPONENT_TYPE.FREE_TEXT:
+                  formattedOptions = [
+                    {
+                      id: formattedOptions[0].id,
+                      text: newResponse.value,
+                      value: newResponse.value,
+                    },
+                  ];
+                  break;
+                default:
+                  console.log(`The component type ${componentType} is unknown`);
+                  return;
+              }
+
+              formattedRecordResponsesForOrm.push({
+                id: responsesFromApi.id,
+                question_name: questionName,
+                user_id: responsesFromApi.user_id,
+                record_id: responsesFromApi.record_id,
+                options: formattedOptions,
+              });
+            }
+          );
+        }
+      }
+      return formattedRecordResponsesForOrm;
+    },
+    formatSelectedOptionObject(status, isFilled = true) {
+      let selectedOptionObj = {
+        status,
+      };
       this.inputs.forEach((input) => {
         // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
 
@@ -199,16 +477,19 @@ export default {
               `The component type ${input.component_type} is unknown, the response can't be save`
             );
         }
-
-        formattedSelectionOptionObject.values = {
-          ...formattedSelectionOptionObject.values,
-          [input.name]: { value: selectedOption.text },
+        selectedOptionObj.values = {
+          ...selectedOptionObj.values,
+          ...(isFilled && {
+            [input.name]: { value: selectedOption.text },
+          }),
         };
       });
-
+      return selectedOptionObj;
+    },
+    formatRequestsToSend(createOrUpdateResponse, obj) {
       const formattedRequestsToSend = {
         status: createOrUpdateResponse,
-        responseByQuestionName: formattedSelectionOptionObject,
+        responseByQuestionName: obj,
         ...(createOrUpdateResponse === STATUS_RESPONSE.UPDATE && {
           responseId: getRecordResponsesIdByRecordId({
             userId: this.userId,
@@ -219,128 +500,7 @@ export default {
           recordId: this.recordId,
         }),
       };
-
-      await this.createOrUpdateRecordResponses(formattedRequestsToSend);
-    },
-    onReset() {
-      this.inputs = cloneDeep(this.initialInputs);
-      this.isError = false;
-      this.colorAsterisk = "black";
-      this.renderForm++;
-    },
-    onError(isError) {
-      if (isError) {
-        this.colorAsterisk = "red";
-        this.isError = true;
-      } else {
-        this.colorAsterisk = "black";
-        this.isError = false;
-      }
-    },
-    async createOrUpdateRecordResponses({
-      status,
-      responseId,
-      responseByQuestionName,
-    }) {
-      let message = "";
-      let typeOfToast = "successOrError";
-      try {
-        let responseData = null;
-        if (status === STATUS_RESPONSE.UPDATE) {
-          responseData = await this.updateRecordResponses(
-            responseId,
-            responseByQuestionName
-          );
-        } else if (status === STATUS_RESPONSE.CREATE) {
-          responseData = await this.createRecordResponses(
-            this.recordId,
-            responseByQuestionName
-          );
-        }
-
-        message = "Responses to the questions are saved!";
-        typeOfToast = "success";
-
-        const { data: updatedResponses } = responseData;
-        if (updatedResponses) {
-          this.updateResponsesInOrm(updatedResponses);
-        }
-      } catch (err) {
-        console.log(err);
-        message = "There was a problem to save the response";
-        typeOfToast = "error";
-      } finally {
-        this.showNotificationComponent(message, typeOfToast);
-      }
-    },
-    updateResponsesInOrm(responsesFromApi) {
-      const newResponseToUpsertInOrm =
-        this.formatResponsesApiForOrm(responsesFromApi);
-
-      upsertRecordResponses(newResponseToUpsertInOrm);
-    },
-    async updateRecordResponses(responseId, responseByQuestionName) {
-      return await this.$axios.put(
-        `/v1/responses/${responseId}`,
-        JSON.parse(JSON.stringify(responseByQuestionName))
-      );
-    },
-    async createRecordResponses(recordId, responseByQuestionName) {
-      return await this.$axios.post(
-        `/v1/records/${recordId}/responses`,
-        JSON.parse(JSON.stringify(responseByQuestionName))
-      );
-    },
-    formatResponsesApiForOrm(responsesFromApi) {
-      const newResponseToUpsertInOrm = Object.entries(
-        responsesFromApi.values
-      ).map(([questionName, newResponse]) => {
-        const componentType =
-          getComponentTypeOfQuestionByDatasetIdAndQuestionName(
-            this.datasetId,
-            questionName
-          );
-        let formattedOptions = getOptionsOfQuestionByDatasetIdAndQuestionName(
-          this.datasetId,
-          questionName
-        );
-
-        switch (componentType) {
-          case COMPONENT_TYPE.SINGLE_LABEL:
-          case COMPONENT_TYPE.RATING:
-            formattedOptions = formattedOptions.map((option) => {
-              if (option.text === newResponse.value) {
-                return { id: option.id, text: option.text, value: true };
-              }
-              return { id: option.id, text: option.text, value: false };
-            });
-            break;
-          case COMPONENT_TYPE.FREE_TEXT:
-            formattedOptions = [
-              {
-                id: formattedOptions[0].id,
-                text: newResponse.value,
-                value: newResponse.value,
-              },
-            ];
-            break;
-          default:
-            console.log(`The component type ${componentType} is unknown`);
-            return;
-        }
-
-        const formattedResponse = {
-          id: responsesFromApi.id,
-          question_name: questionName,
-          user_id: responsesFromApi.user_id,
-          record_id: responsesFromApi.record_id,
-          options: formattedOptions,
-        };
-
-        return formattedResponse;
-      });
-
-      return newResponseToUpsertInOrm;
+      return formattedRequestsToSend;
     },
     showNotificationComponent(message, typeOfToast) {
       Notification.dispatch("notify", {
@@ -348,6 +508,9 @@ export default {
         numberOfChars: message.length,
         type: typeOfToast,
       });
+    },
+    onEmitIsQuestionsFormUntouchedByBusEvent(isFormUntouched) {
+      this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
   },
 };
@@ -358,12 +521,8 @@ export default {
   display: flex;
   flex-direction: column;
   flex-basis: 37em;
-  gap: $base-space * 3;
-  max-width: 100%;
   height: 100%;
   justify-content: space-between;
-  padding: $base-space * 3;
-  border: 1px solid $primary-color;
   border-radius: $border-radius;
   box-shadow: $shadow;
   &__title {
@@ -373,21 +532,26 @@ export default {
   &__content {
     display: flex;
     flex-direction: column;
-    gap: $base-space * 2;
+    gap: 20px;
+    padding: $base-space * 3;
     overflow: auto;
   }
 }
 
 .footer-form {
   display: flex;
-  flex-direction: column;
-  gap: $base-space * 2;
-}
-
-.buttons-area {
-  display: flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: space-between;
+  align-items: center;
+  padding: $base-space * 2 $base-space * 3;
+  border-top: 1px solid $black-10;
+  &__left-area {
+    display: inline-flex;
+  }
+  &__right-area {
+    display: inline-flex;
+    gap: $base-space * 2;
+  }
 }
 
 .error-message {

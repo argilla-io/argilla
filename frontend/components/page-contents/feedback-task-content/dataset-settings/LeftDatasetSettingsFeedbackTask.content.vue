@@ -15,7 +15,10 @@
         </base-button>
       </base-action-tooltip>
     </div>
-    <div class="dataset-description-component left-content-item" v-if="settingsDescription">
+    <div
+      class="dataset-description-component left-content-item"
+      v-if="settingsDescription"
+    >
       <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
     </div>
     <div class="delete-dataset-component" v-if="datasetId">

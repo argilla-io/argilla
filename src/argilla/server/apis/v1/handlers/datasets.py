@@ -29,12 +29,14 @@ from argilla.server.schemas.v1.datasets import (
     Field,
     FieldCreate,
     Fields,
+    Metrics,
     Question,
     QuestionCreate,
     Questions,
     RecordInclude,
     Records,
     RecordsCreate,
+    ResponseStatusFilter,
 )
 from argilla.server.security import auth
 from argilla.server.security.model import User
@@ -56,8 +58,8 @@ def _get_dataset(db: Session, dataset_id: UUID):
     return dataset
 
 
-@router.get("/datasets", response_model=Datasets)
-def list_datasets(
+@router.get("/me/datasets", response_model=Datasets)
+def list_current_user_datasets(
     *,
     db: Session = Depends(get_db),
     current_user: User = Security(auth.get_current_user),
@@ -98,12 +100,13 @@ def list_dataset_questions(
     return Questions(items=dataset.questions)
 
 
-@router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
-def list_dataset_records(
+@router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
+def list_current_user_dataset_records(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
     include: Optional[List[RecordInclude]] = Query([]),
+    response_status: Optional[ResponseStatusFilter] = Query(None),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -112,18 +115,20 @@ def list_dataset_records(
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    records = []
-    if current_user.is_admin:
-        records = datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
-    else:
-        records = datasets.list_records_by_dataset_id_and_user_id(
-            db, dataset_id, current_user.id, include=include, offset=offset, limit=limit
-        )
-
-    return Records(
-        items=[record.__dict__ for record in records],
-        total=datasets.count_records_by_dataset_id(db, dataset_id),
+    records = datasets.list_records_by_dataset_id_and_user_id(
+        db, dataset_id, current_user.id, include=include, response_status=response_status, offset=offset, limit=limit
     )
+
+    if response_status == ResponseStatusFilter.missing:
+        total = datasets.count_records_with_missing_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id)
+    elif response_status == ResponseStatusFilter.submitted:
+        total = datasets.count_submitted_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id)
+    elif response_status == ResponseStatusFilter.discarded:
+        total = datasets.count_discarded_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id)
+    else:
+        total = datasets.count_records_by_dataset_id(db, dataset_id)
+
+    return Records(items=[record.__dict__ for record in records], total=total)
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
@@ -138,6 +143,29 @@ def get_dataset(
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
     return dataset
+
+
+@router.get("/me/datasets/{dataset_id}/metrics", response_model=Metrics)
+def get_current_user_dataset_metrics(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return {
+        "records": {
+            "count": datasets.count_records_by_dataset_id(db, dataset_id),
+        },
+        "responses": {
+            "count": datasets.count_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+            "submitted": datasets.count_submitted_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+            "discarded": datasets.count_discarded_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+        },
+    }
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=Dataset)
@@ -223,7 +251,7 @@ def create_dataset_records(
     dataset = _get_dataset(db, dataset_id)
 
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
         datasets.create_records(db, dataset, current_user, records_create)
     except ValueError as err:

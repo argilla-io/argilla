@@ -2,7 +2,7 @@
   <div class="filters">
     <span
       class="filters__component"
-      v-for="id in Object.keys(this.filters)"
+      v-for="{ id } in sortedFiltersValue"
       :key="id"
     >
       <SearchBarBase
@@ -11,15 +11,22 @@
         @on-search-text="onSearch(id, $event)"
         :placeholder="getFilterById(id).placeholder"
       />
+      <StatusFilter
+        v-if="getFilterById(id).component_type === 'statusSelector'"
+        :options="getFilterById(id).options"
+        v-model="selectedStatus"
+      />
     </span>
   </div>
 </template>
 
 <script>
+import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import {
   upsertDatasetFilters,
   getFiltersByDatasetId,
 } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
+
 export default {
   name: "DatasetFiltersComponent",
   props: {
@@ -34,12 +41,22 @@ export default {
       },
     },
   },
+  data: () => {
+    return {
+      selectedStatus: null,
+    };
+  },
   computed: {
     filtersFromVuex() {
       return getFiltersByDatasetId(
         this.datasetId,
         this.orderBy?.orderFilterBy,
         this.orderBy?.ascendent
+      );
+    },
+    sortedFiltersValue() {
+      return Object.values(this.filters).sort((a, b) =>
+        a.order > b.order ? -1 : 1
       );
     },
   },
@@ -52,7 +69,30 @@ export default {
         order: 0,
         placeholder: "Introduce your query",
       },
+      statusSelector: {
+        id: "statusSelector",
+        name: "Status Selector",
+        componentType: "statusSelector",
+        order: 1,
+        options: [
+          {
+            id: "pending",
+            name: "Pending",
+          },
+          {
+            id: "submitted",
+            name: "Submitted",
+          },
+          {
+            id: "discarded",
+            name: "Discarded",
+          },
+        ],
+      },
     };
+
+    this.selectedStatus =
+      this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
     const filterValues = Object.values(this.filters);
     const formattedFilters = this.factoryFiltersForOrm(filterValues);
     upsertDatasetFilters(formattedFilters);
@@ -103,8 +143,5 @@ export default {
   gap: $base-space * 2;
   align-items: center;
   padding: $base-space * 2 0;
-  &__component {
-    flex: 1;
-  }
 }
 </style>

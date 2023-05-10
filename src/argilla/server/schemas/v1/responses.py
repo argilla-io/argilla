@@ -13,17 +13,26 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing_extensions import Annotated, Literal
 
 from argilla.server.models import ResponseStatus
 
 
+class ResponseValue(BaseModel):
+    value: Any
+
+
+class ResponseValueUpdate(BaseModel):
+    value: Any
+
+
 class Response(BaseModel):
     id: UUID
-    values: Dict[str, Any]
+    values: Optional[Dict[str, ResponseValue]]
     status: ResponseStatus
     record_id: UUID
     user_id: UUID
@@ -34,5 +43,14 @@ class Response(BaseModel):
         orm_mode = True
 
 
-class ResponseUpdate(BaseModel):
-    values: Dict[str, Any]
+class SubmittedResponseUpdate(BaseModel):
+    values: Dict[str, ResponseValueUpdate]
+    status: Literal[ResponseStatus.submitted]
+
+
+class DiscardedResponseUpdate(BaseModel):
+    values: Optional[Dict[str, ResponseValueUpdate]]
+    status: Literal[ResponseStatus.discarded]
+
+
+ResponseUpdate = Annotated[Union[SubmittedResponseUpdate, DiscardedResponseUpdate], Field(discriminator="status")]

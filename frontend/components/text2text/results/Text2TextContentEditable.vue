@@ -14,7 +14,8 @@
           @focus="setFocus(true)"
           @blur="setFocus(false)"
           @keydown.shift.enter.exact="looseFocus"
-          @keydown.shift.delete.exact="looseFocus"
+          @keydown.shift.backspace.exact="looseFocus"
+          @keydown.ctrl.space.exact="looseFocus"
           @keydown.arrow-right.stop=""
           @keydown.arrow-left.stop=""
           @keydown.delete.exact.stop=""
@@ -129,7 +130,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$marginRight: 200px;
 [contenteditable="true"] {
   padding: 0.6em;
   outline: none;
@@ -147,7 +147,6 @@ $marginRight: 200px;
   &__edition-area {
     position: relative;
     width: 100%;
-    margin-right: $marginRight;
     span {
       position: absolute;
       top: 100%;
@@ -162,9 +161,11 @@ $marginRight: 200px;
     display: inline-block;
     width: 100%;
     min-height: 30px;
+    height: 100%;
     color: $black-87;
     white-space: pre-wrap;
     margin: 0;
+    word-break: break-word;
     font-style: italic;
     &.--edited-text {
       font-style: normal;

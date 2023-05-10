@@ -5,12 +5,13 @@
     <div class="pagination__buttons">
       <BaseButton
         class="pagination__button"
-        @click="onClickPrev"
+        ref="prevButton"
+        @click="onPaginate(onClickPrev)"
         :disabled="currentPage === 1"
-        ><svgicon name="chevron-left" width="8" height="8" />{{
-          prevButtonMessage
-        }}</BaseButton
       >
+        <svgicon name="chevron-left" width="8" height="8" />
+        {{ prevButtonMessage }}
+      </BaseButton>
 
       <div class="pagination__page-number-area" v-if="showPageNumber">
         <BaseButton
@@ -19,17 +20,20 @@
           class="pagination__button"
           @click="onClickNumber(page)"
           :disabled="isCurrentPage(page)"
-          >{{ page }}</BaseButton
         >
+          {{ page }}
+        </BaseButton>
       </div>
 
       <BaseButton
         class="pagination__button"
-        @click="onClickNext"
+        ref="nextButton"
+        @click="onPaginate(onClickNext)"
         :disabled="currentPage >= totalPages"
-        >{{ nextButtonMessage
-        }}<svgicon name="chevron-right" width="8" height="8"
-      /></BaseButton>
+      >
+        {{ nextButtonMessage }}
+        <svgicon name="chevron-right" width="8" height="8" />
+      </BaseButton>
     </div>
 
     <div class="total-records-area">
@@ -39,6 +43,8 @@
 </template>
 
 <script>
+import { Notification } from "@/models/Notifications";
+
 export default {
   name: "PaginationComponent",
   props: {
@@ -62,13 +68,27 @@ export default {
       type: Boolean,
       default: false,
     },
+    notificationParams: {
+      type: Object | null,
+    },
+    conditionToShowNotificationComponentOnPagination: {
+      type: Function | null,
+    },
   },
   data() {
     return {
-      currentPage: 1,
+      localCurrentPage: 1,
     };
   },
   computed: {
+    currentPage: {
+      get() {
+        return this.localCurrentPage;
+      },
+      set(newCurrentPage) {
+        this.localCurrentPage = +newCurrentPage;
+      },
+    },
     totalPages() {
       return Math.ceil(this.totalItems / this.numberOfItemsByPage);
     },
@@ -77,7 +97,7 @@ export default {
     },
   },
   watch: {
-    currentPage: {
+    localCurrentPage: {
       immediate: true,
       handler(newCurrentPage) {
         this.emitCurrentPage();
@@ -89,23 +109,75 @@ export default {
     this.currentPage = parseFloat(this.$route.query?._page) || 1;
 
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
+
+    this.onBusEventCurrentPage();
   },
   destroyed() {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+    this.$root.$off("current-page");
   },
   methods: {
     onPressKeyboardShortCut({ code }) {
       switch (code) {
         case "ArrowRight": {
-          this.onClickNext();
+          const elem = this.$refs.nextButton.$el;
+          elem.click();
           break;
         }
         case "ArrowLeft": {
-          this.onClickPrev();
+          const elem = this.$refs.prevButton.$el;
+          elem.click();
           break;
         }
         default:
+        // Do nothing => the code is not registered as shortcut
       }
+    },
+    onBusEventCurrentPage() {
+      this.$root.$on("current-page", (currentPage) => {
+        this.currentPage = currentPage;
+      });
+    },
+    onPaginate(eventToFire) {
+      if (this.isNotificationComponentForThisPage()) {
+        const { message, buttonMessage, typeOfToast } = this.notificationParams;
+        this.showNotificationBeforePaginate({
+          eventToFire,
+          message,
+          buttonMessage,
+          typeOfToast,
+        });
+      } else {
+        eventToFire();
+      }
+    },
+    isNotificationComponentForThisPage() {
+      if (
+        this.notificationParams &&
+        this.conditionToShowNotificationComponentOnPagination
+      ) {
+        const showNotification =
+          this.conditionToShowNotificationComponentOnPagination();
+
+        return showNotification;
+      }
+      return false;
+    },
+    showNotificationBeforePaginate({
+      eventToFire,
+      message,
+      buttonMessage,
+      typeOfToast,
+    }) {
+      Notification.dispatch("notify", {
+        message: message ?? "",
+        numberOfChars: 20000,
+        type: typeOfToast ?? "warning",
+        buttonText: buttonMessage ?? "",
+        async onClick() {
+          eventToFire();
+        },
+      });
     },
     onClickPrev() {
       this.currentPage > 1 && this.currentPage--;
@@ -120,12 +192,12 @@ export default {
       this.$emit("on-paginate", this.currentPage);
     },
     isCurrentPage(page) {
-      return +this.currentPage === +page;
+      return this.currentPage === page;
     },
     updateUrlParams(currentPage) {
       this.$router.push({
         path: this.$route.path,
-        query: { _page: currentPage },
+        query: { ...this.$route.query, _page: currentPage },
       });
     },
   },

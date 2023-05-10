@@ -24,6 +24,7 @@
 
 <script>
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
+import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import {
   upsertFeedbackDataset,
   getFeedbackDatasetNameById,
@@ -83,7 +84,20 @@ export default {
       this.manageErrorIfFetchNotWorking(err);
     }
   },
+  created() {
+    this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
+  },
   methods: {
+    checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
+      this.$route.query?._status ??
+        this.$router.push({
+          query: {
+            ...this.$route.query,
+            _page: 1,
+            _status: RECORD_STATUS.PENDING.toLowerCase(),
+          },
+        });
+    },
     async getDatasetInfo(datasetId) {
       try {
         const { data } = await this.$axios.get(`/v1/datasets/${datasetId}`);

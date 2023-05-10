@@ -22,6 +22,7 @@ from sqlalchemy import JSON, ForeignKey, Text, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
+from argilla.server.models import Question
 
 _USER_API_KEY_BYTES_LENGTH = 80
 
@@ -38,13 +39,9 @@ class FieldType(str, Enum):
     text = "text"
 
 
-class QuestionType(str, Enum):
-    text = "text"
-    rating = "rating"
-
-
 class ResponseStatus(str, Enum):
     submitted = "submitted"
+    discarded = "discarded"
 
 
 class DatasetStatus(str, Enum):
@@ -80,35 +77,11 @@ class Field(Base):
         )
 
 
-class Question(Base):
-    __tablename__ = "questions"
-
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    name: Mapped[str]
-    title: Mapped[str] = mapped_column(Text)
-    description: Mapped[str] = mapped_column(Text)
-    required: Mapped[bool] = mapped_column(default=False)
-    settings: Mapped[dict] = mapped_column(JSON, default={})
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
-
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
-
-    dataset: Mapped["Dataset"] = relationship(back_populates="questions")
-
-    def __repr__(self):
-        return (
-            f"Question(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
-            f"dataset_id={str(self.dataset_id)!r}, "
-            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
-        )
-
-
 class Response(Base):
     __tablename__ = "responses"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    values: Mapped[dict] = mapped_column(JSON)
+    values: Mapped[Optional[dict]] = mapped_column(JSON)
     status: Mapped[ResponseStatus] = mapped_column(default=ResponseStatus.submitted)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
