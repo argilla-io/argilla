@@ -24,7 +24,7 @@ from argilla.client.sdk.commons.models import (
     HTTPValidationError,
     Response,
 )
-from argilla.client.sdk.datasets.v1.models import (
+from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackRecordsModel,
 )

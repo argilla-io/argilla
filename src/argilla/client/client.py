@@ -58,11 +58,6 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
-from argilla.client.sdk.datasets.v1 import api as datasets_api_v1
-from argilla.client.sdk.datasets.v1.models import (
-    FeedbackDatasetModel,
-    FeedbackRecordsModel,
-)
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
 from argilla.client.sdk.text2text.models import (
@@ -91,6 +86,11 @@ from argilla.client.sdk.token_classification.models import (
 )
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import User
+from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.datasets.models import (
+    FeedbackDatasetModel,
+    FeedbackRecordsModel,
+)
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.utils import setup_loop_in_thread

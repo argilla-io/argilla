@@ -30,7 +30,7 @@ import argilla as rg
 
 if TYPE_CHECKING:
     from argilla.client.api import Argilla
-    from argilla.client.sdk.datasets.v1.models import (
+    from argilla.client.sdk.v1.datasets.models import (
         FeedbackDatasetModel,
         FeedbackItemModel,
     )
