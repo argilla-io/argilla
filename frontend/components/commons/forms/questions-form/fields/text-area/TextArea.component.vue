@@ -9,6 +9,7 @@
 
       <BaseIconWithBadge
         class="icon-info"
+        v-if="isIcon"
         icon="info"
         :id="`${title}TextArea`"
         :show-badge="false"
@@ -65,7 +66,7 @@ export default {
     },
     isIcon: {
       type: Boolean,
-      default: false,
+      default: () => false,
     },
     tooltipMessage: {
       type: String,

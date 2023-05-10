@@ -9,6 +9,7 @@
 
       <BaseIconWithBadge
         class="icon-info"
+        v-if="isIcon"
         icon="info"
         :id="`${title}MonoSelection`"
         :show-badge="false"
