@@ -19,6 +19,7 @@ import { Database } from "@vuex-orm/core";
 
 import { FeedbackDataset } from "@/models/feedback-task-model/feedback-dataset/FeedbackDataset.model";
 import { DatasetQuestion } from "@/models/feedback-task-model/dataset-question/DatasetQuestion.model";
+import { DatasetField } from "@/models/feedback-task-model/dataset-field/DatasetField.model";
 import { DatasetFilter } from "@/models/feedback-task-model/dataset-filter/DatasetFilter.model";
 import { Record } from "@/models/feedback-task-model/record/Record.model";
 import { RecordField } from "@/models/feedback-task-model/record-field/RecordField.model";
@@ -47,6 +48,7 @@ const database = new Database();
 
 database.register(FeedbackDataset);
 database.register(DatasetQuestion);
+database.register(DatasetField);
 database.register(DatasetFilter);
 database.register(Record);
 database.register(RecordField);
