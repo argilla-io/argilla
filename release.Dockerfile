@@ -14,7 +14,11 @@ COPY scripts/start_argilla_server.sh /
 # Copying argilla distribution files
 COPY dist/*.whl /packages/
 
-RUN chmod +x /start_argilla_server.sh && \
+RUN apt-get update && \
+    apt-get install -y python-dev libpq-dev gcc && \
+    pip install psycopg2 && \
+    apt-get remove -y python-dev libpq-dev gcc && \
+    chmod +x /start_argilla_server.sh && \
     for wheel in /packages/*.whl; do pip install "$wheel"[server]; done && \
     rm -rf /packages
 

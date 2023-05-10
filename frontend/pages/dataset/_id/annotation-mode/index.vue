@@ -2,23 +2,29 @@
   <HeaderAndTopAndOneColumn v-if="!$fetchState.pending && !$fetchState.error">
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
-        v-if="datasetName && workspace"
-        :datasetName="datasetName"
-        :workspace="workspace"
+        :key="datasetName && workspace"
+        :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
       />
     </template>
     <template v-slot:sidebar-right>
       <SidebarFeedbackTaskComponent />
     </template>
+    <template v-slot:top>
+      <DatasetFiltersComponent :datasetId="datasetId" />
+    </template>
     <template v-slot:center>
       <CenterFeedbackTaskContent :datasetId="datasetId" />
+    </template>
+    <template v-slot:footer>
+      <PaginationFeedbackTaskComponent :datasetId="datasetId" />
     </template>
   </HeaderAndTopAndOneColumn>
 </template>
 
 <script>
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
+import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import {
   upsertFeedbackDataset,
   getFeedbackDatasetNameById,
@@ -78,7 +84,20 @@ export default {
       this.manageErrorIfFetchNotWorking(err);
     }
   },
+  created() {
+    this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
+  },
   methods: {
+    checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
+      this.$route.query?._status ??
+        this.$router.push({
+          query: {
+            ...this.$route.query,
+            _page: 1,
+            _status: RECORD_STATUS.PENDING.toLowerCase(),
+          },
+        });
+    },
     async getDatasetInfo(datasetId) {
       try {
         const { data } = await this.$axios.get(`/v1/datasets/${datasetId}`);
@@ -92,13 +111,11 @@ export default {
     },
     async getWorkspaceInfo(workspaceId) {
       try {
-        const { data: responseWorkspaces } = await this.$axios.get(
-          `/workspaces`
+        const { data: responseWorkspace } = await this.$axios.get(
+          `/v1/workspaces/${workspaceId}`
         );
 
-        const { name } = responseWorkspaces?.find(
-          (workspace) => workspace.id === workspaceId
-        ) || { name: null };
+        const { name } = responseWorkspace || { name: null };
 
         return name;
       } catch (err) {

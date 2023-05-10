@@ -21,6 +21,7 @@ from argilla.server.errors import ForbiddenOperationError
 from argilla.server.models import (
     Dataset,
     Record,
+    Response,
     User,
     UserRole,
     Workspace,
@@ -151,7 +152,11 @@ class DatasetPolicyV1:
         return actor.is_admin
 
     @classmethod
-    def create_annotation(cls, actor: User) -> bool:
+    def create_field(cls, actor: User) -> bool:
+        return actor.is_admin
+
+    @classmethod
+    def create_question(cls, actor: User) -> bool:
         return actor.is_admin
 
     @classmethod
@@ -167,7 +172,13 @@ class DatasetPolicyV1:
         return actor.is_admin
 
 
-class AnnotationPolicyV1:
+class FieldPolicyV1:
+    @classmethod
+    def delete(cls, actor: User) -> bool:
+        return actor.is_admin
+
+
+class QuestionPolicyV1:
     @classmethod
     def delete(cls, actor: User) -> bool:
         return actor.is_admin
@@ -186,6 +197,16 @@ class RecordPolicyV1:
                 )
             )
         )
+
+
+class ResponsePolicyV1:
+    @classmethod
+    def update(cls, response: Response) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.id == response.user_id
+
+    @classmethod
+    def delete(cls, response: Response) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.id == response.user_id
 
 
 class DatasetSettingsPolicy:

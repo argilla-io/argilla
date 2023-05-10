@@ -22,8 +22,8 @@ from sqlalchemy.orm import Session
 from tests.conftest import is_running_elasticsearch
 from tests.factories import (
     DatasetFactory,
-    RatingAnnotationFactory,
-    TextAnnotationFactory,
+    RatingQuestionFactory,
+    TextQuestionFactory,
 )
 
 
@@ -51,7 +51,7 @@ class TestSuiteElasticSearchEngine:
         argnames=("text_ann_size", "rating_ann_size"),
         argvalues=[(random.randint(1, 9), random.randint(1, 9)) for _ in range(1, 5)],
     )
-    async def test_create_index_for_dataset_with_annotations(
+    async def test_create_index_for_dataset_with_questions(
         self,
         search_engine: ElasticSearchEngine,
         elasticsearch: Elasticsearch,
@@ -59,10 +59,10 @@ class TestSuiteElasticSearchEngine:
         text_ann_size: int,
         rating_ann_size: int,
     ):
-        text_annotations = TextAnnotationFactory.create_batch(size=text_ann_size)
-        rating_annotations = RatingAnnotationFactory.create_batch(size=rating_ann_size)
+        text_questions = TextQuestionFactory.create_batch(size=text_ann_size)
+        rating_questions = RatingQuestionFactory.create_batch(size=rating_ann_size)
 
-        dataset = DatasetFactory.create(annotations=text_annotations + rating_annotations)
+        dataset = DatasetFactory.create(questions=text_questions + rating_questions)
 
         await search_engine.create_index(dataset)
 
@@ -79,24 +79,24 @@ class TestSuiteElasticSearchEngine:
             "dynamic_templates": [
                 *[
                     config
-                    for annotation in text_annotations
+                    for question in text_questions
                     for config in [
                         {
-                            f"{annotation.name}_responses": {
+                            f"{question.name}_responses": {
                                 "mapping": {"type": "text"},
-                                "path_match": f"responses.*.{annotation.name}",
+                                "path_match": f"responses.*.{question.name}",
                             }
                         },
                     ]
                 ],
                 *[
                     config
-                    for annotation in rating_annotations
+                    for question in rating_questions
                     for config in [
                         {
-                            f"{annotation.name}_responses": {
+                            f"{question.name}_responses": {
                                 "mapping": {"type": "integer"},
-                                "path_match": f"responses.*.{annotation.name}",
+                                "path_match": f"responses.*.{question.name}",
                             }
                         },
                     ]

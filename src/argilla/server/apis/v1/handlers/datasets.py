@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -24,12 +24,20 @@ from argilla.server.elasticsearch import ElasticSearchEngine, get_search_engine
 from argilla.server.models import User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
-    Annotation,
-    AnnotationCreate,
     Dataset,
     DatasetCreate,
+    Datasets,
+    Field,
+    FieldCreate,
+    Fields,
+    Metrics,
+    Question,
+    QuestionCreate,
+    Questions,
+    RecordInclude,
     Records,
     RecordsCreate,
+    ResponseStatusFilter,
 )
 from argilla.server.security import auth
 
@@ -50,8 +58,8 @@ def _get_dataset(db: Session, dataset_id: UUID):
     return dataset
 
 
-@router.get("/datasets", response_model=List[Dataset])
-def list_datasets(
+@router.get("/me/datasets", response_model=Datasets)
+def list_current_user_datasets(
     *,
     db: Session = Depends(get_db),
     current_user: User = Security(auth.get_current_user),
@@ -59,13 +67,13 @@ def list_datasets(
     authorize(current_user, DatasetPolicyV1.list)
 
     if current_user.is_admin:
-        return datasets.list_datasets(db)
+        return Datasets(items=datasets.list_datasets(db))
     else:
-        return current_user.datasets
+        return Datasets(items=current_user.datasets)
 
 
-@router.get("/datasets/{dataset_id}/annotations", response_model=List[Annotation])
-def list_dataset_annotations(
+@router.get("/datasets/{dataset_id}/fields", response_model=Fields)
+def list_dataset_fields(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
@@ -75,14 +83,30 @@ def list_dataset_annotations(
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    return dataset.annotations
+    return Fields(items=dataset.fields)
 
 
-@router.get("/datasets/{dataset_id}/records", response_model=Records)
-def list_dataset_records(
+@router.get("/datasets/{dataset_id}/questions", response_model=Questions)
+def list_dataset_questions(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return Questions(items=dataset.questions)
+
+
+@router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
+def list_current_user_dataset_records(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    include: Optional[List[RecordInclude]] = Query([]),
+    response_status: Optional[ResponseStatusFilter] = Query(None),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -91,7 +115,20 @@ def list_dataset_records(
 
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    return Records(items=datasets.list_records(db, dataset, offset=offset, limit=limit))
+    records = datasets.list_records_by_dataset_id_and_user_id(
+        db, dataset_id, current_user.id, include=include, response_status=response_status, offset=offset, limit=limit
+    )
+
+    if response_status == ResponseStatusFilter.missing:
+        total = datasets.count_records_with_missing_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id)
+    elif response_status == ResponseStatusFilter.submitted:
+        total = datasets.count_submitted_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id)
+    elif response_status == ResponseStatusFilter.discarded:
+        total = datasets.count_discarded_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id)
+    else:
+        total = datasets.count_records_by_dataset_id(db, dataset_id)
+
+    return Records(items=[record.__dict__ for record in records], total=total)
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
@@ -106,6 +143,29 @@ def get_dataset(
     authorize(current_user, DatasetPolicyV1.get(dataset))
 
     return dataset
+
+
+@router.get("/me/datasets/{dataset_id}/metrics", response_model=Metrics)
+def get_current_user_dataset_metrics(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return {
+        "records": {
+            "count": datasets.count_records_by_dataset_id(db, dataset_id),
+        },
+        "responses": {
+            "count": datasets.count_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+            "submitted": datasets.count_submitted_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+            "discarded": datasets.count_discarded_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+        },
+    }
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=Dataset)
@@ -126,28 +186,54 @@ def create_dataset(
     return datasets.create_dataset(db, dataset_create)
 
 
-@router.post("/datasets/{dataset_id}/annotations", status_code=status.HTTP_201_CREATED, response_model=Annotation)
-def create_dataset_annotation(
+@router.post("/datasets/{dataset_id}/fields", status_code=status.HTTP_201_CREATED, response_model=Field)
+def create_dataset_field(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
-    annotation_create: AnnotationCreate,
+    field_create: FieldCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.create_annotation)
+    authorize(current_user, DatasetPolicyV1.create_field)
 
     dataset = _get_dataset(db, dataset_id)
 
-    if datasets.get_annotation_by_name_and_dataset_id(db, annotation_create.name, dataset_id):
+    if datasets.get_field_by_name_and_dataset_id(db, field_create.name, dataset_id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Annotation with name `{annotation_create.name}` already exists for dataset with id `{dataset_id}`",
+            detail=f"Field with name `{field_create.name}` already exists for dataset with id `{dataset_id}`",
         )
 
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        return datasets.create_annotation(db, dataset, annotation_create)
+        return datasets.create_field(db, dataset, field_create)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.post("/datasets/{dataset_id}/questions", status_code=status.HTTP_201_CREATED, response_model=Question)
+def create_dataset_question(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    question_create: QuestionCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, DatasetPolicyV1.create_question)
+
+    dataset = _get_dataset(db, dataset_id)
+
+    if datasets.get_question_by_name_and_dataset_id(db, question_create.name, dataset_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Question with name `{question_create.name}` already exists for dataset with id `{dataset_id}`",
+        )
+
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        return datasets.create_question(db, dataset, question_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
@@ -166,7 +252,7 @@ async def create_dataset_records(
     dataset = _get_dataset(db, dataset_id)
 
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
         await datasets.create_records(
             db, search_engine, dataset=dataset, user=current_user, records_create=records_create

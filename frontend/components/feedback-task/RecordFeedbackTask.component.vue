@@ -1,25 +1,32 @@
 <template>
   <div class="record">
-    <div
-      class="item"
-      v-for="{ id, title, text } in record.record_fields"
-      :key="id"
-    >
-      <div class="title-area --body1">
-        <span v-text="title" />
-      </div>
-      <div class="content" v-text="text" />
+    <StatusTag class="record__status" :title="recordStatus" />
+    <div v-for="{ id, title, field_text, component_type } in fields" :key="id">
+      <TextFieldComponent
+        v-if="component_type === FIELD_COMPONENT_TYPE.TEXT_FIELD"
+        :title="title"
+        :fieldText="field_text"
+      />
     </div>
   </div>
 </template>
 
 <script>
+import { FIELD_COMPONENT_TYPE } from "./feedbackTask.properties";
+
 export default {
   props: {
-    record: {
-      type: Object,
+    recordStatus: {
+      type: String,
       required: true,
     },
+    fields: {
+      type: Array,
+      required: true,
+    },
+  },
+  created() {
+    this.FIELD_COMPONENT_TYPE = FIELD_COMPONENT_TYPE;
   },
 };
 </script>
@@ -29,24 +36,16 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: $base-space;
-  padding: 2 * $base-space 4 * $base-space 2 * $base-space 4 * $base-space;
-  background: #fff;
-  border: 1px solid #e6e6e6;
-  border-radius: 8px;
-}
-
-.item {
-  display: flex;
-  flex-direction: column;
-  padding: 2 * $base-space;
-  background: #f5f5f5;
-  border-radius: 8px;
-  .title-area {
-    display: flex;
-    align-items: center;
-    gap: $base-space;
-    color: rgba(0, 0, 0, 0.37);
+  height: 100%;
+  overflow: auto;
+  gap: $base-space * 2;
+  padding: $base-space * 2;
+  background: palette(white);
+  border: 1px solid palette(grey, 600);
+  border-radius: $border-radius;
+  &__status {
+    display: inline-flex;
+    margin-right: auto;
   }
 }
 </style>

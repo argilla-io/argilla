@@ -1,23 +1,34 @@
 <template>
-  <div class="wrapper">
-    <RecordFeedbackTaskComponent v-if="record" :record="record" />
-    <QuestionsFormComponent
-      v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
-      :initialInputs="questionsWithRecordAnswers"
-    />
-  </div>
+  <BaseLoading v-if="$fetchState.pending" />
+  <RecordFeedbackTaskAndQuestionnaireContent
+    :key="rerenderChildren"
+    v-else-if="!$fetchState.pending"
+    :datasetId="datasetId"
+    :recordOffset="recordOffset"
+    :recordStatusToFilterWith="recordStatusFilteringValue"
+  />
 </template>
 
 <script>
+import { Notification } from "@/models/Notifications";
+import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
+import { upsertDatasetFields } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
+import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import {
-  upsertDatasetQuestions,
-  getQuestionsByDatasetId,
-} from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import {
-  upsertRecords,
-  getRecordWithFieldsByDatasetId,
+  RECORD_STATUS,
+  deleteAllRecords,
+  getRecordStatusByDatasetIdAndRecordIndex,
 } from "@/models/feedback-task-model/record/record.queries";
-import { getRecordResponsesByRecordId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import {
+  COMPONENT_TYPE,
+  CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API,
+  CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API,
+} from "@/components/feedback-task/feedbackTask.properties";
+
+const TYPE_OF_FEEDBACK = Object.freeze({
+  ERROR_FETCHING_QUESTIONS: "ERROR_FETCHING_QUESTIONS",
+  ERROR_FETCHING_FIELDS: "ERROR_FETCHING_FIELDS",
+});
 
 export default {
   name: "CenterFeedbackTaskContent",
@@ -26,347 +37,290 @@ export default {
       type: String,
       required: true,
     },
-    orderBy: {
-      type: Object,
-      default: () => {
-        return { orderQuestionBy: "order", ascendent: true };
-      },
-    },
   },
   data() {
     return {
+      currentPage: 1,
       recordOffset: 0,
+      rerenderChildren: 0,
+      areResponsesUntouched: true,
     };
   },
-  created() {
-    // TODO - INITIALS records and inputs, will be replaced by API values
-    const records = [
-      {
-        id: "record_1",
-        recordStatus: "discard",
-        responses: [
-          {
-            record_id: "record_1",
-            question_id: "id_5",
-            options: [{ id: 1, value: true, text: "1" }],
-          },
-          {
-            record_id: "record_1",
-            question_id: "id_6",
-            options: [{ id: "id_6-5", value: true, text: "5" }],
-          },
-        ],
-        fields: [
-          {
-            id: "field_1",
-            title: "Input",
-            text: `
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Dolorum ratione quas quis eveniet harum cum, earum a facere
-            voluptate fugit nostrum sequi facilis incidunt debitis unde?
-            Eos rem debitis velit? Officia magni odit possimus quis nisi.
-            Dolore, eaque eligendi! Beatae quos debitis soluta distinctio
-            qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium
-            explicabo ab, pariatur id sapiente tenetur.
-            `,
-          },
-          {
-            id: "field_2",
-            title: "Output",
-            text: `
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Vitae cupiditate fugit quos officiis expedita, deleniti libero
-            inventore fugiat perferendis dolor optio praesentium enim molestiae
-            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
-            reprehenderit non distinctio repellat adipisci laborum, fugit sint
-            labore nulla tempore quam eos iste asperiores eius laudantium vel
-            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
-            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
-            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
-            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
-            delectus similique! Commodi, a. Totam illo iure iste voluptate?
-            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
-            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
-            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
-            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
-            architecto necessitatibus accusamus nesciunt exercitationem neque
-            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
-            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
-            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
-            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
-            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
-            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
-            quaerat impedit animi porro saepe ipsa molestiae quibusdam
-            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
-            eligendi voluptate.`,
-          },
-        ],
-      },
-      {
-        id: "record_2",
-        responses: [
-          {
-            record_id: "record_2",
-            question_id: "id_6",
-            options: [{ id: "id_6-5", value: true, text: "5" }],
-          },
-          {
-            record_id: "record_2",
-            question_id: "id_7",
-            options: [
-              {
-                id: "patati",
-                value: "I m blue daboudi dabouda",
-                text: "I m blue daboudi dabouda",
-              },
-            ],
-          },
-        ],
-        fields: [
-          {
-            id: "field_3",
-            title: "Input",
-            text: `
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Dolorum ratione quas quis eveniet harum cum, earum a facere
-            voluptate fugit nostrum sequi facilis incidunt debitis unde?
-            Eos rem debitis velit? Officia magni odit possimus quis nisi.
-            Dolore, eaque eligendi! Beatae quos debitis soluta distinctio
-            qui ex sint nesciunt non quidem laboriosam. Veniam ex accusantium
-            explicabo ab, pariatur id sapiente tenetur.
-            `,
-          },
-          {
-            id: "field_4",
-            title: "Output",
-            text: `
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Vitae cupiditate fugit quos officiis expedita, deleniti libero
-            inventore fugiat perferendis dolor optio praesentium enim molestiae
-            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
-            reprehenderit non distinctio repellat adipisci laborum, fugit sint
-            labore nulla tempore quam eos iste asperiores eius laudantium vel
-            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
-            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
-            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
-            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
-            delectus similique! Commodi, a. Totam illo iure iste voluptate?
-            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
-            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
-            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
-            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
-            architecto necessitatibus accusamus nesciunt exercitationem neque
-            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
-            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
-            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
-            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
-            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
-            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
-            quaerat impedit animi porro saepe ipsa molestiae quibusdam
-            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
-            eligendi voluptate.`,
-          },
-          {
-            id: "field_5",
-            title: "Second options",
-            text: `
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Vitae cupiditate fugit quos officiis expedita, deleniti libero
-            inventore fugiat perferendis dolor optio praesentium enim molestiae
-            molestias. Ipsam perferendis aperiam perspiciatis assumenda. Numquam
-            reprehenderit non distinctio repellat adipisci laborum, fugit sint
-            labore nulla tempore quam eos iste asperiores eius laudantium vel
-            similique officiis sunt vero beatae magni ab dicta! Culpa, qui
-            dolore. Quaerat, repellendus deserunt doloribus laudantium ducimus
-            atque quia rerum ullam. Sit veritatis, quas id sed culpa deleniti
-            officiis ipsa laudantium, eos qui pariatur iure facere, sequi
-            delectus similique! Commodi, a. Totam illo iure iste voluptate?
-            Veritatis blanditiis est rem? Ipsam consequatur incidunt obcaecati
-            distinctio qui beatae quaerat, ullam sit voluptas facere repellat
-            accusamus dolorem iure aliquam fugit veritatis nesciunt modi.
-            Dolore corrupti assumenda tenetur soluta et? Laborum nemo repellendus
-            architecto necessitatibus accusamus nesciunt exercitationem neque
-            dicta! Dolore sed atque nam sit ea earum quia minima, veniam natus
-            non hic necessitatibus. Quibusdam repudiandae odit eaque enim
-            voluptatem fugiat hic quidem voluptate, sint id quae a? Perferendis
-            ad suscipit reiciendis dolor omnis corrupti quos porro aliquid
-            recusandae. Ipsam doloribus esse debitis libero. Quod corporis
-            eveniet cupiditate aliquid, iure sed dignissimos repellat architecto
-            quaerat impedit animi porro saepe ipsa molestiae quibusdam
-            suscipit nam. Fuga quo sunt itaque corrupti atque dolores fugit,
-            eligendi voluptate.`,
-          },
-        ],
-      },
-    ];
-    const inputs = [
-      // {
-      //   id: "id_1",
-      //   question:
-      //     "Are the instruction and input adequate for the capabilities of this model?",
-      //   options: [
-      //     { id: 1, value: true, text: "Yes" },
-      //     { id: 2, value: false, text: "No" },
-      //   ],
-      //   default: null,
-      //   required: true,
-      //   componentType: "SINGLE_LABEL",
-      //   tooltipMessage: null,
-      // },
-      {
-        id: "id_5",
-        name: "nameOfQuestion_id_5",
-        question:
-          "Rate the helpfulness of the output (1-not helpful, 7-very helpful):",
-        options: [
-          { id: 1, value: false, text: "1" },
-          { id: 2, value: false, text: "2" },
-          { id: 3, value: false, text: "3" },
-          { id: 4, value: false, text: "4" },
-          { id: 5, value: false, text: "5" },
-          { id: 6, value: false, text: "6" },
-          { id: 7, value: false, text: "7" },
-        ],
-        required: true,
-        componentType: "RATING",
-      },
-      {
-        id: "id_6",
-        name: "nameOfQuestion_id_6",
-        question:
-          "Rate the harmlessness of the output (1-very harmful, 5-harmless):",
-        options: [
-          { id: "id_6-1", value: false, text: "1" },
-          { id: "id_6-2", value: false, text: "2" },
-          { id: "id_6-3", value: false, text: "3" },
-          { id: "id_6-4", value: false, text: "4" },
-          { id: "id_6-5", value: false, text: "5" },
-        ],
-        required: false,
-        tooltipMessage: "This is a tooltipz",
-        componentType: "RATING",
-      },
-      {
-        id: "id_7",
-         name:"nameOfQuestion_id_7",
-        question: "Comment",
-        placeholder: "this is the placeholder",
-        options: [
-          {
-            id: "patati",
-            text: "",
-            value: "",
-          },
-        ],
-        default: null,
-        required: true,
-        tooltipMessage: "This is a tooltip",
-        componentType: "FREE_TEXT",
-      },
-    ];
+  async fetch() {
+    // FETCH questions AND fields by dataset
+    const { items: questions } = await this.getQuestions(this.datasetId);
+    const { items: fields } = await this.getFields(this.datasetId);
 
-    // FORMAT records and questions in good orm shapes
-    const formattedRecords = this.factoryRecordsForOrm(records);
-    const formattedQuestions = this.factoryQuestionsForOrm(inputs);
+    // FORMAT questions AND fields to have the shape of ORM
+    const formattedQuestionsForOrm = this.factoryQuestionsForOrm(questions);
+    const formattedFieldsForOrm = this.factoryFieldsForOrm(fields);
 
-    // UPSERT records and questions in ORM
-    upsertRecords(formattedRecords);
-    upsertDatasetQuestions(formattedQuestions);
+    // UPSERT formatted questions in ORM
+    await upsertDatasetQuestions(formattedQuestionsForOrm);
+    await upsertDatasetFields(formattedFieldsForOrm);
 
-    // RETRIEVES records from ORM
-    this.record = getRecordWithFieldsByDatasetId(
-      this.datasetId,
-      1,
-      this.recordOffset
-    );
-
-    this.questionsWithRecordAnswers = null;
-    if (this.record) {
-      this.recordResponses = getRecordResponsesByRecordId(this.record.id);
-
-      // COMPUTE QUESTIONS
-      // INIT questions with record response answers
-      this.questions = getQuestionsByDatasetId(
+    this.onBusEventCurrentPage();
+    this.onBusEventRecordIndexToGo();
+    this.onBusEventAreResponsesUntouched();
+  },
+  computed: {
+    totalRecords() {
+      return getTotalRecordByDatasetId(this.datasetId);
+    },
+    recordStatusFilteringValue() {
+      const { _status: recordStatus } = this.$route.query;
+      return recordStatus ?? RECORD_STATUS.PENDING.toLowerCase();
+    },
+    recordStatus() {
+      return getRecordStatusByDatasetIdAndRecordIndex(
         this.datasetId,
-        this.orderBy?.orderQuestionsBy,
-        this.orderBy?.ascendent
+        this.recordOffset
       );
-
-      // COMPUTE questions with responses from record
-      const newOptionsByQuestion = this.factoryNewOptionsByQuestion();
-      this.questionsWithRecordAnswers =
-        this.factoryQuestionsWithRecordAnswer(newOptionsByQuestion);
-    }
+    },
+  },
+  watch: {
+    async recordStatusFilteringValue(newStatus, oldStatus) {
+      // NOTE 1 - each time the filter change, clean records orm && rerender the children component
+      !this.areResponsesUntouched ||
+        (await this.goToFirstPageAndRerenderChildren());
+      // NOTE 2 - if responses are untouched, toast is not shown. Else, toast is shown
+      this.checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(newStatus) ||
+        this.showNotificationBeforeChangeStatus({
+          eventToFireOnClick: async () =>
+            this.goToFirstPageAndRerenderChildren(),
+          eventToFireOnClose: () =>
+            this.stayOnCurrentPageAndReplaceStatusByOldStatus(oldStatus),
+          message: this.toastMessage,
+          buttonMessage: this.buttonMessage,
+          typeOfToast: this.typeOfToast,
+        });
+    },
+  },
+  created() {
+    this.toastMessage =
+      "Pending actions will be lost when the page is refreshed";
+    this.buttonMessage = "Ok, got it!";
+    this.typeOfToast = "warning";
   },
   methods: {
-    factoryQuestionsWithRecordAnswer(newOptionsByQuestion) {
-      const questionsWithRecordAnswers = this.questions.map((question) => {
-        const newOptions =
-          newOptionsByQuestion.find(
-            (recordResponseByQuestion) =>
-              recordResponseByQuestion.question_id === question.id
-          )?.newOptions || question.options;
-        return { ...question, options: newOptions };
+    showNotificationBeforeChangeStatus({
+      eventToFireOnClick,
+      eventToFireOnClose,
+      message,
+      buttonMessage,
+      typeOfToast,
+    }) {
+      Notification.dispatch("notify", {
+        message: message ?? "",
+        numberOfChars: 20000,
+        type: typeOfToast ?? "warning",
+        buttonText: buttonMessage ?? "",
+        async onClick() {
+          eventToFireOnClick();
+        },
+        async onClose() {
+          eventToFireOnClose();
+        },
       });
-
-      return questionsWithRecordAnswers;
     },
-    factoryNewOptionsByQuestion() {
-      const newOptionsByQuestion = [];
-      this.questions.forEach((question) => {
-        this.recordResponses.forEach((response) => {
-          if (response.question_id === question.id) {
-            const newOptions = question.options.map((output) => {
-              const recordResponseOutputWithSameTextAsInQuestionOutput =
-                response.options.find(
-                  (responseOutput) => responseOutput.id === output.id
-                );
+    stayOnCurrentPageAndReplaceStatusByOldStatus(oldStatus) {
+      // TODO - go to previous status if user click on close button
+      this.updatePageQueryParam("_status", oldStatus);
+    },
+    async goToFirstPageAndRerenderChildren() {
+      await deleteAllRecords();
+      // Go to first page on change filter
+      this.$root.$emit("current-page", 1);
+      this.rerenderChildren++;
+    },
+    onBusEventCurrentPage() {
+      this.$root.$on("current-page", (currentPage) => {
+        this.currentPage = currentPage;
+        this.recordOffset = currentPage - 1;
+      });
+    },
+    onBusEventRecordIndexToGo() {
+      this.$root.$on("go-to-record-index", (recordIndexToGo) => {
+        if (recordIndexToGo >= 0) {
+          // NOTE - recordIndex start at 0 / page start at 1
+          const pageToGo = recordIndexToGo + 1;
 
-              if (recordResponseOutputWithSameTextAsInQuestionOutput) {
-                return recordResponseOutputWithSameTextAsInQuestionOutput;
-              }
-              return output;
-            });
-
-            newOptionsByQuestion.push({ question_id: question.id, newOptions });
+          if (this.currentPage < this.totalRecords) {
+            this.recordOffset = recordIndexToGo;
+            this.currentPage = pageToGo;
+            this.$root.$emit("current-page", this.currentPage);
           }
-        });
+          if (recordIndexToGo < this.totalRecords) {
+            this.updatePageQueryParam("_page", pageToGo);
+          }
+        }
       });
-
-      return newOptionsByQuestion;
     },
-    factoryRecordsForOrm(records) {
-      return records.map((record) => {
-        return {
-          ...record,
-          record_id: record.id,
-          dataset_id: this.datasetId,
-          record_status: record.recordStatus,
-          record_fields: record.fields,
-          record_responses: record.responses,
-        };
+    onBusEventAreResponsesUntouched() {
+      this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
+        this.areResponsesUntouched = areResponsesUntouched;
+      });
+    },
+    updatePageQueryParam(param, value) {
+      this.$router.push({
+        path: this.$route.path,
+        query: { ...this.$route.query, [param]: value },
       });
     },
     factoryQuestionsForOrm(initialQuestions) {
-      return initialQuestions.map((question, index) => {
-        return {
-          ...question,
-          dataset_id: this.datasetId,
-          order: index,
-          component_type: question.componentType,
-          is_required: question.required,
-          tooltip_message: question.tooltipMessage,
-        };
-      });
+      return initialQuestions.map(
+        (
+          {
+            id: questionId,
+            name: questionName,
+            title: questionTitle,
+            required: isRequired,
+            settings: questionSettings,
+          },
+          index
+        ) => {
+          const componentTypeFromBack = questionSettings.type.toLowerCase();
+          const componentType =
+            CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API[
+              componentTypeFromBack
+            ];
+
+          const formattedOptions = this.formatOptionsFromQuestionApi(
+            questionSettings.options,
+            questionName,
+            componentType
+          );
+
+          return {
+            id: questionId,
+            name: questionName,
+            dataset_id: this.datasetId,
+            order: index,
+            question: questionTitle,
+            options: formattedOptions,
+            is_required: isRequired,
+            component_type: componentType,
+            placeholder: questionSettings?.placeholder ?? null,
+            tooltip_message: questionSettings?.tooltip ?? null,
+          };
+        }
+      );
     },
+    factoryFieldsForOrm(initialFields) {
+      return initialFields.map(
+        (
+          {
+            id: fieldId,
+            name: fieldName,
+            title: fieldTitle,
+            required: isRequired,
+            settings: fieldSettings,
+          },
+          index
+        ) => {
+          const componentTypeFromBack =
+            fieldSettings?.type?.toLowerCase() ?? null;
+
+          const componentType = componentTypeFromBack
+            ? CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API[componentTypeFromBack]
+            : null;
+
+          return {
+            id: fieldId,
+            name: fieldName,
+            dataset_id: this.datasetId,
+            order: index,
+            title: fieldTitle,
+            is_required: isRequired,
+            component_type: componentType,
+          };
+        }
+      );
+    },
+    formatOptionsFromQuestionApi(options, questionName, componentType) {
+      // NOTE - the value of the options in questions from API and the value in the DatasetQuestion ORM are different
+      // - the value from the options from the questions in API could be anything (string, number, etc.)
+      // - the value from the options in the DatasetQuestion ORM is a boolean, it the state of the 'checkbox  true (if selected) or false (not selected)
+      // => this is why value is initiate as false for RATING and "" for FREE_TEXT
+
+      let defaultValueByComponent = null;
+      switch (componentType.toUpperCase()) {
+        case COMPONENT_TYPE.FREE_TEXT:
+          defaultValueByComponent = "";
+          break;
+        case COMPONENT_TYPE.RATING:
+          defaultValueByComponent = false;
+          break;
+        case COMPONENT_TYPE.SINGLE_LABEL:
+          defaultValueByComponent = false;
+          break;
+        default:
+          console.log(`the component type ${componentType} is unknown`);
+      }
+
+      if (options) {
+        return options?.map((option) => {
+          const optionText = option.text ?? option.value;
+          const paramObject = {
+            value: defaultValueByComponent,
+            text: optionText,
+            prefixId: questionName,
+            suffixId: option.value,
+          };
+
+          return this.factoryOption(paramObject);
+        });
+      }
+
+      return [
+        this.factoryOption({
+          value: "",
+          prefixId: questionName,
+        }),
+      ];
+    },
+    factoryOption({ value = null, text = "", prefixId, suffixId }) {
+      return {
+        id: `${prefixId}${suffixId ? `_${suffixId}` : ""}`,
+        value,
+        text,
+      };
+    },
+    async getQuestions(datasetId) {
+      try {
+        const { data } = await this.$axios.get(
+          `/v1/datasets/${datasetId}/questions`
+        );
+
+        return data;
+      } catch (err) {
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_QUESTIONS,
+        };
+      }
+    },
+    checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(status) {
+      return (
+        this.areResponsesUntouched || this.recordStatus.toLowerCase() === status
+      );
+    },
+    async getFields(datasetId) {
+      try {
+        const { data } = await this.$axios.get(
+          `/v1/datasets/${datasetId}/fields`
+        );
+
+        return data;
+      } catch (err) {
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_FIELDS,
+        };
+      }
+    },
+  },
+  destroyed() {
+    this.$root.$off("current-page");
+    this.$root.$off("go-to-record-index");
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2 * $base-space;
-}
-</style>

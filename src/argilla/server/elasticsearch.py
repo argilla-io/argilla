@@ -20,7 +20,7 @@ from elasticsearch8 import helpers
 from pydantic import BaseModel
 from pydantic.utils import GetterDict
 
-from argilla.server.models import Annotation, AnnotationType, Dataset, Record
+from argilla.server.models import Dataset, Question, QuestionType
 from argilla.server.settings import settings
 
 
@@ -57,12 +57,12 @@ class ElasticSearchEngine:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
         dynamic_templates = [
             {
-                f"{annotation.name}_responses": {
-                    "path_match": f"responses.*.{annotation.name}",
-                    "mapping": self._field_mapping_for_annotation(annotation),
+                f"{question.name}_responses": {
+                    "path_match": f"responses.*.{question.name}",
+                    "mapping": self._field_mapping_for_question(question),
                 }
             }
-            for annotation in dataset.annotations
+            for question in dataset.question
         ]
 
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
@@ -75,6 +75,18 @@ class ElasticSearchEngine:
 
         index_name = self._index_name_for_dataset(dataset)
         await self.client.indices.create(index=index_name, mappings=mappings)
+
+    def _field_mapping_for_question(self, question: Question):
+        settings_type = question.settings.get("type")
+
+        if settings_type == QuestionType.rating:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
+            return {"type": "integer"}
+        elif settings_type == QuestionType.text:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
+            return {"type": "text"}
+        else:
+            raise ValueError(f"ElasticSearch mappings for Question of type {settings_type} cannot be generated")
 
     async def add_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = self._index_name_for_dataset(dataset)
@@ -101,18 +113,6 @@ class ElasticSearchEngine:
     @staticmethod
     def _index_name_for_dataset(dataset: Dataset):
         return f"rg.{dataset.id}"
-
-    def _field_mapping_for_annotation(self, annotation_task: Annotation):
-        settings_type = annotation_task.settings.get("type")
-
-        if settings_type == AnnotationType.rating:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
-            return {"type": "integer"}
-        elif settings_type == AnnotationType.text:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
-            return {"type": "text"}
-        else:
-            raise ValueError(f"ES mappings for Annotation of type {settings_type} cannot be generated")
 
 
 async def get_search_engine():

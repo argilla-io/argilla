@@ -1,7 +1,7 @@
 import { Model } from "@vuex-orm/core";
 import { RecordField as RecordFieldModel } from "../record-field/RecordField.model";
 import { RecordResponse as RecordResponseModel } from "../record-response/RecordResponse.model";
-
+import { RECORD_STATUS } from "./record.queries";
 class Record extends Model {
   static entity = "records";
 
@@ -9,7 +9,8 @@ class Record extends Model {
     return {
       id: this.uid(),
       dataset_id: this.attr(null),
-      record_status: this.string(null).nullable(),
+      record_status: this.string(RECORD_STATUS.PENDING),
+      record_index: this.number(0),
 
       // relationships
       record_responses: this.hasMany(RecordResponseModel, "record_id"),

@@ -42,13 +42,6 @@ export default {
             action: "change-view-mode",
             relatedMetrics: ["progress", "stats"],
           },
-          {
-            id: "explore",
-            tooltip: "Exploration",
-            icon: "exploration",
-            action: "change-view-mode",
-            relatedMetrics: ["progress", "stats"],
-          },
         ],
       },
       metrics: {
@@ -61,13 +54,6 @@ export default {
             action: "show-metrics",
             type: "expandable",
             component: "FeedbackTaskProgress",
-          },
-          {
-            id: "stats",
-            tooltip: "Stats",
-            icon: "stats",
-            action: "show-metrics",
-            type: "expandable",
           },
         ],
       },
@@ -96,7 +82,7 @@ export default {
           console.log("change-view-mode", info);
           break;
         case "refresh":
-          console.log("refresh dataset");
+          this.$emit("refresh");
           break;
         default:
           console.warn(info);
@@ -105,6 +91,7 @@ export default {
     toggleMetrics(panelContent) {
       this.currentMetric =
         this.currentMetric !== panelContent ? panelContent : null;
+      $nuxt.$emit("on-sidebar-toggle-metrics", !!this.currentMetric);
     },
     closePanel() {
       this.currentMetric = null;

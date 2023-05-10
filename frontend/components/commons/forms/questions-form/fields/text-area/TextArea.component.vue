@@ -1,10 +1,10 @@
 <template>
   <div class="wrapper">
-    <div class="title-area --body1">
+    <div class="title-area --body2">
       <span
         :key="colorHighlight"
         v-text="title"
-        v-required-field="isRequired ? { color: colorHighlight } : false"
+        v-optional-field="isRequired ? false : true"
       />
 
       <TooltipComponent
@@ -16,14 +16,16 @@
       </TooltipComponent>
     </div>
 
-    <div class="container">
+    <div class="container" :class="isFocused ? '--focused' : null">
       <Text2TextContentEditable
+        class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
         :defaultText="initialOptions.text"
         :placeholder="placeholder"
         :isShortcutToSave="false"
         @change-text="onChangeTextArea"
+        @on-change-focus="setFocus"
       />
     </div>
   </div>
@@ -44,6 +46,10 @@ export default {
       default: () => {
         return { text: "", value: "" };
       },
+    },
+    optionId: {
+      type: String,
+      default: () => "optionId",
     },
     placeholder: {
       type: String,
@@ -66,12 +72,18 @@ export default {
       default: () => "black",
     },
   },
+  data: () => {
+    return {
+      isFocused: false,
+    };
+  },
   methods: {
     onChangeTextArea(newText) {
       this.$emit("on-change-text-area", [
         {
+          id: this.optionId,
           text: newText,
-          value: newText,
+          value: newText.length ? newText : null,
         },
       ]);
 
@@ -79,6 +91,9 @@ export default {
       if (this.isRequired) {
         this.$emit("on-error", !isAnyText);
       }
+    },
+    setFocus(status) {
+      this.isFocused = status;
     },
   },
 };
@@ -94,10 +109,12 @@ export default {
   display: flex;
   align-items: center;
   gap: $base-space;
-  color: $black-37;
+  color: $black-87;
+  font-weight: 500;
 }
 
 .container {
+  display: flex;
   padding: $base-space;
   border: 1px solid $black-20;
   border-radius: $border-radius-s;
@@ -113,5 +130,9 @@ export default {
 
 .icon {
   color: $black-37;
+}
+.textarea {
+  display: flex;
+  flex: 0 0 100%;
 }
 </style>

@@ -23,10 +23,11 @@ def gutenberg_spacy_ner(mocked_client):
     from datasets import load_dataset
 
     dataset = "gutenberg_spacy_ner"
-    # TODO(@frascuchon): Move dataset to new organization
     dataset_ds = load_dataset(
-        "rubrix/gutenberg_spacy-ner",
+        "argilla/gutenberg_spacy-ner",
         split="train",
+        # This revision does not includes the vectors info, so tests will pass
+        revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
 
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")

@@ -5,16 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+<!--
+These are the section headers that we use:
+* "Added" for new features.
+* "Changed" for changes in existing functionality.
+* "Deprecated" for soon-to-be removed features.
+* "Removed" for now removed features.
+* "Fixed" for any bug fixes.
+* "Security" in case of vulnerabilities.
+-->
+
 ## [Unreleased]
+
+### Changed
+
+- Argilla server docker image is built with PostgreSQL support. Closes [#2686](https://github.com/argilla-io/argilla/issues/2686)
+
+## [1.7.0 [in-progress]](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.7.0)
 
 ### Added
 
+- add `max_retries` and `num_threads` parameters to `rg.log` to run data logging request concurrently with backoff retry policy. See [#2458](https://github.com/argilla-io/argilla/issues/2458) and [#2533](https://github.com/argilla-io/argilla/issues/2533)
+- `rg.load` accepts `exclude_vectors` and `exclude_metrics` when loading data. Closes [#2398](https://github.com/argilla-io/argilla/issues/2398)
 - `/api/v1/datasets` new endpoint to list and create datasets ([#2615]).
 - `/api/v1/datasets/{dataset_id}` new endpoint to delete datasets ([#2615]).
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
 
-## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.5.1)
+### Changed
+
+- Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
+- bulk endpoints will upsert data when record `id` is present. Closes [#2535](https://github.com/argilla-io/argilla/issues/2535)
+- The `rg.log` computes all batches and raise an error for all failed batches.
+- The default batch size for `rg.log` is now 100.
+
+### Deprecated
+
+- The `rg.log_async` function is deprecated and will be removed in next minor release.
+
+
+## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.5.1...v1.6.0)
 
 ### Added
 
@@ -36,7 +66,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
 
 ### Fixes
-
 - Now the `prepare_for_training` method is working when `multi_label=True`. Closes [#2606](https://github.com/argilla-io/argilla/issues/2606)
 
 ### Changed
@@ -59,6 +88,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
+
+
 
 ## [1.5.1](https://github.com/argilla-io/argilla/compare/v1.5.0...v1.5.1) - 2023-03-30
 

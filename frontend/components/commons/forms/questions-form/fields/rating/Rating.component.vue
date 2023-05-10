@@ -6,8 +6,8 @@
     :colorHighlight="colorHighlight"
     :isIcon="isIcon"
     :tooltipMessage="tooltipMessage"
-    backgroundColor="#d8d8fa"
-    borderColor="#aaaadd"
+    backgroundColor="#E0E0FF"
+    borderColor="#CDCDFF"
     @on-change="onChangeRating"
   />
 </template>

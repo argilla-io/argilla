@@ -53,7 +53,7 @@ server = [
     # Basic dependencies
     "fastapi >= 0.75,< 0.89",
     "opensearch-py ~= 2.0.0",
-    "elasticsearch8 ~= 8.7.0",
+    "elasticsearch8[async] ~= 8.7.0",
     "uvicorn[standard] >= 0.15.0,< 0.21.0",
     "smart-open",
     "brotli-asgi >= 1.1,< 1.3",

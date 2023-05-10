@@ -21,7 +21,7 @@
       <slot name="dropdown-header" />
     </div>
     <transition appear name="fade">
-      <div v-show="visible" class="dropdown__content">
+      <div v-if="visible" class="dropdown__content">
         <slot name="dropdown-content" />
       </div>
     </transition>
@@ -73,9 +73,6 @@ export default {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 270px;
-    margin-top: 0;
-    padding: $base-space * 3;
     z-index: 3;
     transform: translate(0);
     box-shadow: $shadow;
