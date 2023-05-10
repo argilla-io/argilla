@@ -303,6 +303,7 @@ export default {
       return (
         this.areResponsesUntouched || this.recordStatus.toLowerCase() === status
       );
+    },
     async getFields(datasetId) {
       try {
         const { data } = await this.$axios.get(
