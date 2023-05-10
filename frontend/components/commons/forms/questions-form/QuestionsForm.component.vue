@@ -10,8 +10,8 @@
           :placeholder="input.placeholder"
           :initialOptions="input.options[0]"
           :isRequired="input.is_required"
-          :isIcon="!!input.tooltip_message"
-          :tooltipMessage="input.tooltip_message"
+          :isIcon="!!input.description"
+          :tooltipMessage="input.description"
           :colorHighlight="colorAsterisk"
           @on-change-text-area="
             onChange({ newOptions: $event, idComponent: input.id })
@@ -24,8 +24,8 @@
           :title="input.question"
           :initialOptions="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.tooltip_message"
-          :tooltipMessage="input.tooltip_message"
+          :isIcon="!!input.description"
+          :tooltipMessage="input.description"
           :colorHighlight="colorAsterisk"
           @on-change-single-label="
             onChange({ newOptions: $event, idComponent: input.id })
@@ -38,8 +38,8 @@
           :title="input.question"
           :initialOptions="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.tooltip_message"
-          :tooltipMessage="input.tooltip_message"
+          :isIcon="!!input.description"
+          :tooltipMessage="input.description"
           :colorHighlight="colorAsterisk"
           @on-change-rating="
             onChange({ newOptions: $event, idComponent: input.id })
