@@ -29,6 +29,9 @@ const deleteRecordResponsesByUserIdAndResponseId = (userId, responseId) =>
     );
   });
 
+// DELETE ALL RESPONSES
+const deleteAllRecordResponses = () => RecordResponseModel.deleteAll();
+
 // EXIST
 const isResponsesByUserIdExists = (userId, recordId) =>
   RecordResponseModel.query()
@@ -42,5 +45,6 @@ export {
   findRecordResponseByRecordIdByQuestionId,
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
+  deleteAllRecordResponses,
   isResponsesByUserIdExists,
 };

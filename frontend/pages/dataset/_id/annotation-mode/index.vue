@@ -28,6 +28,8 @@ import {
   RECORD_STATUS,
   deleteAllRecords,
 } from "@/models/feedback-task-model/record/record.queries";
+import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
+import { deleteAllRecordResponses } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 import {
   upsertFeedbackDataset,
   getFeedbackDatasetNameById,
@@ -180,6 +182,8 @@ export default {
     },
     async deleteRecordsAndRefreshDataset() {
       await deleteAllRecords();
+      await deleteAllRecordFields();
+      await deleteAllRecordResponses();
       this.$fetch();
     },
     async onBusEventAreResponsesUntouched() {
