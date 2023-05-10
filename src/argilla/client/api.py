@@ -12,7 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 import logging
+import warnings
 from asyncio import Future
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -112,10 +114,12 @@ def log(
     workspace: Optional[str] = None,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
-    batch_size: int = 500,
+    batch_size: int = 100,
     verbose: bool = True,
     background: bool = False,
     chunk_size: Optional[int] = None,
+    num_threads: int = 0,
+    max_retries: int = 3,
 ) -> Union[BulkResponse, Future]:
     """Logs Records to argilla.
 
@@ -133,6 +137,10 @@ def log(
         background: If True, we will NOT wait for the logging process to finish and return an ``asyncio.Future``
             object. You probably want to set ``verbose`` to False in that case.
         chunk_size: DEPRECATED! Use `batch_size` instead.
+        num_threads: If > 0, will use num_thread separate number threads to batches, sending data concurrently.
+                Default to `0`, which means no threading at all.
+        max_retries: Number of retries when logging a batch of records if a `httpx.TransportError` occurs.
+                Default `3`.
 
     Returns:
         Summary of the response from the REST API.
@@ -162,6 +170,8 @@ def log(
         verbose=verbose,
         background=background,
         chunk_size=chunk_size,
+        num_threads=num_threads,
+        max_retries=max_retries,
     )
 
 
@@ -171,7 +181,7 @@ async def log_async(
     workspace: Optional[str] = None,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
-    batch_size: int = 500,
+    batch_size: int = 100,
     verbose: bool = True,
     chunk_size: Optional[int] = None,
 ) -> BulkResponse:
@@ -201,7 +211,14 @@ async def log_async(
         ...     rg.log_async(my_records, dataset_name), loop
         ... )
     """
-    return await ArgillaSingleton.get().log_async(
+
+    warnings.warn(
+        "`log_async` is deprecated and will be removed in next release. "
+        "Please, use `log` with `background=True` instead",
+        DeprecationWarning,
+    )
+
+    future = ArgillaSingleton.get().log(
         records=records,
         name=name,
         workspace=workspace,
@@ -210,7 +227,10 @@ async def log_async(
         batch_size=batch_size,
         verbose=verbose,
         chunk_size=chunk_size,
+        background=True,
     )
+
+    return await asyncio.wrap_future(future)
 
 
 def load(
@@ -223,6 +243,8 @@ def load(
     sort: Optional[List[Tuple[str, str]]] = None,
     id_from: Optional[str] = None,
     batch_size: int = 250,
+    include_vectors: bool = True,
+    include_metrics: bool = True,
     as_pandas=None,
 ) -> Dataset:
     """Loads a argilla dataset.
@@ -242,8 +264,13 @@ def load(
             can be used to load using batches.
         batch_size: If provided, load `batch_size` samples per request. A lower batch
             size may help avoid timeouts.
+        include_vectors: When set to `False`, indicates that records will be retrieved excluding their vectors,
+            if any. By default, this parameter is set to `True`, meaning that vectors will be included.
+        include_metrics: When set to `False`, indicates that records will be retrieved excluding their metrics.
+            By default, this parameter is set to `True`, meaning that metrics will be included.
         as_pandas: DEPRECATED! To get a pandas DataFrame do
             ``rg.load('my_dataset').to_pandas()``.
+
 
     Returns:
         A argilla dataset.
@@ -276,6 +303,8 @@ def load(
         sort=sort,
         id_from=id_from,
         batch_size=batch_size,
+        include_metrics=include_metrics,
+        include_vectors=include_vectors,
         as_pandas=as_pandas,
     )
 
@@ -336,7 +365,7 @@ def delete_records(
         workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
             env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         query: An ElasticSearch query with the `query string syntax
-            <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
+            <https://docs.argilla.io/en/latest/guides/query_datasets.html>`_
         ids: If provided, deletes dataset records with given ids.
         discard_only: If `True`, matched records won't be deleted. Instead, they will be marked as `Discarded`
         discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.

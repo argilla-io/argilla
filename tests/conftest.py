@@ -12,11 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import argilla as rg
 import httpx
 import pytest
 from argilla import app
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import active_api
+from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
@@ -161,3 +163,87 @@ def mocked_client(
         monkeypatch.setattr(rb_api._client, "__httpx__", client_)
 
         yield client_
+
+
+@pytest.fixture
+def dataset_token_classification(mocked_client):
+    from datasets import load_dataset
+
+    dataset = "gutenberg_spacy_ner"
+
+    dataset_ds = load_dataset(
+        "argilla/gutenberg_spacy-ner",
+        split="train[:100]",
+        # This revision does not includes the vectors info, so tests will pass
+        revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
+    )
+
+    dataset_rb = rg.read_datasets(dataset_ds, task="TokenClassification")
+    # Set annotations, required for training tests
+    for rec in dataset_rb:
+        # Strip off "score"
+        rec.annotation = [prediction[:3] for prediction in rec.prediction]
+        rec.annotation_agent = rec.prediction_agent
+        rec.prediction = []
+        rec.prediction_agent = None
+
+    rg.delete(dataset)
+    rg.log(name=dataset, records=dataset_rb)
+
+    return dataset
+
+
+@pytest.fixture
+def dataset_text_classification(mocked_client):
+    from datasets import load_dataset
+
+    dataset = "banking_sentiment_setfit"
+
+    dataset_ds = load_dataset(
+        f"argilla/{dataset}",
+        split="train[:100]",
+    )
+    dataset_rb = [rg.TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
+    labels = set([rec.annotation for rec in dataset_rb])
+    rg.configure_dataset(dataset, settings=TextClassificationSettings(label_schema=labels))
+
+    rg.delete(dataset)
+    rg.log(name=dataset, records=dataset_rb)
+
+    return dataset
+
+
+@pytest.fixture
+def dataset_text_classification_multi_label(mocked_client):
+    from datasets import load_dataset
+
+    dataset = "research_titles_multi_label"
+
+    dataset_ds = load_dataset("argilla/research_titles_multi-label", split="train[:100]")
+
+    dataset_rb = rg.read_datasets(dataset_ds, task="TextClassification")
+
+    dataset_rb = [rec for rec in dataset_rb if rec.annotation]
+
+    rg.delete(dataset)
+    rg.log(name=dataset, records=dataset_rb)
+
+    return dataset
+
+
+@pytest.fixture
+def dataset_text2text(mocked_client):
+    from datasets import load_dataset
+
+    dataset = "news_summary"
+
+    dataset_ds = load_dataset("argilla/news-summary", split="train[:100]")
+
+    records = []
+    for entry in dataset_ds:
+        records.append(rg.Text2TextRecord(text=entry["text"], annotation=entry["prediction"][0]["text"]))
+
+    rg.delete(dataset)
+    rg.log(name=dataset, records=records)
+
+    return dataset

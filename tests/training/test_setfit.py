@@ -15,7 +15,7 @@
 import argilla as rg
 from argilla.training import ArgillaTrainer
 
-from .helpers import cleanup
+from .helpers import train_with_cleanup
 
 FRAMEWORK = "setfit"
 MODEL = "all-MiniLM-L6-v2"
@@ -33,13 +33,13 @@ def test_setfit_train(dataset_text_classification):
     trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
     output_dir = "tmp_setfit_train"
     trainer.update_config(num_epochs=1, num_iterations=1)
-    cleanup(trainer, output_dir)
+    train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
     assert isinstance(record, rg.TextClassificationRecord)
     assert record.multi_label is False
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert not isinstance(not_record, rg.TextClassificationRecord)
-    cleanup(trainer, output_dir, train=False)
+    train_with_cleanup(trainer, output_dir, train=False)
 
 
 def test_setfit_train_multi_label(dataset_text_classification_multi_label):
@@ -48,10 +48,10 @@ def test_setfit_train_multi_label(dataset_text_classification_multi_label):
     )
     output_dir = "tmp_setfit_train_multi_label"
     trainer.update_config(num_epochs=1, num_iterations=1)
-    cleanup(trainer, output_dir)
+    train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
     assert isinstance(record, rg.TextClassificationRecord)
     assert record.multi_label is True
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert not isinstance(not_record, rg.TextClassificationRecord)
-    cleanup(trainer, output_dir, train=False)
+    train_with_cleanup(trainer, output_dir, train=False)

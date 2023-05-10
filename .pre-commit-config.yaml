@@ -8,7 +8,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.4.2
+    rev: v1.5.1
     hooks:
       - id: insert-license
         name: "Insert license header in Python source files"
@@ -20,13 +20,13 @@ repos:
           # - --remove-header
 
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
       - id: black
-        additional_dependencies: ["click==8.0.4"]
+        additional_dependencies: ["typer==0.7.0"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.259
+    rev: v0.0.263
     hooks:
       # Simulate isort via (the much faster) ruff
       - id: ruff
@@ -35,7 +35,7 @@ repos:
           - --fix
 
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-    rev: v9.4.0
+    rev: v9.5.0
     hooks:
       - id: commitlint
         stages: [commit-msg]
