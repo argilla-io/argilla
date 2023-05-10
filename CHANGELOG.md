@@ -26,7 +26,7 @@ These are the section headers that we use:
 ### Added
 
 - add `max_retries` and `num_threads` parameters to `rg.log` to run data logging request concurrently with backoff retry policy. See [#2458](https://github.com/argilla-io/argilla/issues/2458) and [#2533](https://github.com/argilla-io/argilla/issues/2533)
-- `rg.load` accepts `exclude_vectors` and `exclude_metrics` when loading data. Closes [#2398](https://github.com/argilla-io/argilla/issues/2398)
+- `rg.load` accepts `include_vectors` and `include_metrics` when loading data. Closes [#2398](https://github.com/argilla-io/argilla/issues/2398)
 - Added `settings` param to `prepare_for_training` ([#2689](https://github.com/argilla-io/argilla/issues/2689))
 - Added `prepare_for_training` for `openai` ([#2658](https://github.com/argilla-io/argilla/issues/2658))
 - Added `ArgillaOpenAITrainer` ([#2659](https://github.com/argilla-io/argilla/issues/2659))
