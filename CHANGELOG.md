@@ -39,12 +39,12 @@ These are the section headers that we use:
 - bulk endpoints will upsert data when record `id` is present. Closes [#2535](https://github.com/argilla-io/argilla/issues/2535)
 - moved from `click` to `typer` CLI support. Closes ([#2815](https://github.com/argilla-io/argilla/issues/2815))
 - Argilla server docker image is built with PostgreSQL support. Closes [#2686](https://github.com/argilla-io/argilla/issues/2686)
+- The `rg.log` computes all batches and raise an error for all failed batches.
+- The default batch size for `rg.log` is now 100.
 
 ### Fixed
 
 - `argilla.training` bugfixes and unification ([#2665](https://github.com/argilla-io/argilla/issues/2665))
-- The `rg.log` computes all batches and raise an error for all failed batches.
-- The default batch size for `rg.log` is now 100.
 - Resolved several small bugs in the `ArgillaTrainer`.
 
 ### Deprecated
