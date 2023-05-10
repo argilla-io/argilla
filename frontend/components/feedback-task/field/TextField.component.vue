@@ -2,6 +2,15 @@
   <div class="text_field_component">
     <div class="title-area --body1">
       <span v-text="title" />
+      <BaseActionTooltip tooltip="Copied" tooltip-position="left">
+        <BaseButton
+          title="Copy to clipboard"
+          class="text_field_component__copy-button"
+          @click.prevent="$copyToClipboard(fieldText)"
+        >
+          <svgicon name="copy" width="16" height="16" />
+        </BaseButton>
+      </BaseActionTooltip>
     </div>
     <div class="content-area --body1" v-text="fieldText" />
   </div>
@@ -34,11 +43,16 @@ export default {
   .title-area {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: $base-space;
     color: $black-37;
   }
   .content-area {
     white-space: pre-wrap;
+  }
+  &__copy-button {
+    padding: 0;
+    z-index: 2;
   }
 }
 </style>
