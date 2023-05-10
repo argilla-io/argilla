@@ -53,7 +53,7 @@ def create_dataset(
     )
 
     if response.status_code == 201:
-        parsed_response = FeedbackDatasetModel(**response.json())
+        parsed_response = FeedbackDatasetModel.construct(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -77,7 +77,7 @@ def get_dataset(
     )
 
     if response.status_code == 200:
-        parsed_response = FeedbackDatasetModel(**response.json())
+        parsed_response = FeedbackDatasetModel.construct(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -123,7 +123,7 @@ def publish_dataset(
     )
 
     if response.status_code == 200:
-        parsed_response = FeedbackDatasetModel(**response.json())
+        parsed_response = FeedbackDatasetModel.construct(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -146,7 +146,7 @@ def list_datasets(
     )
 
     if response.status_code == 200:
-        parsed_response = [FeedbackDatasetModel(**dataset) for dataset in response.json()["items"]]
+        parsed_response = [FeedbackDatasetModel.construct(**dataset) for dataset in response.json()["items"]]
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -173,7 +173,7 @@ def get_records(
     )
 
     if response.status_code == 200:
-        parsed_response = FeedbackRecordsModel(**response.json())
+        parsed_response = FeedbackRecordsModel.construct(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
