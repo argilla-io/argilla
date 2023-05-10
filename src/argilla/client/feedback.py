@@ -32,7 +32,9 @@ if TYPE_CHECKING:
     from argilla.client.api import Argilla
     from argilla.client.sdk.v1.datasets.models import (
         FeedbackDatasetModel,
+        FeedbackFieldModel,
         FeedbackItemModel,
+        FeedbackQuestionModel,
     )
 
 
@@ -171,15 +173,15 @@ class FeedbackDataset:
         self.__del__()
 
     @property
-    def fields(self) -> List[OnlineFieldSchema]:
+    def fields(self) -> List[FeedbackFieldModel]:
         if self.__fields is None or len(self.__fields) < 1:
-            self.__fields = [OnlineFieldSchema(**field) for field in self.client.get_fields(id=self.id)]
+            self.__fields = self.client.get_fields(id=self.id)
         return self.__fields
 
     @property
-    def questions(self) -> List[OnlineQuestionSchema]:
+    def questions(self) -> List[FeedbackQuestionModel]:
         if self.__questions is None or len(self.__questions) < 1:
-            self.__questions = [OnlineQuestionSchema(**question) for question in self.client.get_questions(id=self.id)]
+            self.__questions = self.client.get_questions(id=self.id)
         return self.__questions
 
     @property

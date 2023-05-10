@@ -60,3 +60,24 @@ class FeedbackRecordsModel(BaseModel):
 
     class Config:
         fields = {"total": {"exclude": True}}
+
+
+class FeedbackFieldModel(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    required: bool
+    settings: Dict[str, Any]
+    inserted_at: datetime
+    updated_at: datetime
+
+
+class FeedbackQuestionModel(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    description: str
+    required: bool
+    settings: Dict[str, Any]
+    inserted_at: datetime
+    updated_at: datetime

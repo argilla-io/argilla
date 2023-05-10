@@ -26,6 +26,8 @@ from argilla.client.sdk.commons.models import (
 )
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
+    FeedbackFieldModel,
+    FeedbackQuestionModel,
     FeedbackRecordsModel,
 )
 
@@ -208,7 +210,7 @@ def add_records(
 def get_fields(
     client: AuthenticatedClient,
     id: str,
-) -> Response[Union[List[Dict[str, Any]], ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[List[FeedbackFieldModel], ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/datasets/{id}/fields".format(client.base_url, id=id)
 
     response = httpx.get(
@@ -219,11 +221,12 @@ def get_fields(
     )
 
     if response.status_code == 200:
+        parsed_response = [FeedbackFieldModel.construct(**item) for item in response.json()["items"]]
         return Response(
             status_code=response.status_code,
             content=response.content,
             headers=response.headers,
-            parsed=response.json()["items"],
+            parsed=parsed_response,
         )
     return handle_response_error(response)
 
@@ -255,7 +258,7 @@ def add_field(
 def get_questions(
     client: AuthenticatedClient,
     id: str,
-) -> Response[Union[List[Dict[str, Any]], ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[List[FeedbackQuestionModel], ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/datasets/{id}/questions".format(client.base_url, id=id)
 
     response = httpx.get(
@@ -266,11 +269,12 @@ def get_questions(
     )
 
     if response.status_code == 200:
+        parsed_response = [FeedbackQuestionModel.construct(**item) for item in response.json()["items"]]
         return Response(
             status_code=response.status_code,
             content=response.content,
             headers=response.headers,
-            parsed=response.json()["items"],
+            parsed=parsed_response,
         )
     return handle_response_error(response)
 

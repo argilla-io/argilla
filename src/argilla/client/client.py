@@ -89,6 +89,8 @@ from argilla.client.sdk.users.models import User
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
+    FeedbackFieldModel,
+    FeedbackQuestionModel,
     FeedbackRecordsModel,
 )
 from argilla.client.sdk.workspaces import api as workspaces_api
@@ -247,13 +249,13 @@ class Argilla:
     def add_records(self, id: str, records: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
         return datasets_api_v1.add_records(client=self._client, id=id, records=records)
 
-    def get_fields(self, id: str) -> List[Dict[str, Any]]:
+    def get_fields(self, id: str) -> List[FeedbackFieldModel]:
         return datasets_api_v1.get_fields(client=self._client, id=id).parsed
 
     def add_field(self, id: str, field: Dict[str, Any]) -> httpx.Response:
         return datasets_api_v1.add_field(client=self._client, id=id, field=field)
 
-    def get_questions(self, id: str) -> List[Dict[str, Any]]:
+    def get_questions(self, id: str) -> List[FeedbackQuestionModel]:
         return datasets_api_v1.get_questions(client=self._client, id=id).parsed
 
     def add_question(self, id: str, question: Dict[str, Any]) -> httpx.Response:
