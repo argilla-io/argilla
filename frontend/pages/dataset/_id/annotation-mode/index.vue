@@ -8,7 +8,7 @@
       />
     </template>
     <template v-slot:sidebar-right>
-      <SidebarFeedbackTaskComponent />
+      <SidebarFeedbackTaskComponent @refresh="onRefresh()" />
     </template>
     <template v-slot:top>
       <DatasetFiltersComponent :datasetId="datasetId" />
@@ -41,6 +41,11 @@ export default {
   name: "DatasetPage",
   components: {
     HeaderAndTopAndOneColumn,
+  },
+  data: () => {
+    return {
+      areResponsesUntouched: false,
+    };
   },
   computed: {
     datasetId() {
@@ -80,12 +85,19 @@ export default {
 
       // 3- insert in ORM
       upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
+
+      // Check if response is untouched
+      this.onBusEventAreResponsesUntouched();
     } catch (err) {
       this.manageErrorIfFetchNotWorking(err);
     }
   },
   created() {
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
+    this.toastMessage =
+      "Pending actions will be lost when the page is refreshed";
+    this.buttonMessage = "Ok, got it!";
+    this.typeOfToast = "warning";
   },
   methods: {
     checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
@@ -148,6 +160,41 @@ export default {
       };
 
       Notification.dispatch("notify", paramsForNotitification);
+    },
+    async onRefresh() {
+      if (this.areResponsesUntouched) {
+        this.$fetch();
+      } else {
+        this.showNotificationBeforeRefresh({
+          eventToFireOnClick: async () => {
+            this.$fetch();
+          },
+          message: this.toastMessage,
+          buttonMessage: this.buttonMessage,
+          typeOfToast: this.typeOfToast,
+        });
+      }
+    },
+    async onBusEventAreResponsesUntouched() {
+      this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
+        this.areResponsesUntouched = areResponsesUntouched;
+      });
+    },
+    showNotificationBeforeRefresh({
+      eventToFireOnClick,
+      message,
+      buttonMessage,
+      typeOfToast,
+    }) {
+      Notification.dispatch("notify", {
+        message: message ?? "",
+        numberOfChars: 20000,
+        type: typeOfToast ?? "warning",
+        buttonText: buttonMessage ?? "",
+        async onClick() {
+          eventToFireOnClick();
+        },
+      });
     },
   },
 };
