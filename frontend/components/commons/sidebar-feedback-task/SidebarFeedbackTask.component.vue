@@ -82,7 +82,7 @@ export default {
           console.log("change-view-mode", info);
           break;
         case "refresh":
-          console.log("refresh dataset");
+          this.$emit("refresh");
           break;
         default:
           console.warn(info);
