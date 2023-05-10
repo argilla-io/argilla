@@ -139,7 +139,7 @@ class FeedbackDataset:
         self.workspace = existing_dataset.workspace_id
         self.guidelines = existing_dataset.guidelines
 
-        self.schema = None
+        self.fields_schema = None
 
         self.__fields = None
         self.__questions = None
@@ -210,18 +210,18 @@ class FeedbackDataset:
         if isinstance(records, FeedbackRecord):
             records = [records]
 
-        if self.schema is None:
+        if self.fields_schema is None:
             warnings.warn("Since the `schema` hasn't been defined during the dataset creation, it will be inferred.")
-            self.schema = generate_pydantic_schema(records[0].fields)
+            self.fields_schema = generate_pydantic_schema(records[0].fields)
 
         for record in records:
-            record.fields = self.schema.parse_obj(record.fields)
+            record.fields = self.fields_schema.parse_obj(record.fields)
 
         # # If there are records already logged to Argilla, fetch one and get the schema
-        # self.schema = generate_pydantic_schema(self.fetch_one())
-        # # If there are no records logged to Argilla, check if `self.schema` has been set
+        # self.fields_schema = generate_pydantic_schema(self.fetch_one())
+        # # If there are no records logged to Argilla, check if `self.fields_schema` has been set
         # ...
-        # # If `self.schema` has not been set, just infer the schema based on the record
+        # # If `self.fields_schema` has not been set, just infer the schema based on the record
         # ...
         # record = record.dict() if isinstance(record, BaseModel) else record
         self.client.add_records(
