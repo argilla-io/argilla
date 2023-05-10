@@ -7,13 +7,17 @@
         v-optional-field="isRequired ? false : true"
       />
 
-      <TooltipComponent
-        v-if="isIcon"
-        :message="tooltipMessage"
-        direction="bottom"
-      >
-        <svgicon class="icon" name="info" width="22" height="22" />
-      </TooltipComponent>
+      <BaseIconWithBadge
+        class="icon-info"
+        icon="info"
+        :id="`${title}TextArea`"
+        :show-badge="false"
+        iconColor="rgba(0, 0, 0, 0.37)"
+        badge-vertical-position="top"
+        badge-horizontal-position="right"
+        badge-border-color="white"
+        v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF' }"
+      />
     </div>
 
     <div class="container" :class="isFocused ? '--focused' : null">
@@ -134,5 +138,19 @@ export default {
 .textarea {
   display: flex;
   flex: 0 0 100%;
+}
+
+.icon-info {
+  margin: 0;
+  padding: 0;
+  overflow: inherit;
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    &:before,
+    &:after {
+      margin-top: 0;
+    }
+  }
 }
 </style>
