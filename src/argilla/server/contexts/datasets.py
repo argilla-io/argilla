@@ -360,9 +360,12 @@ def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue],
 
     values_copy = copy.copy(values or {})
     for question in dataset.questions:
-        if question.required and status == ResponseStatus.submitted:
-            if not (question.name in values and values_copy.get(question.name)):
-                raise ValueError(f"Missing required question: {question.name!r}")
+        if (
+            question.required
+            and status == ResponseStatus.submitted
+            and not (question.name in values and values_copy.get(question.name))
+        ):
+            raise ValueError(f"Missing required question: {question.name!r}")
 
         question_response = values_copy.pop(question.name, None)
         if question_response:
