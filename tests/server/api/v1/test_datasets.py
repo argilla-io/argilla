@@ -1397,10 +1397,16 @@ def test_create_dataset_rating_question_with_invalid_settings_options_values(
 
 def test_create_dataset_records(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    FieldFactory.create(name="input", dataset=dataset)
+    FieldFactory.create(name="output", dataset=dataset)
+
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
     records_json = {
         "items": [
             {
-                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "fields": {"input": "Say Hello", "output": "Hello"},
                 "external_id": "1",
                 "response": {
                     "values": {
@@ -1445,6 +1451,92 @@ def test_create_dataset_records(client: TestClient, db: Session, admin_auth_head
     assert response.status_code == 204
     assert db.query(Record).count() == 5
     assert db.query(Response).count() == 4
+
+
+def test_create_dataset_records_with_missing_required_fields(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    FieldFactory.create(name="input", dataset=dataset, required=True)
+    FieldFactory.create(name="output", dataset=dataset, required=True)
+
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello"},
+            },
+            {
+                "fields": {"input": "Say Hello", "output": "Hi"},
+            },
+            {
+                "fields": {"input": "Say Pello", "output": "Hello World"},
+            },
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Missing required value for field: 'output'"}
+    assert db.query(Record).count() == 0
+
+
+def test_create_dataset_records_with_wrong_value_field(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    FieldFactory.create(name="input", dataset=dataset)
+    FieldFactory.create(name="output", dataset=dataset)
+
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "output": 33},
+            },
+            {
+                "fields": {"input": "Say Hello", "output": "Hi"},
+            },
+            {
+                "fields": {"input": "Say Pello", "output": "Hello World"},
+            },
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Wrong value found for field 'output'. Expected 'str', found 'int'"}
+    assert db.query(Record).count() == 0
+
+
+def test_create_dataset_records_with_extra_fields(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    FieldFactory.create(name="input", dataset=dataset)
+
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "output": "unexpected"},
+            },
+            {
+                "fields": {"input": "Say Hello"},
+            },
+            {
+                "fields": {"input": "Say Pello"},
+            },
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Error: found fields values for non configured fields: ['output']"}
+    assert db.query(Record).count() == 0
 
 
 def test_create_dataset_records_without_authentication(client: TestClient, db: Session):
@@ -1502,10 +1594,16 @@ def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
 
 def test_create_dataset_records_with_submitted_response(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    FieldFactory.create(name="input", dataset=dataset)
+    FieldFactory.create(name="output", dataset=dataset)
+
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
     records_json = {
         "items": [
             {
-                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "fields": {"input": "Say Hello", "output": "Hello"},
                 "response": {
                     "values": {
                         "input_ok": {"value": "yes"},
@@ -1528,6 +1626,7 @@ def test_create_dataset_records_with_submitted_response_without_values(
     client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+
     records_json = {
         "items": [
             {
@@ -1548,10 +1647,16 @@ def test_create_dataset_records_with_submitted_response_without_values(
 
 def test_create_dataset_records_with_discarded_response(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    FieldFactory.create(name="input", dataset=dataset)
+    FieldFactory.create(name="output", dataset=dataset)
+
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
     records_json = {
         "items": [
             {
-                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "fields": {"input": "Say Hello", "output": "Hello"},
                 "response": {
                     "values": {
                         "input_ok": {"value": "yes"},
@@ -1567,7 +1672,7 @@ def test_create_dataset_records_with_discarded_response(client: TestClient, db: 
 
     assert response.status_code == 204
     assert db.query(Record).count() == 1
-    assert db.query(Response).count() == 1
+    assert db.query(Response).filter(Response.status == ResponseStatus.discarded).count() == 1
 
 
 def test_create_dataset_records_with_invalid_response_status(client: TestClient, db: Session, admin_auth_header: dict):
@@ -1598,10 +1703,13 @@ def test_create_dataset_records_with_discarded_response_without_values(
     client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    FieldFactory.create(name="input", dataset=dataset)
+    FieldFactory.create(name="output", dataset=dataset)
+
     records_json = {
         "items": [
             {
-                "fields": {"input": "Say Hello", "ouput": "Hello"},
+                "fields": {"input": "Say Hello", "output": "Hello"},
                 "response": {
                     "status": "discarded",
                 },

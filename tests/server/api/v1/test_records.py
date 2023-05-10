@@ -22,14 +22,21 @@ from sqlalchemy.orm import Session
 
 from tests.factories import (
     AnnotatorFactory,
+    DatasetFactory,
+    RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
+    TextQuestionFactory,
     WorkspaceFactory,
 )
 
 
 def test_create_record_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
-    record = RecordFactory.create()
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
@@ -58,6 +65,60 @@ def test_create_record_response(client: TestClient, db: Session, admin: User, ad
     }
 
 
+def test_create_record_response_with_extra_question_responses(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset, required=False)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset, required=False)
+
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {
+        "values": {
+            "input_ok": {"value": "yes"},
+            "unknown_question": {"value": "Test"},
+        },
+        "status": "submitted",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Error: found responses for non configured questions: ['unknown_question']"}
+
+
+def test_create_record_response_with_wrong_response_value(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    RatingQuestionFactory.create(name="rating_question", dataset=dataset, required=False)
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {
+        "values": {
+            "rating_question": {"value": "wrong-rating-value"},
+        },
+        "status": "submitted",
+    }
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": "'wrong-rating-value' is not a valid option.\nValid options are: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
+    }
+
+
+def test_create_submitted_record_response_with_missing_required_questions(
+    client: TestClient, db: Session, admin_auth_header: dict
+):
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset, required=True)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset, required=True)
+
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {
+        "values": {"input_ok": {"value": "yes"}},
+        "status": "submitted",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Missing required question: 'output_ok'"}
+
+
 def test_create_record_response_without_authentication(client: TestClient, db: Session):
     record = RecordFactory.create()
     response_json = {
@@ -75,7 +136,11 @@ def test_create_record_response_without_authentication(client: TestClient, db: S
 
 
 def test_create_record_submitted_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
-    record = RecordFactory.create()
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
@@ -114,8 +179,23 @@ def test_create_record_submitted_response_without_values(client: TestClient, db:
     assert db.query(Response).count() == 0
 
 
-def test_create_record_discarded_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_create_record_submitted_response_with_wrong_values(client: TestClient, db: Session, admin_auth_header: dict):
     record = RecordFactory.create()
+    response_json = {"status": "submitted", "values": {"wrong_question": {"value": "wrong value"}}}
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
+    assert db.query(Response).count() == 0
+
+
+def test_create_record_discarded_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
     response_json = {
         "values": {
             "input_ok": {"value": "no"},
@@ -147,7 +227,11 @@ def test_create_record_discarded_response(client: TestClient, db: Session, admin
 def test_create_record_discarded_response_without_values(
     client: TestClient, db: Session, admin: User, admin_auth_header: dict
 ):
-    record = RecordFactory.create()
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
     response_json = {"status": "discarded"}
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
@@ -168,7 +252,11 @@ def test_create_record_discarded_response_without_values(
 
 
 def test_create_record_response_as_annotator(client: TestClient, db: Session):
-    record = RecordFactory.create()
+    dataset = DatasetFactory.create()
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    record = RecordFactory.create(dataset=dataset)
     annotator = AnnotatorFactory.create(workspaces=[record.dataset.workspace])
     response_json = {
         "values": {

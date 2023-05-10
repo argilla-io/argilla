@@ -11,8 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import copy
 import logging
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from argilla.server.elasticsearch import ElasticSearchEngine
@@ -21,9 +22,11 @@ from argilla.server.models import (
     DatasetStatus,
     Field,
     Question,
+    QuestionSettings,
     Record,
     Response,
     ResponseStatus,
+    ResponseValue,
 )
 from argilla.server.schemas.v1.datasets import (
     DatasetCreate,
@@ -37,6 +40,7 @@ from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.security.model import User
 from fastapi.encoders import jsonable_encoder
+from pydantic import parse_obj_as
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, contains_eager
 
@@ -234,6 +238,8 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
 
     records = []
     for record_create in records_create.items:
+        validate_record_fields(dataset, fields=record_create.fields)
+
         record = Record(
             fields=record_create.fields,
             external_id=record_create.external_id,
@@ -241,7 +247,15 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
         )
 
         if record_create.response:
-            record.responses = [Response(values=jsonable_encoder(record_create.response.values), user_id=user.id)]
+            record_response = record_create.response
+            validate_response_values(dataset, values=record_response.values, status=record_response.status)
+            record.responses = [
+                Response(
+                    values=jsonable_encoder(record_response.values),
+                    status=record_response.status,
+                    user_id=user.id,
+                )
+            ]
 
         records.append(record)
 
@@ -305,6 +319,8 @@ def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, 
 
 
 def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):
+    validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
+
     response = Response(
         values=jsonable_encoder(response_create.values),
         status=response_create.status,
@@ -320,6 +336,8 @@ def create_response(db: Session, record: Record, user: User, response_create: Re
 
 
 def update_response(db: Session, response: Response, response_update: ResponseUpdate):
+    validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
+
     response.values = jsonable_encoder(response_update.values)
     response.status = response_update.status
 
@@ -334,6 +352,44 @@ def delete_response(db: Session, response: Response):
     db.commit()
 
     return response
+
+
+def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue], status: ResponseStatus):
+    if not values and status == ResponseStatus.discarded:
+        return
+
+    values_copy = copy.copy(values or {})
+    for question in dataset.questions:
+        if (
+            question.required
+            and status == ResponseStatus.submitted
+            and not (question.name in values and values_copy.get(question.name))
+        ):
+            raise ValueError(f"Missing required question: {question.name!r}")
+
+        question_response = values_copy.pop(question.name, None)
+        if question_response:
+            settings = parse_obj_as(QuestionSettings, question.settings)
+            settings.check_response(question_response)
+
+    if values_copy:
+        raise ValueError(f"Error: found responses for non configured questions: {list(values_copy.keys())!r}")
+
+
+def validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
+    fields_copy = copy.copy(fields or {})
+    for field in dataset.fields:
+        if field.required and not (field.name in fields_copy and fields_copy.get(field.name) is not None):
+            raise ValueError(f"Missing required value for field: {field.name!r}")
+
+        value = fields_copy.pop(field.name, None)
+        if not isinstance(value, str):
+            raise ValueError(
+                f"Wrong value found for field {field.name!r}. Expected {str.__name__!r}, found {type(value).__name__!r}"
+            )
+
+    if fields_copy:
+        raise ValueError(f"Error: found fields values for non configured fields: {list(fields_copy.keys())!r}")
 
 
 def _count_fields_by_dataset_id(db: Session, dataset_id: UUID):

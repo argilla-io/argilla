@@ -1,16 +1,21 @@
 <template>
   <div
+    :key="recordOffset"
     class="wrapper"
     v-if="recordId && !$fetchState.pending && !$fetchState.error"
   >
-    <RecordFeedbackTaskComponent :record="record" />
+    <RecordFeedbackTaskComponent
+      v-if="fieldsWithRecordFieldText"
+      :recordStatus="record.record_status"
+      :fields="fieldsWithRecordFieldText"
+    />
     <QuestionsFormComponent
       class="question-form"
       :class="statusClass"
-      :key="recordOffset"
       v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
       :datasetId="datasetId"
       :recordId="recordId"
+      :recordStatus="record.record_status"
       :initialInputs="questionsWithRecordAnswers"
     />
   </div>
@@ -22,6 +27,7 @@ import {
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
   getOptionsOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
+import { getFieldsByDatasetId } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
 import {
   RECORD_STATUS,
   RESPONSE_STATUS_FOR_API,
@@ -50,10 +56,16 @@ export default {
       type: String,
       required: true,
     },
-    orderBy: {
+    orderQuestions: {
       type: Object,
       default: () => {
-        return { orderQuestionBy: "order", ascendent: true };
+        return { orderQuestionsBy: "order", ascendent: true };
+      },
+    },
+    orderFields: {
+      type: Object,
+      default: () => {
+        return { orderFieldsBy: "order", ascendent: true };
       },
     },
     recordOffset: {
@@ -105,12 +117,22 @@ export default {
     questions() {
       return getQuestionsByDatasetId(
         this.datasetId,
-        this.orderBy?.orderQuestionsBy,
-        this.orderBy?.ascendent
+        this.orderQuestions?.orderQuestionsBy,
+        this.orderQuestions?.ascendent
+      );
+    },
+    fields() {
+      return getFieldsByDatasetId(
+        this.datasetId,
+        this.orderFields?.orderFieldsBy,
+        this.orderFields?.ascendent
       );
     },
     recordResponsesFromCurrentUser() {
       return this.record?.record_responses ?? [];
+    },
+    recordFields() {
+      return this.record?.record_fields ?? [];
     },
     questionsWithRecordAnswers() {
       return this.questions?.map((question) => {
@@ -126,6 +148,20 @@ export default {
           };
         }
         return { ...question, response_id: null };
+      });
+    },
+    fieldsWithRecordFieldText() {
+      return this.fields?.map((field) => {
+        const correspondingRecordFieldToField = this.recordFields.find(
+          (recordField) => field.name === recordField.field_name
+        );
+
+        if (correspondingRecordFieldToField) {
+          return {
+            ...field,
+            field_text: correspondingRecordFieldToField.text,
+          };
+        }
       });
     },
     statusClass() {
@@ -206,7 +242,7 @@ export default {
         ([fieldKey, fieldValue], index) => {
           return {
             id: `${recordId}_${index}`,
-            title: fieldKey,
+            field_name: fieldKey,
             text: fieldValue,
           };
         }
@@ -217,7 +253,6 @@ export default {
       const formattedRecordResponsesForOrm = [];
       // NOTE - by default, recordStatus is at "PENDING"
       let recordStatus = RECORD_STATUS.PENDING;
-
       recordResponses.forEach((responsesByRecordAndUser) => {
         recordStatus = responsesByRecordAndUser.status ?? RECORD_STATUS.PENDING;
         if (responsesByRecordAndUser.values) {
