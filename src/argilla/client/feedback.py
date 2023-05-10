@@ -52,11 +52,8 @@ class FeedbackRecord(BaseModel):
     response: Optional[ResponseSchema] = None
     external_id: Optional[str] = None
 
-    @validator("response", always=True)
-    def response_must_have_values(cls, v):
-        if not v:
-            v = ResponseSchema(values={}, status="submitted")
-        return v
+    class Config:
+        fields = {"response": {"exclude": True}, "external_id": {"exclude": True}}
 
 
 class FieldSchema(BaseModel):
