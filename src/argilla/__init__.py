@@ -56,20 +56,20 @@ if _TYPE_CHECKING:
         read_datasets,
         read_pandas,
     )
-    from argilla.client.models import (
-        Text2TextRecord,
-        TextClassificationRecord,
-        TextGenerationRecord,  # TODO Remove TextGenerationRecord
-        TokenAttributions,
-        TokenClassificationRecord,
-    )
-    from argilla.client.nightly import (
+    from argilla.client.feedback import (
         FeedbackDataset,
         FeedbackRecord,
         RatingQuestion,
         TextField,
         TextQuestion,
         create_feedback_dataset,
+    )
+    from argilla.client.models import (
+        Text2TextRecord,
+        TextClassificationRecord,
+        TextGenerationRecord,  # TODO Remove TextGenerationRecord
+        TokenAttributions,
+        TokenClassificationRecord,
     )
     from argilla.client.workspaces import Workspace
     from argilla.datasets import (
@@ -110,7 +110,7 @@ _import_structure = {
         "read_datasets",
         "read_pandas",
     ],
-    "client.nightly": [
+    "client.feedback": [
         "FeedbackDataset",
         "create_feedback_dataset",
         "TextField",
