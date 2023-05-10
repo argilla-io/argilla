@@ -17,10 +17,6 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-### Changed
-
-- Argilla server docker image is built with PostgreSQL support. Closes [#2686](https://github.com/argilla-io/argilla/issues/2686)
-
 ## [1.7.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.7.0)
 
 ### Added
