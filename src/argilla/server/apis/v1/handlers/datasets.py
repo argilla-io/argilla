@@ -38,7 +38,7 @@ from argilla.server.schemas.v1.datasets import (
     RecordsCreate,
     ResponseStatusFilter,
 )
-from argilla.server.search import SearchEngine, get_search_engine
+from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50

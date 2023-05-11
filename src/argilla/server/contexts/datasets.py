@@ -36,7 +36,7 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
-from argilla.server.search import SearchEngine
+from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func
