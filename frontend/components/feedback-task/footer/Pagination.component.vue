@@ -98,7 +98,7 @@ export default {
       return (this.pageFromQuery || this.currentPage) <= this.totalPages;
     },
     pageFromRoute() {
-      return parseFloat(this.$route.query?._page);
+      return parseFloat(this.$route.query?._page) || 1;
     },
   },
   watch: {
@@ -111,7 +111,7 @@ export default {
     },
   },
   mounted() {
-    this.currentPage = this.isPageAvailable ? this.pageFromRoute || 1 : 1;
+    this.currentPage = this.isPageAvailable ? this.pageFromRoute : 1;
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
     this.onBusEventCurrentPage();
   },
