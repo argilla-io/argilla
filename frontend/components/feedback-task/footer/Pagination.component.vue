@@ -112,9 +112,7 @@ export default {
   },
   mounted() {
     this.currentPage = this.isPageAvailable ? this.pageFromRoute || 1 : 1;
-
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
-
     this.onBusEventCurrentPage();
   },
   destroyed() {
