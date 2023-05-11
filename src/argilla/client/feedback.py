@@ -136,58 +136,52 @@ class RatingQuestion(QuestionSchema):
 class FeedbackDataset:
     def __init__(
         self,
-        name: Optional[str] = None,
         *,
-        workspace: Optional[Union[rg.Workspace, str]] = None,
-        id: Optional[str] = None,
+        guidelines: str,
+        fields: List[FieldSchema],
+        questions: List[QuestionSchema],
     ) -> None:
-        self.client: "Argilla" = rg.active_client()
+        if not isinstance(guidelines, str):
+            raise TypeError(f"Expected `guidelines` to be a string, got {type(guidelines)} instead.")
+        self.__guidelines = guidelines
 
-        assert name or (name and workspace) or id, (
-            "You must provide either the `name` and `workspace` (the latter just if applicable, if not the default"
-            " `workspace` will be used) or the `id`, which is the Argilla ID of the `rg.FeedbackDataset`, which implies it must"
-            " exist in advance."
-        )
+        if not isinstance(fields, list):
+            raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
+        any_required = False
+        for field in fields:
+            if not isinstance(field, FieldSchema):
+                raise TypeError(f"Expected `fields` to be a list of `FieldSchema`, got {type(field)} instead.")
+            if not any_required and field.required:
+                any_required = True
+        if not any_required:
+            raise ValueError("At least one `FieldSchema` in `fields` must be required (`required=True`).")
+        self.__fields = fields
+        self.__fields_schema = None
 
-        if name or (name and workspace):
-            if workspace is None or isinstance(workspace, str):
-                workspace = rg.Workspace.from_name(workspace)
+        if not isinstance(questions, list):
+            raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
+        any_required = False
+        for question in questions:
+            if not isinstance(question, QuestionSchema):
+                raise TypeError(f"Expected `questions` to be a list of `QuestionSchema`, got {type(question)} instead.")
+            if not any_required and question.required:
+                any_required = True
+        if not any_required:
+            raise ValueError("At least one `QuestionSchema` in `questions` must be required (`required=True`).")
+        self.__questions = questions
 
-            if not isinstance(workspace, rg.Workspace):
-                raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
-
-            for dataset in self.client.list_datasets():
-                if dataset.name == name and dataset.workspace_id == workspace.id:
-                    self.id = dataset.id
-
-            if not hasattr(self, "id"):
-                raise ValueError(f"Dataset with name {name} not found in workspace {workspace}")
-
-        existing_dataset: FeedbackDatasetModel = self.client.get_dataset(id=id or self.id)
-
-        self.id = existing_dataset.id
-        self.name = existing_dataset.name
-        self.workspace = existing_dataset.workspace_id
-        self.guidelines = existing_dataset.guidelines
-
-        self.fields_schema = None
-
-        self.__fields = None
-        self.__questions = None
-        self.__records = None
-
-    def __repr__(self) -> str:
-        return f"FeedbackDataset(name={self.name}, workspace={self.workspace}, id={self.id})"
+        self.__records = []
 
     def __len__(self) -> int:
-        if self.__records is None or len(self.__records) < 1:
-            warnings.warn(
-                "Since no records were provided, those will be fetched automatically from Argilla if available."
-            )
-            return len(self.records)
         return len(self.__records)
 
     def __getitem__(self, key: Union[slice, int]) -> Union["FeedbackItemModel", List["FeedbackItemModel"]]:
+        if len(self.__records) < 1:
+            raise RuntimeError(
+                "In order to get items from `rg.FeedbackDataset` you need to either add them first with `add_records` or fetch them from Argilla or HuggingFace with `fetch_records`."
+            )
+        if isinstance(key, int) and len(self.__records) < key:
+            raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
         return self.__records[key]
 
     def __del__(self) -> None:
@@ -201,15 +195,21 @@ class FeedbackDataset:
         self.__del__()
 
     @property
+    def guidelines(self) -> str:
+        return self.__guidelines
+
+    @guidelines.setter
+    def guidelines(self, guidelines: str) -> None:
+        if not isinstance(guidelines, str):
+            raise TypeError(f"Expected `guidelines` to be a string, got {type(guidelines)} instead.")
+        self.__guidelines = guidelines
+
+    @property
     def fields(self) -> List[FeedbackFieldModel]:
-        if self.__fields is None or len(self.__fields) < 1:
-            self.__fields = self.client.get_fields(id=self.id)
         return self.__fields
 
     @property
     def questions(self) -> List[FeedbackQuestionModel]:
-        if self.__questions is None or len(self.__questions) < 1:
-            self.__questions = self.client.get_questions(id=self.id)
         return self.__questions
 
     @property
