@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import sys
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 if sys.version_info >= (3, 8):
@@ -288,27 +288,22 @@ class FeedbackDataset:
                 )
 
     def push_to_argilla(self, name: str, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
+        dataset_exists, _ = feedback_dataset_in_argilla(name=name, workspace=workspace)
+        if dataset_exists:
+            raise RuntimeError(
+                f"Dataset with name `{name}` and workspace `{workspace.name}` already exists in Argilla, please choose another name and/or workspace."
+            )
+
         client: "Argilla" = rg.active_client()
 
-        if workspace is None:
-            workspace = rg.Workspace.from_name(client.get_workspace())
-
-        if isinstance(workspace, str):
-            workspace = rg.Workspace.from_name(workspace)
-
-        if not isinstance(workspace, rg.Workspace):
-            raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
-
-        try:
-            datasets = client.list_datasets()
-        except Exception as e:
-            raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
-
-        for dataset in datasets:
-            if dataset.name == name and dataset.workspace_id == workspace.id:
-                raise RuntimeError(
-                    f"Dataset with name `{name}` and workspace `{workspace.name}` already exists in Argilla, please choose another name and/or workspace."
+        def delete_and_raise_exception(dataset_id: str, exception: Exception) -> None:
+            try:
+                client.delete_dataset(id=dataset_id)
+            except Exception as e:
+                raise Exception(
+                    f"Failed while deleting the `FeedbackTask` dataset with ID '{dataset_id}' from Argilla with exception: {e}"
                 )
+            raise exception
 
         try:
             new_dataset: "FeedbackDatasetModel" = client.create_dataset(
@@ -316,28 +311,42 @@ class FeedbackDataset:
             )
             argilla_id = new_dataset.id
         except Exception as e:
-            raise Exception(f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}")
+            delete_and_raise_exception(
+                dataset_id=argilla_id,
+                exception=Exception(f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}"),
+            )
 
         for field in self.fields:
             try:
                 client.add_field(id=argilla_id, field=field.dict())
             except Exception as e:
-                raise Exception(
-                    f"Failed while adding the field '{field.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
+                delete_and_raise_exception(
+                    dataset_id=argilla_id,
+                    exception=Exception(
+                        f"Failed while adding the field '{field.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
+                    ),
                 )
 
         for question in self.questions:
             try:
                 client.add_question(id=argilla_id, question=question.dict())
             except Exception as e:
-                raise Exception(
-                    f"Failed while adding the question '{question.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
+                delete_and_raise_exception(
+                    dataset_id=argilla_id,
+                    exception=Exception(
+                        f"Failed while adding the question '{question.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
+                    ),
                 )
 
         try:
             client.publish_dataset(id=argilla_id)
         except Exception as e:
-            raise Exception(f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}")
+            delete_and_raise_exception(
+                dataset_id=argilla_id,
+                exception=Exception(
+                    f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"
+                ),
+            )
 
         self.argilla_id = argilla_id
 
@@ -352,35 +361,15 @@ class FeedbackDataset:
 
         client: "Argilla" = rg.active_client()
 
-        if name or (name and workspace):
-            if workspace is None:
-                workspace = rg.Workspace.from_name(client.get_workspace())
-
-            if isinstance(workspace, str):
-                workspace = rg.Workspace.from_name(workspace)
-
-            if not isinstance(workspace, rg.Workspace):
-                raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
-
-            try:
-                datasets = client.list_datasets()
-            except Exception as e:
-                raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
-
-            dataset_found = False
-            for dataset in datasets:
-                if dataset.name == name and dataset.workspace_id == workspace.id:
-                    dataset_found = True
-                    existing_dataset = dataset
-                    break
-
-            if not dataset_found:
-                raise ValueError(f"Dataset with name `{name}` and workspace `{workspace.name}` not found in Argilla.")
-        else:
-            try:
-                existing_dataset = client.get_dataset(id=id)
-            except Exception as e:
-                raise ValueError(f"Dataset with ID `{id}` not found in Argilla.")
+        dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
+        if not dataset_exists:
+            raise ValueError(
+                f"Could not find a `FeedbackTask` dataset in Argilla with name='{name}'."
+                if name and not workspace
+                else f"Could not find a `FeedbackTask` dataset in Argilla with name='{name}' and workspace='{workspace}'."
+                if name and workspace
+                else f"Could not find a `FeedbackTask` dataset in Argilla with ID='{id}'."
+            )
 
         cls.loaded_from_argilla = True
         cls.argilla_id = existing_dataset.id
@@ -402,103 +391,46 @@ def generate_pydantic_schema(
 
 def create_feedback_dataset(
     name: str,
-    workspace: Optional[Union[str, rg.Workspace]] = None,
-    guidelines: Optional[str] = None,
-    fields: Optional[List[FieldSchema]] = None,
-    questions: Optional[List[QuestionSchema]] = None,
+    guidelines: str,
+    fields: List[FieldSchema],
+    questions: List[QuestionSchema],
+    workspace: Union[str, rg.Workspace] = None,
 ) -> FeedbackDataset:
-    client = rg.active_client()
+    fds = FeedbackDataset(
+        guidelines=guidelines,
+        fields=fields,
+        questions=questions,
+    )
+    fds.push_to_argilla(name=name, workspace=workspace)
+    return fds
 
-    if workspace is None or isinstance(workspace, str):
-        try:
+
+def feedback_dataset_in_argilla(
+    name: Optional[str] = None, *, workspace: Optional[str] = None, id: Optional[str] = None
+) -> Tuple[bool, Optional[FeedbackDataset]]:
+    client: "Argilla" = rg.active_client()
+
+    if name or (name and workspace):
+        if workspace is None:
+            workspace = rg.Workspace.from_name(client.get_workspace())
+
+        if isinstance(workspace, str):
             workspace = rg.Workspace.from_name(workspace)
-        except ValueError as e:
-            raise e
 
-    if not isinstance(workspace, rg.Workspace):
-        raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
+        if not isinstance(workspace, rg.Workspace):
+            raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
+
+        try:
+            datasets = client.list_datasets()
+        except Exception as e:
+            raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
+
+        for dataset in datasets:
+            if dataset.name == name and dataset.workspace_id == workspace.id:
+                return (True, dataset)
+        return (False, None)
     else:
-        if workspace.id is None:
-            raise ValueError(
-                "`rg.Workspace` must have an ID, which means that it exists in Argilla, if you don't know the ID but know the name and that it exists in Argilla, then use `rg.Workspace.from_name` instead."
-            )
-
-    try:
-        datasets = client.list_datasets()
-    except Exception as e:
-        raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
-
-    for dataset in datasets:
-        if dataset.name == name and dataset.workspace_id == workspace.id:
-            warnings.warn(
-                f"`rg.FeedbackDataset` with name '{name}' in workspace {workspace.id} already exists, skipping creation."
-            )
-            return FeedbackDataset.from_argilla(id=dataset.id)
-
-    def delete_and_raise_exception(dataset_id: str, exception: Exception) -> None:
         try:
-            client.delete_dataset(id=dataset_id)
+            return (True, client.get_dataset(id=id))
         except Exception as e:
-            raise Exception(
-                f"Failed while deleting the `FeedbackTask` dataset with ID '{dataset_id}' from Argilla with exception: {e}"
-            )
-        raise exception
-
-    try:
-        new_dataset: "FeedbackDatasetModel" = client.create_dataset(
-            name=name, workspace_id=workspace.id, guidelines=guidelines
-        )
-    except Exception as e:
-        raise Exception(f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}")
-
-    for field in fields:
-        if isinstance(field, dict):
-            try:
-                field = FieldSchema(**field)
-            except Exception as e:
-                delete_and_raise_exception(
-                    dataset_id=new_dataset.id,
-                    exception=Exception(
-                        f"Failed while parsing the field '{field}' to a `FieldSchema` instance with exception: {e}"
-                    ),
-                )
-        try:
-            client.add_field(id=new_dataset.id, field=field.dict())
-        except Exception as e:
-            delete_and_raise_exception(
-                dataset_id=new_dataset.id,
-                exception=Exception(
-                    f"Failed while adding the field '{field.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
-                ),
-            )
-
-    for question in questions:
-        if isinstance(question, dict):
-            try:
-                question = QuestionSchema(**question)
-            except Exception as e:
-                delete_and_raise_exception(
-                    dataset_id=new_dataset.id,
-                    exception=Exception(
-                        f"Failed while parsing the question '{question}' to a `QuestionSchema` instance with exception: {e}"
-                    ),
-                )
-        try:
-            client.add_question(id=new_dataset.id, question=question.dict())
-        except Exception as e:
-            delete_and_raise_exception(
-                dataset_id=new_dataset.id,
-                exception=Exception(
-                    f"Failed while adding the question '{question.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
-                ),
-            )
-
-    try:
-        client.publish_dataset(id=new_dataset.id)
-    except Exception as e:
-        delete_and_raise_exception(
-            dataset_id=new_dataset.id,
-            exception=Exception(f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"),
-        )
-
-    return FeedbackDataset.from_argilla(id=new_dataset.id)
+            return (False, None)
