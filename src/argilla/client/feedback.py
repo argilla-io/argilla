@@ -17,13 +17,22 @@ from __future__ import annotations
 import sys
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from uuid import UUID
 
 if sys.version_info >= (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr, create_model, validator
+from pydantic import (
+    BaseModel,
+    Field,
+    StrictInt,
+    StrictStr,
+    ValidationError,
+    create_model,
+    validator,
+)
 from tqdm import tqdm
 
 import argilla as rg
@@ -47,13 +56,33 @@ class ResponseSchema(BaseModel):
     status: Literal["submitted", "missing", "discarded"]
 
 
+class OfflineFeedbackResponse(ResponseSchema):
+    user_id: Optional[UUID] = None
+
+    @validator("user_id", always=True)
+    def user_id_must_have_value(cls, v):
+        if not v:
+            warnings.warn(
+                "`user_id` not provided for `OfflineFeedbackResponse`. So it will be set to `None`. Which "
+                "is not an issue, even though if you're planning to log the record in Argilla, as it will be set "
+                "automatically to the current user's id."
+            )
+        return v
+
+
 class FeedbackRecord(BaseModel):
     fields: Dict[str, str]
     response: Optional[ResponseSchema] = None
     external_id: Optional[str] = None
 
-    class Config:
-        fields = {"response": {"exclude": True}, "external_id": {"exclude": True}}
+
+class OfflineFeedbackRecord(BaseModel):
+    id: Optional[str] = None
+    fields: Dict[str, str]
+    responses: List[OfflineFeedbackResponse] = []
+    external_id: Optional[str] = None
+    inserted_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
 
 class FieldSchema(BaseModel):
