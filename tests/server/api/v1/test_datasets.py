@@ -1947,8 +1947,8 @@ def test_publish_dataset_with_error_on_index_creation(
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
-    assert response.status_code == 200
-    assert db.get(Dataset, dataset.id).status == "ready"
+    assert response.status_code == 422
+    assert db.get(Dataset, dataset.id).status == "draft"
 
     assert not opensearch.indices.exists(index=f"rg.{dataset.id}")
 

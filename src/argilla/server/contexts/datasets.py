@@ -85,14 +85,16 @@ async def publish_dataset(db: Session, search_engine: SearchEngine, dataset: Dat
 
     dataset.status = DatasetStatus.ready
     db.commit()
-    db.refresh(dataset)
+    db.expire(dataset)
 
     try:
-        # TODO: search engine operations won't raise errors for now.
-        #  In a next step, this action must be required to fully publish the dataset
         await search_engine.create_index(dataset)
-    except Exception as ex:
-        _LOGGER.error(f"Search index cannot be created: {ex}")
+    except:
+        # TODO: Improve this action using some rollback mechanism
+        dataset.status = DatasetStatus.draft
+        db.commit()
+        db.expire(dataset)
+        raise
 
     return dataset
 
@@ -271,6 +273,7 @@ async def create_records(
 
         await search_engine.add_records(dataset, records)
     except:
+        # TODO: Improve this action using some rollback mechanism
         for record in records:
             db.delete(record)
         db.commit()
