@@ -8,7 +8,7 @@
       />
     </template>
     <template v-slot:sidebar-right>
-      <SidebarFeedbackTaskComponent />
+      <SidebarFeedbackTaskComponent :datasetId="datasetId" />
     </template>
     <template v-slot:top>
       <DatasetFiltersComponent :datasetId="datasetId" />

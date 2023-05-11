@@ -1,8 +1,11 @@
 <template>
   <div class="sidebar__container">
     <SidebarFeedbackTaskPanel v-if="isPanelVisible" @close-panel="closePanel">
-      <component v-if="getProgressComponentName" :is="getProgressComponentName"
-    /></SidebarFeedbackTaskPanel>
+      <component
+        v-if="getProgressComponentName"
+        :is="getProgressComponentName"
+      />
+    </SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
       @on-click-sidebar-action="onClickSidebarAction"
       :sidebar-items="sidebarItems"
@@ -14,6 +17,12 @@
 
 <script>
 export default {
+  props: {
+    datasetId: {
+      type: String,
+      required: true,
+    },
+  },
   data: () => ({
     currentMetric: null,
     currentMode: "annotate",
@@ -73,9 +82,10 @@ export default {
     };
   },
   methods: {
-    onClickSidebarAction(group, info) {
+    async onClickSidebarAction(group, info) {
       switch (group) {
         case "metrics":
+          console.log("fetchMetrics");
           this.toggleMetrics(info);
           break;
         case "mode":
@@ -86,6 +96,12 @@ export default {
           break;
         default:
           console.warn(info);
+      }
+    },
+    async fetchMetrics() {
+      try {
+      } catch (err) {
+        console.log(err);
       }
     },
     toggleMetrics(panelContent) {
