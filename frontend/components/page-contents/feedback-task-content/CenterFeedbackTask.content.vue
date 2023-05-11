@@ -79,10 +79,14 @@ export default {
     },
   },
   watch: {
+    totalRecords(newTotalRecord) {
+      if (!newTotalRecord) this.areResponsesUntouched = true;
+    },
     async recordStatusFilteringValue(newStatus, oldStatus) {
       // NOTE 1 - each time the filter change, clean records orm && rerender the children component
       !this.areResponsesUntouched ||
         (await this.goToFirstPageAndRerenderChildren());
+
       // NOTE 2 - if responses are untouched, toast is not shown. Else, toast is shown
       this.checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(newStatus) ||
         this.showNotificationBeforeChangeStatus({
@@ -302,7 +306,8 @@ export default {
     },
     checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(status) {
       return (
-        this.areResponsesUntouched || this.recordStatus.toLowerCase() === status
+        this.areResponsesUntouched ||
+        this.recordStatus?.toLowerCase() === status
       );
     },
     async getFields(datasetId) {
