@@ -75,7 +75,7 @@
           name="submitButton"
           value="submitButton"
           class="primary"
-          :disabled="isFormUntouched || isSomeRequiredQuestionHaveNoAnswer"
+          :disabled="disableSubmitButton"
         >
           <span v-text="'Submit'" />
         </BaseButton>
@@ -163,6 +163,30 @@ export default {
     },
     isRecordDiscarded() {
       return this.recordStatus === RECORD_STATUS.DISCARDED;
+    },
+    isRecordPending() {
+      return this.recordStatus === RECORD_STATUS.PENDING;
+    },
+    isRecordSubmitted() {
+      return this.recordStatus === RECORD_STATUS.SUBMITTED;
+    },
+    disableSubmitButton() {
+      let isButtonDisable = false;
+      switch (true) {
+        case this.isRecordSubmitted:
+          if (this.isFormUntouched || this.isSomeRequiredQuestionHaveNoAnswer) {
+            isButtonDisable = true;
+          }
+          break;
+        case this.isRecordDiscarded:
+        case this.isRecordPending:
+          if (this.isSomeRequiredQuestionHaveNoAnswer) isButtonDisable = true;
+          break;
+        default:
+          isButtonDisable = false;
+      }
+
+      return isButtonDisable;
     },
   },
   watch: {
