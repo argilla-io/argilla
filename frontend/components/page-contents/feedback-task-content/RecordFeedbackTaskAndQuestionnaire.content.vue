@@ -195,7 +195,6 @@ export default {
         this.initRecordsInDatabase(newRecordOffset);
       }
     },
-    questions: {},
   },
   methods: {
     async initRecordsInDatabase(recordOffset) {
