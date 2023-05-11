@@ -176,6 +176,7 @@ export default {
             title: questionTitle,
             required: isRequired,
             settings: questionSettings,
+            description: questionDescription,
           },
           index
         ) => {
@@ -201,7 +202,7 @@ export default {
             is_required: isRequired,
             component_type: componentType,
             placeholder: questionSettings?.placeholder ?? null,
-            tooltip_message: questionSettings?.tooltip ?? null,
+            description: questionDescription ?? null,
           };
         }
       );

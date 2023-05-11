@@ -16,6 +16,7 @@
 </template>
 
 <script>
+import { SIDEBAR_GROUP } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
 export default {
   props: {
     datasetId: {
@@ -82,16 +83,16 @@ export default {
     };
   },
   methods: {
-    async onClickSidebarAction(group, info) {
-      switch (group) {
-        case "metrics":
+    onClickSidebarAction(group, info) {
+      switch (group.toUpperCase()) {
+        case SIDEBAR_GROUP.METRICS:
           console.log("fetchMetrics");
           this.toggleMetrics(info);
           break;
-        case "mode":
+        case SIDEBAR_GROUP.MODE:
           console.log("change-view-mode", info);
           break;
-        case "refresh":
+        case SIDEBAR_GROUP.REFRESH:
           this.$emit("refresh");
           break;
         default:
