@@ -101,9 +101,8 @@ export default {
     },
   },
   created() {
-    this.toastMessage =
-      "Pending actions will be lost when the page is refreshed";
-    this.buttonMessage = "Ok, got it!";
+    this.toastMessage = "Your changes will be lost if you move to another view";
+    this.buttonMessage = "Ok, continue.";
     this.typeOfToast = "warning";
   },
   methods: {
