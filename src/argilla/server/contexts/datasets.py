@@ -21,7 +21,6 @@ from argilla.server.models import (
     DatasetStatus,
     Field,
     Question,
-    QuestionSettings,
     Record,
     Response,
     ResponseStatus,

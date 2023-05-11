@@ -6,14 +6,19 @@
         v-text="title"
         v-optional-field="isRequired ? false : true"
       />
-      <TooltipComponent
-        class="info-icon"
+
+      <BaseIconWithBadge
+        class="icon-info"
         v-if="isIcon"
-        :message="tooltipMessage"
-        direction="bottom"
-      >
-        <svgicon class="icon" name="info" width="22" height="22" />
-      </TooltipComponent>
+        icon="info"
+        :id="`${title}MonoSelection`"
+        :show-badge="false"
+        iconColor="rgba(0, 0, 0, 0.37)"
+        badge-vertical-position="top"
+        badge-horizontal-position="right"
+        badge-border-color="white"
+        v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF' }"
+      />
     </div>
     <div class="container">
       <div class="inputs-area">
@@ -183,5 +188,19 @@ input {
 
 span {
   word-break: break-word;
+}
+
+.icon-info {
+  margin: 0;
+  padding: 0;
+  overflow: inherit;
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    &:before,
+    &:after {
+      margin-top: 0;
+    }
+  }
 }
 </style>

@@ -1,0 +1,155 @@
+import Vue from "vue";
+
+// NOTE - to use tooltip directive, add to your html element where to put a tooltip :
+//  v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF', borderColor: '#FFF', tooltipPosition: 'bottom' }"
+//    => content (String) the message to show in the tooltip
+//    => backgroundColor (String) the background color of the tooltip
+//    => borderColor (String) the border color of the tooltip
+//    => tooltipPosition (String) the positin of the tooltip (bottom, top, right, left) =>
+// TODO - implement the other tooltip direction top/right/left
+
+Vue.directive("tooltip", {
+  inserted: (element, binding) => {
+    const tooltipId = `${element.id}tooltip`;
+    const tooltipCloseIconId = `${tooltipId}__close-icon`;
+    let tooltip = null;
+    let closeIcon = null;
+    element.style.position = "relative";
+    element.style.cursor = "pointer";
+
+    const {
+      content,
+      backgroundColor,
+      borderColor,
+      tooltipPosition = TOOLTIP_DIRECTION.BOTTOM,
+    } = binding.value;
+
+    if (content?.length) {
+      // NOTE - init tooltip node
+      tooltip = document.createElement("div");
+      tooltip.setAttribute("id", tooltipId);
+
+      // NOTE - init text node
+      const text = document.createTextNode(`${content}`);
+      let textWrapper = document.createElement("span");
+      textWrapper.appendChild(text);
+
+      // NOTE - init close icon
+      let tooltipHeader = document.createElement("div");
+      tooltipHeader = initTooltipHeaderStyle(tooltipHeader);
+      tooltipHeader.firstChild.setAttribute("id", tooltipCloseIconId);
+
+      // NOTE - include close icon and text node inside tooltip
+      tooltip.appendChild(tooltipHeader);
+      tooltip.appendChild(textWrapper);
+
+      // NOTE - text styles
+      textWrapper = initTextStyle(textWrapper);
+
+      // NOTE - tooltip styles
+      tooltip = initTooltipStyle(tooltip, backgroundColor, borderColor);
+
+      // NOTE - init tooltip position
+      tooltip = initTooltipPosition(tooltip, tooltipPosition);
+
+      // NOTE - add the tooltip to the element and add event listenner to the close icon
+      element.appendChild(tooltip);
+      closeIcon = document.getElementById(tooltipCloseIconId);
+    }
+
+    // NOTE - init function for event listeners. Needs to be passed throw 'element' object to be able to destroy them on unbind
+    element.clickOnTooltipElementEvent = () => {
+      tooltip.style.display = "flex";
+    };
+    element.clickOnClose = (event) => {
+      // NOTE - stop propagation to not fire element.clickOnTooltipElement()
+      event.stopPropagation();
+      tooltip.style.display = "none";
+    };
+    element.clickOutsideEvent = function (event) {
+      // NOTE - here we check if the click event is outside the element or it's children
+      if (!(element == event.target || element.contains(event.target))) {
+        tooltip.style.display = "none";
+      }
+    };
+
+    // NOTE - init all eventListeners
+    initEventsListener(element, closeIcon);
+  },
+  unbind: (element) => {
+    destroyEventsListener(element);
+  },
+});
+
+const initEventsListener = (element, closeIcon) => {
+  if (element && closeIcon) {
+    closeIcon.addEventListener("click", element.clickOnClose);
+    closeIcon.addEventListener("touchstart", element.clickOnClose);
+    element.addEventListener("click", element.clickOnTooltipElementEvent);
+    element.addEventListener("touchstart", element.clickOnTooltipElementEvent);
+    document.body.addEventListener("click", element.clickOutsideEvent);
+    document.body.addEventListener("touchstart", element.clickOutsideEvent);
+  }
+};
+
+const destroyEventsListener = (element) => {
+  document.body.removeEventListener(
+    "click",
+    element.clickOnTooltipElementEvent
+  );
+  document.body.removeEventListener(
+    "touchstart",
+    element.clickOnTooltipElementEvent
+  );
+  document.body.removeEventListener("click", element.clickOutsideEvent);
+  document.body.removeEventListener("touchstart", element.clickOutsideEvent);
+  document.body.removeEventListener("click", element.clickOnClose);
+  document.body.removeEventListener("touchstart", element.clickOnClose);
+};
+
+const initTooltipStyle = (
+  tooltip,
+  backgroundColor = "white",
+  borderColor = "transparent"
+) => {
+  tooltip.style.position = "absolute";
+  tooltip.style.display = "none";
+  tooltip.style.flexDirection = "column";
+  tooltip.style.zIndex = "99999";
+  tooltip.style.backgroundColor = backgroundColor;
+  tooltip.style.borderRadius = "5px";
+  tooltip.style.padding = "8px";
+  tooltip.style.boxShadow = "0 0 40px #ccc";
+  tooltip.style.transition = "opacity 0.3s ease 0.2s";
+  tooltip.style.border = `2px ${borderColor} solid`;
+  return tooltip;
+};
+const initTooltipHeaderStyle = (tooltipHeader) => {
+  tooltipHeader.style.display = "flex";
+  tooltipHeader.style.justifyContent = "flex-end";
+  tooltipHeader.innerHTML =
+    '<svg width="41" height="40" viewBox="0 0 41 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 14px; height: 14px;"><path d="M8.9225 5.58721C8.13956 4.80426 6.87015 4.80426 6.08721 5.58721C5.30426 6.37015 5.30426 7.63956 6.08721 8.4225L17.6647 20L6.08733 31.5774C5.30438 32.3603 5.30438 33.6297 6.08733 34.4127C6.87027 35.1956 8.13968 35.1956 8.92262 34.4127L20.5 22.8353L32.0774 34.4127C32.8603 35.1956 34.1297 35.1956 34.9127 34.4127C35.6956 33.6297 35.6956 32.3603 34.9127 31.5774L23.3353 20L34.9128 8.4225C35.6957 7.63956 35.6957 6.37015 34.9128 5.58721C34.1298 4.80426 32.8604 4.80426 32.0775 5.58721L20.5 17.1647L8.9225 5.58721Z" fill="black"/></svg>';
+  return tooltipHeader;
+};
+
+const initTooltipPosition = (tooltip, tooltipPosition) => {
+  switch (tooltipPosition.toUpperCase()) {
+    case TOOLTIP_DIRECTION.BOTTOM:
+      tooltip.style.top = "28px";
+      break;
+    default:
+    // tooltip direction is unknown
+  }
+  return tooltip;
+};
+
+const initTextStyle = (textWrapper) => {
+  textWrapper.style.fontSize = "14px";
+  textWrapper.style.fontStyle = "normal";
+  textWrapper.style.color = "#000";
+  return textWrapper;
+};
+
+const TOOLTIP_DIRECTION = Object.freeze({
+  BOTTOM: "BOTTOM",
+});

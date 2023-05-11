@@ -8,7 +8,7 @@
       />
     </template>
     <template v-slot:sidebar-right>
-      <SidebarFeedbackTaskComponent />
+      <SidebarFeedbackTaskComponent @refresh="onRefresh()" />
     </template>
     <template v-slot:top>
       <DatasetFiltersComponent :datasetId="datasetId" />
@@ -24,7 +24,12 @@
 
 <script>
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
-import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
+import {
+  RECORD_STATUS,
+  deleteAllRecords,
+} from "@/models/feedback-task-model/record/record.queries";
+import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
+import { deleteAllRecordResponses } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 import {
   upsertFeedbackDataset,
   getFeedbackDatasetNameById,
@@ -41,6 +46,11 @@ export default {
   name: "DatasetPage",
   components: {
     HeaderAndTopAndOneColumn,
+  },
+  data: () => {
+    return {
+      areResponsesUntouched: false,
+    };
   },
   computed: {
     datasetId() {
@@ -80,12 +90,19 @@ export default {
 
       // 3- insert in ORM
       upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
+
+      // Check if response is untouched
+      this.onBusEventAreResponsesUntouched();
     } catch (err) {
       this.manageErrorIfFetchNotWorking(err);
     }
   },
   created() {
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
+    this.toastMessage =
+      "Pending actions will be lost when the page is refreshed";
+    this.buttonMessage = "Ok, got it!";
+    this.typeOfToast = "warning";
   },
   methods: {
     checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
@@ -149,6 +166,50 @@ export default {
 
       Notification.dispatch("notify", paramsForNotitification);
     },
+    async onRefresh() {
+      if (this.areResponsesUntouched) {
+        await this.deleteRecordsAndRefreshDataset();
+      } else {
+        this.showNotificationBeforeRefresh({
+          eventToFireOnClick: async () => {
+            await this.deleteRecordsAndRefreshDataset();
+          },
+          message: this.toastMessage,
+          buttonMessage: this.buttonMessage,
+          typeOfToast: this.typeOfToast,
+        });
+      }
+    },
+    async deleteRecordsAndRefreshDataset() {
+      await deleteAllRecords();
+      await deleteAllRecordFields();
+      await deleteAllRecordResponses();
+      this.$fetch();
+    },
+    async onBusEventAreResponsesUntouched() {
+      this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
+        this.areResponsesUntouched = areResponsesUntouched;
+      });
+    },
+    showNotificationBeforeRefresh({
+      eventToFireOnClick,
+      message,
+      buttonMessage,
+      typeOfToast,
+    }) {
+      Notification.dispatch("notify", {
+        message: message ?? "",
+        numberOfChars: 20000,
+        type: typeOfToast ?? "warning",
+        buttonText: buttonMessage ?? "",
+        async onClick() {
+          eventToFireOnClick();
+        },
+      });
+    },
+  },
+  destroyed() {
+    this.$root.$off("are-responses-untouched");
   },
 };
 </script>
