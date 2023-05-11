@@ -276,6 +276,13 @@ class FeedbackDataset:
         else:
             self.__records = [OfflineFeedbackRecord.construct(**record.dict()).dict() for record in records]
 
+        if push and self.argilla_id:
+            client = rg.active_client()
+            client.add_records(
+                id=self.argilla_id,
+                records=[record.dict(exclude_none=True) for record in records],
+            )
+
     def iter(
         self, batch_size: Optional[int] = FETCHING_BATCH_SIZE
     ) -> Iterator[Union["FeedbackItemModel", OfflineFeedbackRecord]]:
