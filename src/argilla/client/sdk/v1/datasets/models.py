@@ -15,7 +15,7 @@
 
 import sys
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 if sys.version_info >= (3, 8):
@@ -23,7 +23,7 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StrictInt, StrictStr
 
 
 class FeedbackDatasetModel(BaseModel):
@@ -36,9 +36,13 @@ class FeedbackDatasetModel(BaseModel):
     last_updated: datetime = None
 
 
+class FeedbackValueModel(BaseModel):
+    value: Union[StrictStr, StrictInt]
+
+
 class FeedbackResponseModel(BaseModel):
     id: UUID
-    values: Dict[str, Any]
+    values: Dict[str, FeedbackValueModel]
     status: Literal["submitted", "missing", "discarded"]
     user_id: UUID
     inserted_at: datetime
