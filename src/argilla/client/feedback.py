@@ -373,13 +373,6 @@ class FeedbackDataset:
     def from_argilla(
         cls, name: Optional[str] = None, *, workspace: Optional[str] = None, id: Optional[str] = None
     ) -> "FeedbackDataset":
-        assert name or (name and workspace) or id, (
-            "You must provide either the `name` and `workspace` (the latter just if applicable, if not the default"
-            " `workspace` will be used) or the `id`, which is the Argilla ID of the `rg.FeedbackDataset`."
-        )
-
-        client: "Argilla" = rg.active_client()
-
         dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if not dataset_exists:
             raise ValueError(
@@ -389,6 +382,8 @@ class FeedbackDataset:
                 if name and workspace
                 else f"Could not find a `FeedbackTask` dataset in Argilla with ID='{id}'."
             )
+
+        client: "Argilla" = rg.active_client()
 
         cls.argilla_id = existing_dataset.id
         self = cls(
@@ -424,8 +419,13 @@ def create_feedback_dataset(
 
 
 def feedback_dataset_in_argilla(
-    name: Optional[str] = None, *, workspace: Optional[str] = None, id: Optional[str] = None
+    name: Optional[str] = None, *, workspace: Optional[Union[str, rg.Workspace]] = None, id: Optional[str] = None
 ) -> Tuple[bool, Optional[FeedbackDataset]]:
+    assert name or (name and workspace) or id, (
+        "You must provide either the `name` and `workspace` (the latter just if applicable, if not the default"
+        " `workspace` will be used) or the `id`, which is the Argilla ID of the `rg.FeedbackDataset`."
+    )
+
     client: "Argilla" = rg.active_client()
 
     if name or (name and workspace):
