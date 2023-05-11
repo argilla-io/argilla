@@ -73,38 +73,6 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
 
     def init_pipeline(self):
         pass
-        import transformers
-        from transformers import pipeline
-
-        if self.device == "cuda":
-            device = 0
-        else:
-            device = -1
-
-        self._transformers_model.__class__ = self._model_sub_class
-
-        if self._record_class == rg.TextClassificationRecord:
-            if transformers.__version__ >= "4.20.0":
-                kwargs = {"top_k": None}
-            else:
-                kwargs = {"return_all_scores": True}
-            self._pipeline = pipeline(
-                task="text-classification",
-                model=self._transformers_model,
-                tokenizer=self._transformers_tokenizer,
-                device=device,
-                **kwargs,
-            )
-        elif self._record_class == rg.TokenClassificationRecord:
-            self._pipeline = pipeline(
-                task="token-classification",
-                model=self._transformers_model,
-                tokenizer=self._transformers_tokenizer,
-                aggregation_strategy="first",
-                device=device,
-            )
-        else:
-            raise NotImplementedError("This is not implemented.")
 
     def update_config(self, **kwargs):
         """
