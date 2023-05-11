@@ -97,7 +97,7 @@ export default {
     isPageAvailable() {
       return (this.pageFromQuery || this.currentPage) <= this.totalPages;
     },
-    pageFromQuery() {
+    pageFromRoute() {
       return parseFloat(this.$route.query?._page);
     },
   },
@@ -111,7 +111,7 @@ export default {
     },
   },
   mounted() {
-    this.currentPage = this.isPageAvailable ? this.pageFromQuery || 1 : 1;
+    this.currentPage = this.isPageAvailable ? this.pageFromRoute || 1 : 1;
 
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
 
