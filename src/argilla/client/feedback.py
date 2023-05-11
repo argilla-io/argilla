@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import sys
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 from uuid import UUID
 
 if sys.version_info >= (3, 8):
@@ -279,13 +279,11 @@ class FeedbackDataset:
         else:
             self.__records = [OfflineFeedbackRecord.construct(**record.dict()).dict() for record in records]
 
-        if push:
-            if self.loaded_from_argilla:
-                client = rg.active_client()
-                client.add_records(
-                    id=self.argilla_id,
-                    records=[record.dict(exclude_none=True) for record in records],
-                )
+    def iter(
+        self, batch_size: Optional[int] = FETCHING_BATCH_SIZE
+    ) -> Iterator[Union["FeedbackItemModel", OfflineFeedbackRecord]]:
+        for i in range(0, len(self.__records), batch_size):
+            yield self.__records[i : i + batch_size]
 
     def push_to_argilla(self, name: str, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
         dataset_exists, _ = feedback_dataset_in_argilla(name=name, workspace=workspace)
