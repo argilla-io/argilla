@@ -114,7 +114,6 @@ export default {
   },
   destroyed() {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
-    this.$root.$off("current-page");
   },
   methods: {
     onPressKeyboardShortCut({ code }) {
