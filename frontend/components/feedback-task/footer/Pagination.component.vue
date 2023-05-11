@@ -106,7 +106,10 @@ export default {
     },
   },
   mounted() {
-    this.currentPage = parseFloat(this.$route.query?._page) || 1;
+    this.currentPage =
+      this.currentPage > this.totalPages
+        ? parseFloat(this.$route.query?._page) || 1
+        : 1;
 
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
 
