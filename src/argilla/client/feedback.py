@@ -134,10 +134,7 @@ class RatingQuestion(QuestionSchema):
 
 
 class FeedbackDataset:
-    loaded_from_argilla: bool = False
     argilla_id: Optional[str] = None
-
-    loaded_from_huggingface: bool = False
 
     def __init__(
         self,
@@ -222,7 +219,7 @@ class FeedbackDataset:
         return self.__records
 
     def fetch_records(self, overwrite: bool = False) -> List["FeedbackItemModel"]:
-        if not self.loaded_from_argilla and not self.loaded_from_huggingface:
+        if not self.argilla_id:
             warnings.warn(
                 "No records have been logged into neither Argilla nor HuggingFace, so no records will be fetched. The current records will be returned instead."
             )
@@ -233,7 +230,7 @@ class FeedbackDataset:
             )
             return self.__records
 
-        if self.loaded_from_argilla:
+        if self.argilla_id:
             client = rg.active_client()
             first_batch = client.get_records(id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE)
             self.__records = first_batch.items
@@ -369,7 +366,6 @@ class FeedbackDataset:
                 else f"Could not find a `FeedbackTask` dataset in Argilla with ID='{id}'."
             )
 
-        cls.loaded_from_argilla = True
         cls.argilla_id = existing_dataset.id
         self = cls(
             guidelines=existing_dataset.guidelines,
