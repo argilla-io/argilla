@@ -15,11 +15,10 @@
 import random
 
 import pytest
-from argilla.server.elasticsearch import ElasticSearchEngine
-from elasticsearch8 import BadRequestError, Elasticsearch
+from argilla.server.search import SearchEngine
+from opensearchpy import OpenSearch, RequestError
 from sqlalchemy.orm import Session
 
-from tests.conftest import is_running_elasticsearch
 from tests.factories import (
     DatasetFactory,
     RatingQuestionFactory,
@@ -28,16 +27,15 @@ from tests.factories import (
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
 class TestSuiteElasticSearchEngine:
-    async def test_create_index_for_dataset(self, search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch):
+    async def test_create_index_for_dataset(self, search_engine: SearchEngine, opensearch: OpenSearch):
         dataset = DatasetFactory.create()
         await search_engine.create_index(dataset)
 
         index_name = f"rg.{dataset.id}"
-        assert elasticsearch.indices.exists(index=index_name)
+        assert opensearch.indices.exists(index=index_name)
 
-        index = elasticsearch.indices.get(index=index_name)[index_name]
+        index = opensearch.indices.get(index=index_name)[index_name]
         assert index["mappings"] == {
             "dynamic": "strict",
             "dynamic_templates": [],
@@ -53,8 +51,8 @@ class TestSuiteElasticSearchEngine:
     )
     async def test_create_index_for_dataset_with_questions(
         self,
-        search_engine: ElasticSearchEngine,
-        elasticsearch: Elasticsearch,
+        search_engine: SearchEngine,
+        opensearch: OpenSearch,
         db: Session,
         text_ann_size: int,
         rating_ann_size: int,
@@ -67,9 +65,9 @@ class TestSuiteElasticSearchEngine:
         await search_engine.create_index(dataset)
 
         index_name = f"rg.{dataset.id}"
-        assert elasticsearch.indices.exists(index=index_name)
+        assert opensearch.indices.exists(index=index_name)
 
-        index = elasticsearch.indices.get(index=index_name)[index_name]
+        index = opensearch.indices.get(index=index_name)[index_name]
         assert index["mappings"] == {
             "dynamic": "strict",
             "properties": {
@@ -105,13 +103,13 @@ class TestSuiteElasticSearchEngine:
         }
 
     async def test_create_index_with_existing_index(
-        self, search_engine: ElasticSearchEngine, elasticsearch: Elasticsearch, db: Session
+        self, search_engine: SearchEngine, opensearch: OpenSearch, db: Session
     ):
         dataset = DatasetFactory.create()
         await search_engine.create_index(dataset)
 
         index_name = f"rg.{dataset.id}"
-        assert elasticsearch.indices.exists(index=index_name)
+        assert opensearch.indices.exists(index=index_name)
 
-        with pytest.raises(BadRequestError, match="'resource_already_exists_exception', 'index"):
+        with pytest.raises(RequestError, match="'resource_already_exists_exception', 'index"):
             await search_engine.create_index(dataset)

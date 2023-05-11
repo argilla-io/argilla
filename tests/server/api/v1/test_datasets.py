@@ -17,7 +17,6 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.elasticsearch import ElasticSearchEngine
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -38,11 +37,11 @@ from argilla.server.schemas.v1.datasets import (
     RECORDS_CREATE_MIN_ITEMS,
     RecordInclude,
 )
-from elasticsearch8 import Elasticsearch
+from argilla.server.search import SearchEngine
 from fastapi.testclient import TestClient
+from opensearchpy import OpenSearch
 from sqlalchemy.orm import Session
 
-from tests.conftest import is_running_elasticsearch
 from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
@@ -1396,18 +1395,17 @@ def test_create_dataset_rating_question_with_invalid_settings_options_values(
     assert db.query(Question).count() == 0
 
 
-@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
 @pytest.mark.asyncio
 async def test_create_dataset_records(
     client: TestClient,
-    search_engine: ElasticSearchEngine,
-    elasticsearch: Elasticsearch,
+    search_engine: SearchEngine,
+    opensearch: OpenSearch,
     db: Session,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    FieldFactory.create(name="input", dataset=dataset)
-    FieldFactory.create(name="output", dataset=dataset)
+    TextFieldFactory.create(name="input", dataset=dataset)
+    TextFieldFactory.create(name="output", dataset=dataset)
 
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
@@ -1459,13 +1457,35 @@ async def test_create_dataset_records(
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
 
-    assert response.status_code == 204
+    assert response.status_code == 204, response.json()
     assert db.query(Record).count() == 5
     assert db.query(Response).count() == 4
 
+    index_name = f"rg.{dataset.id}"
+    opensearch.indices.refresh(index=index_name)
+    assert [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]] == [
+        {
+            "fields": {"input": "Say Hello", "output": "Hello"},
+            "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "yes"}, "status": "submitted"}},
+        },
+        {"fields": {"input": "Say Hello", "output": "Hi"}, "responses": {}},
+        {
+            "fields": {"input": "Say Pello", "output": "Hello World"},
+            "responses": {"admin": {"values": {"input_ok": "no", "output_ok": "no"}, "status": "submitted"}},
+        },
+        {
+            "fields": {"input": "Say Hello", "output": "Good Morning"},
+            "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "no"}, "status": "discarded"}},
+        },
+        {
+            "fields": {"input": "Say Hello", "output": "Say Hello"},
+            "responses": {"admin": {"values": None, "status": "discarded"}},
+        },
+    ]
+
 
 def test_create_dataset_records_with_missing_required_fields(
-    client: TestClient, db: Session, elasticsearch: Elasticsearch, admin_auth_header: dict
+    client: TestClient, db: Session, opensearch: OpenSearch, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     FieldFactory.create(name="input", dataset=dataset, required=True)
@@ -1496,7 +1516,7 @@ def test_create_dataset_records_with_missing_required_fields(
 
 
 def test_create_dataset_records_with_wrong_value_field(
-    client: TestClient, db: Session, elasticsearch: Elasticsearch, admin_auth_header: dict
+    client: TestClient, db: Session, opensearch: OpenSearch, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     FieldFactory.create(name="input", dataset=dataset)
@@ -1527,7 +1547,7 @@ def test_create_dataset_records_with_wrong_value_field(
 
 
 def test_create_dataset_records_with_extra_fields(
-    client: TestClient, db: Session, elasticsearch: Elasticsearch, admin_auth_header: dict
+    client: TestClient, db: Session, opensearch: OpenSearch, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     FieldFactory.create(name="input", dataset=dataset)
@@ -1555,32 +1575,11 @@ def test_create_dataset_records_with_extra_fields(
     assert response.json() == {"detail": "Error: found fields values for non configured fields: ['output']"}
     assert db.query(Record).count() == 0
 
-    index_name = f"rg.{dataset.id}"
 
-    assert elasticsearch.indices.exists(index=index_name)
-
-    elasticsearch.indices.refresh(index=index_name)
-    assert [hit["_source"] for hit in elasticsearch.search(index=index_name)["hits"]["hits"]] == [
-        {
-            "fields": {"input": "Say Hello", "ouput": "Hello"},
-            "responses": {"admin": {"input_ok": "yes", "output_ok": "yes"}},
-        },
-        {
-            "fields": {"input": "Say Hello", "output": "Hi"},
-            "responses": {},
-        },
-        {
-            "fields": {"input": "Say Pello", "output": "Hello World"},
-            "responses": {"admin": {"input_ok": "no", "output_ok": "no"}},
-        },
-    ]
-
-
-@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
 @pytest.mark.asyncio
 async def test_create_dataset_records_with_index_error(
     client: TestClient,
-    elasticsearch: Elasticsearch,
+    opensearch: OpenSearch,
     db: Session,
     admin_auth_header: dict,
 ):
@@ -1601,7 +1600,7 @@ async def test_create_dataset_records_with_index_error(
 
     index_name = f"rg.{dataset.id}"
 
-    assert not elasticsearch.indices.exists(index=index_name)
+    assert not opensearch.indices.exists(index=index_name)
 
 
 def test_create_dataset_records_without_authentication(client: TestClient, db: Session):
@@ -1657,13 +1656,23 @@ def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
     assert db.query(Response).count() == 0
 
 
-def test_create_dataset_records_with_submitted_response(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.asyncio
+async def test_create_dataset_records_with_submitted_response(
+    client: TestClient,
+    db: Session,
+    search_engine: SearchEngine,
+    opensearch: OpenSearch,
+    admin_auth_header: dict,
+):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    FieldFactory.create(name="input", dataset=dataset)
-    FieldFactory.create(name="output", dataset=dataset)
+    TextFieldFactory.create(name="input", dataset=dataset)
+    TextFieldFactory.create(name="output", dataset=dataset)
 
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    # Prepare dataset and es index
+    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -1710,13 +1719,22 @@ def test_create_dataset_records_with_submitted_response_without_values(
     assert db.query(Response).count() == 0
 
 
-def test_create_dataset_records_with_discarded_response(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.asyncio
+async def test_create_dataset_records_with_discarded_response(
+    client: TestClient,
+    db: Session,
+    search_engine: SearchEngine,
+    opensearch: OpenSearch,
+    admin_auth_header: dict,
+):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    FieldFactory.create(name="input", dataset=dataset)
-    FieldFactory.create(name="output", dataset=dataset)
+    TextFieldFactory.create(name="input", dataset=dataset)
+    TextFieldFactory.create(name="output", dataset=dataset)
 
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -1764,12 +1782,22 @@ def test_create_dataset_records_with_invalid_response_status(client: TestClient,
     assert db.query(Response).count() == 0
 
 
-def test_create_dataset_records_with_discarded_response_without_values(
-    client: TestClient, db: Session, admin_auth_header: dict
+@pytest.mark.asyncio
+async def test_create_dataset_records_with_discarded_response_without_values(
+    client: TestClient,
+    db: Session,
+    search_engine: SearchEngine,
+    opensearch: OpenSearch,
+    admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    FieldFactory.create(name="input", dataset=dataset)
-    FieldFactory.create(name="output", dataset=dataset)
+    TextFieldFactory.create(name="input", dataset=dataset)
+    TextFieldFactory.create(name="output", dataset=dataset)
+
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -1886,11 +1914,10 @@ def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, 
     assert db.query(Response).count() == 0
 
 
-@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
 def test_publish_dataset(
     client: TestClient,
     db: Session,
-    elasticsearch: Elasticsearch,
+    opensearch: OpenSearch,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create()
@@ -1905,14 +1932,13 @@ def test_publish_dataset(
     response_body = response.json()
     assert response_body["status"] == "ready"
 
-    assert elasticsearch.indices.exists(index=f"rg.{dataset.id}")
+    assert opensearch.indices.exists(index=f"rg.{dataset.id}")
 
 
-@pytest.mark.skipif(condition=not is_running_elasticsearch(), reason="Test only running with elasticsearch backend")
 def test_publish_dataset_with_error_on_index_creation(
     client: TestClient,
     db: Session,
-    elasticsearch: Elasticsearch,
+    opensearch: OpenSearch,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create()
@@ -1924,7 +1950,7 @@ def test_publish_dataset_with_error_on_index_creation(
     assert response.status_code == 200
     assert db.get(Dataset, dataset.id).status == "ready"
 
-    assert not elasticsearch.indices.exists(index=f"rg.{dataset.id}")
+    assert not opensearch.indices.exists(index=f"rg.{dataset.id}")
 
 
 def test_publish_dataset_without_authentication(client: TestClient, db: Session):

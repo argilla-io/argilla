@@ -17,13 +17,13 @@ import pytest_asyncio
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.elasticsearch import ElasticSearchEngine
+from argilla.server.search import SearchEngine
 from argilla.server.services.datasets import DatasetsService
 
 
 @pytest_asyncio.fixture()
 async def search_engine(elasticsearch_config: dict):
-    engine = ElasticSearchEngine(config=elasticsearch_config)
+    engine = SearchEngine(config=elasticsearch_config)
     yield engine
 
     await engine.client.close()
