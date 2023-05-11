@@ -95,7 +95,10 @@ export default {
       return `${this.currentPage} of ${this.totalItems} records`;
     },
     isPageAvailable() {
-      return (this.$route.query?._page || this.currentPage) <= this.totalPages;
+      return (this.pageFromQuery || this.currentPage) <= this.totalPages;
+    },
+    pageFromQuery() {
+      return parseFloat(this.$route.query?._page);
     },
   },
   watch: {
@@ -108,9 +111,7 @@ export default {
     },
   },
   mounted() {
-    this.currentPage = this.isPageAvailable
-      ? parseFloat(this.$route.query?._page) || 1
-      : 1;
+    this.currentPage = this.isPageAvailable ? this.pageFromQuery || 1 : 1;
 
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
 
