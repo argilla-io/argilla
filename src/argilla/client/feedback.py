@@ -290,13 +290,27 @@ class FeedbackDataset:
             yield self.__records[i : i + batch_size]
 
     def push_to_argilla(self, name: str, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
+        if workspace is None:
+            workspace = rg.Workspace.from_name(client.get_workspace())
+
+        if isinstance(workspace, str):
+            workspace = rg.Workspace.from_name(workspace)
+
         dataset_exists, _ = feedback_dataset_in_argilla(name=name, workspace=workspace)
         if dataset_exists:
             raise RuntimeError(
-                f"Dataset with name `{name}` and workspace `{workspace.name}` already exists in Argilla, please choose another name and/or workspace."
+                f"Dataset with name=`{name}` and workspace=`{workspace.name}` already exists in Argilla, please choose another name and/or workspace."
             )
 
         client: "Argilla" = rg.active_client()
+
+        try:
+            new_dataset: "FeedbackDatasetModel" = client.create_dataset(
+                name=name, workspace_id=workspace.id, guidelines=self.guidelines
+            )
+            argilla_id = new_dataset.id
+        except Exception as e:
+            raise Exception(f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}") from e
 
         def delete_and_raise_exception(dataset_id: str, exception: Exception) -> None:
             try:
@@ -306,17 +320,6 @@ class FeedbackDataset:
                     f"Failed while deleting the `FeedbackTask` dataset with ID '{dataset_id}' from Argilla with exception: {e}"
                 )
             raise exception
-
-        try:
-            new_dataset: "FeedbackDatasetModel" = client.create_dataset(
-                name=name, workspace_id=workspace.id, guidelines=self.guidelines
-            )
-            argilla_id = new_dataset.id
-        except Exception as e:
-            delete_and_raise_exception(
-                dataset_id=argilla_id,
-                exception=Exception(f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}"),
-            )
 
         for field in self.fields:
             try:
@@ -349,6 +352,20 @@ class FeedbackDataset:
                     f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"
                 ),
             )
+
+        for batch in self.iter():
+            try:
+                client.add_records(
+                    id=argilla_id,
+                    records=batch,
+                )
+            except Exception as e:
+                delete_and_raise_exception(
+                    dataset_id=argilla_id,
+                    exception=Exception(
+                        f"Failed while adding the records to the `FeedbackTask` dataset in Argilla with exception: {e}"
+                    ),
+                )
 
         self.argilla_id = argilla_id
 
