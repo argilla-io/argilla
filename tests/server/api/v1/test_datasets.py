@@ -37,7 +37,7 @@ from argilla.server.schemas.v1.datasets import (
     RECORDS_CREATE_MIN_ITEMS,
     RecordInclude,
 )
-from argilla.server.search import SearchEngine
+from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
 from opensearchpy import OpenSearch
 from sqlalchemy.orm import Session

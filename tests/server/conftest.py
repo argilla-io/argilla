@@ -17,7 +17,7 @@ import pytest_asyncio
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.search import SearchEngine
+from argilla.server.search_engine import SearchEngine
 from argilla.server.services.datasets import DatasetsService
 
 

@@ -15,13 +15,14 @@
 import random
 
 import pytest
-from argilla.server.search import SearchEngine
+from argilla.server.search_engine import SearchEngine
 from opensearchpy import OpenSearch, RequestError
 from sqlalchemy.orm import Session
 
 from tests.factories import (
     DatasetFactory,
     RatingQuestionFactory,
+    TextFieldFactory,
     TextQuestionFactory,
 )
 
@@ -40,8 +41,31 @@ class TestSuiteElasticSearchEngine:
             "dynamic": "strict",
             "dynamic_templates": [],
             "properties": {
-                "fields": {"dynamic": "true", "type": "object"},
                 "responses": {"dynamic": "true", "type": "object"},
+            },
+        }
+
+    async def test_create_index_for_dataset_with_fields(
+        self,
+        search_engine: SearchEngine,
+        opensearch: OpenSearch,
+        db: Session,
+    ):
+        text_fields = TextFieldFactory.create_batch(5)
+        dataset = DatasetFactory.create(fields=text_fields)
+
+        await search_engine.create_index(dataset)
+
+        index_name = f"rg.{dataset.id}"
+        assert opensearch.indices.exists(index=index_name)
+
+        index = opensearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"] == {
+            "dynamic": "strict",
+            "dynamic_templates": [],
+            "properties": {
+                "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
+                "responses": {"type": "object", "dynamic": "true"},
             },
         }
 
@@ -71,7 +95,6 @@ class TestSuiteElasticSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "properties": {
-                "fields": {"dynamic": "true", "type": "object"},
                 "responses": {"dynamic": "true", "type": "object"},
             },
             "dynamic_templates": [
@@ -81,8 +104,8 @@ class TestSuiteElasticSearchEngine:
                     for config in [
                         {
                             f"{question.name}_responses": {
-                                "mapping": {"type": "text"},
-                                "path_match": f"responses.*.{question.name}",
+                                "mapping": {"type": "text", "index": False},
+                                "path_match": f"responses.*.values.{question.name}",
                             }
                         },
                     ]
@@ -94,7 +117,7 @@ class TestSuiteElasticSearchEngine:
                         {
                             f"{question.name}_responses": {
                                 "mapping": {"type": "integer"},
-                                "path_match": f"responses.*.{question.name}",
+                                "path_match": f"responses.*.values.{question.name}",
                             }
                         },
                     ]
@@ -111,5 +134,5 @@ class TestSuiteElasticSearchEngine:
         index_name = f"rg.{dataset.id}"
         assert opensearch.indices.exists(index=index_name)
 
-        with pytest.raises(RequestError, match="'resource_already_exists_exception', 'index"):
+        with pytest.raises(RequestError, match="resource_already_exists_exception"):
             await search_engine.create_index(dataset)
