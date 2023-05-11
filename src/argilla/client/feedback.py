@@ -46,6 +46,8 @@ if TYPE_CHECKING:
         FeedbackQuestionModel,
     )
 
+FETCHING_BATCH_SIZE = 250
+
 
 class ValueSchema(BaseModel):
     value: Union[StrictStr, StrictInt]
@@ -212,20 +214,35 @@ class FeedbackDataset:
 
     @property
     def records(self) -> List["FeedbackItemModel"]:
-        # TODO: we can use a cache to store the results to `.cache/argilla/datasets/{dataset_id}/records`
-        if self.__records is None or len(self.__records) < 1:
-            response = self.client.get_records(id=self.id, offset=0, limit=1)
-            self.__records = response.items
-            total_records = response.total
-            if total_records > 1:
-                prev_limit = 0
-                with tqdm(
-                    initial=len(self.__records), total=total_records, desc="Fetching records from Argilla"
-                ) as pbar:
-                    while prev_limit < total_records:
-                        prev_limit += 1
-                        self.__records += self.client.get_records(id=self.id, offset=prev_limit, limit=1).items
-                        pbar.update(1)
+        return self.__records
+
+    def fetch_records(self, overwrite: bool = False) -> List["FeedbackItemModel"]:
+        if not self.loaded_from_argilla and not self.loaded_from_huggingface:
+            warnings.warn(
+                "No records have been logged into neither Argilla nor HuggingFace, so no records will be fetched. The current records will be returned instead."
+            )
+            return self.__records
+        if len(self.__records) > 0 and not overwrite:
+            warnings.warn(
+                "The current `rg.FeedbackDataset` contains records, just the pushed records will be fetched, while the non-pushed records will be lost. To ignore this warning and fetch the pushed records use `overwrite=True`. The current records will be returned instead."
+            )
+            return self.__records
+
+        if self.loaded_from_argilla:
+            client = rg.active_client()
+            first_batch = client.get_records(id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE)
+            self.__records = first_batch.items
+            total_batches = first_batch.total // FETCHING_BATCH_SIZE
+            current_batch = 1
+            with tqdm(initial=current_batch, total=total_batches, desc="Fetching records from Argilla") as pbar:
+                while current_batch <= total_batches:
+                    batch = client.get_records(
+                        id=self.argilla_id, offset=FETCHING_BATCH_SIZE * current_batch, limit=FETCHING_BATCH_SIZE
+                    )
+                    self.__records += batch.items
+                    current_batch += 1
+                    pbar.update(1)
+
         return self.__records
 
     def add_records(
