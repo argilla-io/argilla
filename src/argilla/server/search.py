@@ -13,56 +13,76 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, Optional
 
-from elasticsearch8 import AsyncElasticsearch as AsyncElasticsearch8x
-from elasticsearch8 import helpers
+from opensearchpy import AsyncOpenSearch, helpers
 from pydantic import BaseModel
 from pydantic.utils import GetterDict
 
-from argilla.server.models import Dataset, Question, QuestionType
+from argilla.server.models import (
+    Dataset,
+    Field,
+    FieldType,
+    Question,
+    QuestionType,
+    Record,
+    ResponseStatus,
+)
 from argilla.server.settings import settings
 
 
-class ElasticSearchRecordGetter(GetterDict):
+class SearchDocumentGetter(GetterDict):
     def get(self, key: Any, default: Any = None) -> Any:
         if key == "responses":
-            return {response.user.username: response.values for response in self._obj.responses}
+            return {
+                response.user.username: UserResponse(
+                    values={k: v["value"] for k, v in response.values.items()} if response.values else None,
+                    status=response.status,
+                )
+                for response in self._obj.responses
+            }
         return super().get(key, default)
 
 
-class ElasticSearchRecord(BaseModel):
+class UserResponse(BaseModel):
+    values: Optional[Dict[str, Any]]
+    status: ResponseStatus
+
+
+class SearchDocument(BaseModel):
     fields: Dict[str, Any]
 
-    responses: Optional[Dict[str, Dict[str, Any]]]
+    responses: Optional[Dict[str, UserResponse]]
 
     class Config:
         orm_mode = True
-        getter_dict = ElasticSearchRecordGetter
+        getter_dict = SearchDocumentGetter
 
 
 @dataclasses.dataclass
-class ElasticSearchEngine:
+class SearchEngine:
     config: Dict[str, Any]
 
     def __post_init__(self):
-        self.client = AsyncElasticsearch8x(**self.config)
+        self.client = AsyncOpenSearch(**self.config)
 
     async def create_index(self, dataset: Dataset):
         fields = {
-            "fields": {"dynamic": True, "type": "object"},
             "responses": {"dynamic": True, "type": "object"},
         }
+
+        for field in dataset.fields:
+            fields[f"fields.{field.name}"] = self._es_mapping_for_field(field)
 
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
         dynamic_templates = [
             {
                 f"{question.name}_responses": {
-                    "path_match": f"responses.*.{question.name}",
+                    "path_match": f"responses.*.values.{question.name}",
                     "mapping": self._field_mapping_for_question(question),
-                }
+                },
             }
-            for question in dataset.question
+            for question in dataset.questions
         ]
 
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
@@ -74,26 +94,34 @@ class ElasticSearchEngine:
         }
 
         index_name = self._index_name_for_dataset(dataset)
-        await self.client.indices.create(index=index_name, mappings=mappings)
+        await self.client.indices.create(index=index_name, body=dict(mappings=mappings))
 
     def _field_mapping_for_question(self, question: Question):
-        settings_type = question.settings.get("type")
+        settings = question.parsed_settings
 
-        if settings_type == QuestionType.rating:
+        if settings.type == QuestionType.rating:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
             return {"type": "integer"}
-        elif settings_type == QuestionType.text:
+        elif settings.type == QuestionType.text:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
+            return {"type": "text", "index": False}
+        else:
+            raise ValueError(f"ElasticSearch mappings for Question of type {settings.type} cannot be generated")
+
+    def _es_mapping_for_field(self, field: Field):
+        field_type = field.settings["type"]
+
+        if field_type == FieldType.text:
             return {"type": "text"}
         else:
-            raise ValueError(f"ElasticSearch mappings for Question of type {settings_type} cannot be generated")
+            raise ValueError(f"ElasticSearch mappings for Field of type {field_type} cannot be generated")
 
     async def add_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = self._index_name_for_dataset(dataset)
 
         if not await self.client.indices.exists(index=index_name):
             raise ValueError(
-                f"Unable to add data records to index for dataset {dataset.id}. The specified index is invalid."
+                f"Unable to add data records to index for dataset {dataset.id}: the specified index is invalid."
             )
 
         bulk_actions = [
@@ -101,7 +129,7 @@ class ElasticSearchEngine:
                 "_op_type": "index",  # If document exist, we update source with latest version
                 "_id": record.id,
                 "_index": index_name,
-                **ElasticSearchRecord.from_orm(record).dict(),
+                **SearchDocument.from_orm(record).dict(),
             }
             for record in records
         ]
@@ -123,7 +151,7 @@ async def get_search_engine():
         retry_on_timeout=True,
         max_retries=5,
     )
-    search_engine = ElasticSearchEngine(config)
+    search_engine = SearchEngine(config)
     try:
         yield search_engine
     finally:
