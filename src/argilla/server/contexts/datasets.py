@@ -16,7 +16,6 @@ import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from argilla.server.elasticsearch import ElasticSearchEngine
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -38,9 +37,9 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
+from argilla.server.search import SearchEngine
 from argilla.server.security.model import User
 from fastapi.encoders import jsonable_encoder
-from pydantic import parse_obj_as
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, contains_eager
 
@@ -75,7 +74,7 @@ def create_dataset(db: Session, dataset_create: DatasetCreate):
     return dataset
 
 
-async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, dataset: Dataset):
+async def publish_dataset(db: Session, search_engine: SearchEngine, dataset: Dataset):
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
 
@@ -234,7 +233,7 @@ def count_records_by_dataset_id(db: Session, dataset_id: UUID):
 
 async def create_records(
     db: Session,
-    search_engine: ElasticSearchEngine,
+    search_engine: SearchEngine,
     dataset: Dataset,
     user: User,
     records_create: RecordsCreate,
@@ -273,7 +272,6 @@ async def create_records(
 
         await search_engine.add_records(dataset, records)
     except:
-        # savepoint.rollback()
         for record in records:
             db.delete(record)
         db.commit()
@@ -386,8 +384,7 @@ def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue],
 
         question_response = values_copy.pop(question.name, None)
         if question_response:
-            settings = parse_obj_as(QuestionSettings, question.settings)
-            settings.check_response(question_response)
+            question.parsed_settings.check_response(question_response)
 
     if values_copy:
         raise ValueError(f"Error: found responses for non configured questions: {list(values_copy.keys())!r}")

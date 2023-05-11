@@ -20,7 +20,6 @@ from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
-from argilla.server.elasticsearch import ElasticSearchEngine, get_search_engine
 from argilla.server.models import User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
@@ -39,6 +38,7 @@ from argilla.server.schemas.v1.datasets import (
     RecordsCreate,
     ResponseStatusFilter,
 )
+from argilla.server.search import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
@@ -242,7 +242,7 @@ def create_dataset_question(
 async def create_dataset_records(
     *,
     db: Session = Depends(get_db),
-    search_engine: ElasticSearchEngine = Depends(get_search_engine),
+    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
@@ -265,7 +265,7 @@ async def create_dataset_records(
 async def publish_dataset(
     *,
     db: Session = Depends(get_db),
-    search_engine: ElasticSearchEngine = Depends(get_search_engine),
+    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
