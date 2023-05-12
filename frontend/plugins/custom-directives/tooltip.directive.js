@@ -21,6 +21,7 @@ Vue.directive("tooltip", {
       content,
       backgroundColor,
       borderColor,
+      color,
       tooltipPosition = TOOLTIP_DIRECTION.BOTTOM,
     } = binding.value;
 
@@ -39,12 +40,21 @@ Vue.directive("tooltip", {
       tooltipHeader = initTooltipHeaderStyle(tooltipHeader);
       tooltipHeader.firstChild.setAttribute("id", tooltipCloseIconId);
 
+      // NOTE - triangle
+      let tooltipTriangle = document.createElement("div");
+      tooltipTriangle = initTooltipTriangleStyle(tooltipTriangle);
+      let tooltipTriangleInner = document.createElement("div");
+      tooltipTriangleInner =
+        initTooltipTriangleInnerStyle(tooltipTriangleInner);
+
       // NOTE - include close icon and text node inside tooltip
       tooltip.appendChild(tooltipHeader);
+      tooltip.appendChild(tooltipTriangle);
       tooltip.appendChild(textWrapper);
+      tooltipTriangle.appendChild(tooltipTriangleInner);
 
       // NOTE - text styles
-      textWrapper = initTextStyle(textWrapper);
+      textWrapper = initTextStyle(textWrapper, color);
 
       // NOTE - tooltip styles
       tooltip = initTooltipStyle(tooltip, backgroundColor, borderColor);
@@ -113,29 +123,51 @@ const initTooltipStyle = (
   borderColor = "transparent"
 ) => {
   tooltip.style.position = "absolute";
+  tooltip.style.width = "200px";
   tooltip.style.display = "none";
   tooltip.style.flexDirection = "column";
   tooltip.style.zIndex = "99999";
   tooltip.style.backgroundColor = backgroundColor;
   tooltip.style.borderRadius = "5px";
   tooltip.style.padding = "8px";
-  tooltip.style.boxShadow = "0 0 40px #ccc";
+  tooltip.style.boxShadow = "0 8px 20px 0 rgba(0,0,0,.2)";
   tooltip.style.transition = "opacity 0.3s ease 0.2s";
   tooltip.style.border = `2px ${borderColor} solid`;
+  tooltip.style.cursor = "default";
   return tooltip;
 };
 const initTooltipHeaderStyle = (tooltipHeader) => {
   tooltipHeader.style.display = "flex";
   tooltipHeader.style.justifyContent = "flex-end";
   tooltipHeader.innerHTML =
-    '<svg width="41" height="40" viewBox="0 0 41 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 14px; height: 14px;"><path d="M8.9225 5.58721C8.13956 4.80426 6.87015 4.80426 6.08721 5.58721C5.30426 6.37015 5.30426 7.63956 6.08721 8.4225L17.6647 20L6.08733 31.5774C5.30438 32.3603 5.30438 33.6297 6.08733 34.4127C6.87027 35.1956 8.13968 35.1956 8.92262 34.4127L20.5 22.8353L32.0774 34.4127C32.8603 35.1956 34.1297 35.1956 34.9127 34.4127C35.6956 33.6297 35.6956 32.3603 34.9127 31.5774L23.3353 20L34.9128 8.4225C35.6957 7.63956 35.6957 6.37015 34.9128 5.58721C34.1298 4.80426 32.8604 4.80426 32.0775 5.58721L20.5 17.1647L8.9225 5.58721Z" fill="black"/></svg>';
+    '<svg width="20" height="20" viewBox="0 0 41 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer; width: 14px; height: 14px;"><path d="M8.9225 5.58721C8.13956 4.80426 6.87015 4.80426 6.08721 5.58721C5.30426 6.37015 5.30426 7.63956 6.08721 8.4225L17.6647 20L6.08733 31.5774C5.30438 32.3603 5.30438 33.6297 6.08733 34.4127C6.87027 35.1956 8.13968 35.1956 8.92262 34.4127L20.5 22.8353L32.0774 34.4127C32.8603 35.1956 34.1297 35.1956 34.9127 34.4127C35.6956 33.6297 35.6956 32.3603 34.9127 31.5774L23.3353 20L34.9128 8.4225C35.6957 7.63956 35.6957 6.37015 34.9128 5.58721C34.1298 4.80426 32.8604 4.80426 32.0775 5.58721L20.5 17.1647L8.9225 5.58721Z" fill="#9a9a9a"/></svg>';
   return tooltipHeader;
+};
+
+const initTooltipTriangleStyle = (tooltipTriangle) => {
+  tooltipTriangle.style.position = "absolute";
+  tooltipTriangle.style.left = "50%";
+  tooltipTriangle.style.transform = "translateX(-50%)";
+  tooltipTriangle.style.top = "0";
+  return tooltipTriangle;
+};
+const initTooltipTriangleInnerStyle = (tooltipTriangleInner) => {
+  tooltipTriangleInner.style.position = "relative";
+  tooltipTriangleInner.style.width = "0";
+  tooltipTriangleInner.style.height = "0";
+  tooltipTriangleInner.style.top = "-10px";
+  tooltipTriangleInner.style.borderBottom = "10px solid white";
+  tooltipTriangleInner.style.borderRight = "10px solid transparent";
+  tooltipTriangleInner.style.borderLeft = "10px solid transparent";
+  return tooltipTriangleInner;
 };
 
 const initTooltipPosition = (tooltip, tooltipPosition) => {
   switch (tooltipPosition.toUpperCase()) {
     case TOOLTIP_DIRECTION.BOTTOM:
       tooltip.style.top = "28px";
+      tooltip.style.left = "50%";
+      tooltip.style.transform = "translateX(-50%)";
       break;
     default:
     // tooltip direction is unknown
@@ -143,10 +175,15 @@ const initTooltipPosition = (tooltip, tooltipPosition) => {
   return tooltip;
 };
 
-const initTextStyle = (textWrapper) => {
-  textWrapper.style.fontSize = "14px";
+const initTextStyle = (textWrapper, color = "rgba(0, 0, 0, 0.87)") => {
+  textWrapper.style.padding = "8px";
+  textWrapper.style.textAlign = "left";
+  textWrapper.style.fontSize = "13px";
   textWrapper.style.fontStyle = "normal";
-  textWrapper.style.color = "#000";
+  textWrapper.style.fontWeight = "300";
+  textWrapper.style.lineHeight = "18px";
+  textWrapper.style.whiteSpace = "pre-wrap";
+  textWrapper.style.color = `${color}`;
   return textWrapper;
 };
 
