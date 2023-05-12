@@ -21,7 +21,12 @@
       />
     </template>
     <div v-else class="wrapper--empty">
-      <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+      <p
+        v-if="!totalRecords"
+        class="wrapper__text --heading3"
+        v-text="noRecordsMessage"
+      />
+      <BaseSpinner v-else />
     </div>
   </div>
 </template>
@@ -190,7 +195,6 @@ export default {
         this.initRecordsInDatabase(newRecordOffset);
       }
     },
-    questions: {},
   },
   methods: {
     async initRecordsInDatabase(recordOffset) {
