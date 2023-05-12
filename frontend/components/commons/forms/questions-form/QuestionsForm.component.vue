@@ -250,9 +250,8 @@ export default {
         : STATUS_RESPONSE.CREATE;
 
       // 2 - init formattedSelectionOptionObject
-      const formattedSelectionObject = this.formatSelectedOptionObject(
-        RESPONSE_STATUS_FOR_API.DISCARDED,
-        !this.isSomeRequiredQuestionHaveNoAnswer
+      const formattedSelectionObject = this.formatSelectedOptionObjectOnDiscard(
+        RESPONSE_STATUS_FOR_API.DISCARDED
       );
 
       // 3 - Create the formatted requests to send from the formattedSelectionObject
@@ -263,7 +262,6 @@ export default {
 
       // 4 - create or update the record responses and emit bus event to change record to show
       try {
-        // TODO - make the call here to discard the record
         await this.createOrUpdateRecordResponses(formattedRequestsToSend);
         await updateRecordStatusByRecordId(
           this.recordId,
@@ -276,6 +274,7 @@ export default {
     },
     async onSubmit() {
       // 1 - check if it's a create or update response
+      // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
       const createOrUpdateResponse = isResponsesByUserIdExists(
         this.userId,
         this.recordId
@@ -286,10 +285,9 @@ export default {
         this.isError = true;
         return;
       }
-      // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
 
       // 2 - init formattedSelectionOptionObject
-      const formattedSelectionObject = this.formatSelectedOptionObject(
+      const formattedSelectionObject = this.formatSelectedOptionObjectOnSubmit(
         RESPONSE_STATUS_FOR_API.SUBMITTED
       );
 
@@ -485,7 +483,7 @@ export default {
       }
       return formattedRecordResponsesForOrm;
     },
-    formatSelectedOptionObject(status, isFilled = true) {
+    formatSelectedOptionObjectOnSubmit(status) {
       let selectedOptionObj = {
         status,
       };
@@ -508,17 +506,48 @@ export default {
         }
         selectedOptionObj.values = {
           ...selectedOptionObj.values,
-          ...(isFilled && {
+          [input.name]: { value: selectedOption?.text },
+        };
+      });
+      return selectedOptionObj;
+    },
+    formatSelectedOptionObjectOnDiscard(status) {
+      // NOTE - it's possible to discard with partial response
+      let selectedOptionObj = {
+        status,
+      };
+      this.inputs.forEach((input) => {
+        // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
+
+        let selectedOption = null;
+        switch (input.component_type) {
+          case COMPONENT_TYPE.SINGLE_LABEL:
+          case COMPONENT_TYPE.RATING:
+            selectedOption = input.options?.find((option) => option.value);
+            break;
+          case COMPONENT_TYPE.FREE_TEXT:
+            selectedOption = input.options[0];
+            break;
+          default:
+            console.log(
+              `The component type ${input.component_type} is unknown, the response can't be save`
+            );
+        }
+
+        // NOTE - Since it's possible to discard on partial response, that means => if we have a selectedOptionObj.text then we have a partial answer
+        selectedOptionObj.values = {
+          ...selectedOptionObj.values,
+          ...(selectedOption?.text && {
             [input.name]: { value: selectedOption.text },
           }),
         };
       });
       return selectedOptionObj;
     },
-    formatRequestsToSend(createOrUpdateResponse, obj) {
+    formatRequestsToSend(createOrUpdateResponse, responseByQuestionName) {
       const formattedRequestsToSend = {
         status: createOrUpdateResponse,
-        responseByQuestionName: obj,
+        responseByQuestionName,
         ...(createOrUpdateResponse === STATUS_RESPONSE.UPDATE && {
           responseId: getRecordResponsesIdByRecordId({
             userId: this.userId,
