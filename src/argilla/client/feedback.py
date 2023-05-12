@@ -180,7 +180,8 @@ class FeedbackDataset:
     def __getitem__(self, key: Union[slice, int]) -> Union["FeedbackItemModel", List["FeedbackItemModel"]]:
         if len(self.__records) < 1:
             raise RuntimeError(
-                "In order to get items from `rg.FeedbackDataset` you need to either add them first with `add_records` or fetch them from Argilla or HuggingFace with `fetch_records`."
+                "In order to get items from `rg.FeedbackDataset` you need to either add them first with `add_records` "
+                "or fetch them from Argilla or HuggingFace with `fetch_records`."
             )
         if isinstance(key, int) and len(self.__records) < key:
             raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
