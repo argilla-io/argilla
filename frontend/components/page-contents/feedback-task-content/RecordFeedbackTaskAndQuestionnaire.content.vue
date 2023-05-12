@@ -4,11 +4,7 @@
     :key="recordOffset"
     class="wrapper"
   >
-    <transition
-      :name="transitionWhenNavigating && 'record-page'"
-      v-if="recordId"
-      appear
-    >
+    <transition :name="isTransition && 'record-page'" v-if="recordId" appear>
       <div class="content">
         <RecordFeedbackTaskComponent
           v-if="fieldsWithRecordFieldText"
@@ -88,11 +84,14 @@ export default {
       type: Number,
       required: true,
     },
+    isTransition: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
       rerenderQuestionnaire: 1,
-      transitionWhenNavigating: true,
     };
   },
   computed: {
