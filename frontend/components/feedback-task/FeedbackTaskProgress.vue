@@ -16,16 +16,34 @@
   -->
 
 <template>
-  <SidebarFeedbackTaskProgress :total="100" :validated="40" :discarded="2" />
+  <SidebarFeedbackTaskProgress
+    v-if="datasetMetrics"
+    :total="datasetMetrics.total_record"
+    :validated="datasetMetrics.responses_submitted"
+    :discarded="datasetMetrics.responses_discarded"
+  />
 </template>
 
 <script>
+import { getDatasetMetricsByDatasetIdAndUser } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries";
+
 export default {
-  data: () => ({
-    total: 100,
-    validated: 30,
-    discarded: 10,
-  }),
+  props: {
+    userIdToShowMetrics: {
+      type: String,
+      required: true,
+    },
+  },
+  computed: {
+    datasetId() {
+      return this.$route.params.id;
+    },
+    datasetMetrics() {
+      return getDatasetMetricsByDatasetIdAndUser({
+        datasetId: this.datasetId,
+        userId: this.userIdToShowMetrics,
+      });
+    },
+  },
 };
 </script>
-<style lang="scss" scoped></style>
