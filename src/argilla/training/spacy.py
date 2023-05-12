@@ -161,7 +161,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
 
         self._nlp = spacy.load(self._model)
 
-    def __repr__(self) -> None:
+    def __repr__(self) -> str:
         """Return the string representation of the `ArgillaSpaCyTrainer` object containing
         just the args that can be updated via `update_config`."""
         formatted_string = []
