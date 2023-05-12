@@ -29,16 +29,16 @@
     <base-progress
       re-mode="determinate"
       :multiple="true"
-      :progress="(totalValidated * 100) / progressTotal"
+      :progress="(totalSubmitted * 100) / progressTotal"
       :progress-secondary="(totalDiscarded * 100) / progressTotal"
     ></base-progress>
     <div class="scroll">
       <ul class="metrics__list">
         <li>
-          <span class="color-bullet validated"></span>
-          <label class="metrics__list__name">Validated</label>
+          <span class="color-bullet submitted"></span>
+          <label class="metrics__list__name">Submitted</label>
           <span class="metrics__list__counter">
-            {{ totalValidated | formatNumber }}
+            {{ totalSubmitted | formatNumber }}
           </span>
         </li>
         <li>
@@ -57,37 +57,25 @@
 <script>
 export default {
   props: {
-    total: {
+    progressTotal: {
       type: Number,
       required: true,
     },
-    validated: {
+    totalSubmitted: {
       type: Number,
       required: true,
     },
-    discarded: {
+    totalDiscarded: {
       type: Number,
       required: true,
     },
   },
   computed: {
-    totalValidated() {
-      return this.validated;
-    },
-    totalDiscarded() {
-      return this.discarded;
-    },
     totalAnnotated() {
-      return this.totalValidated + this.totalDiscarded;
-    },
-    progressTotal() {
-      return this.total;
+      return this.totalSubmitted + this.totalDiscarded;
     },
     progress() {
-      return (
-        ((this.totalValidated || 0) + (this.totalDiscarded || 0)) /
-        this.progressTotal
-      );
+      return this.totalAnnotated / this.progressTotal;
     },
   },
 };
@@ -117,7 +105,7 @@ export default {
   border-radius: 50%;
   display: inline-block;
   margin: 0.3em 0.3em 0.3em 0;
-  &.validated {
+  &.submitted {
     background: #4c4ea3;
   }
   &.discarded {

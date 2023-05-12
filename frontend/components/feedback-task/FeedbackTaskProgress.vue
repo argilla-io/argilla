@@ -18,9 +18,9 @@
 <template>
   <SidebarFeedbackTaskProgress
     v-if="datasetMetrics"
-    :total="totalRecordWithParams.value"
-    :validated="responsesSubmittedWithParams.value"
-    :discarded="responsesDiscardedWithParams.value"
+    :progressTotal="totalRecordWithParams.value"
+    :totalSubmitted="responsesSubmittedWithParams.value"
+    :totalDiscarded="responsesDiscardedWithParams.value"
   />
 </template>
 
