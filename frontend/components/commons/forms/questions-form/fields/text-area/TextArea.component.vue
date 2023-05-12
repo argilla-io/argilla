@@ -13,7 +13,7 @@
         icon="info"
         :id="`${title}TextArea`"
         :show-badge="false"
-        iconColor="rgba(0, 0, 0, 0.37)"
+        iconColor="#acacac"
         badge-vertical-position="top"
         badge-horizontal-position="right"
         badge-border-color="white"
@@ -142,6 +142,7 @@ export default {
 }
 
 .icon-info {
+  display: inline-flex;
   margin: 0;
   padding: 0;
   overflow: inherit;
