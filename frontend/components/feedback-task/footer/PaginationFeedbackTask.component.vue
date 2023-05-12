@@ -24,8 +24,8 @@ export default {
   },
   created() {
     this.paginationNotificationParams = {
-      message: "Pending actions will be lost when the page is refreshed",
-      buttonMessage: "Ok, got it!",
+      message: "Your changes will be lost if you move to another page",
+      buttonMessage: "Ok, continue.",
       typeOfToast: "warning",
     };
 
@@ -61,7 +61,6 @@ export default {
     },
   },
   destroyed() {
-    this.$root.$off("current-page");
     this.$root.$off("are-responses-untouched");
   },
 };

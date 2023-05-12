@@ -14,7 +14,7 @@ class DatasetQuestion extends Model {
       placeholder: this.string(null).nullable(),
       is_required: this.boolean(false),
       component_type: this.string(null).nullable(),
-      tooltip_message: this.string(null).nullable(),
+      description: this.string(null).nullable(),
     };
   }
 }

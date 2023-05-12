@@ -18,7 +18,7 @@ from enum import Enum
 from typing import Any, List, Union
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, parse_obj_as
 from sqlalchemy import JSON, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -92,6 +92,10 @@ class Question(Base):
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="questions")
+
+    @property
+    def parsed_settings(self) -> QuestionSettings:
+        return parse_obj_as(QuestionSettings, self.settings)
 
     def __repr__(self):
         return (

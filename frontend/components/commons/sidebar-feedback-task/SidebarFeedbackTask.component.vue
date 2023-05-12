@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { SIDEBAR_GROUP } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
 export default {
   data: () => ({
     currentMetric: null,
@@ -74,15 +75,15 @@ export default {
   },
   methods: {
     onClickSidebarAction(group, info) {
-      switch (group) {
-        case "metrics":
+      switch (group.toUpperCase()) {
+        case SIDEBAR_GROUP.METRICS:
           this.toggleMetrics(info);
           break;
-        case "mode":
+        case SIDEBAR_GROUP.MODE:
           console.log("change-view-mode", info);
           break;
-        case "refresh":
-          console.log("refresh dataset");
+        case SIDEBAR_GROUP.REFRESH:
+          this.$emit("refresh");
           break;
         default:
           console.warn(info);

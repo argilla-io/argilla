@@ -1,23 +1,35 @@
 <template>
   <div
+    v-if="!$fetchState.pending && !$fetchState.error"
     :key="recordOffset"
     class="wrapper"
-    v-if="recordId && !$fetchState.pending && !$fetchState.error"
   >
-    <RecordFeedbackTaskComponent
-      v-if="fieldsWithRecordFieldText"
-      :recordStatus="record.record_status"
-      :fields="fieldsWithRecordFieldText"
-    />
-    <QuestionsFormComponent
-      class="question-form"
-      :class="statusClass"
-      v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
-      :datasetId="datasetId"
-      :recordId="recordId"
-      :recordStatus="record.record_status"
-      :initialInputs="questionsWithRecordAnswers"
-    />
+    <transition :name="isTransition && 'record-page'" v-if="recordId" appear>
+      <div class="content">
+        <RecordFeedbackTaskComponent
+          v-if="fieldsWithRecordFieldText"
+          :recordStatus="record.record_status"
+          :fields="fieldsWithRecordFieldText"
+        />
+        <QuestionsFormComponent
+          class="question-form"
+          :class="statusClass"
+          v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
+          :datasetId="datasetId"
+          :recordId="recordId"
+          :recordStatus="record.record_status"
+          :initialInputs="questionsWithRecordAnswers"
+        />
+      </div>
+    </transition>
+    <div v-else class="wrapper--empty">
+      <p
+        v-if="!totalRecords"
+        class="wrapper__text --heading3"
+        v-text="noRecordsMessage"
+      />
+      <BaseSpinner v-else />
+    </div>
   </div>
 </template>
 
@@ -71,6 +83,10 @@ export default {
     recordOffset: {
       type: Number,
       required: true,
+    },
+    isTransition: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
@@ -164,6 +180,9 @@ export default {
         }
       });
     },
+    noRecordsMessage() {
+      return `There are no ${this.recordStatusToFilterWith} records`;
+    },
     statusClass() {
       return `--${this.record.record_status.toLowerCase()}`;
     },
@@ -182,7 +201,6 @@ export default {
         this.initRecordsInDatabase(newRecordOffset);
       }
     },
-    questions: {},
   },
   methods: {
     async initRecordsInDatabase(recordOffset) {
@@ -339,6 +357,21 @@ export default {
 .wrapper {
   display: flex;
   flex-wrap: wrap;
+  height: 100%;
+  &__text {
+    color: $black-54;
+  }
+  &--empty {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.content {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
   gap: 2 * $base-space;
   height: 100%;
 }
@@ -353,5 +386,14 @@ export default {
   &.--submitted {
     border-color: $primary-color;
   }
+}
+
+.record-page-enter-active,
+.record-page-leave-active {
+  transition: all 1s;
+}
+.record-page-enter,
+.record-page-leave-to {
+  opacity: 0;
 }
 </style>

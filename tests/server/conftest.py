@@ -13,10 +13,20 @@
 #  limitations under the License.
 
 import pytest
+import pytest_asyncio
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
+from argilla.server.search_engine import SearchEngine
 from argilla.server.services.datasets import DatasetsService
+
+
+@pytest_asyncio.fixture()
+async def search_engine(elasticsearch_config: dict):
+    engine = SearchEngine(config=elasticsearch_config)
+    yield engine
+
+    await engine.client.close()
 
 
 @pytest.fixture(scope="session")

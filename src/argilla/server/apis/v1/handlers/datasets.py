@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_db
-from argilla.server.elasticsearch import ElasticSearchEngine, get_search_engine
+from argilla.server.models import User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
     Dataset,
@@ -38,8 +38,8 @@ from argilla.server.schemas.v1.datasets import (
     RecordsCreate,
     ResponseStatusFilter,
 )
+from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
-from argilla.server.security.model import User
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000
@@ -239,9 +239,10 @@ def create_dataset_question(
 
 
 @router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
-def create_dataset_records(
+async def create_dataset_records(
     *,
     db: Session = Depends(get_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
@@ -253,7 +254,9 @@ def create_dataset_records(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        datasets.create_records(db, dataset, current_user, records_create)
+        await datasets.create_records(
+            db, search_engine, dataset=dataset, user=current_user, records_create=records_create
+        )
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
@@ -262,7 +265,7 @@ def create_dataset_records(
 async def publish_dataset(
     *,
     db: Session = Depends(get_db),
-    search_engine: ElasticSearchEngine = Depends(get_search_engine),
+    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
