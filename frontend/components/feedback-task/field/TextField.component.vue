@@ -12,7 +12,9 @@
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div class="content-area --body1" v-text="fieldText" />
+    <transition name="fade" :key="fieldText" appear>
+      <div class="content-area --body1" v-if="fieldText" v-text="fieldText" />
+    </transition>
   </div>
 </template>
 
@@ -54,5 +56,13 @@ export default {
     padding: 0;
     z-index: 2;
   }
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 1s;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
