@@ -195,11 +195,14 @@ export default {
       this.onEmitIsQuestionsFormUntouchedByBusEvent(isFormUntouched);
     },
   },
-  created() {
+  async created() {
     this.COMPONENT_TYPE = COMPONENT_TYPE;
     this.formOnErrorMessage =
       "One of the required field is not answered. Please, answer before validate";
     this.onReset();
+
+    // NOTE - Update dataset Metrics orm
+    await this.initMetricsAndInsertDataInOrm();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
