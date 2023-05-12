@@ -1,6 +1,7 @@
 <template>
   <PaginationComponent
     v-if="totalRecord"
+    :key="totalRecord"
     :showPageNumber="false"
     :totalItems="totalRecord"
     :notificationParams="paginationNotificationParams"
