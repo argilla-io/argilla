@@ -1,5 +1,10 @@
 <template>
-  <form class="questions-form" @submit.prevent="onSubmit" :key="renderForm">
+  <form
+    class="questions-form"
+    :class="{ '--edited-form': !isFormUntouched }"
+    @submit.prevent="onSubmit"
+    :key="renderForm"
+  >
     <div class="questions-form__content">
       <p class="questions-form__title --body1 --medium">Fill the fields</p>
       <div class="form-group" v-for="input in inputs" :key="input.id">
@@ -559,6 +564,9 @@ export default {
     gap: 20px;
     padding: $base-space * 3;
     overflow: auto;
+  }
+  &.--edited-form {
+    border-color: palette(apricot, dark);
   }
 }
 
