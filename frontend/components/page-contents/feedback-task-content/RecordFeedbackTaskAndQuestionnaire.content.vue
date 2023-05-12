@@ -4,22 +4,24 @@
     :key="recordOffset"
     class="wrapper"
   >
-    <template v-if="recordId">
-      <RecordFeedbackTaskComponent
-        v-if="fieldsWithRecordFieldText"
-        :recordStatus="record.record_status"
-        :fields="fieldsWithRecordFieldText"
-      />
-      <QuestionsFormComponent
-        class="question-form"
-        :class="statusClass"
-        v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
-        :datasetId="datasetId"
-        :recordId="recordId"
-        :recordStatus="record.record_status"
-        :initialInputs="questionsWithRecordAnswers"
-      />
-    </template>
+    <transition :name="isTransition && 'record-page'" v-if="recordId" appear>
+      <div class="content">
+        <RecordFeedbackTaskComponent
+          v-if="fieldsWithRecordFieldText"
+          :recordStatus="record.record_status"
+          :fields="fieldsWithRecordFieldText"
+        />
+        <QuestionsFormComponent
+          class="question-form"
+          :class="statusClass"
+          v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
+          :datasetId="datasetId"
+          :recordId="recordId"
+          :recordStatus="record.record_status"
+          :initialInputs="questionsWithRecordAnswers"
+        />
+      </div>
+    </transition>
     <div v-else class="wrapper--empty">
       <p
         v-if="!totalRecords"
@@ -81,6 +83,10 @@ export default {
     recordOffset: {
       type: Number,
       required: true,
+    },
+    isTransition: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
@@ -351,7 +357,6 @@ export default {
 .wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 2 * $base-space;
   height: 100%;
   &__text {
     color: $black-54;
@@ -362,6 +367,13 @@ export default {
     align-items: center;
     justify-content: center;
   }
+}
+.content {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 2 * $base-space;
+  height: 100%;
 }
 .question-form {
   border: 1px solid transparent;
@@ -374,5 +386,14 @@ export default {
   &.--submitted {
     border-color: $primary-color;
   }
+}
+
+.record-page-enter-active,
+.record-page-leave-active {
+  transition: all 1s;
+}
+.record-page-enter,
+.record-page-leave-to {
+  opacity: 0;
 }
 </style>
