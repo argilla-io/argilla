@@ -14,17 +14,31 @@
 
 import logging
 import os
+import sys
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 import argilla as rg
-from argilla.client.models import (
-    Framework,
-    Text2TextRecord,
-    TextClassificationRecord,
-    TokenClassificationRecord,
-)
-from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
+
+if TYPE_CHECKING:
+    from pydantic import BaseModel
+
+    from argilla.client.datasets import (
+        DatasetForTextClassification,
+        DatasetForTokenClassification,
+    )
+    from argilla.client.models import (
+        Framework,
+        Text2TextRecord,
+        TextClassificationRecord,
+        TokenClassificationRecord,
+    )
+    from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -39,8 +53,8 @@ class ArgillaTrainer(object):
     def __init__(
         self,
         name: str,
-        framework: str,
-        workspace: str = None,
+        framework: Framework,
+        workspace: Optional[str] = None,
         lang: Optional["spacy.Language"] = None,
         model: Optional[str] = None,
         train_size: Optional[float] = None,
@@ -213,7 +227,7 @@ _________________________________________________________________
 `trainer.predict(text, as_argilla_records=True)` to make predictions.
 `trainer.save(output_dir)` to save the model manually."""
 
-    def update_config(self, *args, **kwargs):
+    def update_config(self, *args, **kwargs) -> None:
         """
         It updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
         """
@@ -224,7 +238,9 @@ _________________________________________________________________
             + f"{self._trainer}"
         )
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
+    def predict(
+        self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]], BaseModel, List[BaseModel]]:
         """
         `predict` takes a string or list of strings and returns a list of dictionaries, each dictionary
         containing the text, the predicted label, and the confidence score.
@@ -238,7 +254,7 @@ _________________________________________________________________
         """
         return self._trainer.predict(text=text, as_argilla_records=as_argilla_records, **kwargs)
 
-    def train(self, output_dir: str = None):
+    def train(self, output_dir: str = None) -> None:
         """
         `train` takes in a path to a file and trains the model. If a path is provided,
         the model is saved to that path.
@@ -248,7 +264,7 @@ _________________________________________________________________
         """
         self._trainer.train(output_dir)
 
-    def save(self, output_dir: str):
+    def save(self, output_dir: str) -> None:
         """
         Saves the model to the specified path.
 
@@ -261,15 +277,15 @@ _________________________________________________________________
 class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
-        dataset,
-        record_class: Union[TokenClassificationRecord, Text2TextRecord, TextClassificationRecord],
-        multi_label: bool = False,
-        settings: Union[TextClassificationSettings, TokenClassificationSettings] = None,
-        model: str = None,
-        seed: int = None,
+        dataset: Union["DatasetForTextClassification", "DatasetForTokenClassification"],
+        record_class: Union["TokenClassificationRecord", "Text2TextRecord", "TextClassificationRecord"],
+        multi_label: Optional[bool] = False,
+        settings: Union["TextClassificationSettings", "TokenClassificationSettings"] = None,
+        model: Optional[str] = None,
+        seed: Optional[int] = None,
         *arg,
         **kwargs,
-    ):
+    ) -> None:
         self._dataset = dataset
         self._record_class = record_class
         self._multi_label = multi_label
@@ -278,37 +294,39 @@ class ArgillaTrainerSkeleton(ABC):
         self._seed = seed
 
     @abstractmethod
-    def init_training_args(self):
+    def init_training_args(self) -> None:
         """
         Initializes the training arguments.
         """
 
     @abstractmethod
-    def init_model(self):
+    def init_model(self) -> None:
         """
         Initializes a model.
         """
 
     @abstractmethod
-    def update_config(self, *args, **kwargs):
+    def update_config(self, *args, **kwargs) -> None:
         """
         Updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
         """
 
     @abstractmethod
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
+    def predict(
+        self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]], BaseModel, List[BaseModel]]:
         """
         Predicts the label of the text.
         """
 
     @abstractmethod
-    def train(self, output_dir: str = None):
+    def train(self, output_dir: str = None) -> None:
         """
         Trains the model.
         """
 
     @abstractmethod
-    def save(self, output_dir: str):
+    def save(self, output_dir: str) -> None:
         """
         Saves the model to the specified path.
         """
