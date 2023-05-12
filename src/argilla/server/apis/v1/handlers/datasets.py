@@ -254,9 +254,7 @@ async def create_dataset_records(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        await datasets.create_records(
-            db, search_engine, dataset=dataset, user=current_user, records_create=records_create
-        )
+        await datasets.create_records(db, search_engine, dataset=dataset, records_create=records_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
