@@ -208,8 +208,9 @@ export default {
       // FORMAT records for orm
       const formattedRecords = this.factoryRecordsForOrm(records);
 
-      // UPSERT total records && records in ORM
-      updateTotalRecordsByDatasetId(this.datasetId, totalRecords);
+      // UPSERT total records (only if it's not exists in ORM) && records in ORM
+      this.totalRecords ??
+        updateTotalRecordsByDatasetId(this.datasetId, totalRecords);
       upsertRecords(formattedRecords);
     },
     async getRecords(datasetId, recordOffset, numberOfRecordsToFetch = 5) {
