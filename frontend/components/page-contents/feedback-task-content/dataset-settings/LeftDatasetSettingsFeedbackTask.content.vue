@@ -15,10 +15,7 @@
         </base-button>
       </base-action-tooltip>
     </div>
-    <div
-      class="dataset-description-component left-content-item"
-      v-if="settingsDescription"
-    >
+    <div class="dataset-description-component left-content-item">
       <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
     </div>
     <div class="delete-dataset-component" v-if="datasetId">
@@ -47,7 +44,9 @@ export default {
     this.datasetSettingsUrl = `${window.origin}${fullPath}`;
     this.datasetName = getFeedbackDatasetNameById(this.datasetId);
     this.datasetTask = getDatasetTaskByDatasetId(this.datasetId);
-    this.settingsDescription = getDatasetGuidelinesByDatasetId(this.datasetId);
+    this.settingsDescription =
+      getDatasetGuidelinesByDatasetId(this.datasetId) ||
+      "This dataset has no annotation guidelines";
   },
 };
 </script>

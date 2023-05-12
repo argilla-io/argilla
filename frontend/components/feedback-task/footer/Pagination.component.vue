@@ -95,7 +95,7 @@ export default {
       return `${this.currentPage} of ${this.totalItems} records`;
     },
     isPageAvailable() {
-      return (this.pageFromQuery || this.currentPage) <= this.totalPages;
+      return this.pageFromRoute <= this.totalPages;
     },
     pageFromRoute() {
       return parseFloat(this.$route.query?._page) || 1;
