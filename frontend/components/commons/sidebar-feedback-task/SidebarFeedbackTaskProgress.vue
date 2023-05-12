@@ -34,6 +34,7 @@
     ></base-progress>
     <div class="scroll">
       <ul class="metrics__list">
+        <!-- FIXME - loop over an array -->
         <li>
           <span class="color-bullet submitted"></span>
           <label class="metrics__list__name">Submitted</label>
@@ -46,6 +47,13 @@
           <label class="metrics__list__name">Discarded</label>
           <span class="metrics__list__counter">
             {{ totalDiscarded | formatNumber }}
+          </span>
+        </li>
+        <li>
+          <span class="color-bullet pending"></span>
+          <label class="metrics__list__name">Pending</label>
+          <span class="metrics__list__counter">
+            {{ totalPending | formatNumber }}
           </span>
         </li>
       </ul>
@@ -73,6 +81,9 @@ export default {
   computed: {
     totalResponded() {
       return this.totalSubmitted + this.totalDiscarded;
+    },
+    totalPending() {
+      return this.progressTotal - this.totalResponded;
     },
     progress() {
       return this.totalResponded / this.progressTotal;
@@ -106,9 +117,16 @@ export default {
   display: inline-block;
   margin: 0.3em 0.3em 0.3em 0;
   &.submitted {
+    // FIXME - to get from orm
     background: #4c4ea3;
   }
   &.discarded {
+    // FIXME - to get from orm
+    background: #a1a2cc;
+  }
+  &.pending {
+    // FIXME - to get from orm
+    opacity: 0.7;
     background: #a1a2cc;
   }
 }
