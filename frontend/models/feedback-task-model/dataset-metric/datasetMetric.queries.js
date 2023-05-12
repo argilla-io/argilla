@@ -9,4 +9,12 @@ const upsertDatasetMetrics = (datasetMetrics) => {
 const getDatasetMetricsByDatasetIdAndUser = ({ userId, datasetId }) =>
   DatasetMetricModel.query().whereId([userId, datasetId]).first();
 
-export { upsertDatasetMetrics, getDatasetMetricsByDatasetIdAndUser };
+//EXISTS
+const isDatasetExistsByDatasetIdAndUserId = ({ userId, datasetId }) =>
+  DatasetMetricModel.query().whereId([userId, datasetId]).exists();
+
+export {
+  upsertDatasetMetrics,
+  getDatasetMetricsByDatasetIdAndUser,
+  isDatasetExistsByDatasetIdAndUserId,
+};
