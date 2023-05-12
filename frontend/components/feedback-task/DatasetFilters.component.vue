@@ -70,13 +70,14 @@ export default {
   },
   created() {
     this.filters = {
-      searchText: {
-        id: "searchText",
-        name: "Search",
-        componentType: "searchBar",
-        order: 0,
-        placeholder: "Introduce your query",
-      },
+      // NOTE: HIDE SEARCHBAR FOR MVP
+      // searchText: {
+      //   id: "searchText",
+      //   name: "Search",
+      //   componentType: "searchBar",
+      //   order: 0,
+      //   placeholder: "Introduce your query",
+      // },
       statusSelector: {
         id: "statusSelector",
         name: "Status Selector",
