@@ -23,7 +23,7 @@
       <span class="metrics__info__counter">{{ progress | percent }}</span>
     </div>
     <div class="metrics__numbers">
-      <span>{{ totalAnnotated | formatNumber }}</span
+      <span>{{ totalResponded | formatNumber }}</span
       >/{{ progressTotal | formatNumber }}
     </div>
     <base-progress
@@ -71,11 +71,11 @@ export default {
     },
   },
   computed: {
-    totalAnnotated() {
+    totalResponded() {
       return this.totalSubmitted + this.totalDiscarded;
     },
     progress() {
-      return this.totalAnnotated / this.progressTotal;
+      return this.totalResponded / this.progressTotal;
     },
   },
 };
