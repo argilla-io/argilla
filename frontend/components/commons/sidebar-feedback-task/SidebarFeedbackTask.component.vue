@@ -1,9 +1,9 @@
 <template>
   <div class="sidebar__container">
     <SidebarFeedbackTaskPanel v-if="isPanelVisible" @close-panel="closePanel">
-      <component
-        v-if="getProgressComponentName"
-        :is="getProgressComponentName"
+      <FeedbackTaskProgress
+        v-if="getProgressComponentName === 'FeedbackTaskProgress'"
+        :userIdToShowMetrics="userId"
       />
     </SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
@@ -17,6 +17,7 @@
 
 <script>
 import { SIDEBAR_GROUP } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
+
 export default {
   props: {
     datasetId: {
@@ -29,6 +30,9 @@ export default {
     currentMode: "annotate",
   }),
   computed: {
+    userId() {
+      return this.$auth.user.id;
+    },
     getProgressComponentName() {
       return (
         this.sidebarItems.metrics.buttons.find(
@@ -86,7 +90,6 @@ export default {
     onClickSidebarAction(group, info) {
       switch (group.toUpperCase()) {
         case SIDEBAR_GROUP.METRICS:
-          console.log("fetchMetrics");
           this.toggleMetrics(info);
           break;
         case SIDEBAR_GROUP.MODE:
@@ -97,12 +100,6 @@ export default {
           break;
         default:
           console.warn(info);
-      }
-    },
-    async fetchMetrics() {
-      try {
-      } catch (err) {
-        console.log(err);
       }
     },
     toggleMetrics(panelContent) {
