@@ -16,6 +16,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
+from argilla.server.contexts import accounts
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -236,7 +237,6 @@ async def create_records(
     db: Session,
     search_engine: SearchEngine,
     dataset: Dataset,
-    user: User,
     records_create: RecordsCreate,
 ):
     if not dataset.is_ready:
@@ -252,16 +252,16 @@ async def create_records(
             dataset_id=dataset.id,
         )
 
-        if record_create.response:
-            record_response = record_create.response
-            validate_response_values(dataset, values=record_response.values, status=record_response.status)
-            record.responses = [
-                Response(
-                    values=jsonable_encoder(record_response.values),
-                    status=record_response.status,
-                    user_id=user.id,
+        if record_create.responses:
+            for response in record_create.responses:
+                if not accounts.get_user_by_id(db, response.user_id):
+                    raise ValueError(f"Provided user_id: {response.user_id!r} is not a valid user id")
+
+                validate_response_values(dataset, values=response.values, status=response.status)
+
+                record.responses.append(
+                    Response(values=jsonable_encoder(response.values), status=response.status, user_id=response.user_id)
                 )
-            ]
 
         records.append(record)
 

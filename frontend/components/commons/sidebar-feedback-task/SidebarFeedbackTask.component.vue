@@ -1,8 +1,11 @@
 <template>
   <div class="sidebar__container">
     <SidebarFeedbackTaskPanel v-if="isPanelVisible" @close-panel="closePanel">
-      <component v-if="getProgressComponentName" :is="getProgressComponentName"
-    /></SidebarFeedbackTaskPanel>
+      <FeedbackTaskProgress
+        v-if="getProgressComponentName === 'FeedbackTaskProgress'"
+        :userIdToShowMetrics="userId"
+      />
+    </SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
       @on-click-sidebar-action="onClickSidebarAction"
       :sidebar-items="sidebarItems"
@@ -14,12 +17,29 @@
 
 <script>
 import { SIDEBAR_GROUP } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
+import { isDatasetExistsByDatasetIdAndUserId } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries";
+
 export default {
+  props: {
+    datasetId: {
+      type: String,
+      required: true,
+    },
+  },
   data: () => ({
     currentMetric: null,
     currentMode: "annotate",
   }),
   computed: {
+    userId() {
+      return this.$auth.user.id;
+    },
+    isDatasetMetrics() {
+      return isDatasetExistsByDatasetIdAndUserId({
+        userId: this.userId,
+        datasetId: this.datasetId,
+      });
+    },
     getProgressComponentName() {
       return (
         this.sidebarItems.metrics.buttons.find(
@@ -90,6 +110,8 @@ export default {
       }
     },
     toggleMetrics(panelContent) {
+      if (!this.isDatasetMetrics) return;
+
       this.currentMetric =
         this.currentMetric !== panelContent ? panelContent : null;
       $nuxt.$emit("on-sidebar-toggle-metrics", !!this.currentMetric);
