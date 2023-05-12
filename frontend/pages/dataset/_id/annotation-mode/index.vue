@@ -8,7 +8,10 @@
       />
     </template>
     <template v-slot:sidebar-right>
-      <SidebarFeedbackTaskComponent @refresh="onRefresh()" />
+      <SidebarFeedbackTaskComponent
+        :datasetId="datasetId"
+        @refresh="onRefresh()"
+      />
     </template>
     <template v-slot:top>
       <DatasetFiltersComponent :datasetId="datasetId" />

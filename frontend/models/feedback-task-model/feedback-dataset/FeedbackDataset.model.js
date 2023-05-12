@@ -1,6 +1,7 @@
 import { Model } from "@vuex-orm/core";
 import { DatasetQuestion } from "../dataset-question/DatasetQuestion.model";
 import { DatasetField } from "../dataset-field/DatasetField.model";
+import { DatasetMetric } from "../dataset-metric/DatasetMetric.model";
 import { DatasetFilter } from "../dataset-filter/DatasetFilter.model";
 import { Record } from "../record/Record.model";
 
@@ -22,6 +23,7 @@ class FeedbackDataset extends Model {
       // relationships
       dataset_questions: this.hasMany(DatasetQuestion, "dataset_id"),
       dataset_fields: this.hasMany(DatasetField, "dataset_id"),
+      dataset_metrics: this.hasMany(DatasetMetric, "dataset_id"),
       dataset_filters: this.hasMany(DatasetFilter, "dataset_id"),
       records: this.hasMany(Record, "dataset_id"),
     };
