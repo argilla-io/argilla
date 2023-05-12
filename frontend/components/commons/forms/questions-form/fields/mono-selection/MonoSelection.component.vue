@@ -13,7 +13,7 @@
         icon="info"
         :id="`${title}MonoSelection`"
         :show-badge="false"
-        iconColor="rgba(0, 0, 0, 0.37)"
+        iconColor="#acacac"
         badge-vertical-position="top"
         badge-horizontal-position="right"
         badge-border-color="white"
@@ -127,9 +127,6 @@ export default {
   flex-direction: column;
   gap: $base-space;
   .title-area {
-    display: flex;
-    align-items: center;
-    gap: $base-space;
     color: $black-87;
     font-weight: 500;
   }
@@ -191,6 +188,7 @@ span {
 }
 
 .icon-info {
+  display: inline-flex;
   margin: 0;
   padding: 0;
   overflow: inherit;
