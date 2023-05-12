@@ -104,6 +104,7 @@ import {
   deleteRecordResponsesByUserIdAndResponseId,
   isResponsesByUserIdExists,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
 
 const STATUS_RESPONSE = Object.freeze({
   UPDATE: "UPDATE",
@@ -258,8 +259,11 @@ export default {
 
       // 4 - create or update the record responses and emit bus event to change record to show
       try {
-        // TODO - make the call here to discard the record
         await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+
+        // NOTE - Update dataset Metrics orm
+        await this.initMetricsAndInsertDataInOrm();
+
         await updateRecordStatusByRecordId(
           this.recordId,
           RECORD_STATUS.DISCARDED
@@ -297,11 +301,16 @@ export default {
       // 4 - create or update the record responses and emit bus event to change record to show
       try {
         await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+
+        // NOTE - Update dataset Metrics orm
+        await this.initMetricsAndInsertDataInOrm();
+
         // NOTE - onSubmit event => the status change to SUBMITTED
         await updateRecordStatusByRecordId(
           this.recordId,
           RECORD_STATUS.SUBMITTED
         );
+
         this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
       } catch (err) {
         console.log(err);
@@ -337,6 +346,8 @@ export default {
           RECORD_STATUS.PENDING
         );
 
+        // NOTE - Update dataset Metrics orm
+        await this.initMetricsAndInsertDataInOrm();
         this.onReset();
       } catch (err) {
         console.log(err);
@@ -357,8 +368,42 @@ export default {
         this.isError = false;
       }
     },
+    async initMetricsAndInsertDataInOrm() {
+      const datasetMetrics = await this.fetchMetrics();
+
+      const formattedMetrics = this.factoryDatasetMetricsForOrm(datasetMetrics);
+
+      await upsertDatasetMetrics(formattedMetrics);
+    },
     async deleteResponsesByResponseId(responseId) {
       return await this.$axios.delete(`/v1/responses/${responseId}`);
+    },
+    async fetchMetrics() {
+      try {
+        const { data } = await this.$axios.get(
+          `/v1/me/datasets/${this.datasetId}/metrics`
+        );
+
+        return data;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    factoryDatasetMetricsForOrm({ records, responses, user_id }) {
+      const {
+        count: responsesCount,
+        submitted: responsesSubmitted,
+        discarded: responsesDiscarded,
+      } = responses;
+
+      return {
+        dataset_id: this.datasetId,
+        user_id: user_id ?? this.userId,
+        total_record: records?.count ?? 0,
+        responses_count: responsesCount,
+        responses_submitted: responsesSubmitted,
+        responses_discarded: responsesDiscarded,
+      };
     },
     async createOrUpdateRecordResponses({
       status,
