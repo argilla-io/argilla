@@ -102,9 +102,8 @@ export default {
   },
   created() {
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
-    this.toastMessage =
-      "Pending actions will be lost when the page is refreshed";
-    this.buttonMessage = "Ok, got it!";
+    this.toastMessage = "Your changes will be lost if you refresh the page";
+    this.buttonMessage = "Ok, continue.";
     this.typeOfToast = "warning";
   },
   methods: {

@@ -24,7 +24,6 @@ from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 from argilla.server.settings import settings
-from elasticsearch8 import Elasticsearch
 from opensearchpy import OpenSearch
 from starlette.testclient import TestClient
 
@@ -66,8 +65,8 @@ def elasticsearch_config():
 
 
 @pytest.fixture(scope="session")
-def elasticsearch(elasticsearch_config):
-    client = Elasticsearch(**elasticsearch_config)
+def opensearch(elasticsearch_config):
+    client = OpenSearch(**elasticsearch_config)
     yield client
 
     for index_info in client.cat.indices(index="ar.*,rg.*", format="json"):

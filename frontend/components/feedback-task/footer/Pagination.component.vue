@@ -1,7 +1,6 @@
 <template>
   <div class="pagination">
     <div class="number-of-records-by-page-area"></div>
-
     <div class="pagination__buttons">
       <BaseButton
         class="pagination__button"
@@ -95,6 +94,12 @@ export default {
     totalOfRecordMessage() {
       return `${this.currentPage} of ${this.totalItems} records`;
     },
+    isPageAvailable() {
+      return (this.pageFromQuery || this.currentPage) <= this.totalPages;
+    },
+    pageFromRoute() {
+      return parseFloat(this.$route.query?._page) || 1;
+    },
   },
   watch: {
     localCurrentPage: {
@@ -106,10 +111,8 @@ export default {
     },
   },
   mounted() {
-    this.currentPage = parseFloat(this.$route.query?._page) || 1;
-
+    this.currentPage = this.isPageAvailable ? this.pageFromRoute : 1;
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
-
     this.onBusEventCurrentPage();
   },
   destroyed() {

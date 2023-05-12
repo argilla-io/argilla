@@ -16,13 +16,11 @@ import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from argilla.server.elasticsearch import ElasticSearchEngine
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
     Field,
     Question,
-    QuestionSettings,
     Record,
     Response,
     ResponseStatus,
@@ -38,9 +36,9 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
+from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
 from fastapi.encoders import jsonable_encoder
-from pydantic import parse_obj_as
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, contains_eager
 
@@ -75,7 +73,7 @@ def create_dataset(db: Session, dataset_create: DatasetCreate):
     return dataset
 
 
-async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, dataset: Dataset):
+async def publish_dataset(db: Session, search_engine: SearchEngine, dataset: Dataset):
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
 
@@ -87,14 +85,16 @@ async def publish_dataset(db: Session, search_engine: ElasticSearchEngine, datas
 
     dataset.status = DatasetStatus.ready
     db.commit()
-    db.refresh(dataset)
+    db.expire(dataset)
 
     try:
-        # TODO: search engine operations won't raise errors for now.
-        #  In a next step, this action must be required to fully publish the dataset
         await search_engine.create_index(dataset)
-    except Exception as ex:
-        _LOGGER.error(f"Search index cannot be created: {ex}")
+    except:
+        # TODO: Improve this action using some rollback mechanism
+        dataset.status = DatasetStatus.draft
+        db.commit()
+        db.expire(dataset)
+        raise
 
     return dataset
 
@@ -232,7 +232,13 @@ def count_records_by_dataset_id(db: Session, dataset_id: UUID):
     return db.query(func.count(Record.id)).filter_by(dataset_id=dataset_id).scalar()
 
 
-def create_records(db: Session, dataset: Dataset, user: User, records_create: RecordsCreate):
+async def create_records(
+    db: Session,
+    search_engine: SearchEngine,
+    dataset: Dataset,
+    user: User,
+    records_create: RecordsCreate,
+):
     if not dataset.is_ready:
         raise ValueError("Records cannot be created for a non published dataset")
 
@@ -259,8 +265,19 @@ def create_records(db: Session, dataset: Dataset, user: User, records_create: Re
 
         records.append(record)
 
-    db.add_all(records)
-    db.commit()
+    try:
+        db.add_all(records)
+
+        db.commit()
+        db.expire_all()
+
+        await search_engine.add_records(dataset, records)
+    except:
+        # TODO: Improve this action using some rollback mechanism
+        for record in records:
+            db.delete(record)
+        db.commit()
+        raise
 
 
 def get_response_by_id(db: Session, response_id: UUID):
@@ -369,8 +386,7 @@ def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue],
 
         question_response = values_copy.pop(question.name, None)
         if question_response:
-            settings = parse_obj_as(QuestionSettings, question.settings)
-            settings.check_response(question_response)
+            question.parsed_settings.check_response(question_response)
 
     if values_copy:
         raise ValueError(f"Error: found responses for non configured questions: {list(values_copy.keys())!r}")

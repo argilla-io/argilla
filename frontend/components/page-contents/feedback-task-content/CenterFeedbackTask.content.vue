@@ -79,10 +79,14 @@ export default {
     },
   },
   watch: {
+    totalRecords(newTotalRecord) {
+      if (!newTotalRecord) this.areResponsesUntouched = true;
+    },
     async recordStatusFilteringValue(newStatus, oldStatus) {
       // NOTE 1 - each time the filter change, clean records orm && rerender the children component
       !this.areResponsesUntouched ||
         (await this.goToFirstPageAndRerenderChildren());
+
       // NOTE 2 - if responses are untouched, toast is not shown. Else, toast is shown
       this.checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(newStatus) ||
         this.showNotificationBeforeChangeStatus({
@@ -97,9 +101,8 @@ export default {
     },
   },
   created() {
-    this.toastMessage =
-      "Pending actions will be lost when the page is refreshed";
-    this.buttonMessage = "Ok, got it!";
+    this.toastMessage = "Your changes will be lost if you move to another view";
+    this.buttonMessage = "Ok, continue.";
     this.typeOfToast = "warning";
   },
   methods: {
@@ -302,7 +305,8 @@ export default {
     },
     checkIfAreResponsesUntouchedAndRouteStatusIsDifferent(status) {
       return (
-        this.areResponsesUntouched || this.recordStatus.toLowerCase() === status
+        this.areResponsesUntouched ||
+        this.recordStatus?.toLowerCase() === status
       );
     },
     async getFields(datasetId) {
