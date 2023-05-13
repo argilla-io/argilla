@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     import datasets
     import pandas
     import spacy
+    import tensorflow as tf
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -348,6 +349,8 @@ class DatasetBase:
         "spacy.tokens.DocBin",
         Tuple["spacy.tokens.DocBin", "spacy.tokens.DocBin"],
         Tuple["pandas.DataFrame", "pandas.DataFrame"],
+        "tf.data.Dataset",
+        Tuple["tf.data.Dataset", "tf.data.Dataset"],
     ]:
         """Prepares the dataset for training.
 
@@ -455,6 +458,8 @@ class DatasetBase:
         # prepare for training for the right method
         if framework in [Framework.TRANSFORMERS, Framework.SETFIT, Framework.SPAN_MARKER]:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
+        elif framework is Framework.KERAS_NLP:
+            return self._prepare_for_training_with_tensorflow(train_size=train_size, test_size=test_size, seed=seed)
         elif framework is Framework.SPACY and lang is None:
             raise ValueError(
                 "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
@@ -522,6 +527,20 @@ class DatasetBase:
 
         Returns:
             A datasets Dataset.
+        """
+
+        raise NotImplementedError
+
+    @requires_version("numpy")
+    @requires_version("tensorflow")
+    def _prepare_for_training_with_tensorflow(self, **kwargs) -> "tf.data.Dataset":
+        """Prepares the dataset for training using the "tensorflow" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A tf.data.Dataset.
         """
 
         raise NotImplementedError
@@ -832,6 +851,39 @@ class DatasetForTextClassification(DatasetBase):
             ds = ds.train_test_split(train_size=train_size, test_size=test_size, seed=seed)
 
         return ds
+
+    @requires_version("numpy")
+    @requires_version("tensorflow")
+    def _prepare_for_training_with_tensorflow(
+        self, train_size: Optional[float] = None, test_size: Optional[float] = None, seed: Optional[int] = None
+    ) -> Union["tf.data.Dataset", Tuple["tf.data.Dataset", "tf.data.Dataset"]]:
+        import numpy as np
+        import tensorflow as tf
+
+        data = {"text": [], "label": []}
+        for record in self._records:
+            if record.annotation is None:
+                continue
+
+            if record.text is not None:
+                text = record.text
+            elif record.text is None and "text" in record.inputs:
+                text = record.inputs["text"]
+            else:
+                text = " ".join(record.inputs.values())
+
+            data["text"].append(text)
+            data["label"].append(record.annotation)
+
+        dataset = tf.data.Dataset.from_tensors((np.array(data["text"]), np.array(data["label"])))
+        if test_size is not None and test_size != 0 and train_size + test_size <= 1.0:
+            dataset = dataset.shuffle(len(dataset), seed=seed)
+            test_size = int(len(dataset) * test_size)
+            train_size = int(len(dataset) * train_size)
+            dataset = dataset.take(train_size)
+            test_dataset = dataset.skip(train_size).take(test_size)
+            return dataset, test_dataset
+        return dataset
 
     @requires_version("spacy")
     def _prepare_for_training_with_spacy(self, nlp: "spacy.Language", records: List[Record]) -> "spacy.tokens.DocBin":
