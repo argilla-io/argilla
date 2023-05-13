@@ -531,7 +531,6 @@ class DatasetBase:
 
         raise NotImplementedError
 
-    @requires_version("numpy")
     @requires_version("tensorflow")
     def _prepare_for_training_with_tensorflow(self, **kwargs) -> "tf.data.Dataset":
         """Prepares the dataset for training using the "tensorflow" framework.
@@ -852,12 +851,10 @@ class DatasetForTextClassification(DatasetBase):
 
         return ds
 
-    @requires_version("numpy")
     @requires_version("tensorflow")
     def _prepare_for_training_with_tensorflow(
         self, train_size: Optional[float] = None, test_size: Optional[float] = None, seed: Optional[int] = None
     ) -> Union["tf.data.Dataset", Tuple["tf.data.Dataset", "tf.data.Dataset"]]:
-        import numpy as np
         import tensorflow as tf
 
         data = {"text": [], "label": []}
@@ -875,14 +872,14 @@ class DatasetForTextClassification(DatasetBase):
             data["text"].append(text)
             data["label"].append(record.annotation)
 
-        dataset = tf.data.Dataset.from_tensors((np.array(data["text"]), np.array(data["label"])))
+        dataset = tf.data.Dataset.from_tensor_slices(data)
         if test_size is not None and test_size != 0 and train_size + test_size <= 1.0:
             dataset = dataset.shuffle(len(dataset), seed=seed)
             test_size = int(len(dataset) * test_size)
-            train_size = int(len(dataset) * train_size)
-            dataset = dataset.take(train_size)
-            test_dataset = dataset.skip(train_size).take(test_size)
-            return dataset, test_dataset
+            train_size = len(dataset) - test_size
+            train_dataset = dataset.take(train_size)
+            test_dataset = dataset.skip(train_size)
+            return train_dataset, test_dataset
         return dataset
 
     @requires_version("spacy")
