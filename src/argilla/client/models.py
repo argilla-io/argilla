@@ -43,6 +43,7 @@ class Framework(Enum):
     SPAN_MARKER = "span_marker"
     SPARK_NLP = "spark-nlp"
     OPENAI = "openai"
+    KERAS_NLP = "keras_nlp"
 
     @classmethod
     def _missing_(cls, value):
