@@ -157,6 +157,24 @@ class ArgillaTrainer(object):
                 seed=self._seed,
                 model=self.model,
             )
+        elif framework is Framework.KERAS_NLP:
+            from argilla.training.keras_nlp import ArgillaKerasNLPTrainer
+
+            if self._rg_dataset_type is rg.DatasetForTokenClassification:
+                raise NotImplementedError(f"{Framework.KERAS_NLP} does not support `TokenClassification` tasks.")
+            elif self._rg_dataset_type is rg.DatasetForTextClassification and self._multi_label:
+                raise NotImplementedError(
+                    f"{Framework.KERAS_NLP} does not support multi-label `TextClassification` tasks."
+                )
+
+            self._trainer = ArgillaKerasNLPTrainer(
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                multi_label=self._multi_label,
+                settings=self._settings,
+                seed=self._seed,
+                model=self.model,
+            )
         elif framework is Framework.SPACY:
             from argilla.training.spacy import ArgillaSpaCyTrainer
 
