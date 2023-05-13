@@ -24,6 +24,7 @@ else:
     from typing_extensions import Literal
 
 import argilla as rg
+from argilla.client.models import Framework
 
 if TYPE_CHECKING:
     from pydantic import BaseModel
@@ -33,12 +34,12 @@ if TYPE_CHECKING:
         DatasetForTokenClassification,
     )
     from argilla.client.models import (
-        Framework,
         Text2TextRecord,
         TextClassificationRecord,
         TokenClassificationRecord,
     )
     from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
+
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -53,7 +54,7 @@ class ArgillaTrainer(object):
     def __init__(
         self,
         name: str,
-        framework: Framework,
+        framework: Union[str, Framework],
         workspace: Optional[str] = None,
         lang: Optional["spacy.Language"] = None,
         model: Optional[str] = None,
@@ -115,7 +116,7 @@ class ArgillaTrainer(object):
 
         self.dataset_full = rg.load(name=self._name, **load_kwargs)
 
-        framework = Framework(framework)
+        framework = Framework(framework) if isinstance(framework, str) else framework
         if framework is Framework.SPACY:
             import spacy
 
@@ -240,7 +241,7 @@ _________________________________________________________________
 
     def predict(
         self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]], BaseModel, List[BaseModel]]:
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]], "BaseModel", List["BaseModel"]]:
         """
         `predict` takes a string or list of strings and returns a list of dictionaries, each dictionary
         containing the text, the predicted label, and the confidence score.
@@ -314,7 +315,7 @@ class ArgillaTrainerSkeleton(ABC):
     @abstractmethod
     def predict(
         self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]], BaseModel, List[BaseModel]]:
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]], "BaseModel", List["BaseModel"]]:
         """
         Predicts the label of the text.
         """

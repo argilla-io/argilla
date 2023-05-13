@@ -128,7 +128,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
 
         self.init_training_args()
 
-    def init_training_args(self):
+    def init_training_args(self) -> None:
         from spacy.cli.init_config import init_config
 
         self.config = init_config(
@@ -156,7 +156,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
 
         self._nlp = None
 
-    def init_model(self):
+    def init_model(self) -> None:
         import spacy
 
         self._nlp = spacy.load(self._model)
