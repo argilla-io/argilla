@@ -857,7 +857,7 @@ class DatasetForTextClassification(DatasetBase):
     ) -> Union["tf.data.Dataset", Tuple["tf.data.Dataset", "tf.data.Dataset"]]:
         import tensorflow as tf
 
-        data = {"text": [], "label": []}
+        features, labels = [], []
         for record in self._records:
             if record.annotation is None:
                 continue
@@ -869,10 +869,11 @@ class DatasetForTextClassification(DatasetBase):
             else:
                 text = " ".join(record.inputs.values())
 
-            data["text"].append(text)
-            data["label"].append(record.annotation)
+            features.append(text)
+            labels.append(record.annotation)
 
-        dataset = tf.data.Dataset.from_tensor_slices(data)
+        dataset = tf.data.Dataset.from_tensor_slices((tf.strings.unicode_split(features, "UTF-8"), tf.constant(labels)))
+
         if test_size is not None and test_size != 0 and train_size + test_size <= 1.0:
             dataset = dataset.shuffle(len(dataset), seed=seed)
             test_size = int(len(dataset) * test_size)
