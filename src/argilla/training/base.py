@@ -193,7 +193,9 @@ class ArgillaTrainer(object):
             if self._rg_dataset_type is rg.DatasetForTokenClassification:
                 raise NotImplementedError(f"{Framework.OPENAI} does not support `TokenClassification` tasks.")
             elif self._rg_dataset_type is rg.DatasetForTextClassification and self._multi_label:
-                raise NotImplementedError(f"{Framework.OPENAI} does not support multi-label TextClassification tasks.")
+                raise NotImplementedError(
+                    f"{Framework.OPENAI} does not support multi-label `TextClassification` tasks."
+                )
             self._trainer = ArgillaOpenAITrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
