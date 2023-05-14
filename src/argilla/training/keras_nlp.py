@@ -45,6 +45,7 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
 
             all_labels = [y.numpy().decode("utf-8") for _, y in self._train_dataset]
             unique_labels = list(set(all_labels))
+            self.num_classes = len(unique_labels)
 
             self.idx2label = {idx: label for idx, label in enumerate(unique_labels)}
             self.label2idx = {label: idx for idx, label in self.idx2label.items()}
@@ -61,6 +62,10 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
                 )
         else:
             raise NotImplementedError("`rg.TokenClassificationRecord` and `rg.Text2TextRecord` are not supported yet.")
+
+        self._train_batch_size = 16
+        self._eval_batch_size = 8
+        self.n_epochs = 5
 
         self.init_training_args()
 
@@ -80,11 +85,11 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
         # from keras_nlp.models import (BertClassifier, FNetClassifier, AlbertClassifier, RobertaClassifier, DebertaV3Classifier, DistilBertClassifier, XLMRobertaClassifier)
         from keras_nlp.models import BertClassifier
 
-        self.classifier = BertClassifier.from_preset(self._model, num_classes=2)
+        self.classifier = BertClassifier.from_preset(self._model, num_classes=self.num_classes)
         self.classifier.fit(
             self._train_dataset,
             validation_data=self._eval_dataset,
-            epochs=1,
+            epochs=self.n_epochs,
         )
         if output_dir:
             self.save(output_dir)
