@@ -91,8 +91,8 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
 
         self.classifier = BertClassifier.from_preset(self._model, num_classes=self.num_classes)
         self.classifier.fit(
-            self._train_dataset,
-            validation_data=self._eval_dataset,
+            self._train_dataset.batch(self._train_batch_size),
+            validation_data=self._eval_dataset.batch(self._eval_batch_size) if self._eval_dataset else None,
             epochs=self.n_epochs,
         )
         if output_dir:
