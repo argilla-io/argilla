@@ -15,6 +15,7 @@
 import logging
 import os
 import sys
+import textwrap
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -227,26 +228,26 @@ class ArgillaTrainer(object):
         Returns:
           The trainer object.
         """
-        return f"""\
-ArgillaBaseTrainer info:
-_________________________________________________________________
-These baseline params are fixed:
-    dataset: {self._name}
-    task: {self._rg_dataset_type.__name__}
-    multi_label: {self._multi_label}
-    train_size: {self._train_size}
-    seed: {self._seed}
-
-{self._trainer.__class__} info:
-_________________________________________________________________
-The parameters are configurable via `trainer.update_config()`:
-    {self._trainer}
-
-Using the trainer:
-_________________________________________________________________
-`trainer.train(output_dir)` to train to start training. `output_dir` is the directory to save the model automatically.
-`trainer.predict(text, as_argilla_records=True)` to make predictions.
-`trainer.save(output_dir)` to save the model manually."""
+        return textwrap.dedent(
+            f"""\
+            ArgillaBaseTrainer info:
+            _________________________________________________________________
+            These baseline params are fixed:
+                dataset: {self._name}
+                task: {self._rg_dataset_type.__name__}
+                multi_label: {self._multi_label}
+                train_size: {self._train_size}
+                seed: {self._seed}
+            {self._trainer.__class__} info:
+            _________________________________________________________________
+            The parameters are configurable via `trainer.update_config()`:
+                {self._trainer}
+            Using the trainer:
+            _________________________________________________________________
+            `trainer.train(output_dir)` to train to start training. `output_dir` is the directory to save the model automatically.
+            `trainer.predict(text, as_argilla_records=True)` to make predictions.
+            `trainer.save(output_dir)` to save the model manually."""
+        )
 
     def update_config(self, *args, **kwargs) -> None:
         """
@@ -254,9 +255,13 @@ _________________________________________________________________
         """
         self._trainer.update_config(*args, **kwargs)
         self._logger.info(
-            "Updated parameters:\n"
-            + "_________________________________________________________________\n"
-            + f"{self._trainer}"
+            textwrap.dedent(
+                f"""\
+            Updated parameters:
+            _________________________________________________________________
+            {self._trainer}
+            """
+            )
         )
 
     def predict(
