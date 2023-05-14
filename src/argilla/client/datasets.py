@@ -872,7 +872,8 @@ class DatasetForTextClassification(DatasetBase):
             features.append(text)
             labels.append(record.annotation)
 
-        dataset = tf.data.Dataset.from_tensor_slices((tf.strings.unicode_split(features, "UTF-8"), tf.constant(labels)))
+        dataset = tf.data.Dataset.from_tensors((features, labels))
+        del features, labels
 
         if test_size is not None and test_size != 0 and train_size + test_size <= 1.0:
             dataset = dataset.shuffle(len(dataset), seed=seed)
