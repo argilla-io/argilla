@@ -851,10 +851,12 @@ class DatasetForTextClassification(DatasetBase):
 
         return ds
 
+    @requires_version("numpy")
     @requires_version("tensorflow")
     def _prepare_for_training_with_tensorflow(
         self, train_size: Optional[float] = None, test_size: Optional[float] = None, seed: Optional[int] = None
     ) -> Union["tf.data.Dataset", Tuple["tf.data.Dataset", "tf.data.Dataset"]]:
+        import numpy as np
         import tensorflow as tf
 
         features, labels = [], []
@@ -872,7 +874,7 @@ class DatasetForTextClassification(DatasetBase):
             features.append(text)
             labels.append(record.annotation)
 
-        dataset = tf.data.Dataset.from_tensor_slices((features, labels))
+        dataset = tf.data.Dataset.from_tensor_slices((np.array(features), np.array(labels)))
         del features, labels
 
         if test_size is not None and test_size != 0 and train_size + test_size <= 1.0:
