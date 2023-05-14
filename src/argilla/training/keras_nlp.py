@@ -14,11 +14,14 @@
 
 import logging
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 import argilla as rg
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
+
+if TYPE_CHECKING:
+    import tensorflow as tf
 
 
 class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
@@ -32,9 +35,10 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
         super().__init__(*args, **kwargs)
 
         if isinstance(self._dataset, tuple):
-            self._train_dataset, self._eval_dataset = self._dataset
+            self._train_dataset: "tf.data.Dataset" = self._dataset[0]
+            self._eval_dataset: "tf.data.Dataset" = self._dataset[1]
         else:
-            self._train_dataset = self._dataset
+            self._train_dataset: "tf.data.Dataset" = self._dataset
             self._eval_dataset = None
 
         if self._record_class == rg.TextClassificationRecord:
