@@ -34,6 +34,13 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
+        import tensorflow as tf
+
+        if self._model is None:
+            self._model = "bert_tiny_en_uncased"
+
+        tf.random.set_seed(self._seed or 42)
+
         if isinstance(self._dataset, tuple):
             self._train_dataset: "tf.data.Dataset" = self._dataset[0]
             self._eval_dataset: "tf.data.Dataset" = self._dataset[1]
@@ -44,8 +51,6 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
         if self._record_class == rg.TextClassificationRecord:
             if self._multi_label:
                 raise NotImplementedError("`rg.TextClassificationRecord` with multi_label is not supported yet.")
-
-            import tensorflow as tf
 
             all_labels = [y.numpy().decode("utf-8") for _, y in self._train_dataset]
             unique_labels = list(set(all_labels))
@@ -76,8 +81,11 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
     def init_training_args(self) -> None:
         pass
 
-    def init_model(self) -> None:
-        pass
+    def init_model(self) -> "tf.keras.Model":
+        # from keras_nlp.models import (BertClassifier, FNetClassifier, AlbertClassifier, RobertaClassifier, DebertaV3Classifier, DistilBertClassifier, XLMRobertaClassifier)
+        from keras_nlp.models import BertClassifier
+
+        return BertClassifier.from_preset(self._model, num_classes=self.num_classes)
 
     def __repr__(self) -> str:
         return ""
@@ -86,11 +94,10 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
         pass
 
     def train(self, output_dir: Optional[str] = None) -> None:
-        # from keras_nlp.models import (BertClassifier, FNetClassifier, AlbertClassifier, RobertaClassifier, DebertaV3Classifier, DistilBertClassifier, XLMRobertaClassifier)
         import tensorflow as tf
-        from keras_nlp.models import BertClassifier
 
-        self.classifier = BertClassifier.from_preset(self._model, num_classes=self.num_classes)
+        self.classifier = self.init_model()
+
         if self.num_classes > 2:
             self.classifier.compile("adam", loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True))
         self.classifier.fit(
