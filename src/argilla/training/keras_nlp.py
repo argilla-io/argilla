@@ -95,6 +95,7 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
             output_dir.mkdir(parents=True)
         self.classifier.save(output_dir)  # To be loaded as `tf.keras.models.load_model(output_dir)`
 
+    @require_version("numpy")
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs) -> Any:
         import numpy as np
 
