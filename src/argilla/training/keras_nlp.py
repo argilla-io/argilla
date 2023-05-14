@@ -71,7 +71,7 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
         pass
 
     def __repr__(self) -> str:
-        pass
+        return ""
 
     def update_config(self) -> None:
         pass
