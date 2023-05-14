@@ -39,11 +39,26 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
 
         if self._record_class == rg.TextClassificationRecord:
             if self._multi_label:
-                self._column_mapping = {"text": "text", "binarized_label": "label"}
-                self._pipeline = ["textcat_multilabel"]
-            else:
-                self._column_mapping = {"text": "text", "label": "label"}
-                self._pipeline = ["textcat"]
+                raise NotImplementedError("`rg.TextClassificationRecord` with multi_label is not supported yet.")
+
+            import tensorflow as tf
+
+            all_labels = [y.numpy().decode("utf-8") for _, y in self._train_dataset]
+            unique_labels = list(set(all_labels))
+
+            self.idx2label = {idx: label for idx, label in enumerate(unique_labels)}
+            self.label2idx = {label: idx for idx, label in self.idx2label.items()}
+
+            def str_to_int(t: tf.Tensor):
+                return self.label2idx[t.numpy().decode("utf-8")]
+
+            self._train_dataset = self._train_dataset.map(
+                lambda x, y: (x, tf.py_function(func=str_to_int, inp=[y], Tout=tf.int32))
+            )
+            if self._eval_dataset:
+                self._eval_dataset = self._eval_dataset.map(
+                    lambda x, y: (x, tf.py_function(func=str_to_int, inp=[y], Tout=tf.int32))
+                )
         else:
             raise NotImplementedError("`rg.TokenClassificationRecord` and `rg.Text2TextRecord` are not supported yet.")
 
