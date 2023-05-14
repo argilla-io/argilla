@@ -87,9 +87,12 @@ class ArgillaKerasNLPTrainer(ArgillaTrainerSkeleton):
 
     def train(self, output_dir: Optional[str] = None) -> None:
         # from keras_nlp.models import (BertClassifier, FNetClassifier, AlbertClassifier, RobertaClassifier, DebertaV3Classifier, DistilBertClassifier, XLMRobertaClassifier)
+        import tensorflow as tf
         from keras_nlp.models import BertClassifier
 
         self.classifier = BertClassifier.from_preset(self._model, num_classes=self.num_classes)
+        if self.num_classes > 2:
+            self.classifier.compile("adam", loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True))
         self.classifier.fit(
             self._train_dataset.batch(self._train_batch_size),
             validation_data=self._eval_dataset.batch(self._eval_batch_size) if self._eval_dataset else None,
