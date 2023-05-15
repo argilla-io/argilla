@@ -18,7 +18,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.orm import Session
 
-from argilla.server.contexts import datasets
+from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_db
 from argilla.server.models import User
 from argilla.server.policies import DatasetPolicyV1, authorize
@@ -176,6 +176,12 @@ def create_dataset(
     current_user: User = Security(auth.get_current_user),
 ):
     authorize(current_user, DatasetPolicyV1.create)
+
+    if not accounts.get_workspace_by_id(db, dataset_create.workspace_id):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Workspace with id `{dataset_create.workspace_id}` not found",
+        )
 
     if datasets.get_dataset_by_name_and_workspace_id(db, dataset_create.name, dataset_create.workspace_id):
         raise HTTPException(
