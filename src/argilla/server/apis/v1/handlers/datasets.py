@@ -18,7 +18,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.orm import Session
 
-from argilla.server.contexts import datasets
+from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_db
 from argilla.server.models import User
 from argilla.server.policies import DatasetPolicyV1, authorize
@@ -177,6 +177,12 @@ def create_dataset(
 ):
     authorize(current_user, DatasetPolicyV1.create)
 
+    if not accounts.get_workspace_by_id(db, dataset_create.workspace_id):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Workspace with id `{dataset_create.workspace_id}` not found",
+        )
+
     if datasets.get_dataset_by_name_and_workspace_id(db, dataset_create.name, dataset_create.workspace_id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -254,9 +260,7 @@ async def create_dataset_records(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        await datasets.create_records(
-            db, search_engine, dataset=dataset, user=current_user, records_create=records_create
-        )
+        await datasets.create_records(db, search_engine, dataset=dataset, records_create=records_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 

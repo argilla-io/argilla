@@ -920,6 +920,15 @@ def test_create_dataset_with_existent_name(client: TestClient, db: Session, admi
     assert db.query(Dataset).count() == 1
 
 
+def test_create_dataset_with_nonexistent_workspace_id(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset_json = {"name": "name", "workspace_id": str(uuid4())}
+
+    response = client.post("/api/v1/datasets", headers=admin_auth_header, json=dataset_json)
+
+    assert response.status_code == 422
+    assert db.query(Dataset).count() == 0
+
+
 def test_create_dataset_field(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     field_json = {
@@ -1401,6 +1410,7 @@ async def test_create_dataset_records(
     search_engine: SearchEngine,
     opensearch: OpenSearch,
     db: Session,
+    admin: User,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
@@ -1417,13 +1427,13 @@ async def test_create_dataset_records(
             {
                 "fields": {"input": "Say Hello", "output": "Hello"},
                 "external_id": "1",
-                "response": {
-                    "values": {
-                        "input_ok": {"value": "yes"},
-                        "output_ok": {"value": "yes"},
-                    },
-                    "status": "submitted",
-                },
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                        "status": "submitted",
+                        "user_id": str(admin.id),
+                    }
+                ],
             },
             {
                 "fields": {"input": "Say Hello", "output": "Hi"},
@@ -1431,26 +1441,32 @@ async def test_create_dataset_records(
             {
                 "fields": {"input": "Say Pello", "output": "Hello World"},
                 "external_id": "3",
-                "response": {
-                    "values": {
-                        "input_ok": {"value": "no"},
-                        "output_ok": {"value": "no"},
-                    },
-                    "status": "submitted",
-                },
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
+                        "status": "submitted",
+                        "user_id": str(admin.id),
+                    }
+                ],
             },
             {
                 "fields": {"input": "Say Hello", "output": "Good Morning"},
-                "response": {
-                    "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}},
-                    "status": "discarded",
-                },
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}},
+                        "status": "discarded",
+                        "user_id": str(admin.id),
+                    }
+                ],
             },
             {
                 "fields": {"input": "Say Hello", "output": "Say Hello"},
-                "response": {
-                    "status": "discarded",
-                },
+                "responses": [
+                    {
+                        "user_id": str(admin.id),
+                        "status": "discarded",
+                    }
+                ],
             },
         ]
     }
@@ -1482,6 +1498,168 @@ async def test_create_dataset_records(
             "responses": {"admin": {"values": None, "status": "discarded"}},
         },
     ]
+
+
+@pytest.mark.asyncio
+async def test_create_dataset_records_with_response_for_multiple_users(
+    client: TestClient,
+    search_engine: SearchEngine,
+    opensearch: OpenSearch,
+    db: Session,
+    admin: User,
+    admin_auth_header: dict,
+):
+    workspace = WorkspaceFactory.create()
+
+    dataset = DatasetFactory.create(status=DatasetStatus.ready, workspace=workspace)
+    TextFieldFactory.create(name="input", dataset=dataset)
+    TextFieldFactory.create(name="output", dataset=dataset)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    annotator = AnnotatorFactory.create(workspaces=[workspace])
+
+    # Prepare dataset and es index
+    await search_engine.create_index(dataset)
+
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "output": "Hello"},
+                "external_id": "1",
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                        "status": "submitted",
+                        "user_id": str(admin.id),
+                    },
+                    {
+                        "status": "discarded",
+                        "user_id": str(annotator.id),
+                    },
+                ],
+            },
+            {
+                "fields": {"input": "Say Pello", "output": "Hello World"},
+                "external_id": "3",
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
+                        "status": "submitted",
+                        "user_id": str(annotator.id),
+                    }
+                ],
+            },
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 204, response.json()
+    assert db.query(Record).count() == 2
+    assert db.query(Response).filter(Response.user_id == annotator.id).count() == 2
+    assert db.query(Response).filter(Response.user_id == admin.id).count() == 1
+
+
+@pytest.mark.asyncio
+async def test_create_dataset_records_with_response_for_unknown_user(
+    client: TestClient,
+    search_engine: SearchEngine,
+    opensearch: OpenSearch,
+    db: Session,
+    admin_auth_header: dict,
+):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    TextFieldFactory.create(name="input", dataset=dataset)
+    TextFieldFactory.create(name="output", dataset=dataset)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    # Prepare dataset and es index
+    await search_engine.create_index(dataset)
+
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "output": "Hello"},
+                "external_id": "1",
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                        "status": "submitted",
+                        "user_id": str(uuid4()),
+                    },
+                ],
+            },
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422, response.json()
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
+
+
+@pytest.mark.asyncio
+async def test_create_dataset_records_with_duplicated_response_for_an_user(
+    client: TestClient,
+    search_engine: SearchEngine,
+    opensearch: OpenSearch,
+    db: Session,
+    admin: User,
+    admin_auth_header: dict,
+):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    TextFieldFactory.create(name="input", dataset=dataset)
+    TextFieldFactory.create(name="output", dataset=dataset)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    # Prepare dataset and es index
+    await search_engine.create_index(dataset)
+
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "output": "Hello"},
+                "external_id": "1",
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                        "status": "submitted",
+                        "user_id": str(admin.id),
+                    },
+                    {
+                        "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
+                        "status": "submitted",
+                        "user_id": str(admin.id),
+                    },
+                ],
+            },
+        ]
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=admin_auth_header, json=records_json)
+
+    assert response.status_code == 422, response.json()
+    assert response.json() == {
+        "detail": {
+            "code": "argilla.api.errors::ValidationError",
+            "params": {
+                "model": "Request",
+                "errors": [
+                    {
+                        "loc": ["body", "items", 0, "responses"],
+                        "msg": f"Responses contains several responses for the same user_id: {str(admin.id)!r}",
+                        "type": "value_error",
+                    }
+                ],
+            },
+        }
+    }
+    assert db.query(Record).count() == 0
+    assert db.query(Response).count() == 0
 
 
 def test_create_dataset_records_with_missing_required_fields(
@@ -1611,10 +1789,7 @@ def test_create_dataset_records_without_authentication(client: TestClient, db: S
                 "fields": {"input": "Say Hello", "ouput": "Hello"},
                 "external_id": "1",
                 "response": {
-                    "values": {
-                        "input_ok": {"value": "yes"},
-                        "output_ok": {"value": "yes"},
-                    },
+                    "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
                     "status": "submitted",
                 },
             },
@@ -1662,6 +1837,7 @@ async def test_create_dataset_records_with_submitted_response(
     db: Session,
     search_engine: SearchEngine,
     opensearch: OpenSearch,
+    admin: User,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
@@ -1678,13 +1854,13 @@ async def test_create_dataset_records_with_submitted_response(
         "items": [
             {
                 "fields": {"input": "Say Hello", "output": "Hello"},
-                "response": {
-                    "values": {
-                        "input_ok": {"value": "yes"},
-                        "output_ok": {"value": "yes"},
-                    },
-                    "status": "submitted",
-                },
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                        "status": "submitted",
+                        "user_id": str(admin.id),
+                    }
+                ],
             },
         ]
     }
@@ -1697,7 +1873,10 @@ async def test_create_dataset_records_with_submitted_response(
 
 
 def test_create_dataset_records_with_submitted_response_without_values(
-    client: TestClient, db: Session, admin_auth_header: dict
+    client: TestClient,
+    db: Session,
+    admin: User,
+    admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
 
@@ -1705,9 +1884,12 @@ def test_create_dataset_records_with_submitted_response_without_values(
         "items": [
             {
                 "fields": {"input": "Say Hello", "ouput": "Hello"},
-                "response": {
-                    "status": "submitted",
-                },
+                "responses": [
+                    {
+                        "user_id": str(admin.id),
+                        "status": "submitted",
+                    }
+                ],
             },
         ]
     }
@@ -1725,6 +1907,7 @@ async def test_create_dataset_records_with_discarded_response(
     db: Session,
     search_engine: SearchEngine,
     opensearch: OpenSearch,
+    admin: User,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
@@ -1740,13 +1923,13 @@ async def test_create_dataset_records_with_discarded_response(
         "items": [
             {
                 "fields": {"input": "Say Hello", "output": "Hello"},
-                "response": {
-                    "values": {
-                        "input_ok": {"value": "yes"},
-                        "output_ok": {"value": "yes"},
-                    },
-                    "status": "discarded",
-                },
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                        "status": "discarded",
+                        "user_id": str(admin.id),
+                    }
+                ],
             },
         ]
     }
@@ -1758,19 +1941,24 @@ async def test_create_dataset_records_with_discarded_response(
     assert db.query(Response).filter(Response.status == ResponseStatus.discarded).count() == 1
 
 
-def test_create_dataset_records_with_invalid_response_status(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_dataset_records_with_invalid_response_status(
+    client: TestClient,
+    db: Session,
+    admin: User,
+    admin_auth_header: dict,
+):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     records_json = {
         "items": [
             {
                 "fields": {"input": "Say Hello", "ouput": "Hello"},
-                "response": {
-                    "values": {
-                        "input_ok": {"value": "yes"},
-                        "output_ok": {"value": "yes"},
-                    },
-                    "status": "invalid",
-                },
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                        "status": "invalid",
+                        "user_id": str(admin.id),
+                    }
+                ],
             },
         ]
     }
@@ -1788,6 +1976,7 @@ async def test_create_dataset_records_with_discarded_response_without_values(
     db: Session,
     search_engine: SearchEngine,
     opensearch: OpenSearch,
+    admin: User,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
@@ -1803,9 +1992,12 @@ async def test_create_dataset_records_with_discarded_response_without_values(
         "items": [
             {
                 "fields": {"input": "Say Hello", "output": "Hello"},
-                "response": {
-                    "status": "discarded",
-                },
+                "responses": [
+                    {
+                        "status": "discarded",
+                        "user_id": str(admin.id),
+                    }
+                ],
             },
         ]
     }
@@ -1821,17 +2013,7 @@ def test_create_dataset_records_with_non_published_dataset(client: TestClient, d
     dataset = DatasetFactory.create(status=DatasetStatus.draft)
     records_json = {
         "items": [
-            {
-                "fields": {"input": "Say Hello", "ouput": "Hello"},
-                "external_id": "1",
-                "response": {
-                    "values": {
-                        "input_ok": {"value": "yes"},
-                        "output_ok": {"value": "yes"},
-                    },
-                    "status": "submitted",
-                },
-            },
+            {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": "1"},
         ],
     }
 

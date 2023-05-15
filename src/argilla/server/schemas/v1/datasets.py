@@ -18,13 +18,16 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, conlist, constr
+from pydantic import BaseModel, conlist, constr, validator
 from pydantic import Field as ModelField
 
-if sys.version_info >= (3, 8):
+if sys.version_info >= (3, 9):
+    from typing import Annotated, Literal
+elif (3, 9) > sys.version_info >= (3, 8):
     from typing import Literal
+    from typing_extensions import Annotated
 else:
-    from typing_extensions import Literal
+    from typing_extensions import Annotated, Literal
 
 from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
 
@@ -209,20 +212,39 @@ class Records(BaseModel):
     total: int
 
 
-class SubmittedResponseCreate(BaseModel):
+class UserSubmittedResponseCreate(BaseModel):
+    user_id: UUID
     values: Dict[str, ResponseValueCreate]
     status: Literal[ResponseStatus.submitted]
 
 
-class DiscardedResponseCreate(BaseModel):
+class UserDiscardedResponseCreate(BaseModel):
+    user_id: UUID
     values: Optional[Dict[str, ResponseValueCreate]]
     status: Literal[ResponseStatus.discarded]
+
+
+UserResponseCreate = Annotated[
+    Union[UserSubmittedResponseCreate, UserDiscardedResponseCreate],
+    ModelField(discriminator="status"),
+]
 
 
 class RecordCreate(BaseModel):
     fields: Dict[str, Any]
     external_id: Optional[str]
-    response: Optional[Union[SubmittedResponseCreate, DiscardedResponseCreate]] = ModelField(discriminator="status")
+    responses: Optional[List[UserResponseCreate]]
+
+    @validator("responses")
+    def check_user_id_is_unique(cls, values):
+        user_ids = []
+
+        for value in values:
+            if value.user_id in user_ids:
+                raise ValueError(f"Responses contains several responses for the same user_id: {str(value.user_id)!r}")
+            user_ids.append(value.user_id)
+
+        return values
 
 
 class RecordsCreate(BaseModel):
