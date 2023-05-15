@@ -148,6 +148,10 @@ class DatasetPolicyV1:
         )
 
     @classmethod
+    def list_dataset_records_will_all_responses(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.is_admin
+
+    @classmethod
     def create(cls, actor: User) -> bool:
         return actor.is_admin
 
