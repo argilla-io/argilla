@@ -34,10 +34,10 @@
         <svgicon name="chevron-right" width="8" height="8" />
       </BaseButton>
     </div>
-
+    <!-- NOTE: HIDDEN FOR MVP
     <div class="total-records-area">
       <span v-text="totalOfRecordMessage" />
-    </div>
+    </div> -->
   </div>
 </template>
 
