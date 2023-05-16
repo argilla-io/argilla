@@ -13,7 +13,6 @@
           v-html="editableText"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
-          @keydown.shift.enter.exact="looseFocus"
           @keydown.shift.backspace.exact="looseFocus"
           @keydown.shift.space.exact="looseFocus"
           @keydown.arrow-right.stop=""
