@@ -16,51 +16,94 @@ import os
 from typing import List, Union
 from uuid import uuid4
 
-from autotrain.utils import get_project_cost
 from datasets import DatasetDict
 
 import argilla as rg
 from argilla.training.base import ArgillaTrainerSkeleton
-from argilla.training.utils import (
-    filter_allowed_args,
-)
 from argilla.utils.dependency import require_version
 
 
-def get_job_params(
-    job_params,
-    task,
-    param_choice,
-):
-    if param_choice.lower() == "AutoTrain".lower():
-        if len(job_params) > 1:
-            raise ValueError("❌ Only one job parameter is allowed for AutoTrain.")
-        job_params[0].update({"task": task})
-    elif param_choice.lower() == "manual":
-        for i in range(len(job_params)):
-            job_params[i].update({"task": task})
+class AutoTrainer(object):
+    def prepare_dataset(self, data_dict: dict = {}):
+        """
+        This function prepares a dataset for autotrain using a dictionary of data and specific column
+        mappings.
 
-    return job_params
-    # """
-    # Get job parameters list of dicts for AutoTrain and HuggingFace Hub models
-    # :param job_params: job parameters
-    # :param selected_rows: selected rows
-    # :param task: task
-    # :param param_choice: model choice
-    # :return: job parameters list of dicts
-    # """
-    # if param_choice == "AutoTrain":
-    #     if len(job_params) > 1:
-    #         raise ValueError("❌ Only one job parameter is allowed for AutoTrain.")
-    #     job_params[0].update({"task": task})
-    # elif param_choice.lower() == "manual":
-    #     for i in range(len(job_params)):
-    #         job_params[i].update({"task": task})
-    #     job_params = [job_params[i] for i in selected_rows]
-    # return job_params
+        Args:
+          data_dict (dict): `data_dict` is a dictionary that contains additional parameters to be passed
+        to the `AutoTrainDataset` constructor. These parameters are optional and can be used to
+        customize the dataset preparation process.
+        """
+        from autotrain.dataset import AutoTrainDataset
+
+        self.dset = AutoTrainDataset(
+            task=self.task,
+            token=self.HF_TOKEN,
+            username=self.AUTOTRAIN_USERNAME,
+            project_name=self.project_name,
+            **data_dict,
+            percent_valid=None,
+            column_mapping={
+                "text": "text",
+                "label": "label",
+            },
+        )
+        self.dset.prepare()
+
+    def get_project_cost(self):
+        """
+        This function returns the project cost based on various parameters.
+
+        Returns:
+          The `get_project_cost` function is being called with several arguments and its return value is
+        being returned by the `get_project_cost` method. The exact return value depends on the
+        implementation of the `get_project_cost` function.
+        """
+        from autotrain.utils import get_project_cost
+
+        return get_project_cost(
+            username=self.AUTOTRAIN_USERNAME,
+            token=self.HF_TOKEN,
+            task=self.task,
+            num_samples=self._num_samples,
+            num_models=self.trainer_kwargs["autotrain"]["num_models"]
+            if self._model.lower() == "autotrain"
+            else len([self.trainer_kwargs["hub_model"]]),
+        )
+
+    def initialize_project(self):
+        """
+        This function initializes a project with a dataset, hub model, and job parameters, and logs
+        information about the project and its cost.
+        """
+        from autotrain.project import Project
+
+        self.project = Project(
+            dataset=self.dset,
+            hub_model=self._model,
+            job_params=self.get_job_params(),
+        )
+        self._logger.info(self.project)
+        self._logger.info(f"Project cost: {self.get_project_cost()}")
+
+    def get_job_params(self):
+        if self._model.lower() == "autotrain":
+            job_params = [self.trainer_kwargs["autotrain"]]
+            model_choice = "autotrain"
+        else:
+            job_params = [self.trainer_kwargs["hub_model"]]
+            model_choice = "HuggingFace Hub"
+        if model_choice == "autotrain":
+            if len(job_params) > 1:
+                raise ValueError("❌ Only one job parameter is allowed for AutoTrain.")
+            job_params[0].update({"task": self.task})
+        elif model_choice == "HuggingFace Hub":
+            for i in range(len(job_params)):
+                job_params[i].update({"task": self.task})
+        return job_params
 
 
-class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton):
+class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
     _logger = logging.getLogger("ArgillaAutoTrainTrainer")
     _logger.setLevel(logging.INFO)
 
@@ -72,7 +115,8 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.project_name = f"{self._workspace}_{self._name}_{str(uuid4())}"
+
+        self.project_name = f"{self._workspace}_{self._name}_{str(uuid4())[:8]}"
 
         self._transformers_model = None
         self._transformers_tokenizer = None
@@ -82,29 +126,21 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton):
             self._seed = 42
 
         if self._model is None:
-            self._model = "AutoTrain"
+            self._model = "bert-base-uncased"
 
         data_dict = {}
         self._num_samples = 0
         if isinstance(self._dataset, DatasetDict):
             self._train_dataset = self._dataset["train"]
             self._eval_dataset = self._dataset["test"]
-            data_dict["valid_data"] = [self._eval_dataset.to_pandas().set_index("id")]
-            data_dict["valid_data"][0]["label"] = data_dict["valid_data"][0]["label"].apply(
-                lambda x: self._settings.id2label[x]
-            )
+            data_dict["valid_data"] = [self._eval_dataset.to_pandas()]
             self._num_samples += len(self._eval_dataset)
         else:
             self._train_dataset = self._dataset
             self._eval_dataset = None
-        data_dict["train_data"] = [self._train_dataset.to_pandas().set_index("id")]
-        data_dict["train_data"][0]["label"] = data_dict["train_data"][0]["label"].apply(
-            lambda x: self._settings.id2label[x]
-        )
-
+        data_dict["train_data"] = [self._train_dataset.to_pandas()]
         self._num_samples += len(self._train_dataset)
-        data_dict["train_data"][0].to_csv("train.csv")
-        # exit()
+
         if self._record_class == rg.TextClassificationRecord:
             if self._multi_label:
                 raise NotImplementedError("rg.TextClassificaiton multi_label is not supported by `autotrain-advanced`.")
@@ -127,31 +163,10 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton):
                 "rg.Text2TextRecord and rg.TokenClassificationRecord is not supported by `autotrain-advanced`."
             )
 
-        from autotrain.dataset import AutoTrainDataset
-
-        self.dset = AutoTrainDataset(
-            task=self.task,
-            token=self.HF_TOKEN,
-            username=self.AUTOTRAIN_USERNAME,
-            project_name=self.project_name,
-            **data_dict,
-            percent_valid=None,
-            column_mapping={
-                "text": "text",
-                "label": "label",
-            },
-        )
-
         self.init_training_args()
 
-    def get_project_cost(self):
-        return get_project_cost(
-            username=self.AUTOTRAIN_USERNAME,
-            token=self.HF_TOKEN,
-            task=self.task,
-            num_samples=self._num_samples,
-            num_models=5,
-        )
+        self.prepare_dataset(data_dict=data_dict)
+        self.initialize_project()
 
     def init_training_args(self):
         from autotrain.params import Params
@@ -163,73 +178,47 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton):
                 training_type=training_type,
             ).get()
             default_params = {}
-
             for key, value in params.items():
                 default_params[key] = value.DEFAULT
             self.trainer_kwargs[training_type] = default_params
 
-        estimated_costs = self.get_project_cost()
-        self._logger.info(f"Estimated cost: {estimated_costs}")
-
     def init_model(self, new: bool = False):
-        from transformers import AutoTokenizer
-
-        self._transformers_tokenizer = AutoTokenizer.from_pretrained(
-            self.model_kwargs.get("pretrained_model_name_or_path")
-        )
-        if new:
-            model_kwargs = self.model_kwargs
-        else:
-            model_kwargs = {"pretrained_model_name_or_path": self.model_kwargs.get("pretrained_model_name_or_path")}
-        self._transformers_model = self._model_class.from_pretrained(**model_kwargs)
+        pass
 
     def init_pipeline(self):
-        import transformers
-        from transformers import pipeline
-
-        if self.device == "cuda":
-            device = 0
-        else:
-            device = -1
-
-        if self._record_class == rg.TextClassificationRecord:
-            if transformers.__version__ >= "4.20.0":
-                kwargs = {"top_k": None}
-            else:
-                kwargs = {"return_all_scores": True}
-            self._pipeline = pipeline(
-                task="text-classification",
-                model=self._transformers_model,
-                tokenizer=self._transformers_tokenizer,
-                device=device,
-                **kwargs,
-            )
-        elif self._record_class == rg.TokenClassificationRecord:
-            self._pipeline = pipeline(
-                task="token-classification",
-                model=self._transformers_model,
-                tokenizer=self._transformers_tokenizer,
-                aggregation_strategy="first",
-                device=device,
-            )
-        else:
-            raise NotImplementedError("This is not implemented.")
+        pass
 
     def update_config(self, **kwargs):
         """
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
-        from transformers import TrainingArguments
-
-        self.trainer_kwargs.update(filter_allowed_args(TrainingArguments.__init__, **kwargs))
+        if "model" in kwargs:
+            self._model = kwargs["model"]
+            if self._model.lower() == "autotrain":
+                self._model = "autotrain"
+        if "hub_model" in kwargs:
+            if not isinstance(kwargs["hub_model"], list):
+                raise ValueError(
+                    f"hub_model must be a list of dictionaries with: {self.trainer_kwargs['hub_model'].keys()}."
+                )
+            self._model = kwargs["hub_model"]
+        if "autotrain" in kwargs:
+            if not isinstance(kwargs["autotrain"], dict):
+                raise ValueError(f"autotrain must be a dictionary with: {self.trainer_kwargs['autotrain'].keys()}.")
+            self._model = "autotrain"
 
     def __repr__(self):
-        formatted_string = []
+        formatted_string = [
+            "Choose EITHER `autotrain` OR a model from the hub `hub_model` as main key to update parameters.",
+            f"model: {self._model}",
+        ]
         for arg_dict_key, arg_dict_single in self.trainer_kwargs.items():
-            formatted_string.append(arg_dict_key.upper())
+            if arg_dict_key == "hub_model":
+                arg_dict_key = "hub_model: List[dict]"
+            formatted_string.append(arg_dict_key)
             for key, val in arg_dict_single.items():
-                formatted_string.append(f"{key}: {val}")
+                formatted_string.append(f"\t{key}: {val}")
         return "\n".join(formatted_string)
 
     def train(self, output_dir: str):
@@ -237,23 +226,8 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton):
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
         the model, and then train the model
         """
-        from autotrain.project import Project
-
-        print(self.trainer_kwargs)
-        project = Project(
-            dataset=self.dset,
-            # hub_model=self._model if self._model != "AutoTrain" else None,
-            job_params=get_job_params(
-                job_params=[self.trainer_kwargs["hub_model"]]
-                if self._model != "AutoTrain"
-                else [self.trainer_kwargs["autotrain"]],
-                task=self.task,
-                param_choice=self._model,
-            ),
-        )
-        self._logger.info(f"Project cost: {self.get_project_cost()}")
-        project_id = project.create()
-        project.approve(project_id)
+        project_id = self.project.create()
+        self.project.approve(project_id)
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
@@ -267,55 +241,7 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton):
         Returns:
           A list of predictions
         """
-        if self._pipeline is None:
-            self._logger.warning("Using model without fine-tuning.")
-            self.init_model(new=False)
-            self.init_pipeline()
-
-        str_input = False
-        if isinstance(text, str):
-            text = [text]
-            str_input = True
-
-        predictions = self._pipeline(text, **kwargs)
-
-        if as_argilla_records:
-            formatted_prediction = []
-
-            for val, pred in zip(text, predictions):
-                if self._record_class == rg.TextClassificationRecord:
-                    formatted_prediction.append(
-                        self._record_class(
-                            text=val,
-                            prediction=[(entry["label"], entry["score"]) for entry in pred],
-                            multi_label=self._multi_label,
-                        )
-                    )
-                elif self._record_class == rg.TokenClassificationRecord:
-                    _pred = [(value["entity_group"], value["start"], value["end"]) for value in pred]
-                    encoding = self._pipeline.tokenizer(val)
-                    word_ids = sorted(set(encoding.word_ids()) - {None})
-                    tokens = []
-                    for word_id in word_ids:
-                        char_span = encoding.word_to_chars(word_id)
-                        tokens.append(val[char_span.start : char_span.end].lstrip().rstrip())
-                    formatted_prediction.append(
-                        self._record_class(
-                            text=val,
-                            tokens=tokens,
-                            prediction=_pred,
-                        )
-                    )
-
-                else:
-                    raise NotImplementedError("This is not implemented yet.")
-        else:
-            formatted_prediction = predictions
-
-        if str_input:
-            formatted_prediction = formatted_prediction[0]
-
-        return formatted_prediction
+        self._logger.error("Use framework=`transformers` for inference.")
 
     def save(self, output_dir: str):
         """
@@ -325,5 +251,4 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton):
         Args:
           output_dir (str): the path to save the model to
         """
-        self._transformers_model.save_pretrained(output_dir)
-        self._transformers_tokenizer.save_pretrained(output_dir)
+        self._logger.warning("Models are saved on the Hugging Face hub, so this function is not supported.")
