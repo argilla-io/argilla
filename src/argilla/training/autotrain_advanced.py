@@ -66,9 +66,9 @@ class AutoTrainer(object):
             token=self.HF_TOKEN,
             task=self.task,
             num_samples=self._num_samples,
-            num_models=self.trainer_kwargs["autotrain"]["num_models"]
+            num_models=self.trainer_kwargs["autotrain"][0]["num_models"]
             if self._model.lower() == "autotrain"
-            else len([self.trainer_kwargs["hub_model"]]),
+            else len(self.trainer_kwargs["hub_model"]),
         )
 
     def initialize_project(self):
@@ -76,22 +76,24 @@ class AutoTrainer(object):
         This function initializes a project with a dataset, hub model, and job parameters, and logs
         information about the project and its cost.
         """
+        import copy
+
         from autotrain.project import Project
 
         self.project = Project(
             dataset=self.dset,
-            hub_model=self._model,
-            job_params=self.get_job_params(),
+            hub_model=None if self._model.lower() == "autotrain" else self._model,
+            job_params=copy.deepcopy(self.get_job_params()),
         )
         self._logger.info(self.project)
         self._logger.info(f"Project cost: {self.get_project_cost()}")
 
     def get_job_params(self):
         if self._model.lower() == "autotrain":
-            job_params = [self.trainer_kwargs["autotrain"]]
+            job_params = self.trainer_kwargs["autotrain"]
             model_choice = "autotrain"
         else:
-            job_params = [self.trainer_kwargs["hub_model"]]
+            job_params = self.trainer_kwargs["hub_model"]
             model_choice = "HuggingFace Hub"
         if model_choice == "autotrain":
             if len(job_params) > 1:
@@ -107,8 +109,11 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
     _logger = logging.getLogger("ArgillaAutoTrainTrainer")
     _logger.setLevel(logging.INFO)
 
-    AUTOTRAIN_USERNAME = os.environ["AUTOTRAIN_USERNAME"]
-    HF_TOKEN = os.environ["HF_AUTH_TOKEN"]
+    try:
+        AUTOTRAIN_USERNAME = os.environ["AUTOTRAIN_USERNAME"]
+        HF_TOKEN = os.environ["HF_AUTH_TOKEN"]
+    except KeyError:
+        raise KeyError("Please set the `AUTOTRAIN_USERNAME` and `HF_AUTH_TOKEN` environment variables.")
 
     require_version("autotrain-advanced")
     require_version("datasets")
@@ -118,11 +123,8 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
 
         self.project_name = f"{self._workspace}_{self._name}_{str(uuid4())[:8]}"
 
-        self._transformers_model = None
-        self._transformers_tokenizer = None
-        self._pipeline = None
-
-        if self._seed is None:
+        if self._seed:
+            self._logger.warning("❌ Setting a seed is not supported by `autotrain-advanced`.")
             self._seed = 42
 
         if self._model is None:
@@ -138,6 +140,7 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
         else:
             self._train_dataset = self._dataset
             self._eval_dataset = None
+            data_dict["valid_data"] = []
         data_dict["train_data"] = [self._train_dataset.to_pandas()]
         self._num_samples += len(self._train_dataset)
 
@@ -171,42 +174,39 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
     def init_training_args(self):
         from autotrain.params import Params
 
-        self.trainer_kwargs = {}
+        if not hasattr(self, "trainer_kwargs"):
+            self.trainer_kwargs = {"autotrain": [{}], "hub_model": [{}]}
         for training_type in ["autotrain", "hub_model"]:
-            params = Params(
-                task=self.task,
-                training_type=training_type,
-            ).get()
-            default_params = {}
-            for key, value in params.items():
-                default_params[key] = value.DEFAULT
-            self.trainer_kwargs[training_type] = default_params
+            for idx, set_params in enumerate(self.trainer_kwargs[training_type]):
+                params = Params(
+                    task=self.task,
+                    training_type=training_type,
+                ).get()
+                for key, value in params.items():
+                    if key not in set_params:
+                        set_params[key] = value.DEFAULT
 
-    def init_model(self, new: bool = False):
-        pass
-
-    def init_pipeline(self):
-        pass
+                self.trainer_kwargs[training_type][idx] = set_params
 
     def update_config(self, **kwargs):
         """
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
-        if "model" in kwargs:
-            self._model = kwargs["model"]
-            if self._model.lower() == "autotrain":
-                self._model = "autotrain"
+        self._model = kwargs.get("model", self._model)
+        if self._model.lower() == "autotrain":
+            self._model = "autotrain"
         if "hub_model" in kwargs:
             if not isinstance(kwargs["hub_model"], list):
-                raise ValueError(
-                    f"hub_model must be a list of dictionaries with: {self.trainer_kwargs['hub_model'].keys()}."
-                )
-            self._model = kwargs["hub_model"]
+                raise ValueError("hub_model must be a list of dictionaries.")
+            self.trainer_kwargs["hub_model"] = kwargs["hub_model"]
         if "autotrain" in kwargs:
-            if not isinstance(kwargs["autotrain"], dict):
-                raise ValueError(f"autotrain must be a dictionary with: {self.trainer_kwargs['autotrain'].keys()}.")
-            self._model = "autotrain"
+            if not isinstance(kwargs["autotrain"], list):
+                raise ValueError("autotrain must be a list of dictionaries.")
+            self.trainer_kwargs["autotrain"] = kwargs["autotrain"]
+
+        self.init_training_args()
+        self.initialize_project()
 
     def __repr__(self):
         formatted_string = [
@@ -214,11 +214,11 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
             f"model: {self._model}",
         ]
         for arg_dict_key, arg_dict_single in self.trainer_kwargs.items():
-            if arg_dict_key == "hub_model":
-                arg_dict_key = "hub_model: List[dict]"
+            arg_dict_key += ": List[dict]"
             formatted_string.append(arg_dict_key)
-            for key, val in arg_dict_single.items():
-                formatted_string.append(f"\t{key}: {val}")
+            for idx, item in enumerate(arg_dict_single):
+                for key, val in item.items():
+                    formatted_string.append(f"\tjob{idx+1}-{key}: {val}")
         return "\n".join(formatted_string)
 
     def train(self, output_dir: str):
@@ -228,6 +228,12 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
         """
         project_id = self.project.create()
         self.project.approve(project_id)
+
+    def init_model(self, new: bool = False):
+        pass
+
+    def init_pipeline(self):
+        pass
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
