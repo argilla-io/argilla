@@ -46,7 +46,7 @@
             status.name | capitalize
           }}</label>
           <span class="metrics__list__counter">{{
-            status.progress | formatNumber
+            status.progress || 0 | formatNumber
           }}</span>
         </li>
       </ul>
