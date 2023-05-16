@@ -3,7 +3,7 @@
     <h2 class="--heading5 --semibold description__title" v-text="title" />
     <p
       class="--body1 description__text"
-      :class="{ '--light': lightColor }"
+      :class="{ '--light': isColorLight }"
       v-text="datasetDescription"
     />
   </div>
@@ -16,7 +16,7 @@ export default {
       type: String,
       required: true,
     },
-    lightColor: {
+    isColorLight: {
       type: Boolean,
       default: false,
     },

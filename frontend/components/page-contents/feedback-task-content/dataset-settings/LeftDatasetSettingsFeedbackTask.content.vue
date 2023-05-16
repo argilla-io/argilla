@@ -18,7 +18,7 @@
     <div class="dataset-description-component left-content-item">
       <DatasetDescriptionComponent
         :datasetDescription="settingsDescriptionText"
-        :lightColor="!settingsDescription"
+        :isColorLight="!settingsDescription"
       />
     </div>
     <div class="delete-dataset-component" v-if="datasetId">
