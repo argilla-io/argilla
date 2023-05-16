@@ -42,7 +42,9 @@
             class="color-bullet"
             :style="{ backgroundColor: status.color }"
           ></span>
-          <label class="metrics__list__name" v-text="status.name" />
+          <label class="metrics__list__name">{{
+            status.name | capitalize
+          }}</label>
           <span class="metrics__list__counter">{{
             status.progress | formatNumber
           }}</span>
@@ -77,17 +79,17 @@ export default {
     progressItems() {
       return [
         {
-          name: this.capitalize(RECORD_STATUS.SUBMITTED),
+          name: RECORD_STATUS.SUBMITTED,
           color: RECORD_STATUS_COLOR.SUBMITTED,
           progress: this.totalSubmitted,
         },
         {
-          name: this.capitalize(RECORD_STATUS.DISCARDED),
+          name: RECORD_STATUS.DISCARDED,
           color: RECORD_STATUS_COLOR.DISCARDED,
           progress: this.totalDiscarded,
         },
         {
-          name: this.capitalize(RECORD_STATUS.PENDING),
+          name: RECORD_STATUS.PENDING,
           color: RECORD_STATUS_COLOR.PENDING,
           progress: this.totalPending,
         },
@@ -104,10 +106,6 @@ export default {
     },
   },
   methods: {
-    capitalize(text) {
-      const baseText = text.toLowerCase();
-      return `${baseText.charAt(0).toUpperCase()}${baseText.slice(1)}`;
-    },
     itemColor(order) {
       return this.progressItems[order]?.color || null;
     },
