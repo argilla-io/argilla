@@ -53,18 +53,19 @@ export default {
   },
   created() {
     this.sidebarItems = {
-      mode: {
-        buttonType: "non-expandable",
-        buttons: [
-          {
-            id: "annotate",
-            tooltip: "Hand labeling",
-            icon: "hand-labeling",
-            action: "change-view-mode",
-            relatedMetrics: ["progress", "stats"],
-          },
-        ],
-      },
+      // TODO - Hidden for MVP
+      // mode: {
+      //   buttonType: "non-expandable",
+      //   buttons: [
+      //     {
+      //       id: "annotate",
+      //       tooltip: "Hand labeling",
+      //       icon: "hand-labeling",
+      //       action: "change-view-mode",
+      //       relatedMetrics: ["progress", "stats"],
+      //     },
+      //   ],
+      // },
       metrics: {
         buttonType: "expandable",
         buttons: [
@@ -118,6 +119,7 @@ export default {
     },
     closePanel() {
       this.currentMetric = null;
+      $nuxt.$emit("on-sidebar-toggle-metrics", null);
     },
   },
 };

@@ -90,7 +90,6 @@ export default {
   @include resetButtonStyles();
   width: 100%;
   display: flex;
-  margin-bottom: 0.5em;
   padding: 0;
   overflow: visible;
   border-radius: 0;

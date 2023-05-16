@@ -80,6 +80,8 @@ $sidebar-button-size: 45px;
   box-shadow: none;
   pointer-events: all;
   transition: box-shadow 0.2s ease-in-out 0.4s;
+  // TODO - Only for MVP
+  padding-top: $base-space * 2;
   &.--expanded {
     box-shadow: inset 1px 1px 5px -2px #c7c7c7;
     transition: box-shadow 0.2s ease-in-out;
