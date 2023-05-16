@@ -210,7 +210,7 @@ export default {
           tags: dataset?.tags ?? {},
           task: "FeedbackTask",
           created_at: dataset.inserted_at,
-          updated_at: dataset.updated_at,
+          last_updated: dataset.updated_at, // NOTE - need to be last_updated attribute to have the same for old and new dataset
           link: this.factoryLinkForFeedbackDataset(dataset),
         };
       });
