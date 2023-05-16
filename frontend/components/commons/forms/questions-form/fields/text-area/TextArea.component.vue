@@ -22,13 +22,12 @@
     </div>
 
     <div class="container" :class="isFocused ? '--focused' : null">
-      <Text2TextContentEditable
+      <ContentEditableFeedbackTask
         class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
         :defaultText="initialOptions.text"
         :placeholder="placeholder"
-        :isShortcutToSave="false"
         @change-text="onChangeTextArea"
         @on-change-focus="setFocus"
       />
