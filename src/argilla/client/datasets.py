@@ -19,6 +19,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
 
+from argilla._constants import OPENAI_END_TOKEN, OPENAI_SEPARATOR, OPENAI_WHITESPACE
+from argilla.client.apis.datasets import (
+    TextClassificationSettings,
+    TokenClassificationSettings,
+)
 from argilla.client.models import (
     Framework,
     Record,
@@ -55,6 +60,7 @@ class DatasetBase:
     _RECORD_TYPE = None
     # record fields that can hold multiple input columns from a datasets.Dataset or a pandas.DataFrame
     _RECORD_FIELDS_WITH_MULTIPLE_INPUT_COLUMNS = ["inputs", "metadata"]
+    _SETTINGS = None
 
     @classmethod
     def _record_init_args(cls) -> List[str]:
@@ -332,6 +338,7 @@ class DatasetBase:
     def prepare_for_training(
         self,
         framework: Union[Framework, str] = "transformers",
+        settings: Union[TextClassificationSettings, TokenClassificationSettings] = None,
         lang: Optional["spacy.Language"] = None,
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
@@ -400,6 +407,23 @@ class DatasetBase:
              'label': ClassLabel(num_classes=1, names=['SPAM'])}
 
         """
+        if self._RECORD_TYPE == TextClassificationRecord:
+            if settings is None:
+                self._SETTINGS = self._infer_settings_from_records()
+            elif isinstance(settings, TextClassificationSettings):
+                self._SETTINGS = settings
+            else:
+                raise ValueError("settings must be TextClassificationSettings for TextClassificationRecord")
+        elif self._RECORD_TYPE == TokenClassificationRecord:
+            if settings is None:
+                self._SETTINGS = self._infer_settings_from_records()
+            elif isinstance(settings, TokenClassificationSettings):
+                self._SETTINGS = settings
+            else:
+                raise ValueError("settings must be TokenClassificationSettings for TokenClassificationRecord")
+        else:
+            self._SETTINGS = settings
+
         if train_size is None:
             train_size = 1
         if test_size is None:
@@ -429,13 +453,13 @@ class DatasetBase:
             test_size = None
 
         # prepare for training for the right method
-        if framework in [Framework.TRANSFORMERS, Framework.SETFIT]:
+        if framework in [Framework.TRANSFORMERS, Framework.SETFIT, Framework.SPAN_MARKER]:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
         elif framework is Framework.SPACY and lang is None:
             raise ValueError(
                 "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
             )
-        elif framework in [Framework.SPACY, Framework.SPARK_NLP]:
+        elif framework in [Framework.SPACY, Framework.SPARK_NLP, Framework.OPENAI]:
             if train_size and test_size:
                 require_version("scikit-learn")
                 from sklearn.model_selection import train_test_split
@@ -450,18 +474,29 @@ class DatasetBase:
                     train_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_train)
                     test_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_test)
                     return train_docbin, test_docbin
-                else:
+                elif framework is Framework.SPARK_NLP:
                     train_df = self._prepare_for_training_with_spark_nlp(records_train)
                     test_df = self._prepare_for_training_with_spark_nlp(records_test)
-
                     return train_df, test_df
+                else:
+                    train_jsonl = self._prepare_for_training_with_openai(records=records_train)
+                    test_jsonl = self._prepare_for_training_with_openai(records=records_test)
+                    return train_jsonl, test_jsonl
             else:
                 if framework is Framework.SPACY:
                     return self._prepare_for_training_with_spacy(nlp=lang, records=shuffled_records)
-                else:
+                elif framework is Framework.SPARK_NLP:
                     return self._prepare_for_training_with_spark_nlp(records=shuffled_records)
+                elif framework is Framework.OPENAI:
+                    return self._prepare_for_training_with_openai(records=shuffled_records)
+                else:
+                    raise NotImplementedError(
+                        f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
+                    )
         else:
-            raise NotImplementedError(f"Framework {framework} is not supported. Choose from:" f" {list(Framework)}")
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
+            )
 
     @requires_version("spacy")
     def _prepare_for_training_with_spacy(
@@ -491,7 +526,6 @@ class DatasetBase:
 
         raise NotImplementedError
 
-    @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_spark_nlp(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training using the "spark-nlp" framework.
 
@@ -500,6 +534,27 @@ class DatasetBase:
 
         Returns:
             A pd.DataFrame.
+        """
+
+        raise NotImplementedError
+
+    def _prepare_for_training_with_openai(self, **kwargs) -> "dict":
+        """Prepares the dataset for training using the "openai" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
+        """
+
+        raise NotImplementedError
+
+    def _infer_settings_from_records(self) -> Union[TokenClassificationSettings, TextClassificationSettings]:
+        """Infer the settings from the records.
+
+        Returns:
+            A Settings object.
         """
 
         raise NotImplementedError
@@ -783,7 +838,7 @@ class DatasetForTextClassification(DatasetBase):
         from spacy.tokens import DocBin
 
         db = DocBin(store_user_data=True)
-        all_labels = self.__all_labels__()
+        all_labels = self._verify_all_labels()
 
         # Creating the DocBin object as in https://spacy.io/usage/training#training-data
 
@@ -791,10 +846,12 @@ class DatasetForTextClassification(DatasetBase):
             if record.annotation is None:
                 continue
 
-            if record.text is None:
-                text = ". ".join(record.inputs.values())
-            else:
+            if record.text is not None:
                 text = record.text
+            elif record.text is None and "text" in record.inputs:
+                text = record.inputs["text"]
+            else:
+                text = ", ".join(f"{key}: {value}" for key, value in record.inputs.items())
             doc = nlp.make_doc(text)
             doc.user_data["id"] = record.id
 
@@ -823,16 +880,56 @@ class DatasetForTextClassification(DatasetBase):
                 continue
             if record.id is None:
                 record.id = str(uuid.uuid4())
-            if record.text is None:
-                text = ". ".join(record.inputs.values())
-            else:
+            if record.text is not None:
                 text = record.text
+            elif record.text is None and "text" in record.inputs:
+                text = record.inputs["text"]
+            else:
+                text = ", ".join(f"{key}: {value}" for key, value in record.inputs.items())
 
             spark_nlp_data.append([record.id, text, record.annotation])
 
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", label_name])
 
-    def __all_labels__(self):
+    def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "openai" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
+        """
+        separator = OPENAI_SEPARATOR
+        whitespace = OPENAI_WHITESPACE
+        self._verify_all_labels()  # verify that all labels are strings
+
+        if len(self._records) <= len(self._SETTINGS.label_schema) * 100:
+            _LOGGER.warning("OpenAI recommends at least 100 examples per class for training a classification model.")
+
+        jsonl = []
+        for rec in self._records:
+            if rec.annotation is None:
+                continue
+
+            if rec.text is not None:
+                prompt = rec.text
+            elif rec.text is None and "text" in rec.inputs:
+                prompt = rec.inputs["text"]
+            else:
+                prompt = ", ".join(f"{key}: {value}" for key, value in rec.inputs.items())
+            prompt += separator  # needed for better performance
+
+            if self._records[0].multi_label:
+                completion = " ".join([str(self._SETTINGS.label2id[annotation]) for annotation in rec.annotation])
+            else:
+                completion = str(self._SETTINGS.label2id[rec.annotation])
+
+            jsonl.append({"id": rec.id, "prompt": prompt, "completion": whitespace + completion})
+
+        return jsonl
+
+    def _infer_settings_from_records(self) -> TextClassificationSettings:
         all_labels = set()
         for record in self._records:
             if record.annotation is None:
@@ -840,12 +937,36 @@ class DatasetForTextClassification(DatasetBase):
             elif isinstance(record.annotation, str):
                 all_labels.add(record.annotation)
             elif isinstance(record.annotation, list):
-                all_labels.update((tuple(record.annotation)))
+                for label in record.annotation:
+                    all_labels.add(label)
+            else:
+                # this is highly unlikely
+                raise TypeError("Record.annotation contains an unsupported type: {}".format(type(record.annotation)))
+        all_labels = list(all_labels)
+        all_labels.sort()
+
+        _LOGGER.warning(
+            f"""No label schema provided. Using all_labels: TextClassificationSettings({all_labels}). We recommend providing a `TextClassificationSettings()` or setting `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
+        )
+        return TextClassificationSettings(all_labels)
+
+    def _verify_all_labels(self):
+        all_labels = self._SETTINGS.label_schema
+        for record in self._records:
+            if record.annotation is None:
+                continue
+            elif isinstance(record.annotation, str):
+                if record.annotation not in all_labels:
+                    raise ValueError(f"Label {record.annotation} is not in the settings.label_schema: {all_labels}.")
+            elif isinstance(record.annotation, list):
+                for label in record.annotation:
+                    if label not in all_labels:
+                        raise ValueError(f"Label {label} is not in the settings.label_schema: {all_labels}.")
             else:
                 # this is highly unlikely
                 raise TypeError("Record.annotation contains an unsupported type: {}".format(type(record.annotation)))
 
-        return list(all_labels)
+        return all_labels
 
 
 @_prepend_docstring(TokenClassificationRecord)
@@ -986,7 +1107,7 @@ class DatasetForTokenClassification(DatasetBase):
             return datasets.Dataset.from_dict({})
 
         class_tags = ["O"]
-        class_tags.extend([f"{pre}-{label}" for label in sorted(self.__all_labels__()) for pre in ["B", "I"]])
+        class_tags.extend([f"{pre}-{label}" for label in sorted(self._verify_all_labels()) for pre in ["B", "I"]])
         class_tags = datasets.ClassLabel(names=class_tags)
 
         def spans2iob(example):
@@ -1057,13 +1178,62 @@ class DatasetForTokenClassification(DatasetBase):
 
         return pd.DataFrame(iob_doc_data, columns=["id", "text", "token", "label"])
 
-    def __all_labels__(self):
+    def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "openai" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
+        """
+        separator = OPENAI_SEPARATOR
+        end_token = OPENAI_END_TOKEN
+        whitespace = OPENAI_WHITESPACE
+        self._verify_all_labels()
+
+        if len(self._records) <= 500:
+            _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
+
+        jsonl = []
+        for rec in self._records:
+            if rec.annotation is None:
+                continue
+
+            prompt = rec.text + separator  # needed for better performance
+
+            completion = {}
+            for label, start, end in rec.annotation:
+                completion[rec.text[start:end]] = self._SETTINGS.label2id[label]
+
+            completion = "\n".join([f"- {k} {v}" for k, v in completion.items()])
+            completion = completion + end_token
+            jsonl.append({"id": rec.id, "prompt": prompt, "completion": whitespace + completion})
+
+        return jsonl
+
+    def _infer_settings_from_records(self) -> TokenClassificationSettings:
         all_labels = set()
         for record in self._records:
             if record.annotation:
-                all_labels.update([label for label, _, _ in record.annotation])
+                for label, _, _ in record.annotation:
+                    all_labels.add(label)
+        all_labels = list(all_labels)
+        all_labels.sort()
+        _LOGGER.warning(
+            f"""No label schema provided. Using all_labels: TokenClassificationSettings({all_labels}). We recommend providing a `TokenClassificationSettings()` or setting `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
+        )
+        return TokenClassificationSettings(all_labels)
 
-        return list(all_labels)
+    def _verify_all_labels(self) -> List[str]:
+        all_labels = self._SETTINGS.label_schema
+        for record in self._records:
+            if record.annotation:
+                for label, _, _ in record.annotation:
+                    if label not in all_labels:
+                        raise ValueError(f"Label {label} is not in the settings.label_schema: {all_labels}.")
+
+        return all_labels
 
     def __only_annotations__(self, data) -> bool:
         return data["annotation"] is not None
@@ -1294,6 +1464,33 @@ class DatasetForText2Text(DatasetBase):
             spark_nlp_data.append([record.id, text, record.annotation])
 
         return pd.DataFrame(spark_nlp_data, columns=["id", "text", "target"])
+
+    def _prepare_for_training_with_openai(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training using the "openai" framework.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A pd.DataFrame.
+        """
+        separator = OPENAI_SEPARATOR
+        end_token = OPENAI_END_TOKEN
+        whitespace = OPENAI_WHITESPACE
+        if len(self._records) <= 500:
+            _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
+
+        jsonl = []
+        for rec in self._records:
+            if rec.annotation is None:
+                continue
+
+            prompt = rec.text + separator  # needed for better performance
+            completion = rec.annotation + end_token
+
+            jsonl.append({"id": rec.id, "prompt": prompt, "completion": whitespace + completion})
+
+        return jsonl
 
 
 Dataset = Union[DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text]

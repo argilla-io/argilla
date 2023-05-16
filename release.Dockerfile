@@ -16,10 +16,11 @@ COPY dist/*.whl /packages/
 
 RUN apt-get update && \
     apt-get install -y python-dev libpq-dev gcc && \
-    pip install psycopg2 && \
-    apt-get remove -y python-dev libpq-dev gcc && \
     chmod +x /start_argilla_server.sh && \
-    for wheel in /packages/*.whl; do pip install "$wheel"[server]; done && \
+    for wheel in /packages/*.whl; do pip install "$wheel"[server,postgresql]; done && \
+    apt-get remove -y python-dev libpq-dev gcc && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
     rm -rf /packages
 
 # Create argilla volume
