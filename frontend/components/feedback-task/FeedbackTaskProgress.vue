@@ -18,9 +18,9 @@
 <template>
   <SidebarFeedbackTaskProgress
     v-if="datasetMetrics"
-    :total="totalRecordWithParams.value"
-    :validated="responsesSubmittedWithParams.value"
-    :discarded="responsesDiscardedWithParams.value"
+    :progressTotal="datasetMetrics.total_record"
+    :totalSubmitted="datasetMetrics.responses_submitted"
+    :totalDiscarded="datasetMetrics.responses_discarded"
   />
 </template>
 
@@ -43,15 +43,6 @@ export default {
         datasetId: this.datasetId,
         userId: this.userIdToShowMetrics,
       });
-    },
-    totalRecordWithParams() {
-      return this.datasetMetrics.total_record_with_params;
-    },
-    responsesSubmittedWithParams() {
-      return this.datasetMetrics.responses_submitted_with_params;
-    },
-    responsesDiscardedWithParams() {
-      return this.datasetMetrics.responses_discarded_with_params;
     },
   },
 };

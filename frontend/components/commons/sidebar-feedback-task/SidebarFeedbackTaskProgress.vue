@@ -23,22 +23,24 @@
       <span class="metrics__info__counter">{{ progress | percent }}</span>
     </div>
     <div class="metrics__numbers">
-      <span>{{ totalAnnotated | formatNumber }}</span
+      <span>{{ totalResponded | formatNumber }}</span
       >/{{ progressTotal | formatNumber }}
     </div>
     <base-progress
       re-mode="determinate"
       :multiple="true"
-      :progress="(totalValidated * 100) / progressTotal"
+      :progress="(totalSubmitted * 100) / progressTotal"
       :progress-secondary="(totalDiscarded * 100) / progressTotal"
-    ></base-progress>
+    >
+    </base-progress>
     <div class="scroll">
       <ul class="metrics__list">
+        <!-- FIXME - loop over an array -->
         <li>
-          <span class="color-bullet validated"></span>
-          <label class="metrics__list__name">Validated</label>
+          <span class="color-bullet submitted"></span>
+          <label class="metrics__list__name">Submitted</label>
           <span class="metrics__list__counter">
-            {{ totalValidated | formatNumber }}
+            {{ totalSubmitted | formatNumber }}
           </span>
         </li>
         <li>
@@ -46,6 +48,13 @@
           <label class="metrics__list__name">Discarded</label>
           <span class="metrics__list__counter">
             {{ totalDiscarded | formatNumber }}
+          </span>
+        </li>
+        <li>
+          <span class="color-bullet pending"></span>
+          <label class="metrics__list__name">Pending</label>
+          <span class="metrics__list__counter">
+            {{ totalPending | formatNumber }}
           </span>
         </li>
       </ul>
@@ -57,37 +66,28 @@
 <script>
 export default {
   props: {
-    total: {
+    progressTotal: {
       type: Number,
       required: true,
     },
-    validated: {
+    totalSubmitted: {
       type: Number,
       required: true,
     },
-    discarded: {
+    totalDiscarded: {
       type: Number,
       required: true,
     },
   },
   computed: {
-    totalValidated() {
-      return this.validated;
+    totalResponded() {
+      return this.totalSubmitted + this.totalDiscarded;
     },
-    totalDiscarded() {
-      return this.discarded;
-    },
-    totalAnnotated() {
-      return this.totalValidated + this.totalDiscarded;
-    },
-    progressTotal() {
-      return this.total;
+    totalPending() {
+      return this.progressTotal - this.totalResponded;
     },
     progress() {
-      return (
-        ((this.totalValidated || 0) + (this.totalDiscarded || 0)) /
-        this.progressTotal
-      );
+      return this.totalResponded / this.progressTotal;
     },
   },
 };
@@ -117,10 +117,17 @@ export default {
   border-radius: 50%;
   display: inline-block;
   margin: 0.3em 0.3em 0.3em 0;
-  &.validated {
+  &.submitted {
+    // FIXME - to get from orm
     background: #4c4ea3;
   }
   &.discarded {
+    // FIXME - to get from orm
+    background: #a1a2cc;
+  }
+  &.pending {
+    // FIXME - to get from orm
+    opacity: 0.7;
     background: #a1a2cc;
   }
 }
