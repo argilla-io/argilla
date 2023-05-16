@@ -42,12 +42,14 @@
             class="color-bullet"
             :style="{ backgroundColor: status.color }"
           ></span>
-          <label class="metrics__list__name">{{
-            status.name | capitalize
-          }}</label>
-          <span class="metrics__list__counter">{{
-            status.progress || 0 | formatNumber
-          }}</span>
+          <label
+            class="metrics__list__name"
+            v-text="getFormattedName(status.name)"
+          />
+          <span
+            class="metrics__list__counter"
+            v-text="getFormattedProgress(status.progress)"
+          />
         </li>
       </ul>
       <slot></slot>
@@ -108,6 +110,12 @@ export default {
   methods: {
     itemColor(order) {
       return this.progressItems[order]?.color || null;
+    },
+    getFormattedName(name) {
+      return name && this.$options.filters.capitalize(name);
+    },
+    getFormattedProgress(progress) {
+      return progress && this.$options.filters.formatNumber(progress);
     },
   },
 };
