@@ -445,8 +445,10 @@ class FeedbackDataset:
         cls.argilla_id = existing_dataset.id
         self = cls(
             guidelines=existing_dataset.guidelines,
-            fields=[FieldSchema.construct(field) for field in client.get_fields(id=existing_dataset.id)],
-            questions=[QuestionSchema.construct(question) for question in client.get_questions(id=existing_dataset.id)],
+            fields=[FieldSchema.construct(**field.dict()) for field in client.get_fields(id=existing_dataset.id)],
+            questions=[
+                QuestionSchema.construct(**question.dict()) for question in client.get_questions(id=existing_dataset.id)
+            ],
         )
         if with_records:
             self.fetch_records()
