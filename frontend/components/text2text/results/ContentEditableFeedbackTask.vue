@@ -13,6 +13,7 @@
           v-html="editableText"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
+          @keydown.shift.enter.exact="looseFocus"
           @keydown.shift.backspace.exact="looseFocus"
           @keydown.shift.space.exact="looseFocus"
           @keydown.arrow-right.stop=""
@@ -21,12 +22,13 @@
           @keydown.enter.exact.stop=""
         />
       </transition>
-      <span v-if="isShortcutToSave"><strong>shift Enter</strong> to save</span>
     </div>
   </span>
 </template>
+
 <script>
 export default {
+  name: "ContentEditableFeedbackTask",
   props: {
     annotationEnabled: {
       type: Boolean,
@@ -44,16 +46,10 @@ export default {
       type: String,
       default: "",
     },
-    isShortcutToSave: {
-      type: Boolean,
-      default: () => true,
-    },
   },
   data: () => {
     return {
       editableText: null,
-      shiftPressed: false,
-      shiftKey: undefined,
       focus: false,
     };
   },
@@ -66,10 +62,6 @@ export default {
     },
   },
   mounted() {
-    window.addEventListener("keydown", this.keyDown);
-    window.addEventListener("keyup", this.keyUp);
-    window.addEventListener("paste", this.pastePlainText);
-
     if (this.defaultText) {
       this.editableText = this.defaultText;
     } else {
@@ -78,11 +70,6 @@ export default {
 
     this.textAreaWrapper = document.getElementById("contentId");
   },
-  destroyed() {
-    window.removeEventListener("keydown", this.keyDown);
-    window.removeEventListener("keyup", this.keyUp);
-    window.removeEventListener("paste", this.pastePlainText);
-  },
   methods: {
     looseFocus() {
       this.textAreaWrapper.blur();
@@ -90,40 +77,9 @@ export default {
     onInputText(event) {
       this.$emit("change-text", event.target.innerText);
     },
-    annotate() {
-      if (this.defaultText && this.defaultText.trim()) {
-        this.$emit("annotate");
-      }
-    },
-    keyUp(event) {
-      event.preventDefault();
-      if (this.shiftKey === event.key) {
-        this.shiftPressed = false;
-      }
-    },
-    keyDown(event) {
-      if (event.shiftKey) {
-        this.shiftKey = event.key;
-        this.shiftPressed = true;
-      }
-      const enter = event.key === "Enter";
-
-      if (this.focus && this.shiftPressed && enter) {
-        event.preventDefault();
-        this.shiftPressed = false;
-        this.annotate();
-      }
-    },
     setFocus(status) {
       this.focus = status;
       this.$emit("on-change-focus", status);
-    },
-    pastePlainText(event) {
-      if (this.focus && event.target.isContentEditable) {
-        event.preventDefault();
-        const text = event.clipboardData.getData("text/plain");
-        document.execCommand("insertText", false, text);
-      }
     },
   },
 };
