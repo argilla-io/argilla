@@ -126,17 +126,17 @@ There you will find the progress of your annotation session, the distribution of
 You can find more information about the metrics in our dedicated [metrics guide](view_dataset_metrics.md).
 
 
-## Weak labelling
+## Weak labeling
 
-![Weak labelling](../../_static/reference/webapp/features-weak-labelling.png)
+![Weak labeling](../../_static/reference/webapp/features-weak-labelling.png)
 
 The Argilla UI has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
 As shown in our [guide](../../guides/weak-supervision.ipynb) and [tutorial](../../tutorials/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
-You can access the _Weak labelling_ mode via the sidebar of the [Dataset page](dataset.md).
+You can access the _Weak labeling_ mode via the sidebar of the [Dataset page](dataset.md).
 
 ```{note}
-The _Weak labelling_ mode is only available for text classification datasets.
+The _Weak labeling_ mode is only available for text classification datasets.
 ```
 
 ### Query plus labels
@@ -343,7 +343,7 @@ Argilla metrics are very convenient in terms of assesing the status of the datas
 
 ### How to use Metrics
 
-Metrics are composed of two submenus: **Progress** and **Stats**. These submenus might be different for **Token** and **Text Classification** tasks, as well as for the different modes (especially the **Weak labelling mode**).
+Metrics are composed of two submenus: **Progress** and **Stats**. These submenus might be different for **Token** and **Text Classification** tasks, as well as for the different modes (especially the **Weak labeling mode**).
 
 #### Progress
 
@@ -354,7 +354,7 @@ This submenu is useful when users need to know how many records have been annota
 When clicking on this menu, not only the progress is shown. The number of records is also displayed, as well as the number of labeled records or entities that are **validated** or **discarded**.
 
 
-##### Weak labelling mode
+##### Weak labeling mode
 
 In this mode, **progress** is related to the coverage of the rules. It shows the **model coverage** and the **annotated coverage**, and also the **precision average** and the number of correct and incorrect results.
 
@@ -366,7 +366,7 @@ In the **total rules** section, users can find the number of rules related to th
 
 This submenu allows users to know more about the keywords of the dataset.
 
-##### Explore and Weak labelling mode
+##### Explore and Weak labeling mode
 
 In both modes, the **Keywords** list displays a list of relevant words and the number of occurrences.
 

@@ -47,7 +47,7 @@ It is possible to add a certainty score to each of the logged predictions. Often
 ## Metrics
 The Argilla package gets shipped with build-in metrics for `TextClassification`and `TokenClassification`. These provide insight in model performance, annotation correctness and training impact. For an overview of how to use them, take a look at our [metric](../features/metrics.ipynb) section.
 ### Weak Supervision
-![weak-labelling](../_static/reference/webapp/features-weak-labelling.png "Weak Labelling")
+![weak-labeling](../_static/reference/webapp/features-weak-labelling.png "Weak labeling")
 
 Besides our more general metrics, we also provide the option to keep track of the impact of weak supervision rules. This impact is determined by testing against verified annotated data and unannotated data, which gives you an understanding of how the rules perform in real-life and what percentage of the data is influenced by them.
 <!--

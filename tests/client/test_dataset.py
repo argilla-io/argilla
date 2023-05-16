@@ -28,6 +28,7 @@ from argilla.client.datasets import (
     WrongRecordTypeError,
 )
 from argilla.client.models import TextClassificationRecord
+from argilla.datasets import TextClassificationSettings
 
 _HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
 
@@ -198,21 +199,22 @@ class TestDatasetBase:
     def test_prepare_for_training_train_test_splits(self, monkeypatch, singlelabel_textclassification_records):
         monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
         temp_records = copy.deepcopy(singlelabel_textclassification_records)
+        settings = TextClassificationSettings(["a", "b", "c"])
         ds = DatasetBase(temp_records)
 
         with pytest.raises(
             AssertionError,
             match="`train_size` and `test_size` must be larger than 0.",
         ):
-            ds.prepare_for_training(train_size=-1)
+            ds.prepare_for_training(train_size=-1, settings=settings)
 
         with pytest.raises(AssertionError, match="`train_size` and `test_size` must sum to 1."):
-            ds.prepare_for_training(test_size=0.1, train_size=0.6)
+            ds.prepare_for_training(test_size=0.1, train_size=0.6, settings=settings)
 
         for rec in ds:
             rec.annotation = None
         with pytest.raises(AssertionError, match="Dataset has no annotations."):
-            ds.prepare_for_training()
+            ds.prepare_for_training(settings=settings)
 
 
 class TestDatasetForTextClassification:
@@ -396,6 +398,22 @@ class TestDatasetForTextClassification:
         assert len(list(docs_test)) == 1
         assert "id" in docs_train[0].user_data
         assert "id" in docs_test[0].user_data
+
+    @pytest.mark.parametrize(
+        "records",
+        [
+            "singlelabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ],
+    )
+    def test_prepare_for_training_with_openai(self, request, records):
+        records = request.getfixturevalue(records)
+        ds = rg.DatasetForTextClassification(records)
+        jsonl = ds.prepare_for_training(framework="openai", seed=42)
+
+        assert isinstance(jsonl, list)
+        assert isinstance(jsonl[0], dict)
+        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
 
     @pytest.mark.parametrize(
         "records",
@@ -654,6 +672,26 @@ class TestDatasetForTokenClassification:
         _HF_HUB_ACCESS_TOKEN is None,
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
+    def test_prepare_for_training_with_openai(self, request, records):
+        ner_dataset = datasets.load_dataset(
+            # TODO(@frascuchon): Move dataset to the new org
+            "rubrix/gutenberg_spacy-ner",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+        ds: DatasetForTokenClassification = rg.read_datasets(ner_dataset, task="TokenClassification")
+        for r in ds:
+            r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
+        jsonl = ds.prepare_for_training(framework="openai", seed=42)
+
+        assert isinstance(jsonl, list)
+        assert isinstance(jsonl[0], dict)
+        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
     def test_prepare_for_training_with_spark_nlp(self):
         ner_dataset = datasets.load_dataset(
             "argilla/gutenberg_spacy-ner",
@@ -875,6 +913,22 @@ class TestDatasetForText2Text:
         )
         with pytest.raises(NotImplementedError):
             ds.prepare_for_training("spacy", lang=spacy.blank("en"), train_size=1)
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_prepare_for_training_with_openai(self, request, records):
+        ds = rg.DatasetForText2Text(
+            [rg.Text2TextRecord(text="Michael is a professor at Harvard but", annotation=" he used to work at MIT")]
+        )
+
+        jsonl = ds.prepare_for_training(framework="openai", seed=42)
+
+        assert isinstance(jsonl, list)
+        assert isinstance(jsonl[0], dict)
+        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+        assert jsonl[0]["prompt"] == "Michael is a professor at Harvard but"
 
     def test_prepare_for_training_with_spark_nlp(self):
         ds = rg.DatasetForText2Text(

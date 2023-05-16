@@ -71,7 +71,7 @@ bash scripts/build_frontend.sh
 Run database migrations executing the following task:
 
 ```sh
-python -m argilla.tasks.database.migrate
+python -m argilla database migrate
 ```
 
 The default SQLite database will be created at `~/.argilla/argilla.db`. This can be changed setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
@@ -89,7 +89,7 @@ rm ~/.argilla/argilla.db
 After deleting the database, you will need to run the database migrate task:
 
 ```sh
-python -m argilla.tasks.database.migrate
+python -m argilla database migrate
 ```
 
 By following these steps, you'll have a fresh and clean database to work with.
@@ -99,7 +99,7 @@ By following these steps, you'll have a fresh and clean database to work with.
 At least one user is required to interact with Argila API and web UI. You can create easily create your user executing the following task:
 
 ```sh
-python -m argilla.tasks.users.create
+python -m argilla users create
 ```
 
 This task will ask you for the required information to create your user, including `username`, `password` and so on.
