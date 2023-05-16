@@ -15,7 +15,7 @@
           @blur="setFocus(false)"
           @keydown.shift.enter.exact="looseFocus"
           @keydown.shift.backspace.exact="looseFocus"
-          @keydown.ctrl.space.exact="looseFocus"
+          @keydown.shift.space.exact="looseFocus"
           @keydown.arrow-right.stop=""
           @keydown.arrow-left.stop=""
           @keydown.delete.exact.stop=""

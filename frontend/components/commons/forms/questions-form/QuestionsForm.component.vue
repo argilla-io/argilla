@@ -216,7 +216,7 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code, ctrlKey }) {
+    onPressKeyboardShortCut({ code, shiftKey }) {
       switch (code) {
         case "Enter": {
           const elem = this.$refs.submitButton.$el;
@@ -225,7 +225,7 @@ export default {
         }
         case "Space": {
           const elem = this.$refs.clearButton.$el;
-          ctrlKey && elem.click();
+          shiftKey && elem.click();
           break;
         }
         case "Backspace": {
