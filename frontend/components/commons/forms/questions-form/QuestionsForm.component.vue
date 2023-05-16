@@ -246,12 +246,7 @@ export default {
     },
     async onDiscard() {
       // 1 - check if it's a create or update response
-      const createOrUpdateResponse = isResponsesByUserIdExists(
-        this.userId,
-        this.recordId
-      )
-        ? STATUS_RESPONSE.UPDATE
-        : STATUS_RESPONSE.CREATE;
+      const createOrUpdateResponse = this.initFlagCreateOrUpdateResponse();
 
       // 2 - init formattedSelectionOptionObject
       const formattedSelectionObject = this.formatSelectedOptionObjectOnDiscard(
@@ -273,12 +268,8 @@ export default {
     async onSubmit() {
       // 1 - check if it's a create or update response
       // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
-      const createOrUpdateResponse = isResponsesByUserIdExists(
-        this.userId,
-        this.recordId
-      )
-        ? STATUS_RESPONSE.UPDATE
-        : STATUS_RESPONSE.CREATE;
+      const createOrUpdateResponse = this.initFlagCreateOrUpdateResponse();
+
       if (this.isSomeRequiredQuestionHaveNoAnswer) {
         this.isError = true;
         return;
@@ -300,6 +291,16 @@ export default {
         RECORD_STATUS.SUBMITTED,
         formattedRequestsToSend
       );
+    },
+    initFlagCreateOrUpdateResponse() {
+      const createOrUpdateResponse = isResponsesByUserIdExists(
+        this.userId,
+        this.recordId
+      )
+        ? STATUS_RESPONSE.UPDATE
+        : STATUS_RESPONSE.CREATE;
+
+      return createOrUpdateResponse;
     },
     async createOrUpdateResponsesAndEmitRecordToGoBusEvent(
       status,
@@ -331,6 +332,7 @@ export default {
         console.log(err);
       }
     },
+
     onEmitBusEventGoToRecordIndex(typeOfEvent) {
       switch (typeOfEvent) {
         case TYPE_OF_EVENT.ON_SUBMIT:
