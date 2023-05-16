@@ -26,6 +26,7 @@ else:
 
 from pydantic import (
     BaseModel,
+    Extra,
     Field,
     StrictInt,
     StrictStr,
@@ -77,6 +78,9 @@ class FeedbackRecord(BaseModel):
     fields: Dict[str, str]
     response: Optional[ResponseSchema] = None
     external_id: Optional[str] = None
+
+    class Config:
+        extra = Extra.forbid
 
 
 class OfflineFeedbackRecord(BaseModel):
