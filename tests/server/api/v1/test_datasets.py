@@ -29,6 +29,7 @@ from argilla.server.models import (
     Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
+    DATASET_CREATE_GUIDELINES_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
@@ -1117,6 +1118,20 @@ def test_create_dataset(client: TestClient, db: Session, admin_auth_header: dict
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
+
+
+def test_create_dataset_with_invalid_length_guidelines(client: TestClient, db: Session, admin_auth_header: dict):
+    workspace = WorkspaceFactory.create()
+    dataset_json = {
+        "name": "name",
+        "guidelines": "a" * (DATASET_CREATE_GUIDELINES_MAX_LENGTH + 1),
+        "workspace_id": str(workspace.id),
+    }
+
+    response = client.post("/api/v1/datasets", headers=admin_auth_header, json=dataset_json)
+
+    assert response.status_code == 422
+    assert db.query(Dataset).count() == 0
 
 
 def test_create_dataset_without_authentication(client: TestClient, db: Session):
