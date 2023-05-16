@@ -6,7 +6,22 @@
     :key="renderForm"
   >
     <div class="questions-form__content">
-      <p class="questions-form__title --body1 --medium">Fill the fields</p>
+      <div class="questions-form__header">
+        <p class="questions-form__title --body1 --medium">
+          Submit your feedback
+        </p>
+        <p class="questions-form__guidelines-link">
+          Read the
+          <NuxtLink
+            :to="{
+              name: 'dataset-id-settings',
+              params: { id: this.datasetId },
+            }"
+            target="_blank"
+            >annotation guidelines <svgicon name="external-link" width="12"
+          /></NuxtLink>
+        </p>
+      </div>
       <div class="form-group" v-for="input in inputs" :key="input.id">
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
@@ -602,9 +617,25 @@ export default {
   justify-content: space-between;
   border-radius: $border-radius;
   box-shadow: $shadow;
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $base-space * 2;
+  }
   &__title {
     margin: 0;
     color: $black-87;
+  }
+  &__guidelines-link {
+    @include font-size(13px);
+    color: $black-37;
+    a {
+      color: $black-37;
+      outline: 0;
+      &:hover {
+        color: $black-54;
+      }
+    }
   }
   &__content {
     display: flex;
@@ -614,7 +645,7 @@ export default {
     overflow: auto;
   }
   &.--edited-form {
-    border-color: palette(apricot, dark);
+    border-color: palette(brown);
   }
 }
 
