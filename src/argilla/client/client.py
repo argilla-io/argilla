@@ -229,7 +229,7 @@ class Argilla:
     def list_datasets(self) -> List[FeedbackDatasetModel]:
         return datasets_api_v1.list_datasets(client=self._client).parsed
 
-    def create_dataset(self, name: str, workspace_id: str, guidelines: Optional[str] = None) -> httpx.Response:
+    def create_dataset(self, name: str, workspace_id: str, guidelines: Optional[str] = None) -> FeedbackDatasetModel:
         return datasets_api_v1.create_dataset(
             client=self._client, name=name, workspace_id=workspace_id, guidelines=guidelines
         ).parsed
