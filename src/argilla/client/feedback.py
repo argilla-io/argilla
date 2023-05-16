@@ -65,9 +65,10 @@ class OfflineFeedbackResponse(ResponseSchema):
     def user_id_must_have_value(cls, v):
         if not v:
             warnings.warn(
-                "`user_id` not provided for `OfflineFeedbackResponse`. So it will be set to `None`. Which "
-                "is not an issue, even though if you're planning to log the record in Argilla, as it will be set "
-                "automatically to the current user's id."
+                "`user_id` not provided for `OfflineFeedbackResponse`. So it will be"
+                " set to `None`. Which is not an issue, even though if you're planning"
+                " to log the record in Argilla, as it will be set automatically to the"
+                " current user's id."
             )
         return v
 
@@ -165,7 +166,9 @@ class FeedbackDataset:
         any_required = False
         for question in questions:
             if not isinstance(question, QuestionSchema):
-                raise TypeError(f"Expected `questions` to be a list of `QuestionSchema`, got {type(question)} instead.")
+                raise TypeError(
+                    f"Expected `questions` to be a list of `QuestionSchema`, got {type(question)} instead."
+                )
             if not any_required and question.required:
                 any_required = True
         if not any_required:
@@ -180,8 +183,9 @@ class FeedbackDataset:
     def __getitem__(self, key: Union[slice, int]) -> Union["FeedbackItemModel", List["FeedbackItemModel"]]:
         if len(self.__records) < 1:
             raise RuntimeError(
-                "In order to get items from `rg.FeedbackDataset` you need to either add them first with `add_records` "
-                "or fetch them from Argilla or HuggingFace with `fetch_records`."
+                "In order to get items from `rg.FeedbackDataset` you need to either add"
+                " them first with `add_records` or fetch them from Argilla or"
+                " HuggingFace with `fetch_records`."
             )
         if isinstance(key, int) and len(self.__records) < key:
             raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
@@ -222,7 +226,9 @@ class FeedbackDataset:
     def fetch_records(self, overwrite: bool = False) -> List["FeedbackItemModel"]:
         if not self.argilla_id:
             warnings.warn(
-                "No records have been logged into neither Argilla nor HuggingFace, so no records will be fetched. The current records will be returned instead."
+                "No records have been logged into neither Argilla nor HuggingFace, so"
+                " no records will be fetched. The current records will be returned"
+                " instead."
             )
             return self.__records
         if len(self.__records) > 0 and not overwrite:
@@ -237,16 +243,20 @@ class FeedbackDataset:
             self.__records = first_batch.items
             total_batches = first_batch.total // FETCHING_BATCH_SIZE
             current_batch = 1
-            with tqdm(initial=current_batch, total=total_batches, desc="Fetching records from Argilla") as pbar:
+            with tqdm(
+                initial=current_batch,
+                total=total_batches,
+                desc="Fetching records from Argilla",
+            ) as pbar:
                 while current_batch <= total_batches:
                     batch = client.get_records(
-                        id=self.argilla_id, offset=FETCHING_BATCH_SIZE * current_batch, limit=FETCHING_BATCH_SIZE
+                        id=self.argilla_id,
+                        offset=FETCHING_BATCH_SIZE * current_batch,
+                        limit=FETCHING_BATCH_SIZE,
                     )
                     self.__records += batch.items
                     current_batch += 1
                     pbar.update(1)
-
-        return self.__records
 
     def add_records(
         self,
@@ -261,7 +271,9 @@ class FeedbackDataset:
             records = [records]
 
         if self.__fields_schema is None:
-            warnings.warn("Since the `schema` hasn't been defined during the dataset creation, it will be inferred.")
+            warnings.warn(
+                "Since the `schema` hasn't been defined during the dataset creation, it will be inferred."
+            )
             self.__fields_schema = generate_pydantic_schema(records[0].fields)
 
         for record in records:
@@ -372,16 +384,23 @@ class FeedbackDataset:
 
     @classmethod
     def from_argilla(
-        cls, name: Optional[str] = None, *, workspace: Optional[str] = None, id: Optional[str] = None
+        cls,
+        name: Optional[str] = None,
+        *,
+        workspace: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> "FeedbackDataset":
         dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if not dataset_exists:
             raise ValueError(
                 f"Could not find a `FeedbackTask` dataset in Argilla with name='{name}'."
                 if name and not workspace
-                else f"Could not find a `FeedbackTask` dataset in Argilla with name='{name}' and workspace='{workspace}'."
-                if name and workspace
-                else f"Could not find a `FeedbackTask` dataset in Argilla with ID='{id}'."
+                else (
+                    "Could not find a `FeedbackTask` dataset in Argilla with"
+                    f" name='{name}' and workspace='{workspace}'."
+                    if name and workspace
+                    else (f"Could not find a `FeedbackTask` dataset in Argilla with ID='{id}'.")
+                )
             )
 
         client: "Argilla" = rg.active_client()
@@ -390,7 +409,9 @@ class FeedbackDataset:
         self = cls(
             guidelines=existing_dataset.guidelines,
             fields=[FieldSchema.construct(field) for field in client.get_fields(id=existing_dataset.id)],
-            questions=[QuestionSchema.construct(question) for question in client.get_questions(id=existing_dataset.id)],
+            questions=[
+                QuestionSchema.construct(question) for question in client.get_questions(id=existing_dataset.id)
+            ],
         )
         self.fetch_records()
         return self
@@ -420,11 +441,15 @@ def create_feedback_dataset(
 
 
 def feedback_dataset_in_argilla(
-    name: Optional[str] = None, *, workspace: Optional[Union[str, rg.Workspace]] = None, id: Optional[str] = None
+    name: Optional[str] = None,
+    *,
+    workspace: Optional[Union[str, rg.Workspace]] = None,
+    id: Optional[str] = None,
 ) -> Tuple[bool, Optional[FeedbackDataset]]:
     assert name or (name and workspace) or id, (
-        "You must provide either the `name` and `workspace` (the latter just if applicable, if not the default"
-        " `workspace` will be used) or the `id`, which is the Argilla ID of the `rg.FeedbackDataset`."
+        "You must provide either the `name` and `workspace` (the latter just if"
+        " applicable, if not the default `workspace` will be used) or the `id`, which"
+        " is the Argilla ID of the `rg.FeedbackDataset`."
     )
 
     client: "Argilla" = rg.active_client()
@@ -442,7 +467,9 @@ def feedback_dataset_in_argilla(
         try:
             datasets = client.list_datasets()
         except Exception as e:
-            raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
+            raise Exception(
+                f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}"
+            )
 
         for dataset in datasets:
             if dataset.name == name and dataset.workspace_id == workspace.id:
