@@ -131,6 +131,28 @@ def list_current_user_dataset_records(
     return Records(items=[record.__dict__ for record in records], total=total)
 
 
+@router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
+def list_dataset_records(
+    *,
+    db: Session = Depends(get_db),
+    dataset_id: UUID,
+    include: Optional[List[RecordInclude]] = Query([]),
+    offset: int = 0,
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.list_dataset_records_will_all_responses(dataset))
+
+    records = datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
+
+    return Records(
+        items=[record.__dict__ for record in records],
+        total=datasets.count_records_by_dataset_id(db, dataset_id),
+    )
+
+
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
 def get_dataset(
     *,
