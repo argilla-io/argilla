@@ -31,7 +31,8 @@
       :multiple="true"
       :progress="(totalSubmitted * 100) / progressTotal"
       :progress-secondary="(totalDiscarded * 100) / progressTotal"
-    ></base-progress>
+    >
+    </base-progress>
     <div class="scroll">
       <ul class="metrics__list">
         <!-- FIXME - loop over an array -->
