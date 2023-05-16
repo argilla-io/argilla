@@ -53,7 +53,7 @@ class FeedbackItemModel(BaseModel):
     id: UUID
     fields: Dict[str, Any]
     external_id: Optional[str] = None
-    responses: List[FeedbackResponseModel] = []
+    responses: Optional[List[FeedbackResponseModel]] = []
     inserted_at: datetime
     updated_at: datetime
 
