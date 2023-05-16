@@ -51,8 +51,9 @@ By default, if the Argilla instance has no users, the following default admin us
 For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
 
 ```bash
-python -m argilla.tasks.users.create_default --password new-password --api-key new-api-key
+python -m argilla users create_default --password new-password --api-key new-api-key
 ```
+
 ```bash
 User with default credentials succesfully created:
 • username: 'argilla'
@@ -74,7 +75,7 @@ The above user management model is configured using the Argilla tasks, which ser
 First of all, you need to make sure that database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed.
 
 ```bash
-python -m argilla.tasks.database.migrate
+python -m argilla database migrate
 ```
 
 ```
@@ -92,11 +93,11 @@ It is important to launch this task prior to any other database action.
 ### Creating users
 
 ```bash
-python -m argilla.tasks.users.create --help
+python -m argilla users create
 ```
 
 ```
-Usage: python -m argilla.tasks.users.create [OPTIONS]
+Usage: python -m argilla users create [OPTIONS]
 
   Creates a new user in the Argilla database with provided parameters
 
@@ -125,7 +126,7 @@ Options:
 **CLI:**
 
 ```bash
-python -m argilla.tasks.users.create --role admin --first-name Hulio --last-name Ramos --username hurra --password abcde123
+python -m argilla users create --role admin --first-name Hulio --last-name Ramos --username hurra --password abcde123
 ```
 
 ```
@@ -166,7 +167,7 @@ repsonse.json()
 **CLI:**
 
 ```bash
-python -m argilla.tasks.users.create --role annotator --first-name Nick --last-name Name --username nick --password 11223344 --workspace ws
+python -m argilla users create --role annotator --first-name Nick --last-name Name --username nick --password 11223344 --workspace ws
 ```
 
 ```
@@ -324,7 +325,7 @@ The task will also create an extra workspace for each user named after their use
 
 ```bash
 export ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yml
-python -m argilla.tasks.users.migrate
+python -m argilla users migrate
 ```
 
 ```
@@ -462,7 +463,7 @@ docker-compose up
 And after running the containers you can run the task to migrate the users as follows:
 
 ```bash
-docker-compose exec argilla python -m argilla.tasks.users.migrate
+docker-compose exec argilla python -m argilla users migrate
 ```
 
 If everything went well, the configured users can now log in, their annotations will be tracked with their usernames, and they'll have access to the defined workspaces.

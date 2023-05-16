@@ -67,6 +67,7 @@ def _apply_column_mapping(dataset: "Dataset", column_mapping: Dict[str, str]) ->
     Applies the provided column mapping to the dataset, renaming columns accordingly.
     Extra features not in the column mapping are prefixed with `"feat_"`.
     """
+    column_mapping = {label_from: label_to for label_to, label_from in column_mapping.items()}
     dataset = dataset.rename_columns(
         {
             **column_mapping,
