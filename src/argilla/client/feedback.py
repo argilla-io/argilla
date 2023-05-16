@@ -166,9 +166,7 @@ class FeedbackDataset:
         any_required = False
         for question in questions:
             if not isinstance(question, QuestionSchema):
-                raise TypeError(
-                    f"Expected `questions` to be a list of `QuestionSchema`, got {type(question)} instead."
-                )
+                raise TypeError(f"Expected `questions` to be a list of `QuestionSchema`, got {type(question)} instead.")
             if not any_required and question.required:
                 any_required = True
         if not any_required:
@@ -176,24 +174,27 @@ class FeedbackDataset:
         self.__questions = questions
 
         self.__records = []
+        self.__new_records = []
 
     def __len__(self) -> int:
-        return len(self.__records)
+        return len(self.records)
 
     def __getitem__(self, key: Union[slice, int]) -> Union["FeedbackItemModel", List["FeedbackItemModel"]]:
-        if len(self.__records) < 1:
+        if len(self.records) < 1:
             raise RuntimeError(
                 "In order to get items from `rg.FeedbackDataset` you need to either add"
                 " them first with `add_records` or fetch them from Argilla or"
                 " HuggingFace with `fetch_records`."
             )
-        if isinstance(key, int) and len(self.__records) < key:
+        if isinstance(key, int) and len(self.records) < key:
             raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
-        return self.__records[key]
+        return self.records[key]
 
     def __del__(self) -> None:
-        if hasattr(self, "__records"):
+        if hasattr(self, "__records") and self.__records is not None:
             del self.__records
+        if hasattr(self, "__new_records") and self.__new_records is not None:
+            del self.__new_records
 
     def __enter__(self) -> "FeedbackDataset":
         return self
@@ -221,22 +222,18 @@ class FeedbackDataset:
 
     @property
     def records(self) -> List["FeedbackItemModel"]:
-        return self.__records
+        return self.__records + self.__new_records
 
-    def fetch_records(self, overwrite: bool = False) -> List["FeedbackItemModel"]:
+    def fetch_records(self, offset: Optional[int] = None, limit: Optional[int] = None) -> None:
         if not self.argilla_id:
             warnings.warn(
                 "No records have been logged into neither Argilla nor HuggingFace, so"
                 " no records will be fetched. The current records will be returned"
                 " instead."
             )
-            return self.__records
-        if len(self.__records) > 0 and not overwrite:
-            warnings.warn(
-                "The current `rg.FeedbackDataset` contains records, just the pushed records will be fetched, while the non-pushed records will be lost. To ignore this warning and fetch the pushed records use `overwrite=True`. The current records will be returned instead."
-            )
-            return self.__records
+            return self.records
 
+        # TODO(alvarobartt): create `ArgillaMixIn` and `HuggingFaceMixIn` classes to inherit their specific methods
         if self.argilla_id:
             client = rg.active_client()
             first_batch = client.get_records(id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE)
@@ -261,7 +258,6 @@ class FeedbackDataset:
     def add_records(
         self,
         records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
-        push: bool = False,
     ) -> None:
         if isinstance(records, list):
             records = [FeedbackRecord(**record) if isinstance(record, dict) else record for record in records]
@@ -271,9 +267,7 @@ class FeedbackDataset:
             records = [records]
 
         if self.__fields_schema is None:
-            warnings.warn(
-                "Since the `schema` hasn't been defined during the dataset creation, it will be inferred."
-            )
+            warnings.warn("Since the `schema` hasn't been defined during the dataset creation, it will be inferred.")
             self.__fields_schema = generate_pydantic_schema(records[0].fields)
 
         for record in records:
@@ -284,103 +278,145 @@ class FeedbackDataset:
                     f"`rg.FeedbackRecord.fields` do not match the expected schema, with exception: {e}"
                 ) from e
 
-        if self.__records is not None and isinstance(self.__records, list) and len(self.__records) > 0:
-            self.__records += [OfflineFeedbackRecord.construct(**record.dict()).dict() for record in records]
+        if len(self.__new_records) > 0:
+            self.__new_records += [OfflineFeedbackRecord.construct(**record.dict()).dict() for record in records]
         else:
-            self.__records = [OfflineFeedbackRecord.construct(**record.dict()).dict() for record in records]
-
-        if push and self.argilla_id:
-            client = rg.active_client()
-            client.add_records(
-                id=self.argilla_id,
-                records=[record.dict(exclude_none=True) for record in records],
-            )
+            self.__new_records = [OfflineFeedbackRecord.construct(**record.dict()).dict() for record in records]
 
     def iter(
         self, batch_size: Optional[int] = FETCHING_BATCH_SIZE
     ) -> Iterator[Union["FeedbackItemModel", OfflineFeedbackRecord]]:
-        for i in range(0, len(self.__records), batch_size):
-            yield self.__records[i : i + batch_size]
+        for i in range(0, len(self.records), batch_size):
+            yield self.records[i : i + batch_size]
 
-    def push_to_argilla(self, name: str, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
-        if workspace is None:
-            workspace = rg.Workspace.from_name(client.get_workspace())
+    def push_to_argilla(self, name: Optional[str] = None, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
+        if not name or not (name and workspace):
+            if self.argilla_id is None:
+                warnings.warn(
+                    "No `name` or `workspace` have been provided, and no dataset has"
+                    " been pushed to Argilla yet, so no records will be pushed to"
+                    " Argilla."
+                )
+                return
 
-        if isinstance(workspace, str):
-            workspace = rg.Workspace.from_name(workspace)
+            if len(self.__new_records) < 1:
+                warnings.warn(
+                    "No new records have been added to the current `FeedbackTask`"
+                    " dataset, so no records will be pushed to Argilla."
+                )
+                return
 
-        dataset_exists, _ = feedback_dataset_in_argilla(name=name, workspace=workspace)
-        if dataset_exists:
-            raise RuntimeError(
-                f"Dataset with name=`{name}` and workspace=`{workspace.name}` already exists in Argilla, please choose another name and/or workspace."
-            )
-
-        client: "Argilla" = rg.active_client()
-
-        try:
-            new_dataset: "FeedbackDatasetModel" = client.create_dataset(
-                name=name, workspace_id=workspace.id, guidelines=self.guidelines
-            )
-            argilla_id = new_dataset.id
-        except Exception as e:
-            raise Exception(f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}") from e
-
-        def delete_and_raise_exception(dataset_id: str, exception: Exception) -> None:
             try:
-                client.delete_dataset(id=dataset_id)
+                client: "Argilla" = rg.active_client()
+                for i in range(0, len(self.__new_records), 32):
+                    client.add_records(
+                        id=self.argilla_id,
+                        records=self.__new_records[i : i + 32],
+                    )
+                self.__records += self.__new_records
+                self.__new_records = []
+            except Exception as e:
+                Exception(
+                    "Failed while adding new records to the current `FeedbackTask`"
+                    f" dataset in Argilla with exception: {e}"
+                )
+        elif name or (name and workspace):
+            if workspace is None:
+                workspace = rg.Workspace.from_name(client.get_workspace())
+
+            if isinstance(workspace, str):
+                workspace = rg.Workspace.from_name(workspace)
+
+            dataset_exists, _ = feedback_dataset_in_argilla(name=name, workspace=workspace)
+            if dataset_exists:
+                raise RuntimeError(
+                    f"Dataset with name=`{name}` and workspace=`{workspace.name}`"
+                    " already exists in Argilla, please choose another name and/or"
+                    " workspace."
+                )
+
+            client: "Argilla" = rg.active_client()
+
+            try:
+                new_dataset: "FeedbackDatasetModel" = client.create_dataset(
+                    name=name, workspace_id=workspace.id, guidelines=self.guidelines
+                )
+                argilla_id = new_dataset.id
             except Exception as e:
                 raise Exception(
-                    f"Failed while deleting the `FeedbackTask` dataset with ID '{dataset_id}' from Argilla with exception: {e}"
-                )
-            raise exception
+                    f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}"
+                ) from e
 
-        for field in self.fields:
+            def delete_and_raise_exception(dataset_id: str, exception: Exception) -> None:
+                try:
+                    client.delete_dataset(id=dataset_id)
+                except Exception as e:
+                    raise Exception(
+                        "Failed while deleting the `FeedbackTask` dataset with ID"
+                        f" '{dataset_id}' from Argilla with exception: {e}"
+                    )
+                raise exception
+
+            for field in self.fields:
+                try:
+                    client.add_field(id=argilla_id, field=field.dict())
+                except Exception as e:
+                    delete_and_raise_exception(
+                        dataset_id=argilla_id,
+                        exception=Exception(
+                            f"Failed while adding the field '{field.name}' to the"
+                            f" `FeedbackTask` dataset in Argilla with exception: {e}"
+                        ),
+                    )
+
+            for question in self.questions:
+                try:
+                    client.add_question(id=argilla_id, question=question.dict())
+                except Exception as e:
+                    delete_and_raise_exception(
+                        dataset_id=argilla_id,
+                        exception=Exception(
+                            f"Failed while adding the question '{question.name}' to the"
+                            f" `FeedbackTask` dataset in Argilla with exception: {e}"
+                        ),
+                    )
+
             try:
-                client.add_field(id=argilla_id, field=field.dict())
+                client.publish_dataset(id=argilla_id)
             except Exception as e:
                 delete_and_raise_exception(
                     dataset_id=argilla_id,
                     exception=Exception(
-                        f"Failed while adding the field '{field.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
+                        f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"
                     ),
                 )
 
-        for question in self.questions:
-            try:
-                client.add_question(id=argilla_id, question=question.dict())
-            except Exception as e:
-                delete_and_raise_exception(
-                    dataset_id=argilla_id,
-                    exception=Exception(
-                        f"Failed while adding the question '{question.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
-                    ),
-                )
+            for batch in self.iter():
+                try:
+                    client.add_records(
+                        id=argilla_id,
+                        records=batch,
+                    )
+                except Exception as e:
+                    delete_and_raise_exception(
+                        dataset_id=argilla_id,
+                        exception=Exception(
+                            "Failed while adding the records to the `FeedbackTask`"
+                            f" dataset in Argilla with exception: {e}"
+                        ),
+                    )
 
-        try:
-            client.publish_dataset(id=argilla_id)
-        except Exception as e:
-            delete_and_raise_exception(
-                dataset_id=argilla_id,
-                exception=Exception(
-                    f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"
-                ),
-            )
-
-        for batch in self.iter():
-            try:
-                client.add_records(
-                    id=argilla_id,
-                    records=batch,
+            if self.argilla_id is not None:
+                warnings.warn(
+                    "Since the current object is already a `FeedbackDataset` pushed to"
+                    " Argilla, you'll keep on interacting with the same dataset in"
+                    " Argilla, even though the one you just pushed holds a different"
+                    f" ID ({argilla_id}). So on, if you want to switch to the newly"
+                    " pushed `FeedbackDataset` instead, please use"
+                    f" `FeedbackDataset.from_argilla(id='{argilla_id}')`."
                 )
-            except Exception as e:
-                delete_and_raise_exception(
-                    dataset_id=argilla_id,
-                    exception=Exception(
-                        f"Failed while adding the records to the `FeedbackTask` dataset in Argilla with exception: {e}"
-                    ),
-                )
-
-        self.argilla_id = argilla_id
+                return
+            self.argilla_id = argilla_id
 
     @classmethod
     def from_argilla(
@@ -389,6 +425,7 @@ class FeedbackDataset:
         *,
         workspace: Optional[str] = None,
         id: Optional[str] = None,
+        with_records: bool = True,
     ) -> "FeedbackDataset":
         dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if not dataset_exists:
@@ -409,11 +446,10 @@ class FeedbackDataset:
         self = cls(
             guidelines=existing_dataset.guidelines,
             fields=[FieldSchema.construct(field) for field in client.get_fields(id=existing_dataset.id)],
-            questions=[
-                QuestionSchema.construct(question) for question in client.get_questions(id=existing_dataset.id)
-            ],
+            questions=[QuestionSchema.construct(question) for question in client.get_questions(id=existing_dataset.id)],
         )
-        self.fetch_records()
+        if with_records:
+            self.fetch_records()
         return self
 
 
@@ -467,9 +503,7 @@ def feedback_dataset_in_argilla(
         try:
             datasets = client.list_datasets()
         except Exception as e:
-            raise Exception(
-                f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}"
-            )
+            raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
 
         for dataset in datasets:
             if dataset.name == name and dataset.workspace_id == workspace.id:
