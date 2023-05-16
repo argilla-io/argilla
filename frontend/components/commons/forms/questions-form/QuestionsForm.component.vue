@@ -265,20 +265,10 @@ export default {
       );
 
       // 4 - create or update the record responses and emit bus event to change record to show
-      try {
-        await this.createOrUpdateRecordResponses(formattedRequestsToSend);
-
-        // NOTE - Update dataset Metrics orm
-        await this.initMetricsAndInsertDataInOrm();
-
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.DISCARDED
-        );
-        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
-      } catch (err) {
-        console.log(err);
-      }
+      await this.createOrUpdateResponsesAndEmitRecordToGoBusEvent(
+        RECORD_STATUS.DISCARDED,
+        formattedRequestsToSend
+      );
     },
     async onSubmit() {
       // 1 - check if it's a create or update response
@@ -306,19 +296,37 @@ export default {
       );
 
       // 4 - create or update the record responses and emit bus event to change record to show
+      await this.createOrUpdateResponsesAndEmitRecordToGoBusEvent(
+        RECORD_STATUS.SUBMITTED,
+        formattedRequestsToSend
+      );
+    },
+    async createOrUpdateResponsesAndEmitRecordToGoBusEvent(
+      status,
+      requestsToSend
+    ) {
       try {
-        await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+        await this.createOrUpdateRecordResponses(requestsToSend);
 
         // NOTE - Update dataset Metrics orm
         await this.initMetricsAndInsertDataInOrm();
 
         // NOTE - onSubmit event => the status change to SUBMITTED
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.SUBMITTED
-        );
+        await updateRecordStatusByRecordId(this.recordId, status);
 
-        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
+        let typeOfEvent = null;
+        switch (status) {
+          case RECORD_STATUS.SUBMITTED:
+            typeOfEvent = TYPE_OF_EVENT.ON_SUBMIT;
+            break;
+          case RECORD_STATUS.DISCARDED:
+            typeOfEvent = TYPE_OF_EVENT.ON_DISCARD;
+            break;
+          default:
+            console.log(`The event ${status} is unknown`);
+        }
+
+        this.onEmitBusEventGoToRecordIndex(typeOfEvent);
       } catch (err) {
         console.log(err);
       }
