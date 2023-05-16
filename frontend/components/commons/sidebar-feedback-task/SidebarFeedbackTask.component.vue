@@ -53,7 +53,7 @@ export default {
   },
   created() {
     this.sidebarItems = {
-      // NOTE: HIDDEN FOR MVP
+      // TODO - Hidden for MVP
       // mode: {
       //   buttonType: "non-expandable",
       //   buttons: [

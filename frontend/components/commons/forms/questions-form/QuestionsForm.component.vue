@@ -15,7 +15,7 @@
           <NuxtLink
             :to="{
               name: 'dataset-id-settings',
-              params: { id: this.datasetId },
+              params: { id: datasetId },
             }"
             target="_blank"
             >annotation guidelines <svgicon name="external-link" width="12"

@@ -16,7 +16,7 @@ Vue.directive("tooltip", {
     let closeIcon = null;
     element.style.position = "relative";
     element.style.cursor = "pointer";
-    let elementOffset = element.getBoundingClientRect();
+    let elementOffset = initElementOffset(element);
     const {
       content,
       backgroundColor,
@@ -76,7 +76,7 @@ Vue.directive("tooltip", {
     // NOTE - init function for event listeners. Needs to be passed throw 'element' object to be able to destroy them on unbind
     element.clickOnTooltipElementEvent = () => {
       tooltip.style.display = "flex";
-      elementOffset = element.getBoundingClientRect();
+      elementOffset = initElementOffset(element);
       tooltip = initTooltipPosition(
         tooltip,
         tooltipPosition,
@@ -96,8 +96,8 @@ Vue.directive("tooltip", {
       }
     };
     element.scrollInParent = function () {
-      const { top: parentOffsetTop, bottom: parentOffsetBottom } =
-        getScrollableParent(element).getBoundingClientRect();
+      const { top: parentOffsetTop = 0, bottom: parentOffsetBottom = 0 } =
+        initElementOffset(getScrollableParent(element)) || {};
       if (
         elementOffset.top < parentOffsetTop ||
         elementOffset.bottom > parentOffsetBottom
@@ -106,7 +106,7 @@ Vue.directive("tooltip", {
       } else {
         tooltip.style.visibility = "visible";
       }
-      elementOffset = element.getBoundingClientRect();
+      elementOffset = initElementOffset(element);
       tooltip = initTooltipPosition(
         tooltip,
         tooltipPosition,
@@ -122,21 +122,27 @@ Vue.directive("tooltip", {
     destroyEventsListener(element);
   },
 });
-const isScrollable = function (ele) {
-  const hasScrollableContent = ele.scrollHeight > ele.clientHeight;
+const isScrollable = function (element) {
+  const hasScrollableContent = element.scrollHeight > element.clientHeight;
 
-  const overflowYStyle = window.getComputedStyle(ele).overflowY;
+  const overflowYStyle = window.getComputedStyle(element).overflowY;
   const isOverflowHidden = overflowYStyle.indexOf("hidden") !== -1;
 
   return hasScrollableContent && !isOverflowHidden;
 };
 
-const getScrollableParent = function (ele) {
-  return !ele || ele === document.body
+const initElementOffset = function (element) {
+  return element.getBoundingClientRect() || null;
+};
+const getScrollableParent = function (element) {
+  return !element || element === document.body
     ? document.body
-    : isScrollable(ele)
-    ? ele
-    : getScrollableParent(ele.parentNode);
+    : getElementOrParent(element);
+};
+const getElementOrParent = function (element) {
+  return isScrollable(element)
+    ? element
+    : getScrollableParent(element.parentNode);
 };
 const initEventsListener = (element, closeIcon) => {
   if (element && closeIcon) {
