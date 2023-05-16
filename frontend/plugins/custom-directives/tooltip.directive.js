@@ -76,6 +76,13 @@ Vue.directive("tooltip", {
     // NOTE - init function for event listeners. Needs to be passed throw 'element' object to be able to destroy them on unbind
     element.clickOnTooltipElementEvent = () => {
       tooltip.style.display = "flex";
+      elementOffset = element.getBoundingClientRect();
+      tooltip = initTooltipPosition(
+        tooltip,
+        tooltipPosition,
+        elementOffset,
+        width
+      );
     };
     element.clickOnClose = (event) => {
       // NOTE - stop propagation to not fire element.clickOnTooltipElement()
