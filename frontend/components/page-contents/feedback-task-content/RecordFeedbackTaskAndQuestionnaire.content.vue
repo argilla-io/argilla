@@ -351,6 +351,7 @@ export default {
 .wrapper {
   display: flex;
   flex-wrap: wrap;
+  gap: $base-space * 2;
   height: 100%;
   &__text {
     color: $black-54;
