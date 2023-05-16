@@ -506,6 +506,22 @@ def test_list_dataset_records_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
+def test_list_dataset_records_as_annotator(client: TestClient):
+    workspace = WorkspaceFactory.create()
+    annotator = AnnotatorFactory.create(workspaces=[workspace])
+    dataset = DatasetFactory.create(workspace=workspace)
+
+    RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+    RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
+    RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    assert response.status_code == 403
+
+
 def test_list_current_user_dataset_records(client: TestClient, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
