@@ -76,8 +76,16 @@ class OfflineFeedbackResponse(ResponseSchema):
 
 class FeedbackRecord(BaseModel):
     fields: Dict[str, str]
-    response: Optional[ResponseSchema] = None
+    responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
+
+    @validator("responses", always=True)
+    def responses_must_be_a_list(cls, v):
+        if not v:
+            return []
+        if isinstance(v, ResponseSchema):
+            return [v]
+        return v
 
     class Config:
         extra = Extra.forbid
