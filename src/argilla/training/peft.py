@@ -36,13 +36,15 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
 
     def init_training_args(self):
         super().init_training_args()
-        self.lora_training_args = {
+
+        self.lora_kwargs = {
             "r": 8,
             "target_modules": None,
             "lora_alpha": 16,
             "lora_dropout": 0.1,
             "fan_in_fan_out": False,
             "bias": "none",
+            "inference_mode": False,
             "modules_to_save": None,
             "init_lora_weights": True,
         }
@@ -52,9 +54,9 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
         from transformers import AutoTokenizer
 
         if self._record_class == rg.TextClassificationRecord:
-            task_type = "SEQ_CLS"
+            self.lora_kwargs["task_type"] = "SEQ_CLS"
         elif self._record_class == rg.TokenClassificationRecord:
-            task_type = "TOKEN_CLS"
+            self.lora_kwargs["task_type"] = "TOKEN_CLS"
         else:
             raise NotImplementedError("This is not implemented yet.")
 
@@ -64,7 +66,7 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
             self._model_sub_class = model.__class__
             model = PeftModel.from_pretrained(model, self.model_kwargs["pretrained_model_name_or_path"])
         except Exception:
-            config = LoraConfig(task_type=task_type, inference_mode=False, r=8, lora_alpha=16, lora_dropout=0.1)
+            config = LoraConfig(**self.lora_kwargs)
             model = self._model_class.from_pretrained(**self.model_kwargs, return_dict=True)
             self._model_sub_class = model.__class__
             model = get_peft_model(model, config)
@@ -79,15 +81,18 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
-        from transformers import TrainingArguments
+        super().update_config(**kwargs)
 
-        self.trainer_kwargs.update(filter_allowed_args(TrainingArguments.__init__, **kwargs))
+        from peft import LoraConfig
+
+        self.lora_kwargs.update(filter_allowed_args(LoraConfig.__init__, **kwargs))
 
     def __repr__(self):
         formatted_string = []
         arg_dict = {
             "'AutoModel'": self.model_kwargs,
             "'Trainer'": self.trainer_kwargs,
+            "'LoraConfig'": self.lora_kwargs,
         }
         for arg_dict_key, arg_dict_single in arg_dict.items():
             formatted_string.append(arg_dict_key)
@@ -124,7 +129,10 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
             logits = self._transformers_model(**inputs).logits
 
         if self._record_class == rg.TextClassificationRecord:
-            probabilities = torch.softmax(logits, dim=1)
+            if self._multi_label:
+                probabilities = torch.sigmoid(logits)
+            else:
+                probabilities = torch.softmax(logits, dim=1)
             predictions = []
             for probability in probabilities:
                 prediction = []
