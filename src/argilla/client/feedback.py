@@ -105,9 +105,7 @@ class TextField(FieldSchema):
     settings: Dict[str, Any] = Field({"type": "text"}, const=True)
 
 
-FIELD_TYPE_TO_PYTHON_TYPE = {
-    "text": str
-}
+FIELD_TYPE_TO_PYTHON_TYPE = {"text": str}
 
 
 class QuestionSchema(BaseModel):
@@ -124,6 +122,7 @@ class QuestionSchema(BaseModel):
         return v
 
 
+# TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
 class TextQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "text"}, const=True)
 
@@ -140,6 +139,77 @@ class RatingQuestion(QuestionSchema):
 
 
 class FeedbackDataset:
+    """Class to work with `FeedbackDataset`s either locally, or remotely (Argilla or HuggingFace Hub).
+
+    Args:
+        guidelines: contains the guidelines for annotating the dataset.
+        fields: contains the fields that will define the schema of the records in the dataset.
+        questions: contains the questions that will be used to annotate the dataset.
+
+    Attributes:
+        guidelines: contains the guidelines for annotating the dataset.
+        fields: contains the fields that will define the schema of the records in the dataset.
+        questions: contains the questions that will be used to annotate the dataset.
+        records: contains the records of the dataset if any. Otherwise it is an empty list.
+        argilla_id: contains the id of the dataset in Argilla, if it has been uploaded (via `self.push_to_argilla()`). Otherwise, it is `None`.
+
+    Raises:
+        TypeError: if `guidelines` is not a string.
+        TypeError: if `fields` is not a list of `FieldSchema`.
+        ValueError: if `fields` does not contain at least one required field.
+        TypeError: if `questions` is not a list of `QuestionSchema`.
+        ValueError: if `questions` does not contain at least one required question.
+
+    Examples:
+        >>> import argilla as rg
+        >>> rg.init(api_url="...", api_key="...")
+        >>> dataset = rg.FeedbackDataset(
+        ...     guidelines="These are the annotation guidelines.",
+        ...     fields=[
+        ...         rg.TextField(name="text", required=True),
+        ...         rg.TextField(name="label", required=True),
+        ...     ],
+        ...     questions=[
+        ...         rg.TextQuestion(
+        ...             name="question-1",
+        ...             description="This is the first question",
+        ...             required=True,
+        ...         ),
+        ...         rg.RatingQuestion(
+        ...             name="question-2",
+        ...             description="This is the second question",
+        ...             required=True,
+        ...             values=[1, 2, 3, 4, 5],
+        ...         ),
+        ...     ],
+        ... )
+        >>> dataset.guidelines
+        "These are the annotation guidelines."
+        >>> dataset.fields
+        [TextField(name="text", title="Text", required=True, settings={"type": "text"}), TextField(name="label", title="Label", required=True, settings={"type": "text"})]
+        >>> dataset.questions
+        [TextQuestion(name="question-1", title="Question 1", description="This is the first question", required=True, settings={"type": "text"}), RatingQuestion(name="question-2", title="Question 2", description="This is the second question", required=True, settings={"type": "rating"}, values=[1, 2, 3, 4, 5])]
+        >>> dataset.records
+        []
+        >>> dataset.add_records(
+        ...     [
+        ...         rg.FeedbackRecord(
+        ...             fields={"text": "This is the first record", "label": "positive"},
+        ...             response={"question-1": "This is the first answer", "question-2": 5},
+        ...             external_id="entry-1",
+        ...         ),
+        ...     ]
+        ... )
+        >>> dataset.records
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, response={"question-1": "This is the first answer", "question-2": 5}, external_id="entry-1")]
+        >>> dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
+        >>> dataset.argilla_id
+        "..."
+        >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
+        >>> dataset.records
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, response={"question-1": "This is the first answer", "question-2": 5}, external_id="entry-1")]
+    """
+
     argilla_id: Optional[str] = None
 
     def __init__(
@@ -149,6 +219,44 @@ class FeedbackDataset:
         fields: List[FieldSchema],
         questions: List[QuestionSchema],
     ) -> None:
+        """Initializes a `FeedbackDataset` instance locally.
+
+        Args:
+            guidelines: contains the guidelines for annotating the dataset.
+            fields: contains the fields that will define the schema of the records in the dataset.
+            questions: contains the questions that will be used to annotate the dataset.
+
+        Raises:
+            TypeError: if `guidelines` is not a string.
+            TypeError: if `fields` is not a list of `FieldSchema`.
+            ValueError: if `fields` does not contain at least one required field.
+            TypeError: if `questions` is not a list of `QuestionSchema`.
+            ValueError: if `questions` does not contain at least one required question.
+
+        Examples:
+            >>> import argilla as rg
+            >>> rg.init(api_url="...", api_key="...")
+            >>> dataset = rg.FeedbackDataset(
+            ...     guidelines="These are the annotation guidelines.",
+            ...     fields=[
+            ...         rg.TextField(name="text", required=True),
+            ...         rg.TextField(name="label", required=True),
+            ...     ],
+            ...     questions=[
+            ...         rg.TextQuestion(
+            ...             name="question-1",
+            ...             description="This is the first question",
+            ...             required=True,
+            ...         ),
+            ...         rg.RatingQuestion(
+            ...             name="question-2",
+            ...             description="This is the second question",
+            ...             required=True,
+            ...             values=[1, 2, 3, 4, 5],
+            ...         ),
+            ...     ],
+            ... )
+        """
         if not isinstance(guidelines, str):
             raise TypeError(f"Expected `guidelines` to be a string, got {type(guidelines)} instead.")
         self.__guidelines = guidelines
@@ -182,9 +290,18 @@ class FeedbackDataset:
         self.__new_records = []
 
     def __len__(self) -> int:
+        """Returns the number of records in the dataset."""
         return len(self.records)
 
     def __getitem__(self, key: Union[slice, int]) -> Union["FeedbackItemModel", List["FeedbackItemModel"]]:
+        """Returns the record(s) at the given index(es).
+
+        Args:
+            key: the index(es) of the record(s) to return. Can either be a single index or a slice.
+
+        Returns:
+            Either the record of the given index, or a list with the records at the given indexes.
+        """
         if len(self.records) < 1:
             raise RuntimeError(
                 "In order to get items from `rg.FeedbackDataset` you need to either add"
@@ -196,40 +313,53 @@ class FeedbackDataset:
         return self.records[key]
 
     def __del__(self) -> None:
+        """When the dataset object is deleted, delete all the records as well to avoid memory leaks."""
         if hasattr(self, "__records") and self.__records is not None:
             del self.__records
         if hasattr(self, "__new_records") and self.__new_records is not None:
             del self.__new_records
 
     def __enter__(self) -> "FeedbackDataset":
+        """Allows the dataset to be used as a context manager."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """When the context manager is exited, delete all the records as well to avoid memory leaks."""
         self.__del__()
 
     @property
     def guidelines(self) -> str:
+        """Returns the guidelines for annotating the dataset."""
         return self.__guidelines
 
     @guidelines.setter
     def guidelines(self, guidelines: str) -> None:
+        """Sets the guidelines for annotating the dataset."""
         if not isinstance(guidelines, str):
             raise TypeError(f"Expected `guidelines` to be a string, got {type(guidelines)} instead.")
         self.__guidelines = guidelines
 
     @property
     def fields(self) -> List[FeedbackFieldModel]:
+        """Returns the fields that define the schema of the records in the dataset."""
         return self.__fields
 
     @property
     def questions(self) -> List[FeedbackQuestionModel]:
+        """Returns the questions that will be used to annotate the dataset."""
         return self.__questions
 
     @property
     def records(self) -> List["FeedbackItemModel"]:
+        """Returns the all the records in the dataset."""
         return self.__records + self.__new_records
 
-    def fetch_records(self, offset: Optional[int] = None, limit: Optional[int] = None) -> None:
+    def fetch_records(self) -> None:
+        """Fetches the records from Argilla or HuggingFace and stores them locally.
+
+        If the dataset has not been saved in Argilla or HuggingFace, a warning will be
+        raised and the current records will be returned instead.
+        """
         if not self.argilla_id:
             warnings.warn(
                 "No records have been logged into neither Argilla nor HuggingFace, so"
@@ -264,6 +394,17 @@ class FeedbackDataset:
         self,
         records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
     ) -> None:
+        """Adds the given records to the dataset, and stores them locally. If you're planning to add those
+        records either to Argilla or HuggingFace, make sure to call `push_to_argilla` or `push_to_huggingface`,
+        respectively, after adding the records.
+
+        Args:
+            records: the records to add to the dataset. Can be a single record, a list of records or a dictionary
+                with the fields of the record.
+
+        Raises:
+            ValueError: if the given records do not match the expected schema.
+        """
         if isinstance(records, list):
             records = [FeedbackRecord(**record) if isinstance(record, dict) else record for record in records]
         if isinstance(records, dict):
@@ -290,10 +431,26 @@ class FeedbackDataset:
     def iter(
         self, batch_size: Optional[int] = FETCHING_BATCH_SIZE
     ) -> Iterator[Union["FeedbackItemModel", OfflineFeedbackRecord]]:
+        """Returns an iterator over the records in the dataset.
+
+        Args:
+            batch_size: the size of the batches to return. Defaults to 100.
+        """
         for i in range(0, len(self.records), batch_size):
             yield self.records[i : i + batch_size]
 
     def push_to_argilla(self, name: Optional[str] = None, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
+        """Pushes the dataset to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
+        with the new records.
+
+        Note that you may need to `rg.init(...)` with your Argilla credentials before calling this function, otherwise
+        the default https://localhost:9200 will be used, which will fail if Argilla is not deployed locally.
+
+        Args:
+            name: the name of the dataset to push to Argilla. If not provided, the `argilla_id` will be used if the dataset
+                has been previously pushed to Argilla.
+            workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
+        """
         if not name or not (name and workspace):
             if self.argilla_id is None:
                 warnings.warn(
@@ -431,6 +588,30 @@ class FeedbackDataset:
         id: Optional[str] = None,
         with_records: bool = True,
     ) -> "FeedbackDataset":
+        """Retrieves an existing `FeedbackDataset` from Argilla (must have been pushed in advance).
+
+        Note that even no argument is mandatory, you must provide either the `name`, the combination of
+        `name` and `workspace`, or the `id`, otherwise an error will be raised.
+
+        Args:
+            name: the name of the `FeedbackDataset` to retrieve from Argilla. Defaults to `None`.
+            workspace: the workspace of the `FeedbackDataset` to retrieve from Argilla. If not provided, the active
+                workspace will be used.
+            id: the ID of the `FeedbackDataset` to retrieve from Argilla. Defaults to `None`.
+            with_records: whether to retrieve the records of the `FeedbackDataset` from Argilla. Defaults to `True`.
+
+        Returns:
+            The `FeedbackDataset` retrieved from Argilla.
+
+        Raises:
+            ValueError: if no `FeedbackDataset` with the provided `name` and `workspace` exists in Argilla.
+            ValueError: if no `FeedbackDataset` with the provided `id` exists in Argilla.
+
+        Examples:
+            >>> import argilla as rg
+            >>> rg.init(...)
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="my_dataset")
+        """
         dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if not dataset_exists:
             raise ValueError(
@@ -459,9 +640,31 @@ class FeedbackDataset:
         return self
 
 
-def generate_pydantic_schema(
-    fields: List[FieldSchema], name: Optional[str] = "FieldsSchema"
-) -> BaseModel:
+def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "FieldsSchema") -> BaseModel:
+    """Generates a `pydantic.BaseModel` schema from a list of `FieldSchema` objects to validate
+    the fields of a `FeedbackDataset` object before inserting them.
+
+    Args:
+        fields: the list of `FieldSchema` objects to generate the schema from.
+        name: the name of the `pydantic.BaseModel` schema to generate. Defaults to "FieldsSchema".
+
+    Returns:
+        A `pydantic.BaseModel` schema to validate the fields of a `FeedbackDataset` object before
+        inserting them.
+
+    Raises:
+        ValueError: if one of the fields has an unsupported type.
+
+    Examples:
+        >>> from argilla.client.feedback import TextField, generate_pydantic_schema
+        >>> fields = [
+        ...     TextField(name="text", required=True),
+        ...     TextField(name="label", required=True),
+        ... ]
+        >>> FieldsSchema = generate_pydantic_schema(fields)
+        >>> FieldsSchema(text="Hello", label="World")
+        FieldsSchema(text='Hello', label='World')
+    """
     fields_schema = {}
     for field in fields:
         if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
@@ -469,7 +672,9 @@ def generate_pydantic_schema(
                 f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment only the"
                 f" following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
             )
-        fields_schema.update({field.name: (FIELD_TYPE_TO_PYTHON_TYPE[field.settings["type"]], ... if field.required else None)})
+        fields_schema.update(
+            {field.name: (FIELD_TYPE_TO_PYTHON_TYPE[field.settings["type"]], ... if field.required else None)}
+        )
     return create_model(name, **fields_schema)
 
 
@@ -480,6 +685,47 @@ def create_feedback_dataset(
     questions: List[QuestionSchema],
     workspace: Union[str, rg.Workspace] = None,
 ) -> FeedbackDataset:
+    """Creates a `FeedbackDataset` object and pushes it to Argilla.
+
+    Args:
+        name: the name of dataset in Argilla (must be unique per workspace).
+        guidelines: the annotation guidelines to help the annotator understand the dataset to annotate and how to annotate it.
+        fields: the list of `FieldSchema` objects to define the schema of the records pushed to Argilla.
+        questions: the list of `QuestionSchema` objects to define the questions to ask to the annotator.
+        workspace: the name of the workspace in Argilla where to push the dataset. Defaults to the default workspace.
+
+    Returns:
+        The `FeedbackDataset` object created and pushed to Argilla.
+
+    Raises:
+        ValueError: if one of the fields has an unsupported type.
+        Exception: if the dataset could not be pushed to Argilla.
+
+    Examples:
+        >>> import argilla as rg
+        >>> rg.init(api_url="...", api_key="...")
+        >>> fds = rg.create_feedback_dataset(
+        ...     name="my-dataset",
+        ...     guidelines="These are the annotation guidelines.",
+        ...     fields=[
+        ...         rg.TextField(name="text", required=True),
+        ...         rg.TextField(name="label", required=True),
+        ...     ],
+        ...     questions=[
+        ...         rg.TextQuestion(
+        ...             name="question-1",
+        ...             description="This is the first question",
+        ...             required=True,
+        ...         ),
+        ...         rg.RatingQuestion(
+        ...             name="question-2",
+        ...             description="This is the second question",
+        ...             required=True,
+        ...             values=[1, 2, 3, 4, 5],
+        ...         ),
+        ...     ],
+        ... )
+    """
     fds = FeedbackDataset(
         guidelines=guidelines,
         fields=fields,
@@ -495,6 +741,28 @@ def feedback_dataset_in_argilla(
     workspace: Optional[Union[str, rg.Workspace]] = None,
     id: Optional[str] = None,
 ) -> Tuple[bool, Optional[FeedbackDataset]]:
+    """Checks whether a `FeedbackDataset` exists in Argilla or not, based on the `name`, `id`, or the combination of
+    `name` and `workspace`.
+
+    Args:
+        name: the name of the `FeedbackDataset` in Argilla.
+        workspace: the name of the workspace in Argilla where the `FeedbackDataset` is located.
+        id: the Argilla ID of the `FeedbackDataset`.
+
+    Returns:
+        A tuple with a boolean indicating whether the `FeedbackDataset` exists in Argilla or not, and the `FeedbackDataset`
+        object if it exists, `None` otherwise.
+
+    Raises:
+        ValueError: if the `workspace` is not a `rg.Workspace` instance or a string.
+        Exception: if the `FeedbackDataset` could not be listed from Argilla.
+
+    Examples:
+        >>> import argilla as rg
+        >>> rg.init(api_url="...", api_key="...")
+        >>> from argilla.client.feedback import feedback_dataset_in_argilla
+        >>> fds_exists, fds_cls = feedback_dataset_in_argilla(name="my-dataset")
+    """
     assert name or (name and workspace) or id, (
         "You must provide either the `name` and `workspace` (the latter just if"
         " applicable, if not the default `workspace` will be used) or the `id`, which"
