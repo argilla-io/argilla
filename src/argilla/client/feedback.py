@@ -105,6 +105,11 @@ class TextField(FieldSchema):
     settings: Dict[str, Any] = Field({"type": "text"}, const=True)
 
 
+FIELD_TYPE_TO_PYTHON_TYPE = {
+    "text": str
+}
+
+
 class QuestionSchema(BaseModel):
     name: str
     title: Optional[str] = None
@@ -267,15 +272,14 @@ class FeedbackDataset:
             records = [records]
 
         if self.__fields_schema is None:
-            warnings.warn("Since the `schema` hasn't been defined during the dataset creation, it will be inferred.")
-            self.__fields_schema = generate_pydantic_schema(records[0].fields)
+            self.__fields_schema = generate_pydantic_schema(self.fields)
 
         for record in records:
             try:
                 record.fields = self.__fields_schema.parse_obj(record.fields)
             except ValidationError as e:
                 raise ValueError(
-                    f"`rg.FeedbackRecord.fields` do not match the expected schema, with exception: {e}"
+                    f"`rg.FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
                 ) from e
 
         if len(self.__new_records) > 0:
@@ -456,9 +460,16 @@ class FeedbackDataset:
 
 
 def generate_pydantic_schema(
-    fields: Union[BaseModel, Dict[str, Any]], name: Optional[str] = "FieldsSchema"
+    fields: List[FieldSchema], name: Optional[str] = "FieldsSchema"
 ) -> BaseModel:
-    fields_schema = {key: (type(value), ...) for key, value in fields.items()}
+    fields_schema = {}
+    for field in fields:
+        if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
+            raise ValueError(
+                f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment only the"
+                f" following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
+            )
+        fields_schema.update({field.name: (FIELD_TYPE_TO_PYTHON_TYPE[field.settings["type"]], ... if field.required else None)})
     return create_model(name, **fields_schema)
 
 
