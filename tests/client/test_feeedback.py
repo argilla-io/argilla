@@ -31,65 +31,67 @@ from argilla.client.feedback import (
 
 class TestFeedbackDataset:
     @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions")
-    def test_init(self, guidelines: str, fields: list, questions: list) -> None:
+    def test_init(
+        self, feedback_dataset_guidelines: str, feedback_dataset_fields: list, feedback_dataset_questions: list
+    ) -> None:
         dataset = FeedbackDataset(
-            guidelines=guidelines,
-            fields=fields,
-            questions=questions,
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
         )
 
-        assert dataset.guidelines == guidelines
-        assert dataset.fields == fields
-        assert dataset.questions == questions
+        assert dataset.guidelines == feedback_dataset_guidelines
+        assert dataset.fields == feedback_dataset_fields
+        assert dataset.questions == feedback_dataset_questions
 
     @pytest.mark.usefixtures("feedback_dataset_fields", "feedback_dataset_questions")
-    def test_init_wrong_guidelines(self, fields: list, questions: list) -> None:
+    def test_init_wrong_guidelines(self, feedback_dataset_fields: list, feedback_dataset_questions: list) -> None:
         with pytest.raises(TypeError, match="Expected `guidelines` to be a string"):
             FeedbackDataset(
                 guidelines=None,
-                fields=fields,
-                questions=questions,
+                fields=feedback_dataset_fields,
+                questions=feedback_dataset_questions,
             )
 
     @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_questions")
-    def test_init_wrong_fields(self, guidelines: str, questions: list) -> None:
+    def test_init_wrong_fields(self, feedback_dataset_guidelines: str, feedback_dataset_questions: list) -> None:
         with pytest.raises(TypeError, match="Expected `fields` to be a list"):
             FeedbackDataset(
-                guidelines=guidelines,
+                guidelines=feedback_dataset_guidelines,
                 fields=None,
-                questions=questions,
+                questions=feedback_dataset_questions,
             )
         with pytest.raises(TypeError, match="Expected `fields` to be a list of `FieldSchema`"):
             FeedbackDataset(
-                guidelines=guidelines,
+                guidelines=feedback_dataset_guidelines,
                 fields=[{"wrong": "field"}],
-                questions=questions,
+                questions=feedback_dataset_questions,
             )
         with pytest.raises(ValueError, match="At least one `FieldSchema` in `fields` must be required"):
             FeedbackDataset(
-                guidelines=guidelines,
+                guidelines=feedback_dataset_guidelines,
                 fields=[TextField(name="test", required=False)],
-                questions=questions,
+                questions=feedback_dataset_questions,
             )
 
     @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields")
-    def test_init_wrong_questions(self, guidelines: str, fields: list) -> None:
+    def test_init_wrong_questions(self, feedback_dataset_guidelines: str, feedback_dataset_fields: list) -> None:
         with pytest.raises(TypeError, match="Expected `questions` to be a list"):
             FeedbackDataset(
-                guidelines=guidelines,
-                fields=fields,
+                guidelines=feedback_dataset_guidelines,
+                fields=feedback_dataset_fields,
                 questions=None,
             )
         with pytest.raises(TypeError, match="Expected `questions` to be a list of `QuestionSchema`"):
             FeedbackDataset(
-                guidelines=guidelines,
-                fields=fields,
+                guidelines=feedback_dataset_guidelines,
+                fields=feedback_dataset_fields,
                 questions=[{"wrong": "question"}],
             )
         with pytest.raises(ValueError, match="At least one `QuestionSchema` in `questions` must be required"):
             FeedbackDataset(
-                guidelines=guidelines,
-                fields=fields,
+                guidelines=feedback_dataset_guidelines,
+                fields=feedback_dataset_fields,
                 questions=[
                     TextQuestion(name="test", required=False),
                     RatingQuestion(name="test", values=[0, 1], required=False),
@@ -97,11 +99,16 @@ class TestFeedbackDataset:
             )
 
     @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions")
-    def test_records(self, guidelines: str, fields: List["FieldSchema"], questions: List["QuestionSchema"]) -> None:
+    def test_records(
+        self,
+        feedback_dataset_guidelines: str,
+        feedback_dataset_fields: List["FieldSchema"],
+        feedback_dataset_questions: List["QuestionSchema"],
+    ) -> None:
         dataset = FeedbackDataset(
-            guidelines=guidelines,
-            fields=fields,
-            questions=questions,
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
         )
 
         assert dataset.records == []
@@ -131,10 +138,10 @@ class TestFeedbackDataset:
                         "text": "C",
                         "label": "D",
                     },
-                    response={
+                    responses={
                         "values": {
-                            "question-1": "answer",
-                            "question-2": 0,
+                            "question-1": {"value": "answer"},
+                            "question-2": {"value": 0},
                         },
                         "status": "submitted",
                     },
@@ -151,8 +158,8 @@ class TestFeedbackDataset:
         assert dataset.records[1]["responses"] == [
             {
                 "values": {
-                    "question-1": "answer",
-                    "question-2": 0,
+                    "question-1": {"value": "answer"},
+                    "question-2": {"value": 0},
                 },
                 "status": "submitted",
             },
@@ -195,21 +202,21 @@ class TestFeedbackDataset:
     )
     def test_push_to_argilla_and_from_argilla(
         self,
-        guidelines: str,
-        fields: List["FieldSchema"],
-        questions: List["QuestionSchema"],
-        records: List[FeedbackRecord],
         mocked_client,
+        feedback_dataset_guidelines: str,
+        feedback_dataset_fields: List["FieldSchema"],
+        feedback_dataset_questions: List["QuestionSchema"],
+        feedback_dataset_records: List[FeedbackRecord],
     ) -> None:
         api.active_api()
         api.init(api_key="argilla.apikey")
 
         dataset = FeedbackDataset(
-            guidelines=guidelines,
-            fields=fields,
-            questions=questions,
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
         )
-        dataset.add_records(records=records)
+        dataset.add_records(records=feedback_dataset_records)
         dataset.push_to_argilla(name="test-dataset")
 
         assert dataset.argilla_id is not None
