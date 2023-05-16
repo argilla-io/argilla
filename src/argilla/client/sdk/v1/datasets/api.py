@@ -33,24 +33,18 @@ from argilla.client.sdk.v1.datasets.models import (
 
 
 def create_dataset(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     name: str,
     workspace_id: str,
     guidelines: Optional[str] = None,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets".format(client.base_url)
+    url = "/api/v1/datasets"
 
     body = {"name": name, "workspace_id": workspace_id}
     if guidelines is not None:
         body.update({"guidelines": guidelines})
 
-    response = httpx.post(
-        url=url,
-        json=body,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.post(url=url, json=body)
 
     if response.status_code == 201:
         parsed_response = FeedbackDatasetModel.construct(**response.json())
@@ -64,17 +58,12 @@ def create_dataset(
 
 
 def get_dataset(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     id: str,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets/{id}".format(client.base_url, id=id)
+    url = "/api/v1/datasets/{id}".format(id=id)
 
-    response = httpx.get(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.get(url=url)
 
     if response.status_code == 200:
         parsed_response = FeedbackDatasetModel.construct(**response.json())
@@ -88,17 +77,12 @@ def get_dataset(
 
 
 def delete_dataset(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     id: str,
 ) -> Response:
-    url = "{}/api/v1/datasets/{id}".format(client.base_url, id=id)
+    url = "/api/v1/datasets/{id}".format(id=id)
 
-    response = httpx.delete(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.delete(url=url)
 
     if response.status_code == 200:
         return Response(
@@ -110,17 +94,12 @@ def delete_dataset(
 
 
 def publish_dataset(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     id: str,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets/{id}/publish".format(client.base_url, id=id)
+    url = "/api/v1/datasets/{id}/publish".format(id=id)
 
-    response = httpx.put(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.put(url=url)
 
     if response.status_code == 200:
         parsed_response = FeedbackDatasetModel.construct(**response.json())
@@ -134,16 +113,11 @@ def publish_dataset(
 
 
 def list_datasets(
-    client: AuthenticatedClient,
+    client: httpx.Client,
 ) -> Response[Union[List[FeedbackDatasetModel], ErrorMessage, HTTPValidationError]]:
     url = "{}/api/v1/me/datasets".format(client.base_url)
 
-    response = httpx.get(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.get(url=url)
 
     if response.status_code == 200:
         parsed_response = [FeedbackDatasetModel.construct(**dataset) for dataset in response.json()["items"]]
@@ -157,19 +131,16 @@ def list_datasets(
 
 
 def get_records(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     id: str,
     offset: int = 0,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/me/datasets/{id}/records".format(client.base_url, id=id)
+    url = "/api/v1/me/datasets/{id}/records".format(id=id)
 
-    response = httpx.get(
+    response = client.get(
         url=url,
         params={"include": "responses", "offset": offset, "limit": limit},
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
     )
 
     if response.status_code == 200:
@@ -184,19 +155,13 @@ def get_records(
 
 
 def add_records(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     id: str,
     records: List[Dict[str, Any]],
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets/{id}/records".format(client.base_url, id=id)
+    url = "/api/v1/datasets/{id}/records".format(id=id)
 
-    response = httpx.post(
-        url=url,
-        json={"items": records},
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.post(url=url, json={"items": records})
 
     if response.status_code == 204:
         return Response(
@@ -208,17 +173,12 @@ def add_records(
 
 
 def get_fields(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     id: str,
 ) -> Response[Union[List[FeedbackFieldModel], ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets/{id}/fields".format(client.base_url, id=id)
+    url = "/api/v1/datasets/{id}/fields".format(id=id)
 
-    response = httpx.get(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.get(url=url)
 
     if response.status_code == 200:
         parsed_response = [FeedbackFieldModel.construct(**item) for item in response.json()["items"]]
@@ -232,19 +192,13 @@ def get_fields(
 
 
 def add_field(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     id: str,
     field: Dict[str, Any],
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets/{id}/fields".format(client.base_url, id=id)
+    url = "/api/v1/datasets/{id}/fields".format(id=id)
 
-    response = httpx.post(
-        url=url,
-        json=field,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.post(url=url, json=field)
 
     if response.status_code == 201:
         return Response(
@@ -256,17 +210,12 @@ def add_field(
 
 
 def get_questions(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     id: str,
 ) -> Response[Union[List[FeedbackQuestionModel], ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets/{id}/questions".format(client.base_url, id=id)
+    url = "/api/v1/datasets/{id}/questions".format(id=id)
 
-    response = httpx.get(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.get(url=url)
 
     if response.status_code == 200:
         parsed_response = [FeedbackQuestionModel.construct(**item) for item in response.json()["items"]]
@@ -280,19 +229,13 @@ def get_questions(
 
 
 def add_question(
-    client: AuthenticatedClient,
+    client: httpx.Client,
     id: str,
     question: Dict[str, Any],
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/datasets/{id}/questions".format(client.base_url, id=id)
+    url = "/api/v1/datasets/{id}/questions".format(id=id)
 
-    response = httpx.post(
-        url=url,
-        json=question,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.post(url=url, json=question)
 
     if response.status_code == 201:
         return Response(
