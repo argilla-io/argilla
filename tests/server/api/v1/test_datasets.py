@@ -29,8 +29,12 @@ from argilla.server.models import (
     Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
+    DATASET_CREATE_GUIDELINES_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
+    FIELD_CREATE_TITLE_MAX_LENGTH,
+    QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
+    QUESTION_CREATE_TITLE_MAX_LENGTH,
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
@@ -1116,6 +1120,20 @@ def test_create_dataset(client: TestClient, db: Session, admin_auth_header: dict
     }
 
 
+def test_create_dataset_with_invalid_length_guidelines(client: TestClient, db: Session, admin_auth_header: dict):
+    workspace = WorkspaceFactory.create()
+    dataset_json = {
+        "name": "name",
+        "guidelines": "a" * (DATASET_CREATE_GUIDELINES_MAX_LENGTH + 1),
+        "workspace_id": str(workspace.id),
+    }
+
+    response = client.post("/api/v1/datasets", headers=admin_auth_header, json=dataset_json)
+
+    assert response.status_code == 422
+    assert db.query(Dataset).count() == 0
+
+
 def test_create_dataset_without_authentication(client: TestClient, db: Session):
     dataset_json = {"name": "name", "workspace_id": str(WorkspaceFactory.create().id)}
 
@@ -1235,6 +1253,20 @@ def test_create_dataset_field_with_invalid_max_length_name(client: TestClient, d
     field_json = {
         "name": "a" * (FIELD_CREATE_NAME_MAX_LENGTH + 1),
         "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert db.query(Field).count() == 0
+
+
+def test_create_dataset_field_with_invalid_max_length_title(client: TestClient, db: Session, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "a" * (FIELD_CREATE_TITLE_MAX_LENGTH + 1),
         "settings": {"type": "text"},
     }
 
@@ -1414,6 +1446,39 @@ def test_create_dataset_question_with_invalid_max_length_name(client: TestClient
     question_json = {
         "name": "a" * (QUESTION_CREATE_NAME_MAX_LENGTH + 1),
         "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
+
+    assert response.status_code == 422
+    assert db.query(Question).count() == 0
+
+
+def test_create_dataset_question_with_invalid_max_length_title(
+    client: TestClient, db: Session, admin_auth_header: dict
+):
+    dataset = DatasetFactory.create()
+    question_json = {
+        "name": "name",
+        "title": "a" * (QUESTION_CREATE_TITLE_MAX_LENGTH + 1),
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
+
+    assert response.status_code == 422
+    assert db.query(Question).count() == 0
+
+
+def test_create_dataset_question_with_invalid_max_length_description(
+    client: TestClient, db: Session, admin_auth_header: dict
+):
+    dataset = DatasetFactory.create()
+    question_json = {
+        "name": "name",
+        "title": "title",
+        "description": "a" * (QUESTION_CREATE_DESCRIPTION_MAX_LENGTH + 1),
         "settings": {"type": "text"},
     }
 
