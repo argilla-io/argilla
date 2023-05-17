@@ -138,6 +138,9 @@ export default {
       border-radius: 5em;
       border: 1px solid var(--border-color);
       background: var(--background-color);
+      &:hover {
+        border-color: darken(palette(purple, 800), 12%);
+      }
     }
   }
 }
