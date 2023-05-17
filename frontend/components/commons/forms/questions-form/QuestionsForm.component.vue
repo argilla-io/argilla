@@ -161,6 +161,12 @@ export default {
     recordIdIndex() {
       return getRecordIndexByRecordId(this.recordId);
     },
+    responseId() {
+      return getRecordResponsesIdByRecordId({
+        userId: this.userId,
+        recordId: this.recordId,
+      });
+    },
     isFormUntouched() {
       return isEqual(this.initialInputs, this.inputs);
     },
@@ -256,14 +262,11 @@ export default {
         return input;
       });
     },
-    async sendBackendRequest(responseId, responseValues) {
+    async sendBackendRequest(responseValues) {
       try {
         let responseData = null;
-        if (responseId) {
-          responseData = await this.updateRecordResponses(
-            responseId,
-            responseValues
-          );
+        if (this.responseId) {
+          responseData = await this.updateRecordResponses(responseValues);
         } else {
           responseData = await this.createRecordResponses(
             this.recordId,
@@ -284,8 +287,8 @@ export default {
         // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
         let message = "";
 
-        if (responseId) {
-          message = `There was a probleme to update response with responseId: ${responseId}`;
+        if (this.responseId) {
+          message = `There was a probleme to update response with responseId: ${this.responseId}`;
         } else {
           message = `There was a probleme to create response with recordId. ${this.recordId}`;
         }
@@ -297,12 +300,7 @@ export default {
       try {
         const responseValues = this.factoryInputsToResponseValues();
 
-        const responseId = getRecordResponsesIdByRecordId({
-          userId: this.userId,
-          recordId: this.recordId,
-        });
-
-        await this.sendBackendRequest(responseId, {
+        await this.sendBackendRequest({
           status: RESPONSE_STATUS_FOR_API.DISCARDED,
           values: responseValues,
         });
@@ -328,12 +326,7 @@ export default {
       try {
         const responseValues = this.factoryInputsToResponseValues();
 
-        const responseId = getRecordResponsesIdByRecordId({
-          userId: this.userId,
-          recordId: this.recordId,
-        });
-
-        await this.sendBackendRequest(responseId, {
+        await this.sendBackendRequest({
           status: RESPONSE_STATUS_FOR_API.SUBMITTED,
           values: responseValues,
         });
@@ -360,14 +353,9 @@ export default {
       }
     },
     async onClear() {
-      const responseId = getRecordResponsesIdByRecordId({
-        userId: this.userId,
-        recordId: this.recordId,
-      });
-
       try {
         const responseData =
-          responseId && (await this.deleteResponsesByResponseId(responseId));
+          this.responseId && (await this.deleteResponsesByResponseId());
 
         await deleteRecordResponsesByUserIdAndResponseId(
           this.userId,
@@ -406,8 +394,8 @@ export default {
 
       await upsertDatasetMetrics(formattedMetrics);
     },
-    async deleteResponsesByResponseId(responseId) {
-      return await this.$axios.delete(`/v1/responses/${responseId}`);
+    async deleteResponsesByResponseId() {
+      return await this.$axios.delete(`/v1/responses/${this.responseId}`);
     },
     async fetchMetrics() {
       try {
@@ -442,9 +430,9 @@ export default {
 
       await upsertRecordResponses(newResponseToUpsertInOrm);
     },
-    async updateRecordResponses(responseId, responseByQuestionName) {
+    async updateRecordResponses(responseByQuestionName) {
       return await this.$axios.put(
-        `/v1/responses/${responseId}`,
+        `/v1/responses/${this.responseId}`,
         JSON.parse(JSON.stringify(responseByQuestionName))
       );
     },
