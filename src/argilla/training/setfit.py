@@ -139,7 +139,9 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         for val, pred in zip(text, predictions):
             pred = {self._id2label[idx]: float(p) for idx, p in enumerate(pred)}
             if as_argilla_records:
-                pred = self._record_class(text=val, prediction=[(p, 1) for p in pred], multi_label=self._multi_label)
+                pred = self._record_class(
+                    text=val, prediction=[(k, v) for k, v in pred.items()], multi_label=self._multi_label
+                )
             formatted_prediction.append(pred)
 
         if str_input:
