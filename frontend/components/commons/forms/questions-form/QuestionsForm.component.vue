@@ -659,7 +659,7 @@ export default {
   box-shadow: $shadow;
   &__header {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: $base-space * 2;
   }
   &__title {
@@ -667,6 +667,7 @@ export default {
     color: $black-87;
   }
   &__guidelines-link {
+    margin: 0;
     @include font-size(13px);
     color: $black-37;
     a {
