@@ -34,7 +34,7 @@
           :tooltipMessage="input.description"
           :colorHighlight="colorAsterisk"
           @on-change-text-area="
-            onChange({ newOptions: $event, idComponent: input.id })
+            onChangeTextArea({ newOptions: $event, idComponent: input.id })
           "
           @on-error="onError"
         />
@@ -62,7 +62,7 @@
           :tooltipMessage="input.description"
           :colorHighlight="colorAsterisk"
           @on-change-rating="
-            onChange({ newOptions: $event, idComponent: input.id })
+            onChangeRating({ newOptions: $event, idComponent: input.id })
           "
           @on-error="onError"
         />
@@ -158,6 +158,7 @@ export default {
   data() {
     return {
       inputs: [],
+      formData: {},
       renderForm: 0,
       colorAsterisk: "black",
       isError: false,
@@ -259,36 +260,63 @@ export default {
         return input;
       });
     },
+    async sendResponse(responseId, responseValues) {
+      try {
+        let responseData = null;
+        if (responseId) {
+          responseData = await this.updateRecordResponses(
+              responseId,
+              responseValues
+            );
+        } else {
+          responseData = await this.createRecordResponses(
+              this.recordId,
+              responseValues
+            );
+        }
+        const { data: updatedResponses } = responseData;
+
+        if (updatedResponses) {
+          this.updateResponsesInOrm({
+            record_id: this.recordId,
+            ...updatedResponses,
+          });
+        }
+
+      } catch(error) {
+        // notify  and throw
+        // throw error;
+      }
+    },
     async onDiscard() {
-      // 1 - check if it's a create or update response
-      const createOrUpdateResponse = this.initFlagCreateOrUpdateResponse();
+      try {
+        const responseValues = this.inputsToResponseValues();
+        const responseId = getRecordResponsesIdByRecordId({
+          userId: this.userId,
+          recordId: this.recordId,
+        });
 
-      // 2 - init formattedSelectionOptionObject
-      const formattedSelectionObject = this.formatSelectedOptionObjectOnDiscard(
-        RESPONSE_STATUS_FOR_API.DISCARDED
-      );
+        await this.sendBackendRequest(responseId, {status: RECORD_STATUS.DISCARDED, values: responseValues});
+        // NOTE - Update dataset Metrics orm
+        await this.initMetricsAndInsertDataInOrm();
+        // NOTE - onSubmit event => the status change to SUBMITTED
+        await updateRecordStatusByRecordId(this.recordId, RECORD_STATUS.DISCARDED);
 
-      // 3 - Create the formatted requests to send from the formattedSelectionObject
-      const formattedRequestsToSend = this.formatRequestsToSend(
-        createOrUpdateResponse,
-        formattedSelectionObject
-      );
-
-      // 4 - create or update the record responses and emit bus event to change record to show
-      await this.createOrUpdateResponsesAndEmitRecordToGoBusEvent(
-        RECORD_STATUS.DISCARDED,
-        formattedRequestsToSend
-      );
+        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+      } catch (error) {
+        console.log(error)
+      }
     },
     async onSubmit() {
-      // 1 - check if it's a create or update response
-      // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
-      const createOrUpdateResponse = this.initFlagCreateOrUpdateResponse();
-
       if (this.isSomeRequiredQuestionHaveNoAnswer) {
         this.isError = true;
         return;
       }
+
+      // 1 - check if it's a create or update response
+      // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
+      const createOrUpdateResponse = this.initFlagCreateOrUpdateResponse();
+
 
       // 2 - init formattedSelectionOptionObject
       const formattedSelectionObject = this.formatSelectedOptionObjectOnSubmit(
@@ -585,10 +613,33 @@ export default {
       });
       return selectedOptionObj;
     },
+    inputsToResponseValues() {
+      let values = {};
+
+      this.inputs.forEach((input) => {
+        let selectedOption = null;
+        switch (input.component_type) {
+          case COMPONENT_TYPE.RATING:
+            selectedOption = input.options?.find((option) => option.value);
+            break;
+          case COMPONENT_TYPE.FREE_TEXT:
+            selectedOption = input.options[0];
+            break;
+          default:
+            console.log(
+              `The component type ${input.component_type} is unknown, the response can't be save`
+            );
+        }
+      })
+      if (selectedOption?.text) {
+        values[input.name]= { value: selectedOption.text }
+      }
+    },
     formatSelectedOptionObjectOnDiscard(status) {
       // NOTE - it's possible to discard with partial response
       let selectedOptionObj = {
         status,
+        values
       };
       this.inputs.forEach((input) => {
         // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
