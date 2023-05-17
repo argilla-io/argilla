@@ -26,36 +26,30 @@
       <span>{{ totalResponded | formatNumber }}</span
       >/{{ progressTotal | formatNumber }}
     </div>
-    <base-progress
+    <BaseProgress
       re-mode="determinate"
       :multiple="true"
       :progress="(totalSubmitted * 100) / progressTotal"
       :progress-secondary="(totalDiscarded * 100) / progressTotal"
+      :color="itemColor(0)"
+      :color-secondary="itemColor(1)"
     >
-    </base-progress>
+    </BaseProgress>
     <div class="scroll">
       <ul class="metrics__list">
-        <!-- FIXME - loop over an array -->
-        <li>
-          <span class="color-bullet submitted"></span>
-          <label class="metrics__list__name">Submitted</label>
-          <span class="metrics__list__counter">
-            {{ totalSubmitted | formatNumber }}
-          </span>
-        </li>
-        <li>
-          <span class="color-bullet discarded"></span>
-          <label class="metrics__list__name">Discarded</label>
-          <span class="metrics__list__counter">
-            {{ totalDiscarded | formatNumber }}
-          </span>
-        </li>
-        <li>
-          <span class="color-bullet pending"></span>
-          <label class="metrics__list__name">Pending</label>
-          <span class="metrics__list__counter">
-            {{ totalPending | formatNumber }}
-          </span>
+        <li v-for="(status, index) in progressItems" :key="index">
+          <span
+            class="color-bullet"
+            :style="{ backgroundColor: status.color }"
+          ></span>
+          <label
+            class="metrics__list__name"
+            v-text="getFormattedName(status.name)"
+          />
+          <span
+            class="metrics__list__counter"
+            v-text="getFormattedProgress(status.progress)"
+          />
         </li>
       </ul>
       <slot></slot>
@@ -64,6 +58,10 @@
 </template>
 
 <script>
+import {
+  RECORD_STATUS,
+  RECORD_STATUS_COLOR,
+} from "@/models/feedback-task-model/record/record.queries";
 export default {
   props: {
     progressTotal: {
@@ -80,6 +78,25 @@ export default {
     },
   },
   computed: {
+    progressItems() {
+      return [
+        {
+          name: RECORD_STATUS.SUBMITTED,
+          color: RECORD_STATUS_COLOR.SUBMITTED,
+          progress: this.totalSubmitted,
+        },
+        {
+          name: RECORD_STATUS.DISCARDED,
+          color: RECORD_STATUS_COLOR.DISCARDED,
+          progress: this.totalDiscarded,
+        },
+        {
+          name: RECORD_STATUS.PENDING,
+          color: RECORD_STATUS_COLOR.PENDING,
+          progress: this.totalPending,
+        },
+      ];
+    },
     totalResponded() {
       return this.totalSubmitted + this.totalDiscarded;
     },
@@ -88,6 +105,17 @@ export default {
     },
     progress() {
       return this.totalResponded / this.progressTotal;
+    },
+  },
+  methods: {
+    itemColor(order) {
+      return this.progressItems[order]?.color || null;
+    },
+    getFormattedName(name) {
+      return name && this.$options.filters.capitalize(name);
+    },
+    getFormattedProgress(progress) {
+      return progress && this.$options.filters.formatNumber(progress);
     },
   },
 };
@@ -117,19 +145,6 @@ export default {
   border-radius: 50%;
   display: inline-block;
   margin: 0.3em 0.3em 0.3em 0;
-  &.submitted {
-    // FIXME - to get from orm
-    background: #4c4ea3;
-  }
-  &.discarded {
-    // FIXME - to get from orm
-    background: #a1a2cc;
-  }
-  &.pending {
-    // FIXME - to get from orm
-    opacity: 0.7;
-    background: #a1a2cc;
-  }
 }
 :deep() {
   .metrics__title {
