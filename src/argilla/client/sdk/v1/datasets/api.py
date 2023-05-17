@@ -38,6 +38,18 @@ def create_dataset(
     workspace_id: str,
     guidelines: Optional[str] = None,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a POST reques to `/api/v1/datasets` endpoint to create a new `FeedbackTask` dataset.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        name: the name of the dataset to be created.
+        workspace_id: the id of the workspace where the dataset will be created.
+        guidelines: the guidelines of the dataset to be created. Defaults to `None`.
+
+    Returns:
+        A `Response` object with the parsed response, containing a `parsed` attribute with the
+        parsed response if the request was successful, which is an instance of `FeedbackDatasetModel`.
+    """
     url = "/api/v1/datasets"
 
     body = {"name": name, "workspace_id": workspace_id}
@@ -61,6 +73,16 @@ def get_dataset(
     client: httpx.Client,
     id: str,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets/{id}` endpoint to retrieve a `FeedbackTask` dataset.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to be retrieved.
+
+    Returns:
+        A `Response` object with the parsed response, containing a `parsed` attribute with the
+        parsed response if the request was successful, which is an instance of `FeedbackDatasetModel`.
+    """
     url = "/api/v1/datasets/{id}".format(id=id)
 
     response = client.get(url=url)
@@ -79,7 +101,16 @@ def get_dataset(
 def delete_dataset(
     client: httpx.Client,
     id: str,
-) -> Response:
+) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    """Sends a DELETE request to `/api/v1/datasets/{id}` endpoint to delete a `FeedbackTask` dataset.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to be deleted.
+
+    Returns:
+        A `Response` object with the response itself, and/or the error codes if applicable.
+    """
     url = "/api/v1/datasets/{id}".format(id=id)
 
     response = client.delete(url=url)
@@ -97,6 +128,18 @@ def publish_dataset(
     client: httpx.Client,
     id: str,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a PUT request to `/api/v1/datasets/{id}/publish` endpoint to publish a `FeedbackTask` dataset.
+    Publishing in Argilla means setting the status of the dataset from `draft` to `ready`, so that
+    it can be used to add records to it.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to be published.
+
+    Returns:
+        A `Response` object with the parsed response, containing a `parsed` attribute with the
+        parsed response if the request was successful, which is an instance of `FeedbackDatasetModel`.
+    """
     url = "/api/v1/datasets/{id}/publish".format(id=id)
 
     response = client.put(url=url)
@@ -115,6 +158,14 @@ def publish_dataset(
 def list_datasets(
     client: httpx.Client,
 ) -> Response[Union[List[FeedbackDatasetModel], ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets` endpoint to retrieve a list of `FeedbackTask` datasets.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+
+    Returns:
+        A `Response` object with the parsed response, containing a `parsed` attribute with the
+        parsed response if the request was successful, which is a list of `FeedbackDatasetModel`."""
     url = "/api/v1/me/datasets"
 
     response = client.get(url=url)
@@ -136,6 +187,18 @@ def get_records(
     offset: int = 0,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets/{id}/records` endpoint to retrieve a list of `FeedbackTask` records.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to retrieve the records from.
+        offset: the offset to be used in the pagination. Defaults to 0.
+        limit: the limit to be used in the pagination. Defaults to 50.
+
+    Returns:
+        A `Response` object with the parsed response, containing a `parsed` attribute with the
+        parsed response if the request was successful, which is an instance of `FeedbackRecordsModel`.
+    """
     url = "/api/v1/me/datasets/{id}/records".format(id=id)
 
     response = client.get(
@@ -159,6 +222,16 @@ def add_records(
     id: str,
     records: List[Dict[str, Any]],
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    """Sends a POST request to `/api/v1/datasets/{id}/records` endpoint to add a list of `FeedbackTask` records.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to add the records to.
+        records: the list of records to be added to the dataset.
+
+    Returns:
+        A `Response` object with the response itself, and/or the error codes if applicable.
+    """
     url = "/api/v1/datasets/{id}/records".format(id=id)
 
     response = client.post(url=url, json={"items": records})
@@ -176,6 +249,16 @@ def get_fields(
     client: httpx.Client,
     id: str,
 ) -> Response[Union[List[FeedbackFieldModel], ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets/{id}/fields` endpoint to retrieve a list of `FeedbackTask` fields.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to retrieve the fields from.
+
+    Returns:
+        A `Response` object with the parsed response, containing a `parsed` attribute with the
+        parsed response if the request was successful, which is a list of `FeedbackFieldModel`.
+    """
     url = "/api/v1/datasets/{id}/fields".format(id=id)
 
     response = client.get(url=url)
@@ -196,6 +279,16 @@ def add_field(
     id: str,
     field: Dict[str, Any],
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    """Sends a POST request to `/api/v1/datasets/{id}/fields` endpoint to add a `FeedbackTask` field.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to add the field to.
+        field: the field to be added to the dataset.
+
+    Returns:
+        A `Response` object with the response itself, and/or the error codes if applicable.
+    """
     url = "/api/v1/datasets/{id}/fields".format(id=id)
 
     response = client.post(url=url, json=field)
@@ -213,6 +306,16 @@ def get_questions(
     client: httpx.Client,
     id: str,
 ) -> Response[Union[List[FeedbackQuestionModel], ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets/{id}/questions` endpoint to retrieve a list of `FeedbackTask` questions.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to retrieve the questions from.
+
+    Returns:
+        A `Response` object with the parsed response, containing a `parsed` attribute with the
+        parsed response if the request was successful, which is a list of `FeedbackQuestionModel`.
+    """
     url = "/api/v1/datasets/{id}/questions".format(id=id)
 
     response = client.get(url=url)
@@ -233,6 +336,14 @@ def add_question(
     id: str,
     question: Dict[str, Any],
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    """Sends a POST request to `/api/v1/datasets/{id}/questions` endpoint to add a question to the `FeedbackTask` dataset.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+
+    Returns:
+        A Response object containing the response itself, and/or the error codes if applicable.
+    """
     url = "/api/v1/datasets/{id}/questions".format(id=id)
 
     response = client.post(url=url, json=question)
