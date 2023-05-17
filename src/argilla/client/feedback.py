@@ -385,22 +385,25 @@ class FeedbackDataset:
             client = rg.active_client()
             first_batch = client.get_records(id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE)
             self.__records = first_batch.items
-            total_batches = first_batch.total // FETCHING_BATCH_SIZE
             current_batch = 1
+            # TODO(alvarobartt): use `total` from Argilla Metrics API
             with tqdm(
                 initial=current_batch,
-                total=total_batches,
                 desc="Fetching records from Argilla",
             ) as pbar:
-                while current_batch <= total_batches:
+                while True:
                     batch = client.get_records(
                         id=self.argilla_id,
                         offset=FETCHING_BATCH_SIZE * current_batch,
                         limit=FETCHING_BATCH_SIZE,
                     )
-                    self.__records += batch.items
+                    records = batch.items
+                    self.__records += records
                     current_batch += 1
                     pbar.update(1)
+
+                    if len(records) < FETCHING_BATCH_SIZE:
+                        break
 
     def add_records(
         self,
