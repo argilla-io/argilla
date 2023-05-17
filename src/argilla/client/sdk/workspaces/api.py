@@ -27,9 +27,7 @@ from argilla.client.sdk.commons.models import (
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 
 
-def list_workspaces(
-    client: AuthenticatedClient,
-) -> Response[Union[List[WorkspaceModel], ErrorMessage, HTTPValidationError]]:
+def list_workspaces(client: httpx.Client) -> Response[Union[List[WorkspaceModel], ErrorMessage, HTTPValidationError]]:
     """Sends a requet to `GET /api/workspaces` to list all the workspaces in the account.
 
     Args:
@@ -39,14 +37,9 @@ def list_workspaces(
         A Response object with the parsed response, containing a `parsed` attribute with the
         parsed response if the request was successful, which is a list of `WorkspaceModel` objects.
     """
-    url = "{}/api/workspaces".format(client.base_url)
+    url = "/api/workspaces"
 
-    response = httpx.get(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-    )
+    response = client.get(url=url)
 
     if response.status_code == 200:
         parsed_response = [WorkspaceModel(**workspace) for workspace in response.json()]

@@ -224,42 +224,45 @@ class Argilla:
             A list of `WorkspaceModel` objects, containing the workspace
             attributes: name, id, created_at, and updated_at.
         """
-        return workspaces_api.list_workspaces(client=self._client).parsed
+        return workspaces_api.list_workspaces(client=self._client.httpx).parsed
 
     def list_datasets(self) -> List[FeedbackDatasetModel]:
-        return datasets_api_v1.list_datasets(client=self._client).parsed
+        return datasets_api_v1.list_datasets(client=self._client.httpx).parsed
 
     def create_dataset(self, name: str, workspace_id: str, guidelines: Optional[str] = None) -> FeedbackDatasetModel:
         return datasets_api_v1.create_dataset(
-            client=self._client, name=name, workspace_id=workspace_id, guidelines=guidelines
+            client=self._client.httpx,
+            name=name,
+            workspace_id=workspace_id,
+            guidelines=guidelines,
         ).parsed
 
     def get_dataset(self, id: str) -> FeedbackDatasetModel:
-        return datasets_api_v1.get_dataset(client=self._client, id=id).parsed
+        return datasets_api_v1.get_dataset(client=self._client.httpx, id=id).parsed
 
     def delete_dataset(self, id: str) -> httpx.Response:
-        return datasets_api_v1.delete_dataset(client=self._client, id=id)
+        return datasets_api_v1.delete_dataset(client=self._client.httpx, id=id)
 
     def publish_dataset(self, id: str) -> FeedbackDatasetModel:
-        return datasets_api_v1.publish_dataset(client=self._client, id=id).parsed
+        return datasets_api_v1.publish_dataset(client=self._client.httpx, id=id).parsed
 
     def get_records(self, id: str, offset: int = 0, limit: int = 50) -> FeedbackRecordsModel:
-        return datasets_api_v1.get_records(client=self._client, id=id, offset=offset, limit=limit).parsed
+        return datasets_api_v1.get_records(client=self._client.httpx, id=id, offset=offset, limit=limit).parsed
 
     def add_records(self, id: str, records: List[Dict[str, Any]]) -> None:
-        return datasets_api_v1.add_records(client=self._client, id=id, records=records)
+        datasets_api_v1.add_records(client=self._client.httpx, id=id, records=records)
 
     def get_fields(self, id: str) -> List[FeedbackFieldModel]:
-        return datasets_api_v1.get_fields(client=self._client, id=id).parsed
+        return datasets_api_v1.get_fields(client=self._client.httpx, id=id).parsed
 
     def add_field(self, id: str, field: Dict[str, Any]) -> httpx.Response:
-        return datasets_api_v1.add_field(client=self._client, id=id, field=field)
+        return datasets_api_v1.add_field(client=self._client.httpx, id=id, field=field)
 
     def get_questions(self, id: str) -> List[FeedbackQuestionModel]:
-        return datasets_api_v1.get_questions(client=self._client, id=id).parsed
+        return datasets_api_v1.get_questions(client=self._client.httpx, id=id).parsed
 
     def add_question(self, id: str, question: Dict[str, Any]) -> httpx.Response:
-        return datasets_api_v1.add_question(client=self._client, id=id, question=question)
+        return datasets_api_v1.add_question(client=self._client.httpx, id=id, question=question)
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata

@@ -26,13 +26,13 @@ def sdk_client():
     return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
 
 
-def test_list_workspaces(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(httpx, "get", mocked_client.get)
+def test_list_workspaces(mocked_client, sdk_client: AuthenticatedClient, monkeypatch) -> None:
+    monkeypatch.setattr(sdk_client.httpx, "get", mocked_client.get)
 
     workspace_name = "test_workspace"
     mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
 
-    response = list_workspaces(client=sdk_client)
+    response = list_workspaces(client=sdk_client.httpx)
 
     assert response.status_code == 200
     assert isinstance(response.parsed, list)
