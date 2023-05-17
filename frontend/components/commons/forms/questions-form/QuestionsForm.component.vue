@@ -32,9 +32,8 @@
           :isRequired="input.is_required"
           :isIcon="!!input.description"
           :tooltipMessage="input.description"
-          :colorHighlight="colorAsterisk"
           @on-change-text-area="
-            onChangeTextArea({ newOptions: $event, idComponent: input.id })
+            onChange({ newOptions: $event, idComponent: input.id })
           "
           @on-error="onError"
         />
@@ -46,7 +45,6 @@
           :isRequired="input.is_required"
           :isIcon="!!input.description"
           :tooltipMessage="input.description"
-          :colorHighlight="colorAsterisk"
           @on-change-single-label="
             onChange({ newOptions: $event, idComponent: input.id })
           "
@@ -60,9 +58,8 @@
           :isRequired="input.is_required"
           :isIcon="!!input.description"
           :tooltipMessage="input.description"
-          :colorHighlight="colorAsterisk"
           @on-change-rating="
-            onChangeRating({ newOptions: $event, idComponent: input.id })
+            onChange({ newOptions: $event, idComponent: input.id })
           "
           @on-error="onError"
         />
@@ -160,7 +157,6 @@ export default {
       inputs: [],
       formData: {},
       renderForm: 0,
-      colorAsterisk: "black",
       isError: false,
     };
   },
@@ -223,7 +219,7 @@ export default {
     this.onReset();
 
     // NOTE - Update dataset Metrics orm
-    await this.initMetricsAndInsertDataInOrm();
+    await this.refreshMetrics();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
@@ -260,19 +256,19 @@ export default {
         return input;
       });
     },
-    async sendResponse(responseId, responseValues) {
+    async sendBackendRequest(responseId, responseValues) {
       try {
         let responseData = null;
         if (responseId) {
           responseData = await this.updateRecordResponses(
-              responseId,
-              responseValues
-            );
+            responseId,
+            responseValues
+          );
         } else {
           responseData = await this.createRecordResponses(
-              this.recordId,
-              responseValues
-            );
+            this.recordId,
+            responseValues
+          );
         }
         const { data: updatedResponses } = responseData;
 
@@ -282,10 +278,17 @@ export default {
             ...updatedResponses,
           });
         }
+      } catch (error) {
+        // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
+        let message = "";
 
-      } catch(error) {
-        // notify  and throw
-        // throw error;
+        if (responseId) {
+          message = `There was a probleme to update response with responseId: ${responseId}`;
+        } else {
+          message = `There was a probleme to create response with recordId. ${this.recordId}`;
+        }
+
+        this.showNotificationComponent(message, "error");
       }
     },
     async onDiscard() {
@@ -296,15 +299,21 @@ export default {
           recordId: this.recordId,
         });
 
-        await this.sendBackendRequest(responseId, {status: RECORD_STATUS.DISCARDED, values: responseValues});
-        // NOTE - Update dataset Metrics orm
-        await this.initMetricsAndInsertDataInOrm();
-        // NOTE - onSubmit event => the status change to SUBMITTED
-        await updateRecordStatusByRecordId(this.recordId, RECORD_STATUS.DISCARDED);
+        await this.sendBackendRequest(responseId, {
+          status: RESPONSE_STATUS_FOR_API.DISCARDED,
+          values: responseValues,
+        });
 
-        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+        await this.refreshMetrics();
+
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.DISCARDED
+        );
+
+        this.emitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
     },
     async onSubmit() {
@@ -316,7 +325,6 @@ export default {
       // 1 - check if it's a create or update response
       // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
       const createOrUpdateResponse = this.initFlagCreateOrUpdateResponse();
-
 
       // 2 - init formattedSelectionOptionObject
       const formattedSelectionObject = this.formatSelectedOptionObjectOnSubmit(
@@ -353,7 +361,7 @@ export default {
         await this.createOrUpdateRecordResponses(requestsToSend);
 
         // NOTE - Update dataset Metrics orm
-        await this.initMetricsAndInsertDataInOrm();
+        await this.refreshMetrics();
 
         // NOTE - onSubmit event => the status change to SUBMITTED
         await updateRecordStatusByRecordId(this.recordId, status);
@@ -370,13 +378,13 @@ export default {
             console.log(`The event ${status} is unknown`);
         }
 
-        this.onEmitBusEventGoToRecordIndex(typeOfEvent);
+        this.emitBusEventGoToRecordIndex(typeOfEvent);
       } catch (err) {
         console.log(err);
       }
     },
 
-    onEmitBusEventGoToRecordIndex(typeOfEvent) {
+    emitBusEventGoToRecordIndex(typeOfEvent) {
       switch (typeOfEvent) {
         case TYPE_OF_EVENT.ON_SUBMIT:
         case TYPE_OF_EVENT.ON_DISCARD:
@@ -407,7 +415,7 @@ export default {
         );
 
         // NOTE - Update dataset Metrics orm
-        await this.initMetricsAndInsertDataInOrm();
+        await this.refreshMetrics();
         this.onReset();
       } catch (err) {
         console.log(err);
@@ -416,19 +424,16 @@ export default {
     onReset() {
       this.inputs = cloneDeep(this.initialInputs);
       this.isError = false;
-      this.colorAsterisk = "black";
       this.renderForm++;
     },
     onError(isError) {
       if (isError) {
-        this.colorAsterisk = "red";
         this.isError = true;
       } else {
-        this.colorAsterisk = "black";
         this.isError = false;
       }
     },
-    async initMetricsAndInsertDataInOrm() {
+    async refreshMetrics() {
       const datasetMetrics = await this.fetchMetrics();
 
       const formattedMetrics = this.factoryDatasetMetricsForOrm(datasetMetrics);
@@ -614,11 +619,12 @@ export default {
       return selectedOptionObj;
     },
     inputsToResponseValues() {
-      let values = {};
+      let responseByQuestionName = {};
 
       this.inputs.forEach((input) => {
         let selectedOption = null;
         switch (input.component_type) {
+          case COMPONENT_TYPE.SINGLE_LABEL:
           case COMPONENT_TYPE.RATING:
             selectedOption = input.options?.find((option) => option.value);
             break;
@@ -630,16 +636,17 @@ export default {
               `The component type ${input.component_type} is unknown, the response can't be save`
             );
         }
-      })
-      if (selectedOption?.text) {
-        values[input.name]= { value: selectedOption.text }
-      }
+        if (selectedOption?.text) {
+          responseByQuestionName[input.name] = { value: selectedOption.text };
+        }
+      });
+      return responseByQuestionName;
     },
     formatSelectedOptionObjectOnDiscard(status) {
       // NOTE - it's possible to discard with partial response
       let selectedOptionObj = {
         status,
-        values
+        values,
       };
       this.inputs.forEach((input) => {
         // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
