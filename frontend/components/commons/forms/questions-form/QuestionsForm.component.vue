@@ -312,7 +312,7 @@ export default {
           RECORD_STATUS.DISCARDED
         );
 
-        this.emitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
+        this.emitBusEventGoToRecordIndex();
       } catch (error) {
         console.log(error);
       }
@@ -338,19 +338,13 @@ export default {
           RECORD_STATUS.SUBMITTED
         );
 
-        this.emitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
+        this.emitBusEventGoToRecordIndex();
       } catch (error) {
         console.log(error);
       }
     },
-    emitBusEventGoToRecordIndex(typeOfEvent) {
-      switch (typeOfEvent) {
-        case TYPE_OF_EVENT.ON_SUBMIT:
-        case TYPE_OF_EVENT.ON_DISCARD:
-          this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
-          break;
-        default:
-      }
+    emitBusEventGoToRecordIndex() {
+      this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
     },
     async onClear() {
       try {
