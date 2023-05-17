@@ -3,13 +3,14 @@
     <div class="content__edition-area">
       <transition appear name="fade">
         <p
+          :key="editableText"
           ref="text"
           class="content__text"
           :class="textIsEdited ? '--edited-text' : null"
           :contenteditable="annotationEnabled"
           :placeholder="placeholder"
           @input="onInputText"
-          v-html="editableText"
+          v-html="customEditableText"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
         ></p>
@@ -19,6 +20,7 @@
   </span>
 </template>
 <script>
+import { escapeHtmlChars } from "@/utils/escapeHtmlChars";
 export default {
   props: {
     annotationEnabled: {
@@ -52,6 +54,11 @@ export default {
         this.defaultText !== this.editableText ||
         this.defaultText === this.annotations[0]?.text
       );
+    },
+    customEditableText() {
+      return this.$checkValidHtml(this.editableText)
+        ? this.editableText
+        : escapeHtmlChars(this.editableText);
     },
   },
   mounted() {

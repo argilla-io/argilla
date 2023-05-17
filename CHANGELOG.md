@@ -46,6 +46,7 @@ These are the section headers that we use:
 
 - `argilla.training` bugfixes and unification ([#2665](https://github.com/argilla-io/argilla/issues/2665))
 - Resolved several small bugs in the `ArgillaTrainer`.
+- Avoid rendering html for invalid html strings in Text2text ([#2911]https://github.com/argilla-io/argilla/issues/2911)
 
 ### Deprecated
 
@@ -73,6 +74,7 @@ These are the section headers that we use:
 - Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
 
 ### Fixes
+
 - Now the `prepare_for_training` method is working when `multi_label=True`. Closes [#2606](https://github.com/argilla-io/argilla/issues/2606)
 
 ### Changed
@@ -95,8 +97,6 @@ These are the section headers that we use:
 - The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
-
-
 
 ## [1.5.1](https://github.com/argilla-io/argilla/compare/v1.5.0...v1.5.1) - 2023-03-30
 
