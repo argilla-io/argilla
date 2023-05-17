@@ -34,9 +34,11 @@ from pydantic import (
 from tqdm import tqdm
 
 import argilla as rg
+from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 
 if TYPE_CHECKING:
-    from argilla.client.api import Argilla
+    import httpx
+
     from argilla.client.sdk.v1.datasets.models import (
         FeedbackDatasetModel,
         FeedbackFieldModel,
@@ -382,8 +384,10 @@ class FeedbackDataset:
 
         # TODO(alvarobartt): create `ArgillaMixIn` and `HuggingFaceMixIn` classes to inherit their specific methods
         if self.argilla_id:
-            client = rg.active_client()
-            first_batch = client.get_records(id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE)
+            httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+            first_batch = datasets_api_v1.get_records(
+                client=httpx_client, id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE
+            ).parsed
             self.__records = first_batch.items
             current_batch = 1
             # TODO(alvarobartt): use `total` from Argilla Metrics API
@@ -392,11 +396,12 @@ class FeedbackDataset:
                 desc="Fetching records from Argilla",
             ) as pbar:
                 while True:
-                    batch = client.get_records(
+                    batch = datasets_api_v1.get_records(
+                        client=httpx_client,
                         id=self.argilla_id,
                         offset=FETCHING_BATCH_SIZE * current_batch,
                         limit=FETCHING_BATCH_SIZE,
-                    )
+                    ).parsed
                     records = batch.items
                     self.__records += records
                     current_batch += 1
@@ -466,6 +471,8 @@ class FeedbackDataset:
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
         """
+        httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+
         if not name or (not name and not workspace):
             if self.argilla_id is None:
                 warnings.warn(
@@ -483,9 +490,9 @@ class FeedbackDataset:
                 return
 
             try:
-                client: "Argilla" = rg.active_client()
                 for i in range(0, len(self.__new_records), 32):
-                    client.add_records(
+                    datasets_api_v1.add_records(
+                        client=httpx_client,
                         id=self.argilla_id,
                         records=self.__new_records[i : i + 32],
                     )
@@ -497,9 +504,8 @@ class FeedbackDataset:
                     f" dataset in Argilla with exception: {e}"
                 )
         elif name or (name and workspace):
-            client: "Argilla" = rg.active_client()
             if workspace is None:
-                workspace = rg.Workspace.from_name(client.get_workspace())
+                workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
 
             if isinstance(workspace, str):
                 workspace = rg.Workspace.from_name(workspace)
@@ -512,12 +518,10 @@ class FeedbackDataset:
                     " workspace."
                 )
 
-            client: "Argilla" = rg.active_client()
-
             try:
-                new_dataset: "FeedbackDatasetModel" = client.create_dataset(
-                    name=name, workspace_id=workspace.id, guidelines=self.guidelines
-                )
+                new_dataset: "FeedbackDatasetModel" = datasets_api_v1.create_dataset(
+                    client=httpx_client, name=name, workspace_id=workspace.id, guidelines=self.guidelines
+                ).parsed
                 argilla_id = new_dataset.id
             except Exception as e:
                 raise Exception(
@@ -526,7 +530,7 @@ class FeedbackDataset:
 
             def delete_and_raise_exception(dataset_id: str, exception: Exception) -> None:
                 try:
-                    client.delete_dataset(id=dataset_id)
+                    datasets_api_v1.delete_dataset(client=httpx_client, id=dataset_id)
                 except Exception as e:
                     raise Exception(
                         "Failed while deleting the `FeedbackTask` dataset with ID"
@@ -536,7 +540,7 @@ class FeedbackDataset:
 
             for field in self.fields:
                 try:
-                    client.add_field(id=argilla_id, field=field.dict())
+                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=field.dict())
                 except Exception as e:
                     delete_and_raise_exception(
                         dataset_id=argilla_id,
@@ -548,7 +552,7 @@ class FeedbackDataset:
 
             for question in self.questions:
                 try:
-                    client.add_question(id=argilla_id, question=question.dict())
+                    datasets_api_v1.add_question(client=httpx_client, id=argilla_id, question=question.dict())
                 except Exception as e:
                     delete_and_raise_exception(
                         dataset_id=argilla_id,
@@ -559,7 +563,7 @@ class FeedbackDataset:
                     )
 
             try:
-                client.publish_dataset(id=argilla_id)
+                datasets_api_v1.publish_dataset(client=httpx_client, id=argilla_id)
             except Exception as e:
                 delete_and_raise_exception(
                     dataset_id=argilla_id,
@@ -570,7 +574,8 @@ class FeedbackDataset:
 
             for batch in self.iter():
                 try:
-                    client.add_records(
+                    datasets_api_v1.add_records(
+                        client=httpx_client,
                         id=argilla_id,
                         records=batch,
                     )
@@ -628,6 +633,8 @@ class FeedbackDataset:
             >>> rg.init(...)
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my_dataset")
         """
+        httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+
         dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if not dataset_exists:
             raise ValueError(
@@ -641,14 +648,16 @@ class FeedbackDataset:
                 )
             )
 
-        client: "Argilla" = rg.active_client()
-
         cls.argilla_id = existing_dataset.id
         self = cls(
             guidelines=existing_dataset.guidelines,
-            fields=[FieldSchema.construct(**field.dict()) for field in client.get_fields(id=existing_dataset.id)],
+            fields=[
+                FieldSchema.construct(**field.dict())
+                for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed
+            ],
             questions=[
-                QuestionSchema.construct(**question.dict()) for question in client.get_questions(id=existing_dataset.id)
+                QuestionSchema.construct(**question.dict())
+                for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed
             ],
         )
         if with_records:
@@ -785,11 +794,11 @@ def feedback_dataset_in_argilla(
         " is the Argilla ID of the `rg.FeedbackDataset`."
     )
 
-    client: "Argilla" = rg.active_client()
+    httpx_client: "httpx.Client" = rg.active_client()._client.httpx
 
     if name or (name and workspace):
         if workspace is None:
-            workspace = rg.Workspace.from_name(client.get_workspace())
+            workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
 
         if isinstance(workspace, str):
             workspace = rg.Workspace.from_name(workspace)
@@ -798,7 +807,7 @@ def feedback_dataset_in_argilla(
             raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
 
         try:
-            datasets = client.list_datasets()
+            datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
         except Exception as e:
             raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
 
@@ -808,6 +817,6 @@ def feedback_dataset_in_argilla(
         return (False, None)
     else:
         try:
-            return (True, client.get_dataset(id=id))
+            return (True, datasets_api_v1.get_dataset(client=httpx_client, id=id).parsed)
         except Exception as e:
             return (False, None)
