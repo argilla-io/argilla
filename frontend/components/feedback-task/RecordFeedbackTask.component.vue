@@ -42,7 +42,7 @@ export default {
   padding: $base-space * 2;
   background: palette(white);
   border: 1px solid palette(grey, 600);
-  border-radius: $border-radius;
+  border-radius: $border-radius-m;
   &__status {
     display: inline-flex;
     margin-right: auto;

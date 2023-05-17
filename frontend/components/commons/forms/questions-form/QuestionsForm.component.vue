@@ -655,7 +655,7 @@ export default {
   flex-basis: 37em;
   height: 100%;
   justify-content: space-between;
-  border-radius: $border-radius;
+  border-radius: $border-radius-m;
   box-shadow: $shadow;
   &__header {
     display: flex;
