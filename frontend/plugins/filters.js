@@ -27,17 +27,3 @@ Vue.filter("capitalize", function (value) {
 
   return capitalize(value);
 });
-
-Vue.filter("escape", function (value) {
-  return value?.replace(
-    /[&<>'"]/g,
-    (tag) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        "'": "&#39;",
-        '"': "&quot;",
-      }[tag])
-  );
-});

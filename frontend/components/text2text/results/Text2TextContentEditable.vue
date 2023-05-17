@@ -20,6 +20,7 @@
   </span>
 </template>
 <script>
+import { escapeHtmlChars } from "@/utils/escapeHtmlChars";
 export default {
   props: {
     annotationEnabled: {
@@ -57,7 +58,7 @@ export default {
     customEditableText() {
       return this.$checkValidHtml(this.editableText)
         ? this.editableText
-        : this.$options.filters.escape(this.editableText);
+        : escapeHtmlChars(this.editableText);
     },
   },
   mounted() {
