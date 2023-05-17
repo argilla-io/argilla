@@ -456,7 +456,7 @@ class FeedbackDataset:
         with the new records.
 
         Note that you may need to `rg.init(...)` with your Argilla credentials before calling this function, otherwise
-        the default https://localhost:9200 will be used, which will fail if Argilla is not deployed locally.
+        the default http://localhost:6900 will be used, which will fail if Argilla is not deployed locally.
 
         Args:
             name: the name of the dataset to push to Argilla. If not provided, the `argilla_id` will be used if the dataset
