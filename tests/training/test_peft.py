@@ -18,7 +18,7 @@ from argilla.training import ArgillaTrainer
 
 from .helpers import train_with_cleanup
 
-FRAMEWORK = "transformers"
+FRAMEWORK = "peft"
 MODEL = "prajjwal1/bert-tiny"
 
 
@@ -65,7 +65,7 @@ def test_train_tokencat(dataset_token_classification):
     trainer.update_config(max_steps=1, num_train_epochs=1)
     output_dir = f"tmp_{FRAMEWORK}_train_tokencat"
     train_with_cleanup(trainer, output_dir)
-    record = trainer.predict("This is a text", as_argilla_records=True)
+    record = trainer.predict("this is a text", as_argilla_records=True)
     assert isinstance(record, rg.TokenClassificationRecord)
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert not isinstance(not_record, rg.TokenClassificationRecord)

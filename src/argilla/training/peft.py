@@ -15,6 +15,8 @@
 import logging
 from typing import List, Union
 
+import numpy as np
+
 import argilla as rg
 from argilla.training.transformers import ArgillaTransformersTrainer
 from argilla.training.utils import (
@@ -62,7 +64,13 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
 
         try:
             config = PeftConfig.from_pretrained(self.model_kwargs["pretrained_model_name_or_path"])
-            model = self._model_class.from_pretrained(config.base_model_name_or_path, return_dict=True)
+            model = self._model_class.from_pretrained(
+                config.base_model_name_or_path,
+                return_dict=True,
+                num_labels=len(self._id2label),
+                id2label=self._id2label,
+                label2id=self._label2id,
+            )
             self._model_sub_class = model.__class__
             model = PeftModel.from_pretrained(model, self.model_kwargs["pretrained_model_name_or_path"])
         except Exception:
@@ -70,7 +78,9 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
             model = self._model_class.from_pretrained(**self.model_kwargs, return_dict=True)
             self._model_sub_class = model.__class__
             model = get_peft_model(model, config)
-        self._transformers_tokenizer = AutoTokenizer.from_pretrained(config.base_model_name_or_path)
+        self._transformers_tokenizer = AutoTokenizer.from_pretrained(
+            config.base_model_name_or_path, add_prefix_space=True
+        )
         self._transformers_model = model
 
     def init_pipeline(self):
@@ -123,12 +133,12 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
             text = [text]
             str_input = True
 
-        inputs = self._transformers_tokenizer(text, truncation=True, padding="longest", return_tensors="pt")
-
-        with torch.no_grad():
-            logits = self._transformers_model(**inputs).logits
-
         if self._record_class == rg.TextClassificationRecord:
+            inputs = self._transformers_tokenizer(text, truncation=True, padding="longest", return_tensors="pt")
+
+            with torch.no_grad():
+                logits = self._transformers_model(**inputs).logits
+
             if self._multi_label:
                 probabilities = torch.sigmoid(logits)
             else:
@@ -140,10 +150,60 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
                     prediction.append({"label": self._id2label[idx], "score": score})
                 predictions.append(prediction)
         else:
-            tokens = inputs.tokens()
-            predictions = logits.argmax(dim=2)
-            for token, prediction in zip(tokens, predictions[0].numpy()):
-                print((token, self._id2label[prediction]))
+            # Tokenize the text
+            inputs_with_offsets = self._transformers_tokenizer(
+                text, truncation=True, padding="longest", return_offsets_mapping=True, return_tensors="pt"
+            )
+            offsets = inputs_with_offsets["offset_mapping"]
+
+            # Perform the forward pass through the model
+            with torch.no_grad():
+                outputs = self._transformers_model(
+                    **{k: v for k, v in inputs_with_offsets.items() if k != "offset_mapping"}
+                )
+                probabilities = torch.nn.functional.softmax(outputs.logits, dim=-1).tolist()
+                predictions = outputs.logits.argmax(dim=-1).tolist()
+
+            # Iterate over the predictions and the offsets
+            batch_formatted_predictions = []
+            for batch_idx, example in enumerate(text):
+                formatted_predictions = []
+                idx = 0
+                while idx < len(predictions[batch_idx]):
+                    pred = predictions[batch_idx][idx]
+                    label = self._transformers_model.config.id2label[pred]
+                    if label != "O":
+                        # Remove the B- or I-
+                        label = label[2:]
+                        start, end = offsets[batch_idx][idx]
+
+                        # Grab all the tokens labeled with I-label
+                        all_scores = []
+                        while (
+                            idx < len(predictions[batch_idx])
+                            and self._transformers_model.config.id2label[predictions[batch_idx][idx]] == f"I-{label}"
+                        ):
+                            all_scores.append(probabilities[batch_idx][idx][pred])
+                            _, end = offsets[batch_idx][idx]
+                            idx += 1
+
+                        # If the entity is only one token, we don't need to do anything
+                        if start != end:
+                            # The score is the mean of all the scores of the tokens in that grouped entity
+                            score = None if np.isnan(np.mean(all_scores).item()) else np.mean(all_scores).item()
+                            word = example[start:end]
+                            formatted_predictions.append(
+                                {
+                                    "entity_group": label,
+                                    "score": score,
+                                    "word": word,
+                                    "start": int(start),
+                                    "end": int(end),
+                                }
+                            )
+                    idx += 1
+                batch_formatted_predictions.append(formatted_predictions)
+            predictions = batch_formatted_predictions
 
         if as_argilla_records:
             formatted_prediction = []
@@ -158,18 +218,19 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
                         )
                     )
                 elif self._record_class == rg.TokenClassificationRecord:
-                    _pred = [(value["entity_group"], value["start"], value["end"]) for value in pred]
-                    encoding = self._pipeline.tokenizer(val)
-                    word_ids = sorted(set(encoding.word_ids()) - {None})
-                    tokens = []
-                    for word_id in word_ids:
-                        char_span = encoding.word_to_chars(word_id)
-                        tokens.append(val[char_span.start : char_span.end].lstrip().rstrip())
                     formatted_prediction.append(
                         self._record_class(
                             text=val,
-                            tokens=tokens,
-                            prediction=_pred,
+                            tokens=val.split(),
+                            prediction=[
+                                (
+                                    char_spans["entity_group"],
+                                    char_spans["start"],
+                                    char_spans["end"],
+                                    char_spans["score"],
+                                )
+                                for char_spans in pred
+                            ],
                         )
                     )
 
