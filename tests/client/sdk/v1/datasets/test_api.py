@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import httpx
 import pytest
 from argilla._constants import DEFAULT_API_KEY
 from argilla.client.sdk.client import AuthenticatedClient
@@ -39,11 +38,11 @@ from argilla.client.sdk.v1.datasets.models import (
 
 @pytest.fixture
 def sdk_client():
-    return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
+    return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY).httpx
 
 
 def test_list_datasets(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(httpx, "get", mocked_client.get)
+    monkeypatch.setattr(sdk_client, "get", mocked_client.get)
 
     workspace_name = "test_workspace"
     mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})

@@ -115,7 +115,7 @@ def publish_dataset(
 def list_datasets(
     client: httpx.Client,
 ) -> Response[Union[List[FeedbackDatasetModel], ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/v1/me/datasets".format(client.base_url)
+    url = "/api/v1/me/datasets"
 
     response = client.get(url=url)
 
