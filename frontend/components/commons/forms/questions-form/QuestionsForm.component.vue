@@ -122,10 +122,6 @@ import {
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
 
-const TYPE_OF_EVENT = Object.freeze({
-  ON_SUBMIT: "ON_SUBMIT",
-  ON_DISCARD: "ON_DISCARD",
-});
 export default {
   name: "QuestionsFormComponent",
   props: {
