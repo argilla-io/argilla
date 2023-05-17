@@ -1,11 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="title-area --body2">
-      <span
-        :key="colorHighlight"
-        v-text="title"
-        v-optional-field="isRequired ? false : true"
-      />
+      <span v-text="title" v-optional-field="isRequired ? false : true" />
 
       <BaseIconWithBadge
         class="icon-info"
@@ -26,7 +22,7 @@
         class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
-        :defaultText="initialOptions.text"
+        :defaultText="initialText"
         :placeholder="placeholder"
         @change-text="onChangeTextArea"
         @on-change-focus="setFocus"
@@ -45,11 +41,9 @@ export default {
       type: String,
       required: true,
     },
-    initialOptions: {
-      type: Object,
-      default: () => {
-        return { text: "", value: "" };
-      },
+    initialText: {
+      type: String,
+      default: () => "",
     },
     optionId: {
       type: String,
@@ -71,10 +65,6 @@ export default {
       type: String,
       default: () => "",
     },
-    colorHighlight: {
-      type: String,
-      default: () => "black",
-    },
   },
   data: () => {
     return {
@@ -83,15 +73,12 @@ export default {
   },
   methods: {
     onChangeTextArea(newText) {
-      this.$emit("on-change-text-area", [
-        {
-          id: this.optionId,
-          text: newText,
-          value: newText.length ? newText : null,
-        },
-      ]);
-
       const isAnyText = newText?.length;
+      this.$emit("on-change-text-area", {
+        id: this.optionId,
+        text: isAnyText ? newText : null,
+      });
+
       if (this.isRequired) {
         this.$emit("on-error", !isAnyText);
       }

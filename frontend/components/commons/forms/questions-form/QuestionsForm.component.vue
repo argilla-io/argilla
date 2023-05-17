@@ -28,12 +28,12 @@
           :title="input.question"
           :optionId="`${input.name}_0`"
           :placeholder="input.placeholder"
-          :initialOptions="input.options[0]"
+          :initialText="input.options[0].text"
           :isRequired="input.is_required"
           :isIcon="!!input.description"
           :tooltipMessage="input.description"
           @on-change-text-area="
-            onChange({ newOptions: $event, idComponent: input.id })
+            onChangeTextArea({ newOptions: $event, idComponent: input.id })
           "
           @on-error="onError"
         />
@@ -248,7 +248,16 @@ export default {
         default:
       }
     },
+    onChangeTextArea({ newOptions, idComponent }) {
+      this.inputs = this.inputs.map((input) => {
+        if (input.id === idComponent) {
+          input.options = [{ ...newOptions, value: newOptions.text }];
+        }
+        return input;
+      });
+    },
     onChange({ newOptions, idComponent }) {
+      console.log(newOptions);
       this.inputs = this.inputs.map((input) => {
         if (input.id === idComponent) {
           input.options = newOptions;
