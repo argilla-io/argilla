@@ -11,17 +11,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.server.contexts import accounts
 from argilla.server.models import User, UserRole
-from argilla.tasks.users.create_default import create_default
 from click.testing import CliRunner
 from sqlalchemy.orm import Session
+from typer import Typer
 
 
-def test_create_default(db: Session):
-    result = CliRunner().invoke(create_default)
+def test_create_default(db: Session, cli_runner: CliRunner, cli: Typer):
+    result = cli_runner.invoke(cli, "users create_default")
 
     assert result.exit_code == 0
     assert result.output != ""
@@ -35,8 +34,8 @@ def test_create_default(db: Session):
     assert [ws.name for ws in default_user.workspaces] == [DEFAULT_USERNAME]
 
 
-def test_create_default_with_specific_api_key_and_password(db: Session):
-    result = CliRunner().invoke(create_default, "--api-key my-api-key --password my-password")
+def test_create_default_with_specific_api_key_and_password(db: Session, cli_runner: CliRunner, cli: Typer):
+    result = cli_runner.invoke(cli, "users create_default --api-key my-api-key --password my-password")
 
     assert result.exit_code == 0
     assert result.output != ""
@@ -50,36 +49,36 @@ def test_create_default_with_specific_api_key_and_password(db: Session):
     assert [ws.name for ws in default_user.workspaces] == [DEFAULT_USERNAME]
 
 
-def test_create_default_quiet(db: Session):
-    result = CliRunner().invoke(create_default, ["--quiet"])
+def test_create_default_quiet(db: Session, cli_runner: CliRunner, cli: Typer):
+    result = cli_runner.invoke(cli, "users create_default --quiet")
 
     assert result.exit_code == 0
     assert result.output == ""
     assert db.query(User).count() == 1
 
 
-def test_create_default_with_existent_default_user(db: Session):
-    result = CliRunner().invoke(create_default)
+def test_create_default_with_existent_default_user(db: Session, cli_runner: CliRunner, cli: Typer):
+    result = cli_runner.invoke(cli, "users create_default")
 
     assert result.exit_code == 0
     assert result.output != ""
     assert db.query(User).count() == 1
 
-    result = CliRunner().invoke(create_default)
+    result = cli_runner.invoke(cli, "users create_default")
 
     assert result.exit_code == 0
     assert result.output == "User with default username already found on database, will not do anything.\n"
     assert db.query(User).count() == 1
 
 
-def test_create_default_with_existent_default_user_and_quiet(db: Session):
-    result = CliRunner().invoke(create_default)
+def test_create_default_with_existent_default_user_and_quiet(db: Session, cli_runner: CliRunner, cli: Typer):
+    result = cli_runner.invoke(cli, "users create_default")
 
     assert result.exit_code == 0
     assert result.output != ""
     assert db.query(User).count() == 1
 
-    result = CliRunner().invoke(create_default, ["--quiet"])
+    result = cli_runner.invoke(cli, "users create_default --quiet")
 
     assert result.exit_code == 0
     assert result.output == ""

@@ -2,7 +2,7 @@
 
 Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers`, `hub`, and `setfit`), and now it can also be deployed using the Hub's Spaces.
 
-In this guide, you'll learn to deploy your own Argilla app and use it for data labelling workflows right from the Hub.
+In this guide, you'll learn to deploy your own Argilla app and use it for data labeling workflows right from the Hub.
 
 ## Your first Argilla Space
 
@@ -75,9 +75,9 @@ rg.init(api_url="[your_space_url]", api_key="admin.apikey")
 rg.log(rg.read_datasets(dataset, task="TextClassification"), name="bankingapp_sentiment")
 ```
 
-Congrats! You now have a dataset available from the Argilla UI to start browsing and labelling. In the code above, we've used one of the many integrations with Hugging Face libraries, which let you [read hundreds of datasets](https://docs.argilla.io/en/latest/guides/features/datasets.html#Importing-a-Dataset) available on the Hub.
+Congrats! You now have a dataset available from the Argilla UI to start browsing and labeling. In the code above, we've used one of the many integrations with Hugging Face libraries, which let you [read hundreds of datasets](https://docs.argilla.io/en/latest/guides/features/datasets.html#Importing-a-Dataset) available on the Hub.
 
-### Data labelling and model training
+### Data labeling and model training
 
 At this point, you can label your data directly using your Argilla Space and read the training data to train your model of choice.
 

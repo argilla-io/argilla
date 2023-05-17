@@ -13,12 +13,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-if __name__ == "__main__":
-    import uvicorn
 
-    uvicorn.run(
-        "argilla:app",
-        port=6900,
-        host="0.0.0.0",
-        access_log=True,
-    )
+import typer
+
+from .tasks import database, server, training, users
+
+app = typer.Typer(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
+
+app.add_typer(users, name="users")
+app.add_typer(database, name="database")
+app.add_typer(training, name="train")
+app.add_typer(server, name="server")
+
+if __name__ == "__main__":
+    app()

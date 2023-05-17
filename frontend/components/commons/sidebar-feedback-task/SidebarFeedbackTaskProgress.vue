@@ -23,30 +23,33 @@
       <span class="metrics__info__counter">{{ progress | percent }}</span>
     </div>
     <div class="metrics__numbers">
-      <span>{{ totalAnnotated | formatNumber }}</span
+      <span>{{ totalResponded | formatNumber }}</span
       >/{{ progressTotal | formatNumber }}
     </div>
-    <base-progress
+    <BaseProgress
       re-mode="determinate"
       :multiple="true"
-      :progress="(totalValidated * 100) / progressTotal"
+      :progress="(totalSubmitted * 100) / progressTotal"
       :progress-secondary="(totalDiscarded * 100) / progressTotal"
-    ></base-progress>
+      :color="itemColor(0)"
+      :color-secondary="itemColor(1)"
+    >
+    </BaseProgress>
     <div class="scroll">
       <ul class="metrics__list">
-        <li>
-          <span class="color-bullet validated"></span>
-          <label class="metrics__list__name">Validated</label>
-          <span class="metrics__list__counter">
-            {{ totalValidated | formatNumber }}
-          </span>
-        </li>
-        <li>
-          <span class="color-bullet discarded"></span>
-          <label class="metrics__list__name">Discarded</label>
-          <span class="metrics__list__counter">
-            {{ totalDiscarded | formatNumber }}
-          </span>
+        <li v-for="(status, index) in progressItems" :key="index">
+          <span
+            class="color-bullet"
+            :style="{ backgroundColor: status.color }"
+          ></span>
+          <label
+            class="metrics__list__name"
+            v-text="getFormattedName(status.name)"
+          />
+          <span
+            class="metrics__list__counter"
+            v-text="getFormattedProgress(status.progress)"
+          />
         </li>
       </ul>
       <slot></slot>
@@ -55,39 +58,64 @@
 </template>
 
 <script>
+import {
+  RECORD_STATUS,
+  RECORD_STATUS_COLOR,
+} from "@/models/feedback-task-model/record/record.queries";
 export default {
   props: {
-    total: {
+    progressTotal: {
       type: Number,
       required: true,
     },
-    validated: {
+    totalSubmitted: {
       type: Number,
       required: true,
     },
-    discarded: {
+    totalDiscarded: {
       type: Number,
       required: true,
     },
   },
   computed: {
-    totalValidated() {
-      return this.validated;
+    progressItems() {
+      return [
+        {
+          name: RECORD_STATUS.SUBMITTED,
+          color: RECORD_STATUS_COLOR.SUBMITTED,
+          progress: this.totalSubmitted,
+        },
+        {
+          name: RECORD_STATUS.DISCARDED,
+          color: RECORD_STATUS_COLOR.DISCARDED,
+          progress: this.totalDiscarded,
+        },
+        {
+          name: RECORD_STATUS.PENDING,
+          color: RECORD_STATUS_COLOR.PENDING,
+          progress: this.totalPending,
+        },
+      ];
     },
-    totalDiscarded() {
-      return this.discarded;
+    totalResponded() {
+      return this.totalSubmitted + this.totalDiscarded;
     },
-    totalAnnotated() {
-      return this.totalValidated + this.totalDiscarded;
-    },
-    progressTotal() {
-      return this.total;
+    totalPending() {
+      return this.progressTotal - this.totalResponded;
     },
     progress() {
-      return (
-        ((this.totalValidated || 0) + (this.totalDiscarded || 0)) /
-        this.progressTotal
-      );
+      return this.totalResponded / this.progressTotal;
+    },
+  },
+  methods: {
+    itemColor(order) {
+      return this.progressItems[order]?.color || null;
+    },
+    getFormattedName(name) {
+      return name && this.$options.filters.capitalize(name);
+    },
+    getFormattedProgress(progress) {
+      return progress && this.$options.filters.formatNumber(progress);
     },
   },
 };
@@ -117,12 +145,6 @@ export default {
   border-radius: 50%;
   display: inline-block;
   margin: 0.3em 0.3em 0.3em 0;
-  &.validated {
-    background: #4c4ea3;
-  }
-  &.discarded {
-    background: #a1a2cc;
-  }
 }
 :deep() {
   .metrics__title {

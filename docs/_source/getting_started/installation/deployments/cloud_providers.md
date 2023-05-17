@@ -30,7 +30,7 @@ The `aws` command cli must be installed. Then, type:
 aws configure --profile argilla
 ```
 
-and follow command instructions. For more details, visit [AWS official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html).
+and follow command instructions. For more details, visit [AWS official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 
 Once the profile is created (a new entry should appear in file `~/.aws/config`), you can activate it via setting environment variable:
 
@@ -50,7 +50,16 @@ docker-machine create --driver amazonec2 \
 argilla-aws
 ```
 
-Available ami depends on region. The provided ami is available for eu-west regions
+Available Amazon Machine Instance (AMI) depends on region. The provided AMI is available for eu-west regions and is an ubuntu-16.04-server image.
+To find available recent images, go to the [AWS AMI Marketplace](https://console.aws.amazon.com/ec2/home), choose "Launch instance". and filter by `ubuntu`
+(don't forget to choose your targeted region).
+
+If you already have multiple instances and VPC in the targeted region, creating a new VPC before creating the Argilla instance is recommended.
+Add the following parameter to specify the VPC you want to use for the instance:
+
+```bash
+--amazonec2-vpc-id vpc-1234abcd  # Replace vpc-1234abcd with the created VPC id
+```
 
 ### Verify machine creation
 

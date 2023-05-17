@@ -76,6 +76,8 @@ if _TYPE_CHECKING:
         TextClassificationSettings,
         TokenClassificationSettings,
         configure_dataset,
+        configure_dataset_settings,
+        load_dataset_settings,
     )
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
@@ -128,6 +130,8 @@ _import_structure = {
     ],
     "datasets": [
         "configure_dataset",
+        "load_dataset_settings",
+        "configure_dataset_settings",
         "TextClassificationSettings",
         "TokenClassificationSettings",
     ],

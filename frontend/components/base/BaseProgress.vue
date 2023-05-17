@@ -51,6 +51,11 @@ export default {
     },
     color: {
       type: String,
+      default: "#4c4ea3",
+    },
+    colorSecondary: {
+      type: String,
+      default: "#a1a2cc",
     },
     tooltip: {
       default: undefined,
@@ -84,6 +89,7 @@ export default {
       return {
         left: `${this.progress}%`,
         width: `${this.progressSecondary}%`,
+        backgroundColor: this.colorSecondary,
       };
     },
   },
@@ -105,7 +111,7 @@ export default {
     content: "";
     position: absolute;
     background: white;
-    opacity: 0.7;
+    opacity: 0.8;
     top: 0;
     bottom: 0;
     right: 0;

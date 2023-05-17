@@ -14,9 +14,10 @@
 
 from typing import List, Optional
 
-import click
+import typer
 from pydantic import constr
 from sqlalchemy.orm import Session
+from typer import Typer
 
 from argilla.server.contexts import accounts
 from argilla.server.database import SessionLocal
@@ -39,51 +40,65 @@ def _get_or_new_workspace(session: Session, workspace_name: str):
     return session.query(Workspace).filter_by(name=workspace_name).first() or Workspace(name=workspace_name)
 
 
-@click.command()
-@click.option("--first-name", prompt=True)
-@click.option("--last-name")
-@click.option(
-    "--username",
-    prompt=True,
-    help="Username as a lowercase string without spaces allowing letters, numbers, dashes and underscores.",
-)
-@click.option(
-    "--role",
-    prompt=True,
-    type=click.Choice(UserRole.__members__, case_sensitive=False),
-    default=UserRole.annotator,
-    show_default=True,
-    help="Role for the user.",
-)
-@click.password_option(
-    "--password",
-    prompt=f"Password (min. {USER_PASSWORD_MIN_LENGTH} characters)",
-    help=f"Password as a string with a minimum length of {USER_PASSWORD_MIN_LENGTH} characters.",
-)
-@click.option(
-    "--api-key",
-    help=f"API key as a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters. If not specified a secure random API key will be generated",
-)
-@click.option(
-    "--workspace", multiple=True, help="A workspace that the user will be a member of (can be used multiple times)."
-)
+def role_callback(value: str):
+    try:
+        return UserRole(value).value
+    except ValueError:
+        raise typer.BadParameter("Only Camila is allowed")
+
+
+def password_callback(password: str = None):
+    # if password is None:
+    #     raise typer.BadParameter("Password must be specified.")
+    # if len(password)<USER_PASSWORD_MIN_LENGTH:
+    #     raise typer.BadParameter(f"Password must be at least {USER_PASSWORD_MIN_LENGTH} characters long.")
+    return password
+
+
+def api_key_callback(api_key: str):
+    # if api_key and len(api_key)<USER_PASSWORD_MIN_LENGTH:
+    #     raise typer.BadParameter(f"API key must a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters.")
+    return api_key
+
+
 def create(
-    first_name: str,
-    username: str,
-    role: UserRole,
-    password: str,
-    last_name: Optional[str],
-    api_key: Optional[str],
-    workspace: Optional[List[str]],
+    first_name: str = typer.Option(default=None, help="First name as a string."),
+    username: str = typer.Option(
+        default=None,
+        prompt=True,
+        help="Username as a lowercase string without spaces allowing letters, numbers, dashes and underscores.",
+    ),
+    role: UserRole = typer.Option(
+        callback=role_callback,
+        prompt=True,
+        default=UserRole.annotator.value,
+        show_default=True,
+        help="Role for the user.",
+    ),
+    password: str = typer.Option(
+        default=None,
+        prompt=True,
+        callback=password_callback,
+        help=f"Password as a string with a minimum length of {USER_PASSWORD_MIN_LENGTH} characters.",
+    ),
+    last_name: str = typer.Option(default=None, help="Last name as a string."),
+    api_key: Optional[str] = typer.Option(
+        default=None,
+        callback=api_key_callback,
+        help=f"API key as a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters. If not specified a secure random API key will be generated",
+    ),
+    workspace: List[str] = typer.Option(
+        default=[], help="A workspace that the user will be a member of (can be used multiple times)."
+    ),
 ):
     """Creates a new user in the Argilla database with provided parameters"""
     with SessionLocal() as session:
         if accounts.get_user_by_username(session, username):
-            click.echo(f"User with username {username!r} already exists in database. Skipping...")
+            typer.echo(f"User with username {username!r} already exists in database. Skipping...")
             return
 
         if accounts.get_user_by_api_key(session, api_key):
-            click.echo(f"User with api_key {api_key!r} already exists in database. Skipping...")
+            typer.echo(f"User with api_key {api_key!r} already exists in database. Skipping...")
             return
 
         user_create = UserCreateForTask(
@@ -110,15 +125,17 @@ def create(
         session.commit()
         session.refresh(user)
 
-        click.echo("User successfully created:")
-        click.echo(f"• first_name: {user.first_name!r}")
+        typer.echo("User successfully created:")
+        typer.echo(f"• first_name: {user.first_name!r}")
         if user.last_name:
-            click.echo(f"• last_name: {user.last_name!r}")
-        click.echo(f"• username: {user.username!r}")
-        click.echo(f"• role: {user.role.value!r}")
-        click.echo(f"• api_key: {user.api_key!r}")
-        click.echo(f"• workspaces: {[workspace.name for workspace in user.workspaces]!r}")
+            typer.echo(f"• last_name: {user.last_name!r}")
+        typer.echo(f"• username: {user.username!r}")
+        typer.echo(f"• role: {user.role.value!r}")
+        typer.echo(f"• api_key: {user.api_key!r}")
+        typer.echo(f"• workspaces: {[workspace.name for workspace in user.workspaces]!r}")
 
 
 if __name__ == "__main__":
-    create()
+    app = Typer(add_completion=False)
+    app.command(no_args_is_help=True)(create)
+    app()

@@ -17,32 +17,47 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-### Changed
+## Added
 
-- Argilla server docker image is built with PostgreSQL support. Closes [#2686](https://github.com/argilla-io/argilla/issues/2686)
-
-## [1.7.0 [in-progress]](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.7.0)
-
-### Added
-
-- add `max_retries` and `num_threads` parameters to `rg.log` to run data logging request concurrently with backoff retry policy. See [#2458](https://github.com/argilla-io/argilla/issues/2458) and [#2533](https://github.com/argilla-io/argilla/issues/2533)
-- `rg.load` accepts `exclude_vectors` and `exclude_metrics` when loading data. Closes [#2398](https://github.com/argilla-io/argilla/issues/2398)
 - `/api/v1/datasets` new endpoint to list and create datasets ([#2615]).
 - `/api/v1/datasets/{dataset_id}` new endpoint to delete datasets ([#2615]).
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
 
+
+## [1.7.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.7.0)
+
+### Added
+
+- add `max_retries` and `num_threads` parameters to `rg.log` to run data logging request concurrently with backoff retry policy. See [#2458](https://github.com/argilla-io/argilla/issues/2458) and [#2533](https://github.com/argilla-io/argilla/issues/2533)
+- `rg.load` accepts `include_vectors` and `include_metrics` when loading data. Closes [#2398](https://github.com/argilla-io/argilla/issues/2398)
+- Added `settings` param to `prepare_for_training` ([#2689](https://github.com/argilla-io/argilla/issues/2689))
+- Added `prepare_for_training` for `openai` ([#2658](https://github.com/argilla-io/argilla/issues/2658))
+- Added `ArgillaOpenAITrainer` ([#2659](https://github.com/argilla-io/argilla/issues/2659))
+- Added `ArgillaSpanMarkerTrainer` for Named Entity Recognition ([#2693](https://github.com/argilla-io/argilla/pull/2693))
+- Added `ArgillaTrainer` CLI support. Closes ([#2809](https://github.com/argilla-io/argilla/issues/2809))
+
+### Fixes
+
+- fix image alignment on token classification
+
 ### Changed
 
 - Argilla quickstart image dependencies are externalized into `quickstart.requirements.txt`. See [#2666](https://github.com/argilla-io/argilla/pull/2666)
 - bulk endpoints will upsert data when record `id` is present. Closes [#2535](https://github.com/argilla-io/argilla/issues/2535)
+- moved from `click` to `typer` CLI support. Closes ([#2815](https://github.com/argilla-io/argilla/issues/2815))
+- Argilla server docker image is built with PostgreSQL support. Closes [#2686](https://github.com/argilla-io/argilla/issues/2686)
 - The `rg.log` computes all batches and raise an error for all failed batches.
 - The default batch size for `rg.log` is now 100.
+
+### Fixed
+
+- `argilla.training` bugfixes and unification ([#2665](https://github.com/argilla-io/argilla/issues/2665))
+- Resolved several small bugs in the `ArgillaTrainer`.
 
 ### Deprecated
 
 - The `rg.log_async` function is deprecated and will be removed in next minor release.
-
 
 ## [1.6.0](https://github.com/argilla-io/argilla/compare/v1.5.1...v1.6.0)
 
@@ -76,7 +91,7 @@ These are the section headers that we use:
 - `quickstart.Dockerfile` image default users from `team` and `argilla` to `admin` and `annotator` including new passwords and API keys ([#2564]).
 - Datasets to be managed only by users with `admin` role ([#2564]).
 - The list of rules is now accessible while metrics are computed. Closes[#2117](https://github.com/argilla-io/argilla/issues/2117)
-- Style updates for weak labelling and adding feedback toast when delete rules. See [#2626](https://github.com/argilla-io/argilla/pull/2626) and [#2648](https://github.com/argilla-io/argilla/pull/2648)
+- Style updates for weak labeling and adding feedback toast when delete rules. See [#2626](https://github.com/argilla-io/argilla/pull/2626) and [#2648](https://github.com/argilla-io/argilla/pull/2648)
 
 ### Removed
 

@@ -41,7 +41,7 @@ from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func
-from sqlalchemy.orm import Session, contains_eager
+from sqlalchemy.orm import Session, contains_eager, joinedload
 
 LIST_RECORDS_LIMIT = 20
 
@@ -184,6 +184,27 @@ def delete_question(db: Session, question: Question):
 
 def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
+
+
+def list_records_by_dataset_id(
+    db: Session,
+    dataset_id: UUID,
+    include: List[RecordInclude] = [],
+    offset: int = 0,
+    limit: int = LIST_RECORDS_LIMIT,
+):
+    query = db.query(Record)
+
+    if RecordInclude.responses in include:
+        query = query.options(joinedload(Record.responses))
+
+    return (
+        query.filter(Record.dataset_id == dataset_id)
+        .order_by(Record.inserted_at.asc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
 
 def list_records_by_dataset_id_and_user_id(

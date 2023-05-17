@@ -27,13 +27,22 @@ except ImportError:
 
 from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
 
+DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
+DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
+
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1
 FIELD_CREATE_NAME_MAX_LENGTH = 200
+FIELD_CREATE_TITLE_MIN_LENGTH = 1
+FIELD_CREATE_TITLE_MAX_LENGTH = 500
 
 QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 QUESTION_CREATE_NAME_MIN_LENGTH = 1
 QUESTION_CREATE_NAME_MAX_LENGTH = 200
+QUESTION_CREATE_TITLE_MIN_LENGTH = 1
+QUESTION_CREATE_TITLE_MAX_LENGTH = 500
+QUESTION_CREATE_DESCRIPTION_MIN_LENGTH = 1
+QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
@@ -61,7 +70,12 @@ class Datasets(BaseModel):
 
 class DatasetCreate(BaseModel):
     name: str
-    guidelines: Optional[str]
+    guidelines: Optional[
+        constr(
+            min_length=DATASET_CREATE_GUIDELINES_MIN_LENGTH,
+            max_length=DATASET_CREATE_GUIDELINES_MAX_LENGTH,
+        )
+    ]
     workspace_id: UUID
 
 
@@ -107,7 +121,10 @@ class FieldCreate(BaseModel):
         min_length=FIELD_CREATE_NAME_MIN_LENGTH,
         max_length=FIELD_CREATE_NAME_MAX_LENGTH,
     )
-    title: str
+    title: constr(
+        min_length=FIELD_CREATE_TITLE_MIN_LENGTH,
+        max_length=FIELD_CREATE_TITLE_MAX_LENGTH,
+    )
     required: Optional[bool]
     settings: TextFieldSettings
 
@@ -153,8 +170,16 @@ class QuestionCreate(BaseModel):
         min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
         max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
     )
-    title: str
-    description: Optional[str]
+    title: constr(
+        min_length=QUESTION_CREATE_TITLE_MIN_LENGTH,
+        max_length=QUESTION_CREATE_TITLE_MAX_LENGTH,
+    )
+    description: Optional[
+        constr(
+            min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
+            max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
+        )
+    ]
     required: Optional[bool]
     settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
 

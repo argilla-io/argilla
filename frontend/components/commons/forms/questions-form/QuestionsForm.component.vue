@@ -6,7 +6,22 @@
     :key="renderForm"
   >
     <div class="questions-form__content">
-      <p class="questions-form__title --body1 --medium">Fill the fields</p>
+      <div class="questions-form__header">
+        <p class="questions-form__title --body1 --medium">
+          Submit your feedback
+        </p>
+        <p class="questions-form__guidelines-link">
+          Read the
+          <NuxtLink
+            :to="{
+              name: 'dataset-id-settings',
+              params: { id: datasetId },
+            }"
+            target="_blank"
+            >annotation guidelines <svgicon name="external-link" width="12"
+          /></NuxtLink>
+        </p>
+      </div>
       <div class="form-group" v-for="input in inputs" :key="input.id">
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
@@ -216,7 +231,7 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code, ctrlKey }) {
+    onPressKeyboardShortCut({ code, shiftKey }) {
       switch (code) {
         case "Enter": {
           const elem = this.$refs.submitButton.$el;
@@ -225,7 +240,7 @@ export default {
         }
         case "Space": {
           const elem = this.$refs.clearButton.$el;
-          ctrlKey && elem.click();
+          shiftKey && elem.click();
           break;
         }
         case "Backspace": {
@@ -246,17 +261,11 @@ export default {
     },
     async onDiscard() {
       // 1 - check if it's a create or update response
-      const createOrUpdateResponse = isResponsesByUserIdExists(
-        this.userId,
-        this.recordId
-      )
-        ? STATUS_RESPONSE.UPDATE
-        : STATUS_RESPONSE.CREATE;
+      const createOrUpdateResponse = this.initFlagCreateOrUpdateResponse();
 
       // 2 - init formattedSelectionOptionObject
-      const formattedSelectionObject = this.formatSelectedOptionObject(
-        RESPONSE_STATUS_FOR_API.DISCARDED,
-        !this.isSomeRequiredQuestionHaveNoAnswer
+      const formattedSelectionObject = this.formatSelectedOptionObjectOnDiscard(
+        RESPONSE_STATUS_FOR_API.DISCARDED
       );
 
       // 3 - Create the formatted requests to send from the formattedSelectionObject
@@ -266,37 +275,23 @@ export default {
       );
 
       // 4 - create or update the record responses and emit bus event to change record to show
-      try {
-        await this.createOrUpdateRecordResponses(formattedRequestsToSend);
-
-        // NOTE - Update dataset Metrics orm
-        await this.initMetricsAndInsertDataInOrm();
-
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.DISCARDED
-        );
-        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_DISCARD);
-      } catch (err) {
-        console.log(err);
-      }
+      await this.createOrUpdateResponsesAndEmitRecordToGoBusEvent(
+        RECORD_STATUS.DISCARDED,
+        formattedRequestsToSend
+      );
     },
     async onSubmit() {
       // 1 - check if it's a create or update response
-      const createOrUpdateResponse = isResponsesByUserIdExists(
-        this.userId,
-        this.recordId
-      )
-        ? STATUS_RESPONSE.UPDATE
-        : STATUS_RESPONSE.CREATE;
+      // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
+      const createOrUpdateResponse = this.initFlagCreateOrUpdateResponse();
+
       if (this.isSomeRequiredQuestionHaveNoAnswer) {
         this.isError = true;
         return;
       }
-      // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
 
       // 2 - init formattedSelectionOptionObject
-      const formattedSelectionObject = this.formatSelectedOptionObject(
+      const formattedSelectionObject = this.formatSelectedOptionObjectOnSubmit(
         RESPONSE_STATUS_FOR_API.SUBMITTED
       );
 
@@ -307,23 +302,52 @@ export default {
       );
 
       // 4 - create or update the record responses and emit bus event to change record to show
+      await this.createOrUpdateResponsesAndEmitRecordToGoBusEvent(
+        RECORD_STATUS.SUBMITTED,
+        formattedRequestsToSend
+      );
+    },
+    initFlagCreateOrUpdateResponse() {
+      const createOrUpdateResponse = isResponsesByUserIdExists(
+        this.userId,
+        this.recordId
+      )
+        ? STATUS_RESPONSE.UPDATE
+        : STATUS_RESPONSE.CREATE;
+
+      return createOrUpdateResponse;
+    },
+    async createOrUpdateResponsesAndEmitRecordToGoBusEvent(
+      status,
+      requestsToSend
+    ) {
       try {
-        await this.createOrUpdateRecordResponses(formattedRequestsToSend);
+        await this.createOrUpdateRecordResponses(requestsToSend);
 
         // NOTE - Update dataset Metrics orm
         await this.initMetricsAndInsertDataInOrm();
 
         // NOTE - onSubmit event => the status change to SUBMITTED
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.SUBMITTED
-        );
+        await updateRecordStatusByRecordId(this.recordId, status);
 
-        this.onEmitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
+        let typeOfEvent = null;
+        switch (status) {
+          case RECORD_STATUS.SUBMITTED:
+            typeOfEvent = TYPE_OF_EVENT.ON_SUBMIT;
+            break;
+          case RECORD_STATUS.DISCARDED:
+            typeOfEvent = TYPE_OF_EVENT.ON_DISCARD;
+            break;
+          default:
+            console.log(`The event ${status} is unknown`);
+        }
+
+        this.onEmitBusEventGoToRecordIndex(typeOfEvent);
       } catch (err) {
         console.log(err);
       }
     },
+
     onEmitBusEventGoToRecordIndex(typeOfEvent) {
       switch (typeOfEvent) {
         case TYPE_OF_EVENT.ON_SUBMIT:
@@ -533,7 +557,7 @@ export default {
       }
       return formattedRecordResponsesForOrm;
     },
-    formatSelectedOptionObject(status, isFilled = true) {
+    formatSelectedOptionObjectOnSubmit(status) {
       let selectedOptionObj = {
         status,
       };
@@ -556,17 +580,48 @@ export default {
         }
         selectedOptionObj.values = {
           ...selectedOptionObj.values,
-          ...(isFilled && {
+          [input.name]: { value: selectedOption?.text },
+        };
+      });
+      return selectedOptionObj;
+    },
+    formatSelectedOptionObjectOnDiscard(status) {
+      // NOTE - it's possible to discard with partial response
+      let selectedOptionObj = {
+        status,
+      };
+      this.inputs.forEach((input) => {
+        // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
+
+        let selectedOption = null;
+        switch (input.component_type) {
+          case COMPONENT_TYPE.SINGLE_LABEL:
+          case COMPONENT_TYPE.RATING:
+            selectedOption = input.options?.find((option) => option.value);
+            break;
+          case COMPONENT_TYPE.FREE_TEXT:
+            selectedOption = input.options[0];
+            break;
+          default:
+            console.log(
+              `The component type ${input.component_type} is unknown, the response can't be save`
+            );
+        }
+
+        // NOTE - Since it's possible to discard on partial response, that means => if we have a selectedOptionObj.text then we have a partial answer
+        selectedOptionObj.values = {
+          ...selectedOptionObj.values,
+          ...(selectedOption?.text && {
             [input.name]: { value: selectedOption.text },
           }),
         };
       });
       return selectedOptionObj;
     },
-    formatRequestsToSend(createOrUpdateResponse, obj) {
+    formatRequestsToSend(createOrUpdateResponse, responseByQuestionName) {
       const formattedRequestsToSend = {
         status: createOrUpdateResponse,
-        responseByQuestionName: obj,
+        responseByQuestionName,
         ...(createOrUpdateResponse === STATUS_RESPONSE.UPDATE && {
           responseId: getRecordResponsesIdByRecordId({
             userId: this.userId,
@@ -602,9 +657,25 @@ export default {
   justify-content: space-between;
   border-radius: $border-radius;
   box-shadow: $shadow;
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $base-space * 2;
+  }
   &__title {
     margin: 0;
     color: $black-87;
+  }
+  &__guidelines-link {
+    @include font-size(13px);
+    color: $black-37;
+    a {
+      color: $black-37;
+      outline: 0;
+      &:hover {
+        color: $black-54;
+      }
+    }
   }
   &__content {
     display: flex;
@@ -614,7 +685,7 @@ export default {
     overflow: auto;
   }
   &.--edited-form {
-    border-color: palette(apricot, dark);
+    border-color: palette(brown);
   }
 }
 
