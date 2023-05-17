@@ -146,6 +146,9 @@ class RatingQuestion(QuestionSchema):
             values["settings"]["options"] = [{"value": value} for value in v]
         return v
 
+    class Config:
+        validate_assignment = True
+
 
 class FeedbackDataset:
     """Class to work with `FeedbackDataset`s either locally, or remotely (Argilla or HuggingFace Hub).
