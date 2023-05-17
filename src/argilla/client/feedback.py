@@ -462,7 +462,7 @@ class FeedbackDataset:
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
         """
-        if not name or not (name and workspace):
+        if not name or (not name and not workspace):
             if self.argilla_id is None:
                 warnings.warn(
                     "No `name` or `workspace` have been provided, and no dataset has"
@@ -493,6 +493,7 @@ class FeedbackDataset:
                     f" dataset in Argilla with exception: {e}"
                 )
         elif name or (name and workspace):
+            client: "Argilla" = rg.active_client()
             if workspace is None:
                 workspace = rg.Workspace.from_name(client.get_workspace())
 
