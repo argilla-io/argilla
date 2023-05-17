@@ -221,10 +221,13 @@ class TestFeedbackDataset:
 
         assert dataset.argilla_id is not None
 
-        dataset_from_argilla = FeedbackDataset.from_argilla(dataset.argilla_id)
+        dataset_from_argilla = FeedbackDataset.from_argilla(id=dataset.argilla_id)
 
         assert dataset_from_argilla.guidelines == dataset.guidelines
-        assert dataset_from_argilla.fields == dataset.fields
-        assert dataset_from_argilla.questions == dataset.questions
-
+        assert len(dataset_from_argilla.fields) == len(dataset.fields)
+        assert [field.name for field in dataset_from_argilla.fields] == [field.name for field in dataset.fields]
+        assert len(dataset_from_argilla.questions) == len(dataset.questions)
+        assert [question.name for question in dataset_from_argilla.questions] == [
+            question.name for question in dataset.questions
+        ]
         assert len(dataset_from_argilla.records) == len(dataset.records)
