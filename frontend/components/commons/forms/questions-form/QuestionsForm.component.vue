@@ -287,6 +287,7 @@ export default {
           });
         }
       } catch (error) {
+        console.log(error);
         // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
         let message = "";
 
