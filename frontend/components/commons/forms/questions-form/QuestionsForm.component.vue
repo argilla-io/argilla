@@ -119,15 +119,9 @@ import {
   getRecordResponsesIdByRecordId,
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
-  isResponsesByUserIdExists,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
 
-const STATUS_RESPONSE = Object.freeze({
-  UPDATE: "UPDATE",
-  CREATE: "CREATE",
-  UNKNOWN: "UNKNOWN",
-});
 const TYPE_OF_EVENT = Object.freeze({
   ON_SUBMIT: "ON_SUBMIT",
   ON_DISCARD: "ON_DISCARD",
@@ -209,13 +203,11 @@ export default {
   },
   watch: {
     isFormUntouched(isFormUntouched) {
-      this.onEmitIsQuestionsFormUntouchedByBusEvent(isFormUntouched);
+      this.emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched);
     },
   },
   async created() {
     this.COMPONENT_TYPE = COMPONENT_TYPE;
-    this.formOnErrorMessage =
-      "One of the required field is not answered. Please, answer before validate";
     this.onReset();
 
     // NOTE - Update dataset Metrics orm
@@ -288,6 +280,7 @@ export default {
         }
       } catch (error) {
         console.log(error);
+
         // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
         let message = "";
 
@@ -302,7 +295,8 @@ export default {
     },
     async onDiscard() {
       try {
-        const responseValues = this.inputsToResponseValues();
+        const responseValues = this.factoryInputsToResponseValues();
+
         const responseId = getRecordResponsesIdByRecordId({
           userId: this.userId,
           recordId: this.recordId,
@@ -331,68 +325,31 @@ export default {
         return;
       }
 
-      // 1 - check if it's a create or update response
-      // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
-      const createOrUpdateResponse = this.initFlagCreateOrUpdateResponse();
-
-      // 2 - init formattedSelectionOptionObject
-      const formattedSelectionObject = this.formatSelectedOptionObjectOnSubmit(
-        RESPONSE_STATUS_FOR_API.SUBMITTED
-      );
-
-      // 3 - Create the formatted requests to send from the formattedSelectionObject
-      const formattedRequestsToSend = this.formatRequestsToSend(
-        createOrUpdateResponse,
-        formattedSelectionObject
-      );
-
-      // 4 - create or update the record responses and emit bus event to change record to show
-      await this.createOrUpdateResponsesAndEmitRecordToGoBusEvent(
-        RECORD_STATUS.SUBMITTED,
-        formattedRequestsToSend
-      );
-    },
-    initFlagCreateOrUpdateResponse() {
-      const createOrUpdateResponse = isResponsesByUserIdExists(
-        this.userId,
-        this.recordId
-      )
-        ? STATUS_RESPONSE.UPDATE
-        : STATUS_RESPONSE.CREATE;
-
-      return createOrUpdateResponse;
-    },
-    async createOrUpdateResponsesAndEmitRecordToGoBusEvent(
-      status,
-      requestsToSend
-    ) {
       try {
-        await this.createOrUpdateRecordResponses(requestsToSend);
+        const responseValues = this.factoryInputsToResponseValues();
 
-        // NOTE - Update dataset Metrics orm
+        const responseId = getRecordResponsesIdByRecordId({
+          userId: this.userId,
+          recordId: this.recordId,
+        });
+
+        await this.sendBackendRequest(responseId, {
+          status: RESPONSE_STATUS_FOR_API.SUBMITTED,
+          values: responseValues,
+        });
+
         await this.refreshMetrics();
 
-        // NOTE - onSubmit event => the status change to SUBMITTED
-        await updateRecordStatusByRecordId(this.recordId, status);
+        await updateRecordStatusByRecordId(
+          this.recordId,
+          RECORD_STATUS.SUBMITTED
+        );
 
-        let typeOfEvent = null;
-        switch (status) {
-          case RECORD_STATUS.SUBMITTED:
-            typeOfEvent = TYPE_OF_EVENT.ON_SUBMIT;
-            break;
-          case RECORD_STATUS.DISCARDED:
-            typeOfEvent = TYPE_OF_EVENT.ON_DISCARD;
-            break;
-          default:
-            console.log(`The event ${status} is unknown`);
-        }
-
-        this.emitBusEventGoToRecordIndex(typeOfEvent);
-      } catch (err) {
-        console.log(err);
+        this.emitBusEventGoToRecordIndex(TYPE_OF_EVENT.ON_SUBMIT);
+      } catch (error) {
+        console.log(error);
       }
     },
-
     emitBusEventGoToRecordIndex(typeOfEvent) {
       switch (typeOfEvent) {
         case TYPE_OF_EVENT.ON_SUBMIT:
@@ -478,40 +435,6 @@ export default {
         responses_submitted: responsesSubmitted,
         responses_discarded: responsesDiscarded,
       };
-    },
-    async createOrUpdateRecordResponses({
-      status,
-      responseId,
-      responseByQuestionName,
-    }) {
-      try {
-        let responseData = null;
-        if (status === STATUS_RESPONSE.UPDATE) {
-          responseData = await this.updateRecordResponses(
-            responseId,
-            responseByQuestionName
-          );
-        } else if (status === STATUS_RESPONSE.CREATE) {
-          responseData = await this.createRecordResponses(
-            this.recordId,
-            responseByQuestionName
-          );
-        }
-
-        const { data: updatedResponses } = responseData;
-
-        if (updatedResponses) {
-          this.updateResponsesInOrm({
-            record_id: this.recordId,
-            ...updatedResponses,
-          });
-        }
-      } catch (err) {
-        console.log(err);
-        const message = "There was a problem to save the response";
-        const typeOfToast = "error";
-        this.showNotificationComponent(message, typeOfToast);
-      }
     },
     async updateResponsesInOrm(responsesFromApi) {
       const newResponseToUpsertInOrm =
@@ -599,35 +522,7 @@ export default {
       }
       return formattedRecordResponsesForOrm;
     },
-    formatSelectedOptionObjectOnSubmit(status) {
-      let selectedOptionObj = {
-        status,
-      };
-      this.inputs.forEach((input) => {
-        // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
-
-        let selectedOption = null;
-        switch (input.component_type) {
-          case COMPONENT_TYPE.SINGLE_LABEL:
-          case COMPONENT_TYPE.RATING:
-            selectedOption = input.options?.find((option) => option.value);
-            break;
-          case COMPONENT_TYPE.FREE_TEXT:
-            selectedOption = input.options[0];
-            break;
-          default:
-            console.log(
-              `The component type ${input.component_type} is unknown, the response can't be save`
-            );
-        }
-        selectedOptionObj.values = {
-          ...selectedOptionObj.values,
-          [input.name]: { value: selectedOption?.text },
-        };
-      });
-      return selectedOptionObj;
-    },
-    inputsToResponseValues() {
+    factoryInputsToResponseValues() {
       let responseByQuestionName = {};
 
       this.inputs.forEach((input) => {
@@ -651,56 +546,6 @@ export default {
       });
       return responseByQuestionName;
     },
-    formatSelectedOptionObjectOnDiscard(status) {
-      // NOTE - it's possible to discard with partial response
-      let selectedOptionObj = {
-        status,
-        values,
-      };
-      this.inputs.forEach((input) => {
-        // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
-
-        let selectedOption = null;
-        switch (input.component_type) {
-          case COMPONENT_TYPE.SINGLE_LABEL:
-          case COMPONENT_TYPE.RATING:
-            selectedOption = input.options?.find((option) => option.value);
-            break;
-          case COMPONENT_TYPE.FREE_TEXT:
-            selectedOption = input.options[0];
-            break;
-          default:
-            console.log(
-              `The component type ${input.component_type} is unknown, the response can't be save`
-            );
-        }
-
-        // NOTE - Since it's possible to discard on partial response, that means => if we have a selectedOptionObj.text then we have a partial answer
-        selectedOptionObj.values = {
-          ...selectedOptionObj.values,
-          ...(selectedOption?.text && {
-            [input.name]: { value: selectedOption.text },
-          }),
-        };
-      });
-      return selectedOptionObj;
-    },
-    formatRequestsToSend(createOrUpdateResponse, responseByQuestionName) {
-      const formattedRequestsToSend = {
-        status: createOrUpdateResponse,
-        responseByQuestionName,
-        ...(createOrUpdateResponse === STATUS_RESPONSE.UPDATE && {
-          responseId: getRecordResponsesIdByRecordId({
-            userId: this.userId,
-            recordId: this.recordId,
-          }),
-        }),
-        ...(createOrUpdateResponse === STATUS_RESPONSE.CREATE && {
-          recordId: this.recordId,
-        }),
-      };
-      return formattedRequestsToSend;
-    },
     showNotificationComponent(message, typeOfToast) {
       Notification.dispatch("notify", {
         message,
@@ -708,7 +553,7 @@ export default {
         type: typeOfToast,
       });
     },
-    onEmitIsQuestionsFormUntouchedByBusEvent(isFormUntouched) {
+    emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched) {
       this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
   },
