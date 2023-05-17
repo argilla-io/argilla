@@ -349,12 +349,12 @@ class FeedbackDataset:
         self.__guidelines = guidelines
 
     @property
-    def fields(self) -> List[FeedbackFieldModel]:
+    def fields(self) -> List["FeedbackFieldModel"]:
         """Returns the fields that define the schema of the records in the dataset."""
         return self.__fields
 
     @property
-    def questions(self) -> List[FeedbackQuestionModel]:
+    def questions(self) -> List["FeedbackQuestionModel"]:
         """Returns the questions that will be used to annotate the dataset."""
         return self.__questions
 
