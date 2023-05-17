@@ -102,7 +102,7 @@ export default {
   },
   created() {
     this.toastMessage = "Your changes will be lost if you move to another view";
-    this.buttonMessage = "Ok, continue.";
+    this.buttonMessage = "Continue";
     this.typeOfToast = "warning";
   },
   methods: {

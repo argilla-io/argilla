@@ -26,7 +26,7 @@ export default {
   created() {
     this.paginationNotificationParams = {
       message: "Your changes will be lost if you move to another page",
-      buttonMessage: "Ok, continue.",
+      buttonMessage: "Continue",
       typeOfToast: "warning",
     };
 

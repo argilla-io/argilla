@@ -103,7 +103,7 @@ export default {
   created() {
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
     this.toastMessage = "Your changes will be lost if you refresh the page";
-    this.buttonMessage = "Ok, continue.";
+    this.buttonMessage = "Continue";
     this.typeOfToast = "warning";
   },
   methods: {
