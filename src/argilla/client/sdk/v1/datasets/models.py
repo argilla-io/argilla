@@ -13,14 +13,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import sys
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-if sys.version_info >= (3, 8):
+try:
     from typing import Literal
-else:
+except ImportError:
     from typing_extensions import Literal
 
 from pydantic import BaseModel, Field, StrictInt, StrictStr

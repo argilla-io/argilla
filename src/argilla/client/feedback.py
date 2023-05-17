@@ -14,14 +14,13 @@
 
 from __future__ import annotations
 
-import sys
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 from uuid import UUID
 
-if sys.version_info >= (3, 8):
+try:
     from typing import Literal
-else:
+except ImportError:
     from typing_extensions import Literal
 
 from pydantic import (

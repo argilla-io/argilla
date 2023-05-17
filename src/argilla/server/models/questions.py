@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import sys
 from datetime import datetime
 from enum import Enum
 from typing import Any, List, Union
@@ -22,9 +21,9 @@ from pydantic import BaseModel, Field, parse_obj_as
 from sqlalchemy import JSON, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-if sys.version_info >= (3, 8):
+try:
     from typing import Annotated, Literal
-else:
+except ImportError:
     from typing_extensions import Annotated, Literal
 
 from argilla.client.datasets import Dataset
