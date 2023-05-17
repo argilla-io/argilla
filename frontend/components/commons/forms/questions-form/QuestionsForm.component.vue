@@ -46,7 +46,7 @@
           :isIcon="!!input.description"
           :tooltipMessage="input.description"
           @on-change-single-label="
-            onChangeMonoselection({ newOptions: $event, idComponent: input.id })
+            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
           "
           @on-error="onError"
         />
@@ -59,7 +59,7 @@
           :isIcon="!!input.description"
           :tooltipMessage="input.description"
           @on-change-rating="
-            onChangeMonoselection({ newOptions: $event, idComponent: input.id })
+            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
           "
           @on-error="onError"
         />
@@ -256,8 +256,7 @@ export default {
         return input;
       });
     },
-    onChangeMonoselection({ newOptions, idComponent }) {
-      console.log(newOptions);
+    onChangeMonoSelection({ newOptions, idComponent }) {
       this.inputs = this.inputs.map((input) => {
         if (input.id === idComponent) {
           input.options = newOptions;
