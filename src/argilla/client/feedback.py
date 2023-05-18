@@ -464,7 +464,7 @@ class FeedbackDataset:
             yield self.records[i : i + batch_size]
 
     def push_to_argilla(self, name: Optional[str] = None, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
-        """Pushes the dataset to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
+        """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
         with the new records.
 
         Note that you may need to `rg.init(...)` with your Argilla credentials before calling this function, otherwise
