@@ -13,7 +13,10 @@
 #  limitations under the License.
 
 
+import sys
+
 import argilla as rg
+import pytest
 from argilla.training import ArgillaTrainer
 
 from .helpers import train_with_cleanup
@@ -22,6 +25,7 @@ FRAMEWORK = "peft"
 MODEL = "prajjwal1/bert-tiny"
 
 
+@pytest.mark.skipif(sys.version_info < (3, 9))
 def test_update_config(dataset_text_classification):
     trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
     trainer.update_config(num_train_epochs=4)
@@ -32,6 +36,7 @@ def test_update_config(dataset_text_classification):
     assert trainer._trainer.trainer_kwargs["max_steps"] == 1
 
 
+@pytest.mark.skipif(sys.version_info < (3, 9))
 def test_train_textcat(dataset_text_classification):
     trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
     trainer.update_config(max_steps=1, num_train_epochs=1)
@@ -45,6 +50,7 @@ def test_train_textcat(dataset_text_classification):
     train_with_cleanup(trainer, output_dir, train=False)
 
 
+@pytest.mark.skipif(sys.version_info < (3, 9))
 def test_train_textcat_multi_label(dataset_text_classification_multi_label):
     trainer = ArgillaTrainer(
         name=dataset_text_classification_multi_label, model=MODEL, train_size=0.5, framework=FRAMEWORK
@@ -60,6 +66,7 @@ def test_train_textcat_multi_label(dataset_text_classification_multi_label):
     train_with_cleanup(trainer, output_dir, train=False)
 
 
+@pytest.mark.skipif(sys.version_info < (3, 9))
 def test_train_tokencat(dataset_token_classification):
     trainer = ArgillaTrainer(name=dataset_token_classification, model=MODEL, framework=FRAMEWORK)
     trainer.update_config(max_steps=1, num_train_epochs=1)
