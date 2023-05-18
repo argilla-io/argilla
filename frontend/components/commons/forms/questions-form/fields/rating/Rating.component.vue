@@ -43,6 +43,7 @@ export default {
   },
   methods: {
     onChangeRating(newOptions) {
+      // TODO - refactor with a v-model instead of props/emit
       this.$emit("on-change-rating", newOptions);
 
       const isAnyRatingSelected = this.isAnyRatingSelected(newOptions);
