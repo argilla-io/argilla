@@ -243,26 +243,22 @@ export default {
       }
     },
     onChangeTextArea({ newOptions, idComponent }) {
-      this.inputs = this.inputs.map((input) => {
-        if (input.id === idComponent) {
-          input.options = [{ ...newOptions, value: newOptions.text }];
-        }
-        return input;
-      });
+      const component = this.inputs.find(({ id }) => id === idComponent);
+      // NOTE - formatting to the standard options
+      component.options = [{ ...newOptions, value: newOptions.text }];
     },
     onChangeMonoSelection({ newOptions, idComponent }) {
-      this.inputs = this.inputs.map((input) => {
-        if (input.id === idComponent) {
-          input.options = newOptions;
-        }
-        return input;
-      });
+      const component = this.inputs.find(({ id }) => id === idComponent);
+      component.options = newOptions;
     },
     async sendBackendRequest(responseValues) {
       try {
         let responseData = null;
         if (this.responseId) {
-          responseData = await this.updateRecordResponses(responseValues);
+          responseData = await this.updateResponseValues(
+            this.responseId,
+            responseValues
+          );
         } else {
           responseData = await this.createRecordResponses(
             this.recordId,
@@ -338,7 +334,8 @@ export default {
     async onClear() {
       try {
         const responseData =
-          this.responseId && (await this.deleteResponsesByResponseId());
+          this.responseId &&
+          (await this.deleteResponsesByResponseId(this.responseId));
 
         await deleteRecordResponsesByUserIdAndResponseId(
           this.userId,
@@ -377,8 +374,8 @@ export default {
 
       await upsertDatasetMetrics(formattedMetrics);
     },
-    async deleteResponsesByResponseId() {
-      return await this.$axios.delete(`/v1/responses/${this.responseId}`);
+    async deleteResponsesByResponseId(responseId) {
+      return await this.$axios.delete(`/v1/responses/${responseId}`);
     },
     async fetchMetrics() {
       try {
@@ -413,9 +410,9 @@ export default {
 
       await upsertRecordResponses(newResponseToUpsertInOrm);
     },
-    async updateRecordResponses(responseByQuestionName) {
+    async updateResponseValues(responseId, responseByQuestionName) {
       return await this.$axios.put(
-        `/v1/responses/${this.responseId}`,
+        `/v1/responses/${responseId}`,
         JSON.parse(JSON.stringify(responseByQuestionName))
       );
     },
