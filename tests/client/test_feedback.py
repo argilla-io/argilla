@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import tempfile
 from typing import TYPE_CHECKING, List
 
 import pytest
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
 
 from argilla.client.feedback import (
     FeedbackDataset,
+    FeedbackDatasetConfig,
     FeedbackRecord,
     RatingQuestion,
     TextField,
@@ -233,3 +235,52 @@ def test_push_to_argilla_and_from_argilla(
         question.name for question in dataset.questions
     ]
     assert len(dataset_from_argilla.records) == len(dataset.records)
+
+
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_push_to_huggingface_and_from_huggingface(
+    mocked_client,
+    monkeypatch,
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["FieldSchema"],
+    feedback_dataset_questions: List["QuestionSchema"],
+    feedback_dataset_records: List[FeedbackRecord],
+) -> None:
+    api.active_api()
+    api.init(api_key="argilla.apikey")
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records)
+
+    monkeypatch.setattr("datasets.arrow_dataset.Dataset.push_to_hub", lambda *args, **kwargs: None)
+    monkeypatch.setattr("huggingface_hub.hf_api.HfApi.upload_file", lambda *args, **kwargs: None)
+    monkeypatch.setattr("huggingface_hub.repocard.RepoCard.push_to_hub", lambda *args, **kwargs: None)
+
+    dataset.push_to_huggingface(repo_id="test-dataset", generate_card=True)
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".cfg", delete=False) as f:
+        f.write(
+            FeedbackDatasetConfig(
+                fields=feedback_dataset_fields,
+                questions=feedback_dataset_questions,
+                guidelines=feedback_dataset_guidelines,
+            ).json()
+        )
+        config_file = f.name
+
+    monkeypatch.setattr("huggingface_hub.file_download.hf_hub_download", lambda *args, **kwargs: config_file)
+    monkeypatch.setattr("datasets.load.load_dataset", lambda *args, **kwargs: "a")
+
+    dataset_from_huggingface = FeedbackDataset.from_huggingface(repo_id="test-dataset")
+    assert isinstance(dataset_from_huggingface, FeedbackDataset)
+    assert dataset_from_huggingface.guidelines == dataset.guidelines
+    assert len(dataset_from_huggingface.fields) == len(dataset.fields)
