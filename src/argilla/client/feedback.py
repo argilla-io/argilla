@@ -22,8 +22,8 @@ try:
 except ImportError:
     from typing_extensions import Literal
 
-from datasets import Dataset, Features, Sequence, Value
-from huggingface_hub import DatasetCard, upload_file
+from datasets import Dataset, DatasetDict, Features, Sequence, Value, load_dataset
+from huggingface_hub import DatasetCard, hf_hub_download, upload_file
 from pydantic import (
     BaseModel,
     Extra,
@@ -804,6 +804,64 @@ class FeedbackDataset:
                 )
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs["token"] if "token" in kwargs else None)
+
+    @classmethod
+    def from_huggingface(cls, repo_id: str, *args, **kwargs) -> "FeedbackDataset":
+        """Loads a `FeedbackDataset` from the HuggingFace Hub.
+
+        Args:
+            repo_id: the ID of the HuggingFace Hub repo to load the `FeedbackDataset` from.
+            *args: the args to pass to `datasets.Dataset.load_from_hub`.
+            **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
+
+        Returns:
+            A `FeedbackDataset` loaded from the HuggingFace Hub.
+        """
+        config_path = hf_hub_download(
+            repo_id=repo_id,
+            filename="argilla.cfg",
+            repo_type="dataset",
+            token=kwargs["token"] if "token" in kwargs else None,
+        )
+        with open(config_path, "rb") as f:
+            config = FeedbackDatasetConfig.parse_raw(f.read())
+
+        cls = cls(
+            fields=config.fields,
+            questions=config.questions,
+            guidelines=config.guidelines,
+        )
+        if "token" in kwargs:
+            kwargs["use_auth_token"] = kwargs["token"]
+            del kwargs["token"]
+        hfds = load_dataset(repo_id, *args, **kwargs)
+        if isinstance(hfds, DatasetDict) and "split" not in kwargs:
+            if len(hfds.keys()) > 1:
+                raise ValueError(
+                    f"Only one dataset can be loaded at a time, use `split` to select a split, available splits are: {', '.join(hfds.keys())}."
+                )
+        for index in range(len(hfds)):
+            responses = {}
+            for question in cls.questions:
+                if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
+                    continue
+                for user_id, value in zip(hfds[index][question.name]["user_id"], hfds[index][question.name]["value"]):
+                    if user_id not in responses:
+                        responses[user_id] = {
+                            "user_id": user_id,
+                            "status": "submitted",
+                            "values": {},
+                        }
+                    responses[user_id]["values"].update({question.name: {"value": value}})
+            cls.__records.append(
+                FeedbackRecord(
+                    fields={field.name: hfds[index][field.name] for field in cls.fields},
+                    responses=list(responses.values()) or None,
+                    external_id=hfds[index]["external_id"],
+                )
+            )
+        del hfds
+        return cls
 
 
 def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "FieldsSchema") -> BaseModel:
