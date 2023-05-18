@@ -10,7 +10,7 @@ The platform's versatility is showcased in its two main components: the Python S
 
 The UI is another significant component, designed for efficient data collection and curation. This tool further simplifies the process of collecting, curating, and using data, enhancing its overall utility.
 
-Argilla Feedback stands as a key resource for Reinforcement Learning from Human Feedback (RLHF) and LLM workflows. It equips developers and data teams with necessary capabilities during critical stages of the RLHF process. 
+Argilla Feedback stands as a key resource for Reinforcement Learning from Human Feedback (RLHF) and LLM workflows. It equips developers and data teams with necessary capabilities during critical stages of the RLHF process.
 
 This guide offers a conceptual overview of Argilla Feedback, setting the foundation for exploring its technical applications and utilities.
 
