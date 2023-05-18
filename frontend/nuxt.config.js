@@ -65,7 +65,6 @@ export default {
     { src: "~/plugins/toast.js" },
     { src: "~/plugins/highlight-search.js" },
     { src: "~/plugins/copy-to-clipboard.js" },
-    { src: "~/plugins/check-valid-html.js" },
     { src: "~/plugins/filters.js" },
     { src: "~/plugins/variables.js" },
     { src: "~/plugins/custom-directives/badge.directive.js" },
