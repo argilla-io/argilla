@@ -50,7 +50,7 @@ dependencies:
       - charset-normalizer==2.1.0
       - defusedxml==0.7.1
       - docutils==0.18.1
-      - entrypoints==0.
+      - entrypoints==0.4
       - fastjsonschema==2.15.3
       - furo==2022.6.4.1
       - h11==0.9.0
