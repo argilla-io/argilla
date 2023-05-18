@@ -67,24 +67,7 @@ docker-compose -f docker-compose.elasticsearch.yaml up
 
 
 (launch-the-web-app)=
-
-## 3. Prepare database
-
-First of all, you need to make sure that database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed. This will prepare some default ables for storing the data and user info.
-
-```bash
-python -m argilla database migrate
-```
-
-```
-INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
-INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
-INFO  [alembic.runtime.migration] Running upgrade  -> 74694870197c, create users table
-INFO  [alembic.runtime.migration] Running upgrade 74694870197c -> 82a5a88a3fa5, create workspaces table
-INFO  [alembic.runtime.migration] Running upgrade 82a5a88a3fa5 -> 1769ee58fbb4, create workspaces_users table
-```
-
-## 4. Launch Argilla Server
+## 3. Launch Argilla Server
 
 
 You can start the Argilla Server and UI by running:
@@ -103,7 +86,7 @@ You can also launch the Argilla Server and UI using [docker](launching-the-web-a
 For the latter you do not need a running ES instance.
 :::
 
-## 5. Start logging data
+## 3. Start logging data
 
 The following code will log one record into a data set called `example-dataset`:
 
