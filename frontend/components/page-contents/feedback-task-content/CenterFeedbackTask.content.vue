@@ -24,7 +24,7 @@ import {
   CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API,
   CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API,
 } from "@/components/feedback-task/feedbackTask.properties";
-import { FEEDBACK_TASK_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
+import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
 const TYPE_OF_FEEDBACK = Object.freeze({
   ERROR_FETCHING_QUESTIONS: "ERROR_FETCHING_QUESTIONS",
   ERROR_FETCHING_FIELDS: "ERROR_FETCHING_FIELDS",
@@ -102,7 +102,7 @@ export default {
   },
   created() {
     this.toastMessage = "Your changes will be lost if you move to another view";
-    this.buttonMessage = FEEDBACK_TASK_PROPERTIES.CONTINUE;
+    this.buttonMessage = LABEL_PROPERTIES.CONTINUE;
     this.typeOfToast = "warning";
   },
   methods: {
