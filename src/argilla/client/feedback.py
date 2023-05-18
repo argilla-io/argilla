@@ -140,7 +140,7 @@ class TextQuestion(QuestionSchema):
 
 class RatingQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "rating"})
-    values: List[int]
+    values: List[int] = Field(unique_items=True)
 
     @validator("values", always=True)
     def update_settings_with_values(cls, v, values):
@@ -178,7 +178,6 @@ class FeedbackDataset:
         >>> import argilla as rg
         >>> rg.init(api_url="...", api_key="...")
         >>> dataset = rg.FeedbackDataset(
-        ...     guidelines="These are the annotation guidelines.",
         ...     fields=[
         ...         rg.TextField(name="text", required=True),
         ...         rg.TextField(name="label", required=True),
@@ -196,6 +195,7 @@ class FeedbackDataset:
         ...             values=[1, 2, 3, 4, 5],
         ...         ),
         ...     ],
+        ...     guidelines="These are the annotation guidelines.",
         ... )
         >>> dataset.guidelines
         "These are the annotation guidelines."
@@ -229,30 +229,29 @@ class FeedbackDataset:
     def __init__(
         self,
         *,
-        guidelines: str,
         fields: List[FieldSchema],
         questions: List[QuestionSchema],
+        guidelines: Optional[str] = None,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.
 
         Args:
-            guidelines: contains the guidelines for annotating the dataset.
             fields: contains the fields that will define the schema of the records in the dataset.
             questions: contains the questions that will be used to annotate the dataset.
+            guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
 
         Raises:
-            TypeError: if `guidelines` is not a string.
-            ValueError: if `guidelines` is an empty string.
             TypeError: if `fields` is not a list of `FieldSchema`.
             ValueError: if `fields` does not contain at least one required field.
             TypeError: if `questions` is not a list of `QuestionSchema`.
             ValueError: if `questions` does not contain at least one required question.
+            TypeError: if `guidelines` is not None and not a string.
+            ValueError: if `guidelines` is an empty string.
 
         Examples:
             >>> import argilla as rg
             >>> rg.init(api_url="...", api_key="...")
             >>> dataset = rg.FeedbackDataset(
-            ...     guidelines="These are the annotation guidelines.",
             ...     fields=[
             ...         rg.TextField(name="text", required=True),
             ...         rg.TextField(name="label", required=True),
@@ -270,14 +269,9 @@ class FeedbackDataset:
             ...             values=[1, 2, 3, 4, 5],
             ...         ),
             ...     ],
+            ...     guidelines="These are the annotation guidelines.",
             ... )
         """
-        if not isinstance(guidelines, str):
-            raise TypeError(f"Expected `guidelines` to be a string, got {type(guidelines)} instead.")
-        if len(guidelines) < 1:
-            raise ValueError("Expected `guidelines` to be a non-empty string, minimum length is 1.")
-        self.__guidelines = guidelines
-
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
         any_required = False
@@ -302,6 +296,17 @@ class FeedbackDataset:
         if not any_required:
             raise ValueError("At least one `QuestionSchema` in `questions` must be required (`required=True`).")
         self.__questions = questions
+
+        if guidelines is not None:
+            if not isinstance(guidelines, str):
+                raise TypeError(
+                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
+                )
+            if len(guidelines) < 1:
+                raise ValueError(
+                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
+                )
+        self.__guidelines = guidelines
 
         self.__records = []
         self.__new_records = []
@@ -653,7 +658,6 @@ class FeedbackDataset:
 
         cls.argilla_id = existing_dataset.id
         self = cls(
-            guidelines=existing_dataset.guidelines,
             fields=[
                 FieldSchema.construct(**field.dict())
                 for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed
@@ -662,6 +666,7 @@ class FeedbackDataset:
                 QuestionSchema.construct(**question.dict())
                 for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed
             ],
+            guidelines=existing_dataset.guidelines or None,
         )
         if with_records:
             self.fetch_records()
@@ -708,19 +713,20 @@ def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "F
 
 def create_feedback_dataset(
     name: str,
-    guidelines: str,
     fields: List[FieldSchema],
     questions: List[QuestionSchema],
     workspace: Union[str, rg.Workspace] = None,
+    guidelines: Optional[str] = None,
 ) -> FeedbackDataset:
     """Creates a `FeedbackDataset` object and pushes it to Argilla.
 
     Args:
         name: the name of dataset in Argilla (must be unique per workspace).
-        guidelines: the annotation guidelines to help the annotator understand the dataset to annotate and how to annotate it.
         fields: the list of `FieldSchema` objects to define the schema of the records pushed to Argilla.
         questions: the list of `QuestionSchema` objects to define the questions to ask to the annotator.
         workspace: the name of the workspace in Argilla where to push the dataset. Defaults to the default workspace.
+        guidelines: the annotation guidelines to help the annotator understand the dataset to annotate and how to annotate it.
+            Defaults to `None`.
 
     Returns:
         The `FeedbackDataset` object created and pushed to Argilla.
@@ -734,7 +740,6 @@ def create_feedback_dataset(
         >>> rg.init(api_url="...", api_key="...")
         >>> fds = rg.create_feedback_dataset(
         ...     name="my-dataset",
-        ...     guidelines="These are the annotation guidelines.",
         ...     fields=[
         ...         rg.TextField(name="text", required=True),
         ...         rg.TextField(name="label", required=True),
@@ -752,12 +757,13 @@ def create_feedback_dataset(
         ...             values=[1, 2, 3, 4, 5],
         ...         ),
         ...     ],
+        ...     guidelines="These are the annotation guidelines.",
         ... )
     """
     fds = FeedbackDataset(
-        guidelines=guidelines,
         fields=fields,
         questions=questions,
+        guidelines=guidelines,
     )
     fds.push_to_argilla(name=name, workspace=workspace)
     return fds
