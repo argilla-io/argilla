@@ -21,6 +21,7 @@ try:
 except ImportError:
     from typing_extensions import Literal
 
+from datasets import Dataset, Features, Sequence, Value
 from pydantic import (
     BaseModel,
     Extra,
@@ -666,6 +667,68 @@ class FeedbackDataset:
         if with_records:
             self.fetch_records()
         return self
+
+    def format_as(self, format: Literal["datasets"]) -> Dataset:
+        """Formats the `FeedbackDataset` as a `datasets.Dataset` object.
+
+        Args:
+            format: the format to use to format the `FeedbackDataset`. Currently supported formats are:
+                `datasets`.
+
+        Returns:
+            The `FeedbackDataset.records` formatted as a `datasets.Dataset` object.
+
+        Raises:
+            ValueError: if the provided format is not supported.
+
+        Examples:
+            >>> import argilla as rg
+            >>> rg.init(...)
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
+            >>> huggingface_dataset = dataset.format_as("datasets")
+        """
+        if format == "datasets":
+            dataset = {}
+            features = {}
+            for field in self.fields:
+                if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
+                    raise ValueError(
+                        f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment only the"
+                        f" following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
+                    )
+                features[field.name] = Value(dtype="string", id="field")
+                if field.name not in dataset:
+                    dataset[field.name] = []
+            for question in self.questions:
+                # TODO(alvarobartt): if we constraint ranges from 0 to N, then we can use `ClassLabel` for ratings
+                features[question.name] = Sequence(
+                    {
+                        "user_id": Value(dtype="string"),
+                        "value": Value(dtype="string" if question.settings["type"] == "text" else "int32"),
+                    },
+                    id="question",
+                )
+                if question.name not in dataset:
+                    dataset[question.name] = []
+            features["external_id"] = Value(dtype="string", id="external_id")
+            dataset["external_id"] = []
+
+            for record in self.records:
+                for field in self.fields:
+                    dataset[field.name].append(record["fields"][field.name])
+                for question in self.questions:
+                    dataset[question.name].append(
+                        [
+                            {"user_id": r["user_id"], "value": r["values"][question.name]["value"]}
+                            for r in record["responses"]
+                        ]
+                        or None
+                    )
+                dataset["external_id"].append(record["external_id"] or None)
+
+            # TODO(alvarobartt): add info as `DatasetInfo`
+            return Dataset.from_dict({dataset}, features=Features(features))
+        raise ValueError(f"Unsupported format '{format}'.")
 
 
 def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "FieldsSchema") -> BaseModel:
