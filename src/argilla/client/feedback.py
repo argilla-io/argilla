@@ -22,8 +22,6 @@ try:
 except ImportError:
     from typing_extensions import Literal
 
-from datasets import Dataset, DatasetDict, Features, Sequence, Value, load_dataset
-from huggingface_hub import DatasetCard, hf_hub_download, upload_file
 from pydantic import (
     BaseModel,
     Extra,
@@ -41,6 +39,7 @@ from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 
 if TYPE_CHECKING:
     import httpx
+    from datasets import Dataset
 
     from argilla.client.sdk.v1.datasets.models import (
         FeedbackDatasetModel,
@@ -676,7 +675,7 @@ class FeedbackDataset:
             self.fetch_records()
         return self
 
-    def format_as(self, format: Literal["datasets"]) -> Dataset:
+    def format_as(self, format: Literal["datasets"]) -> "Dataset":
         """Formats the `FeedbackDataset` as a `datasets.Dataset` object.
 
         Args:
@@ -696,6 +695,8 @@ class FeedbackDataset:
             >>> huggingface_dataset = dataset.format_as("datasets")
         """
         if format == "datasets":
+            from datasets import Dataset, Features, Sequence, Value
+
             dataset = {}
             features = {}
             for field in self.fields:
@@ -752,6 +753,8 @@ class FeedbackDataset:
             *args: the args to pass to `datasets.Dataset.push_to_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
+        from huggingface_hub import DatasetCard, HfApi
+
         hfds = self.format_as("datasets")
         hfds.push_to_hub(repo_id, *args, **kwargs)
 
@@ -760,7 +763,8 @@ class FeedbackDataset:
                 FeedbackDatasetConfig(fields=self.fields, questions=self.questions, guidelines=self.guidelines).json()
             )
             f.flush()
-            upload_file(
+
+            HfApi().upload_file(
                 path_or_fileobj=f.name,
                 path_in_repo="argilla.cfg",
                 repo_id=repo_id,
@@ -817,6 +821,9 @@ class FeedbackDataset:
         Returns:
             A `FeedbackDataset` loaded from the HuggingFace Hub.
         """
+        from datasets import DatasetDict, load_dataset
+        from huggingface_hub import hf_hub_download
+
         config_path = hf_hub_download(
             repo_id=repo_id,
             filename="argilla.cfg",
@@ -831,15 +838,18 @@ class FeedbackDataset:
             questions=config.questions,
             guidelines=config.guidelines,
         )
+
         if "token" in kwargs:
             kwargs["use_auth_token"] = kwargs["token"]
             del kwargs["token"]
+
         hfds = load_dataset(repo_id, *args, **kwargs)
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
                 raise ValueError(
                     f"Only one dataset can be loaded at a time, use `split` to select a split, available splits are: {', '.join(hfds.keys())}."
                 )
+
         for index in range(len(hfds)):
             responses = {}
             for question in cls.questions:
