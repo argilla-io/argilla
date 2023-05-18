@@ -50,7 +50,9 @@ def test_list_datasets(mocked_client, sdk_client, monkeypatch) -> None:
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
-    mocked_client.post(f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id})
+    mocked_client.post(
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
+    )
 
     response = list_datasets(client=sdk_client)
     assert response.status_code == 200
@@ -68,7 +70,7 @@ def test_get_datasets(mocked_client, sdk_client, monkeypatch) -> None:
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id}
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -86,7 +88,7 @@ def test_create_dataset(mocked_client, sdk_client, monkeypatch) -> None:
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
-    response = create_dataset(client=sdk_client, name=dataset_name, workspace_id=workspace_id, guidelines="")
+    response = create_dataset(client=sdk_client, name=dataset_name, workspace_id=workspace_id, guidelines="...")
     assert response.status_code == 201
     assert isinstance(response.parsed, FeedbackDatasetModel)
     assert response.parsed.name == dataset_name
@@ -101,7 +103,7 @@ def test_delete_dataset(mocked_client, sdk_client, monkeypatch) -> None:
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id}
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -122,7 +124,7 @@ def test_publish_dataset(mocked_client, sdk_client, monkeypatch) -> None:
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id}
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -157,7 +159,7 @@ def test_add_field(mocked_client, sdk_client, monkeypatch) -> None:
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id}
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -178,7 +180,7 @@ def test_get_fields(mocked_client, sdk_client, monkeypatch) -> None:
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id}
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -203,7 +205,7 @@ def test_add_question(mocked_client, sdk_client, monkeypatch) -> None:
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id}
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -230,7 +232,7 @@ def test_get_questions(mocked_client, sdk_client, monkeypatch) -> None:
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id}
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -261,7 +263,7 @@ def test_add_records(mocked_client, sdk_client, monkeypatch) -> None:
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id}
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -294,7 +296,7 @@ def test_get_records(mocked_client, sdk_client, monkeypatch) -> None:
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "", "workspace_id": workspace_id}
+        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": "...", "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
