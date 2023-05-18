@@ -18,7 +18,7 @@ from argilla.training import ArgillaTrainer
 
 FRAMEWORK = "autotrain"
 MODELS = ["prajjwal1/bert-tiny", "autotrain"]
-_HF_HUB_ACCESS_TOKEN = os.environ["HF_AUTH_TOKEN"] or os.environ["HF_HUB_ACCESS_TOKEN"]
+_HF_HUB_ACCESS_TOKEN = os.environ.get("HF_AUTH_TOKEN") or os.environ.get("HF_HUB_ACCESS_TOKEN")
 
 
 @pytest.mark.skipif(
