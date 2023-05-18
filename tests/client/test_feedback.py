@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, List
 
 import pytest
 from argilla.client import api
+from pydantic import ValidationError
 
 if TYPE_CHECKING:
     from argilla.client.feedback import FieldSchema, QuestionSchema
@@ -101,6 +102,14 @@ class TestFeedbackDataset:
                 questions=[
                     TextQuestion(name="test", required=False),
                     RatingQuestion(name="test", values=[0, 1], required=False),
+                ],
+            )
+        with pytest.raises(ValidationError, match="1 validation error for RatingQuestion"):
+            FeedbackDataset(
+                guidelines=feedback_dataset_guidelines,
+                fields=feedback_dataset_fields,
+                questions=[
+                    RatingQuestion(name="test", values=[0, 0], required=True),
                 ],
             )
 
