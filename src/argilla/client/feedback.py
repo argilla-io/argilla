@@ -726,8 +726,10 @@ class FeedbackDataset:
                     )
                 dataset["external_id"].append(record["external_id"] or None)
 
-            # TODO(alvarobartt): add info as `DatasetInfo`
-            return Dataset.from_dict({dataset}, features=Features(features))
+            return Dataset.from_dict(
+                dataset,
+                features=Features(features),
+            )
         raise ValueError(f"Unsupported format '{format}'.")
 
 
