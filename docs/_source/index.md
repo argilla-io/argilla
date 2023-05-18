@@ -15,6 +15,14 @@
 
 .. toctree::
    :maxdepth: 3
+   :caption: LLMs
+   :hidden:
+
+   guides/llms/llm_concepts
+   guides/llms/llm_guides
+
+.. toctree::
+   :maxdepth: 3
    :caption: Guides
    :hidden:
 
