@@ -22,6 +22,7 @@ except ImportError:
     from typing_extensions import Literal
 
 from datasets import Dataset, Features, Sequence, Value
+from huggingface_hub import DatasetCard
 from pydantic import (
     BaseModel,
     Extra,
@@ -731,6 +732,58 @@ class FeedbackDataset:
                 features=Features(features),
             )
         raise ValueError(f"Unsupported format '{format}'.")
+
+    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs) -> None:
+        """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
+        HuggingFace Hub, it will be updated instead. Note that some params as `private` have no effect at all
+        when a dataset is previously uploaded to the HuggingFace Hub.
+
+        Args:
+            repo_id: the ID of the HuggingFace Hub repo to push the `FeedbackDataset` to.
+            generate_card: whether to generate a dataset card for the `FeedbackDataset` in the HuggingFace Hub. Defaults
+                to `True`.
+            *args: the args to pass to `datasets.Dataset.push_to_hub`.
+            **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
+        """
+        ds = self.format_as("datasets")
+        ds.push_to_hub(repo_id, *args, **kwargs)
+
+        if generate_card:
+            explained_fields = "## Fields\n\n" + "".join(
+                [
+                    f"* `{field.name}` is of type {FIELD_TYPE_TO_PYTHON_TYPE[field.settings['type']]}\n"
+                    for field in self.fields
+                ]
+            )
+            explained_questions = "## Questions\n\n" + "".join(
+                [
+                    f"* `{question.name}` {': ' + question.description if question.description else None}\n"
+                    for question in self.questions
+                ]
+            )
+            loading_guide = (
+                "## Load with Argilla\n\nTo load this dataset with Argilla, you'll just need to "
+                "install Argilla as `pip install argilla --upgrade` and then use the following code:\n\n"
+                "```python\n"
+                "import argilla as rg\n\n"
+                f"ds = rg.FeedbackDataset.from_huggingface({repo_id!r})\n"
+                "```\n\n"
+                "## Load with Datasets\n\nTo load this dataset with Datasets, you'll just need to "
+                "install Datasets as `pip install datasets --upgrade` and then use the following code:\n\n"
+                "```python\n"
+                "from datasets import load_dataset\n\n"
+                f"ds = load_dataset({repo_id!r})\n"
+                "```"
+            )
+            card = DatasetCard(
+                (
+                    f"## Guidelines\n\n{self.guidelines}\n\n"
+                    f"{explained_fields}\n\n"
+                    f"{explained_questions}\n\n"
+                    f"{loading_guide}\n\n"
+                )
+            )
+            card.push_to_hub(repo_id, repo_type="dataset", token=kwargs["token"] if "token" in kwargs else None)
 
 
 def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "FieldsSchema") -> BaseModel:
