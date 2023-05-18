@@ -46,9 +46,15 @@ class TestFeedbackDataset:
 
     @pytest.mark.usefixtures("feedback_dataset_fields", "feedback_dataset_questions")
     def test_init_wrong_guidelines(self, feedback_dataset_fields: list, feedback_dataset_questions: list) -> None:
-        with pytest.raises(TypeError, match="Expected `guidelines` to be a string"):
+        with pytest.raises(TypeError, match="Expected `guidelines` to be"):
             FeedbackDataset(
-                guidelines=None,
+                guidelines=[],
+                fields=feedback_dataset_fields,
+                questions=feedback_dataset_questions,
+            )
+        with pytest.raises(ValueError, match="Expected `guidelines` to be"):
+            FeedbackDataset(
+                guidelines="",
                 fields=feedback_dataset_fields,
                 questions=feedback_dataset_questions,
             )
