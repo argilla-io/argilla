@@ -29,6 +29,9 @@ const actions = {
       type: type || "default",
     });
   },
+  clear() {
+    return Vue.$toast.clear();
+  },
 };
 
 export default {

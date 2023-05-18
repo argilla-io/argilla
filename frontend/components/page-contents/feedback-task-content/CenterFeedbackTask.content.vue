@@ -24,7 +24,7 @@ import {
   CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API,
   CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API,
 } from "@/components/feedback-task/feedbackTask.properties";
-
+import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
 const TYPE_OF_FEEDBACK = Object.freeze({
   ERROR_FETCHING_QUESTIONS: "ERROR_FETCHING_QUESTIONS",
   ERROR_FETCHING_FIELDS: "ERROR_FETCHING_FIELDS",
@@ -102,7 +102,7 @@ export default {
   },
   created() {
     this.toastMessage = "Your changes will be lost if you move to another view";
-    this.buttonMessage = "Ok, continue.";
+    this.buttonMessage = LABEL_PROPERTIES.CONTINUE;
     this.typeOfToast = "warning";
   },
   methods: {
@@ -115,7 +115,7 @@ export default {
     }) {
       Notification.dispatch("notify", {
         message: message ?? "",
-        numberOfChars: 20000,
+        numberOfChars: 500,
         type: typeOfToast ?? "warning",
         buttonText: buttonMessage ?? "",
         async onClick() {
