@@ -71,7 +71,7 @@ export default {
         buttons: [
           {
             id: "metrics",
-            tooltip: "Metrics",
+            tooltip: "Progress",
             icon: "progress",
             action: "show-metrics",
             type: "expandable",

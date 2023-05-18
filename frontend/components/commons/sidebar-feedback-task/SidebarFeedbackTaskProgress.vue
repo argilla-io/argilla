@@ -31,8 +31,8 @@
       :multiple="true"
       :progress="(totalSubmitted * 100) / progressTotal"
       :progress-secondary="(totalDiscarded * 100) / progressTotal"
-      :color="itemColor(0)"
-      :color-secondary="itemColor(1)"
+      :color="itemColor(1)"
+      :color-secondary="itemColor(2)"
     >
     </BaseProgress>
     <div class="scroll">
@@ -81,6 +81,11 @@ export default {
     progressItems() {
       return [
         {
+          name: RECORD_STATUS.PENDING,
+          color: RECORD_STATUS_COLOR.PENDING,
+          progress: this.totalPending,
+        },
+        {
           name: RECORD_STATUS.SUBMITTED,
           color: RECORD_STATUS_COLOR.SUBMITTED,
           progress: this.totalSubmitted,
@@ -89,11 +94,6 @@ export default {
           name: RECORD_STATUS.DISCARDED,
           color: RECORD_STATUS_COLOR.DISCARDED,
           progress: this.totalDiscarded,
-        },
-        {
-          name: RECORD_STATUS.PENDING,
-          color: RECORD_STATUS_COLOR.PENDING,
-          progress: this.totalPending,
         },
       ];
     },

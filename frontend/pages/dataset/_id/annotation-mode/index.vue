@@ -38,6 +38,7 @@ import {
   getFeedbackDatasetNameById,
   getFeedbackDatasetWorkspaceNameById,
 } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
 import { Notification } from "@/models/Notifications";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
@@ -103,7 +104,7 @@ export default {
   created() {
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
     this.toastMessage = "Your changes will be lost if you refresh the page";
-    this.buttonMessage = "Ok, continue.";
+    this.buttonMessage = LABEL_PROPERTIES.CONTINUE;
     this.typeOfToast = "warning";
   },
   methods: {
