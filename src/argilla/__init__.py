@@ -19,6 +19,7 @@ as well as in the `_import_structure` dictionary.
 """
 
 import sys as _sys
+import warnings
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from argilla.logging import configure_logging as _configure_logging
@@ -33,6 +34,14 @@ try:
     _install_rich()
 except ModuleNotFoundError:
     pass
+
+if _sys.version_info < (3, 8):
+    warnings.warn(
+        message="Your Python runtime version is deprecated and will not be supported in the upcoming release. "
+        "To ensure compatibility and uninterrupted service, we kindly request that you migrate to Argilla with"
+        " Python 3.8 or higher runtimes",
+        category=DeprecationWarning,
+    )
 
 __version__ = _version.version
 
