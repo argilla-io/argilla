@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import tempfile
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 from uuid import UUID
@@ -22,7 +23,7 @@ except ImportError:
     from typing_extensions import Literal
 
 from datasets import Dataset, Features, Sequence, Value
-from huggingface_hub import DatasetCard
+from huggingface_hub import DatasetCard, upload_file
 from pydantic import (
     BaseModel,
     Extra,
@@ -152,6 +153,12 @@ class RatingQuestion(QuestionSchema):
 
     class Config:
         validate_assignment = True
+
+
+class FeedbackDatasetConfig(BaseModel):
+    fields: List[FieldSchema]
+    questions: List[QuestionSchema]
+    guidelines: Optional[str] = None
 
 
 class FeedbackDataset:
@@ -745,8 +752,21 @@ class FeedbackDataset:
             *args: the args to pass to `datasets.Dataset.push_to_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
-        ds = self.format_as("datasets")
-        ds.push_to_hub(repo_id, *args, **kwargs)
+        hfds = self.format_as("datasets")
+        hfds.push_to_hub(repo_id, *args, **kwargs)
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".cfg", delete=False) as f:
+            f.write(
+                FeedbackDatasetConfig(fields=self.fields, questions=self.questions, guidelines=self.guidelines).json()
+            )
+            f.flush()
+            upload_file(
+                path_or_fileobj=f.name,
+                path_in_repo="argilla.cfg",
+                repo_id=repo_id,
+                repo_type="dataset",
+                token=kwargs["token"] if "token" in kwargs else None,
+            )
 
         if generate_card:
             explained_fields = "## Fields\n\n" + "".join(
