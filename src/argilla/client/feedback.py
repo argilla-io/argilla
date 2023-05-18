@@ -242,6 +242,7 @@ class FeedbackDataset:
 
         Raises:
             TypeError: if `guidelines` is not a string.
+            ValueError: if `guidelines` is an empty string.
             TypeError: if `fields` is not a list of `FieldSchema`.
             ValueError: if `fields` does not contain at least one required field.
             TypeError: if `questions` is not a list of `QuestionSchema`.
@@ -273,6 +274,8 @@ class FeedbackDataset:
         """
         if not isinstance(guidelines, str):
             raise TypeError(f"Expected `guidelines` to be a string, got {type(guidelines)} instead.")
+        if len(guidelines) < 1:
+            raise ValueError("Expected `guidelines` to be a non-empty string, minimum length is 1.")
         self.__guidelines = guidelines
 
         if not isinstance(fields, list):
