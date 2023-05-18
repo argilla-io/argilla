@@ -28,11 +28,11 @@
           :title="input.question"
           :optionId="`${input.name}_0`"
           :placeholder="input.placeholder"
-          :initialText="input.options[0].text"
+          :value="input.options[0].text"
           :isRequired="input.is_required"
           :isIcon="!!input.description"
           :tooltipMessage="input.description"
-          @on-change-text-area="
+          @on-change-value="
             onChangeTextArea({ newOptions: $event, idComponent: input.id })
           "
           @on-error="onError"
@@ -280,14 +280,7 @@ export default {
       } catch (error) {
         console.log(error);
 
-        // NOTE - if there is a responseid for the input, means that it's an update. Otherwise it's a create
-        let message = "";
-
-        if (this.responseId) {
-          message = `There was a probleme to update response with responseId: ${this.responseId}`;
-        } else {
-          message = `There was a probleme to create response with recordId. ${this.recordId}`;
-        }
+        const message = "There was a problem to save the response";
 
         this.showNotificationComponent(message, "error");
       }

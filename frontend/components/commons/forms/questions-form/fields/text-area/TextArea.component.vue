@@ -22,7 +22,7 @@
         class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
-        :defaultText="initialText"
+        :defaultText="value"
         :placeholder="placeholder"
         @change-text="onChangeTextArea"
         @on-change-focus="setFocus"
@@ -41,7 +41,7 @@ export default {
       type: String,
       required: true,
     },
-    initialText: {
+    value: {
       type: String,
       default: () => "",
     },
@@ -74,7 +74,7 @@ export default {
   methods: {
     onChangeTextArea(newText) {
       const isAnyText = newText?.length;
-      this.$emit("on-change-text-area", {
+      this.$emit("on-change-value", {
         id: this.optionId,
         text: isAnyText ? newText : null,
       });
