@@ -297,6 +297,7 @@ export default {
           RECORD_STATUS.DISCARDED
         );
 
+        this.onReset();
         this.emitBusEventGoToRecordIndex();
       } catch (error) {
         console.log(error);
@@ -323,6 +324,7 @@ export default {
           RECORD_STATUS.SUBMITTED
         );
 
+        this.onReset();
         this.emitBusEventGoToRecordIndex();
       } catch (error) {
         console.log(error);
