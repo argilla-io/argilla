@@ -28,7 +28,7 @@ from pydantic import BaseModel, Field, StrictInt, StrictStr
 class FeedbackDatasetModel(BaseModel):
     id: UUID
     name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_ ]+$")
-    guidelines: str = None
+    guidelines: Optional[str] = None
     status: str = None
     workspace_id: str = None
     created_at: datetime = None
