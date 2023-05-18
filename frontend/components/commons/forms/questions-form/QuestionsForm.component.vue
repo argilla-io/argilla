@@ -298,6 +298,8 @@ export default {
         );
 
         this.emitBusEventGoToRecordIndex();
+
+        // TODO - reset only when we know that we fetch and computed all the necessary records data
         this.onReset();
       } catch (error) {
         console.log(error);
@@ -325,6 +327,8 @@ export default {
         );
 
         this.emitBusEventGoToRecordIndex();
+
+        // TODO - reset only when we know that we fetch and computed all the necessary records data
         this.onReset();
       } catch (error) {
         console.log(error);
