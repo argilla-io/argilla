@@ -35,11 +35,12 @@ try:
 except ModuleNotFoundError:
     pass
 
+# TODO: Remove this warning once https://github.com/argilla-io/argilla/issues/2902 is tackled
 if _sys.version_info < (3, 8):
     warnings.warn(
         message="Your Python runtime version is deprecated and will not be supported in the upcoming release. "
         "To ensure compatibility and uninterrupted service, we kindly request that you migrate to Argilla with"
-        " Python 3.8 or higher runtimes",
+        " Python 3.8 or higher.",
         category=DeprecationWarning,
     )
 
