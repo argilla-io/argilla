@@ -1,3 +1,4 @@
+#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,32 +13,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
-from uuid import UUID
-
-from pydantic import BaseModel
-
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
-
-from argilla.server.models import FieldType
+import pytest
+from argilla.client import api
+from argilla.client.workspaces import Workspace
 
 
-class TextFieldSettings(BaseModel):
-    type: Literal[FieldType.text]
+def test_workspace_cls_init(mocked_client):
+    the_api = api.active_api()
+    workspace = the_api.http_client.post("/api/workspaces", json={"name": "test_workspace"})
+    assert workspace["name"] == "test_workspace"
 
+    api.init(api_key="argilla.apikey")
+    workspace = Workspace.from_name("test_workspace")
+    assert workspace.name == "test_workspace"
+    assert isinstance(workspace.id, str)
 
-class Field(BaseModel):
-    id: UUID
-    name: str
-    title: str
-    required: bool
-    settings: TextFieldSettings
-    dataset_id: UUID
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
+    with pytest.raises(ValueError):
+        Workspace.from_name("this_workspace_does_not_exist")

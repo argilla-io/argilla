@@ -1,3 +1,4 @@
+#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,33 +12,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from datetime import datetime
-from uuid import UUID
-
-from pydantic import BaseModel
-
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
-
-from argilla.server.models import FieldType
-
-
-class TextFieldSettings(BaseModel):
-    type: Literal[FieldType.text]
-
-
-class Field(BaseModel):
-    id: UUID
-    name: str
-    title: str
-    required: bool
-    settings: TextFieldSettings
-    dataset_id: UUID
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True

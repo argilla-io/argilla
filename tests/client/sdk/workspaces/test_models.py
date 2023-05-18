@@ -12,32 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
-from uuid import UUID
-
-from pydantic import BaseModel
-
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
-
-from argilla.server.models import FieldType
+from argilla.client.sdk.workspaces.models import WorkspaceModel as ClientSchema
+from argilla.server.apis.v1.handlers.workspaces import Workspace as ServerSchema
 
 
-class TextFieldSettings(BaseModel):
-    type: Literal[FieldType.text]
-
-
-class Field(BaseModel):
-    id: UUID
-    name: str
-    title: str
-    required: bool
-    settings: TextFieldSettings
-    dataset_id: UUID
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
+def test_users_schema(helpers):
+    assert helpers.are_compatible_api_schemas(ClientSchema.schema(), ServerSchema.schema())

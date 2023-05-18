@@ -56,6 +56,14 @@ if _TYPE_CHECKING:
         read_datasets,
         read_pandas,
     )
+    from argilla.client.feedback import (
+        FeedbackDataset,
+        FeedbackRecord,
+        RatingQuestion,
+        TextField,
+        TextQuestion,
+        create_feedback_dataset,
+    )
     from argilla.client.models import (
         Text2TextRecord,
         TextClassificationRecord,
@@ -63,6 +71,7 @@ if _TYPE_CHECKING:
         TokenAttributions,
         TokenClassificationRecord,
     )
+    from argilla.client.workspaces import Workspace
     from argilla.datasets import (
         TextClassificationSettings,
         TokenClassificationSettings,
@@ -103,6 +112,15 @@ _import_structure = {
         "read_datasets",
         "read_pandas",
     ],
+    "client.feedback": [
+        "FeedbackDataset",
+        "create_feedback_dataset",
+        "TextField",
+        "TextQuestion",
+        "RatingQuestion",
+        "FeedbackRecord",
+    ],
+    "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [
         "listener",

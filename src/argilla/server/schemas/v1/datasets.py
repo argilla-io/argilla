@@ -19,7 +19,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, conlist, constr, validator
 from pydantic import Field as ModelField
-from typing_extensions import Annotated, Literal
+
+try:
+    from typing import Annotated, Literal
+except ImportError:
+    from typing_extensions import Annotated, Literal
 
 from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
 
