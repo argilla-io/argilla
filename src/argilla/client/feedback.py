@@ -140,7 +140,7 @@ class TextQuestion(QuestionSchema):
 
 class RatingQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "rating"})
-    values: List[int]
+    values: List[int] = Field(unique_items=True)
 
     @validator("values", always=True)
     def update_settings_with_values(cls, v, values):
