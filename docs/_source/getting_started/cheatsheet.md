@@ -32,11 +32,11 @@ To get started with your data from our Python library, we first need to connect 
 
 ::::{tab-set}
 
-:::{tab-item} Default (global)
+:::{tab-item} Default
 By default Argilla connects to `localhost:6900` using the `argilla.apikey` in the background.
 :::
 
-:::{tab-item} Environment Variables (global)
+:::{tab-item} Environment Variables
 
 ```bash
 # MacOS
@@ -50,7 +50,7 @@ setx ARGILLA_API_URL="argilla-api-key"
 
 :::
 
-:::{tab-item} rg.init() (global)
+:::{tab-item} rg.init()
 ```python
 import argilla as rg
 
@@ -61,7 +61,7 @@ rg.init(
 ```
 :::
 
-:::{tab-item} client (local)
+:::{tab-item} local client
 ```python
 from argilla.client.client import Argilla
 
