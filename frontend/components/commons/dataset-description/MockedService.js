@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-const FAKE_DESCRIPTION = `# Title 
+const FAKE_DESCRIPTION = `# Title
 
 ## Subtitle`;
 
