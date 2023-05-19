@@ -1,184 +1,33 @@
 ## 🎼 Cheatsheet
 
-### Deployments
+### Installation
 
-Before being able to use Argilla from our Python library, you first need to deploy our FastAPI server, Elastic Search and the Argilla UI. We also have a more extensive page on [deployments](/getting_started/installation/deployments/deployments) and [configurations](/getting_started/installation/configurations/configurations).
-
-::::{tab-set}
-
-:::{tab-item} Docker
+First things first!
 ```bash
-docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
+pip install argilla
 ```
-:::
 
-:::{tab-item} Docker Compose
+```{include} /_common/tabs/argilla_install.md
 ```
-wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml && docker-compose up -d
-```
-:::
-
-:::{tab-item} Hugging Face Spaces
-<a  href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
-    <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
-</a>
-:::
-
-::::
 
 ### Connect to Argilla
 
-To get started with your data from our Python library, we first need to connect to our FastAPI. This is done via `httpx` using an API key and a URL. Or take a more extensive look [here](/guides/log_load_and_prepare_data).
+To get started with your data from our Python library, we first need to connect to our FastAPI server. This is done via `httpx` using an API key and a URL. Or take a more extensive look [here](/guides/log_load_and_prepare_data).
 
-::::{tab-set}
-
-:::{tab-item} Default
-By default Argilla connects to `localhost:6900` using the `argilla.apikey` in the background.
-:::
-
-:::{tab-item} Environment Variables
-
-```bash
-# MacOS
-export ARGILLA_API_URL="argilla-api-url"
-export ARGILLA_API_KEY="argilla-api-key"
-
-# Windows
-setx ARGILLA_API_URL="argilla-api-url"
-setx ARGILLA_API_URL="argilla-api-key"
+```{include} /_common/tabs/argilla_connect.md
 ```
 
-:::
-
-:::{tab-item} rg.init()
-```python
-import argilla as rg
-
-rg.init(
-    api_url="argilla-api-url",
-    api_key="argilla-api-key"
-)
-```
-:::
-
-:::{tab-item} local client
-```python
-from argilla.client.client import Argilla
-
-client = Argilla(
-    api_url="argilla-api-url",
-    api_key="argilla-api-key"
-)
-```
-:::
-
-::::
-
-### Configure dataset
+### Configure datasets
 
 Before getting started with any textual data project, we advise setting up annotation guidelines and a labeling schema. Need some more context? Take look [here](/guides/log_load_and_prepare_data).
 
-::::{tab-set}
-
-:::{tab-item} Text Classification
-:sync: textclass
-```python
-import argilla as rg
-
-settings = rg.TextClassificationSettings(label_schema=["A", "B", "C"])
-
-rg.configure_dataset(name="my_dataset", settings=settings)
+```{include} /_common/tabs/dataset_settings.md
 ```
-:::
-
-:::{tab-item} Token Classification
-:sync: tokenclass
-```python
-import argilla as rg
-
-settings = rg.TokenClassificationSettings(label_schema=["A", "B", "C"])
-
-rg.configure_dataset(name="my_dataset", settings=settings)
-```
-:::
-
-:::{tab-item} Text2Text
-:sync: text2text
-Because we do not require a labeling schema, we can create a dataset by directly logging records as shown below.
-:::
-
-::::
 
 ### Create records
 
-We support different tasks within the Argilla eco-system focused on NLP: `Text Classification`, `Token Classification`, `Text2Text` and LLM-related `Feedback`. To know more about creation, take a look [here](/guides/log_load_and_prepare_data).
-
-::::{tab-set}
-
-:::{tab-item} Text Classification
-```python
-:sync: textclass
-import argilla as rg
-
-rec = rg.TextClassificationRecord(
-    text="beautiful accomodations stayed hotel santa... hotels higer ranked website.",
-    prediction=[("price", 0.75), ("hygiene", 0.25)],
-    annotation="price"
-)
-rg.log(records=rec, name="my_dataset")
+```{include} /_common/tabs/records_create.md
 ```
-![single_textclass_record](../../_static/reference/webapp/features-single_textclass_record.png)
-:::
-
-:::{tab-item} Text Classification (multi-label)
-:sync: textclass
-```python
-import argilla as rg
-
-rec = rg.TextClassificationRecord(
-    text="damn this kid and her fancy clothes makes me feel like a bad parent.",
-    prediction=[("admiration", 0.75), ("annoyance", 0.25)],
-    annotation=["price", "annoyance"],
-    multi_label=True
-)
-rg.log(records=rec, name="my_dataset")
-```
-![multi_textclass_record](../../_static/reference/webapp/features-multi_textclass_record.png)
-:::
-
-
-:::{tab-item} Token Classification
-:sync: tokenclass
-```python
-import argilla as rg
-
-record = rg.TokenClassificationRecord(
-    text="Michael is a professor at Harvard",
-    tokens=["Michael", "is", "a", "professor", "at", "Harvard"],
-    prediction=[("NAME", 0, 7, 0.75), ("LOC", 26, 33, 0.8)],
-    annotation=[("NAME", 0, 7), ("LOC", 26, 33)],
-)
-rg.log(records=rec, name="my_dataset")
-```
-![tokclass_record](../../_static/reference/webapp/features-tokclass_record.png)
-:::
-
-:::{tab-item} Text2Text
-:sync: text2text
-```python
-import argilla as rg
-
-record = rg.Text2TextRecord(
-    text="A giant giant spider is discovered... how much does he make in a year?",
-    prediction=["He has 3*4 trees. So he has 12*5=60 apples."],
-)
-rg.log(records=rec, name="my_dataset")
-```
-
-![text2text_record](../../_static/reference/webapp/features-text2text_record.png)
-:::
-
-::::
 
 ### Query datasets
 
@@ -389,86 +238,7 @@ trainer.train()
 records = trainer.predict(["my-text"], as_argilla_records=True)
 ```
 
-::::{tab-set}
-
-:::{tab-item} SetFit
-```python
-trainer.update_config(
-    metric = "accuracy",
-    num_iterations = 20,
-    num_epochs = 1,
-    learning_rate = 2e-5,
-    batch_size = 16,
-    seed = 42,
-    use_amp = True,
-    warmup_proportion = 0.1,
-    distance_metric = "BatchHardTripletLossDistanceFunction.cosine_distance",
-    margin = 0.25,
-    samples_per_label = 2
-)
+```{include} /_common/tabs/train_update_config.md
 ```
-:::
-
-:::{tab-item} spaCy
-```python
-trainer.update_config(
-    dev_corpus = "corpora.dev",
-    train_corpus = "corpora.train",
-    seed = 42,
-    gpu_allocator = 0,
-    accumulate_gradient = 1,
-    patience = 1600,
-    max_epochs = 0,
-    max_steps = 20000,
-    eval_frequency = 200,
-    frozen_components = [],
-    annotating_components = [],
-    before_to_disk = None,
-    before_update = None
-)
-```
-:::
-
-:::{tab-item} Transformers
-```python
-# `transformers.AutoModelForTextClassification`
-trainer.update_config(
-    pretrained_model_name_or_path = "distilbert-base-uncased",
-    force_download = False,
-    resume_download = False,
-    proxies = None,
-    token = None,
-    cache_dir = None,
-    local_files_only = False
-)
-# `transformers.TrainingArguments`
-trainer.update_config(
-    per_device_train_batch_size = 8,
-    per_device_eval_batch_size = 8,
-    gradient_accumulation_steps = 1,
-    learning_rate = 5e-5,
-    weight_decay = 0,
-    adam_beta1 = 0.9,
-    adam_beta2 = 0.9,
-    adam_epsilon = 1e-8,
-    max_grad_norm = 1,
-    learning_rate = 5e-5,
-    num_train_epochs = 3,
-    max_steps = 0,
-    log_level = "passive",
-    logging_strategy = "steps",
-    save_strategy = "steps",
-    save_steps = 500,
-    seed = 42,
-    push_to_hub = False,
-    hub_model_id = "user_name/output_dir_name",
-    hub_strategy = "every_save",
-    hub_token = "1234",
-    hub_private_repo = False
-)
-```
-:::
-
-::::
 
 <a href="https://argilla.io/blog/introducing-argilla-trainer"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>

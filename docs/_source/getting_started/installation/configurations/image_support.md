@@ -1,0 +1,3 @@
+# Image Support
+
+You can pass a URL in the metadata field `_image_url` and the image will be rendered in the Argilla UI. You can use this in the Text Classification and the Token Classification tasks. These images need to be hosted on a publicly available URL, or private file servers like NGINX, or Minio. A good example of this would be the [tutorial by Ben Burtenshaw](/tutorials/notebooks/labelling-textclassification-sentencetransformers-semantic.ipynb).

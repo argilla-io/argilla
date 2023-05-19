@@ -9,24 +9,25 @@
 
    self
    getting_started/quickstart
+   getting_started/cheatsheet
    getting_started/installation/deployments/deployments.md
    getting_started/installation/configurations/configurations.md
-   getting_started/terminology
+
 
 .. toctree::
    :maxdepth: 3
    :caption: LLMs
    :hidden:
 
-   guides/llms/llm_concepts
-   guides/llms/llm_guides
+   guides/llms/conceptual_guide
+   guides/llms/practical_guides/practical_guides
+   guides/llms/examples/examples
 
 .. toctree::
    :maxdepth: 3
    :caption: Guides
    :hidden:
 
-   guides/how_to
    guides/log_load_and_prepare_data
    guides/train_a_model
    guides/query_datasets
@@ -62,6 +63,7 @@
    reference/datamodel
    reference/notebooks
    reference/telemetry
+   reference/terminology
 
 .. toctree::
    :maxdepth: 2
