@@ -76,7 +76,7 @@ export default {
       const isAnyText = newText?.length;
       this.$emit("on-change-value", {
         id: this.optionId,
-        text: isAnyText ? newText : null,
+        text: isAnyText ? newText : "",
       });
 
       if (this.isRequired) {
