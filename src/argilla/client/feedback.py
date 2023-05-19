@@ -779,7 +779,7 @@ class FeedbackDataset:
                 path_in_repo="argilla.cfg",
                 repo_id=repo_id,
                 repo_type="dataset",
-                token=kwargs["token"] if "token" in kwargs else None,
+                token=kwargs.get("token"),
             )
 
         if generate_card:
@@ -817,7 +817,7 @@ class FeedbackDataset:
                     f"{loading_guide}\n\n"
                 )
             )
-            card.push_to_hub(repo_id, repo_type="dataset", token=kwargs["token"] if "token" in kwargs else None)
+            card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
     @classmethod
     def from_huggingface(cls, repo_id: str, *args, **kwargs) -> "FeedbackDataset":
