@@ -829,9 +829,9 @@ class FeedbackDataset:
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
+    @classmethod
     @requires_version("datasets")
     @requires_version("huggingface_hub")
-    @classmethod
     def from_huggingface(cls, repo_id: str, *args, **kwargs) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 
