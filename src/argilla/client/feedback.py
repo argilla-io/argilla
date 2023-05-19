@@ -36,6 +36,7 @@ from tqdm import tqdm
 
 import argilla as rg
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.utils.dependency import requires_version
 
 if TYPE_CHECKING:
     import httpx
@@ -680,6 +681,7 @@ class FeedbackDataset:
             self.fetch_records()
         return self
 
+    @requires_version("datasets")
     def format_as(self, format: Literal["datasets"]) -> "Dataset":
         """Formats the `FeedbackDataset` as a `datasets.Dataset` object.
 
@@ -746,6 +748,7 @@ class FeedbackDataset:
             )
         raise ValueError(f"Unsupported format '{format}'.")
 
+    @requires_version("huggingface_hub")
     def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs) -> None:
         """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
         HuggingFace Hub, it will be updated instead. Note that some params as `private` have no effect at all
@@ -758,7 +761,14 @@ class FeedbackDataset:
             *args: the args to pass to `datasets.Dataset.push_to_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
+        import huggingface_hub
         from huggingface_hub import DatasetCard, HfApi
+        from packaging.version import parse as parse_version
+
+        if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
+            warnings.warn(
+                f"Recommended `huggingface_hub` version is 0.14.0 or higher, and you have {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
+            )
 
         if len(self) < 1:
             raise ValueError(
@@ -819,6 +829,8 @@ class FeedbackDataset:
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
+    @requires_version("datasets")
+    @requires_version("huggingface_hub")
     @classmethod
     def from_huggingface(cls, repo_id: str, *args, **kwargs) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
@@ -831,8 +843,15 @@ class FeedbackDataset:
         Returns:
             A `FeedbackDataset` loaded from the HuggingFace Hub.
         """
+        import huggingface_hub
         from datasets import DatasetDict, load_dataset
         from huggingface_hub import hf_hub_download
+        from packaging.version import parse as parse_version
+
+        if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
+            warnings.warn(
+                f"Recommended `huggingface_hub` version is 0.14.0 or higher, and you have {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
+            )
 
         config_path = hf_hub_download(
             repo_id=repo_id,
