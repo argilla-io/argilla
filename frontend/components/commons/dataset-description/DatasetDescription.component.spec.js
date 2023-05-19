@@ -4,7 +4,8 @@ import DatasetDescription from "./DatasetDescription.component";
 let wrapper = null;
 const options = {
   propsData: {
-    datasetDescription: "Lorem ipsum",
+    datasetId: "FAKE_ID",
+    datasetTask: "FAKE_TASK"
   },
 };
 beforeEach(() => {
@@ -15,8 +16,19 @@ afterEach(() => {
   wrapper.destroy();
 });
 
-describe("DatasetDescriptionComponent", () => {
+jest.mock("@/models/dataset.utilities", () => {
+  return {
+    getDatasetFromORM: jest.fn(() => ({ tags: { description: "FAKE_DESCRIPTION" } }))
+  }
+})
+describe("DatasetDescriptionComponent should", () => {
   it("render the component", () => {
     expect(wrapper.is(DatasetDescription)).toBe(true);
+  });
+
+  it("see description", () => {
+    const description = wrapper.find(".description__text");
+
+    expect(description.element.innerHTML).toBe("FAKE_DESCRIPTION")
   });
 });

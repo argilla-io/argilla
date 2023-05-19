@@ -16,7 +16,10 @@
       </base-action-tooltip>
     </div>
     <div class="dataset-description-component left-content-item">
-      <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
+      <DatasetDescriptionComponent
+        :datasetId="datasetId"
+        :datasetTask="datasetTask"
+      />
     </div>
     <div
       class="labels-edition-component left-content-item"
@@ -76,9 +79,6 @@ export default {
     },
     isTaskTextClassification() {
       return this.datasetTask === "TextClassification";
-    },
-    settingsDescription() {
-      return "Soon you will be able to edit your information";
     },
     isLoading() {
       return this.$fetchState.pending;
