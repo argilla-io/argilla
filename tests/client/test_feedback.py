@@ -48,7 +48,7 @@ def test_init(
 
 
 @pytest.mark.usefixtures("feedback_dataset_fields", "feedback_dataset_questions")
-def test_init_wrong_guidelines(self, feedback_dataset_fields: list, feedback_dataset_questions: list) -> None:
+def test_init_wrong_guidelines(feedback_dataset_fields: list, feedback_dataset_questions: list) -> None:
     with pytest.raises(TypeError, match="Expected `guidelines` to be"):
         FeedbackDataset(
             guidelines=[],
@@ -86,7 +86,7 @@ def test_init_wrong_fields(feedback_dataset_guidelines: str, feedback_dataset_qu
 
 
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields")
-def test_init_wrong_questions(self, feedback_dataset_guidelines: str, feedback_dataset_fields: list) -> None:
+def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset_fields: list) -> None:
     with pytest.raises(TypeError, match="Expected `questions` to be a list"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
