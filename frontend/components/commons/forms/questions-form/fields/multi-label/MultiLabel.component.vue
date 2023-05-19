@@ -2,7 +2,7 @@
   <div class="">
     <ClassifierAnnotationForFeedbackTaskComponent
       v-if="inputId && options"
-      :maxVisibleLabels="1"
+      :maxVisibleLabels="100"
       :inputLabels="formattedOptionsForClassifierAnnotationComponent"
       :datasetName="'feedbackTask'"
       :isMultiLabel="true"
@@ -49,7 +49,7 @@ export default {
   methods: {
     onChangeClassifierAnnotation($event) {
       const { options, inputId } = this;
-      
+
       options.forEach((option) => {
         if ($event.includes(`${option.text}`)) {
           option.value = true;
@@ -58,10 +58,7 @@ export default {
         }
       });
 
-      this.$emit("on-change-multilabel", {
-        newOptions: options,
-        idComponent: inputId,
-      });
+      this.$emit("on-change-multilabel", options);
     },
   },
 };
