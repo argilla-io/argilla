@@ -12,14 +12,14 @@
       <!-- Markdown input component here -->
 
       <div class="description__button-area">
-        <base-button name="save-button" class="primary small" @on-click="onSave"
-          >Save</base-button
+        <BaseButton name="save-button" class="primary small" @on-click="onSave"
+          >Save</BaseButton
         >
-        <base-button
+        <BaseButton
           name="close-button"
           class="secondary small"
           @on-click="onClose"
-          >Discard</base-button
+          >Discard</BaseButton
         >
       </div>
     </div>
