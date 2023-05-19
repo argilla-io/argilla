@@ -83,7 +83,6 @@ export default {
     text-decoration: none;
     outline: none;
     @include font-size(13px);
-    background: transparent;
     transition: all 0.2s ease-in-out;
     background: palette(grey, 800);
     .svg-icon {
