@@ -1,0 +1,68 @@
+<template>
+  <div class="">
+    <ClassifierAnnotationForFeedbackTaskComponent
+      v-if="inputId && options"
+      :maxVisibleLabels="1"
+      :inputLabels="formattedOptionsForClassifierAnnotationComponent"
+      :datasetName="'feedbackTask'"
+      :isMultiLabel="true"
+      :paginationSize="10"
+      :record="formattedSelectedInputsClassifierAnnotationComponent"
+      @update-labels="onChangeClassifierAnnotation"
+    />
+  </div>
+</template>
+
+<script>
+export default {
+  name: "MultiLabelComponent",
+  props: {
+    inputId: {
+      type: String,
+      required: true,
+    },
+    options: {
+      type: Array,
+      required: true,
+    },
+  },
+  computed: {
+    formattedOptionsForClassifierAnnotationComponent() {
+      return this.options.reduce((acc, curr) => acc.concat(curr.text), []);
+    },
+    currentAnnotation() {
+      const labels = this.options.reduce((acc, curr) => {
+        if (curr.value) return acc.concat({ class: curr.text });
+        return acc;
+      }, []);
+
+      return { labels };
+    },
+    formattedSelectedInputsClassifierAnnotationComponent() {
+      const { inputId, currentAnnotation } = this;
+      return {
+        id: inputId,
+        currentAnnotation,
+      };
+    },
+  },
+  methods: {
+    onChangeClassifierAnnotation($event) {
+      const { options, inputId } = this;
+      
+      options.forEach((option) => {
+        if ($event.includes(`${option.text}`)) {
+          option.value = true;
+        } else {
+          option.value = false;
+        }
+      });
+
+      this.$emit("on-change-multilabel", {
+        newOptions: options,
+        idComponent: inputId,
+      });
+    },
+  },
+};
+</script>
