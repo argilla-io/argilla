@@ -28,6 +28,7 @@ from argilla.client.datasets import (
     WrongRecordTypeError,
 )
 from argilla.client.models import TextClassificationRecord
+from argilla.datasets import TextClassificationSettings
 
 _HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
 
@@ -198,21 +199,22 @@ class TestDatasetBase:
     def test_prepare_for_training_train_test_splits(self, monkeypatch, singlelabel_textclassification_records):
         monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
         temp_records = copy.deepcopy(singlelabel_textclassification_records)
+        settings = TextClassificationSettings(["a", "b", "c"])
         ds = DatasetBase(temp_records)
 
         with pytest.raises(
             AssertionError,
             match="`train_size` and `test_size` must be larger than 0.",
         ):
-            ds.prepare_for_training(train_size=-1)
+            ds.prepare_for_training(train_size=-1, settings=settings)
 
         with pytest.raises(AssertionError, match="`train_size` and `test_size` must sum to 1."):
-            ds.prepare_for_training(test_size=0.1, train_size=0.6)
+            ds.prepare_for_training(test_size=0.1, train_size=0.6, settings=settings)
 
         for rec in ds:
             rec.annotation = None
         with pytest.raises(AssertionError, match="Dataset has no annotations."):
-            ds.prepare_for_training()
+            ds.prepare_for_training(settings=settings)
 
 
 class TestDatasetForTextClassification:
@@ -404,6 +406,22 @@ class TestDatasetForTextClassification:
             "multilabel_textclassification_records",
         ],
     )
+    def test_prepare_for_training_with_openai(self, request, records):
+        records = request.getfixturevalue(records)
+        ds = rg.DatasetForTextClassification(records)
+        jsonl = ds.prepare_for_training(framework="openai", seed=42)
+
+        assert isinstance(jsonl, list)
+        assert isinstance(jsonl[0], dict)
+        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+
+    @pytest.mark.parametrize(
+        "records",
+        [
+            "singlelabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ],
+    )
     def test_prepare_for_training_with_spark_nlp(self, request, records):
         records = request.getfixturevalue(records)
 
@@ -432,9 +450,8 @@ class TestDatasetForTextClassification:
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
     def test_from_dataset_with_non_argilla_format_multilabel(self):
-        # TODO(@frascuchon): Move dataset to the new org
         ds = datasets.load_dataset(
-            "rubrix/go_emotions_test_100",
+            "argilla/_go_emotions_test_100",
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
@@ -474,8 +491,7 @@ class TestDatasetForTextClassification:
     )
     def test_from_dataset_with_non_argilla_format(self):
         ds = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/app_reviews_train_100",
+            "argilla/_app_reviews_train_100",
             split="train",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
@@ -608,15 +624,13 @@ class TestDatasetForTokenClassification:
         dataset_ds = rg.DatasetForTokenClassification(tokenclassification_records).to_datasets()
         _push_to_hub_with_retries(
             dataset_ds,
-            # TODO(@frascuchon): Move dataset to the new org
-            repo_id="rubrix/_test_token_classification_records",
+            repo_id="argilla/_test_token_classification_records",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
         sleep(1)
         dataset_ds = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/_test_token_classification_records",
+            "argilla/_test_token_classification_records",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -629,8 +643,7 @@ class TestDatasetForTokenClassification:
     )
     def test_prepare_for_training_with_spacy(self):
         ner_dataset = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/gutenberg_spacy-ner",
+            "argilla/gutenberg_spacy-ner",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -659,10 +672,29 @@ class TestDatasetForTokenClassification:
         _HF_HUB_ACCESS_TOKEN is None,
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
-    def test_prepare_for_training_with_spark_nlp(self):
+    def test_prepare_for_training_with_openai(self, request, records):
         ner_dataset = datasets.load_dataset(
             # TODO(@frascuchon): Move dataset to the new org
             "rubrix/gutenberg_spacy-ner",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+        ds: DatasetForTokenClassification = rg.read_datasets(ner_dataset, task="TokenClassification")
+        for r in ds:
+            r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
+        jsonl = ds.prepare_for_training(framework="openai", seed=42)
+
+        assert isinstance(jsonl, list)
+        assert isinstance(jsonl[0], dict)
+        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_prepare_for_training_with_spark_nlp(self):
+        ner_dataset = datasets.load_dataset(
+            "argilla/gutenberg_spacy-ner",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -686,8 +718,7 @@ class TestDatasetForTokenClassification:
     )
     def test_prepare_for_training(self):
         ner_dataset = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/gutenberg_spacy-ner",
+            "argilla/gutenberg_spacy-ner",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -750,8 +781,7 @@ class TestDatasetForTokenClassification:
     )
     def test_from_dataset_with_non_argilla_format(self):
         ds = datasets.load_dataset(
-            # TODO(@frascuchon): Move dataset to the new org
-            "rubrix/wikiann_es_test_100",
+            "argilla/_wikiann_es_test_100",
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
@@ -884,6 +914,22 @@ class TestDatasetForText2Text:
         with pytest.raises(NotImplementedError):
             ds.prepare_for_training("spacy", lang=spacy.blank("en"), train_size=1)
 
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_prepare_for_training_with_openai(self, request, records):
+        ds = rg.DatasetForText2Text(
+            [rg.Text2TextRecord(text="Michael is a professor at Harvard but", annotation=" he used to work at MIT")]
+        )
+
+        jsonl = ds.prepare_for_training(framework="openai", seed=42)
+
+        assert isinstance(jsonl, list)
+        assert isinstance(jsonl[0], dict)
+        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+        assert jsonl[0]["prompt"] == "Michael is a professor at Harvard but"
+
     def test_prepare_for_training_with_spark_nlp(self):
         ds = rg.DatasetForText2Text(
             [rg.Text2TextRecord(text="mock", annotation="mock"), rg.Text2TextRecord(text="mock")] * 10
@@ -899,14 +945,13 @@ class TestDatasetForText2Text:
         dataset_ds = rg.DatasetForText2Text(text2text_records).to_datasets()
         _push_to_hub_with_retries(
             dataset_ds,
-            # TODO(@frascuchon): Move dataset to the new org
-            repo_id="rubrix/_test_text2text_records",
+            repo_id="argilla/_test_text2text_records",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
         sleep(1)
         dataset_ds = datasets.load_dataset(
-            "rubrix/_test_text2text_records",
+            "argilla/_test_text2text_records",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
@@ -919,7 +964,7 @@ class TestDatasetForText2Text:
     )
     def test_from_dataset_with_non_argilla_format(self):
         ds = datasets.load_dataset(
-            "rubrix/big_patent_a_test_100",
+            "argilla/_big_patent_a_test_100",
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )

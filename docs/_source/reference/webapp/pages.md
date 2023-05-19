@@ -108,8 +108,8 @@ The right sidebar is divided into three sections.
 
 This section of the sidebar lets you switch between the different Argilla modes that are covered extensively in their respective guides:
 
-- **Hand labelling**: this mode lets you conveniently [annotate your data](./features.md#annotate-records)
-- **Weak labelling**: this mode helps you to [define rules](./features.md#weak-labelling) to automatically label your data (Text Classification only)
+- **Hand labeling**: this mode lets you conveniently [annotate your data](./features.md#annotate-records)
+- **Weak labeling**: this mode helps you to [define rules](./features.md#weak-labeling) to automatically label your data (Text Classification only)
 - **Explore**: this mode is for [exploring your dataset](./features.md#explore-records) and gain valuable insights
 
 
@@ -147,3 +147,22 @@ Here you can [define your labeling schema](../../guides/log_load_and_prepare_dat
 
 ### Danger zone
 In this area, you will find a button to delete the current dataset.
+
+## User settings
+![User settings page](../../_static/images/reference/ui/user_settings_page.png)
+
+You can access this page by clicking on your user icon in the top right corner and selecting "My settings" in the dropdown.
+
+In this page, you will be able to access your user settings and copy your API key. Learn more about how to [set up users](../../getting_started/installation/configurations/user_management.md).
+
+### Role
+
+You can see your user role next to the user icon. The roles can be `admin` or `annotator`.
+
+### Username, name and surname
+
+These are your user details. The `username` shows the username used as login for the Argilla UI. The `Name` field corresponds to the `first_name` setting and the `Surname` field to the `last_name` setting.
+
+### API key
+
+Here you can copy your API key that you can use to conect to Argilla from the Python client.

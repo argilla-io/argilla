@@ -19,7 +19,7 @@ from pathlib import Path
 from argilla.training import ArgillaTrainer
 
 
-def cleanup(trainer: ArgillaTrainer, output_dir: str, train: bool = True):
+def train_with_cleanup(trainer: ArgillaTrainer, output_dir: str, train: bool = True):
     try:
         if train:
             trainer.train(output_dir)

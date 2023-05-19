@@ -65,6 +65,14 @@ class LabelsSchemaSettings(_AbstractSettings):
         labels = {label["name"] for label in label_schema.get("labels", [])}
         return cls(label_schema=labels)
 
+    @property
+    def label2id(self) -> Dict[str, int]:
+        return {label: i for i, label in enumerate(self.label_schema)}
+
+    @property
+    def id2label(self) -> Dict[int, str]:
+        return {i: label for i, label in enumerate(self.label_schema)}
+
 
 @dataclass
 class TextClassificationSettings(LabelsSchemaSettings):
@@ -102,6 +110,7 @@ class Datasets(AbstractApi):
     _API_PREFIX = "/api/datasets"
 
     class _DatasetApiModel(BaseModel):
+        id: Optional[str]
         name: str
         task: TaskType
         owner: Optional[str] = None
@@ -333,4 +342,6 @@ class Datasets(AbstractApi):
                 response = self.http_client.get(f"{self._API_PREFIX}/{dataset.name}/{dataset.task}/settings")
                 return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)
         except NotFoundApiError:
+            return None
+        except Exception:
             return None

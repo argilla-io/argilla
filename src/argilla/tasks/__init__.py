@@ -11,3 +11,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from .database import app as database
+from .server import app as server
+from .training import app as training
+from .users import app as users

@@ -16,17 +16,17 @@ import os
 
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 from argilla.server.security.auth_provider.local.settings import settings
-from argilla.tasks.users.migrate import migrate
 from click.testing import CliRunner
 from sqlalchemy.orm import Session
+from typer import Typer
 
 
-def test_migrate(monkeypatch, db: Session):
+def test_migrate(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(
         settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users.yml")
     )
 
-    result = CliRunner().invoke(migrate)
+    result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 0
     assert db.query(User).count() == 5
@@ -74,12 +74,12 @@ def test_migrate(monkeypatch, db: Session):
     assert [ws.name for ws in user.workspaces] == ["sanchez"]
 
 
-def test_migrate_with_one_user_file(monkeypatch, db: Session):
+def test_migrate_with_one_user_file(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(
         settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users_one.yml")
     )
 
-    result = CliRunner().invoke(migrate)
+    result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 0
     assert db.query(User).count() == 1
@@ -95,12 +95,12 @@ def test_migrate_with_one_user_file(monkeypatch, db: Session):
     assert [ws.name for ws in user.workspaces] == ["john", "argilla", "team"]
 
 
-def test_migrate_with_invalid_user(monkeypatch, db: Session):
+def test_migrate_with_invalid_user(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(
         settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_user.yml")
     )
 
-    result = CliRunner().invoke(migrate)
+    result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 1
     assert db.query(User).count() == 0
@@ -108,14 +108,14 @@ def test_migrate_with_invalid_user(monkeypatch, db: Session):
     assert db.query(WorkspaceUser).count() == 0
 
 
-def test_migrate_with_invalid_workspace(monkeypatch, db: Session):
+def test_migrate_with_invalid_workspace(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(
         settings,
         "users_db_file",
         os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_workspace.yml"),
     )
 
-    result = CliRunner().invoke(migrate)
+    result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 1
     assert db.query(User).count() == 0
@@ -123,10 +123,10 @@ def test_migrate_with_invalid_workspace(monkeypatch, db: Session):
     assert db.query(WorkspaceUser).count() == 0
 
 
-def test_migrate_with_nonexistent_file(monkeypatch, db: Session):
+def test_migrate_with_nonexistent_file(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(settings, "users_db_file", "nonexistent.yml")
 
-    result = CliRunner().invoke(migrate)
+    result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 1
     assert db.query(User).count() == 0
