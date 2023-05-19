@@ -63,14 +63,15 @@
           "
           @on-error="onError"
         />
-        <!-- <MultiLabelComponent
-          v-if="input.component_type === COMPONENT_TYPE.RATING"
+
+        <MultiLabelComponent
+          v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
           :inputId="input.id"
           :options="input.options"
           @on-change-multilabel="
             onChangeMultiLabel({ newOptions: $event, idComponent: input.id })
           "
-        /> -->
+        />
       </div>
     </div>
     <div class="footer-form">
@@ -262,7 +263,7 @@ export default {
     onChangeMultiLabel({ newOptions, idComponent }) {
       const component = this.inputs.find(({ id }) => id === idComponent);
       component.options = newOptions;
-      console.log(component)
+      console.log(component);
     },
     async sendBackendRequest(responseValues) {
       try {
