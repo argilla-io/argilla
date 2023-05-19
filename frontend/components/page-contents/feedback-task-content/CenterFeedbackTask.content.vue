@@ -253,9 +253,8 @@ export default {
           defaultValueByComponent = "";
           break;
         case COMPONENT_TYPE.RATING:
-          defaultValueByComponent = false;
-          break;
         case COMPONENT_TYPE.SINGLE_LABEL:
+        case COMPONENT_TYPE.MULTI_LABEL:
           defaultValueByComponent = false;
           break;
         default:
