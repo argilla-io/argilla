@@ -4,7 +4,7 @@
     <div class="description__markdown" v-if="!isEditing">
       <!-- Markdown content here  -->
       <p class="--body1 description__text" v-html="description" />
-      <BaseButton id="onEdit" @on-click="onEdit">
+      <BaseButton name="edit-button" @on-click="onEdit">
         <svgicon width="15" height="15" name="pen"></svgicon
       ></BaseButton>
     </div>
@@ -12,10 +12,13 @@
       <!-- Markdown input component here -->
 
       <div class="description__button-area">
-        <base-button id="onSave" class="primary small" @on-click="onSave"
+        <base-button name="save-button" class="primary small" @on-click="onSave"
           >Save</base-button
         >
-        <base-button id="onClose" class="secondary small" @on-click="onClose"
+        <base-button
+          name="close-button"
+          class="secondary small"
+          @on-click="onClose"
           >Discard</base-button
         >
       </div>
@@ -24,7 +27,8 @@
 </template>
 
 <script>
-import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { getDatasetDescription, saveDescription } from "./MockedService";
+
 export default {
   props: {
     datasetId: {
@@ -43,18 +47,21 @@ export default {
     };
   },
   computed: {
-    dataset() {
-      return getDatasetFromORM(this.datasetId, this.datasetTask, false);
-    },
     description() {
-      return this.dataset?.tags.description;
+      return getDatasetDescription(this.datasetId, this.datasetTask, false);
     },
   },
   methods: {
     onEdit() {
       this.isEditing = true;
     },
-    onSave() {
+    async onSave() {
+      await saveDescription(
+        this.datasetId,
+        this.datasetTask,
+        "TEMPORAL_TODO_REMOVE"
+      );
+
       this.isEditing = false;
     },
     onClose() {
@@ -74,7 +81,7 @@ export default {
   &__markdown {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
   }
 
