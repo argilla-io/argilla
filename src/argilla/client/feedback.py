@@ -760,6 +760,11 @@ class FeedbackDataset:
         """
         from huggingface_hub import DatasetCard, HfApi
 
+        if len(self) < 1:
+            raise ValueError(
+                "Cannot push an empty `rg.FeedbackDataset` to the HuggingFace Hub, please make sure to add at least one record, via the method `add_records`."
+            )
+
         hfds = self.format_as("datasets")
         hfds.push_to_hub(repo_id, *args, **kwargs)
 
