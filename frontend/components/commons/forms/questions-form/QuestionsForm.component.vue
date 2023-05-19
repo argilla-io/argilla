@@ -514,7 +514,7 @@ export default {
               `The component type ${input.component_type} is unknown, the response can't be save`
             );
         }
-        
+
         const isSelectedOptionNotEmpty = selectedOption ?? false;
 
         if (isSelectedOptionNotEmpty) {
