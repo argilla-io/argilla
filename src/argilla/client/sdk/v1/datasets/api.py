@@ -199,7 +199,7 @@ def get_records(
         A `Response` object with the parsed response, containing a `parsed` attribute with the
         parsed response if the request was successful, which is an instance of `FeedbackRecordsModel`.
     """
-    url = "/api/v1/me/datasets/{id}/records".format(id=id)
+    url = "/api/v1/datasets/{id}/records".format(id=id)
 
     response = client.get(
         url=url,

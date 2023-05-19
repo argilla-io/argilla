@@ -175,7 +175,7 @@ export default {
       });
     },
     noRecordsMessage() {
-      return `There are no ${this.recordStatusToFilterWith} records`;
+      return `You have no ${this.recordStatusToFilterWith} records`;
     },
     statusClass() {
       return `--${this.record.record_status.toLowerCase()}`;

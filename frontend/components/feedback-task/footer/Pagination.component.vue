@@ -173,7 +173,7 @@ export default {
     }) {
       Notification.dispatch("notify", {
         message: message ?? "",
-        numberOfChars: 20000,
+        numberOfChars: 500,
         type: typeOfToast ?? "warning",
         buttonText: buttonMessage ?? "",
         async onClick() {

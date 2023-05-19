@@ -41,7 +41,7 @@ export default {
   gap: $base-space;
   padding: 2 * $base-space;
   background: palette(grey, 800);
-  border-radius: $border-radius;
+  border-radius: $border-radius-m;
   .title-area {
     display: flex;
     align-items: center;

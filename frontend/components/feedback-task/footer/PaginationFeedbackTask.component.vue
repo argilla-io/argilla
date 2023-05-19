@@ -14,7 +14,7 @@
 
 <script>
 import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
-
+import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
 export default {
   name: "PaginationFeedbackTaskComponent",
   props: {
@@ -26,7 +26,7 @@ export default {
   created() {
     this.paginationNotificationParams = {
       message: "Your changes will be lost if you move to another page",
-      buttonMessage: "Ok, continue.",
+      buttonMessage: LABEL_PROPERTIES.CONTINUE,
       typeOfToast: "warning",
     };
 

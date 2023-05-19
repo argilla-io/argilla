@@ -22,7 +22,7 @@ export default {
     },
   },
   created() {
-    this.title = "Description and annotation guidelines";
+    this.title = "Annotation guidelines";
   },
 };
 </script>
