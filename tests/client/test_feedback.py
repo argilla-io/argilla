@@ -15,6 +15,7 @@
 import tempfile
 from typing import TYPE_CHECKING, List
 
+import datasets
 import pytest
 from argilla.client import api
 from pydantic import ValidationError
@@ -212,6 +213,33 @@ def test_records(
     assert len(dataset[:2]) == 2
     assert len(dataset[1:2]) == 1
     assert len(dataset) == len(dataset.records)
+
+
+@pytest.mark.parametrize("format_as,expected_output", [("datasets", datasets.Dataset)])
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions", "feedback_dataset_records"
+)
+def test_format_as(
+    mocked_client,
+    format_as,
+    expected_output,
+    feedback_dataset_guidelines,
+    feedback_dataset_fields,
+    feedback_dataset_questions,
+    feedback_dataset_records,
+) -> None:
+    api.active_api()
+    api.init(api_key="argilla.apikey")
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records)
+
+    ds = dataset.format_as(format=format_as)
+    assert isinstance(ds, expected_output)
 
 
 @pytest.mark.usefixtures(
