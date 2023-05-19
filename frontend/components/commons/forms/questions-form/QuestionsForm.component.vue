@@ -63,6 +63,14 @@
           "
           @on-error="onError"
         />
+        <!-- <MultiLabelComponent
+          v-if="input.component_type === COMPONENT_TYPE.RATING"
+          :inputId="input.id"
+          :options="input.options"
+          @on-change-multilabel="
+            onChangeMultiLabel({ newOptions: $event, idComponent: input.id })
+          "
+        /> -->
       </div>
     </div>
     <div class="footer-form">
@@ -250,6 +258,11 @@ export default {
     onChangeMonoSelection({ newOptions, idComponent }) {
       const component = this.inputs.find(({ id }) => id === idComponent);
       component.options = newOptions;
+    },
+    onChangeMultiLabel({ newOptions, idComponent }) {
+      const component = this.inputs.find(({ id }) => id === idComponent);
+      component.options = newOptions;
+      console.log(component)
     },
     async sendBackendRequest(responseValues) {
       try {
@@ -460,6 +473,7 @@ export default {
                 );
 
               switch (componentType) {
+                case COMPONENT_TYPE.MULTI_LABEL:
                 case COMPONENT_TYPE.SINGLE_LABEL:
                 case COMPONENT_TYPE.RATING:
                   formattedOptions = formattedOptions.map((option) => {
@@ -502,6 +516,10 @@ export default {
       this.inputs.forEach((input) => {
         let selectedOption = null;
         switch (input.component_type) {
+          case COMPONENT_TYPE.MULTI_LABEL:
+            // TODO
+            // selectedOptions = input.options?.filter((option)=>option.value)
+            break;
           case COMPONENT_TYPE.SINGLE_LABEL:
           case COMPONENT_TYPE.RATING:
             selectedOption = input.options?.find((option) => option.value);
