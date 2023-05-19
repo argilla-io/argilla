@@ -39,6 +39,7 @@ export default {
       return { labels };
     },
     formattedSelectedInputsClassifierAnnotationComponent() {
+      // NOTE - inputId is only necessary because the child component use the scroll plugin which need an id
       const { inputId, currentAnnotation } = this;
       return {
         id: inputId,
@@ -48,7 +49,7 @@ export default {
   },
   methods: {
     onChangeClassifierAnnotation($event) {
-      const { options, inputId } = this;
+      const { options } = this;
 
       options.forEach((option) => {
         if ($event.includes(`${option.text}`)) {
