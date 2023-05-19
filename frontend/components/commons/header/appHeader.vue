@@ -212,7 +212,6 @@ export default {
 $header-button-color: #262a2e;
 .header {
   opacity: 1;
-  position: relative;
   transition: none;
   top: 0;
   right: 0;
