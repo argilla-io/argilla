@@ -75,7 +75,6 @@ export default {
     height: 20px;
     width: 20px;
     line-height: 19px;
-    text-align: center;
     border-radius: $border-radius-s;
     text-align: center;
     margin-left: 1.5em;
