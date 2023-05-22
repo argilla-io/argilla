@@ -125,23 +125,50 @@ export default {
       );
     },
     visualTokens() {
-      // This is used for both, annotation ad exploration components
-      const recordHasEmoji = this.record.text.containsEmoji;
+      //This is used for both, annotation ad exploration components
+      const emojiRegex =
+        /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
+      const recordHasEmoji = emojiRegex.test(this.record.text);
+      // console.log(recordHasEmoji);
+      // const recordHasEmoji = this.record.text.containsEmoji;
       const searchKeywordsSpans = this.$keywordsSpans(
         this.record.text,
         this.record.search_keywords
       );
+      // console.log(this.record.tokens, this.record.tokens.length);
+      // console.log([...this.record.tokens], [...this.record.tokens].length);
 
+      let indexCounter = 0;
       const { visualTokens } = this.record.tokens.reduce(
         ({ visualTokens, startPosition }, token, index) => {
+          // console.group(visualTokens, token, token.length);
+          if (token === "💚" || token === "❤️") {
+            //   console.log("string length", length(token));
+            //   console.log(startPosition);
+            //   console.log("spread token", [...token], [...token].length);
+            // console.log("token length", token.length);
+            // console.log("token spread length", [...token].length);
+            // console.log("char position", [...token].length);
+          }
+          // console.log("index counter", token, indexCounter);
+
           const start = recordHasEmoji
-            ? indexOf(this.record.text, token, startPosition)
+            ? indexCounter
             : this.record.text.indexOf(token, startPosition);
-          const end = start + (recordHasEmoji ? length(token) : token.length);
+
+          console.log(token, indexCounter);
+          const end =
+            start + (recordHasEmoji ? [...token].length : token.length);
+
           const nextStart = recordHasEmoji
-            ? indexOf(this.record.text, this.record.tokens[index + 1], end)
+            ? indexOf(
+                this.record.text,
+                this.record.tokens[indexCounter + 1],
+                end
+              )
             : this.record.text.indexOf(this.record.tokens[index + 1], end);
           const charsBetweenTokens = this.record.text.slice(end, nextStart);
+          console.log(charsBetweenTokens)
           let highlighted = false;
           for (let highlight of searchKeywordsSpans) {
             if (highlight.start <= start && highlight.end >= end) {
@@ -149,6 +176,9 @@ export default {
               break;
             }
           }
+
+          indexCounter += [...token].length;
+          console.groupEnd();
           return {
             visualTokens: [
               ...visualTokens,
@@ -162,6 +192,8 @@ export default {
           startPosition: 0,
         }
       );
+
+      //  console.log(visualTokens);
       return visualTokens;
     },
     tokenClassifierActionButtons() {
