@@ -58,21 +58,17 @@ class ValueSchema(BaseModel):
 
 
 class ResponseSchema(BaseModel):
-    values: Dict[str, ValueSchema]
-    status: Literal["submitted", "missing", "discarded"]
-
-
-class OfflineFeedbackResponse(ResponseSchema):
     user_id: Optional[UUID] = None
+    values: Dict[str, ValueSchema]
+    status: Literal["submitted", "missing", "discarded"] = "submitted"
 
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):
         if not v:
             warnings.warn(
-                "`user_id` not provided for `OfflineFeedbackResponse`. So it will be"
-                " set to `None`. Which is not an issue, even though if you're planning"
-                " to log the record in Argilla, as it will be set automatically to the"
-                " current user's id."
+                "`user_id` not provided, so it will be set to `None`. Which is not an"
+                " issue, unless if you're planning to log the response in Argilla, as "
+                " it will be automatically set to the active `user_id`."
             )
         return v
 
@@ -97,7 +93,7 @@ class FeedbackRecord(BaseModel):
 class OfflineFeedbackRecord(BaseModel):
     id: Optional[str] = None
     fields: Dict[str, str]
-    responses: List[OfflineFeedbackResponse] = []
+    responses: List[ResponseSchema] = []
     external_id: Optional[str] = None
     inserted_at: Optional[str] = None
     updated_at: Optional[str] = None
