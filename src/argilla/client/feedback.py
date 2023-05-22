@@ -50,6 +50,7 @@ if TYPE_CHECKING:
     )
 
 FETCHING_BATCH_SIZE = 250
+PUSHING_BATCH_SIZE = 32
 
 
 class ValueSchema(BaseModel):
@@ -507,11 +508,11 @@ class FeedbackDataset:
                 return
 
             try:
-                for i in range(0, len(self.__new_records), 32):
+                for i in range(0, len(self.__new_records), PUSHING_BATCH_SIZE):
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=self.argilla_id,
-                        records=self.__new_records[i : i + 32],
+                        records=self.__new_records[i : i + PUSHING_BATCH_SIZE],
                     )
                 self.__records += self.__new_records
                 self.__new_records = []
