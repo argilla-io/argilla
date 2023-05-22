@@ -16,7 +16,7 @@ import dataclasses
 import logging
 import platform
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 from fastapi import Request
@@ -95,27 +95,21 @@ def _process_request_info(request: Request):
 
 
 async def track_error(error: ServerError, request: Request):
-    global telemetry_client
-
     data = {"code": error.code}
     if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
         data["type"] = error.type
 
     data.update(_process_request_info(request))
 
-    telemetry_client.track_data("ServerErrorFound", data)
+    track_data("ServerErrorFound", data)
 
 
 async def track_bulk(task: TaskType, records: int):
-    global telemetry_client
-
-    telemetry_client.track_data("LogRecordsRequested", {"task": task, "records": records})
+    track_data("LogRecordsRequested", {"task": task, "records": records})
 
 
 async def track_login(request: Request, username: str):
-    global telemetry_client
-
-    telemetry_client.track_data(
+    track_data(
         "UserInfoRequested",
         {
             "is_default_user": username == "argilla",
@@ -123,3 +117,9 @@ async def track_login(request: Request, username: str):
             **_process_request_info(request),
         },
     )
+
+
+def track_data(event: str, data: dict):
+    global telemetry_client
+
+    telemetry_client.track_data(action=event, data=data)
