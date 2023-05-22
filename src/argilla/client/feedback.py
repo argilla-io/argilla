@@ -665,11 +665,17 @@ class FeedbackDataset:
         cls.argilla_id = existing_dataset.id
         self = cls(
             fields=[
-                FieldSchema.construct(**field.dict())
+                TextField.construct(**field.dict())
+                if field.settings.type == "text"
+                else FieldSchema.construct(**field.dict())
                 for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed
             ],
             questions=[
-                QuestionSchema.construct(**question.dict())
+                RatingQuestion.construct(**question.dict())
+                if question.settings.type == "rating"
+                else TextQuestion.construct(**question.dict())
+                if question.settings.type == "text"
+                else QuestionSchema.construct(**question.dict())
                 for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed
             ],
             guidelines=existing_dataset.guidelines or None,
