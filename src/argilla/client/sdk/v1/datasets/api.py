@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
@@ -232,6 +233,22 @@ def add_records(
         A `Response` object with the response itself, and/or the error codes if applicable.
     """
     url = "/api/v1/datasets/{id}/records".format(id=id)
+
+    for record in records:
+        cleaned_responses = []
+        response_without_user_id = False
+        for response in record["responses"]:
+            if response["user_id"] is None:
+                if response_without_user_id is True:
+                    warnings.warn(
+                        f"Multiple responses without `user_id` found in record {record}, so just the first one will be used while the rest will be ignored."
+                    )
+                    continue
+                else:
+                    response["user_id"] = client.get("api/me").json()["id"]
+                    response_without_user_id = True
+            cleaned_responses.append(response)
+        record["responses"] = cleaned_responses
 
     response = client.post(url=url, json={"items": records})
 
