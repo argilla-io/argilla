@@ -1,4 +1,4 @@
-import { shallowMount } from "@vue/test-utils";
+import { mount } from "@vue/test-utils";
 import DatasetDescription from "./DatasetDescription.component";
 import * as Mocked from "./MockedService";
 
@@ -23,14 +23,14 @@ describe("DatasetDescriptionComponent should", () => {
   })
 
   it("render the component", () => {
-    const wrapper = shallowMount(DatasetDescription, options);
+    const wrapper = mount(DatasetDescription, options);
 
     expect(wrapper.is(DatasetDescription)).toBe(true);
   });
 
   it("see the dataset description", () => {
     jest.spyOn(Mocked, "getDatasetDescription").mockReturnValue("FAKE_DESCRIPTION");
-    const wrapper = shallowMount(DatasetDescription, options);
+    const wrapper = mount(DatasetDescription, options);
 
     const description = wrapper.find(".description__markdown__viewer-text");
 
@@ -39,7 +39,7 @@ describe("DatasetDescriptionComponent should", () => {
 
   it("save description when user click on save button", async () => {
     const saveDescriptionMocked = jest.spyOn(Mocked, "saveDescription");
-    const wrapper = shallowMount(DatasetDescription, options);
+    const wrapper = mount(DatasetDescription, options);
     await wrapper.find("[name=edit-button]").trigger("on-click");
 
     await wrapper.find("[name=description-input]").setValue("NEW_DESCRIPTION")
@@ -51,7 +51,7 @@ describe("DatasetDescriptionComponent should", () => {
 
   it("discard new description if the user cancel edition", async () => {
     const saveDescriptionMocked = jest.spyOn(Mocked, "saveDescription");
-    const wrapper = shallowMount(DatasetDescription, options);
+    const wrapper = mount(DatasetDescription, options);
     await wrapper.find("[name=edit-button]").trigger("on-click");
     await wrapper.find("[name=description-input]").setValue("NEW_DESCRIPTION")
 
