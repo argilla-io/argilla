@@ -56,7 +56,7 @@ export default {
       areResponsesUntouched: false,
     };
   },
-  beforeRouteLeave(to, next) {
+  beforeRouteLeave(to, from, next) {
     if (!this.areResponsesUntouched) {
       let message = "";
       switch (to.name) {
