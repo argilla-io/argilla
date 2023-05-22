@@ -66,6 +66,8 @@
 
         <MultiLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
+          :isRequired="input.is_required"
+          :title="input.question"
           :inputId="input.id"
           :options="input.options"
           @on-change-multilabel="

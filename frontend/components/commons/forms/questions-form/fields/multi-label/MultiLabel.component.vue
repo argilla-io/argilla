@@ -1,5 +1,8 @@
 <template>
-  <div class="">
+  <div class="multi-label-component">
+    <div class="title-area --body2" v-if="title.length">
+      <span v-text="title" v-optional-field="isRequired ? false : true" />
+    </div>
     <ClassifierAnnotationForFeedbackTaskComponent
       v-if="inputId && options"
       :maxVisibleLabels="100"
@@ -20,6 +23,10 @@ export default {
     inputId: {
       type: String,
       required: true,
+    },
+    title: {
+      type: String,
+      default: () => "",
     },
     options: {
       type: Array,
@@ -64,3 +71,12 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+// reset css
+.multi-label-component > .searchbar {
+  margin: 0;
+}
+.multi-label-component > .annotation-area {
+  margin: 0;
+}
+</style>
