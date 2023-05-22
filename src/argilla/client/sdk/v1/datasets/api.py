@@ -234,6 +234,8 @@ def add_records(
     """
     url = "/api/v1/datasets/{id}/records".format(id=id)
 
+    active_user_id = None
+
     for record in records:
         cleaned_responses = []
         response_without_user_id = False
@@ -245,7 +247,9 @@ def add_records(
                     )
                     continue
                 else:
-                    response["user_id"] = client.get("api/me").json()["id"]
+                    if active_user_id is None:
+                        active_user_id = client.get("api/me").json()["id"]
+                    response["user_id"] = active_user_id
                     response_without_user_id = True
             cleaned_responses.append(response)
         record["responses"] = cleaned_responses
