@@ -533,7 +533,10 @@ export default {
               `The component type ${input.component_type} is unknown, the response can't be save`
             );
         }
-        if (selectedOption?.text) {
+
+        const isSelectedOptionNotEmpty = selectedOption ?? false;
+
+        if (isSelectedOptionNotEmpty) {
           responseByQuestionName[input.name] = { value: selectedOption.text };
         }
       });

@@ -62,6 +62,7 @@ export default {
     },
   },
   mounted() {
+    window.addEventListener("paste", this.pastePlainText);
     if (this.defaultText) {
       this.editableText = this.defaultText;
     } else {
@@ -69,6 +70,9 @@ export default {
     }
 
     this.textAreaWrapper = document.getElementById("contentId");
+  },
+  destroyed() {
+    window.removeEventListener("paste", this.pastePlainText);
   },
   methods: {
     looseFocus() {
@@ -80,6 +84,13 @@ export default {
     setFocus(status) {
       this.focus = status;
       this.$emit("on-change-focus", status);
+    },
+    pastePlainText(event) {
+      if (this.focus && event.target.isContentEditable) {
+        event.preventDefault();
+        const text = event.clipboardData?.getData("text/plain") ?? "";
+        document.execCommand("insertText", false, text);
+      }
     },
   },
 };
