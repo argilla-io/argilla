@@ -284,6 +284,93 @@ def test_push_to_argilla_and_from_argilla(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
     "feedback_dataset_questions",
+)
+def test_push_to_argilla_and_from_argilla_without_user_ids(
+    mocked_client,
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["FieldSchema"],
+    feedback_dataset_questions: List["QuestionSchema"],
+) -> None:
+    api.active_api()
+    api.init(api_key="argilla.apikey")
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={
+                    "text": "E",
+                    "label": "F",
+                },
+                responses=[
+                    {
+                        "values": {
+                            "question-1": {"value": "answer"},
+                            "question-2": {"value": 0},
+                        },
+                        "status": "submitted",
+                    },
+                ],
+                external_id="test-id",
+            ),
+        ]
+    )
+    dataset.push_to_argilla(name="test-dataset")
+    assert dataset.argilla_id is not None
+
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={
+                    "text": "E",
+                    "label": "F",
+                },
+                responses=[
+                    {
+                        "values": {
+                            "question-1": {"value": "answer"},
+                            "question-2": {"value": 0},
+                        },
+                        "status": "submitted",
+                    },
+                    {
+                        "values": {
+                            "question-1": {"value": "answer"},
+                            "question-2": {"value": 0},
+                        },
+                        "status": "submitted",
+                    },
+                ],
+            ),
+        ]
+    )
+    with pytest.warns(UserWarning, match="Multiple responses without `user_id`"):
+        dataset.push_to_argilla()
+
+    dataset_from_argilla = FeedbackDataset.from_argilla(id=dataset.argilla_id)
+    print(dataset_from_argilla.records)
+
+    assert dataset_from_argilla.guidelines == dataset.guidelines
+    assert len(dataset_from_argilla.fields) == len(dataset.fields)
+    assert [field.name for field in dataset_from_argilla.fields] == [field.name for field in dataset.fields]
+    assert len(dataset_from_argilla.questions) == len(dataset.questions)
+    assert [question.name for question in dataset_from_argilla.questions] == [
+        question.name for question in dataset.questions
+    ]
+    assert len(dataset_from_argilla.records) == len(dataset.records)
+    assert (
+        len(dataset_from_argilla.records[-1]["responses"]) == 1
+    )  # Since the second one was discarded as `user_id=None`
+
+
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
     "feedback_dataset_records",
 )
 def test_push_to_huggingface_and_from_huggingface(
