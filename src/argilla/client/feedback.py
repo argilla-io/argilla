@@ -602,6 +602,9 @@ class FeedbackDataset:
                         ),
                     )
 
+            self.__records += self.__new_records
+            self.__new_records = []
+
             if self.argilla_id is not None:
                 warnings.warn(
                     "Since the current object is already a `FeedbackDataset` pushed to"
@@ -666,15 +669,15 @@ class FeedbackDataset:
         self = cls(
             fields=[
                 TextField.construct(**field.dict())
-                if field.settings.type == "text"
+                if field.settings["type"] == "text"
                 else FieldSchema.construct(**field.dict())
                 for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed
             ],
             questions=[
                 RatingQuestion.construct(**question.dict())
-                if question.settings.type == "rating"
+                if question.settings["type"] == "rating"
                 else TextQuestion.construct(**question.dict())
-                if question.settings.type == "text"
+                if question.settings["type"] == "text"
                 else QuestionSchema.construct(**question.dict())
                 for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed
             ],
