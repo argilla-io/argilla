@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from unittest.mock import MagicMock
 
 import argilla as rg
 import httpx
@@ -130,7 +131,7 @@ def argilla_user(db):
 
 
 @pytest.fixture
-def telemetry_track_data(mocker):
+def test_telemetry(mocker) -> MagicMock:
     telemetry.telemetry_client = TelemetryClient(disable_send=True)
 
     return mocker.spy(telemetry.telemetry_client, "track_data")
@@ -151,7 +152,7 @@ def api():
 def mocked_client(
     db,
     monkeypatch,
-    telemetry_track_data,
+    test_telemetry,
     argilla_user,
 ) -> SecuredClient:
     with TestClient(app, raise_server_exceptions=False) as _client:

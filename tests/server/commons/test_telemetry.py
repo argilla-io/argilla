@@ -37,7 +37,7 @@ def test_disable_telemetry():
 
 
 @pytest.mark.asyncio
-async def test_track_login(telemetry_track_data):
+async def test_track_login(test_telemetry):
     await telemetry.track_login(request=mock_request, username="argilla")
 
     current_server_id = telemetry.telemetry_client.server_id
@@ -47,15 +47,15 @@ async def test_track_login(telemetry_track_data):
         "user-agent": None,
         "user_hash": str(uuid.uuid5(current_server_id, name="argilla")),
     }
-    telemetry_track_data.assert_called_once_with("UserInfoRequested", expected_event_data)
+    test_telemetry.assert_called_once_with("UserInfoRequested", expected_event_data)
 
 
 @pytest.mark.asyncio
-async def test_track_bulk(telemetry_track_data):
+async def test_track_bulk(test_telemetry):
     task, records = TaskType.token_classification, 100
 
     await telemetry.track_bulk(task=task, records=records)
-    telemetry_track_data.assert_called_once_with("LogRecordsRequested", {"task": task, "records": records})
+    test_telemetry.assert_called_once_with("LogRecordsRequested", {"task": task, "records": records})
 
 
 @pytest.mark.asyncio
@@ -99,7 +99,7 @@ async def test_track_bulk(telemetry_track_data):
         ),
     ],
 )
-async def test_track_error(telemetry_track_data, error, expected_event):
+async def test_track_error(test_telemetry, error, expected_event):
     await telemetry.track_error(error, request=mock_request)
 
-    telemetry_track_data.assert_called_once_with("ServerErrorFound", expected_event)
+    test_telemetry.assert_called_once_with("ServerErrorFound", expected_event)
