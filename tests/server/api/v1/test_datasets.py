@@ -337,7 +337,6 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -442,7 +441,6 @@ def test_list_dataset_records_with_include_responses(client: TestClient, admin_a
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -461,7 +459,6 @@ def test_list_dataset_records_with_offset(client: TestClient, admin_auth_header:
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_dataset_records_with_limit(client: TestClient, admin_auth_header: dict):
@@ -479,7 +476,6 @@ def test_list_dataset_records_with_limit(client: TestClient, admin_auth_header: 
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_a.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_auth_header: dict):
@@ -499,7 +495,6 @@ def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_au
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_dataset_records_without_authentication(client: TestClient):
@@ -562,7 +557,6 @@ def test_list_current_user_dataset_records(client: TestClient, admin_auth_header
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -670,7 +664,6 @@ def test_list_current_user_dataset_records_with_include_responses(
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -689,7 +682,6 @@ def test_list_current_user_dataset_records_with_offset(client: TestClient, admin
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_current_user_dataset_records_with_limit(client: TestClient, admin_auth_header: dict):
@@ -707,7 +699,6 @@ def test_list_current_user_dataset_records_with_limit(client: TestClient, admin_
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_a.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_current_user_dataset_records_with_offset_and_limit(client: TestClient, admin_auth_header: dict):
@@ -727,7 +718,6 @@ def test_list_current_user_dataset_records_with_offset_and_limit(client: TestCli
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-    assert response_body["total"] == 3
 
 
 @pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted"])
@@ -764,7 +754,6 @@ def test_list_current_user_dataset_records_with_response_status_filter(
     assert response.status_code == 200
     response_json = response.json()
 
-    assert response_json["total"] == num_responses_per_status
     assert len(response_json["items"]) == num_responses_per_status
 
     if response_status_filter == "missing":
@@ -819,7 +808,6 @@ def test_list_current_user_dataset_records_as_annotator(client: TestClient, admi
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -927,7 +915,6 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
