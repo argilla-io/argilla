@@ -61,30 +61,22 @@ export default {
       let message = "";
       switch (to.name) {
         case "datasets":
-          message =
-            "Your changes will be lost if you navigate throw the breadcrumb";
-          break;
         case "dataset-id-settings":
-          message =
-            "Your changes will be lost if you go to the dataset settings page";
-          break;
         case "user-settings":
-          message =
-            "Your changes will be lost if you go to your user settings page";
-          break;
         case "login":
-          message = "Your changes will be lost if you logout";
+          message = "Your changes will be lost if you leave the current page";
           break;
         default:
-          message = "Your current modification will be lost";
+        // do nothing
       }
-      this.showNotification({
-        eventToFireOnClick: async () => {
-          await next();
-        },
-        message,
-        buttonMessage: this.buttonMessage,
-      });
+      message.length &&
+        this.showNotification({
+          eventToFireOnClick: async () => {
+            await next();
+          },
+          message,
+          buttonMessage: this.buttonMessage,
+        });
     } else {
       next();
     }
