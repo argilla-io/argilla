@@ -18,6 +18,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.orm import Session
 
+from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_db
 from argilla.server.models import User
@@ -271,6 +272,7 @@ async def create_dataset_records(
     *,
     db: Session = Depends(get_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
@@ -283,6 +285,7 @@ async def create_dataset_records(
     #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
         await datasets.create_records(db, search_engine, dataset=dataset, records_create=records_create)
+        telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
@@ -292,6 +295,7 @@ async def publish_dataset(
     *,
     db: Session = Depends(get_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -300,9 +304,16 @@ async def publish_dataset(
     dataset = _get_dataset(db, dataset_id)
 
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        return await datasets.publish_dataset(db, search_engine, dataset)
+        dataset = await datasets.publish_dataset(db, search_engine, dataset)
+
+        telemetry_client.track_data(
+            action="PublishedDataset",
+            data={"questions": list(set([question.settings["type"] for question in dataset.questions]))},
+        )
+
+        return dataset
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 

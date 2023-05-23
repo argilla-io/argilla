@@ -13,10 +13,12 @@
 #  limitations under the License.
 
 from datetime import datetime
+from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -1699,6 +1701,8 @@ async def test_create_dataset_records(
     client: TestClient,
     search_engine: SearchEngine,
     opensearch: OpenSearch,
+    # TODO: use the overwrite deps to provide a spied local telemetry client.
+    test_telemetry: MagicMock,
     db: Session,
     admin: User,
     admin_auth_header: dict,
@@ -1788,6 +1792,8 @@ async def test_create_dataset_records(
             "responses": {"admin": {"values": None, "status": "discarded"}},
         },
     ]
+
+    test_telemetry.assert_called_once_with(action="DatasetRecordsCreated", data={"records": len(records_json["items"])})
 
 
 @pytest.mark.asyncio
@@ -2390,6 +2396,8 @@ def test_publish_dataset(
     client: TestClient,
     db: Session,
     opensearch: OpenSearch,
+    # TODO: use the overwrite deps to provide a spied local telemetry client.
+    test_telemetry: MagicMock,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create()
@@ -2405,6 +2413,7 @@ def test_publish_dataset(
     assert response_body["status"] == "ready"
 
     assert opensearch.indices.exists(index=f"rg.{dataset.id}")
+    test_telemetry.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
 
 
 def test_publish_dataset_with_error_on_index_creation(
