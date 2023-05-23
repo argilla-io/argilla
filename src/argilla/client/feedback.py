@@ -1061,5 +1061,5 @@ def feedback_dataset_in_argilla(
     else:
         try:
             return (True, datasets_api_v1.get_dataset(client=httpx_client, id=id).parsed)
-        except Exception as e:
+        except:
             return (False, None)
