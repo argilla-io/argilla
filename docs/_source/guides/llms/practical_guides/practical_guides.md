@@ -5,10 +5,10 @@ This guide will help you with all the practical aspects of setting up an annotat
 
 ````{grid}  1 1 2 2
 :class-container: tuto-section-2
-```{grid-item-card} Define the task
-:link: define_task.html
+```{grid-item-card} Create a Feedback Dataset
+:link: create_dataset.html
 
-Format the records to show specific inputs, define questions for the task and add annotation guidelines.
+Create a `FeedbackDataset` with `fields`, `questions`, and `guidelines`; and add `records` to it, based on your task.
 
 ```
 ```{grid-item-card} Set up your annotation team
@@ -49,7 +49,7 @@ Fine-tune an LLM with the feedback collected from Argilla.
 :maxdepth: 2
 :hidden:
 
-define_task
+create_dataset
 set_up_annotation_team
 import_export_dataset
 annotate_dataset
