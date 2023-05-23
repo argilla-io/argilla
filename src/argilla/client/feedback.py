@@ -887,6 +887,7 @@ class FeedbackDataset:
                 raise ValueError(
                     f"Only one dataset can be loaded at a time, use `split` to select a split, available splits are: {', '.join(hfds.keys())}."
                 )
+            hfds = hfds[list(hfds.keys())[0]]
 
         for index in range(len(hfds)):
             responses = {}
