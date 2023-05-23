@@ -177,6 +177,7 @@ def test_records(
     }
     assert dataset.records[1]["responses"] == [
         {
+            "user_id": None,
             "values": {
                 "question-1": {"value": "answer"},
                 "question-2": {"value": 0},
