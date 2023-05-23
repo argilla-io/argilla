@@ -4,7 +4,6 @@ We support different tasks within the Argilla eco-system focused on NLP: `Text C
 ::::{tab-set}
 
 :::{tab-item} Feedback Task
-:sync: feedbacktask
 
 ```python
 import argilla as rg
@@ -22,7 +21,7 @@ record = rg.FeedbackRecord(
 
 
 :::{tab-item} Text Classification
-:sync: textclass
+
 ```python
 import argilla as rg
 
@@ -37,7 +36,6 @@ rg.log(records=rec, name="my_dataset")
 :::
 
 :::{tab-item} Text Classification (multi-label)
-:sync: textclass
 ```python
 import argilla as rg
 
@@ -54,7 +52,6 @@ rg.log(records=rec, name="my_dataset")
 
 
 :::{tab-item} Token Classification
-:sync: tokenclass
 ```python
 import argilla as rg
 
@@ -70,7 +67,6 @@ rg.log(records=rec, name="my_dataset")
 :::
 
 :::{tab-item} Text2Text
-:sync: text2text
 ```python
 import argilla as rg
 
