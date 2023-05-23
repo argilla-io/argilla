@@ -727,6 +727,7 @@ class FeedbackDataset:
                     {
                         "user_id": Value(dtype="string"),
                         "value": Value(dtype="string" if question.settings["type"] == "text" else "int32"),
+                        "status": Value(dtype="string"),
                     },
                     id="question",
                 )
@@ -741,7 +742,11 @@ class FeedbackDataset:
                 for question in self.questions:
                     dataset[question.name].append(
                         [
-                            {"user_id": r["user_id"], "value": r["values"][question.name]["value"]}
+                            {
+                                "user_id": r["user_id"],
+                                "value": r["values"][question.name]["value"],
+                                "status": r["status"],
+                            }
                             for r in record["responses"]
                         ]
                         or None
@@ -888,11 +893,15 @@ class FeedbackDataset:
             for question in cls.questions:
                 if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
                     continue
-                for user_id, value in zip(hfds[index][question.name]["user_id"], hfds[index][question.name]["value"]):
+                for user_id, value, status in zip(
+                    hfds[index][question.name]["user_id"],
+                    hfds[index][question.name]["value"],
+                    hfds[index][question.name]["status"],
+                ):
                     if user_id not in responses:
                         responses[user_id] = {
                             "user_id": user_id,
-                            "status": "submitted",
+                            "status": status,
                             "values": {},
                         }
                     responses[user_id]["values"].update({question.name: {"value": value}})
