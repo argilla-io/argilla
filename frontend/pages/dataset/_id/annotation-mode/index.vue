@@ -63,7 +63,6 @@ export default {
         case "datasets":
         case "dataset-id-settings":
         case "user-settings":
-        case "login":
           message = "Your changes will be lost if you leave the current page";
           break;
         default:
