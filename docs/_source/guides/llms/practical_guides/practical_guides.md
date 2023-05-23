@@ -23,10 +23,10 @@ Organize your team efficiently and set up your dataset depending on the level of
 Add configurations to your dataset and import it. Copy existing datasets from Argilla or import them from the Hugging Face Hub.
 
 ```
-```{grid-item-card} Annotate Feedback datasets
-:link: annotate_feedback_dataset.html
+```{grid-item-card} Annotate a Feedback Dataset
+:link: annotate_dataset.html
 
-Learn how to use the Feedback Task UI to submit feedback, including shortcuts.
+Learn how to use the Argilla UI to submit feedback for `FeedbackTask` datasets, including shortcuts.
 
 ```
 ```{grid-item-card} Collect responses
@@ -52,7 +52,7 @@ Fine-tune an LLM with the feedback collected from Argilla.
 define_task
 set_up_annotation_team
 create_and_import_dataset
-annotate_feedback_dataset
+annotate_dataset
 collect_responses
 fine_tune
 ```
