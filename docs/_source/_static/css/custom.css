@@ -788,7 +788,6 @@ div[class*="tuto-section-"] {
 .sd-card {
   border-radius: 5px;
   margin-bottom: 1.5em;
-  border: none;
   transition: box-shadow 0.2s ease-in;
   box-shadow: 1px 1px 3px var(--sd-color-shadow),
     1px 1px 6px rgb(39 27 27 / 10%) !important;
@@ -796,7 +795,7 @@ div[class*="tuto-section-"] {
 
 .sd-card:hover {
   transform: none;
-  border-color: transparent;
+  border-color: var(--sd-color-card-border);
   transition: box-shadow 0.2s ease-in;
   box-shadow: 1px 1px 3px var(--sd-color-shadow),
     1px 1px 10px rgb(39 27 27 / 30%) !important;
@@ -880,7 +879,7 @@ div[class*="tuto-section-"] {
 .sd-card-body .sd-card-title {
   font-weight: 600 !important;
   margin-top: 10px;
-  text-align: center
+  color: var(--color-link);
 }
 
 .sd-card-body .sd-card-text {
