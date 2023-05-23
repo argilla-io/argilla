@@ -888,6 +888,12 @@ div[class*="tuto-section-"] {
   line-height: 1.8em;
 }
 
+/* Tabs */
+.sd-tab-set>label {
+  font-weight: 600;
+  padding: 1em 0.9em 0.5em;
+}
+
 /* pager */
 .related-pages .title [class*="tuto-section-"] {
   display: none;
