@@ -8,43 +8,38 @@ This guide will help you with all the practical aspects of setting up an annotat
 ```{grid-item-card} Define the task
 :link: define_task.html
 
-- Format records
-- Define questions
-- Write guidelines
+Format the records to show specific inputs, define questions for the task and add annotation guidelines.
+
 ```
 ```{grid-item-card} Set up your annotation team
 :link: set_up_annotation_team.html
 
-- Full overlap
-- Zero overlap
-- Controlled overlap
+Organize your team efficiently and set up your dataset depending on the level of overlap: none, complete or partial.
+
 ```
 ```{grid-item-card} Create and import a dataset
 :link: create_and_import_dataset.html
 
-- Argilla
-- Hugging Face Hub
+Add configurations to your dataset and import it. Copy existing datasets from Argilla or import them from the Hugging Face Hub.
+
 ```
 ```{grid-item-card} Annotate Feedback datasets
 :link: annotate_feedback_dataset.html
 
-- Annotation Guidelines
-- Annotation view
-- Keyboard Shortcuts
+Learn how to use the Feedback Task UI to submit feedback, including shortcuts.
+
 ```
 ```{grid-item-card} Collect responses
 :link: collect_responses.html
 
-- Measure and solve disagreements
-  - Unifying ratings
-  - Unifying texts
-- Export or publish
+Load annotations from Argilla, visualize and solve disagreements. Finally, export your dataset or publish it in the Hugging Face Hub.
+
 ```
 ```{grid-item-card} Fine-tune
 :link: fine_tune.html
 
-- RLHF
-- Supervised
+Fine-tune an LLM with the feedback collected from Argilla.
+
 ```
 ````
 
