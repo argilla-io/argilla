@@ -17,10 +17,10 @@ Format the records to show specific inputs, define questions for the task and ad
 Organize your team efficiently and set up your dataset depending on the level of overlap: none, complete or partial.
 
 ```
-```{grid-item-card} Create and import a dataset
-:link: create_and_import_dataset.html
+```{grid-item-card} Import/Export a Feedback Dataset
+:link: import_export_dataset.html
 
-Add configurations to your dataset and import it. Copy existing datasets from Argilla or import them from the Hugging Face Hub.
+Easily import and export your `FeedbackTask` dataset from/to Argilla, HuggingFace Hub, or a combination of both. Or save the records in a local file.
 
 ```
 ```{grid-item-card} Annotate a Feedback Dataset
@@ -51,7 +51,7 @@ Fine-tune an LLM with the feedback collected from Argilla.
 
 define_task
 set_up_annotation_team
-create_and_import_dataset
+import_export_dataset
 annotate_dataset
 collect_responses
 fine_tune
