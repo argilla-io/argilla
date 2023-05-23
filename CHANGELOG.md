@@ -24,6 +24,9 @@ These are the section headers that we use:
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
 
+### Deprecated
+
+- Using argilla with python 3.7 runtime is deprecated and support will be removed from version 1.9.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
 
 ## [1.7.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.7.0)
 
