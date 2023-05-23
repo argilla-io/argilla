@@ -132,9 +132,9 @@ def argilla_user(db):
 
 @pytest.fixture
 def test_telemetry(mocker) -> MagicMock:
-    telemetry.telemetry_client = TelemetryClient(disable_send=True)
+    telemetry._CLIENT = TelemetryClient(disable_send=True)
 
-    return mocker.spy(telemetry.telemetry_client, "track_data")
+    return mocker.spy(telemetry._CLIENT, "track_data")
 
 
 @pytest.fixture(scope="session")

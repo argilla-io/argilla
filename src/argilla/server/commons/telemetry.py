@@ -87,7 +87,7 @@ class TelemetryClient:
         )
 
 
-telemetry_client = TelemetryClient()
+_CLIENT = TelemetryClient()
 
 
 def _process_request_info(request: Request):
@@ -101,25 +101,23 @@ async def track_error(error: ServerError, request: Request):
 
     data.update(_process_request_info(request))
 
-    track_data("ServerErrorFound", data)
+    _CLIENT.track_data(action="ServerErrorFound", data=data)
 
 
 async def track_bulk(task: TaskType, records: int):
-    track_data("LogRecordsRequested", {"task": task, "records": records})
+    _CLIENT.track_data(action="LogRecordsRequested", data={"task": task, "records": records})
 
 
 async def track_login(request: Request, username: str):
-    track_data(
-        "UserInfoRequested",
-        {
+    _CLIENT.track_data(
+        action="UserInfoRequested",
+        data={
             "is_default_user": username == "argilla",
-            "user_hash": str(uuid.uuid5(namespace=telemetry_client.server_id, name=username)),
+            "user_hash": str(uuid.uuid5(namespace=_CLIENT.server_id, name=username)),
             **_process_request_info(request),
         },
     )
 
 
-def track_data(event: str, data: dict):
-    global telemetry_client
-
-    telemetry_client.track_data(action=event, data=data)
+def get_telemetry_client() -> TelemetryClient:
+    return _CLIENT

@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 import uuid
+from unittest.mock import MagicMock
 
 import pytest
 from argilla.server.commons import telemetry
 from argilla.server.commons.models import TaskType
-from argilla.server.commons.telemetry import TelemetryClient
+from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
@@ -37,10 +38,10 @@ def test_disable_telemetry():
 
 
 @pytest.mark.asyncio
-async def test_track_login(test_telemetry):
+async def test_track_login(test_telemetry: MagicMock):
     await telemetry.track_login(request=mock_request, username="argilla")
 
-    current_server_id = telemetry.telemetry_client.server_id
+    current_server_id = get_telemetry_client().server_id
     expected_event_data = {
         "accept-language": None,
         "is_default_user": True,

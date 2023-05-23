@@ -1701,6 +1701,7 @@ async def test_create_dataset_records(
     client: TestClient,
     search_engine: SearchEngine,
     opensearch: OpenSearch,
+    # TODO: use the overwrite deps to provide a spied local telemetry client.
     test_telemetry: MagicMock,
     db: Session,
     admin: User,
@@ -2395,6 +2396,7 @@ def test_publish_dataset(
     client: TestClient,
     db: Session,
     opensearch: OpenSearch,
+    # TODO: use the overwrite deps to provide a spied local telemetry client.
     test_telemetry: MagicMock,
     admin_auth_header: dict,
 ):
