@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import logging
 import tempfile
-import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 from uuid import UUID
 
@@ -52,6 +52,8 @@ if TYPE_CHECKING:
 FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32
 
+_LOGGER = logging.getLogger(__name__)
+
 
 class ValueSchema(BaseModel):
     value: Union[StrictStr, StrictInt]
@@ -65,7 +67,7 @@ class ResponseSchema(BaseModel):
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):
         if not v:
-            warnings.warn(
+            _LOGGER.warning(
                 "`user_id` not provided, so it will be set to `None`. Which is not an"
                 " issue, unless if you're planning to log the response in Argilla, as "
                 " it will be automatically set to the active `user_id`."
@@ -389,7 +391,7 @@ class FeedbackDataset:
         raised and the current records will be returned instead.
         """
         if not self.argilla_id:
-            warnings.warn(
+            _LOGGER.warning(
                 "No records have been logged into neither Argilla nor HuggingFace, so"
                 " no records will be fetched. The current records will be returned"
                 " instead."
@@ -489,7 +491,7 @@ class FeedbackDataset:
 
         if not name or (not name and not workspace):
             if self.argilla_id is None:
-                warnings.warn(
+                _LOGGER.warning(
                     "No `name` or `workspace` have been provided, and no dataset has"
                     " been pushed to Argilla yet, so no records will be pushed to"
                     " Argilla."
@@ -497,7 +499,7 @@ class FeedbackDataset:
                 return
 
             if len(self.__new_records) < 1:
-                warnings.warn(
+                _LOGGER.warning(
                     "No new records have been added to the current `FeedbackTask`"
                     " dataset, so no records will be pushed to Argilla."
                 )
@@ -606,7 +608,7 @@ class FeedbackDataset:
             self.__new_records = []
 
             if self.argilla_id is not None:
-                warnings.warn(
+                _LOGGER.warning(
                     "Since the current object is already a `FeedbackDataset` pushed to"
                     " Argilla, you'll keep on interacting with the same dataset in"
                     " Argilla, even though the one you just pushed holds a different"
@@ -777,7 +779,7 @@ class FeedbackDataset:
         from packaging.version import parse as parse_version
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
-            warnings.warn(
+            _LOGGER.warning(
                 f"Recommended `huggingface_hub` version is 0.14.0 or higher, and you have {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
             )
 
@@ -860,7 +862,7 @@ class FeedbackDataset:
         from packaging.version import parse as parse_version
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
-            warnings.warn(
+            _LOGGER.warning(
                 f"Recommended `huggingface_hub` version is 0.14.0 or higher, and you have {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
             )
 
