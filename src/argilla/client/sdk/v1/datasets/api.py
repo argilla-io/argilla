@@ -239,6 +239,8 @@ def add_records(
     for record in records:
         cleaned_responses = []
         response_without_user_id = False
+        if "responses" not in record:
+            continue
         for response in record["responses"]:
             if response["user_id"] is None:
                 if response_without_user_id is True:
