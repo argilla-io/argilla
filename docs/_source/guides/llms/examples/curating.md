@@ -1,2 +1,0 @@
-# Datasets for curating instructions
-

@@ -5,8 +5,8 @@
 :maxdepth: 2
 :hidden:
 
+curating-feedback-instructiondataset
 rating
-curating
 supervised
 rlhf
 ```
