@@ -3,9 +3,27 @@ We support different tasks within the Argilla eco-system focused on NLP: `Text C
 
 ::::{tab-set}
 
-:::{tab-item} Text Classification
+:::{tab-item} Feedback Task
+:sync: feedbacktask
+
 ```python
+import argilla as rg
+
+record = rg.FeedbackRecord(
+    fields={
+        "question": "Why can camels survive long without water?",
+        "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time."
+    }
+)
+```
+
+![text2text_record](../../_static/images/llms/feedback-record.jpeg)
+:::
+
+
+:::{tab-item} Text Classification
 :sync: textclass
+```python
 import argilla as rg
 
 rec = rg.TextClassificationRecord(
