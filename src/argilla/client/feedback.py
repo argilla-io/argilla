@@ -865,7 +865,7 @@ class FeedbackDataset:
             repo_id=repo_id,
             filename="argilla.cfg",
             repo_type="dataset",
-            token=token,
+            token=token if not isinstance(token, bool) else None,
         )
         with open(config_path, "rb") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
