@@ -349,11 +349,11 @@ def test_push_to_argilla_and_from_argilla_without_user_ids(
             ),
         ]
     )
+
     with pytest.warns(UserWarning, match="Multiple responses without `user_id`"):
         dataset.push_to_argilla()
 
     dataset_from_argilla = FeedbackDataset.from_argilla(id=dataset.argilla_id)
-    print(dataset_from_argilla.records)
 
     assert dataset_from_argilla.guidelines == dataset.guidelines
     assert len(dataset_from_argilla.fields) == len(dataset.fields)
