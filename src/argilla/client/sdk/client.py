@@ -101,7 +101,6 @@ class Client(_ClientCommonDefaults, _Client):
 
     def __del__(self):
         del self.__httpx__
-        del self.__http_async__
 
     def __hash__(self):
         return hash(self.base_url)
@@ -112,14 +111,6 @@ class Client(_ClientCommonDefaults, _Client):
             raise BaseClientError(err_str) from None
 
         @functools.wraps(func)
-        async def inner_async(self, *args, **kwargs):
-            try:
-                result = await func(self, *args, **kwargs)
-                return result
-            except httpx.ConnectError as err:  # noqa: F841
-                return wrap_error(self.base_url)
-
-        @functools.wraps(func)
         def inner(self, *args, **kwargs):
             try:
                 result = func(self, *args, **kwargs)
@@ -127,8 +118,7 @@ class Client(_ClientCommonDefaults, _Client):
             except httpx.ConnectError as err:  # noqa: F841
                 return wrap_error(self.base_url)
 
-        is_coroutine = inspect.iscoroutinefunction(func)
-        return inner_async if is_coroutine else inner
+        return inner
 
     @with_httpx_error_handler
     def get(self, path: str, *args, **kwargs):
@@ -192,24 +182,6 @@ class Client(_ClientCommonDefaults, _Client):
         return build_raw_response(response).parsed
 
     @with_httpx_error_handler
-    async def post_async(
-        self,
-        path: str,
-        *args,
-        json: Optional[dict] = None,
-        **kwargs,
-    ):
-        path = self._normalize_path(path)
-        body = self._normalize_body(json)
-        return await self.__http_async__.post(
-            url=path,
-            headers=self.get_headers(),
-            json=body,
-            *args,
-            **kwargs,
-        )
-
-    @with_httpx_error_handler
     def put(
         self,
         path: str,
@@ -247,25 +219,6 @@ class Client(_ClientCommonDefaults, _Client):
             **kwargs,
         )
         return build_raw_response(response).parsed
-
-    @with_httpx_error_handler
-    def stream(
-        self,
-        path: str,
-        *args,
-        json: Optional[dict] = None,
-        **kwargs,
-    ):
-        path = self._normalize_path(path)
-        body = self._normalize_body(json)
-        return self.__httpx__.stream(
-            url=path,
-            headers=self.get_headers(),
-            json=body,
-            timeout=None,  # Avoid timeouts. TODO: Improve the logic
-            *args,
-            **kwargs,
-        )
 
     @staticmethod
     def _normalize_path(path: str) -> str:
