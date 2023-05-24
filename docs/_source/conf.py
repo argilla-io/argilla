@@ -318,7 +318,7 @@ html_theme_options = {
         "sd-color-card-border": "#27282a",
         "color-tuto-card-bg": "#27282a",
         "color-tuto-card-bg-hover": "#3b3b3f",
-        "color-tuto-card-text": "#ffffff"
+        "color-tuto-card-text": "#ffffff",
     },
 }
 pygments_style = "material"
