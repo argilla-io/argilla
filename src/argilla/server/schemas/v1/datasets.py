@@ -230,7 +230,6 @@ class Record(BaseModel):
 
 class Records(BaseModel):
     items: List[Record]
-    total: int
 
 
 class UserSubmittedResponseCreate(BaseModel):
