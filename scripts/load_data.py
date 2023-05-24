@@ -146,6 +146,16 @@ class LoadDatasets:
             },
         )
 
+    @staticmethod
+    def load_sharegpt_prompt_rating_mini():
+        print("Loading sharegpt-prompt-rating-mini dataset")
+
+        # Load dataset from the hub
+        dataset = rg.FeedbackDataset.from_huggingface("argilla/sharegpt-prompt-rating-mini")
+
+        # Read in dataset, assuming it's a dataset for token classification
+        dataset.push_to_argilla(name="sharegpt-prompt-rating-mini")
+
 
 if __name__ == "__main__":
     API_KEY = sys.argv[1]
@@ -160,15 +170,15 @@ if __name__ == "__main__":
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
 
-                    ld.load_sst_sentiment_explainability()
+                    ld.load_sharegpt_prompt_rating_mini()
+
                     if LOAD_DATASETS.lower() == "single":
                         break
-
                     ld.load_news_text_summarization()
                     ld.load_news_programmatic_labeling()
                     ld.load_gutenberg_spacy_ner_monitoring()
+                    ld.load_sst_sentiment_explainability()
                     break
-
             except requests.exceptions.ConnectionError:
                 pass
             except Exception as e:

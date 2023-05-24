@@ -11,6 +11,8 @@ on:
       - "develop"
       - "integration"
       - "releases/**"
+      - "feature/**"
+      - "feat/**"
 
 
   pull_request:
@@ -20,6 +22,7 @@ on:
       - "releases/**"
       - "feature/**"
       - "feat/**"
+
 
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed

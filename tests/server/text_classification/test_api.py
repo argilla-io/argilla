@@ -133,7 +133,7 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
     assert results.aggregations.predicted_by == {"testA": 1}
 
 
-def test_create_records_for_text_classification(mocked_client, telemetry_track_data):
+def test_create_records_for_text_classification(mocked_client, test_telemetry):
     dataset = "test_create_records_for_text_classification"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     tags = {"env": "test", "class": "text classification"}
@@ -193,14 +193,14 @@ def test_create_records_for_text_classification(mocked_client, telemetry_track_d
         "words": {"data": 1},
     }
 
-    telemetry_track_data.assert_called_once()
+    test_telemetry.assert_called_once()
 
 
 @pytest.mark.skipif(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_create_records_for_text_classification_vector_search(mocked_client, telemetry_track_data):
+def test_create_records_for_text_classification_vector_search(mocked_client, test_telemetry):
     dataset = "test_create_records_for_text_classification_vector_search"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     tags = {"env": "test", "class": "text classification"}

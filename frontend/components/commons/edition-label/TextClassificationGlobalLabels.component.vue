@@ -80,7 +80,7 @@ export default {
 
 .label-text {
   outline: none;
-  background: #f0f0fe;
+  background: palette(purple, 800);
   border-radius: 50em;
   height: 40px;
   line-height: 40px;
@@ -90,7 +90,7 @@ export default {
   display: flex;
   font-weight: 500;
   overflow: hidden;
-  color: #4c4ea3;
+  color: palette(purple, 200);
   box-shadow: 0;
   transition: all 0.2s ease-in-out;
 }

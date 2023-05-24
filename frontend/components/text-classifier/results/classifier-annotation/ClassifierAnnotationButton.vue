@@ -110,7 +110,7 @@ $annotation-button-size: 20px;
     .button {
       outline: none;
       cursor: pointer;
-      background: #f0f0fe;
+      background: palette(purple, 800);
       border-radius: 25px;
       height: $base-space * 5;
       line-height: $base-space * 5;
@@ -189,7 +189,7 @@ $annotation-button-size: 20px;
     }
     &:not(.active):hover {
       .button {
-        background: darken(#f0f0fe, 2%);
+        background: darken(palette(purple, 800), 2%);
       }
     }
   }

@@ -53,8 +53,8 @@ class Helpers:
     def remove_pattern(self, schema: dict):
         return self.remove_key(schema, key="pattern")
 
-    def are_compatible_api_schemas(self, client_schema: dict, server_schema: dict):
-        def check_schema_props(client_props, server_props):
+    def are_compatible_api_schemas(self, client_schema: dict, server_schema: dict) -> bool:
+        def check_schema_props(client_props: dict, server_props: dict) -> bool:
             different_props = []
             for name, definition in client_props.items():
                 if name == "type":
@@ -66,8 +66,9 @@ class Helpers:
                     different_props.append(name)
                     continue
                 elif definition != server_props[name]:
-                    if not check_schema_props(definition, server_props[name]):
-                        return False
+                    if isinstance(definition, dict) and isinstance(server_props[name], dict):
+                        if not check_schema_props(definition, server_props[name]):
+                            return False
             return len(different_props) < len(client_props) / 2
 
         client_props = self._expands_schema(
