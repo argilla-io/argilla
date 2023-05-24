@@ -59,10 +59,6 @@ class FeedbackItemModel(BaseModel):
 
 class FeedbackRecordsModel(BaseModel):
     items: List[FeedbackItemModel]
-    total: Optional[int] = None
-
-    class Config:
-        fields = {"total": {"exclude": True}}
 
 
 class FeedbackFieldModel(BaseModel):

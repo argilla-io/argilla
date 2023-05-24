@@ -20,7 +20,7 @@
     <RadioButtonsSelectBase
       :options="options"
       :selected-option="selectedOption"
-      @change="changeOption"
+      @change="onChangeOption"
     />
   </div>
 </template>
@@ -41,15 +41,8 @@ export default {
     event: "change",
   },
   methods: {
-    changeOption(id) {
-      this.$emit("change", id);
-      this.updateRouteQuery(id);
-    },
-    updateRouteQuery(query) {
-      const currentQuery = this.$route.query;
-      this.$router.push({
-        query: { ...currentQuery, _status: query },
-      });
+    onChangeOption(option) {
+      this.$emit("change", option);
     },
   },
 };

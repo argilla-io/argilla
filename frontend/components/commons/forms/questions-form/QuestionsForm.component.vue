@@ -145,7 +145,6 @@ export default {
   data() {
     return {
       inputs: [],
-      formData: {},
       renderForm: 0,
       isError: false,
     };
@@ -297,7 +296,7 @@ export default {
           RECORD_STATUS.DISCARDED
         );
 
-        this.emitBusEventGoToRecordIndex();
+        this.$emit("on-discard-responses");
 
         // TODO - reset only when we know that we fetch and computed all the necessary records data
         this.onReset();
@@ -326,16 +325,13 @@ export default {
           RECORD_STATUS.SUBMITTED
         );
 
-        this.emitBusEventGoToRecordIndex();
+        this.$emit("on-submit-responses");
 
         // TODO - reset only when we know that we fetch and computed all the necessary records data
         this.onReset();
       } catch (error) {
         console.log(error);
       }
-    },
-    emitBusEventGoToRecordIndex() {
-      this.$root.$emit("go-to-record-index", this.recordIdIndex + 1);
     },
     async onClear() {
       try {
@@ -531,6 +527,8 @@ export default {
       });
     },
     emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched) {
+      this.$emit("on-question-form-touched", !isFormUntouched);
+      // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
   },
