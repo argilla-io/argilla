@@ -750,10 +750,32 @@ def test_load_sort(mocked_client):
     assert list(df.id) == ["11str", "1str", "2str"]
 
 
-def test_check_argilla_versions(monkeypatch, mocked_client):
+def test_not_aligned_argilla_versions(monkeypatch):
     def mock_get_info(*args, **kwargs):
         return ApiInfo(version="1.0.0")
 
+    def mock_whoami(*args, **kwargs):
+        return User(username="mock")
+
     monkeypatch.setattr(Status, "get_info", mock_get_info)
+    monkeypatch.setattr(users_api, "whoami", mock_whoami)
+
     with pytest.warns(UserWarning, match="You're connecting to Argilla Server 1.0.0 using a different client version"):
         Argilla()
+
+
+def test_aligned_argilla_versions(monkeypatch):
+    from argilla import __version__ as rg_version
+
+    def mock_get_info(*args, **kwargs):
+        return ApiInfo(version=rg_version)
+
+    def mock_whoami(*args, **kwargs):
+        return User(username="mock")
+
+    monkeypatch.setattr(Status, "get_info", mock_get_info)
+    monkeypatch.setattr(users_api, "whoami", mock_whoami)
+
+    with pytest.warns(None) as record:
+        Argilla()
+    assert len(record) == 0
