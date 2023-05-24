@@ -674,21 +674,31 @@ class FeedbackDataset:
             )
 
         cls.argilla_id = existing_dataset.id
+        fields = []
+        for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed:
+            if field.settings["type"] == "text":
+                field = TextField.construct(**field.dict())
+            else:
+                raise ValueError(
+                    f"Field '{field.name}' is not a supported field in the current Python package version,"
+                    " supported field types are: `TextField`."
+                )
+            fields.append(field)
+        questions = []
+        for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed:
+            if question.settings["type"] == "rating":
+                question = RatingQuestion.construct(**question.dict())
+            elif question.settings["type"] == "text":
+                question = TextQuestion.construct(**question.dict())
+            else:
+                raise ValueError(
+                    f"Question '{question.name}' is not a supported question in the current Python package"
+                    " version, supported question types are: `RatingQuestion` and `TextQuestion`."
+                )
+            questions.append(question)
         self = cls(
-            fields=[
-                TextField.construct(**field.dict())
-                if field.settings["type"] == "text"
-                else FieldSchema.construct(**field.dict())
-                for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed
-            ],
-            questions=[
-                RatingQuestion.construct(**question.dict())
-                if question.settings["type"] == "rating"
-                else TextQuestion.construct(**question.dict())
-                if question.settings["type"] == "text"
-                else QuestionSchema.construct(**question.dict())
-                for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed
-            ],
+            fields=fields,
+            questions=questions,
             guidelines=existing_dataset.guidelines or None,
         )
         if with_records:
