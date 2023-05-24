@@ -49,6 +49,7 @@ dependencies:
       - evaluate
       - seqeval
       - setfit
+      - autotrain-advanced==0.5.2
       - span_marker
       - openai
       - rich==13.0.1
