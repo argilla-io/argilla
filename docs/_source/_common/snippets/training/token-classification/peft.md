@@ -6,7 +6,7 @@ links:
     linkLink: https://docs.argilla.io/en/latest/guides/train_a_model.html
   - linkText: Transformers blog
     linkLink: https://huggingface.co/blog/peft
-  - linkText: Transformers docss
+  - linkText: Transformers docs
     linkLink: https://huggingface.co/docs/peft/index
 ---
 
