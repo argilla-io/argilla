@@ -36,6 +36,10 @@ These are the section headers that we use:
 - `/api/v1/me/datasets/{dataset_id}/metrics` new endpoint to get the dataset user metrics ([#2615])
 - `/api/v1/me/records/{record_id}/responses` new endpoint to create record user responses ([#2615])
 - Support for Feedback dataset in UI ([#2615])
+    - showing new feedback task datasets in datasets list ([#2719])
+    - new page for feedback task ([#2680])
+    - show feedback task metrics ([#2822])
+    - user can delete dataset in dataset settings page ([#2792]) 
 - Support for Feedback dataset in python client ([#2615])
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
