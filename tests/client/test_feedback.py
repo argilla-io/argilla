@@ -88,19 +88,19 @@ def test_init_wrong_fields(feedback_dataset_guidelines: str, feedback_dataset_qu
 
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields")
 def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset_fields: list) -> None:
-    with pytest.raises(TypeError, match="Expected `questions` to be a list"):
+    with pytest.raises(TypeError, match="Expected `questions` to be a list, got"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=None,
         )
-    with pytest.raises(TypeError, match="Expected `questions` to be a list of `QuestionSchema`"):
+    with pytest.raises(TypeError, match="Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[{"wrong": "question"}],
         )
-    with pytest.raises(ValueError, match="At least one `QuestionSchema` in `questions` must be required"):
+    with pytest.raises(ValueError, match="At least one question in `questions` must be required"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
