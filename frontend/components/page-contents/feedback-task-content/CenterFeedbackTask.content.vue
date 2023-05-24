@@ -25,9 +25,6 @@ export default {
       required: true,
     },
   },
-  data() {
-
-  },
   async fetch() {
     // FETCH questions AND fields by dataset
     const { items: questions } = await this.getQuestions(this.datasetId);
