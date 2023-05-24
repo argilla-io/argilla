@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import logging
 import tempfile
-import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 from uuid import UUID
 
@@ -50,6 +50,9 @@ if TYPE_CHECKING:
     )
 
 FETCHING_BATCH_SIZE = 250
+PUSHING_BATCH_SIZE = 32
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class ValueSchema(BaseModel):
@@ -57,21 +60,17 @@ class ValueSchema(BaseModel):
 
 
 class ResponseSchema(BaseModel):
-    values: Dict[str, ValueSchema]
-    status: Literal["submitted", "missing", "discarded"]
-
-
-class OfflineFeedbackResponse(ResponseSchema):
     user_id: Optional[UUID] = None
+    values: Dict[str, ValueSchema]
+    status: Literal["submitted", "discarded"] = "submitted"
 
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):
         if not v:
-            warnings.warn(
-                "`user_id` not provided for `OfflineFeedbackResponse`. So it will be"
-                " set to `None`. Which is not an issue, even though if you're planning"
-                " to log the record in Argilla, as it will be set automatically to the"
-                " current user's id."
+            _LOGGER.warning(
+                "`user_id` not provided, so it will be set to `None`. Which is not an"
+                " issue, unless if you're planning to log the response in Argilla, as "
+                " it will be automatically set to the active `user_id`."
             )
         return v
 
@@ -96,7 +95,7 @@ class FeedbackRecord(BaseModel):
 class OfflineFeedbackRecord(BaseModel):
     id: Optional[str] = None
     fields: Dict[str, str]
-    responses: List[OfflineFeedbackResponse] = []
+    responses: List[ResponseSchema] = []
     external_id: Optional[str] = None
     inserted_at: Optional[str] = None
     updated_at: Optional[str] = None
@@ -155,9 +154,12 @@ class RatingQuestion(QuestionSchema):
         validate_assignment = True
 
 
+AllowedQuestionTypes = Union[TextQuestion, RatingQuestion]
+
+
 class FeedbackDatasetConfig(BaseModel):
     fields: List[FieldSchema]
-    questions: List[QuestionSchema]
+    questions: List[AllowedQuestionTypes]
     guidelines: Optional[str] = None
 
 
@@ -180,7 +182,7 @@ class FeedbackDataset:
         TypeError: if `guidelines` is not a string.
         TypeError: if `fields` is not a list of `FieldSchema`.
         ValueError: if `fields` does not contain at least one required field.
-        TypeError: if `questions` is not a list of `QuestionSchema`.
+        TypeError: if `questions` is not a list of `TextQuestion` and/or `RatingQuestion`.
         ValueError: if `questions` does not contain at least one required question.
 
     Examples:
@@ -239,7 +241,7 @@ class FeedbackDataset:
         self,
         *,
         fields: List[FieldSchema],
-        questions: List[QuestionSchema],
+        questions: List[AllowedQuestionTypes],
         guidelines: Optional[str] = None,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.
@@ -252,7 +254,7 @@ class FeedbackDataset:
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
             ValueError: if `fields` does not contain at least one required field.
-            TypeError: if `questions` is not a list of `QuestionSchema`.
+            TypeError: if `questions` is not a list of `TextQuestion` and/or `RatingQuestion`.
             ValueError: if `questions` does not contain at least one required question.
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
@@ -298,12 +300,15 @@ class FeedbackDataset:
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
         any_required = False
         for question in questions:
-            if not isinstance(question, QuestionSchema):
-                raise TypeError(f"Expected `questions` to be a list of `QuestionSchema`, got {type(question)} instead.")
+            if not isinstance(question, (TextQuestion, RatingQuestion)):
+                raise TypeError(
+                    "Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`, got a"
+                    f" question in the list with type {type(question)} instead."
+                )
             if not any_required and question.required:
                 any_required = True
         if not any_required:
-            raise ValueError("At least one `QuestionSchema` in `questions` must be required (`required=True`).")
+            raise ValueError("At least one question in `questions` must be required (`required=True`).")
         self.__questions = questions
 
         if guidelines is not None:
@@ -392,7 +397,7 @@ class FeedbackDataset:
         raised and the current records will be returned instead.
         """
         if not self.argilla_id:
-            warnings.warn(
+            _LOGGER.warning(
                 "No records have been logged into neither Argilla nor HuggingFace, so"
                 " no records will be fetched. The current records will be returned"
                 " instead."
@@ -492,7 +497,7 @@ class FeedbackDataset:
 
         if not name or (not name and not workspace):
             if self.argilla_id is None:
-                warnings.warn(
+                _LOGGER.warning(
                     "No `name` or `workspace` have been provided, and no dataset has"
                     " been pushed to Argilla yet, so no records will be pushed to"
                     " Argilla."
@@ -500,18 +505,18 @@ class FeedbackDataset:
                 return
 
             if len(self.__new_records) < 1:
-                warnings.warn(
+                _LOGGER.warning(
                     "No new records have been added to the current `FeedbackTask`"
                     " dataset, so no records will be pushed to Argilla."
                 )
                 return
 
             try:
-                for i in range(0, len(self.__new_records), 32):
+                for i in range(0, len(self.__new_records), PUSHING_BATCH_SIZE):
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=self.argilla_id,
-                        records=self.__new_records[i : i + 32],
+                        records=self.__new_records[i : i + PUSHING_BATCH_SIZE],
                     )
                 self.__records += self.__new_records
                 self.__new_records = []
@@ -605,8 +610,11 @@ class FeedbackDataset:
                         ),
                     )
 
+            self.__records += self.__new_records
+            self.__new_records = []
+
             if self.argilla_id is not None:
-                warnings.warn(
+                _LOGGER.warning(
                     "Since the current object is already a `FeedbackDataset` pushed to"
                     " Argilla, you'll keep on interacting with the same dataset in"
                     " Argilla, even though the one you just pushed holds a different"
@@ -666,15 +674,31 @@ class FeedbackDataset:
             )
 
         cls.argilla_id = existing_dataset.id
+        fields = []
+        for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed:
+            if field.settings["type"] == "text":
+                field = TextField.construct(**field.dict())
+            else:
+                raise ValueError(
+                    f"Field '{field.name}' is not a supported field in the current Python package version,"
+                    " supported field types are: `TextField`."
+                )
+            fields.append(field)
+        questions = []
+        for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed:
+            if question.settings["type"] == "rating":
+                question = RatingQuestion.construct(**question.dict())
+            elif question.settings["type"] == "text":
+                question = TextQuestion.construct(**question.dict())
+            else:
+                raise ValueError(
+                    f"Question '{question.name}' is not a supported question in the current Python package"
+                    " version, supported question types are: `RatingQuestion` and `TextQuestion`."
+                )
+            questions.append(question)
         self = cls(
-            fields=[
-                FieldSchema.construct(**field.dict())
-                for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed
-            ],
-            questions=[
-                QuestionSchema.construct(**question.dict())
-                for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed
-            ],
+            fields=fields,
+            questions=questions,
             guidelines=existing_dataset.guidelines or None,
         )
         if with_records:
@@ -709,8 +733,8 @@ class FeedbackDataset:
             for field in self.fields:
                 if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
                     raise ValueError(
-                        f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment only the"
-                        f" following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
+                        f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment"
+                        f" only the following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
                     )
                 features[field.name] = Value(dtype="string", id="field")
                 if field.name not in dataset:
@@ -721,6 +745,7 @@ class FeedbackDataset:
                     {
                         "user_id": Value(dtype="string"),
                         "value": Value(dtype="string" if question.settings["type"] == "text" else "int32"),
+                        "status": Value(dtype="string"),
                     },
                     id="question",
                 )
@@ -735,7 +760,11 @@ class FeedbackDataset:
                 for question in self.questions:
                     dataset[question.name].append(
                         [
-                            {"user_id": r["user_id"], "value": r["values"][question.name]["value"]}
+                            {
+                                "user_id": r["user_id"],
+                                "value": r["values"][question.name]["value"],
+                                "status": r["status"],
+                            }
                             for r in record["responses"]
                         ]
                         or None
@@ -766,13 +795,16 @@ class FeedbackDataset:
         from packaging.version import parse as parse_version
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
-            warnings.warn(
-                f"Recommended `huggingface_hub` version is 0.14.0 or higher, and you have {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
+            _LOGGER.warning(
+                "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
+                f" {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the"
+                " HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
             )
 
         if len(self) < 1:
             raise ValueError(
-                "Cannot push an empty `rg.FeedbackDataset` to the HuggingFace Hub, please make sure to add at least one record, via the method `add_records`."
+                "Cannot push an empty `rg.FeedbackDataset` to the HuggingFace Hub, please make sure to add at"
+                " least one record, via the method `add_records`."
             )
 
         hfds = self.format_as("datasets")
@@ -820,12 +852,10 @@ class FeedbackDataset:
                 "```"
             )
             card = DatasetCard(
-                (
-                    f"## Guidelines\n\n{self.guidelines}\n\n"
-                    f"{explained_fields}\n\n"
-                    f"{explained_questions}\n\n"
-                    f"{loading_guide}\n\n"
-                )
+                f"## Guidelines\n\n{self.guidelines}\n\n"
+                f"{explained_fields}\n\n"
+                f"{explained_questions}\n\n"
+                f"{loading_guide}\n\n"
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
@@ -849,15 +879,24 @@ class FeedbackDataset:
         from packaging.version import parse as parse_version
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
-            warnings.warn(
-                f"Recommended `huggingface_hub` version is 0.14.0 or higher, and you have {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
+            _LOGGER.warning(
+                "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
+                f" {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the"
+                " HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
             )
+
+        if "token" in kwargs:
+            token = kwargs.pop("token")
+        elif "use_auth_token" in kwargs:
+            token = kwargs.pop("use_auth_token")
+        else:
+            token = None
 
         config_path = hf_hub_download(
             repo_id=repo_id,
             filename="argilla.cfg",
             repo_type="dataset",
-            token=kwargs["token"] if "token" in kwargs else None,
+            token=token,
         )
         with open(config_path, "rb") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
@@ -868,27 +907,29 @@ class FeedbackDataset:
             guidelines=config.guidelines,
         )
 
-        if "token" in kwargs:
-            kwargs["use_auth_token"] = kwargs["token"]
-            del kwargs["token"]
-
-        hfds = load_dataset(repo_id, *args, **kwargs)
+        hfds = load_dataset(repo_id, use_auth_token=token, *args, **kwargs)
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
                 raise ValueError(
-                    f"Only one dataset can be loaded at a time, use `split` to select a split, available splits are: {', '.join(hfds.keys())}."
+                    "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
+                    f" are: {', '.join(hfds.keys())}."
                 )
+            hfds = hfds[list(hfds.keys())[0]]
 
         for index in range(len(hfds)):
             responses = {}
             for question in cls.questions:
                 if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
                     continue
-                for user_id, value in zip(hfds[index][question.name]["user_id"], hfds[index][question.name]["value"]):
+                for user_id, value, status in zip(
+                    hfds[index][question.name]["user_id"],
+                    hfds[index][question.name]["value"],
+                    hfds[index][question.name]["status"],
+                ):
                     if user_id not in responses:
                         responses[user_id] = {
                             "user_id": user_id,
-                            "status": "submitted",
+                            "status": status,
                             "values": {},
                         }
                     responses[user_id]["values"].update({question.name: {"value": value}})
@@ -897,7 +938,7 @@ class FeedbackDataset:
                     fields={field.name: hfds[index][field.name] for field in cls.fields},
                     responses=list(responses.values()) or None,
                     external_id=hfds[index]["external_id"],
-                )
+                ).dict()
             )
         del hfds
         return cls
@@ -1057,5 +1098,5 @@ def feedback_dataset_in_argilla(
     else:
         try:
             return (True, datasets_api_v1.get_dataset(client=httpx_client, id=id).parsed)
-        except Exception as e:
+        except:
             return (False, None)

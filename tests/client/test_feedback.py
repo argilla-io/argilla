@@ -88,19 +88,19 @@ def test_init_wrong_fields(feedback_dataset_guidelines: str, feedback_dataset_qu
 
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields")
 def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset_fields: list) -> None:
-    with pytest.raises(TypeError, match="Expected `questions` to be a list"):
+    with pytest.raises(TypeError, match="Expected `questions` to be a list, got"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=None,
         )
-    with pytest.raises(TypeError, match="Expected `questions` to be a list of `QuestionSchema`"):
+    with pytest.raises(TypeError, match="Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[{"wrong": "question"}],
         )
-    with pytest.raises(ValueError, match="At least one `QuestionSchema` in `questions` must be required"):
+    with pytest.raises(ValueError, match="At least one question in `questions` must be required"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
@@ -177,6 +177,7 @@ def test_records(
     }
     assert dataset.records[1]["responses"] == [
         {
+            "user_id": None,
             "values": {
                 "question-1": {"value": "answer"},
                 "question-2": {"value": 0},
@@ -268,6 +269,36 @@ def test_push_to_argilla_and_from_argilla(
 
     assert dataset.argilla_id is not None
 
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={
+                    "text": "E",
+                    "label": "F",
+                },
+                responses=[
+                    {
+                        "values": {
+                            "question-1": {"value": "answer"},
+                            "question-2": {"value": 0},
+                        },
+                        "status": "submitted",
+                    },
+                    {
+                        "values": {
+                            "question-1": {"value": "answer"},
+                            "question-2": {"value": 0},
+                        },
+                        "status": "submitted",
+                    },
+                ],
+            ),
+        ]
+    )
+
+    with pytest.warns(UserWarning, match="Multiple responses without `user_id`"):
+        dataset.push_to_argilla()
+
     dataset_from_argilla = FeedbackDataset.from_argilla(id=dataset.argilla_id)
 
     assert dataset_from_argilla.guidelines == dataset.guidelines
@@ -278,6 +309,9 @@ def test_push_to_argilla_and_from_argilla(
         question.name for question in dataset.questions
     ]
     assert len(dataset_from_argilla.records) == len(dataset.records)
+    assert (
+        len(dataset_from_argilla.records[-1]["responses"]) == 1
+    )  # Since the second one was discarded as `user_id=None`
 
 
 @pytest.mark.usefixtures(
