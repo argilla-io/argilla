@@ -789,16 +789,16 @@ div[class*="tuto-section-"] {
   border-radius: 5px;
   margin-bottom: 1.5em;
   transition: box-shadow 0.2s ease-in;
-  box-shadow: 1px 1px 3px var(--sd-color-shadow),
-    1px 1px 6px rgb(39 27 27 / 10%) !important;
+  box-shadow: 0 var(--sd-color-shadow),
+    1px 1px 6px rgba(0, 0, 0, 0.1) !important;
 }
 
 .sd-card:hover {
   transform: none;
   border-color: var(--sd-color-card-border);
   transition: box-shadow 0.2s ease-in;
-  box-shadow: 1px 1px 3px var(--sd-color-shadow),
-    1px 1px 10px rgb(39 27 27 / 30%) !important;
+  box-shadow: 1px 1px 10px var(--sd-color-shadow),
+    1px 1px 10px rgba(0, 0, 0, 0.1) !important;
 }
 
 .sd-card:hover .sd-card-title {
@@ -878,13 +878,14 @@ div[class*="tuto-section-"] {
 
 .sd-card-body .sd-card-title {
   font-weight: 600 !important;
-  margin-top: 10px;
   color: var(--color-link);
+  margin-bottom: 0;
 }
 
 .sd-card-body .sd-card-text {
   font-size: 14px;
-  line-height: 1.8em;
+  line-height: 1.5em;
+  margin-top: 0.6em;
 }
 
 /* Tabs */
