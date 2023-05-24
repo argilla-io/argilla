@@ -300,7 +300,7 @@ class FeedbackDataset:
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
         any_required = False
         for question in questions:
-            if not isinstance(question, AllowedQuestionTypes):
+            if not isinstance(question, (TextQuestion, RatingQuestion)):
                 raise TypeError(
                     "Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`, got a"
                     f" question in the list with type {type(question)} instead."
@@ -314,11 +314,11 @@ class FeedbackDataset:
         if guidelines is not None:
             if not isinstance(guidelines, str):
                 raise TypeError(
-                    "Expected `guidelines` to be either None (default) or a string, got" f" {type(guidelines)} instead."
+                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
                 )
             if len(guidelines) < 1:
                 raise ValueError(
-                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length" " is 1."
+                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
                 )
         self.__guidelines = guidelines
 
