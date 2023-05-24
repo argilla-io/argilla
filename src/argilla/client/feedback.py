@@ -62,7 +62,7 @@ class ValueSchema(BaseModel):
 class ResponseSchema(BaseModel):
     user_id: Optional[UUID] = None
     values: Dict[str, ValueSchema]
-    status: Literal["submitted", "missing", "discarded"] = "submitted"
+    status: Literal["submitted", "discarded"] = "submitted"
 
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):

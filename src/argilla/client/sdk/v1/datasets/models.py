@@ -42,7 +42,7 @@ class FeedbackValueModel(BaseModel):
 class FeedbackResponseModel(BaseModel):
     id: UUID
     values: Dict[str, FeedbackValueModel]
-    status: Literal["submitted", "missing", "discarded"]
+    status: Literal["submitted", "discarded"]  # API also contains "missing", but it's just a filter-status
     user_id: UUID
     inserted_at: datetime
     updated_at: datetime
