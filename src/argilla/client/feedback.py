@@ -154,9 +154,12 @@ class RatingQuestion(QuestionSchema):
         validate_assignment = True
 
 
+AllowedQuestionTypes = Union[TextQuestion, RatingQuestion]
+
+
 class FeedbackDatasetConfig(BaseModel):
     fields: List[FieldSchema]
-    questions: List[QuestionSchema]
+    questions: List[AllowedQuestionTypes]
     guidelines: Optional[str] = None
 
 
@@ -179,7 +182,7 @@ class FeedbackDataset:
         TypeError: if `guidelines` is not a string.
         TypeError: if `fields` is not a list of `FieldSchema`.
         ValueError: if `fields` does not contain at least one required field.
-        TypeError: if `questions` is not a list of `QuestionSchema`.
+        TypeError: if `questions` is not a list of `TextQuestion` and/or `RatingQuestion`.
         ValueError: if `questions` does not contain at least one required question.
 
     Examples:
@@ -238,7 +241,7 @@ class FeedbackDataset:
         self,
         *,
         fields: List[FieldSchema],
-        questions: List[QuestionSchema],
+        questions: List[AllowedQuestionTypes],
         guidelines: Optional[str] = None,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.
@@ -251,7 +254,7 @@ class FeedbackDataset:
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
             ValueError: if `fields` does not contain at least one required field.
-            TypeError: if `questions` is not a list of `QuestionSchema`.
+            TypeError: if `questions` is not a list of `TextQuestion` and/or `RatingQuestion`.
             ValueError: if `questions` does not contain at least one required question.
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
@@ -297,12 +300,15 @@ class FeedbackDataset:
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
         any_required = False
         for question in questions:
-            if not isinstance(question, QuestionSchema):
-                raise TypeError(f"Expected `questions` to be a list of `QuestionSchema`, got {type(question)} instead.")
+            if not isinstance(question, AllowedQuestionTypes):
+                raise TypeError(
+                    "Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`, got a"
+                    f" question in the list with type {type(question)} instead."
+                )
             if not any_required and question.required:
                 any_required = True
         if not any_required:
-            raise ValueError("At least one `QuestionSchema` in `questions` must be required (`required=True`).")
+            raise ValueError("At least one question in `questions` must be required (`required=True`).")
         self.__questions = questions
 
         if guidelines is not None:
