@@ -24,20 +24,24 @@ trainer.update_config(
 :::{tab-item} AutoTrain
 
 ```python
-# `OpenAI.FineTune`
+# `AutoTrain.autotrain_advanced`
 trainer.update_config(
-    training_file = None,
-    validation_file = None,
-    model = "curie,
-    n_epochs = 2,
-    batch_size = None,
-    learning_rate_multiplier = 0.1,
-    prompt_loss_weight = 0.1,
-    compute_classification_metrics = False,
-    classification_n_classes = None,
-    classification_positive_class = None,
-    classification_betas = None,
-    suffix = None
+    model = "autotrain", # hub models like roberta-base
+    autotrain = [{
+        "source_language": "en",
+        "num_models": 5
+    }],
+    hub_model = [{
+        "learning_rate":  0.001,
+        "optimizer": "adam",
+        "scheduler": "linear",
+        "train_batch_size": 8,
+        "epochs": 10,
+        "percentage_warmup": 0.1,
+        "gradient_accumulation_steps": 1,
+        "weight_decay": 0.1,
+        "tasks": "text_binary_classification", # this is inferred from the dataset
+    }]
 )
 ```
 :::

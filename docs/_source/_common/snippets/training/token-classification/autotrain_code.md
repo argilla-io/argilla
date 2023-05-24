@@ -22,7 +22,7 @@ trainer = ArgillaTrainer(
     train_size=0.8
 )
 trainer.update_config(model="roberta-base", hub_model=[{"learning_rate": 0.0002}, {"learning_rate": 0.0003}])
-trainer.train(output_dir="text-classification")
+trainer.train(output_dir="token-classification")
 records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
 ```
 
