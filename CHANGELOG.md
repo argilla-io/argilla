@@ -35,13 +35,12 @@ These are the section headers that we use:
 - `/api/v1/me/dataset/{dataset_id}/records` new endpoint to list  dataset records with user responses ([#2615])
 - `/api/v1/me/datasets/{dataset_id}/metrics` new endpoint to get the dataset user metrics ([#2615])
 - `/api/v1/me/records/{record_id}/responses` new endpoint to create record user responses ([#2615])
-- Support for Feedback dataset in UI ([#2615])
-    - showing new feedback task datasets in datasets list ([#2719])
-    - new page for feedback task ([#2680])
-    - show feedback task metrics ([#2822])
-    - user can delete dataset in dataset settings page ([#2792])
+- showing new feedback task datasets in datasets list ([#2719])
+- new page for feedback task ([#2680])
+- show feedback task metrics ([#2822])
+- user can delete dataset in dataset settings page ([#2792])
 - Support for Feedback dataset in python client (parent PR [#2615], and nested PRs: [#2949], [#2827], [#2943], [#2945], and [#2962])
-  - Integration with the HuggingFace Hub ([#2949])
+- Integration with the HuggingFace Hub ([#2949])
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
 
