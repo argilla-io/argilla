@@ -34,6 +34,7 @@ from argilla._constants import (
 from argilla.client.apis.datasets import Datasets
 from argilla.client.apis.metrics import MetricsAPI
 from argilla.client.apis.search import Search, VectorSearch
+from argilla.client.apis.status import Status
 from argilla.client.datasets import (
     Dataset,
     DatasetForText2Text,
@@ -52,7 +53,6 @@ from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import bulk
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
-    BaseClientError,
     InputValueError,
     NotFoundApiError,
 )
@@ -64,14 +64,15 @@ from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
 )
-from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
+from argilla.client.sdk.text2text.models import (
+    Text2TextRecord as SdkText2TextRecord,
+)
 from argilla.client.sdk.text_classification import api as text_classification_api
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     LabelingRule,
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
-    TextClassificationQuery,
 )
 from argilla.client.sdk.text_classification.models import (
     TextClassificationRecord as SdkTextClassificationRecord,
@@ -79,14 +80,12 @@ from argilla.client.sdk.text_classification.models import (
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
-    TokenClassificationQuery,
 )
 from argilla.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
 )
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import User
-from argilla.utils import setup_loop_in_thread
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -137,6 +136,25 @@ class Argilla:
 
         self._user: User = users_api.whoami(client=self._client)
         self.set_workspace(workspace or self._user.username)
+
+        self._check_argilla_versions()
+
+    def _check_argilla_versions(self):
+        from argilla import __version__ as rg_version
+
+        api_info = Status(self.http_client).get_info()
+
+        client_version = rg_version.split(".")[:2]
+        server_version = api_info.version.split(".")[:2]
+        if client_version != server_version:
+            warnings.warn(
+                message=f"You're connecting to Argilla Server {api_info.version} using a different client version "
+                f"({rg_version}).\n"
+                "This may lead to potential compatibility issues during your experience.\n"
+                "To ensure a seamless and optimized connection, we highly recommend "
+                "aligning your client version with the server version.",
+                category=UserWarning,
+            )
 
     def __del__(self):
         if hasattr(self, "_client"):

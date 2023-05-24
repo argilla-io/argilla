@@ -29,6 +29,7 @@ from argilla._constants import (
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client import api
+from argilla.client.apis.status import ApiInfo, Status
 from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
@@ -747,3 +748,12 @@ def test_load_sort(mocked_client):
     ds = api.load(name=dataset, ids=["1str", "2str", "11str"])
     df = ds.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]
+
+
+def test_check_argilla_versions(monkeypatch, mocked_client):
+    def mock_get_info(*args, **kwargs):
+        return ApiInfo(version="1.0.0")
+
+    monkeypatch.setattr(Status, "get_info", mock_get_info)
+    with pytest.warns(UserWarning, match="You're connecting to Argilla Server 1.0.0 using a different client version"):
+        Argilla()
