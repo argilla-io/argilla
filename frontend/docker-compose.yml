@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:3000"
+    network_mode: "host"
+    command: ["npm", "run", "dev"]
+    volumes:
+      - ".:/app"
+      - "../docs:/docs"
+      - "/app/node_modules"

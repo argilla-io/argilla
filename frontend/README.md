@@ -1,20 +1,8 @@
 # Argilla (UI)
 
-## Build Setup
+For local development of only the UI, you need to start the normal docker-compose.yml of the project (root folder). Then, start the docker-compose.yml of this folder. This docker-compose is only for local development, as it starts a dev mode that watches the file changes and recompiles. This is not suitable for production environments.
 
-```bash
-# install dependencies
-$ yarn install
-
-# serve with hot reload at localhost:3000
-$ yarn dev
-
-# build for production and launch server
-$ yarn build
-$ yarn start
-
-# generate static project
-$ yarn generate
-```
-
-For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+1. `cd argilla`
+2. `docker compose up`
+3. `cd frontend`
+4. `docker compose up`
