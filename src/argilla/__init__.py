@@ -62,7 +62,6 @@ if _TYPE_CHECKING:
         RatingQuestion,
         TextField,
         TextQuestion,
-        create_feedback_dataset,
     )
     from argilla.client.models import (
         Text2TextRecord,
@@ -114,7 +113,6 @@ _import_structure = {
     ],
     "client.feedback": [
         "FeedbackDataset",
-        "create_feedback_dataset",
         "TextField",
         "TextQuestion",
         "RatingQuestion",
