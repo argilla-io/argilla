@@ -314,11 +314,11 @@ class FeedbackDataset:
         if guidelines is not None:
             if not isinstance(guidelines, str):
                 raise TypeError(
-                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
+                    "Expected `guidelines` to be either None (default) or a string, got" f" {type(guidelines)} instead."
                 )
             if len(guidelines) < 1:
                 raise ValueError(
-                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
+                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length" " is 1."
                 )
         self.__guidelines = guidelines
 
@@ -723,8 +723,8 @@ class FeedbackDataset:
             for field in self.fields:
                 if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
                     raise ValueError(
-                        f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment only the"
-                        f" following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
+                        f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment"
+                        f" only the following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
                     )
                 features[field.name] = Value(dtype="string", id="field")
                 if field.name not in dataset:
@@ -786,12 +786,15 @@ class FeedbackDataset:
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
             _LOGGER.warning(
-                f"Recommended `huggingface_hub` version is 0.14.0 or higher, and you have {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
+                "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
+                f" {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the"
+                " HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
             )
 
         if len(self) < 1:
             raise ValueError(
-                "Cannot push an empty `rg.FeedbackDataset` to the HuggingFace Hub, please make sure to add at least one record, via the method `add_records`."
+                "Cannot push an empty `rg.FeedbackDataset` to the HuggingFace Hub, please make sure to add at"
+                " least one record, via the method `add_records`."
             )
 
         hfds = self.format_as("datasets")
@@ -839,12 +842,10 @@ class FeedbackDataset:
                 "```"
             )
             card = DatasetCard(
-                (
-                    f"## Guidelines\n\n{self.guidelines}\n\n"
-                    f"{explained_fields}\n\n"
-                    f"{explained_questions}\n\n"
-                    f"{loading_guide}\n\n"
-                )
+                f"## Guidelines\n\n{self.guidelines}\n\n"
+                f"{explained_fields}\n\n"
+                f"{explained_questions}\n\n"
+                f"{loading_guide}\n\n"
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
@@ -869,7 +870,9 @@ class FeedbackDataset:
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
             _LOGGER.warning(
-                f"Recommended `huggingface_hub` version is 0.14.0 or higher, and you have {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
+                "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
+                f" {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the"
+                " HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
             )
 
         if "token" in kwargs:
@@ -898,7 +901,8 @@ class FeedbackDataset:
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
                 raise ValueError(
-                    f"Only one dataset can be loaded at a time, use `split` to select a split, available splits are: {', '.join(hfds.keys())}."
+                    "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
+                    f" are: {', '.join(hfds.keys())}."
                 )
             hfds = hfds[list(hfds.keys())[0]]
 
