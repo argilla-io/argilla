@@ -866,13 +866,18 @@ class FeedbackDataset:
                 f"Recommended `huggingface_hub` version is 0.14.0 or higher, and you have {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
             )
 
-        token = kwargs.get("token") or kwargs.get("use_auth_token")
+        if "token" in kwargs:
+            token = kwargs.pop("token")
+        elif "use_auth_token" in kwargs:
+            token = kwargs.pop("use_auth_token")
+        else:
+            token = None
 
         config_path = hf_hub_download(
             repo_id=repo_id,
             filename="argilla.cfg",
             repo_type="dataset",
-            token=token if not isinstance(token, bool) else None,
+            token=token,
         )
         with open(config_path, "rb") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
@@ -913,7 +918,7 @@ class FeedbackDataset:
                     fields={field.name: hfds[index][field.name] for field in cls.fields},
                     responses=list(responses.values()) or None,
                     external_id=hfds[index]["external_id"],
-                )
+                ).dict()
             )
         del hfds
         return cls
