@@ -76,6 +76,7 @@ class ObservationDataset extends Model {
       last_updated: this.string(null),
       // This will be normalized in a future PR using also workspace for relational ids
       viewSettings: this.hasOne(DatasetViewSettings, "id", "name"),
+      guidelines: this.string(),
     };
   }
 }

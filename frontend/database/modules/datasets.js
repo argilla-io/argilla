@@ -780,6 +780,16 @@ const actions = {
         });
     }
   },
+
+  async updateDatasetGuidelines(id, guidelines) {
+    return await ObservationDataset.update({
+      where: dataset => dataset.id == id,
+      data: {
+        guidelines
+      },
+    });
+  },
+
   async deleteDataset(_, { workspace, name: datasetName }) {
     let message = "";
     let typeOfNotification = "";
