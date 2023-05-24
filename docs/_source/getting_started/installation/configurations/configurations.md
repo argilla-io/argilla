@@ -1,7 +1,7 @@
 (configurations)=
 # ⚙️ Configuration
 
-````{grid}  1 1 2 2
+````{grid}  1 1 3 3
 :class-container: tuto-section-2
 ```{grid-item-card} ElasticSearch
 :link: elasticsearch.md
