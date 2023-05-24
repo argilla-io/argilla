@@ -29,12 +29,12 @@ records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=Tru
 ```python
 # `transformers.AutoModelForTextClassification`
 trainer.update_config(
-    pretrained_model_name_or_path = "distilbert-base-uncased"
-    force_download = False
-    resume_download = False
-    proxies = None
-    token = None
-    cache_dir = None
+    pretrained_model_name_or_path = "distilbert-base-uncased",
+    force_download = False,
+    resume_download = False,
+    proxies = None,
+    token = None,
+    cache_dir = None,
     local_files_only = False
 )
 # `transformers.TrainingArguments`
