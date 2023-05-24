@@ -40,7 +40,8 @@ These are the section headers that we use:
     - new page for feedback task ([#2680])
     - show feedback task metrics ([#2822])
     - user can delete dataset in dataset settings page ([#2792])
-- Support for Feedback dataset in python client ([#2615])
+- Support for Feedback dataset in python client (parent PR [#2615], and nested PRs: [#2949], [#2827], [#2943], [#2945], and [#2962])
+  - Integration with the HuggingFace Hub ([#2949])
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
 
