@@ -260,7 +260,7 @@ export default {
       fetchDatasets: "entities/datasets/fetchAll",
     }),
     isOldTask(task) {
-      // NOTE - we need to detect ald/new task because the redirection correcponding pages does not have same route
+      // NOTE - we need to detect old/new task because the redirection corresponding pages does not have the same route
       return [
         "TokenClassification",
         "TextClassification",
