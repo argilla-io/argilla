@@ -28,6 +28,10 @@ export default {
       type: String,
       default: () => "",
     },
+    isRequired: {
+      type: Boolean,
+      default: () => false,
+    },
     options: {
       type: Array,
       required: true,
@@ -73,7 +77,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 // reset css
-.multi-label-component > .searchbar {
+.multi-label-component .searchbar {
   margin: 0;
 }
 .multi-label-component > .annotation-area {
