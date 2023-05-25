@@ -3,7 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to [Semanti
+c Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!--
 These are the section headers that we use:
@@ -17,7 +18,7 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-## [1.8.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
+## [1.8.0](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
 ## Added
 
