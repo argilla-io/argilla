@@ -1,4 +1,7 @@
 # Examples
+
+Here you can find end-to-end examples to help you get started with curanting datasets and collecting feedback to fine-tune LLMs.
+
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
 ```{grid-item-card} Curate an instruction dataset for supervised fine-tuning

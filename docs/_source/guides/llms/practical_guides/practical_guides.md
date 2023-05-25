@@ -8,29 +8,29 @@ This guide will help you with all the practical aspects of setting up an annotat
 ```{grid-item-card} Create and import a Feedback Dataset
 :link: create_dataset.html
 
-Methods to configure and import a Feedback Dataset in Argilla
+Methods to configure and import a Feedback Dataset in Argilla.
 
 ```
 ```{grid-item-card} Set up your annotation team
 :link: set_up_annotation_team.html
 
-Workflows to organize your annotation team
+Workflows to organize your annotation team.
 ```
 ```{grid-item-card} Annotate a Feedback Dataset
 :link: annotate_dataset.html
 
-Check the Feedback Task UI and the available shortcuts
+Check the Feedback Task UI and the available shortcuts.
 
 ```
 ```{grid-item-card} Collect responses
 :link: collect_responses.html
 
-Collect annotations and solve disagreements
+Collect annotations and solve disagreements.
 ```
 ```{grid-item-card} Export a Feedback Dataset
 :link: import_export_dataset.html
 
-Export your dataset and save it in the Hugging Face Hub or locally
+Export your dataset and save it in the Hugging Face Hub or locally.
 
 ```
 ```{grid-item-card} Fine-tune

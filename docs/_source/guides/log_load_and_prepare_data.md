@@ -6,6 +6,10 @@ The Dataset classes are lightweight containers for Argilla records. These classe
 For each record type there's a corresponding Dataset class called `DatasetFor<RecordType>`.
 You can look up their API in the [reference section](../reference/python/python_client.rst#module-argilla.client.datasets)
 
+```{note}
+For information on how to manage data for the new Feedback Task datasets, check our [How-to guides](../guides/llms/practical_guides/practical_guides.md) that explain how to import/export data, configure this type of dataset and more!
+```
+
 ## Argilla Records
 
 The main component of the Argilla data model is called a record. A dataset in Argilla is a collection of these records.
