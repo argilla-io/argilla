@@ -199,11 +199,11 @@ nbsphinx_prolog = (
 """
 )
 
-nbsphinx_epilog = f"""
-.. raw:: html
+# nbsphinx_epilog = f"""
+# .. raw:: html
 
-    {next_steps_html}
-"""
+#     {next_steps_html}
+# """
 
 # -- Options for HTML output -------------------------------------------------
 
