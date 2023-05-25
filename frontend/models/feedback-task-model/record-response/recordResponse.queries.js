@@ -30,7 +30,8 @@ const deleteRecordResponsesByUserIdAndResponseId = (userId, responseId) =>
   });
 
 // DELETE ALL RESPONSES
-const deleteAllRecordResponses = () => RecordResponseModel.deleteAll();
+const deleteAllRecordResponses = async () =>
+  await RecordResponseModel.deleteAll();
 
 // EXIST
 const isResponsesByUserIdExists = (userId, recordId) =>
