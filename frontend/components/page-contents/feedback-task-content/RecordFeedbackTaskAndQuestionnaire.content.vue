@@ -50,7 +50,8 @@ import {
   isRecordWithRecordIndexByDatasetIdExists,
   isAnyRecordByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
-
+import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 
@@ -213,6 +214,8 @@ export default {
   },
 
   async fetch() {
+    await this.cleanRecordOrm();
+
     await this.initRecordsInDatabase(this.currentPage - 1);
 
     const offset = this.currentPage - 1;
@@ -244,7 +247,6 @@ export default {
       this.recordStatusToFilterWith = status;
       this.currentPage = 1;
 
-      await deleteAllRecords();
       await this.$fetch();
 
       this.reRenderQuestionForm++;
@@ -477,6 +479,14 @@ export default {
       });
 
       return { formattedRecordResponsesForOrm, recordStatus };
+    },
+    async cleanRecordOrm() {
+      await deleteAllRecords();
+      await deleteRecordResponsesByUserIdAndResponseId(
+        this.userId,
+        this.datasetId
+      );
+      await deleteAllRecordFields();
     },
   },
   beforeDestroy() {
