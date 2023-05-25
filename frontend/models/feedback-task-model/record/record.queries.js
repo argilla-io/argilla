@@ -20,8 +20,8 @@ const RESPONSE_STATUS_FOR_API = Object.freeze({
 });
 
 // UPSERT
-const upsertRecords = (records) => {
-  RecordModel.insertOrUpdate({ data: records });
+const upsertRecords = async (records) => {
+  await RecordModel.insertOrUpdate({ data: records });
 };
 
 // UPDATE
@@ -73,8 +73,12 @@ const isRecordContainsAnyResponsesByUserId = (userId, recordId) => {
     .exists();
 };
 
+const isAnyRecordByDatasetId = (datasetId) => {
+  return RecordModel.query().where("dataset_id", datasetId).exists();
+};
+
 // DELETE
-const deleteAllRecords = () => RecordModel.deleteAll();
+const deleteAllRecords = async () => await RecordModel.deleteAll();
 
 export {
   RECORD_STATUS,
@@ -87,5 +91,6 @@ export {
   updateRecordStatusByRecordId,
   isRecordWithRecordIndexByDatasetIdExists,
   isRecordContainsAnyResponsesByUserId,
+  isAnyRecordByDatasetId,
   deleteAllRecords,
 };

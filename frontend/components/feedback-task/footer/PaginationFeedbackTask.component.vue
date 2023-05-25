@@ -1,20 +1,19 @@
 <template>
   <PaginationComponent
-    v-if="totalRecord"
-    :key="totalRecord"
-    :showPageNumber="false"
-    :totalItems="totalRecord"
-    :notificationParams="paginationNotificationParams"
-    :conditionToShowNotificationComponentOnPagination="
-      conditionToShowNotificationComponent
-    "
-    @on-paginate="onPaginate"
+    v-if="hasRecords"
+    :key="hasRecords"
+    :currentPage="currentPage"
+    @on-click-next="onPaginate(goToNextPage)"
+    @on-click-prev="onPaginate(goToPrevPage)"
   />
 </template>
 
 <script>
-import { getTotalRecordByDatasetId } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { isNil } from "lodash";
+import { Notification } from "@/models/Notifications";
+import { isAnyRecordByDatasetId } from "@/models/feedback-task-model/record/record.queries";
 import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
+
 export default {
   name: "PaginationFeedbackTaskComponent",
   props: {
@@ -24,13 +23,8 @@ export default {
     },
   },
   created() {
-    this.paginationNotificationParams = {
-      message: "Your changes will be lost if you move to another page",
-      buttonMessage: LABEL_PROPERTIES.CONTINUE,
-      typeOfToast: "warning",
-    };
-
     this.onBusEventAreResponsesUntouched();
+    this.onBusEventGoToNextPage();
   },
   data() {
     return {
@@ -38,31 +32,61 @@ export default {
     };
   },
   computed: {
-    totalRecord() {
-      return getTotalRecordByDatasetId(this.datasetId);
+    currentPage() {
+      const { _page } = this.$route.query;
+      switch (_page) {
+        case isNil(_page):
+        case _page < 1:
+          return 1;
+        default:
+          return +_page;
+      }
+    },
+    hasRecords() {
+      return isAnyRecordByDatasetId(this.datasetId);
     },
   },
   methods: {
-    onPaginate(currentPage) {
-      this.onEmitCurrentPageByBusEvent(currentPage);
+    goToNextPage() {
+      this.$root.$emit("go-to-next-page");
+    },
+    goToPrevPage() {
+      this.$root.$emit("go-to-prev-page");
     },
     onBusEventAreResponsesUntouched() {
+      // TODO - move logic to check if questionnaire is untouched in RecordFeedbackAndQuestionnaire component
       this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
-        this.areResponsesUntouched = areResponsesUntouched;
+        this.isQuestionFormTouched = !areResponsesUntouched;
       });
     },
-    onEmitCurrentPageByBusEvent(currentPage) {
-      this.$root.$emit("current-page", currentPage);
+    onBusEventGoToNextPage() {
+      this.$root.$on("go-to-page", (newPage) => {
+        this.currentPage = newPage;
+      });
     },
-    conditionToShowNotificationComponent() {
-      // NOTE 1 - this method have to be passed to the generic pagination component to keep it 'stupid'
-      // NOTE 2 - return true if responses have been touched,return false in other case
-
-      return !this.areResponsesUntouched;
+    showNotificationBeforePaginate(eventToFire) {
+      // TODO - move logic to show notification in RecordFeedbackAndQuestionnaire component
+      Notification.dispatch("notify", {
+        message: "Your changes will be lost if you move to another page",
+        numberOfChars: 500,
+        type: "warning",
+        buttonText: LABEL_PROPERTIES.CONTINUE,
+        async onClick() {
+          eventToFire();
+        },
+      });
+    },
+    onPaginate(eventToFire) {
+      if (this.isQuestionFormTouched) {
+        this.showNotificationBeforePaginate(eventToFire);
+      } else {
+        eventToFire();
+      }
     },
   },
   destroyed() {
     this.$root.$off("are-responses-untouched");
+    this.$root.$off("go-to-page");
   },
 };
 </script>

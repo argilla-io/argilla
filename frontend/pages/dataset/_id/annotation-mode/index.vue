@@ -56,6 +56,30 @@ export default {
       areResponsesUntouched: false,
     };
   },
+  beforeRouteLeave(to, from, next) {
+    if (!this.areResponsesUntouched) {
+      let message = "";
+      switch (to.name) {
+        case "datasets":
+        case "dataset-id-settings":
+        case "user-settings":
+          message = "Your changes will be lost if you leave the current page";
+          break;
+        default:
+        // do nothing
+      }
+      message.length &&
+        this.showNotification({
+          eventToFireOnClick: async () => {
+            await next();
+          },
+          message,
+          buttonMessage: this.buttonMessage,
+        });
+    } else {
+      next();
+    }
+  },
   computed: {
     datasetId() {
       return this.$route.params.id;
@@ -173,13 +197,13 @@ export default {
       if (this.areResponsesUntouched) {
         await this.deleteRecordsAndRefreshDataset();
       } else {
-        this.showNotificationBeforeRefresh({
+        this.showNotification({
           eventToFireOnClick: async () => {
             await this.deleteRecordsAndRefreshDataset();
           },
           message: this.toastMessage,
           buttonMessage: this.buttonMessage,
-          typeOfToast: this.typeOfToast,
+          typeOfToast: "warning",
         });
       }
     },
@@ -194,7 +218,7 @@ export default {
         this.areResponsesUntouched = areResponsesUntouched;
       });
     },
-    showNotificationBeforeRefresh({
+    showNotification({
       eventToFireOnClick,
       message,
       buttonMessage,

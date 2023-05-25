@@ -13,10 +13,12 @@
 #  limitations under the License.
 
 from datetime import datetime
+from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -337,7 +339,6 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -442,7 +443,6 @@ def test_list_dataset_records_with_include_responses(client: TestClient, admin_a
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -461,7 +461,6 @@ def test_list_dataset_records_with_offset(client: TestClient, admin_auth_header:
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_dataset_records_with_limit(client: TestClient, admin_auth_header: dict):
@@ -479,7 +478,6 @@ def test_list_dataset_records_with_limit(client: TestClient, admin_auth_header: 
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_a.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_auth_header: dict):
@@ -499,7 +497,6 @@ def test_list_dataset_records_with_offset_and_limit(client: TestClient, admin_au
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_dataset_records_without_authentication(client: TestClient):
@@ -562,7 +559,6 @@ def test_list_current_user_dataset_records(client: TestClient, admin_auth_header
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -670,7 +666,6 @@ def test_list_current_user_dataset_records_with_include_responses(
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -689,7 +684,6 @@ def test_list_current_user_dataset_records_with_offset(client: TestClient, admin
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_current_user_dataset_records_with_limit(client: TestClient, admin_auth_header: dict):
@@ -707,7 +701,6 @@ def test_list_current_user_dataset_records_with_limit(client: TestClient, admin_
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_a.id)]
-    assert response_body["total"] == 3
 
 
 def test_list_current_user_dataset_records_with_offset_and_limit(client: TestClient, admin_auth_header: dict):
@@ -727,7 +720,6 @@ def test_list_current_user_dataset_records_with_offset_and_limit(client: TestCli
 
     response_body = response.json()
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-    assert response_body["total"] == 3
 
 
 @pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted"])
@@ -764,7 +756,6 @@ def test_list_current_user_dataset_records_with_response_status_filter(
     assert response.status_code == 200
     response_json = response.json()
 
-    assert response_json["total"] == num_responses_per_status
     assert len(response_json["items"]) == num_responses_per_status
 
     if response_status_filter == "missing":
@@ -819,7 +810,6 @@ def test_list_current_user_dataset_records_as_annotator(client: TestClient, admi
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -927,7 +917,6 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
-        "total": 3,
     }
 
 
@@ -1699,6 +1688,8 @@ async def test_create_dataset_records(
     client: TestClient,
     search_engine: SearchEngine,
     opensearch: OpenSearch,
+    # TODO: use the overwrite deps to provide a spied local telemetry client.
+    test_telemetry: MagicMock,
     db: Session,
     admin: User,
     admin_auth_header: dict,
@@ -1788,6 +1779,8 @@ async def test_create_dataset_records(
             "responses": {"admin": {"values": None, "status": "discarded"}},
         },
     ]
+
+    test_telemetry.assert_called_once_with(action="DatasetRecordsCreated", data={"records": len(records_json["items"])})
 
 
 @pytest.mark.asyncio
@@ -2390,6 +2383,8 @@ def test_publish_dataset(
     client: TestClient,
     db: Session,
     opensearch: OpenSearch,
+    # TODO: use the overwrite deps to provide a spied local telemetry client.
+    test_telemetry: MagicMock,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create()
@@ -2405,6 +2400,7 @@ def test_publish_dataset(
     assert response_body["status"] == "ready"
 
     assert opensearch.indices.exists(index=f"rg.{dataset.id}")
+    test_telemetry.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
 
 
 def test_publish_dataset_with_error_on_index_creation(

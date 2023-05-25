@@ -13,11 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
 
-from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors_handler import handle_response_error
 from argilla.client.sdk.commons.models import (
     ErrorMessage,
@@ -233,6 +233,28 @@ def add_records(
         A `Response` object with the response itself, and/or the error codes if applicable.
     """
     url = "/api/v1/datasets/{id}/records".format(id=id)
+
+    active_user_id = None
+
+    for record in records:
+        cleaned_responses = []
+        response_without_user_id = False
+        if "responses" not in record:
+            continue
+        for response in record["responses"]:
+            if response["user_id"] is None:
+                if response_without_user_id:
+                    warnings.warn(
+                        f"Multiple responses without `user_id` found in record {record}, so just the first one will be used while the rest will be ignored."
+                    )
+                    continue
+                else:
+                    if active_user_id is None:
+                        active_user_id = client.get("api/me").json()["id"]
+                    response["user_id"] = active_user_id
+                    response_without_user_id = True
+            cleaned_responses.append(response)
+        record["responses"] = cleaned_responses
 
     response = client.post(url=url, json={"items": records})
 

@@ -17,13 +17,36 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+## [1.8.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
+
 ## Added
 
 - `/api/v1/datasets` new endpoint to list and create datasets ([#2615]).
-- `/api/v1/datasets/{dataset_id}` new endpoint to delete datasets ([#2615]).
+- `/api/v1/datasets/{dataset_id}` new endpoint to get and delete datasets ([#2615]).
+- `/api/v1/datasets/{dataset_id}/publish` new endpoint to publish a dataset ([#2615]).
+- `/api/v1/datasets/{dataset_id}/questions` new endpoint to list and create dataset questions ([#2615])
+- `/api/v1/datasets/{dataset_id}/fields` new endpoint to list and create dataset fields ([#2615])
+- `/api/v1/datasets/{dataset_id}/questions/{question_id}` new endpoint to delete a dataset questions ([#2615])
+- `/api/v1/datasets/{dataset_id}/fields/{field_id}` new endpoint to delete a dataset field ([#2615])
+- `/api/v1/workspaces/{workspace_id}` new endpoint to get workspaces by id ([#2615])
+- `/api/v1/responses/{response_id}` new endpoint to update and delete a response ([#2615])
+- `/api/v1/datasets/{dataset_id}/records` new endpoint to create and list dataset records ([#2615])
+- `/api/v1/me/datasets` new endpoint to list user visible datasets ([#2615])
+- `/api/v1/me/dataset/{dataset_id}/records` new endpoint to list  dataset records with user responses ([#2615])
+- `/api/v1/me/datasets/{dataset_id}/metrics` new endpoint to get the dataset user metrics ([#2615])
+- `/api/v1/me/records/{record_id}/responses` new endpoint to create record user responses ([#2615])
+- showing new feedback task datasets in datasets list ([#2719])
+- new page for feedback task ([#2680])
+- show feedback task metrics ([#2822])
+- user can delete dataset in dataset settings page ([#2792])
+- Support for Feedback dataset in python client (parent PR [#2615], and nested PRs: [#2949], [#2827], [#2943], [#2945], and [#2962])
+- Integration with the HuggingFace Hub ([#2949])
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
 
+### Deprecated
+
+- Using argilla with python 3.7 runtime is deprecated and support will be removed from version 1.9.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
 
 ## [1.7.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.7.0)
 
@@ -54,6 +77,7 @@ These are the section headers that we use:
 
 - `argilla.training` bugfixes and unification ([#2665](https://github.com/argilla-io/argilla/issues/2665))
 - Resolved several small bugs in the `ArgillaTrainer`.
+- Avoid rendering html for invalid html strings in Text2text ([#2911]https://github.com/argilla-io/argilla/issues/2911)
 
 ### Deprecated
 
@@ -81,6 +105,7 @@ These are the section headers that we use:
 - Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
 
 ### Fixes
+
 - Now the `prepare_for_training` method is working when `multi_label=True`. Closes [#2606](https://github.com/argilla-io/argilla/issues/2606)
 
 ### Changed
@@ -103,8 +128,6 @@ These are the section headers that we use:
 - The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
-
-
 
 ## [1.5.1](https://github.com/argilla-io/argilla/compare/v1.5.0...v1.5.1) - 2023-03-30
 

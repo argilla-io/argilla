@@ -46,6 +46,14 @@ export default {
       selectedStatus: null,
     };
   },
+  mounted() {
+    this.selectedStatus = this.selectedStatus || this.statusFromRoute;
+
+    this.$root.$on("reset-status-filter", () => {
+      this.selectedStatus = this.statusFromRoute;
+    });
+  },
+
   computed: {
     filtersFromVuex() {
       return getFiltersByDatasetId(
@@ -64,8 +72,8 @@ export default {
     },
   },
   watch: {
-    statusFromRoute() {
-      this.selectedStatus = this.statusFromRoute;
+    selectedStatus(newValue) {
+      this.$root.$emit("status-filter-changed", newValue);
     },
   },
   created() {
@@ -142,6 +150,9 @@ export default {
         }
       );
     },
+  },
+  beforeDestroy() {
+    this.$root.$off("reset-status-filter");
   },
 };
 </script>
