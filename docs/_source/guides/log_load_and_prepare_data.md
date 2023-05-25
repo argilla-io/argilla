@@ -38,8 +38,72 @@ Let's see how to create and upload a basic record to the Argilla web app  (make 
 
 ### Create records
 
-```{include} /_common/tabs/records_create.md
+We support different tasks within the Argilla eco-system focused on NLP: `Text Classification`, `Token Classification` and `Text2Text`.
+
+
+::::{tab-set}
+
+:::{tab-item} Text Classification
+
+```python
+import argilla as rg
+
+rec = rg.TextClassificationRecord(
+    text="beautiful accomodations stayed hotel santa... hotels higer ranked website.",
+    prediction=[("price", 0.75), ("hygiene", 0.25)],
+    annotation="price"
+)
+rg.log(records=rec, name="my_dataset")
 ```
+![single_textclass_record](../../_static/reference/webapp/features-single_textclass_record.png)
+:::
+
+:::{tab-item} Text Classification (multi-label)
+```python
+import argilla as rg
+
+rec = rg.TextClassificationRecord(
+    text="damn this kid and her fancy clothes makes me feel like a bad parent.",
+    prediction=[("admiration", 0.75), ("annoyance", 0.25)],
+    annotation=["price", "annoyance"],
+    multi_label=True
+)
+rg.log(records=rec, name="my_dataset")
+```
+![multi_textclass_record](../../_static/reference/webapp/features-multi_textclass_record.png)
+:::
+
+
+:::{tab-item} Token Classification
+```python
+import argilla as rg
+
+record = rg.TokenClassificationRecord(
+    text="Michael is a professor at Harvard",
+    tokens=["Michael", "is", "a", "professor", "at", "Harvard"],
+    prediction=[("NAME", 0, 7, 0.75), ("LOC", 26, 33, 0.8)],
+    annotation=[("NAME", 0, 7), ("LOC", 26, 33)],
+)
+rg.log(records=rec, name="my_dataset")
+```
+![tokclass_record](../../_static/reference/webapp/features-tokclass_record.png)
+:::
+
+:::{tab-item} Text2Text
+```python
+import argilla as rg
+
+record = rg.Text2TextRecord(
+    text="A giant giant spider is discovered... how much does he make in a year?",
+    prediction=["He has 3*4 trees. So he has 12*5=60 apples."],
+)
+rg.log(records=rec, name="my_dataset")
+```
+
+![text2text_record](../../_static/reference/webapp/features-text2text_record.png)
+:::
+
+::::
 
 ### Special Metadata Fields
 
@@ -75,9 +139,33 @@ If you forget to define a labeling schema, Argilla will aggregate the labels it 
 
 ![Schema not saved](../../_source/_static/images/guides/guides-define_schema.png)
 
-```{include} /_common/tabs/dataset_settings.md
-```
+::::{tab-set}
 
+:::{tab-item} Text Classification
+```python
+import argilla as rg
+
+settings = rg.TextClassificationSettings(label_schema=["A", "B", "C"])
+
+rg.configure_dataset(name="my_dataset", settings=settings)
+```
+:::
+
+:::{tab-item} Token Classification
+```python
+import argilla as rg
+
+settings = rg.TokenClassificationSettings(label_schema=["A", "B", "C"])
+
+rg.configure_dataset(name="my_dataset", settings=settings)
+```
+:::
+
+:::{tab-item} Text2Text
+Because we do not require a labeling schema for `Text2Text`, we can create a dataset by directly logging records via `rg.log()`.
+:::
+
+::::
 ## Log data
 
 Argilla currently gives users several ways to log model predictions besides the `rg.log` async method.
