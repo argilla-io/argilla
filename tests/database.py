@@ -14,4 +14,4 @@
 
 from sqlalchemy import orm
 
-TestSession = orm.scoped_session(orm.sessionmaker(join_transaction_mode="create_savepoint"))
+TestSession = orm.scoped_session(orm.sessionmaker())
