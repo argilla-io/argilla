@@ -4,7 +4,7 @@
 ## Annotate records
 
 ```{note}
-For features related to the new [Feedback Task] datasets, please check [this guide](../../guides/llms/practical_guides/annotate_dataset.ipynb).
+For information about features in the new Feedback Task datasets, please check [this guide](../../guides/llms/practical_guides/annotate_dataset.ipynb).
 ```
 
 ![Annotate records](../../_static/reference/webapp/features-annotate.png)
