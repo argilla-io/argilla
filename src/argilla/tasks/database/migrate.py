@@ -44,8 +44,7 @@ def migrate_db(revision: Optional[str] = typer.Option(default="head", help="DB R
 
     alembic_args = ["-c", ALEMBIC_CONFIG_FILE, action, revision]
 
-    typer.echo("Running command: ", color=True)
-    typer.echo(f"alembic {' '.join(alembic_args)}", color=True)
+    typer.echo(f"command: alembic {' '.join(alembic_args)}")
 
     alembic.config.main(argv=alembic_args)
 
