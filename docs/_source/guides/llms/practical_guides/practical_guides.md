@@ -5,34 +5,32 @@ This guide will help you with all the practical aspects of setting up an annotat
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
-```{grid-item-card} Create a Feedback Dataset
+```{grid-item-card} Create and import a Feedback Dataset
 :link: create_dataset.html
 
-Create a `FeedbackDataset` with `fields`, `questions`, and `guidelines`; and add `records` to it, based on your task.
+Methods to configure and import a Feedback Dataset in Argilla
 
 ```
 ```{grid-item-card} Set up your annotation team
 :link: set_up_annotation_team.html
 
-Organize your team efficiently and set up your dataset depending on the level of overlap: none, complete or partial.
-
-```
-```{grid-item-card} Import/Export a Feedback Dataset
-:link: import_export_dataset.html
-
-Easily import and export your `FeedbackTask` dataset from/to Argilla, HuggingFace Hub, or a combination of both. Or save the records in a local file.
-
+Workflows to organize your annotation team
 ```
 ```{grid-item-card} Annotate a Feedback Dataset
 :link: annotate_dataset.html
 
-Learn how to use the Argilla UI to submit feedback for `FeedbackTask` datasets, including shortcuts.
+Check the Feedback Task UI and the available shortcuts
 
 ```
 ```{grid-item-card} Collect responses
 :link: collect_responses.html
 
-Load annotations from Argilla, visualize and solve disagreements. Finally, export your dataset or publish it in the Hugging Face Hub.
+Collect annotations and solve disagreements
+```
+```{grid-item-card} Export a Feedback Dataset
+:link: import_export_dataset.html
+
+Export your dataset and save it in the Hugging Face Hub or locally
 
 ```
 ```{grid-item-card} Fine-tune
@@ -51,8 +49,8 @@ Fine-tune an LLM with the feedback collected from Argilla.
 
 create_dataset
 set_up_annotation_team
-import_export_dataset
 annotate_dataset
 collect_responses
+export_dataset
 fine_tune
 ```
