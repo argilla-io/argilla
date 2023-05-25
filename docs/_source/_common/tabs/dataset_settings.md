@@ -5,9 +5,7 @@
 ```python
 import argilla as rg
 
-dataset = rg.create_feedback_dataset(
-    name="my_dataset",
-    workspace="my_workspace",
+dataset = rg.FeedbackDataset(
     guidelines="Add some guidelines for the annotation team here.",
     fields=[
         rg.TextField(name="prompt", title="Human prompt"),
@@ -28,6 +26,8 @@ dataset = rg.create_feedback_dataset(
         )
     ]
 )
+
+dataset.push_to_argilla(name="my_dataset", workspace="my_workspace")
 ```
 :::
 

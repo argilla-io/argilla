@@ -12,7 +12,8 @@ record = rg.FeedbackRecord(
     fields={
         "question": "Why can camels survive long without water?",
         "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time."
-    }
+    },
+    external_id='rec_1'
 )
 ```
 
