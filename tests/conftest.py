@@ -61,18 +61,21 @@ def connection() -> Generator["Connection", None, None]:
 
 @pytest.fixture(autouse=True)
 def db(connection: "Connection") -> Generator["Session", None, None]:
+    nested_transaction = connection.begin_nested()
     session = TestSession()
 
     yield session
 
     session.close()
-    connection.rollback()
+    nested_transaction.rollback()
 
 
 @pytest.fixture(scope="function")
 def client() -> Generator[TestClient, None, None]:
+    session = TestSession()
+
     def override_get_db():
-        yield TestSession()
+        yield session
 
     argilla_app.dependency_overrides[get_db] = override_get_db
 
@@ -131,7 +134,7 @@ def admin_auth_header(admin: User) -> Dict[str, str]:
 
 
 @pytest.fixture
-def argilla_user(db: "Session") -> User:
+def argilla_user() -> User:
     return UserFactory.create(
         first_name="Argilla",
         username="argilla",
