@@ -112,6 +112,9 @@ export default {
     userId() {
       return this.$auth.user.id;
     },
+    noMoreDataMessage() {
+      return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
+    },
     recordStatusFilterValueForGetRecords() {
       // NOTE - this is only used to fetch record, this is why the return value is in lowercase
       let paramForUrl = null;
@@ -225,8 +228,6 @@ export default {
     }
   },
   async created() {
-    this.noMoreDataMessage = "There is no more data";
-
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
     this.currentPage = this.pageFromQuery;
   },
