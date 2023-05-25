@@ -22,8 +22,8 @@ const upsertRecordResponses = (recordResponses) =>
   RecordResponseModel.insertOrUpdate({ data: recordResponses });
 
 // DELETE
-const deleteRecordResponsesByUserIdAndResponseId = (userId, responseId) =>
-  RecordResponseModel.delete((recordResponse) => {
+const deleteRecordResponsesByUserIdAndResponseId = async (userId, responseId) =>
+  await RecordResponseModel.delete((recordResponse) => {
     return (
       userId === recordResponse.user_id && responseId === recordResponse.id
     );
