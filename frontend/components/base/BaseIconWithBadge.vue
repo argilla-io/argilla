@@ -14,7 +14,7 @@
         borderColor: badgeBorderColor,
       }"
     >
-      <svgicon :name="icon" width="22" height="22" color="white" />
+      <svgicon :name="icon" width="22" height="22" :color="iconColor" />
     </i>
   </BaseButton>
 </template>
@@ -27,6 +27,10 @@ export default {
     },
     icon: {
       type: String,
+    },
+    iconColor: {
+      type: String,
+      default: () => "white",
     },
     tooltip: {
       type: String,

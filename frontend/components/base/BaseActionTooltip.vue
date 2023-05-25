@@ -4,7 +4,12 @@
     @click="active()"
   >
     <slot></slot>
-    <span v-if="showTooltip && tooltip" class="tooltip">{{ tooltip }}</span>
+    <span
+      v-if="showTooltip && tooltip"
+      class="tooltip"
+      :class="tooltipClass"
+      v-text="tooltip"
+    />
   </span>
 </template>
 
@@ -18,6 +23,15 @@ export default {
   props: {
     tooltip: {
       type: String,
+    },
+    tooltipPosition: {
+      type: String,
+      default: "right",
+    },
+  },
+  computed: {
+    tooltipClass() {
+      return `--${this.tooltipPosition}`;
     },
   },
   methods: {
@@ -34,7 +48,6 @@ export default {
 <style scoped lang="scss">
 .tooltip {
   position: absolute;
-  left: 0;
   top: 100%;
   background: palette(grey, 100);
   display: inline-block;
@@ -45,6 +58,12 @@ export default {
   padding: 0.1em 0.5em;
   white-space: nowrap;
   font-family: $primary-font-family !important;
+  &.--left {
+    right: 0;
+  }
+  &.--right {
+    left: 0;
+  }
   &__container {
     position: relative;
     &.active {

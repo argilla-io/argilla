@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from unittest.mock import MagicMock
 
 import argilla as rg
 import httpx
@@ -25,9 +26,11 @@ from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
+from argilla.server.settings import settings
+from opensearchpy import OpenSearch
 from starlette.testclient import TestClient
 
-from .factories import AnnotatorFactory
+from .factories import AdminFactory, AnnotatorFactory
 from .helpers import SecuredClient
 
 
@@ -50,20 +53,32 @@ def db():
     session.commit()
 
 
+def is_running_elasticsearch() -> bool:
+    open_search = OpenSearch(hosts=settings.elasticsearch)
+
+    info = open_search.info(format="json")
+    version_info = info["version"]
+
+    return "distribution" not in version_info
+
+
+@pytest.fixture(scope="session")
+def elasticsearch_config():
+    return {"hosts": settings.elasticsearch}
+
+
+@pytest.fixture(scope="session")
+def opensearch(elasticsearch_config):
+    client = OpenSearch(**elasticsearch_config)
+    yield client
+
+    for index_info in client.cat.indices(index="ar.*,rg.*", format="json"):
+        client.indices.delete(index=index_info["index"])
+
+
 @pytest.fixture(scope="function")
 def admin(db):
-    user = User(
-        first_name="Admin",
-        username="admin",
-        role=UserRole.admin,
-        password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
-        api_key="admin.apikey",
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
+    return AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
 
 
 @pytest.fixture(scope="function")
@@ -116,10 +131,10 @@ def argilla_user(db):
 
 
 @pytest.fixture
-def telemetry_track_data(mocker):
-    telemetry.telemetry_client = TelemetryClient(disable_send=True)
+def test_telemetry(mocker) -> MagicMock:
+    telemetry._CLIENT = TelemetryClient(disable_send=True)
 
-    return mocker.spy(telemetry.telemetry_client, "track_data")
+    return mocker.spy(telemetry._CLIENT, "track_data")
 
 
 @pytest.fixture(scope="session")
@@ -137,7 +152,7 @@ def api():
 def mocked_client(
     db,
     monkeypatch,
-    telemetry_track_data,
+    test_telemetry,
     argilla_user,
 ) -> SecuredClient:
     with TestClient(app, raise_server_exceptions=False) as _client:

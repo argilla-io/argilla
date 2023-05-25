@@ -53,4 +53,8 @@ const getTaskDatasetById = (datasetId, datasetTask, isWithViewSettings) => {
   return datasetById;
 };
 
-export { getDatasetFromORM, getDatasetTaskById };
+const upsertDataset = (datasetObj) => {
+  ObservationDataset.insertOrUpdate({ data: datasetObj });
+};
+
+export { getDatasetFromORM, getDatasetTaskById, upsertDataset };

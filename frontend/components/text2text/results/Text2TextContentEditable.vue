@@ -4,6 +4,7 @@
       <transition appear name="fade">
         <p
           ref="text"
+          id="contentId"
           class="content__text"
           :class="textIsEdited ? '--edited-text' : null"
           :contenteditable="annotationEnabled"
@@ -12,9 +13,15 @@
           v-html="editableText"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
-        ></p>
+          @keydown.shift.backspace.exact="looseFocus"
+          @keydown.shift.space.exact="looseFocus"
+          @keydown.arrow-right.stop=""
+          @keydown.arrow-left.stop=""
+          @keydown.delete.exact.stop=""
+          @keydown.enter.exact.stop=""
+        />
       </transition>
-      <span><strong>shift Enter</strong> to save</span>
+      <span v-if="isShortcutToSave"><strong>shift Enter</strong> to save</span>
     </div>
   </span>
 </template>
@@ -37,6 +44,10 @@ export default {
       type: String,
       default: "",
     },
+    isShortcutToSave: {
+      type: Boolean,
+      default: () => true,
+    },
   },
   data: () => {
     return {
@@ -58,11 +69,14 @@ export default {
     window.addEventListener("keydown", this.keyDown);
     window.addEventListener("keyup", this.keyUp);
     window.addEventListener("paste", this.pastePlainText);
+
     if (this.defaultText) {
       this.editableText = this.defaultText;
     } else {
       this.editableText = this.text;
     }
+
+    this.textAreaWrapper = document.getElementById("contentId");
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
@@ -70,6 +84,9 @@ export default {
     window.removeEventListener("paste", this.pastePlainText);
   },
   methods: {
+    looseFocus() {
+      this.textAreaWrapper.blur();
+    },
     onInputText(event) {
       this.$emit("change-text", event.target.innerText);
     },
@@ -112,7 +129,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$marginRight: 200px;
 [contenteditable="true"] {
   padding: 0.6em;
   outline: none;
@@ -130,7 +146,6 @@ $marginRight: 200px;
   &__edition-area {
     position: relative;
     width: 100%;
-    margin-right: $marginRight;
     span {
       position: absolute;
       top: 100%;
@@ -145,9 +160,11 @@ $marginRight: 200px;
     display: inline-block;
     width: 100%;
     min-height: 30px;
+    height: 100%;
     color: $black-87;
     white-space: pre-wrap;
     margin: 0;
+    word-break: break-word;
     font-style: italic;
     &.--edited-text {
       font-style: normal;

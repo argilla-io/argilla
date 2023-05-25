@@ -4,7 +4,7 @@
       <span slot="dropdown-header">
         <base-button class="small clear"> Find similar </base-button>
       </span>
-      <span slot="dropdown-content">
+      <span slot="dropdown-content" class="similarity-search__dropdown-content">
         <similarity-search-content
           :formattedVectors="formattedVectors"
           v-model="selectedVector"
@@ -81,7 +81,15 @@ export default {
 <style lang="scss" scoped>
 .similarity-search {
   position: relative;
+  &__dropdown-content {
+    display: block;
+    width: 270px;
+    margin-top: 0;
+    padding: $base-space * 3;
+  }
   &__options {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 2em;
   }
   &__title {

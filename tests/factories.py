@@ -14,20 +14,35 @@
 
 import factory
 from argilla.server.database import SessionLocal
-from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
+from argilla.server.models import (
+    Dataset,
+    Field,
+    FieldType,
+    Question,
+    QuestionType,
+    Record,
+    Response,
+    User,
+    UserRole,
+    Workspace,
+    WorkspaceUser,
+)
+from sqlalchemy import orm
+
+Session = orm.scoped_session(SessionLocal)
 
 
 class WorkspaceUserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = WorkspaceUser
-        sqlalchemy_session = SessionLocal()
+        sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
 
 
 class WorkspaceFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Workspace
-        sqlalchemy_session = SessionLocal()
+        sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
 
     name = factory.Sequence(lambda n: f"workspace-{n}")
@@ -36,7 +51,7 @@ class WorkspaceFactory(factory.alchemy.SQLAlchemyModelFactory):
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = User
-        sqlalchemy_session = SessionLocal()
+        sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
 
     first_name = factory.Faker("first_name")
@@ -51,3 +66,85 @@ class AdminFactory(UserFactory):
 
 class AnnotatorFactory(UserFactory):
     role = UserRole.annotator
+
+
+class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Dataset
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    name = factory.Sequence(lambda n: f"dataset-{n}")
+    workspace = factory.SubFactory(WorkspaceFactory)
+
+
+class RecordFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Record
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    fields = {
+        "text": "This is a text",
+        "sentiment": "neutral",
+    }
+    external_id = factory.Sequence(lambda n: f"external-id-{n}")
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Response
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    record = factory.SubFactory(RecordFactory)
+    user = factory.SubFactory(UserFactory)
+
+
+class FieldFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Field
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    name = factory.Sequence(lambda n: f"field-{n}")
+    title = "Field Title"
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class TextFieldFactory(FieldFactory):
+    settings = {"type": FieldType.text.value}
+
+
+class QuestionFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Question
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = "commit"
+
+    name = factory.Sequence(lambda n: f"question-{n}")
+    title = "Question Title"
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class TextQuestionFactory(QuestionFactory):
+    settings = {"type": QuestionType.text.value}
+
+
+class RatingQuestionFactory(QuestionFactory):
+    settings = {
+        "type": QuestionType.rating.value,
+        "options": [
+            {"value": 1},
+            {"value": 2},
+            {"value": 3},
+            {"value": 4},
+            {"value": 5},
+            {"value": 6},
+            {"value": 7},
+            {"value": 8},
+            {"value": 9},
+            {"value": 10},
+        ],
+    }
