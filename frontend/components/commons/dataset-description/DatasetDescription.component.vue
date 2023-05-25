@@ -2,7 +2,7 @@
   <div class="description">
     <h2 class="--heading5 --semibold description__title">{{ title }}</h2>
     <BaseSpinner v-if="isLoading" />
-    <markdown-editor
+    <MarkdownEditorComponent
       v-if="!isLoading"
       :value="datasetGuidelines"
       placeholder="Insert here your guidelines"
@@ -13,7 +13,6 @@
 
 <script>
 import { getDatasetFromORM } from "@/models/dataset.utilities";
-import MarkdownEditor from './MarkdownEditor.component'
 import { mapActions } from "vuex";
 
 export default {
@@ -30,9 +29,6 @@ export default {
       type: Boolean,
       default: () => true,
     },
-  },
-  components: {
-    MarkdownEditor
   },
   data() {
     return {

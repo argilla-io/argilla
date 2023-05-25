@@ -8,7 +8,7 @@
     />
 
     <div class="markdown_editor__preview">
-      <markdown-element :markdown="markdown" />
+      <MarkdownElementComponent :markdown="markdown" />
     </div>
 
     <div class="markdown_editor__actions">
@@ -18,8 +18,6 @@
 </template>
 
 <script>
-import MarkdownElement from './MarkdownElement.component'
-
 export default {
   props: {
     placeholder: {
@@ -35,9 +33,6 @@ export default {
     return {
       markdown: this.value
     }
-  },
-  components: {
-    MarkdownElement
   },
   methods: {
     submit() {
