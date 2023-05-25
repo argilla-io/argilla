@@ -11,18 +11,45 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import io
 from typing import Optional
 
+import alembic
 import typer
+from alembic import command
+from alembic.config import Config
+from alembic.script import ScriptDirectory
+from alembic.util import CommandError
 
-from argilla.server.database import migrate_db
+from argilla.server.database import ALEMBIC_CONFIG_FILE, TAGGED_REVISIONS
+from argilla.tasks.database import utils
 
 
-def migrate_db_cmd(
-    revision: Optional[str] = typer.Option(default="head", help="DB Revision to migrate to"),
-):
-    migrate_db(revision)
+def migrate_db(revision: Optional[str] = typer.Option(default="head", help="DB Revision to migrate to")):
+    current_revision = utils.get_current_revision(ALEMBIC_CONFIG_FILE)
+
+    if revision and current_revision:
+        revision = TAGGED_REVISIONS.get(revision, revision)
+        script = ScriptDirectory.from_config(Config(ALEMBIC_CONFIG_FILE))
+
+        try:
+            print(current_revision, revision)
+            script.walk_revisions(base=current_revision, head=revision).__next__()
+            action = "upgrade"
+        except CommandError:
+            action = "downgrade"
+
+    else:
+        revision = "head"
+        action = "upgrade"
+
+    alembic_args = ["-c", ALEMBIC_CONFIG_FILE, action, revision]
+
+    typer.echo("Running command: ", color=True)
+    typer.echo(f"alembic {' '.join(alembic_args)}", color=True)
+
+    alembic.config.main(argv=alembic_args)
 
 
 if __name__ == "__main__":
-    typer.run(migrate_db_cmd)
+    typer.run(migrate_db)

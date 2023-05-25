@@ -11,22 +11,19 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import io
 import os
 from collections import OrderedDict
 from sqlite3 import Connection as SQLite3Connection
-from typing import Optional
 
-import alembic.config
-from alembic import command
-from alembic.config import Config
-from alembic.script import ScriptDirectory
-from alembic.util import CommandError
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
+import argilla
 from argilla.server.settings import settings
+
+ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla.__file__), "alembic.ini"))
+TAGGED_REVISIONS = OrderedDict({"1.7": "1769ee58fbb4", "1.8": "ae5522b4c674"})
 
 
 @event.listens_for(Engine, "connect")
@@ -47,52 +44,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-TAGGED_REVISIONS = OrderedDict(
-    {
-        "1.7": "1769ee58fbb4",
-        "1.8": "ae5522b4c674",
-    }
-)
-
-
-def migrate_db(revision: Optional[str] = None):
-    alembic_config_file = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "alembic.ini"))
-    if revision:
-        revision = TAGGED_REVISIONS.get(revision, revision)
-
-        current_revision = _get_current_revision(alembic_config_file)
-        script = ScriptDirectory.from_config(Config(alembic_config_file))
-
-        try:
-            script.walk_revisions(base=current_revision, head=revision)
-            action = "upgrade"
-        except CommandError:
-            action = "downgrade"
-
-    else:
-        revision = "head"
-        action = "upgrade"
-
-    alembic.config.main(argv=["-c", alembic_config_file, action, revision])
-
-
-def revisions(show_current: bool = True):
-    alembic_config_file = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "alembic.ini"))
-
-    alembic.config.main(argv=["-c", alembic_config_file, "history"])
-    if show_current:
-        print("\n")
-        alembic.config.main(argv=["-c", alembic_config_file, "current", "--v"])
-
-
-def _get_current_revision(alembic_config_file: str) -> str:
-    output_buffer = io.StringIO()
-    alembic_cfg = Config(alembic_config_file, stdout=output_buffer)
-
-    command.current(alembic_cfg)
-    return output_buffer.getvalue().strip().split(" ")[0]
 
 
 class Base(DeclarativeBase):
