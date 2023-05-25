@@ -13,6 +13,7 @@
 
 <script>
 import { getDatasetFromORM } from "@/models/dataset.utilities";
+import { Notification } from "@/models/Notifications";
 import { mapActions } from "vuex";
 
 export default {
@@ -56,7 +57,10 @@ export default {
         await this.updateDatasetGuidelines();
       }
       catch (e) {
-        //Do nothing. The updateDatasetGuidelines will fail as there is no backend implementation yet
+        Notification.dispatch("notify", {
+          message: 'Error when saving the dataset description and annotation guidelines.',
+          type: "error",
+        });
       }
     }
   },

@@ -12,13 +12,14 @@
     </div>
 
     <div class="markdown_editor__actions">
-      <base-button @click="submit" class="markdown_editor__actions__save primary small">Save</base-button>
+      <base-button @on-click="submit" class="markdown_editor__actions__save primary small">Save</base-button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+name: "MarkdownEditorComponent",
   props: {
     placeholder: {
       type: String,

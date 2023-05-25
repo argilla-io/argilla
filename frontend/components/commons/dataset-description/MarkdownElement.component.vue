@@ -7,6 +7,7 @@ import { marked } from "marked";
 import * as DOMPurify from 'dompurify';
 
 export default {
+  name: "MarkdownElementComponent",
   props: {
     markdown: {
       type: String,
