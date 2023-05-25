@@ -27,9 +27,9 @@ from argilla.tasks.database import utils
 
 def migrate_db(revision: Optional[str] = typer.Option(default="head", help="DB Revision to migrate to")):
     current_revision = utils.get_current_revision(ALEMBIC_CONFIG_FILE)
+    revision = TAGGED_REVISIONS.get(revision, revision)
 
     if revision and current_revision:
-        revision = TAGGED_REVISIONS.get(revision, revision)
         script = ScriptDirectory.from_config(Config(ALEMBIC_CONFIG_FILE))
 
         try:
@@ -39,11 +39,10 @@ def migrate_db(revision: Optional[str] = typer.Option(default="head", help="DB R
             action = "downgrade"
 
     else:
-        revision = "head"
+        revision = revision or "head"
         action = "upgrade"
 
     alembic_args = ["-c", ALEMBIC_CONFIG_FILE, action, revision]
-
     typer.echo(f"command: alembic {' '.join(alembic_args)}")
 
     alembic.config.main(argv=alembic_args)
