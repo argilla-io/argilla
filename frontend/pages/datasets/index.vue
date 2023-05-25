@@ -161,7 +161,7 @@ export default {
         feedbackTaskDatasets,
         workspaces
       );
-
+    console.log(feedbackDatasetsWithWorkspaces);
     // UPSERT old dataset (Text2Text, TextClassification, TokenClassification) into the old orm
     upsertDataset(oldDatasets);
 
@@ -252,6 +252,14 @@ export default {
     ...mapActions({
       fetchDatasets: "entities/datasets/fetchAll",
     }),
+    isOldTask(task) {
+      // NOTE - we need to detect ald/new task because the redirection correcponding pages does not have same route
+      return [
+        "TokenClassification",
+        "TextClassification",
+        "Text2Text",
+      ].includes(task);
+    },
     async fetchFeedbackDatasets() {
       const url = URL_GET_V1_DATASETS;
       try {
@@ -374,9 +382,17 @@ export default {
     copyName(id) {
       this.copy(id);
     },
-    copyUrl(dataset) {
-      const route = `${window.origin}${dataset.link}`;
-      this.copy(route);
+    copyUrl({ task, id, workspace, name }) {
+      let url = `${window.origin}`;
+      const isOldTask = this.isOldTask(task);
+      
+      if (isOldTask) {
+        url += `/datasets/${workspace}/${name}`;
+      } else {
+        url += `/dataset/${id}/annotation-mode`;
+      }
+
+      this.copy(url);
     },
     copy(id) {
       this.$copyToClipboard(id);
