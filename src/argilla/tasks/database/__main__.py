@@ -14,13 +14,14 @@
 
 import typer
 
-from .migrate import migrate_db
+from .migrate import migrate_db_cmd
+from .revisions import revisions_cmd
 
 app = typer.Typer(help="Holds CLI commands for migrations and database management.", no_args_is_help=True)
 
-app.command(name="migrate", help="Run database migrations to align user config with pre-defined server settings.")(
-    migrate_db
-)
+app.command(name="migrate", help="Run database migrations.")(migrate_db_cmd)
+
+app.command(name="revisions", help="Show available revisions.")(revisions_cmd)
 
 if __name__ == "__main__":
     app()

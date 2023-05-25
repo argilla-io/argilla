@@ -15,14 +15,16 @@ from typing import Optional
 
 import typer
 
-from argilla.server.database import migrate_db
+from argilla.server.database import TAGGED_REVISIONS, revisions
 
 
-def migrate_db_cmd(
-    revision: Optional[str] = typer.Option(default="head", help="DB Revision to migrate to"),
-):
-    migrate_db(revision)
+def revisions_cmd():
+    typer.echo("\n\nTagged revisions:\n")
+    for version, revision in TAGGED_REVISIONS.items():
+        typer.echo(f"• {version} ({revision!r})")
+    typer.echo("\n\nAlembic revisions:\n")
+    revisions()
 
 
 if __name__ == "__main__":
-    typer.run(migrate_db_cmd)
+    typer.run(revisions_cmd)
