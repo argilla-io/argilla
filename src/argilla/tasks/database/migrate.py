@@ -33,7 +33,6 @@ def migrate_db(revision: Optional[str] = typer.Option(default="head", help="DB R
         script = ScriptDirectory.from_config(Config(ALEMBIC_CONFIG_FILE))
 
         try:
-            print(current_revision, revision)
             script.walk_revisions(base=current_revision, head=revision).__next__()
             action = "upgrade"
         except CommandError:
