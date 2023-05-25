@@ -13,12 +13,21 @@
 #  limitations under the License.
 
 import datetime
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import argilla
 import argilla as rg
 import pytest
 from argilla.client.sdk.datasets.models import TaskType
+
+if TYPE_CHECKING:
+    from argilla.client.feedback import FieldSchema, QuestionSchema
+from argilla.client.feedback import (
+    FeedbackRecord,
+    RatingQuestion,
+    TextField,
+    TextQuestion,
+)
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
@@ -370,3 +379,36 @@ def log_text2text_records(
     )
 
     return dataset_name
+
+
+@pytest.fixture
+def feedback_dataset_guidelines() -> str:
+    return "These are the annotation guidelines."
+
+
+@pytest.fixture
+def feedback_dataset_fields() -> List["FieldSchema"]:
+    return [
+        TextField(name="text", required=True),
+        TextField(name="label", required=True),
+    ]
+
+
+@pytest.fixture
+def feedback_dataset_questions() -> List["QuestionSchema"]:
+    return [
+        TextQuestion(name="question-1", required=True),
+        RatingQuestion(name="question-2", values=[0, 1], required=True),
+    ]
+
+
+@pytest.fixture
+def feedback_dataset_records() -> List[FeedbackRecord]:
+    return [
+        FeedbackRecord(
+            fields={"text": "This is a positive example", "label": "positive"},
+        ),
+        FeedbackRecord(
+            fields={"text": "This is a negative example", "label": "negative"},
+        ),
+    ]

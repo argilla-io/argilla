@@ -213,8 +213,10 @@ async def log_async(
     """
 
     warnings.warn(
-        "`log_async` is deprecated and will be removed in next release. "
-        "Please, use `log` with `background=True` instead",
+        (
+            "`log_async` is deprecated and will be removed in next release. "
+            "Please, use `log` with `background=True` instead"
+        ),
         DeprecationWarning,
     )
 

@@ -16,7 +16,7 @@ import dataclasses
 import logging
 import platform
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 from fastapi import Request
@@ -87,7 +87,7 @@ class TelemetryClient:
         )
 
 
-telemetry_client = TelemetryClient()
+_CLIENT = TelemetryClient()
 
 
 def _process_request_info(request: Request):
@@ -95,31 +95,29 @@ def _process_request_info(request: Request):
 
 
 async def track_error(error: ServerError, request: Request):
-    global telemetry_client
-
     data = {"code": error.code}
     if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
         data["type"] = error.type
 
     data.update(_process_request_info(request))
 
-    telemetry_client.track_data("ServerErrorFound", data)
+    _CLIENT.track_data(action="ServerErrorFound", data=data)
 
 
 async def track_bulk(task: TaskType, records: int):
-    global telemetry_client
-
-    telemetry_client.track_data("LogRecordsRequested", {"task": task, "records": records})
+    _CLIENT.track_data(action="LogRecordsRequested", data={"task": task, "records": records})
 
 
 async def track_login(request: Request, username: str):
-    global telemetry_client
-
-    telemetry_client.track_data(
-        "UserInfoRequested",
-        {
+    _CLIENT.track_data(
+        action="UserInfoRequested",
+        data={
             "is_default_user": username == "argilla",
-            "user_hash": str(uuid.uuid5(namespace=telemetry_client.server_id, name=username)),
+            "user_hash": str(uuid.uuid5(namespace=_CLIENT.server_id, name=username)),
             **_process_request_info(request),
         },
     )
+
+
+def get_telemetry_client() -> TelemetryClient:
+    return _CLIENT

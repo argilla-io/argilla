@@ -66,11 +66,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.description {
-  &__text {
-    color: $black-37;
-  }
-}
-</style>
