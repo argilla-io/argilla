@@ -154,12 +154,6 @@ def test_telemetry(mocker) -> MagicMock:
     return mocker.spy(telemetry._CLIENT, "track_data")
 
 
-# @pytest.fixture(scope="session")
-# def test_client():
-#     with TestClient(app) as client:
-#         yield client
-
-
 @pytest.fixture
 def api() -> Argilla:
     return Argilla()
