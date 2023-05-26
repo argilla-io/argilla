@@ -1,11 +1,6 @@
 <template>
   <MonoSelectionComponent
-    :title="title"
     :initialOptions="initialOptions"
-    :isRequired="isRequired"
-    :isIcon="tooltipMessage"
-    :tooltipMessage="tooltipMessage"
-    :colorHighlight="colorHighlight"
     @on-change="onChangeSingleLabel"
   />
 </template>
@@ -26,17 +21,9 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    isIcon: {
-      type: Boolean,
-      default: () => false,
-    },
     tooltipMessage: {
       type: String,
       default: () => "",
-    },
-    colorHighlight: {
-      type: String,
-      default: () => "black",
     },
   },
   methods: {
