@@ -28,12 +28,9 @@
           :title="input.question"
           :optionId="`${input.name}_0`"
           :placeholder="input.placeholder"
-          :value="input.options[0].text"
+          v-model="input.options[0]"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
-          @on-change-value="
-            onChangeTextArea({ newOptions: $event, idComponent: input.id })
-          "
           @on-error="onError"
         />
 
@@ -52,12 +49,9 @@
         <RatingComponent
           v-if="input.component_type === COMPONENT_TYPE.RATING"
           :title="input.question"
-          :initialOptions="input.options"
+          v-model="input.options"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
-          @on-change-rating="
-            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
-          "
           @on-error="onError"
         />
       </div>
@@ -238,12 +232,8 @@ export default {
         default:
       }
     },
-    onChangeTextArea({ newOptions, idComponent }) {
-      const component = this.inputs.find(({ id }) => id === idComponent);
-      // NOTE - formatting to the standard options
-      component.options = [{ ...newOptions, value: newOptions.text }];
-    },
     onChangeMonoSelection({ newOptions, idComponent }) {
+      // TODO - to remove when single label will use v-model
       const component = this.inputs.find(({ id }) => id === idComponent);
       component.options = newOptions;
     },
