@@ -5,10 +5,10 @@ Argilla Feedback is carefully crafted for custom and multi-aspect feedback in LL
 This guide offers a conceptual overview of Argilla Feedback, setting the foundation for exploring its technical applications. If you are looking for a hands-on practical introduction, feel free to jump directly in the How-to Guides or the Examples section.
 :::
 
-## Data collection and fine-tuning of LLMs: the ChatGPT stages
+## Data collection for LLMs: the ChatGPT path
 The following figure shows the stages for training and fine-tuning LLMs. From top to bottom, it shows, the data needed at each stage (note the color for the data collected with human feedback), the stage (namely, pre-training, supervised fine-tuning, reward modelling, and reinforcement learning), and finally the model created at each stage. Argilla Feedback makes the process of collecting human feedback seamless at each step after pre-training.
 
-![sft-fine-tune-flow](../../_static/images/llms/rlhf.svg "LLM fine-tuning stages")
+![llm-flow](../../_static/images/llms/rlhf.svg "LLM fine-tuning stages")
 
 :::{note}
 This guide uses a combination of terminology defined in the seminal "Training language models to follow instructions with human feedback" paper by OpenAI and the wonderful “State of GPT” talk by Andrej Karpathy. The figure above is highly inspired by the figure shown by Andrej during the talk.
@@ -35,7 +35,7 @@ Moreover, Argilla Feedback can be used to collect prompts as well. In this case,
 
 Additionally, you may choose to gather extra feedback on the prompts. For example, you could ask labelers to rate the clarity or relevance of each prompt, or to provide general comments in natural language. This auxiliary information can be invaluable for refining your prompts and guiding the assessment and training processes.
 
-![sft-fine-tune-flow](../../_static/images/llms/sft.svg "Completion collection for SFT")
+![sft-flow](../../_static/images/llms/sft.svg "Completion collection for SFT")
 
 :::{tip}
 Beyond instruction-tuning, collecting and curating demonstration data is an important step for aligning the model with certain values and reduce its toxicity. An important related work is "Process for Adapting Language Models to Society (PALMS) with Values-Targeted Datasets". In this work, researchers improve language model behaviour by fine-tuning on a curated dataset of <100 examples of prompts and values-aligned responses. If you’d like help setting up such effort, reach out to us and we’ll gladly help out.
@@ -58,9 +58,9 @@ Using Argilla, you can setup an offline feedback collection process to ask label
 You can use Argilla Feedback for the internal evaluation process by registering the interactions with the model and asking labelers to rate the quality of the responses. If you’d like help setting up such effort, reach out to us and will gladly help with the setup.
 :::
 
-![sft-fine-tune-flow](../../_static/images/llms/rm.svg "Comparison collection for Reward Modeling")
+![rm-flow](../../_static/images/llms/rm.svg "Comparison collection for Reward Modeling")
 
 
 ## Feedback Data Model
 
-![sft-fine-tune-flow](../../_static/images/llms/fb-dm.svg "Argilla Feedback Data Model")
+![sft-fine-tune-flow](../../_static/images/llms/fb-model.svg "Argilla Feedback Data Model")
