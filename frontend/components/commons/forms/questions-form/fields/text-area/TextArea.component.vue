@@ -22,7 +22,7 @@
         class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
-        :defaultText="value.text"
+        :defaultText="value"
         :placeholder="placeholder"
         @change-text="onChangeTextArea"
         @on-change-focus="setFocus"
@@ -46,10 +46,8 @@ export default {
       default: () => "optionId",
     },
     value: {
-      type: Object,
-      default: () => {
-        return { id: this.optionId, text: "" };
-      },
+      type: String,
+      default: () => "",
     },
     placeholder: {
       type: String,
@@ -67,10 +65,6 @@ export default {
       type: String,
       default: () => "",
     },
-  },
-  model: {
-    prop: "value",
-    event: "on-change-value",
   },
   data: () => {
     return {
