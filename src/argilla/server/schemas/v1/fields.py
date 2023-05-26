@@ -27,6 +27,7 @@ from argilla.server.models import FieldType
 
 class TextFieldSettings(BaseModel):
     type: Literal[FieldType.text]
+    use_markdown: bool = False
 
 
 class Field(BaseModel):
