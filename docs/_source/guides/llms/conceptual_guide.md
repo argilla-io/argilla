@@ -1,27 +1,24 @@
 # Conceptual Guide
 Argilla Feedback is carefully crafted for custom and multi-aspect feedback in LLM projects. Argilla Feedback stands as a key resource for LLM fine-tuning and Reinforcement Learning from Human Feedback (RLHF). It equips teams with a highly flexible platform for the critical stages of evaluating and fine-tuning LLMs, and potentially aligning them with RLHF.
 
-The followig figure shows the stages for training and fine-tuning LLMs. From top to bottom, it shows, the data needed at each stage (note the color for the data collected with human feedback), the stage (namely, pre-training, supervised fine-tuning, reward modelling, and reinforcement learning), and finally the model created at each stage. Argilla Feedback makes the process of collecting human feedback seamless at each step after pre-training.
+:::{note}
+This guide offers a conceptual overview of Argilla Feedback, setting the foundation for exploring its technical applications. If you are looking for a hands-on practical introduction, feel free to jump directly in the How-to Guides or the Examples section.
+:::
+
+## Fine-tuning and data collection for LLMs
+The following figure shows the stages for training and fine-tuning LLMs. From top to bottom, it shows, the data needed at each stage (note the color for the data collected with human feedback), the stage (namely, pre-training, supervised fine-tuning, reward modelling, and reinforcement learning), and finally the model created at each stage. Argilla Feedback makes the process of collecting human feedback seamless at each step after pre-training.
 
 ![sft-fine-tune-flow](../../_static/images/llms/llm-fine-tune-stages.svg "LLM fine-tuning stages")
-
-Argilla Feedback assists in three critical stages of the LLM fine-tuning process. The first is the **collection of completion data for supervised fine-tuning of large language models**. This stage, while a part of the RLHF process, also operates independently. In supervised fine-tuning, models learn from human-guided examples, steering them, and improving their capabilities.
 
 :::{note}
 This guide uses a combination of terminology defined in the seminal "Training language models to follow instructions with human feedback" paper by OpenAI and the wonderful “State of GPT” talk by Andrej Karpathy. The figure above is highly inspired by the figure shown by Andrej during the talk.
 :::
 
+Argilla Feedback assists in three critical stages of the LLM fine-tuning process. The first is the **collection of completion data for supervised fine-tuning of large language models**. This stage, while a part of the RLHF process, also operates independently. In supervised fine-tuning, models learn from human-guided examples, steering them, and improving their capabilities.
+
 The second stage where Argilla Feedback proves beneficial is in the **collection of comparison data**, a key element for training a reward model for RLHF.
 
-:::{note}
-This guide offers a conceptual overview of Argilla Feedback, setting the foundation for exploring its technical applications. If you are looking for a hands-on practical introduction, feel free to jump directly in the How-to Guides or the Examples section.
-:::
-
 Similarly, Argilla Feedback can be used to write or select prompts for the last stage: Reinforcement learning. This collection process is highly similar to the first stage except that we don't ask users to write completions.
-
-:::{tip}
-This guide offers a conceptual overview of Argilla Feedback, setting the foundation for exploring its technical applications. If you are looking for a hands-on practical introduction, feel free to jump directly in the How-to Guides or the Examples section.
-:::
 
 To understand how Argilla Feedback works, let’s deep-dive into the **Collecting completion data** and **Collecting comparison data** stages.
 
