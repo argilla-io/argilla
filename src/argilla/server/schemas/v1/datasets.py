@@ -25,7 +25,13 @@ try:
 except ImportError:
     from typing_extensions import Annotated, Literal
 
-from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
+from argilla.server.models import (
+    DatasetStatus,
+    FieldType,
+    QuestionSettings,
+    QuestionType,
+    ResponseStatus,
+)
 
 DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
 DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
@@ -152,7 +158,7 @@ class Question(BaseModel):
     title: str
     description: Optional[str]
     required: bool
-    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
+    settings: QuestionSettings
     inserted_at: datetime
     updated_at: datetime
 
@@ -181,7 +187,7 @@ class QuestionCreate(BaseModel):
         )
     ]
     required: Optional[bool]
-    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
+    settings: QuestionSettings
 
 
 class ResponseValue(BaseModel):
