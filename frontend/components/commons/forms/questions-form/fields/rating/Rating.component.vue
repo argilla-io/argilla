@@ -7,7 +7,7 @@
         class="icon-info"
         v-if="!!tooltipMessage"
         icon="info"
-        :id="`${title}MonoSelection`"
+        :id="`${title}Rating`"
         :show-badge="false"
         iconColor="#acacac"
         badge-vertical-position="top"
@@ -18,7 +18,7 @@
     </div>
 
     <MonoSelectionComponent
-      :initialOptions="initialOptions"
+      :initialOptions="options"
       backgroundColor="#E0E0FF"
       borderColor="#CDCDFF"
       @on-change="onChangeRating"
@@ -34,7 +34,7 @@ export default {
       type: String,
       required: true,
     },
-    initialOptions: {
+    options: {
       type: Array,
       required: true,
     },
@@ -48,7 +48,7 @@ export default {
     },
   },
   model: {
-    prop: "initialOptions",
+    prop: "options",
     event: "on-change-rating",
   },
   methods: {
