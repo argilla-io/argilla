@@ -251,7 +251,6 @@ export default {
       await this.$fetch();
 
       this.reRenderQuestionForm++;
-      this.questionFormTouched = false;
     },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
