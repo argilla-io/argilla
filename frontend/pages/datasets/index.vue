@@ -372,11 +372,16 @@ export default {
 
       if (isOldTask) {
         this.$router.push({
-          path: `/datasets/${workspace}/${name}/settings`,
+          name: "datasets-workspace-dataset-settings",
+          params: {
+            workspace,
+            dataset: name,
+          },
         });
       } else {
         this.$router.push({
-          path: `/dataset/${id}/settings`,
+          name: "dataset-id-settings",
+          params: { id },
         });
       }
     },
