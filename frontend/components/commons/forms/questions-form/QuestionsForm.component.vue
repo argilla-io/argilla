@@ -42,7 +42,6 @@
           :title="input.question"
           :initialOptions="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
           :tooltipMessage="input.description"
           @on-change-single-label="
             onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
@@ -55,7 +54,6 @@
           :title="input.question"
           :initialOptions="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
           :tooltipMessage="input.description"
           @on-change-rating="
             onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
