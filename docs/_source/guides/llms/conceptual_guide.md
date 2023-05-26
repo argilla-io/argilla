@@ -59,3 +59,8 @@ You can use Argilla Feedback for the internal evaluation process by registering 
 :::
 
 ![sft-fine-tune-flow](../../_static/images/llms/rm.svg "Comparison collection for Reward Modeling")
+
+
+## Feedback Data Model
+
+![sft-fine-tune-flow](../../_static/images/llms/fb-dm.svg "Argilla Feedback Data Model")
