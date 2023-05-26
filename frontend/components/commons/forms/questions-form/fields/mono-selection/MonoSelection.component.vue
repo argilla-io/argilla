@@ -1,48 +1,26 @@
 <template>
-  <div class="wrapper" :style="cssVars">
-    <div class="title-area --body2">
-      <span
-        :key="colorHighlight"
-        v-text="title"
-        v-optional-field="isRequired ? false : true"
-      />
-
-      <BaseIconWithBadge
-        class="icon-info"
-        v-if="isIcon"
-        icon="info"
-        :id="`${title}MonoSelection`"
-        :show-badge="false"
-        iconColor="#acacac"
-        badge-vertical-position="top"
-        badge-horizontal-position="right"
-        badge-border-color="white"
-        v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF' }"
-      />
-    </div>
-    <div class="container">
-      <div class="inputs-area">
-        <div class="input-button" v-for="option in options" :key="option.id">
-          <input
-            type="checkbox"
-            :name="option.text"
-            :id="option.id"
-            v-model="option.value"
-            @change="
-              onSelect({
-                id: option.id,
-                text: option.text,
-                value: option.value,
-              })
-            "
-          />
-          <label
-            class="label-text cursor-pointer"
-            :class="{ 'label-active': option.value }"
-            :for="option.id"
-            v-text="option.text"
-          />
-        </div>
+  <div class="container" :style="cssVars">
+    <div class="inputs-area">
+      <div class="input-button" v-for="option in options" :key="option.id">
+        <input
+          type="checkbox"
+          :name="option.text"
+          :id="option.id"
+          v-model="option.value"
+          @change="
+            onSelect({
+              id: option.id,
+              text: option.text,
+              value: option.value,
+            })
+          "
+        />
+        <label
+          class="label-text cursor-pointer"
+          :class="{ 'label-active': option.value }"
+          :for="option.id"
+          v-text="option.text"
+        />
       </div>
     </div>
   </div>
@@ -55,28 +33,9 @@ import "assets/icons/info";
 export default {
   name: "MonoSelectionComponent",
   props: {
-    title: {
-      type: String,
-    },
     initialOptions: {
       type: Array,
       required: true,
-    },
-    isRequired: {
-      type: Boolean,
-      default: () => false,
-    },
-    isIcon: {
-      type: Boolean,
-      default: () => false,
-    },
-    tooltipMessage: {
-      type: String,
-      default: () => "",
-    },
-    colorHighlight: {
-      type: String,
-      default: () => "red",
     },
     backgroundColor: {
       type: String,
@@ -89,7 +48,6 @@ export default {
   },
   data() {
     return {
-      showAllLabels: true,
       options: cloneDeep(this.initialOptions),
     };
   },
@@ -114,33 +72,22 @@ export default {
 
       this.$emit("on-change", this.options);
     },
-    toggleShowAllLabels() {
-      this.showAllLabels = !this.showAllLabels;
-    },
   },
 };
 </script>
 
+//
 <style lang="scss" scoped>
-.wrapper {
+.container {
   display: flex;
-  flex-direction: column;
-  gap: $base-space;
-  .title-area {
-    color: $black-87;
-    font-weight: 500;
-  }
-  .container {
-    display: flex;
-    .inputs-area {
-      display: inline-flex;
-      gap: $base-space;
-      border-radius: 5em;
-      border: 1px solid var(--border-color);
-      background: var(--background-color);
-      &:hover {
-        border-color: darken(palette(purple, 800), 12%);
-      }
+  .inputs-area {
+    display: inline-flex;
+    gap: $base-space;
+    border-radius: 5em;
+    border: 1px solid var(--border-color);
+    background: var(--background-color);
+    &:hover {
+      border-color: darken(palette(purple, 800), 12%);
     }
   }
 }
@@ -175,33 +122,5 @@ input {
 }
 .cursor-pointer {
   cursor: pointer;
-}
-
-.icon {
-  color: $black-37;
-}
-
-.info-icon {
-  display: flex;
-  flex-basis: 37px;
-}
-
-span {
-  word-break: break-word;
-}
-
-.icon-info {
-  display: inline-flex;
-  margin: 0;
-  padding: 0;
-  overflow: inherit;
-  &[data-title] {
-    position: relative;
-    overflow: visible;
-    &:before,
-    &:after {
-      margin-top: 0;
-    }
-  }
 }
 </style>
