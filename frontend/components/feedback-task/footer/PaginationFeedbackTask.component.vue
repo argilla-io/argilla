@@ -28,7 +28,7 @@ export default {
   },
   data() {
     return {
-      areResponsesUntouched: true,
+      areResponsesUntouched: true, // TODO - ensure 'areResponsesUntouched' flag is centralized (see other use in index.vue from annotation-mode)
     };
   },
   computed: {

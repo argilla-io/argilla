@@ -52,6 +52,7 @@ export default {
     HeaderAndTopAndOneColumn,
   },
   data: () => {
+    // TODO - ensure 'areResponsesUntouched' flag is centralized (see other use in PaginationFeedbackTask component)
     return {
       areResponsesUntouched: true, // NOTE - this flag is used to show or to not show a toast when questionnaire is touched (to prevent loosing current modification)
     };
