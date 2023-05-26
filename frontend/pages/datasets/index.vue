@@ -84,68 +84,75 @@ const TYPE_OF_FEEDBACK = Object.freeze({
 
 export default {
   layout: "app",
-  data: () => ({
-    querySearch: undefined,
-    breadcrumbs: [{ action: "clearFilters", name: "Home" }],
-    tableColumns: [
-      { name: "Name", field: "name", class: "table-info__title", type: "link" },
-      {
-        name: "Workspace",
-        field: "workspace",
-        class: "text",
-        type: "text",
-        filtrable: "true",
+  data() {
+    return {
+      querySearch: undefined,
+      breadcrumbs: [{ action: "clearFilters", name: "Home" }],
+      tableColumns: [
+        {
+          name: "Name",
+          field: "name",
+          class: "table-info__title",
+          type: "link",
+        },
+        {
+          name: "Workspace",
+          field: "workspace",
+          class: "text",
+          type: "text",
+          filtrable: "true",
+        },
+        {
+          name: "Task",
+          field: "task",
+          class: "task",
+          type: "task",
+          filtrable: "true",
+        },
+        {
+          name: "Tags",
+          field: "tags",
+          class: "text",
+          type: "object",
+          filtrable: "true",
+        },
+        {
+          name: "Created at",
+          field: "created_at",
+          class: "date",
+          type: "date",
+          sortable: "true",
+        },
+        {
+          name: "Updated at",
+          field: "last_updated",
+          class: "date",
+          type: "date",
+          sortable: "true",
+        },
+      ],
+      actions: [
+        {
+          name: "go-to-settings",
+          icon: "settings",
+          title: "Go to dataset settings",
+          tooltip: "Dataset settings",
+        },
+        {
+          name: "copy",
+          icon: "link",
+          title: "Copy url to clipboard",
+          tooltip: "Copied",
+        },
+      ],
+      emptySearchInfo: {
+        title: "0 datasets found",
       },
-      {
-        name: "Task",
-        field: "task",
-        class: "task",
-        type: "task",
-        filtrable: "true",
-      },
-      {
-        name: "Tags",
-        field: "tags",
-        class: "text",
-        type: "object",
-        filtrable: "true",
-      },
-      {
-        name: "Created at",
-        field: "created_at",
-        class: "date",
-        type: "date",
-        sortable: "true",
-      },
-      {
-        name: "Updated at",
-        field: "last_updated",
-        class: "date",
-        type: "date",
-        sortable: "true",
-      },
-    ],
-    actions: [
-      {
-        name: "go-to-settings",
-        icon: "settings",
-        title: "Go to dataset settings",
-        tooltip: "Dataset settings",
-      },
-      {
-        name: "copy",
-        icon: "link",
-        title: "Copy url to clipboard",
-        tooltip: "Copied",
-      },
-    ],
-    emptySearchInfo: {
-      title: "0 datasets found",
-    },
-    externalLinks: [],
-    sortedOrder: "desc",
-    sortedByField: "last_updated",
-  }),
+      externalLinks: [],
+      sortedOrder: "desc",
+      sortedByField: "last_updated",
+    };
+  },
   async fetch() {
     // FETCH old list of datasets (Text2Text, TextClassification, TokenClassification)
     const oldDatasets = await this.fetchDatasets();
@@ -252,6 +259,14 @@ export default {
     ...mapActions({
       fetchDatasets: "entities/datasets/fetchAll",
     }),
+    isOldTask(task) {
+      // NOTE - we need to detect old/new task because the redirection corresponding pages does not have the same route
+      return [
+        "TokenClassification",
+        "TextClassification",
+        "Text2Text",
+      ].includes(task);
+    },
     async fetchFeedbackDatasets() {
       const url = URL_GET_V1_DATASETS;
       try {
@@ -343,7 +358,7 @@ export default {
           this.copyUrl(dataset);
           break;
         case "copy-name":
-          this.copyName(dataset.name);
+          this.copyName(dataset);
           break;
         default:
           console.warn(action);
@@ -352,31 +367,39 @@ export default {
     onSearch(event) {
       this.querySearch = event;
     },
-    goToSetting(dataset) {
-      const { id, workspace, name, task } = dataset;
-      switch (task) {
-        case "TokenClassification":
-        case "TextClassification":
-        case "Text2Text":
-          this.$router.push({
-            path: `/datasets/${workspace}/${name}/settings`,
-          });
-          break;
-        case "FeedbackTask":
-          this.$router.push({
-            path: `/dataset/${id}/settings`,
-          });
-          break;
-        default:
-          console.log(`The task ${task} is unknown`);
+    goToSetting({ id, workspace, name, task }) {
+      const isOldTask = this.isOldTask(task);
+
+      if (isOldTask) {
+        this.$router.push({
+          name: "datasets-workspace-dataset-settings",
+          params: {
+            workspace,
+            dataset: name,
+          },
+        });
+      } else {
+        this.$router.push({
+          name: "dataset-id-settings",
+          params: { id },
+        });
       }
     },
-    copyName(id) {
-      this.copy(id);
+    copyName({ name }) {
+      this.copy(name);
     },
-    copyUrl(dataset) {
-      const route = `${window.origin}${dataset.link}`;
-      this.copy(route);
+    copyUrl({ task, id, workspace, name }) {
+      let url = `${window.origin}`;
+      const isOldTask = this.isOldTask(task);
+
+      //NOTE - IMPORTANT => if pages route change, don't forget to update the url !
+      if (isOldTask) {
+        url += `/datasets/${workspace}/${name}`;
+      } else {
+        url += `/dataset/${id}/annotation-mode`;
+      }
+
+      this.copy(url);
     },
     copy(id) {
       this.$copyToClipboard(id);
