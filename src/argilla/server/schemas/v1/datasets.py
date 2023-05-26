@@ -102,6 +102,7 @@ class Metrics(BaseModel):
 
 class TextFieldSettings(BaseModel):
     type: Literal[FieldType.text]
+    use_markdown: bool = False
 
 
 class Field(BaseModel):
@@ -137,6 +138,7 @@ class FieldCreate(BaseModel):
 
 class TextQuestionSettings(BaseModel):
     type: Literal[QuestionType.text]
+    use_markdown: bool = False
 
 
 class RatingQuestionSettingsOption(BaseModel):

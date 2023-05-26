@@ -37,7 +37,7 @@ def test_delete_field(client: TestClient, db: Session, admin_auth_header: dict):
         "name": "name",
         "title": "title",
         "required": False,
-        "settings": {"type": "text"},
+        "settings": {"type": "text", "use_markdown": False},
         "dataset_id": str(field.dataset.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
