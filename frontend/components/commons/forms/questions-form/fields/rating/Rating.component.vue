@@ -1,10 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="title-area --body2">
-      <span
-        v-text="title"
-        v-optional-field="isRequired ? false : true"
-      />
+      <span v-text="title" v-optional-field="isRequired ? false : true" />
 
       <BaseIconWithBadge
         class="icon-info"
@@ -50,9 +47,12 @@ export default {
       default: () => "",
     },
   },
+  model: {
+    prop: "initialOptions",
+    event: "on-change-rating",
+  },
   methods: {
     onChangeRating(newOptions) {
-      // TODO - refactor with a v-model instead of props/emit
       this.$emit("on-change-rating", newOptions);
 
       const isAnyRatingSelected = this.isAnyRatingSelected(newOptions);
