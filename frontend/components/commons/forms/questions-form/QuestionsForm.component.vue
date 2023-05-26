@@ -1,9 +1,9 @@
 <template>
   <form
+    :key="renderForm"
     class="questions-form"
     :class="{ '--edited-form': !isFormUntouched }"
     @submit.prevent="onSubmit"
-    :key="renderForm"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -30,7 +30,6 @@
           :placeholder="input.placeholder"
           :value="input.options[0].text"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
           :tooltipMessage="input.description"
           @on-change-value="
             onChangeTextArea({ newOptions: $event, idComponent: input.id })
