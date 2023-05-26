@@ -133,7 +133,7 @@ def admin_auth_header(admin: User) -> Dict[str, str]:
     return {API_KEY_HEADER_NAME: admin.api_key}
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def argilla_user() -> User:
     return UserFactory.create(
         first_name="Argilla",
@@ -163,35 +163,29 @@ def api() -> Argilla:
 
 
 @pytest.fixture
-def mocked_client(
-    db,
-    monkeypatch,
-    test_telemetry,
-    argilla_user,
-) -> SecuredClient:
-    with TestClient(app, raise_server_exceptions=False) as _client:
-        client_ = SecuredClient(_client)
+def mocked_client(db, monkeypatch, test_telemetry, argilla_user, client) -> SecuredClient:
+    client_ = SecuredClient(client)
 
-        real_whoami = users_api.whoami
+    real_whoami = users_api.whoami
 
-        def whoami_mocked(client):
-            monkeypatch.setattr(client, "__httpx__", client_)
-            return real_whoami(client)
+    def whoami_mocked(client):
+        monkeypatch.setattr(client, "__httpx__", client_)
+        return real_whoami(client)
 
-        monkeypatch.setattr(users_api, "whoami", whoami_mocked)
+    monkeypatch.setattr(users_api, "whoami", whoami_mocked)
 
-        monkeypatch.setattr(httpx, "post", client_.post)
-        monkeypatch.setattr(httpx, "patch", client_.patch)
-        monkeypatch.setattr(httpx.AsyncClient, "post", client_.post_async)
-        monkeypatch.setattr(httpx, "get", client_.get)
-        monkeypatch.setattr(httpx, "delete", client_.delete)
-        monkeypatch.setattr(httpx, "put", client_.put)
-        monkeypatch.setattr(httpx, "stream", client_.stream)
+    monkeypatch.setattr(httpx, "post", client_.post)
+    monkeypatch.setattr(httpx, "patch", client_.patch)
+    monkeypatch.setattr(httpx.AsyncClient, "post", client_.post_async)
+    monkeypatch.setattr(httpx, "get", client_.get)
+    monkeypatch.setattr(httpx, "delete", client_.delete)
+    monkeypatch.setattr(httpx, "put", client_.put)
+    monkeypatch.setattr(httpx, "stream", client_.stream)
 
-        rb_api = active_api()
-        monkeypatch.setattr(rb_api._client, "__httpx__", client_)
+    rb_api = active_api()
+    monkeypatch.setattr(rb_api._client, "__httpx__", client_)
 
-        yield client_
+    yield client_
 
 
 @pytest.fixture
