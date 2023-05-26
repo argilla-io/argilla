@@ -13,7 +13,6 @@
 #  limitations under the License.
 import tempfile
 from typing import TYPE_CHECKING, Dict, Generator
-from unittest.mock import MagicMock
 
 import argilla as rg
 import httpx
@@ -38,6 +37,9 @@ from tests.factories import AdminFactory, AnnotatorFactory, UserFactory
 from tests.helpers import SecuredClient
 
 if TYPE_CHECKING:
+    from unittest.mock import MagicMock
+
+    from pytest_mock import MockerFixture
     from sqlalchemy import Connection
     from sqlalchemy.orm import Session
 
@@ -71,7 +73,7 @@ def db(connection: "Connection") -> Generator["Session", None, None]:
 
 
 @pytest.fixture(scope="function")
-def client() -> Generator[TestClient, None, None]:
+def client(request) -> Generator[TestClient, None, None]:
     session = TestSession()
 
     def override_get_db():
@@ -79,7 +81,8 @@ def client() -> Generator[TestClient, None, None]:
 
     argilla_app.dependency_overrides[get_db] = override_get_db
 
-    with TestClient(app) as client:
+    raise_server_exceptions = request.param if hasattr(request, "param") else False
+    with TestClient(app, raise_server_exceptions=raise_server_exceptions) as client:
         yield client
 
     argilla_app.dependency_overrides.clear()
@@ -151,7 +154,7 @@ def argilla_auth_header(argilla_user: User) -> Dict[str, str]:
 
 
 @pytest.fixture
-def test_telemetry(mocker) -> MagicMock:
+def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
     telemetry._CLIENT = TelemetryClient(disable_send=True)
 
     return mocker.spy(telemetry._CLIENT, "track_data")
@@ -162,8 +165,11 @@ def api() -> Argilla:
     return Argilla()
 
 
+@pytest.mark.parametrize("client", [True], indirect=True)
 @pytest.fixture
-def mocked_client(db, monkeypatch, test_telemetry, argilla_user, client) -> SecuredClient:
+def mocked_client(
+    db: "Session", monkeypatch, test_telemetry: "MagicMock", argilla_user: User, client: TestClient
+) -> SecuredClient:
     client_ = SecuredClient(client)
 
     real_whoami = users_api.whoami
@@ -185,7 +191,7 @@ def mocked_client(db, monkeypatch, test_telemetry, argilla_user, client) -> Secu
     rb_api = active_api()
     monkeypatch.setattr(rb_api._client, "__httpx__", client_)
 
-    yield client_
+    return client_
 
 
 @pytest.fixture
