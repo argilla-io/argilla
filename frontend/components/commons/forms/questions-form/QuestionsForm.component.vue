@@ -218,6 +218,7 @@ export default {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
+    this.$root.$emit("are-responses-untouched", true); // NOTE - ensure that on destroy, all parents and siblings have the flag well reinitiate
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
