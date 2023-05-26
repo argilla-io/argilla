@@ -28,6 +28,7 @@ from argilla.server.models import QuestionType
 
 class TextQuestionSettings(BaseModel):
     type: Literal[QuestionType.text]
+    use_markdown: bool = False
 
 
 class RatingQuestionSettingsOption(BaseModel):
