@@ -392,6 +392,7 @@ export default {
       let url = `${window.origin}`;
       const isOldTask = this.isOldTask(task);
 
+      //NOTE - IMPORTANT => if pages route change, don't forget to update the url !
       if (isOldTask) {
         url += `/datasets/${workspace}/${name}`;
       } else {
