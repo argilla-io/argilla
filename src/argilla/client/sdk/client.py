@@ -47,6 +47,10 @@ class _ClientCommonDefaults:
     def get_timeout(self) -> float:
         return self.timeout
 
+    @property
+    def httpx(self):
+        return self.__httpx__
+
 
 @dataclasses.dataclass
 class _Client:
