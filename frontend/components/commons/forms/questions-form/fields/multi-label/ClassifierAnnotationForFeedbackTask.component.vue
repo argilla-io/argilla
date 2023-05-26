@@ -56,21 +56,12 @@
 </template>
 
 <script>
-import { IdState } from "vue-virtual-scroller";
 import ClassifierAnnotationButton from "@/components/text-classifier/results/classifier-annotation/ClassifierAnnotationButton.vue";
 
 export default {
   components: {
     ClassifierAnnotationButton,
   },
-  mixins: [
-    IdState({
-      // You can customize this
-      idProp: (vm) => {
-        return `${vm.prefix}-${vm.record.id}`;
-      },
-    }),
-  ],
   props: {
     maxVisibleLabels: {
       type: Number,
@@ -97,7 +88,7 @@ export default {
       required: true,
     },
   },
-  idState() {
+  data() {
     return {
       searchText: "",
       selectedLabels: [],
@@ -114,28 +105,28 @@ export default {
   computed: {
     searchText: {
       get: function () {
-        return this.idState.searchText;
+        return this.searchText;
       },
       set: function (newValue) {
-        this.idState.searchText = newValue;
+        this.searchText = newValue;
       },
     },
     selectedLabels: {
       get: function () {
-        return this.idState.selectedLabels;
+        return this.selectedLabels;
       },
       set: function (newValue) {
-        this.idState.selectedLabels = newValue;
+        this.selectedLabels = newValue;
       },
     },
     shownLabels: {
       get: function () {
         return this.allowToShowAllLabels
           ? this.labels.length
-          : this.idState.shownLabels;
+          : this.shownLabels;
       },
       set: function (newValue) {
-        this.idState.shownLabels = newValue;
+        this.shownLabels = newValue;
       },
     },
     visibleLabels() {
