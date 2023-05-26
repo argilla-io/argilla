@@ -76,51 +76,47 @@ export default {
 };
 </script>
 
-//
 <style lang="scss" scoped>
-.container {
-  display: flex;
-  .inputs-area {
-    display: inline-flex;
-    gap: $base-space;
-    border-radius: 5em;
-    border: 1px solid var(--border-color);
-    background: var(--background-color);
-    &:hover {
-      border-color: darken(palette(purple, 800), 12%);
-    }
-  }
-}
-
-.label-text {
-  display: flex;
-  width: 100%;
-  border-radius: 50em;
-  height: 40px;
-  background: palette(purple, 800);
-  outline: none;
-  padding-left: 16px;
-  padding-right: 16px;
-  line-height: 40px;
-  font-weight: 500;
-  overflow: hidden;
-  color: palette(purple, 200);
-  box-shadow: 0;
-  transition: all 0.2s ease-in-out;
-  &:not(.label-active):hover {
-    background: darken(palette(purple, 800), 8%);
-  }
-}
-
-input {
-  display: none;
-}
-
-.label-active {
-  color: white;
-  background: #4c4ea3;
-}
-.cursor-pointer {
-  cursor: pointer;
-}
+ .container {
+   display: flex;
+   .inputs-area {
+     display: inline-flex;
+     gap: $base-space;
+     border-radius: 5em;
+     border: 1px solid var(--border-color);
+     background: var(--background-color);
+     &:hover {
+       border-color: darken(palette(purple, 800), 12%);
+     }
+   }
+ }
+ .label-text {
+   display: flex;
+   width: 100%;
+   border-radius: 50em;
+   height: 40px;
+   background: palette(purple, 800);
+   outline: none;
+   padding-left: 16px;
+   padding-right: 16px;
+   line-height: 40px;
+   font-weight: 500;
+   overflow: hidden;
+   color: palette(purple, 200);
+   box-shadow: 0;
+   transition: all 0.2s ease-in-out;
+   &:not(.label-active):hover {
+     background: darken(palette(purple, 800), 8%);
+   }
+ }
+ input {
+   display: none;
+ }
+ .label-active {
+   color: white;
+   background: #4c4ea3;
+ }
+ .cursor-pointer {
+   cursor: pointer;
+ }
 </style>
