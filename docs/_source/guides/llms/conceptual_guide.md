@@ -35,14 +35,52 @@ Moreover, Argilla Feedback can be used to collect prompts as well. In this case,
 
 Additionally, you may choose to gather extra feedback on the prompts. For example, you could ask labelers to rate the clarity or relevance of each prompt, or to provide general comments in natural language. This auxiliary information can be invaluable for refining your prompts and guiding the assessment and training processes.
 
-![sft-flow](../../_static/images/llms/sft.svg "Completion collection for SFT")
-
 :::{tip}
 Beyond instruction-tuning, collecting and curating demonstration data is an important step for aligning the model with certain values and reduce its toxicity. An important related work is "Process for Adapting Language Models to Society (PALMS) with Values-Targeted Datasets". In this work, researchers improve language model behaviour by fine-tuning on a curated dataset of <100 examples of prompts and values-aligned responses. If you’d like help setting up such effort, reach out to us and we’ll gladly help out.
 :::
 
+Let's implement this workflow with Argilla.
+### End-to-end implementation with Argilla
+
+First, we need to configure a **dataset**. Argilla datasets allows you to mix different **questions** for labelers to answer. In this case, we want to collect **completions** from our labelers. We’ll just need to define a **text question**. Datasets are configured using the Argilla Python SDK. This is how you’d define this field.
+
+```python
+import argilla as rg
+
+questions =[
+    rg.TextQuestion(
+        name="completion",
+        title="Please write a harmless and helpful response for the prompt:",
+        required=True
+    )
+]
+```
+
+Argilla Datasets are composed of **records**. A **record** is a data point that can be labeled by one or more labelers. A record consists of one or more **fields**. These fields and the order in which they are presented to labelers is fully configurable. In this case, we want to show labelers a prompt. We’ll just need to define a **text field**. This is how you’d define this field using the Python SDK:
+
+```python
+fields = [
+    rg.TextField(name="prompt", required=True)
+]
+```
+
+To create a dataset, the final step is to define the **guidelines** for labelers. These guidelines help labelers understand and answer the questions consistently. This is how you’d configure the dataset, including the guidelines:
+
+```python
+dataset = rg.FeedbackDataset(
+	guidelines="Please, read the prompt carefully and...",
+	questions=questions,
+	fields=fields
+)
+```
+
+
+![sft-flow](../../_static/images/llms/sft.svg "Completion collection for SFT")
+
+
+
 ## Collecting comparison data
-The most significant reasons behind the success of ChatGPT by OpenAI or Claude by Anthropic is the application of a third stage after supervised fine-tuning. This third stage uses Reinforcement Learning to steer and align the model with human preferences. The most well-known technique for this stage is called RLHF.
+The key behind the success of ChatGPT by OpenAI or Claude by Anthropic is the application of a third stage. This third stage uses Reinforcement Learning to steer and align the model with human preferences. The most well-known technique for this stage is called RLHF.
 
 :::{note}
 There are other, potentially complementary, approaches like Reinforcement Learning From AI Feedback, but we strongly believe that fine-tuning LLMs with humans in the loop is key to building robust, responsible, and safe models.
@@ -57,6 +95,7 @@ Using Argilla, you can setup an offline feedback collection process to ask label
 :::{tip}
 You can use Argilla Feedback for the internal evaluation process by registering the interactions with the model and asking labelers to rate the quality of the responses. If you’d like help setting up such effort, reach out to us and will gladly help with the setup.
 :::
+
 
 ![rm-flow](../../_static/images/llms/rm.svg "Comparison collection for Reward Modeling")
 
