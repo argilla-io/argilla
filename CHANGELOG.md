@@ -24,6 +24,10 @@ These are the section headers that we use:
 - Added boolean `use_markdown` property to `TextFieldSettings` model.
 - Added boolean `use_markdown` property to `TextQuestionSettings` model.
 
+## Changed
+
+- Database setup for unit tests. Now the unit tests use a different database than the one used by the local Argilla server ([#2987]).
+
 ## [1.8.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
 ## Added
