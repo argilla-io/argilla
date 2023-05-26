@@ -22,7 +22,7 @@
         class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
-        :defaultText="value"
+        :defaultText="value.text"
         :placeholder="placeholder"
         @change-text="onChangeTextArea"
         @on-change-focus="setFocus"
@@ -65,6 +65,10 @@ export default {
       type: String,
       default: () => "",
     },
+  },
+  model: {
+    prop: "value",
+    event: "on-change-value",
   },
   data: () => {
     return {
