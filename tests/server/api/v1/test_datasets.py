@@ -143,7 +143,7 @@ def test_list_dataset_fields(client: TestClient, db: Session, admin_auth_header:
                 "name": "text-field-a",
                 "title": "Text Field A",
                 "required": True,
-                "settings": {"type": "text"},
+                "settings": {"type": "text", "use_markdown": False},
                 "inserted_at": text_field_a.inserted_at.isoformat(),
                 "updated_at": text_field_a.updated_at.isoformat(),
             },
@@ -152,7 +152,7 @@ def test_list_dataset_fields(client: TestClient, db: Session, admin_auth_header:
                 "name": "text-field-b",
                 "title": "Text Field B",
                 "required": False,
-                "settings": {"type": "text"},
+                "settings": {"type": "text", "use_markdown": False},
                 "inserted_at": text_field_b.inserted_at.isoformat(),
                 "updated_at": text_field_b.updated_at.isoformat(),
             },
@@ -230,7 +230,7 @@ def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_head
                 "title": "Text Question",
                 "description": None,
                 "required": True,
-                "settings": {"type": "text"},
+                "settings": {"type": "text", "use_markdown": False},
                 "inserted_at": text_question.inserted_at.isoformat(),
                 "updated_at": text_question.updated_at.isoformat(),
             },
@@ -1161,13 +1161,23 @@ def test_create_dataset_with_nonexistent_workspace_id(client: TestClient, db: Se
     assert db.query(Dataset).count() == 0
 
 
-def test_create_dataset_field(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.parametrize(
+    ("settings", "expected_settings"),
+    [
+        ({"type": "text"}, {"type": "text", "use_markdown": False}),
+        ({"type": "text", "discarded": "value"}, {"type": "text", "use_markdown": False}),
+        ({"type": "text", "use_markdown": False}, {"type": "text", "use_markdown": False}),
+    ],
+)
+def test_create_dataset_field(
+    client: TestClient,
+    db: Session,
+    admin_auth_header: dict,
+    settings: dict,
+    expected_settings: dict,
+):
     dataset = DatasetFactory.create()
-    field_json = {
-        "name": "name",
-        "title": "title",
-        "settings": {"type": "text"},
-    }
+    field_json = {"name": "name", "title": "title", "settings": settings}
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
 
@@ -1181,7 +1191,7 @@ def test_create_dataset_field(client: TestClient, db: Session, admin_auth_header
         "name": "name",
         "title": "title",
         "required": False,
-        "settings": {"type": "text"},
+        "settings": expected_settings,
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -1265,6 +1275,33 @@ def test_create_dataset_field_with_invalid_max_length_title(client: TestClient, 
     assert db.query(Field).count() == 0
 
 
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {},
+        None,
+        {"type": "wrong-type"},
+        {"type": "text", "use_markdown": None},
+        {"type": "rating", "options": None},
+        {"type": "rating", "options": []},
+    ],
+)
+def test_create_dataset_field_with_invalid_settings(
+    client: TestClient, db: Session, admin_auth_header: dict, settings: dict
+):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "Title",
+        "settings": settings,
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert db.query(Field).count() == 0
+
+
 def test_create_dataset_field_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
     field = FieldFactory.create(name="name")
     field_json = {
@@ -1308,38 +1345,36 @@ def test_create_dataset_field_with_nonexistent_dataset_id(client: TestClient, db
     assert db.query(Field).count() == 0
 
 
-def test_create_dataset_text_field(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    field_json = {
-        "name": "text",
-        "title": "Text",
-        "settings": {"type": "text", "discarded": "value"},
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
-
-    assert response.status_code == 201
-    assert db.query(Field).count() == 1
-
-    response_body = response.json()
-    assert db.get(Field, UUID(response_body["id"]))
-    assert response_body == {
-        "id": str(UUID(response_body["id"])),
-        "name": "text",
-        "title": "Text",
-        "required": False,
-        "settings": {"type": "text"},
-        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-    }
-
-
-def test_create_dataset_question(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.parametrize(
+    ("settings", "expected_settings"),
+    [
+        ({"type": "text"}, {"type": "text", "use_markdown": False}),
+        ({"type": "text", "use_markdown": True}, {"type": "text", "use_markdown": True}),
+        ({"type": "text", "use_markdown": False}, {"type": "text", "use_markdown": False}),
+        (
+            {
+                "type": "rating",
+                "options": [{"value": 1}, {"value": 2}, {"value": 3}, {"value": 4}, {"value": 5}],
+            },
+            {
+                "type": "rating",
+                "options": [{"value": 1}, {"value": 2}, {"value": 3}, {"value": 4}, {"value": 5}],
+            },
+        ),
+    ],
+)
+def test_create_dataset_question(
+    client: TestClient,
+    db: Session,
+    admin_auth_header: dict,
+    settings: dict,
+    expected_settings: dict,
+):
     dataset = DatasetFactory.create()
     question_json = {
         "name": "name",
         "title": "title",
-        "settings": {"type": "text"},
+        "settings": settings,
     }
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
@@ -1355,7 +1390,7 @@ def test_create_dataset_question(client: TestClient, db: Session, admin_auth_hea
         "title": "title",
         "description": None,
         "required": False,
-        "settings": {"type": "text"},
+        "settings": expected_settings,
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -1522,160 +1557,36 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
     assert db.query(Question).count() == 0
 
 
-def test_create_dataset_text_question(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "text",
-        "title": "Text",
-        "settings": {"type": "text", "discarded": "value"},
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 201
-    assert db.query(Question).count() == 1
-
-    response_body = response.json()
-    assert db.get(Question, UUID(response_body["id"]))
-    assert response_body == {
-        "id": str(UUID(response_body["id"])),
-        "name": "text",
-        "title": "Text",
-        "description": None,
-        "required": False,
-        "settings": {"type": "text"},
-        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-    }
-
-
-def test_create_dataset_rating_question(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
+@pytest.mark.parametrize(
+    "settings",
+    [
+        None,
+        {},
+        {"type": "wrong"},
+        {"type": "text", "use_markdown": None},
+        {"type": "text", "use_markdown": "wrong"},
+        {
             "type": "rating",
             "options": [
-                {"value": 1},
-                {"value": 2},
-                {"value": 3},
-                {"value": 4},
-                {"value": 5},
-                {"value": 6},
-                {"value": 7},
-                {"value": 8},
-                {"value": 9},
-                {"value": 10},
+                {"value": "A wrong value"},
+                {"value": "B wrong value"},
+                {"value": "C Wrong value"},
+                {"value": "D wrong value"},
             ],
         },
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 201
-    assert db.query(Question).count() == 1
-
-    response_body = response.json()
-    assert db.get(Question, UUID(response_body["id"]))
-    assert response_body == {
-        "id": str(UUID(response_body["id"])),
-        "name": "rating",
-        "title": "Rating",
-        "description": None,
-        "required": False,
-        "settings": {
-            "type": "rating",
-            "options": [
-                {"value": 1},
-                {"value": 2},
-                {"value": 3},
-                {"value": 4},
-                {"value": 5},
-                {"value": 6},
-                {"value": 7},
-                {"value": 8},
-                {"value": 9},
-                {"value": 10},
-            ],
-        },
-        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-    }
-
-
-def test_create_dataset_rating_question_with_less_options_than_allowed(
-    client: TestClient, db: Session, admin_auth_header: dict
+        {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
+        {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
+        {"type": "rating", "options": "invalid"},
+    ],
+)
+def test_create_dataset_question_with_invalid_settings(
+    client: TestClient,
+    db: Session,
+    admin_auth_header: dict,
+    settings: dict,
 ):
     dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
-            "type": "rating",
-            "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)],
-        },
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 422
-    assert db.query(Question).count() == 0
-
-
-def test_create_dataset_rating_question_with_more_options_than_allowed(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
-            "type": "rating",
-            "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)],
-        },
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 422
-    assert db.query(Question).count() == 0
-
-
-def test_create_dataset_rating_question_with_invalid_settings(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
-            "type": "rating",
-            "options": "invalid",
-        },
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 422
-    assert db.query(Question).count() == 0
-
-
-def test_create_dataset_rating_question_with_invalid_settings_options_values(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
-            "type": "rating",
-            "options": [
-                {"value": "A"},
-                {"value": "B"},
-                {"value": "C"},
-                {"value": "D"},
-            ],
-        },
-    }
+    question_json = {"name": "rating", "title": "Rating", "settings": settings}
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
