@@ -1570,7 +1570,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
             "options": [
                 {"value": "A wrong value"},
                 {"value": "B wrong value"},
-                {"value": "C Wrong value"},
+                {"value": "C wrong value"},
                 {"value": "D wrong value"},
             ],
         },
