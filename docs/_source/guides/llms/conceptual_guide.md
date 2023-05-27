@@ -99,7 +99,7 @@ For collecting **prompts** or instructions, there are at least the following opt
 As the field is rapidly evolving and lacking consensus, we suggest beginning with a small dataset of the highest quality. Argilla Feedback is built for iteration. Starting small allows for faster iteration: training is cheaper and faster, and the length of the feedback loop is reduced.
 :::
 
-**Use an open dataset of prompts or user queries**. If you don’t have an internal database for your use case, you can sample and select prompts from an open dataset. The steps here can include: (1) *finding an open dataset that might contain prompts related to your use case*, (2) *perform exploratory data analysis and topic extraction to understand the data*, and (3) *filter and select prompts based on topic, quality, text descriptives, etc.* 
+**Use an open dataset of prompts or user queries**. If you don’t have an internal database for your use case, you can sample and select prompts from an open dataset. The steps here can include: (1) *finding an open dataset that might contain prompts related to your use case*, (2) *perform exploratory data analysis and topic extraction to understand the data*, and (3) *filter and select prompts based on topic, quality, text descriptives, etc.*
 
 Some general and freely available datasets are [ShareGPT](https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered), [Open Assistant Conversation Dataset](https://huggingface.co/datasets/OpenAssistant/oasst1), or [Stack Exchange](https://huggingface.co/datasets/HuggingFaceH4/stack-exchange-preferences). Please be aware that some of these datasets might contain innapropriate, irrelevant, or bad quality examples for your use case.
 
@@ -140,7 +140,7 @@ from datasets import load_dataset
 prompts = load_dataset('your_prompts_dataset', split=["train"])
 
 records = [
-	rg.FeedbackRecord(fields={"prompt": record["prompt"]}) 
+	rg.FeedbackRecord(fields={"prompt": record["prompt"]})
 	for record in dataset
 ]
 
