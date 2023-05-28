@@ -11,7 +11,7 @@ The following figure shows the stages for training and fine-tuning LLMs. From to
 ![llm-flow](../../_static/images/llms/rlhf.svg "LLM fine-tuning stages")
 
 :::{note}
-This guide are highly inspired by the "Training language models to follow instructions with human feedback" paper and the amazing introduction to RLHF by Chip Huyen. The above figure is an adaptation from the figure created by Chip Huyen for this post.
+This guide are highly inspired by the "Training language models to follow instructions with human feedback" paper and the amazing introduction to RLHF by Chip Huyen. The above figure is an adaptation from Chip Huyen's post.
 :::
 
 Argilla Feedback assists in three critical stages of the LLM fine-tuning process. The first is the **collection of completion data for supervised fine-tuning of large language models**. This stage, while a part of the RLHF process, also operates independently. In supervised fine-tuning, models learn from human-guided examples, steering them, and improving their capabilities.
@@ -22,8 +22,8 @@ Similarly, Argilla Feedback can be used to write or select prompts for the last 
 
 To understand how Argilla Feedback works, let’s deep-dive into the **Collecting completion data** and **Collecting comparison data** stages.
 
-## Collecting completion data
-When training large language models, the collection of completion data play a significant role. This data, consisting of prompts and completions, is used in the supervised fine-tuning process where models learn to generate responses to prompts based on human-provided examples. Other common names for this stage are instruction-tuning and behaviour cloning. Argilla Feedback is designed to simplify and to seamlessly distribute this process across multiple labelers. As shown by recent research, like the LIMA work[TODO add reference], collecting and curating even a small set of high-quality and diverse examples can
+## Collecting demonstration data
+When training large language models, the collection of demonstration data play a significant role. This data, consisting of prompts and demonstrations, is used in the supervised fine-tuning process where models learn to generate responses to prompts based on human-provided examples. Other common names for this stage are instruction-tuning and behaviour cloning. Argilla Feedback is designed to simplify and to seamlessly distribute this process across multiple labelers. As shown by recent research, like the LIMA work[TODO add reference], collecting and curating even a small set of high-quality and diverse examples can
 
 Consider this example. Your company has access to a database of prompts, perhaps from an existing database like ShareGPT or from your internal resources, and you aim to fine-tune a model to respond accurately to these prompts. Using Argilla Feedback, you can efficiently distribute the prompts to human labelers who then generate responses as if they were the model. This set of model responses becomes a key component of the supervised fine-tuning process.
 
@@ -39,10 +39,10 @@ Additionally, you may choose to gather extra feedback on the prompts. For exampl
 Beyond instruction-tuning, collecting and curating demonstration data is an important step for aligning the model with certain values and reduce its toxicity. An important related work is "Process for Adapting Language Models to Society (PALMS) with Values-Targeted Datasets". In this work, researchers improve language model behaviour by fine-tuning on a curated dataset of <100 examples of prompts and values-aligned responses. If you’d like help setting up such effort, reach out to us and we’ll gladly help out.
 :::
 
-Let's implement this workflow with Argilla. The following figure illustrates the steps for setting up completion data collection from a team of labelers and performing supervised fine-tuning. The steps are: **configure the dataset**, **add records**, **labelers write completions**, **fetch records with completions**, **prepare the dataset**, and **fine-tune the SFT model**.
+Let's implement this workflow with Argilla. The following figure illustrates the steps for setting up demonstration data collection from a team of labelers and performing supervised fine-tuning. The steps are: **configure the dataset**, **add records**, **labelers write demonstrations**, **fetch records with demonstrations**, **prepare the dataset**, and **fine-tune the SFT model**.
 
 
-![sft-flow](../../_static/images/llms/sft.svg "Completion collection for SFT")
+![sft-flow](../../_static/images/llms/sft.svg "demonstration collection for SFT")
 
 :::{note}
 The following sections give a detailed, conceptual description of the above steps. For a hands-on practical introduction, go directly to the How-to Guides or Examples section.
@@ -50,14 +50,14 @@ The following sections give a detailed, conceptual description of the above step
 
 ### Configure the dataset
 
-First, we need to configure a **dataset**. Argilla datasets allows you to mix different **questions** for labelers to answer. In this case, we want to collect **completions** from our labelers. We’ll just need to define a **text question**. Datasets are configured using the Argilla Python SDK. This is how you can define this field:
+First, we need to configure a **dataset**. Argilla datasets allows you to mix different **questions** for labelers to answer. In this case, we want to collect **demonstrations** from our labelers. We’ll just need to define a **text question**. Datasets are configured using the Argilla Python SDK. This is how you can define this field:
 
 ```python
 import argilla as rg
 
 questions =[
     rg.TextQuestion(
-        name="completion",
+        name="demonstration",
         title="Please write a harmless and helpful response for the prompt:",
         required=True
     )
