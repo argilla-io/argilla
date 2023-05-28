@@ -17,11 +17,17 @@
       />
     </div>
 
-    <MonoSelectionContainerComponent v-model="options" styleType="style1" />
+    <MonoSelectionContainerComponent
+      v-model="options"
+      :styleType="COMPONENT_STYLE.STYLE_1"
+    />
   </div>
 </template>
 
 <script>
+import "assets/icons/info";
+import { COMPONENT_STYLE } from "../mono-selection/monoSelection.properties";
+
 export default {
   name: "RatingComponent",
   props: {
@@ -45,6 +51,9 @@ export default {
   model: {
     prop: "options",
     event: "on-change-rating",
+  },
+  created() {
+    this.COMPONENT_STYLE = COMPONENT_STYLE;
   },
   methods: {
     onChangeRating(newOptions) {
