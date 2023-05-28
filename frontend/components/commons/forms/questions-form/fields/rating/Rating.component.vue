@@ -17,12 +17,7 @@
       />
     </div>
 
-    <MonoSelectionComponent
-      :initialOptions="options"
-      backgroundColor="#E0E0FF"
-      borderColor="#CDCDFF"
-      @on-change="onChangeRating"
-    />
+    <MonoSelectionContainerComponent v-model="options" styleType="style1" />
   </div>
 </template>
 
