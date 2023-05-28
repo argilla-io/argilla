@@ -14,3 +14,38 @@ The second stage where Argilla Feedback proves beneficial is in the **collection
 Similarly, Argilla Feedback can be used to write or select prompts for the last stage: Reinforcement learning. This collection process is highly similar to the first stage except that we don't ask users to write demonstrations.
 
 To understand how Argilla Feedback works, let’s deep-dive into the **Collecting demonstration data** and **Collecting comparison data** stages.
+
+## Collecting demonstration data
+
+When training large language models, the collection of demonstration data play a significant role. This data, consisting of prompts and demonstrations, is used in the supervised fine-tuning process where models learn to generate responses to prompts based on human-provided examples. Other common names for this stage are instruction-tuning and behaviour cloning. Argilla Feedback is designed to simplify and to seamlessly distribute this process across multiple labelers. As shown by recent research, like the LIMA work, collecting and curating a small set of 1,000 high-quality and diverse examples can effectively teach a model to follow instructions.
+
+Consider this example. Your company has access to a database of prompts, perhaps from an existing database like ShareGPT or from your internal resources, and you aim to fine-tune a model to respond accurately to these prompts. Using Argilla Feedback, you can efficiently distribute the prompts to human labelers who then generate responses as if they were the model. This set of model responses becomes a key component of the supervised fine-tuning process.
+
+:::{tip}
+As you can add unlimited users to your Argilla instance and datasets, Argilla can be seamlessly used to distribute the workload among hundreds of labelers or experts within your company, in the line of other efforts like the Dolly v2 dataset from Databricks. If you’d like help setting up such effort, reach out to us and we’ll gladly help out.
+:::
+
+Moreover, Argilla Feedback can be used to collect prompts as well. In this case, you would ask the labelers not only to provide a response to a given prompt but also to write the prompts themselves. This dual functionality enhances the diversity of your dataset and can lead to more robust model performance.
+
+Additionally, you may choose to gather extra feedback on the prompts. For example, you could ask labelers to rate the clarity or relevance of each prompt, or to provide general comments in natural language. This auxiliary information can be invaluable for refining your prompts and guiding the assessment and training processes.
+
+:::{tip}
+Beyond instruction-tuning, collecting and curating demonstration data is an important step for aligning the model with certain values and reduce its toxicity. An important related work is "Process for Adapting Language Models to Society (PALMS) with Values-Targeted Datasets". In this work, researchers improve language model behaviour by fine-tuning on a curated dataset of <100 examples of prompts and values-aligned responses. If you’d like help setting up such effort, reach out to us and we’ll gladly help out.
+:::
+
+## Collecting comparison data
+The key behind the success of ChatGPT by OpenAI or Claude by Anthropic is the application of a third stage. This third stage uses Reinforcement Learning to steer and align the model with human preferences. The most well-known technique for this stage is called RLHF.
+
+:::{note}
+There are other, potentially complementary, approaches like Reinforcement Learning From AI Feedback, but we strongly believe that fine-tuning LLMs with humans in the loop is key to building robust, responsible, and safe models.
+:::
+
+RLHF itself has two stages: collecting comparison data and training a reward model and training a supervised policy. In this section, we discuss how to collect and curate demonstration data with Argilla Feedback.
+
+Consider this example. Your company has access to an instruction-following model, after going through the supervised fine-tuning stage or reusing an open-source instruction-following model. After an internal evaluation process, the model shows undesired behaviours like generating made up facts (sometimes referred to as “hallucinations”), harmful content, or just unhelpful responses. This is where a second stage of alignment with human preferences becomes relevant.
+
+Using Argilla, you can setup an offline feedback collection process to ask labelers to rank two or more model outputs for a given prompt.
+
+:::{tip}
+You can use Argilla Feedback for the internal evaluation process by registering the interactions with the model and asking labelers to rate the quality of the responses. If you’d like help setting up such effort, reach out to us and will gladly help with the setup.
+:::
