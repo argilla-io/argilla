@@ -8,7 +8,7 @@ These guides offer a conceptual overview of Argilla Feedback, setting the founda
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
-```{grid-item-card} Data collection for LLMs: the ChatGPT path
+```{grid-item-card} Data collection for LLMs
 :link: rlhf.html
 
 Introduction to data collection for LLMs and RLHF
@@ -17,7 +17,7 @@ Introduction to data collection for LLMs and RLHF
 ```{grid-item-card} Collecting demonstration data
 :link: sft.html
 
-Introduction to data collection for supervised and instruction tuning.
+Introduction to data collection for supervised and instruction fine-tuning.
 ```
 ```{grid-item-card} Collecting comparison data
 :link: rm.html
@@ -28,11 +28,11 @@ Introduction to data collection for reward modeling.
 ```{grid-item-card} Argilla Feedback Data Model
 :link: data_model.html
 
-Argilla Feedback Data Model
+Introduction to the main components to build human-in-the-loop workflows for LLMs.
 ```
 ````
 
-![Feedback dataset snapshot](../../../_static/images/llms/snapshot-feedback-demo.png)
+![llm-flow](../../../_static/images/llms/rlhf.svg "LLM fine-tuning stages")
 
 ```{toctree}
 :maxdepth: 2
