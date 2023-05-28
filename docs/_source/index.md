@@ -19,7 +19,7 @@
    :caption: LLMs
    :hidden:
 
-   guides/llms/conceptual_guide
+   guides/llms/conceptual_guides/conceptual_guides
    guides/llms/practical_guides/practical_guides
    guides/llms/examples/examples
 
