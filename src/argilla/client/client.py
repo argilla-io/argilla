@@ -137,7 +137,7 @@ class Argilla:
             headers=headers.copy(),
         )
 
-        self._user: User = users_api.whoami(client=self._client)
+        self._user: User = users_api.whoami(client=self._client.httpx).parsed
         self.set_workspace(workspace or self._user.username)
 
     def __del__(self):

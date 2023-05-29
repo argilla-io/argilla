@@ -12,10 +12,41 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.sdk.client import AuthenticatedClient
+from typing import Union
+
+import httpx
+
+from argilla.client.sdk.commons.errors_handler import handle_response_error
+from argilla.client.sdk.commons.models import (
+    ErrorMessage,
+    HTTPValidationError,
+    Response,
+)
 from argilla.client.sdk.users.models import User
 
 
-def whoami(client: AuthenticatedClient) -> User:
-    response = client.get("/api/me")
-    return User(**response)
+def whoami(
+    client: httpx.Client,
+) -> Response[Union[User, ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/me` endpoint to get the current user information.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if
+        the request was successful, which is an instance of `User`.
+    """
+    url = "/api/me"
+
+    response = client.get(url=url)
+
+    if response.status_code == 200:
+        parsed_response = User.construct(**response.json())
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)
