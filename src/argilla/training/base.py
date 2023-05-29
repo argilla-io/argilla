@@ -143,9 +143,9 @@ class ArgillaTrainer(object):
                 model=self.model,
             )
         elif framework is Framework.PEFT:
-            from argilla.training.peft import ArgillaTransformersPEFTTrainer
+            from argilla.training.peft import ArgillaPeftTrainer
 
-            self._trainer = ArgillaTransformersPEFTTrainer(
+            self._trainer = ArgillaPeftTrainer(
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,

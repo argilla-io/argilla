@@ -51,6 +51,7 @@ dependencies:
       - setfit
       - span_marker
       - openai
+      - peft
       - rich==13.0.1
       # install Argilla in editable mode
       - -e .[server,listeners]

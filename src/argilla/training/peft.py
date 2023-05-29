@@ -25,7 +25,7 @@ from argilla.training.utils import (
 from argilla.utils.dependency import require_version
 
 
-class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
+class ArgillaPeftTrainer(ArgillaTransformersTrainer):
     _logger = logging.getLogger("ArgillaTransformersPEFTTrainer")
     _logger.setLevel(logging.INFO)
 
