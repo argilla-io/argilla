@@ -72,7 +72,7 @@ class RatingQuestionSettings(BaseQuestionSettings, ValidOptionCheckerMixin[int])
 class LabelSelectionQuestionSettingsOption(BaseModel):
     value: str
     text: str
-    tooltip: Optional[str] = None
+    description: Optional[str] = None
 
 
 class LabelSelectionQuestionSettings(BaseQuestionSettings, ValidOptionCheckerMixin[str]):
