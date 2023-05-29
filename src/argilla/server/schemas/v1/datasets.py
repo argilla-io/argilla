@@ -17,7 +17,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, conlist, constr, validator
+from pydantic import BaseModel, PositiveInt, conlist, constr, validator
 from pydantic import Field as PydanticField
 
 try:
@@ -25,13 +25,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated, Literal
 
-from argilla.server.models import (
-    DatasetStatus,
-    FieldType,
-    LabelSelectionQuestionSettings,
-    QuestionType,
-    ResponseStatus,
-)
+from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
 
 DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
 DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
@@ -52,6 +46,9 @@ QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
+
+LABEL_SELECTION_OPTIONS_MIN_ITEMS = 2
+LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
@@ -152,6 +149,22 @@ class RatingQuestionSettings(BaseModel):
         min_items=RATING_OPTIONS_MIN_ITEMS,
         max_items=RATING_OPTIONS_MAX_ITEMS,
     )
+
+
+class LabelSelectionQuestionSettingsOption(BaseModel):
+    value: str
+    text: str
+    description: Optional[str] = PydanticField(None, max_length=100)
+
+
+class LabelSelectionQuestionSettings(BaseModel):
+    type: Literal[QuestionType.label_selection]
+    options: conlist(
+        item_type=LabelSelectionQuestionSettingsOption,
+        min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
+        max_items=LABEL_SELECTION_OPTIONS_MAX_ITEMS,
+    )
+    visible_options: Optional[PositiveInt] = None
 
 
 QuestionSettings = Annotated[

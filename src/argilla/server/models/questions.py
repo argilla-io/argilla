@@ -15,16 +15,12 @@
 from enum import Enum
 from typing import Any, Generic, List, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field, PositiveInt, conlist
+from pydantic import BaseModel, Field
 
 try:
     from typing import Annotated, Literal
 except ImportError:
     from typing_extensions import Annotated, Literal
-
-
-LABEL_SELECTION_OPTIONS_MIN_ITEMS = 2
-LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
 
 
 class QuestionType(str, Enum):
@@ -81,12 +77,8 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
 
 class LabelSelectionQuestionSettings(ValidOptionCheckerMixin[str], BaseQuestionSettings):
     type: Literal[QuestionType.label_selection]
-    options: conlist(
-        LabelSelectionQuestionSettingsOption,
-        min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
-        max_items=LABEL_SELECTION_OPTIONS_MAX_ITEMS,
-    )
-    visible_options: Optional[PositiveInt] = None
+    options: List[LabelSelectionQuestionSettingsOption]
+    visible_options: Optional[int] = None
 
 
 QuestionSettings = Annotated[
