@@ -51,6 +51,7 @@ dependencies:
       - setfit
       - span_marker
       - openai
+      - peft
       - autotrain-advanced==0.5.2
       - rich==13.0.1
       # install Argilla in editable mode

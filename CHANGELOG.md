@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+
 ## [1.8.0](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
 ## Added
@@ -42,7 +43,10 @@ These are the section headers that we use:
 - user can delete dataset in dataset settings page ([#2792])
 - Support for `FeedbackDataset` in Python client (parent PR [#2615], and nested PRs: [#2949], [#2827], [#2943], [#2945], [#2962], and [#3003])
 - Integration with the HuggingFace Hub ([#2949])
+- Added `ArgillaPeftTrainer` for text and token classificaiton [#2854](https://github.com/argilla-io/argilla/issues/2854)
+- Added `predict_proba()` method to `ArgillaSetFitTrainer`
 - Added `ArgillaAutoTrainTrainer` for Text Classification [#2664](https://github.com/argilla-io/argilla/issues/2664)
+
 - New `database revisions` command showing database revisions info
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
@@ -116,7 +120,6 @@ These are the section headers that we use:
 - Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
 
 ### Fixes
-
 - Now the `prepare_for_training` method is working when `multi_label=True`. Closes [#2606](https://github.com/argilla-io/argilla/issues/2606)
 
 ### Changed
@@ -139,6 +142,8 @@ These are the section headers that we use:
 - The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
+
+
 
 ## [1.5.1](https://github.com/argilla-io/argilla/compare/v1.5.0...v1.5.1) - 2023-03-30
 

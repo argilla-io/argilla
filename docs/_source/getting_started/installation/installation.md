@@ -65,10 +65,8 @@ docker-compose -f docker-compose.elasticsearch.yaml up
 
 ```
 
-
 (launch-the-web-app)=
-
-## 3. Prepare database
+## 3. Prepare Argilla Database
 
 First of all, you need to make sure that database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed. This will prepare some default ables for storing the data and user info.
 
