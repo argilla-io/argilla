@@ -49,6 +49,13 @@ RATING_OPTIONS_MAX_ITEMS = 100
 
 LABEL_SELECTION_OPTIONS_MIN_ITEMS = 2
 LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
+LABEL_SELECTION_VALUE_MIN_LENGHT = 1
+LABEL_SELECTION_VALUE_MAX_LENGHT = 200
+LABEL_SELECTION_TEXT_MIN_LENGTH = 1
+LABEL_SELECTION_TEXT_MAX_LENGTH = 500
+LABEL_SELECTION_DESCRIPTION_MIN_LENGTH = 1
+LABEL_SELECTION_DESCRIPTION_MAX_LENGTH = 1000
+LABEL_SELECTION_LABEL_DESCRIPTION_MAX_LENGTH = 100
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
@@ -152,9 +159,20 @@ class RatingQuestionSettings(BaseModel):
 
 
 class LabelSelectionQuestionSettingsOption(BaseModel):
-    value: str
-    text: str
-    description: Optional[str] = PydanticField(None, max_length=100)
+    value: constr(
+        min_length=LABEL_SELECTION_VALUE_MIN_LENGHT,
+        max_length=LABEL_SELECTION_VALUE_MAX_LENGHT,
+    )
+    text: constr(
+        min_length=LABEL_SELECTION_TEXT_MIN_LENGTH,
+        max_length=LABEL_SELECTION_TEXT_MAX_LENGTH,
+    )
+    description: Optional[
+        constr(
+            min_length=LABEL_SELECTION_DESCRIPTION_MIN_LENGTH,
+            max_length=LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
+        )
+    ] = PydanticField(None, max_length=100)
 
 
 class LabelSelectionQuestionSettings(BaseModel):
