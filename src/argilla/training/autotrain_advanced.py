@@ -23,16 +23,16 @@ from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
 
 
-class AutoTrainer(object):
-    def prepare_dataset(self, data_dict: dict = {}):
+class AutoTrainMixIn:
+    def prepare_dataset(self, data_dict_params: Optional[dict] = {}) -> None:
         """
         This function prepares a dataset for autotrain using a dictionary of data and specific column
         mappings.
 
         Args:
-          data_dict (dict): `data_dict` is a dictionary that contains additional parameters to be passed
-        to the `AutoTrainDataset` constructor. These parameters are optional and can be used to
-        customize the dataset preparation process.
+          data_dict_params: A dictionary that contains additional parameters to be passed
+            to the `AutoTrainDataset` constructor. These parameters are optional and can be used to
+            customize the dataset preparation process.
         """
         from autotrain.dataset import AutoTrainDataset
 
@@ -41,7 +41,7 @@ class AutoTrainer(object):
             token=self.HF_TOKEN,
             username=self.AUTOTRAIN_USERNAME,
             project_name=self.project_name,
-            **data_dict,
+            **data_dict_params,
             percent_valid=None,
             column_mapping={
                 "text": "text",
@@ -97,7 +97,7 @@ class AutoTrainer(object):
             model_choice = "HuggingFace Hub"
         if model_choice == "autotrain":
             if len(job_params) > 1:
-                raise ValueError("❌ Only one job parameter is allowed for AutoTrain.")
+                raise ValueError("Only one job parameter is allowed for AutoTrain.")
             job_params[0].update({"task": self.task})
         elif model_choice == "HuggingFace Hub":
             for i in range(len(job_params)):
@@ -105,7 +105,7 @@ class AutoTrainer(object):
         return job_params
 
 
-class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
+class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixIn):
     _logger = logging.getLogger("ArgillaAutoTrainTrainer")
     _logger.setLevel(logging.INFO)
 
@@ -124,7 +124,7 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
         self.project_name = f"{self._workspace}_{self._name}_{str(uuid4())[:8]}"
 
         if self._seed:
-            self._logger.warning("❌ Setting a seed is not supported by `autotrain-advanced`.")
+            self._logger.warning("Setting a seed is not supported by `autotrain-advanced`.")
             self._seed = 42
 
         if self._model is None:
@@ -257,4 +257,4 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainer):
         Args:
           output_dir (str): the path to save the model to
         """
-        self._logger.warning("Models are saved on the Hugging Face hub, so this function is not supported.")
+        self._logger.warning("Models are saved on the HuggingFace Hub, so this function is not supported.")

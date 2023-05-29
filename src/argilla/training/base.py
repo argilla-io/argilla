@@ -73,9 +73,7 @@ class ArgillaTrainer(object):
             **load_kwargs: arguments for the rg.load() function.
         """
         self._name = name
-        if workspace is None:
-            workspace = rg.get_workspace()
-        self._workspace = workspace
+        self._workspace = workspace or rg.get_workspace()
         self._multi_label = False
         self._split_applied = False
         self._train_size = train_size
