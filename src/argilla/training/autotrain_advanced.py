@@ -247,7 +247,9 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixIn):
         Returns:
           A list of predictions
         """
-        self._logger.error("Use framework=`transformers` for inference.")
+        self._logger.error(
+            f"Use ArgillaTrainer(name={self._name}, workspace={self._workspace}, framework='transformers', model='my_model_name') for inference via `.predict()`."
+        )
 
     def save(self, output_dir: str):
         """
