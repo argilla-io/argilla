@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "argilla"
 description = "Open-source tool for exploring, labeling, and monitoring data for NLP projects."
 readme = "README.md"
-requires-python = ">=3.7"
-license = {text = "Apache-2.0"}
+requires-python = ">=3.7"  # TODO: upgrade minimum Python version to 3.8, and pin maximum to < 3.12
+license = { text = "Apache-2.0" }
 keywords = [
     "data-science",
     "natural-language-processing",
@@ -17,14 +17,10 @@ keywords = [
     "knowledged-graph",
     "developers-tools",
     "human-in-the-loop",
-    "mlops"
+    "mlops",
 ]
-authors = [
-    {name = "argilla", email = "contact@argilla.io"}
-]
-maintainers = [
-    {name = "argilla", email = "contact@argilla.io"}
-]
+authors = [{ name = "argilla", email = "contact@argilla.io" }]
+maintainers = [{ name = "argilla", email = "contact@argilla.io" }]
 dependencies = [
     # Client
     "httpx >= 0.15,< 0.24",
@@ -83,10 +79,7 @@ postgresql = [
     # If we're on macOS, then install `psycopg2-binary` instead
     "psycopg2-binary ~= 2.9.5; sys_platform == 'darwin'",
 ]
-listeners = [
-    "schedule ~= 1.1.0",
-    "prodict ~= 0.8.0"
-]
+listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 
 [project.urls]
 homepage = "https://www.argilla.io"
@@ -94,15 +87,13 @@ documentation = "https://docs.argilla.io"
 repository = "https://github.com/argilla-io/argilla"
 
 [tool.setuptools.dynamic]
-version = {attr = "argilla.__version__"}
+version = { attr = "argilla.__version__" }
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
-testpaths = [
-    "tests"
-]
+testpaths = ["tests"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -114,7 +105,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
     "if _TYPE_CHECKING:",
-    "if typing.TYPE_CHECKING:"
+    "if typing.TYPE_CHECKING:",
 ]
 
 [tool.isort]
