@@ -48,9 +48,6 @@ export default {
     prop: "options",
     event: "on-change-rating",
   },
-  created() {
-    this.COMPONENT_STYLE = COMPONENT_STYLE;
-  },
   methods: {
     onChangeRating(newOptions) {
       this.$emit("on-change-rating", newOptions);
