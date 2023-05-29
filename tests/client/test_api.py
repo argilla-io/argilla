@@ -29,6 +29,7 @@ from argilla._constants import (
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client import api
+from argilla.client.apis.status import ApiInfo, Status
 from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
@@ -57,16 +58,22 @@ from tests.server.test_api import create_some_data_for_text_classification
 
 
 @pytest.fixture
-def mock_response_200(monkeypatch):
+def mock_init_ok(monkeypatch):
     """Creating of mock_get method from the class, and monkeypatch application.
 
     It will return a 200 status code, emulating the correct login.
     """
 
-    def mock_get(*args, **kwargs):
+    from argilla import __version__ as rg_version
+
+    def mock_get_info(*args, **kwargs):
+        return ApiInfo(version=rg_version)
+
+    def mock_whoami(*args, **kwargs):
         return User(username="booohh", api_key="api-key", workspaces=["mock-workspace"])
 
-    monkeypatch.setattr(users_api, "whoami", mock_get)
+    monkeypatch.setattr(Status, "get_info", mock_get_info)
+    monkeypatch.setattr(users_api, "whoami", mock_whoami)
 
 
 @pytest.fixture
@@ -105,7 +112,7 @@ def test_init_uppercase_workspace(mocked_client):
 
 
 @pytest.mark.skip(reason="Mock response is not working")
-def test_init_correct(mock_response_200):
+def test_init_correct(mock_init_ok):
     """Testing correct default initialization
 
     It checks if the _client created is a argillaClient object.
@@ -133,7 +140,7 @@ def test_init_correct(mock_response_200):
     )
 
 
-def test_init_environment_url(mock_response_200, monkeypatch):
+def test_init_environment_url(mock_init_ok, monkeypatch):
     """Testing initialization with api_url provided via environment variable
 
     It checks the url in the environment variable gets passed to client.
@@ -155,7 +162,7 @@ def test_init_environment_url(mock_response_200, monkeypatch):
     )
 
 
-def test_trailing_slash(mock_response_200):
+def test_trailing_slash(mock_init_ok):
     """Testing initialization with provided api_url via environment variable and argument
 
     It checks the trailing slash is removed in all cases
@@ -747,3 +754,39 @@ def test_load_sort(mocked_client):
     ds = api.load(name=dataset, ids=["1str", "2str", "11str"])
     df = ds.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]
+
+
+def test_not_aligned_argilla_versions(monkeypatch):
+    from argilla import __version__ as rg_version
+
+    def mock_get_info(*args, **kwargs):
+        return ApiInfo(version="1.0.0")
+
+    def mock_whoami(*args, **kwargs):
+        return User(username="mock")
+
+    monkeypatch.setattr(Status, "get_info", mock_get_info)
+    monkeypatch.setattr(users_api, "whoami", mock_whoami)
+
+    with pytest.warns(
+        UserWarning,
+        match=rf"You're connecting to Argilla Server 1.0.0 using a different client version \({rg_version}\)",
+    ):
+        Argilla()
+
+
+def test_aligned_argilla_versions(monkeypatch):
+    from argilla import __version__ as rg_version
+
+    def mock_get_info(*args, **kwargs):
+        return ApiInfo(version=rg_version)
+
+    def mock_whoami(*args, **kwargs):
+        return User(username="mock")
+
+    monkeypatch.setattr(Status, "get_info", mock_get_info)
+    monkeypatch.setattr(users_api, "whoami", mock_whoami)
+
+    with pytest.warns(None) as record:
+        Argilla()
+    assert len(record) == 0
