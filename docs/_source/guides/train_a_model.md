@@ -13,17 +13,19 @@ There are two ways to train custom models on top of your annotated data:
 
 ## Train directly
 
-Quick and easy but does not offer specific customization.
+This is, quick and easy but does not offer specific customizations.
 
-The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract workflow to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla. We plan on adding more support for tasks and frameworks like OpenAI, AutoTrain and SageMaker in the coming releases.
+The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract workflow to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla. We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub.
 
-| Framework/Task    | TextClassification | TokenClassification | Text2Text |
-|-------------------|--------------------|---------------------|-----------|
-| OpenAI            | ✔️                  |                     | ✔️         |
-| SetFit            | ✔️                  |                     |           |
-| spaCy             | ✔️                  | ✔️                   |           |
-| Transformers      | ✔️                  | ✔️                   |           |
-| SpanMarker        |                    | ✔️                   |           |
+| Framework/Task    | TextClassification | TokenClassification | Text2Text | Feedback  |
+|-------------------|--------------------|---------------------|-----------|-----------|
+| OpenAI            | ✔️                  |                     | ✔️         |           |
+| AutoTrai          | ✔️                  | ✔️                   | ✔️         |           |
+| SetFit            | ✔️                  |                     |           |           |
+| spaCy             | ✔️                  | ✔️                   |           |           |
+| Transformers      | ✔️                  | ✔️                   |           |           |
+| PEFT              | ✔️                  | ✔️                   |           |           |
+| SpanMarker        |                    | ✔️                   |           |           |
 
 ### The `ArgillaTrainer`
 
@@ -132,15 +134,21 @@ By passing the `framework` variable as `transformers`, `spark-nlp` or `spacy`.  
 For text generation tasks like `summarization` and translation tasks, it converts the annotations of a record `text` and `target` columns.
 By passing the `framework` variable as `transformers` and `spark-nlp`.  This task requires a `DatastForText2Text`.
 
+*Feedback*
+For feedback-oriented datasets, we currently rely on a fully customizable workflow, which means automation is limited and yet to be thought out.
+This task requires a `FeedbackDataset`.
 
-| Framework/Dataset | TextClassification | TokenClassification | Text2Text |
-|-------------------|--------------------|---------------------|-----------|
-| OpenAI            | ✔️                  | ✔️                   | ✔️         |
-| SetFit            | ✔️                  |                     |           |
-| spaCy             | ✔️                  | ✔️                   |           |
-| Transformers      | ✔️                  | ✔️                   | ✔️         |
-| SpanMarker        |                    | ✔️                   |           |
-| Spark NLP         | ✔️                  | ✔️                   | ✔️         |
+
+| Framework/Dataset | TextClassification | TokenClassification | Text2Text | Feedback  |
+|-------------------|--------------------|---------------------|-----------|-----------|
+| OpenAI            | ✔️                  | ✔️                   | ✔️         |           |
+| AutoTrain         | ✔️                  | ✔️                   |           |           |
+| SetFit            | ✔️                  |                     |           |           |
+| spaCy             | ✔️                  | ✔️                   |           |           |
+| Transformers      | ✔️                  | ✔️                   | ✔️         |           |
+| PEFT              | ✔️                  | ✔️                   | ✔️         |           |
+| SpanMarker        |                    | ✔️                   |           |           |
+| Spark NLP         | ✔️                  | ✔️                   | ✔️         |           |
 
 
 ```{include} /_common/tabs/train_prepare_for_training.md

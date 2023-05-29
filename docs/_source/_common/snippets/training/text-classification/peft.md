@@ -1,11 +1,13 @@
 ---
 title: Transformers
-description: The ArgillaTransformersTrainer leverages the features of transformers to train programmatically with Argilla.
+description: The ArgillaPeftTrainer leverages the base features of transformers and uses the Low Rank Adaptation (LoRA) implementation of Parameter Efficient Fine-Tuning (PEFT).
 links:
   - linkText: Argilla docs
     linkLink: https://docs.argilla.io/en/latest/guides/train_a_model.html
-  - linkText: Transformers docs
-    linkLink: https://huggingface.co/docs/transformers/training
+  - linkText: Transformers blog
+    linkLink: https://huggingface.co/blog/peft
+  - linkText: Transformers docss
+    linkLink: https://huggingface.co/docs/peft/index
 ---
 
 *code snippet*
@@ -16,17 +18,29 @@ from argilla.training import ArgillaTrainer
 trainer = ArgillaTrainer(
     name="<my_dataset_name>",
     workspace="<my_workspace_name>",
-    framework="transformers",
+    framework="peft",
     train_size=0.8
 )
-trainer.update_config(num_train_epochs=10)
-trainer.train(output_dir="token-classification")
+trainer.update_config(lora_alpha=8, num_train_epochs=3)
+trainer.train(output_dir="text-classification")
 records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
 ```
 
 *update training config*
 
 ```python
+# `peft.LoraConfig`
+trainer.update_config(
+    r=8,
+    target_modules=None,
+    lora_alpha=16,
+    lora_dropout=0.1,
+    fan_in_fan_out=False,
+    bias="none",
+    inference_mode=False,
+    modules_to_save=None,
+    init_lora_weights=True
+)
 # `transformers.AutoModelForTextClassification`
 trainer.update_config(
     pretrained_model_name_or_path = "distilbert-base-uncased",

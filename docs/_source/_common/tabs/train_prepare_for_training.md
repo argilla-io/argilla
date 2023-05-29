@@ -1,7 +1,6 @@
 ::::{tab-set}
 
 :::{tab-item} OpenAI
-:sync: openai
 
 ```python
 import argilla as rg
@@ -12,8 +11,18 @@ dataset_rg.prepare_for_training(framework="openai", train_size=1)
 ```
 :::
 
+:::{tab-item} AutoTrain
+
+```python
+import argilla as rg
+
+dataset_rg = rg.load("<my_dataset>")
+dataset_rg.prepare_for_training(framework="autotrain", train_size=1)
+# {'title': 'My title', 'content': 'My content', 'label': 0}
+```
+:::
+
 :::{tab-item} Setfit
-:sync: setfit
 
 ```python
 import argilla as rg
@@ -25,7 +34,6 @@ dataset_rg.prepare_for_training(framework="setfit", train_size=1)
 :::
 
 :::{tab-item} spaCy
-:sync: spacy
 
 ```python
 import argilla as rg
@@ -40,7 +48,6 @@ dataset_rg.prepare_for_training(framework="spacy", lang=nlp, train_size=1)
 :::
 
 :::{tab-item} Transformers
-:sync: transformers
 
 ```python
 import argilla as rg
@@ -51,8 +58,18 @@ dataset_rg.prepare_for_training(framework="transformers", train_size=1)
 ```
 :::
 
+:::{tab-item} Peft (LoRA)
+
+```python
+import argilla as rg
+
+dataset_rg = rg.load("<my_dataset>")
+dataset_rg.prepare_for_training(framework="peft", train_size=1)
+# {'title': 'My title', 'content': 'My content', 'label': 0}
+```
+:::
+
 :::{tab-item} SpanMarker
-:sync: spanmarker
 
 ```python
 import argilla as rg
@@ -64,7 +81,6 @@ dataset_rg.prepare_for_training(framework="span_marker", train_size=1)
 :::
 
 :::{tab-item} Spark NLP
-:sync: sparknlp
 
 ```python
 import argilla as rg
