@@ -1,6 +1,6 @@
 <template>
   <MonoSelectionRenderStyle1Component
-    v-if="styleType === COMPONENT_STYLE.STYLE_1"
+    v-if="styleType === COMPONENT_STYLE.RATING"
     :options="options"
     @on-select="onSelect"
   />
@@ -18,7 +18,7 @@ export default {
     },
     styleType: {
       type: String,
-      default: () => COMPONENT_STYLE.STYLE_1,
+      default: () => COMPONENT_STYLE.RATING,
     },
   },
   model: {

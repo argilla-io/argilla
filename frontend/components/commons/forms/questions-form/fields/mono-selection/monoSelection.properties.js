@@ -1,7 +1,7 @@
 // Use to render different kind of monoSelection
 const COMPONENT_STYLE = Object.freeze({
-  STYLE_1: "STYLE_1",
-  STYLE_2: "STYLE_2",
+  RATING: "RATING",
+  SINGLE_LABEL: "SINGLE_LABEL",
 });
 
 export { COMPONENT_STYLE };
