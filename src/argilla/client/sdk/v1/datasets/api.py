@@ -38,7 +38,7 @@ def create_dataset(
     workspace_id: str,
     guidelines: Optional[str] = None,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a POST reques to `/api/v1/datasets` endpoint to create a new `FeedbackTask` dataset.
+    """Sends a POST request to `/api/v1/datasets` endpoint to create a new `FeedbackTask` dataset.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
@@ -47,8 +47,8 @@ def create_dataset(
         guidelines: the guidelines of the dataset to be created. Defaults to `None`.
 
     Returns:
-        A `Response` object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is an instance of `FeedbackDatasetModel`.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is an instance of `FeedbackDatasetModel`.
     """
     url = "/api/v1/datasets"
 
@@ -80,8 +80,8 @@ def get_dataset(
         id: the id of the dataset to be retrieved.
 
     Returns:
-        A `Response` object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is an instance of `FeedbackDatasetModel`.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is an instance of `FeedbackDatasetModel`.
     """
     url = "/api/v1/datasets/{id}".format(id=id)
 
@@ -137,8 +137,8 @@ def publish_dataset(
         id: the id of the dataset to be published.
 
     Returns:
-        A `Response` object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is an instance of `FeedbackDatasetModel`.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is an instance of `FeedbackDatasetModel`.
     """
     url = "/api/v1/datasets/{id}/publish".format(id=id)
 
@@ -164,8 +164,9 @@ def list_datasets(
         client: the authenticated Argilla client to be used to send the request to the API.
 
     Returns:
-        A `Response` object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is a list of `FeedbackDatasetModel`."""
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a list of `FeedbackDatasetModel`.
+    """
     url = "/api/v1/me/datasets"
 
     response = client.get(url=url)
@@ -196,8 +197,8 @@ def get_records(
         limit: the limit to be used in the pagination. Defaults to 50.
 
     Returns:
-        A `Response` object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is an instance of `FeedbackRecordsModel`.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is an instance of `FeedbackRecordsModel`.
     """
     url = "/api/v1/datasets/{id}/records".format(id=id)
 
@@ -245,7 +246,8 @@ def add_records(
             if response["user_id"] is None:
                 if response_without_user_id:
                     warnings.warn(
-                        f"Multiple responses without `user_id` found in record {record}, so just the first one will be used while the rest will be ignored."
+                        f"Multiple responses without `user_id` found in record {record}, so "
+                        "just the first one will be used while the rest will be ignored."
                     )
                     continue
                 else:
@@ -278,8 +280,8 @@ def get_fields(
         id: the id of the dataset to retrieve the fields from.
 
     Returns:
-        A `Response` object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is a list of `FeedbackFieldModel`.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a list of `FeedbackFieldModel`.
     """
     url = "/api/v1/datasets/{id}/fields".format(id=id)
 
@@ -335,8 +337,8 @@ def get_questions(
         id: the id of the dataset to retrieve the questions from.
 
     Returns:
-        A `Response` object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is a list of `FeedbackQuestionModel`.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a list of `FeedbackQuestionModel`.
     """
     url = "/api/v1/datasets/{id}/questions".format(id=id)
 
