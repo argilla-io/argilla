@@ -21,10 +21,10 @@ from argilla.client import api
 from pydantic import ValidationError
 
 if TYPE_CHECKING:
-    from argilla.client.feedback import FieldSchema, QuestionSchema
+    from argilla.client.feedback.schemas import FieldSchema, QuestionSchema
 
-from argilla.client.feedback import (
-    FeedbackDataset,
+from argilla.client.feedback.dataset import FeedbackDataset
+from argilla.client.feedback.schemas import (
     FeedbackDatasetConfig,
     FeedbackRecord,
     RatingQuestion,
