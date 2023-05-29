@@ -58,7 +58,7 @@ class RatingQuestionSettingsOption(BaseModel):
 T = TypeVar("T")
 
 
-class ValidOptionCheckerMixin(Generic[T]):
+class ValidOptionCheckerMixin(BaseQuestionSettings, Generic[T]):
     @property
     def option_values(self) -> List[T]:
         return [option.value for option in self.options]
@@ -68,7 +68,7 @@ class ValidOptionCheckerMixin(Generic[T]):
             raise ValueError(f"{response.value!r} is not a valid option.\nValid options are: {self.option_values!r}")
 
 
-class RatingQuestionSettings(BaseQuestionSettings, ValidOptionCheckerMixin[int]):
+class RatingQuestionSettings(ValidOptionCheckerMixin[int], BaseQuestionSettings):
     type: Literal[QuestionType.rating]
     options: List[RatingQuestionSettingsOption]
 
@@ -79,7 +79,7 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
     description: Optional[str] = None
 
 
-class LabelSelectionQuestionSettings(BaseQuestionSettings, ValidOptionCheckerMixin[str]):
+class LabelSelectionQuestionSettings(ValidOptionCheckerMixin[str], BaseQuestionSettings):
     type: Literal[QuestionType.label_selection]
     options: conlist(
         LabelSelectionQuestionSettingsOption,
