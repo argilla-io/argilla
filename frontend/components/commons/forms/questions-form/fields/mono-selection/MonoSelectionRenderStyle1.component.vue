@@ -22,7 +22,7 @@
 
 <script>
 export default {
-  name: "MonoSelectionRenderComponent",
+  name: "MonoSelectionRenderStyle1Component",
   props: {
     options: {
       type: Array,
