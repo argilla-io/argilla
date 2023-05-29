@@ -10,6 +10,8 @@ The following sections give a detailed, conceptual description of the above step
 
 ### Configure the dataset
 
+The aim of this phase is to configure a dataset for gathering human demonstrations for each `prompt`.
+
 First, we need to configure a **dataset**. Argilla datasets allows you to mix different **questions** for labelers to answer. In this case, we want to collect **demonstrations** from our labelers. We’ll just need to define a **text question**. Datasets are configured using the Argilla Python SDK. This is how you can define this field:
 
 ```python
@@ -43,6 +45,8 @@ dataset = rg.FeedbackDataset(
 ```
 
 ### Add records
+
+The aim of this phase is create records with `prompts` to be pushed into Argilla for collecting human `completions`.
 
 Once you have configured the dataset, you need to add records and publish it for labelers. In this case, the records will contain a single field, the **prompt**. This **prompt** will be shown to labelers in the UI and we will ask them to provide a **completion**. The most important questions at this step are: **where to get the prompts from** and **how to select them** in order to maximise the quality of the resulting LLM.
 
@@ -111,8 +115,55 @@ dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
 
 ### Labelers write completions
-After pushing the to Argilla you and your team can start annotating with Argilla UI. Argilla Feedback enables...
+The aim of this phase is to provide human demonstrations for each `prompt` using Argilla UI.
 
-### Prepare dataset
+Once you upload your dataset to Argilla, it becomes accessible via the Argilla UI. Argilla Feedback allows simultaneous feedback collection from multiple users, enhancing quality control. Each user with dataset access can give their feedback.
 
-### Fine-tune LLM
+However, when resources are scarce, workload distribution among various labelers is recommended. This strategy entails assigning each labeler a subset of records to label. This [how-to guide](../practical_guides/set_up_annotation_team.html) provides detailed instructions on setting up these workload distribution options effectively.
+
+For a comprehensive understanding of the Argilla UI's main features, refer this [how-to guide](../practical_guides/annotate_dataset.html).
+
+## Prepare the dataset
+
+The aim of this phase is to compile a dataset into `prompt` and `demonstration` pairs that will be used for supervised fine-tuning.
+
+Once the dataset has been labeled, you can retrieve the responses using the Python SDK as follows:
+
+```python
+# Assume we distribute the workload in one dataset with several labelers
+feedback = rg.FeedbackDataset.from_argilla(
+	name="my-dataset", 
+	workspace="my-workspace"
+)
+```
+
+Your work distribution strategy may require you to gather and consolidate responses from multiple datasets and workspaces. Let's consider a scenario where you've divided the task among four labelers. Here's how you can retrieve their responses:
+
+```python
+# Assume the workload has been divided across the following workspaces
+user_workspaces = ["natalia", "amelie", "tom", "dani"]
+
+# this will hold each user's subsets
+feedback_datasets = []
+
+for workspace in user_workspaces:
+	feedback = rg.FeedbackDataset.from_argilla(
+		name="my-dataset", 
+		workspace=workspace
+	)
+	feedback_datasets.append(feedback)
+```
+
+Every record in `feedback.records` contains a `responses` attribute, which holds any feedback provided for that record. Each response includes:
+
+- `user_id`: The annotator's Argilla user ID.
+- `values`: The feedback given by the annotator. It's formatted as a dictionary, with keys for each question and values holding the respective answers.
+- `status`: The condition of the response - `submitted` or `discarded`. For our purposes, we focus on the `submitted` records.
+
+For datasets without annotation overlap, meaning each record has a single response, post-processing is simple as there's no need to choose which annotations to keep. If overlaps exist, refer to [this guide](../practical_guides/collect_responses.html) for conflict resolution strategies.
+
+Upon reconciling, we aim to have a list of records each with a `demonstration` answer, to be used for fine-tuning.
+
+Additionally, records include a `fields` attribute, outlining all fields set during dataset creation. In this case, we have `prompt` to use as input for fine-tuning.
+
+After gathering one `demonstration` per `prompt`, the last step is to prep your dataset for fine-tuning your base LLM. This preparation hinges on your selected fine-tuning framework. [This guide](../practical_guides/fine_tune.html) discusses the options and respective data preparation methods.
