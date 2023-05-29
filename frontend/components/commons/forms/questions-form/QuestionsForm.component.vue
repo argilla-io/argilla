@@ -1,9 +1,9 @@
 <template>
   <form
+    :key="renderForm"
     class="questions-form"
     :class="{ '--edited-form': !isFormUntouched }"
     @submit.prevent="onSubmit"
-    :key="renderForm"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -30,7 +30,6 @@
           :placeholder="input.placeholder"
           :value="input.options[0].text"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
           :tooltipMessage="input.description"
           @on-change-value="
             onChangeTextArea({ newOptions: $event, idComponent: input.id })
@@ -41,9 +40,8 @@
         <SingleLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
           :title="input.question"
-          :initialOptions="input.options"
+          :options="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
           :tooltipMessage="input.description"
           @on-change-single-label="
             onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
@@ -54,13 +52,9 @@
         <RatingComponent
           v-if="input.component_type === COMPONENT_TYPE.RATING"
           :title="input.question"
-          :initialOptions="input.options"
+          v-model="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
           :tooltipMessage="input.description"
-          @on-change-rating="
-            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
-          "
           @on-error="onError"
         />
       </div>
@@ -242,11 +236,13 @@ export default {
       }
     },
     onChangeTextArea({ newOptions, idComponent }) {
+      // TODO - remove this function when adding v-model on textArea component
       const component = this.inputs.find(({ id }) => id === idComponent);
       // NOTE - formatting to the standard options
       component.options = [{ ...newOptions, value: newOptions.text }];
     },
     onChangeMonoSelection({ newOptions, idComponent }) {
+      // TODO - to remove when single label will use v-model
       const component = this.inputs.find(({ id }) => id === idComponent);
       component.options = newOptions;
     },
