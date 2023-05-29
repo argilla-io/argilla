@@ -308,7 +308,7 @@ class Datasets(AbstractApi):
     def _save_settings(self, dataset: _DatasetApiModel, settings: Settings):
         if __TASK_TO_SETTINGS__.get(dataset.task) != type(settings):
             raise ValueError(
-                f"The provided settings type {type(settings)} cannot be applied to dataset." " Task type mismatch"
+                f"The provided settings type {type(settings)} cannot be applied to dataset. Task type mismatch"
             )
 
         settings_ = self._SettingsApiModel(label_schema={"labels": [label for label in settings.label_schema]})
