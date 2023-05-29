@@ -41,10 +41,12 @@ These are the section headers that we use:
 - new page for feedback task ([#2680])
 - show feedback task metrics ([#2822])
 - user can delete dataset in dataset settings page ([#2792])
-- Support for Feedback dataset in python client (parent PR [#2615], and nested PRs: [#2949], [#2827], [#2943], [#2945], and [#2962])
+- Support for `FeedbackDataset` in Python client (parent PR [#2615], and nested PRs: [#2949], [#2827], [#2943], [#2945], [#2962], and [#3003])
 - Integration with the HuggingFace Hub ([#2949])
 - Added `ArgillaPeftTrainer` for text and token classificaiton [#2854](https://github.com/argilla-io/argilla/issues/2854)
 - Added `predict_proba()` method to `ArgillaSetFitTrainer`
+- Added `ArgillaAutoTrainTrainer` for Text Classification [#2664](https://github.com/argilla-io/argilla/issues/2664)
+
 - New `database revisions` command showing database revisions info
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
