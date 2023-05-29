@@ -35,7 +35,7 @@ The following usage and error information is reported:
 * Task name and number of records for bulk operations
 * An anonymous generated user uuid
 * The argilla version running the server
-* The python version, e.g. `3.8.13`
+* The Python version, e.g. `3.8.13`
 * The system/OS name, such as `Linux`, `Darwin`, `Windows`
 * The system’s release version, e.g. `Darwin Kernel Version 21.5.0: Tue Apr 26 21:08:22 PDT 2022; root:xnu-8020`
 * The machine type, e.g. `AMD64`
