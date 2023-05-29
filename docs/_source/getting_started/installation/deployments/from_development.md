@@ -4,7 +4,7 @@
 If you want the cutting-edge version of *Argilla* with the latest changes and experimental features, follow the steps below in your terminal.
 **Be aware that this version might be unstable!**
 
-First, you need to install the master version of our python client:
+First, you need to install the master version of our Python client:
 
 ```bash
  pip install -U git+https://github.com/argilla-io/argilla.git
