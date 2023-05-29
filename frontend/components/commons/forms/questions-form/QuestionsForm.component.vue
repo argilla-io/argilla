@@ -39,6 +39,7 @@
 
         <SingleLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
+          :inputId="input.id"
           :title="input.question"
           :options="input.options"
           :isRequired="input.is_required"
