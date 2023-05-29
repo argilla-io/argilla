@@ -66,8 +66,8 @@ if _TYPE_CHECKING:
         read_datasets,
         read_pandas,
     )
-    from argilla.client.feedback import (
-        FeedbackDataset,
+    from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.schemas import (
         FeedbackRecord,
         RatingQuestion,
         TextField,
@@ -121,12 +121,12 @@ _import_structure = {
         "read_datasets",
         "read_pandas",
     ],
-    "client.feedback": [
-        "FeedbackDataset",
+    "client.feedback.dataset": ["FeedbackDataset"],
+    "client.feedback.schemas": [
+        "FeedbackRecord",
+        "RatingQuestion",
         "TextField",
         "TextQuestion",
-        "RatingQuestion",
-        "FeedbackRecord",
     ],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
