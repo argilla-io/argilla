@@ -40,7 +40,7 @@
         <SingleLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
           :title="input.question"
-          :initialOptions="input.options"
+          :options="input.options"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           @on-change-single-label="
