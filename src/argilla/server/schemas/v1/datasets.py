@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, conlist, constr, validator
-from pydantic import Field as ModelField
+from pydantic import Field as PydanticField
 
 try:
     from typing import Annotated, Literal
@@ -28,7 +28,7 @@ except ImportError:
 from argilla.server.models import (
     DatasetStatus,
     FieldType,
-    QuestionSettings,
+    LabelSelectionQuestionSettings,
     QuestionType,
     ResponseStatus,
 )
@@ -154,6 +154,12 @@ class RatingQuestionSettings(BaseModel):
     )
 
 
+QuestionSettings = Annotated[
+    Union[TextQuestionSettings, RatingQuestionSettings, LabelSelectionQuestionSettings],
+    PydanticField(discriminator="type"),
+]
+
+
 class Question(BaseModel):
     id: UUID
     name: str
@@ -254,7 +260,7 @@ class UserDiscardedResponseCreate(BaseModel):
 
 UserResponseCreate = Annotated[
     Union[UserSubmittedResponseCreate, UserDiscardedResponseCreate],
-    ModelField(discriminator="status"),
+    PydanticField(discriminator="status"),
 ]
 
 
