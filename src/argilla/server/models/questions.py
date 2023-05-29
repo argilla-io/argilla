@@ -41,6 +41,7 @@ class BaseQuestionSettings(BaseModel):
 
 class TextQuestionSettings(BaseQuestionSettings):
     type: Literal[QuestionType.text]
+    use_markdown: bool = False
 
     def check_response(self, response: ResponseValue):
         if not isinstance(response.value, str):

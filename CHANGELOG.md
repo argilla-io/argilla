@@ -42,6 +42,7 @@ These are the section headers that we use:
 - user can delete dataset in dataset settings page ([#2792])
 - Support for `FeedbackDataset` in Python client (parent PR [#2615], and nested PRs: [#2949], [#2827], [#2943], [#2945], [#2962], and [#3003])
 - Integration with the HuggingFace Hub ([#2949])
+- Added `ArgillaAutoTrainTrainer` for Text Classification [#2664](https://github.com/argilla-io/argilla/issues/2664)
 - New `database revisions` command showing database revisions info
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
