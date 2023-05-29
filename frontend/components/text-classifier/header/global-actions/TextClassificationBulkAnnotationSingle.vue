@@ -99,9 +99,9 @@ export default {
 }
 .label-text {
   cursor: pointer;
-  background: #f0f0fe;
+  background: palette(purple, 800);
   border-radius: 25px;
-  color: #4c4ea3;
+  color: palette(purple, 200);
   padding: calc($base-space / 2) $base-space;
   @include truncate;
   width: auto;
@@ -110,10 +110,10 @@ export default {
   @include font-size(13px);
   font-weight: 500;
   &:hover {
-    background: darken(#f0f0fe, 2%);
+    background: darken(palette(purple, 800), 2%);
   }
   &:active {
-    background: #4c4ea3;
+    background: palette(purple, 200);
     color: palette(white);
   }
 }

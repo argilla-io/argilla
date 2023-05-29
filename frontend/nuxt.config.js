@@ -65,10 +65,14 @@ export default {
     { src: "~/plugins/toast.js" },
     { src: "~/plugins/highlight-search.js" },
     { src: "~/plugins/copy-to-clipboard.js" },
+    { src: "~/plugins/check-valid-html.js" },
     { src: "~/plugins/filters.js" },
     { src: "~/plugins/variables.js" },
     { src: "~/plugins/custom-directives/badge.directive.js" },
     { src: "~/plugins/custom-directives/circle.directive.js" },
+    { src: "~/plugins/custom-directives/required-field.directive.js" },
+    { src: "~/plugins/custom-directives/optional-field.directive.js" },
+    { src: "~/plugins/custom-directives/tooltip.directive.js" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)

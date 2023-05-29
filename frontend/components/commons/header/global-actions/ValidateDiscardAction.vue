@@ -306,6 +306,7 @@ export default {
     border-radius: $border-radius;
   }
   &__button {
+    padding: $base-space * 2 $base-space;
     .svg-icon {
       color: $black-54;
       height: 18px;

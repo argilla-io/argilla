@@ -1,20 +1,13 @@
 <template>
-  <span :class="['status-tag', title]">
+  <span :class="['status-tag', getStatusInfo.class]">
     <svgicon
-      :name="
-        title === 'Validated'
-          ? 'validate'
-          : null || title === 'Edited'
-          ? 'time'
-          : null || title === 'Discarded'
-          ? 'discard'
-          : null
-      "
+      v-if="getStatusInfo.icon"
+      :name="getStatusInfo.icon"
       width="14"
       height="14"
       color="#ffffff"
     ></svgicon>
-    {{ title === "Edited" ? "Pending" : title }}
+    {{ getStatusInfo.name }}
   </span>
 </template>
 
@@ -28,25 +21,84 @@ export default {
       type: String,
     },
   },
+  computed: {
+    getStatusInfo() {
+      let statusInfo = null;
+      switch (this.title.toUpperCase()) {
+        case "PENDING":
+          statusInfo = {
+            name: "Pending",
+            icon: null,
+            class: "--pending",
+          };
+          break;
+        case "EDITED":
+          statusInfo = {
+            name: "Pending",
+            icon: "time",
+            class: "--edited",
+          };
+          break;
+        case "DISCARDED":
+          statusInfo = {
+            name: "Discarded",
+            icon: "discard",
+            class: "--discarded",
+          };
+          break;
+        case "VALIDATED":
+          statusInfo = {
+            name: "Validate",
+            icon: "validate",
+            class: "--validated",
+          };
+          break;
+        case "SUBMITTED":
+          statusInfo = {
+            name: "Submitted",
+            icon: "validate",
+            class: "--submitted",
+          };
+          break;
+        default:
+          console.log(`wrong status: ${this.title}`);
+      }
+      return statusInfo;
+    },
+  },
 };
 </script>
 
 <style scoped lang="scss">
 .status-tag {
   display: inline-flex;
-  align-items: center;
-  background: palette(green);
-  color: palette(white);
-  border-radius: 50px;
-  padding: 0.2em 1em;
-  @include font-size(12px);
-  font-weight: 600;
   z-index: 0;
-  &.Edited {
-    background: #bb720a;
+  align-items: center;
+  padding: 0.2em 1em;
+  color: palette(white);
+  @include font-size(13px);
+  border-radius: 50px;
+  font-weight: 600;
+  &.--validated {
+    background: palette(green);
+    border: 1px solid palette(green);
   }
-  &.Discarded {
-    background: #70767f;
+  &.--edited {
+    background: #bb720a;
+    border: 1px solid #bb720a;
+  }
+  &.--discarded {
+    background: #a7a7a7;
+    border: 1px solid #a7a7a7;
+  }
+  &.--submitted {
+    background: $primary-color;
+    border: 1px solid $primary-color;
+  }
+  &.--pending {
+    background: #eeeeff;
+    border: 1px solid #b6b9ff;
+    color: #4c4ea3;
   }
   .svg-icon {
     margin-right: 0.5em;

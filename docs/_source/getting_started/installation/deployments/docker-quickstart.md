@@ -35,6 +35,6 @@ This will run the latest quickstart docker image with 2 users `admin` and `argil
   is `12345678`. By setting up a custom password you can use your own password to login into the app.
 - `LOAD_DATASETS`: This variables will allow you to load sample datasets. The default value will be `full`. The
   supported values for this variable is as follows:
-    1. `single`: Load single datasets for TextClassification task.
-    2. `full`: Load all the sample datasets for NLP tasks (TokenClassification, TextClassification, Text2Text)
+    1. `single`: Load single datasets for Feedback task.
+    2. `full`: Load all the sample datasets for NLP tasks (Feedback, TokenClassification, TextClassification, Text2Text)
     3. `none`: No datasets are loaded.
