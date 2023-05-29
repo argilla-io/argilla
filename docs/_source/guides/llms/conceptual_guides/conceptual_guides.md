@@ -30,11 +30,8 @@ Introduction to the main components to build human-in-the-loop workflows for LLM
 ```
 ````
 
-.. figure:: ../../../_static/images/llms/rlhf.svg
 
-   LLM fine-tuning stages
-
-
+![llm-flow](../../../_static/images/llms/rlhf.svg "LLM fine-tuning stages")
 
 ```{toctree}
 :maxdepth: 2
