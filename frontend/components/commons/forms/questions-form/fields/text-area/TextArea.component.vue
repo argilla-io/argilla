@@ -41,13 +41,13 @@ export default {
       type: String,
       required: true,
     },
-    value: {
-      type: String,
-      default: () => "",
-    },
     optionId: {
       type: String,
       default: () => "optionId",
+    },
+    value: {
+      type: String,
+      default: () => "",
     },
     placeholder: {
       type: String,
