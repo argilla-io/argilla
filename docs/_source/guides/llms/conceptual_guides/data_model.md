@@ -38,8 +38,5 @@ With Suggestions, each record can be equipped with multiple machine-generated re
 
 Guidelines are a crucial component of the feedback collection process. They provide instructions, expectations, and any specific guidance for labelers to follow while providing feedback. Guidelines help ensure consistency and quality in the collected feedback. It is essential to provide clear and concise guidelines to help labelers understand the context and requirements of the feedback task.
 
-By understanding and utilizing these entities effectively, you can configure datasets, define fields and questions, and collect high-quality feedback data. The collected feedback can be used for various purposes, such as training machine learning models, evaluating system performance, or gaining insights into user preferences.
-
-Argilla Feedback simplifies the process of collecting and managing feedback data, empowering you to gather valuable insights and improve your models, systems, or applications based on the feedback provided by labelers.
 
 
