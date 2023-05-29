@@ -77,7 +77,11 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
 
 class LabelSelectionQuestionSettings(BaseQuestionSettings, ValidOptionCheckerMixin[str]):
     type: Literal[QuestionType.label_selection]
-    options: conlist(LabelSelectionQuestionSettingsOption, min_items=2)
+    options: conlist(
+        LabelSelectionQuestionSettingsOption,
+        min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
+        max_items=LABEL_SELECTION_OPTIONS_MAX_ITEMS,
+    )
     visible_options: Optional[int] = None
 
 
