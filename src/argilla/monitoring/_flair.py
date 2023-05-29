@@ -46,11 +46,13 @@ class FlairMonitor(BaseMonitor):
                     prediction=[
                         (
                             label.value,
-                            label.span.start_pos,
-                            label.span.end_pos,
+                            span.start_position,
+                            span.end_position,
                             label.score,
                         )
-                        for label in sentence.get_labels(self.__model__.tag_type)
+                        for label, span in zip(
+                            sentence.get_labels(self.__model__.tag_type), sentence.get_spans(self.__model__.tag_type)
+                        )
                     ],
                 )
                 for sentence, meta in data
