@@ -42,4 +42,4 @@ FeedbackDataset
 --------
 
 .. automodule:: argilla.client.feedback
-   :members: FeedbackDataset, FeedbackDatasetConfig, RatingQuestion, TextQuestion, QuestionSchema, TextField, FieldSchema, OfflineFeedbackRecord, FeedbackRecord, create_feedback_dataset
+   :members: FeedbackDataset, FeedbackDatasetConfig, RatingQuestion, TextQuestion, QuestionSchema, TextField, FieldSchema, OfflineFeedbackRecord, FeedbackRecord
