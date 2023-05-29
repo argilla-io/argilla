@@ -8,6 +8,8 @@ Here we describe the Python client of Argilla that we divide into three basic mo
 - :ref:`python ref methods`: These methods make up the interface to interact with Argilla's REST API.
 - :ref:`python ref records`: You need to wrap your data in these *Records* for Argilla to understand it.
 - :ref:`python ref datasets`: Datasets: You can wrap your records around these *Datasets* for extra functionality.
+- :ref:`python ref feedbackdataset`: FeedbackDataset: the dataset format for *FeedbackTask* and LLM support.
+
 
 .. _python ref methods:
 
@@ -33,3 +35,11 @@ Datasets
 
 .. automodule:: argilla.client.datasets
    :members: DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text, read_datasets, read_pandas
+
+.. _python ref feedbackdataset:
+
+FeedbackDataset
+--------
+
+.. automodule:: argilla.client.feedback
+   :members: FeedbackDataset, FeedbackDatasetConfig, RatingQuestion, TextQuestion, QuestionSchema, TextField, FieldSchema, OfflineFeedbackRecord, FeedbackRecord, create_feedback_dataset
