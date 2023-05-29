@@ -59,7 +59,7 @@ export default {
   beforeRouteLeave(to, from, next) {
     const isNotificationForThisRoute =
       !this.areResponsesUntouched &&
-      ["datasets", "dataseat-id-settings", "user-settings"].includes(to.name);
+      ["datasets", "dataset-id-settings", "user-settings"].includes(to.name);
 
     if (isNotificationForThisRoute) {
       this.showNotification({
