@@ -34,6 +34,12 @@ from argilla.server.schemas.v1.datasets import (
     DATASET_CREATE_GUIDELINES_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
+    LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
+    LABEL_SELECTION_DESCRIPTION_MIN_LENGTH,
+    LABEL_SELECTION_TEXT_MAX_LENGTH,
+    LABEL_SELECTION_TEXT_MIN_LENGTH,
+    LABEL_SELECTION_VALUE_MAX_LENGHT,
+    LABEL_SELECTION_VALUE_MIN_LENGHT,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
@@ -1361,6 +1367,54 @@ def test_create_dataset_field_with_nonexistent_dataset_id(client: TestClient, db
                 "options": [{"value": 1}, {"value": 2}, {"value": 3}, {"value": 4}, {"value": 5}],
             },
         ),
+        (
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
+                    {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
+                    {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                ],
+                "visible_options": 10,
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
+                    {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
+                    {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                ],
+                "visible_options": 10,
+            },
+        ),
+        (
+            {
+                "type": "label_selection",
+                "options": [
+                    {
+                        "value": "positive",
+                        "text": "Positive",
+                    },
+                    {
+                        "value": "negative",
+                        "text": "Negative",
+                    },
+                    {
+                        "value": "neutral",
+                        "text": "Neutral",
+                    },
+                ],
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": None},
+                    {"value": "negative", "text": "Negative", "description": None},
+                    {"value": "neutral", "text": "Neutral", "description": None},
+                ],
+                "visible_options": None,
+            },
+        ),
     ],
 )
 def test_create_dataset_question(
@@ -1577,6 +1631,55 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
         {"type": "rating", "options": "invalid"},
+        {"type": "label_selection", "options": []},
+        {"type": "label_selection", "options": [{"value": "just_one_label", "text": "Just one label"}]},
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+            "visible_options": 0,
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+            "visible_options": -1,
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "", "text": "a"}, {"value": "b", "text": "b"}],
+        },
+        {
+            "type": "label_selection",
+            "options": [
+                {"value": "".join(["a" for _ in range(LABEL_SELECTION_VALUE_MAX_LENGHT + 1)]), "text": "a"},
+                {"value": "b", "text": "b"},
+            ],
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": ""}, {"value": "b", "text": "b"}],
+        },
+        {
+            "type": "label_selection",
+            "options": [
+                {"value": "a", "text": "".join(["a" for _ in range(LABEL_SELECTION_TEXT_MAX_LENGTH + 1)])},
+                {"value": "b", "text": "b"},
+            ],
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a", "description": ""}, {"value": "b", "text": "b"}],
+        },
+        {
+            "type": "label_selection",
+            "options": [
+                {
+                    "value": "a",
+                    "text": "a",
+                    "description": "".join(["a" for _ in range(LABEL_SELECTION_DESCRIPTION_MAX_LENGTH + 1)]),
+                },
+                {"value": "b", "text": "b"},
+            ],
+        },
     ],
 )
 def test_create_dataset_question_with_invalid_settings(
@@ -1586,7 +1689,7 @@ def test_create_dataset_question_with_invalid_settings(
     settings: dict,
 ):
     dataset = DatasetFactory.create()
-    question_json = {"name": "rating", "title": "Rating", "settings": settings}
+    question_json = {"name": "question", "title": "Question", "settings": settings}
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 

@@ -148,3 +148,14 @@ class RatingQuestionFactory(QuestionFactory):
             {"value": 10},
         ],
     }
+
+
+class LabelSelectionQuestionFactory(QuestionFactory):
+    settings = {
+        "type": QuestionType.label_selection.value,
+        "options": [
+            {"value": "option1", "text": "Option 1"},
+            {"value": "option2", "text": "Option 2"},
+            {"value": "option3", "text": "Option 3"},
+        ],
+    }
