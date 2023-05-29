@@ -5,10 +5,10 @@ This guide will help you with all the practical aspects of setting up an annotat
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
-```{grid-item-card} Create and import a Feedback Dataset
+```{grid-item-card} Create a Feedback Dataset
 :link: create_dataset.html
 
-Methods to configure and import a Feedback Dataset in Argilla.
+Methods to configure a Feedback Dataset and push it to Argilla.
 
 ```
 ```{grid-item-card} Set up your annotation team

@@ -1,7 +1,6 @@
 ::::{tab-set}
 
 :::{tab-item} OpenAI
-:sync: openai
 
 ```python
 # `OpenAI.FineTune`
@@ -22,8 +21,32 @@ trainer.update_config(
 ```
 :::
 
+:::{tab-item} AutoTrain
+
+```python
+# `AutoTrain.autotrain_advanced`
+trainer.update_config(
+    model = "autotrain", # hub models like roberta-base
+    autotrain = [{
+        "source_language": "en",
+        "num_models": 5
+    }],
+    hub_model = [{
+        "learning_rate":  0.001,
+        "optimizer": "adam",
+        "scheduler": "linear",
+        "train_batch_size": 8,
+        "epochs": 10,
+        "percentage_warmup": 0.1,
+        "gradient_accumulation_steps": 1,
+        "weight_decay": 0.1,
+        "tasks": "text_binary_classification", # this is inferred from the dataset
+    }]
+)
+```
+:::
+
 :::{tab-item} SetFit
-:sync: setfit
 
 ```python
 # `setfit.SetFitModel`
@@ -54,7 +77,6 @@ trainer.update_config(
 :::
 
 :::{tab-item} spaCy
-:sync: spacy
 
 ```python
 # `spacy.training`
@@ -77,7 +99,6 @@ trainer.update_config(
 :::
 
 :::{tab-item} Transformers
-:sync: transformers
 
 ```python
 # `transformers.AutoModelForTextClassification`
@@ -118,8 +139,61 @@ trainer.update_config(
 ```
 :::
 
+:::{tab-item} Peft (LoRA)
+
+```python
+# `peft.LoraConfig`
+trainer.update_config(
+    r=8,
+    target_modules=None,
+    lora_alpha=16,
+    lora_dropout=0.1,
+    fan_in_fan_out=False,
+    bias="none",
+    inference_mode=False,
+    modules_to_save=None,
+    init_lora_weights=True,
+)
+# `transformers.AutoModelForTextClassification`
+trainer.update_config(
+    pretrained_model_name_or_path = "distilbert-base-uncased",
+    force_download = False,
+    resume_download = False,
+    proxies = None,
+    token = None,
+    cache_dir = None,
+    local_files_only = False
+)
+# `transformers.TrainingArguments`
+trainer.update_config(
+    per_device_train_batch_size = 8,
+    per_device_eval_batch_size = 8,
+    gradient_accumulation_steps = 1,
+    learning_rate = 5e-5,
+    weight_decay = 0,
+    adam_beta1 = 0.9,
+    adam_beta2 = 0.9,
+    adam_epsilon = 1e-8,
+    max_grad_norm = 1,
+    learning_rate = 5e-5,
+    num_train_epochs = 3,
+    max_steps = 0,
+    log_level = "passive",
+    logging_strategy = "steps",
+    save_strategy = "steps",
+    save_steps = 500,
+    seed = 42,
+    push_to_hub = False,
+    hub_model_id = "user_name/output_dir_name",
+    hub_strategy = "every_save",
+    hub_token = "1234",
+    hub_private_repo = False
+)
+```
+:::
+
+
 :::{tab-item} SpanMarker
-:sync: spanmarker
 
 ```python
 # `SpanMarkerConfig`
