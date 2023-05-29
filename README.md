@@ -66,39 +66,20 @@ There are different options to get started:
 
 ## 🎼 Cheatsheet
 
-<table>
-
-<tr>
-<td>
 
 <h3><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker-quickstart.html"> Deploy Locally</a></h3>
-</td>
-</tr>
-<tr>
-<td>
+
 
 ```bash
 docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 ```
 
-</td>
-</tr>
-<tr>
-<td>
 <h3><a href="https://argilla.io/blog/launching-argilla-huggingface-hub/">Deploy on Hugging Face Hub</a></h3>
-</td>
-</tr>
-<tr>
-<td>
+
 <a href="https://argilla.io/blog/launching-argilla-huggingface-hub/"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
-</td>
-</tr>
-<tr>
-<td>
-<h3><a href="https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#Argilla-Records">Create Records</a></td></h3>
-</tr>
-<tr>
-<td>
+
+<h3><a href="https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#Argilla-Records">Create Records</a></h3>
+
 
 ```python
 import argilla as rg
@@ -112,15 +93,9 @@ rg.log(records=record, name="news")
 ```
 
 <a href="https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#Argilla-Records"><img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
-</td>
-</tr>
-<tr>
-<td>
+
 <h3><a href="https://docs.argilla.io/en/latest/guides/query_datasets.html">Query datasets</a></h3>
-</td>
-</tr>
-<tr>
-<td>
+
 
 ```python
 import argilla as rg
@@ -129,15 +104,8 @@ rg.load(name="news", query="text:spor*")
 ```
 
 <a href="https://docs.argilla.io/en/latest/guides/query_datasets.html"><img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
-</td>
-</tr>
-<tr>
-<td>
+
 <h3><a href="https://docs.argilla.io/en/latest/guides/label_records_with_semanticsearch.html">Semantic search</a></h3>
-</td>
-</tr>
-<tr>
-<td>
 
 ```python
 import argilla as rg
@@ -152,15 +120,8 @@ rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 
 <a href="https://docs.argilla.io/en/latest/guides/label_records_with_semanticsearch.html"><img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
 
-</td>
-</tr>
-<tr>
-<td>
 <h3><a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html">Weak supervision</a></h3>
-</td>
-</tr>
-<tr>
-<td>
+
 
 ```python
 from argilla.labeling.text_classification import add_rules, Rule
@@ -170,8 +131,7 @@ add_rules(dataset="go_emotion", rules=[rule])
 ```
 
 <a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html"><img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
-</td>
-</tr>
+
 <!-- <tr>
 <td>
 <a href="https://argilla.io/blog/introducing-argilla-trainer">Active Learning</a>
@@ -188,13 +148,8 @@ plugin.start()
 <video src="https://share.descript.com/view/nvlUjF8tNcZ"/>
 </td>
 </tr> -->
-<tr>
-<td>
+
 <h3><a href="https://argilla.io/blog/introducing-argilla-trainer">Train models</a></h3>
-</td>
-</tr>
-<tr>
-<td>
 
 ```python
 from argilla.training import ArgillaTrainer
@@ -204,9 +159,7 @@ trainer.train()
 ```
 
 <a href="https://argilla.io/blog/introducing-argilla-trainer"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>
-</td>
-</tr>
-</table>
+
 
 
 ## 📏 Principles
