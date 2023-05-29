@@ -19,7 +19,7 @@
 
     <MonoSelectionContainerComponent
       v-model="options"
-      :styleType="COMPONENT_STYLE.STYLE_1"
+      :styleType="COMPONENT_STYLE.RATING"
     />
   </div>
 </template>
