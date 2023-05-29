@@ -85,7 +85,6 @@ from argilla.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
 )
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import User
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.utils import setup_loop_in_thread
@@ -137,7 +136,7 @@ class Argilla:
             headers=headers.copy(),
         )
 
-        self._user: User = users_api.whoami(client=self._client.httpx).parsed
+        self._user = users_api.whoami(client=self._client.httpx).parsed
         self.set_workspace(workspace or self._user.username)
 
     def __del__(self):
