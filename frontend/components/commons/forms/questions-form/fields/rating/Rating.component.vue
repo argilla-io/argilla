@@ -17,16 +17,12 @@
       />
     </div>
 
-    <MonoSelectionContainerComponent
-      v-model="options"
-      :styleType="COMPONENT_STYLE.RATING"
-    />
+    <RatingMonoSelectionComponent v-model="options" />
   </div>
 </template>
 
 <script>
 import "assets/icons/info";
-import { COMPONENT_STYLE } from "../mono-selection/monoSelection.properties";
 
 export default {
   name: "RatingComponent",
