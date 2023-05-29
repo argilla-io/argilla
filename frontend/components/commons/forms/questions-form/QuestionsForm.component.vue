@@ -38,9 +38,9 @@
         />
 
         <SingleLabelComponent
-          v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
+          v-if="input.component_type === COMPONENT_TYPE.RATING"
           :title="input.question"
-          :initialOptions="input.options"
+          :options="input.options"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           @on-change-single-label="
@@ -49,14 +49,14 @@
           @on-error="onError"
         />
 
-        <RatingComponent
+        <!-- <RatingComponent
           v-if="input.component_type === COMPONENT_TYPE.RATING"
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           @on-error="onError"
-        />
+        /> -->
       </div>
     </div>
     <div class="footer-form">

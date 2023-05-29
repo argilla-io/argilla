@@ -1,19 +1,19 @@
 <template>
-  <MonoSelectionComponent
-    :initialOptions="initialOptions"
+  <MonoSelectionContainerComponent
+    :options="options"
     @on-change="onChangeSingleLabel"
   />
 </template>
 
 <script>
 export default {
-  name: "RatingComponent",
+  name: "SingleLabelComponent",
   props: {
     title: {
       type: String,
       required: true,
     },
-    initialOptions: {
+    options: {
       type: Array,
       required: true,
     },
