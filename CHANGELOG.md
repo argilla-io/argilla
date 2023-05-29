@@ -17,6 +17,9 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+- Added `ArgillaPeftTrainer` for text and token classificaiton [#2854](https://github.com/argilla-io/argilla/issues/2854)
+- Added `predict_proba()` method to `ArgillaSetFitTrainer`
+
 ### Changed
 
 - Argilla server docker image is built with PostgreSQL support. Closes [#2686](https://github.com/argilla-io/argilla/issues/2686)
