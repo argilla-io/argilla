@@ -78,6 +78,34 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 
 <a href="https://argilla.io/blog/launching-argilla-huggingface-hub/"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
 
+<h3><a href="https://docs.argilla.io/en/latest/guides/guides/llms/conceptual_guides/conceptual_guides.html">LLM support</a></h3>
+
+```python
+import argilla as rg
+
+dataset = rg.FeedbackDataset(
+    guidelines="Please, read the question carefully and try to answer it as accurately as possible.",
+    fields=[
+        rg.TextField(name="question"),
+        rg.TextField(name="answer"),
+    ],
+    questions=[
+        rg.RatingQuestion(
+            name="answer_quality",
+            description="How would you rate the quality of the answer?",
+            values=[1, 2, 3, 4, 5],
+        ),
+        rg.TextQuestion(
+            name="answer_correction",
+            description="If you think the answer is not accurate, please, correct it.",
+            required=False,
+        ),
+    ]
+)
+```
+
+<a href="https://docs.argilla.io/en/latest/guides/guides/llms/conceptual_guides/conceptual_guides.html"><img src="https://docs.argilla.io/en/latest/_images/snapshot-feedback-demo.png" width="100%"></a>
+
 <h3><a href="https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#Argilla-Records">Create Records</a></h3>
 
 
