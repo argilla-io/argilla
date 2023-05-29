@@ -17,16 +17,22 @@
       />
     </div>
 
-    <SingleLabelMonoSelectionComponent v-model="options" />
+    <SingleLabelMonoSelectionComponent
+      v-model="options"
+      :componentId="inputId"
+      :isSearch="isSearch"
+    />
   </div>
 </template>
 
 <script>
-import SingleLabelMonoSelectionComponent from "./SingleLabelMonoSelection.component.vue";
 export default {
-  components: { SingleLabelMonoSelectionComponent },
   name: "SingleLabelComponent",
   props: {
+    inputId: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -44,18 +50,9 @@ export default {
       default: () => "",
     },
   },
-  methods: {
-    onChangeSingleLabel(newOptions) {
-      this.$emit("on-change-single-label", newOptions);
-      const isAnySingleLabelSelected =
-        this.isAnySingleLabelSelected(newOptions);
-
-      if (this.isRequired) {
-        this.$emit("on-error", !isAnySingleLabelSelected);
-      }
-    },
-    isAnySingleLabelSelected(options) {
-      return options.some((option) => option.value);
+  computed: {
+    isSearch() {
+      return this.options.length >= 12;
     },
   },
 };
