@@ -27,7 +27,7 @@ questions = [
 ```
 
 :::{tip}
-While the proposed setup in this guide is designed for comparing two responses, it is possible to include more than two responses for each prompt. This approach provides richer data for training your reward model, but increases the complexity of the task for the labelers. To include three responses per prompt, for instance, you would need to add additional fields for the extra responses and adjust the RatingQuestion to be: 
+While the proposed setup in this guide is designed for comparing two responses, it is possible to include more than two responses for each prompt. This approach provides richer data for training your reward model, but increases the complexity of the task for the labelers. To include three responses per prompt, for instance, you would need to add additional fields for the extra responses and adjust the RatingQuestion to be:
 
 ```python
 rg.RatingQuestion(name="rankings", title="Rank the responses in terms of accuracy.", choices=["1", "2", "3"]).
