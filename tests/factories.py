@@ -159,3 +159,14 @@ class LabelSelectionQuestionFactory(QuestionFactory):
             {"value": "option3", "text": "Option 3"},
         ],
     }
+
+
+class MultiLabelSelectionQuestionFactory(QuestionFactory):
+    settings = {
+        "type": QuestionType.multi_label_selection.value,
+        "options": [
+            {"value": "option1", "text": "Option 1"},
+            {"value": "option2", "text": "Option 2"},
+            {"value": "option3", "text": "Option 3"},
+        ],
+    }
