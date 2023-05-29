@@ -158,13 +158,8 @@ def mocked_client(
     with TestClient(app, raise_server_exceptions=False) as _client:
         client_ = SecuredClient(_client)
 
-        real_whoami = users_api.whoami
-
-        def whoami_mocked(client):
-            monkeypatch.setattr(client, "__httpx__", client_)
-            return real_whoami(client)
-
-        monkeypatch.setattr(users_api, "whoami", whoami_mocked)
+        whoami_fn = users_api.whoami
+        monkeypatch.setattr(users_api, "whoami", lambda client: whoami_fn(client_))
 
         monkeypatch.setattr(httpx, "post", client_.post)
         monkeypatch.setattr(httpx, "patch", client_.patch)
