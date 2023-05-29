@@ -293,9 +293,9 @@ class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
         name: str,
-        workspace: Optional[str] = None,
         dataset,
         record_class: Union[TokenClassificationRecord, Text2TextRecord, TextClassificationRecord],
+        workspace: Optional[str] = None,
         multi_label: bool = False,
         settings: Union[TextClassificationSettings, TokenClassificationSettings] = None,
         model: str = None,
@@ -304,7 +304,7 @@ class ArgillaTrainerSkeleton(ABC):
         **kwargs,
     ):
         self._name = name
-        self._workspace = workspace
+        self._workspace = workspace or rg.get_workspace()
         self._dataset = dataset
         self._record_class = record_class
         self._multi_label = multi_label
