@@ -293,7 +293,7 @@ class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
         name: str,
-        workspace: str,
+        workspace: Optional[str] = None,
         dataset,
         record_class: Union[TokenClassificationRecord, Text2TextRecord, TextClassificationRecord],
         multi_label: bool = False,
