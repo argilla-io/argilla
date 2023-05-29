@@ -251,7 +251,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             remove_columns = ["id", "tokens", "ner_tags"]
             replace_labels = False
         else:
-            raise NotImplementedError("This is not implemented yet.")
+            raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
         self._tokenized_train_dataset = self._train_dataset.map(
             preprocess_function, batched=True, remove_columns=remove_columns

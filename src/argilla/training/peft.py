@@ -31,7 +31,7 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
 
     import sys
 
-    if sys.version_info[1] < 9 or sys.version_info[0] < 3:
+    if sys.version_info < (3, 9):
         raise Exception("Must be using Python 3.9 or higher or PEFT won't work.")
 
     require_version("peft")
@@ -60,7 +60,7 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
         elif self._record_class == rg.TokenClassificationRecord:
             self.lora_kwargs["task_type"] = "TOKEN_CLS"
         else:
-            raise NotImplementedError("This is not implemented yet.")
+            raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
         try:
             config = PeftConfig.from_pretrained(self.model_kwargs["pretrained_model_name_or_path"])
@@ -73,7 +73,7 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
             )
             self._model_sub_class = model.__class__
             model = PeftModel.from_pretrained(model, self.model_kwargs["pretrained_model_name_or_path"])
-        except Exception:
+        except:
             config = LoraConfig(**self.lora_kwargs)
             model = self._model_class.from_pretrained(**self.model_kwargs, return_dict=True)
             self._model_sub_class = model.__class__
@@ -235,7 +235,7 @@ class ArgillaTransformersPEFTTrainer(ArgillaTransformersTrainer):
                     )
 
                 else:
-                    raise NotImplementedError("This is not implemented yet.")
+                    raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
         else:
             formatted_prediction = predictions
 
