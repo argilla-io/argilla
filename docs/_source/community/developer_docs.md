@@ -38,7 +38,7 @@ git remote add upstream https://github.com/argilla-io/argilla.git
 
 ### Install dependencies
 
-To be able to use Argilla via either the Python client or the Python Command Line Interface (CLI), you'll need to 
+To be able to use Argilla via either the Python client or the Python Command Line Interface (CLI), you'll need to
 install `argilla` and its extra dependencies, if applicable. To do so, you can either install it via `pip` or setup
 a Conda environment with all the required dependencies.
 
@@ -75,7 +75,7 @@ conda env create -f environment_dev.yml
 conda activate argilla
 ```
 
-In the new Conda environment, *Argilla* will already be installed in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#install-editable) 
+In the new Conda environment, *Argilla* will already be installed in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#install-editable)
 with all the server dependencies. But if you're willing to install any other dependency you can do so via `pip` to install your own, or just
 see the available extras besides the `server` extras, which are: `listeners`, `postgresql`, and `tests`; all those installable as `pip install -e ".[<EXTRA_NAME>]"`.
 
