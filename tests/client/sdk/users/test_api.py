@@ -15,7 +15,7 @@
 from argilla._constants import DEFAULT_API_KEY
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.users.api import whoami
-from argilla.client.sdk.users.models import User
+from argilla.client.sdk.users.models import UserModel
 
 
 def test_whoami(monkeypatch, mocked_client) -> None:
@@ -23,4 +23,4 @@ def test_whoami(monkeypatch, mocked_client) -> None:
     monkeypatch.setattr(httpx_client, "get", mocked_client.get)
     response = whoami(client=httpx_client)
     assert response.status_code == 200
-    assert isinstance(response.parsed, User)
+    assert isinstance(response.parsed, UserModel)

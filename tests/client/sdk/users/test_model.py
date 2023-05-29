@@ -12,12 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.sdk.users.models import User
+from argilla.client.sdk.users.models import UserModel as ClientUser
 from argilla.server.security.model import User as ServerUser
 
 
 def test_users_schema(helpers):
-    client_schema = User.schema()
-    server_schema = ServerUser.schema()
-
-    assert helpers.are_compatible_api_schemas(client_schema, server_schema)
+    assert helpers.are_compatible_api_schemas(ClientUser.schema(), ServerUser.schema())

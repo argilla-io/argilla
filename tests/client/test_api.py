@@ -12,11 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import concurrent.futures
 import datetime
 import re
 from time import sleep
 from typing import Any, Iterable
+from uuid import uuid4
 
 import argilla as rg
 import datasets
@@ -31,9 +33,9 @@ from argilla._constants import (
 from argilla.client import api
 from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
+from argilla.client.sdk.commons.api import Response
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
-    BaseClientError,
     ForbiddenApiError,
     GenericApiError,
     HttpResponseError,
@@ -43,7 +45,7 @@ from argilla.client.sdk.commons.errors import (
     ValidationApiError,
 )
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import User
+from argilla.client.sdk.users.models import UserModel
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
@@ -63,8 +65,22 @@ def mock_response_200(monkeypatch):
     It will return a 200 status code, emulating the correct login.
     """
 
-    def mock_get(*args, **kwargs):
-        return User(username="booohh", api_key="api-key", workspaces=["mock-workspace"])
+    def mock_get(*args, **kwargs) -> Response:
+        return Response(
+            status_code=200,
+            content=b"",
+            headers={},
+            parsed=UserModel(
+                id=uuid4(),
+                username="mock_username",
+                first_name="mock_first_name",
+                role="admin",
+                api_key="mock_api_key",
+                workspaces=["mock_workspace"],
+                inserted_at=datetime.datetime.now(),
+                updated_at=datetime.datetime.now(),
+            ),
+        )
 
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
@@ -94,7 +110,21 @@ def mock_response_token_401(monkeypatch):
         if kwargs["url"] == "fake_url/api/me":
             raise UnauthorizedApiError()
         elif kwargs["url"] == "fake_url/api/docs/spec.json":
-            return User(username="booohh", api_key="api-key")
+            return Response(
+                status_code=200,
+                content=b"",
+                headers={},
+                parsed=UserModel(
+                    id=uuid4(),
+                    username="mock_username",
+                    first_name="mock_first_name",
+                    role="admin",
+                    api_key="mock_api_key",
+                    workspaces=["mock_workspace"],
+                    inserted_at=datetime.datetime.now(),
+                    updated_at=datetime.datetime.now(),
+                ),
+            )
 
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
@@ -138,7 +168,7 @@ def test_init_environment_url(mock_response_200, monkeypatch):
 
     It checks the url in the environment variable gets passed to client.
     """
-    workspace_name = "mock-workspace"
+    workspace_name = "mock_workspace"
     url = "mock_url"
     api_key = "mock_api_key"
 
@@ -488,7 +518,7 @@ def test_dataset_copy(mocked_client):
         api.copy(dataset, name_of_copy=dataset_copy, workspace=other_workspace)
 
 
-def test_dataset_copy_to_another_workspace(mocked_client, argilla_user: User, db: Session):
+def test_dataset_copy_to_another_workspace(mocked_client, argilla_user: UserModel, db: Session):
     dataset_name = "test_dataset_copy_to_another_workspace"
     dataset_copy = "new_dataset"
     new_workspace_name = "my-fun-workspace"
