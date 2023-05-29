@@ -15,7 +15,7 @@
 from enum import Enum
 from typing import Any, Generic, List, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, conlist
 
 try:
     from typing import Annotated, Literal
@@ -77,7 +77,7 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
 
 class LabelSelectionQuestionSettings(BaseQuestionSettings, ValidOptionCheckerMixin[str]):
     type: Literal[QuestionType.label_selection]
-    options: List[LabelSelectionQuestionSettingsOption]
+    options: conlist(LabelSelectionQuestionSettingsOption, min_items=2)
     visible_options: Optional[int] = None
 
 
