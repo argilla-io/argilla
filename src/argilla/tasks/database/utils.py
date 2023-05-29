@@ -12,15 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
+import io
 
-from .migrate import migrate_db
-from .revisions import revisions
+from alembic import command
+from alembic.config import Config
 
-app = typer.Typer(help="Holds CLI commands for migrations and database management.", no_args_is_help=True)
 
-app.command(name="migrate", help="Run database migrations.")(migrate_db)
-app.command(name="revisions", help="Show available revisions.")(revisions)
+def get_current_revision(alembic_config_file: str, verbose: bool = False) -> str:
+    output_buffer = io.StringIO()
+    alembic_cfg = Config(alembic_config_file, stdout=output_buffer)
 
-if __name__ == "__main__":
-    app()
+    command.current(alembic_cfg, verbose=verbose)
+    command_result = output_buffer.getvalue().strip()
+
+    if verbose:
+        return command_result
+    return command_result.split(" ")[0]

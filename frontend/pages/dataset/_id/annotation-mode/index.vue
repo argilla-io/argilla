@@ -53,7 +53,7 @@ export default {
   },
   data: () => {
     return {
-      areResponsesUntouched: false,
+      areResponsesUntouched: true, // NOTE - this flag is used to show or to not show a toast when questionnaire is touched (to prevent loosing current modification)
     };
   },
   beforeRouteLeave(to, from, next) {
