@@ -38,7 +38,7 @@ def test_delete_question(client: TestClient, db: Session, admin_auth_header: dic
         "title": "title",
         "description": "description",
         "required": False,
-        "settings": {"type": "text"},
+        "settings": {"type": "text", "use_markdown": False},
         "dataset_id": str(question.dataset_id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),

@@ -18,7 +18,14 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-## [1.8.0](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
+## [1.9.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
+
+## Added
+
+- Added boolean `use_markdown` property to `TextFieldSettings` model.
+- Added boolean `use_markdown` property to `TextQuestionSettings` model.
+
+## [1.8.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
 ## Added
 
