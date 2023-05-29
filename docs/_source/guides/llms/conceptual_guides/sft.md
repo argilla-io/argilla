@@ -132,7 +132,7 @@ Once the dataset has been labeled, you can retrieve the responses using the Pyth
 ```python
 # Assume we distribute the workload in one dataset with several labelers
 feedback = rg.FeedbackDataset.from_argilla(
-	name="my-dataset", 
+	name="my-dataset",
 	workspace="my-workspace"
 )
 ```
@@ -148,7 +148,7 @@ feedback_datasets = []
 
 for workspace in user_workspaces:
 	feedback = rg.FeedbackDataset.from_argilla(
-		name="my-dataset", 
+		name="my-dataset",
 		workspace=workspace
 	)
 	feedback_datasets.append(feedback)
