@@ -172,7 +172,7 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
             min_length=LABEL_SELECTION_DESCRIPTION_MIN_LENGTH,
             max_length=LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
         )
-    ] = PydanticField(None, max_length=100)
+    ] = None
 
 
 class LabelSelectionQuestionSettings(BaseModel):
