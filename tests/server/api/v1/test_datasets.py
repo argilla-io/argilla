@@ -1361,6 +1361,54 @@ def test_create_dataset_field_with_nonexistent_dataset_id(client: TestClient, db
                 "options": [{"value": 1}, {"value": 2}, {"value": 3}, {"value": 4}, {"value": 5}],
             },
         ),
+        (
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
+                    {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
+                    {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                ],
+                "visible_options": 10,
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
+                    {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
+                    {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                ],
+                "visible_options": 10,
+            },
+        ),
+        (
+            {
+                "type": "label_selection",
+                "options": [
+                    {
+                        "value": "positive",
+                        "text": "Positive",
+                    },
+                    {
+                        "value": "negative",
+                        "text": "Negative",
+                    },
+                    {
+                        "value": "neutral",
+                        "text": "Neutral",
+                    },
+                ],
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": None},
+                    {"value": "negative", "text": "Negative", "description": None},
+                    {"value": "neutral", "text": "Neutral", "description": None},
+                ],
+                "visible_options": None,
+            },
+        ),
     ],
 )
 def test_create_dataset_question(
@@ -1577,6 +1625,18 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
         {"type": "rating", "options": "invalid"},
+        {"type": "label_selection", "options": []},
+        {"type": "label_selection", "options": [{"value": "just_one_label", "text": "Just one label"}]},
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+            "visible_options": 0,
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+            "visible_options": -1,
+        },
     ],
 )
 def test_create_dataset_question_with_invalid_settings(
@@ -1586,7 +1646,7 @@ def test_create_dataset_question_with_invalid_settings(
     settings: dict,
 ):
     dataset = DatasetFactory.create()
-    question_json = {"name": "rating", "title": "Rating", "settings": settings}
+    question_json = {"name": "question", "title": "Question", "settings": settings}
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
