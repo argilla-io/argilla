@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from argilla import TokenClassificationRecord
 from argilla.client.api import Api
@@ -22,18 +22,22 @@ from argilla.monitoring.types import MissingType
 
 try:
     from flair import __version__ as _flair_version
-    from flair.data import Sentence
-    from flair.models import SequenceTagger
-except ModuleNotFoundError:
-    Sentence = MissingType
-    SequenceTagger = MissingType
+except (ImportError, ModuleNotFoundError):
     _flair_version = None
+
+if TYPE_CHECKING:
+    try:
+        from flair.data import Sentence
+        from flair.models import SequenceTagger
+    except (ImportError, ModuleNotFoundError):
+        Sentence = MissingType
+        SequenceTagger = MissingType
 
 
 class FlairMonitor(BaseMonitor):
     def _prepare_log_data(
         self,
-        data: List[Tuple[Sentence, Dict[str, Any]]],
+        data: List[Tuple["Sentence", Dict[str, Any]]],
     ) -> Dict[str, Any]:
         return dict(
             records=[
@@ -61,11 +65,11 @@ class FlairMonitor(BaseMonitor):
             tags={**(self.tags or {}), "flair_version": _flair_version},
         )
 
-    def predict(self, sentences: Union[List[Sentence], Sentence], *args, **kwargs):
+    def predict(self, sentences: Union[List["Sentence"], "Sentence"], *args, **kwargs):
         metadata = kwargs.pop("metadata", None)
         result = self.__model__.predict(sentences, *args, **kwargs)
 
-        if isinstance(sentences, Sentence):
+        if not isinstance(sentences, list):
             sentences = [sentences]
 
         if not metadata:
@@ -79,12 +83,12 @@ class FlairMonitor(BaseMonitor):
 
 
 def flair_monitor(
-    pl: SequenceTagger,
+    pl: "SequenceTagger",
     api: Api,
     dataset: str,
     sample_rate: float,
     log_interval: float,
-) -> Optional[SequenceTagger]:
+) -> Optional["SequenceTagger"]:
     return FlairMonitor(
         pl,
         api=api,
