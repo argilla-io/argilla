@@ -13,7 +13,7 @@
 #  limitations under the License.
 import logging
 import os
-from typing import List, Union
+from typing import List, Optional, Union
 from uuid import uuid4
 
 from datasets import DatasetDict
@@ -48,7 +48,6 @@ class AutoTrainMixIn:
                 "label": "label",
             },
         )
-        self.dset.prepare()
 
     def get_project_cost(self):
         """
@@ -226,6 +225,7 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixIn):
         We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
         the model, and then train the model
         """
+        self.project.dataset.prepare()
         project_id = self.project.create()
         self.project.approve(project_id)
 

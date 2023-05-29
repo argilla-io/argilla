@@ -54,7 +54,7 @@ def test_passed_functions(dataset_text_classification, model):
     _HF_HUB_ACCESS_TOKEN is None,
     reason="You need a HF Hub access token to test the push_to_hub feature",
 )
-def test_setfit_train_multi_label(dataset_text_classification_multi_label):
+def test_autotrain_train_multi_label(dataset_text_classification_multi_label):
     with pytest.raises(NotImplementedError):
         ArgillaTrainer(name=dataset_text_classification_multi_label, model=MODELS[0], limit=10, framework=FRAMEWORK)
 
@@ -63,7 +63,7 @@ def test_setfit_train_multi_label(dataset_text_classification_multi_label):
     _HF_HUB_ACCESS_TOKEN is None,
     reason="You need a HF Hub access token to test the push_to_hub feature",
 )
-def test_setfit_train_token(dataset_token_classification):
+def test_autotrain_train_token(dataset_token_classification):
     with pytest.raises(NotImplementedError):
         ArgillaTrainer(name=dataset_token_classification, model=MODELS[0], limit=10, framework=FRAMEWORK)
 
@@ -72,6 +72,6 @@ def test_setfit_train_token(dataset_token_classification):
     _HF_HUB_ACCESS_TOKEN is None,
     reason="You need a HF Hub access token to test the push_to_hub feature",
 )
-def test_setfit_train_token(dataset_text2text):
+def test_autotrain_train_text2text(dataset_text2text):
     with pytest.raises(NotImplementedError):
         ArgillaTrainer(name=dataset_text2text, model=MODELS[0], limit=10, framework=FRAMEWORK)
