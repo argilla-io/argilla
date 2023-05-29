@@ -1,7 +1,7 @@
 # Data collection for LLMs
 The following figure shows **the stages for training and fine-tuning LLMs**. From top to bottom, it shows, the data needed at each stage (note the color for the data collected with human feedback), the stage (namely, pre-training, supervised fine-tuning, reward modelling, and reinforcement learning), and finally the model created at each stage. Argilla Feedback makes the process of collecting human feedback seamless at each step after the pre-training stage.
 
-![llm-flow](../../../_static/images/llms/rlhf.svg "LLM fine-tuning stages")
+<img src="../../../_static/images/llms/rlhf.svg" alt="LLM fine-tuning stages" style="display:block;margin-left:auto;margin-right:auto;">
 
 :::{note}
 This guide uses terminology from the InstructGPT paper ()"Training language models to follow instructions with human feedback") and the amazing [introduction to RLHF](https://huyenchip.com/2023/05/02/rlhf.html) by Chip Huyen. The above figure is an adaptation from Chip Huyen's post.
