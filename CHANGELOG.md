@@ -3,7 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to [Semanti
+c Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!--
 These are the section headers that we use:
@@ -17,16 +18,8 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-### Changed
 
-## [1.9.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
-
-## Added
-
-- Added boolean `use_markdown` property to `TextFieldSettings` model.
-- Added boolean `use_markdown` property to `TextQuestionSettings` model.
-
-## [1.8.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
+## [1.8.0](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
 ## Added
 
@@ -52,12 +45,22 @@ These are the section headers that we use:
 - Integration with the HuggingFace Hub ([#2949])
 - Added `ArgillaPeftTrainer` for text and token classificaiton [#2854](https://github.com/argilla-io/argilla/issues/2854)
 - Added `predict_proba()` method to `ArgillaSetFitTrainer`
+- New `database revisions` command showing database revisions info
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615
+
+### Fixes
+
+- Avoid rendering html for invalid html strings in Text2text ([#2911]https://github.com/argilla-io/argilla/issues/2911)
+
+### Changed
+
+- The `database migrate` command accepts a `--revision` param to provide specific revision id
 
 ### Deprecated
 
 - Using argilla with python 3.7 runtime is deprecated and support will be removed from version 1.9.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
+
 
 ## [1.7.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.7.0)
 
