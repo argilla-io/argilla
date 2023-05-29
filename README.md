@@ -67,14 +67,14 @@ There are different options to get started:
 ## 🎼 Cheatsheet
 
 <table>
-<tr>
-<td> <b>Feature</b> </td> <td> <b>Description</b> </td>
-</tr>
+
 <tr>
 <td>
 
 <a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker-quickstart.html"> Deploy Locally</a>
 </td>
+</tr>
+<tr>
 <td>
 
 ```bash
@@ -87,6 +87,8 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 <td>
 <a href="https://argilla.io/blog/launching-argilla-huggingface-hub/">Deploy on Hugging Face Hub</a>
 </td>
+</tr>
+<tr>
 <td>
 <a href="https://argilla.io/blog/launching-argilla-huggingface-hub/"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
 </td>
@@ -94,6 +96,8 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 <tr>
 <td>
 <a href="https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#Argilla-Records">Create Records</a></td>
+</tr>
+<tr>
 <td>
 
 ```python
@@ -114,6 +118,8 @@ rg.log(records=record, name="news")
 <td>
 <a href="https://docs.argilla.io/en/latest/guides/query_datasets.html">Query datasets</a>
 </td>
+</tr>
+<tr>
 <td>
 
 ```python
@@ -129,6 +135,8 @@ rg.load(name="news", query="text:spor*")
 <td>
 <a href="https://docs.argilla.io/en/latest/guides/label_records_with_semanticsearch.html">Semantic search</a>
 </td>
+</tr>
+<tr>
 <td>
 
 ```python
@@ -150,6 +158,8 @@ rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 <td>
 <a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html">Weak supervision</a>
 </td>
+</tr>
+<tr>
 <td>
 
 ```python
@@ -182,6 +192,8 @@ plugin.start()
 <td>
 <a href="https://argilla.io/blog/introducing-argilla-trainer">Train models</a>
 </td>
+</tr>
+<tr>
 <td>
 
 ```python
