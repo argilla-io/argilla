@@ -79,7 +79,9 @@ server = [
     "segment-analytics-python == 2.2.0"
 ]
 postgresql = [
-   "psycopg2 ~= 2.9.5"
+    "psycopg2 ~= 2.9.5; sys_platform != 'darwin'",
+    # If we're on macOS, then install `psycopg2-binary` instead
+    "psycopg2-binary ~= 2.9.5; sys_platform == 'darwin'",
 ]
 listeners = [
     "schedule ~= 1.1.0",
