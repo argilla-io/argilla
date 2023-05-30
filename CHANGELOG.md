@@ -19,10 +19,15 @@ These are the section headers that we use:
 
 ## [1.9.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
-## Added
+### Added
 
 - Added boolean `use_markdown` property to `TextFieldSettings` model.
 - Added boolean `use_markdown` property to `TextQuestionSettings` model.
+- Added new status `draft` for the `Response` model.
+
+### Changed
+
+- Updated `GET /api/v1/me/datasets/:dataset_id/metrics` output payload to include the count of responses with `draft` status.
 
 ## [1.8.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
