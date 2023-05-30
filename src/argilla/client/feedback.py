@@ -926,17 +926,22 @@ class FeedbackDataset:
             )
 
         if "token" in kwargs:
-            token = kwargs.pop("token")
+            auth = kwargs.pop("token")
         elif "use_auth_token" in kwargs:
-            token = kwargs.pop("use_auth_token")
+            auth = kwargs.pop("use_auth_token")
         else:
-            token = None
+            auth = None
 
+        hub_auth = (
+            {"use_auth_token": auth}
+            if parse_version(huggingface_hub.__version__) < parse_version("0.11.0")
+            else {"token": auth}
+        )
         config_path = hf_hub_download(
             repo_id=repo_id,
             filename="argilla.cfg",
             repo_type="dataset",
-            token=token,
+            **hub_auth,
         )
         with open(config_path, "rb") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
@@ -947,7 +952,7 @@ class FeedbackDataset:
             guidelines=config.guidelines,
         )
 
-        hfds = load_dataset(repo_id, use_auth_token=token, *args, **kwargs)
+        hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
                 raise ValueError(
