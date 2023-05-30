@@ -220,19 +220,19 @@ class FeedbackDataset:
         ...     [
         ...         rg.FeedbackRecord(
         ...             fields={"text": "This is the first record", "label": "positive"},
-        ...             response={"question-1": "This is the first answer", "question-2": 5},
+        ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
         ...             external_id="entry-1",
         ...         ),
         ...     ]
         ... )
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, response={"question-1": "This is the first answer", "question-2": 5}, external_id="entry-1")]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[{"user_id": None, "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}])]
         >>> dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
         >>> dataset.argilla_id
         "..."
         >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, response={"question-1": "This is the first answer", "question-2": 5}, external_id="entry-1")]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[{"user_id": None, "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}])]
     """
 
     argilla_id: Optional[str] = None
@@ -446,6 +446,43 @@ class FeedbackDataset:
 
         Raises:
             ValueError: if the given records do not match the expected schema.
+
+        Examples:
+            >>> import argilla as rg
+            >>> rg.init(api_url="...", api_key="...")
+            >>> dataset = rg.FeedbackDataset(
+            ...     fields=[
+            ...         rg.TextField(name="text", required=True),
+            ...         rg.TextField(name="label", required=True),
+            ...     ],
+            ...     questions=[
+            ...         rg.TextQuestion(
+            ...             name="question-1",
+            ...             description="This is the first question",
+            ...             required=True,
+            ...         ),
+            ...         rg.RatingQuestion(
+            ...             name="question-2",
+            ...             description="This is the second question",
+            ...             required=True,
+            ...             values=[1, 2, 3, 4, 5],
+            ...         ),
+            ...     ],
+            ...     guidelines="These are the annotation guidelines.",
+            ... )
+            >>> dataset.records
+            []
+            >>> dataset.add_records(
+            ...     [
+            ...         rg.FeedbackRecord(
+            ...             fields={"text": "This is the first record", "label": "positive"},
+            ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
+            ...             external_id="entry-1",
+            ...         ),
+            ...     ]
+            ... )
+            >>> dataset.records
+            [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[{"user_id": None, "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}])]
         """
         if isinstance(records, list):
             records = [FeedbackRecord(**record) if isinstance(record, dict) else record for record in records]
