@@ -1,11 +1,10 @@
 # Conceptual Guides
-Argilla Feedback is carefully crafted for **custom and multi-aspect feedback in LLM projects**. Argilla Feedback stands as a key resource for **LLM fine-tuning and Reinforcement Learning from Human Feedback** (RLHF). It equips teams with a highly flexible platform for the critical stages of **evaluating and fine-tuning LLMs for custom use cases**. These guides offer a **conceptual overview of Argilla Feedback**, setting the foundation for exploring its technical applications. 
+Argilla Feedback is purpose-built to support **customized and multifaceted feedback in Large Language Model (LLM) projects**. Serving as a critical tool for LLM fine-tuning and Reinforcement Learning from Human Feedback (RLHF), Argilla Feedback provides a flexible platform essential for the evaluation and fine-tuning stages of LLMs tailored to unique use cases. The figure below encapsulates the stages detailed in these guides:
 
-The figure below provides a summary of the various stages discussed across these guides:
 
 <img src="../../../_static/images/llms/rlhf.svg" alt="LLM fine-tuning stages" style="display:block;margin-left:auto;margin-right:auto; width:60%">
 
-For a practical, hands-on introduction, you can dive straight into our How-to Guides or Examples section. Alternatively, get started exploring the guides below:
+For a practical, hands-on introduction, you can dive straight into our How-to Guides or Examples section. Alternatively, get started exploring one of the guides below:
 
 
 ````{grid}  1 1 3 3
