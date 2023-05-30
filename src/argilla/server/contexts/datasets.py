@@ -217,7 +217,7 @@ def list_records_by_dataset_id_and_user_id(
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ):
-    query = db.query(Record)
+    query = db.query(Record).filter(Record.dataset_id == dataset_id)
 
     if response_status == ResponseStatusFilter.missing:
         query = (
@@ -225,10 +225,9 @@ def list_records_by_dataset_id_and_user_id(
                 Response,
                 and_(Response.record_id == Record.id, Response.user_id == user_id),
             )
+            .filter(Response.status == None)
             .options(contains_eager(Record.responses))
-            .filter(and_(Record.dataset_id == dataset_id, Response.status == None))
         )
-
     else:
         if response_status:
             query = query.join(
@@ -239,14 +238,11 @@ def list_records_by_dataset_id_and_user_id(
                     Response.status == ResponseStatus(response_status),
                 ),
             ).options(contains_eager(Record.responses))
-
         elif RecordInclude.responses in include:
             query = query.outerjoin(
                 Response,
                 and_(Response.record_id == Record.id, Response.user_id == user_id),
             ).options(contains_eager(Record.responses))
-
-        query = query.filter(Record.dataset_id == dataset_id)
 
     return query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit).all()
 
@@ -314,29 +310,17 @@ def list_responses_by_record_id(db: Session, record_id: UUID):
     return db.query(Response).filter_by(record_id=record_id).order_by(Response.inserted_at.asc()).all()
 
 
-def count_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
+def count_responses_by_dataset_id_and_user_id(
+    db: Session, dataset_id: UUID, user_id: UUID, response_status: Optional[ResponseStatus] = None
+) -> int:
+    expressions = [Response.user_id == user_id]
+    if response_status:
+        expressions.append(Response.status == response_status)
+
     return (
         db.query(func.count(Response.id))
         .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-        .filter(Response.user_id == user_id)
-        .scalar()
-    )
-
-
-def count_submitted_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
-    return (
-        db.query(func.count(Response.id))
-        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-        .filter(Response.user_id == user_id, Response.status == ResponseStatus.submitted)
-        .scalar()
-    )
-
-
-def count_discarded_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
-    return (
-        db.query(func.count(Response.id))
-        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-        .filter(Response.user_id == user_id, Response.status == ResponseStatus.discarded)
+        .filter(*expressions)
         .scalar()
     )
 
