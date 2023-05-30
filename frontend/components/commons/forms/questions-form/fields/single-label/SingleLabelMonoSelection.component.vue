@@ -6,6 +6,7 @@
         v-if="isSearch"
         :ref="searchRef"
         v-model.trim="searchInput"
+        @change="resetShowMore"
         @keydown.shift.backspace.exact="looseFocus"
         @keydown.shift.space.exact="looseFocus"
         @keydown.arrow-right.stop=""
@@ -53,7 +54,6 @@
 
 <script>
 const MAX_OPTION_TO_SHOW = 30;
-// const MAX_OPTION_TO_SHOW = 2;
 
 export default {
   name: "SingleLabelMonoSelectionComponent",
@@ -100,10 +100,10 @@ export default {
       if (this.filteredOptions.length > MAX_OPTION_TO_SHOW) {
         return this.filteredOptions.length - MAX_OPTION_TO_SHOW;
       }
-      return 0;
+      return null;
     },
     isButtonShowMore() {
-      return this.numberToShowInTheButton;
+      return this.numberToShowInTheButton || this.showMore;
     },
     textToShowInTheButton() {
       if (this.showMore) {
@@ -124,6 +124,9 @@ export default {
       });
 
       this.$emit("on-change", this.options);
+    },
+    resetShowMore() {
+      this.showMore = false;
     },
     looseFocus() {
       this.$refs[this.searchRef].blur();
