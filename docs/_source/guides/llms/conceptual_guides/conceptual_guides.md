@@ -1,5 +1,5 @@
 # Conceptual Guides
-Argilla Feedback is carefully crafted for **custom and multi-aspect feedback in LLM projects**. Argilla Feedback stands as a key resource for **LLM fine-tuning and Reinforcement Learning from Human Feedback** (RLHF). It equips teams with a highly flexible platform for the critical stages of **evaluating and fine-tuning LLMs for custom use cases**. These guides offer a **conceptual overview of Argilla Feedback**, setting the foundation for exploring its technical applications. 
+Argilla Feedback is carefully crafted for **custom and multi-aspect feedback in LLM projects**. Argilla Feedback stands as a key resource for **LLM fine-tuning and Reinforcement Learning from Human Feedback** (RLHF). It equips teams with a highly flexible platform for the critical stages of **evaluating and fine-tuning LLMs for custom use cases**. These guides offer a **conceptual overview of Argilla Feedback**, setting the foundation for exploring its technical applications.
 
 The figure below provides a summary of the various stages discussed across these guides:
 
