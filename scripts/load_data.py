@@ -151,7 +151,7 @@ class LoadDatasets:
         print("Loading databricks-dolly-15k-curated-en dataset")
 
         # Load dataset from the hub
-        dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
+        dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en", split="train[:100]")
 
         # Read in dataset, assuming it's a dataset for token classification
         dataset.push_to_argilla(name="databricks-dolly-15k-curated-en")
