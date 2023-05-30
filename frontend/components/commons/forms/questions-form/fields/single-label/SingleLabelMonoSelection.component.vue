@@ -22,7 +22,7 @@
         @click="toggleShowMore"
       />
     </div>
-    <div class="inputs-area">
+    <transition-group name="shuffle" class="inputs-area">
       <div
         class="input-button"
         v-for="option in filteredOptions"
@@ -42,13 +42,13 @@
           v-text="option.text"
         />
       </div>
+    </transition-group>
 
-      <i
-        class="no-result"
-        v-if="!filteredOptions.length"
-        v-text="noResultMessage"
-      />
-    </div>
+    <i
+      class="no-result"
+      v-if="!filteredOptions.length"
+      v-text="noResultMessage"
+    />
   </div>
 </template>
 
@@ -184,5 +184,18 @@ input[type="checkbox"] {
 }
 .cursor-pointer {
   cursor: pointer;
+}
+
+.shuffle-move {
+  transition: transform 0.5s;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
