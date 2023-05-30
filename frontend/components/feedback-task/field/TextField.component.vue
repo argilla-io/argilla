@@ -13,7 +13,10 @@
       </BaseActionTooltip>
     </div>
     <transition name="fade" :key="fieldText" appear>
-      <div class="content-area --body1" v-if="fieldText" v-text="fieldText" />
+      <div class="content-area --body1" v-if="fieldText">
+        <div v-if="!useMarkdown" v-text="fieldText" />
+        <BaseRenderMarkdown v-else :markdown="fieldText" />
+      </div>
     </transition>
   </div>
 </template>
@@ -29,6 +32,10 @@ export default {
     fieldText: {
       type: String,
       required: true,
+    },
+    useMarkdown: {
+      type: Boolean,
+      default: false,
     },
   },
 };

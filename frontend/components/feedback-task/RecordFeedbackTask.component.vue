@@ -6,6 +6,7 @@
         v-if="component_type === FIELD_COMPONENT_TYPE.TEXT_FIELD"
         :title="title"
         :fieldText="field_text"
+        :useMarkdown="useMarkdown"
       />
     </div>
   </div>
@@ -23,6 +24,10 @@ export default {
     fields: {
       type: Array,
       required: true,
+    },
+    useMarkdown: {
+      type: Boolean,
+      default: false,
     },
   },
   created() {

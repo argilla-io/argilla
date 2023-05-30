@@ -5,6 +5,7 @@
         v-if="fieldsWithRecordFieldText"
         :recordStatus="record.record_status"
         :fields="fieldsWithRecordFieldText"
+        :useMarkdown="true"
       />
       <QuestionsFormComponent
         :key="questionFormKey"
