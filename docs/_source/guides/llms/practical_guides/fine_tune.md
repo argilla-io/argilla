@@ -2,71 +2,13 @@
 
 After [collecting the responses](/guides/llms/practical_guides/collect_responses) from our `FeedbackDataset` we can start fine-tuning our LLM. Due to the customizability of the task, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the [classic LLM approaches](/guides/llms/conceptual_guides/rlhf): pre-training, supervised fine-tuning, reward modeling, and reinforcement learning.
 
-## Pre-training
-
-When talking about pre-training, we generally talk about a simple `prompt-completion` task, where we need the model to pick up on basic statistics of the language it is learning. Given that you are familiar with Spanish cuisine and the prompt sentence, `The base ingredient of paella is ___`, you know that the word in the `___` is much more likely to be `rice` than `apples`.  So, you are basically training a causal language model or text generation model.
-
-```{note}
-This is an unsupervised approach hence we only infer training data from a basic sentence like `The base ingredient of paella is rice.` by starting with the word `The`, and from there unwrapping the sentence step by step.
-```
-
-### Data
-
-Many training datasets for this task can be found online (e.g., [Hugging Face](https://huggingface.co/datasets?task_categories=task_categories:text-generation&sort=downloads)). You can either upload this in the right Argilla format but it might be needed to collect and fine-tune additional data with Argilla. So we, therefore, provide a basic setup underneath which should help you to start gathering or preparing pre-training data.
-
-```python
-import argilla as rg
-
-# create promp-completion dataset
-dataset = rg.FeedbackDataset(
-    guidelines="Please, complete the following prompt fields with a brief text answer.",
-    fields=[
-        rg.TextField(name="content"),
-    ],
-)
-
-# create a Feedback Records
-record = [
-	rg.FeedbackRecord(
-		fields={
-			"content": "The base ingredient of paella is rice.",
-        }
-	)
-]
-rg.add_records(record)
-dataset.push_to_argilla(name="pre-training")
-```
-
-```{note}
-When it comes to pre-training an LLM, we generally do not need data of highest quality, but it is always smart to use domain-specfic data and to avoid data that might lead to undecired effect like hallucination and bias.
-```
-
-### Training
-
-There are many ways and great packages to deal with this `pre-training` phase, but generally, NLP training frameworks like [KerasNLP](https://keras.io/keras_nlp/) and [Hugging Face](https://huggingface.co/) offer great out-of-the-box methods for training a causal language model. In our guide, we will be using Hugging Face `transformers` and `datasets` library and prepare our training data in the format they require for [training a causal language model](https://huggingface.co/learn/nlp-course/chapter7/6#training-a-causal-language-model-from-scratch).
-
-```python
-import argilla as rg
-from datasets import Dataset
-
-feedback = rg.FeedbackDataset.from_argilla("pre-training")
-content = {"content": [rec.get("fields").get("content") for rec in feedback]}
-dataset = Dataset.from_dict(content)
-dataset
-# Dataset({
-#     features: ['content'],
-#     num_rows: 1
-# })
-```
-
-
 ## Supervised finetuning
 
 The goal of Supervised Fine Tuning (SFT) is to optimize this pre-trained model to generate the responses that users are looking for. After pre-training a causal language model, it can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction setting. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](/guides/llms/conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
 
 ### Data
 
-Data for training phase is generally divided into two different types generic for domain-like finetuning or chat for fine-tuning to an instruction setting.
+Data for the training phase is generally divided into two different types generic for domain-like finetuning or chat for fine-tuning an instruction set.
 
 #### Generic
 
@@ -185,6 +127,96 @@ dataset = ...
 dataset.to_csv("databricks-dolly-15k-curated-en.csv", index=False)
 ```
 Second, start the UI for training.
-<iframe width="100%" height="600" src="https://www.youtube.com/embed/r6v0JSZXO9E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="100%" height="600" src="https://youtu.be/T_Lq8Zq-pwQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+## RLHF
+
+The last part of the fine-tuning process is the part that contains doing Reinforcement Learning with Human Feedback. This is generally done by training a reward model (RM) to rate responses in alignment with human preferences and afterward using this reward model to fine-tune the LLM with high-scoring responses.
+
+### Data
+
+The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. Therefore, we need to have a classification dataset with a `better_response` and a `poorer_responses`. These are then used to train a preference classifier. There are several public datasets [available](https://huggingface.co/datasets?search=rlhf) but a good baseline can be found in the one that is the one offered by [Anthropic](https://huggingface.co/datasets/Anthropic/hh-rlhf). We will however showcase how to use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
+
+```python
+import argilla as rg
+from datasets import Dataset
 
 
+feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
+
+data = {"instruction": [], "context": [], "poorer_responses": [], "better_response": []}
+for entry in feedback_dataset:
+    if entry.get("responses"):
+        res = entry["responses"][0]["values"]
+        if res["new-response"]["value"] != res["original-response"]["value"]:
+            data["instruction"].append(res["new-instruction"]["value"])
+            data["context"].append(res["new-context"]["value"])
+            data["poorer_responses"].append(res["original-response"]["value"])
+            data["better_response"].append(res["new-response"]["value"])
+
+dataset = Dataset.from_dict(data)
+```
+
+### Training
+#### Reward Model
+
+
+
+#### Fine-tuning using Reward Model
+
+## Pre-training
+
+When talking about pre-training, we generally talk about a simple `prompt-completion` task, where we need the model to pick up on basic statistics of the language it is learning. Given that you are familiar with Spanish cuisine and the prompt sentence, `The base ingredient of paella is ___`, you know that the word in the `___` is much more likely to be `rice` than `apples`.  So, you are basically training a causal language model or text generation model.
+
+```{note}
+This is an unsupervised approach hence we only infer training data from a basic sentence like `The base ingredient of paella is rice.` by starting with the word `The`, and from there unwrapping the sentence step by step.
+```
+
+### Data
+
+Many training datasets for this task can be found online (e.g., [Hugging Face](https://huggingface.co/datasets?task_categories=task_categories:text-generation&sort=downloads)). You can either upload this in the right Argilla format but it might be needed to collect and fine-tune additional data with Argilla. So we, therefore, provide a basic setup underneath which should help you to start gathering or preparing pre-training data.
+
+```python
+import argilla as rg
+
+# create promp-completion dataset
+dataset = rg.FeedbackDataset(
+    guidelines="Please, complete the following prompt fields with a brief text answer.",
+    fields=[
+        rg.TextField(name="content"),
+    ],
+)
+
+# create a Feedback Records
+record = [
+	rg.FeedbackRecord(
+		fields={
+			"content": "The base ingredient of paella is rice.",
+        }
+	)
+]
+rg.add_records(record)
+dataset.push_to_argilla(name="pre-training")
+```
+
+```{note}
+When it comes to pre-training an LLM, we generally do not need data of highest quality, but it is always smart to use domain-specfic data and to avoid data that might lead to undecired effect like hallucination and bias.
+```
+
+### Training
+
+There are many ways and great packages to deal with this `pre-training` phase, but generally, NLP training frameworks like [KerasNLP](https://keras.io/keras_nlp/) and [Hugging Face](https://huggingface.co/) offer great out-of-the-box methods for training a causal language model. In our guide, we will be using Hugging Face `transformers` and `datasets` library and prepare our training data in the format they require for [training a causal language model](https://huggingface.co/learn/nlp-course/chapter7/6#training-a-causal-language-model-from-scratch).
+
+```python
+import argilla as rg
+from datasets import Dataset
+
+feedback = rg.FeedbackDataset.from_argilla("pre-training")
+content = {"content": [rec.get("fields").get("content") for rec in feedback]}
+dataset = Dataset.from_dict(content)
+dataset
+# Dataset({
+#     features: ['content'],
+#     num_rows: 1
+# })
+```
