@@ -14,6 +14,7 @@
 
 import logging
 import tempfile
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 from uuid import UUID
 
@@ -67,10 +68,11 @@ class ResponseSchema(BaseModel):
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):
         if not v:
-            _LOGGER.warning(
+            warnings.warn(
                 "`user_id` not provided, so it will be set to `None`. Which is not an"
-                " issue, unless if you're planning to log the response in Argilla, as "
-                " it will be automatically set to the active `user_id`."
+                " issue, unless you're planning to log the response in Argilla, as "
+                " it will be automatically set to the active `user_id`.",
+                stacklevel=2,
             )
         return v
 
