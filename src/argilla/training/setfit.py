@@ -44,7 +44,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             self._column_mapping = {"text": "text", "label": "label"}
         self.init_training_args()
 
-    def init_training_args(self):
+    def init_training_args(self) -> None:
         from setfit import SetFitModel, SetFitTrainer
 
         # SetFit only: we get both the HuggingFace Hub args and the SetFit-specific args
@@ -73,7 +73,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     def update_config(
         self,
         **kwargs,
-    ):
+    ) -> None: 
         """
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.

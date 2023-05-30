@@ -18,7 +18,7 @@ from typing import Dict
 args_to_remove = ["self", "cls", "model_args", "args", "kwargs", "model_kwargs"]
 
 
-def get_default_args(fn):
+def get_default_args(fn) -> dict:
     """
     It takes a function and returns a dictionary of the default arguments
 
