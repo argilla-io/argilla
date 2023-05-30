@@ -1002,10 +1002,12 @@ def test_get_current_user_dataset_metrics(client: TestClient, db: Session, admin
     record_a = RecordFactory.create(dataset=dataset)
     record_b = RecordFactory.create(dataset=dataset)
     record_c = RecordFactory.create(dataset=dataset)
+    record_d = RecordFactory.create(dataset=dataset)
     RecordFactory.create_batch(3, dataset=dataset)
     ResponseFactory.create(record=record_a, user=admin)
     ResponseFactory.create(record=record_b, user=admin, status=ResponseStatus.discarded)
     ResponseFactory.create(record=record_c, user=admin, status=ResponseStatus.discarded)
+    ResponseFactory.create(record=record_d, user=admin, status=ResponseStatus.draft)
 
     other_dataset = DatasetFactory.create()
     other_record_a = RecordFactory.create(dataset=other_dataset)
@@ -1021,12 +1023,13 @@ def test_get_current_user_dataset_metrics(client: TestClient, db: Session, admin
     assert response.status_code == 200
     assert response.json() == {
         "records": {
-            "count": 6,
+            "count": 7,
         },
         "responses": {
-            "count": 3,
+            "count": 4,
             "submitted": 1,
             "discarded": 2,
+            "draft": 1,
         },
     }
 
@@ -1045,10 +1048,12 @@ def test_get_current_user_dataset_metrics_as_annotator(client: TestClient, db: S
     record_a = RecordFactory.create(dataset=dataset)
     record_b = RecordFactory.create(dataset=dataset)
     record_c = RecordFactory.create(dataset=dataset)
+    record_d = RecordFactory.create(dataset=dataset)
     RecordFactory.create_batch(2, dataset=dataset)
     ResponseFactory.create(record=record_a, user=annotator)
     ResponseFactory.create(record=record_b, user=annotator)
     ResponseFactory.create(record=record_c, user=annotator, status=ResponseStatus.discarded)
+    ResponseFactory.create(record=record_d, user=annotator, status=ResponseStatus.draft)
 
     other_dataset = DatasetFactory.create()
     other_record_a = RecordFactory.create(dataset=other_dataset)
@@ -1063,14 +1068,8 @@ def test_get_current_user_dataset_metrics_as_annotator(client: TestClient, db: S
 
     assert response.status_code == 200
     assert response.json() == {
-        "records": {
-            "count": 5,
-        },
-        "responses": {
-            "count": 3,
-            "submitted": 2,
-            "discarded": 1,
-        },
+        "records": {"count": 6},
+        "responses": {"count": 4, "submitted": 2, "discarded": 1, "draft": 1},
     }
 
 
