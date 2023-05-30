@@ -114,7 +114,7 @@ dataset.add_records(records)
 dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
 
-The above code will generate two responses for each prompt and push these records to Argilla. Labelers will see these prompts and responses, and rank the responses according to the instructions provided in the dataset. 
+The above code will generate two responses for each prompt and push these records to Argilla. Labelers will see these prompts and responses, and rank the responses according to the instructions provided in the dataset.
 
 Here's an example of the generated records:
 
