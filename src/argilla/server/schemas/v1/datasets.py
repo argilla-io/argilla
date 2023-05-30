@@ -97,6 +97,7 @@ class ResponseMetrics(BaseModel):
     count: int
     submitted: int
     discarded: int
+    draft: int
 
 
 class Metrics(BaseModel):
@@ -254,6 +255,7 @@ class RecordInclude(str, Enum):
 
 
 class ResponseStatusFilter(str, Enum):
+    draft = "draft"
     missing = "missing"
     submitted = "submitted"
     discarded = "discarded"

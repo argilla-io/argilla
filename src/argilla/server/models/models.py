@@ -41,6 +41,7 @@ class FieldType(str, Enum):
 
 
 class ResponseStatus(str, Enum):
+    draft = "draft"
     submitted = "submitted"
     discarded = "discarded"
 
