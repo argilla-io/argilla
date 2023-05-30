@@ -48,6 +48,7 @@ export default {
             name: questionName,
             title: questionTitle,
             required: isRequired,
+            use_markdown: useMarkdown,
             settings: questionSettings,
             description: questionDescription,
           },
@@ -73,6 +74,7 @@ export default {
             question: questionTitle,
             options: formattedOptions,
             is_required: isRequired,
+            use_markdown: useMarkdown,
             component_type: componentType,
             placeholder: questionSettings?.placeholder ?? null,
             description: questionDescription ?? null,
@@ -81,6 +83,7 @@ export default {
       );
     },
     factoryFieldsForOrm(initialFields) {
+      console.log("initialFields", initialFields);
       return initialFields.map(
         (
           {
@@ -88,6 +91,7 @@ export default {
             name: fieldName,
             title: fieldTitle,
             required: isRequired,
+            use_markdown: useMarkdown,
             settings: fieldSettings,
           },
           index
@@ -106,6 +110,7 @@ export default {
             order: index,
             title: fieldTitle,
             is_required: isRequired,
+            use_markdown: useMarkdown,
             component_type: componentType,
           };
         }

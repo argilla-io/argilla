@@ -29,6 +29,7 @@
           :optionId="`${input.name}_0`"
           :placeholder="input.placeholder"
           :value="input.options[0].text"
+          :useMarkdown="input.use_markdown"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           @on-change-value="
