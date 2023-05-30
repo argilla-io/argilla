@@ -33,5 +33,15 @@ export default {
   h5 {
     line-height: 1.4em;
   }
+  p,
+  strong,
+  em,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    margin-top: 0;
+  }
 }
 </style>
