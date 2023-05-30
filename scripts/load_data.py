@@ -154,7 +154,7 @@ class LoadDatasets:
         dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
 
         # Read in dataset, assuming it's a dataset for token classification
-        dataset.push_to_argilla(name="sharegpt-prompt-rating-mini")
+        dataset.push_to_argilla(name="databricks-dolly-15k-curated-en")
 
 
 if __name__ == "__main__":
