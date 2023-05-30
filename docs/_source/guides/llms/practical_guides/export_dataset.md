@@ -50,7 +50,7 @@ dataset = rg.FeedbackDataset.from_huggingface("argilla/my-dataset", use_auth_tok
 ```
 
 ```{note}
-The args and kwargs of `push_to_huggingface` are the args of `push_to_hub` from 🤗[Datasets](https://github.com/huggingface/datasets), and the ones of `from_huggingface` are the args of `load_dataset` from 🤗[Datasets](https://github.com/huggingface/datasets).
+The args and kwargs of `push_to_huggingface` are the args of `push_to_hub` from 🤗[Datasets](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.push_to_hub), and the ones of `from_huggingface` are the args of `load_dataset` from 🤗[Datasets](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/loading_methods#datasets.load_dataset).
 ```
 
 ## Save to disk

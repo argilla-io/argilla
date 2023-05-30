@@ -2,7 +2,7 @@
 
 ![Spanshot of the Submitted queue and the progress bar in a Feedback dataset](../../../_static/images/llms/snapshot-feedback-submitted.png)
 
-After pushing a `FeedbackDataset` to Argilla, as explained in [Create and import a Feedback Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
+After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Feedback Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
 
 As you open the dataset in the UI, you will see by default the records with `Pending` responses, i.e. records that still don't have a response (annotation), in a single-record view. On the left, you can find the record to annotate and on the right the form with the questions to answer. You can navigate through the records using the `Prev` and `Next` buttons in the bottom bar.
 
