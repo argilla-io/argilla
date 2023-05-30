@@ -3,7 +3,18 @@
 </template>
 <script>
 import { marked } from "marked";
+import { markedHighlight } from "marked-highlight";
+import hljs from "highlight.js";
 import * as DOMPurify from "dompurify";
+marked.use(
+  markedHighlight({
+    langPrefix: "hljs language-",
+    highlight(code, lang) {
+      const language = hljs.getLanguage(lang) ? lang : "plaintext";
+      return hljs.highlight(code, { language }).value;
+    },
+  })
+);
 export default {
   props: {
     markdown: {
@@ -13,7 +24,10 @@ export default {
   },
   computed: {
     markdownToHtml() {
-      const parsed = marked.parse(this.markdown);
+      const parsed = marked.parse(this.markdown, {
+        headerIds: false,
+        mangle: false,
+      });
       return DOMPurify.sanitize(parsed);
     },
   },
@@ -24,6 +38,10 @@ export default {
   pre {
     overflow: scroll;
     white-space: pre-wrap;
+    word-break: break-all;
+  }
+  a,
+  p {
     word-break: break-all;
   }
   h1,
@@ -43,5 +61,49 @@ export default {
   h5 {
     margin-top: 0;
   }
+}
+.hljs {
+  position: relative;
+  font-family: monospace, serif;
+  margin: 0;
+  background-color: #333346;
+  color: white;
+  padding: 2em !important;
+  border-radius: $border-radius;
+  text-align: left;
+  font-weight: 500;
+  @include font-size(13px);
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+  color: #3ef070;
+  font-weight: bold;
+}
+.hljs-deletion,
+.hljs-number,
+.hljs-quote,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-string,
+.hljs-template-tag,
+.hljs-type {
+  color: #febf96;
+}
+.hljs-string,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-attribute,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: #a0c7ee;
 }
 </style>
