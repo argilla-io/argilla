@@ -18,7 +18,14 @@
     </div>
 
     <div class="container" :class="isFocused ? '--focused' : null">
+      <BaseRenderMarkdown
+        v-if="useMarkdown && !isFocused"
+        class="textarea--markdown"
+        :markdown="value"
+        @click.native="setFocus(true)"
+      />
       <ContentEditableFeedbackTask
+        v-else
         class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
@@ -64,6 +71,10 @@ export default {
     tooltipMessage: {
       type: String,
       default: () => "",
+    },
+    useMarkdown: {
+      type: Boolean,
+      default: () => false,
     },
   },
   data: () => {
@@ -125,6 +136,12 @@ export default {
 .textarea {
   display: flex;
   flex: 0 0 100%;
+  &--markdown {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: $base-space;
+  }
 }
 
 .icon-info {

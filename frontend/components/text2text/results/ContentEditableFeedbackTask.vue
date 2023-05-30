@@ -1,6 +1,12 @@
 <template>
   <span>
-    <div class="content__edition-area">
+    <div
+      class="content__edition-area"
+      v-click-outside="{
+        events: ['mousedown'],
+        handler: onClickOutside,
+      }"
+    >
       <transition appear name="fade">
         <p
           ref="text"
@@ -91,6 +97,9 @@ export default {
         const text = event.clipboardData?.getData("text/plain") ?? "";
         document.execCommand("insertText", false, text);
       }
+    },
+    onClickOutside() {
+      this.setFocus(false);
     },
   },
 };
