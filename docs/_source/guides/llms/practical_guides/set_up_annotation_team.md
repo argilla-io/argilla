@@ -6,7 +6,7 @@ You will need to decide the level of overlap before creating or pushing a datase
 ```
 
 ## Full overlap
-The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create and import a Feedback Dataset](create_dataset.ipynb)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](../../../getting_started/installation/configurations/user_management.md#creating-an-annotator-user-assigned-to-a-workspace).
+The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create a Feedback Dataset](create_dataset.md#push-to-argilla)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](../../../getting_started/installation/configurations/user_management.md#creating-an-annotator-user-assigned-to-a-workspace).
 
 ## Zero overlap
 If you only want one annotation per record, we recommend that you split your records into chunks and assign each of them to a single annotator. Then, you can create several datasets, one in each annotator's personal workspace with the records assigned to them.
@@ -64,7 +64,7 @@ for chunk in chunked_records:
 3. Loop through the dictionary of assignments to create one dataset per user:
 
 ```{note}
-If you haven't done so already, decide on the settings of the project (the `fields`, `questions` and `guidelines`) as detailed in the [Create and import a Feedback Dataset guide](create_dataset.ipynb) and set them as variables.
+If you haven't done so already, decide on the settings of the project (the `fields`, `questions` and `guidelines`) as detailed in the [Create a Feedback Dataset guide](create_dataset.ipynb) and set them as variables.
 ```
 
 ```python
@@ -113,5 +113,5 @@ assignments = assign_records(users, records, overlap=3)
 Like in the previous method, you will need to import the assignment of each annotator as a separate dataset in their personal workspace, as demonstrated in the step no.3. On post-processing, you can combine the responses to each record.
 
 ```{warning}
-If you use this method, we recommend you will need to add an id to the records in order to combine the responses in post-processing. Learn how to set a record id [here](create_dataset.ipynb).
+If you use this method, we recommend you will need to add an id to the records in order to combine the responses in post-processing. Learn how to set a record id [here](create_dataset.md#add-records).
 ```
