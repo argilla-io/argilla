@@ -18,7 +18,7 @@ from typing import Dict
 args_to_remove = ["self", "cls", "model_args", "args", "kwargs", "model_kwargs"]
 
 
-def get_default_args(func):
+def get_default_args(fn):
     """
     It takes a function and returns a dictionary of the default arguments
 
@@ -28,16 +28,18 @@ def get_default_args(func):
     Returns:
       A dictionary of the default arguments for the function.
     """
-    signature = inspect.signature(func)
-    default_args = {k: v.default for k, v in signature.parameters.items() if v.default is not inspect.Parameter.empty}
-    required_args = func.__code__.co_varnames
-    for arg in required_args:
-        if arg not in default_args:
-            default_args[arg] = None
+    arg_spec = inspect.getfullargspec(fn)
+    # `arg_spec` contains the default values for the optional arguments, starting on the first optional, so there
+    # may be mandatory arguments before with no default value, those will be set to `None`, while the rest should match
+    # the default values in `arg_spec.defaults`
+    default_args = (
+        dict(zip(arg_spec.args, [None] * (len(arg_spec.args) - len(arg_spec.defaults)) + list(arg_spec.defaults)))
+        if arg_spec.defaults
+        else {}
+    )
     for key in args_to_remove:
         if key in default_args:
             del default_args[key]
-
     return default_args
 
 
