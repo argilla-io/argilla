@@ -21,8 +21,9 @@ import pytest
 from argilla.client.sdk.datasets.models import TaskType
 
 if TYPE_CHECKING:
-    from argilla.client.feedback import FieldSchema, QuestionSchema
-from argilla.client.feedback import (
+    from argilla.client.feedback.schemas import FieldSchema, QuestionSchema
+
+from argilla.client.feedback.schemas import (
     FeedbackRecord,
     RatingQuestion,
     TextField,
