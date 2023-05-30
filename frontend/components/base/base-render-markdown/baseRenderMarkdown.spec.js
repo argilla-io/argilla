@@ -26,9 +26,15 @@ describe("BaseRenderMarkdown", () => {
     expect(wrapper.contains("h1")).toBe(true);
   });
 
-  it("prevent render", async () => {
-    await wrapper.setProps({ markdown: "<script></script>" });
+  it("prevent render not allowed tags", async () => {
+    await wrapper.setProps({ markdown: "<script>" });
     await wrapper.vm.$nextTick();
     expect(wrapper.contains("script")).toBe(false);
+  });
+
+  it("prevent render unsanitized html", async () => {
+    await wrapper.setProps({ markdown: "<TABLE>" });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.contains("TABLE")).toBe(true);
   });
 });
