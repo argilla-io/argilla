@@ -197,6 +197,11 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
             },
             "['option4', 'option5'] are not valid options.\nValid options are: ['option1', 'option2', 'option3']",
         ),
+        (
+            create_multi_label_selection_questions,
+            {"values": {"multi_label_selection_question": {"value": []}}},
+            "Expected list of values, found empty list",
+        ),
     ],
 )
 def test_create_record_response_with_wrong_response_value(
