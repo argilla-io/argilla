@@ -12,8 +12,8 @@
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <transition name="fade" :key="fieldText" appear>
-      <div class="content-area --body1" v-if="fieldText">
+    <transition name="fade" v-if="fieldText" appear mode="out-in">
+      <div class="content-area --body1" :key="fieldText">
         <div v-if="!useMarkdown" v-text="fieldText" />
         <BaseRenderMarkdown v-else :markdown="fieldText" />
       </div>
@@ -66,9 +66,9 @@ export default {
 }
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 1s;
+  transition: all 0.2s;
 }
-.fade-enter,
+.fade-enter-from,
 .fade-leave-to {
   opacity: 0;
 }
