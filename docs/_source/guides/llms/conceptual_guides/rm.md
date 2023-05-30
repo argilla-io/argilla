@@ -116,25 +116,11 @@ dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 
 The above code will generate two responses for each prompt and push these records to Argilla. Labelers will see these prompts and responses, and rank the responses according to the instructions provided in the dataset. 
 
-Here's an example of the generated records:
+Here's an example of record generated with the above code:
 
 | Prompt | Response 1 | Response 2 |
 |--------|------------|------------|
-| Write a follow-up for a sales email | Dear [Customer Name],
-
-Thank you for purchasing [Product Name] from us last week. We hope you have been enjoying using it!
-
-If you have any questions or feedback about your purchase, please do not hesitate to let us know. We are always happy to help.
-
-Best regards,
-[Sales Team]| Dear [Customer Name],
-
-Thank you for your recent purchase [Product Name]. We hope you're enjoying your [Product Name] as much as we are here at [Company Name].
-
-If you have any questions or feedback regarding your purchase, please don't hesitate to let us know. We'd love the chance to make your shopping experience even better.
-
-Thank you again for your purchase,
-[Company Name] |
+| Write a follow-up for a sales email | Dear [Customer Name],<br/><br/>Thank you for purchasing [Product Name] from us last week. We hope you have been enjoying using it!<br/><br/>If you have any questions or feedback about your purchase, please do not hesitate to let us know. We are always happy to help.<br/><br/>Best regards,<br/>[Sales Team] | Dear [Customer Name],<br/><br/>Thank you for your recent purchase [Product Name]. We hope you're enjoying your [Product Name] as much as we are here at [Company Name].<br/><br/>If you have any questions or feedback regarding your purchase, please don't hesitate to let us know. We'd love the chance to make your shopping experience even better.<br/><br/>Thank you again for your purchase,<br/>[Company Name] |
 
 
 :::{note}
