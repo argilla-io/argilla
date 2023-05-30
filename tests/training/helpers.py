@@ -25,9 +25,9 @@ def train_with_cleanup(trainer: ArgillaTrainer, output_dir: str, train: bool = T
             trainer.train(output_dir)
         else:
             trainer.save(output_dir)
-        assert Path(output_dir).exists()
     finally:
-        shutil.rmtree(output_dir)
+        if Path(output_dir).exists():
+            shutil.rmtree(output_dir)
 
 
 def cleanup_spacy_config(trainer: ArgillaTrainer):
