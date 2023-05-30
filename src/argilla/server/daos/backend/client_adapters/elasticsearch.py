@@ -15,15 +15,15 @@
 import dataclasses
 from typing import Any, Dict, Iterable, Optional, Tuple
 
-import elasticsearch8
+import elasticsearch
 
 from argilla.server.daos.backend.base import BackendErrorHandler
 from argilla.server.daos.backend.client_adapters.opensearch import OpenSearchClient
 from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 
-ES_CLIENT_VERSION: str = elasticsearch8.__versionstr__
+ES_CLIENT_VERSION: str = elasticsearch.__versionstr__
 
-from elasticsearch8 import (
+from elasticsearch import (
     ApiError,
     Elasticsearch,
     ElasticsearchWarning,
@@ -31,7 +31,7 @@ from elasticsearch8 import (
     RequestError,
     helpers,
 )
-from elasticsearch8.helpers import BulkIndexError
+from elasticsearch.helpers import BulkIndexError
 
 
 @dataclasses.dataclass
