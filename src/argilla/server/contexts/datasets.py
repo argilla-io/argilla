@@ -378,7 +378,9 @@ def delete_response(db: Session, response: Response):
 
 
 def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue], status: ResponseStatus):
-    if not values and status == ResponseStatus.discarded:
+    if not values:
+        if status != ResponseStatus.discarded:
+            raise ValueError("Missing response values")
         return
 
     values_copy = copy.copy(values or {})
