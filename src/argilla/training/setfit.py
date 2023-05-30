@@ -72,18 +72,14 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
 
     def update_config(
         self,
-        **setfit_kwargs,
+        **kwargs,
     ):
         """
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
-        from setfit import SetFitTrainer
-
-        self.setfit_model_kwargs.update(setfit_kwargs)
-
-        self.setfit_trainer_kwargs.update(setfit_kwargs)
-        self.setfit_trainer_kwargs = filter_allowed_args(SetFitTrainer.__init__, **self.setfit_trainer_kwargs)
+        self.setfit_model_kwargs.update((k, v) for k, v in kwargs.items() if k in self.setfit_model_kwargs)
+        self.setfit_trainer_kwargs.update((k, v) for k, v in kwargs.items() if k in self.setfit_trainer_kwargs)
 
     def __repr__(self):
         formatted_string = []
