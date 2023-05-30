@@ -901,12 +901,11 @@ class FeedbackDataset:
     @classmethod
     @requires_version("datasets")
     @requires_version("huggingface_hub")
-    def from_huggingface(cls, repo_id: str, include_responses: bool = True, *args, **kwargs) -> "FeedbackDataset":
+    def from_huggingface(cls, repo_id: str, *args, **kwargs) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 
         Args:
             repo_id: the ID of the HuggingFace Hub repo to load the `FeedbackDataset` from.
-            include_responses: whether to include the `FeedbackRecord.responses` in the `FeedbackDataset` or not. Defaults to `True`.
             *args: the args to pass to `datasets.Dataset.load_from_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
 
@@ -963,22 +962,21 @@ class FeedbackDataset:
 
         for index in range(len(hfds)):
             responses = {}
-            if include_responses:
-                for question in cls.questions:
-                    if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
-                        continue
-                    for user_id, value, status in zip(
-                        hfds[index][question.name]["user_id"],
-                        hfds[index][question.name]["value"],
-                        hfds[index][question.name]["status"],
-                    ):
-                        if user_id not in responses:
-                            responses[user_id] = {
-                                "user_id": user_id,
-                                "status": status,
-                                "values": {},
-                            }
-                        responses[user_id]["values"].update({question.name: {"value": value}})
+            for question in cls.questions:
+                if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
+                    continue
+                for user_id, value, status in zip(
+                    hfds[index][question.name]["user_id"],
+                    hfds[index][question.name]["value"],
+                    hfds[index][question.name]["status"],
+                ):
+                    if user_id not in responses:
+                        responses[user_id] = {
+                            "user_id": user_id,
+                            "status": status,
+                            "values": {},
+                        }
+                    responses[user_id]["values"].update({question.name: {"value": value}})
             cls.__records.append(
                 FeedbackRecord(
                     fields={field.name: hfds[index][field.name] for field in cls.fields},
