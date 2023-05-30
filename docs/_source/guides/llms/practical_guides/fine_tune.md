@@ -1,4 +1,4 @@
-# Fine-tuning
+# Fine-tune an LLM
 
 After [collecting the responses](/guides/llms/practical_guides/collect_responses) from our `FeedbackDataset` we can start fine-tuning our LLM. Due to the customizability of the task, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the [classic LLM approaches](/guides/llms/conceptual_guides/rlhf): pre-training, supervised fine-tuning, reward modeling, and reinforcement learning.
 
@@ -6,7 +6,7 @@ After [collecting the responses](/guides/llms/practical_guides/collect_responses
 
 When talking about pre-training, we generally talk about a simple `prompt-completion` task, where we need the model to pick up on basic statistics of the language it is learning. Given that you are familiar with Spanish cuisine and the prompt sentence, `The base ingredient of paella is ___`, you know that the word in the `___` is much more likely to be `rice` than `apples`.  So, you are basically training a causal language model or text generation model.
 
-```{tip}
+```{note}
 This is an unsupervised approach hence we only infer training data from a basic sentence like `The base ingredient of paella is rice.` by starting with the word `The`, and from there unwrapping the sentence step by step.
 ```
 
@@ -37,7 +37,7 @@ rg.add_records(record)
 dataset.push_to_argilla(name="pre-training")
 ```
 
-```{tip}
+```{note}
 When it comes to pre-training an LLM, we generally do not need data of highest quality, but it is always smart to use domain-specfic data and to avoid data that might lead to undecired effect like hallucination and bias.
 ```
 
@@ -138,7 +138,7 @@ for entry in feedback_dataset:
 dataset = Dataset.from_dict(data)
 ```
 
-```{tip}
+```{note}
 This dataset only contains a single annotator response per record. We gave some sugggestions on dealing with [responses from multiple annotators](/guides/llms/practical_guides/collect_responses).
 ```
 
@@ -186,3 +186,5 @@ dataset.to_csv("databricks-dolly-15k-curated-en.csv", index=False)
 ```
 Second, start the UI for training.
 <iframe width="100%" height="600" src="https://www.youtube.com/embed/r6v0JSZXO9E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+
