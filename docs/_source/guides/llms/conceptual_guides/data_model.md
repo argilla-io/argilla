@@ -1,5 +1,5 @@
 # Feedback Data Model
-This comprehensive guide introduces the key entities in Argilla Feedback. Argilla Feedback is a powerful platform designed for collecting and managing feedback data from labelers or annotators. By understanding these entities and their relationships, you can effectively utilize the platform and leverage the collected feedback for various applications. 
+This comprehensive guide introduces the key entities in Argilla Feedback. Argilla Feedback is a powerful platform designed for collecting and managing feedback data from labelers or annotators. By understanding these entities and their relationships, you can effectively utilize the platform and leverage the collected feedback for various applications.
 
 Refer to the diagram below to visualize the relationships between the entities in Argilla Feedback:
 
