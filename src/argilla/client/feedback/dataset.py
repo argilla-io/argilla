@@ -857,7 +857,8 @@ def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "F
         ValueError: if one of the fields has an unsupported type.
 
     Examples:
-        >>> from argilla.client.feedback import TextField, generate_pydantic_schema
+        >>> from argilla.client.feedback.schemas import TextField
+        >>> from argilla.client.feedback.dataset import generate_pydantic_schema
         >>> fields = [
         ...     TextField(name="text", required=True),
         ...     TextField(name="label", required=True),
@@ -962,7 +963,7 @@ def feedback_dataset_in_argilla(
     Examples:
         >>> import argilla as rg
         >>> rg.init(api_url="...", api_key="...")
-        >>> from argilla.client.feedback import feedback_dataset_in_argilla
+        >>> from argilla.client.feedback.dataset import feedback_dataset_in_argilla
         >>> fds_exists, fds_cls = feedback_dataset_in_argilla(name="my-dataset")
     """
     assert name or (name and workspace) or id, (
