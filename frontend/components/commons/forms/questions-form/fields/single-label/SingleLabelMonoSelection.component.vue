@@ -1,28 +1,49 @@
 <template>
   <div class="container">
-    <div class="component-header">
-      <input
-        type="text"
-        v-if="isSearch"
-        :ref="searchRef"
-        v-model.trim="searchInput"
-        @change="resetShowMore"
-        @keydown.shift.backspace.exact="looseFocus"
-        @keydown.shift.space.exact="looseFocus"
-        @keydown.arrow-right.stop=""
-        @keydown.arrow-left.stop=""
-        @keydown.delete.exact.stop=""
-        @keydown.enter.exact.stop=""
-      />
+    <div class="component-header" v-if="isSearch || isButtonShowMore">
+      <div class="left-header">
+        <div class="search-area" v-if="isSearch" @click="focusInSearch">
+          <BaseIconWithBadge
+            class="icon-search"
+            icon="search"
+            :show-badge="false"
+            iconColor="#acacac"
+            badge-vertical-position="top"
+            badge-horizontal-position="right"
+            badge-border-color="white"
+          />
+          <input
+            class="search-input"
+            type="text"
+            :ref="searchRef"
+            :placeholder="placeholder"
+            v-model.trim="searchInput"
+            @change="resetShowMore"
+            @keydown.shift.backspace.exact="looseFocus"
+            @keydown.shift.space.exact="looseFocus"
+            @keydown.arrow-right.stop=""
+            @keydown.arrow-left.stop=""
+            @keydown.delete.exact.stop=""
+            @keydown.enter.exact.stop=""
+          />
+        </div>
+      </div>
 
-      <button
-        type="button"
-        v-if="isButtonShowMore"
-        v-text="textToShowInTheButton"
-        @click="toggleShowMore"
-      />
+      <div class="right-header">
+        <button
+          type="button"
+          class="show-more-button"
+          v-if="isButtonShowMore"
+          v-text="textToShowInTheButton"
+          @click="toggleShowMore"
+        />
+      </div>
     </div>
-    <transition-group name="shuffle" class="inputs-area">
+    <transition-group
+      name="shuffle"
+      class="inputs-area"
+      v-if="filteredOptions.length"
+    >
       <div
         class="input-button"
         v-for="option in filteredOptions"
@@ -43,7 +64,6 @@
         />
       </div>
     </transition-group>
-
     <i
       class="no-result"
       v-if="!filteredOptions.length"
@@ -61,6 +81,10 @@ export default {
     options: {
       type: Array,
       required: true,
+    },
+    placeholder: {
+      type: String,
+      default: () => "Search labels",
     },
     componentId: {
       type: String,
@@ -134,6 +158,9 @@ export default {
     toggleShowMore() {
       this.showMore = !this.showMore;
     },
+    focusInSearch() {
+      this.$refs[this.searchRef].focus();
+    },
   },
 };
 </script>
@@ -142,9 +169,10 @@ export default {
 .container {
   display: flex;
   flex-direction: column;
+  gap: $base-space * 2;
   .component-header {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto;
   }
   .inputs-area {
     display: inline-flex;
@@ -156,6 +184,43 @@ export default {
     }
   }
 }
+
+.search-area {
+  display: flex;
+  align-items: center;
+  width: 14.5em;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  .icon-search {
+    padding: 0;
+    background: transparent;
+  }
+  &:hover {
+    box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.1);
+  }
+}
+
+.search-input {
+  height: $base-space * 4;
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  &:focus-visible {
+    outline: 0;
+  }
+}
+
+.show-more-button {
+  background: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.6);
+  text-decoration: none;
+  cursor: pointer;
+  &:hover {
+    color: rgba(0, 0, 0, 0.87);
+  }
+}
+
 .label-text {
   display: flex;
   width: 100%;
