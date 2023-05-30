@@ -19,7 +19,7 @@ from pathlib import Path
 from argilla.training import ArgillaTrainer
 
 
-def train_with_cleanup(trainer: ArgillaTrainer, output_dir: str, train: bool = True):
+def train_with_cleanup(trainer: ArgillaTrainer, output_dir: str, train: bool = True) -> None:
     try:
         if train:
             trainer.train(output_dir)
@@ -30,7 +30,7 @@ def train_with_cleanup(trainer: ArgillaTrainer, output_dir: str, train: bool = T
             shutil.rmtree(output_dir)
 
 
-def cleanup_spacy_config(trainer: ArgillaTrainer):
+def cleanup_spacy_config(trainer: ArgillaTrainer) -> None:
     for split in ["train", "dev"]:
         path = trainer._trainer.config["paths"][split]
         if path is not None and Path(path).exists():
