@@ -159,7 +159,7 @@ export default {
 .label-text {
   display: flex;
   width: 100%;
-  border-radius: 2px;
+  border-radius: 50em;
   height: 40px;
   background: palette(purple, 800);
   outline: none;
