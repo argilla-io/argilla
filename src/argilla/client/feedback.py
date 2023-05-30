@@ -220,19 +220,19 @@ class FeedbackDataset:
         ...     [
         ...         rg.FeedbackRecord(
         ...             fields={"text": "This is the first record", "label": "positive"},
-        ...             response={"question-1": "This is the first answer", "question-2": 5},
+        ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
         ...             external_id="entry-1",
         ...         ),
         ...     ]
         ... )
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, response={"question-1": "This is the first answer", "question-2": 5}, external_id="entry-1")]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[{"user_id": None, "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}])]
         >>> dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
         >>> dataset.argilla_id
         "..."
         >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, response={"question-1": "This is the first answer", "question-2": 5}, external_id="entry-1")]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[{"user_id": None, "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}])]
     """
 
     argilla_id: Optional[str] = None
