@@ -47,7 +47,17 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     def init_training_args(self):
         from setfit import SetFitModel, SetFitTrainer
 
-        self.setfit_model_kwargs = get_default_args(SetFitModel.from_pretrained)
+        # SetFit only: we get both the HuggingFace Hub args and the SetFit-specific args
+        # We get the default args for `_from_pretrained` first to override the shared args
+        # with the HuggingFace Hub specific args
+        self.setfit_model_kwargs = get_default_args(SetFitModel._from_pretrained)
+        self.setfit_model_kwargs.update(get_default_args(SetFitModel.from_pretrained))
+
+        # Due to an inconsistency between `pretrained_model_name_or_path` with both `model_id` and `revision`
+        # we pop both `model_id` and `revision`
+        self.setfit_model_kwargs.pop("model_id", None)
+        self.setfit_model_kwargs.pop("revision", None)
+
         self.setfit_model_kwargs["pretrained_model_name_or_path"] = self._model
         self.setfit_model_kwargs["multi_target_strategy"] = self.multi_target_strategy
         self.setfit_model_kwargs["device"] = self.device
