@@ -80,7 +80,7 @@ def create_label_selection_questions(dataset: "Dataset") -> None:
         ),
     ],
 )
-def test_create_record_response(
+def test_create_record_response_with_valid_values(
     client: TestClient,
     db: Session,
     admin: User,
@@ -245,7 +245,8 @@ def test_create_record_response_without_authentication(client: TestClient, db: S
     assert db.query(Response).count() == 0
 
 
-def test_create_record_submitted_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+@pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
+def test_create_record_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict, status: str):
     dataset = DatasetFactory.create()
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
@@ -256,7 +257,7 @@ def test_create_record_submitted_response(client: TestClient, db: Session, admin
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
-        "status": "submitted",
+        "status": status,
     }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
@@ -272,93 +273,59 @@ def test_create_record_submitted_response(client: TestClient, db: Session, admin
             "input_ok": {"value": "yes"},
             "output_ok": {"value": "yes"},
         },
-        "status": "submitted",
+        "status": status,
         "user_id": str(admin.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
 
 
-def test_create_record_submitted_response_without_values(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.parametrize(
+    "status, expected_status_code, expected_response_count",
+    [("submitted", 422, 0), ("discarded", 201, 1), ("draft", 422, 0)],
+)
+def test_create_record_response_without_values(
+    client: TestClient,
+    db: Session,
+    admin: User,
+    admin_auth_header: dict,
+    status: str,
+    expected_status_code: int,
+    expected_response_count: int,
+):
     record = RecordFactory.create()
-    response_json = {"status": "submitted"}
+    response_json = {"status": status}
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
 
-    assert response.status_code == 422
-    assert db.query(Response).count() == 0
+    assert response.status_code == expected_status_code
+    assert db.query(Response).count() == expected_response_count
+
+    if expected_status_code == 201:
+        response_body = response.json()
+        assert db.get(Response, UUID(response_body["id"]))
+        assert response_body == {
+            "id": str(UUID(response_body["id"])),
+            "values": None,
+            "status": "discarded",
+            "user_id": str(admin.id),
+            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+        }
 
 
-def test_create_record_submitted_response_with_wrong_values(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
+def test_create_record_submitted_response_with_wrong_values(
+    client: TestClient, db: Session, admin_auth_header: dict, status: str
+):
     record = RecordFactory.create()
-    response_json = {"status": "submitted", "values": {"wrong_question": {"value": "wrong value"}}}
+    response_json = {"status": status, "values": {"wrong_question": {"value": "wrong value"}}}
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
     assert db.query(Response).count() == 0
-
-
-def test_create_record_discarded_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    TextQuestionFactory.create(name="input_ok", dataset=dataset)
-    TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-    record = RecordFactory.create(dataset=dataset)
-    response_json = {
-        "values": {
-            "input_ok": {"value": "no"},
-            "output_ok": {"value": "no"},
-        },
-        "status": "discarded",
-    }
-
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
-
-    assert response.status_code == 201
-    assert db.query(Response).count() == 1
-
-    response_body = response.json()
-    assert db.get(Response, UUID(response_body["id"]))
-    assert response_body == {
-        "id": str(UUID(response_body["id"])),
-        "values": {
-            "input_ok": {"value": "no"},
-            "output_ok": {"value": "no"},
-        },
-        "status": "discarded",
-        "user_id": str(admin.id),
-        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-    }
-
-
-def test_create_record_discarded_response_without_values(
-    client: TestClient, db: Session, admin: User, admin_auth_header: dict
-):
-    dataset = DatasetFactory.create()
-    TextQuestionFactory.create(name="input_ok", dataset=dataset)
-    TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-    record = RecordFactory.create(dataset=dataset)
-    response_json = {"status": "discarded"}
-
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
-
-    assert response.status_code == 201
-    assert db.query(Response).count() == 1
-
-    response_body = response.json()
-    assert db.get(Response, UUID(response_body["id"]))
-    assert response_body == {
-        "id": str(UUID(response_body["id"])),
-        "values": None,
-        "status": "discarded",
-        "user_id": str(admin.id),
-        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-    }
 
 
 def test_create_record_response_as_annotator(client: TestClient, db: Session):
