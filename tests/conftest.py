@@ -11,12 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from unittest.mock import MagicMock
+import tempfile
+from typing import TYPE_CHECKING, Dict, Generator
 
 import argilla as rg
 import httpx
 import pytest
-from argilla import app
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import active_api
 from argilla.client.apis.datasets import TextClassificationSettings
@@ -24,33 +24,68 @@ from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
-from argilla.server.database import SessionLocal
-from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
+from argilla.server.database import Base, get_db
+from argilla.server.models import User, UserRole, Workspace
+from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
+from fastapi.testclient import TestClient
 from opensearchpy import OpenSearch
-from starlette.testclient import TestClient
+from sqlalchemy import create_engine
 
-from .factories import AdminFactory, AnnotatorFactory
-from .helpers import SecuredClient
+from tests.database import TestSession
+from tests.factories import AdminFactory, AnnotatorFactory, UserFactory
+from tests.helpers import SecuredClient
+
+if TYPE_CHECKING:
+    from unittest.mock import MagicMock
+
+    from pytest_mock import MockerFixture
+    from sqlalchemy import Connection
+    from sqlalchemy.orm import Session
 
 
 @pytest.fixture(scope="session")
-def client():
-    with TestClient(app) as c:
-        yield c
+def connection() -> Generator["Connection", None, None]:
+    # Create a temp directory to store a SQLite database used for testing
+    with tempfile.TemporaryDirectory() as tmpdir:
+        database_url = f"sqlite:///{tmpdir}/test.db"
+        engine = create_engine(database_url, connect_args={"check_same_thread": False})
+        conn = engine.connect()
+        TestSession.configure(bind=conn)
+        Base.metadata.create_all(conn)
+
+        yield conn
+
+        Base.metadata.drop_all(conn)
+        conn.close()
+        engine.dispose()
 
 
-@pytest.fixture(scope="function")
-def db():
-    session = SessionLocal()
-    # test_seeds(session)  # without a session, rollback is not working when some error occurs in a test
+@pytest.fixture(autouse=True)
+def db(connection: "Connection") -> Generator["Session", None, None]:
+    nested_transaction = connection.begin_nested()
+    session = TestSession()
 
     yield session
 
-    session.query(User).delete()
-    session.query(Workspace).delete()
-    session.query(WorkspaceUser).delete()
-    session.commit()
+    session.close()
+    nested_transaction.rollback()
+
+
+@pytest.fixture(scope="function")
+def client(request) -> Generator[TestClient, None, None]:
+    session = TestSession()
+
+    def override_get_db():
+        yield session
+
+    argilla_app.dependency_overrides[get_db] = override_get_db
+
+    raise_server_exceptions = request.param if hasattr(request, "param") else False
+    with TestClient(app, raise_server_exceptions=raise_server_exceptions) as client:
+        yield client
+
+    argilla_app.dependency_overrides.clear()
 
 
 def is_running_elasticsearch() -> bool:
@@ -77,44 +112,33 @@ def opensearch(elasticsearch_config):
 
 
 @pytest.fixture(scope="function")
-def admin(db):
+def admin() -> User:
     return AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
 
 
 @pytest.fixture(scope="function")
-def annotator(db):
+def annotator() -> User:
     return AnnotatorFactory.create(first_name="Annotator", username="annotator", api_key="annotator.apikey")
 
 
-@pytest.fixture
-def mock_user(db):
-    user = User(
+@pytest.fixture(scope="function")
+def mock_user() -> User:
+    return UserFactory.create(
         first_name="Mock",
         username="mock-user",
         password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
         api_key="mock-user.apikey",
     )
 
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
-
 
 @pytest.fixture(scope="function")
-def admin_auth_header(db, admin):
+def admin_auth_header(admin: User) -> Dict[str, str]:
     return {API_KEY_HEADER_NAME: admin.api_key}
 
 
 @pytest.fixture(scope="function")
-def argilla_auth_header(db, argilla_user):
-    return {API_KEY_HEADER_NAME: argilla_user.api_key}
-
-
-@pytest.fixture
-def argilla_user(db):
-    user = User(
+def argilla_user() -> User:
+    return UserFactory.create(
         first_name="Argilla",
         username="argilla",
         role=UserRole.admin,
@@ -123,61 +147,51 @@ def argilla_user(db):
         workspaces=[Workspace(name="argilla")],
     )
 
-    db.add(user)
-    db.commit()
-    db.refresh(user)
 
-    return user
+@pytest.fixture(scope="function")
+def argilla_auth_header(argilla_user: User) -> Dict[str, str]:
+    return {API_KEY_HEADER_NAME: argilla_user.api_key}
 
 
 @pytest.fixture
-def test_telemetry(mocker) -> MagicMock:
+def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
     telemetry._CLIENT = TelemetryClient(disable_send=True)
 
     return mocker.spy(telemetry._CLIENT, "track_data")
 
 
-@pytest.fixture(scope="session")
-def test_client():
-    with TestClient(app) as client:
-        yield client
-
-
 @pytest.fixture
-def api():
+def api() -> Argilla:
     return Argilla()
 
 
+@pytest.mark.parametrize("client", [True], indirect=True)
 @pytest.fixture
 def mocked_client(
-    db,
-    monkeypatch,
-    test_telemetry,
-    argilla_user,
+    db: "Session", monkeypatch, test_telemetry: "MagicMock", argilla_user: User, client: TestClient
 ) -> SecuredClient:
-    with TestClient(app, raise_server_exceptions=False) as _client:
-        client_ = SecuredClient(_client)
+    client_ = SecuredClient(client)
 
-        real_whoami = users_api.whoami
+    real_whoami = users_api.whoami
 
-        def whoami_mocked(client):
-            monkeypatch.setattr(client, "__httpx__", client_)
-            return real_whoami(client)
+    def whoami_mocked(client):
+        monkeypatch.setattr(client, "__httpx__", client_)
+        return real_whoami(client)
 
-        monkeypatch.setattr(users_api, "whoami", whoami_mocked)
+    monkeypatch.setattr(users_api, "whoami", whoami_mocked)
 
-        monkeypatch.setattr(httpx, "post", client_.post)
-        monkeypatch.setattr(httpx, "patch", client_.patch)
-        monkeypatch.setattr(httpx.AsyncClient, "post", client_.post_async)
-        monkeypatch.setattr(httpx, "get", client_.get)
-        monkeypatch.setattr(httpx, "delete", client_.delete)
-        monkeypatch.setattr(httpx, "put", client_.put)
-        monkeypatch.setattr(httpx, "stream", client_.stream)
+    monkeypatch.setattr(httpx, "post", client_.post)
+    monkeypatch.setattr(httpx, "patch", client_.patch)
+    monkeypatch.setattr(httpx.AsyncClient, "post", client_.post_async)
+    monkeypatch.setattr(httpx, "get", client_.get)
+    monkeypatch.setattr(httpx, "delete", client_.delete)
+    monkeypatch.setattr(httpx, "put", client_.put)
+    monkeypatch.setattr(httpx, "stream", client_.stream)
 
-        rb_api = active_api()
-        monkeypatch.setattr(rb_api._client, "__httpx__", client_)
+    rb_api = active_api()
+    monkeypatch.setattr(rb_api._client, "__httpx__", client_)
 
-        yield client_
+    return client_
 
 
 @pytest.fixture

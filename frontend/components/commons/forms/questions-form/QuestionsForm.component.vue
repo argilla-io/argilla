@@ -26,14 +26,10 @@
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
           :title="input.question"
-          :optionId="`${input.name}_0`"
           :placeholder="input.placeholder"
-          :value="input.options[0].text"
+          v-model="input.options[0].text"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
-          @on-change-value="
-            onChangeTextArea({ newOptions: $event, idComponent: input.id })
-          "
           @on-error="onError"
         />
 
@@ -235,12 +231,6 @@ export default {
         }
         default:
       }
-    },
-    onChangeTextArea({ newOptions, idComponent }) {
-      // TODO - remove this function when adding v-model on textArea component
-      const component = this.inputs.find(({ id }) => id === idComponent);
-      // NOTE - formatting to the standard options
-      component.options = [{ ...newOptions, value: newOptions.text }];
     },
     onChangeMonoSelection({ newOptions, idComponent }) {
       // TODO - to remove when single label will use v-model
