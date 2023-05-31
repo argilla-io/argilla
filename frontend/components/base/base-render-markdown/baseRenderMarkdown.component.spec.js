@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import BaseRenderMarkdownComponent from "./BaseRenderMarkdownComponent";
+import BaseRenderMarkdownComponent from "./BaseRenderMarkdown.component";
 
 let wrapper = null;
 const options = {
