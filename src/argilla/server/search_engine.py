@@ -63,6 +63,9 @@ class SearchDocument(BaseModel):
 class SearchEngine:
     config: Dict[str, Any]
 
+    es_number_of_shards: int
+    es_number_of_replicas: int
+
     def __post_init__(self):
         self.client = AsyncOpenSearch(**self.config)
 
@@ -93,8 +96,17 @@ class SearchEngine:
             "properties": fields,
         }
 
+        settings = {
+            "number_of_shards": self.es_number_of_shards,
+            "number_of_replicas": self.es_number_of_replicas,
+        }
+
         index_name = self._index_name_for_dataset(dataset)
-        await self.client.indices.create(index=index_name, body=dict(mappings=mappings))
+        await self.client.indices.create(index=index_name, body=dict(settings=settings, mappings=mappings))
+
+    async def delete_index(self, dataset: Dataset):
+        index_name = self._index_name_for_dataset(dataset)
+        await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
 
     def _field_mapping_for_question(self, question: Question):
         settings = question.parsed_settings
@@ -152,7 +164,11 @@ async def get_search_engine():
         retry_on_timeout=True,
         max_retries=5,
     )
-    search_engine = SearchEngine(config)
+    search_engine = SearchEngine(
+        config,
+        es_number_of_shards=settings.es_records_index_shards,
+        es_number_of_replicas=settings.es_records_index_shards,
+    )
     try:
         yield search_engine
     finally:

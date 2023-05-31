@@ -2516,7 +2516,7 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
-def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_delete_dataset(client: TestClient, db: Session, opensearch: OpenSearch, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
@@ -2539,6 +2539,7 @@ def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth
         dataset.workspace_id,
         other_dataset.workspace_id,
     ]
+    assert not opensearch.indices.exists(index=f"rg.{dataset.id}")
 
 
 def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
