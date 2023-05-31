@@ -41,7 +41,7 @@ def test_update_response(client: TestClient, db: Session, admin_auth_header: dic
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
         },
-        status="submitted",
+        status=ResponseStatus.submitted,
     )
     response_json = {
         "values": {

@@ -16,9 +16,8 @@ import dataclasses
 import logging
 import platform
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-import httpx
 from fastapi import Request
 
 from argilla.server.commons.models import TaskType
