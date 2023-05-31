@@ -83,7 +83,6 @@ export default {
       );
     },
     factoryFieldsForOrm(initialFields) {
-      console.log("initialFields", initialFields);
       return initialFields.map(
         (
           {
