@@ -13,7 +13,7 @@ class DatasetQuestion extends Model {
       options: this.attr([]),
       placeholder: this.string(null).nullable(),
       is_required: this.boolean(false),
-      use_markdown: this.boolean(true), //TODO - remove true (only for testing)
+      use_markdown: this.boolean(true),
       component_type: this.string(null).nullable(),
       description: this.string(null).nullable(),
     };
