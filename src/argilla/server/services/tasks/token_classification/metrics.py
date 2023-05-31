@@ -153,14 +153,14 @@ class MentionMetrics(BaseModel):
     label: str
     score: float = Field(ge=0.0)
     capitalness: Optional[str] = Field(None)
-    density: float = Field(ge=0.0)
-    tokens_length: int = Field(g=0)
-    chars_length: int = Field(g=0)
+    # density: float = Field(ge=0.0)
+    # tokens_length: int = Field(g=0)
+    # chars_length: int = Field(g=0)
 
 
-class TokenTagMetrics(BaseModel):
-    value: str
-    tag: str
+# class TokenTagMetrics(BaseModel):
+#    value: str
+#    tag: str
 
 
 class TokenMetrics(BaseModel):
@@ -177,15 +177,15 @@ class TokenMetrics(BaseModel):
         custom: extra token level info
     """
 
-    idx: int
+    # idx: int
     value: str
-    char_start: int
-    char_end: int
-    length: int
+    # char_start: int
+    # char_end: int
+    # length: int
     capitalness: Optional[str] = None
-    score: Optional[float] = None
-    tag: Optional[str] = None  # TODO: remove!
-    custom: Dict[str, Any] = None
+    # score: Optional[float] = None
+    # tag: Optional[str] = None  # TODO: remove!
+    # custom: Dict[str, Any] = None
 
 
 class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRecord]):
@@ -213,10 +213,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
         return None
 
     @staticmethod
-    def mentions_metrics(
-        record: ServiceTokenClassificationRecord,
-        mentions: List[Tuple[str, EntitySpan]],
-    ):
+    def mentions_metrics(record: ServiceTokenClassificationRecord, mentions: List[Tuple[str, EntitySpan]]):
         def mention_tokens_length(entity: EntitySpan) -> int:
             """Compute mention tokens length"""
             return len(
@@ -236,36 +233,36 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 label=entity.label,
                 score=entity.score,
                 capitalness=TokenClassificationMetrics.capitalness(mention),
-                density=TokenClassificationMetrics.density(_tokens_length, sentence_length=len(record.tokens)),
-                tokens_length=_tokens_length,
-                chars_length=len(mention),
+                # density=TokenClassificationMetrics.density(_tokens_length, sentence_length=len(record.tokens)),
+                # tokens_length=_tokens_length,
+                # chars_length=len(mention),
             )
             for mention, entity in mentions
-            for _tokens_length in [
-                mention_tokens_length(entity),
-            ]
+            # for _tokens_length in [
+            #    mention_tokens_length(entity),
+            # ]
         ]
 
     @classmethod
     def build_tokens_metrics(
         cls,
         record: ServiceTokenClassificationRecord,
-        tags: Optional[List[str]] = None,
+        # tags: Optional[List[str]] = None,
     ) -> List[TokenMetrics]:
         return [
             TokenMetrics(
-                idx=token_idx,
+                # idx=token_idx,
                 value=token_value,
-                char_start=char_start,
+                # char_start=char_start,
                 # TODO(@frascuchon): Align char span definition to the entity level definition
                 #   (char_end should be the next char after the token span boundaries).
-                char_end=char_end - 1,
+                # char_end=char_end - 1,
                 capitalness=cls.capitalness(token_value),
-                length=char_end - char_start,
-                tag=tags[token_idx] if tags else None,
+                # length=char_end - char_start,
+                # tag=tags[token_idx] if tags else None,
             )
             for token_idx, token_value in enumerate(record.tokens)
-            for char_start, char_end in [record.span_utils.token_to_char_idx[token_idx]]
+            # for char_start, char_end in [record.span_utils.token_to_char_idx[token_idx]]
         ]
 
     @classmethod
@@ -273,22 +270,23 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
         """Compute metrics at record level"""
         base_metrics = super(TokenClassificationMetrics, cls).record_metrics(record)
 
-        span_utils = SpanUtils(record.text, record.tokens)
-        annotated_tags = cls._compute_iob_tags(span_utils, record.annotation) or []
-        predicted_tags = cls._compute_iob_tags(span_utils, record.prediction) or []
+        # span_utils = SpanUtils(record.text, record.tokens)
+        # annotated_tags = cls._compute_iob_tags(span_utils, record.annotation) or []
+        # predicted_tags = cls._compute_iob_tags(span_utils, record.prediction) or []
 
-        tokens_metrics = cls.build_tokens_metrics(record, predicted_tags or annotated_tags)
+        # tokens_metrics = cls.build_tokens_metrics(record, predicted_tags or annotated_tags)
+        tokens_metrics = cls.build_tokens_metrics(record)
         return {
             **base_metrics,
             "tokens": tokens_metrics,
-            "tokens_length": len(record.tokens),
+            # "tokens_length": len(record.tokens),
             "predicted": {
                 "mentions": cls.mentions_metrics(record, record.predicted_mentions()),
-                "tags": [TokenTagMetrics(tag=tag, value=token) for tag, token in zip(predicted_tags, record.tokens)],
+                # "tags": [TokenTagMetrics(tag=tag, value=token) for tag, token in zip(predicted_tags, record.tokens)],
             },
             "annotated": {
                 "mentions": cls.mentions_metrics(record, record.annotated_mentions()),
-                "tags": [TokenTagMetrics(tag=tag, value=token) for tag, token in zip(annotated_tags, record.tokens)],
+                # "tags": [TokenTagMetrics(tag=tag, value=token) for tag, token in zip(annotated_tags, record.tokens)],
             },
         }
 
@@ -333,28 +331,13 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 name="Annotated labels distribution",
             ),
             ServiceBaseMetric(
-                id="tokens_length",
-                name="Tokens length",
-                description="Computes the text length distribution measured in number of tokens",
-            ),
-            ServiceBaseMetric(
                 id="token_frequency",
                 name="Tokens frequency distribution",
-            ),
-            ServiceBaseMetric(
-                id="token_length",
-                name="Token length distribution",
-                description="Computes token length distribution in number of characters",
             ),
             ServiceBaseMetric(
                 id="token_capitalness",
                 name="Token capitalness distribution",
                 description="Computes capitalization information of tokens",
-            ),
-            ServiceBaseMetric(
-                id="predicted_entity_density",
-                name="Mention entity density for predictions",
-                description="Computes the ratio between the number of all entity tokens and tokens in the text",
             ),
             ServiceBaseMetric(
                 id="predicted_entity_labels",
@@ -367,16 +350,6 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 description="Computes capitalization information of predicted entity mentions",
             ),
             ServiceBaseMetric(
-                id="predicted_mention_token_length",
-                name="Predicted mention tokens length",
-                description="Computes the length of the predicted entity mention measured in number of tokens",
-            ),
-            ServiceBaseMetric(
-                id="predicted_mention_char_length",
-                name="Predicted mention characters length",
-                description="Computes the length of the predicted entity mention measured in number of tokens",
-            ),
-            ServiceBaseMetric(
                 id="predicted_mentions_distribution",
                 name="Predicted mentions distribution by entity",
                 description="Computes predicted mentions distribution against its labels",
@@ -385,16 +358,6 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 id="predicted_top_k_mentions_consistency",
                 name="Entity label consistency for predictions",
                 description="Computes entity label variability for top-k predicted entity mentions",
-            ),
-            ServiceBaseMetric(
-                id="predicted_tag_consistency",
-                name="Token tag consistency for predictions",
-                description="Computes token tag variability for top-k predicted tags",
-            ),
-            ServiceBaseMetric(
-                id="annotated_entity_density",
-                name="Mention entity density for annotations",
-                description="Computes the ratio between the number of all entity tokens and tokens in the text",
             ),
             ServiceBaseMetric(
                 id="annotated_entity_labels",
@@ -407,16 +370,6 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 description="Compute capitalization information of annotated entity mentions",
             ),
             ServiceBaseMetric(
-                id="annotated_mention_token_length",
-                name="Annotated mention tokens length",
-                description="Computes the length of the entity mention measured in number of tokens",
-            ),
-            ServiceBaseMetric(
-                id="annotated_mention_char_length",
-                name="Annotated mention characters length",
-                description="Computes the length of the entity mention measured in number of tokens",
-            ),
-            ServiceBaseMetric(
                 id="annotated_mentions_distribution",
                 name="Annotated mentions distribution by entity",
                 description="Computes annotated mentions distribution against its labels",
@@ -426,6 +379,61 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 name="Entity label consistency for annotations",
                 description="Computes entity label variability for top-k annotated entity mentions",
             ),
+            # TODO: Remove in v1.10.0
+            ServiceBaseMetric(
+                id="tokens_length",
+                name="Tokens length",
+                description="Computes the text length distribution measured in number of tokens",
+            ),
+            # TODO: Remove in v1.10.0
+            ServiceBaseMetric(
+                id="token_length",
+                name="Token length distribution",
+                description="Computes token length distribution in number of characters",
+            ),
+            # TODO: Remove in v1.10.0
+            ServiceBaseMetric(
+                id="predicted_entity_density",
+                name="Mention entity density for predictions",
+                description="Computes the ratio between the number of all entity tokens and tokens in the text",
+            ),
+            # TODO: Remove in v1.10.0
+            ServiceBaseMetric(
+                id="predicted_mention_token_length",
+                name="Predicted mention tokens length",
+                description="Computes the length of the predicted entity mention measured in number of tokens",
+            ),
+            # TODO: Remove in v1.10.0
+            ServiceBaseMetric(
+                id="predicted_mention_char_length",
+                name="Predicted mention characters length",
+                description="Computes the length of the predicted entity mention measured in number of tokens",
+            ),
+            # TODO: Remove in v1.10.0
+            ServiceBaseMetric(
+                id="predicted_tag_consistency",
+                name="Token tag consistency for predictions",
+                description="Computes token tag variability for top-k predicted tags",
+            ),
+            # TODO: Remove in v1.10.0
+            ServiceBaseMetric(
+                id="annotated_entity_density",
+                name="Mention entity density for annotations",
+                description="Computes the ratio between the number of all entity tokens and tokens in the text",
+            ),
+            # TODO: Remove in v1.10.0
+            ServiceBaseMetric(
+                id="annotated_mention_token_length",
+                name="Annotated mention tokens length",
+                description="Computes the length of the entity mention measured in number of tokens",
+            ),
+            # TODO: Remove in v1.10.0
+            ServiceBaseMetric(
+                id="annotated_mention_char_length",
+                name="Annotated mention characters length",
+                description="Computes the length of the entity mention measured in number of tokens",
+            ),
+            # TODO: Remove in v1.10.0
             ServiceBaseMetric(
                 id="annotated_tag_consistency",
                 name="Token tag consistency for annotations",
