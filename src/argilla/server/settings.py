@@ -65,6 +65,7 @@ class Settings(BaseSettings):
     home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
     base_url: Optional[str] = Field(description="The default base url where server will be deployed")
     database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
+    database_url_async: Optional[str] = Field(description="The async database url that argilla will use as data store")
 
     elasticsearch: str = "http://localhost:9200"
     elasticsearch_ssl_verify: bool = True
@@ -126,8 +127,16 @@ class Settings(BaseSettings):
         return base_url
 
     @validator("database_url", always=True)
-    def set_database_url_default(cls, database_url: str, values: dict):
+    def set_database_url_default(cls, database_url: str, values: dict) -> str:
         return database_url or f"sqlite:///{os.path.join(values['home_path'], 'argilla.db')}?check_same_thread=False"
+
+    @validator("database_url_async", always=True)
+    def set_database_url_async_default(cls, database_url_async: str, values: dict) -> str:
+        if database_url_async:
+            return database_url_async
+        database_url = values.get("database_url")
+        assert database_url, "database_url must be set"
+        return database_url.replace("sqlite:///", "sqlite+aiosqlite:///")
 
     @root_validator(skip_on_failure=True)
     def create_home_path(cls, values):
