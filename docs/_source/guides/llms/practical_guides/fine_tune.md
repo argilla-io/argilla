@@ -71,11 +71,11 @@ feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly
 
 data = {"instruction": [], "context": [], "response": []}
 for entry in feedback_dataset:
-    if entry.get("responses"):
-        res = entry["responses"][0]["values"]
-        data["instruction"].append(res["new-instruction"]["value"])
-        data["context"].append(res["new-context"]["value"])
-        data["response"].append(res["new-response"]["value"])
+    if entry.responses is not None and len(entry.responses) > 0:
+        res = entry.responses[0].values
+        data["instruction"].append(res["new-instruction"].value)
+        data["context"].append(res["new-context"].value)
+        data["response"].append(res["new-response"].value)
 
 dataset = Dataset.from_dict(data)
 ```
@@ -146,13 +146,13 @@ feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly
 
 data = {"instruction": [], "context": [], "poorer_responses": [], "better_response": []}
 for entry in feedback_dataset:
-    if entry.get("responses"):
-        res = entry["responses"][0]["values"]
-        if res["new-response"]["value"] != res["original-response"]["value"]:
-            data["instruction"].append(res["new-instruction"]["value"])
-            data["context"].append(res["new-context"]["value"])
-            data["poorer_responses"].append(res["original-response"]["value"])
-            data["better_response"].append(res["new-response"]["value"])
+    if entry.responses is not None and len(entry.responses) > 0:
+        res = entry.responses[0].values
+        if res["new-response"].value != entry.fields["original-response"]:
+            data["instruction"].append(res["new-instruction"].value)
+            data["context"].append(res["new-context"].value)
+            data["poorer_responses"].append(entry.fields["original-response"])
+            data["better_response"].append(res["new-response"].value)
 
 dataset = Dataset.from_dict(data)
 ```
@@ -212,7 +212,7 @@ import argilla as rg
 from datasets import Dataset
 
 feedback = rg.FeedbackDataset.from_argilla("pre-training")
-content = {"content": [rec.get("fields").get("content") for rec in feedback]}
+content = {"content": [rec.fields["content"] for rec in feedback]}
 dataset = Dataset.from_dict(content)
 dataset
 # Dataset({
