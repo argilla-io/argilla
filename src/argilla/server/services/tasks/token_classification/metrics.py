@@ -153,14 +153,6 @@ class MentionMetrics(BaseModel):
     label: str
     score: float = Field(ge=0.0)
     capitalness: Optional[str] = Field(None)
-    # density: float = Field(ge=0.0)
-    # tokens_length: int = Field(g=0)
-    # chars_length: int = Field(g=0)
-
-
-# class TokenTagMetrics(BaseModel):
-#    value: str
-#    tag: str
 
 
 class TokenMetrics(BaseModel):
@@ -177,15 +169,8 @@ class TokenMetrics(BaseModel):
         custom: extra token level info
     """
 
-    # idx: int
     value: str
-    # char_start: int
-    # char_end: int
-    # length: int
     capitalness: Optional[str] = None
-    # score: Optional[float] = None
-    # tag: Optional[str] = None  # TODO: remove!
-    # custom: Dict[str, Any] = None
 
 
 class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRecord]):
@@ -233,36 +218,15 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 label=entity.label,
                 score=entity.score,
                 capitalness=TokenClassificationMetrics.capitalness(mention),
-                # density=TokenClassificationMetrics.density(_tokens_length, sentence_length=len(record.tokens)),
-                # tokens_length=_tokens_length,
-                # chars_length=len(mention),
             )
             for mention, entity in mentions
-            # for _tokens_length in [
-            #    mention_tokens_length(entity),
-            # ]
         ]
 
     @classmethod
-    def build_tokens_metrics(
-        cls,
-        record: ServiceTokenClassificationRecord,
-        # tags: Optional[List[str]] = None,
-    ) -> List[TokenMetrics]:
+    def build_tokens_metrics(cls, record: ServiceTokenClassificationRecord) -> List[TokenMetrics]:
         return [
-            TokenMetrics(
-                # idx=token_idx,
-                value=token_value,
-                # char_start=char_start,
-                # TODO(@frascuchon): Align char span definition to the entity level definition
-                #   (char_end should be the next char after the token span boundaries).
-                # char_end=char_end - 1,
-                capitalness=cls.capitalness(token_value),
-                # length=char_end - char_start,
-                # tag=tags[token_idx] if tags else None,
-            )
+            TokenMetrics(value=token_value, capitalness=cls.capitalness(token_value))
             for token_idx, token_value in enumerate(record.tokens)
-            # for char_start, char_end in [record.span_utils.token_to_char_idx[token_idx]]
         ]
 
     @classmethod
@@ -270,24 +234,12 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
         """Compute metrics at record level"""
         base_metrics = super(TokenClassificationMetrics, cls).record_metrics(record)
 
-        # span_utils = SpanUtils(record.text, record.tokens)
-        # annotated_tags = cls._compute_iob_tags(span_utils, record.annotation) or []
-        # predicted_tags = cls._compute_iob_tags(span_utils, record.prediction) or []
-
-        # tokens_metrics = cls.build_tokens_metrics(record, predicted_tags or annotated_tags)
         tokens_metrics = cls.build_tokens_metrics(record)
         return {
             **base_metrics,
             "tokens": tokens_metrics,
-            # "tokens_length": len(record.tokens),
-            "predicted": {
-                "mentions": cls.mentions_metrics(record, record.predicted_mentions()),
-                # "tags": [TokenTagMetrics(tag=tag, value=token) for tag, token in zip(predicted_tags, record.tokens)],
-            },
-            "annotated": {
-                "mentions": cls.mentions_metrics(record, record.annotated_mentions()),
-                # "tags": [TokenTagMetrics(tag=tag, value=token) for tag, token in zip(annotated_tags, record.tokens)],
-            },
+            "predicted": {"mentions": cls.mentions_metrics(record, record.predicted_mentions())},
+            "annotated": {"mentions": cls.mentions_metrics(record, record.annotated_mentions())},
         }
 
     @staticmethod

@@ -27,28 +27,15 @@ class MentionMetrics(BaseModel):
     label: str
     score: float = Field(ge=0.0)
     capitalness: Optional[str] = Field(None)
-    # density: float = Field(ge=0.0)
-    # tokens_length: int = Field(g=0)
-    # chars_length: int = Field(g=0)
-
-
-# class TokenTagMetrics(BaseModel):
-#    value: str
-#    tag: str
 
 
 class TokenMetrics(BaseModel):
-    # idx: int
     value: str
-    # char_start: int
-    # char_end: int
     capitalness: Optional[str] = None
-    # score: Optional[float] = None
 
 
 def token_classification_mappings():
     metrics_mentions_mappings = nested_mappings_from_base_model(MentionMetrics)
-    # metrics_tags_mappings = nested_mappings_from_base_model(TokenTagMetrics)
     return {
         "_source": mappings.source(
             excludes=[
@@ -71,7 +58,5 @@ def token_classification_mappings():
             "metrics.tokens": nested_mappings_from_base_model(TokenMetrics),
             "metrics.predicted.mentions": metrics_mentions_mappings,
             "metrics.annotated.mentions": metrics_mentions_mappings,
-            # "metrics.predicted.tags": metrics_tags_mappings,
-            # "metrics.annotated.tags": metrics_tags_mappings,
         },
     }
