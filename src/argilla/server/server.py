@@ -42,7 +42,7 @@ from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.database import get_db
+from argilla.server.database import get_async_db
 from argilla.server.errors import (
     APIErrorHandler,
     ClosedDatasetError,
@@ -213,7 +213,7 @@ def configure_telemetry(app: FastAPI):
 
 
 def configure_database(app: FastAPI):
-    get_db_wrapper = contextlib.contextmanager(get_db)
+    get_db_wrapper = contextlib.asynccontextmanager(get_async_db)
 
     def _user_has_default_credentials(user: User):
         return user.api_key == DEFAULT_API_KEY or accounts.verify_password(DEFAULT_PASSWORD, user.password_hash)
@@ -227,8 +227,8 @@ def configure_database(app: FastAPI):
 
     @app.on_event("startup")
     async def log_default_user_warning_if_present():
-        with get_db_wrapper() as db:
-            default_user = accounts.get_user_by_username(db, DEFAULT_USERNAME)
+        async with get_db_wrapper() as db:
+            default_user = await accounts.get_user_by_username(db, DEFAULT_USERNAME)
             if default_user and _user_has_default_credentials(default_user):
                 _log_default_user_warning()
 
