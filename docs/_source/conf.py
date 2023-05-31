@@ -51,9 +51,10 @@ release = version_
 # The short X.Y version
 try:
     version = ".".join(release.split(".")[0:2])
+    release = version
 except:
     version = ""
-
+    release = ""
 
 # -- General configuration ---------------------------------------------------
 
