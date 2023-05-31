@@ -26,6 +26,7 @@ from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
     LabelSelectionQuestionFactory,
+    MultiLabelSelectionQuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
@@ -43,11 +44,15 @@ def create_text_questions(dataset: "Dataset") -> None:
 
 
 def create_rating_questions(dataset: "Dataset") -> None:
-    RatingQuestionFactory.create(name="rating_question", dataset=dataset, required=False)
+    RatingQuestionFactory.create(name="rating_question", dataset=dataset)
 
 
 def create_label_selection_questions(dataset: "Dataset") -> None:
-    LabelSelectionQuestionFactory.create(name="label_selection_question", dataset=dataset, required=False)
+    LabelSelectionQuestionFactory.create(name="label_selection_question", dataset=dataset)
+
+
+def create_multi_label_selection_questions(dataset: "Dataset") -> None:
+    MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question", dataset=dataset)
 
 
 @pytest.mark.parametrize(
@@ -75,6 +80,22 @@ def create_label_selection_questions(dataset: "Dataset") -> None:
             {
                 "values": {
                     "label_selection_question": {"value": "option1"},
+                },
+            },
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question": {"value": ["option1"]},
+                },
+            },
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question": {"value": ["option1", "option2"]},
                 },
             },
         ),
@@ -109,50 +130,18 @@ def test_create_record_response(
     }
 
 
-@pytest.mark.parametrize(
-    "create_questions_func, responses",
-    [
-        (
-            create_text_questions,
-            {
-                "values": {
-                    "input_ok": {"value": "yes"},
-                    "unknown_question": {"value": "Test"},
-                },
-            },
-        ),
-        (
-            create_rating_questions,
-            {
-                "values": {
-                    "rating_question": {"value": 5},
-                    "unknown_question": {"value": "Test"},
-                },
-            },
-        ),
-        (
-            create_label_selection_questions,
-            {
-                "values": {
-                    "label_selection_question": {"value": "option1"},
-                    "unknown_question": {"value": "Test"},
-                },
-            },
-        ),
-    ],
-)
-def test_create_record_response_with_extra_question_responses(
-    client: TestClient,
-    db: Session,
-    admin_auth_header: dict,
-    create_questions_func: Callable[["Dataset"], None],
-    responses: dict,
-):
+def test_create_record_response_with_extra_question_responses(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    create_questions_func(dataset)
+    create_text_questions(dataset)
     record = RecordFactory.create(dataset=dataset)
 
-    response_json = {**responses, "status": "submitted"}
+    response_json = {
+        "values": {
+            "input_ok": {"value": "yes"},
+            "unknown_question": {"value": "Test"},
+        },
+        "status": "submitted",
+    }
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
 
     assert response.status_code == 422
@@ -189,6 +178,29 @@ def test_create_record_response_with_extra_question_responses(
                 },
             },
             "False is not a valid option.\nValid options are: ['option1', 'option2', 'option3']",
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question": {"value": "wrong-type"},
+                },
+            },
+            "Expected list of values, found <class 'str'>",
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question": {"value": ["option4", "option5"]},
+                },
+            },
+            "['option4', 'option5'] are not valid options.\nValid options are: ['option1', 'option2', 'option3']",
+        ),
+        (
+            create_multi_label_selection_questions,
+            {"values": {"multi_label_selection_question": {"value": []}}},
+            "Expected list of values, found empty list",
         ),
     ],
 )
