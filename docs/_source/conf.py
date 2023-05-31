@@ -49,7 +49,10 @@ author = "Argilla.io"
 release = version_
 
 # The short X.Y version
-version = ".".join(release.split(".")[0:2])
+try:
+    version = ".".join(release.split(".")[0:2])
+except:
+    version = ""
 
 
 # -- General configuration ---------------------------------------------------
