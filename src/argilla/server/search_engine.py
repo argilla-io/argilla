@@ -161,17 +161,12 @@ class SearchEngine:
         next_page_token: Optional[str] = None,
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
-        bool_query = {"must": []}
+
         if isinstance(query, str):
-            # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
-            text_query = {
-                "simple_query_string": {
-                    "query": query,
-                    "default_operator": "and",
-                    "fields": [f"fields.{field.name}" for field in dataset.fields],
-                }
-            }
-        elif not query.text.field:
+            query = Query(text=TextFieldQuery(q=query))
+
+        bool_query = {"must": []}
+        if not query.text.field:
             # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-combined-fields-query.html
             text_query = {
                 "combined_fields": {
