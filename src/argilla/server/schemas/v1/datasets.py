@@ -17,8 +17,8 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, conlist, constr, validator
-from pydantic import Field as ModelField
+from pydantic import BaseModel, PositiveInt, conlist, constr, validator
+from pydantic import Field as PydanticField
 
 try:
     from typing import Annotated, Literal
@@ -46,6 +46,16 @@ QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
+
+LABEL_SELECTION_OPTIONS_MIN_ITEMS = 2
+LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
+LABEL_SELECTION_VALUE_MIN_LENGHT = 1
+LABEL_SELECTION_VALUE_MAX_LENGHT = 200
+LABEL_SELECTION_TEXT_MIN_LENGTH = 1
+LABEL_SELECTION_TEXT_MAX_LENGTH = 500
+LABEL_SELECTION_DESCRIPTION_MIN_LENGTH = 1
+LABEL_SELECTION_DESCRIPTION_MAX_LENGTH = 1000
+LABEL_SELECTION_LABEL_DESCRIPTION_MAX_LENGTH = 100
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
@@ -148,13 +158,55 @@ class RatingQuestionSettings(BaseModel):
     )
 
 
+class LabelSelectionQuestionSettingsOption(BaseModel):
+    value: constr(
+        min_length=LABEL_SELECTION_VALUE_MIN_LENGHT,
+        max_length=LABEL_SELECTION_VALUE_MAX_LENGHT,
+    )
+    text: constr(
+        min_length=LABEL_SELECTION_TEXT_MIN_LENGTH,
+        max_length=LABEL_SELECTION_TEXT_MAX_LENGTH,
+    )
+    description: Optional[
+        constr(
+            min_length=LABEL_SELECTION_DESCRIPTION_MIN_LENGTH,
+            max_length=LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
+        )
+    ] = None
+
+
+class LabelSelectionQuestionSettings(BaseModel):
+    type: Literal[QuestionType.label_selection]
+    options: conlist(
+        item_type=LabelSelectionQuestionSettingsOption,
+        min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
+        max_items=LABEL_SELECTION_OPTIONS_MAX_ITEMS,
+    )
+    visible_options: Optional[PositiveInt] = None
+
+
+class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
+    type: Literal[QuestionType.multi_label_selection]
+
+
+QuestionSettings = Annotated[
+    Union[
+        TextQuestionSettings,
+        RatingQuestionSettings,
+        LabelSelectionQuestionSettings,
+        MultiLabelSelectionQuestionSettings,
+    ],
+    PydanticField(discriminator="type"),
+]
+
+
 class Question(BaseModel):
     id: UUID
     name: str
     title: str
     description: Optional[str]
     required: bool
-    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
+    settings: QuestionSettings
     inserted_at: datetime
     updated_at: datetime
 
@@ -183,7 +235,7 @@ class QuestionCreate(BaseModel):
         )
     ]
     required: Optional[bool]
-    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
+    settings: QuestionSettings
 
 
 class ResponseValue(BaseModel):
@@ -248,7 +300,7 @@ class UserDiscardedResponseCreate(BaseModel):
 
 UserResponseCreate = Annotated[
     Union[UserSubmittedResponseCreate, UserDiscardedResponseCreate],
-    ModelField(discriminator="status"),
+    PydanticField(discriminator="status"),
 ]
 
 

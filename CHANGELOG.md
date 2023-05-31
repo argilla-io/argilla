@@ -23,6 +23,8 @@ These are the section headers that we use:
 
 - Added boolean `use_markdown` property to `TextFieldSettings` model.
 - Added boolean `use_markdown` property to `TextQuestionSettings` model.
+- Added `LabelSelectionQuestionSettings` class allowing to create label selection (single-choice) questions in the API.
+- Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API.
 
 ## [1.8.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 

@@ -13,8 +13,10 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import TYPE_CHECKING, Callable
 from uuid import UUID, uuid4
 
+import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import Response, User
 from fastapi.testclient import TestClient
@@ -23,6 +25,8 @@ from sqlalchemy.orm import Session
 from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
+    LabelSelectionQuestionFactory,
+    MultiLabelSelectionQuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
@@ -30,34 +34,95 @@ from tests.factories import (
     WorkspaceFactory,
 )
 
+if TYPE_CHECKING:
+    from argilla.server.models import Dataset
 
-def test_create_record_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
+
+def create_text_questions(dataset: "Dataset") -> None:
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
-    record = RecordFactory.create(dataset=dataset)
-    response_json = {
-        "values": {
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        "status": "submitted",
-    }
 
+def create_rating_questions(dataset: "Dataset") -> None:
+    RatingQuestionFactory.create(name="rating_question", dataset=dataset)
+
+
+def create_label_selection_questions(dataset: "Dataset") -> None:
+    LabelSelectionQuestionFactory.create(name="label_selection_question", dataset=dataset)
+
+
+def create_multi_label_selection_questions(dataset: "Dataset") -> None:
+    MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question", dataset=dataset)
+
+
+@pytest.mark.parametrize(
+    "create_questions_func, responses",
+    [
+        (
+            create_text_questions,
+            {
+                "values": {
+                    "input_ok": {"value": "yes"},
+                    "output_ok": {"value": "yes"},
+                },
+            },
+        ),
+        (
+            create_rating_questions,
+            {
+                "values": {
+                    "rating_question": {"value": 5},
+                },
+            },
+        ),
+        (
+            create_label_selection_questions,
+            {
+                "values": {
+                    "label_selection_question": {"value": "option1"},
+                },
+            },
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question": {"value": ["option1"]},
+                },
+            },
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question": {"value": ["option1", "option2"]},
+                },
+            },
+        ),
+    ],
+)
+def test_create_record_response(
+    client: TestClient,
+    db: Session,
+    admin: User,
+    admin_auth_header: dict,
+    create_questions_func: Callable[["Dataset"], None],
+    responses: dict,
+):
+    dataset = DatasetFactory.create()
+    create_questions_func(dataset)
+    record = RecordFactory.create(dataset=dataset)
+
+    response_json = {**responses, "status": "submitted"}
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
 
+    response_body = response.json()
     assert response.status_code == 201
     assert db.query(Response).count() == 1
-
-    response_body = response.json()
     assert db.get(Response, UUID(response_body["id"]))
     assert response_body == {
         "id": str(UUID(response_body["id"])),
-        "values": {
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
+        "values": responses["values"],
         "status": "submitted",
         "user_id": str(admin.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
@@ -67,10 +132,9 @@ def test_create_record_response(client: TestClient, db: Session, admin: User, ad
 
 def test_create_record_response_with_extra_question_responses(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create()
-    TextQuestionFactory.create(name="input_ok", dataset=dataset, required=False)
-    TextQuestionFactory.create(name="output_ok", dataset=dataset, required=False)
-
+    create_text_questions(dataset)
     record = RecordFactory.create(dataset=dataset)
+
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
@@ -78,27 +142,85 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
         },
         "status": "submitted",
     }
-
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
     assert response.status_code == 422
     assert response.json() == {"detail": "Error: found responses for non configured questions: ['unknown_question']"}
 
 
-def test_create_record_response_with_wrong_response_value(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.parametrize(
+    "create_questions_func, responses, expected_error_msg",
+    [
+        (
+            create_text_questions,
+            {
+                "values": {
+                    "input_ok": {"value": True},
+                    "output_ok": {"value": False},
+                },
+            },
+            "Expected text value, found <class 'bool'>",
+        ),
+        (
+            create_rating_questions,
+            {
+                "values": {
+                    "rating_question": {"value": "wrong-rating-value"},
+                },
+            },
+            "'wrong-rating-value' is not a valid option.\nValid options are: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
+        ),
+        (
+            create_label_selection_questions,
+            {
+                "values": {
+                    "label_selection_question": {"value": False},
+                },
+            },
+            "False is not a valid option.\nValid options are: ['option1', 'option2', 'option3']",
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question": {"value": "wrong-type"},
+                },
+            },
+            "Expected list of values, found <class 'str'>",
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question": {"value": ["option4", "option5"]},
+                },
+            },
+            "['option4', 'option5'] are not valid options.\nValid options are: ['option1', 'option2', 'option3']",
+        ),
+        (
+            create_multi_label_selection_questions,
+            {"values": {"multi_label_selection_question": {"value": []}}},
+            "Expected list of values, found empty list",
+        ),
+    ],
+)
+def test_create_record_response_with_wrong_response_value(
+    client: TestClient,
+    db: Session,
+    admin_auth_header: dict,
+    create_questions_func: Callable[["Dataset"], None],
+    responses: dict,
+    expected_error_msg: str,
+):
     dataset = DatasetFactory.create()
-    RatingQuestionFactory.create(name="rating_question", dataset=dataset, required=False)
+    create_questions_func(dataset)
     record = RecordFactory.create(dataset=dataset)
-    response_json = {
-        "values": {
-            "rating_question": {"value": "wrong-rating-value"},
-        },
-        "status": "submitted",
-    }
+
+    response_json = {**responses, "status": "submitted"}
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
     assert response.status_code == 422
-    assert response.json() == {
-        "detail": "'wrong-rating-value' is not a valid option.\nValid options are: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
-    }
+    assert response.json() == {"detail": expected_error_msg}
 
 
 def test_create_submitted_record_response_with_missing_required_questions(
