@@ -105,7 +105,7 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: $base-space;
+  gap: 12px;
 }
 .title-area {
   display: flex;

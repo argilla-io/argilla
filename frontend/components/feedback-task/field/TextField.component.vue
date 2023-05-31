@@ -8,7 +8,7 @@
           class="text_field_component__copy-button"
           @click.prevent="$copyToClipboard(fieldText)"
         >
-          <svgicon name="copy" width="16" height="16" />
+          <svgicon color="#acacac" name="copy" width="16" height="16" />
         </BaseButton>
       </BaseActionTooltip>
     </div>
@@ -54,7 +54,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     gap: $base-space;
-    color: $black-37;
+    color: $black-87;
   }
   .content-area {
     white-space: pre-wrap;
