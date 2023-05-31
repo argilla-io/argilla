@@ -13,7 +13,7 @@ fastjsonschema==2.15.3
 furo==2022.6.4.1
 h11==0.9.0
 httpcore==0.11.1
-httpx==0.15.5
+httpx
 idna==3.3
 imagesize==1.4.1
 importlib-metadata==4.12.0
@@ -21,9 +21,9 @@ importlib-resources==5.8.0
 jinja2==3.1.2
 jsonschema==4.6.1
 jupyter-client==7.3.4
-jupyter-core==4.10.0
+jupyter-core
 jupyterlab-pygments==0.2.2
-markdown-it-py==2.1.0
+markdown-it-py
 markupsafe==2.1.1
 mdit-py-plugins==0.3.0
 mdurl==0.1.1
@@ -65,7 +65,7 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 sphinxext-opengraph==0.6.3
 tinycss2==1.1.1
-tornado==6.2
+tornado
 tqdm==4.64.0
 traitlets==5.3.0
 typing-extensions==4.3.0

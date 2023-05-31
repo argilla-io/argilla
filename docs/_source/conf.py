@@ -38,7 +38,7 @@ try:
 
     version_ = rg.__version__
 except ModuleNotFoundError:
-    version_ = os.environ["VERSION"]
+    version_ = os.environ.get("VERSION")
 
 
 project = "Argilla"
