@@ -23,7 +23,7 @@ from argilla.metrics.models import MetricSummary
 
 _UNUSED_METRIC_WARNING_MESSAGE = (
     "This metric won't be computed anymore and this function will disappear in a next release!!\n"
-    "The metric could return emtpy results for new Argilla servers"
+    "The metric could return empty results for new Argilla servers"
 )
 
 
