@@ -31,6 +31,7 @@ from pydantic import (
     StrictStr,
     ValidationError,
     create_model,
+    parse_obj_as,
     validator,
 )
 from tqdm import tqdm
@@ -402,7 +403,7 @@ class FeedbackDataset:
             first_batch = datasets_api_v1.get_records(
                 client=httpx_client, id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE
             ).parsed
-            self.__records = [FeedbackRecord(**item.dict()) for item in first_batch.items]
+            self.__records = parse_obj_as(List[FeedbackRecord], first_batch.items)
             current_batch = 1
             # TODO(alvarobartt): use `total` from Argilla Metrics API
             with tqdm(
@@ -416,7 +417,7 @@ class FeedbackDataset:
                         offset=FETCHING_BATCH_SIZE * current_batch,
                         limit=FETCHING_BATCH_SIZE,
                     ).parsed
-                    records = [FeedbackRecord(**item.dict()) for item in batch.items]
+                    records = parse_obj_as(List[FeedbackRecord], batch.items)
                     self.__records += records
                     current_batch += 1
                     pbar.update(1)
