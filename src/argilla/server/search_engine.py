@@ -89,7 +89,6 @@ class SearchResponseItem:
 @dataclasses.dataclass
 class SearchResponses:
     items: List[SearchResponseItem]
-    next_page_token: Any
 
 
 @dataclasses.dataclass
@@ -158,7 +157,6 @@ class SearchEngine:
         query: Union[Query, str],
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         limit: int = 100,
-        next_page_token: Optional[str] = None,
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
@@ -198,7 +196,8 @@ class SearchEngine:
             "query": {"bool": bool_query},
             "sort": ["_score", {"id": "asc"}],
         }
-
+        # TODO: Work on search pagination after endpoint integration
+        next_page_token = None
         if next_page_token:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
             body["search_after"] = next_page_token
@@ -212,7 +211,7 @@ class SearchEngine:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
             next_page_token = hit.get("_sort")
 
-        return SearchResponses(items=items, next_page_token=next_page_token)
+        return SearchResponses(items=items)
 
     def _field_mapping_for_question(self, question: Question):
         settings = question.parsed_settings
