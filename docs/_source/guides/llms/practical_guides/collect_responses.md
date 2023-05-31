@@ -16,7 +16,7 @@ feedback = rg.FeedbackDataset.from_argilla("demo_feedback", workspace="recognai"
 Each record in `feedback.records` will have an attribute `responses` where you will find a list with all the responses to that record, if any. Each response will have the following attributes:
 
 - `user_id`: contains the Argilla user ID of the annotator
-- `values`: contains the responses given by the annotator in the shape of a dictinary, where the key is the name of the question and the value is another dictionary where you can find the answer to the question under the key `value`.
+- `values`: contains the responses given by the annotator in the shape of a dictionary, where the key is the name of the question and the value is another dictionary where you can find the answer to the question under the key `value`.
 - `status`: contains the status of the response i.e., whether it is `submitted`, or `discarded`.
 
 
@@ -30,9 +30,9 @@ Remember to only take into account responses with the `submitted` status.
 
 If your dataset does have records with more than one `submitted` response, you will need to unify the responses before using the data for training.
 
-Ratings often represent a subjective value, meaning that there is no wrong or right answer for these questions. However, since a `RatingQuestion` has a closed set of options, their results can help with visualizing the disagreement between annotators. On the other hand, texts are unique and subjective, making it almost impossible that two annotators will give the same answer for a `TextQuestion`. For this reason, we don't recommend using these responses to measure disagreements.
+Ratings often represent a subjective value, meaning that there is no wrong or right answer to these questions. However, since a `RatingQuestion` has a closed set of options, their results can help with visualizing the disagreement between annotators. On the other hand, texts are unique and subjective, making it almost impossible that two annotators will give the same answer for a `TextQuestion`. For this reason, we don't recommend using these responses to measure disagreements.
 
-If you want to do an initial exploration of the responses, you can use your preferred library for plotting data. Here are some simple examples of some visualisations that you could do to evaluate the potential disagreement between annotators:
+If you want to do an initial exploration of the responses, you can use your preferred library for plotting data. Here are some simple examples of some visualizations that you could do to evaluate the potential disagreement between annotators:
 
 ```python
 # plot 1: submitted responses per record
@@ -67,7 +67,7 @@ for record_ix,record in enumerate(feedback):
                 list_values.append({"record": str(record_ix+1), "annotator": str(response_ix+1), "value": response.values["rating"].value})
 
 
-fig = px.box(list_values, x='annotator', y='value', color='annotator', points='all', hover_data='record')
+fig = px.box(list_values, x="annotator", y="value", color="annotator", points="all", hover_data="record")
 fig.update_yaxes(dtick=1)
 fig.show()
 ```
@@ -76,22 +76,22 @@ fig.show()
 
 
 ```{hint}
-If you feel that the disagreement between annotators is too high, especially for questions that aren't as subjective, this is a good sign that you should review your annotation guidelines and/or the questions and options.
+If you feel that the disagreement between annotators is too high, especially for questions that aren"t as subjective, this is a good sign that you should review your annotation guidelines and/or the questions and options.
 ```
 
 ## Solve disagreements
 
 In this section, we explore some techniques you can use to solve disagreements in the responses. These are not the only possible techniques and you should choose them carefully according to the needs of your project and annotation team.
 
-Once you have unified your responses, you will have a dataset that's ready for [fine-tuning](fine_tune.ipynb). Remember to saved your unified dataset following one of the methods explained in [Export a Feedback dataset](export_dataset.ipynb).
+Once you have unified your responses, you will have a dataset that"s ready for [fine-tuning](fine_tune.ipynb). Remember to save your unified dataset following one of the methods explained in [Export a Feedback dataset](export_dataset.ipynb).
 
 
 ### Unifying ratings
 #### Majority vote
-If a record has more than 2 submitted responses, you can take the most popular option as the final score. In the case of a tie, you can break it choosing a random option or the lowest / highest score.
+If a record has more than 2 submitted responses, you can take the most popular option as the final score. In the case of a tie, you can break it by choosing a random option or the lowest / highest score.
 
 #### Mean score
-For this technique you can take all responses and calculate the mean score. That will be final rating.
+For this technique, you can take all responses and calculate the mean score. That will be the final rating.
 
 #### Lowest / highest score
 Depending on how the question is formulated, you can take the `max` or `min` value. That will be the final rating.

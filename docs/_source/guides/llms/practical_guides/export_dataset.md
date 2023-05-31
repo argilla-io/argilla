@@ -27,9 +27,9 @@ dataset.push_to_argilla(name="my-dataset-clone", workspace="my-workspace")
 
 ## Push to the Hugging Face Hub
 
-It is also possible to save and load a `FeedbackDataset` into the Hugging Face Hub for persistance. The methods `push_to_huggingface` and `from_huggingface` allow you to push to or pull from the Hugging Face Hub, respectively.
+It is also possible to save and load a `FeedbackDataset` into the Hugging Face Hub for persistence. The methods `push_to_huggingface` and `from_huggingface` allow you to push to or pull from the Hugging Face Hub, respectively.
 
-When pushing a `FeedbackDataset` to the HuggingFace Hub, one can provide the param `generate_card` to generate and push the Dataset Card too. `generate_card` is by deafult `True`, so it will always be generated unless `generate_card=False` is specified.
+When pushing a `FeedbackDataset` to the HuggingFace Hub, one can provide the param `generate_card` to generate and push the Dataset Card too. `generate_card` is by default `True`, so it will always be generated unless `generate_card=False` is specified.
 
 ```python
 # Push to HuggingFace Hub

@@ -4,7 +4,7 @@ After [collecting the responses](/guides/llms/practical_guides/collect_responses
 
 ## Supervised finetuning
 
-The goal of Supervised Fine Tuning (SFT) is to optimize this pre-trained model to generate the responses that users are looking for. After pre-training a causal language model, it can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction setting. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](/guides/llms/conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
+The goal of Supervised Fine Tuning (SFT) is to optimize this pre-trained model to generate the responses that users are looking for. After pre-training a causal language model, it can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](/guides/llms/conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
 
 ### Data
 
@@ -71,7 +71,7 @@ feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly
 
 data = {"instruction": [], "context": [], "response": []}
 for entry in feedback_dataset:
-    if entry.responses is not None and len(entry.responses) > 0:
+    if entry.responses:
         res = entry.responses[0].values
         data["instruction"].append(res["new-instruction"].value)
         data["context"].append(res["new-context"].value)
@@ -146,7 +146,7 @@ feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly
 
 data = {"instruction": [], "context": [], "poorer_responses": [], "better_response": []}
 for entry in feedback_dataset:
-    if entry.responses is not None and len(entry.responses) > 0:
+    if entry.responses:
         res = entry.responses[0].values
         if res["new-response"].value != entry.fields["original-response"]:
             data["instruction"].append(res["new-instruction"].value)
