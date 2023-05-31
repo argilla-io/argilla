@@ -146,6 +146,20 @@ class LoadDatasets:
             },
         )
 
+    @staticmethod
+    def load_curated_dolly_en():
+        print("Loading databricks-dolly-15k-curated-en dataset")
+
+        # Load dataset from the hub
+        dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en", split="train[:100]")
+
+        # Remove the `responses` from every `FeedbackRecord` to upload just the `fields`
+        for record in dataset.records:
+            record.responses = []
+
+        # Read in dataset, assuming it's a dataset for token classification
+        dataset.push_to_argilla(name="databricks-dolly-15k-curated-en")
+
 
 if __name__ == "__main__":
     API_KEY = sys.argv[1]
@@ -160,15 +174,15 @@ if __name__ == "__main__":
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
 
-                    ld.load_sst_sentiment_explainability()
+                    ld.load_curated_dolly_en()
+
                     if LOAD_DATASETS.lower() == "single":
                         break
-
                     ld.load_news_text_summarization()
                     ld.load_news_programmatic_labeling()
                     ld.load_gutenberg_spacy_ner_monitoring()
+                    ld.load_sst_sentiment_explainability()
                     break
-
             except requests.exceptions.ConnectionError:
                 pass
             except Exception as e:

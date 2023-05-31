@@ -19,14 +19,18 @@ import Vue from "vue";
 const getters = {};
 
 const actions = {
-  notify(_, { message, type, numberOfChars, buttonText, onClick }) {
+  notify(_, { message, type, numberOfChars, buttonText, onClick, onClose }) {
     return Vue.$toast.open({
       message,
       numberOfChars,
       buttonText,
       onClick,
+      onClose,
       type: type || "default",
     });
+  },
+  clear() {
+    return Vue.$toast.clear();
   },
 };
 

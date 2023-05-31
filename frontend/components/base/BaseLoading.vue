@@ -84,12 +84,12 @@ export default {
   background: $bg;
   height: 100vh;
   width: 100vw;
-  z-index: 1;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 3;
 }
 .spinner {
   width: 200px;

@@ -14,9 +14,19 @@
 
 from typing import Callable
 
+from sqlalchemy.orm.session import Session
+
+from argilla.server.contexts import accounts
 from argilla.server.errors import ForbiddenOperationError
-from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
-from argilla.server.schemas.datasets import Dataset
+from argilla.server.models import (
+    Dataset,
+    Record,
+    Response,
+    User,
+    UserRole,
+    Workspace,
+    WorkspaceUser,
+)
 
 PolicyAction = Callable[[User], bool]
 
@@ -49,6 +59,21 @@ class WorkspacePolicy:
     @classmethod
     def delete(cls, workspace: Workspace) -> PolicyAction:
         return lambda actor: actor.role == UserRole.admin
+
+
+class WorkspacePolicyV1:
+    @classmethod
+    def get(cls, workspace: Workspace) -> PolicyAction:
+        return lambda actor: (
+            actor.is_admin
+            or bool(
+                accounts.get_workspace_user_by_workspace_id_and_user_id(
+                    Session.object_session(actor),
+                    workspace.id,
+                    actor.id,
+                )
+            )
+        )
 
 
 class UserPolicy:
@@ -102,6 +127,90 @@ class DatasetPolicy:
     def copy(cls, dataset: Dataset) -> PolicyAction:
         is_get_allowed = cls.get(dataset)
         return lambda actor: actor.is_admin or is_get_allowed(actor) and cls.create(actor)
+
+
+class DatasetPolicyV1:
+    @classmethod
+    def list(cls, actor: User) -> bool:
+        return True
+
+    @classmethod
+    def get(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: (
+            actor.is_admin
+            or bool(
+                accounts.get_workspace_user_by_workspace_id_and_user_id(
+                    Session.object_session(actor),
+                    dataset.workspace_id,
+                    actor.id,
+                )
+            )
+        )
+
+    @classmethod
+    def list_dataset_records_will_all_responses(cls, dataset: Dataset) -> PolicyAction:
+        return lambda actor: actor.is_admin
+
+    @classmethod
+    def create(cls, actor: User) -> bool:
+        return actor.is_admin
+
+    @classmethod
+    def create_field(cls, actor: User) -> bool:
+        return actor.is_admin
+
+    @classmethod
+    def create_question(cls, actor: User) -> bool:
+        return actor.is_admin
+
+    @classmethod
+    def create_records(cls, actor: User) -> bool:
+        return actor.is_admin
+
+    @classmethod
+    def publish(cls, actor: User) -> bool:
+        return actor.is_admin
+
+    @classmethod
+    def delete(cls, actor: User) -> bool:
+        return actor.is_admin
+
+
+class FieldPolicyV1:
+    @classmethod
+    def delete(cls, actor: User) -> bool:
+        return actor.is_admin
+
+
+class QuestionPolicyV1:
+    @classmethod
+    def delete(cls, actor: User) -> bool:
+        return actor.is_admin
+
+
+class RecordPolicyV1:
+    @classmethod
+    def create_response(cls, record: Record) -> PolicyAction:
+        return lambda actor: (
+            actor.is_admin
+            or bool(
+                accounts.get_workspace_user_by_workspace_id_and_user_id(
+                    Session.object_session(actor),
+                    record.dataset.workspace_id,
+                    actor.id,
+                )
+            )
+        )
+
+
+class ResponsePolicyV1:
+    @classmethod
+    def update(cls, response: Response) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.id == response.user_id
+
+    @classmethod
+    def delete(cls, response: Response) -> PolicyAction:
+        return lambda actor: actor.is_admin or actor.id == response.user_id
 
 
 class DatasetSettingsPolicy:

@@ -70,25 +70,6 @@ def bulk(
     return BulkResponse.parse_obj(response)
 
 
-async def async_bulk(
-    client: AuthenticatedClient,
-    name: str,
-    json_body: Union[
-        TextClassificationBulkData,
-        TokenClassificationBulkData,
-        Text2TextBulkData,
-    ],
-) -> Response[BulkResponse]:
-    path = f"/api/datasets/{name}/{_TASK_TO_ENDPOINT[type(json_body)]}:bulk"
-
-    response = await client.post_async(
-        path=path,
-        json=json_body.dict(by_alias=True),
-    )
-
-    return build_bulk_response(response, name=name, body=json_body)
-
-
 def build_bulk_response(response: httpx.Response, name: str, body: Any) -> Response[BulkResponse]:
     if 200 <= response.status_code < 400:
         return Response(
