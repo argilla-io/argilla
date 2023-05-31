@@ -96,6 +96,10 @@ class SearchEngine:
         index_name = self._index_name_for_dataset(dataset)
         await self.client.indices.create(index=index_name, body=dict(mappings=mappings))
 
+    async def delete_index(self, dataset: Dataset):
+        index_name = self._index_name_for_dataset(dataset)
+        await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
+
     def _field_mapping_for_question(self, question: Question):
         settings = question.parsed_settings
 
