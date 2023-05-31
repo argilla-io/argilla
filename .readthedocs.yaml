@@ -22,4 +22,3 @@ python:
   install:
     - requirements: docs/_source/requirements.txt
     -  .[listeners]
- 
