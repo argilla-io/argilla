@@ -23,12 +23,13 @@ These are the section headers that we use:
 
 - Added boolean `use_markdown` property to `TextFieldSettings` model.
 - Added boolean `use_markdown` property to `TextQuestionSettings` model.
-- Added `LabelSelectionQuestionSettings` class allowing to create label selection (single-choice) questions in the API.
-- Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API.
+- Added `LabelSelectionQuestionSettings` class allowing to create label selection (single-choice) questions in the API ([#3005])
+- Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API ([#3010]).
 
 ## Changed
 
-- Database setup for unit tests. Now the unit tests use a different database than the one used by the local Argilla server ([#2987]).
+- Database setup for unit tests. Now the unit tests use a different database than the one used by the local Argilla server ([#2993]).
+- Updated `alembic` setup to be able to autogenerate revision/migration scripts using SQLAlchemy metadata from Argilla server models ([#3044])
 
 ## [1.8.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
