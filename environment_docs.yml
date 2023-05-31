@@ -67,7 +67,7 @@ dependencies:
       - jupyterlab-pygments==0.2.2
       - markdown-it-py==2.1.0
       - markupsafe==2.1.1
-      - mdit-py-plugins==0.3.0
+      - mdit-py-plugins==0.3.5
       - mdurl==0.1.1
       - mistune==0.8.4
       - myst-parser==0.16.1
@@ -95,13 +95,13 @@ dependencies:
       - snowballstemmer==2.2.0
       - soupsieve==2.3.2.post1
       - sphinx==4.5.0
-      - sphinx-basic-ng==0.0.1a12
+      - sphinx-basic-ng==1.0.0b1
       - sphinx-copybutton==0.5.0
       - sphinx-design==0.2.0
       - sphinx-notfound-page==0.8.3
       - sphinxcontrib-applehelp==1.0.2
       - sphinxcontrib-devhelp==1.0.2
-      - sphinxcontrib-htmlhelp==2.0.0
+      - sphinxcontrib-htmlhelp==2.0.1
       - sphinxcontrib-jsmath==1.0.1
       - sphinxcontrib-qthelp==1.0.3
       - sphinxcontrib-serializinghtml==1.1.5

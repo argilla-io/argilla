@@ -199,11 +199,11 @@ nbsphinx_prolog = (
 """
 )
 
-nbsphinx_epilog = f"""
-.. raw:: html
+# nbsphinx_epilog = f"""
+# .. raw:: html
 
-    {next_steps_html}
-"""
+#     {next_steps_html}
+# """
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -268,9 +268,16 @@ html_theme_options = {
         "color-card-bg": "#ffffff",
         "color-card-bg-hover": "#484848",
         "color-card-text": "#ffffff",
+        "sd-color-card-border": "#dadada",
         "color-tuto-card-bg": "#ffffff",
         "color-tuto-card-bg-hover": "#ffffff",
         "color-tuto-card-text": "#484848",
+        "sd-color-tabs-underline-active": "#FF675F",
+        "sd-color-tabs-label-active": "#FF675F",
+        "sd-color-tabs-label-inactive": "#6d6d6d",
+        "sd-color-tabs-label-hover": "#6d6d6d",
+        "sd-color-tabs-underline-hover": "#6d6d6d",
+        "sd-fontsize-tabs-label": "0.9rem",
     },
     "dark_css_variables": {
         "color-sidebar-background": "#131416",
@@ -305,9 +312,10 @@ html_theme_options = {
         "color-img-background": "#18181a",
         "sidebar-tree-space-above": "0",
         "sidebar-caption-space-above": "0",
-        "color-card-bg": "##27282a",
+        "color-card-bg": "#27282a",
         "color-card-bg-hover": "#27282a",
         "color-card-text": "#ffffff",
+        "sd-color-card-border": "#27282a",
         "color-tuto-card-bg": "#27282a",
         "color-tuto-card-bg-hover": "#3b3b3f",
         "color-tuto-card-text": "#ffffff",

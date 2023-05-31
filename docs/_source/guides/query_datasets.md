@@ -12,6 +12,104 @@ import argilla as rg
 rg.load("my_dataset", query="text.exact:example")
 ```
 
+Also, we provide a brief summary of the syntax, but for a complete overview, dive deep into the docs below.
+
+::::{tab-set}
+
+:::{tab-item} text and inputs
+
+The `text` field uses Elasticsearch's [standard analyzer](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/analysis-standard-analyzer.html) that ignores capitalization and removes most of the punctuation;
+The `text.exact` field uses the [whitespace analyzer](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/analysis-whitespace-analyzer.html) that differentiates between lower and upper case, and does take into account punctuation;
+
+- `text:dog.` or `text:fox`: matches both of the records.
+- `text.exact:dog` or `text.exact:FOX`: matches none of the records.
+- `text.exact:dog.` or `text.exact:fox`: matches only the first record.
+- `text.exact:DOG` or `text.exact:FOX\!`: matches only the second record.
+
+Similar reasoning holds for the `inputs` to look for records in which the *subject*-key contains the word *news*, you would search for
+
+- `inputs.subject:news`
+
+Again, as with the `text` field, you can also use the white space analyzer to perform more fine-grained searches by specifying the `exact` field.
+
+- `inputs.subject.exact:NEWS`
+
+![text2text_record](../../_static/reference/webapp/features-search.png)
+:::
+
+:::{tab-item} metadata and filters
+
+Imagine you provided the split to which the record belongs as metadata, that is `metadata={"split": "train"}` or `metadata={"split": "test"}`.
+Then you could only search your training data by specifying the corresponding field in your query:
+
+- `metadata.split:train`
+
+Just like the metadata, you can also use the filter fields in your query.
+A few examples to emulate the filters in the query string are:
+
+- `status:Validated`
+- `annotated_as:HAM`
+- `predicted_by:Model A`
+
+Ranges can be specified for date, numeric or string fields.
+Inclusive ranges are specified with square brackets and exclusive ranges are with curly brackets:
+
+- `score:[0.5 TO 0.6]`
+- `score:{0.9 TO *}`
+- `event_timestamp:[1984-01-01T01:01:01.000000 TO *]`
+- `last_updated:{* TO 1984-01-01T01:01:01.000000}`
+
+![text2text_record](../../_static/reference/webapp/features-search.png)
+:::
+
+:::{tab-item} operators
+
+You can combine an arbitrary amount of terms and fields in your search using the familiar boolean operators `AND`, `OR` and `NOT`.
+Following examples showcase the power of these operators:
+
+- `text:(quick AND fox)`: Returns records that contain the word *quick* and *fox*. The `AND` operator is the default operator, so `text:(quick fox)` is equivalent.
+- `text:(quick OR brown)`: Returns records that contain either the word *quick* or *brown*.
+- `text:(quick AND fox AND NOT news)`: Returns records that contain the words *quick* and *fox*, **and do not** contain *news*.
+- `metadata.split:train AND text:fox`: Returns records that contain the word *fox* and that have the metadata *"split: train"*.
+- `NOT _exists_:metadata.split` : Returns records that don't have a metadata *split*.
+
+![text2text_record](../../_static/reference/webapp/features-search.png)
+:::
+
+:::{tab-item} regex
+
+Regular expression patterns can be embedded in the query string by wrapping them in forward slashes "/":
+
+- `text:/joh?n(ath[oa]n)/`: Matches *jonathon*, *jonathan*, *johnathon*, and *johnathan*.
+
+The supported regular expression syntax is explained in the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/regexp-syntax.html).
+
+![text2text_record](../../_static/reference/webapp/features-search.png)
+:::
+
+:::{tab-item} fuzzy
+
+You can search for terms that are similar to, but not exactly like the search terms, using the *fuzzy* operator.
+This is useful to cover human misspellings:
+
+- `text:quikc~`: Matches quick and quikc.
+
+![text2text_record](../../_static/reference/webapp/features-search.png)
+:::
+
+:::{tab-item} wildcards
+
+Wildcard searches can be run on individual search terms, using `?` to replace a single character, and `*` to replace zero or more characters:
+
+- `text:(qu?ck bro*)`
+- `text.exact:"Lazy Dog*"`: Matches, for example, *"Lazy Dog"*, *"Lazy Dog."*, or *"Lazy Dogs"*.
+- `inputs.\*:news`: Searches all input fields for the word *news*.
+
+![text2text_record](../../_static/reference/webapp/features-search.png)
+:::
+
+::::
+
 ## Search fields
 
 An important concept when searching with Elasticsearch is the *field* concept.
