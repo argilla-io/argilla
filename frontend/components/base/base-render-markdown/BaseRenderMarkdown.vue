@@ -106,4 +106,12 @@ export default {
 .hljs-template-variable {
   color: #a0c7ee;
 }
+.hljs-built_in {
+  color: #8fbb62;
+}
+.hljs-tag,
+.hljs-tag .hljs-attr,
+.hljs-tag .hljs-name {
+  color: #c0a5a5;
+}
 </style>
