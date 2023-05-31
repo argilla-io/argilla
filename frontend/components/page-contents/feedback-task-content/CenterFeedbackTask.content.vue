@@ -64,7 +64,6 @@ export default {
             questionName,
             componentType
           );
-
           return {
             id: questionId,
             name: questionName,
@@ -137,6 +136,7 @@ export default {
           const optionText = option.text ?? option.value;
           const paramObject = {
             value: defaultValueByComponent,
+            value_in_api: option.value ?? defaultValueByComponent,
             text: optionText,
             prefixId: questionName,
             suffixId: option.value,
@@ -149,13 +149,21 @@ export default {
       return [
         this.factoryOption({
           value: "",
+          value_in_api: "",
           prefixId: questionName,
         }),
       ];
     },
-    factoryOption({ value = null, text = "", prefixId, suffixId }) {
+    factoryOption({
+      value = null,
+      value_in_api = null,
+      text = "",
+      prefixId,
+      suffixId,
+    }) {
       return {
         id: `${prefixId}${suffixId ? `_${suffixId}` : ""}`,
+        value_in_api,
         value,
         text,
       };

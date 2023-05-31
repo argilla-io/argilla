@@ -27,7 +27,7 @@
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
           :title="input.question"
           :placeholder="input.placeholder"
-          v-model="input.options[0].text"
+          v-model="input.options[0].value_in_api"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           @on-error="onError"
@@ -443,12 +443,39 @@ export default {
 
               switch (componentType) {
                 case COMPONENT_TYPE.SINGLE_LABEL:
+                  formattedOptions = formattedOptions.map((option) => {
+                    if (option.value_in_api === newResponse.value) {
+                      return {
+                        id: option.id,
+                        text: option.text,
+                        value: true,
+                        value_in_api: option.value_in_api,
+                      };
+                    }
+                    return {
+                      id: option.id,
+                      text: option.text,
+                      value: false,
+                      value_in_api: option.value_in_api,
+                    };
+                  });
+                  break;
                 case COMPONENT_TYPE.RATING:
                   formattedOptions = formattedOptions.map((option) => {
                     if (option.text === newResponse.value) {
-                      return { id: option.id, text: option.text, value: true };
+                      return {
+                        id: option.id,
+                        text: option.text,
+                        value: true,
+                        value_in_api: option.value_in_api,
+                      };
                     }
-                    return { id: option.id, text: option.text, value: false };
+                    return {
+                      id: option.id,
+                      text: option.text,
+                      value: false,
+                      value_in_api: option.value_in_api,
+                    };
                   });
                   break;
                 case COMPONENT_TYPE.FREE_TEXT:
@@ -457,6 +484,7 @@ export default {
                       id: formattedOptions[0].id,
                       text: newResponse.value,
                       value: newResponse.value,
+                      value_in_api: newResponse.value,
                     },
                   ];
                   break;
@@ -500,7 +528,9 @@ export default {
         const isSelectedOptionNotEmpty = selectedOption ?? false;
 
         if (isSelectedOptionNotEmpty) {
-          responseByQuestionName[input.name] = { value: selectedOption.text };
+          responseByQuestionName[input.name] = {
+            value: selectedOption.value_in_api,
+          };
         }
       });
       return responseByQuestionName;
