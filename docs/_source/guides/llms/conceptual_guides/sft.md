@@ -1,8 +1,8 @@
 # Collecting demonstration data
-This guide explains how to implement workflows for collecting demonstration data. As covered in the ["Data Collection for Large Language Models" guide](rlhf.md), the importance of demonstration data - **prompts and demonstrations** - is paramount for improving LLMs. This data aids in supervised fine-tuning, also known as instruction-tuning or behaviour cloning, where models learn to respond based on human examples. Despite being seen as labor-intensive, recent research like the LIMA work indicates that even a small set of 1,000 diverse, high-quality examples can efficiently train a model. Argilla Feedback was developed to **simplify this process, distributing it among multiple labelers in your organization**.
+This guide explains how to implement workflows for collecting demonstration data. As covered in the ["Data Collection for Large Language Models" guide](rlhf.md), the importance of demonstration data - **prompts and demonstrations** - is paramount for improving LLMs. This data aids in supervised fine-tuning, also known as instruction-tuning or behavior cloning, where models learn to respond based on human examples. Despite being seen as labor-intensive, recent research like the LIMA work indicates that even a small set of 1,000 diverse, high-quality examples can efficiently train a model. Argilla Feedback was developed to **simplify this process, distributing it among multiple labelers in your organization**.
 
 :::{tip}
-You can add unlimited users to your Argilla instance and datasets so Argilla can be seamlessly used to **distribute the workload among hundreds of labelers or experts within your organization**. Similar efforts include Dolly from Databricks or OpenAssistant. If you’d like help setting up such effort, reach out to us and we’ll gladly help out.
+You can add unlimited users to your Argilla instance and datasets so Argilla can be seamlessly used to **distribute the workload among hundreds of labelers or experts within your organization**. Similar efforts include Dolly from Databricks or OpenAssistant. If you’d like help setting up such an effort, reach out to us and we’ll gladly help out.
 :::
 
 The following figure illustrates the steps to collect feedback from a team of labelers and perform supervised fine-tuning. The steps are: **configure the dataset**, **add records**, **labelers write demonstrations**, **prepare the dataset**, and **fine-tune the SFT model**.
@@ -18,7 +18,7 @@ The following sections give a detailed, conceptual description of the above step
 
 The aim of this phase is to configure a dataset for gathering human demonstrations for each `prompt`.
 
-First, we need to configure a **dataset**. Argilla datasets allows you to mix different **questions** for labelers to answer. In this case, we want to collect **demonstrations** from our labelers. We’ll just need to define a **text question**. Datasets are configured using the Argilla Python SDK. This is how you can define this field:
+First, we need to configure a **dataset**. Argilla datasets allow you to mix different **questions** for labelers to answer. In this case, we want to collect **demonstrations** from our labelers. We’ll just need to define a **text question**. Datasets are configured using the Argilla Python SDK. This is how you can define this field:
 
 ```python
 import argilla as rg
@@ -32,7 +32,7 @@ questions =[
 ]
 ```
 
-Argilla Datasets are composed of **records**. A **record** is a data point that can be labeled by one or more labelers. A record consists of one or more **fields**. These fields and the order in which they are presented to labelers is fully configurable. In this case, we want to show labelers a prompt. We’ll just need to define a **********text field.********** This is how you can define this field:
+Argilla Datasets are composed of **records**. A **record** is a data point that can be labeled by one or more labelers. A record consists of one or more **fields**. These fields and the order in which they are presented to labelers are fully configurable. In this case, we want to show labelers a prompt. We’ll just need to define a **********text field.********** This is how you can define this field:
 
 ```python
 fields = [
@@ -52,9 +52,9 @@ dataset = rg.FeedbackDataset(
 
 ## Add records
 
-The aim of this phase is create records with `prompts` to be pushed into Argilla for collecting human `completions`.
+The aim of this phase is to create records with `prompts` to be pushed into Argilla for collecting human `completions`.
 
-Once you have configured the dataset, you need to add records and publish it for labelers. In this case, the records will contain a single field, the **prompt**. This **prompt** will be shown to labelers in the UI and we will ask them to provide a **completion**. The most important questions at this step are: **where to get the prompts from** and **how to select them** in order to maximise the quality of the resulting LLM.
+Once you have configured the dataset, you need to add records and publish them for labelers. In this case, the records will contain a single field, the **prompt**. This **prompt** will be shown to labelers in the UI and we will ask them to provide a **completion**. The most important questions at this step are: **where to get the prompts from** and **how to select them** in order to maximize the quality of the resulting LLM.
 
 :::{tip}
 Important features for the resulting dataset include diversity, consistent completion style, and quality. These features must be considered when designing the data selection and collection processes.
@@ -63,7 +63,7 @@ Important features for the resulting dataset include diversity, consistent compl
 For collecting **prompts** or instructions, there are at least the following options:
 
 ### Use an existing internal database of prompts or user queries related to your use case
-If your goal is to fine-tune a LLM for your use case, this is the best option. As shown by the recent “LIMA: Less is More for Alignment” paper, you can get good results by collecting a diverse, high-quality, consistent dataset of 1,000-5,000 examples. Previous research recommends using 10,000 to 20,000 examples.
+If your goal is to fine-tune an LLM for your use case, this is the best option. As shown by the recent “LIMA: Less is More for Alignment” paper, you can get good results by collecting a diverse, high-quality, consistent dataset of 1,000-5,000 examples. Previous research recommends using 10,000 to 20,000 examples.
 
 
 :::{tip}
@@ -71,12 +71,12 @@ As the field is rapidly evolving and lacking consensus, we suggest beginning wit
 :::
 
 ### Use an open dataset of prompts or user queries
-If you don’t have an internal database for your use case, you can sample and select prompts from an open dataset. The steps here can include: (1) **finding an open dataset** that might contain prompts related to your use case, (2) **perform exploratory data analysis and topic extraction** to understand the data, and (3) **filter and select prompts** based on topic, quality, text descriptives, etc.
+If you don’t have an internal database for your use case, you can sample and select prompts from an open dataset. The steps here can include: (1) **finding an open dataset** that might contain prompts related to your use case, (2) performing** exploratory data** analysis and topic extraction** to understand the data, and (3) **filtering and selecting prompts** based on topic, quality, text descriptives, etc.
 
-Some available datasets are [ShareGPT](https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered), [Open Assistant Conversation Dataset](https://huggingface.co/datasets/OpenAssistant/oasst1), or [Stack Exchange](https://huggingface.co/datasets/HuggingFaceH4/stack-exchange-preferences). Please be aware that some of these datasets might contain innapropriate, irrelevant, or bad quality examples for your use case.
+Some available datasets are [ShareGPT](https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered), [Open Assistant Conversation Dataset](https://huggingface.co/datasets/OpenAssistant/oasst1), or [Stack Exchange](https://huggingface.co/datasets/HuggingFaceH4/stack-exchange-preferences). Please be aware that some of these datasets might contain inappropriate, irrelevant, or bad-quality examples for your use case.
 
 :::{note}
-Open datasets might contain responses, so you might think about skipping the data collection process entirely. If you want to build a good quality instruction-following model for your use case, these datasets cover a wide range of topics, but the responses may not fit your use case's quality and style. Also, there are several models already trained with these datasets. If you think the quality and style of the data already fit your use case, we recommend running an evaluation campaign using one of the model with your own data.
+Open datasets might contain responses, so you might think about skipping the data collection process entirely. If you want to build a good quality instruction-following model for your use case, these datasets cover a wide range of topics, but the responses may not fit your use case's quality and style. Also, there are several models already trained with these datasets. If you think the quality and style of the data already fit your use case, we recommend running an evaluation campaign using one of the models with your own data.
 :::
 
 An alternative is to obtain a dataset of user queries in your domain and apply the same process of data analysis and sampling. A good strategy is to search for datasets of user intent or utterances. For example, if you plan to fine-tune an LLM for a customer service banking assistant, you might start with the [banking77](https://huggingface.co/datasets/banking77) dataset.
@@ -98,10 +98,10 @@ question = rg.TextQuestion(
 )
 ```
 
-Please note that you can also ask labelers to provide a response for the proposed instruction. This strategy may work depending on the project and resources available, but it can make labeling more complex and affect overall consistency.
+Please note that you can also ask labelers to respond to the proposed instruction. This strategy may work depending on the project and resources available, but it can make labeling more complex and affect overall consistency.
 
 :::{tip}
-No matter the option you choose, for maximum quality, we recommend to build a feedback workflow with Argilla where you ask labelers to rate the quality of prompts. You can use the aggregated ratings to select the highest quality examples.
+No matter the option you choose, for maximum quality, we recommend building a feedback workflow with Argilla where you ask labelers to rate the quality of prompts. You can use the aggregated ratings to select the highest-quality examples.
 :::
 
 Once you have the dataset with prompts ready, you just need to create the records, add them to the dataset, and push the dataset to Argilla to make it available for labelers (or yourself):
@@ -126,11 +126,11 @@ dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ## Labelers write completions
 The aim of this phase is to provide human demonstrations for each `prompt` using Argilla UI.
 
-Once you upload your dataset to Argilla, it becomes accessible via the Argilla UI. Argilla Feedback allows simultaneous feedback collection from multiple users, enhancing quality control. Each user with dataset access can give their feedback.
+Once you upload your dataset to Argilla, it becomes accessible via the Argilla UI. Argilla Feedback allows simultaneous feedback collection from multiple users, enhancing quality control. Each user with dataset access can give feedback.
 
 However, when resources are scarce, workload distribution among various labelers is recommended. This strategy entails assigning each labeler a subset of records to label. This [how-to guide](../practical_guides/set_up_annotation_team.html) provides detailed instructions on setting up these workload distribution options effectively.
 
-For a comprehensive understanding of the Argilla UI's main features, refer this [how-to guide](../practical_guides/annotate_dataset.html).
+For a comprehensive understanding of the Argilla UI's main features, refer to this [how-to guide](../practical_guides/annotate_dataset.html)](../practical_guides/annotate_dataset.html).
 
 ## Prepare the dataset
 
@@ -163,7 +163,7 @@ for workspace in user_workspaces:
 	feedback_datasets.append(feedback)
 ```
 
-Every record in `feedback.records` contains a `responses` attribute, which holds any feedback provided for that record. Each response includes:
+Every record in `feedback.records` contain a `responses` attribute, which holds any feedback provided for that record. Each response includes:
 
 - `user_id`: The annotator's Argilla user ID.
 - `values`: The feedback given by the annotator. It's formatted as a dictionary, with keys for each question and values holding the respective answers.

@@ -79,7 +79,7 @@ Once you have decided on the data to show and the questions to ask, it's importa
 - In the dataset guidelines: this is added as an argument when you create your dataset in the Python SDK (see [below](#configure-the-dataset)). It will appear in the dataset settings in the UI.
 - As question descriptions: these are added as an argument when you create questions in the Python SDK (see [above](#define-questions)). This text will appear in a tooltip next to the question in the UI.
 
-It is good practice to use at least the dataset guidelines, if not both methods. Question descriptions should be short and provide context to a specific question. They can be a summary of the guidelines to that question, but often times that is not sufficient to align the whole annotation team. In the guidelines, you can include a description of the project, details on how to answer each question with examples, instructions on when to discard a record, etc.
+It is good practice to use at least the dataset guidelines if not both methods. Question descriptions should be short and provide context to a specific question. They can be a summary of the guidelines to that question, but often times that is not sufficient to align the whole annotation team. In the guidelines, you can include a description of the project, details on how to answer each question with examples, instructions on when to discard a record, etc.
 
 ## Configure the dataset
 
@@ -91,7 +91,7 @@ Once the scope of the project is defined, which implies knowing the `fields`, `q
 
 If you haven't done so already, check the sections above to learn about each of them.
 
-Below you can find a quick example where we create locally a `FeedbackDataset` to assess the quality of a reponse in a question-answering task. The `FeedbackDataset` contains two fields, question and answer, and two questions to measure the quality of the answer and to correct it, if needed.
+Below you can find a quick example where we create locally a `FeedbackDataset` to assess the quality of a response in a question-answering task. The `FeedbackDataset` contains two fields, question and answer, and two questions to measure the quality of the answer and to correct it if needed.
 
 ```python
 dataset = rg.FeedbackDataset(
