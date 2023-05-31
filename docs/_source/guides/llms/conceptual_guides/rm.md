@@ -201,16 +201,16 @@ for record in feedback.records:
     if response.status == 'submitted':
 
         # Get the preferred response index from the feedback
-        preferred_index = response.values['response_ranking'].value
+        preferred_index = response.values["response_ranking"].value
 
         # Append the non-preferred response index
         less_preferred_index = 1 if preferred_index == 2 else 2
 
         # Construct the triplet and append to the list
         triplets.append({
-            'prompt': record.fields['prompt'],
-            'preferred_response': record.fields[f'response {preferred_index}'],
-            'less_preferred_response': record.fields[f'response {less_preferred_index}'],
+            'prompt': record.fields["prompt"],
+            'preferred_response': record.fields[f"response {preferred_index}"],
+            'less_preferred_response': record.fields[f"response {less_preferred_index}"],
         })
 
 # Now, 'triplets' is a list of dictionaries, each containing a prompt and the associated

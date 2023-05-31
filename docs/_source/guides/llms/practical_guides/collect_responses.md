@@ -41,7 +41,7 @@ import plotly.express as px
 
 count_submitted = Counter()
 for record in feedback.records:
-    if record.responses != []:
+    if record.responses:
         submitted = [r for r in record.responses if r.status == "submitted"]
         count_submitted[len(submitted)] += 1
 count_submitted = OrderedDict(sorted(count_submitted.items()))
@@ -60,7 +60,7 @@ fig.show()
 # plot 2: distance between responses in rating question
 list_values = []
 for record_ix,record in enumerate(feedback):
-    if record.responses != []:
+    if record.responses:
         submitted = [r for r in record.responses if r.status == "submitted"]
         if len(submitted) > 1:
             for response_ix, response in enumerate(submitted):
