@@ -4,6 +4,7 @@
 </template>
 
 <script>
+import { isBoolean } from "lodash";
 import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import { upsertDatasetFields } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
 import {
@@ -64,6 +65,7 @@ export default {
             questionName,
             componentType
           );
+
           return {
             id: questionId,
             name: questionName,
@@ -130,13 +132,13 @@ export default {
         default:
           console.log(`the component type ${componentType} is unknown`);
       }
-
+      // TODO - the next logic is only for RATING && SINGLE_LABEL => put it directly in the switch case
       if (options) {
         return options?.map((option) => {
           const optionText = option.text ?? option.value;
           const paramObject = {
-            value: defaultValueByComponent,
-            value_in_api: option.value ?? defaultValueByComponent,
+            is_selected: defaultValueByComponent,
+            value: option.value,
             text: optionText,
             prefixId: questionName,
             suffixId: option.value,
@@ -146,24 +148,24 @@ export default {
         });
       }
 
+      // TODO - the next return is only for FREE_TEXT => put it directly in the switch case
       return [
         this.factoryOption({
           value: "",
-          value_in_api: "",
           prefixId: questionName,
         }),
       ];
     },
     factoryOption({
       value = null,
-      value_in_api = null,
+      is_selected = null,
       text = "",
       prefixId,
       suffixId,
     }) {
       return {
         id: `${prefixId}${suffixId ? `_${suffixId}` : ""}`,
-        value_in_api,
+        ...(isBoolean(is_selected) && { is_selected }),
         value,
         text,
       };

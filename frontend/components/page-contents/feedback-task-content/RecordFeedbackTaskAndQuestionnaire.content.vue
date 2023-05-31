@@ -439,18 +439,16 @@ export default {
                     // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
                     formattedOptionsWithRecordResponse =
                       optionsByQuestionName.map(
-                        ({ id, text, value, value_in_api }) => {
-                          if (
-                            value_in_api === recordResponseByQuestionName.value
-                          ) {
+                        ({ id, text, value, is_selected }) => {
+                          if (value === recordResponseByQuestionName.value) {
                             return {
                               id,
                               text,
-                              value: true,
-                              value_in_api,
+                              value,
+                              is_selected: true,
                             };
                           }
-                          return { id, text, value, value_in_api };
+                          return { id, text, value, is_selected: false };
                         }
                       );
                     break;
@@ -458,9 +456,7 @@ export default {
                     formattedOptionsWithRecordResponse = [
                       {
                         id: questionName,
-                        text: recordResponseByQuestionName.value,
                         value: recordResponseByQuestionName.value,
-                        value_in_api: recordResponseByQuestionName.value,
                       },
                     ];
                     break;
