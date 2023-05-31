@@ -130,7 +130,6 @@ class SearchEngine:
         index_name = self._index_name_for_dataset(dataset)
         await self.client.indices.create(index=index_name, body=dict(mappings=mappings))
 
-
     async def add_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = self._index_name_for_dataset(dataset)
 
