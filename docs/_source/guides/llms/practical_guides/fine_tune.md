@@ -60,7 +60,7 @@ Ultimately, the choice between these two approaches depends on the specific requ
 
 ### Training
 
-There are many good libraries to help with this step, however, we are a fan of the Transformer Reinforcement Learning ([TRL](https://huggingface.co/docs/trl)) package and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model, obtained from the [pre-training step](#pre-training) and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
+There are many good libraries to help with this step, however, we are a fan of the Transformer Reinforcement Learning ([TRL](https://huggingface.co/docs/trl)) package, and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model, obtained from the [pre-training step](#pre-training) and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
 
 ```python
 import argilla as rg
@@ -78,6 +78,11 @@ for entry in feedback_dataset:
         data["response"].append(res["new-response"].value)
 
 dataset = Dataset.from_dict(data)
+dataset
+# Dataset({
+#     features: ['instruction', 'context', 'response'],
+#     num_rows: 15000
+# })
 ```
 
 ```{note}
@@ -86,7 +91,7 @@ This dataset only contains a single annotator response per record. We gave some 
 
 ####  TRL
 
-The manual TRL package provides a flexible and customizable framework for fine-tuning models. It allows users to have fine-grained control over the training process, enabling them to define their functions and to further specify the desired behavior of the model. This approach requires a deeper understanding of reinforcement learning concepts and techniques, as well as more careful experimentation. It is best suited for users who have experience in reinforcement learning and want fine-grained control over the training process. Additionally, it directly integrates with [Performance Efficient Fine Tuning](https://huggingface.co/docs/peft/index) (PEFT) decreasing the computational complexity of this step of training an LLM.
+The Transformer Reinforcement Learning (TRL) package provides a flexible and customizable framework for fine-tuning models. It allows users to have fine-grained control over the training process, enabling them to define their functions and to further specify the desired behavior of the model. This approach requires a deeper understanding of reinforcement learning concepts and techniques, as well as more careful experimentation. It is best suited for users who have experience in reinforcement learning and want fine-grained control over the training process. Additionally, it directly integrates with [Performance Efficient Fine Tuning](https://huggingface.co/docs/peft/index) (PEFT) decreasing the computational complexity of this step of training an LLM.
 
 ```python
 from transformers import AutoModelForCausalLM
@@ -101,7 +106,7 @@ def formatting_prompts_func(example):
     text = (
         f"### Instruction: {example['instruction']}\n" +
         f"### Context: {example['context']}\n" +
-        f"### Resposne: {example['response']}"
+        f"### Response: {example['response']}"
     )
     return text
 
@@ -116,9 +121,28 @@ trainer = SFTTrainer(
 trainer.train()
 ```
 
+####  TRLX
+
+The other package is [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx), which has been heavily inspired by TRL but with an increased focus on incorporating Human Feedback into the training loop. However, out of the box, it also provides intuitive support for supervised `prompt-completion` fine-tuning using a relatively simple SDK, that takes tuples as `(prompt, completion)`. Take a look at the [RLHF section](#rlhf) for the other more feedback-oriented use cases of this library.
+
+```python
+import trlx
+
+# dataset = ...
+
+samples = [
+    [
+        f"### Instruction: {entry['instruction']} ### Context: {entry['context']}",
+        f"### Response: {entry['response']}"
+    ] for entry in dataset
+]
+
+trainer = trlx.train('gpt2', samples=samples)
+```
+
 #### AutoTrain
 
-AutoTrain offers an option for users who prefer a simpler and more automated approach. It offers a no-code solution for fine-tuning models wrapped and enabled by a nice [streamlit UI](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) or a low-code option with the [AutoTrain Advanced package](https://github.com/huggingface/autotrain-advanced). This option leverages techniques to automatically optimize the model's performance without requiring users to have extensive knowledge of reinforcement learning or coding skills. It streamlines the fine-tuning process by automatically adjusting the model's parameters and optimizing its performance based on user-provided feedback.
+AutoTrain offers an option for users who prefer a simpler and more automated approach. It offers a no-code solution for fine-tuning models wrapped and enabled by a nice [streamlit UI](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced), or by a low-code option with the [AutoTrain Advanced package](https://github.com/huggingface/autotrain-advanced). This tool leverages techniques to automatically optimize the model's performance without requiring users to have extensive knowledge of reinforcement learning or coding skills. It streamlines the fine-tuning process by automatically adjusting the model's parameters and optimizing its performance based on user-provided feedback.
 
 First, export the data.
 ```python
@@ -127,11 +151,15 @@ dataset = ...
 dataset.to_csv("databricks-dolly-15k-curated-en.csv", index=False)
 ```
 Second, start the UI for training.
-<iframe width="100%" height="600" src="https://youtu.be/T_Lq8Zq-pwQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="100%" height="600" src="https://www.youtube.com/embed/T_Lq8Zq-pwQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 ## RLHF
 
-The last part of the fine-tuning process is the part that contains doing Reinforcement Learning with Human Feedback. This is generally done by training a reward model (RM) to rate responses in alignment with human preferences and afterward using this reward model to fine-tune the LLM with high-scoring responses.
+The last part of the fine-tuning process is the part that contains doing Reinforcement Learning with Human Feedback (RLHf). This is generally done by creating a reward model (RM) to rate responses in alignment with human preferences and afterward using this reward model to fine-tune the LLM with the associated scores.
+
+```{note}
+First, create a reward model or heuristic. Second, use this as automated procedure during reinforcment learning to align with human preferences.
+```
 
 ### Data
 
@@ -141,28 +169,214 @@ The data required for these steps need to be used as comparison data to showcase
 import argilla as rg
 from datasets import Dataset
 
+feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en", split="train")
 
-feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
-
-data = {"instruction": [], "context": [], "poorer_responses": [], "better_response": []}
+data = {"instruction": [], "context": [], "poorer_response": [], "better_response": []}
 for entry in feedback_dataset:
     if entry.responses:
         res = entry.responses[0].values
-        if res["new-response"].value != entry.fields["original-response"]:
+        original_input = entry.fields["original-response"]
+        if original_input != res["new-response"].value:
             data["instruction"].append(res["new-instruction"].value)
             data["context"].append(res["new-context"].value)
-            data["poorer_responses"].append(entry.fields["original-response"])
+            data["poorer_response"].append(original_input)
             data["better_response"].append(res["new-response"].value)
 
 dataset = Dataset.from_dict(data)
+dataset
+# Dataset({
+#     features: ['instruction', 'context', 'poorer_response', 'better_response'],
+#     num_rows: 475
+# })
 ```
 
 ### Training
-#### Reward Model
+
+Fine-tuning using a Reward Model can be done in different ways. We can either get the annotator to rate output completely manually, we can use a simple heuristic or we can use a stochastic preference model. Both TRL and TRLX provide decent options for incorporating rewards. The [DeepSpeed library of Microsoft](https://github.com/microsoft/DeepSpeed/tree/master/blogs/deepspeed-chat) is a worthy mention too but will not be covered in our docs.
 
 
+#### TRL
 
-#### Fine-tuning using Reward Model
+TRL has a direct reward modeling integration via the `RewardTrainer` class. This trains a classifier to mimic the human evaluation of generated texts. Afterward, we can use the `PPOTrainer` class for the reinforcement learning step in combination with the trained `RewardTrainer`.
+
+::::{tab-set}
+
+:::{tab-item} RewardTrainer
+TRL has a direct reward modeling integration via the `RewardTrainer` class. This class functions similarly to the SFTTrainer and TransformersTrainer but requires `rejected-accepted` input pairs as training data. These are then used to fine-tune an `AutoModelForSequenceClassification` which we can use as a reward model during the reinforcement learning phase. The entries within the dataset should be `input_ids_chosen`, `attention_mask_chosen`, `input_ids_rejected` and `attention_mask_rejected` so we should first format them.
+
+```python
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    TrainingArguments,
+)
+from trl import RewardTrainer
+
+dataset = ...
+model = AutoModelForSequenceClassification.from_pretrained("gpt2")
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
+    model.config.pad_token_id = model.config.eos_token_id
+
+def formatting_func(examples):
+    kwargs = {"padding": "max_length", "truncation": True, "max_length": 512, "return_tensors": "pt"}
+    tokens_chosen = tokenizer.encode_plus(examples["better_response"], **kwargs)
+    tokens_rejected = tokenizer.encode_plus(examples["poorer_response"], **kwargs)
+    return {
+        "input_ids_chosen": tokens_chosen["input_ids"][0], "attention_mask_chosen": tokens_chosen["attention_mask"][0],
+        "input_ids_rejected": tokens_rejected["input_ids"][0], "attention_mask_rejected": tokens_rejected["attention_mask"][0]
+    }
+
+formatted_dataset = dataset.map(formatting_func)
+
+trainer = RewardTrainer(
+    model=model,
+    args=TrainingArguments("output_dir"),
+    tokenizer=tokenizer,
+    train_dataset=formatted_dataset,
+     # peft_config=LoraConfig(), # from peft import LoraConfig
+)
+
+trainer.train()
+```
+:::
+
+:::{tab-item} PPOTrainer
+The TRL `PPOTrainer` allows to update while plugging in any arbitrary model or heuristic to assign `rewards` to the generated output. In the example below, we use the  `reward_model` and `reward_tokenizer` to create a transformers text-classification pipeline. This pipeline is then used to create `rewards` which are then passed during the PPO `.step()` to include in the weigh optimization for the next batch.
+
+```python
+reward_model = ...
+reward_tokenizer = ...
+
+import torch
+from transformers import AutoTokenizer, pipeline
+from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer
+from trl.core import LengthSampler
+
+config = PPOConfig(model_name="gpt2", batch_size=2)
+
+model = AutoModelForCausalLMWithValueHead.from_pretrained(config.model_name)
+ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(config.model_name)
+tokenizer = AutoTokenizer.from_pretrained(config.model_name)
+tokenizer.pad_token = tokenizer.eos_token
+reward_pipe = pipeline(model=reward_model, tokenizer=reward_tokenizer)
+
+def formatting_func(examples):
+    kwargs = {
+        "padding": "max_length", "truncation": True,
+        "max_length": 512, "return_tensors": "pt"
+    }
+    input_size = LengthSampler(min_value=2, max_value=8)
+    input_text = examples["instruction"] + examples["context"] + examples["response"]
+    examples["input_ids"] = tokenizer.encode(input_text, **kwargs)[0][: input_size()]
+    examples["query"] = tokenizer.decode(examples["input_ids"][0])
+    return examples
+
+formatted_dataset = dataset.map(formatting_func, batched=False)
+formatted_dataset.set_format(type="torch")
+
+def collator(data):
+    return dict((key, [d[key] for d in data]) for key in data[0])
+
+ppo_trainer = PPOTrainer(config, model, ref_model, tokenizer, dataset=formatted_dataset, data_collator=collator)
+
+output_min_length = 4
+output_max_length = 16
+output_length_sampler = LengthSampler(output_min_length, output_max_length)
+
+generation_kwargs = {
+    "min_length": -1,
+    "top_k": 0.0,
+    "top_p": 1.0,
+    "do_sample": True,
+    "pad_token_id": tokenizer.eos_token_id,
+}
+
+for epoch, batch in enumerate(ppo_trainer.dataloader):
+    query_tensors = batch["input_ids"]
+
+    #### Get response from gpt2
+    response_tensors = []
+    for query in query_tensors:
+        gen_len = output_length_sampler()
+        generation_kwargs["max_new_tokens"] = gen_len
+        response = ppo_trainer.generate(query, **generation_kwargs)
+        response_tensors.append(response.squeeze()[-gen_len:])
+    batch["response"] = [tokenizer.decode(r.squeeze()) for r in response_tensors]
+
+    #### Compute sentiment score
+    texts = [q + r for q, r in zip(batch["query"], batch["response"])]
+    pipe_outputs = reward_pipe(texts, return_all_scores=True)
+    rewards = [torch.tensor(output[1]["score"]) for output in pipe_outputs]
+
+    #### Run PPO step
+    stats = ppo_trainer.step(query_tensors, response_tensors, rewards)
+    ppo_trainer.log_stats(stats, batch, rewards)
+```
+
+:::
+
+::::
+
+
+#### TRLX
+
+TRLX gives the option to use a `reward function` or a `reward-labeled` dataset in combination with Proximal Policy Optimization (PPO) for the reinforcement learning step, which can be used by defining a PPO policy configuration. During this step, we infer rewards to mimic the human evaluation of generated texts. Additionally, [Hugging Face Accelerate](https://huggingface.co/docs/accelerate/index) can be used to speed up training or [Ray Tune](https://docs.ray.io/en/latest/tune/index.html) to optimize hyperparameter tuning.
+
+```python
+from trlx.data.default_configs import default_ppo_config
+
+config = default_ppo_config()
+config.model.model_path = 'gpt2'
+config.train.batch_size = 16
+```
+
+
+::::{tab-set}
+
+:::{tab-item} reward function
+
+```python
+dataset = ...
+config = ...
+
+def my_reward_function(entry):
+    return classifier.predict_proba(entry)[0]
+
+trainer = trlx.train(
+    config=config,
+    reward_fn=lambda samples, **kwargs: [my_reward_function(sample) for sample in samples]
+)
+```
+
+:::
+
+
+:::{tab-item} reward-labeled dataset
+
+```{note}
+For demo purposes, we now infer the rewards from the corrected respones, but we can also set-up [specific ranking datasets](guides/llms/conceptual_guides/rm) using the Argilla UI.
+```
+
+```python
+dataset = ...
+config = ...
+
+samples, rewards = [], []
+for entry in dataset:
+    samples.append(entry["poorer_response"])
+    rewards.append(1)
+    samples.append(entry["better_response"])
+    rewards.append(2)
+
+trainer = trlx.train(config=config, samples=samples, rewards=rewards)
+```
+
+:::
+
+::::
 
 ## Pre-training
 
@@ -188,14 +402,13 @@ dataset = rg.FeedbackDataset(
 )
 
 # create a Feedback Records
-record = [
-	rg.FeedbackRecord(
-		fields={
-			"content": "The base ingredient of paella is rice.",
-        }
-	)
-]
-rg.add_records(record)
+record = rg.FeedbackRecord(
+    fields={
+        "content": "The base ingredient of paella is rice."
+    }
+)
+
+rg.add_records([record])
 dataset.push_to_argilla(name="pre-training")
 ```
 
@@ -205,14 +418,14 @@ When it comes to pre-training an LLM, we generally do not need data of highest q
 
 ### Training
 
-There are many ways and great packages to deal with this `pre-training` phase, but generally, NLP training frameworks like [KerasNLP](https://keras.io/keras_nlp/) and [Hugging Face](https://huggingface.co/) offer great out-of-the-box methods for training a causal language model. In our guide, we will be using Hugging Face `transformers` and `datasets` library and prepare our training data in the format they require for [training a causal language model](https://huggingface.co/learn/nlp-course/chapter7/6#training-a-causal-language-model-from-scratch).
+There are many ways and great packages to deal with this `pre-training` phase, but generally, NLP training frameworks like [KerasNLP](https://keras.io/keras_nlp/) and [Hugging Face](https://huggingface.co/) offer great out-of-the-box methods for training a causal language model. In our guide, we will be using Hugging Face `transformers` and `datasets` library and prepare our training data in the format they require for [training a causal language model](https://huggingface.co/learn/nlp-course/chapter7/6#training-a-causal-language-model-from-scratch). A c
 
 ```python
 import argilla as rg
 from datasets import Dataset
 
 feedback = rg.FeedbackDataset.from_argilla("pre-training")
-content = {"content": [rec.fields["content"] for rec in feedback]}
+content = {"content": [rec.get("fields").get("content") for rec in feedback]}
 dataset = Dataset.from_dict(content)
 dataset
 # Dataset({
