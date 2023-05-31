@@ -1,25 +1,25 @@
 import { mount } from "@vue/test-utils";
-import BaseRenderMarkdown from "./BaseRenderMarkdown";
+import BaseRenderMarkdownComponent from "./BaseRenderMarkdownComponent";
 
 let wrapper = null;
 const options = {
-  components: { BaseRenderMarkdown },
+  components: { BaseRenderMarkdownComponent },
   propsData: {
     markdown: "# example",
   },
 };
 
 beforeEach(() => {
-  wrapper = mount(BaseRenderMarkdown, options);
+  wrapper = mount(BaseRenderMarkdownComponent, options);
 });
 
 afterEach(() => {
   wrapper.destroy();
 });
 
-describe("BaseRenderMarkdown", () => {
+describe("BaseRenderMarkdownComponent", () => {
   it("render component", () => {
-    expect(wrapper.is(BaseRenderMarkdown)).toBe(true);
+    expect(wrapper.is(BaseRenderMarkdownComponent)).toBe(true);
   });
 
   it("render parsed html", () => {
