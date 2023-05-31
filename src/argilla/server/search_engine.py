@@ -66,7 +66,7 @@ class SearchDocument(BaseModel):
 @dataclasses.dataclass
 class TextFieldQuery:
     q: str
-    field: Optional[str]
+    field: Optional[str] = None
 
 
 @dataclasses.dataclass
@@ -163,27 +163,28 @@ class SearchEngine:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
         bool_query = {"must": []}
         if isinstance(query, str):
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
+            # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
             text_query = {
-                "query_string": {
+                "simple_query_string": {
                     "query": query,
-                    "default_field": "fields.*",
+                    "default_operator": "and",
+                    "fields": [f"fields.{field.name}" for field in dataset.fields],
                 }
             }
         elif not query.text.field:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-combined-fields-query.html
+            # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-combined-fields-query.html
             text_query = {
                 "combined_fields": {
                     "query": query.text.q,
-                    "fields": [field.name for field in dataset.fields],
+                    "fields": [f"fields.{field.name}" for field in dataset.fields],
                     "operator": "and",
                 }
             }
         else:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html
             text_query = {
-                "match": {
-                    query.text.field: {
+                "match_phrase": {
+                    f"fields.{query.text.field}": {
                         "query": query.text.q,
                         "operator": "and",
                     }

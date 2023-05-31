@@ -17,7 +17,7 @@ import random
 import pytest
 import pytest_asyncio
 from argilla.server.models import Dataset
-from argilla.server.search_engine import SearchEngine
+from argilla.server.search_engine import Query, SearchEngine, TextFieldQuery
 from opensearchpy import OpenSearch, RequestError
 from sqlalchemy.orm import Session
 
@@ -188,7 +188,14 @@ class TestSuiteElasticSearchEngine:
 
     @pytest.mark.parametrize(
         ("query", "expected_items"),
-        [("*", 4), ("card", 2), ("account", 1), ("pay*", 2), ("cash", 2), ("negative", 2), ("00000", 1)],
+        [
+            ("card", 2),
+            ("account", 1),
+            ("payment", 2),
+            ("cash", 2),
+            ("negative", 2),
+            ("00000", 1),
+        ],
     )
     async def test_query_string_search(
         self,
@@ -201,7 +208,10 @@ class TestSuiteElasticSearchEngine:
     ):
         opensearch.indices.refresh(index=f"rg.{test_banking_sentiment_dataset.id}")
 
-        result = await search_engine.search(test_banking_sentiment_dataset, query=query)
+        result = await search_engine.search(
+            test_banking_sentiment_dataset,
+            query=Query(text=TextFieldQuery(q=query)),
+        )
         assert len(result.items) == expected_items
 
         scores = [item.score > 0 for item in result.items]
