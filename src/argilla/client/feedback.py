@@ -437,6 +437,7 @@ class FeedbackDataset:
                 with the fields of the record.
 
         Raises:
+            ValueError: if the given records are an empty list.
             ValueError: if the given records are neither: `FeedbackRecord`, list of `FeedbackRecord`,
                 list of dictionaries as a record or dictionary as a record.
             ValueError: if the given records do not match the expected schema.
@@ -479,6 +480,8 @@ class FeedbackDataset:
             [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
         """
         if isinstance(records, list):
+            if len(records) == 0:
+                raise ValueError("Expected `records` to be a non-empty list of `dict` or `rg.FeedbackRecord`.")
             new_records = []
             for record in records:
                 if isinstance(record, dict):
