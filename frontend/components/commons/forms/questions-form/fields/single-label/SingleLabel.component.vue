@@ -50,6 +50,9 @@ export default {
       default: () => "",
     },
   },
+  model: {
+    prop: "options",
+  },
   computed: {
     isSearch() {
       return this.options.length >= 12;
