@@ -184,6 +184,15 @@ def test_records(
         "status": "submitted",
     }
 
+    with pytest.raises(ValueError, match="Expected `records` to be a non-empty list"):
+        dataset.add_records([])
+
+    with pytest.raises(ValueError, match="Expected `records` to be a list of `dict` or `rg.FeedbackRecord`"):
+        dataset.add_records([None])
+
+    with pytest.raises(ValueError, match="Expected `records` to be a `dict` or `rg.FeedbackRecord`"):
+        dataset.add_records(None)
+
     with pytest.raises(ValueError, match="`rg.FeedbackRecord.fields` does not match the expected schema"):
         dataset.add_records(
             [
