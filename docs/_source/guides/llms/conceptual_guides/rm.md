@@ -198,10 +198,9 @@ for record in feedback.records:
 
     # Ensure the response has been submitted (not discarded)
     response = record.responses[0]
-    if response.status == "submitted":
 
+    if response.status == 'submitted':
         # Get the preferred response index from the feedback
-        preferred_index = response.values["response_ranking"].value
         preferred_index = response.values["response_ranking"].value
 
         # Append the non-preferred response index
