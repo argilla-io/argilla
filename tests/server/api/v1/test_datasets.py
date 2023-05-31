@@ -18,7 +18,6 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -34,6 +33,9 @@ from argilla.server.schemas.v1.datasets import (
     DATASET_CREATE_GUIDELINES_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
+    LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
+    LABEL_SELECTION_TEXT_MAX_LENGTH,
+    LABEL_SELECTION_VALUE_MAX_LENGHT,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
@@ -109,7 +111,7 @@ def test_list_current_user_datasets_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
-def test_list_current_user_datasets_as_annotator(client: TestClient, db: Session):
+def test_list_current_user_datasets_as_annotator(client: TestClient):
     workspace = WorkspaceFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[workspace])
 
@@ -125,8 +127,8 @@ def test_list_current_user_datasets_as_annotator(client: TestClient, db: Session
     assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a", "dataset-b"]
 
 
-def test_list_dataset_fields(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
+def test_list_dataset_fields(client: TestClient, admin_auth_header: dict):
+    dataset = DatasetFactory.build()
     text_field_a = TextFieldFactory.create(name="text-field-a", title="Text Field A", required=True, dataset=dataset)
     text_field_b = TextFieldFactory.create(name="text-field-b", title="Text Field B", dataset=dataset)
 
@@ -160,7 +162,7 @@ def test_list_dataset_fields(client: TestClient, db: Session, admin_auth_header:
     }
 
 
-def test_list_dataset_fields_without_authentication(client: TestClient, db: Session):
+def test_list_dataset_fields_without_authentication(client: TestClient):
     dataset = DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/fields")
@@ -168,7 +170,7 @@ def test_list_dataset_fields_without_authentication(client: TestClient, db: Sess
     assert response.status_code == 401
 
 
-def test_list_dataset_fields_as_annotator(client: TestClient, db: Session):
+def test_list_dataset_fields_as_annotator(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     TextFieldFactory.create(name="text-field-a", dataset=dataset)
@@ -185,7 +187,7 @@ def test_list_dataset_fields_as_annotator(client: TestClient, db: Session):
     assert [field["name"] for field in response_body["items"]] == ["text-field-a", "text-field-b"]
 
 
-def test_list_dataset_fields_as_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_list_dataset_fields_as_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -194,7 +196,7 @@ def test_list_dataset_fields_as_annotator_from_different_workspace(client: TestC
     assert response.status_code == 403
 
 
-def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{uuid4()}/fields", headers=admin_auth_header)
@@ -202,7 +204,7 @@ def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClient, db:
     assert response.status_code == 404
 
 
-def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_header: dict):
+def test_list_dataset_questions(client: TestClient, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     text_question = TextQuestionFactory.create(
         name="text-question",
@@ -228,7 +230,7 @@ def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_head
                 "id": str(text_question.id),
                 "name": "text-question",
                 "title": "Text Question",
-                "description": None,
+                "description": "Question Description",
                 "required": True,
                 "settings": {"type": "text", "use_markdown": False},
                 "inserted_at": text_question.inserted_at.isoformat(),
@@ -262,7 +264,7 @@ def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_head
     }
 
 
-def test_list_dataset_questions_without_authentication(client: TestClient, db: Session):
+def test_list_dataset_questions_without_authentication(client: TestClient):
     dataset = DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/questions")
@@ -270,7 +272,7 @@ def test_list_dataset_questions_without_authentication(client: TestClient, db: S
     assert response.status_code == 401
 
 
-def test_list_dataset_questions_as_annotator(client: TestClient, db: Session):
+def test_list_dataset_questions_as_annotator(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     TextQuestionFactory.create(name="text-question", dataset=dataset)
@@ -286,7 +288,7 @@ def test_list_dataset_questions_as_annotator(client: TestClient, db: Session):
     assert [question["name"] for question in response_body["items"]] == ["text-question", "rating-question"]
 
 
-def test_list_dataset_questions_as_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_list_dataset_questions_as_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -295,7 +297,7 @@ def test_list_dataset_questions_as_annotator_from_different_workspace(client: Te
     assert response.status_code == 403
 
 
-def test_list_dataset_questions_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_list_dataset_questions_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{uuid4()}/questions", headers=admin_auth_header)
@@ -772,7 +774,7 @@ def test_list_current_user_dataset_records_without_authentication(client: TestCl
     assert response.status_code == 401
 
 
-def test_list_current_user_dataset_records_as_annotator(client: TestClient, admin: User, db: Session):
+def test_list_current_user_dataset_records_as_annotator(client: TestClient, admin: User):
     workspace = WorkspaceFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[workspace])
     dataset = DatasetFactory.create(workspace=workspace)
@@ -813,9 +815,7 @@ def test_list_current_user_dataset_records_as_annotator(client: TestClient, admi
     }
 
 
-def test_list_current_user_dataset_records_as_annotator_with_include_responses(
-    client: TestClient, admin: User, db: Session
-):
+def test_list_current_user_dataset_records_as_annotator_with_include_responses(client: TestClient, admin: User):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -920,7 +920,7 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(
     }
 
 
-def test_list_current_user_dataset_records_as_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_list_current_user_dataset_records_as_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -929,9 +929,7 @@ def test_list_current_user_dataset_records_as_annotator_from_different_workspace
     assert response.status_code == 403
 
 
-def test_list_current_user_dataset_records_with_nonexistent_dataset_id(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
+def test_list_current_user_dataset_records_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/me/datasets/{uuid4()}/records", headers=admin_auth_header)
@@ -956,7 +954,7 @@ def test_get_dataset(client: TestClient, admin_auth_header: dict):
     }
 
 
-def test_get_dataset_without_authentication(client: TestClient, db: Session):
+def test_get_dataset_without_authentication(client: TestClient):
     dataset = DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{dataset.id}")
@@ -964,7 +962,7 @@ def test_get_dataset_without_authentication(client: TestClient, db: Session):
     assert response.status_code == 401
 
 
-def test_get_dataset_as_annotator(client: TestClient, db: Session):
+def test_get_dataset_as_annotator(client: TestClient):
     dataset = DatasetFactory.create(name="dataset")
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
 
@@ -974,7 +972,7 @@ def test_get_dataset_as_annotator(client: TestClient, db: Session):
     assert response.json()["name"] == "dataset"
 
 
-def test_get_dataset_as_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_get_dataset_as_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -983,7 +981,7 @@ def test_get_dataset_as_annotator_from_different_workspace(client: TestClient, d
     assert response.status_code == 403
 
 
-def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{uuid4()}", headers=admin_auth_header)
@@ -991,7 +989,7 @@ def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session
     assert response.status_code == 404
 
 
-def test_get_current_user_dataset_metrics(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_get_current_user_dataset_metrics(client: TestClient, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     record_a = RecordFactory.create(dataset=dataset)
     record_b = RecordFactory.create(dataset=dataset)
@@ -1025,7 +1023,7 @@ def test_get_current_user_dataset_metrics(client: TestClient, db: Session, admin
     }
 
 
-def test_get_current_user_dataset_metrics_without_authentication(client: TestClient, db: Session):
+def test_get_current_user_dataset_metrics_without_authentication(client: TestClient):
     dataset = DatasetFactory.create()
 
     response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics")
@@ -1033,7 +1031,7 @@ def test_get_current_user_dataset_metrics_without_authentication(client: TestCli
     assert response.status_code == 401
 
 
-def test_get_current_user_dataset_metrics_as_annotator(client: TestClient, db: Session):
+def test_get_current_user_dataset_metrics_as_annotator(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     record_a = RecordFactory.create(dataset=dataset)
@@ -1068,7 +1066,7 @@ def test_get_current_user_dataset_metrics_as_annotator(client: TestClient, db: S
     }
 
 
-def test_get_current_user_dataset_metrics_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_get_current_user_dataset_metrics_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -1077,9 +1075,7 @@ def test_get_current_user_dataset_metrics_annotator_from_different_workspace(cli
     assert response.status_code == 403
 
 
-def test_get_current_user_dataset_metrics_with_nonexistent_dataset_id(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
+def test_get_current_user_dataset_metrics_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/me/datasets/{uuid4()}/metrics", headers=admin_auth_header)
@@ -1361,6 +1357,54 @@ def test_create_dataset_field_with_nonexistent_dataset_id(client: TestClient, db
                 "options": [{"value": 1}, {"value": 2}, {"value": 3}, {"value": 4}, {"value": 5}],
             },
         ),
+        (
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
+                    {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
+                    {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                ],
+                "visible_options": 10,
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
+                    {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
+                    {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                ],
+                "visible_options": 10,
+            },
+        ),
+        (
+            {
+                "type": "label_selection",
+                "options": [
+                    {
+                        "value": "positive",
+                        "text": "Positive",
+                    },
+                    {
+                        "value": "negative",
+                        "text": "Negative",
+                    },
+                    {
+                        "value": "neutral",
+                        "text": "Neutral",
+                    },
+                ],
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": None},
+                    {"value": "negative", "text": "Negative", "description": None},
+                    {"value": "neutral", "text": "Neutral", "description": None},
+                ],
+                "visible_options": None,
+            },
+        ),
     ],
 )
 def test_create_dataset_question(
@@ -1577,6 +1621,55 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
         {"type": "rating", "options": "invalid"},
+        {"type": "label_selection", "options": []},
+        {"type": "label_selection", "options": [{"value": "just_one_label", "text": "Just one label"}]},
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+            "visible_options": 0,
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+            "visible_options": -1,
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "", "text": "a"}, {"value": "b", "text": "b"}],
+        },
+        {
+            "type": "label_selection",
+            "options": [
+                {"value": "".join(["a" for _ in range(LABEL_SELECTION_VALUE_MAX_LENGHT + 1)]), "text": "a"},
+                {"value": "b", "text": "b"},
+            ],
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": ""}, {"value": "b", "text": "b"}],
+        },
+        {
+            "type": "label_selection",
+            "options": [
+                {"value": "a", "text": "".join(["a" for _ in range(LABEL_SELECTION_TEXT_MAX_LENGTH + 1)])},
+                {"value": "b", "text": "b"},
+            ],
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a", "description": ""}, {"value": "b", "text": "b"}],
+        },
+        {
+            "type": "label_selection",
+            "options": [
+                {
+                    "value": "a",
+                    "text": "a",
+                    "description": "".join(["a" for _ in range(LABEL_SELECTION_DESCRIPTION_MAX_LENGTH + 1)]),
+                },
+                {"value": "b", "text": "b"},
+            ],
+        },
     ],
 )
 def test_create_dataset_question_with_invalid_settings(
@@ -1586,7 +1679,7 @@ def test_create_dataset_question_with_invalid_settings(
     settings: dict,
 ):
     dataset = DatasetFactory.create()
-    question_json = {"name": "rating", "title": "Rating", "settings": settings}
+    question_json = {"name": "question", "title": "Question", "settings": settings}
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 

@@ -4,6 +4,7 @@
 </template>
 
 <script>
+import { isBoolean } from "lodash";
 import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import { upsertDatasetFields } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
 import {
@@ -117,26 +118,12 @@ export default {
       // - the value from the options in the DatasetQuestion ORM is a boolean, it the state of the 'checkbox  true (if selected) or false (not selected)
       // => this is why value is initiate as false for RATING and "" for FREE_TEXT
 
-      let defaultValueByComponent = null;
-      switch (componentType.toUpperCase()) {
-        case COMPONENT_TYPE.FREE_TEXT:
-          defaultValueByComponent = "";
-          break;
-        case COMPONENT_TYPE.RATING:
-          defaultValueByComponent = false;
-          break;
-        case COMPONENT_TYPE.SINGLE_LABEL:
-          defaultValueByComponent = false;
-          break;
-        default:
-          console.log(`the component type ${componentType} is unknown`);
-      }
-
+      // TODO - the next logic is only for RATING && SINGLE_LABEL => put it directly in switch case
       if (options) {
         return options?.map((option) => {
           const optionText = option.text ?? option.value;
           const paramObject = {
-            value: defaultValueByComponent,
+            value: option.value,
             text: optionText,
             prefixId: questionName,
             suffixId: option.value,
@@ -146,6 +133,7 @@ export default {
         });
       }
 
+      // TODO - the next logic return is only for FREE_TEXT => put it directly in switch case
       return [
         this.factoryOption({
           value: "",

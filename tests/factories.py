@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import factory
-from argilla.server.database import SessionLocal
 from argilla.server.models import (
     Dataset,
     Field,
@@ -27,32 +26,31 @@ from argilla.server.models import (
     Workspace,
     WorkspaceUser,
 )
-from sqlalchemy import orm
 
-Session = orm.scoped_session(SessionLocal)
+from tests.database import TestSession
 
 
-class WorkspaceUserFactory(factory.alchemy.SQLAlchemyModelFactory):
+class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        sqlalchemy_session = TestSession
+        sqlalchemy_session_persistence = "flush"
+
+
+class WorkspaceUserFactory(BaseFactory):
     class Meta:
         model = WorkspaceUser
-        sqlalchemy_session = Session
-        sqlalchemy_session_persistence = "commit"
 
 
-class WorkspaceFactory(factory.alchemy.SQLAlchemyModelFactory):
+class WorkspaceFactory(BaseFactory):
     class Meta:
         model = Workspace
-        sqlalchemy_session = Session
-        sqlalchemy_session_persistence = "commit"
 
     name = factory.Sequence(lambda n: f"workspace-{n}")
 
 
-class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
+class UserFactory(BaseFactory):
     class Meta:
         model = User
-        sqlalchemy_session = Session
-        sqlalchemy_session_persistence = "commit"
 
     first_name = factory.Faker("first_name")
     username = factory.Sequence(lambda n: f"username-{n}")
@@ -68,21 +66,17 @@ class AnnotatorFactory(UserFactory):
     role = UserRole.annotator
 
 
-class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
+class DatasetFactory(BaseFactory):
     class Meta:
         model = Dataset
-        sqlalchemy_session = Session
-        sqlalchemy_session_persistence = "commit"
 
     name = factory.Sequence(lambda n: f"dataset-{n}")
     workspace = factory.SubFactory(WorkspaceFactory)
 
 
-class RecordFactory(factory.alchemy.SQLAlchemyModelFactory):
+class RecordFactory(BaseFactory):
     class Meta:
         model = Record
-        sqlalchemy_session = Session
-        sqlalchemy_session_persistence = "commit"
 
     fields = {
         "text": "This is a text",
@@ -92,21 +86,17 @@ class RecordFactory(factory.alchemy.SQLAlchemyModelFactory):
     dataset = factory.SubFactory(DatasetFactory)
 
 
-class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
+class ResponseFactory(BaseFactory):
     class Meta:
         model = Response
-        sqlalchemy_session = Session
-        sqlalchemy_session_persistence = "commit"
 
     record = factory.SubFactory(RecordFactory)
     user = factory.SubFactory(UserFactory)
 
 
-class FieldFactory(factory.alchemy.SQLAlchemyModelFactory):
+class FieldFactory(BaseFactory):
     class Meta:
         model = Field
-        sqlalchemy_session = Session
-        sqlalchemy_session_persistence = "commit"
 
     name = factory.Sequence(lambda n: f"field-{n}")
     title = "Field Title"
@@ -117,14 +107,13 @@ class TextFieldFactory(FieldFactory):
     settings = {"type": FieldType.text.value}
 
 
-class QuestionFactory(factory.alchemy.SQLAlchemyModelFactory):
+class QuestionFactory(BaseFactory):
     class Meta:
         model = Question
-        sqlalchemy_session = Session
-        sqlalchemy_session_persistence = "commit"
 
     name = factory.Sequence(lambda n: f"question-{n}")
     title = "Question Title"
+    description = "Question Description"
     dataset = factory.SubFactory(DatasetFactory)
 
 
@@ -146,5 +135,27 @@ class RatingQuestionFactory(QuestionFactory):
             {"value": 8},
             {"value": 9},
             {"value": 10},
+        ],
+    }
+
+
+class LabelSelectionQuestionFactory(QuestionFactory):
+    settings = {
+        "type": QuestionType.label_selection.value,
+        "options": [
+            {"value": "option1", "text": "Option 1"},
+            {"value": "option2", "text": "Option 2"},
+            {"value": "option3", "text": "Option 3"},
+        ],
+    }
+
+
+class MultiLabelSelectionQuestionFactory(QuestionFactory):
+    settings = {
+        "type": QuestionType.multi_label_selection.value,
+        "options": [
+            {"value": "option1", "text": "Option 1"},
+            {"value": "option2", "text": "Option 2"},
+            {"value": "option3", "text": "Option 3"},
         ],
     }

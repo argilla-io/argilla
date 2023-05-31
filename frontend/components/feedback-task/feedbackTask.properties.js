@@ -8,7 +8,7 @@ const COMPONENT_TYPE = Object.freeze({
 const CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API = Object.freeze({
   text: COMPONENT_TYPE.FREE_TEXT,
   rating: COMPONENT_TYPE.RATING,
-  single_label: COMPONENT_TYPE.SINGLE_LABEL,
+  label_selection: COMPONENT_TYPE.SINGLE_LABEL,
 });
 
 // fields

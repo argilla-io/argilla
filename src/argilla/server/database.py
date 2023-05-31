@@ -14,6 +14,7 @@
 
 import os
 from sqlite3 import Connection as SQLite3Connection
+from typing import TYPE_CHECKING, Generator
 
 import alembic.config
 from sqlalchemy import create_engine, event
@@ -21,6 +22,9 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from argilla.server.settings import settings
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 
 @event.listens_for(Engine, "connect")
@@ -35,7 +39,7 @@ engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_db():
+def get_db() -> Generator["Session", None, None]:
     try:
         db = SessionLocal()
         yield db
