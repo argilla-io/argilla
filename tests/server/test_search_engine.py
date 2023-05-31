@@ -17,7 +17,8 @@ import random
 import pytest
 import pytest_asyncio
 from argilla.server.models import Dataset
-from argilla.server.search_engine import Query, SearchEngine, TextFieldQuery
+from argilla.server.search_engine import Query as SearchQuery
+from argilla.server.search_engine import SearchEngine
 from opensearchpy import OpenSearch, RequestError
 from sqlalchemy.orm import Session
 
@@ -90,6 +91,7 @@ class TestSuiteElasticSearchEngine:
             "dynamic": "strict",
             "dynamic_templates": [],
             "properties": {
+                "id": {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
             },
         }
@@ -113,6 +115,7 @@ class TestSuiteElasticSearchEngine:
             "dynamic": "strict",
             "dynamic_templates": [],
             "properties": {
+                "id": {"type": "keyword"},
                 "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
                 "responses": {"type": "object", "dynamic": "true"},
             },
@@ -144,6 +147,7 @@ class TestSuiteElasticSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "properties": {
+                "id": {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
             },
             "dynamic_templates": [
@@ -195,9 +199,20 @@ class TestSuiteElasticSearchEngine:
             ("cash", 2),
             ("negative", 2),
             ("00000", 1),
+            ("card payment", 2),
+            ("nothing", 0),
+            (SearchQuery(text=TextFieldFactory(q="card")), 2),
+            (SearchQuery(text=TextFieldFactory(q="account")), 1),
+            (SearchQuery(text=TextFieldFactory(q="payment")), 2),
+            (SearchQuery(text=TextFieldFactory(q="cash")), 2),
+            (SearchQuery(text=TextFieldFactory(q="card payment")), 2),
+            (SearchQuery(text=TextFieldFactory(q="nothing")), 0),
+            (SearchQuery(text=TextFieldFactory(q="negative", field="label")), 2),
+            (SearchQuery(text=TextFieldFactory(q="00000", field="textId")), 1),
+            (SearchQuery(text=TextFieldFactory(q="card payment", field="text")), 2),
         ],
     )
-    async def test_query_string_search(
+    async def test_search_with_query_string(
         self,
         search_engine: SearchEngine,
         opensearch: OpenSearch,
@@ -208,10 +223,7 @@ class TestSuiteElasticSearchEngine:
     ):
         opensearch.indices.refresh(index=f"rg.{test_banking_sentiment_dataset.id}")
 
-        result = await search_engine.search(
-            test_banking_sentiment_dataset,
-            query=Query(text=TextFieldQuery(q=query)),
-        )
+        result = await search_engine.search(test_banking_sentiment_dataset, query=query)
         assert len(result.items) == expected_items
 
         scores = [item.score > 0 for item in result.items]

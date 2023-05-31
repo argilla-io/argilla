@@ -1791,21 +1791,30 @@ async def test_create_dataset_records(
 
     index_name = f"rg.{dataset.id}"
     opensearch.indices.refresh(index=index_name)
-    assert [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]] == [
+    es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
+    assert es_docs == [
         {
+            "id": str(db.get(Record, UUID(es_docs[0]["id"])).id),
             "fields": {"input": "Say Hello", "output": "Hello"},
             "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "yes"}, "status": "submitted"}},
         },
-        {"fields": {"input": "Say Hello", "output": "Hi"}, "responses": {}},
         {
+            "id": str(db.get(Record, UUID(es_docs[1]["id"])).id),
+            "fields": {"input": "Say Hello", "output": "Hi"},
+            "responses": {},
+        },
+        {
+            "id": str(db.get(Record, UUID(es_docs[2]["id"])).id),
             "fields": {"input": "Say Pello", "output": "Hello World"},
             "responses": {"admin": {"values": {"input_ok": "no", "output_ok": "no"}, "status": "submitted"}},
         },
         {
+            "id": str(db.get(Record, UUID(es_docs[3]["id"])).id),
             "fields": {"input": "Say Hello", "output": "Good Morning"},
             "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "no"}, "status": "discarded"}},
         },
         {
+            "id": str(db.get(Record, UUID(es_docs[4]["id"])).id),
             "fields": {"input": "Say Hello", "output": "Say Hello"},
             "responses": {"admin": {"values": None, "status": "discarded"}},
         },
