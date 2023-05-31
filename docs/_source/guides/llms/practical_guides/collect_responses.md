@@ -40,12 +40,12 @@ from collections import Counter, OrderedDict
 import plotly.express as px
 
 count_submitted = Counter()
-for record in feedback:
-    if record["responses"] != []:
-        submitted = [r for r in record["responses"] if r["status"] == "submitted"]
+for record in feedback.records:
+    if record.responses != []:
+        submitted = [r for r in record.responses if r.status == "submitted"]
         count_submitted[len(submitted)] += 1
 count_submitted = OrderedDict(sorted(count_submitted.items()))
-count_submitted = [{"submitted_responses": k, "no_records": v} for k,v in count_submitted.items()]
+count_submitted = [{"submitted_responses": k, "no_records": v} for k, v in count_submitted.items()]
 
 
 fig = px.bar(count_submitted, x="submitted_responses", y="no_records")
@@ -60,11 +60,11 @@ fig.show()
 # plot 2: distance between responses in rating question
 list_values = []
 for record_ix,record in enumerate(feedback):
-    if record["responses"] != []:
-        submitted = [r for r in record["responses"] if r["status"] == "submitted"]
+    if record.responses != []:
+        submitted = [r for r in record.responses if r.status == "submitted"]
         if len(submitted) > 1:
-            for response_ix,response in enumerate(submitted):
-                list_values.append({"record": str(record_ix+1), "annotator": str(response_ix+1), "value": response["values"]["rating"]["value"]})
+            for response_ix, response in enumerate(submitted):
+                list_values.append({"record": str(record_ix+1), "annotator": str(response_ix+1), "value": response.values["rating"].value})
 
 
 fig = px.box(list_values, x='annotator', y='value', color='annotator', points='all', hover_data='record')
