@@ -45,10 +45,10 @@ https://user-images.githubusercontent.com/25269220/235918158-359726bb-a479-4239-
 <h3>
 <p align="center">
 <a href="https://docs.argilla.io">📄 Documentation</a> | </span>
-<a href="#🚀-quickstart">🚀 Quickstart</a> <span> | </span>
-<a href="#🎼-cheatsheet">🎼 Cheatsheet</a> <span> | </span>
-<a href="#📏-principles">📏 Principles</a> | </span>
-<a href="#🫱🏾‍🫲🏼-contribute">🫱🏾‍🫲🏼 Contribute</a>
+<a href="#-quickstart">🚀 Quickstart</a> <span> | </span>
+<a href="#-cheatsheet">🎼 Cheatsheet</a> <span> | </span>
+<a href="#-principles">📏 Principles</a> | </span>
+<a href="#-contribute">🫱🏾‍🫲🏼 Contribute</a>
 </p>
 </h3>
 

@@ -1,12 +1,12 @@
 <template>
-  <div class="radio-button" :class="[radioClasses]">
-    <div class="radio-button__container" @click.stop="toggleCheck">
+  <div class="radio-button" :class="[radioClasses]" @click.stop="toggleCheck">
+    <div class="radio-button__container" :style="cssVars">
       <input
         type="radio"
         v-bind="{ id, name, disabled, value, checked: isSelected }"
       />
     </div>
-    <label :for="id" class="radio-button-label" @click.prevent="toggleCheck">
+    <label :for="id" class="radio-button__label" @click.prevent="toggleCheck">
       <slot />
     </label>
   </div>
@@ -30,6 +30,10 @@ export default {
       type: [String, Number, Boolean, Object],
     },
     disabled: Boolean,
+    color: {
+      type: String,
+      default: "#3e5cc9",
+    },
   },
   model: {
     prop: "model",
@@ -43,6 +47,11 @@ export default {
       return {
         "--checked": this.isSelected,
         "--disabled": this.disabled,
+      };
+    },
+    cssVars() {
+      return {
+        "--radio-color": this.color,
       };
     },
   },
@@ -63,7 +72,6 @@ $radio-button-size: 20px;
   $this: &;
   position: relative;
   display: flex;
-  width: auto;
   margin: 16px 16px 16px 0;
   gap: $base-space;
   word-break: break-word;
@@ -79,6 +87,7 @@ $radio-button-size: 20px;
     height: $radio-button-size;
     position: relative;
     border: 1px solid palette(grey, 600);
+    background: palette(white);
     border-radius: 50%;
     transition: all 0.2s ease;
     input {
@@ -111,6 +120,10 @@ $radio-button-size: 20px;
       border-radius: 50%;
       transform: scale3D(0, 0, 1);
     }
+    &:hover {
+      border-color: var(--radio-color);
+      transition: border-color 0.3s ease-in-out;
+    }
     &:focus {
       outline: none;
     }
@@ -119,17 +132,16 @@ $radio-button-size: 20px;
   &__label {
     position: relative;
     height: $radio-button-size;
-    padding-left: 16px;
     line-height: $radio-button-size;
   }
   &.--checked {
     #{$this}__container {
-      background: $primary-color;
-      border-color: $primary-color;
+      background: var(--radio-color);
+      border-color: var(--radio-color);
       &:after {
         opacity: 1;
         transform: scale3D(1, 1, 1);
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
       }
     }
   }

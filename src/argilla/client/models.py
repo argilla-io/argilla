@@ -38,11 +38,13 @@ Vectors = Dict[str, List[float]]
 
 class Framework(Enum):
     TRANSFORMERS = "transformers"
+    PEFT = "peft"
     SETFIT = "setfit"
     SPACY = "spacy"
     SPAN_MARKER = "span_marker"
     SPARK_NLP = "spark-nlp"
     OPENAI = "openai"
+    AUTOTRAIN = "autotrain"
 
     @classmethod
     def _missing_(cls, value):

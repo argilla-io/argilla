@@ -118,7 +118,7 @@ services:
 # Do not execute the notebooks when building the docs
 nbsphinx_execute = "never"
 
-# open html file as python string
+# open html file as Python string
 getting_started_html = open("./_common/getting_started.html", "r", encoding="utf8").read()
 next_steps_html = open("./_common/next_steps.html", "r", encoding="utf8").read()
 

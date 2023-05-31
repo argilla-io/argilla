@@ -66,76 +66,115 @@
 </template>
 
 <script>
+import {
+  getAllFeedbackDatasets,
+  upsertFeedbackDataset,
+} from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { URL_GET_WORKSPACES, URL_GET_V1_DATASETS } from "/utils/url.properties";
+import { upsertDataset } from "@/models/dataset.utilities";
 import { ObservationDataset } from "@/models/Dataset";
 import { mapActions } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
+
+const TYPE_OF_FEEDBACK = Object.freeze({
+  ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
+  ERROR_FETCHING_WORKSPACES: "ERROR_FETCHING_WORKSPACES",
+});
+
 export default {
   layout: "app",
-  data: () => ({
-    querySearch: undefined,
-    breadcrumbs: [{ action: "clearFilters", name: "Home" }],
-    tableColumns: [
-      { name: "Name", field: "name", class: "table-info__title", type: "link" },
-      {
-        name: "Workspace",
-        field: "workspace",
-        class: "text",
-        type: "text",
-        filtrable: "true",
+  data() {
+    return {
+      querySearch: undefined,
+      breadcrumbs: [{ action: "clearFilters", name: "Home" }],
+      tableColumns: [
+        {
+          name: "Name",
+          field: "name",
+          class: "table-info__title",
+          type: "link",
+        },
+        {
+          name: "Workspace",
+          field: "workspace",
+          class: "text",
+          type: "text",
+          filtrable: "true",
+        },
+        {
+          name: "Task",
+          field: "task",
+          class: "task",
+          type: "task",
+          filtrable: "true",
+        },
+        {
+          name: "Tags",
+          field: "tags",
+          class: "text",
+          type: "object",
+          filtrable: "true",
+        },
+        {
+          name: "Created at",
+          field: "created_at",
+          class: "date",
+          type: "date",
+          sortable: "true",
+        },
+        {
+          name: "Updated at",
+          field: "last_updated",
+          class: "date",
+          type: "date",
+          sortable: "true",
+        },
+      ],
+      actions: [
+        {
+          name: "go-to-settings",
+          icon: "settings",
+          title: "Go to dataset settings",
+          tooltip: "Dataset settings",
+        },
+        {
+          name: "copy",
+          icon: "link",
+          title: "Copy url to clipboard",
+          tooltip: "Copied",
+        },
+      ],
+      emptySearchInfo: {
+        title: "0 datasets found",
       },
-      {
-        name: "Task",
-        field: "task",
-        class: "task",
-        type: "task",
-        filtrable: "true",
-      },
-      {
-        name: "Tags",
-        field: "tags",
-        class: "text",
-        type: "object",
-        filtrable: "true",
-      },
-      {
-        name: "Created at",
-        field: "created_at",
-        class: "date",
-        type: "date",
-        sortable: "true",
-      },
-      {
-        name: "Updated at",
-        field: "last_updated",
-        class: "date",
-        type: "date",
-        sortable: "true",
-      },
-    ],
-    actions: [
-      {
-        name: "go-to-settings",
-        icon: "settings",
-        title: "Go to dataset settings",
-        tooltip: "Dataset settings",
-      },
-      {
-        name: "copy",
-        icon: "link",
-        title: "Copy url to clipboard",
-        tooltip: "Copied",
-      },
-    ],
-    emptySearchInfo: {
-      title: "0 datasets found",
-    },
-    externalLinks: [],
-    sortedOrder: "desc",
-    sortedByField: "last_updated",
-  }),
+      externalLinks: [],
+      sortedOrder: "desc",
+      sortedByField: "last_updated",
+    };
+  },
   async fetch() {
-    await this.fetchDatasets();
+    // FETCH old list of datasets (Text2Text, TextClassification, TokenClassification)
+    const oldDatasets = await this.fetchDatasets();
+
+    // FETCH new FeedbackTask list
+    const { items: feedbackTaskDatasets } = await this.fetchFeedbackDatasets();
+
+    // TODO - remove next line when workspace will be include in the api endpoint to fetch feedbackTask
+    const workspaces = await this.fetchWorkspaces();
+
+    const feedbackDatasetsWithWorkspaces =
+      this.factoryFeedbackDatasetsWithCorrespondingWorkspaceName(
+        feedbackTaskDatasets,
+        workspaces
+      );
+
+    // UPSERT old dataset (Text2Text, TextClassification, TokenClassification) into the old orm
+    upsertDataset(oldDatasets);
+
+    // TODO - when workspaces will be include in feedbackDatasets, upsert directly "feedbackTaskDatasets" instead of "feedbackDatasetsWithWorkspaces"
+    // UPSERT FeedbackDataset into the new orm for this task
+    upsertFeedbackDataset(feedbackDatasetsWithWorkspaces);
   },
   computed: {
     activeFilters() {
@@ -159,14 +198,35 @@ export default {
         },
       ];
     },
-    datasets() {
+    formattedOldDatasets() {
       return ObservationDataset.all().map((dataset) => {
         return {
           ...dataset,
           id: dataset.id,
-          link: this.datasetWorkspace(dataset),
+          link: this.factoryLinkForOldDatasets(dataset),
         };
       });
+    },
+    formattedFeedbackTaskDatasets() {
+      // TODO - when workspace object will be include in the API call, replace line197 by the workspace
+      return getAllFeedbackDatasets().map((dataset) => {
+        return {
+          ...dataset,
+          id: dataset.id,
+          workspace: dataset.workspace_name,
+          tags: dataset?.tags ?? {},
+          task: "FeedbackTask",
+          created_at: dataset.inserted_at,
+          last_updated: dataset.updated_at, // NOTE - need to be last_updated attribute to have the same for old and new dataset
+          link: this.factoryLinkForFeedbackDataset(dataset),
+        };
+      });
+    },
+    datasets() {
+      return [
+        ...this.formattedFeedbackTaskDatasets,
+        ...this.formattedOldDatasets,
+      ];
     },
     workspaces() {
       let _workspaces = this.$route.query.workspace;
@@ -192,8 +252,6 @@ export default {
       return _tags;
     },
     workspace() {
-      // THIS IS WRONG !!!
-      this.$route.query.workspace;
       return currentWorkspace(this.$route);
     },
   },
@@ -201,6 +259,38 @@ export default {
     ...mapActions({
       fetchDatasets: "entities/datasets/fetchAll",
     }),
+    isOldTask(task) {
+      // NOTE - we need to detect old/new task because the redirection corresponding pages does not have the same route
+      return [
+        "TokenClassification",
+        "TextClassification",
+        "Text2Text",
+      ].includes(task);
+    },
+    async fetchFeedbackDatasets() {
+      const url = URL_GET_V1_DATASETS;
+      try {
+        const { data } = await this.$axios.get(url);
+
+        return data;
+      } catch (err) {
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_FEEDBACK_DATASETS,
+        };
+      }
+    },
+    async fetchWorkspaces() {
+      const url = URL_GET_WORKSPACES;
+      try {
+        const { data } = await this.$axios.get(url);
+
+        return data;
+      } catch (err) {
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACES,
+        };
+      }
+    },
     onColumnFilterApplied({ column, values }) {
       if (column === "workspace") {
         if (values !== this.workspaces) {
@@ -227,12 +317,37 @@ export default {
         }
       }
     },
-    datasetWorkspace(dataset) {
-      var workspace = dataset.workspace;
-      if (workspace === null || workspace === "null") {
-        workspace = this.workspace;
-      }
-      return `/datasets/${workspace}/${dataset.name}`;
+    factoryFeedbackDatasetsWithCorrespondingWorkspaceName(
+      feedbackDatasets,
+      workspaces
+    ) {
+      const newFeedbackDatasets = feedbackDatasets.map((feedbackDataset) => {
+        return {
+          ...feedbackDataset,
+          workspace_name:
+            workspaces.find(
+              (workspace) => workspace.id === feedbackDataset.workspace_id
+            )?.name || "",
+        };
+      });
+      return newFeedbackDatasets;
+    },
+    factoryLinkForOldDatasets({ name, workspace }) {
+      return {
+        name: "datasets-workspace-dataset",
+        params: {
+          dataset: name,
+          workspace: workspace || this.workspace,
+        },
+      };
+    },
+    factoryLinkForFeedbackDataset({ id }) {
+      return {
+        name: "dataset-id-annotation-mode",
+        params: {
+          id,
+        },
+      };
     },
     onActionClicked(action, dataset) {
       switch (action) {
@@ -243,7 +358,7 @@ export default {
           this.copyUrl(dataset);
           break;
         case "copy-name":
-          this.copyName(dataset.name);
+          this.copyName(dataset);
           break;
         default:
           console.warn(action);
@@ -252,18 +367,39 @@ export default {
     onSearch(event) {
       this.querySearch = event;
     },
-    goToSetting(dataset) {
-      const { workspace, name } = dataset;
-      this.$router.push({
-        path: `/datasets/${workspace}/${name}/settings`,
-      });
+    goToSetting({ id, workspace, name, task }) {
+      const isOldTask = this.isOldTask(task);
+
+      if (isOldTask) {
+        this.$router.push({
+          name: "datasets-workspace-dataset-settings",
+          params: {
+            workspace,
+            dataset: name,
+          },
+        });
+      } else {
+        this.$router.push({
+          name: "dataset-id-settings",
+          params: { id },
+        });
+      }
     },
-    copyName(id) {
-      this.copy(id);
+    copyName({ name }) {
+      this.copy(name);
     },
-    copyUrl(dataset) {
-      const route = `${window.origin}${dataset.link}`;
-      this.copy(route);
+    copyUrl({ task, id, workspace, name }) {
+      let url = `${window.origin}`;
+      const isOldTask = this.isOldTask(task);
+
+      //NOTE - IMPORTANT => if pages route change, don't forget to update the url !
+      if (isOldTask) {
+        url += `/datasets/${workspace}/${name}`;
+      } else {
+        url += `/dataset/${id}/annotation-mode`;
+      }
+
+      this.copy(url);
     },
     copy(id) {
       this.$copyToClipboard(id);

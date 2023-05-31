@@ -4,7 +4,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - python~=3.7.0
+  - python~=3.8.0
   - pip>=2.22.0
   - openjdk=11
   # pyparsing 3.0.5 seems to be buggy
@@ -51,6 +51,8 @@ dependencies:
       - setfit
       - span_marker
       - openai
+      - peft
+      - autotrain-advanced==0.5.2
       - rich==13.0.1
       # install Argilla in editable mode
       - -e .[server,listeners]

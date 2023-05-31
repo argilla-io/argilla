@@ -3,7 +3,7 @@
 Python
 ======
 
-The python reference guide for Argilla. This section contains:
+The Python reference guide for Argilla. This section contains:
 
 * :ref:`python_client`: The base client module
 * :ref:`python_metrics`: The module for dataset metrics
