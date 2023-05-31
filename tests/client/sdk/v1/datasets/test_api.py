@@ -323,4 +323,4 @@ def test_get_records(mocked_client, sdk_client, monkeypatch) -> None:
     assert response.status_code == 200
     assert isinstance(response.parsed, FeedbackRecordsModel)
     assert len(response.parsed.items) > 0
-    assert FeedbackItemModel(**response.parsed.items[0])
+    assert FeedbackItemModel(**response.parsed.items[0].dict())
