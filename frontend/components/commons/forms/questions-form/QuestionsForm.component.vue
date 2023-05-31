@@ -198,7 +198,7 @@ export default {
   },
   watch: {
     isFormUntouched(isFormUntouched) {
-      this.emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched);
+      this.emitIsQuestionsFormUntouched(isFormUntouched);
     },
   },
   async created() {
@@ -212,6 +212,7 @@ export default {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
+    this.emitIsQuestionsFormUntouched(true); // NOTE - ensure that on destroy, all parents and siblings have the flag well reinitiate
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
@@ -522,7 +523,7 @@ export default {
         type: typeOfToast,
       });
     },
-    emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched) {
+    emitIsQuestionsFormUntouched(isFormUntouched) {
       this.$emit("on-question-form-touched", !isFormUntouched);
       // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);
