@@ -970,7 +970,7 @@ class FeedbackDataset:
                     fields={field.name: hfds[index][field.name] for field in cls.fields},
                     responses=list(responses.values()) or None,
                     external_id=hfds[index]["external_id"],
-                ).dict()
+                )
             )
         del hfds
         return cls
