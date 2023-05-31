@@ -102,7 +102,7 @@ class SearchEngine:
         if settings.type == QuestionType.rating:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
             return {"type": "integer"}
-        elif settings.type in [QuestionType.text, QuestionType.label_selection]:
+        elif settings.type in [QuestionType.text, QuestionType.label_selection, QuestionType.multi_label_selection]:
             # TODO: Review mapping for label selection. Could make sense to use `keyword` mapping instead. See https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
             return {"type": "text", "index": False}
