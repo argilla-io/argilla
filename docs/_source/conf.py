@@ -38,7 +38,7 @@ try:
 
     version_ = rg.__version__
 except ModuleNotFoundError:
-    version_ = os.environ["VERSION"]
+    version_ = os.environ.get("VERSION")
 
 
 project = "Argilla"
@@ -49,8 +49,12 @@ author = "Argilla.io"
 release = version_
 
 # The short X.Y version
-version = ".".join(release.split(".")[0:2])
-
+try:
+    version = ".".join(release.split(".")[0:2])
+    release = version
+except:
+    version = ""
+    release = ""
 
 # -- General configuration ---------------------------------------------------
 
