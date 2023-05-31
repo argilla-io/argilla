@@ -157,6 +157,7 @@ export default {
   .inputs-area {
     display: inline-flex;
     gap: $base-space;
+    flex-wrap: wrap;
     border-radius: 5em;
     background: transparent;
     &:hover {
