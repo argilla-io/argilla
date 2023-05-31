@@ -218,13 +218,13 @@ class FeedbackDataset:
         ...     ]
         ... )
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[{"user_id": None, "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}])]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
         >>> dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
         >>> dataset.argilla_id
         "..."
         >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[{"user_id": None, "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}])]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
     """
 
     argilla_id: Optional[str] = None
@@ -474,7 +474,7 @@ class FeedbackDataset:
             ...     ]
             ... )
             >>> dataset.records
-            [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[{"user_id": None, "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}])]
+            [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
         """
         if isinstance(records, list):
             records = [FeedbackRecord(**record) if isinstance(record, dict) else record for record in records]
