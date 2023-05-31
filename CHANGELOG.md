@@ -58,11 +58,27 @@ These are the section headers that we use:
 ### Changed
 
 - The `database migrate` command accepts a `--revision` param to provide specific revision id
+- `tokens_length` metrics function returns empty data ([#3045])
+- `token_length` metrics function returns empty data ([#3045])
+- `mention_length` metrics function returns empty data ([#3045])
+- `entity_density` metrics function returns empty data ([#3045])
+
 
 ### Deprecated
 
 - Using argilla with python 3.7 runtime is deprecated and support will be removed from version 1.9.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
+- `tokens_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
+- `token_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
+- `mention_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
+- `entity_density` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
 
+### Removed
+
+- Removed mention `density`, `tokens_length` and `chars_length` metrics from token classification metrics storage ([#3045])
+- Removed token `char_start`, `char_end`, `tag`, and `score` metrics from token classification metrics storage ([#3045])
+- Removed tags-related metrics from token classification metrics storage ([#3045])
+
+[#3045]: https://github.com/argilla-io/argilla/pull/3045
 
 ## [1.7.0](https://github.com/argilla-io/argilla/compare/v1.6.0...v1.7.0)
 
