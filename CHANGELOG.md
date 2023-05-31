@@ -26,6 +26,10 @@ These are the section headers that we use:
 - Added `LabelSelectionQuestionSettings` class allowing to create label selection (single-choice) questions in the API.
 - Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API.
 
+## Changed
+
+- Database setup for unit tests. Now the unit tests use a different database than the one used by the local Argilla server ([#2987]).
+
 ## [1.8.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
 ## Added
