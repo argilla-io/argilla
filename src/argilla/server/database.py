@@ -53,12 +53,12 @@ def get_db() -> Generator["Session", None, None]:
         db.close()
 
 
-def get_async_db() -> Generator["AsyncSession", None, None]:
+async def get_async_db() -> Generator["AsyncSession", None, None]:
     try:
-        db = AsyncSessionLocal()
+        db: "AsyncSession" = AsyncSessionLocal()
         yield db
     finally:
-        db.close()
+        await db.close()
 
 
 def migrate_db():
