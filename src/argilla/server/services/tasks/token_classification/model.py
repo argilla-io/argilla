@@ -83,19 +83,6 @@ class ServiceTokenClassificationRecord(ServiceBaseRecord[ServiceTokenClassificat
     # TODO: review this.
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
-    def extended_fields(self) -> Dict[str, Any]:
-        return {
-            **super().extended_fields(),
-            # See ../service/service.py
-            PREDICTED_MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label, "score": entity.score}
-                for mention, entity in self.predicted_mentions()
-            ],
-            MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label} for mention, entity in self.annotated_mentions()
-            ],
-        }
-
     def __init__(self, **data):
         super().__init__(**data)
 

@@ -32,7 +32,6 @@ class ApiInfo:
 class Status(AbstractApi):
     class _ApiInfo(BaseModel):
         version: Optional[str] = None
-        rubrix_version: Optional[str] = None
 
     def get_info(self) -> ApiInfo:
         """
@@ -42,7 +41,7 @@ class Status(AbstractApi):
 
         response = self.http_client.get("/api/_info")
         api_info = self._ApiInfo.parse_obj(response)
-        return ApiInfo(version=api_info.version or api_info.rubrix_version)
+        return ApiInfo(version=api_info.version)
 
 
 class _ApiCompatibilityContextManager(ContextManager):

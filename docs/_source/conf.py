@@ -38,7 +38,7 @@ try:
 
     version_ = rg.__version__
 except ModuleNotFoundError:
-    version_ = os.environ["VERSION"]
+    version_ = os.environ.get("VERSION")
 
 
 project = "Argilla"
@@ -49,8 +49,12 @@ author = "Argilla.io"
 release = version_
 
 # The short X.Y version
-version = ".".join(release.split(".")[0:2])
-
+try:
+    version = ".".join(release.split(".")[0:2])
+    release = version
+except:
+    version = ""
+    release = ""
 
 # -- General configuration ---------------------------------------------------
 
@@ -118,7 +122,7 @@ services:
 # Do not execute the notebooks when building the docs
 nbsphinx_execute = "never"
 
-# open html file as python string
+# open html file as Python string
 getting_started_html = open("./_common/getting_started.html", "r", encoding="utf8").read()
 next_steps_html = open("./_common/next_steps.html", "r", encoding="utf8").read()
 
@@ -199,11 +203,11 @@ nbsphinx_prolog = (
 """
 )
 
-nbsphinx_epilog = f"""
-.. raw:: html
+# nbsphinx_epilog = f"""
+# .. raw:: html
 
-    {next_steps_html}
-"""
+#     {next_steps_html}
+# """
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -268,9 +272,16 @@ html_theme_options = {
         "color-card-bg": "#ffffff",
         "color-card-bg-hover": "#484848",
         "color-card-text": "#ffffff",
+        "sd-color-card-border": "#dadada",
         "color-tuto-card-bg": "#ffffff",
         "color-tuto-card-bg-hover": "#ffffff",
         "color-tuto-card-text": "#484848",
+        "sd-color-tabs-underline-active": "#FF675F",
+        "sd-color-tabs-label-active": "#FF675F",
+        "sd-color-tabs-label-inactive": "#6d6d6d",
+        "sd-color-tabs-label-hover": "#6d6d6d",
+        "sd-color-tabs-underline-hover": "#6d6d6d",
+        "sd-fontsize-tabs-label": "0.9rem",
     },
     "dark_css_variables": {
         "color-sidebar-background": "#131416",
@@ -305,9 +316,10 @@ html_theme_options = {
         "color-img-background": "#18181a",
         "sidebar-tree-space-above": "0",
         "sidebar-caption-space-above": "0",
-        "color-card-bg": "##27282a",
+        "color-card-bg": "#27282a",
         "color-card-bg-hover": "#27282a",
         "color-card-text": "#ffffff",
+        "sd-color-card-border": "#27282a",
         "color-tuto-card-bg": "#27282a",
         "color-tuto-card-bg-hover": "#3b3b3f",
         "color-tuto-card-text": "#ffffff",

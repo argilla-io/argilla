@@ -34,6 +34,11 @@ You can find a user icon and a refresh button on the top right:
 
 
 ## Dataset
+
+```{note}
+For a description of the UI and features related to the new Feedback Task datasets, please check [this guide](../../guides/llms/practical_guides/annotate_dataset.ipynb).
+```
+
 ![Dataset page](../../_static/reference/webapp/pages-dataset_page.png)
 
 The _Dataset_ page is the main page of the Argilla web app.

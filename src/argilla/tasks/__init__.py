@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .database import app as database
-from .server import app as server
-from .training import app as training
-from .users import app as users
+from .database import app as database_app
+from .server import app as server_app
+from .training import app as training_app
+from .users import app as users_app

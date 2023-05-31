@@ -207,7 +207,7 @@ def get_records(
     )
 
     if response.status_code == 200:
-        parsed_response = FeedbackRecordsModel.construct(**response.json())
+        parsed_response = FeedbackRecordsModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -286,7 +286,7 @@ def get_fields(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [FeedbackFieldModel.construct(**item) for item in response.json()["items"]]
+        parsed_response = [FeedbackFieldModel(**item) for item in response.json()["items"]]
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -343,7 +343,7 @@ def get_questions(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [FeedbackQuestionModel.construct(**item) for item in response.json()["items"]]
+        parsed_response = [FeedbackQuestionModel(**item) for item in response.json()["items"]]
         return Response(
             status_code=response.status_code,
             content=response.content,
