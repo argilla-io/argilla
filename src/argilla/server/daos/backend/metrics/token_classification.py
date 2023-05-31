@@ -35,8 +35,6 @@ class TopKMentionsConsistency(NestedPathElasticsearchMetric):
 
     mention_field: str
     labels_field: str
-    chars_length_field: str
-    tokens_length_field: str
 
     def _inner_aggregation(
         self,
@@ -148,16 +146,12 @@ METRICS = {
         nested_path="metrics.predicted.mentions",
         mention_field="value",
         labels_field="label",
-        chars_length_field="chars_length",
-        tokens_length_field="tokens_length",
     ),
     "annotated_top_k_mentions_consistency": TopKMentionsConsistency(
         id="annotated_top_k_mentions_consistency",
         nested_path="metrics.annotated.mentions",
         mention_field="value",
         labels_field="label",
-        chars_length_field="chars_length",
-        tokens_length_field="tokens_length",
     ),
     # TODO: Remove in v1.10.0
     "tokens_length": HistogramAggregation(
@@ -224,8 +218,6 @@ METRICS = {
         nested_path="metrics.predicted.tags",
         mention_field="value",
         labels_field="tag",
-        chars_length_field="chars_length",
-        tokens_length_field="tokens_length",
     ),
     # TODO: Remove in v1.10.0
     "annotated_tag_consistency": TopKMentionsConsistency(
@@ -233,7 +225,5 @@ METRICS = {
         nested_path="metrics.annotated.tags",
         mention_field="value",
         labels_field="tag",
-        chars_length_field="chars_length",
-        tokens_length_field="tokens_length",
     ),
 }

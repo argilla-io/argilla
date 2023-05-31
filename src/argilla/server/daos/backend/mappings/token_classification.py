@@ -68,7 +68,7 @@ def token_classification_mappings():
             "predicted_as": mappings.keyword_field(enable_text_search=True),
             "score": {"type": "float"},
             "tokens": mappings.keyword_field(),
-            # "metrics.tokens": nested_mappings_from_base_model(TokenMetrics),
+            "metrics.tokens": nested_mappings_from_base_model(TokenMetrics),
             "metrics.predicted.mentions": metrics_mentions_mappings,
             "metrics.annotated.mentions": metrics_mentions_mappings,
             # "metrics.predicted.tags": metrics_tags_mappings,
