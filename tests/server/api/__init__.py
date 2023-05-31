@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-
-import typer
-
-from .tasks import database_app, server_app, training_app, users_app
-
-app = typer.Typer(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
-
-app.add_typer(users_app, name="users")
-app.add_typer(database_app, name="database")
-app.add_typer(training_app, name="train")
-app.add_typer(server_app, name="server")
-
-if __name__ == "__main__":
-    app()

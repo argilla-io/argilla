@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
 
-import typer
+import pytest
 
-from .tasks import database_app, server_app, training_app, users_app
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+    from sqlalchemy.orm import Session
 
-app = typer.Typer(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
 
-app.add_typer(users_app, name="users")
-app.add_typer(database_app, name="database")
-app.add_typer(training_app, name="train")
-app.add_typer(server_app, name="server")
-
-if __name__ == "__main__":
-    app()
+@pytest.fixture(autouse=True)
+def mock_session_local(mocker: "MockerFixture", db: "Session") -> None:
+    mocker.patch.object(db, "close", side_effect=lambda: None)
+    mocker.patch("argilla.tasks.users.create.SessionLocal", return_value=db)
+    mocker.patch("argilla.tasks.users.create_default.SessionLocal", return_value=db)
+    mocker.patch("argilla.tasks.users.migrate.SessionLocal", return_value=db)
