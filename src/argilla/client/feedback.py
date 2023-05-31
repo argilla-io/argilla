@@ -479,15 +479,17 @@ class FeedbackDataset:
             [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
         """
         if isinstance(records, list):
+            new_records = []
             for record in records:
                 if isinstance(record, dict):
-                    self.add_records(record)
+                    new_records.append(FeedbackRecord(**record))
                 elif isinstance(record, FeedbackRecord):
-                    self.add_records(record)
+                    new_records.append(record)
                 else:
                     raise ValueError(
                         f"Expected `records` to be a list of `dict` or `rg.FeedbackRecord`, got type {type(record)} instead."
                     )
+            records = new_records
         elif isinstance(records, dict):
             records = [FeedbackRecord(**records)]
         elif isinstance(records, FeedbackRecord):
