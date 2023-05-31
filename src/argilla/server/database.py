@@ -14,10 +14,12 @@
 
 import os
 from sqlite3 import Connection as SQLite3Connection
+from typing import Generator
 
 import alembic.config
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from argilla.server.settings import settings
@@ -34,10 +36,21 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+async_engine = create_async_engine(settings.database_url)
+AsyncSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=async_engine, class_=AsyncSession)
+
 
 def get_db():
     try:
         db = SessionLocal()
+        yield db
+    finally:
+        db.close()
+
+
+def get_async_db() -> Generator["AsyncSession", None, None]:
+    try:
+        db = AsyncSessionLocal()
         yield db
     finally:
         db.close()
