@@ -437,6 +437,8 @@ class FeedbackDataset:
                 with the fields of the record.
 
         Raises:
+            ValueError: if the given records are neither: `FeedbackRecord`, list of `FeedbackRecord`,
+                list of dictionaries as a record or dictionary as a record.
             ValueError: if the given records do not match the expected schema.
 
         Examples:
@@ -477,11 +479,23 @@ class FeedbackDataset:
             [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
         """
         if isinstance(records, list):
-            records = [FeedbackRecord(**record) if isinstance(record, dict) else record for record in records]
-        if isinstance(records, dict):
+            for record in records:
+                if isinstance(record, dict):
+                    self.add_records(record)
+                elif isinstance(record, FeedbackRecord):
+                    self.add_records(record)
+                else:
+                    raise ValueError(
+                        f"Expected `records` to be a list of `dict` or `rg.FeedbackRecord`, got type {type(record)} instead."
+                    )
+        elif isinstance(records, dict):
             records = [FeedbackRecord(**records)]
-        if isinstance(records, FeedbackRecord):
+        elif isinstance(records, FeedbackRecord):
             records = [records]
+        else:
+            raise ValueError(
+                f"Expected `records` to be a `dict` or `rg.FeedbackRecord`, got type {type(records)} instead."
+            )
 
         if self.__fields_schema is None:
             self.__fields_schema = generate_pydantic_schema(self.fields)
