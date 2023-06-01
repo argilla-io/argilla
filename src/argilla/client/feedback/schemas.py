@@ -12,18 +12,26 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
+import warnings
 from typing import Any, Dict, List, Optional, Union
+from uuid import UUID
 
 try:
     from typing import Literal
 except ImportError:
     from typing_extensions import Literal
-from uuid import UUID
 
-from pydantic import BaseModel, Extra, Field, StrictInt, StrictStr, validator
+from pydantic import (
+    BaseModel,
+    Extra,
+    Field,
+    StrictInt,
+    StrictStr,
+    validator,
+)
 
-_LOGGER = logging.getLogger(__name__)
+FETCHING_BATCH_SIZE = 250
+PUSHING_BATCH_SIZE = 32
 
 
 class ValueSchema(BaseModel):
@@ -38,10 +46,11 @@ class ResponseSchema(BaseModel):
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):
         if not v:
-            _LOGGER.warning(
+            warnings.warn(
                 "`user_id` not provided, so it will be set to `None`. Which is not an"
-                " issue, unless if you're planning to log the response in Argilla, as "
-                " it will be automatically set to the active `user_id`."
+                " issue, unless you're planning to log the response in Argilla, as "
+                " it will be automatically set to the active `user_id`.",
+                stacklevel=2,
             )
         return v
 
@@ -60,16 +69,7 @@ class FeedbackRecord(BaseModel):
         return v
 
     class Config:
-        extra = Extra.forbid
-
-
-class OfflineFeedbackRecord(BaseModel):
-    id: Optional[str] = None
-    fields: Dict[str, str]
-    responses: List[ResponseSchema] = []
-    external_id: Optional[str] = None
-    inserted_at: Optional[str] = None
-    updated_at: Optional[str] = None
+        extra = Extra.ignore
 
 
 class FieldSchema(BaseModel):
