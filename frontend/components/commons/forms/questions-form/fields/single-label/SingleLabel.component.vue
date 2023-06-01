@@ -18,9 +18,11 @@
     </div>
 
     <SingleLabelMonoSelectionComponent
-      v-model="options"
-      :componentId="inputId"
-      :isSearch="isSearch"
+      :options="uniqueOptions"
+      :componentId="questionId"
+      :showSearch="showSearch"
+      :maxOptionsToShowBeforeCollapse="settings.visible_options"
+      @change="$emit('update:options', options)"
     />
   </div>
 </template>
@@ -29,7 +31,7 @@
 export default {
   name: "SingleLabelComponent",
   props: {
-    inputId: {
+    questionId: {
       type: String,
       required: true,
     },
@@ -49,13 +51,34 @@ export default {
       type: String,
       default: () => "",
     },
+    settings: {
+      type: Object,
+      default: () => {
+        return {
+          visible_options: 30,
+        };
+      },
+    },
   },
   model: {
     prop: "options",
   },
+  data() {
+    return {
+      uniqueOptions: [],
+    };
+  },
+  beforeMount() {
+    this.uniqueOptions = this.options.reduce((accumulator, current) => {
+      if (!accumulator.find((item) => item.id === current.id)) {
+        accumulator.push(current);
+      }
+      return accumulator;
+    }, []);
+  },
   computed: {
-    isSearch() {
-      return this.options.length >= 12;
+    showSearch() {
+      return this.uniqueOptions.length >= 12;
     },
   },
 };
