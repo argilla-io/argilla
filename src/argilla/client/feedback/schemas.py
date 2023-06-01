@@ -77,7 +77,6 @@ class FieldSchema(BaseModel):
     title: Optional[str] = None
     required: Optional[bool] = True
     settings: Dict[str, Any]
-    use_markdown: bool = False
 
     @validator("title", always=True)
     def title_must_have_value(cls, v, values):
@@ -85,13 +84,16 @@ class FieldSchema(BaseModel):
             return values["name"].capitalize()
         return v
 
-    @validator("use_markdown", always=True)
-    def update_settings_with_use_markdown(cls, v, values):
-        values["settings"]["use_markdown"] = v
-
 
 class TextField(FieldSchema):
-    settings: Dict[str, Any] = Field({"type": "text"}, const=True)
+    settings: Dict[str, Any] = Field({"type": "text"})
+    use_markdown: bool = False
+
+    @validator("use_markdown", always=True)
+    def update_settings_with_use_markdown(cls, v, values):
+        if v:
+            values["settings"]["use_markdown"] = v
+        return False
 
 
 FIELD_TYPE_TO_PYTHON_TYPE = {"text": str}
@@ -103,7 +105,6 @@ class QuestionSchema(BaseModel):
     description: Optional[str] = None
     required: Optional[bool] = True
     settings: Dict[str, Any]
-    use_markdown: bool = False
 
     @validator("title", always=True)
     def title_must_have_value(cls, v, values):
@@ -111,14 +112,17 @@ class QuestionSchema(BaseModel):
             return values["name"].capitalize()
         return v
 
-    @validator("use_markdown", always=True)
-    def update_settings_with_use_markdown(cls, v, values):
-        values["settings"]["use_markdown"] = v
-
 
 # TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
 class TextQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({"type": "text"}, const=True)
+    settings: Dict[str, Any] = Field({"type": "text", "use_markdown": False})
+    use_markdown: bool = False
+
+    @validator("use_markdown", always=True)
+    def update_settings_with_use_markdown(cls, v, values):
+        if v:
+            values["settings"]["use_markdown"] = v
+        return False
 
 
 class RatingQuestion(QuestionSchema):
