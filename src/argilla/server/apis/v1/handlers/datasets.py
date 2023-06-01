@@ -316,15 +316,14 @@ async def search_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.search_records)
+    dataset = _get_dataset(db, dataset_id)
+    authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
     if query.text.field and not datasets.get_field_by_name_and_dataset_id(db, query.text.field, dataset_id):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Field `{query.text.field}` not found in dataset `{dataset_id}`.",
         )
-
-    dataset = _get_dataset(db, dataset_id)
 
     user_response_status_filter = None
     if response_status:
