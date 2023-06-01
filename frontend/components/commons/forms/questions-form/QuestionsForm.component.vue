@@ -41,6 +41,7 @@
           v-model="input.options"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
+          :visibleOptions="input.settings.visible_options"
           @on-error="onError"
         />
 
@@ -528,6 +529,17 @@ export default {
       this.inputs.forEach((input) => {
         let selectedOption = null;
         switch (input.component_type) {
+          case COMPONENT_TYPE.MULTI_LABEL:
+            //TODO - place the code after the switch inside RATING and FREE_TEXT cases 
+            const selectedOptions = input.options?.filter(
+              (option) => option.is_selected
+            );
+
+            if (selectedOptions?.length)
+              responseByQuestionName[input.name] = {
+                value: selectedOptions.map((option) => option.value),
+              };
+            break;
           case COMPONENT_TYPE.SINGLE_LABEL:
           case COMPONENT_TYPE.RATING:
             selectedOption = input.options?.find(
