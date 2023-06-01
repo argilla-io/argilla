@@ -196,11 +196,11 @@ class SearchEngine:
     @staticmethod
     def _text_query_builder(dataset: Dataset, text: TextQuery) -> dict:
         if not text.field:
-            # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-combined-fields-query.html
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html
             field_names = [
                 f"fields.{field.name}" for field in dataset.fields if field.settings.get("type") == FieldType.text
             ]
-            return {"combined_fields": {"query": text.q, "fields": field_names, "operator": "and"}}
+            return {"multi_match": {"query": text.q, "fields": field_names, "operator": "and"}}
         else:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html
             return {"match": {f"fields.{text.field}": {"query": text.q, "operator": "and"}}}
