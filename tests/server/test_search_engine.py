@@ -24,6 +24,8 @@ from sqlalchemy.orm import Session
 
 from tests.factories import (
     DatasetFactory,
+    LabelSelectionQuestionFactory,
+    MultiLabelSelectionQuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
     TextFieldFactory,
@@ -89,7 +91,9 @@ class TestSuiteElasticSearchEngine:
         index = opensearch.indices.get(index=index_name)[index_name]
         assert index["mappings"] == {
             "dynamic": "strict",
-            "dynamic_templates": [],
+            "dynamic_templates": [
+                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+            ],
             "properties": {
                 "id": {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
@@ -115,7 +119,9 @@ class TestSuiteElasticSearchEngine:
         index = opensearch.indices.get(index=index_name)[index_name]
         assert index["mappings"] == {
             "dynamic": "strict",
-            "dynamic_templates": [],
+            "dynamic_templates": [
+                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+            ],
             "properties": {
                 "id": {"type": "keyword"},
                 "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
@@ -137,8 +143,11 @@ class TestSuiteElasticSearchEngine:
     ):
         text_questions = TextQuestionFactory.create_batch(size=text_ann_size)
         rating_questions = RatingQuestionFactory.create_batch(size=rating_ann_size)
+        label_questions = LabelSelectionQuestionFactory.create_batch(size=text_ann_size)
+        multilabel_questions = MultiLabelSelectionQuestionFactory.create_batch(size=rating_ann_size)
 
-        dataset = DatasetFactory.create(questions=text_questions + rating_questions)
+        all_questions = text_questions + rating_questions + label_questions + multilabel_questions
+        dataset = DatasetFactory.create(questions=all_questions)
 
         await search_engine.create_index(dataset)
 
@@ -153,6 +162,7 @@ class TestSuiteElasticSearchEngine:
                 "responses": {"dynamic": "true", "type": "object"},
             },
             "dynamic_templates": [
+                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}},
                 *[
                     config
                     for question in text_questions
@@ -172,6 +182,18 @@ class TestSuiteElasticSearchEngine:
                         {
                             f"{question.name}_responses": {
                                 "mapping": {"type": "integer"},
+                                "path_match": f"responses.*.values.{question.name}",
+                            }
+                        },
+                    ]
+                ],
+                *[
+                    config
+                    for question in label_questions + multilabel_questions
+                    for config in [
+                        {
+                            f"{question.name}_responses": {
+                                "mapping": {"type": "keyword"},
                                 "path_match": f"responses.*.values.{question.name}",
                             }
                         },

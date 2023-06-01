@@ -102,31 +102,16 @@ class SearchEngine:
         self.client = AsyncOpenSearch(**self.config)
 
     async def create_index(self, dataset: Dataset):
-        fields = {
-            "id": {"type": "keyword"},
-            "responses": {"dynamic": True, "type": "object"},
-        }
-
-        for field in dataset.fields:
-            fields[f"fields.{field.name}"] = self._es_mapping_for_field(field)
-
-        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
-        dynamic_templates: List[dict] = [
-            {
-                f"{question.name}_responses": {
-                    "path_match": f"responses.*.values.{question.name}",
-                    "mapping": self._field_mapping_for_question(question),
-                },
-            }
-            for question in dataset.questions
-        ]
-
-        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
         mappings = {
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
             "dynamic": "strict",
-            "dynamic_templates": dynamic_templates,
-            "properties": fields,
+            "dynamic_templates": self._dynamic_templates_for_question_responses(dataset.questions),
+            "properties": {
+                # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
+                "id": {"type": "keyword"},
+                "responses": {"dynamic": True, "type": "object"},
+                **self._mapping_for_fields(dataset.fields),
+            },
         }
 
         settings = {
@@ -217,17 +202,37 @@ class SearchEngine:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html
             return {"match": {f"fields.{text.field}": {"query": text.q, "operator": "and"}}}
 
+    def _mapping_for_fields(self, fields: List[Field]):
+        return {f"fields.{field.name}": self._es_mapping_for_field(field) for field in fields}
+
+    def _dynamic_templates_for_question_responses(self, questions: List[Question]) -> List[dict]:
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
+        return [
+            {"status_responses": {"path_match": f"responses.*.status", "mapping": {"type": "keyword"}}},
+            *[
+                {
+                    f"{question.name}_responses": {
+                        "path_match": f"responses.*.values.{question.name}",
+                        "mapping": self._field_mapping_for_question(question),
+                    },
+                }
+                for question in questions
+            ],
+        ]
+
     def _field_mapping_for_question(self, question: Question):
         settings = question.parsed_settings
 
         if settings.type == QuestionType.rating:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
             return {"type": "integer"}
-        elif settings.type in [QuestionType.text, QuestionType.label_selection, QuestionType.multi_label_selection]:
+        elif settings.type == QuestionType.text:
             # TODO: Review mapping for label selection. Could make sense to use `keyword` mapping instead.
             #  See https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
             #  See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
             return {"type": "text", "index": False}
+        elif settings.type in [QuestionType.label_selection, QuestionType.multi_label_selection]:
+            return {"type": "keyword"}
         else:
             raise ValueError(f"ElasticSearch mappings for Question of type {settings.type} cannot be generated")
 
