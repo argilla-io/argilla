@@ -1,9 +1,9 @@
 <template>
   <div class="container">
-    <div class="component-header" v-if="isSearch || isButtonShowMore">
+    <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchSingleLabelComponent
-          v-if="isSearch"
+          v-if="showSearch"
           v-model="searchInput"
           :searchRef="searchRef"
           :placeholder="placeholder"
@@ -14,8 +14,8 @@
         <button
           type="button"
           class="show-more-button cursor-pointer"
-          v-if="isButtonShowMore"
-          v-text="textToShowInTheButton"
+          v-if="showCollapseButton"
+          v-text="textToShowInTheCollapseButton"
           @click="toggleShowMore"
         />
       </div>
@@ -54,11 +54,13 @@
 </template>
 
 <script>
-const MAX_OPTION_TO_SHOW = 30;
-
 export default {
   name: "SingleLabelMonoSelectionComponent",
   props: {
+    maxOptionsToShowBeforeCollapse: {
+      type: Number | null,
+      default: () => 30,
+    },
     options: {
       type: Array,
       required: true,
@@ -71,7 +73,7 @@ export default {
       type: String,
       required: true,
     },
-    isSearch: {
+    showSearch: {
       type: Boolean,
       default: () => false,
     },
@@ -97,28 +99,35 @@ export default {
             .toLowerCase()
             .includes(this.searchInput.toLowerCase())
         )
-        .slice(0, this.showMore ? this.options.length : MAX_OPTION_TO_SHOW);
+        .slice(
+          0,
+          this.showMore
+            ? this.options.length
+            : this.maxOptionsToShowBeforeCollapse
+        );
     },
     noResultMessage() {
       return `There is no result matching: ${this.searchInput}`;
     },
-    numberToShowInTheButton() {
+    numberToShowInTheCollapseButton() {
       if (!this.searchInput.length) {
         return this.options.length - this.filteredOptions.length;
       }
-      if (this.filteredOptions.length > MAX_OPTION_TO_SHOW) {
-        return this.filteredOptions.length - MAX_OPTION_TO_SHOW;
+      if (this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse) {
+        return (
+          this.filteredOptions.length - this.maxOptionsToShowBeforeCollapse
+        );
       }
       return null;
     },
-    isButtonShowMore() {
-      return this.numberToShowInTheButton || this.showMore;
+    showCollapseButton() {
+      return this.numberToShowInTheCollapseButton || this.showMore;
     },
-    textToShowInTheButton() {
+    textToShowInTheCollapseButton() {
       if (this.showMore) {
         return "Show less";
       }
-      return `+${this.numberToShowInTheButton}`;
+      return `+${this.numberToShowInTheCollapseButton}`;
     },
   },
   watch: {

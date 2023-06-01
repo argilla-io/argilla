@@ -13,8 +13,8 @@
       class="search-input"
       type="text"
       :value="value"
-      :ref="$attrs.searchRef"
-      :placeholder="$attrs.placeholder"
+      :ref="searchRef"
+      :placeholder="placeholder"
       @input="$emit('input', $event.target.value)"
       @keydown.shift.backspace.exact="looseFocus"
       @keydown.shift.space.exact="looseFocus"
@@ -34,13 +34,21 @@ export default {
       type: String,
       default: () => "",
     },
+    searchRef: {
+      type: String,
+      required: true,
+    },
+    placeholder: {
+      type: String,
+      default: () => "",
+    },
   },
   methods: {
     looseFocus() {
-      this.$refs[this.$attrs.searchRef].blur();
+      this.$refs[this.searchRef].blur();
     },
     focusInSearch() {
-      this.$refs[this.$attrs.searchRef].focus();
+      this.$refs[this.searchRef].focus();
     },
   },
 };
