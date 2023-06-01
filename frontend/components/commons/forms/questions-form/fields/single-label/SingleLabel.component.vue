@@ -17,16 +17,24 @@
       />
     </div>
 
-    <SingleLabelMonoSelectionComponent v-model="options" />
+    <SingleLabelMonoSelectionComponent
+      :options="uniqueOptions"
+      :componentId="questionId"
+      :showSearch="showSearch"
+      :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
+      @change="$emit('update:options', options)"
+    />
   </div>
 </template>
 
 <script>
-import SingleLabelMonoSelectionComponent from "./SingleLabelMonoSelection.component.vue";
 export default {
-  components: { SingleLabelMonoSelectionComponent },
   name: "SingleLabelComponent",
   props: {
+    questionId: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -43,19 +51,33 @@ export default {
       type: String,
       default: () => "",
     },
-  },
-  methods: {
-    onChangeSingleLabel(newOptions) {
-      this.$emit("on-change-single-label", newOptions);
-      const isAnySingleLabelSelected =
-        this.isAnySingleLabelSelected(newOptions);
-
-      if (this.isRequired) {
-        this.$emit("on-error", !isAnySingleLabelSelected);
-      }
+    visibleOptions: {
+      type: Number | null,
+      required: false,
     },
-    isAnySingleLabelSelected(options) {
-      return options.some((option) => option.value);
+  },
+  model: {
+    prop: "options",
+  },
+  data() {
+    return {
+      uniqueOptions: [],
+    };
+  },
+  beforeMount() {
+    this.uniqueOptions = this.options.reduce((accumulator, current) => {
+      if (!accumulator.find((item) => item.id === current.id)) {
+        accumulator.push(current);
+      }
+      return accumulator;
+    }, []);
+  },
+  computed: {
+    showSearch() {
+      return this.uniqueOptions.length >= 12;
+    },
+    maxOptionsToShowBeforeCollapse() {
+      return this.visibleOptions ?? -1;
     },
   },
 };
