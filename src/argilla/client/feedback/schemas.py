@@ -139,10 +139,11 @@ class RatingQuestion(QuestionSchema):
         validate_assignment = True
 
 
+AllowedFieldTypes = TextField
 AllowedQuestionTypes = Union[TextQuestion, RatingQuestion]
 
 
 class FeedbackDatasetConfig(BaseModel):
-    fields: List[FieldSchema]
+    fields: List[AllowedFieldTypes]
     questions: List[AllowedQuestionTypes]
     guidelines: Optional[str] = None
