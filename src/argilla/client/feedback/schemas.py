@@ -147,3 +147,6 @@ class FeedbackDatasetConfig(BaseModel):
     fields: List[AllowedFieldTypes]
     questions: List[AllowedQuestionTypes]
     guidelines: Optional[str] = None
+
+    class Config:
+        smart_union = True
