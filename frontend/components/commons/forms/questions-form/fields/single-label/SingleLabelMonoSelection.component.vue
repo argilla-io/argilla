@@ -13,10 +13,10 @@
       <div class="right-header">
         <button
           type="button"
-          class="show-more-button cursor-pointer"
+          class="show-less-button cursor-pointer"
           v-if="showCollapseButton"
           v-text="textToShowInTheCollapseButton"
-          @click="toggleShowMore"
+          @click="toggleShowLess"
         />
       </div>
     </div>
@@ -27,7 +27,7 @@
     >
       <div
         class="input-button"
-        v-for="option in filteredOptions"
+        v-for="option in visibleOptions"
         :key="option.id"
       >
         <input
@@ -58,8 +58,8 @@ export default {
   name: "SingleLabelMonoSelectionComponent",
   props: {
     maxOptionsToShowBeforeCollapse: {
-      type: Number | null,
-      default: () => 30,
+      type: Number,
+      default: () => -1,
     },
     options: {
       type: Array,
@@ -85,7 +85,7 @@ export default {
   data() {
     return {
       searchInput: "",
-      showMore: false,
+      showLess: false,
     };
   },
   created() {
@@ -93,46 +93,37 @@ export default {
   },
   computed: {
     filteredOptions() {
-      return this.options
-        .filter((option) =>
-          String(option.text)
-            .toLowerCase()
-            .includes(this.searchInput.toLowerCase())
-        )
-        .slice(
-          0,
-          this.showMore
-            ? this.options.length
-            : this.maxOptionsToShowBeforeCollapse
-        );
+      return this.options.filter((option) =>
+        String(option.text)
+          .toLowerCase()
+          .includes(this.searchInput.toLowerCase())
+      );
+    },
+    visibleOptions() {
+      if (!this.showCollapseButton || this.showLess)
+        return this.filteredOptions;
+
+      return this.filteredOptions.slice(
+        0,
+        this.maxOptionsToShowBeforeCollapse + 1
+      );
     },
     noResultMessage() {
       return `There is no result matching: ${this.searchInput}`;
     },
     numberToShowInTheCollapseButton() {
-      if (!this.searchInput.length) {
-        return this.options.length - this.filteredOptions.length;
-      }
-      if (this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse) {
-        return (
-          this.filteredOptions.length - this.maxOptionsToShowBeforeCollapse
-        );
-      }
-      return null;
+      return this.filteredOptions.length - this.maxOptionsToShowBeforeCollapse;
     },
     showCollapseButton() {
-      return this.numberToShowInTheCollapseButton || this.showMore;
+      if (this.maxOptionsToShowBeforeCollapse === -1) return false;
+      if (this.numberToShowInTheCollapseButton < 0) return false;
+      return this.options.length > this.maxOptionsToShowBeforeCollapse;
     },
     textToShowInTheCollapseButton() {
-      if (this.showMore) {
+      if (this.showLess) {
         return "Show less";
       }
       return `+${this.numberToShowInTheCollapseButton}`;
-    },
-  },
-  watch: {
-    searchInput() {
-      this.resetShowMore();
     },
   },
   methods: {
@@ -148,11 +139,8 @@ export default {
 
       this.$emit("on-change", this.options);
     },
-    resetShowMore() {
-      this.showMore = false;
-    },
-    toggleShowMore() {
-      this.showMore = !this.showMore;
+    toggleShowLess() {
+      this.showLess = !this.showLess;
     },
   },
 };
@@ -179,7 +167,7 @@ export default {
   }
 }
 
-.show-more-button {
+.show-less-button {
   background: none;
   border: none;
   color: rgba(0, 0, 0, 0.6);
