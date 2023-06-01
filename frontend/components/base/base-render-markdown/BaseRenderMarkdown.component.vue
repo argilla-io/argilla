@@ -41,6 +41,11 @@ export default {
       white-space: pre-wrap;
       word-break: break-all;
     }
+    code:not(.hljs) {
+      color: palette(orange-red-crayola);
+      background-color: palette(apricot, light);
+      border-radius: 4px;
+    }
     a {
       word-break: break-all;
       color: $primary-color;
