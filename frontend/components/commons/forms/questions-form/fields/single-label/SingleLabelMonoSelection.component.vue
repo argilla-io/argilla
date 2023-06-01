@@ -34,12 +34,12 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
-          v-model="option.value"
+          v-model="option.is_selected"
           @change="onSelect(option)"
         />
         <label
           class="label-text cursor-pointer"
-          :class="{ 'label-active': option.value }"
+          :class="{ 'label-active': option.is_selected }"
           :for="option.id"
           v-text="option.text"
         />
@@ -92,7 +92,11 @@ export default {
   computed: {
     filteredOptions() {
       return this.options
-        .filter((option) => String(option.text).includes(this.searchInput))
+        .filter((option) =>
+          String(option.text)
+            .toLowerCase()
+            .includes(this.searchInput.toLowerCase())
+        )
         .slice(0, this.showMore ? this.options.length : MAX_OPTION_TO_SHOW);
     },
     noResultMessage() {
@@ -123,12 +127,12 @@ export default {
     },
   },
   methods: {
-    onSelect({ id, value }) {
+    onSelect({ id, is_selected }) {
       this.options.map((option) => {
         if (option.id === id) {
-          option.value = value;
+          option.is_selected = is_selected;
         } else {
-          option.value = false;
+          option.is_selected = false;
         }
         return option;
       });
