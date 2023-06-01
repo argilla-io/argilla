@@ -360,3 +360,6 @@ def test_push_to_huggingface_and_from_huggingface(
     assert isinstance(dataset_from_huggingface, FeedbackDataset)
     assert dataset_from_huggingface.guidelines == dataset.guidelines
     assert len(dataset_from_huggingface.fields) == len(dataset.fields)
+    assert all(original_field in dataset_from_huggingface.fields for original_field in dataset.fields)
+    assert len(dataset_from_huggingface.questions) == len(dataset.questions)
+    assert all(original_question in dataset_from_huggingface.questions for original_question in dataset.questions)
