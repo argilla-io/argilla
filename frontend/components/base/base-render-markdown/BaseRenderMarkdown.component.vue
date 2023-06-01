@@ -35,6 +35,7 @@ export default {
 <style lang="scss" scoped>
 .markdown-render {
   white-space: normal;
+  word-break: break-all;
   :deep() {
     pre {
       overflow: scroll;
