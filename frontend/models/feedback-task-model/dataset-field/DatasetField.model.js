@@ -11,8 +11,8 @@ class DatasetField extends Model {
       order: this.number(0),
       title: this.string(""),
       is_required: this.boolean(false),
-      use_markdown: this.boolean(true),
       component_type: this.string(null).nullable(),
+      settings: this.attr(null),
     };
   }
 }

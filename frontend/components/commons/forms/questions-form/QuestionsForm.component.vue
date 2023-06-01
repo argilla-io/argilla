@@ -28,7 +28,7 @@
           :title="input.question"
           :placeholder="input.placeholder"
           v-model="input.options[0].value"
-          :useMarkdown="input.use_markdown"
+          :useMarkdown="input.settings.use_markdown"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           @on-error="onError"
@@ -601,9 +601,6 @@ export default {
     a {
       color: $black-37;
       outline: 0;
-      &:hover {
-        color: $black-54;
-      }
     }
   }
   &__content {

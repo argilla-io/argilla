@@ -72,10 +72,10 @@ export default {
             question: questionTitle,
             options: formattedOptions,
             is_required: isRequired,
-            use_markdown: questionSettings.use_markdown,
             component_type: componentType,
             placeholder: questionSettings?.placeholder ?? null,
             description: questionDescription ?? null,
+            settings: questionSettings,
           };
         }
       );
@@ -106,8 +106,8 @@ export default {
             order: index,
             title: fieldTitle,
             is_required: isRequired,
-            use_markdown: fieldSettings.use_markdown,
             component_type: componentType,
+            settings: fieldSettings,
           };
         }
       );
