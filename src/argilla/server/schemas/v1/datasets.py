@@ -323,3 +323,12 @@ class RecordCreate(BaseModel):
 
 class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+
+
+class SearchRecord(BaseModel):
+    record: Record
+    query_score: float
+
+
+class SearchRecordsResult(BaseModel):
+    items: List[SearchRecord]

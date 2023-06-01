@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -38,9 +38,19 @@ from argilla.server.schemas.v1.datasets import (
     Records,
     RecordsCreate,
     ResponseStatusFilter,
+    SearchRecord,
+    SearchRecordsResult,
 )
-from argilla.server.search_engine import SearchEngine, get_search_engine
+from argilla.server.search_engine import Query as SearchEngineQuery
+from argilla.server.search_engine import (
+    SearchEngine,
+    UserResponseStatusFilter,
+    get_search_engine,
+)
 from argilla.server.security import auth
+
+if TYPE_CHECKING:
+    from argilla.server.search_engine import SearchResponses
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000
@@ -57,6 +67,16 @@ def _get_dataset(db: Session, dataset_id: UUID):
         )
 
     return dataset
+
+
+def _merge_search_records(search_responses: "SearchResponses", records: List[Records]) -> List[SearchRecord]:
+    search_records = []
+    for response in search_responses.items:
+        record = next((r for r in records if r.id == UUID(response.record_id)), None)
+        if record:
+            search_records.append(SearchRecord(record=record, query_score=response.score))
+            records.remove(record)
+    return search_records
 
 
 @router.get("/me/datasets", response_model=Datasets)
@@ -106,7 +126,7 @@ def list_current_user_dataset_records(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
-    include: Optional[List[RecordInclude]] = Query([]),
+    include: List[RecordInclude] = Query([]),
     response_status: Optional[ResponseStatusFilter] = Query(None),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
@@ -276,6 +296,54 @@ async def create_dataset_records(
         telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.post(
+    "/datasets/{dataset_id}/records/search",
+    status_code=status.HTTP_200_OK,
+    response_model=SearchRecordsResult,
+    response_model_exclude_unset=True,
+)
+async def search_dataset_records(
+    *,
+    db: Session = Depends(get_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
+    dataset_id: UUID,
+    query: SearchEngineQuery,
+    include: List[RecordInclude] = Query([]),
+    response_status: Optional[ResponseStatusFilter] = Query(None),
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
+    current_user: User = Security(auth.get_current_user),
+):
+    authorize(current_user, DatasetPolicyV1.search_records)
+
+    if query.text.field and not datasets.get_field_by_name_and_dataset_id(db, query.text.field, dataset_id):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Field `{query.text.field}` not found in dataset `{dataset_id}`.",
+        )
+
+    dataset = _get_dataset(db, dataset_id)
+
+    user_response_status_filter = None
+    if response_status:
+        user_response_status_filter = UserResponseStatusFilter(
+            user=current_user,
+            statuses=[response_status.value],
+        )
+
+    search_responses = await search_engine.search(
+        dataset=dataset,
+        query=query,
+        user_response_status_filter=user_response_status_filter,
+        limit=limit,
+    )
+
+    record_ids = [UUID(response.record_id) for response in search_responses.items]
+    records = datasets.get_records_by_ids(db, dataset_id, record_ids, include)
+
+    return SearchRecordsResult(items=_merge_search_records(search_responses, records))
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
