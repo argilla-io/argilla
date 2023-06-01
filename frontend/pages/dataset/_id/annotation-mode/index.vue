@@ -53,29 +53,20 @@ export default {
   },
   data: () => {
     return {
-      areResponsesUntouched: false,
+      areResponsesUntouched: true, // NOTE - this flag is used to show or to not show a toast when questionnaire is touched (to prevent loosing current modification)
     };
   },
   beforeRouteLeave(to, from, next) {
-    if (!this.areResponsesUntouched) {
-      let message = "";
-      switch (to.name) {
-        case "datasets":
-        case "dataset-id-settings":
-        case "user-settings":
-          message = "Your changes will be lost if you leave the current page";
-          break;
-        default:
-        // do nothing
-      }
-      message.length &&
-        this.showNotification({
-          eventToFireOnClick: async () => {
-            await next();
-          },
-          message,
-          buttonMessage: this.buttonMessage,
-        });
+    const isNotificationForThisRoute =
+      !this.areResponsesUntouched &&
+      ["datasets", "dataset-id-settings", "user-settings"].includes(to.name);
+
+    if (isNotificationForThisRoute) {
+      this.showNotification({
+        eventToFireOnClick: next,
+        message: this.toastMessageOnLeavingRoute,
+        buttonMessage: this.buttonMessage,
+      });
     } else {
       next();
     }
@@ -127,7 +118,11 @@ export default {
   },
   created() {
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
-    this.toastMessage = "Your changes will be lost if you refresh the page";
+
+    this.toastMessageOnRefresh =
+      "Your changes will be lost if you refresh the page";
+    this.toastMessageOnLeavingRoute =
+      "Your changes will be lost if you leave the current page";
     this.buttonMessage = LABEL_PROPERTIES.CONTINUE;
     this.typeOfToast = "warning";
   },
@@ -201,7 +196,7 @@ export default {
           eventToFireOnClick: async () => {
             await this.deleteRecordsAndRefreshDataset();
           },
-          message: this.toastMessage,
+          message: this.toastMessageOnRefresh,
           buttonMessage: this.buttonMessage,
           typeOfToast: "warning",
         });

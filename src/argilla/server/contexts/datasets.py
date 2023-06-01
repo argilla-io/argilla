@@ -101,8 +101,10 @@ async def publish_dataset(db: Session, search_engine: SearchEngine, dataset: Dat
     return dataset
 
 
-def delete_dataset(db: Session, dataset: Dataset):
+async def delete_dataset(db: Session, search_engine: SearchEngine, dataset: Dataset):
     db.delete(dataset)
+    await search_engine.delete_index(dataset)
+
     db.commit()
 
     return dataset
