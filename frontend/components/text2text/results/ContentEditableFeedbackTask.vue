@@ -16,7 +16,7 @@
           :contenteditable="annotationEnabled"
           :placeholder="placeholder"
           @input="onInputText"
-          v-html="editableText"
+          v-html="sanitazedEditableText"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
           @keydown.shift.enter.exact="looseFocus"
@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import * as DOMPurify from "dompurify";
 export default {
   name: "ContentEditableFeedbackTask",
   props: {
@@ -52,6 +53,10 @@ export default {
       type: String,
       default: "",
     },
+    isMarkdownFormat: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: () => {
     return {
@@ -65,6 +70,9 @@ export default {
         this.defaultText !== this.editableText ||
         this.defaultText === this.annotations[0]?.text
       );
+    },
+    sanitazedEditableText() {
+      return DOMPurify.sanitize(this.editableText);
     },
   },
   mounted() {
@@ -92,7 +100,11 @@ export default {
       this.$emit("on-change-focus", status);
     },
     pastePlainText(event) {
-      if (this.focus && event.target.isContentEditable) {
+      if (
+        !this.isMarkdownFormat &&
+        this.focus &&
+        event.target.isContentEditable
+      ) {
         event.preventDefault();
         const text = event.clipboardData?.getData("text/plain") ?? "";
         document.execCommand("insertText", false, text);

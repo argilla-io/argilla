@@ -31,6 +31,7 @@
         :annotations="[]"
         :defaultText="value"
         :placeholder="placeholder"
+        :isMarkdownFormat="useMarkdown"
         @change-text="onChangeTextArea"
         @on-change-focus="setFocus"
       />
