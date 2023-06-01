@@ -22,8 +22,9 @@ import argilla as rg
 questions = [
     rg.RatingQuestion(
         name="response_ranking",
-        title="Rank the accuracy of the responses\n1: first response is more accurate,\n 2: second response is more accurate):",
-        required=True
+        title="Select the most accurate and helpful response (1) or (2). If both are equal select (3):",
+        required=True,
+        values=[1, 2,3]
     )
 ]
 ```
@@ -36,11 +37,13 @@ While the proposed setup in this guide is designed for comparing two responses, 
 In future versions, Argilla will include a `RankingQuestion`, specifically tailored for this workflow. You can track the progress, provide feedback, and leave comments on [this GitHub issue](https://github.com/argilla-io/argilla/issues/3021).
 :::
 
-The dataset consists of **records**. Each **record** is a data point that can be labeled by one or more labelers. A record has one or more **fields**. For this task, we need to present labelers with a prompt. We’ll define a **text field**:
+The dataset consists of **records**. Each **record** is a data point that can be labeled by one or more labelers. A record has one or more **fields**. For this task, we need to present labelers with a prompt and two responses to rank. We’ll define a **text field**:
 
 ```python
 fields = [
-    rg.TextField(name="prompt", required=True)
+    rg.TextField(name="prompt", required=True),
+    rg.TextField(name="response-1", required=True),
+    rg.TextField(name="response-2", required=True)
 ]
 ```
 
@@ -141,7 +144,7 @@ However, when resources are limited, workload distribution among various labeler
 
 For a comprehensive understanding of the Argilla UI's main features, refer to this [how-to guide](../practical_guides/annotate_dataset.html).
 
-### Prepare the dataset
+## Prepare the dataset
 
 The goal of this phase is to organize a dataset into prompt, preferred response, and less preferred response triplets. This data structure will be used for training the reward model.
 
