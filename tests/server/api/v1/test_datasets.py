@@ -1298,6 +1298,33 @@ def test_create_dataset_field_with_invalid_settings(
     assert db.query(Field).count() == 0
 
 
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {},
+        None,
+        {"type": "wrong-type"},
+        {"type": "text", "use_markdown": None},
+        {"type": "rating", "options": None},
+        {"type": "rating", "options": []},
+    ],
+)
+def test_create_dataset_field_with_invalid_settings(
+    client: TestClient, db: Session, admin_auth_header: dict, settings: dict
+):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "Title",
+        "settings": settings,
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert db.query(Field).count() == 0
+
+
 def test_create_dataset_field_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
     field = FieldFactory.create(name="name")
     field_json = {
@@ -1621,6 +1648,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
         {"type": "rating", "options": "invalid"},
+        {"type": "rating", "options": [{"value": 0}, {"value": 1}, {"value": 1}]},
         {"type": "label_selection", "options": []},
         {"type": "label_selection", "options": [{"value": "just_one_label", "text": "Just one label"}]},
         {
@@ -1668,6 +1696,14 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
                     "description": "".join(["a" for _ in range(LABEL_SELECTION_DESCRIPTION_MAX_LENGTH + 1)]),
                 },
                 {"value": "b", "text": "b"},
+            ],
+        },
+        {
+            "type": "label_selection",
+            "options": [
+                {"value": "a", "text": "a", "description": "a"},
+                {"value": "b", "text": "b", "description": "b"},
+                {"value": "b", "text": "b", "description": "b"},
             ],
         },
     ],
@@ -1764,21 +1800,30 @@ async def test_create_dataset_records(
 
     index_name = f"rg.{dataset.id}"
     opensearch.indices.refresh(index=index_name)
-    assert [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]] == [
+    es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
+    assert es_docs == [
         {
+            "id": str(db.get(Record, UUID(es_docs[0]["id"])).id),
             "fields": {"input": "Say Hello", "output": "Hello"},
             "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "yes"}, "status": "submitted"}},
         },
-        {"fields": {"input": "Say Hello", "output": "Hi"}, "responses": {}},
         {
+            "id": str(db.get(Record, UUID(es_docs[1]["id"])).id),
+            "fields": {"input": "Say Hello", "output": "Hi"},
+            "responses": {},
+        },
+        {
+            "id": str(db.get(Record, UUID(es_docs[2]["id"])).id),
             "fields": {"input": "Say Pello", "output": "Hello World"},
             "responses": {"admin": {"values": {"input_ok": "no", "output_ok": "no"}, "status": "submitted"}},
         },
         {
+            "id": str(db.get(Record, UUID(es_docs[3]["id"])).id),
             "fields": {"input": "Say Hello", "output": "Good Morning"},
             "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "no"}, "status": "discarded"}},
         },
         {
+            "id": str(db.get(Record, UUID(es_docs[4]["id"])).id),
             "fields": {"input": "Say Hello", "output": "Say Hello"},
             "responses": {"admin": {"values": None, "status": "discarded"}},
         },
@@ -2489,7 +2534,7 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
-def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_delete_dataset(client: TestClient, db: Session, opensearch: OpenSearch, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
@@ -2512,6 +2557,7 @@ def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth
         dataset.workspace_id,
         other_dataset.workspace_id,
     ]
+    assert not opensearch.indices.exists(index=f"rg.{dataset.id}")
 
 
 def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):

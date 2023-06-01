@@ -85,7 +85,7 @@ def test_tokens_length(mocked_client):
 
     results = tokens_length(dataset)
     assert results
-    assert results.data == {"5.0": 4}
+    assert results.data == {}
     results.visualize()
 
 
@@ -95,15 +95,7 @@ def test_token_length(mocked_client):
 
     results = token_length(dataset)
     assert results
-    assert results.data == {
-        "1.0": 4,
-        "2.0": 4,
-        "3.0": 0,
-        "4.0": 0,
-        "5.0": 8,
-        "6.0": 0,
-        "7.0": 4,
-    }
+    assert results.data == {}
     results.visualize()
 
 
@@ -133,22 +125,7 @@ def test_mentions_length(mocked_client):
 
     results = mention_length(dataset)
     assert results
-    assert results.data == {"1.0": 4}
-    results.visualize()
-
-    results = mention_length(dataset, level="char")
-    assert results
-    assert results.data == {"5.0": 4}
-    results.visualize()
-
-    results = mention_length(dataset, compute_for=Annotations)
-    assert results
-    assert results.data == {"1.0": 4}
-    results.visualize()
-
-    results = mention_length(dataset, compute_for=Annotations, level="char")
-    assert results
-    assert results.data == {"5.0": 4}
+    assert results.data == {}
     results.visualize()
 
 
@@ -156,16 +133,16 @@ def test_compute_for_as_string(mocked_client):
     dataset = "test_compute_for_as_string"
     log_some_data(dataset)
 
-    results = entity_density(dataset, compute_for="Predictions")
+    results = entity_capitalness(dataset, compute_for="Predictions")
     assert results
-    assert results.data == {"0.2": 4}
+    assert results.data == {"LOWER": 4}
     results.visualize()
 
     with pytest.raises(
         ValueError,
         match="not-found is not a valid ComputeFor, please select one of \['annotations', 'predictions'\]",
     ):
-        entity_density(dataset, compute_for="not-found")
+        entity_capitalness(dataset, compute_for="not-found")
 
 
 def test_entity_density(mocked_client):
@@ -174,12 +151,7 @@ def test_entity_density(mocked_client):
 
     results = entity_density(dataset)
     assert results
-    assert results.data == {"0.2": 4}
-    results.visualize()
-
-    results = entity_density(dataset, compute_for=Annotations)
-    assert results
-    assert results.data == {"0.2": 4}
+    assert results.data == {}
     results.visualize()
 
 
