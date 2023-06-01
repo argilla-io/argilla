@@ -37,12 +37,9 @@
           v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
           :inputId="input.id"
           :title="input.question"
-          :options="input.options"
+          v-model="input.options"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
-          @on-change-single-label="
-            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
-          "
           @on-error="onError"
         />
 
@@ -240,11 +237,7 @@ export default {
         default:
       }
     },
-    onChangeMonoSelection({ newOptions, idComponent }) {
-      // TODO - to remove when single label will use v-model
-      const component = this.inputs.find(({ id }) => id === idComponent);
-      component.options = newOptions;
-    },
+
     async sendBackendRequest(responseValues) {
       try {
         let responseData = null;
