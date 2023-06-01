@@ -22,7 +22,7 @@ USER root
 
 COPY scripts/start_quickstart_argilla.sh /
 COPY scripts/load_data.py /
-COPY quickstart.requirements.txt /packages/requirements.txt
+COPY .github/quickstart.requirements.txt /packages/requirements.txt
 COPY dist/*.whl /packages/
 
 RUN apt update && \
