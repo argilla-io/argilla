@@ -13,7 +13,8 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, List, Optional, Union
+from uuid import UUID
 
 from opensearchpy import AsyncOpenSearch, helpers
 from pydantic import BaseModel
@@ -27,7 +28,9 @@ from argilla.server.models import (
     QuestionType,
     Record,
     ResponseStatus,
+    User,
 )
+from argilla.server.schemas.v1.datasets import ResponseStatusFilter
 from argilla.server.settings import settings
 
 
@@ -50,6 +53,7 @@ class UserResponse(BaseModel):
 
 
 class SearchDocument(BaseModel):
+    id: UUID
     fields: Dict[str, Any]
 
     responses: Optional[Dict[str, UserResponse]]
@@ -57,6 +61,34 @@ class SearchDocument(BaseModel):
     class Config:
         orm_mode = True
         getter_dict = SearchDocumentGetter
+
+
+@dataclasses.dataclass
+class TextQuery:
+    q: str
+    field: Optional[str] = None
+
+
+@dataclasses.dataclass
+class Query:
+    text: TextQuery
+
+
+@dataclasses.dataclass
+class UserResponseStatusFilter:
+    user: User
+    statuses: List[ResponseStatusFilter]
+
+
+@dataclasses.dataclass
+class SearchResponseItem:
+    record_id: UUID
+    score: Optional[float]
+
+
+@dataclasses.dataclass
+class SearchResponses:
+    items: List[SearchResponseItem]
 
 
 @dataclasses.dataclass
@@ -71,6 +103,7 @@ class SearchEngine:
 
     async def create_index(self, dataset: Dataset):
         fields = {
+            "id": {"type": "keyword"},
             "responses": {"dynamic": True, "type": "object"},
         }
 
@@ -78,7 +111,7 @@ class SearchEngine:
             fields[f"fields.{field.name}"] = self._es_mapping_for_field(field)
 
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
-        dynamic_templates = [
+        dynamic_templates: List[dict] = [
             {
                 f"{question.name}_responses": {
                     "path_match": f"responses.*.values.{question.name}",
@@ -108,27 +141,6 @@ class SearchEngine:
         index_name = self._index_name_for_dataset(dataset)
         await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
 
-    def _field_mapping_for_question(self, question: Question):
-        settings = question.parsed_settings
-
-        if settings.type == QuestionType.rating:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
-            return {"type": "integer"}
-        elif settings.type in [QuestionType.text, QuestionType.label_selection, QuestionType.multi_label_selection]:
-            # TODO: Review mapping for label selection. Could make sense to use `keyword` mapping instead. See https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
-            return {"type": "text", "index": False}
-        else:
-            raise ValueError(f"ElasticSearch mappings for Question of type {settings.type} cannot be generated")
-
-    def _es_mapping_for_field(self, field: Field):
-        field_type = field.settings["type"]
-
-        if field_type == FieldType.text:
-            return {"type": "text"}
-        else:
-            raise ValueError(f"ElasticSearch mappings for Field of type {field_type} cannot be generated")
-
     async def add_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = self._index_name_for_dataset(dataset)
 
@@ -150,6 +162,82 @@ class SearchEngine:
         _, errors = await helpers.async_bulk(client=self.client, actions=bulk_actions, raise_on_error=False)
         if errors:
             raise RuntimeError(errors)
+
+    async def search(
+        self,
+        dataset: Dataset,
+        query: Union[Query, str],
+        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        limit: int = 100,
+    ) -> SearchResponses:
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
+
+        if isinstance(query, str):
+            query = Query(text=TextQuery(q=query))
+
+        text_query = self._text_query_builder(dataset, text=query.text)
+
+        bool_query = {"must": [text_query]}
+        if user_response_status_filter:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
+            user_response_status_field = f"responses.{user_response_status_filter.user.username}.status"
+            bool_query["filter"] = [{"terms": {user_response_status_field: user_response_status_filter.statuses}}]
+
+        body = {
+            "_source": False,
+            "query": {"bool": bool_query},
+            "sort": ["_score", {"id": "asc"}],
+        }
+        # TODO: Work on search pagination after endpoint integration
+        next_page_token = None
+        if next_page_token:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
+            body["search_after"] = next_page_token
+
+        response = await self.client.search(index=self._index_name_for_dataset(dataset), size=limit, body=body)
+
+        items = []
+        next_page_token = None
+        for hit in response["hits"]["hits"]:
+            items.append(SearchResponseItem(record_id=hit["_id"], score=hit["_score"]))
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
+            next_page_token = hit.get("_sort")
+
+        return SearchResponses(items=items)
+
+    @staticmethod
+    def _text_query_builder(dataset: Dataset, text: TextQuery) -> dict:
+        if not text.field:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html
+            field_names = [
+                f"fields.{field.name}" for field in dataset.fields if field.settings.get("type") == FieldType.text
+            ]
+            return {"multi_match": {"query": text.q, "fields": field_names, "operator": "and"}}
+        else:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html
+            return {"match": {f"fields.{text.field}": {"query": text.q, "operator": "and"}}}
+
+    def _field_mapping_for_question(self, question: Question):
+        settings = question.parsed_settings
+
+        if settings.type == QuestionType.rating:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
+            return {"type": "integer"}
+        elif settings.type in [QuestionType.text, QuestionType.label_selection, QuestionType.multi_label_selection]:
+            # TODO: Review mapping for label selection. Could make sense to use `keyword` mapping instead.
+            #  See https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
+            #  See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
+            return {"type": "text", "index": False}
+        else:
+            raise ValueError(f"ElasticSearch mappings for Question of type {settings.type} cannot be generated")
+
+    def _es_mapping_for_field(self, field: Field):
+        field_type = field.settings["type"]
+
+        if field_type == FieldType.text:
+            return {"type": "text"}
+        else:
+            raise ValueError(f"ElasticSearch mappings for Field of type {field_type} cannot be generated")
 
     @staticmethod
     def _index_name_for_dataset(dataset: Dataset):
