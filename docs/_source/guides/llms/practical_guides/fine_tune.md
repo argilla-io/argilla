@@ -202,7 +202,7 @@ Fine-tuning using a Reward Model can be done in different ways. We can either ge
 ::::{tab-set}
 
 :::{tab-item} RewardTrainer
-[TRL](https://huggingface.co/docs/trl) has a direct reward modeling integration via the `RewardTrainer` class. This class functions similarly to the SFTTrainer and TransformersTrainer but requires `rejected-accepted` input pairs as training data. These are then used to fine-tune an `AutoModelForSequenceClassification` which we can use as a reward model during the reinforcement learning phase. The entries within the dataset should be `input_ids_chosen`, `attention_mask_chosen`, `input_ids_rejected` and `attention_mask_rejected` so we should first format them. A good example of training an actual reward model can be found [here](https://colab.research.google.com/drive/1Bfmo0-q8pvg6wV2BM9iFMY6GXasGWJWu?usp=sharing) along with the trained [roberta-base-reward-model-falcon-dolly model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly).
+[TRL](https://huggingface.co/docs/trl) has a direct reward modeling integration via the `RewardTrainer` class. This class functions similarly to the SFTTrainer and TransformersTrainer but requires `rejected-accepted` input pairs as training data. These are then used to fine-tune an `AutoModelForSequenceClassification` which we can use as a reward model during the reinforcement learning phase. The entries within the dataset should be `input_ids_chosen`, `attention_mask_chosen`, `input_ids_rejected` and `attention_mask_rejected` so we should first format them. The [roberta-base-reward-model-falcon-dolly reward model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly) was trained using the code below.
 
 ```python
 from transformers import (
@@ -210,35 +210,47 @@ from transformers import (
     AutoTokenizer,
     TrainingArguments,
 )
+​
 from trl import RewardTrainer
-
-dataset = ...
-model = AutoModelForSequenceClassification.from_pretrained("gpt2")
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
-
+​
+from datasets import load_dataset
+​
+dataset = load_dataset("argilla/dolly-curated-comparison-falcon-7b-instruct", split="train")
+​
+model_name = "distilroberta-base"
+​
+model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=1)
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+​
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
     model.config.pad_token_id = model.config.eos_token_id
-
+​
 def formatting_func(examples):
     kwargs = {"padding": "max_length", "truncation": True, "max_length": 512, "return_tensors": "pt"}
-    tokens_chosen = tokenizer.encode_plus(examples["better_response"], **kwargs)
-    tokens_rejected = tokenizer.encode_plus(examples["poorer_response"], **kwargs)
+​
+    # Assuming original human response is preferred to Falcon's
+    chosen_response = examples["original_response"]
+    rejected_response = examples["response-1"]
+    prompt = examples["prompt"]
+​
+    tokens_chosen = tokenizer.encode_plus(prompt, chosen_response, **kwargs)
+    tokens_rejected = tokenizer.encode_plus(prompt, rejected_response, **kwargs)
+​
     return {
         "input_ids_chosen": tokens_chosen["input_ids"][0], "attention_mask_chosen": tokens_chosen["attention_mask"][0],
         "input_ids_rejected": tokens_rejected["input_ids"][0], "attention_mask_rejected": tokens_rejected["attention_mask"][0]
     }
 
 formatted_dataset = dataset.map(formatting_func)
-
+​
 trainer = RewardTrainer(
     model=model,
     args=TrainingArguments("output_dir"),
     tokenizer=tokenizer,
-    train_dataset=formatted_dataset,
-     # peft_config=LoraConfig(), # from peft import LoraConfig
+    train_dataset=formatted_dataset
 )
-
+​
 trainer.train()
 ```
 :::
