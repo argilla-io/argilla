@@ -77,12 +77,17 @@ class FieldSchema(BaseModel):
     title: Optional[str] = None
     required: Optional[bool] = True
     settings: Dict[str, Any]
+    use_markdown: bool = False
 
     @validator("title", always=True)
     def title_must_have_value(cls, v, values):
         if not v:
             return values["name"].capitalize()
         return v
+
+    @validator("use_markdown", always=True)
+    def update_settings_with_use_markdown(cls, v, values):
+        values["settings"]["use_markdown"] = v
 
 
 class TextField(FieldSchema):
@@ -98,12 +103,17 @@ class QuestionSchema(BaseModel):
     description: Optional[str] = None
     required: Optional[bool] = True
     settings: Dict[str, Any]
+    use_markdown: bool = False
 
     @validator("title", always=True)
     def title_must_have_value(cls, v, values):
         if not v:
             return values["name"].capitalize()
         return v
+
+    @validator("use_markdown", always=True)
+    def update_settings_with_use_markdown(cls, v, values):
+        values["settings"]["use_markdown"] = v
 
 
 # TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
