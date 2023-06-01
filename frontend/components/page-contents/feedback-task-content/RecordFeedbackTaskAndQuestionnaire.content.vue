@@ -171,11 +171,26 @@ export default {
             (recordResponse) => question.name === recordResponse.question_name
           );
         if (correspondingResponseToQuestion) {
+          const formattedOptions = correspondingResponseToQuestion.options.map(
+            (option) => {
+              return { ...option, is_selected: option.is_selected || false };
+            }
+          );
           return {
             ...question,
             response_id: correspondingResponseToQuestion.id,
-            options: correspondingResponseToQuestion.options,
+            options: formattedOptions,
           };
+        }
+        if (
+          question.component_type === COMPONENT_TYPE.RATING ||
+          question.component_type === COMPONENT_TYPE.SINGLE_LABEL
+        ) {
+          const formattedOptions = question.options.map((option) => {
+            return { ...option, is_selected: false };
+          });
+
+          return { ...question, options: formattedOptions, response_id: null };
         }
         return { ...question, response_id: null };
       });
