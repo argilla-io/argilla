@@ -33,7 +33,6 @@
           @on-error="onError"
         />
 
-        <!--TODO -  pass visibleOption as props from settings-->
         <SingleLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
           :questionId="input.id"
