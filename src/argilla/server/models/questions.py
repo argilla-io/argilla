@@ -65,7 +65,7 @@ class ValidOptionCheckerMixin(BaseQuestionSettings, Generic[T]):
             raise ValueError(f"{response.value!r} is not a valid option.\nValid options are: {self.option_values!r}")
 
 
-class RatingQuestionSettings(ValidOptionCheckerMixin[int], BaseQuestionSettings):
+class RatingQuestionSettings(ValidOptionCheckerMixin[int]):
     type: Literal[QuestionType.rating]
     options: List[RatingQuestionSettingsOption]
 
@@ -76,7 +76,7 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
     description: Optional[str] = None
 
 
-class LabelSelectionQuestionSettings(ValidOptionCheckerMixin[str], BaseQuestionSettings):
+class LabelSelectionQuestionSettings(ValidOptionCheckerMixin[str]):
     type: Literal[QuestionType.label_selection]
     options: List[LabelSelectionQuestionSettingsOption]
     visible_options: Optional[int] = None
