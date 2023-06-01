@@ -270,13 +270,13 @@ jobs:
       matrix:
         include:
           - image: argilla/argilla-server
-            dockerfile: .github/release.Dockerfile
-            readme: .github/README.md
+            dockerfile: release.Dockerfile
+            readme: README.md
             platforms: linux/amd64
 
           - image: argilla/argilla-quickstart
-            dockerfile: .github/quickstart.Dockerfile
-            readme: .github/quickstart.README.md
+            dockerfile: quickstart.Dockerfile
+            readme: quickstart.README.md
             platforms: linux/amd64,linux/arm64
 
     defaults:
