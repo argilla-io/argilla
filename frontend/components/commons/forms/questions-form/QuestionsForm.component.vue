@@ -1,9 +1,9 @@
 <template>
   <form
+    :key="renderForm"
     class="questions-form"
     :class="{ '--edited-form': !isFormUntouched }"
     @submit.prevent="onSubmit"
-    :key="renderForm"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -26,24 +26,18 @@
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
           :title="input.question"
-          :optionId="`${input.name}_0`"
           :placeholder="input.placeholder"
-          :value="input.options[0].text"
+          v-model="input.options[0].text"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
           :tooltipMessage="input.description"
-          @on-change-value="
-            onChangeTextArea({ newOptions: $event, idComponent: input.id })
-          "
           @on-error="onError"
         />
 
         <SingleLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
           :title="input.question"
-          :initialOptions="input.options"
+          :options="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
           :tooltipMessage="input.description"
           @on-change-single-label="
             onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
@@ -54,13 +48,9 @@
         <RatingComponent
           v-if="input.component_type === COMPONENT_TYPE.RATING"
           :title="input.question"
-          :initialOptions="input.options"
+          v-model="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
           :tooltipMessage="input.description"
-          @on-change-rating="
-            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
-          "
           @on-error="onError"
         />
       </div>
@@ -204,7 +194,7 @@ export default {
   },
   watch: {
     isFormUntouched(isFormUntouched) {
-      this.emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched);
+      this.emitIsQuestionsFormUntouched(isFormUntouched);
     },
   },
   async created() {
@@ -218,6 +208,7 @@ export default {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
+    this.emitIsQuestionsFormUntouched(true); // NOTE - ensure that on destroy, all parents and siblings have the flag well reinitiate
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
@@ -241,12 +232,8 @@ export default {
         default:
       }
     },
-    onChangeTextArea({ newOptions, idComponent }) {
-      const component = this.inputs.find(({ id }) => id === idComponent);
-      // NOTE - formatting to the standard options
-      component.options = [{ ...newOptions, value: newOptions.text }];
-    },
     onChangeMonoSelection({ newOptions, idComponent }) {
+      // TODO - to remove when single label will use v-model
       const component = this.inputs.find(({ id }) => id === idComponent);
       component.options = newOptions;
     },
@@ -526,7 +513,7 @@ export default {
         type: typeOfToast,
       });
     },
-    emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched) {
+    emitIsQuestionsFormUntouched(isFormUntouched) {
       this.$emit("on-question-form-touched", !isFormUntouched);
       // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);

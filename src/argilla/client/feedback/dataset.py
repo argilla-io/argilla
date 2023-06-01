@@ -14,7 +14,9 @@
 
 import logging
 import tempfile
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
+from uuid import UUID
 
 try:
     from typing import Literal
@@ -23,8 +25,14 @@ except ImportError:
 
 from pydantic import (
     BaseModel,
+    Extra,
+    Field,
+    StrictInt,
+    StrictStr,
     ValidationError,
     create_model,
+    parse_obj_as,
+    validator,
 )
 from tqdm import tqdm
 
@@ -34,7 +42,6 @@ from argilla.client.feedback.schemas import (
     FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,
-    OfflineFeedbackRecord,
     QuestionSchema,
     RatingQuestion,
     TextField,
@@ -50,7 +57,6 @@ if TYPE_CHECKING:
     from argilla.client.sdk.v1.datasets.models import (
         FeedbackDatasetModel,
         FeedbackFieldModel,
-        FeedbackItemModel,
         FeedbackQuestionModel,
     )
 
@@ -58,6 +64,106 @@ FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class ValueSchema(BaseModel):
+    value: Union[StrictStr, StrictInt]
+
+
+class ResponseSchema(BaseModel):
+    user_id: Optional[UUID] = None
+    values: Dict[str, ValueSchema]
+    status: Literal["submitted", "discarded"] = "submitted"
+
+    @validator("user_id", always=True)
+    def user_id_must_have_value(cls, v):
+        if not v:
+            warnings.warn(
+                "`user_id` not provided, so it will be set to `None`. Which is not an"
+                " issue, unless you're planning to log the response in Argilla, as "
+                " it will be automatically set to the active `user_id`.",
+                stacklevel=2,
+            )
+        return v
+
+
+class FeedbackRecord(BaseModel):
+    fields: Dict[str, str]
+    responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
+    external_id: Optional[str] = None
+
+    @validator("responses", always=True)
+    def responses_must_be_a_list(cls, v):
+        if not v:
+            return []
+        if isinstance(v, ResponseSchema):
+            return [v]
+        return v
+
+    class Config:
+        extra = Extra.ignore
+
+
+class FieldSchema(BaseModel):
+    name: str
+    title: Optional[str] = None
+    required: Optional[bool] = True
+    settings: Dict[str, Any]
+
+    @validator("title", always=True)
+    def title_must_have_value(cls, v, values):
+        if not v:
+            return values["name"].capitalize()
+        return v
+
+
+class TextField(FieldSchema):
+    settings: Dict[str, Any] = Field({"type": "text"}, const=True)
+
+
+FIELD_TYPE_TO_PYTHON_TYPE = {"text": str}
+
+
+class QuestionSchema(BaseModel):
+    name: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    required: Optional[bool] = True
+    settings: Dict[str, Any]
+
+    @validator("title", always=True)
+    def title_must_have_value(cls, v, values):
+        if not v:
+            return values["name"].capitalize()
+        return v
+
+
+# TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
+class TextQuestion(QuestionSchema):
+    settings: Dict[str, Any] = Field({"type": "text"}, const=True)
+
+
+class RatingQuestion(QuestionSchema):
+    settings: Dict[str, Any] = Field({"type": "rating"})
+    values: List[int] = Field(unique_items=True)
+
+    @validator("values", always=True)
+    def update_settings_with_values(cls, v, values):
+        if v:
+            values["settings"]["options"] = [{"value": value} for value in v]
+        return v
+
+    class Config:
+        validate_assignment = True
+
+
+AllowedQuestionTypes = Union[TextQuestion, RatingQuestion]
+
+
+class FeedbackDatasetConfig(BaseModel):
+    fields: List[FieldSchema]
+    questions: List[AllowedQuestionTypes]
+    guidelines: Optional[str] = None
 
 
 class FeedbackDataset:
@@ -117,19 +223,19 @@ class FeedbackDataset:
         ...     [
         ...         rg.FeedbackRecord(
         ...             fields={"text": "This is the first record", "label": "positive"},
-        ...             response={"question-1": "This is the first answer", "question-2": 5},
+        ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
         ...             external_id="entry-1",
         ...         ),
         ...     ]
         ... )
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, response={"question-1": "This is the first answer", "question-2": 5}, external_id="entry-1")]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
         >>> dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
         >>> dataset.argilla_id
         "..."
         >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, response={"question-1": "This is the first answer", "question-2": 5}, external_id="entry-1")]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
     """
 
     argilla_id: Optional[str] = None
@@ -226,7 +332,7 @@ class FeedbackDataset:
         """Returns the number of records in the dataset."""
         return len(self.records)
 
-    def __getitem__(self, key: Union[slice, int]) -> Union["FeedbackItemModel", List["FeedbackItemModel"]]:
+    def __getitem__(self, key: Union[slice, int]) -> Union[FeedbackRecord, List[FeedbackRecord]]:
         """Returns the record(s) at the given index(es).
 
         Args:
@@ -283,7 +389,7 @@ class FeedbackDataset:
         return self.__questions
 
     @property
-    def records(self) -> List["FeedbackItemModel"]:
+    def records(self) -> List[FeedbackRecord]:
         """Returns the all the records in the dataset."""
         return self.__records + self.__new_records
 
@@ -307,7 +413,7 @@ class FeedbackDataset:
             first_batch = datasets_api_v1.get_records(
                 client=httpx_client, id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE
             ).parsed
-            self.__records = first_batch.items
+            self.__records = parse_obj_as(List[FeedbackRecord], first_batch.items)
             current_batch = 1
             # TODO(alvarobartt): use `total` from Argilla Metrics API
             with tqdm(
@@ -321,7 +427,7 @@ class FeedbackDataset:
                         offset=FETCHING_BATCH_SIZE * current_batch,
                         limit=FETCHING_BATCH_SIZE,
                     ).parsed
-                    records = batch.items
+                    records = parse_obj_as(List[FeedbackRecord], batch.items)
                     self.__records += records
                     current_batch += 1
                     pbar.update(1)
@@ -342,34 +448,88 @@ class FeedbackDataset:
                 with the fields of the record.
 
         Raises:
+            ValueError: if the given records are an empty list.
+            ValueError: if the given records are neither: `FeedbackRecord`, list of `FeedbackRecord`,
+                list of dictionaries as a record or dictionary as a record.
             ValueError: if the given records do not match the expected schema.
+
+        Examples:
+            >>> import argilla as rg
+            >>> rg.init(api_url="...", api_key="...")
+            >>> dataset = rg.FeedbackDataset(
+            ...     fields=[
+            ...         rg.TextField(name="text", required=True),
+            ...         rg.TextField(name="label", required=True),
+            ...     ],
+            ...     questions=[
+            ...         rg.TextQuestion(
+            ...             name="question-1",
+            ...             description="This is the first question",
+            ...             required=True,
+            ...         ),
+            ...         rg.RatingQuestion(
+            ...             name="question-2",
+            ...             description="This is the second question",
+            ...             required=True,
+            ...             values=[1, 2, 3, 4, 5],
+            ...         ),
+            ...     ],
+            ...     guidelines="These are the annotation guidelines.",
+            ... )
+            >>> dataset.records
+            []
+            >>> dataset.add_records(
+            ...     [
+            ...         rg.FeedbackRecord(
+            ...             fields={"text": "This is the first record", "label": "positive"},
+            ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
+            ...             external_id="entry-1",
+            ...         ),
+            ...     ]
+            ... )
+            >>> dataset.records
+            [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
         """
         if isinstance(records, list):
-            records = [FeedbackRecord(**record) if isinstance(record, dict) else record for record in records]
-        if isinstance(records, dict):
+            if len(records) == 0:
+                raise ValueError("Expected `records` to be a non-empty list of `dict` or `rg.FeedbackRecord`.")
+            new_records = []
+            for record in records:
+                if isinstance(record, dict):
+                    new_records.append(FeedbackRecord(**record))
+                elif isinstance(record, FeedbackRecord):
+                    new_records.append(record)
+                else:
+                    raise ValueError(
+                        f"Expected `records` to be a list of `dict` or `rg.FeedbackRecord`, got type {type(record)} instead."
+                    )
+            records = new_records
+        elif isinstance(records, dict):
             records = [FeedbackRecord(**records)]
-        if isinstance(records, FeedbackRecord):
+        elif isinstance(records, FeedbackRecord):
             records = [records]
+        else:
+            raise ValueError(
+                f"Expected `records` to be a `dict` or `rg.FeedbackRecord`, got type {type(records)} instead."
+            )
 
         if self.__fields_schema is None:
             self.__fields_schema = generate_pydantic_schema(self.fields)
 
         for record in records:
             try:
-                record.fields = self.__fields_schema.parse_obj(record.fields)
+                self.__fields_schema.parse_obj(record.fields)
             except ValidationError as e:
                 raise ValueError(
                     f"`rg.FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
                 ) from e
 
         if len(self.__new_records) > 0:
-            self.__new_records += [OfflineFeedbackRecord.construct(**record.dict()).dict() for record in records]
+            self.__new_records += records
         else:
-            self.__new_records = [OfflineFeedbackRecord.construct(**record.dict()).dict() for record in records]
+            self.__new_records = records
 
-    def iter(
-        self, batch_size: Optional[int] = FETCHING_BATCH_SIZE
-    ) -> Iterator[Union["FeedbackItemModel", OfflineFeedbackRecord]]:
+    def iter(self, batch_size: Optional[int] = FETCHING_BATCH_SIZE) -> Iterator[FeedbackRecord]:
         """Returns an iterator over the records in the dataset.
 
         Args:
@@ -413,7 +573,7 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=self.argilla_id,
-                        records=self.__new_records[i : i + PUSHING_BATCH_SIZE],
+                        records=[record.dict() for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]],
                     )
                 self.__records += self.__new_records
                 self.__new_records = []
@@ -496,7 +656,7 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=batch,
+                        records=[record.dict() for record in batch],
                     )
                 except Exception as e:
                     delete_and_raise_exception(
@@ -653,20 +813,20 @@ class FeedbackDataset:
 
             for record in self.records:
                 for field in self.fields:
-                    dataset[field.name].append(record["fields"][field.name])
+                    dataset[field.name].append(record.fields[field.name])
                 for question in self.questions:
                     dataset[question.name].append(
                         [
                             {
-                                "user_id": r["user_id"],
-                                "value": r["values"][question.name]["value"],
-                                "status": r["status"],
+                                "user_id": r.user_id,
+                                "value": r.values[question.name].value,
+                                "status": r.status,
                             }
-                            for r in record["responses"]
+                            for r in record.responses
                         ]
                         or None
                     )
-                dataset["external_id"].append(record["external_id"] or None)
+                dataset["external_id"].append(record.external_id or None)
 
             return Dataset.from_dict(
                 dataset,
@@ -783,17 +943,22 @@ class FeedbackDataset:
             )
 
         if "token" in kwargs:
-            token = kwargs.pop("token")
+            auth = kwargs.pop("token")
         elif "use_auth_token" in kwargs:
-            token = kwargs.pop("use_auth_token")
+            auth = kwargs.pop("use_auth_token")
         else:
-            token = None
+            auth = None
 
+        hub_auth = (
+            {"use_auth_token": auth}
+            if parse_version(huggingface_hub.__version__) < parse_version("0.11.0")
+            else {"token": auth}
+        )
         config_path = hf_hub_download(
             repo_id=repo_id,
             filename="argilla.cfg",
             repo_type="dataset",
-            token=token,
+            **hub_auth,
         )
         with open(config_path, "rb") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
@@ -804,7 +969,7 @@ class FeedbackDataset:
             guidelines=config.guidelines,
         )
 
-        hfds = load_dataset(repo_id, use_auth_token=token, *args, **kwargs)
+        hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
                 raise ValueError(
@@ -835,7 +1000,7 @@ class FeedbackDataset:
                     fields={field.name: hfds[index][field.name] for field in cls.fields},
                     responses=list(responses.values()) or None,
                     external_id=hfds[index]["external_id"],
-                ).dict()
+                )
             )
         del hfds
         return cls

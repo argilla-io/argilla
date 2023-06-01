@@ -112,11 +112,11 @@ def uri_2_path(uri: str):
     return os.path.abspath(os.path.join(p.netloc, p.path))
 
 
-def test_docs_redirect(test_client: TestClient):
-    response = test_client.get("/docs", follow_redirects=False)
+def test_docs_redirect(client: TestClient):
+    response = client.get("/docs", follow_redirects=False)
     assert response.status_code == 307
     assert response.next_request.url.path == "/api/docs"
 
-    response = test_client.get("/api", follow_redirects=False)
+    response = client.get("/api", follow_redirects=False)
     assert response.status_code == 307
     assert response.next_request.url.path == "/api/docs"

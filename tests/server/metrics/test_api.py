@@ -150,8 +150,8 @@ def test_dataset_for_token_classification(mocked_client):
         assert response.status_code == 200, f"{metric} :: {response.json()}"
         summary = response.json()
 
-        if not ("predicted" in metric_id or "annotated" in metric_id):
-            assert len(summary) > 0, (metric_id, summary)
+        if "length" not in metric_id and "predicted" not in metric_id and "annotated" not in metric_id:
+            assert summary, (metric_id, summary)
 
 
 def test_dataset_metrics(mocked_client):

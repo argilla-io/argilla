@@ -45,10 +45,6 @@ export default {
       type: String,
       default: () => "",
     },
-    optionId: {
-      type: String,
-      default: () => "optionId",
-    },
     placeholder: {
       type: String,
       default: () => "",
@@ -71,13 +67,14 @@ export default {
       isFocused: false,
     };
   },
+  model: {
+    prop: "value",
+    event: "on-change-value",
+  },
   methods: {
     onChangeTextArea(newText) {
       const isAnyText = newText?.length;
-      this.$emit("on-change-value", {
-        id: this.optionId,
-        text: isAnyText ? newText : "",
-      });
+      this.$emit("on-change-value", isAnyText ? newText : "");
 
       if (this.isRequired) {
         this.$emit("on-error", !isAnyText);

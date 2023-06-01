@@ -145,11 +145,11 @@ def test_records(
     )
 
     assert len(dataset.records) == 1
-    assert dataset.records[0]["fields"] == {
+    assert dataset.records[0].fields == {
         "text": "A",
         "label": "B",
     }
-    assert dataset.records[0]["responses"] == []
+    assert dataset.records[0].responses == []
 
     dataset.add_records(
         [
@@ -171,20 +171,27 @@ def test_records(
     )
 
     assert len(dataset.records) == 2
-    assert dataset.records[1]["fields"] == {
+    assert dataset.records[1].fields == {
         "text": "C",
         "label": "D",
     }
-    assert dataset.records[1]["responses"] == [
-        {
-            "user_id": None,
-            "values": {
-                "question-1": {"value": "answer"},
-                "question-2": {"value": 0},
-            },
-            "status": "submitted",
+    assert dataset.records[1].responses[0].dict() == {
+        "user_id": None,
+        "values": {
+            "question-1": {"value": "answer"},
+            "question-2": {"value": 0},
         },
-    ]
+        "status": "submitted",
+    }
+
+    with pytest.raises(ValueError, match="Expected `records` to be a non-empty list"):
+        dataset.add_records([])
+
+    with pytest.raises(ValueError, match="Expected `records` to be a list of `dict` or `rg.FeedbackRecord`"):
+        dataset.add_records([None])
+
+    with pytest.raises(ValueError, match="Expected `records` to be a `dict` or `rg.FeedbackRecord`"):
+        dataset.add_records(None)
 
     with pytest.raises(ValueError, match="`rg.FeedbackRecord.fields` does not match the expected schema"):
         dataset.add_records(
@@ -198,18 +205,12 @@ def test_records(
         )
 
     for record in dataset.records:
-        assert all(
-            key in ["id", "fields", "external_id", "responses", "inserted_at", "updated_at"]
-            for key in list(record.keys())
-        )
+        assert isinstance(record, FeedbackRecord)
 
     for batch in dataset.iter(batch_size=1):
         assert len(batch) == 1
         for record in batch:
-            assert all(
-                key in ["id", "fields", "external_id", "responses", "inserted_at", "updated_at"]
-                for key in list(record.keys())
-            )
+            assert isinstance(record, FeedbackRecord)
 
     assert len(dataset[:2]) == 2
     assert len(dataset[1:2]) == 1
@@ -309,9 +310,7 @@ def test_push_to_argilla_and_from_argilla(
         question.name for question in dataset.questions
     ]
     assert len(dataset_from_argilla.records) == len(dataset.records)
-    assert (
-        len(dataset_from_argilla.records[-1]["responses"]) == 1
-    )  # Since the second one was discarded as `user_id=None`
+    assert len(dataset_from_argilla.records[-1].responses) == 1  # Since the second one was discarded as `user_id=None`
 
 
 @pytest.mark.usefixtures(

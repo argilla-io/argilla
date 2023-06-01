@@ -23,6 +23,10 @@ Records are defined by the type of **task** they are related to. Let's see three
 
 ### Examples
 
+```{note}
+For information about the Data model for the new `FeedbackDataset`, check [this guide](../guides/llms/practical_guides/create_dataset.ipynb) instead.
+```
+
 #### Text classification record
 
 Text classification deals with predicting in which categories a text fits. As if you're shown an image you could quickly tell if there's a dog or a cat in it, we build NLP models to distinguish between a Jane Austen's novel or a Charlotte Bronte's poem. It's all about feeding models with labelled examples and seeing how they start predicting over the very same labels.

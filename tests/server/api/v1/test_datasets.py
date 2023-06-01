@@ -18,7 +18,6 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -34,6 +33,9 @@ from argilla.server.schemas.v1.datasets import (
     DATASET_CREATE_GUIDELINES_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
+    LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
+    LABEL_SELECTION_TEXT_MAX_LENGTH,
+    LABEL_SELECTION_VALUE_MAX_LENGHT,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
@@ -109,7 +111,7 @@ def test_list_current_user_datasets_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
-def test_list_current_user_datasets_as_annotator(client: TestClient, db: Session):
+def test_list_current_user_datasets_as_annotator(client: TestClient):
     workspace = WorkspaceFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[workspace])
 
@@ -125,8 +127,8 @@ def test_list_current_user_datasets_as_annotator(client: TestClient, db: Session
     assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a", "dataset-b"]
 
 
-def test_list_dataset_fields(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
+def test_list_dataset_fields(client: TestClient, admin_auth_header: dict):
+    dataset = DatasetFactory.build()
     text_field_a = TextFieldFactory.create(name="text-field-a", title="Text Field A", required=True, dataset=dataset)
     text_field_b = TextFieldFactory.create(name="text-field-b", title="Text Field B", dataset=dataset)
 
@@ -143,7 +145,7 @@ def test_list_dataset_fields(client: TestClient, db: Session, admin_auth_header:
                 "name": "text-field-a",
                 "title": "Text Field A",
                 "required": True,
-                "settings": {"type": "text"},
+                "settings": {"type": "text", "use_markdown": False},
                 "inserted_at": text_field_a.inserted_at.isoformat(),
                 "updated_at": text_field_a.updated_at.isoformat(),
             },
@@ -152,7 +154,7 @@ def test_list_dataset_fields(client: TestClient, db: Session, admin_auth_header:
                 "name": "text-field-b",
                 "title": "Text Field B",
                 "required": False,
-                "settings": {"type": "text"},
+                "settings": {"type": "text", "use_markdown": False},
                 "inserted_at": text_field_b.inserted_at.isoformat(),
                 "updated_at": text_field_b.updated_at.isoformat(),
             },
@@ -160,7 +162,7 @@ def test_list_dataset_fields(client: TestClient, db: Session, admin_auth_header:
     }
 
 
-def test_list_dataset_fields_without_authentication(client: TestClient, db: Session):
+def test_list_dataset_fields_without_authentication(client: TestClient):
     dataset = DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/fields")
@@ -168,7 +170,7 @@ def test_list_dataset_fields_without_authentication(client: TestClient, db: Sess
     assert response.status_code == 401
 
 
-def test_list_dataset_fields_as_annotator(client: TestClient, db: Session):
+def test_list_dataset_fields_as_annotator(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     TextFieldFactory.create(name="text-field-a", dataset=dataset)
@@ -185,7 +187,7 @@ def test_list_dataset_fields_as_annotator(client: TestClient, db: Session):
     assert [field["name"] for field in response_body["items"]] == ["text-field-a", "text-field-b"]
 
 
-def test_list_dataset_fields_as_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_list_dataset_fields_as_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -194,7 +196,7 @@ def test_list_dataset_fields_as_annotator_from_different_workspace(client: TestC
     assert response.status_code == 403
 
 
-def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{uuid4()}/fields", headers=admin_auth_header)
@@ -202,7 +204,7 @@ def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClient, db:
     assert response.status_code == 404
 
 
-def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_header: dict):
+def test_list_dataset_questions(client: TestClient, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     text_question = TextQuestionFactory.create(
         name="text-question",
@@ -228,9 +230,9 @@ def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_head
                 "id": str(text_question.id),
                 "name": "text-question",
                 "title": "Text Question",
-                "description": None,
+                "description": "Question Description",
                 "required": True,
-                "settings": {"type": "text"},
+                "settings": {"type": "text", "use_markdown": False},
                 "inserted_at": text_question.inserted_at.isoformat(),
                 "updated_at": text_question.updated_at.isoformat(),
             },
@@ -262,7 +264,7 @@ def test_list_dataset_questions(client: TestClient, db: Session, admin_auth_head
     }
 
 
-def test_list_dataset_questions_without_authentication(client: TestClient, db: Session):
+def test_list_dataset_questions_without_authentication(client: TestClient):
     dataset = DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/questions")
@@ -270,7 +272,7 @@ def test_list_dataset_questions_without_authentication(client: TestClient, db: S
     assert response.status_code == 401
 
 
-def test_list_dataset_questions_as_annotator(client: TestClient, db: Session):
+def test_list_dataset_questions_as_annotator(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     TextQuestionFactory.create(name="text-question", dataset=dataset)
@@ -286,7 +288,7 @@ def test_list_dataset_questions_as_annotator(client: TestClient, db: Session):
     assert [question["name"] for question in response_body["items"]] == ["text-question", "rating-question"]
 
 
-def test_list_dataset_questions_as_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_list_dataset_questions_as_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -295,7 +297,7 @@ def test_list_dataset_questions_as_annotator_from_different_workspace(client: Te
     assert response.status_code == 403
 
 
-def test_list_dataset_questions_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_list_dataset_questions_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{uuid4()}/questions", headers=admin_auth_header)
@@ -772,7 +774,7 @@ def test_list_current_user_dataset_records_without_authentication(client: TestCl
     assert response.status_code == 401
 
 
-def test_list_current_user_dataset_records_as_annotator(client: TestClient, admin: User, db: Session):
+def test_list_current_user_dataset_records_as_annotator(client: TestClient, admin: User):
     workspace = WorkspaceFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[workspace])
     dataset = DatasetFactory.create(workspace=workspace)
@@ -813,9 +815,7 @@ def test_list_current_user_dataset_records_as_annotator(client: TestClient, admi
     }
 
 
-def test_list_current_user_dataset_records_as_annotator_with_include_responses(
-    client: TestClient, admin: User, db: Session
-):
+def test_list_current_user_dataset_records_as_annotator_with_include_responses(client: TestClient, admin: User):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -920,7 +920,7 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(
     }
 
 
-def test_list_current_user_dataset_records_as_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_list_current_user_dataset_records_as_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -929,9 +929,7 @@ def test_list_current_user_dataset_records_as_annotator_from_different_workspace
     assert response.status_code == 403
 
 
-def test_list_current_user_dataset_records_with_nonexistent_dataset_id(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
+def test_list_current_user_dataset_records_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/me/datasets/{uuid4()}/records", headers=admin_auth_header)
@@ -956,7 +954,7 @@ def test_get_dataset(client: TestClient, admin_auth_header: dict):
     }
 
 
-def test_get_dataset_without_authentication(client: TestClient, db: Session):
+def test_get_dataset_without_authentication(client: TestClient):
     dataset = DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{dataset.id}")
@@ -964,7 +962,7 @@ def test_get_dataset_without_authentication(client: TestClient, db: Session):
     assert response.status_code == 401
 
 
-def test_get_dataset_as_annotator(client: TestClient, db: Session):
+def test_get_dataset_as_annotator(client: TestClient):
     dataset = DatasetFactory.create(name="dataset")
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
 
@@ -974,7 +972,7 @@ def test_get_dataset_as_annotator(client: TestClient, db: Session):
     assert response.json()["name"] == "dataset"
 
 
-def test_get_dataset_as_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_get_dataset_as_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -983,7 +981,7 @@ def test_get_dataset_as_annotator_from_different_workspace(client: TestClient, d
     assert response.status_code == 403
 
 
-def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/datasets/{uuid4()}", headers=admin_auth_header)
@@ -991,7 +989,7 @@ def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, db: Session
     assert response.status_code == 404
 
 
-def test_get_current_user_dataset_metrics(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_get_current_user_dataset_metrics(client: TestClient, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     record_a = RecordFactory.create(dataset=dataset)
     record_b = RecordFactory.create(dataset=dataset)
@@ -1025,7 +1023,7 @@ def test_get_current_user_dataset_metrics(client: TestClient, db: Session, admin
     }
 
 
-def test_get_current_user_dataset_metrics_without_authentication(client: TestClient, db: Session):
+def test_get_current_user_dataset_metrics_without_authentication(client: TestClient):
     dataset = DatasetFactory.create()
 
     response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics")
@@ -1033,7 +1031,7 @@ def test_get_current_user_dataset_metrics_without_authentication(client: TestCli
     assert response.status_code == 401
 
 
-def test_get_current_user_dataset_metrics_as_annotator(client: TestClient, db: Session):
+def test_get_current_user_dataset_metrics_as_annotator(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     record_a = RecordFactory.create(dataset=dataset)
@@ -1068,7 +1066,7 @@ def test_get_current_user_dataset_metrics_as_annotator(client: TestClient, db: S
     }
 
 
-def test_get_current_user_dataset_metrics_annotator_from_different_workspace(client: TestClient, db: Session):
+def test_get_current_user_dataset_metrics_annotator_from_different_workspace(client: TestClient):
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
 
@@ -1077,9 +1075,7 @@ def test_get_current_user_dataset_metrics_annotator_from_different_workspace(cli
     assert response.status_code == 403
 
 
-def test_get_current_user_dataset_metrics_with_nonexistent_dataset_id(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
+def test_get_current_user_dataset_metrics_with_nonexistent_dataset_id(client: TestClient, admin_auth_header: dict):
     DatasetFactory.create()
 
     response = client.get(f"/api/v1/me/datasets/{uuid4()}/metrics", headers=admin_auth_header)
@@ -1161,13 +1157,23 @@ def test_create_dataset_with_nonexistent_workspace_id(client: TestClient, db: Se
     assert db.query(Dataset).count() == 0
 
 
-def test_create_dataset_field(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.parametrize(
+    ("settings", "expected_settings"),
+    [
+        ({"type": "text"}, {"type": "text", "use_markdown": False}),
+        ({"type": "text", "discarded": "value"}, {"type": "text", "use_markdown": False}),
+        ({"type": "text", "use_markdown": False}, {"type": "text", "use_markdown": False}),
+    ],
+)
+def test_create_dataset_field(
+    client: TestClient,
+    db: Session,
+    admin_auth_header: dict,
+    settings: dict,
+    expected_settings: dict,
+):
     dataset = DatasetFactory.create()
-    field_json = {
-        "name": "name",
-        "title": "title",
-        "settings": {"type": "text"},
-    }
+    field_json = {"name": "name", "title": "title", "settings": settings}
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
 
@@ -1181,7 +1187,7 @@ def test_create_dataset_field(client: TestClient, db: Session, admin_auth_header
         "name": "name",
         "title": "title",
         "required": False,
-        "settings": {"type": "text"},
+        "settings": expected_settings,
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -1265,6 +1271,60 @@ def test_create_dataset_field_with_invalid_max_length_title(client: TestClient, 
     assert db.query(Field).count() == 0
 
 
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {},
+        None,
+        {"type": "wrong-type"},
+        {"type": "text", "use_markdown": None},
+        {"type": "rating", "options": None},
+        {"type": "rating", "options": []},
+    ],
+)
+def test_create_dataset_field_with_invalid_settings(
+    client: TestClient, db: Session, admin_auth_header: dict, settings: dict
+):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "Title",
+        "settings": settings,
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert db.query(Field).count() == 0
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {},
+        None,
+        {"type": "wrong-type"},
+        {"type": "text", "use_markdown": None},
+        {"type": "rating", "options": None},
+        {"type": "rating", "options": []},
+    ],
+)
+def test_create_dataset_field_with_invalid_settings(
+    client: TestClient, db: Session, admin_auth_header: dict, settings: dict
+):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "Title",
+        "settings": settings,
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert db.query(Field).count() == 0
+
+
 def test_create_dataset_field_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
     field = FieldFactory.create(name="name")
     field_json = {
@@ -1308,38 +1368,84 @@ def test_create_dataset_field_with_nonexistent_dataset_id(client: TestClient, db
     assert db.query(Field).count() == 0
 
 
-def test_create_dataset_text_field(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    field_json = {
-        "name": "text",
-        "title": "Text",
-        "settings": {"type": "text", "discarded": "value"},
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
-
-    assert response.status_code == 201
-    assert db.query(Field).count() == 1
-
-    response_body = response.json()
-    assert db.get(Field, UUID(response_body["id"]))
-    assert response_body == {
-        "id": str(UUID(response_body["id"])),
-        "name": "text",
-        "title": "Text",
-        "required": False,
-        "settings": {"type": "text"},
-        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-    }
-
-
-def test_create_dataset_question(client: TestClient, db: Session, admin_auth_header: dict):
+@pytest.mark.parametrize(
+    ("settings", "expected_settings"),
+    [
+        ({"type": "text"}, {"type": "text", "use_markdown": False}),
+        ({"type": "text", "use_markdown": True}, {"type": "text", "use_markdown": True}),
+        ({"type": "text", "use_markdown": False}, {"type": "text", "use_markdown": False}),
+        (
+            {
+                "type": "rating",
+                "options": [{"value": 1}, {"value": 2}, {"value": 3}, {"value": 4}, {"value": 5}],
+            },
+            {
+                "type": "rating",
+                "options": [{"value": 1}, {"value": 2}, {"value": 3}, {"value": 4}, {"value": 5}],
+            },
+        ),
+        (
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
+                    {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
+                    {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                ],
+                "visible_options": 10,
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
+                    {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
+                    {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                ],
+                "visible_options": 10,
+            },
+        ),
+        (
+            {
+                "type": "label_selection",
+                "options": [
+                    {
+                        "value": "positive",
+                        "text": "Positive",
+                    },
+                    {
+                        "value": "negative",
+                        "text": "Negative",
+                    },
+                    {
+                        "value": "neutral",
+                        "text": "Neutral",
+                    },
+                ],
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "positive", "text": "Positive", "description": None},
+                    {"value": "negative", "text": "Negative", "description": None},
+                    {"value": "neutral", "text": "Neutral", "description": None},
+                ],
+                "visible_options": None,
+            },
+        ),
+    ],
+)
+def test_create_dataset_question(
+    client: TestClient,
+    db: Session,
+    admin_auth_header: dict,
+    settings: dict,
+    expected_settings: dict,
+):
     dataset = DatasetFactory.create()
     question_json = {
         "name": "name",
         "title": "title",
-        "settings": {"type": "text"},
+        "settings": settings,
     }
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
@@ -1355,7 +1461,7 @@ def test_create_dataset_question(client: TestClient, db: Session, admin_auth_hea
         "title": "title",
         "description": None,
         "required": False,
-        "settings": {"type": "text"},
+        "settings": expected_settings,
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -1522,160 +1628,85 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
     assert db.query(Question).count() == 0
 
 
-def test_create_dataset_text_question(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "text",
-        "title": "Text",
-        "settings": {"type": "text", "discarded": "value"},
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 201
-    assert db.query(Question).count() == 1
-
-    response_body = response.json()
-    assert db.get(Question, UUID(response_body["id"]))
-    assert response_body == {
-        "id": str(UUID(response_body["id"])),
-        "name": "text",
-        "title": "Text",
-        "description": None,
-        "required": False,
-        "settings": {"type": "text"},
-        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-    }
-
-
-def test_create_dataset_rating_question(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
+@pytest.mark.parametrize(
+    "settings",
+    [
+        None,
+        {},
+        {"type": "wrong"},
+        {"type": "text", "use_markdown": None},
+        {"type": "text", "use_markdown": "wrong"},
+        {
             "type": "rating",
             "options": [
-                {"value": 1},
-                {"value": 2},
-                {"value": 3},
-                {"value": 4},
-                {"value": 5},
-                {"value": 6},
-                {"value": 7},
-                {"value": 8},
-                {"value": 9},
-                {"value": 10},
+                {"value": "A wrong value"},
+                {"value": "B wrong value"},
+                {"value": "C wrong value"},
+                {"value": "D wrong value"},
             ],
         },
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 201
-    assert db.query(Question).count() == 1
-
-    response_body = response.json()
-    assert db.get(Question, UUID(response_body["id"]))
-    assert response_body == {
-        "id": str(UUID(response_body["id"])),
-        "name": "rating",
-        "title": "Rating",
-        "description": None,
-        "required": False,
-        "settings": {
-            "type": "rating",
+        {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
+        {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
+        {"type": "rating", "options": "invalid"},
+        {"type": "label_selection", "options": []},
+        {"type": "label_selection", "options": [{"value": "just_one_label", "text": "Just one label"}]},
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+            "visible_options": 0,
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+            "visible_options": -1,
+        },
+        {
+            "type": "label_selection",
+            "options": [{"value": "", "text": "a"}, {"value": "b", "text": "b"}],
+        },
+        {
+            "type": "label_selection",
             "options": [
-                {"value": 1},
-                {"value": 2},
-                {"value": 3},
-                {"value": 4},
-                {"value": 5},
-                {"value": 6},
-                {"value": 7},
-                {"value": 8},
-                {"value": 9},
-                {"value": 10},
+                {"value": "".join(["a" for _ in range(LABEL_SELECTION_VALUE_MAX_LENGHT + 1)]), "text": "a"},
+                {"value": "b", "text": "b"},
             ],
         },
-        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-    }
-
-
-def test_create_dataset_rating_question_with_less_options_than_allowed(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
-            "type": "rating",
-            "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)],
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": ""}, {"value": "b", "text": "b"}],
         },
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 422
-    assert db.query(Question).count() == 0
-
-
-def test_create_dataset_rating_question_with_more_options_than_allowed(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
-            "type": "rating",
-            "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)],
-        },
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 422
-    assert db.query(Question).count() == 0
-
-
-def test_create_dataset_rating_question_with_invalid_settings(client: TestClient, db: Session, admin_auth_header: dict):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
-            "type": "rating",
-            "options": "invalid",
-        },
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
-
-    assert response.status_code == 422
-    assert db.query(Question).count() == 0
-
-
-def test_create_dataset_rating_question_with_invalid_settings_options_values(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
-    dataset = DatasetFactory.create()
-    question_json = {
-        "name": "rating",
-        "title": "Rating",
-        "settings": {
-            "type": "rating",
+        {
+            "type": "label_selection",
             "options": [
-                {"value": "A"},
-                {"value": "B"},
-                {"value": "C"},
-                {"value": "D"},
+                {"value": "a", "text": "".join(["a" for _ in range(LABEL_SELECTION_TEXT_MAX_LENGTH + 1)])},
+                {"value": "b", "text": "b"},
             ],
         },
-    }
+        {
+            "type": "label_selection",
+            "options": [{"value": "a", "text": "a", "description": ""}, {"value": "b", "text": "b"}],
+        },
+        {
+            "type": "label_selection",
+            "options": [
+                {
+                    "value": "a",
+                    "text": "a",
+                    "description": "".join(["a" for _ in range(LABEL_SELECTION_DESCRIPTION_MAX_LENGTH + 1)]),
+                },
+                {"value": "b", "text": "b"},
+            ],
+        },
+    ],
+)
+def test_create_dataset_question_with_invalid_settings(
+    client: TestClient,
+    db: Session,
+    admin_auth_header: dict,
+    settings: dict,
+):
+    dataset = DatasetFactory.create()
+    question_json = {"name": "question", "title": "Question", "settings": settings}
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header, json=question_json)
 
@@ -2485,7 +2516,7 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
-def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_delete_dataset(client: TestClient, db: Session, opensearch: OpenSearch, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
@@ -2508,6 +2539,7 @@ def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth
         dataset.workspace_id,
         other_dataset.workspace_id,
     ]
+    assert not opensearch.indices.exists(index=f"rg.{dataset.id}")
 
 
 def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):

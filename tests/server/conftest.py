@@ -23,7 +23,7 @@ from argilla.server.services.datasets import DatasetsService
 
 @pytest_asyncio.fixture()
 async def search_engine(elasticsearch_config: dict):
-    engine = SearchEngine(config=elasticsearch_config)
+    engine = SearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
     yield engine
 
     await engine.client.close()
