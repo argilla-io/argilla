@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Union
 from uuid import UUID
 
 from opensearchpy import AsyncOpenSearch, helpers
@@ -249,7 +249,7 @@ class SearchEngine:
         return f"rg.{dataset.id}"
 
 
-async def get_search_engine():
+async def get_search_engine() -> Generator[SearchEngine, None, None]:
     config = dict(
         hosts=settings.elasticsearch,
         verify_certs=settings.elasticsearch_ssl_verify,
