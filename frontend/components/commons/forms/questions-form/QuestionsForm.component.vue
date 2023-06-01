@@ -530,7 +530,7 @@ export default {
         let selectedOption = null;
         switch (input.component_type) {
           case COMPONENT_TYPE.MULTI_LABEL:
-            //TODO - place the code after the switch inside RATING and FREE_TEXT cases 
+            //TODO - place the code after the switch inside RATING and FREE_TEXT cases
             const selectedOptions = input.options?.filter(
               (option) => option.is_selected
             );
