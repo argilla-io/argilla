@@ -124,6 +124,10 @@ class TextQuestion(QuestionSchema):
             values["settings"]["use_markdown"] = v
         return False
 
+    class Config:
+        validate_assignment = True
+        extra = Extra.forbid
+
 
 class RatingQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "rating"})
@@ -137,6 +141,7 @@ class RatingQuestion(QuestionSchema):
 
     class Config:
         validate_assignment = True
+        extra = Extra.forbid
 
 
 AllowedFieldTypes = TextField
@@ -147,3 +152,6 @@ class FeedbackDatasetConfig(BaseModel):
     fields: List[AllowedFieldTypes]
     questions: List[AllowedQuestionTypes]
     guidelines: Optional[str] = None
+
+    class Config:
+        smart_union = True
