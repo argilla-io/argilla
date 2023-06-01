@@ -21,7 +21,7 @@
       :options="uniqueOptions"
       :componentId="questionId"
       :showSearch="showSearch"
-      :maxOptionsToShowBeforeCollapse="settings.visible_options"
+      :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       @change="$emit('update:options', options)"
     />
   </div>
@@ -51,13 +51,9 @@ export default {
       type: String,
       default: () => "",
     },
-    settings: {
-      type: Object,
-      default: () => {
-        return {
-          visible_options: 30,
-        };
-      },
+    visibleOptions: {
+      type: Number | null,
+      required: false,
     },
   },
   model: {
@@ -79,6 +75,9 @@ export default {
   computed: {
     showSearch() {
       return this.uniqueOptions.length >= 12;
+    },
+    maxOptionsToShowBeforeCollapse() {
+      return this.visibleOptions ?? -1;
     },
   },
 };
