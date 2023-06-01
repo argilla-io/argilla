@@ -50,7 +50,8 @@ import {
   isRecordWithRecordIndexByDatasetIdExists,
   isAnyRecordByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
-
+import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 
@@ -111,6 +112,9 @@ export default {
   computed: {
     userId() {
       return this.$auth.user.id;
+    },
+    noMoreDataMessage() {
+      return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
     },
     recordStatusFilterValueForGetRecords() {
       // NOTE - this is only used to fetch record, this is why the return value is in lowercase
@@ -228,6 +232,8 @@ export default {
   },
 
   async fetch() {
+    await this.cleanRecordOrm();
+
     await this.initRecordsInDatabase(this.currentPage - 1);
 
     const offset = this.currentPage - 1;
@@ -240,8 +246,6 @@ export default {
     }
   },
   async created() {
-    this.noMoreDataMessage = "There is no more data";
-
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
     this.currentPage = this.pageFromQuery;
   },
@@ -259,11 +263,9 @@ export default {
       this.recordStatusToFilterWith = status;
       this.currentPage = 1;
 
-      await deleteAllRecords();
       await this.$fetch();
 
       this.reRenderQuestionForm++;
-      this.questionFormTouched = false;
     },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
@@ -492,6 +494,14 @@ export default {
       });
 
       return { formattedRecordResponsesForOrm, recordStatus };
+    },
+    async cleanRecordOrm() {
+      await deleteAllRecords();
+      await deleteRecordResponsesByUserIdAndResponseId(
+        this.userId,
+        this.datasetId
+      );
+      await deleteAllRecordFields();
     },
   },
   beforeDestroy() {

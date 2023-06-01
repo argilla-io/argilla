@@ -61,6 +61,8 @@ Keep in mind that you need a running Elasticsearch instance for Argilla to work.
 By default, the Argilla server will look for your Elasticsearch endpoint at `http://localhost:9200`.
 But you can customize this by setting the `ELASTICSEARCH` environment variable.
 
+
+
 ```bash
 docker run --network argilla-net -p 6900:6900 -e "ELASTICSEARCH=http://elasticsearch-for-argilla:9200" --name argilla argilla/argilla-server
 ```

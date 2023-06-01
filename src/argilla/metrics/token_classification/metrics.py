@@ -21,6 +21,11 @@ from argilla.client import api
 from argilla.metrics import helpers
 from argilla.metrics.models import MetricSummary
 
+_UNUSED_METRIC_WARNING_MESSAGE = (
+    "This metric won't be computed anymore and this function will disappear in a next release!!\n"
+    "The metric could return empty results for new Argilla servers"
+)
+
 
 def tokens_length(name: str, query: Optional[str] = None, interval: int = 1) -> MetricSummary:
     """Computes the text length distribution measured in number of tokens.
@@ -40,6 +45,8 @@ def tokens_length(name: str, query: Optional[str] = None, interval: int = 1) -> 
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # the raw histogram data with bins of size 5
     """
+    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
+
     metric = api.active_api().compute_metric(name, metric="tokens_length", query=query, interval=interval)
 
     return MetricSummary.new_summary(
@@ -98,6 +105,8 @@ def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # The token length distribution
     """
+    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
+
     metric = api.active_api().compute_metric(name, metric="token_length", query=query)
 
     return MetricSummary.new_summary(
@@ -202,6 +211,8 @@ def mention_length(
         >>> summary.visualize() # will plot a histogram chart with results
         >>> summary.data # the raw histogram data with bins of size 2
     """
+    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
+
     level = (level or "token").lower().strip()
     accepted_levels = ["token", "char"]
     assert level in accepted_levels, f"Unexpected value for level. Accepted values are {accepted_levels}"
@@ -289,6 +300,9 @@ def entity_density(
         >>> summary = entity_density(name="example-dataset")
         >>> summary.visualize()
     """
+
+    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
+
     metric = api.active_api().compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_density",
