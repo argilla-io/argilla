@@ -76,6 +76,24 @@ python -m argilla database migrate
 
 The default SQLite database will be created at `~/.argilla/argilla.db`. This can be changed setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
 
+### Generating a database migration
+
+If you have updated one of the SQLAlchemy ORM classes in `src/argilla/server/models/models.py` or added a new one, then you will need to generate a new migration script that you can later apply to the database. To generate a new migration script execute the following command:
+
+```sh
+alembic -c src/argilla/alembic.ini revision --autogenerate -m "descriptive message here"
+```
+
+`alembic` will automatically detect the changes made and generate a new migration script in the `src/argilla/server/alembic/versions` directory.
+
+<div class="alert alert-info">
+
+Note
+
+After generating a new migration script, you will need to apply the migrations as described in [running database migrations](#running-database-migrations).
+
+</div>
+
 ### Recreating the database
 
 Occasionally, it may be necessary to recreate the database from scratch to ensure a clean state in your development environment. For instance, to run the Argilla test suite or troubleshoot issues that could be related to database inconsistencies.

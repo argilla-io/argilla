@@ -1653,6 +1653,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
         {"type": "rating", "options": "invalid"},
+        {"type": "rating", "options": [{"value": 0}, {"value": 1}, {"value": 1}]},
         {"type": "label_selection", "options": []},
         {"type": "label_selection", "options": [{"value": "just_one_label", "text": "Just one label"}]},
         {
@@ -1700,6 +1701,14 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
                     "description": "".join(["a" for _ in range(LABEL_SELECTION_DESCRIPTION_MAX_LENGTH + 1)]),
                 },
                 {"value": "b", "text": "b"},
+            ],
+        },
+        {
+            "type": "label_selection",
+            "options": [
+                {"value": "a", "text": "a", "description": "a"},
+                {"value": "b", "text": "b", "description": "b"},
+                {"value": "b", "text": "b", "description": "b"},
             ],
         },
     ],
@@ -1796,21 +1805,30 @@ async def test_create_dataset_records(
 
     index_name = f"rg.{dataset.id}"
     opensearch.indices.refresh(index=index_name)
-    assert [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]] == [
+    es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
+    assert es_docs == [
         {
+            "id": str(db.get(Record, UUID(es_docs[0]["id"])).id),
             "fields": {"input": "Say Hello", "output": "Hello"},
             "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "yes"}, "status": "submitted"}},
         },
-        {"fields": {"input": "Say Hello", "output": "Hi"}, "responses": {}},
         {
+            "id": str(db.get(Record, UUID(es_docs[1]["id"])).id),
+            "fields": {"input": "Say Hello", "output": "Hi"},
+            "responses": {},
+        },
+        {
+            "id": str(db.get(Record, UUID(es_docs[2]["id"])).id),
             "fields": {"input": "Say Pello", "output": "Hello World"},
             "responses": {"admin": {"values": {"input_ok": "no", "output_ok": "no"}, "status": "submitted"}},
         },
         {
+            "id": str(db.get(Record, UUID(es_docs[3]["id"])).id),
             "fields": {"input": "Say Hello", "output": "Good Morning"},
             "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "no"}, "status": "discarded"}},
         },
         {
+            "id": str(db.get(Record, UUID(es_docs[4]["id"])).id),
             "fields": {"input": "Say Hello", "output": "Say Hello"},
             "responses": {"admin": {"values": None, "status": "discarded"}},
         },

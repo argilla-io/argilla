@@ -17,7 +17,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, PositiveInt, conlist, constr, validator
+from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 
 try:
@@ -146,11 +146,27 @@ class TextQuestionSettings(BaseModel):
     use_markdown: bool = False
 
 
+class UniqueValuesCheckerMixin(BaseModel):
+    @root_validator
+    def check_unique_values(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        options = values.get("options", [])
+        seen = set()
+        duplicates = set()
+        for option in options:
+            if option.value in seen:
+                duplicates.add(option.value)
+            else:
+                seen.add(option.value)
+        if duplicates:
+            raise ValueError(f"Option values must be unique, found duplicates: {duplicates}")
+        return values
+
+
 class RatingQuestionSettingsOption(BaseModel):
     value: int
 
 
-class RatingQuestionSettings(BaseModel):
+class RatingQuestionSettings(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.rating]
     options: conlist(
         item_type=RatingQuestionSettingsOption,
@@ -176,7 +192,7 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
     ] = None
 
 
-class LabelSelectionQuestionSettings(BaseModel):
+class LabelSelectionQuestionSettings(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.label_selection]
     options: conlist(
         item_type=LabelSelectionQuestionSettingsOption,

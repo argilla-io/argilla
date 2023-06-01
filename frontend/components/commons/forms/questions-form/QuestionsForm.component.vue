@@ -27,7 +27,7 @@
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
           :title="input.question"
           :placeholder="input.placeholder"
-          v-model="input.options[0].text"
+          v-model="input.options[0].value"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           @on-error="onError"
@@ -160,7 +160,7 @@ export default {
         (input) =>
           input.is_required &&
           input.options.every(
-            (option) => !option.value || option.value.length === 0
+            (option) => !option.is_selected || option.value.length === 0
           )
       );
     },
@@ -190,6 +190,14 @@ export default {
       }
 
       return isButtonDisable;
+    },
+    currentInputsWithNoResponses() {
+      return this.inputs.filter(
+        (input) =>
+          (input.component_type === COMPONENT_TYPE.RATING ||
+            input.component_type === COMPONENT_TYPE.SINGLE_LABEL) &&
+          input.options.every((option) => !option.is_selected)
+      );
     },
   },
   watch: {
@@ -429,6 +437,21 @@ export default {
           );
         } else {
           // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
+
+          // TODO - remove both loop with only one loop over the form object ( this.inputs)
+
+          // 1/ push formatted object corresponding to recordResponse which have been remove from api
+          this.currentInputsWithNoResponses.forEach((input) => {
+            formattedRecordResponsesForOrm.push({
+              id: input.response_id,
+              question_name: input.name,
+              options: input.options,
+              record_id: this.recordId,
+              user_id: this.userId,
+            });
+          });
+
+          // 2/ loop over the responseFromApi
           Object.entries(responsesFromApi.values).map(
             ([questionName, newResponse]) => {
               const componentType =
@@ -444,19 +467,45 @@ export default {
 
               switch (componentType) {
                 case COMPONENT_TYPE.SINGLE_LABEL:
+                  formattedOptions = formattedOptions.map((option) => {
+                    const currentOptionsFromForm = this.inputs.find(
+                      (input) => input.name === questionName
+                    )?.options;
+
+                    const currentOption = currentOptionsFromForm.find(
+                      (currentOption) => currentOption.id === option.id
+                    );
+
+                    return {
+                      id: option.id,
+                      text: option.text,
+                      is_selected: currentOption.is_selected,
+                      value: option.value,
+                    };
+                  });
+                  break;
                 case COMPONENT_TYPE.RATING:
                   formattedOptions = formattedOptions.map((option) => {
-                    if (option.text === newResponse.value) {
-                      return { id: option.id, text: option.text, value: true };
-                    }
-                    return { id: option.id, text: option.text, value: false };
+                    const currentOptionsFromForm = this.inputs.find(
+                      (input) => input.name === questionName
+                    )?.options;
+
+                    const currentOption = currentOptionsFromForm.find(
+                      (currentOption) => currentOption.id === option.id
+                    );
+
+                    return {
+                      id: option.id,
+                      text: option.text,
+                      is_selected: currentOption.is_selected,
+                      value: option.text,
+                    };
                   });
                   break;
                 case COMPONENT_TYPE.FREE_TEXT:
                   formattedOptions = [
                     {
                       id: formattedOptions[0].id,
-                      text: newResponse.value,
                       value: newResponse.value,
                     },
                   ];
@@ -487,7 +536,9 @@ export default {
         switch (input.component_type) {
           case COMPONENT_TYPE.SINGLE_LABEL:
           case COMPONENT_TYPE.RATING:
-            selectedOption = input.options?.find((option) => option.value);
+            selectedOption = input.options?.find(
+              (option) => option.is_selected
+            );
             break;
           case COMPONENT_TYPE.FREE_TEXT:
             selectedOption = input.options[0];
@@ -501,7 +552,9 @@ export default {
         const isSelectedOptionNotEmpty = selectedOption ?? false;
 
         if (isSelectedOptionNotEmpty) {
-          responseByQuestionName[input.name] = { value: selectedOption.text };
+          responseByQuestionName[input.name] = {
+            value: selectedOption.value,
+          };
         }
       });
       return responseByQuestionName;

@@ -15,16 +15,68 @@
 import random
 
 import pytest
-from argilla.server.search_engine import SearchEngine
+import pytest_asyncio
+from argilla.server.models import Dataset
+from argilla.server.search_engine import Query as SearchQuery
+from argilla.server.search_engine import SearchEngine, TextQuery
 from opensearchpy import OpenSearch, RequestError
 from sqlalchemy.orm import Session
 
 from tests.factories import (
     DatasetFactory,
+    LabelSelectionQuestionFactory,
+    MultiLabelSelectionQuestionFactory,
     RatingQuestionFactory,
+    RecordFactory,
     TextFieldFactory,
     TextQuestionFactory,
 )
+
+
+@pytest_asyncio.fixture()
+async def test_banking_sentiment_dataset(search_engine: SearchEngine):
+    text_question = TextQuestionFactory()
+    rating_question = RatingQuestionFactory()
+
+    dataset = DatasetFactory.create(
+        fields=[TextFieldFactory(name="textId"), TextFieldFactory(name="text"), TextFieldFactory(name="label")],
+        questions=[text_question, rating_question],
+    )
+
+    await search_engine.create_index(dataset)
+
+    await search_engine.add_records(
+        dataset,
+        records=[
+            RecordFactory(
+                dataset=dataset,
+                fields={"textId": "00000", "text": "My card payment had the wrong exchange rate", "label": "negative"},
+            ),
+            RecordFactory(
+                dataset=dataset,
+                fields={
+                    "textId": "00001",
+                    "text": "I believe that a card payment I made was cancelled.",
+                    "label": "neutral",
+                },
+            ),
+            RecordFactory(
+                dataset=dataset,
+                fields={"textId": "00002", "text": "Why was I charged for getting cash?", "label": "neutral"},
+            ),
+            RecordFactory(
+                dataset=dataset,
+                fields={
+                    "textId": "00003",
+                    "text": "I deposited cash into my account a week ago and it is still not available,"
+                    " please tell me why? I need the cash back now.",
+                    "label": "negative",
+                },
+            ),
+        ],
+    )
+
+    return dataset
 
 
 @pytest.mark.asyncio
@@ -39,8 +91,11 @@ class TestSuiteElasticSearchEngine:
         index = opensearch.indices.get(index=index_name)[index_name]
         assert index["mappings"] == {
             "dynamic": "strict",
-            "dynamic_templates": [],
+            "dynamic_templates": [
+                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+            ],
             "properties": {
+                "id": {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
             },
         }
@@ -64,8 +119,11 @@ class TestSuiteElasticSearchEngine:
         index = opensearch.indices.get(index=index_name)[index_name]
         assert index["mappings"] == {
             "dynamic": "strict",
-            "dynamic_templates": [],
+            "dynamic_templates": [
+                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+            ],
             "properties": {
+                "id": {"type": "keyword"},
                 "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
                 "responses": {"type": "object", "dynamic": "true"},
             },
@@ -85,8 +143,11 @@ class TestSuiteElasticSearchEngine:
     ):
         text_questions = TextQuestionFactory.create_batch(size=text_ann_size)
         rating_questions = RatingQuestionFactory.create_batch(size=rating_ann_size)
+        label_questions = LabelSelectionQuestionFactory.create_batch(size=text_ann_size)
+        multilabel_questions = MultiLabelSelectionQuestionFactory.create_batch(size=rating_ann_size)
 
-        dataset = DatasetFactory.create(questions=text_questions + rating_questions)
+        all_questions = text_questions + rating_questions + label_questions + multilabel_questions
+        dataset = DatasetFactory.create(questions=all_questions)
 
         await search_engine.create_index(dataset)
 
@@ -97,9 +158,11 @@ class TestSuiteElasticSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "properties": {
+                "id": {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
             },
             "dynamic_templates": [
+                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}},
                 *[
                     config
                     for question in text_questions
@@ -124,6 +187,18 @@ class TestSuiteElasticSearchEngine:
                         },
                     ]
                 ],
+                *[
+                    config
+                    for question in label_questions + multilabel_questions
+                    for config in [
+                        {
+                            f"{question.name}_responses": {
+                                "mapping": {"type": "keyword"},
+                                "path_match": f"responses.*.values.{question.name}",
+                            }
+                        },
+                    ]
+                ],
             ],
         }
 
@@ -138,3 +213,47 @@ class TestSuiteElasticSearchEngine:
 
         with pytest.raises(RequestError, match="resource_already_exists_exception"):
             await search_engine.create_index(dataset)
+
+    @pytest.mark.parametrize(
+        ("query", "expected_items"),
+        [
+            ("card", 2),
+            ("account", 1),
+            ("payment", 2),
+            ("cash", 2),
+            ("negative", 2),
+            ("00000", 1),
+            ("card payment", 2),
+            ("nothing", 0),
+            (SearchQuery(text=TextQuery(q="card")), 2),
+            (SearchQuery(text=TextQuery(q="account")), 1),
+            (SearchQuery(text=TextQuery(q="payment")), 2),
+            (SearchQuery(text=TextQuery(q="cash")), 2),
+            (SearchQuery(text=TextQuery(q="card payment")), 2),
+            (SearchQuery(text=TextQuery(q="nothing")), 0),
+            (SearchQuery(text=TextQuery(q="negative", field="label")), 2),
+            (SearchQuery(text=TextQuery(q="00000", field="textId")), 1),
+            (SearchQuery(text=TextQuery(q="card payment", field="text")), 2),
+        ],
+    )
+    async def test_search_with_query_string(
+        self,
+        search_engine: SearchEngine,
+        opensearch: OpenSearch,
+        db: Session,
+        test_banking_sentiment_dataset: Dataset,
+        query: str,
+        expected_items: int,
+    ):
+        opensearch.indices.refresh(index=f"rg.{test_banking_sentiment_dataset.id}")
+
+        result = await search_engine.search(test_banking_sentiment_dataset, query=query)
+        assert len(result.items) == expected_items
+
+        scores = [item.score > 0 for item in result.items]
+        assert all(map(lambda s: s > 0, scores))
+
+        sorted_scores = scores.copy()
+        sorted_scores.sort(reverse=True)
+
+        assert scores == sorted_scores
