@@ -441,21 +441,21 @@ export default {
                     // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
                     formattedOptionsWithRecordResponse =
                       optionsByQuestionName.map(({ id, text, value }) => {
-                        if (text === recordResponseByQuestionName.value) {
+                        if (value === recordResponseByQuestionName.value) {
                           return {
                             id,
                             text,
-                            value: true,
+                            value,
+                            is_selected: true,
                           };
                         }
-                        return { id, text, value };
+                        return { id, text, value, is_selected: false };
                       });
                     break;
                   case COMPONENT_TYPE.FREE_TEXT:
                     formattedOptionsWithRecordResponse = [
                       {
                         id: questionName,
-                        text: recordResponseByQuestionName.value,
                         value: recordResponseByQuestionName.value,
                       },
                     ];
