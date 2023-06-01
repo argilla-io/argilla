@@ -168,6 +168,10 @@ class DatasetPolicyV1:
         return actor.is_admin
 
     @classmethod
+    def search_records(cls, actor: User) -> bool:
+        return True
+
+    @classmethod
     def publish(cls, actor: User) -> bool:
         return actor.is_admin
 
