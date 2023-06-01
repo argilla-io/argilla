@@ -44,6 +44,8 @@ class TestSuiteElasticSearchEngine:
                 "responses": {"dynamic": "true", "type": "object"},
             },
         }
+        assert index["settings"]["index"]["number_of_shards"] == str(search_engine.es_number_of_shards)
+        assert index["settings"]["index"]["number_of_replicas"] == str(search_engine.es_number_of_replicas)
 
     async def test_create_index_for_dataset_with_fields(
         self,

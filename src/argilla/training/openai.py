@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import logging
+import os
 from typing import List, Union
 
 import numpy as np
@@ -33,9 +34,12 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
     require_version("openai")
 
+    OPENAI_API_KEY = "OPENAI_API_KEY"
+    if OPENAI_API_KEY not in os.environ:
+        raise ValueError(f"{OPENAI_API_KEY} not found in environment variables.")
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        import os
 
         self.sleep_timer = 10
         self.device = None
@@ -46,10 +50,6 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
         if self._model is None:
             self._model = "curie"
-
-        key = "OPENAI_API_KEY"
-        if key not in os.environ:
-            raise ValueError(f"{key} not found in environment variables.")
 
         if isinstance(self._dataset, tuple):
             self._train_dataset = self._dataset[0]

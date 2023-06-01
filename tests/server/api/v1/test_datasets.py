@@ -1298,6 +1298,33 @@ def test_create_dataset_field_with_invalid_settings(
     assert db.query(Field).count() == 0
 
 
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {},
+        None,
+        {"type": "wrong-type"},
+        {"type": "text", "use_markdown": None},
+        {"type": "rating", "options": None},
+        {"type": "rating", "options": []},
+    ],
+)
+def test_create_dataset_field_with_invalid_settings(
+    client: TestClient, db: Session, admin_auth_header: dict, settings: dict
+):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "Title",
+        "settings": settings,
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert db.query(Field).count() == 0
+
+
 def test_create_dataset_field_with_existent_name(client: TestClient, db: Session, admin_auth_header: dict):
     field = FieldFactory.create(name="name")
     field_json = {
@@ -2489,7 +2516,7 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
-def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_delete_dataset(client: TestClient, db: Session, opensearch: OpenSearch, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
@@ -2512,6 +2539,7 @@ def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth
         dataset.workspace_id,
         other_dataset.workspace_id,
     ]
+    assert not opensearch.indices.exists(index=f"rg.{dataset.id}")
 
 
 def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
