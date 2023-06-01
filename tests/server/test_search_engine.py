@@ -18,7 +18,7 @@ import pytest
 import pytest_asyncio
 from argilla.server.models import Dataset
 from argilla.server.search_engine import Query as SearchQuery
-from argilla.server.search_engine import SearchEngine
+from argilla.server.search_engine import SearchEngine, TextFieldQuery
 from opensearchpy import OpenSearch, RequestError
 from sqlalchemy.orm import Session
 
@@ -201,15 +201,15 @@ class TestSuiteElasticSearchEngine:
             ("00000", 1),
             ("card payment", 2),
             ("nothing", 0),
-            (SearchQuery(text=TextFieldFactory(q="card")), 2),
-            (SearchQuery(text=TextFieldFactory(q="account")), 1),
-            (SearchQuery(text=TextFieldFactory(q="payment")), 2),
-            (SearchQuery(text=TextFieldFactory(q="cash")), 2),
-            (SearchQuery(text=TextFieldFactory(q="card payment")), 2),
-            (SearchQuery(text=TextFieldFactory(q="nothing")), 0),
-            (SearchQuery(text=TextFieldFactory(q="negative", field="label")), 2),
-            (SearchQuery(text=TextFieldFactory(q="00000", field="textId")), 1),
-            (SearchQuery(text=TextFieldFactory(q="card payment", field="text")), 2),
+            (SearchQuery(text=TextFieldQuery(q="card")), 2),
+            (SearchQuery(text=TextFieldQuery(q="account")), 1),
+            (SearchQuery(text=TextFieldQuery(q="payment")), 2),
+            (SearchQuery(text=TextFieldQuery(q="cash")), 2),
+            (SearchQuery(text=TextFieldQuery(q="card payment")), 2),
+            (SearchQuery(text=TextFieldQuery(q="nothing")), 0),
+            (SearchQuery(text=TextFieldQuery(q="negative", field="label")), 2),
+            (SearchQuery(text=TextFieldQuery(q="00000", field="textId")), 1),
+            (SearchQuery(text=TextFieldQuery(q="card payment", field="text")), 2),
         ],
     )
     async def test_search_with_query_string(
