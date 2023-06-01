@@ -146,9 +146,8 @@ class TestSuiteElasticSearchEngine:
         label_questions = LabelSelectionQuestionFactory.create_batch(size=text_ann_size)
         multilabel_questions = MultiLabelSelectionQuestionFactory.create_batch(size=rating_ann_size)
 
-        dataset = DatasetFactory.create(
-            questions=(text_questions + rating_questions) + (label_questions + multilabel_questions)
-        )
+        all_questions = text_questions + rating_questions + label_questions + multilabel_questions
+        dataset = DatasetFactory.create(questions=all_questions)
 
         await search_engine.create_index(dataset)
 
