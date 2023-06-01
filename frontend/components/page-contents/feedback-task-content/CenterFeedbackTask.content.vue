@@ -4,11 +4,9 @@
 </template>
 
 <script>
-import { isBoolean } from "lodash";
 import { upsertDatasetQuestions } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import { upsertDatasetFields } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
 import {
-  COMPONENT_TYPE,
   CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API,
   CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API,
 } from "@/components/feedback-task/feedbackTask.properties";
@@ -112,7 +110,7 @@ export default {
         }
       );
     },
-    formatOptionsFromQuestionApi(options, questionName, componentType) {
+    formatOptionsFromQuestionApi(options, questionName) {
       // NOTE - the value of the options in questions from API and the value in the DatasetQuestion ORM are different
       // - the value from the options from the questions in API could be anything (string, number, etc.)
       // - the value from the options in the DatasetQuestion ORM is a boolean, it the state of the 'checkbox  true (if selected) or false (not selected)
