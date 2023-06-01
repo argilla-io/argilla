@@ -75,6 +75,7 @@ export default {
             component_type: componentType,
             placeholder: questionSettings?.placeholder ?? null,
             description: questionDescription ?? null,
+            settings: questionSettings,
           };
         }
       );
