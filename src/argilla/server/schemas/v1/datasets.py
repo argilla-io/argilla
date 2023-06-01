@@ -186,8 +186,17 @@ class LabelSelectionQuestionSettings(BaseModel):
     visible_options: Optional[PositiveInt] = None
 
 
+class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
+    type: Literal[QuestionType.multi_label_selection]
+
+
 QuestionSettings = Annotated[
-    Union[TextQuestionSettings, RatingQuestionSettings, LabelSelectionQuestionSettings],
+    Union[
+        TextQuestionSettings,
+        RatingQuestionSettings,
+        LabelSelectionQuestionSettings,
+        MultiLabelSelectionQuestionSettings,
+    ],
     PydanticField(discriminator="type"),
 ]
 

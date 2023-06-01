@@ -19,7 +19,7 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from pydantic import parse_obj_as
-from sqlalchemy import JSON, ForeignKey, Text, and_
+from sqlalchemy import JSON, ForeignKey, Index, Text, UniqueConstraint, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
@@ -60,16 +60,18 @@ class Field(Base):
     __tablename__ = "fields"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(Text, index=True)
     title: Mapped[str] = mapped_column(Text)
     required: Mapped[bool] = mapped_column(default=False)
     settings: Mapped[dict] = mapped_column(JSON, default={})
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="fields")
+
+    __table_args__ = (UniqueConstraint("name", "dataset_id", name="field_name_dataset_id_uq"),)
 
     def __repr__(self):
         return (
@@ -84,15 +86,17 @@ class Response(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     values: Mapped[Optional[dict]] = mapped_column(JSON)
-    status: Mapped[ResponseStatus] = mapped_column(default=ResponseStatus.submitted)
-    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id"))
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    status: Mapped[ResponseStatus] = mapped_column(default=ResponseStatus.submitted, index=True)
+    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
+
+    __table_args__ = (UniqueConstraint("record_id", "user_id", name="response_record_id_user_id_uq"),)
 
     @property
     def is_submitted(self):
@@ -109,15 +113,17 @@ class Record(Base):
     __tablename__ = "records"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    fields: Mapped[dict] = mapped_column(JSON)
-    external_id: Mapped[Optional[str]]
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
+    fields: Mapped[dict] = mapped_column(JSON, default={})
+    external_id: Mapped[Optional[str]] = mapped_column(index=True)
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="records")
     responses: Mapped[List["Response"]] = relationship(back_populates="record", order_by=Response.inserted_at.asc())
+
+    __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
     def __repr__(self):
         return (
@@ -130,17 +136,19 @@ class Question(Base):
     __tablename__ = "questions"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(index=True)
     title: Mapped[str] = mapped_column(Text)
-    description: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
     required: Mapped[bool] = mapped_column(default=False)
     settings: Mapped[dict] = mapped_column(JSON, default={})
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"))
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="questions")
+
+    __table_args__ = (UniqueConstraint("name", "dataset_id", name="question_name_dataset_id_uq"),)
 
     @property
     def parsed_settings(self) -> QuestionSettings:
@@ -158,10 +166,10 @@ class Dataset(Base):
     __tablename__ = "datasets"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(index=True)
     guidelines: Mapped[Optional[str]] = mapped_column(Text)
-    status: Mapped[DatasetStatus] = mapped_column(default=DatasetStatus.draft)
-    workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id"))
+    status: Mapped[DatasetStatus] = mapped_column(default=DatasetStatus.draft, index=True)
+    workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
@@ -176,6 +184,8 @@ class Dataset(Base):
     records: Mapped[List["Record"]] = relationship(
         back_populates="dataset", passive_deletes=True, order_by=Record.inserted_at.asc()
     )
+
+    __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
 
     @property
     def is_draft(self):
@@ -197,14 +207,16 @@ class WorkspaceUser(Base):
     __tablename__ = "workspaces_users"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id"))
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspace: Mapped["Workspace"] = relationship(viewonly=True)
     user: Mapped["User"] = relationship(viewonly=True)
+
+    __table_args__ = (UniqueConstraint("workspace_id", "user_id", name="workspace_id_user_id_uq"),)
 
     def __repr__(self):
         return (
@@ -218,7 +230,7 @@ class Workspace(Base):
     __tablename__ = "workspaces"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    name: Mapped[str] = mapped_column(unique=True)
+    name: Mapped[str] = mapped_column(unique=True, index=True)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
@@ -241,9 +253,9 @@ class User(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     first_name: Mapped[str]
     last_name: Mapped[Optional[str]]
-    username: Mapped[str] = mapped_column(unique=True)
-    role: Mapped[UserRole] = mapped_column(default=UserRole.annotator)
-    api_key: Mapped[str] = mapped_column(Text, unique=True, default=generate_user_api_key)
+    username: Mapped[str] = mapped_column(unique=True, index=True)
+    role: Mapped[UserRole] = mapped_column(default=UserRole.annotator, index=True)
+    api_key: Mapped[str] = mapped_column(Text, unique=True, index=True, default=generate_user_api_key)
     password_hash: Mapped[str] = mapped_column(Text)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)

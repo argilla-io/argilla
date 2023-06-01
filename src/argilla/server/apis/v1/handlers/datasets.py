@@ -314,9 +314,10 @@ async def publish_dataset(
 
 
 @router.delete("/datasets/{dataset_id}", response_model=Dataset)
-def delete_dataset(
+async def delete_dataset(
     *,
     db: Session = Depends(get_db),
+    search_engine=Depends(get_search_engine),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -324,6 +325,6 @@ def delete_dataset(
 
     dataset = _get_dataset(db, dataset_id)
 
-    datasets.delete_dataset(db, dataset)
+    await datasets.delete_dataset(db, search_engine, dataset=dataset)
 
     return dataset
