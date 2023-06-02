@@ -314,3 +314,35 @@ class TestSuiteElasticSearchEngine:
                 }
             },
         }
+
+    async def test_delete_record_response(
+        self,
+        elastic_search_engine: SearchEngine,
+        opensearch: OpenSearch,
+        db: Session,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        record = test_banking_sentiment_dataset.records[0]
+        question = test_banking_sentiment_dataset.questions[0]
+
+        response = ResponseFactory.create(record=record, values={question.name: {"value": "test"}})
+        await elastic_search_engine.update_record_response(response)
+
+        index_name = f"rg.{test_banking_sentiment_dataset.id}"
+
+        opensearch.indices.refresh(index=index_name)
+
+        results = opensearch.get(index=index_name, id=record.id)
+        assert results["_source"]["responses"] == {
+            response.user.username: {
+                "values": {question.name: "test"},
+                "status": response.status.value,
+            }
+        }
+
+        await elastic_search_engine.delete_record_response(response)
+
+        opensearch.indices.refresh(index=index_name)
+
+        results = opensearch.get(index=index_name, id=record.id)
+        assert results["_source"]["responses"] == {}

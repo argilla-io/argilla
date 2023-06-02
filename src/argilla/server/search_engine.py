@@ -166,7 +166,7 @@ class SearchEngine:
         await self.client.update(
             index=index_name,
             id=record.id,
-            body={"script": f'ctx._source.remove("responses.{response.user.username}")'},
+            body={"script": f'ctx._source["responses"].remove("{response.user.username}")'},
         )
 
     async def search(
