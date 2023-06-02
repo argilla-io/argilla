@@ -306,7 +306,7 @@ async def create_dataset_records(
 
 
 @router.post(
-    "/datasets/{dataset_id}/records/search",
+    "/me/datasets/{dataset_id}/records/search",
     status_code=status.HTTP_200_OK,
     response_model=SearchRecordsResult,
     response_model_exclude_unset=True,
