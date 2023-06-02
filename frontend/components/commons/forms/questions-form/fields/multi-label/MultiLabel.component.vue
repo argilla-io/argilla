@@ -17,11 +17,11 @@
       />
     </div>
 
-    <MultiLabelSelectionComponent
+    <LabelSelectionComponent
       :options="uniqueOptions"
+      :multiple="true"
       :componentId="questionId"
       :showSearch="showSearch"
-      :multiple="true"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       @change="$emit('update:options', options)"
     />
@@ -56,6 +56,10 @@ export default {
       type: Number | null,
       required: false,
     },
+    optionsThresholdToEnableSeach: {
+      type: Number,
+      required: true,
+    },
   },
   model: {
     prop: "options",
@@ -75,7 +79,7 @@ export default {
   },
   computed: {
     showSearch() {
-      return this.uniqueOptions.length >= 12;
+      return this.uniqueOptions.length >= this.optionsThresholdToEnableSeach;
     },
     maxOptionsToShowBeforeCollapse() {
       return this.visibleOptions ?? -1;

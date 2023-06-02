@@ -18,8 +18,8 @@
               params: { id: datasetId },
             }"
             target="_blank"
-            >annotation guidelines <svgicon name="external-link" width="12"
-          /></NuxtLink>
+            >annotation guidelines <svgicon name="external-link" width="12" />
+          </NuxtLink>
         </p>
       </div>
       <div class="form-group" v-for="input in inputs" :key="input.id">
@@ -42,7 +42,9 @@
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           :visibleOptions="input.settings.visible_options"
-          @on-error="onError"
+          :optionsThresholdToEnableSeach="
+            OPTIONS_THRESHOLD_TO_ENABLE_SEARCH
+          "
         />
 
         <MultiLabelComponent
@@ -53,6 +55,9 @@
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           :visibleOptions="input.settings.visible_options"
+          :optionsThresholdToEnableSeach="
+            OPTIONS_THRESHOLD_TO_ENABLE_SEARCH
+          "
         />
 
         <RatingComponent
@@ -104,7 +109,10 @@
 <script>
 import { isEqual, cloneDeep } from "lodash";
 import { Notification } from "@/models/Notifications";
-import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
+import {
+  COMPONENT_TYPE,
+  OPTIONS_THRESHOLD_TO_ENABLE_SEARCH,
+} from "@/components/feedback-task/feedbackTask.properties";
 import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
@@ -147,6 +155,8 @@ export default {
       inputs: [],
       renderForm: 0,
       isError: false,
+      OPTIONS_THRESHOLD_TO_ENABLE_SEARCH:
+        OPTIONS_THRESHOLD_TO_ENABLE_SEARCH,
     };
   },
   computed: {

@@ -39,7 +39,11 @@
         />
         <label
           class="label-text cursor-pointer"
-          :class="{ 'label-active': option.is_selected }"
+          :class="{
+            'label-active': option.is_selected,
+            square: multiple,
+            round: !multiple,
+          }"
           :for="option.id"
           v-text="option.text"
         />
@@ -55,7 +59,7 @@
 
 <script>
 export default {
-  name: "SingleLabelSelectionComponent",
+  name: "LabelSelectionComponent",
   props: {
     maxOptionsToShowBeforeCollapse: {
       type: Number,
@@ -74,6 +78,10 @@ export default {
       required: true,
     },
     showSearch: {
+      type: Boolean,
+      default: () => false,
+    },
+    multiple: {
       type: Boolean,
       default: () => false,
     },
@@ -132,6 +140,17 @@ export default {
   },
   methods: {
     onSelect({ id, is_selected }) {
+      this.multiple ||
+        this.tranformOptionsForMonoSelectionAndEmitNewOptions({
+          id,
+          is_selected,
+        });
+    },
+    tranformOptionsForMonoSelectionAndEmitNewOptions({ id, is_selected }) {
+      this.factoryOptionsForMonoSelection({ id, is_selected });
+      this.$emit("on-change", this.options);
+    },
+    factoryOptionsForMonoSelection({ id, is_selected }) {
       this.options.map((option) => {
         if (option.id === id) {
           option.is_selected = is_selected;
@@ -140,8 +159,6 @@ export default {
         }
         return option;
       });
-
-      this.$emit("on-change", this.options);
     },
     toggleShowLess() {
       this.showLess = !this.showLess;
@@ -187,7 +204,6 @@ export default {
 .label-text {
   display: flex;
   width: 100%;
-  border-radius: 50em;
   height: 40px;
   background: palette(purple, 800);
   outline: none;
@@ -202,6 +218,14 @@ export default {
     background: darken(palette(purple, 800), 8%);
   }
 }
+
+.round {
+  border-radius: 50em;
+}
+.square {
+  border-radius: 5px;
+}
+
 input[type="checkbox"] {
   display: none;
 }

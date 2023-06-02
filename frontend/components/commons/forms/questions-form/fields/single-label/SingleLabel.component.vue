@@ -17,8 +17,9 @@
       />
     </div>
 
-    <SingleLabelSelectionComponent
+    <LabelSelectionComponent
       :options="uniqueOptions"
+      :multiple="false"
       :componentId="questionId"
       :showSearch="showSearch"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
@@ -55,6 +56,10 @@ export default {
       type: Number | null,
       required: false,
     },
+    optionsThresholdToEnableSeach: {
+      type: Number,
+      required: true,
+    },
   },
   model: {
     prop: "options",
@@ -74,7 +79,7 @@ export default {
   },
   computed: {
     showSearch() {
-      return this.uniqueOptions.length >= 12;
+      return this.uniqueOptions.length >= this.optionsThresholdToEnableSeach;
     },
     maxOptionsToShowBeforeCollapse() {
       return this.visibleOptions ?? -1;
