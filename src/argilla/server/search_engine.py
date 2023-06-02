@@ -184,7 +184,7 @@ class SearchEngine:
         items = []
         next_page_token = None
         for hit in response["hits"]["hits"]:
-            items.append(SearchResponseItem(record_id=hit["_id"], score=hit["_score"]))
+            items.append(SearchResponseItem(record_id=UUID(hit["_id"]), score=hit["_score"]))
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
             next_page_token = hit.get("_sort")
 

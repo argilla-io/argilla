@@ -72,7 +72,7 @@ def _get_dataset(db: Session, dataset_id: UUID):
 def _merge_search_records(search_responses: "SearchResponses", records: List[Records]) -> List[SearchRecord]:
     search_records = []
     for response in search_responses.items:
-        record = next((r for r in records if r.id == UUID(response.record_id)), None)
+        record = next((r for r in records if r.id == response.record_id), None)
         if record:
             search_records.append(SearchRecord(record=record, query_score=response.score))
             records.remove(record)
@@ -346,7 +346,7 @@ async def search_dataset_records(
         limit=limit,
     )
 
-    record_ids = [UUID(response.record_id) for response in search_responses.items]
+    record_ids = [response.record_id for response in search_responses.items]
     records = datasets.get_records_by_ids(db, dataset_id, record_ids, include)
 
     return SearchRecordsResult(items=_merge_search_records(search_responses, records))
