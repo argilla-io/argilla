@@ -55,6 +55,7 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
     MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question", dataset=dataset)
 
 
+@pytest.mark.parametrize("response_status", ["submitted", "discarded", "draft"])
 @pytest.mark.parametrize(
     "create_questions_func, responses",
     [
@@ -99,6 +100,14 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
                 },
             },
         ),
+        (
+            create_text_questions,
+            {
+                "values": {
+                    "input_ok": {"value": "yes"},
+                },
+            },
+        ),
     ],
 )
 def test_create_record_response_with_valid_values(
@@ -107,13 +116,14 @@ def test_create_record_response_with_valid_values(
     admin: User,
     admin_auth_header: dict,
     create_questions_func: Callable[["Dataset"], None],
+    response_status: str,
     responses: dict,
 ):
     dataset = DatasetFactory.create()
     create_questions_func(dataset)
     record = RecordFactory.create(dataset=dataset)
 
-    response_json = {**responses, "status": "submitted"}
+    response_json = {**responses, "status": response_status}
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
 
     response_body = response.json()
@@ -123,7 +133,7 @@ def test_create_record_response_with_valid_values(
     assert response_body == {
         "id": str(UUID(response_body["id"])),
         "values": responses["values"],
-        "status": "submitted",
+        "status": response_status,
         "user_id": str(admin.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
