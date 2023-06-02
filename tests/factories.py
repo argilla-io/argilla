@@ -111,10 +111,20 @@ class QuestionFactory(BaseFactory):
     class Meta:
         model = Question
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        default_settings = cls.settings.copy()
+        settings = kwargs.get("settings", {})
+        if settings:
+            default_settings.update(settings)
+            kwargs["settings"] = default_settings
+        return super()._create(model_class, *args, **kwargs)
+
     name = factory.Sequence(lambda n: f"question-{n}")
     title = "Question Title"
     description = "Question Description"
     dataset = factory.SubFactory(DatasetFactory)
+    settings = {}
 
 
 class TextQuestionFactory(QuestionFactory):
