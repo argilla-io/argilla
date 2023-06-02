@@ -74,7 +74,7 @@ def db(connection: "Connection") -> Generator["Session", None, None]:
 
 
 @pytest.fixture(scope="function")
-def search_engine():
+def search_engine() -> Generator["MockSearchEngine", None, None]:
     # TODO: MockSearchEngine will implement the SearchEngine once is defined as an interface
     class MockSearchEngine:
         async def create_index(self, dataset):
