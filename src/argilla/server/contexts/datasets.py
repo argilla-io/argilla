@@ -358,7 +358,7 @@ async def create_response(
     db.add(response)
     db.flush([response])
     # TODO: Rollback
-    await search_engine.update_record_responses(record, responses=[response])
+    await search_engine.update_record_response(response)
 
     db.commit()
     db.refresh(response)
@@ -376,7 +376,7 @@ async def update_response(
 
     db.flush([response])
     # TODO: Rollback
-    await search_engine.update_record_responses(response.record, responses=[response])
+    await search_engine.update_record_response(response)
 
     db.commit()
     db.refresh(response)

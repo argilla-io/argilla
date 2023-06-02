@@ -144,23 +144,19 @@ class SearchEngine:
         if errors:
             raise RuntimeError(errors)
 
-    async def update_record_responses(self, record: Record, responses: List[Response]):
+    async def update_record_response(self, response: Response):
+        record = response.record
         index_name = await self._get_index_or_raise(record.dataset)
+
+        es_response = UserResponse(
+            values={k: v["value"] for k, v in response.values.items()} if response.values else None,
+            status=response.status,
+        )
 
         await self.client.update(
             index=index_name,
             id=record.id,
-            body={
-                "doc": {
-                    "responses": {
-                        response.user.username: UserResponse(
-                            values={k: v["value"] for k, v in response.values.items()} if response.values else None,
-                            status=response.status,
-                        ).dict()
-                        for response in responses
-                    }
-                }
-            },
+            body={"doc": {"responses": {response.user.username: es_response.dict()}}},
         )
 
     async def delete_record_response(self, response: Response):
