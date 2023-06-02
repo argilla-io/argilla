@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Type
+from typing import Optional, Type
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
@@ -778,28 +778,33 @@ def test_list_current_user_dataset_records_with_offset_and_limit(client: TestCli
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
 
-@pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted"])
+def create_records_with_response(
+    num_records: int,
+    dataset: Dataset,
+    user: User,
+    response_status: ResponseStatus,
+    response_values: Optional[dict] = None,
+):
+    for record in RecordFactory.create_batch(size=num_records, dataset=dataset):
+        ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
+
+
+@pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
 def test_list_current_user_dataset_records_with_response_status_filter(
     client: TestClient, admin: User, admin_auth_header: dict, response_status_filter: str
 ):
-    dataset = DatasetFactory.create()
     num_responses_per_status = 10
+    response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
+
+    dataset = DatasetFactory.create()
     # missing responses
     RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset)
     # discarded responses
-    for record in RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset):
-        ResponseFactory.create(record=record, user=admin, status=ResponseStatus.discarded)
+    create_records_with_response(num_responses_per_status, dataset, admin, ResponseStatus.discarded)
     # submitted responses
-    for record in RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset):
-        ResponseFactory.create(
-            record=record,
-            user=admin,
-            values={
-                "input_ok": {"value": "yes"},
-                "output_ok": {"value": "yes"},
-            },
-            status=ResponseStatus.submitted,
-        )
+    create_records_with_response(num_responses_per_status, dataset, admin, ResponseStatus.submitted, response_values)
+    # drafted responses
+    create_records_with_response(num_responses_per_status, dataset, admin, ResponseStatus.draft, response_values)
 
     other_dataset = DatasetFactory.create()
     RecordFactory.create_batch(size=2, dataset=other_dataset)
@@ -1048,10 +1053,12 @@ def test_get_current_user_dataset_metrics(client: TestClient, admin: User, admin
     record_a = RecordFactory.create(dataset=dataset)
     record_b = RecordFactory.create(dataset=dataset)
     record_c = RecordFactory.create(dataset=dataset)
+    record_d = RecordFactory.create(dataset=dataset)
     RecordFactory.create_batch(3, dataset=dataset)
     ResponseFactory.create(record=record_a, user=admin)
     ResponseFactory.create(record=record_b, user=admin, status=ResponseStatus.discarded)
     ResponseFactory.create(record=record_c, user=admin, status=ResponseStatus.discarded)
+    ResponseFactory.create(record=record_d, user=admin, status=ResponseStatus.draft)
 
     other_dataset = DatasetFactory.create()
     other_record_a = RecordFactory.create(dataset=other_dataset)
@@ -1067,12 +1074,13 @@ def test_get_current_user_dataset_metrics(client: TestClient, admin: User, admin
     assert response.status_code == 200
     assert response.json() == {
         "records": {
-            "count": 6,
+            "count": 7,
         },
         "responses": {
-            "count": 3,
+            "count": 4,
             "submitted": 1,
             "discarded": 2,
+            "draft": 1,
         },
     }
 
@@ -1091,10 +1099,12 @@ def test_get_current_user_dataset_metrics_as_annotator(client: TestClient):
     record_a = RecordFactory.create(dataset=dataset)
     record_b = RecordFactory.create(dataset=dataset)
     record_c = RecordFactory.create(dataset=dataset)
+    record_d = RecordFactory.create(dataset=dataset)
     RecordFactory.create_batch(2, dataset=dataset)
     ResponseFactory.create(record=record_a, user=annotator)
     ResponseFactory.create(record=record_b, user=annotator)
     ResponseFactory.create(record=record_c, user=annotator, status=ResponseStatus.discarded)
+    ResponseFactory.create(record=record_d, user=annotator, status=ResponseStatus.draft)
 
     other_dataset = DatasetFactory.create()
     other_record_a = RecordFactory.create(dataset=other_dataset)
@@ -1109,14 +1119,8 @@ def test_get_current_user_dataset_metrics_as_annotator(client: TestClient):
 
     assert response.status_code == 200
     assert response.json() == {
-        "records": {
-            "count": 5,
-        },
-        "responses": {
-            "count": 3,
-            "submitted": 2,
-            "discarded": 1,
-        },
+        "records": {"count": 6},
+        "responses": {"count": 4, "submitted": 2, "discarded": 1, "draft": 1},
     }
 
 

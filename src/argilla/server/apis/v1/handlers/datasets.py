@@ -173,8 +173,15 @@ def get_current_user_dataset_metrics(
         },
         "responses": {
             "count": datasets.count_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
-            "submitted": datasets.count_submitted_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
-            "discarded": datasets.count_discarded_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+            "submitted": datasets.count_responses_by_dataset_id_and_user_id(
+                db, dataset_id, current_user.id, ResponseStatusFilter.submitted
+            ),
+            "discarded": datasets.count_responses_by_dataset_id_and_user_id(
+                db, dataset_id, current_user.id, ResponseStatusFilter.discarded
+            ),
+            "draft": datasets.count_responses_by_dataset_id_and_user_id(
+                db, dataset_id, current_user.id, ResponseStatusFilter.draft
+            ),
         },
     }
 
