@@ -124,6 +124,7 @@ class QuestionFactory(BaseFactory):
     title = "Question Title"
     description = "Question Description"
     dataset = factory.SubFactory(DatasetFactory)
+    settings = {}
 
 
 class TextQuestionFactory(QuestionFactory):
