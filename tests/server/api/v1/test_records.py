@@ -39,26 +39,22 @@ if TYPE_CHECKING:
 
 
 def create_text_questions(dataset: "Dataset") -> None:
-    TextQuestionFactory.create(name="input_ok", dataset=dataset, settings={"required": True})
+    TextQuestionFactory.create(name="input_ok", dataset=dataset, required=True)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
 
 def create_rating_questions(dataset: "Dataset") -> None:
-    RatingQuestionFactory.create(name="rating_question_1", dataset=dataset, settings={"required": True})
+    RatingQuestionFactory.create(name="rating_question_1", dataset=dataset, required=True)
     RatingQuestionFactory.create(name="rating_question_2", dataset=dataset)
 
 
 def create_label_selection_questions(dataset: "Dataset") -> None:
-    LabelSelectionQuestionFactory.create(
-        name="label_selection_question_1", dataset=dataset, settings={"required": True}
-    )
+    LabelSelectionQuestionFactory.create(name="label_selection_question_1", dataset=dataset, required=True)
     LabelSelectionQuestionFactory.create(name="label_selection_question_2", dataset=dataset)
 
 
 def create_multi_label_selection_questions(dataset: "Dataset") -> None:
-    MultiLabelSelectionQuestionFactory.create(
-        name="multi_label_selection_question_1", dataset=dataset, settings={"required": True}
-    )
+    MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question_1", dataset=dataset, required=True)
     MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question_2", dataset=dataset)
 
 
@@ -153,13 +149,13 @@ def test_create_submitted_record_response_with_missing_required_questions(client
 
     record = RecordFactory.create(dataset=dataset)
     response_json = {
-        "values": {"input_ok": {"value": "yes"}},
+        "values": {"output_ok": {"value": "yes"}},
         "status": "submitted",
     }
 
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
     assert response.status_code == 422
-    assert response.json() == {"detail": "Missing required question: 'output_ok'"}
+    assert response.json() == {"detail": "Missing required question: 'input_ok'"}
 
 
 @pytest.mark.parametrize("response_status", ["discarded", "draft"])
@@ -273,7 +269,7 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
             create_rating_questions,
             {
                 "values": {
-                    "rating_question": {"value": "wrong-rating-value"},
+                    "rating_question_1": {"value": "wrong-rating-value"},
                 },
             },
             "'wrong-rating-value' is not a valid option.\nValid options are: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
@@ -282,7 +278,7 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
             create_label_selection_questions,
             {
                 "values": {
-                    "label_selection_question": {"value": False},
+                    "label_selection_question_1": {"value": False},
                 },
             },
             "False is not a valid option.\nValid options are: ['option1', 'option2', 'option3']",
@@ -291,7 +287,7 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
             create_multi_label_selection_questions,
             {
                 "values": {
-                    "multi_label_selection_question": {"value": "wrong-type"},
+                    "multi_label_selection_question_1": {"value": "wrong-type"},
                 },
             },
             "Expected list of values, found <class 'str'>",
@@ -300,14 +296,14 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
             create_multi_label_selection_questions,
             {
                 "values": {
-                    "multi_label_selection_question": {"value": ["option4", "option5"]},
+                    "multi_label_selection_question_1": {"value": ["option4", "option5"]},
                 },
             },
             "['option4', 'option5'] are not valid options.\nValid options are: ['option1', 'option2', 'option3']",
         ),
         (
             create_multi_label_selection_questions,
-            {"values": {"multi_label_selection_question": {"value": []}}},
+            {"values": {"multi_label_selection_question_1": {"value": []}}},
             "Expected list of values, found empty list",
         ),
     ],
