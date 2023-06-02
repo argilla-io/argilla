@@ -194,7 +194,7 @@ def get_records_by_ids(
 ) -> List[Record]:
     query = db.query(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
     if RecordInclude.responses in include:
-        query = query.options(contains_eager(Record.responses))
+        query = query.options(joinedload(Record.responses))
     else:
         query = query.options(noload(Record.responses))
     return query.all()
