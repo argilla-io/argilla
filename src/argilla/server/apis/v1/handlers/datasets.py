@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -67,16 +67,6 @@ def _get_dataset(db: Session, dataset_id: UUID):
         )
 
     return dataset
-
-
-def _merge_search_records(search_responses: "SearchResponses", records: List[Records]) -> List[SearchRecord]:
-    search_records = []
-    for response in search_responses.items:
-        record = next((r for r in records if r.id == response.record_id), None)
-        if record:
-            search_records.append(SearchRecord(record=record, query_score=response.score))
-            records.remove(record)
-    return search_records
 
 
 @router.get("/me/datasets", response_model=Datasets)
@@ -346,10 +336,14 @@ async def search_dataset_records(
         limit=limit,
     )
 
-    record_ids = [response.record_id for response in search_responses.items]
-    records = datasets.get_records_by_ids(db, dataset_id, record_ids, include)
+    record_id_score_map = {response.record_id: response.score for response in search_responses.items}
+    records = datasets.get_records_by_ids(
+        db=db, dataset_id=dataset_id, record_ids=list(record_id_score_map.keys()), include=include
+    )
 
-    return SearchRecordsResult(items=_merge_search_records(search_responses, records))
+    return SearchRecordsResult(
+        items=[SearchRecord(record=record, query_score=record_id_score_map[record.id]) for record in records]
+    )
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
