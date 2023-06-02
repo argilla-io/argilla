@@ -538,9 +538,8 @@ export default {
       let responseByQuestionName = {};
 
       this.inputs.forEach((input) => {
-        let selectedOption = null;
         switch (input.component_type) {
-          case COMPONENT_TYPE.MULTI_LABEL:
+          case COMPONENT_TYPE.MULTI_LABEL: {
             const selectedOptions =
               input.options?.filter((option) => option.is_selected) ?? false;
 
@@ -550,9 +549,10 @@ export default {
               };
             }
             break;
+          }
           case COMPONENT_TYPE.SINGLE_LABEL:
-          case COMPONENT_TYPE.RATING:
-            selectedOption =
+          case COMPONENT_TYPE.RATING: {
+            const selectedOption =
               input.options?.find((option) => option.is_selected) ?? false;
 
             if (selectedOption) {
@@ -561,8 +561,9 @@ export default {
               };
             }
             break;
-          case COMPONENT_TYPE.FREE_TEXT:
-            selectedOption = input.options[0] ?? false;
+          }
+          case COMPONENT_TYPE.FREE_TEXT: {
+            const selectedOption = input.options[0] ?? false;
 
             if (selectedOption) {
               responseByQuestionName[input.name] = {
@@ -570,6 +571,7 @@ export default {
               };
             }
             break;
+          }
           default:
             console.log(
               `The component type ${input.component_type} is unknown, the response can't be save`
