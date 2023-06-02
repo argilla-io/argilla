@@ -18,7 +18,14 @@
     </div>
 
     <div class="container" :class="isFocused ? '--focused' : null">
+      <BaseRenderMarkdownComponent
+        v-if="useMarkdown && !isFocused"
+        class="textarea--markdown"
+        :markdown="value"
+        @click.native="setFocus(true)"
+      />
       <ContentEditableFeedbackTask
+        v-else
         class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
@@ -61,6 +68,10 @@ export default {
       type: String,
       default: () => "",
     },
+    useMarkdown: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   data: () => {
     return {
@@ -91,7 +102,7 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: $base-space;
+  gap: 12px;
 }
 .title-area {
   display: flex;
@@ -122,6 +133,12 @@ export default {
 .textarea {
   display: flex;
   flex: 0 0 100%;
+  &--markdown {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: $base-space;
+  }
 }
 
 .icon-info {

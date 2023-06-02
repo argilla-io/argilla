@@ -75,6 +75,7 @@ export default {
             component_type: componentType,
             placeholder: questionSettings?.placeholder ?? null,
             description: questionDescription ?? null,
+            settings: questionSettings,
           };
         }
       );
@@ -106,6 +107,7 @@ export default {
             title: fieldTitle,
             is_required: isRequired,
             component_type: componentType,
+            settings: fieldSettings,
           };
         }
       );
