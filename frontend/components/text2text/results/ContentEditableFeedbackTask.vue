@@ -53,10 +53,6 @@ export default {
       type: String,
       default: "",
     },
-    isMarkdownFormat: {
-      type: Boolean,
-      default: false,
-    },
   },
   data: () => {
     return {
@@ -100,14 +96,10 @@ export default {
       this.$emit("on-change-focus", status);
     },
     pastePlainText(event) {
-      if (
-        !this.isMarkdownFormat &&
-        this.focus &&
-        event.target.isContentEditable
-      ) {
+      if (this.focus && event.target.isContentEditable) {
         event.preventDefault();
         const text = event.clipboardData?.getData("text/plain") ?? "";
-        document.execCommand("insertText", false, text);
+        document.execCommand("insertHtml", false, text);
       }
     },
     onClickOutside() {
