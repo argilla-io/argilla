@@ -34,7 +34,7 @@ from tests.factories import (
 
 
 @pytest_asyncio.fixture()
-async def test_banking_sentiment_dataset(search_engine: SearchEngine):
+async def test_banking_sentiment_dataset(elastic_search_engine):
     text_question = TextQuestionFactory()
     rating_question = RatingQuestionFactory()
 
@@ -43,9 +43,9 @@ async def test_banking_sentiment_dataset(search_engine: SearchEngine):
         questions=[text_question, rating_question],
     )
 
-    await search_engine.create_index(dataset)
+    await elastic_search_engine.create_index(dataset)
 
-    await search_engine.add_records(
+    await elastic_search_engine.add_records(
         dataset,
         records=[
             RecordFactory(
@@ -81,9 +81,9 @@ async def test_banking_sentiment_dataset(search_engine: SearchEngine):
 
 @pytest.mark.asyncio
 class TestSuiteElasticSearchEngine:
-    async def test_create_index_for_dataset(self, search_engine: SearchEngine, opensearch: OpenSearch):
+    async def test_create_index_for_dataset(self, elastic_search_engine, opensearch: OpenSearch):
         dataset = DatasetFactory.create()
-        await search_engine.create_index(dataset)
+        await elastic_search_engine.create_index(dataset)
 
         index_name = f"rg.{dataset.id}"
         assert opensearch.indices.exists(index=index_name)
@@ -99,19 +99,19 @@ class TestSuiteElasticSearchEngine:
                 "responses": {"dynamic": "true", "type": "object"},
             },
         }
-        assert index["settings"]["index"]["number_of_shards"] == str(search_engine.es_number_of_shards)
-        assert index["settings"]["index"]["number_of_replicas"] == str(search_engine.es_number_of_replicas)
+        assert index["settings"]["index"]["number_of_shards"] == str(elastic_search_engine.es_number_of_shards)
+        assert index["settings"]["index"]["number_of_replicas"] == str(elastic_search_engine.es_number_of_replicas)
 
     async def test_create_index_for_dataset_with_fields(
         self,
-        search_engine: SearchEngine,
+        elastic_search_engine,
         opensearch: OpenSearch,
         db: Session,
     ):
         text_fields = TextFieldFactory.create_batch(5)
         dataset = DatasetFactory.create(fields=text_fields)
 
-        await search_engine.create_index(dataset)
+        await elastic_search_engine.create_index(dataset)
 
         index_name = f"rg.{dataset.id}"
         assert opensearch.indices.exists(index=index_name)
@@ -135,7 +135,7 @@ class TestSuiteElasticSearchEngine:
     )
     async def test_create_index_for_dataset_with_questions(
         self,
-        search_engine: SearchEngine,
+        elastic_search_engine,
         opensearch: OpenSearch,
         db: Session,
         text_ann_size: int,
@@ -149,7 +149,7 @@ class TestSuiteElasticSearchEngine:
         all_questions = text_questions + rating_questions + label_questions + multilabel_questions
         dataset = DatasetFactory.create(questions=all_questions)
 
-        await search_engine.create_index(dataset)
+        await elastic_search_engine.create_index(dataset)
 
         index_name = f"rg.{dataset.id}"
         assert opensearch.indices.exists(index=index_name)
@@ -202,17 +202,15 @@ class TestSuiteElasticSearchEngine:
             ],
         }
 
-    async def test_create_index_with_existing_index(
-        self, search_engine: SearchEngine, opensearch: OpenSearch, db: Session
-    ):
+    async def test_create_index_with_existing_index(self, elastic_search_engine, opensearch: OpenSearch, db: Session):
         dataset = DatasetFactory.create()
-        await search_engine.create_index(dataset)
+        await elastic_search_engine.create_index(dataset)
 
         index_name = f"rg.{dataset.id}"
         assert opensearch.indices.exists(index=index_name)
 
         with pytest.raises(RequestError, match="resource_already_exists_exception"):
-            await search_engine.create_index(dataset)
+            await elastic_search_engine.create_index(dataset)
 
     @pytest.mark.parametrize(
         ("query", "expected_items"),
@@ -238,7 +236,7 @@ class TestSuiteElasticSearchEngine:
     )
     async def test_search_with_query_string(
         self,
-        search_engine: SearchEngine,
+        elastic_search_engine,
         opensearch: OpenSearch,
         db: Session,
         test_banking_sentiment_dataset: Dataset,
@@ -247,7 +245,7 @@ class TestSuiteElasticSearchEngine:
     ):
         opensearch.indices.refresh(index=f"rg.{test_banking_sentiment_dataset.id}")
 
-        result = await search_engine.search(test_banking_sentiment_dataset, query=query)
+        result = await elastic_search_engine.search(test_banking_sentiment_dataset, query=query)
         assert len(result.items) == expected_items
 
         scores = [item.score > 0 for item in result.items]
