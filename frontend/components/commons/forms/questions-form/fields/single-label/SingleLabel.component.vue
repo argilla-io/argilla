@@ -17,7 +17,7 @@
       />
     </div>
 
-    <SingleLabelMonoSelectionComponent
+    <SingleLabelSelectionComponent
       :options="uniqueOptions"
       :componentId="questionId"
       :showSearch="showSearch"
