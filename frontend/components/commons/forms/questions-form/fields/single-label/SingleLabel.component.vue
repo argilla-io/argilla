@@ -87,7 +87,7 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: $base-space;
+  gap: 12px;
   .title-area {
     color: $black-87;
     font-weight: 500;
