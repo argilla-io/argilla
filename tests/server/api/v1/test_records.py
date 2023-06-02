@@ -18,7 +18,8 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Response, User
+from argilla.server.models import Record, Response, User
+from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -114,8 +115,10 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
     ],
 )
 def test_create_record_response_with_required_questions(
+    mocker,
     client: TestClient,
     db: Session,
+    search_engine: SearchEngine,
     admin: User,
     admin_auth_header: dict,
     create_questions_func: Callable[["Dataset"], None],
@@ -125,6 +128,8 @@ def test_create_record_response_with_required_questions(
     dataset = DatasetFactory.create()
     create_questions_func(dataset)
     record = RecordFactory.create(dataset=dataset)
+
+    spy_update_record_responses = mocker.spy(search_engine, "update_record_responses")
 
     response_json = {**responses, "status": response_status}
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
@@ -141,6 +146,10 @@ def test_create_record_response_with_required_questions(
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
+
+    spy_update_record_responses.assert_called_once_with(
+        record=record, responses=db.query(Response).where(Record.id == record.id).all()
+    )
 
 
 def test_create_submitted_record_response_with_missing_required_questions(client: TestClient, admin_auth_header: dict):
@@ -205,8 +214,10 @@ def test_create_submitted_record_response_with_missing_required_questions(client
     ],
 )
 def test_create_record_response_with_missing_required_questions(
+    mocker,
     client: TestClient,
     db: Session,
+    search_engine: SearchEngine,
     admin: User,
     admin_auth_header: dict,
     create_questions_func: Callable[["Dataset"], None],
@@ -216,6 +227,8 @@ def test_create_record_response_with_missing_required_questions(
     dataset = DatasetFactory.create()
     create_questions_func(dataset)
     record = RecordFactory.create(dataset=dataset)
+
+    spy_update_record_responses = mocker.spy(search_engine, "update_record_responses")
 
     response_json = {**responses, "status": response_status}
     response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
@@ -232,6 +245,10 @@ def test_create_record_response_with_missing_required_questions(
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
+
+    spy_update_record_responses.assert_called_once_with(
+        record=record, responses=db.query(Response).where(Record.id == record.id).all()
+    )
 
 
 def test_create_record_response_with_extra_question_responses(client: TestClient, db: Session, admin_auth_header: dict):

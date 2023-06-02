@@ -89,6 +89,9 @@ def search_engine() -> Generator["MockSearchEngine", None, None]:
         async def update_record_responses(self, record, responses):
             pass
 
+        async def delete_record_response(self, response):
+            pass
+
         async def search(self, dataset, query, user_response_status_filter, limit):
             pass
 
