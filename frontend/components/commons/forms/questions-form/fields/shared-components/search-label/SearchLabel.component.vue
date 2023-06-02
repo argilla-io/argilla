@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  name: "SearchSingleLabelComponent",
+  name: "SearchLabelComponent",
   props: {
     value: {
       type: String,
