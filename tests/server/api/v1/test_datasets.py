@@ -2478,10 +2478,12 @@ def test_delete_dataset(
         other_dataset.workspace_id,
     ]
 
-    assert spy_delete_index.assert_called_once_with(dataset=dataset)
+    spy_delete_index.assert_called_once_with(dataset=dataset)
 
 
-def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_delete_published_dataset(
+    mocker, client: TestClient, db: Session, search_engine: SearchEngine, admin: User, admin_auth_header: dict
+):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
@@ -2508,13 +2510,16 @@ def test_delete_published_dataset(client: TestClient, db: Session, admin: User, 
     ]
 
 
-def test_delete_dataset_without_authentication(client: TestClient, db: Session):
+def test_delete_dataset_without_authentication(mocker, client: TestClient, db: Session, search_engine: SearchEngine):
     dataset = DatasetFactory.create()
+    spy_delete_index = mocker.spy(search_engine, "delete_index")
 
     response = client.delete(f"/api/v1/datasets/{dataset.id}")
 
     assert response.status_code == 401
     assert db.query(Dataset).count() == 1
+
+    assert not spy_delete_index.called
 
 
 def test_delete_dataset_as_annotator(client: TestClient, db: Session):
