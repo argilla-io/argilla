@@ -39,20 +39,27 @@ if TYPE_CHECKING:
 
 
 def create_text_questions(dataset: "Dataset") -> None:
-    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset, settings={"required": True})
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
 
 def create_rating_questions(dataset: "Dataset") -> None:
-    RatingQuestionFactory.create(name="rating_question", dataset=dataset)
+    RatingQuestionFactory.create(name="rating_question_1", dataset=dataset, settings={"required": True})
+    RatingQuestionFactory.create(name="rating_question_2", dataset=dataset)
 
 
 def create_label_selection_questions(dataset: "Dataset") -> None:
-    LabelSelectionQuestionFactory.create(name="label_selection_question", dataset=dataset)
+    LabelSelectionQuestionFactory.create(
+        name="label_selection_question_1", dataset=dataset, settings={"required": True}
+    )
+    LabelSelectionQuestionFactory.create(name="label_selection_question_2", dataset=dataset)
 
 
 def create_multi_label_selection_questions(dataset: "Dataset") -> None:
-    MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question", dataset=dataset)
+    MultiLabelSelectionQuestionFactory.create(
+        name="multi_label_selection_question_1", dataset=dataset, settings={"required": True}
+    )
+    MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question_2", dataset=dataset)
 
 
 @pytest.mark.parametrize("response_status", ["submitted", "discarded", "draft"])
@@ -72,7 +79,7 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
             create_rating_questions,
             {
                 "values": {
-                    "rating_question": {"value": 5},
+                    "rating_question_1": {"value": 5},
                 },
             },
         ),
@@ -80,7 +87,7 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
             create_label_selection_questions,
             {
                 "values": {
-                    "label_selection_question": {"value": "option1"},
+                    "label_selection_question_1": {"value": "option1"},
                 },
             },
         ),
@@ -88,7 +95,7 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
             create_multi_label_selection_questions,
             {
                 "values": {
-                    "multi_label_selection_question": {"value": ["option1"]},
+                    "multi_label_selection_question_1": {"value": ["option1"]},
                 },
             },
         ),
@@ -96,7 +103,7 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
             create_multi_label_selection_questions,
             {
                 "values": {
-                    "multi_label_selection_question": {"value": ["option1", "option2"]},
+                    "multi_label_selection_question_1": {"value": ["option1", "option2"]},
                 },
             },
         ),
@@ -110,7 +117,98 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
         ),
     ],
 )
-def test_create_record_response_with_valid_values(
+def test_create_record_response_with_required_questions(
+    client: TestClient,
+    db: Session,
+    admin: User,
+    admin_auth_header: dict,
+    create_questions_func: Callable[["Dataset"], None],
+    response_status: str,
+    responses: dict,
+):
+    dataset = DatasetFactory.create()
+    create_questions_func(dataset)
+    record = RecordFactory.create(dataset=dataset)
+
+    response_json = {**responses, "status": response_status}
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+
+    response_body = response.json()
+    assert response.status_code == 201
+    assert db.query(Response).count() == 1
+    assert db.get(Response, UUID(response_body["id"]))
+    assert response_body == {
+        "id": str(UUID(response_body["id"])),
+        "values": responses["values"],
+        "status": response_status,
+        "user_id": str(admin.id),
+        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+    }
+
+
+def test_create_submitted_record_response_with_missing_required_questions(client: TestClient, admin_auth_header: dict):
+    dataset = DatasetFactory.create()
+    create_text_questions(dataset)
+
+    record = RecordFactory.create(dataset=dataset)
+    response_json = {
+        "values": {"input_ok": {"value": "yes"}},
+        "status": "submitted",
+    }
+
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Missing required question: 'output_ok'"}
+
+
+@pytest.mark.parametrize("response_status", ["discarded", "draft"])
+@pytest.mark.parametrize(
+    "create_questions_func, responses",
+    [
+        (
+            create_text_questions,
+            {
+                "values": {
+                    "output_ok": {"value": "yes"},
+                },
+            },
+        ),
+        (
+            create_rating_questions,
+            {
+                "values": {
+                    "rating_question_2": {"value": 5},
+                },
+            },
+        ),
+        (
+            create_label_selection_questions,
+            {
+                "values": {
+                    "label_selection_question_2": {"value": "option1"},
+                },
+            },
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question_2": {"value": ["option1"]},
+                },
+            },
+        ),
+        (
+            create_multi_label_selection_questions,
+            {
+                "values": {
+                    "multi_label_selection_question_2": {"value": ["option1", "option2"]},
+                },
+            },
+        ),
+    ],
+)
+def test_create_record_response_with_missing_required_questions(
     client: TestClient,
     db: Session,
     admin: User,
@@ -231,24 +329,6 @@ def test_create_record_response_with_wrong_response_value(
 
     assert response.status_code == 422
     assert response.json() == {"detail": expected_error_msg}
-
-
-def test_create_submitted_record_response_with_missing_required_questions(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
-    dataset = DatasetFactory.create()
-    TextQuestionFactory.create(name="input_ok", dataset=dataset, required=True)
-    TextQuestionFactory.create(name="output_ok", dataset=dataset, required=True)
-
-    record = RecordFactory.create(dataset=dataset)
-    response_json = {
-        "values": {"input_ok": {"value": "yes"}},
-        "status": "submitted",
-    }
-
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
-    assert response.status_code == 422
-    assert response.json() == {"detail": "Missing required question: 'output_ok'"}
 
 
 def test_create_record_response_without_authentication(client: TestClient, db: Session):
