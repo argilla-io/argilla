@@ -47,7 +47,6 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
-from opensearchpy import OpenSearch
 from sqlalchemy.orm import Session
 
 from tests.factories import (
@@ -1802,13 +1801,7 @@ def test_create_dataset_records(
 
 
 def test_create_dataset_records_with_response_for_multiple_users(
-    mocker,
-    client: TestClient,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
-    db: Session,
-    admin: User,
-    admin_auth_header: dict,
+    mocker, client: TestClient, search_engine: SearchEngine, db: Session, admin: User, admin_auth_header: dict
 ):
     workspace = WorkspaceFactory.create()
 
@@ -1864,7 +1857,7 @@ def test_create_dataset_records_with_response_for_multiple_users(
 
 
 def test_create_dataset_records_with_response_for_unknown_user(
-    client: TestClient, opensearch: OpenSearch, db: Session, admin_auth_header: dict
+    client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextFieldFactory.create(name="input", dataset=dataset)
@@ -1896,12 +1889,7 @@ def test_create_dataset_records_with_response_for_unknown_user(
 
 
 def test_create_dataset_records_with_duplicated_response_for_an_user(
-    client: TestClient,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
-    db: Session,
-    admin: User,
-    admin_auth_header: dict,
+    client: TestClient, db: Session, admin: User, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextFieldFactory.create(name="input", dataset=dataset)
@@ -1952,9 +1940,7 @@ def test_create_dataset_records_with_duplicated_response_for_an_user(
     assert db.query(Response).count() == 0
 
 
-def test_create_dataset_records_with_missing_required_fields(
-    client: TestClient, db: Session, opensearch: OpenSearch, admin_auth_header: dict
-):
+def test_create_dataset_records_with_missing_required_fields(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     FieldFactory.create(name="input", dataset=dataset, required=True)
     FieldFactory.create(name="output", dataset=dataset, required=True)
@@ -1983,9 +1969,7 @@ def test_create_dataset_records_with_missing_required_fields(
     assert db.query(Record).count() == 0
 
 
-def test_create_dataset_records_with_wrong_value_field(
-    client: TestClient, db: Session, opensearch: OpenSearch, admin_auth_header: dict
-):
+def test_create_dataset_records_with_wrong_value_field(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     FieldFactory.create(name="input", dataset=dataset)
     FieldFactory.create(name="output", dataset=dataset)
@@ -2014,9 +1998,7 @@ def test_create_dataset_records_with_wrong_value_field(
     assert db.query(Record).count() == 0
 
 
-def test_create_dataset_records_with_extra_fields(
-    client: TestClient, db: Session, opensearch: OpenSearch, admin_auth_header: dict
-):
+def test_create_dataset_records_with_extra_fields(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     FieldFactory.create(name="input", dataset=dataset)
 
@@ -2044,14 +2026,12 @@ def test_create_dataset_records_with_extra_fields(
     assert db.query(Record).count() == 0
 
 
-@pytest.mark.asyncio
-async def test_create_dataset_records_with_index_error(
-    client: TestClient,
-    opensearch: OpenSearch,
-    db: Session,
-    admin_auth_header: dict,
+def test_create_dataset_records_with_index_error(
+    mocker, client: TestClient, search_engine: SearchEngine, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
+
+    spy_create_index = mocker.spy(search_engine, "create_index")
 
     records_json = {
         "items": [
@@ -2066,9 +2046,7 @@ async def test_create_dataset_records_with_index_error(
     assert response.status_code == 422
     assert db.query(Record).count() == 0
 
-    index_name = f"rg.{dataset.id}"
-
-    assert not opensearch.indices.exists(index=index_name)
+    assert not spy_create_index.called
 
 
 def test_create_dataset_records_without_authentication(client: TestClient, db: Session):
@@ -2122,12 +2100,7 @@ def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
 
 
 def test_create_dataset_records_with_submitted_response(
-    client: TestClient,
-    db: Session,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
-    admin: User,
-    admin_auth_header: dict,
+    client: TestClient, db: Session, admin: User, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextFieldFactory.create(name="input", dataset=dataset)
@@ -2190,7 +2163,6 @@ def test_create_dataset_records_with_submitted_response_without_values(
 def test_create_dataset_records_with_discarded_response(
     client: TestClient,
     db: Session,
-    opensearch: OpenSearch,
     admin: User,
     admin_auth_header: dict,
 ):
@@ -2255,7 +2227,6 @@ def test_create_dataset_records_with_invalid_response_status(
 def test_create_dataset_records_with_discarded_response_without_values(
     client: TestClient,
     db: Session,
-    opensearch: OpenSearch,
     admin: User,
     admin_auth_header: dict,
 ):
@@ -2479,10 +2450,14 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
-def test_delete_dataset(client: TestClient, db: Session, opensearch: OpenSearch, admin: User, admin_auth_header: dict):
+def test_delete_dataset(
+    mocker, client: TestClient, db: Session, search_engine: SearchEngine, admin: User, admin_auth_header: dict
+):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
+
+    spy_delete_index = mocker.spy(search_engine, "delete_index")
 
     other_dataset = DatasetFactory.create()
     other_field = TextFieldFactory.create(dataset=other_dataset)
@@ -2502,7 +2477,8 @@ def test_delete_dataset(client: TestClient, db: Session, opensearch: OpenSearch,
         dataset.workspace_id,
         other_dataset.workspace_id,
     ]
-    assert not opensearch.indices.exists(index=f"rg.{dataset.id}")
+
+    assert spy_delete_index.assert_called_once_with(dataset=dataset)
 
 
 def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
