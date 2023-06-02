@@ -169,11 +169,13 @@ export default {
       return this.record?.record_fields ?? [];
     },
     questionsWithRecordAnswers() {
+      // TODO - do this in a hook instead of computed => it's expensive
       return this.questions?.map((question) => {
         const correspondingResponseToQuestion =
           this.recordResponsesFromCurrentUser.find(
             (recordResponse) => question.name === recordResponse.question_name
           );
+
         if (correspondingResponseToQuestion) {
           const formattedOptions = correspondingResponseToQuestion.options.map(
             (option) => {
@@ -188,12 +190,12 @@ export default {
         }
         if (
           question.component_type === COMPONENT_TYPE.RATING ||
-          question.component_type === COMPONENT_TYPE.SINGLE_LABEL
+          question.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
+          question.component_type === COMPONENT_TYPE.MULTI_LABEL
         ) {
           const formattedOptions = question.options.map((option) => {
             return { ...option, is_selected: false };
           });
-
           return { ...question, options: formattedOptions, response_id: null };
         }
         return { ...question, response_id: null };
@@ -451,6 +453,19 @@ export default {
                   );
 
                 switch (correspondingComponentTypeOfTheAnswer) {
+                  case COMPONENT_TYPE.MULTI_LABEL:
+                    optionsByQuestionName.forEach(({ id, text, value }) => {
+                      const isValueInRecordResponse =
+                        recordResponseByQuestionName.value.includes(value);
+
+                      formattedOptionsWithRecordResponse.push({
+                        id,
+                        text,
+                        value,
+                        is_selected: isValueInRecordResponse,
+                      });
+                    });
+                    break;
                   case COMPONENT_TYPE.SINGLE_LABEL:
                   case COMPONENT_TYPE.RATING:
                     // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
