@@ -79,7 +79,7 @@ def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
 
 
 @pytest.fixture(scope="function")
-def client(request, mock_search_engine) -> Generator[TestClient, None, None]:
+def client(request, mock_search_engine: SearchEngine) -> Generator[TestClient, None, None]:
     session = TestSession()
 
     def override_get_db():
