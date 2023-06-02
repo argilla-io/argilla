@@ -23,7 +23,6 @@ from argilla.server.models import (
     DatasetStatus,
     Field,
     Question,
-    QuestionType,
     Record,
     Response,
     ResponseStatus,
@@ -56,6 +55,7 @@ from tests.factories import (
     DatasetFactory,
     FieldFactory,
     LabelSelectionQuestionFactory,
+    MultiLabelSelectionQuestionFactory,
     QuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
@@ -266,41 +266,53 @@ def test_list_dataset_questions(client: TestClient, admin_auth_header: dict):
     }
 
 
-def test_list_dataset_label_selection_questions_with_duplicated(client: TestClient, admin_auth_header: dict):
+@pytest.mark.parametrize(
+    "QuestionFactory, settings",
+    [
+        (RatingQuestionFactory, {"options": [{"value": 1}, {"value": 2}, {"value": 2}]}),
+        (
+            LabelSelectionQuestionFactory,
+            {
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": None,
+            },
+        ),
+        (
+            MultiLabelSelectionQuestionFactory,
+            {
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": None,
+            },
+        ),
+    ],
+)
+def test_list_dataset_questions_with_duplicate_values(
+    client: TestClient, admin_auth_header: dict, QuestionFactory, settings
+):
     dataset = DatasetFactory.create()
-    label_select_question = LabelSelectionQuestionFactory.create(
-        dataset=dataset,
-        settings={
-            "type": QuestionType.label_selection.value,
-            "options": [
-                {"value": "a", "text": "Text for A"},
-                {"value": "b", "text": "Text for B"},
-                {"value": "b", "text": "Text for BB"},
-            ],
-        },
-    )
+    question = QuestionFactory.create(dataset=dataset, settings=settings)
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header)
     assert response.status_code == 200
     assert response.json() == {
         "items": [
             {
-                "id": str(label_select_question.id),
-                "name": label_select_question.name,
-                "title": label_select_question.title,
-                "description": label_select_question.description,
-                "required": label_select_question.required,
-                "settings": {
-                    "options": [
-                        {"description": None, "text": "Text for A", "value": "a"},
-                        {"description": None, "text": "Text for B", "value": "b"},
-                        {"description": None, "text": "Text for BB", "value": "b"},
-                    ],
-                    "type": "label_selection",
-                    "visible_options": None,
-                },
-                "inserted_at": label_select_question.inserted_at.isoformat(),
-                "updated_at": label_select_question.updated_at.isoformat(),
+                "id": str(question.id),
+                "name": question.name,
+                "title": question.title,
+                "description": question.description,
+                "required": question.required,
+                "settings": {"type": QuestionFactory.settings["type"], **settings},
+                "inserted_at": question.inserted_at.isoformat(),
+                "updated_at": question.updated_at.isoformat(),
             }
         ]
     }
