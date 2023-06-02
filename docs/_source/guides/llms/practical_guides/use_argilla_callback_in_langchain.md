@@ -44,6 +44,12 @@ dataset = rg.FeedbackDataset(
 )
 ```
 
+Then you'll need to push that `FeedbackDataset` to Argilla as follows, otherwise, the `ArgillaCallbackHandler` won't work.
+
+```python
+dataset.push_to_argilla("langchain-dataset")
+```
+
 For more information on how to create a `FeedbackDataset`, please refer to the [Create a Feedback Dataset](create_dataset.md) guide.
 
 ## How to use `ArgillaCallbackHandler`
