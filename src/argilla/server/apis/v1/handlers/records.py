@@ -21,15 +21,17 @@ from argilla.server.database import get_db
 from argilla.server.models import User
 from argilla.server.policies import RecordPolicyV1, authorize
 from argilla.server.schemas.v1.records import Response, ResponseCreate
+from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
 router = APIRouter(tags=["records"])
 
 
 @router.post("/records/{record_id}/responses", status_code=status.HTTP_201_CREATED, response_model=Response)
-def create_record_response(
+async def create_record_response(
     *,
     db: Session = Depends(get_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     record_id: UUID,
     response_create: ResponseCreate,
     current_user: User = Security(auth.get_current_user),
@@ -52,6 +54,6 @@ def create_record_response(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        return datasets.create_response(db, record, current_user, response_create)
+        return await datasets.create_response(db, search_engine, record, current_user, response_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
