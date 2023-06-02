@@ -34,7 +34,7 @@ from tests.factories import (
 
 
 @pytest_asyncio.fixture()
-async def test_banking_sentiment_dataset(elastic_search_engine):
+async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
     text_question = TextQuestionFactory()
     rating_question = RatingQuestionFactory()
 
