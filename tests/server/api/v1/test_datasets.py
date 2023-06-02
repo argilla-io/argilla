@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import Type
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
@@ -54,6 +55,8 @@ from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
     FieldFactory,
+    LabelSelectionQuestionFactory,
+    MultiLabelSelectionQuestionFactory,
     QuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
@@ -260,6 +263,58 @@ def test_list_dataset_questions(client: TestClient, admin_auth_header: dict):
                 "inserted_at": rating_question.inserted_at.isoformat(),
                 "updated_at": rating_question.updated_at.isoformat(),
             },
+        ]
+    }
+
+
+@pytest.mark.parametrize(
+    "QuestionFactory, settings",
+    [
+        (RatingQuestionFactory, {"options": [{"value": 1}, {"value": 2}, {"value": 2}]}),
+        (
+            LabelSelectionQuestionFactory,
+            {
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": None,
+            },
+        ),
+        (
+            MultiLabelSelectionQuestionFactory,
+            {
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": None,
+            },
+        ),
+    ],
+)
+def test_list_dataset_questions_with_duplicate_values(
+    client: TestClient, admin_auth_header: dict, QuestionFactory: Type[QuestionFactory], settings: dict
+):
+    dataset = DatasetFactory.create()
+    question = QuestionFactory.create(dataset=dataset, settings=settings)
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header)
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "id": str(question.id),
+                "name": question.name,
+                "title": question.title,
+                "description": question.description,
+                "required": question.required,
+                "settings": {"type": QuestionFactory.settings["type"], **settings},
+                "inserted_at": question.inserted_at.isoformat(),
+                "updated_at": question.updated_at.isoformat(),
+            }
         ]
     }
 

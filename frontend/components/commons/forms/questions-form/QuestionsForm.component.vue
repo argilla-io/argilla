@@ -28,6 +28,7 @@
           :title="input.question"
           :placeholder="input.placeholder"
           v-model="input.options[0].value"
+          :useMarkdown="input.settings.use_markdown"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           @on-error="onError"
@@ -35,13 +36,12 @@
 
         <SingleLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
+          :questionId="input.id"
           :title="input.question"
-          :options="input.options"
+          v-model="input.options"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
-          @on-change-single-label="
-            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
-          "
+          :visibleOptions="input.settings.visible_options"
           @on-error="onError"
         />
 
@@ -240,11 +240,7 @@ export default {
         default:
       }
     },
-    onChangeMonoSelection({ newOptions, idComponent }) {
-      // TODO - to remove when single label will use v-model
-      const component = this.inputs.find(({ id }) => id === idComponent);
-      component.options = newOptions;
-    },
+
     async sendBackendRequest(responseValues) {
       try {
         let responseData = null;
@@ -534,6 +530,18 @@ export default {
       this.inputs.forEach((input) => {
         let selectedOption = null;
         switch (input.component_type) {
+          // case COMPONENT_TYPE.MULTI_LABEL:
+          //TODO - place the code after the switch inside RATING and FREE_TEXT cases
+          // const selectedOptions = input.options?.filter(
+          //   (option) => option.is_selected
+          // );
+
+          // if (selectedOptions?.length) {
+          //   responseByQuestionName[input.name] = {
+          //     value: selectedOptions.map((option) => option.value),
+          //   };
+          // }
+          // break;
           case COMPONENT_TYPE.SINGLE_LABEL:
           case COMPONENT_TYPE.RATING:
             selectedOption = input.options?.find(
@@ -600,9 +608,6 @@ export default {
     a {
       color: $black-37;
       outline: 0;
-      &:hover {
-        color: $black-54;
-      }
     }
   }
   &__content {
