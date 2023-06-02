@@ -44,6 +44,16 @@
           @on-error="onError"
         />
 
+        <MultiLabelComponent
+          v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
+          :questionId="input.id"
+          :title="input.question"
+          v-model="input.options"
+          :isRequired="input.is_required"
+          :tooltipMessage="input.description"
+          :visibleOptions="input.settings.visible_options"
+        />
+
         <RatingComponent
           v-if="input.component_type === COMPONENT_TYPE.RATING"
           :title="input.question"
@@ -194,7 +204,8 @@ export default {
       return this.inputs.filter(
         (input) =>
           (input.component_type === COMPONENT_TYPE.RATING ||
-            input.component_type === COMPONENT_TYPE.SINGLE_LABEL) &&
+            input.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
+            input.component_type === COMPONENT_TYPE.MULTI_LABEL) &&
           input.options.every((option) => !option.is_selected)
       );
     },
@@ -434,7 +445,6 @@ export default {
           // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
 
           // TODO - remove both loop with only one loop over the form object ( this.inputs)
-
           // 1/ push formatted object corresponding to recordResponse which have been remove from api
           this.currentInputsWithNoResponses.forEach((input) => {
             formattedRecordResponsesForOrm.push({
@@ -461,12 +471,12 @@ export default {
                 );
 
               switch (componentType) {
+                case COMPONENT_TYPE.MULTI_LABEL:
                 case COMPONENT_TYPE.SINGLE_LABEL:
                   formattedOptions = formattedOptions.map((option) => {
                     const currentOptionsFromForm = this.inputs.find(
                       (input) => input.name === questionName
                     )?.options;
-
                     const currentOption = currentOptionsFromForm.find(
                       (currentOption) => currentOption.id === option.id
                     );
@@ -529,39 +539,40 @@ export default {
       this.inputs.forEach((input) => {
         let selectedOption = null;
         switch (input.component_type) {
-          // case COMPONENT_TYPE.MULTI_LABEL:
-          //TODO - place the code after the switch inside RATING and FREE_TEXT cases
-          // const selectedOptions = input.options?.filter(
-          //   (option) => option.is_selected
-          // );
+          case COMPONENT_TYPE.MULTI_LABEL:
+            const selectedOptions =
+              input.options?.filter((option) => option.is_selected) ?? false;
 
-          // if (selectedOptions?.length) {
-          //   responseByQuestionName[input.name] = {
-          //     value: selectedOptions.map((option) => option.value),
-          //   };
-          // }
-          // break;
+            if (selectedOptions?.length) {
+              responseByQuestionName[input.name] = {
+                value: selectedOptions.map((option) => option.value),
+              };
+            }
+            break;
           case COMPONENT_TYPE.SINGLE_LABEL:
           case COMPONENT_TYPE.RATING:
-            selectedOption = input.options?.find(
-              (option) => option.is_selected
-            );
+            selectedOption =
+              input.options?.find((option) => option.is_selected) ?? false;
+
+            if (selectedOption) {
+              responseByQuestionName[input.name] = {
+                value: selectedOption.value,
+              };
+            }
             break;
           case COMPONENT_TYPE.FREE_TEXT:
-            selectedOption = input.options[0];
+            selectedOption = input.options[0] ?? false;
+
+            if (selectedOption) {
+              responseByQuestionName[input.name] = {
+                value: selectedOption.value,
+              };
+            }
             break;
           default:
             console.log(
               `The component type ${input.component_type} is unknown, the response can't be save`
             );
-        }
-
-        const isSelectedOptionNotEmpty = selectedOption ?? false;
-
-        if (isSelectedOptionNotEmpty) {
-          responseByQuestionName[input.name] = {
-            value: selectedOption.value,
-          };
         }
       });
       return responseByQuestionName;
