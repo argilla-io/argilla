@@ -25,7 +25,13 @@ try:
 except ImportError:
     from typing_extensions import Annotated, Literal
 
-from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
+from argilla.server.models import (
+    DatasetStatus,
+    FieldType,
+    QuestionSettings,
+    QuestionType,
+    ResponseStatus,
+)
 
 DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
 DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
@@ -141,7 +147,7 @@ class FieldCreate(BaseModel):
     settings: TextFieldSettings
 
 
-class TextQuestionSettings(BaseModel):
+class TextQuestionSettingsCreate(BaseModel):
     type: Literal[QuestionType.text]
     use_markdown: bool = False
 
@@ -166,7 +172,7 @@ class RatingQuestionSettingsOption(BaseModel):
     value: int
 
 
-class RatingQuestionSettings(UniqueValuesCheckerMixin):
+class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.rating]
     options: conlist(
         item_type=RatingQuestionSettingsOption,
@@ -192,7 +198,7 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
     ] = None
 
 
-class LabelSelectionQuestionSettings(UniqueValuesCheckerMixin):
+class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.label_selection]
     options: conlist(
         item_type=LabelSelectionQuestionSettingsOption,
@@ -202,16 +208,16 @@ class LabelSelectionQuestionSettings(UniqueValuesCheckerMixin):
     visible_options: Optional[PositiveInt] = None
 
 
-class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
+class MultiLabelSelectionQuestionSettingsCreate(LabelSelectionQuestionSettingsCreate):
     type: Literal[QuestionType.multi_label_selection]
 
 
-QuestionSettings = Annotated[
+QuestionSettingsCreate = Annotated[
     Union[
-        TextQuestionSettings,
-        RatingQuestionSettings,
-        LabelSelectionQuestionSettings,
-        MultiLabelSelectionQuestionSettings,
+        TextQuestionSettingsCreate,
+        RatingQuestionSettingsCreate,
+        LabelSelectionQuestionSettingsCreate,
+        MultiLabelSelectionQuestionSettingsCreate,
     ],
     PydanticField(discriminator="type"),
 ]
@@ -252,7 +258,7 @@ class QuestionCreate(BaseModel):
         )
     ]
     required: Optional[bool]
-    settings: QuestionSettings
+    settings: QuestionSettingsCreate
 
 
 class ResponseValue(BaseModel):
