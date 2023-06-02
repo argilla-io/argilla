@@ -1782,9 +1782,8 @@ def test_create_dataset_question_with_invalid_settings(
 
 
 def test_create_dataset_records(
-    mocker,
     client: TestClient,
-    search_engine: SearchEngine,
+    mock_search_engine: SearchEngine,
     test_telemetry: MagicMock,
     db: Session,
     admin: User,
@@ -1796,8 +1795,6 @@ def test_create_dataset_records(
 
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-    spy_add_records = mocker.spy(search_engine, "add_records")
 
     records_json = {
         "items": [
@@ -1854,13 +1851,13 @@ def test_create_dataset_records(
     assert db.query(Record).count() == 5
     assert db.query(Response).count() == 4
 
-    spy_add_records.assert_called_once_with(dataset=dataset, records=db.query(Record).all())
+    mock_search_engine.add_records.assert_called_once_with(dataset, db.query(Record).all())
 
     test_telemetry.assert_called_once_with(action="DatasetRecordsCreated", data={"records": len(records_json["items"])})
 
 
 def test_create_dataset_records_with_response_for_multiple_users(
-    mocker, client: TestClient, search_engine: SearchEngine, db: Session, admin: User, admin_auth_header: dict
+    client: TestClient, mock_search_engine: SearchEngine, db: Session, admin: User, admin_auth_header: dict
 ):
     workspace = WorkspaceFactory.create()
 
@@ -1871,8 +1868,6 @@ def test_create_dataset_records_with_response_for_multiple_users(
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
     annotator = AnnotatorFactory.create(workspaces=[workspace])
-
-    spy_add_records = mocker.spy(search_engine, "add_records")
 
     records_json = {
         "items": [
@@ -1912,7 +1907,7 @@ def test_create_dataset_records_with_response_for_multiple_users(
     assert db.query(Response).filter(Response.user_id == annotator.id).count() == 2
     assert db.query(Response).filter(Response.user_id == admin.id).count() == 1
 
-    spy_add_records.assert_called_once_with(dataset=dataset, records=db.query(Record).all())
+    mock_search_engine.add_records.assert_called_once_with(dataset, db.query(Record).all())
 
 
 def test_create_dataset_records_with_response_for_unknown_user(
@@ -2086,11 +2081,9 @@ def test_create_dataset_records_with_extra_fields(client: TestClient, db: Sessio
 
 
 def test_create_dataset_records_with_index_error(
-    mocker, client: TestClient, search_engine: SearchEngine, db: Session, admin_auth_header: dict
+    client: TestClient, mock_search_engine: SearchEngine, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
-
-    spy_create_index = mocker.spy(search_engine, "create_index")
 
     records_json = {
         "items": [
@@ -2105,7 +2098,7 @@ def test_create_dataset_records_with_index_error(
     assert response.status_code == 422
     assert db.query(Record).count() == 0
 
-    assert not spy_create_index.called
+    assert not mock_search_engine.create_index.called
 
 
 def test_create_dataset_records_without_authentication(client: TestClient, db: Session):
@@ -2405,18 +2398,15 @@ def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, 
 
 
 def test_publish_dataset(
-    mocker,
     client: TestClient,
     db: Session,
-    search_engine: SearchEngine,
+    mock_search_engine: SearchEngine,
     test_telemetry: MagicMock,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     RatingQuestionFactory.create(dataset=dataset)
-
-    spy_create_index = mocker.spy(search_engine, "create_index")
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
@@ -2427,13 +2417,13 @@ def test_publish_dataset(
     assert response_body["status"] == "ready"
 
     test_telemetry.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
-    spy_create_index.assert_called_once_with(dataset=dataset)
+    mock_search_engine.create_index.assert_called_once_with(dataset)
 
 
 def test_publish_dataset_with_error_on_index_creation(
-    client: TestClient, db: Session, search_engine: SearchEngine, mocker, admin_auth_header: dict
+    client: TestClient, db: Session, mock_search_engine: SearchEngine, mocker, admin_auth_header: dict
 ):
-    mocker.patch.object(search_engine, "create_index", side_effect=ValueError("Error creating index"))
+    mocker.patch.object(mock_search_engine, "create_index", side_effect=ValueError("Error creating index"))
 
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
@@ -2510,13 +2500,11 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
 
 
 def test_delete_dataset(
-    mocker, client: TestClient, db: Session, search_engine: SearchEngine, admin: User, admin_auth_header: dict
+    client: TestClient, db: Session, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
-
-    spy_delete_index = mocker.spy(search_engine, "delete_index")
 
     other_dataset = DatasetFactory.create()
     other_field = TextFieldFactory.create(dataset=other_dataset)
@@ -2537,12 +2525,10 @@ def test_delete_dataset(
         other_dataset.workspace_id,
     ]
 
-    spy_delete_index.assert_called_once_with(dataset=dataset)
+    mock_search_engine.delete_index.assert_called_once_with(dataset)
 
 
-def test_delete_published_dataset(
-    mocker, client: TestClient, db: Session, search_engine: SearchEngine, admin: User, admin_auth_header: dict
-):
+def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
@@ -2569,16 +2555,15 @@ def test_delete_published_dataset(
     ]
 
 
-def test_delete_dataset_without_authentication(mocker, client: TestClient, db: Session, search_engine: SearchEngine):
+def test_delete_dataset_without_authentication(client: TestClient, db: Session, mock_search_engine: SearchEngine):
     dataset = DatasetFactory.create()
-    spy_delete_index = mocker.spy(search_engine, "delete_index")
 
     response = client.delete(f"/api/v1/datasets/{dataset.id}")
 
     assert response.status_code == 401
     assert db.query(Dataset).count() == 1
 
-    assert not spy_delete_index.called
+    assert not mock_search_engine.delete_index.called
 
 
 def test_delete_dataset_as_annotator(client: TestClient, db: Session):

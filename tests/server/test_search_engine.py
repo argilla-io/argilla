@@ -288,7 +288,7 @@ class TestSuiteElasticSearchEngine:
         question = test_banking_sentiment_dataset.questions[0]
 
         response = ResponseFactory.create(record=record, values={question.name: {"value": "test"}})
-        await elastic_search_engine.update_record_responses(record, responses=[response])
+        await elastic_search_engine.update_record_response(response)
 
         index_name = f"rg.{test_banking_sentiment_dataset.id}"
         opensearch.indices.refresh(index=index_name)

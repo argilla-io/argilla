@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
@@ -30,13 +31,11 @@ from tests.factories import (
 )
 
 
-def test_update_response(mocker, client: TestClient, db: Session, search_engine: SearchEngine, admin_auth_header: dict):
+def test_update_response(client: TestClient, db: Session, mock_search_engine: SearchEngine, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
     record = RecordFactory.create(dataset=dataset)
-
-    spy_update_record_responses = mocker.spy(search_engine, "update_record_responses")
 
     response = ResponseFactory.create(
         record=record,
@@ -64,7 +63,7 @@ def test_update_response(mocker, client: TestClient, db: Session, search_engine:
         "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
     }
 
-    spy_update_record_responses.assert_called_once_with(record, [response])
+    mock_search_engine.update_record_response.assert_called_once_with(response)
 
 
 def test_update_response_without_authentication(client: TestClient, db: Session):
@@ -318,17 +317,15 @@ def test_update_response_with_nonexistent_response_id(client: TestClient, db: Se
     }
 
 
-def test_delete_response(mocker, client: TestClient, search_engine: SearchEngine, db: Session, admin_auth_header: dict):
+def test_delete_response(client: TestClient, mock_search_engine: SearchEngine, db: Session, admin_auth_header: dict):
     response = ResponseFactory.create()
-
-    spy_delete_record_response = mocker.spy(search_engine, "delete_record_response")
 
     resp = client.delete(f"/api/v1/responses/{response.id}", headers=admin_auth_header)
 
     assert resp.status_code == 200
     assert db.query(Response).count() == 0
 
-    spy_delete_record_response.assert_called_once_with(response)
+    mock_search_engine.delete_record_response.assert_called_once_with(response)
 
 
 def test_delete_response_without_authentication(client: TestClient, db: Session):
