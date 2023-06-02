@@ -128,12 +128,7 @@ class SearchEngine:
         await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
 
     async def add_records(self, dataset: Dataset, records: Iterable[Record]):
-        index_name = self._index_name_for_dataset(dataset)
-
-        if not await self.client.indices.exists(index=index_name):
-            raise ValueError(
-                f"Unable to add records to index for dataset {dataset.id}: the specified index is invalid."
-            )
+        index_name = await self._get_index_or_raise(dataset)
 
         bulk_actions = [
             {
@@ -150,13 +145,7 @@ class SearchEngine:
             raise RuntimeError(errors)
 
     async def update_record_responses(self, record: Record, responses: List[Response]):
-        index_name = self._index_name_for_dataset(record.dataset)
-
-        if not await self.client.indices.exists(index=index_name):
-            raise ValueError(
-                f"Unable to update record responses to index for dataset {record.dataset.id}: "
-                "the specified index is invalid."
-            )
+        index_name = await self._get_index_or_raise(record.dataset)
 
         await self.client.update(
             index=index_name,
@@ -172,6 +161,16 @@ class SearchEngine:
                     }
                 }
             },
+        )
+
+    async def delete_record_response(self, response: Response):
+        record = response.record
+        index_name = await self._get_index_or_raise(record.dataset)
+
+        await self.client.update(
+            index=index_name,
+            id=record.id,
+            body={"script": f'ctx._source.remove("responses.{response.user.username}")'},
         )
 
     async def search(
@@ -262,13 +261,21 @@ class SearchEngine:
         else:
             raise ValueError(f"ElasticSearch mappings for Question of type {settings.type} cannot be generated")
 
-    def _es_mapping_for_field(self, field: Field):
+    @staticmethod
+    def _es_mapping_for_field(field: Field):
         field_type = field.settings["type"]
 
         if field_type == FieldType.text:
             return {"type": "text"}
         else:
             raise ValueError(f"ElasticSearch mappings for Field of type {field_type} cannot be generated")
+
+    async def _get_index_or_raise(self, dataset: Dataset):
+        index_name = self._index_name_for_dataset(dataset)
+        if not await self.client.indices.exists(index=index_name):
+            raise ValueError(f"Cannot access to index for dataset {dataset.id}: the specified index does not exist")
+
+        return index_name
 
     @staticmethod
     def _index_name_for_dataset(dataset: Dataset):
