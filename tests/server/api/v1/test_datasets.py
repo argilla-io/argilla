@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Type
+from typing import Type
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
@@ -65,9 +65,6 @@ from tests.factories import (
     TextQuestionFactory,
     WorkspaceFactory,
 )
-
-if TYPE_CHECKING:
-    from tests.factories import QuestionFactory
 
 
 def test_list_current_user_datasets(client: TestClient, admin_auth_header: dict):
@@ -299,7 +296,7 @@ def test_list_dataset_questions(client: TestClient, admin_auth_header: dict):
     ],
 )
 def test_list_dataset_questions_with_duplicate_values(
-    client: TestClient, admin_auth_header: dict, QuestionFactory: Type["QuestionFactory"], settings: dict
+    client: TestClient, admin_auth_header: dict, QuestionFactory: Type[QuestionFactory], settings: dict
 ):
     dataset = DatasetFactory.create()
     question = QuestionFactory.create(dataset=dataset, settings=settings)
