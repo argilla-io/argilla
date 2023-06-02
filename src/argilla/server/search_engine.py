@@ -27,6 +27,7 @@ from argilla.server.models import (
     Question,
     QuestionType,
     Record,
+    Response,
     ResponseStatus,
     User,
 )
@@ -131,7 +132,7 @@ class SearchEngine:
 
         if not await self.client.indices.exists(index=index_name):
             raise ValueError(
-                f"Unable to add data records to index for dataset {dataset.id}: the specified index is invalid."
+                f"Unable to add records to index for dataset {dataset.id}: the specified index is invalid."
             )
 
         bulk_actions = [
@@ -147,6 +148,31 @@ class SearchEngine:
         _, errors = await helpers.async_bulk(client=self.client, actions=bulk_actions, raise_on_error=False)
         if errors:
             raise RuntimeError(errors)
+
+    async def update_record_responses(self, record: Record, responses: List[Response]):
+        index_name = self._index_name_for_dataset(record.dataset)
+
+        if not await self.client.indices.exists(index=index_name):
+            raise ValueError(
+                f"Unable to update record responses to index for dataset {record.dataset.id}: "
+                "the specified index is invalid."
+            )
+
+        await self.client.update(
+            index=index_name,
+            id=record.id,
+            body={
+                "doc": {
+                    "responses": {
+                        response.user.username: UserResponse(
+                            values={k: v["value"] for k, v in response.values.items()} if response.values else None,
+                            status=response.status,
+                        ).dict()
+                        for response in responses
+                    }
+                }
+            },
+        )
 
     async def search(
         self,
