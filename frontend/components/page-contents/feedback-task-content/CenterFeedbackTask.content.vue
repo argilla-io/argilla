@@ -107,6 +107,7 @@ export default {
             title: fieldTitle,
             is_required: isRequired,
             component_type: componentType,
+            settings: fieldSettings,
           };
         }
       );

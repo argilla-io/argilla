@@ -1,6 +1,12 @@
 <template>
   <span>
-    <div class="content__edition-area">
+    <div
+      class="content__edition-area"
+      v-click-outside="{
+        events: ['mousedown'],
+        handler: onClickOutside,
+      }"
+    >
       <transition appear name="fade">
         <p
           ref="text"
@@ -10,7 +16,7 @@
           :contenteditable="annotationEnabled"
           :placeholder="placeholder"
           @input="onInputText"
-          v-html="editableText"
+          v-html="sanitazedEditableText"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
           @keydown.shift.enter.exact="looseFocus"
@@ -27,6 +33,7 @@
 </template>
 
 <script>
+import * as DOMPurify from "dompurify";
 export default {
   name: "ContentEditableFeedbackTask",
   props: {
@@ -60,6 +67,9 @@ export default {
         this.defaultText === this.annotations[0]?.text
       );
     },
+    sanitazedEditableText() {
+      return DOMPurify.sanitize(this.editableText);
+    },
   },
   mounted() {
     window.addEventListener("paste", this.pastePlainText);
@@ -89,8 +99,11 @@ export default {
       if (this.focus && event.target.isContentEditable) {
         event.preventDefault();
         const text = event.clipboardData?.getData("text/plain") ?? "";
-        document.execCommand("insertText", false, text);
+        document.execCommand("insertHtml", false, text);
       }
+    },
+    onClickOutside() {
+      this.setFocus(false);
     },
   },
 };
