@@ -1,8 +1,9 @@
 <template>
   <div class="search-area" @click="focusInSearch">
     <BaseIconWithBadge
+      ref="iconRef"
       class="icon-search"
-      :icon="value?.length ? 'close' : 'search'"
+      :icon="iconType"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
@@ -42,6 +43,11 @@ export default {
     placeholder: {
       type: String,
       default: () => "",
+    },
+  },
+  computed: {
+    iconType() {
+      return this.value?.length ? "close" : "search";
     },
   },
   methods: {
