@@ -84,6 +84,8 @@ llm = OpenAI(temperature=0.9, callbacks=[argilla_callback])
 llm.generate(["Tell me a joke", "Tell me a poem"] * 3)
 ```
 
+![Argilla UI with LangChain LLM input-response](../../../_static/images/llms/langchain-integration/llm.png)
+
 ### Scenario 2: Tracking an LLM in a chain
 
 Then we can create a chain using a prompt template, and then track the initial prompt and the final response in Argilla.
@@ -112,6 +114,8 @@ test_prompts = [{"title": "Documentary about Bigfoot in Paris"}]
 synopsis_chain.apply(test_prompts)
 ```
 
+![Argilla UI with LangChain Chain input-response](../../../_static/images/llms/langchain-integration/chain.png)
+
 ### Scenario 3: Using an Agent with Tools
 
 Finally, as a more advanced workflow, you can create an agent that uses some tools. So that `ArgillaCallbackHandler` will keep track of the input and the output, but not about the intermediate steps/thoughts, so that given a prompt we log the original prompt and the final response to that given prompt.
@@ -139,3 +143,5 @@ agent = initialize_agent(
 )
 agent.run("Who was the first president of the United States of America?")
 ```
+
+![Argilla UI with LangChain Agent input-response](../../../_static/images/llms/langchain-integration/agent.png)
