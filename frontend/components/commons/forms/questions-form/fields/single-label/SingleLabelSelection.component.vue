@@ -2,14 +2,13 @@
   <div class="container">
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
-        <SearchSingleLabelComponent
+        <SearchLabelComponent
           v-if="showSearch"
           v-model="searchInput"
           :searchRef="searchRef"
           :placeholder="placeholder"
         />
       </div>
-
       <div class="right-header">
         <button
           type="button"
@@ -21,6 +20,7 @@
       </div>
     </div>
     <transition-group
+      :key="searchInput"
       name="shuffle"
       class="inputs-area"
       v-if="filteredOptions.length"
@@ -55,7 +55,7 @@
 
 <script>
 export default {
-  name: "SingleLabelMonoSelectionComponent",
+  name: "SingleLabelSelectionComponent",
   props: {
     maxOptionsToShowBeforeCollapse: {
       type: Number,
@@ -93,11 +93,13 @@ export default {
   },
   computed: {
     filteredOptions() {
-      return this.options.filter((option) =>
-        String(option.text)
-          .toLowerCase()
-          .includes(this.searchInput.toLowerCase())
-      );
+      return this.options
+        .filter((option) =>
+          String(option.text)
+            .toLowerCase()
+            .includes(this.searchInput.toLowerCase())
+        )
+        .sort((a, b) => b.is_selected - a.is_selected);
     },
     visibleOptions() {
       if (!this.showCollapseButton || this.showLess)
@@ -112,11 +114,13 @@ export default {
       return `There is no result matching: ${this.searchInput}`;
     },
     numberToShowInTheCollapseButton() {
-      return this.filteredOptions.length - this.maxOptionsToShowBeforeCollapse;
+      return (
+        this.filteredOptions.length - this.maxOptionsToShowBeforeCollapse - 1
+      );
     },
     showCollapseButton() {
       if (this.maxOptionsToShowBeforeCollapse === -1) return false;
-      if (this.numberToShowInTheCollapseButton < 0) return false;
+      if (this.numberToShowInTheCollapseButton <= 0) return false;
       return this.options.length > this.maxOptionsToShowBeforeCollapse;
     },
     textToShowInTheCollapseButton() {
@@ -157,8 +161,9 @@ export default {
   }
   .inputs-area {
     display: inline-flex;
-    gap: $base-space;
+    align-items: center;
     flex-wrap: wrap;
+    gap: $base-space;
     border-radius: 5em;
     background: transparent;
     &:hover {
@@ -168,12 +173,14 @@ export default {
 }
 
 .show-less-button {
-  background: none;
-  border: none;
   color: rgba(0, 0, 0, 0.6);
+  background: none;
   text-decoration: none;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   &:hover {
     color: rgba(0, 0, 0, 0.87);
+    border-color: rgba(0, 0, 0, 0.87);
   }
 }
 
@@ -191,7 +198,6 @@ export default {
   overflow: hidden;
   color: palette(purple, 200);
   box-shadow: 0;
-  transition: all 0.2s ease-in-out;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
