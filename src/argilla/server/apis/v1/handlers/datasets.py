@@ -342,7 +342,11 @@ async def search_dataset_records(
     )
 
     return SearchRecordsResult(
-        items=[SearchRecord(record=record, query_score=record_id_score_map[record.id]) for record in records]
+        items=sorted(
+            [SearchRecord(record=record, query_score=record_id_score_map[record.id]) for record in records],
+            key=lambda x: x.query_score,
+            reverse=True,
+        )
     )
 
 
