@@ -2463,7 +2463,7 @@ def test_search_dataset_records(
         ]
     )
 
-    query_json = {"text": {"q": "Hello", "field": "input"}}
+    query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search", headers=admin_auth_header, json=query_json
     )
@@ -2526,7 +2526,7 @@ def test_search_dataset_records_including_responses(
         ]
     )
 
-    query_json = {"text": {"q": "Hello", "field": "input"}}
+    query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search",
         headers=admin_auth_header,
@@ -2610,7 +2610,7 @@ def test_search_dataset_records_with_response_status_filter(
     dataset, _, _ = create_dataset_for_search(user=admin)
     mock_search_engine.search.return_value = SearchResponses(items=[])
 
-    query_json = {"text": {"q": "Hello", "field": "input"}}
+    query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search",
         headers=admin_auth_header,
@@ -2633,7 +2633,7 @@ def test_search_dataset_records_with_limit(
     dataset, _, _ = create_dataset_for_search(user=admin)
     mock_search_engine.search.return_value = SearchResponses(items=[])
 
-    query_json = {"text": {"q": "Hello", "field": "input"}}
+    query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search",
         headers=admin_auth_header,
@@ -2661,7 +2661,7 @@ def test_search_dataset_records_as_annotator(client: TestClient, admin: User, mo
         ]
     )
 
-    query_json = {"text": {"q": "unit test", "field": "input"}}
+    query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search",
         headers={API_KEY_HEADER_NAME: annotator.api_key},
@@ -2686,7 +2686,7 @@ def test_search_dataset_records_as_annotator_from_different_workspace(client: Te
     dataset, _, _ = create_dataset_for_search()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.create()])
 
-    query_json = {"text": {"q": "unit test", "field": "input"}}
+    query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search",
         headers={API_KEY_HEADER_NAME: annotator.api_key},
@@ -2699,7 +2699,7 @@ def test_search_dataset_records_as_annotator_from_different_workspace(client: Te
 def test_search_dataset_records_with_non_existent_field(client: TestClient, admin_auth_header: dict):
     dataset, _, _ = create_dataset_for_search()
 
-    query_json = {"text": {"q": "unit test", "field": "i do not exist"}}
+    query_json = {"query": {"text": {"q": "unit test", "field": "i do not exist"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search", headers=admin_auth_header, json=query_json
     )
@@ -2708,7 +2708,7 @@ def test_search_dataset_records_with_non_existent_field(client: TestClient, admi
 
 
 def test_search_dataset_with_non_existent_dataset(client: TestClient, admin_auth_header: dict):
-    query_json = {"text": {"q": "unit test", "field": "input"}}
+    query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
     response = client.post(f"/api/v1/me/datasets/{uuid4()}/records/search", headers=admin_auth_header, json=query_json)
 
     assert response.status_code == 404
