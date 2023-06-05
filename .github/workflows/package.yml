@@ -223,7 +223,8 @@ jobs:
               - 'frontend/**'
               - 'pyproject.toml'
               - 'setup.py'
-              - 'scripts/*.sh'
+              - 'docker/**'
+              - 'docker/scripts/*.sh'
               - '*.Dockerfile'
               - '.dockerignore'
               - '.github/workflows/package.yml'
@@ -270,13 +271,13 @@ jobs:
       matrix:
         include:
           - image: argilla/argilla-server
-            dockerfile: release.Dockerfile
-            readme: README.md
+            dockerfile: docker/release.Dockerfile
+            readme: .github/README.md
             platforms: linux/amd64
 
           - image: argilla/argilla-quickstart
-            dockerfile: quickstart.Dockerfile
-            readme: quickstart.README.md
+            dockerfile: docker/quickstart.Dockerfile
+            readme: docker/quickstart.README.md
             platforms: linux/amd64,linux/arm64
 
     defaults:

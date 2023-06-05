@@ -63,7 +63,7 @@ pre-commit install --hook-type commit-msg
 Build the static UI files in case you want to work on the UI:
 
 ```sh
-bash scripts/build_frontend.sh
+bash docker/scripts/build_frontend.sh
 ```
 
 ### Running database migrations
