@@ -336,7 +336,10 @@ async def search_dataset_records(
         limit=limit,
     )
 
-    record_id_score_map = {response.record_id: response.score for response in search_responses.items}
+    record_id_score_map = {
+        response.record_id: {"query_score": response.score, "search_record": None}
+        for response in search_responses.items
+    }
     records = datasets.get_records_by_ids(
         db=db,
         dataset_id=dataset_id,
@@ -345,13 +348,12 @@ async def search_dataset_records(
         user_id=current_user.id,
     )
 
-    return SearchRecordsResult(
-        items=sorted(
-            [SearchRecord(record=record, query_score=record_id_score_map[record.id]) for record in records],
-            key=lambda x: x.query_score,
-            reverse=True,
+    for record in records:
+        record_id_score_map[record.id]["search_record"] = SearchRecord(
+            record=record, query_score=record_id_score_map[record.id]["query_score"]
         )
-    )
+
+    return SearchRecordsResult(items=[record["search_record"] for record in record_id_score_map.values()])
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
