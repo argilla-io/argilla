@@ -20,6 +20,8 @@ from uuid import UUID
 from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 
+from argilla.server.search_engine import Query
+
 try:
     from typing import Annotated, Literal
 except ImportError:
@@ -285,13 +287,6 @@ class RecordInclude(str, Enum):
     responses = "responses"
 
 
-class ResponseStatusFilter(str, Enum):
-    draft = "draft"
-    missing = "missing"
-    submitted = "submitted"
-    discarded = "discarded"
-
-
 class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
@@ -347,3 +342,16 @@ class RecordCreate(BaseModel):
 
 class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+
+
+class SearchRecordsQuery(BaseModel):
+    query: Query
+
+
+class SearchRecord(BaseModel):
+    record: Record
+    query_score: Optional[float]
+
+
+class SearchRecordsResult(BaseModel):
+    items: List[SearchRecord]

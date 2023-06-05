@@ -168,6 +168,19 @@ class DatasetPolicyV1:
         return actor.is_admin
 
     @classmethod
+    def search_records(cls, dataset: Dataset) -> bool:
+        return lambda actor: (
+            actor.is_admin
+            or bool(
+                accounts.get_workspace_user_by_workspace_id_and_user_id(
+                    Session.object_session(actor),
+                    dataset.workspace_id,
+                    actor.id,
+                )
+            )
+        )
+
+    @classmethod
     def publish(cls, actor: User) -> bool:
         return actor.is_admin
 

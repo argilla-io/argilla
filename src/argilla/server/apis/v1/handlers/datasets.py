@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_db
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
@@ -37,9 +38,15 @@ from argilla.server.schemas.v1.datasets import (
     RecordInclude,
     Records,
     RecordsCreate,
-    ResponseStatusFilter,
+    SearchRecord,
+    SearchRecordsQuery,
+    SearchRecordsResult,
 )
-from argilla.server.search_engine import SearchEngine, get_search_engine
+from argilla.server.search_engine import (
+    SearchEngine,
+    UserResponseStatusFilter,
+    get_search_engine,
+)
 from argilla.server.security import auth
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
@@ -106,7 +113,7 @@ def list_current_user_dataset_records(
     *,
     db: Session = Depends(get_db),
     dataset_id: UUID,
-    include: Optional[List[RecordInclude]] = Query([]),
+    include: List[RecordInclude] = Query([]),
     response_status: Optional[ResponseStatusFilter] = Query(None),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
@@ -283,6 +290,70 @@ async def create_dataset_records(
         telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.post(
+    "/me/datasets/{dataset_id}/records/search",
+    status_code=status.HTTP_200_OK,
+    response_model=SearchRecordsResult,
+    response_model_exclude_unset=True,
+)
+async def search_dataset_records(
+    *,
+    db: Session = Depends(get_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
+    dataset_id: UUID,
+    query: SearchRecordsQuery,
+    include: List[RecordInclude] = Query([]),
+    response_status: Optional[ResponseStatusFilter] = Query(None),
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = _get_dataset(db, dataset_id)
+    authorize(current_user, DatasetPolicyV1.search_records(dataset))
+
+    search_engine_query = query.query
+    if search_engine_query.text.field and not datasets.get_field_by_name_and_dataset_id(
+        db, search_engine_query.text.field, dataset_id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Field `{search_engine_query.text.field}` not found in dataset `{dataset_id}`.",
+        )
+
+    user_response_status_filter = None
+    if response_status:
+        user_response_status_filter = UserResponseStatusFilter(
+            user=current_user,
+            statuses=[response_status.value],
+        )
+
+    search_responses = await search_engine.search(
+        dataset=dataset,
+        query=search_engine_query,
+        user_response_status_filter=user_response_status_filter,
+        limit=limit,
+    )
+
+    record_id_score_map = {
+        response.record_id: {"query_score": response.score, "search_record": None}
+        for response in search_responses.items
+    }
+    records = datasets.get_records_by_ids(
+        db=db,
+        dataset_id=dataset_id,
+        record_ids=list(record_id_score_map.keys()),
+        include=include,
+        user_id=current_user.id,
+    )
+
+    for record in records:
+        record_id_score_map[record.id]["search_record"] = SearchRecord(
+            record=record, query_score=record_id_score_map[record.id]["query_score"]
+        )
+
+    return SearchRecordsResult(items=[record["search_record"] for record in record_id_score_map.values()])
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
