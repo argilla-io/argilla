@@ -2477,6 +2477,7 @@ def test_search_dataset_records(
             )
         ),
         user_response_status_filter=None,
+        offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
     assert response.status_code == 200
@@ -2543,6 +2544,7 @@ def test_search_dataset_records_including_responses(
             )
         ),
         user_response_status_filter=None,
+        offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
     assert response.status_code == 200
@@ -2622,6 +2624,7 @@ def test_search_dataset_records_with_response_status_filter(
         dataset=dataset,
         query=Query(text=TextQuery(q="Hello", field="input")),
         user_response_status_filter=UserResponseStatusFilter(user=admin, statuses=[ResponseStatus.submitted]),
+        offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
     assert response.status_code == 200
@@ -2651,7 +2654,7 @@ def test_search_dataset_records_with_offset_and_limit(
         query=Query(text=TextQuery(q="Hello", field="input")),
         user_response_status_filter=None,
         offset=0,
-        limit=10,
+        limit=5,
     )
     assert response.status_code == 200
     assert len(response.json()["items"]) == 2
@@ -2684,6 +2687,7 @@ def test_search_dataset_records_as_annotator(client: TestClient, admin: User, mo
             )
         ),
         user_response_status_filter=None,
+        offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
     assert response.status_code == 200
