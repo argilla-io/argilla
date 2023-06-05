@@ -352,7 +352,7 @@ async def search_dataset_records(
 
     for record in records:
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=record, query_score=record_id_score_map[record.id]["query_score"]
+            record=record.__dict__, query_score=record_id_score_map[record.id]["query_score"]
         )
 
     return SearchRecordsResult(items=[record["search_record"] for record in record_id_score_map.values()])

@@ -18,7 +18,7 @@ from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func
-from sqlalchemy.orm import Session, contains_eager, joinedload, noload
+from sqlalchemy.orm import Session, contains_eager, joinedload
 
 from argilla.server.contexts import accounts
 from argilla.server.enums import ResponseStatusFilter
@@ -204,8 +204,6 @@ def get_records_by_ids(
             ).options(contains_eager(Record.responses))
         else:
             query = query.options(joinedload(Record.responses))
-    else:
-        query = query.options(noload(Record.responses))
     return query.all()
 
 
