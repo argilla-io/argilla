@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { OPTIONS_THRESHOLD_TO_ENABLE_SEARCH } from "@/components/feedback-task/feedbackTask.properties";
 export default {
   name: "SingleLabelComponent",
   props: {
@@ -56,10 +57,6 @@ export default {
       type: Number | null,
       required: false,
     },
-    optionsThresholdToEnableSeach: {
-      type: Number,
-      required: true,
-    },
   },
   model: {
     prop: "options",
@@ -79,7 +76,7 @@ export default {
   },
   computed: {
     showSearch() {
-      return this.uniqueOptions.length >= this.optionsThresholdToEnableSeach;
+      return this.uniqueOptions.length >= OPTIONS_THRESHOLD_TO_ENABLE_SEARCH;
     },
     maxOptionsToShowBeforeCollapse() {
       return this.visibleOptions ?? -1;
