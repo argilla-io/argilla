@@ -44,6 +44,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         from transformers import (
             AutoModelForSequenceClassification,
             AutoModelForTokenClassification,
+            set_seed,
         )
 
         self._transformers_model = None
@@ -58,9 +59,10 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
         if self._seed is None:
             self._seed = 42
+        set_seed(self._seed)
 
         if self._model is None:
-            self._model = "microsoft/deberta-v3-base"
+            self._model = "bert-base-cased"
 
         if isinstance(self._dataset, DatasetDict):
             self._train_dataset = self._dataset["train"]
@@ -92,15 +94,24 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         self.init_training_args()
 
     def init_training_args(self):
+        import torch
         from transformers import TrainingArguments
+
+        def convert_to_floats(dataset):
+            dataset.set_format("torch")
+            return dataset.map(
+                lambda x: {"float_label": x["label"].to(torch.float)}, remove_columns=["label"]
+            ).rename_column("float_label", "label")
 
         if self._record_class == rg.TextClassificationRecord:
             columns_mapping = {"text": "text", "label": "binarized_label"}
             if self._multi_label:
                 self._train_dataset = _apply_column_mapping(self._train_dataset, columns_mapping)
+                self._train_dataset = convert_to_floats(self._train_dataset)
 
                 if self._eval_dataset is not None:
                     self._eval_dataset = _apply_column_mapping(self._eval_dataset, columns_mapping)
+                    self._eval_dataset = convert_to_floats(self._eval_dataset)
 
         self.model_kwargs = {}
         self.model_kwargs["pretrained_model_name_or_path"] = self._model
@@ -113,18 +124,32 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         self.trainer_kwargs = get_default_args(TrainingArguments.__init__)
         self.trainer_kwargs["evaluation_strategy"] = "no" if self._eval_dataset is None else "epoch"
         self.trainer_kwargs["logging_steps"] = 30
+        self.trainer_kwargs["logging_steps"] = 1
+        self.trainer_kwargs["num_train_epochs"] = 1
 
     def init_model(self, new: bool = False):
         from transformers import AutoTokenizer
 
+        if any(k in self.model_kwargs.get("pretrained_model_name_or_path") for k in ("gpt", "opt", "bloom")):
+            padding_side = "left"
+        else:
+            padding_side = "right"
         self._transformers_tokenizer = AutoTokenizer.from_pretrained(
-            self.model_kwargs.get("pretrained_model_name_or_path")
+            self.model_kwargs.get("pretrained_model_name_or_path"), padding_side=padding_side, add_prefix_space=True
         )
+        if getattr(self._transformers_tokenizer, "pad_token_id") is None:
+            self._transformers_tokenizer.pad_token_id = self._transformers_tokenizer.eos_token_id
+        if getattr(self._transformers_tokenizer, "model_max_length") is None:
+            self._transformers_tokenizer.model_max_length = 512
+
         if new:
             model_kwargs = self.model_kwargs
         else:
             model_kwargs = {"pretrained_model_name_or_path": self.model_kwargs.get("pretrained_model_name_or_path")}
-        self._transformers_model = self._model_class.from_pretrained(**model_kwargs)
+
+        self._transformers_model = self._model_class.from_pretrained(**model_kwargs, return_dict=True)
+        if new:
+            self._transformers_model = self._transformers_model.to(self.device)
 
     def init_pipeline(self):
         import transformers
@@ -182,27 +207,26 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
     def preprocess_datasets(self):
         from transformers import (
             DataCollatorForTokenClassification,
+            DataCollatorWithPadding,
         )
 
         def text_classification_preprocess_function(examples):
-            tokens = self._transformers_tokenizer(examples["text"], padding=True, truncation=True)
-
-            return tokens
+            return self._transformers_tokenizer(examples["text"], truncation=True, max_length=None)
 
         def token_classification_preprocess_function(examples):
             tokenized_inputs = self._transformers_tokenizer(
-                examples["tokens"], padding=True, is_split_into_words=True, truncation=True
+                examples["tokens"], truncation=True, is_split_into_words=True
             )
 
             labels = []
             for i, label in enumerate(examples["ner_tags"]):
-                word_ids = tokenized_inputs.word_ids(batch_index=i)  # Map tokens to their respective word.
+                word_ids = tokenized_inputs.word_ids(batch_index=i)
                 previous_word_idx = None
                 label_ids = []
-                for word_idx in word_ids:  # Set the special tokens to -100.
+                for word_idx in word_ids:
                     if word_idx is None:
                         label_ids.append(-100)
-                    elif word_idx != previous_word_idx:  # Only label the first token of a given word.
+                    elif word_idx != previous_word_idx:
                         label_ids.append(label[word_idx])
                     else:
                         label_ids.append(-100)
@@ -215,16 +239,32 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         # set correct tokenization
         if self._record_class == rg.TextClassificationRecord:
             preprocess_function = text_classification_preprocess_function
-            self._data_collator = None
+            self._data_collator = DataCollatorWithPadding(tokenizer=self._transformers_tokenizer)
+            if self._multi_label:
+                remove_columns = ["feat_id", "text", "feat_label"]
+            else:
+                remove_columns = ["id", "text"]
+            replace_labels = True
         elif self._record_class == rg.TokenClassificationRecord:
             preprocess_function = token_classification_preprocess_function
             self._data_collator = DataCollatorForTokenClassification(tokenizer=self._transformers_tokenizer)
+            remove_columns = ["id", "tokens", "ner_tags"]
+            replace_labels = False
         else:
-            raise NotImplementedError("")
+            raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
-        self._tokenized_train_dataset = self._train_dataset.map(preprocess_function, batched=True)
+        self._tokenized_train_dataset = self._train_dataset.map(
+            preprocess_function, batched=True, remove_columns=remove_columns
+        )
+        if replace_labels:
+            self._tokenized_train_dataset = self._tokenized_train_dataset.rename_column("label", "labels")
+
         if self._eval_dataset is not None:
-            self._tokenized_eval_dataset = self._eval_dataset.map(preprocess_function, batched=True)
+            self._tokenized_eval_dataset = self._eval_dataset.map(
+                preprocess_function, batched=True, remove_columns=remove_columns
+            )
+            if replace_labels:
+                self._tokenized_eval_dataset = self._tokenized_eval_dataset.rename_column("label", "labels")
         else:
             self._tokenized_eval_dataset = None
 
@@ -310,6 +350,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         # get metrics function
         compute_metrics = self.compute_metrics()
 
+        self._transformers_model.to(self.device)
         # set trainer
         self._training_args = TrainingArguments(**self.trainer_kwargs)
         self._transformers_trainer = Trainer(

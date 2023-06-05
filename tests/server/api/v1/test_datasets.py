@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import Optional, Type
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
@@ -47,13 +48,14 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
-from opensearchpy import OpenSearch
 from sqlalchemy.orm import Session
 
 from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
     FieldFactory,
+    LabelSelectionQuestionFactory,
+    MultiLabelSelectionQuestionFactory,
     QuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
@@ -260,6 +262,58 @@ def test_list_dataset_questions(client: TestClient, admin_auth_header: dict):
                 "inserted_at": rating_question.inserted_at.isoformat(),
                 "updated_at": rating_question.updated_at.isoformat(),
             },
+        ]
+    }
+
+
+@pytest.mark.parametrize(
+    "QuestionFactory, settings",
+    [
+        (RatingQuestionFactory, {"options": [{"value": 1}, {"value": 2}, {"value": 2}]}),
+        (
+            LabelSelectionQuestionFactory,
+            {
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": None,
+            },
+        ),
+        (
+            MultiLabelSelectionQuestionFactory,
+            {
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": None,
+            },
+        ),
+    ],
+)
+def test_list_dataset_questions_with_duplicate_values(
+    client: TestClient, admin_auth_header: dict, QuestionFactory: Type[QuestionFactory], settings: dict
+):
+    dataset = DatasetFactory.create()
+    question = QuestionFactory.create(dataset=dataset, settings=settings)
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers=admin_auth_header)
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "id": str(question.id),
+                "name": question.name,
+                "title": question.title,
+                "description": question.description,
+                "required": question.required,
+                "settings": {"type": QuestionFactory.settings["type"], **settings},
+                "inserted_at": question.inserted_at.isoformat(),
+                "updated_at": question.updated_at.isoformat(),
+            }
         ]
     }
 
@@ -724,28 +778,33 @@ def test_list_current_user_dataset_records_with_offset_and_limit(client: TestCli
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
 
-@pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted"])
+def create_records_with_response(
+    num_records: int,
+    dataset: Dataset,
+    user: User,
+    response_status: ResponseStatus,
+    response_values: Optional[dict] = None,
+):
+    for record in RecordFactory.create_batch(size=num_records, dataset=dataset):
+        ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
+
+
+@pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
 def test_list_current_user_dataset_records_with_response_status_filter(
     client: TestClient, admin: User, admin_auth_header: dict, response_status_filter: str
 ):
-    dataset = DatasetFactory.create()
     num_responses_per_status = 10
+    response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
+
+    dataset = DatasetFactory.create()
     # missing responses
     RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset)
     # discarded responses
-    for record in RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset):
-        ResponseFactory.create(record=record, user=admin, status=ResponseStatus.discarded)
+    create_records_with_response(num_responses_per_status, dataset, admin, ResponseStatus.discarded)
     # submitted responses
-    for record in RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset):
-        ResponseFactory.create(
-            record=record,
-            user=admin,
-            values={
-                "input_ok": {"value": "yes"},
-                "output_ok": {"value": "yes"},
-            },
-            status=ResponseStatus.submitted,
-        )
+    create_records_with_response(num_responses_per_status, dataset, admin, ResponseStatus.submitted, response_values)
+    # drafted responses
+    create_records_with_response(num_responses_per_status, dataset, admin, ResponseStatus.draft, response_values)
 
     other_dataset = DatasetFactory.create()
     RecordFactory.create_batch(size=2, dataset=other_dataset)
@@ -994,10 +1053,12 @@ def test_get_current_user_dataset_metrics(client: TestClient, admin: User, admin
     record_a = RecordFactory.create(dataset=dataset)
     record_b = RecordFactory.create(dataset=dataset)
     record_c = RecordFactory.create(dataset=dataset)
+    record_d = RecordFactory.create(dataset=dataset)
     RecordFactory.create_batch(3, dataset=dataset)
     ResponseFactory.create(record=record_a, user=admin)
     ResponseFactory.create(record=record_b, user=admin, status=ResponseStatus.discarded)
     ResponseFactory.create(record=record_c, user=admin, status=ResponseStatus.discarded)
+    ResponseFactory.create(record=record_d, user=admin, status=ResponseStatus.draft)
 
     other_dataset = DatasetFactory.create()
     other_record_a = RecordFactory.create(dataset=other_dataset)
@@ -1013,12 +1074,13 @@ def test_get_current_user_dataset_metrics(client: TestClient, admin: User, admin
     assert response.status_code == 200
     assert response.json() == {
         "records": {
-            "count": 6,
+            "count": 7,
         },
         "responses": {
-            "count": 3,
+            "count": 4,
             "submitted": 1,
             "discarded": 2,
+            "draft": 1,
         },
     }
 
@@ -1037,10 +1099,12 @@ def test_get_current_user_dataset_metrics_as_annotator(client: TestClient):
     record_a = RecordFactory.create(dataset=dataset)
     record_b = RecordFactory.create(dataset=dataset)
     record_c = RecordFactory.create(dataset=dataset)
+    record_d = RecordFactory.create(dataset=dataset)
     RecordFactory.create_batch(2, dataset=dataset)
     ResponseFactory.create(record=record_a, user=annotator)
     ResponseFactory.create(record=record_b, user=annotator)
     ResponseFactory.create(record=record_c, user=annotator, status=ResponseStatus.discarded)
+    ResponseFactory.create(record=record_d, user=annotator, status=ResponseStatus.draft)
 
     other_dataset = DatasetFactory.create()
     other_record_a = RecordFactory.create(dataset=other_dataset)
@@ -1055,14 +1119,8 @@ def test_get_current_user_dataset_metrics_as_annotator(client: TestClient):
 
     assert response.status_code == 200
     assert response.json() == {
-        "records": {
-            "count": 5,
-        },
-        "responses": {
-            "count": 3,
-            "submitted": 2,
-            "discarded": 1,
-        },
+        "records": {"count": 6},
+        "responses": {"count": 4, "submitted": 2, "discarded": 1, "draft": 1},
     }
 
 
@@ -1263,6 +1321,33 @@ def test_create_dataset_field_with_invalid_max_length_title(client: TestClient, 
         "name": "name",
         "title": "a" * (FIELD_CREATE_TITLE_MAX_LENGTH + 1),
         "settings": {"type": "text"},
+    }
+
+    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
+
+    assert response.status_code == 422
+    assert db.query(Field).count() == 0
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {},
+        None,
+        {"type": "wrong-type"},
+        {"type": "text", "use_markdown": None},
+        {"type": "rating", "options": None},
+        {"type": "rating", "options": []},
+    ],
+)
+def test_create_dataset_field_with_invalid_settings(
+    client: TestClient, db: Session, admin_auth_header: dict, settings: dict
+):
+    dataset = DatasetFactory.create()
+    field_json = {
+        "name": "name",
+        "title": "Title",
+        "settings": settings,
     }
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=admin_auth_header, json=field_json)
@@ -1621,6 +1706,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
         {"type": "rating", "options": "invalid"},
+        {"type": "rating", "options": [{"value": 0}, {"value": 1}, {"value": 1}]},
         {"type": "label_selection", "options": []},
         {"type": "label_selection", "options": [{"value": "just_one_label", "text": "Just one label"}]},
         {
@@ -1670,6 +1756,14 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
                 {"value": "b", "text": "b"},
             ],
         },
+        {
+            "type": "label_selection",
+            "options": [
+                {"value": "a", "text": "a", "description": "a"},
+                {"value": "b", "text": "b", "description": "b"},
+                {"value": "b", "text": "b", "description": "b"},
+            ],
+        },
     ],
 )
 def test_create_dataset_question_with_invalid_settings(
@@ -1687,12 +1781,9 @@ def test_create_dataset_question_with_invalid_settings(
     assert db.query(Question).count() == 0
 
 
-@pytest.mark.asyncio
-async def test_create_dataset_records(
+def test_create_dataset_records(
     client: TestClient,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
-    # TODO: use the overwrite deps to provide a spied local telemetry client.
+    mock_search_engine: SearchEngine,
     test_telemetry: MagicMock,
     db: Session,
     admin: User,
@@ -1704,8 +1795,6 @@ async def test_create_dataset_records(
 
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
-    # Prepare dataset and es index
-    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -1762,39 +1851,13 @@ async def test_create_dataset_records(
     assert db.query(Record).count() == 5
     assert db.query(Response).count() == 4
 
-    index_name = f"rg.{dataset.id}"
-    opensearch.indices.refresh(index=index_name)
-    assert [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]] == [
-        {
-            "fields": {"input": "Say Hello", "output": "Hello"},
-            "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "yes"}, "status": "submitted"}},
-        },
-        {"fields": {"input": "Say Hello", "output": "Hi"}, "responses": {}},
-        {
-            "fields": {"input": "Say Pello", "output": "Hello World"},
-            "responses": {"admin": {"values": {"input_ok": "no", "output_ok": "no"}, "status": "submitted"}},
-        },
-        {
-            "fields": {"input": "Say Hello", "output": "Good Morning"},
-            "responses": {"admin": {"values": {"input_ok": "yes", "output_ok": "no"}, "status": "discarded"}},
-        },
-        {
-            "fields": {"input": "Say Hello", "output": "Say Hello"},
-            "responses": {"admin": {"values": None, "status": "discarded"}},
-        },
-    ]
+    mock_search_engine.add_records.assert_called_once_with(dataset, db.query(Record).all())
 
     test_telemetry.assert_called_once_with(action="DatasetRecordsCreated", data={"records": len(records_json["items"])})
 
 
-@pytest.mark.asyncio
-async def test_create_dataset_records_with_response_for_multiple_users(
-    client: TestClient,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
-    db: Session,
-    admin: User,
-    admin_auth_header: dict,
+def test_create_dataset_records_with_response_for_multiple_users(
+    client: TestClient, mock_search_engine: SearchEngine, db: Session, admin: User, admin_auth_header: dict
 ):
     workspace = WorkspaceFactory.create()
 
@@ -1805,9 +1868,6 @@ async def test_create_dataset_records_with_response_for_multiple_users(
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
     annotator = AnnotatorFactory.create(workspaces=[workspace])
-
-    # Prepare dataset and es index
-    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -1847,23 +1907,17 @@ async def test_create_dataset_records_with_response_for_multiple_users(
     assert db.query(Response).filter(Response.user_id == annotator.id).count() == 2
     assert db.query(Response).filter(Response.user_id == admin.id).count() == 1
 
+    mock_search_engine.add_records.assert_called_once_with(dataset, db.query(Record).all())
 
-@pytest.mark.asyncio
-async def test_create_dataset_records_with_response_for_unknown_user(
-    client: TestClient,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
-    db: Session,
-    admin_auth_header: dict,
+
+def test_create_dataset_records_with_response_for_unknown_user(
+    client: TestClient, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextFieldFactory.create(name="input", dataset=dataset)
     TextFieldFactory.create(name="output", dataset=dataset)
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-    # Prepare dataset and es index
-    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -1888,23 +1942,14 @@ async def test_create_dataset_records_with_response_for_unknown_user(
     assert db.query(Response).count() == 0
 
 
-@pytest.mark.asyncio
-async def test_create_dataset_records_with_duplicated_response_for_an_user(
-    client: TestClient,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
-    db: Session,
-    admin: User,
-    admin_auth_header: dict,
+def test_create_dataset_records_with_duplicated_response_for_an_user(
+    client: TestClient, db: Session, admin: User, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextFieldFactory.create(name="input", dataset=dataset)
     TextFieldFactory.create(name="output", dataset=dataset)
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-    # Prepare dataset and es index
-    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -1949,9 +1994,7 @@ async def test_create_dataset_records_with_duplicated_response_for_an_user(
     assert db.query(Response).count() == 0
 
 
-def test_create_dataset_records_with_missing_required_fields(
-    client: TestClient, db: Session, opensearch: OpenSearch, admin_auth_header: dict
-):
+def test_create_dataset_records_with_missing_required_fields(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     FieldFactory.create(name="input", dataset=dataset, required=True)
     FieldFactory.create(name="output", dataset=dataset, required=True)
@@ -1980,9 +2023,7 @@ def test_create_dataset_records_with_missing_required_fields(
     assert db.query(Record).count() == 0
 
 
-def test_create_dataset_records_with_wrong_value_field(
-    client: TestClient, db: Session, opensearch: OpenSearch, admin_auth_header: dict
-):
+def test_create_dataset_records_with_wrong_value_field(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     FieldFactory.create(name="input", dataset=dataset)
     FieldFactory.create(name="output", dataset=dataset)
@@ -2011,9 +2052,7 @@ def test_create_dataset_records_with_wrong_value_field(
     assert db.query(Record).count() == 0
 
 
-def test_create_dataset_records_with_extra_fields(
-    client: TestClient, db: Session, opensearch: OpenSearch, admin_auth_header: dict
-):
+def test_create_dataset_records_with_extra_fields(client: TestClient, db: Session, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     FieldFactory.create(name="input", dataset=dataset)
 
@@ -2041,12 +2080,8 @@ def test_create_dataset_records_with_extra_fields(
     assert db.query(Record).count() == 0
 
 
-@pytest.mark.asyncio
-async def test_create_dataset_records_with_index_error(
-    client: TestClient,
-    opensearch: OpenSearch,
-    db: Session,
-    admin_auth_header: dict,
+def test_create_dataset_records_with_index_error(
+    client: TestClient, mock_search_engine: SearchEngine, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
 
@@ -2063,9 +2098,7 @@ async def test_create_dataset_records_with_index_error(
     assert response.status_code == 422
     assert db.query(Record).count() == 0
 
-    index_name = f"rg.{dataset.id}"
-
-    assert not opensearch.indices.exists(index=index_name)
+    assert not mock_search_engine.create_index.called
 
 
 def test_create_dataset_records_without_authentication(client: TestClient, db: Session):
@@ -2118,14 +2151,8 @@ def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
     assert db.query(Response).count() == 0
 
 
-@pytest.mark.asyncio
-async def test_create_dataset_records_with_submitted_response(
-    client: TestClient,
-    db: Session,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
-    admin: User,
-    admin_auth_header: dict,
+def test_create_dataset_records_with_submitted_response(
+    client: TestClient, db: Session, admin: User, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextFieldFactory.create(name="input", dataset=dataset)
@@ -2133,9 +2160,6 @@ async def test_create_dataset_records_with_submitted_response(
 
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-    # Prepare dataset and es index
-    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -2188,12 +2212,9 @@ def test_create_dataset_records_with_submitted_response_without_values(
     assert db.query(Response).count() == 0
 
 
-@pytest.mark.asyncio
-async def test_create_dataset_records_with_discarded_response(
+def test_create_dataset_records_with_discarded_response(
     client: TestClient,
     db: Session,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
     admin: User,
     admin_auth_header: dict,
 ):
@@ -2203,8 +2224,6 @@ async def test_create_dataset_records_with_discarded_response(
 
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -2257,12 +2276,9 @@ def test_create_dataset_records_with_invalid_response_status(
     assert db.query(Response).count() == 0
 
 
-@pytest.mark.asyncio
-async def test_create_dataset_records_with_discarded_response_without_values(
+def test_create_dataset_records_with_discarded_response_without_values(
     client: TestClient,
     db: Session,
-    search_engine: SearchEngine,
-    opensearch: OpenSearch,
     admin: User,
     admin_auth_header: dict,
 ):
@@ -2272,8 +2288,6 @@ async def test_create_dataset_records_with_discarded_response_without_values(
 
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-    await search_engine.create_index(dataset)
 
     records_json = {
         "items": [
@@ -2386,8 +2400,7 @@ def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, 
 def test_publish_dataset(
     client: TestClient,
     db: Session,
-    opensearch: OpenSearch,
-    # TODO: use the overwrite deps to provide a spied local telemetry client.
+    mock_search_engine: SearchEngine,
     test_telemetry: MagicMock,
     admin_auth_header: dict,
 ):
@@ -2403,16 +2416,15 @@ def test_publish_dataset(
     response_body = response.json()
     assert response_body["status"] == "ready"
 
-    assert opensearch.indices.exists(index=f"rg.{dataset.id}")
     test_telemetry.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
+    mock_search_engine.create_index.assert_called_once_with(dataset)
 
 
 def test_publish_dataset_with_error_on_index_creation(
-    client: TestClient,
-    db: Session,
-    opensearch: OpenSearch,
-    admin_auth_header: dict,
+    client: TestClient, db: Session, mock_search_engine: SearchEngine, mocker, admin_auth_header: dict
 ):
+    mocker.patch.object(mock_search_engine, "create_index", side_effect=ValueError("Error creating index"))
+
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     QuestionFactory.create(settings={"type": "invalid"}, dataset=dataset)
@@ -2421,8 +2433,6 @@ def test_publish_dataset_with_error_on_index_creation(
 
     assert response.status_code == 422
     assert db.get(Dataset, dataset.id).status == "draft"
-
-    assert not opensearch.indices.exists(index=f"rg.{dataset.id}")
 
 
 def test_publish_dataset_without_authentication(client: TestClient, db: Session):
@@ -2489,7 +2499,9 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
     assert db.get(Dataset, dataset.id).status == "draft"
 
 
-def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_delete_dataset(
+    client: TestClient, db: Session, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
+):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
@@ -2512,6 +2524,8 @@ def test_delete_dataset(client: TestClient, db: Session, admin: User, admin_auth
         dataset.workspace_id,
         other_dataset.workspace_id,
     ]
+
+    mock_search_engine.delete_index.assert_called_once_with(dataset)
 
 
 def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
@@ -2541,13 +2555,15 @@ def test_delete_published_dataset(client: TestClient, db: Session, admin: User, 
     ]
 
 
-def test_delete_dataset_without_authentication(client: TestClient, db: Session):
+def test_delete_dataset_without_authentication(client: TestClient, db: Session, mock_search_engine: SearchEngine):
     dataset = DatasetFactory.create()
 
     response = client.delete(f"/api/v1/datasets/{dataset.id}")
 
     assert response.status_code == 401
     assert db.query(Dataset).count() == 1
+
+    assert not mock_search_engine.delete_index.called
 
 
 def test_delete_dataset_as_annotator(client: TestClient, db: Session):

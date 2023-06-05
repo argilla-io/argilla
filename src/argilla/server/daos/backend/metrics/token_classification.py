@@ -35,8 +35,6 @@ class TopKMentionsConsistency(NestedPathElasticsearchMetric):
 
     mention_field: str
     labels_field: str
-    chars_length_field: str
-    tokens_length_field: str
 
     def _inner_aggregation(
         self,
@@ -89,10 +87,6 @@ class TopKMentionsConsistency(NestedPathElasticsearchMetric):
 
 
 METRICS = {
-    "tokens_length": HistogramAggregation(
-        "tokens_length",
-        field="metrics.tokens_length",
-    ),
     "token_frequency": NestedTermsAggregation(
         id="token_frequency",
         nested_path="metrics.tokens",
@@ -101,39 +95,12 @@ METRICS = {
             field="value",
         ),
     ),
-    "token_length": NestedHistogramAggregation(
-        id="token_length",
-        nested_path="metrics.tokens",
-        histogram=HistogramAggregation(
-            id="length",
-            field="length",
-            fixed_interval=1,
-        ),
-    ),
     "token_capitalness": NestedTermsAggregation(
         id="token_capitalness",
         nested_path="metrics.tokens",
         terms=TermsAggregation(
             id="capitalness",
             field="capitalness",
-        ),
-    ),
-    "predicted_mention_char_length": NestedHistogramAggregation(
-        id="predicted_mention_char_length",
-        nested_path="metrics.predicted.mentions",
-        histogram=HistogramAggregation(
-            id="length",
-            field="chars_length",
-            fixed_interval=1,
-        ),
-    ),
-    "annotated_mention_char_length": NestedHistogramAggregation(
-        id="annotated_mention_char_length",
-        nested_path="metrics.annotated.mentions",
-        histogram=HistogramAggregation(
-            id="length",
-            field="chars_length",
-            fixed_interval=1,
         ),
     ),
     "predicted_entity_labels": NestedTermsAggregation(
@@ -153,26 +120,6 @@ METRICS = {
             field="label",
             default_size=_DEFAULT_MAX_ENTITY_BUCKET,
         ),
-    ),
-    "predicted_entity_density": NestedHistogramAggregation(
-        id="predicted_entity_density",
-        nested_path="metrics.predicted.mentions",
-        histogram=HistogramAggregation(id="histogram", field="density"),
-    ),
-    "annotated_entity_density": NestedHistogramAggregation(
-        id="annotated_entity_density",
-        nested_path="metrics.annotated.mentions",
-        histogram=HistogramAggregation(id="histogram", field="density"),
-    ),
-    "predicted_mention_token_length": NestedHistogramAggregation(
-        id="predicted_mention_token_length",
-        nested_path="metrics.predicted.mentions",
-        histogram=HistogramAggregation(id="histogram", field="tokens_length"),
-    ),
-    "annotated_mention_token_length": NestedHistogramAggregation(
-        id="annotated_mention_token_length",
-        nested_path="metrics.annotated.mentions",
-        histogram=HistogramAggregation(id="histogram", field="tokens_length"),
     ),
     "predicted_entity_capitalness": NestedTermsAggregation(
         id="predicted_entity_capitalness",
@@ -199,31 +146,84 @@ METRICS = {
         nested_path="metrics.predicted.mentions",
         mention_field="value",
         labels_field="label",
-        chars_length_field="chars_length",
-        tokens_length_field="tokens_length",
     ),
     "annotated_top_k_mentions_consistency": TopKMentionsConsistency(
         id="annotated_top_k_mentions_consistency",
         nested_path="metrics.annotated.mentions",
         mention_field="value",
         labels_field="label",
-        chars_length_field="chars_length",
-        tokens_length_field="tokens_length",
     ),
+    # TODO: Remove in v1.10.0
+    "tokens_length": HistogramAggregation(
+        "tokens_length",
+        field="metrics.tokens_length",
+    ),
+    # TODO: Remove in v1.10.0
+    "token_length": NestedHistogramAggregation(
+        id="token_length",
+        nested_path="metrics.tokens",
+        histogram=HistogramAggregation(
+            id="length",
+            field="length",
+            fixed_interval=1,
+        ),
+    ),
+    # TODO: Remove in v1.10.0
+    "predicted_mention_char_length": NestedHistogramAggregation(
+        id="predicted_mention_char_length",
+        nested_path="metrics.predicted.mentions",
+        histogram=HistogramAggregation(
+            id="length",
+            field="chars_length",
+            fixed_interval=1,
+        ),
+    ),
+    # TODO: Remove in v1.10.0
+    "annotated_mention_char_length": NestedHistogramAggregation(
+        id="annotated_mention_char_length",
+        nested_path="metrics.annotated.mentions",
+        histogram=HistogramAggregation(
+            id="length",
+            field="chars_length",
+            fixed_interval=1,
+        ),
+    ),
+    # TODO: Remove in v1.10.0
+    "predicted_entity_density": NestedHistogramAggregation(
+        id="predicted_entity_density",
+        nested_path="metrics.predicted.mentions",
+        histogram=HistogramAggregation(id="histogram", field="density"),
+    ),
+    # TODO: Remove in v1.10.0
+    "annotated_entity_density": NestedHistogramAggregation(
+        id="annotated_entity_density",
+        nested_path="metrics.annotated.mentions",
+        histogram=HistogramAggregation(id="histogram", field="density"),
+    ),
+    # TODO: Remove in v1.10.0
+    "predicted_mention_token_length": NestedHistogramAggregation(
+        id="predicted_mention_token_length",
+        nested_path="metrics.predicted.mentions",
+        histogram=HistogramAggregation(id="histogram", field="tokens_length"),
+    ),
+    # TODO: Remove in v1.10.0
+    "annotated_mention_token_length": NestedHistogramAggregation(
+        id="annotated_mention_token_length",
+        nested_path="metrics.annotated.mentions",
+        histogram=HistogramAggregation(id="histogram", field="tokens_length"),
+    ),
+    # TODO: Remove in v1.10.0
     "predicted_tag_consistency": TopKMentionsConsistency(
         id="predicted_tag_consistency",
         nested_path="metrics.predicted.tags",
         mention_field="value",
         labels_field="tag",
-        chars_length_field="chars_length",
-        tokens_length_field="tokens_length",
     ),
+    # TODO: Remove in v1.10.0
     "annotated_tag_consistency": TopKMentionsConsistency(
         id="annotated_tag_consistency",
         nested_path="metrics.annotated.tags",
         mention_field="value",
         labels_field="tag",
-        chars_length_field="chars_length",
-        tokens_length_field="tokens_length",
     ),
 }

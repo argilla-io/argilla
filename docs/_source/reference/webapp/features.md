@@ -3,6 +3,10 @@
 
 ## Annotate records
 
+```{note}
+For information about features in the new Feedback Task datasets, please check [this guide](../../guides/llms/practical_guides/annotate_dataset.ipynb).
+```
+
 ![Annotate records](../../_static/reference/webapp/features-annotate.png)
 
 The Argilla UI has a dedicated mode to quickly label your data in a very intuitive way, or revise previous gold labels and correct them.

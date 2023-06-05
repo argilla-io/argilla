@@ -11,21 +11,24 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import os
+from collections import OrderedDict
 from sqlite3 import Connection as SQLite3Connection
 from typing import TYPE_CHECKING, Generator
 
-import alembic.config
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
+import argilla
 from argilla.server.settings import settings
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
+
+ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla.__file__), "alembic.ini"))
+TAGGED_REVISIONS = OrderedDict({"1.7": "1769ee58fbb4", "1.8": "ae5522b4c674"})
 
 
 @event.listens_for(Engine, "connect")
@@ -59,11 +62,6 @@ async def get_async_db() -> Generator["AsyncSession", None, None]:
         yield db
     finally:
         await db.close()
-
-
-def migrate_db():
-    alembic_config = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "alembic.ini"))
-    alembic.config.main(argv=["-c", alembic_config, "upgrade", "head"])
 
 
 class Base(DeclarativeBase):

@@ -50,7 +50,8 @@ import {
   isRecordWithRecordIndexByDatasetIdExists,
   isAnyRecordByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
-
+import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 
@@ -112,6 +113,9 @@ export default {
     userId() {
       return this.$auth.user.id;
     },
+    noMoreDataMessage() {
+      return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
+    },
     recordStatusFilterValueForGetRecords() {
       // NOTE - this is only used to fetch record, this is why the return value is in lowercase
       let paramForUrl = null;
@@ -171,11 +175,26 @@ export default {
             (recordResponse) => question.name === recordResponse.question_name
           );
         if (correspondingResponseToQuestion) {
+          const formattedOptions = correspondingResponseToQuestion.options.map(
+            (option) => {
+              return { ...option, is_selected: option.is_selected || false };
+            }
+          );
           return {
             ...question,
             response_id: correspondingResponseToQuestion.id,
-            options: correspondingResponseToQuestion.options,
+            options: formattedOptions,
           };
+        }
+        if (
+          question.component_type === COMPONENT_TYPE.RATING ||
+          question.component_type === COMPONENT_TYPE.SINGLE_LABEL
+        ) {
+          const formattedOptions = question.options.map((option) => {
+            return { ...option, is_selected: false };
+          });
+
+          return { ...question, options: formattedOptions, response_id: null };
         }
         return { ...question, response_id: null };
       });
@@ -213,6 +232,8 @@ export default {
   },
 
   async fetch() {
+    await this.cleanRecordOrm();
+
     await this.initRecordsInDatabase(this.currentPage - 1);
 
     const offset = this.currentPage - 1;
@@ -225,8 +246,6 @@ export default {
     }
   },
   async created() {
-    this.noMoreDataMessage = "There is no more data";
-
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
     this.currentPage = this.pageFromQuery;
   },
@@ -244,11 +263,9 @@ export default {
       this.recordStatusToFilterWith = status;
       this.currentPage = 1;
 
-      await deleteAllRecords();
       await this.$fetch();
 
       this.reRenderQuestionForm++;
-      this.questionFormTouched = false;
     },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
@@ -439,21 +456,21 @@ export default {
                     // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
                     formattedOptionsWithRecordResponse =
                       optionsByQuestionName.map(({ id, text, value }) => {
-                        if (text === recordResponseByQuestionName.value) {
+                        if (value === recordResponseByQuestionName.value) {
                           return {
                             id,
                             text,
-                            value: true,
+                            value,
+                            is_selected: true,
                           };
                         }
-                        return { id, text, value };
+                        return { id, text, value, is_selected: false };
                       });
                     break;
                   case COMPONENT_TYPE.FREE_TEXT:
                     formattedOptionsWithRecordResponse = [
                       {
                         id: questionName,
-                        text: recordResponseByQuestionName.value,
                         value: recordResponseByQuestionName.value,
                       },
                     ];
@@ -477,6 +494,14 @@ export default {
       });
 
       return { formattedRecordResponsesForOrm, recordStatus };
+    },
+    async cleanRecordOrm() {
+      await deleteAllRecords();
+      await deleteRecordResponsesByUserIdAndResponseId(
+        this.userId,
+        this.datasetId
+      );
+      await deleteAllRecordFields();
     },
   },
   beforeDestroy() {
