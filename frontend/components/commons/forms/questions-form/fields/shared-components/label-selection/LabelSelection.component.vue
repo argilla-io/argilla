@@ -113,18 +113,13 @@ export default {
       if (!this.showCollapseButton || this.showLess)
         return this.filteredOptions;
 
-      return this.filteredOptions.slice(
-        0,
-        this.maxOptionsToShowBeforeCollapse + 1
-      );
+      return this.filteredOptions.slice(0, this.maxOptionsToShowBeforeCollapse);
     },
     noResultMessage() {
       return `There is no result matching: ${this.searchInput}`;
     },
     numberToShowInTheCollapseButton() {
-      return (
-        this.filteredOptions.length - this.maxOptionsToShowBeforeCollapse - 1
-      );
+      return this.filteredOptions.length - this.maxOptionsToShowBeforeCollapse;
     },
     showCollapseButton() {
       if (this.maxOptionsToShowBeforeCollapse === -1) return false;
