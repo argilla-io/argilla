@@ -19,7 +19,7 @@
 
     <LabelSelectionComponent
       v-model="uniqueOptions"
-      :multiple="true"
+      :multiple="isMultipleSelection"
       :componentId="questionId"
       :showSearch="showSearch"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
@@ -63,6 +63,7 @@ export default {
   data() {
     return {
       uniqueOptions: [],
+      isMultipleSelection: true,
     };
   },
   beforeMount() {
