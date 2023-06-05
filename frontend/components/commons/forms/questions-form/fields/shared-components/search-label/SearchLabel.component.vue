@@ -2,12 +2,13 @@
   <div class="search-area" @click="focusInSearch">
     <BaseIconWithBadge
       class="icon-search"
-      icon="search"
+      :icon="value?.length ? 'close' : 'search'"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
+      @click-icon="resetValue"
     />
     <input
       class="search-input"
@@ -28,7 +29,7 @@
 
 <script>
 export default {
-  name: "SearchSingleLabelComponent",
+  name: "SearchLabelComponent",
   props: {
     value: {
       type: String,
@@ -49,6 +50,9 @@ export default {
     },
     focusInSearch() {
       this.$refs[this.searchRef].focus();
+    },
+    resetValue() {
+      this.value.length && this.$emit("input", "");
     },
   },
 };
