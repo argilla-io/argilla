@@ -42,7 +42,6 @@
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           :visibleOptions="input.settings.visible_options"
-          :optionsThresholdToEnableSeach="OPTIONS_THRESHOLD_TO_ENABLE_SEARCH"
         />
 
         <MultiLabelComponent
@@ -53,7 +52,6 @@
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           :visibleOptions="input.settings.visible_options"
-          :optionsThresholdToEnableSeach="OPTIONS_THRESHOLD_TO_ENABLE_SEARCH"
         />
 
         <RatingComponent
@@ -105,10 +103,7 @@
 <script>
 import { isEqual, cloneDeep } from "lodash";
 import { Notification } from "@/models/Notifications";
-import {
-  COMPONENT_TYPE,
-  OPTIONS_THRESHOLD_TO_ENABLE_SEARCH,
-} from "@/components/feedback-task/feedbackTask.properties";
+import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
@@ -151,7 +146,6 @@ export default {
       inputs: [],
       renderForm: 0,
       isError: false,
-      OPTIONS_THRESHOLD_TO_ENABLE_SEARCH: OPTIONS_THRESHOLD_TO_ENABLE_SEARCH,
     };
   },
   computed: {
