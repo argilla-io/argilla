@@ -9,7 +9,7 @@ ENV USERS_DB=/config/.users.yml
 ENV UVICORN_PORT=6900
 
 # Copying script for starting argilla server
-COPY scripts/start_argilla_server.sh /
+COPY docker/scripts/start_argilla_server.sh /
 
 # Copying argilla distribution files
 COPY dist/*.whl /packages/

@@ -20,9 +20,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 USER root
 
-COPY scripts/start_quickstart_argilla.sh /
-COPY scripts/load_data.py /
-COPY quickstart.requirements.txt /packages/requirements.txt
+COPY docker/scripts/start_quickstart_argilla.sh /
+COPY docker/scripts/load_data.py /
+COPY docker/quickstart.requirements.txt /packages/requirements.txt
 COPY dist/*.whl /packages/
 
 RUN apt update && \
