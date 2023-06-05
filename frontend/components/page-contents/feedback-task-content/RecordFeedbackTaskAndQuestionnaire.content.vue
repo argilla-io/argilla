@@ -530,6 +530,7 @@ export default {
 }
 .question-form {
   border: 1px solid transparent;
+  background: palette(white);
   &.--pending {
     border-color: transparent;
   }

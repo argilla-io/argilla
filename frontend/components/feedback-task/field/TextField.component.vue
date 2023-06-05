@@ -1,6 +1,6 @@
 <template>
   <div class="text_field_component">
-    <div class="title-area --body1">
+    <div class="title-area --body2">
       <span v-text="title" />
       <BaseActionTooltip tooltip="Copied" tooltip-position="left">
         <BaseButton
