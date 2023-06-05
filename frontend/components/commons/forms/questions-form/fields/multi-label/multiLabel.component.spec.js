@@ -1,6 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
 import MultiLabelComponent from "./MultiLabel.component";
-import LabelSelectionComponent from "../shared-components/label-selection/LabelSelection.component";
 
 let wrapper = null;
 const options = {
@@ -59,9 +58,9 @@ afterEach(() => {
 describe("MultiLabelComponent", () => {
   it("render by default the title of the question and the LabelSelectionComponent", () => {
     expect(wrapper.is(MultiLabelComponent)).toBe(true);
-    const labelSelectionWrapper = wrapper.findComponent(
-      LabelSelectionComponent
-    );
+    const labelSelectionWrapper = wrapper.findComponent({
+      name: "LabelSelectionComponent",
+    });
     expect(labelSelectionWrapper.exists()).toBe(true);
     const baseIconWithBadgeWrapper = wrapper.findComponent({
       name: "BaseIconWithBadge",
