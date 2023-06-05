@@ -18,12 +18,11 @@
     </div>
 
     <LabelSelectionComponent
-      :options="uniqueOptions"
+      v-model="uniqueOptions"
       :multiple="true"
       :componentId="questionId"
       :showSearch="showSearch"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
-      @change="$emit('update:options', options)"
     />
   </div>
 </template>
