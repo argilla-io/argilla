@@ -2446,19 +2446,15 @@ def create_dataset_for_search() -> Tuple[Dataset, List[Record]]:
 
 
 def test_search_dataset_records(
-    mocker: "MockerFixture", client: TestClient, search_engine: SearchEngine, admin: User, admin_auth_header: dict
+    client: TestClient, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
 ):
     dataset, records, _ = create_dataset_for_search()
 
-    search_mock = mocker.patch.object(
-        search_engine,
-        "search",
-        return_value=SearchResponses(
-            items=[
-                SearchResponseItem(record_id=records[0].id, score=14.2),
-                SearchResponseItem(record_id=records[1].id, score=12.2),
-            ]
-        ),
+    mock_search_engine.search.return_value = SearchResponses(
+        items=[
+            SearchResponseItem(record_id=records[0].id, score=14.2),
+            SearchResponseItem(record_id=records[1].id, score=12.2),
+        ]
     )
 
     query_json = {"text": {"q": "Hello", "field": "input"}}
@@ -2466,7 +2462,7 @@ def test_search_dataset_records(
         f"/api/v1/me/datasets/{dataset.id}/records/search", headers=admin_auth_header, json=query_json
     )
 
-    search_mock.assert_called_once_with(
+    mock_search_engine.search.assert_called_once_with(
         dataset=dataset,
         query=Query(
             text=TextQuery(
@@ -2513,19 +2509,15 @@ def test_search_dataset_records(
 
 
 def test_search_dataset_records_including_responses(
-    mocker: "MockerFixture", client: TestClient, search_engine: SearchEngine, admin_auth_header: dict
+    client: TestClient, mock_search_engine: SearchEngine, admin_auth_header: dict
 ):
     dataset, records, responses = create_dataset_for_search()
 
-    search_mock = mocker.patch.object(
-        search_engine,
-        "search",
-        return_value=SearchResponses(
-            items=[
-                SearchResponseItem(record_id=records[0].id, score=14.2),
-                SearchResponseItem(record_id=records[1].id, score=12.2),
-            ]
-        ),
+    mock_search_engine.search.return_value = SearchResponses(
+        items=[
+            SearchResponseItem(record_id=records[0].id, score=14.2),
+            SearchResponseItem(record_id=records[1].id, score=12.2),
+        ]
     )
 
     query_json = {"text": {"q": "Hello", "field": "input"}}
@@ -2536,7 +2528,7 @@ def test_search_dataset_records_including_responses(
         params={"include": RecordInclude.responses.value},
     )
 
-    search_mock.assert_called_once_with(
+    mock_search_engine.search.assert_called_once_with(
         dataset=dataset,
         query=Query(
             text=TextQuery(
@@ -2607,10 +2599,10 @@ def test_search_dataset_records_including_responses(
 
 
 def test_search_dataset_records_with_response_status_filter(
-    mocker: "MockerFixture", client: TestClient, search_engine: SearchEngine, admin: User, admin_auth_header: dict
+    client: TestClient, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
 ):
     dataset, _, _ = create_dataset_for_search()
-    search_mock = mocker.patch.object(search_engine, "search", return_value=SearchResponses(items=[]))
+    mock_search_engine.search.return_value = SearchResponses(items=[])
 
     query_json = {"text": {"q": "Hello", "field": "input"}}
     response = client.post(
@@ -2620,7 +2612,7 @@ def test_search_dataset_records_with_response_status_filter(
         params={"response_status": ResponseStatus.submitted.value},
     )
 
-    search_mock.assert_called_once_with(
+    mock_search_engine.search.assert_called_once_with(
         dataset=dataset,
         query=Query(text=TextQuery(q="Hello", field="input")),
         user_response_status_filter=UserResponseStatusFilter(user=admin, statuses=[ResponseStatus.submitted]),
@@ -2630,10 +2622,10 @@ def test_search_dataset_records_with_response_status_filter(
 
 
 def test_search_dataset_records_with_limit(
-    mocker: "MockerFixture", client: TestClient, search_engine: SearchEngine, admin_auth_header: dict
+    client: TestClient, mock_search_engine: SearchEngine, admin_auth_header: dict
 ):
     dataset, _, _ = create_dataset_for_search()
-    search_mock = mocker.patch.object(search_engine, "search", return_value=SearchResponses(items=[]))
+    mock_search_engine.search.return_value = SearchResponses(items=[])
 
     query_json = {"text": {"q": "Hello", "field": "input"}}
     response = client.post(
@@ -2643,7 +2635,7 @@ def test_search_dataset_records_with_limit(
         params={"limit": 10},
     )
 
-    search_mock.assert_called_once_with(
+    mock_search_engine.search.assert_called_once_with(
         dataset=dataset,
         query=Query(text=TextQuery(q="Hello", field="input")),
         user_response_status_filter=None,
@@ -2652,19 +2644,15 @@ def test_search_dataset_records_with_limit(
     assert response.status_code == 200
 
 
-def test_search_dataset_records_as_annotator(mocker: "MockerFixture", client: TestClient, search_engine: SearchEngine):
+def test_search_dataset_records_as_annotator(client: TestClient, mock_search_engine: SearchEngine):
     dataset, records, _ = create_dataset_for_search()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
 
-    search_mock = mocker.patch.object(
-        search_engine,
-        "search",
-        return_value=SearchResponses(
-            items=[
-                SearchResponseItem(record_id=records[0].id, score=14.2),
-                SearchResponseItem(record_id=records[1].id, score=12.2),
-            ]
-        ),
+    mock_search_engine.search.return_value = SearchResponses(
+        items=[
+            SearchResponseItem(record_id=records[0].id, score=14.2),
+            SearchResponseItem(record_id=records[1].id, score=12.2),
+        ]
     )
 
     query_json = {"text": {"q": "unit test", "field": "input"}}
@@ -2674,7 +2662,7 @@ def test_search_dataset_records_as_annotator(mocker: "MockerFixture", client: Te
         json=query_json,
     )
 
-    search_mock.assert_called_once_with(
+    mock_search_engine.search.assert_called_once_with(
         dataset=dataset,
         query=Query(
             text=TextQuery(
@@ -2688,9 +2676,7 @@ def test_search_dataset_records_as_annotator(mocker: "MockerFixture", client: Te
     assert response.status_code == 200
 
 
-def test_search_dataset_records_as_annotator_from_different_workspace(
-    mocker: "MockerFixture", client: TestClient, search_engine: SearchEngine
-):
+def test_search_dataset_records_as_annotator_from_different_workspace(client: TestClient):
     dataset, _, _ = create_dataset_for_search()
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.create()])
 
