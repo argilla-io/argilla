@@ -82,6 +82,13 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
 
 @pytest.mark.asyncio
 class TestSuiteElasticSearchEngine:
+    async def test_get_index_or_raise(self, elastic_search_engine: SearchEngine):
+        dataset = DatasetFactory.create()
+        with pytest.raises(
+            ValueError, match=f"Cannot access to index for dataset {dataset.id}: the specified index does not exist"
+        ):
+            await elastic_search_engine._get_index_or_raise(dataset)
+
     async def test_create_index_for_dataset(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
         dataset = DatasetFactory.create()
         await elastic_search_engine.create_index(dataset)
