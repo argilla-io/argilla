@@ -93,7 +93,7 @@ export default {
   data() {
     return {
       searchInput: "",
-      showLess: false,
+      isExpanded: false,
     };
   },
   created() {
@@ -107,30 +107,31 @@ export default {
           .includes(this.searchInput.toLowerCase())
       );
     },
+    remainingVisibleOptions() {
+      return this.filteredOptions
+        .slice(this.maxOptionsToShowBeforeCollapse)
+        .filter((option) => option.is_selected);
+    },
     visibleOptions() {
-      if (!this.showCollapseButton || this.showLess)
+      if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
         return this.filteredOptions;
 
-      const setOfFirstMaxOptionsToShowAndAllSelectedOptions = new Set(
-        this.filteredOptions
-          .slice(0, this.maxOptionsToShowBeforeCollapse)
-          .concat(this.filteredOptions.filter((option) => option.is_selected))
-      );
-      return setOfFirstMaxOptionsToShowAndAllSelectedOptions;
+      return this.filteredOptions
+        .slice(0, this.maxOptionsToShowBeforeCollapse)
+        .concat(this.remainingVisibleOptions);
     },
     noResultMessage() {
       return `There is no result matching: ${this.searchInput}`;
     },
     numberToShowInTheCollapseButton() {
-      return this.filteredOptions.length - this.maxOptionsToShowBeforeCollapse;
+      return this.filteredOptions.length - this.visibleOptions.length;
     },
     showCollapseButton() {
       if (this.maxOptionsToShowBeforeCollapse === -1) return false;
-      if (this.numberToShowInTheCollapseButton <= 0) return false;
-      return this.options.length > this.maxOptionsToShowBeforeCollapse;
+      return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
     },
     textToShowInTheCollapseButton() {
-      if (this.showLess) {
+      if (this.isExpanded) {
         return "Show less";
       }
       return `+${this.numberToShowInTheCollapseButton}`;
@@ -148,11 +149,11 @@ export default {
           }
           return option;
         });
-        this.$emit("on-change", this.options);
+        this.$emit("options-change", this.options);
       }
     },
     toggleShowLess() {
-      this.showLess = !this.showLess;
+      this.isExpanded = !this.isExpanded;
     },
   },
 };
