@@ -74,6 +74,30 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
                     "label": "negative",
                 },
             ),
+            RecordFactory(
+                dataset=dataset,
+                fields={
+                    "textId": "00004",
+                    "text": "Why was I charged for getting cash?",
+                    "label": "neutral",
+                },
+            ),
+            RecordFactory(
+                dataset=dataset,
+                fields={
+                    "textId": "00005",
+                    "text": "I tried to make a payment with my card and it was declined.",
+                    "label": "negative",
+                },
+            ),
+            RecordFactory(
+                dataset=dataset,
+                fields={
+                    "textId": "00006",
+                    "text": "My credit card was declined when I tried to make a payment.",
+                    "label": "negative",
+                },
+            ),
         ],
     )
 
@@ -246,7 +270,7 @@ class TestSuiteElasticSearchEngine:
     )
     async def test_search_with_query_string(
         self,
-        elastic_search_engine,
+        elastic_search_engine: SearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
         query: str,
@@ -265,6 +289,30 @@ class TestSuiteElasticSearchEngine:
         sorted_scores.sort(reverse=True)
 
         assert scores == sorted_scores
+
+    async def test_search_with_offset_and_limit(
+        self, elastic_search_engine: SearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
+    ):
+        opensearch.indices.refresh(index=f"rg.{test_banking_sentiment_dataset.id}")
+
+        query = SearchQuery(text=TextQuery(q="card", field="text"))
+
+        first_search = await elastic_search_engine.search(
+            test_banking_sentiment_dataset, query=query, offset=0, limit=2
+        )
+
+        assert len(first_search.items) == 2
+
+        second_search = await elastic_search_engine.search(
+            test_banking_sentiment_dataset, query=query, offset=2, limit=2
+        )
+
+        assert len(second_search.items) == 2
+        first_search_ids = [item.record_id for item in first_search.items]
+        first_search_scores = [item.score for item in first_search.items]
+        for item in second_search.items:
+            assert item.record_id not in first_search_ids
+            assert all(item.score < score for score in first_search_scores)
 
     async def test_add_records(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
         text_fields = TextFieldFactory.create_batch(5)
