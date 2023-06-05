@@ -21,6 +21,7 @@ from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, contains_eager, joinedload, noload
 
 from argilla.server.contexts import accounts
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -37,7 +38,6 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     RecordInclude,
     RecordsCreate,
-    ResponseStatusFilter,
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate

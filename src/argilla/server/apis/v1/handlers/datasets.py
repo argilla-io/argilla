@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_db
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
@@ -37,20 +38,16 @@ from argilla.server.schemas.v1.datasets import (
     RecordInclude,
     Records,
     RecordsCreate,
-    ResponseStatusFilter,
     SearchRecord,
+    SearchRecordsQuery,
     SearchRecordsResult,
 )
-from argilla.server.search_engine import Query as SearchEngineQuery
 from argilla.server.search_engine import (
     SearchEngine,
     UserResponseStatusFilter,
     get_search_engine,
 )
 from argilla.server.security import auth
-
-if TYPE_CHECKING:
-    from argilla.server.search_engine import SearchResponses
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000
@@ -307,7 +304,7 @@ async def search_dataset_records(
     search_engine: SearchEngine = Depends(get_search_engine),
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
-    query: SearchEngineQuery,
+    query: SearchRecordsQuery,
     include: List[RecordInclude] = Query([]),
     response_status: Optional[ResponseStatusFilter] = Query(None),
     offset: int = Query(0, ge=0),
@@ -317,10 +314,13 @@ async def search_dataset_records(
     dataset = _get_dataset(db, dataset_id)
     authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
-    if query.text.field and not datasets.get_field_by_name_and_dataset_id(db, query.text.field, dataset_id):
+    search_engine_query = query.query
+    if search_engine_query.text.field and not datasets.get_field_by_name_and_dataset_id(
+        db, search_engine_query.text.field, dataset_id
+    ):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Field `{query.text.field}` not found in dataset `{dataset_id}`.",
+            detail=f"Field `{search_engine_query.text.field}` not found in dataset `{dataset_id}`.",
         )
 
     user_response_status_filter = None
@@ -332,7 +332,7 @@ async def search_dataset_records(
 
     search_responses = await search_engine.search(
         dataset=dataset,
-        query=query,
+        query=search_engine_query,
         user_response_status_filter=user_response_status_filter,
         offset=offset,
         limit=limit,

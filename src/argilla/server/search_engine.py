@@ -20,6 +20,7 @@ from opensearchpy import AsyncOpenSearch, helpers
 from pydantic import BaseModel
 from pydantic.utils import GetterDict
 
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     Field,
@@ -31,7 +32,6 @@ from argilla.server.models import (
     ResponseStatus,
     User,
 )
-from argilla.server.schemas.v1.datasets import ResponseStatusFilter
 from argilla.server.settings import settings
 
 
