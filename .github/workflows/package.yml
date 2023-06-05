@@ -248,7 +248,7 @@ jobs:
         if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
         run: |
           pip install -U build
-          scripts/build_distribution.sh
+          docker/scripts/build_distribution.sh
 
       - name: Upload package artifact
         if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
