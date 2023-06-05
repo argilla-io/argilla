@@ -5,10 +5,10 @@
 !dist/*.whl
 
 # Scripts
-!scripts/start_argilla_server.sh
-!scripts/wait-for-it.sh
-!scripts/start_quickstart_argilla.sh
-!scripts/load_data.py
+!docker/scripts/start_argilla_server.sh
+!docker/scripts/wait-for-it.sh
+!docker/scripts/start_quickstart_argilla.sh
+!docker/scripts/load_data.py
 
 # Package dependencies
-!quickstart.requirements.txt
+!docker/quickstart.requirements.txt
