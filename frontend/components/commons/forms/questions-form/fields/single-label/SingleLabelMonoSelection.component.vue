@@ -15,9 +15,18 @@
           type="button"
           class="show-less-button cursor-pointer"
           v-if="showCollapseButton"
-          v-text="textToShowInTheCollapseButton"
           @click="toggleShowLess"
-        />
+        >
+          <span
+            :class="showLess ? '--less' : '--more'"
+            v-text="textToShowInTheCollapseButton"
+          />
+          <svgicon
+            width="18"
+            height="18"
+            :name="iconToShowInTheCollapseButton"
+          />
+        </button>
       </div>
     </div>
     <transition-group
@@ -45,11 +54,6 @@
         />
       </div>
     </transition-group>
-    <i
-      class="no-result"
-      v-if="!filteredOptions.length"
-      v-text="noResultMessage"
-    />
   </div>
 </template>
 
@@ -121,9 +125,12 @@ export default {
     },
     textToShowInTheCollapseButton() {
       if (this.showLess) {
-        return "Show less";
+        return "Less";
       }
       return `+${this.numberToShowInTheCollapseButton}`;
+    },
+    iconToShowInTheCollapseButton() {
+      return this.showLess ? "chevron-up" : "chevron-down";
     },
   },
   methods: {
@@ -154,6 +161,7 @@ export default {
   .component-header {
     display: grid;
     grid-template-columns: 1fr auto;
+    align-items: center;
   }
   .inputs-area {
     display: inline-flex;
@@ -168,12 +176,22 @@ export default {
 }
 
 .show-less-button {
+  display: flex;
+  align-items: center;
+  gap: $base-space;
   background: none;
   border: none;
-  color: rgba(0, 0, 0, 0.6);
+  color: $black-37;
+  font-weight: 500;
   text-decoration: none;
-  &:hover {
-    color: rgba(0, 0, 0, 0.87);
+  .--more {
+    border-radius: 20px;
+    border: 1px solid $black-10;
+    @include font-size(12px);
+    padding: 2px 4px;
+  }
+  .svg-icon {
+    border-radius: $border-radius;
   }
 }
 
@@ -181,12 +199,12 @@ export default {
   display: flex;
   width: 100%;
   border-radius: 50em;
-  height: 40px;
+  height: 32px;
   background: palette(purple, 800);
   outline: none;
-  padding-left: 16px;
-  padding-right: 16px;
-  line-height: 40px;
+  padding-left: 12px;
+  padding-right: 12px;
+  line-height: 32px;
   font-weight: 500;
   overflow: hidden;
   color: palette(purple, 200);

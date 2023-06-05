@@ -68,12 +68,12 @@ export default {
   display: flex;
   width: 100%;
   border-radius: 50em;
-  height: 40px;
+  height: 32px;
   background: palette(purple, 800);
   outline: none;
-  padding-left: 16px;
-  padding-right: 16px;
-  line-height: 40px;
+  padding-left: 12px;
+  padding-right: 12px;
+  line-height: 32px;
   font-weight: 500;
   overflow: hidden;
   color: palette(purple, 200);
