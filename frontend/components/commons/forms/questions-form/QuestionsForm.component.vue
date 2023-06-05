@@ -593,12 +593,10 @@ export default {
   border-radius: $border-radius-m;
   box-shadow: $shadow;
   &__header {
-    display: flex;
     align-items: baseline;
-    gap: $base-space * 2;
   }
   &__title {
-    margin: 0;
+    margin: 0 0 4px 0;
     color: $black-87;
   }
   &__guidelines-link {
@@ -608,6 +606,10 @@ export default {
     a {
       color: $black-37;
       outline: 0;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
   &__content {
