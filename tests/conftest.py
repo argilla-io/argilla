@@ -26,6 +26,7 @@ from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.database import Base, get_db
 from argilla.server.models import User, UserRole, Workspace
+from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
 from fastapi.testclient import TestClient
@@ -73,13 +74,22 @@ def db(connection: "Connection") -> Generator["Session", None, None]:
 
 
 @pytest.fixture(scope="function")
-def client(request) -> Generator[TestClient, None, None]:
+def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
+    return mocker.AsyncMock(SearchEngine)
+
+
+@pytest.fixture(scope="function")
+def client(request, mock_search_engine: SearchEngine) -> Generator[TestClient, None, None]:
     session = TestSession()
 
     def override_get_db():
         yield session
 
+    async def override_get_search_engine():
+        yield mock_search_engine
+
     argilla_app.dependency_overrides[get_db] = override_get_db
+    argilla_app.dependency_overrides[get_search_engine] = override_get_search_engine
 
     raise_server_exceptions = request.param if hasattr(request, "param") else False
     with TestClient(app, raise_server_exceptions=raise_server_exceptions) as client:
