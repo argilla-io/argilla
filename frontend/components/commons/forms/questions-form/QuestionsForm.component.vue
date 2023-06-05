@@ -42,9 +42,7 @@
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           :visibleOptions="input.settings.visible_options"
-          :optionsThresholdToEnableSeach="
-            OPTIONS_THRESHOLD_TO_ENABLE_SEARCH
-          "
+          :optionsThresholdToEnableSeach="OPTIONS_THRESHOLD_TO_ENABLE_SEARCH"
         />
 
         <MultiLabelComponent
@@ -55,9 +53,7 @@
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
           :visibleOptions="input.settings.visible_options"
-          :optionsThresholdToEnableSeach="
-            OPTIONS_THRESHOLD_TO_ENABLE_SEARCH
-          "
+          :optionsThresholdToEnableSeach="OPTIONS_THRESHOLD_TO_ENABLE_SEARCH"
         />
 
         <RatingComponent
@@ -155,8 +151,7 @@ export default {
       inputs: [],
       renderForm: 0,
       isError: false,
-      OPTIONS_THRESHOLD_TO_ENABLE_SEARCH:
-        OPTIONS_THRESHOLD_TO_ENABLE_SEARCH,
+      OPTIONS_THRESHOLD_TO_ENABLE_SEARCH: OPTIONS_THRESHOLD_TO_ENABLE_SEARCH,
     };
   },
   computed: {
