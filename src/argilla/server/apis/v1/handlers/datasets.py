@@ -338,7 +338,11 @@ async def search_dataset_records(
 
     record_id_score_map = {response.record_id: response.score for response in search_responses.items}
     records = datasets.get_records_by_ids(
-        db=db, dataset_id=dataset_id, record_ids=list(record_id_score_map.keys()), include=include
+        db=db,
+        dataset_id=dataset_id,
+        record_ids=list(record_id_score_map.keys()),
+        include=include,
+        user_id=current_user.id,
     )
 
     return SearchRecordsResult(

@@ -190,11 +190,20 @@ def get_record_by_id(db: Session, record_id: UUID):
 
 
 def get_records_by_ids(
-    db: Session, dataset_id: UUID, record_ids: List[UUID], include: List[RecordInclude] = []
+    db: Session,
+    dataset_id: UUID,
+    record_ids: List[UUID],
+    include: List[RecordInclude] = [],
+    user_id: Optional[UUID] = None,
 ) -> List[Record]:
     query = db.query(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
     if RecordInclude.responses in include:
-        query = query.options(joinedload(Record.responses))
+        if user_id:
+            query = query.outerjoin(
+                Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
+            ).options(contains_eager(Record.responses))
+        else:
+            query = query.options(joinedload(Record.responses))
     else:
         query = query.options(noload(Record.responses))
     return query.all()
