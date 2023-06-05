@@ -35,12 +35,12 @@ You can launch Opensearch with Docker as follows:
 ```bash
 
 mkdir argilla & cd argilla
-wget https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.opensearch.yaml
+wget https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.opensearch.yaml
 docker-compose up -d
 
 ```
 
-Alternatively, you can download the [docker-compose](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.opensearch.yaml) manually and then run:
+Alternatively, you can download the [docker-compose](https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.opensearch.yaml) manually and then run:
 
 ```bash
 
@@ -53,11 +53,11 @@ You can launch Elasticsearch with Docker as follows:
 ```bash
 
 mkdir argilla & cd argilla
-wget https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.elasticsearch.yaml
+wget https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.elasticsearch.yaml
 docker-compose up -d
 
 ```
-Alternatively, you can download the [docker-compose](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.elasticsearch.yaml) manually and then run:
+Alternatively, you can download the [docker-compose](https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.elasticsearch.yaml) manually and then run:
 
 ```bash
 
