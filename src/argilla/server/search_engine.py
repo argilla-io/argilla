@@ -200,10 +200,9 @@ class SearchEngine:
 
         response = await self.client.search(index=self._index_name_for_dataset(dataset), body=body)
 
-        items = []
-        for hit in response["hits"]["hits"]:
-            items.append(SearchResponseItem(record_id=UUID(hit["_id"]), score=hit["_score"]))
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
+        items = [
+            SearchResponseItem(record_id=UUID(hit["_id"]), score=hit["_score"]) for hit in response["hits"]["hits"]
+        ]
 
         return SearchResponses(items=items)
 
