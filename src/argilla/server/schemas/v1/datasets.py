@@ -351,7 +351,7 @@ class RecordsCreate(BaseModel):
 
 class SearchRecord(BaseModel):
     record: Record
-    query_score: float
+    query_score: Optional[float]
 
 
 class SearchRecordsResult(BaseModel):
