@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, Generator, Iterable, List, Optional, Union
+from typing import Any, AsyncGenerator, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
 from opensearchpy import AsyncOpenSearch, helpers
@@ -174,6 +174,7 @@ class SearchEngine:
         dataset: Dataset,
         query: Union[Query, str],
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        offset: int = 0,
         limit: int = 100,
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
@@ -193,21 +194,16 @@ class SearchEngine:
             "_source": False,
             "query": {"bool": bool_query},
             "sort": ["_score", {"id": "asc"}],
+            "from": offset,
+            "size": limit,
         }
-        # TODO: Work on search pagination after endpoint integration
-        next_page_token = None
-        if next_page_token:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
-            body["search_after"] = next_page_token
 
-        response = await self.client.search(index=self._index_name_for_dataset(dataset), size=limit, body=body)
+        response = await self.client.search(index=self._index_name_for_dataset(dataset), body=body)
 
         items = []
-        next_page_token = None
         for hit in response["hits"]["hits"]:
             items.append(SearchResponseItem(record_id=UUID(hit["_id"]), score=hit["_score"]))
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
-            next_page_token = hit.get("_sort")
 
         return SearchResponses(items=items)
 
@@ -278,7 +274,7 @@ class SearchEngine:
         return f"rg.{dataset.id}"
 
 
-async def get_search_engine() -> Generator[SearchEngine, None, None]:
+async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
     config = dict(
         hosts=settings.elasticsearch,
         verify_certs=settings.elasticsearch_ssl_verify,
