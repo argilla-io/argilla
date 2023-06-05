@@ -138,25 +138,18 @@ export default {
   },
   methods: {
     onSelect({ id, is_selected }) {
-      this.multiple ||
-        this.tranformOptionsForMonoSelectionAndEmitNewOptions({
-          id,
-          is_selected,
+      if (this.multiple) return;
+      else {
+        this.options.map((option) => {
+          if (option.id === id) {
+            option.is_selected = is_selected;
+          } else {
+            option.is_selected = false;
+          }
+          return option;
         });
-    },
-    tranformOptionsForMonoSelectionAndEmitNewOptions({ id, is_selected }) {
-      this.factoryOptionsForMonoSelection({ id, is_selected });
-      this.$emit("on-change", this.options);
-    },
-    factoryOptionsForMonoSelection({ id, is_selected }) {
-      this.options.map((option) => {
-        if (option.id === id) {
-          option.is_selected = is_selected;
-        } else {
-          option.is_selected = false;
-        }
-        return option;
-      });
+        this.$emit("on-change", this.options);
+      }
     },
     toggleShowLess() {
       this.showLess = !this.showLess;
