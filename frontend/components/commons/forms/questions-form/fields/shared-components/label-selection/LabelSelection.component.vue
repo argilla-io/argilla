@@ -3,6 +3,7 @@
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
+          ref="searchComponentRef"
           v-if="showSearch"
           v-model="searchInput"
           :searchRef="searchRef"
@@ -11,6 +12,7 @@
       </div>
       <div class="right-header">
         <button
+          ref="showLessButtonRef"
           type="button"
           class="show-less-button cursor-pointer"
           v-if="showCollapseButton"
@@ -20,6 +22,7 @@
       </div>
     </div>
     <transition-group
+      ref="inputsAreaRef"
       :key="searchInput"
       name="shuffle"
       class="inputs-area"
