@@ -101,19 +101,22 @@ export default {
   },
   computed: {
     filteredOptions() {
-      return this.options
-        .filter((option) =>
-          String(option.text)
-            .toLowerCase()
-            .includes(this.searchInput.toLowerCase())
-        )
-        .sort((a, b) => b.is_selected - a.is_selected);
+      return this.options.filter((option) =>
+        String(option.text)
+          .toLowerCase()
+          .includes(this.searchInput.toLowerCase())
+      );
     },
     visibleOptions() {
       if (!this.showCollapseButton || this.showLess)
         return this.filteredOptions;
 
-      return this.filteredOptions.slice(0, this.maxOptionsToShowBeforeCollapse);
+      const setOfFirstMaxOptionsToShowAndAllSelectedOptions = new Set(
+        this.filteredOptions
+          .slice(0, this.maxOptionsToShowBeforeCollapse)
+          .concat(this.filteredOptions.filter((option) => option.is_selected))
+      );
+      return setOfFirstMaxOptionsToShowAndAllSelectedOptions;
     },
     noResultMessage() {
       return `There is no result matching: ${this.searchInput}`;
