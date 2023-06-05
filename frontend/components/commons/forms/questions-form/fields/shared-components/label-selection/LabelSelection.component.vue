@@ -141,7 +141,7 @@ export default {
     onSelect({ id, is_selected }) {
       if (this.multiple) return;
       else {
-        this.options.map((option) => {
+        this.options.forEach((option) => {
           if (option.id === id) {
             option.is_selected = is_selected;
           } else {
@@ -149,7 +149,6 @@ export default {
           }
           return option;
         });
-        this.$emit("options-change", this.options);
       }
     },
     toggleShowLess() {
