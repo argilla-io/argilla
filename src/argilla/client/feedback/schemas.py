@@ -25,8 +25,10 @@ from pydantic import (
     BaseModel,
     Extra,
     Field,
+    PositiveInt,
     StrictInt,
     StrictStr,
+    root_validator,
     validator,
 )
 
@@ -84,16 +86,19 @@ class FieldSchema(BaseModel):
             return values["name"].capitalize()
         return v
 
+    class Config:
+        validate_assignment = True
+        extra = Extra.forbid
+
 
 class TextField(FieldSchema):
     settings: Dict[str, Any] = Field({"type": "text"})
     use_markdown: bool = False
 
-    @validator("use_markdown", always=True)
-    def update_settings_with_use_markdown(cls, v: bool, values: Dict[str, Any]) -> bool:
-        if v:
-            values["settings"]["use_markdown"] = v
-        return False
+    @root_validator
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["use_markdown"] = values.get("use_markdown", False)
+        return values
 
 
 FIELD_TYPE_TO_PYTHON_TYPE = {"text": str}
@@ -112,36 +117,30 @@ class QuestionSchema(BaseModel):
             return values["name"].capitalize()
         return v
 
+    class Config:
+        validate_assignment = True
+        extra = Extra.forbid
+
 
 # TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
 class TextQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "text", "use_markdown": False})
     use_markdown: bool = False
 
-    @validator("use_markdown", always=True)
-    def update_settings_with_use_markdown(cls, v: bool, values: Dict[str, Any]) -> bool:
-        if v:
-            values["settings"]["use_markdown"] = v
-        return False
-
-    class Config:
-        validate_assignment = True
-        extra = Extra.forbid
+    @root_validator
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["use_markdown"] = values.get("use_markdown", False)
+        return values
 
 
 class RatingQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "rating"})
     values: List[int] = Field(unique_items=True)
 
-    @validator("values", always=True)
-    def update_settings_with_values(cls, v: List[int], values: Dict[str, Any]) -> List[int]:
-        if v:
-            values["settings"]["options"] = [{"value": value} for value in v]
-        return v
-
-    class Config:
-        validate_assignment = True
-        extra = Extra.forbid
+    @root_validator
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["options"] = [{"value": value} for value in values.get("values", [])]
+        return values
 
 
 AllowedFieldTypes = TextField
