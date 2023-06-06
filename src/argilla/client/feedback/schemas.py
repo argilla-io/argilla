@@ -143,8 +143,28 @@ class RatingQuestion(QuestionSchema):
         return values
 
 
+class _LabelQuestion(QuestionSchema):
+    settings: Dict[str, Any] = Field({})
+    labels: List[str] = Field(unique_items=True)
+    visible_labels: Optional[PositiveInt] = None
+
+    @root_validator
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["options"] = [{"value": label} for label in values.get("labels", [])]
+        values["settings"]["visible_options"] = values.get("visible_labels", None)
+        return values
+
+
+class SingleLabelQuestion(_LabelQuestion):
+    settings: Dict[str, Any] = Field({"type": "label_selection"})
+
+
+class MultiLabelQuestion(_LabelQuestion):
+    settings: Dict[str, Any] = Field({"type": "multi_label_selection"})
+
+
 AllowedFieldTypes = TextField
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion]
+AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, SingleLabelQuestion, MultiLabelQuestion]
 
 
 class FeedbackDatasetConfig(BaseModel):
