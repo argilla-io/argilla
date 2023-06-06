@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Generator
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 import argilla
@@ -64,5 +64,5 @@ async def get_async_db() -> Generator["AsyncSession", None, None]:
         await db.close()
 
 
-class Base(DeclarativeBase):
+class Base(AsyncAttrs, DeclarativeBase):
     pass
