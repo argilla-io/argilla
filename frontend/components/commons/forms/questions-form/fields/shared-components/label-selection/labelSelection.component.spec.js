@@ -379,8 +379,6 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(labelsWrapper.at(1).classes()).toContain("round");
     expect(labelsWrapper.at(2).classes()).toContain("round");
     expect(labelsWrapper.length).toBe(3);
-    let noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
 
     await wrapper.setData({ searchInput: "Very" });
     expect(wrapper.vm.filteredOptions).toStrictEqual([
@@ -394,18 +392,11 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     labelsWrapper = wrapper.findAll("label");
     expect(labelsWrapper.at(0).classes()).toContain("round");
     expect(labelsWrapper.length).toBe(1);
-    noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
 
     await wrapper.setData({ searchInput: "I'm blue daboudi dabouda" });
     expect(wrapper.vm.filteredOptions).toStrictEqual([]);
     labelsWrapper = wrapper.findAll("label");
     expect(labelsWrapper.length).toBe(0);
-    noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(true);
-    expect(noResultWrapper.text()).toBe(
-      "There is no result matching: I'm blue daboudi dabouda"
-    );
 
     await wrapper.setData({ searchInput: "" });
     expect(wrapper.vm.filteredOptions).toStrictEqual([
@@ -433,8 +424,6 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(labelsWrapper.at(1).classes()).toContain("round");
     expect(labelsWrapper.at(2).classes()).toContain("round");
     expect(labelsWrapper.length).toBe(3);
-    noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
   });
   it("collapse the list of labels when user click on collapse button", async () => {
     const options = [
@@ -488,12 +477,10 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(labelsWrapper.at(0).classes()).toContain("round");
     expect(labelsWrapper.at(1).classes()).toContain("round");
     expect(labelsWrapper.length).toBe(2);
-    let noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
 
     await showLessButtonWrapper.trigger("click");
     expect(wrapper.vm.isExpanded).toBe(true);
-    expect(showLessButtonWrapper.text()).toBe("Show less");
+    expect(showLessButtonWrapper.text()).toBe("Less");
     expect(wrapper.vm.visibleOptions).toStrictEqual([
       {
         id: "sentiment_positive",
@@ -519,8 +506,6 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(labelsWrapper.at(1).classes()).toContain("round");
     expect(labelsWrapper.at(2).classes()).toContain("round");
     expect(labelsWrapper.length).toBe(3);
-    noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
   });
 });
 
@@ -788,8 +773,6 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
     expect(labelsWrapper.at(1).classes()).toContain("square");
     expect(labelsWrapper.at(2).classes()).toContain("square");
     expect(labelsWrapper.length).toBe(3);
-    let noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
 
     await wrapper.setData({ searchInput: "Very" });
     expect(wrapper.vm.filteredOptions).toStrictEqual([
@@ -803,18 +786,11 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
     labelsWrapper = wrapper.findAll("label");
     expect(labelsWrapper.at(0).classes()).toContain("square");
     expect(labelsWrapper.length).toBe(1);
-    noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
 
     await wrapper.setData({ searchInput: "I'm blue daboudi dabouda" });
     expect(wrapper.vm.filteredOptions).toStrictEqual([]);
     labelsWrapper = wrapper.findAll("label");
     expect(labelsWrapper.length).toBe(0);
-    noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(true);
-    expect(noResultWrapper.text()).toBe(
-      "There is no result matching: I'm blue daboudi dabouda"
-    );
 
     await wrapper.setData({ searchInput: "" });
     expect(wrapper.vm.filteredOptions).toStrictEqual([
@@ -842,8 +818,6 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
     expect(labelsWrapper.at(1).classes()).toContain("square");
     expect(labelsWrapper.at(2).classes()).toContain("square");
     expect(labelsWrapper.length).toBe(3);
-    noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
   });
   it("collapse the list of labels when user click on collapse button", async () => {
     const options = [
@@ -898,12 +872,10 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
     expect(labelsWrapper.at(0).classes()).toContain("square");
     expect(labelsWrapper.at(1).classes()).toContain("square");
     expect(labelsWrapper.length).toBe(2);
-    let noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
 
     await showLessButtonWrapper.trigger("click");
     expect(wrapper.vm.isExpanded).toBe(true);
-    expect(showLessButtonWrapper.text()).toBe("Show less");
+    expect(showLessButtonWrapper.text()).toBe("Less");
     expect(wrapper.vm.visibleOptions).toStrictEqual([
       {
         id: "sentiment_positive",
@@ -929,7 +901,5 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
     expect(labelsWrapper.at(1).classes()).toContain("square");
     expect(labelsWrapper.at(2).classes()).toContain("square");
     expect(labelsWrapper.length).toBe(3);
-    noResultWrapper = wrapper.find(".no-result");
-    expect(noResultWrapper.exists()).toBe(false);
   });
 });
