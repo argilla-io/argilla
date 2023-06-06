@@ -132,6 +132,7 @@ export default {
         this.$router.push({
           query: {
             ...this.$route.query,
+            _search: "",
             _page: 1,
             _status: RECORD_STATUS.PENDING.toLowerCase(),
           },
