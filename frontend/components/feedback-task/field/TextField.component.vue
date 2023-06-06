@@ -1,6 +1,6 @@
 <template>
   <div class="text_field_component">
-    <div class="title-area --body1">
+    <div class="title-area --body2">
       <span v-text="title" />
       <BaseActionTooltip tooltip="Copied" tooltip-position="left">
         <BaseButton
@@ -8,7 +8,7 @@
           class="text_field_component__copy-button"
           @click.prevent="$copyToClipboard(fieldText)"
         >
-          <svgicon color="#acacac" name="copy" width="16" height="16" />
+          <svgicon color="#acacac" name="copy" width="18" height="18" />
         </BaseButton>
       </BaseActionTooltip>
     </div>
