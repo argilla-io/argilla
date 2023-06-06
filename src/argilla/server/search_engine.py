@@ -78,7 +78,7 @@ class Query:
 @dataclasses.dataclass
 class UserResponseStatusFilter:
     user: User
-    statuses: List[ResponseStatusFilter]
+    status: ResponseStatusFilter
 
 
 @dataclasses.dataclass
@@ -184,11 +184,9 @@ class SearchEngine:
 
         text_query = self._text_query_builder(dataset, text=query.text)
 
-        bool_query = {"must": [text_query]}
+        bool_query: dict = {"must": [text_query]}
         if user_response_status_filter:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
-            user_response_status_field = f"responses.{user_response_status_filter.user.username}.status"
-            bool_query["filter"] = [{"terms": {user_response_status_field: user_response_status_filter.statuses}}]
+            bool_query["filter"] = self._response_status_filter_builder(user_response_status_filter)
 
         body = {
             "_source": False,
@@ -271,6 +269,16 @@ class SearchEngine:
     @staticmethod
     def _index_name_for_dataset(dataset: Dataset):
         return f"rg.{dataset.id}"
+
+    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter):
+        user_response_field = f"responses.{status_filter.user.username}"
+
+        if status_filter.status == ResponseStatusFilter.missing:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
+            return [{"bool": {"must_not": {"exists": {"field": user_response_field}}}}]
+        else:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
+            return [{"term": {f"{user_response_field}.status": status_filter.status}}]
 
 
 async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:

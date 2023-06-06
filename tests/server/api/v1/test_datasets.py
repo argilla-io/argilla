@@ -2623,7 +2623,7 @@ def test_search_dataset_records_with_response_status_filter(
     mock_search_engine.search.assert_called_once_with(
         dataset=dataset,
         query=Query(text=TextQuery(q="Hello", field="input")),
-        user_response_status_filter=UserResponseStatusFilter(user=admin, statuses=[ResponseStatus.submitted]),
+        user_response_status_filter=UserResponseStatusFilter(user=admin, status=ResponseStatus.submitted),
         offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )

@@ -168,7 +168,7 @@ class DatasetPolicyV1:
         return actor.is_admin
 
     @classmethod
-    def search_records(cls, dataset: Dataset) -> bool:
+    def search_records(cls, dataset: Dataset) -> PolicyAction:
         return lambda actor: (
             actor.is_admin
             or bool(
