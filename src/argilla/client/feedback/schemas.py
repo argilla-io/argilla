@@ -75,7 +75,7 @@ class FeedbackRecord(BaseModel):
 class FieldSchema(BaseModel):
     name: str
     title: Optional[str] = None
-    required: Optional[bool] = True
+    required: bool = True
     settings: Dict[str, Any]
 
     @validator("title", always=True)
@@ -103,7 +103,7 @@ class QuestionSchema(BaseModel):
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
-    required: Optional[bool] = True
+    required: bool = True
     settings: Dict[str, Any]
 
     @validator("title", always=True)
