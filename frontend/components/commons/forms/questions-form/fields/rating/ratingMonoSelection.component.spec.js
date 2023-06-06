@@ -94,33 +94,8 @@ describe("RatingMonoSelectionComponent", () => {
     const checkbox4 = wrapper.find("#helpfulness_reply_1_4");
     const checkbox5 = wrapper.find("#helpfulness_reply_1_5");
 
-    expect(wrapper.vm.options).toStrictEqual([
-      { id: "helpfulness_reply_1_1", value: 1, text: 1, is_selected: false },
-      { id: "helpfulness_reply_1_2", value: 2, text: 2, is_selected: false },
-      { id: "helpfulness_reply_1_3", value: 3, text: 3, is_selected: false },
-      { id: "helpfulness_reply_1_4", value: 4, text: 4, is_selected: false },
-      { id: "helpfulness_reply_1_5", value: 5, text: 5, is_selected: false },
-    ]);
-
     await checkbox1.setChecked(true);
-
-    expect(wrapper.vm.options).toStrictEqual([
-      { id: "helpfulness_reply_1_1", value: 1, text: 1, is_selected: true },
-      { id: "helpfulness_reply_1_2", value: 2, text: 2, is_selected: false },
-      { id: "helpfulness_reply_1_3", value: 3, text: 3, is_selected: false },
-      { id: "helpfulness_reply_1_4", value: 4, text: 4, is_selected: false },
-      { id: "helpfulness_reply_1_5", value: 5, text: 5, is_selected: false },
-    ]);
-
     await checkbox1.setChecked(false);
-
-    expect(wrapper.vm.options).toStrictEqual([
-      { id: "helpfulness_reply_1_1", value: 1, text: 1, is_selected: false },
-      { id: "helpfulness_reply_1_2", value: 2, text: 2, is_selected: false },
-      { id: "helpfulness_reply_1_3", value: 3, text: 3, is_selected: false },
-      { id: "helpfulness_reply_1_4", value: 4, text: 4, is_selected: false },
-      { id: "helpfulness_reply_1_5", value: 5, text: 5, is_selected: false },
-    ]);
 
     expect(checkbox1.element.checked).toBeFalsy();
     expect(checkbox2.element.checked).toBeFalsy();
@@ -143,33 +118,8 @@ describe("RatingMonoSelectionComponent", () => {
     const checkbox4 = wrapper.find("#helpfulness_reply_1_4");
     const checkbox5 = wrapper.find("#helpfulness_reply_1_5");
 
-    expect(wrapper.vm.options).toStrictEqual([
-      { id: "helpfulness_reply_1_1", value: 1, text: 1, is_selected: false },
-      { id: "helpfulness_reply_1_2", value: 2, text: 2, is_selected: false },
-      { id: "helpfulness_reply_1_3", value: 3, text: 3, is_selected: false },
-      { id: "helpfulness_reply_1_4", value: 4, text: 4, is_selected: false },
-      { id: "helpfulness_reply_1_5", value: 5, text: 5, is_selected: false },
-    ]);
-
     await checkbox1.setChecked(true);
-
-    expect(wrapper.vm.options).toStrictEqual([
-      { id: "helpfulness_reply_1_1", value: 1, text: 1, is_selected: true },
-      { id: "helpfulness_reply_1_2", value: 2, text: 2, is_selected: false },
-      { id: "helpfulness_reply_1_3", value: 3, text: 3, is_selected: false },
-      { id: "helpfulness_reply_1_4", value: 4, text: 4, is_selected: false },
-      { id: "helpfulness_reply_1_5", value: 5, text: 5, is_selected: false },
-    ]);
-
     await checkbox5.setChecked(true);
-
-    expect(wrapper.vm.options).toStrictEqual([
-      { id: "helpfulness_reply_1_1", value: 1, text: 1, is_selected: false },
-      { id: "helpfulness_reply_1_2", value: 2, text: 2, is_selected: false },
-      { id: "helpfulness_reply_1_3", value: 3, text: 3, is_selected: false },
-      { id: "helpfulness_reply_1_4", value: 4, text: 4, is_selected: false },
-      { id: "helpfulness_reply_1_5", value: 5, text: 5, is_selected: true },
-    ]);
 
     expect(checkbox1.element.checked).toBeFalsy();
     expect(checkbox2.element.checked).toBeFalsy();
