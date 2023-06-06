@@ -108,7 +108,7 @@ def feedback_dataset_in_argilla(
         " is the Argilla ID of the `rg.FeedbackDataset`."
     )
 
-    httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+    httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
     if (name and workspace) or name:
         if workspace is None:

@@ -305,7 +305,7 @@ class FeedbackDataset:
 
         # TODO(alvarobartt): create `ArgillaMixIn` and `HuggingFaceMixIn` classes to inherit their specific methods
         if self.argilla_id:
-            httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+            httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
             first_batch = datasets_api_v1.get_records(
                 client=httpx_client, id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE
             ).parsed
@@ -446,7 +446,7 @@ class FeedbackDataset:
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
         """
-        httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
         if not name or (not name and not workspace):
             if self.argilla_id is None:
@@ -611,7 +611,7 @@ class FeedbackDataset:
             >>> rg.init(...)
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my_dataset")
         """
-        httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
         dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if not dataset_exists:
