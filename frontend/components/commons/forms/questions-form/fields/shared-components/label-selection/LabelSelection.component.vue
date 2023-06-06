@@ -55,6 +55,7 @@
           }"
           :for="option.id"
           v-text="option.text"
+          :title="option.text"
         />
       </div>
     </transition-group>
@@ -209,8 +210,9 @@ export default {
 }
 
 .label-text {
-  display: flex;
+  display: block;
   width: 100%;
+  max-width: 200px;
   border-radius: 50em;
   height: 32px;
   background: palette(purple, 800);
@@ -222,6 +224,9 @@ export default {
   overflow: hidden;
   color: palette(purple, 200);
   box-shadow: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
