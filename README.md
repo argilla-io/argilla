@@ -26,7 +26,8 @@
 
 <br>
 
-https://user-images.githubusercontent.com/25269220/235918158-359726bb-a479-4239-8c6e-c9e4cdb4fcdf.mp4
+
+https://github.com/argilla-io/argilla/assets/1107111/49e28d64-9799-4cac-be49-19dce0f6bd86
 
 <p align="center">
 <a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
