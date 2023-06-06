@@ -16,9 +16,18 @@
           type="button"
           class="show-less-button cursor-pointer"
           v-if="showCollapseButton"
-          v-text="textToShowInTheCollapseButton"
           @click="toggleShowLess"
-        />
+        >
+          <span
+            :class="isExpanded ? '--less' : '--more'"
+            v-text="textToShowInTheCollapseButton"
+          />
+          <svgicon
+            width="18"
+            height="18"
+            :name="iconToShowInTheCollapseButton"
+          />
+        </button>
       </div>
     </div>
     <transition-group
@@ -49,14 +58,10 @@
           }"
           :for="option.id"
           v-text="option.text"
+          :title="option.text"
         />
       </div>
     </transition-group>
-    <i
-      class="no-result"
-      v-if="!filteredOptions.length"
-      v-text="noResultMessage"
-    />
   </div>
 </template>
 
@@ -135,9 +140,12 @@ export default {
     },
     textToShowInTheCollapseButton() {
       if (this.isExpanded) {
-        return "Show less";
+        return "Less";
       }
       return `+${this.numberToShowInTheCollapseButton}`;
+    },
+    iconToShowInTheCollapseButton() {
+      return this.isExpanded ? "chevron-up" : "chevron-down";
     },
   },
   methods: {
@@ -169,6 +177,7 @@ export default {
   .component-header {
     display: grid;
     grid-template-columns: 1fr auto;
+    align-items: center;
   }
   .inputs-area {
     display: inline-flex;
@@ -184,30 +193,41 @@ export default {
 }
 
 .show-less-button {
-  color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  gap: $base-space;
   background: none;
+  border: none;
+  color: $black-37;
+  font-weight: 500;
   text-decoration: none;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  &:hover {
-    color: rgba(0, 0, 0, 0.87);
-    border-color: rgba(0, 0, 0, 0.87);
+  .--more {
+    border-radius: 20px;
+    border: 1px solid $black-10;
+    @include font-size(12px);
+    padding: 2px 4px;
+  }
+  .svg-icon {
+    border-radius: $border-radius;
   }
 }
 
 .label-text {
-  display: flex;
+  display: block;
   width: 100%;
-  height: 40px;
-  background: palette(purple, 800);
-  outline: none;
-  padding-left: 16px;
-  padding-right: 16px;
-  line-height: 40px;
-  font-weight: 500;
-  overflow: hidden;
-  color: palette(purple, 200);
+  height: 32px;
+  max-width: 200px;
+  padding-inline: 12px;
   box-shadow: 0;
+  border-radius: 50em;
+  background: palette(purple, 800);
+  color: palette(purple, 200);
+  line-height: 32px;
+  font-weight: 500;
+  outline: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
