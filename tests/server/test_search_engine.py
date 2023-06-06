@@ -24,7 +24,7 @@ from argilla.server.search_engine import (
     TextQuery,
     UserResponseStatusFilter,
 )
-from opensearchpy import OpenSearch, RequestError
+from opensearchpy import OpenSearch, RequestError, helpers
 from sqlalchemy.orm import Session
 
 from tests.factories import (
@@ -40,7 +40,35 @@ from tests.factories import (
 )
 
 
-@pytest_asyncio.fixture()
+@pytest.fixture(scope="function")
+def dataset_for_pagination(opensearch: OpenSearch):
+    dataset = DatasetFactory.create()
+    records = RecordFactory.create_batch(size=100, dataset=dataset)
+    index_name = f"rg.{dataset.id}"
+
+    opensearch.indices.create(index=index_name, body={"mappings": {"properties": {"id": {"type": "keyword"}}}})
+
+    bulk_actions = [
+        {
+            "_op_type": "index",
+            "_id": record.id,
+            "_index": index_name,
+            "id": record.id,
+            "fields": {"text": "The same text for all documents"},
+        }
+        for record in records
+    ]
+
+    helpers.bulk(client=opensearch, actions=bulk_actions)
+
+    opensearch.indices.refresh(index=index_name)
+
+    yield dataset
+
+    opensearch.indices.delete(index=index_name)
+
+
+@pytest_asyncio.fixture(scope="function")
 async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
     text_question = TextQuestionFactory()
     rating_question = RatingQuestionFactory()
@@ -296,30 +324,6 @@ class TestSuiteElasticSearchEngine:
 
         assert scores == sorted_scores
 
-    async def test_search_with_offset_and_limit(
-        self, elastic_search_engine: SearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
-    ):
-        opensearch.indices.refresh(index=f"rg.{test_banking_sentiment_dataset.id}")
-
-        query = SearchQuery(text=TextQuery(q="card", field="text"))
-
-        first_search = await elastic_search_engine.search(
-            test_banking_sentiment_dataset, query=query, offset=0, limit=2
-        )
-
-        assert len(first_search.items) == 2
-
-        second_search = await elastic_search_engine.search(
-            test_banking_sentiment_dataset, query=query, offset=2, limit=2
-        )
-
-        assert len(second_search.items) == 2
-        first_search_ids = [item.record_id for item in first_search.items]
-        first_search_scores = [item.score for item in first_search.items]
-        for item in second_search.items:
-            assert item.record_id not in first_search_ids
-            assert all(item.score < score for score in first_search_scores)
-
     @pytest.mark.parametrize(
         "status",
         [
@@ -355,6 +359,24 @@ class TestSuiteElasticSearchEngine:
             user_response_status_filter=UserResponseStatusFilter(user=user, status=status),
         )
         assert len(result.items) == 4
+
+    @pytest.mark.parametrize(("offset", "limit"), [(0, 50), (10, 5), (0, 0), (90, 100)])
+    async def test_search_with_pagination(
+        self,
+        elastic_search_engine: SearchEngine,
+        opensearch: OpenSearch,
+        dataset_for_pagination: Dataset,
+        offset: int,
+        limit: int,
+    ):
+        results = await elastic_search_engine.search(
+            dataset_for_pagination, query="documents", offset=offset, limit=limit
+        )
+
+        assert len(results.items) == min(len(dataset_for_pagination.records) - offset, limit)
+
+        records = sorted(dataset_for_pagination.records, key=lambda r: r.id)
+        assert [record.id for record in records[offset : offset + limit]] == [item.record_id for item in results.items]
 
     async def test_add_records(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
         text_fields = TextFieldFactory.create_batch(5)
