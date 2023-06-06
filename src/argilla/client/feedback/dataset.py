@@ -14,9 +14,7 @@
 
 import logging
 import tempfile
-import warnings
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
-from uuid import UUID
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 try:
     from typing import Literal
@@ -24,19 +22,30 @@ except ImportError:
     from typing_extensions import Literal
 
 from pydantic import (
-    BaseModel,
-    Extra,
-    Field,
-    StrictInt,
-    StrictStr,
     ValidationError,
-    create_model,
     parse_obj_as,
-    validator,
 )
 from tqdm import tqdm
 
 import argilla as rg
+from argilla.client.feedback.constants import (
+    FETCHING_BATCH_SIZE,
+    FIELD_TYPE_TO_PYTHON_TYPE,
+    PUSHING_BATCH_SIZE,
+)
+from argilla.client.feedback.schemas import (
+    FIELD_TYPE_TO_PYTHON_TYPE,
+    FeedbackDatasetConfig,
+    FeedbackRecord,
+    FieldSchema,
+    RatingQuestion,
+    TextField,
+    TextQuestion,
+)
+from argilla.client.feedback.utils import (
+    feedback_dataset_in_argilla,
+    generate_pydantic_schema,
+)
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.utils.dependency import requires_version
 
@@ -50,110 +59,7 @@ if TYPE_CHECKING:
         FeedbackQuestionModel,
     )
 
-FETCHING_BATCH_SIZE = 250
-PUSHING_BATCH_SIZE = 32
-
 _LOGGER = logging.getLogger(__name__)
-
-
-class ValueSchema(BaseModel):
-    value: Union[StrictStr, StrictInt]
-
-
-class ResponseSchema(BaseModel):
-    user_id: Optional[UUID] = None
-    values: Dict[str, ValueSchema]
-    status: Literal["submitted", "discarded"] = "submitted"
-
-    @validator("user_id", always=True)
-    def user_id_must_have_value(cls, v):
-        if not v:
-            warnings.warn(
-                "`user_id` not provided, so it will be set to `None`. Which is not an"
-                " issue, unless you're planning to log the response in Argilla, as "
-                " it will be automatically set to the active `user_id`.",
-                stacklevel=2,
-            )
-        return v
-
-
-class FeedbackRecord(BaseModel):
-    fields: Dict[str, str]
-    responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
-    external_id: Optional[str] = None
-
-    @validator("responses", always=True)
-    def responses_must_be_a_list(cls, v):
-        if not v:
-            return []
-        if isinstance(v, ResponseSchema):
-            return [v]
-        return v
-
-    class Config:
-        extra = Extra.ignore
-
-
-class FieldSchema(BaseModel):
-    name: str
-    title: Optional[str] = None
-    required: Optional[bool] = True
-    settings: Dict[str, Any]
-
-    @validator("title", always=True)
-    def title_must_have_value(cls, v, values):
-        if not v:
-            return values["name"].capitalize()
-        return v
-
-
-class TextField(FieldSchema):
-    settings: Dict[str, Any] = Field({"type": "text"}, const=True)
-
-
-FIELD_TYPE_TO_PYTHON_TYPE = {"text": str}
-
-
-class QuestionSchema(BaseModel):
-    name: str
-    title: Optional[str] = None
-    description: Optional[str] = None
-    required: Optional[bool] = True
-    settings: Dict[str, Any]
-
-    @validator("title", always=True)
-    def title_must_have_value(cls, v, values):
-        if not v:
-            return values["name"].capitalize()
-        return v
-
-
-# TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
-class TextQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({"type": "text"}, const=True)
-
-
-class RatingQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({"type": "rating"})
-    values: List[int] = Field(unique_items=True)
-
-    @validator("values", always=True)
-    def update_settings_with_values(cls, v, values):
-        if v:
-            values["settings"]["options"] = [{"value": value} for value in v]
-        return v
-
-    class Config:
-        validate_assignment = True
-
-
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion]
-
-
-class FeedbackDatasetConfig(BaseModel):
-    fields: List[FieldSchema]
-    questions: List[AllowedQuestionTypes]
-    guidelines: Optional[str] = None
 
 
 class FeedbackDataset:
@@ -234,7 +140,7 @@ class FeedbackDataset:
         self,
         *,
         fields: List[FieldSchema],
-        questions: List[AllowedQuestionTypes],
+        questions: List[Union[TextQuestion, RatingQuestion]],
         guidelines: Optional[str] = None,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.
@@ -399,7 +305,7 @@ class FeedbackDataset:
 
         # TODO(alvarobartt): create `ArgillaMixIn` and `HuggingFaceMixIn` classes to inherit their specific methods
         if self.argilla_id:
-            httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+            httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
             first_batch = datasets_api_v1.get_records(
                 client=httpx_client, id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE
             ).parsed
@@ -540,7 +446,7 @@ class FeedbackDataset:
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
         """
-        httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
         if not name or (not name and not workspace):
             if self.argilla_id is None:
@@ -705,7 +611,7 @@ class FeedbackDataset:
             >>> rg.init(...)
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my_dataset")
         """
-        httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
         dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if not dataset_exists:
@@ -994,161 +900,3 @@ class FeedbackDataset:
             )
         del hfds
         return cls
-
-
-def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "FieldsSchema") -> BaseModel:
-    """Generates a `pydantic.BaseModel` schema from a list of `FieldSchema` objects to validate
-    the fields of a `FeedbackDataset` object before inserting them.
-
-    Args:
-        fields: the list of `FieldSchema` objects to generate the schema from.
-        name: the name of the `pydantic.BaseModel` schema to generate. Defaults to "FieldsSchema".
-
-    Returns:
-        A `pydantic.BaseModel` schema to validate the fields of a `FeedbackDataset` object before
-        inserting them.
-
-    Raises:
-        ValueError: if one of the fields has an unsupported type.
-
-    Examples:
-        >>> from argilla.client.feedback import TextField, generate_pydantic_schema
-        >>> fields = [
-        ...     TextField(name="text", required=True),
-        ...     TextField(name="label", required=True),
-        ... ]
-        >>> FieldsSchema = generate_pydantic_schema(fields)
-        >>> FieldsSchema(text="Hello", label="World")
-        FieldsSchema(text='Hello', label='World')
-    """
-    fields_schema = {}
-    for field in fields:
-        if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
-            raise ValueError(
-                f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment only the"
-                f" following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
-            )
-        fields_schema.update(
-            {field.name: (FIELD_TYPE_TO_PYTHON_TYPE[field.settings["type"]], ... if field.required else None)}
-        )
-    return create_model(name, **fields_schema)
-
-
-def create_feedback_dataset(
-    name: str,
-    fields: List[FieldSchema],
-    questions: List[QuestionSchema],
-    workspace: Union[str, rg.Workspace] = None,
-    guidelines: Optional[str] = None,
-) -> FeedbackDataset:
-    """Creates a `FeedbackDataset` object and pushes it to Argilla.
-
-    Args:
-        name: the name of dataset in Argilla (must be unique per workspace).
-        fields: the list of `FieldSchema` objects to define the schema of the records pushed to Argilla.
-        questions: the list of `QuestionSchema` objects to define the questions to ask to the annotator.
-        workspace: the name of the workspace in Argilla where to push the dataset. Defaults to the default workspace.
-        guidelines: the annotation guidelines to help the annotator understand the dataset to annotate and how to annotate it.
-            Defaults to `None`.
-
-    Returns:
-        The `FeedbackDataset` object created and pushed to Argilla.
-
-    Raises:
-        ValueError: if one of the fields has an unsupported type.
-        Exception: if the dataset could not be pushed to Argilla.
-
-    Examples:
-        >>> import argilla as rg
-        >>> rg.init(api_url="...", api_key="...")
-        >>> fds = rg.create_feedback_dataset(
-        ...     name="my-dataset",
-        ...     fields=[
-        ...         rg.TextField(name="text", required=True),
-        ...         rg.TextField(name="label", required=True),
-        ...     ],
-        ...     questions=[
-        ...         rg.TextQuestion(
-        ...             name="question-1",
-        ...             description="This is the first question",
-        ...             required=True,
-        ...         ),
-        ...         rg.RatingQuestion(
-        ...             name="question-2",
-        ...             description="This is the second question",
-        ...             required=True,
-        ...             values=[1, 2, 3, 4, 5],
-        ...         ),
-        ...     ],
-        ...     guidelines="These are the annotation guidelines.",
-        ... )
-    """
-    fds = FeedbackDataset(
-        fields=fields,
-        questions=questions,
-        guidelines=guidelines,
-    )
-    fds.push_to_argilla(name=name, workspace=workspace)
-    return fds
-
-
-def feedback_dataset_in_argilla(
-    name: Optional[str] = None,
-    *,
-    workspace: Optional[Union[str, rg.Workspace]] = None,
-    id: Optional[str] = None,
-) -> Tuple[bool, Optional[FeedbackDataset]]:
-    """Checks whether a `FeedbackDataset` exists in Argilla or not, based on the `name`, `id`, or the combination of
-    `name` and `workspace`.
-
-    Args:
-        name: the name of the `FeedbackDataset` in Argilla.
-        workspace: the name of the workspace in Argilla where the `FeedbackDataset` is located.
-        id: the Argilla ID of the `FeedbackDataset`.
-
-    Returns:
-        A tuple with a boolean indicating whether the `FeedbackDataset` exists in Argilla or not, and the `FeedbackDataset`
-        object if it exists, `None` otherwise.
-
-    Raises:
-        ValueError: if the `workspace` is not a `rg.Workspace` instance or a string.
-        Exception: if the `FeedbackDataset` could not be listed from Argilla.
-
-    Examples:
-        >>> import argilla as rg
-        >>> rg.init(api_url="...", api_key="...")
-        >>> from argilla.client.feedback import feedback_dataset_in_argilla
-        >>> fds_exists, fds_cls = feedback_dataset_in_argilla(name="my-dataset")
-    """
-    assert name or (name and workspace) or id, (
-        "You must provide either the `name` and `workspace` (the latter just if"
-        " applicable, if not the default `workspace` will be used) or the `id`, which"
-        " is the Argilla ID of the `rg.FeedbackDataset`."
-    )
-
-    httpx_client: "httpx.Client" = rg.active_client()._client.httpx
-
-    if name or (name and workspace):
-        if workspace is None:
-            workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
-
-        if isinstance(workspace, str):
-            workspace = rg.Workspace.from_name(workspace)
-
-        if not isinstance(workspace, rg.Workspace):
-            raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
-
-        try:
-            datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
-        except Exception as e:
-            raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
-
-        for dataset in datasets:
-            if dataset.name == name and dataset.workspace_id == workspace.id:
-                return (True, dataset)
-        return (False, None)
-    else:
-        try:
-            return (True, datasets_api_v1.get_dataset(client=httpx_client, id=id).parsed)
-        except:
-            return (False, None)

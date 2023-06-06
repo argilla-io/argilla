@@ -2,6 +2,7 @@
   <div class="search-area" @click="focusInSearch">
     <BaseIconWithBadge
       class="icon-search"
+      :class="value?.length ? '--close' : '--search'"
       :icon="value?.length ? 'close' : 'search'"
       :show-badge="false"
       iconColor="#acacac"
@@ -62,20 +63,32 @@ export default {
 .search-area {
   display: flex;
   align-items: center;
+  gap: calc($base-space / 2);
   width: 14.5em;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  padding: 0 $base-space;
+  border: 1px solid $black-10;
+  border-radius: 20px;
+  overflow: hidden;
   .icon-search {
     padding: 0;
     background: transparent;
+    width: 20px;
+    height: 20px;
+    transition: none;
+    &.--search {
+      cursor: default;
+    }
+    &.--close {
+      padding: 2px;
+    }
   }
   &:hover {
-    box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.1);
+    border-color: $black-20;
   }
 }
 
 .search-input {
-  height: $base-space * 4;
+  height: 28px;
   width: 100%;
   border: none;
   border-radius: 10px;
