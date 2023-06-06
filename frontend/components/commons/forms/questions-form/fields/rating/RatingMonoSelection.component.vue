@@ -71,8 +71,7 @@ export default {
   height: 32px;
   background: palette(purple, 800);
   outline: none;
-  padding-left: 12px;
-  `padding-inline: 12px`
+  padding-inline: 12px;
   line-height: 32px;
   font-weight: 500;
   overflow: hidden;

@@ -65,10 +65,10 @@ export default {
   align-items: center;
   gap: calc($base-space / 2);
   width: 14.5em;
+  padding: 0 $base-space;
   border: 1px solid $black-10;
   border-radius: 20px;
   overflow: hidden;
-  padding: 0 $base-space;
   .icon-search {
     padding: 0;
     background: transparent;

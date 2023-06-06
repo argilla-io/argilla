@@ -212,21 +212,19 @@ export default {
 .label-text {
   display: block;
   width: 100%;
-  max-width: 200px;
-  border-radius: 50em;
   height: 32px;
+  max-width: 200px;
+  padding-inline: 12px;
+  box-shadow: 0;
+  border-radius: 50em;
   background: palette(purple, 800);
-  outline: none;
-  padding-left: 12px;
-  `padding-inline: 12px`
+  color: palette(purple, 200);
   line-height: 32px;
   font-weight: 500;
-  overflow: hidden;
-  color: palette(purple, 200);
-  box-shadow: 0;
+  outline: none;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
