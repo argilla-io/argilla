@@ -324,10 +324,7 @@ async def search_dataset_records(
 
     user_response_status_filter = None
     if response_status:
-        user_response_status_filter = UserResponseStatusFilter(
-            user=current_user,
-            statuses=[response_status.value],
-        )
+        user_response_status_filter = UserResponseStatusFilter(user=current_user, status=response_status)
 
     search_responses = await search_engine.search(
         dataset=dataset,
