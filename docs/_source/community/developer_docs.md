@@ -51,13 +51,6 @@ To keep a consistent code format, we use [pre-commit](https://pre-commit.com) ho
 pre-commit install
 ```
 
-Install the `commit-msg` hook if you want to check your commit messages in your contributions:
-
-
-```sh
-pre-commit install --hook-type commit-msg
-```
-
 ### Building Frontend static files
 
 Build the static UI files in case you want to work on the UI:
