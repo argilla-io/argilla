@@ -102,7 +102,7 @@ def feedback_dataset_in_argilla(
         >>> from argilla.client.feedback.dataset import feedback_dataset_in_argilla
         >>> fds_exists, fds_cls = feedback_dataset_in_argilla(name="my-dataset")
     """
-    assert name or (name and workspace) or id, (
+    assert (name and workspace) or name or id, (
         "You must provide either the `name` and `workspace` (the latter just if"
         " applicable, if not the default `workspace` will be used) or the `id`, which"
         " is the Argilla ID of the `rg.FeedbackDataset`."
@@ -110,7 +110,7 @@ def feedback_dataset_in_argilla(
 
     httpx_client: "httpx.Client" = rg.active_client()._client.httpx
 
-    if name or (name and workspace):
+    if (name and workspace) or name:
         if workspace is None:
             workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
 
@@ -127,10 +127,10 @@ def feedback_dataset_in_argilla(
 
         for dataset in datasets:
             if dataset.name == name and dataset.workspace_id == workspace.id:
-                return (True, dataset)
-        return (False, None)
+                return True, dataset
+        return False, None
     else:
         try:
-            return (True, datasets_api_v1.get_dataset(client=httpx_client, id=id).parsed)
+            return True, datasets_api_v1.get_dataset(client=httpx_client, id=id).parsed
         except:
-            return (False, None)
+            return False, None

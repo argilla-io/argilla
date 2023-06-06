@@ -61,7 +61,7 @@ class FeedbackRecord(BaseModel):
     external_id: Optional[str] = None
 
     @validator("responses", always=True)
-    def responses_must_be_a_list(cls, v):
+    def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
         if not v:
             return []
         if isinstance(v, ResponseSchema):
@@ -79,7 +79,7 @@ class FieldSchema(BaseModel):
     settings: Dict[str, Any]
 
     @validator("title", always=True)
-    def title_must_have_value(cls, v, values):
+    def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if not v:
             return values["name"].capitalize()
         return v
@@ -90,7 +90,7 @@ class TextField(FieldSchema):
     use_markdown: bool = False
 
     @validator("use_markdown", always=True)
-    def update_settings_with_use_markdown(cls, v, values):
+    def update_settings_with_use_markdown(cls, v: bool, values: Dict[str, Any]) -> bool:
         if v:
             values["settings"]["use_markdown"] = v
         return False
@@ -107,7 +107,7 @@ class QuestionSchema(BaseModel):
     settings: Dict[str, Any]
 
     @validator("title", always=True)
-    def title_must_have_value(cls, v, values):
+    def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) ->str:
         if not v:
             return values["name"].capitalize()
         return v
@@ -119,7 +119,7 @@ class TextQuestion(QuestionSchema):
     use_markdown: bool = False
 
     @validator("use_markdown", always=True)
-    def update_settings_with_use_markdown(cls, v, values):
+    def update_settings_with_use_markdown(cls, v: bool, values: Dict[str, Any]) -> bool:
         if v:
             values["settings"]["use_markdown"] = v
         return False
@@ -134,7 +134,7 @@ class RatingQuestion(QuestionSchema):
     values: List[int] = Field(unique_items=True)
 
     @validator("values", always=True)
-    def update_settings_with_values(cls, v, values):
+    def update_settings_with_values(cls, v: List[int], values: Dict[str, Any]) -> List[int]:
         if v:
             values["settings"]["options"] = [{"value": value} for value in v]
         return v
