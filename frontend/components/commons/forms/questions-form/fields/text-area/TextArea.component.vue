@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <div class="title-area --body2">
+    <div class="title-area --body1">
       <span v-text="title" v-optional-field="isRequired ? false : true" />
 
       <BaseIconWithBadge
@@ -18,7 +18,14 @@
     </div>
 
     <div class="container" :class="isFocused ? '--focused' : null">
+      <BaseRenderMarkdownComponent
+        v-if="useMarkdown && !isFocused"
+        class="textarea--markdown"
+        :markdown="value"
+        @click.native="setFocus(true)"
+      />
       <ContentEditableFeedbackTask
+        v-else
         class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
@@ -41,10 +48,6 @@ export default {
       type: String,
       required: true,
     },
-    optionId: {
-      type: String,
-      default: () => "optionId",
-    },
     value: {
       type: String,
       default: () => "",
@@ -65,19 +68,24 @@ export default {
       type: String,
       default: () => "",
     },
+    useMarkdown: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   data: () => {
     return {
       isFocused: false,
     };
   },
+  model: {
+    prop: "value",
+    event: "on-change-value",
+  },
   methods: {
     onChangeTextArea(newText) {
       const isAnyText = newText?.length;
-      this.$emit("on-change-value", {
-        id: this.optionId,
-        text: isAnyText ? newText : "",
-      });
+      this.$emit("on-change-value", isAnyText ? newText : "");
 
       if (this.isRequired) {
         this.$emit("on-error", !isAnyText);
@@ -94,14 +102,13 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: $base-space;
+  gap: 12px;
 }
 .title-area {
   display: flex;
   align-items: center;
-  gap: $base-space;
+  gap: 4px;
   color: $black-87;
-  font-weight: 500;
 }
 
 .container {
@@ -125,10 +132,18 @@ export default {
 .textarea {
   display: flex;
   flex: 0 0 100%;
+  &--markdown {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: $base-space;
+  }
 }
 
 .icon-info {
   display: inline-flex;
+  width: 20px;
+  height: 20px;
   margin: 0;
   padding: 0;
   overflow: inherit;

@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <div class="title-area --body2">
+    <div class="title-area --body1">
       <span v-text="title" v-optional-field="isRequired ? false : true" />
 
       <BaseIconWithBadge
@@ -17,16 +17,25 @@
       />
     </div>
 
-    <SingleLabelMonoSelectionComponent v-model="options" />
+    <LabelSelectionComponent
+      v-model="uniqueOptions"
+      :multiple="false"
+      :componentId="questionId"
+      :showSearch="showSearch"
+      :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
+    />
   </div>
 </template>
 
 <script>
-import SingleLabelMonoSelectionComponent from "./SingleLabelMonoSelection.component.vue";
+import { OPTIONS_THRESHOLD_TO_ENABLE_SEARCH } from "@/components/feedback-task/feedbackTask.properties";
 export default {
-  components: { SingleLabelMonoSelectionComponent },
   name: "SingleLabelComponent",
   props: {
+    questionId: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -43,19 +52,33 @@ export default {
       type: String,
       default: () => "",
     },
-  },
-  methods: {
-    onChangeSingleLabel(newOptions) {
-      this.$emit("on-change-single-label", newOptions);
-      const isAnySingleLabelSelected =
-        this.isAnySingleLabelSelected(newOptions);
-
-      if (this.isRequired) {
-        this.$emit("on-error", !isAnySingleLabelSelected);
-      }
+    visibleOptions: {
+      type: Number | null,
+      required: false,
     },
-    isAnySingleLabelSelected(options) {
-      return options.some((option) => option.value);
+  },
+  model: {
+    prop: "options",
+  },
+  data() {
+    return {
+      uniqueOptions: [],
+    };
+  },
+  beforeMount() {
+    this.uniqueOptions = this.options.reduce((accumulator, current) => {
+      if (!accumulator.find((item) => item.id === current.id)) {
+        accumulator.push(current);
+      }
+      return accumulator;
+    }, []);
+  },
+  computed: {
+    showSearch() {
+      return this.uniqueOptions.length >= OPTIONS_THRESHOLD_TO_ENABLE_SEARCH;
+    },
+    maxOptionsToShowBeforeCollapse() {
+      return this.visibleOptions ?? -1;
     },
   },
 };
@@ -65,10 +88,12 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: $base-space;
+  gap: 12px;
   .title-area {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     color: $black-87;
-    font-weight: 500;
   }
 }
 
@@ -87,6 +112,8 @@ span {
 
 .icon-info {
   display: inline-flex;
+  width: 20px;
+  height: 20px;
   margin: 0;
   padding: 0;
   overflow: inherit;

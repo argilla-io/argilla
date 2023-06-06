@@ -27,6 +27,7 @@ class QuestionType(str, Enum):
     text = "text"
     rating = "rating"
     label_selection = "label_selection"
+    multi_label_selection = "multi_label_selection"
 
 
 class ResponseValue(BaseModel):
@@ -64,7 +65,7 @@ class ValidOptionCheckerMixin(BaseQuestionSettings, Generic[T]):
             raise ValueError(f"{response.value!r} is not a valid option.\nValid options are: {self.option_values!r}")
 
 
-class RatingQuestionSettings(ValidOptionCheckerMixin[int], BaseQuestionSettings):
+class RatingQuestionSettings(ValidOptionCheckerMixin[int]):
     type: Literal[QuestionType.rating]
     options: List[RatingQuestionSettingsOption]
 
@@ -75,13 +76,31 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
     description: Optional[str] = None
 
 
-class LabelSelectionQuestionSettings(ValidOptionCheckerMixin[str], BaseQuestionSettings):
+class LabelSelectionQuestionSettings(ValidOptionCheckerMixin[str]):
     type: Literal[QuestionType.label_selection]
     options: List[LabelSelectionQuestionSettingsOption]
     visible_options: Optional[int] = None
 
 
+class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
+    type: Literal[QuestionType.multi_label_selection]
+
+    def check_response(self, response: ResponseValue):
+        if not isinstance(response.value, list):
+            raise ValueError(f"Expected list of values, found {type(response.value)}")
+        if len(response.value) == 0:
+            raise ValueError("Expected list of values, found empty list")
+        invalid_options = sorted(list(set(response.value) - set(self.option_values)))
+        if invalid_options:
+            raise ValueError(f"{invalid_options!r} are not valid options.\nValid options are: {self.option_values!r}")
+
+
 QuestionSettings = Annotated[
-    Union[TextQuestionSettings, RatingQuestionSettings, LabelSelectionQuestionSettings],
+    Union[
+        TextQuestionSettings,
+        RatingQuestionSettings,
+        LabelSelectionQuestionSettings,
+        MultiLabelSelectionQuestionSettings,
+    ],
     Field(..., discriminator="type"),
 ]

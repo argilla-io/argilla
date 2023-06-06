@@ -18,35 +18,40 @@
               params: { id: datasetId },
             }"
             target="_blank"
-            >annotation guidelines <svgicon name="external-link" width="12"
-          /></NuxtLink>
+            >annotation guidelines <svgicon name="external-link" width="12" />
+          </NuxtLink>
         </p>
       </div>
       <div class="form-group" v-for="input in inputs" :key="input.id">
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
           :title="input.question"
-          :optionId="`${input.name}_0`"
           :placeholder="input.placeholder"
-          :value="input.options[0].text"
+          v-model="input.options[0].value"
+          :useMarkdown="input.settings.use_markdown"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
-          @on-change-value="
-            onChangeTextArea({ newOptions: $event, idComponent: input.id })
-          "
           @on-error="onError"
         />
 
         <SingleLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
+          :questionId="input.id"
           :title="input.question"
-          :options="input.options"
+          v-model="input.options"
           :isRequired="input.is_required"
           :tooltipMessage="input.description"
-          @on-change-single-label="
-            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
-          "
-          @on-error="onError"
+          :visibleOptions="input.settings.visible_options"
+        />
+
+        <MultiLabelComponent
+          v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
+          :questionId="input.id"
+          :title="input.question"
+          v-model="input.options"
+          :isRequired="input.is_required"
+          :tooltipMessage="input.description"
+          :visibleOptions="input.settings.visible_options"
         />
 
         <RatingComponent
@@ -164,7 +169,7 @@ export default {
         (input) =>
           input.is_required &&
           input.options.every(
-            (option) => !option.value || option.value.length === 0
+            (option) => !option.is_selected || option.value.length === 0
           )
       );
     },
@@ -195,10 +200,19 @@ export default {
 
       return isButtonDisable;
     },
+    currentInputsWithNoResponses() {
+      return this.inputs.filter(
+        (input) =>
+          (input.component_type === COMPONENT_TYPE.RATING ||
+            input.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
+            input.component_type === COMPONENT_TYPE.MULTI_LABEL) &&
+          input.options.every((option) => !option.is_selected)
+      );
+    },
   },
   watch: {
     isFormUntouched(isFormUntouched) {
-      this.emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched);
+      this.emitIsQuestionsFormUntouched(isFormUntouched);
     },
   },
   async created() {
@@ -212,6 +226,7 @@ export default {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
+    this.emitIsQuestionsFormUntouched(true); // NOTE - ensure that on destroy, all parents and siblings have the flag well reinitiate
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
@@ -235,17 +250,7 @@ export default {
         default:
       }
     },
-    onChangeTextArea({ newOptions, idComponent }) {
-      // TODO - remove this function when adding v-model on textArea component
-      const component = this.inputs.find(({ id }) => id === idComponent);
-      // NOTE - formatting to the standard options
-      component.options = [{ ...newOptions, value: newOptions.text }];
-    },
-    onChangeMonoSelection({ newOptions, idComponent }) {
-      // TODO - to remove when single label will use v-model
-      const component = this.inputs.find(({ id }) => id === idComponent);
-      component.options = newOptions;
-    },
+
     async sendBackendRequest(responseValues) {
       try {
         let responseData = null;
@@ -438,6 +443,20 @@ export default {
           );
         } else {
           // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
+
+          // TODO - remove both loop with only one loop over the form object ( this.inputs)
+          // 1/ push formatted object corresponding to recordResponse which have been remove from api
+          this.currentInputsWithNoResponses.forEach((input) => {
+            formattedRecordResponsesForOrm.push({
+              id: input.response_id,
+              question_name: input.name,
+              options: input.options,
+              record_id: this.recordId,
+              user_id: this.userId,
+            });
+          });
+
+          // 2/ loop over the responseFromApi
           Object.entries(responsesFromApi.values).map(
             ([questionName, newResponse]) => {
               const componentType =
@@ -452,20 +471,46 @@ export default {
                 );
 
               switch (componentType) {
+                case COMPONENT_TYPE.MULTI_LABEL:
                 case COMPONENT_TYPE.SINGLE_LABEL:
+                  formattedOptions = formattedOptions.map((option) => {
+                    const currentOptionsFromForm = this.inputs.find(
+                      (input) => input.name === questionName
+                    )?.options;
+                    const currentOption = currentOptionsFromForm.find(
+                      (currentOption) => currentOption.id === option.id
+                    );
+
+                    return {
+                      id: option.id,
+                      text: option.text,
+                      is_selected: currentOption.is_selected,
+                      value: option.value,
+                    };
+                  });
+                  break;
                 case COMPONENT_TYPE.RATING:
                   formattedOptions = formattedOptions.map((option) => {
-                    if (option.text === newResponse.value) {
-                      return { id: option.id, text: option.text, value: true };
-                    }
-                    return { id: option.id, text: option.text, value: false };
+                    const currentOptionsFromForm = this.inputs.find(
+                      (input) => input.name === questionName
+                    )?.options;
+
+                    const currentOption = currentOptionsFromForm.find(
+                      (currentOption) => currentOption.id === option.id
+                    );
+
+                    return {
+                      id: option.id,
+                      text: option.text,
+                      is_selected: currentOption.is_selected,
+                      value: option.text,
+                    };
                   });
                   break;
                 case COMPONENT_TYPE.FREE_TEXT:
                   formattedOptions = [
                     {
                       id: formattedOptions[0].id,
-                      text: newResponse.value,
                       value: newResponse.value,
                     },
                   ];
@@ -492,25 +537,44 @@ export default {
       let responseByQuestionName = {};
 
       this.inputs.forEach((input) => {
-        let selectedOption = null;
         switch (input.component_type) {
+          case COMPONENT_TYPE.MULTI_LABEL: {
+            const selectedOptions =
+              input.options?.filter((option) => option.is_selected) ?? false;
+
+            if (selectedOptions?.length) {
+              responseByQuestionName[input.name] = {
+                value: selectedOptions.map((option) => option.value),
+              };
+            }
+            break;
+          }
           case COMPONENT_TYPE.SINGLE_LABEL:
-          case COMPONENT_TYPE.RATING:
-            selectedOption = input.options?.find((option) => option.value);
+          case COMPONENT_TYPE.RATING: {
+            const selectedOption =
+              input.options?.find((option) => option.is_selected) ?? false;
+
+            if (selectedOption) {
+              responseByQuestionName[input.name] = {
+                value: selectedOption.value,
+              };
+            }
             break;
-          case COMPONENT_TYPE.FREE_TEXT:
-            selectedOption = input.options[0];
+          }
+          case COMPONENT_TYPE.FREE_TEXT: {
+            const selectedOption = input.options[0] ?? false;
+
+            if (selectedOption) {
+              responseByQuestionName[input.name] = {
+                value: selectedOption.value,
+              };
+            }
             break;
+          }
           default:
             console.log(
               `The component type ${input.component_type} is unknown, the response can't be save`
             );
-        }
-
-        const isSelectedOptionNotEmpty = selectedOption ?? false;
-
-        if (isSelectedOptionNotEmpty) {
-          responseByQuestionName[input.name] = { value: selectedOption.text };
         }
       });
       return responseByQuestionName;
@@ -522,7 +586,7 @@ export default {
         type: typeOfToast,
       });
     },
-    emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched) {
+    emitIsQuestionsFormUntouched(isFormUntouched) {
       this.$emit("on-question-form-touched", !isFormUntouched);
       // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);
@@ -541,12 +605,10 @@ export default {
   border-radius: $border-radius-m;
   box-shadow: $shadow;
   &__header {
-    display: flex;
     align-items: baseline;
-    gap: $base-space * 2;
   }
   &__title {
-    margin: 0;
+    margin: 0 0 calc($base-space / 2) 0;
     color: $black-87;
   }
   &__guidelines-link {
@@ -556,8 +618,9 @@ export default {
     a {
       color: $black-37;
       outline: 0;
+      text-decoration: none;
       &:hover {
-        color: $black-54;
+        text-decoration: underline;
       }
     }
   }

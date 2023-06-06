@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <div class="title-area --body2">
+    <div class="title-area --body1">
       <span v-text="title" v-optional-field="isRequired ? false : true" />
 
       <BaseIconWithBadge
@@ -68,10 +68,12 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: $base-space;
+  gap: 12px;
   .title-area {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     color: $black-87;
-    font-weight: 500;
   }
 }
 
@@ -90,6 +92,8 @@ span {
 
 .icon-info {
   display: inline-flex;
+  width: 20px;
+  height: 20px;
   margin: 0;
   padding: 0;
   overflow: inherit;

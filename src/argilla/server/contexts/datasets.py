@@ -18,9 +18,10 @@ from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func
-from sqlalchemy.orm import Session, contains_eager, joinedload
+from sqlalchemy.orm import Session, contains_eager, joinedload, noload
 
 from argilla.server.contexts import accounts
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -37,7 +38,6 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     RecordInclude,
     RecordsCreate,
-    ResponseStatusFilter,
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
@@ -101,8 +101,10 @@ async def publish_dataset(db: Session, search_engine: SearchEngine, dataset: Dat
     return dataset
 
 
-def delete_dataset(db: Session, dataset: Dataset):
+async def delete_dataset(db: Session, search_engine: SearchEngine, dataset: Dataset):
     db.delete(dataset)
+    await search_engine.delete_index(dataset)
+
     db.commit()
 
     return dataset
@@ -187,6 +189,26 @@ def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
 
 
+def get_records_by_ids(
+    db: Session,
+    dataset_id: UUID,
+    record_ids: List[UUID],
+    include: List[RecordInclude] = [],
+    user_id: Optional[UUID] = None,
+) -> List[Record]:
+    query = db.query(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
+    if RecordInclude.responses in include:
+        if user_id:
+            query = query.outerjoin(
+                Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
+            ).options(contains_eager(Record.responses))
+        else:
+            query = query.options(joinedload(Record.responses))
+    else:
+        query = query.options(noload(Record.responses))
+    return query.all()
+
+
 def list_records_by_dataset_id(
     db: Session,
     dataset_id: UUID,
@@ -217,7 +239,7 @@ def list_records_by_dataset_id_and_user_id(
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ):
-    query = db.query(Record)
+    query = db.query(Record).filter(Record.dataset_id == dataset_id)
 
     if response_status == ResponseStatusFilter.missing:
         query = (
@@ -225,10 +247,9 @@ def list_records_by_dataset_id_and_user_id(
                 Response,
                 and_(Response.record_id == Record.id, Response.user_id == user_id),
             )
+            .filter(Response.status == None)
             .options(contains_eager(Record.responses))
-            .filter(and_(Record.dataset_id == dataset_id, Response.status == None))
         )
-
     else:
         if response_status:
             query = query.join(
@@ -239,14 +260,11 @@ def list_records_by_dataset_id_and_user_id(
                     Response.status == ResponseStatus(response_status),
                 ),
             ).options(contains_eager(Record.responses))
-
         elif RecordInclude.responses in include:
             query = query.outerjoin(
                 Response,
                 and_(Response.record_id == Record.id, Response.user_id == user_id),
             ).options(contains_eager(Record.responses))
-
-        query = query.filter(Record.dataset_id == dataset_id)
 
     return query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit).all()
 
@@ -314,29 +332,17 @@ def list_responses_by_record_id(db: Session, record_id: UUID):
     return db.query(Response).filter_by(record_id=record_id).order_by(Response.inserted_at.asc()).all()
 
 
-def count_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
+def count_responses_by_dataset_id_and_user_id(
+    db: Session, dataset_id: UUID, user_id: UUID, response_status: Optional[ResponseStatus] = None
+) -> int:
+    expressions = [Response.user_id == user_id]
+    if response_status:
+        expressions.append(Response.status == response_status)
+
     return (
         db.query(func.count(Response.id))
         .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-        .filter(Response.user_id == user_id)
-        .scalar()
-    )
-
-
-def count_submitted_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
-    return (
-        db.query(func.count(Response.id))
-        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-        .filter(Response.user_id == user_id, Response.status == ResponseStatus.submitted)
-        .scalar()
-    )
-
-
-def count_discarded_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
-    return (
-        db.query(func.count(Response.id))
-        .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-        .filter(Response.user_id == user_id, Response.status == ResponseStatus.discarded)
+        .filter(*expressions)
         .scalar()
     )
 
@@ -357,7 +363,9 @@ def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, 
     )
 
 
-def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):
+async def create_response(
+    db: Session, search_engine: SearchEngine, record: Record, user: User, response_create: ResponseCreate
+):
     validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
 
     response = Response(
@@ -368,33 +376,48 @@ def create_response(db: Session, record: Record, user: User, response_create: Re
     )
 
     db.add(response)
+    db.flush([response])
+    # TODO: Rollback
+    await search_engine.update_record_response(response)
+
     db.commit()
     db.refresh(response)
 
     return response
 
 
-def update_response(db: Session, response: Response, response_update: ResponseUpdate):
+async def update_response(
+    db: Session, search_engine: SearchEngine, response: Response, response_update: ResponseUpdate
+):
     validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
 
     response.values = jsonable_encoder(response_update.values)
     response.status = response_update.status
 
+    db.flush([response])
+    # TODO: Rollback
+    await search_engine.update_record_response(response)
+
     db.commit()
     db.refresh(response)
 
     return response
 
 
-def delete_response(db: Session, response: Response):
+async def delete_response(db: Session, search_engine: SearchEngine, response: Response):
     db.delete(response)
+    # TODO: Rollback
+    await search_engine.delete_record_response(response)
+
     db.commit()
 
     return response
 
 
 def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue], status: ResponseStatus):
-    if not values and status == ResponseStatus.discarded:
+    if not values:
+        if status != ResponseStatus.discarded:
+            raise ValueError("Missing response values")
         return
 
     values_copy = copy.copy(values or {})

@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import AsyncGenerator
+
 import pytest
 import pytest_asyncio
 from argilla.server.daos.backend import GenericElasticEngineBackend
@@ -22,8 +24,8 @@ from argilla.server.services.datasets import DatasetsService
 
 
 @pytest_asyncio.fixture()
-async def search_engine(elasticsearch_config: dict):
-    engine = SearchEngine(config=elasticsearch_config)
+async def elastic_search_engine(elasticsearch_config: dict) -> AsyncGenerator[SearchEngine, None]:
+    engine = SearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
     yield engine
 
     await engine.client.close()
