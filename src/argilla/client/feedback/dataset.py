@@ -560,7 +560,19 @@ class FeedbackDataset:
 
             for question in self.questions:
                 try:
-                    datasets_api_v1.add_question(client=httpx_client, id=argilla_id, question=question.dict())
+                    datasets_api_v1.add_question(
+                        client=httpx_client,
+                        id=argilla_id,
+                        question=question.dict(
+                            include={
+                                "name": True,
+                                "title": True,
+                                "description": True,
+                                "required": True,
+                                "settings": True,
+                            }
+                        ),
+                    )
                 except Exception as e:
                     delete_and_raise_exception(
                         dataset_id=argilla_id,
