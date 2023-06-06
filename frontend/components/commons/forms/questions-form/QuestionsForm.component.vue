@@ -608,7 +608,7 @@ export default {
     align-items: baseline;
   }
   &__title {
-    margin: 0 0 4px 0;
+    margin: 0 0 calc($base-space / 2) 0;
     color: $black-87;
   }
   &__guidelines-link {
