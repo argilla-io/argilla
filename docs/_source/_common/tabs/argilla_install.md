@@ -10,7 +10,7 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 
 :::{tab-item} Docker Compose
 ```
-wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml && docker-compose up -d
+wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.yaml && docker-compose up -d
 ```
 :::
 
