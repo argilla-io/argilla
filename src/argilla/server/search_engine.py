@@ -196,7 +196,7 @@ class SearchEngine:
             "size": limit,
         }
 
-        response = await self.client.search(index=self._index_name_for_dataset(dataset), body=body)
+        response = await self.client.search(index=self._index_name_for_dataset(dataset),body=body, from_=offset, size=size, _source=False, sort=["_score", {"id": "asc"}])
 
         items = [
             SearchResponseItem(record_id=UUID(hit["_id"]), score=hit["_score"]) for hit in response["hits"]["hits"]
