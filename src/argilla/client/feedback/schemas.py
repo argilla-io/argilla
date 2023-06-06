@@ -107,7 +107,7 @@ class QuestionSchema(BaseModel):
     settings: Dict[str, Any]
 
     @validator("title", always=True)
-    def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) ->str:
+    def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if not v:
             return values["name"].capitalize()
         return v
