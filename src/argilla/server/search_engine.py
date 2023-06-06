@@ -191,6 +191,7 @@ class SearchEngine:
         body = {
             "_source": False,
             "query": {"bool": bool_query},
+            # "sort": [{"_score": "desc"}, {"id": "asc"}],
         }
 
         response = await self.client.search(
@@ -199,7 +200,7 @@ class SearchEngine:
             from_=offset,
             size=limit,
             _source=False,
-            sort=["_score", {"id": "asc"}],
+            sort="_score:desc,id:asc",
         )
 
         items = [
