@@ -201,10 +201,15 @@ export default {
   .--more {
     border-radius: 20px;
     border: 1px solid $black-10;
-    @include font-size(12px);
     padding: 2px 4px;
+    color: $black-54;
+    @include font-size(12px);
+  }
+  .--less {
+    @include font-size(14px);
   }
   .svg-icon {
+    color: $black-37;
     border-radius: $border-radius;
   }
 }

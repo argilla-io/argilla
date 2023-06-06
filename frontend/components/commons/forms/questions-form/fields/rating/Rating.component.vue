@@ -70,9 +70,6 @@ export default {
   flex-direction: column;
   gap: 12px;
   .title-area {
-    display: flex;
-    align-items: center;
-    gap: 4px;
     color: $black-87;
   }
 }
@@ -97,6 +94,7 @@ span {
   margin: 0;
   padding: 0;
   overflow: inherit;
+  vertical-align: middle;
   &[data-title] {
     position: relative;
     overflow: visible;

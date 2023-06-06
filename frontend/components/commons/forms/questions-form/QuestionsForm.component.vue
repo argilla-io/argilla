@@ -627,7 +627,7 @@ export default {
   &__content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: $base-space * 4;
     padding: $base-space * 3;
     overflow: auto;
   }

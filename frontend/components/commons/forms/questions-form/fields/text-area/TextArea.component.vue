@@ -105,9 +105,6 @@ export default {
   gap: 12px;
 }
 .title-area {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   color: $black-87;
 }
 
@@ -147,6 +144,7 @@ export default {
   margin: 0;
   padding: 0;
   overflow: inherit;
+  vertical-align: middle;
   &[data-title] {
     position: relative;
     overflow: visible;
