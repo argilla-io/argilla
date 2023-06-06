@@ -94,7 +94,10 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
             fields=feedback_dataset_fields,
             questions=None,
         )
-    with pytest.raises(TypeError, match="Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`"):
+    with pytest.raises(
+        TypeError,
+        match="Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`, `SingleLabelQuestion`, and/or `MultiLabelQuestion`",
+    ):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
