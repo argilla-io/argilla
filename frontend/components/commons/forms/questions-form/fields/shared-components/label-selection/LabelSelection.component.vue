@@ -2,14 +2,13 @@
   <div class="container">
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
-        <SearchSingleLabelComponent
+        <SearchLabelComponent
           v-if="showSearch"
           v-model="searchInput"
           :searchRef="searchRef"
           :placeholder="placeholder"
         />
       </div>
-
       <div class="right-header">
         <button
           type="button"
@@ -18,7 +17,7 @@
           @click="toggleShowLess"
         >
           <span
-            :class="showLess ? '--less' : '--more'"
+            :class="isExpanded ? '--less' : '--more'"
             v-text="textToShowInTheCollapseButton"
           />
           <svgicon
@@ -30,6 +29,7 @@
       </div>
     </div>
     <transition-group
+      :key="searchInput"
       name="shuffle"
       class="inputs-area"
       v-if="filteredOptions.length"
@@ -48,7 +48,11 @@
         />
         <label
           class="label-text cursor-pointer"
-          :class="{ 'label-active': option.is_selected }"
+          :class="{
+            'label-active': option.is_selected,
+            square: multiple,
+            round: !multiple,
+          }"
           :for="option.id"
           v-text="option.text"
         />
@@ -59,7 +63,7 @@
 
 <script>
 export default {
-  name: "SingleLabelMonoSelectionComponent",
+  name: "LabelSelectionComponent",
   props: {
     maxOptionsToShowBeforeCollapse: {
       type: Number,
@@ -81,6 +85,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    multiple: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   model: {
     prop: "options",
@@ -89,7 +97,7 @@ export default {
   data() {
     return {
       searchInput: "",
-      showLess: false,
+      isExpanded: false,
     };
   },
   created() {
@@ -103,51 +111,55 @@ export default {
           .includes(this.searchInput.toLowerCase())
       );
     },
+    remainingVisibleOptions() {
+      return this.filteredOptions
+        .slice(this.maxOptionsToShowBeforeCollapse)
+        .filter((option) => option.is_selected);
+    },
     visibleOptions() {
-      if (!this.showCollapseButton || this.showLess)
+      if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
         return this.filteredOptions;
 
-      return this.filteredOptions.slice(
-        0,
-        this.maxOptionsToShowBeforeCollapse + 1
-      );
+      return this.filteredOptions
+        .slice(0, this.maxOptionsToShowBeforeCollapse)
+        .concat(this.remainingVisibleOptions);
     },
     noResultMessage() {
       return `There is no result matching: ${this.searchInput}`;
     },
     numberToShowInTheCollapseButton() {
-      return this.filteredOptions.length - this.maxOptionsToShowBeforeCollapse;
+      return this.filteredOptions.length - this.visibleOptions.length;
     },
     showCollapseButton() {
       if (this.maxOptionsToShowBeforeCollapse === -1) return false;
-      if (this.numberToShowInTheCollapseButton < 0) return false;
-      return this.options.length > this.maxOptionsToShowBeforeCollapse;
+      return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
     },
     textToShowInTheCollapseButton() {
-      if (this.showLess) {
+      if (this.isExpanded) {
         return "Less";
       }
       return `+${this.numberToShowInTheCollapseButton}`;
     },
     iconToShowInTheCollapseButton() {
-      return this.showLess ? "chevron-up" : "chevron-down";
+      return this.isExpanded ? "chevron-up" : "chevron-down";
     },
   },
   methods: {
     onSelect({ id, is_selected }) {
-      this.options.map((option) => {
-        if (option.id === id) {
-          option.is_selected = is_selected;
-        } else {
-          option.is_selected = false;
-        }
-        return option;
-      });
-
-      this.$emit("on-change", this.options);
+      if (this.multiple) return;
+      else {
+        this.options.forEach((option) => {
+          if (option.id === id) {
+            option.is_selected = is_selected;
+          } else {
+            option.is_selected = false;
+          }
+          return option;
+        });
+      }
     },
     toggleShowLess() {
-      this.showLess = !this.showLess;
+      this.isExpanded = !this.isExpanded;
     },
   },
 };
@@ -165,8 +177,9 @@ export default {
   }
   .inputs-area {
     display: inline-flex;
-    gap: $base-space;
+    align-items: center;
     flex-wrap: wrap;
+    gap: $base-space;
     border-radius: 5em;
     background: transparent;
     &:hover {
@@ -209,11 +222,18 @@ export default {
   overflow: hidden;
   color: palette(purple, 200);
   box-shadow: 0;
-  transition: all 0.2s ease-in-out;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
 }
+
+.round {
+  border-radius: 50em;
+}
+.square {
+  border-radius: 5px;
+}
+
 input[type="checkbox"] {
   display: none;
 }

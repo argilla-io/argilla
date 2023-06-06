@@ -18,9 +18,10 @@ from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func
-from sqlalchemy.orm import Session, contains_eager, joinedload
+from sqlalchemy.orm import Session, contains_eager, joinedload, noload
 
 from argilla.server.contexts import accounts
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -37,7 +38,6 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     RecordInclude,
     RecordsCreate,
-    ResponseStatusFilter,
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
@@ -187,6 +187,26 @@ def delete_question(db: Session, question: Question):
 
 def get_record_by_id(db: Session, record_id: UUID):
     return db.get(Record, record_id)
+
+
+def get_records_by_ids(
+    db: Session,
+    dataset_id: UUID,
+    record_ids: List[UUID],
+    include: List[RecordInclude] = [],
+    user_id: Optional[UUID] = None,
+) -> List[Record]:
+    query = db.query(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
+    if RecordInclude.responses in include:
+        if user_id:
+            query = query.outerjoin(
+                Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
+            ).options(contains_eager(Record.responses))
+        else:
+            query = query.options(joinedload(Record.responses))
+    else:
+        query = query.options(noload(Record.responses))
+    return query.all()
 
 
 def list_records_by_dataset_id(
@@ -343,7 +363,9 @@ def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, 
     )
 
 
-def create_response(db: Session, record: Record, user: User, response_create: ResponseCreate):
+async def create_response(
+    db: Session, search_engine: SearchEngine, record: Record, user: User, response_create: ResponseCreate
+):
     validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
 
     response = Response(
@@ -354,26 +376,39 @@ def create_response(db: Session, record: Record, user: User, response_create: Re
     )
 
     db.add(response)
+    db.flush([response])
+    # TODO: Rollback
+    await search_engine.update_record_response(response)
+
     db.commit()
     db.refresh(response)
 
     return response
 
 
-def update_response(db: Session, response: Response, response_update: ResponseUpdate):
+async def update_response(
+    db: Session, search_engine: SearchEngine, response: Response, response_update: ResponseUpdate
+):
     validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
 
     response.values = jsonable_encoder(response_update.values)
     response.status = response_update.status
 
+    db.flush([response])
+    # TODO: Rollback
+    await search_engine.update_record_response(response)
+
     db.commit()
     db.refresh(response)
 
     return response
 
 
-def delete_response(db: Session, response: Response):
+async def delete_response(db: Session, search_engine: SearchEngine, response: Response):
     db.delete(response)
+    # TODO: Rollback
+    await search_engine.delete_record_response(response)
+
     db.commit()
 
     return response

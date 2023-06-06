@@ -13,12 +13,13 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Optional, Type
+from typing import TYPE_CHECKING, List, Optional, Tuple, Type
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -46,7 +47,14 @@ from argilla.server.schemas.v1.datasets import (
     RECORDS_CREATE_MIN_ITEMS,
     RecordInclude,
 )
-from argilla.server.search_engine import SearchEngine
+from argilla.server.search_engine import (
+    Query,
+    SearchEngine,
+    SearchResponseItem,
+    SearchResponses,
+    TextQuery,
+    UserResponseStatusFilter,
+)
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -64,6 +72,9 @@ from tests.factories import (
     TextQuestionFactory,
     WorkspaceFactory,
 )
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def test_list_current_user_datasets(client: TestClient, admin_auth_header: dict):
@@ -1782,9 +1793,8 @@ def test_create_dataset_question_with_invalid_settings(
 
 
 def test_create_dataset_records(
-    mocker,
     client: TestClient,
-    search_engine: SearchEngine,
+    mock_search_engine: SearchEngine,
     test_telemetry: MagicMock,
     db: Session,
     admin: User,
@@ -1796,8 +1806,6 @@ def test_create_dataset_records(
 
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-    spy_add_records = mocker.spy(search_engine, "add_records")
 
     records_json = {
         "items": [
@@ -1854,13 +1862,13 @@ def test_create_dataset_records(
     assert db.query(Record).count() == 5
     assert db.query(Response).count() == 4
 
-    spy_add_records.assert_called_once_with(dataset=dataset, records=db.query(Record).all())
+    mock_search_engine.add_records.assert_called_once_with(dataset, db.query(Record).all())
 
     test_telemetry.assert_called_once_with(action="DatasetRecordsCreated", data={"records": len(records_json["items"])})
 
 
 def test_create_dataset_records_with_response_for_multiple_users(
-    mocker, client: TestClient, search_engine: SearchEngine, db: Session, admin: User, admin_auth_header: dict
+    client: TestClient, mock_search_engine: SearchEngine, db: Session, admin: User, admin_auth_header: dict
 ):
     workspace = WorkspaceFactory.create()
 
@@ -1871,8 +1879,6 @@ def test_create_dataset_records_with_response_for_multiple_users(
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
     annotator = AnnotatorFactory.create(workspaces=[workspace])
-
-    spy_add_records = mocker.spy(search_engine, "add_records")
 
     records_json = {
         "items": [
@@ -1912,7 +1918,7 @@ def test_create_dataset_records_with_response_for_multiple_users(
     assert db.query(Response).filter(Response.user_id == annotator.id).count() == 2
     assert db.query(Response).filter(Response.user_id == admin.id).count() == 1
 
-    spy_add_records.assert_called_once_with(dataset=dataset, records=db.query(Record).all())
+    mock_search_engine.add_records.assert_called_once_with(dataset, db.query(Record).all())
 
 
 def test_create_dataset_records_with_response_for_unknown_user(
@@ -2086,11 +2092,9 @@ def test_create_dataset_records_with_extra_fields(client: TestClient, db: Sessio
 
 
 def test_create_dataset_records_with_index_error(
-    mocker, client: TestClient, search_engine: SearchEngine, db: Session, admin_auth_header: dict
+    client: TestClient, mock_search_engine: SearchEngine, db: Session, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
-
-    spy_create_index = mocker.spy(search_engine, "create_index")
 
     records_json = {
         "items": [
@@ -2105,7 +2109,7 @@ def test_create_dataset_records_with_index_error(
     assert response.status_code == 422
     assert db.query(Record).count() == 0
 
-    assert not spy_create_index.called
+    assert not mock_search_engine.create_index.called
 
 
 def test_create_dataset_records_without_authentication(client: TestClient, db: Session):
@@ -2404,19 +2408,323 @@ def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, 
     assert db.query(Response).count() == 0
 
 
+def create_dataset_for_search(user: Optional[User] = None) -> Tuple[Dataset, List[Record]]:
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    TextFieldFactory.create(name="input", dataset=dataset)
+    TextFieldFactory.create(name="output", dataset=dataset)
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+    records = [
+        RecordFactory.create(dataset=dataset, fields={"input": "Say Hello", "output": "Hello"}),
+        RecordFactory.create(dataset=dataset, fields={"input": "Hello", "output": "Hi"}),
+        RecordFactory.create(dataset=dataset, fields={"input": "Say Goodbye", "output": "Goodbye"}),
+        RecordFactory.create(dataset=dataset, fields={"input": "Say bye", "output": "Bye"}),
+    ]
+    responses = [
+        ResponseFactory.create(
+            record=records[0],
+            values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+            status=ResponseStatus.submitted,
+            user=user,
+        ),
+        ResponseFactory.create(
+            record=records[1],
+            values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+            status=ResponseStatus.submitted,
+            user=user,
+        ),
+        ResponseFactory.create(
+            record=records[2],
+            values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+            status=ResponseStatus.submitted,
+            user=user,
+        ),
+        ResponseFactory.create(
+            record=records[3],
+            values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+            status=ResponseStatus.submitted,
+            user=user,
+        ),
+    ]
+    # Add some responses from other users
+    ResponseFactory.create_batch(10, record=records[0], status=ResponseStatus.submitted)
+    return dataset, records, responses
+
+
+def test_search_dataset_records(
+    client: TestClient, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
+):
+    dataset, records, _ = create_dataset_for_search(user=admin)
+
+    mock_search_engine.search.return_value = SearchResponses(
+        items=[
+            SearchResponseItem(record_id=records[0].id, score=14.2),
+            SearchResponseItem(record_id=records[1].id, score=12.2),
+        ]
+    )
+
+    query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+    response = client.post(
+        f"/api/v1/me/datasets/{dataset.id}/records/search", headers=admin_auth_header, json=query_json
+    )
+
+    mock_search_engine.search.assert_called_once_with(
+        dataset=dataset,
+        query=Query(
+            text=TextQuery(
+                q="Hello",
+                field="input",
+            )
+        ),
+        user_response_status_filter=None,
+        limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "record": {
+                    "id": str(records[0].id),
+                    "fields": {
+                        "input": "Say Hello",
+                        "output": "Hello",
+                    },
+                    "external_id": records[0].external_id,
+                    "responses": [],
+                    "inserted_at": records[0].inserted_at.isoformat(),
+                    "updated_at": records[0].updated_at.isoformat(),
+                },
+                "query_score": 14.2,
+            },
+            {
+                "record": {
+                    "id": str(records[1].id),
+                    "fields": {
+                        "input": "Hello",
+                        "output": "Hi",
+                    },
+                    "external_id": records[1].external_id,
+                    "responses": [],
+                    "inserted_at": records[1].inserted_at.isoformat(),
+                    "updated_at": records[1].updated_at.isoformat(),
+                },
+                "query_score": 12.2,
+            },
+        ]
+    }
+
+
+def test_search_dataset_records_including_responses(
+    client: TestClient, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
+):
+    dataset, records, responses = create_dataset_for_search(user=admin)
+
+    mock_search_engine.search.return_value = SearchResponses(
+        items=[
+            SearchResponseItem(record_id=records[0].id, score=14.2),
+            SearchResponseItem(record_id=records[1].id, score=12.2),
+        ]
+    )
+
+    query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+    response = client.post(
+        f"/api/v1/me/datasets/{dataset.id}/records/search",
+        headers=admin_auth_header,
+        json=query_json,
+        params={"include": RecordInclude.responses.value},
+    )
+
+    mock_search_engine.search.assert_called_once_with(
+        dataset=dataset,
+        query=Query(
+            text=TextQuery(
+                q="Hello",
+                field="input",
+            )
+        ),
+        user_response_status_filter=None,
+        limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "record": {
+                    "id": str(records[0].id),
+                    "fields": {
+                        "input": "Say Hello",
+                        "output": "Hello",
+                    },
+                    "external_id": records[0].external_id,
+                    "responses": [
+                        {
+                            "id": str(responses[0].id),
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
+                            "status": "submitted",
+                            "user_id": str(responses[0].user_id),
+                            "inserted_at": responses[0].inserted_at.isoformat(),
+                            "updated_at": responses[0].updated_at.isoformat(),
+                        }
+                    ],
+                    "inserted_at": records[0].inserted_at.isoformat(),
+                    "updated_at": records[0].updated_at.isoformat(),
+                },
+                "query_score": 14.2,
+            },
+            {
+                "record": {
+                    "id": str(records[1].id),
+                    "fields": {
+                        "input": "Hello",
+                        "output": "Hi",
+                    },
+                    "external_id": records[1].external_id,
+                    "responses": [
+                        {
+                            "id": str(responses[1].id),
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
+                            "status": "submitted",
+                            "user_id": str(responses[1].user_id),
+                            "inserted_at": responses[1].inserted_at.isoformat(),
+                            "updated_at": responses[1].updated_at.isoformat(),
+                        }
+                    ],
+                    "inserted_at": records[1].inserted_at.isoformat(),
+                    "updated_at": records[1].updated_at.isoformat(),
+                },
+                "query_score": 12.2,
+            },
+        ]
+    }
+
+
+def test_search_dataset_records_with_response_status_filter(
+    client: TestClient, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
+):
+    dataset, _, _ = create_dataset_for_search(user=admin)
+    mock_search_engine.search.return_value = SearchResponses(items=[])
+
+    query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+    response = client.post(
+        f"/api/v1/me/datasets/{dataset.id}/records/search",
+        headers=admin_auth_header,
+        json=query_json,
+        params={"response_status": ResponseStatus.submitted.value},
+    )
+
+    mock_search_engine.search.assert_called_once_with(
+        dataset=dataset,
+        query=Query(text=TextQuery(q="Hello", field="input")),
+        user_response_status_filter=UserResponseStatusFilter(user=admin, statuses=[ResponseStatus.submitted]),
+        limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+    )
+    assert response.status_code == 200
+
+
+def test_search_dataset_records_with_limit(
+    client: TestClient, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
+):
+    dataset, _, _ = create_dataset_for_search(user=admin)
+    mock_search_engine.search.return_value = SearchResponses(items=[])
+
+    query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+    response = client.post(
+        f"/api/v1/me/datasets/{dataset.id}/records/search",
+        headers=admin_auth_header,
+        json=query_json,
+        params={"limit": 10},
+    )
+
+    mock_search_engine.search.assert_called_once_with(
+        dataset=dataset,
+        query=Query(text=TextQuery(q="Hello", field="input")),
+        user_response_status_filter=None,
+        limit=10,
+    )
+    assert response.status_code == 200
+
+
+def test_search_dataset_records_as_annotator(client: TestClient, admin: User, mock_search_engine: SearchEngine):
+    dataset, records, _ = create_dataset_for_search(user=admin)
+    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+
+    mock_search_engine.search.return_value = SearchResponses(
+        items=[
+            SearchResponseItem(record_id=records[0].id, score=14.2),
+            SearchResponseItem(record_id=records[1].id, score=12.2),
+        ]
+    )
+
+    query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
+    response = client.post(
+        f"/api/v1/me/datasets/{dataset.id}/records/search",
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+        json=query_json,
+    )
+
+    mock_search_engine.search.assert_called_once_with(
+        dataset=dataset,
+        query=Query(
+            text=TextQuery(
+                q="unit test",
+                field="input",
+            )
+        ),
+        user_response_status_filter=None,
+        limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+    )
+    assert response.status_code == 200
+
+
+def test_search_dataset_records_as_annotator_from_different_workspace(client: TestClient):
+    dataset, _, _ = create_dataset_for_search()
+    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.create()])
+
+    query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
+    response = client.post(
+        f"/api/v1/me/datasets/{dataset.id}/records/search",
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+        json=query_json,
+    )
+
+    assert response.status_code == 403
+
+
+def test_search_dataset_records_with_non_existent_field(client: TestClient, admin_auth_header: dict):
+    dataset, _, _ = create_dataset_for_search()
+
+    query_json = {"query": {"text": {"q": "unit test", "field": "i do not exist"}}}
+    response = client.post(
+        f"/api/v1/me/datasets/{dataset.id}/records/search", headers=admin_auth_header, json=query_json
+    )
+
+    assert response.status_code == 422
+
+
+def test_search_dataset_with_non_existent_dataset(client: TestClient, admin_auth_header: dict):
+    query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
+    response = client.post(f"/api/v1/me/datasets/{uuid4()}/records/search", headers=admin_auth_header, json=query_json)
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
 def test_publish_dataset(
-    mocker,
     client: TestClient,
     db: Session,
-    search_engine: SearchEngine,
+    mock_search_engine: SearchEngine,
     test_telemetry: MagicMock,
     admin_auth_header: dict,
 ):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     RatingQuestionFactory.create(dataset=dataset)
-
-    spy_create_index = mocker.spy(search_engine, "create_index")
 
     response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=admin_auth_header)
 
@@ -2427,13 +2735,13 @@ def test_publish_dataset(
     assert response_body["status"] == "ready"
 
     test_telemetry.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
-    spy_create_index.assert_called_once_with(dataset=dataset)
+    mock_search_engine.create_index.assert_called_once_with(dataset)
 
 
 def test_publish_dataset_with_error_on_index_creation(
-    client: TestClient, db: Session, search_engine: SearchEngine, mocker, admin_auth_header: dict
+    client: TestClient, db: Session, mock_search_engine: SearchEngine, mocker, admin_auth_header: dict
 ):
-    mocker.patch.object(search_engine, "create_index", side_effect=ValueError("Error creating index"))
+    mocker.patch.object(mock_search_engine, "create_index", side_effect=ValueError("Error creating index"))
 
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
@@ -2510,13 +2818,11 @@ def test_publish_dataset_with_nonexistent_dataset_id(client: TestClient, db: Ses
 
 
 def test_delete_dataset(
-    mocker, client: TestClient, db: Session, search_engine: SearchEngine, admin: User, admin_auth_header: dict
+    client: TestClient, db: Session, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
 ):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
-
-    spy_delete_index = mocker.spy(search_engine, "delete_index")
 
     other_dataset = DatasetFactory.create()
     other_field = TextFieldFactory.create(dataset=other_dataset)
@@ -2537,12 +2843,10 @@ def test_delete_dataset(
         other_dataset.workspace_id,
     ]
 
-    spy_delete_index.assert_called_once_with(dataset=dataset)
+    mock_search_engine.delete_index.assert_called_once_with(dataset)
 
 
-def test_delete_published_dataset(
-    mocker, client: TestClient, db: Session, search_engine: SearchEngine, admin: User, admin_auth_header: dict
-):
+def test_delete_published_dataset(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     TextFieldFactory.create(dataset=dataset)
     TextQuestionFactory.create(dataset=dataset)
@@ -2569,16 +2873,15 @@ def test_delete_published_dataset(
     ]
 
 
-def test_delete_dataset_without_authentication(mocker, client: TestClient, db: Session, search_engine: SearchEngine):
+def test_delete_dataset_without_authentication(client: TestClient, db: Session, mock_search_engine: SearchEngine):
     dataset = DatasetFactory.create()
-    spy_delete_index = mocker.spy(search_engine, "delete_index")
 
     response = client.delete(f"/api/v1/datasets/{dataset.id}")
 
     assert response.status_code == 401
     assert db.query(Dataset).count() == 1
 
-    assert not spy_delete_index.called
+    assert not mock_search_engine.delete_index.called
 
 
 def test_delete_dataset_as_annotator(client: TestClient, db: Session):
