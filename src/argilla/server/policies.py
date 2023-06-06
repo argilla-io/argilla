@@ -204,19 +204,19 @@ class DatasetPolicyV1:
 
     @classmethod
     def search_records(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: (
-            actor.is_admin
-            or bool(
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_admin or bool(
                 accounts.get_workspace_user_by_workspace_id_and_user_id(
                     Session.object_session(actor),
                     dataset.workspace_id,
                     actor.id,
                 )
             )
-        )
+
+        return is_allowed
 
     @classmethod
-    def publish(cls, actor: User) -> bool:
+    async def publish(cls, actor: User) -> bool:
         return actor.is_admin
 
     @classmethod
