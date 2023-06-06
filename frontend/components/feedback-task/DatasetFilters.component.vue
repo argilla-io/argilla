@@ -2,18 +2,18 @@
   <div class="filters">
     <span
       class="filters__component"
-      v-for="{ id } in sortedFiltersValue"
-      :key="id"
+      v-for="filterObj in sortedFiltersValue"
+      :key="filterObj.id"
     >
       <SearchBarBase
-        v-if="getFilterById(id).component_type === 'searchBar'"
-        :current-search-text="getFilterById(id).value"
-        @on-search-text="onSearch(id, $event)"
-        :placeholder="getFilterById(id).placeholder"
+        v-if="filterObj.componentType === 'searchBar'"
+        :placeholder="filterObj.placeholder"
+        v-model="searchInput"
       />
+
       <StatusFilter
-        v-if="getFilterById(id).component_type === 'statusSelector'"
-        :options="getFilterById(id).options"
+        v-if="filterObj.componentType === 'statusSelector'"
+        :options="filterObj.options"
         v-model="selectedStatus"
       />
     </span>
@@ -44,16 +44,25 @@ export default {
   data: () => {
     return {
       selectedStatus: null,
+      searchInput: null,
+      sortedFiltersValue: [],
     };
   },
-  mounted() {
+  beforeMount() {
     this.selectedStatus = this.selectedStatus || this.statusFromRoute;
+    this.searchInput = this.searchInput ?? this.searchFromRoute;
 
     this.$root.$on("reset-status-filter", () => {
       this.selectedStatus = this.statusFromRoute;
     });
-  },
+    this.$root.$on("reset-search-filter", () => {
+      this.searchInput = this.searchFromRoute;
+    });
 
+    this.sortedFiltersValue = Object.values(this.filters).sort((a, b) =>
+      a.order > b.order ? -1 : 1
+    );
+  },
   computed: {
     filtersFromVuex() {
       return getFiltersByDatasetId(
@@ -62,30 +71,30 @@ export default {
         this.orderBy?.ascendent
       );
     },
-    sortedFiltersValue() {
-      return Object.values(this.filters).sort((a, b) =>
-        a.order > b.order ? -1 : 1
-      );
-    },
     statusFromRoute() {
       return this.$route.query?._status;
+    },
+    searchFromRoute() {
+      return this.$route.query?._search;
     },
   },
   watch: {
     selectedStatus(newValue) {
       this.$root.$emit("status-filter-changed", newValue);
     },
+    async searchInput(searchInput) {
+      this.$root.$emit("search-filter-changed", searchInput);
+    },
   },
   created() {
     this.filters = {
-      // NOTE: HIDE SEARCHBAR FOR MVP
-      // searchText: {
-      //   id: "searchText",
-      //   name: "Search",
-      //   componentType: "searchBar",
-      //   order: 0,
-      //   placeholder: "Introduce your query",
-      // },
+      searchText: {
+        id: "searchText",
+        name: "Search",
+        componentType: "searchBar",
+        order: 0,
+        placeholder: "Introduce your query",
+      },
       statusSelector: {
         id: "statusSelector",
         name: "Status Selector",
@@ -160,6 +169,7 @@ export default {
 <style lang="scss" scoped>
 .filters {
   display: flex;
+  flex-wrap: wrap;
   gap: $base-space * 2;
   align-items: center;
   padding: $base-space * 2 0;
