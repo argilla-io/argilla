@@ -192,8 +192,6 @@ class SearchEngine:
             "_source": False,
             "query": {"bool": bool_query},
             "sort": ["_score", {"id": "asc"}],
-            "from": offset,
-            "size": limit,
         }
 
         response = await self.client.search(
