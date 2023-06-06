@@ -2,6 +2,7 @@
   <div class="search-area" @click="focusInSearch">
     <BaseIconWithBadge
       class="icon-search"
+      :class="value?.length ? '--close' : '--search'"
       :icon="value?.length ? 'close' : 'search'"
       :show-badge="false"
       iconColor="#acacac"
@@ -71,6 +72,15 @@ export default {
   .icon-search {
     padding: 0;
     background: transparent;
+    width: 20px;
+    height: 20px;
+    transition: none;
+    &.--search {
+      cursor: default;
+    }
+    &.--close {
+      padding: 2px;
+    }
   }
   &:hover {
     border-color: $black-20;
