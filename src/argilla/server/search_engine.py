@@ -191,14 +191,13 @@ class SearchEngine:
         body = {
             "_source": False,
             "query": {"bool": bool_query},
-            "sort": ["_score", {"id": "asc"}],
         }
 
         response = await self.client.search(
             index=self._index_name_for_dataset(dataset),
             body=body,
             from_=offset,
-            size=size,
+            size=limit,
             _source=False,
             sort=["_score", {"id": "asc"}],
         )
