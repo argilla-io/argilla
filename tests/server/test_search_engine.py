@@ -354,7 +354,7 @@ class TestSuiteElasticSearchEngine:
             query=SearchQuery(text=TextQuery(q="payment")),
             user_response_status_filter=UserResponseStatusFilter(user=user, status=status),
         )
-        assert len(result.items) == 2
+        assert len(result.items) == 4
 
     async def test_add_records(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
         text_fields = TextFieldFactory.create_batch(5)
