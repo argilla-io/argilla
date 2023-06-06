@@ -307,6 +307,7 @@ async def search_dataset_records(
     query: SearchRecordsQuery,
     include: List[RecordInclude] = Query([]),
     response_status: Optional[ResponseStatusFilter] = Query(None),
+    offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
@@ -330,6 +331,7 @@ async def search_dataset_records(
         dataset=dataset,
         query=search_engine_query,
         user_response_status_filter=user_response_status_filter,
+        offset=offset,
         limit=limit,
     )
 
@@ -347,7 +349,7 @@ async def search_dataset_records(
 
     for record in records:
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=record, query_score=record_id_score_map[record.id]["query_score"]
+            record=record.__dict__, query_score=record_id_score_map[record.id]["query_score"]
         )
 
     return SearchRecordsResult(items=[record["search_record"] for record in record_id_score_map.values()])
