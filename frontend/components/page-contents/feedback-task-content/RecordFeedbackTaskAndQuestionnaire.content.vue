@@ -95,6 +95,7 @@ export default {
         path: this.$route.path,
         query: {
           ...this.$route.query,
+          _search: "",
           _status: newValue,
           _page: this.currentPage,
         },
@@ -106,6 +107,7 @@ export default {
       reRenderQuestionForm: 1,
       questionFormTouched: false,
       recordStatusToFilterWith: null,
+      searchTextToFilterWith: null,
       currentPage: null,
     };
   },
@@ -227,6 +229,9 @@ export default {
     statusFilterFromQuery() {
       return this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
     },
+    searchFilterFromQuery() {
+      return this.$route.query?._search ?? "";
+    },
     pageFromQuery() {
       const { _page } = this.$route.query;
       return isNil(_page) ? 1 : +_page;
@@ -249,6 +254,7 @@ export default {
   },
   async created() {
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
+    this.searchTextToFilterWith = this.searchFilterFromQuery;
     this.currentPage = this.pageFromQuery;
   },
   mounted() {
@@ -259,6 +265,7 @@ export default {
       this.setCurrentPage(this.currentPage - 1);
     });
     this.$root.$on("status-filter-changed", this.onStatusFilterChanged);
+    this.$root.$on("search-filter-changed", this.onSearchFilterChanged);
   },
   methods: {
     async applyStatusFilter(status) {
@@ -269,8 +276,45 @@ export default {
 
       this.reRenderQuestionForm++;
     },
+    async applySearchFilter(searchFilter) {
+      console.log("apply: ", searchFilter);
+      // this.searchTextToFilterWith = searchFilter;
+      // this.currentPage = 1;
+
+      // await this.$fetch();
+
+      // this.reRenderQuestionForm++;
+    },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
+    },
+    emitResetSearchFilter() {
+      this.$root.$emit("reset-search-filter");
+    },
+    async onSearchFilterChanged(newSearchValue) {
+      console.log(newSearchValue);
+
+      const localApplySearchFilter = this.applySearchFilter;
+      const localEmitResetSearchFilter = this.emitResetSearchFilter;
+
+      // console.log(this.searchTextToFilterWith);
+
+      if (this.questionFormTouched) {
+        Notification.dispatch("notify", {
+          message: "Your changes will be lost if you apply the search filter",
+          numberOfChars: 500,
+          type: "warning",
+          buttonText: LABEL_PROPERTIES.CONTINUE,
+          async onClick() {
+            await localApplySearchFilter(newSearchValue);
+          },
+          onClose() {
+            localEmitResetSearchFilter();
+          },
+        });
+      } else {
+        await this.applySearchFilter(newSearchValue);
+      }
     },
     async onStatusFilterChanged(newStatus) {
       if (this.recordStatusToFilterWith === newStatus) {
@@ -523,6 +567,7 @@ export default {
     this.$root.$off("go-to-next-page");
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
+    this.$root.$off("search-filter-changed");
   },
 };
 </script>
