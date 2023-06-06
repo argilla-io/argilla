@@ -150,7 +150,7 @@ class _LabelQuestion(QuestionSchema):
 
     @root_validator
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        values["settings"]["options"] = [{"value": label} for label in values.get("labels", [])]
+        values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels", [])]
         values["settings"]["visible_options"] = values.get("visible_labels", None)
         return values
 
