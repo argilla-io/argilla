@@ -94,7 +94,6 @@ export default {
     align-items: center;
     gap: 4px;
     color: $black-87;
-    font-weight: 500;
   }
 }
 
