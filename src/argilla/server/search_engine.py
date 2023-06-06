@@ -13,13 +13,14 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Union
 from uuid import UUID
 
 from opensearchpy import AsyncOpenSearch, helpers
 from pydantic import BaseModel
 from pydantic.utils import GetterDict
 
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     Field,
@@ -31,7 +32,6 @@ from argilla.server.models import (
     ResponseStatus,
     User,
 )
-from argilla.server.schemas.v1.datasets import ResponseStatusFilter
 from argilla.server.settings import settings
 
 
@@ -78,7 +78,7 @@ class Query:
 @dataclasses.dataclass
 class UserResponseStatusFilter:
     user: User
-    statuses: List[ResponseStatusFilter]
+    status: ResponseStatusFilter
 
 
 @dataclasses.dataclass
@@ -183,11 +183,9 @@ class SearchEngine:
 
         text_query = self._text_query_builder(dataset, text=query.text)
 
-        bool_query = {"must": [text_query]}
+        bool_query: dict = {"must": [text_query]}
         if user_response_status_filter:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
-            user_response_status_field = f"responses.{user_response_status_filter.user.username}.status"
-            bool_query["filter"] = [{"terms": {user_response_status_field: user_response_status_filter.statuses}}]
+            bool_query["filter"] = self._response_status_filter_builder(user_response_status_filter)
 
         body = {
             "_source": False,
@@ -205,7 +203,7 @@ class SearchEngine:
         items = []
         next_page_token = None
         for hit in response["hits"]["hits"]:
-            items.append(SearchResponseItem(record_id=hit["_id"], score=hit["_score"]))
+            items.append(SearchResponseItem(record_id=UUID(hit["_id"]), score=hit["_score"]))
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
             next_page_token = hit.get("_sort")
 
@@ -277,8 +275,18 @@ class SearchEngine:
     def _index_name_for_dataset(dataset: Dataset):
         return f"rg.{dataset.id}"
 
+    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter):
+        user_response_field = f"responses.{status_filter.user.username}"
 
-async def get_search_engine():
+        if status_filter.status == ResponseStatusFilter.missing:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
+            return [{"bool": {"must_not": {"exists": {"field": user_response_field}}}}]
+        else:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
+            return [{"term": {f"{user_response_field}.status": status_filter.status}}]
+
+
+async def get_search_engine() -> Generator[SearchEngine, None, None]:
     config = dict(
         hosts=settings.elasticsearch,
         verify_certs=settings.elasticsearch_ssl_verify,

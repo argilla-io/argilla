@@ -16,9 +16,14 @@ import random
 
 import pytest
 import pytest_asyncio
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import Dataset
 from argilla.server.search_engine import Query as SearchQuery
-from argilla.server.search_engine import SearchEngine, TextQuery
+from argilla.server.search_engine import (
+    SearchEngine,
+    TextQuery,
+    UserResponseStatusFilter,
+)
 from opensearchpy import OpenSearch, RequestError
 from sqlalchemy.orm import Session
 
@@ -31,6 +36,7 @@ from tests.factories import (
     ResponseFactory,
     TextFieldFactory,
     TextQuestionFactory,
+    UserFactory,
 )
 
 
@@ -246,7 +252,7 @@ class TestSuiteElasticSearchEngine:
     )
     async def test_search_with_query_string(
         self,
-        elastic_search_engine,
+        elastic_search_engine: SearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
         query: str,
@@ -265,6 +271,42 @@ class TestSuiteElasticSearchEngine:
         sorted_scores.sort(reverse=True)
 
         assert scores == sorted_scores
+
+    @pytest.mark.parametrize(
+        "status",
+        [
+            ResponseStatusFilter.discarded,
+            ResponseStatusFilter.submitted,
+            ResponseStatusFilter.draft,
+            ResponseStatusFilter.missing,
+        ],
+    )
+    async def test_search_with_response_status_filter(
+        self,
+        elastic_search_engine: SearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+        status: ResponseStatusFilter,
+    ):
+        index_name = f"rg.{test_banking_sentiment_dataset.id}"
+        user = UserFactory.create()
+        another_user = UserFactory.create()
+
+        if status != ResponseStatusFilter.missing:
+            for record in test_banking_sentiment_dataset.records:
+                users_responses = {
+                    f"{user.username}.status": status.value,
+                    f"{another_user.username}.status": status.value,
+                }
+                opensearch.update(index_name, id=record.id, body={"doc": {"responses": users_responses}})
+
+        opensearch.indices.refresh(index=index_name)
+        result = await elastic_search_engine.search(
+            test_banking_sentiment_dataset,
+            query=SearchQuery(text=TextQuery(q="payment")),
+            user_response_status_filter=UserResponseStatusFilter(user=user, status=status),
+        )
+        assert len(result.items) == 2
 
     async def test_add_records(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
         text_fields = TextFieldFactory.create_batch(5)

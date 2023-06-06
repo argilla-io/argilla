@@ -19,7 +19,7 @@
 
     <LabelSelectionComponent
       v-model="uniqueOptions"
-      :multiple="false"
+      :multiple="true"
       :componentId="questionId"
       :showSearch="showSearch"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
@@ -30,7 +30,7 @@
 <script>
 import { OPTIONS_THRESHOLD_TO_ENABLE_SEARCH } from "@/components/feedback-task/feedbackTask.properties";
 export default {
-  name: "SingleLabelComponent",
+  name: "MultiLabelComponent",
   props: {
     questionId: {
       type: String,
@@ -88,7 +88,7 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: $base-space;
   .title-area {
     color: $black-87;
     font-weight: 500;

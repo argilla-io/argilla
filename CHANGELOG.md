@@ -27,6 +27,7 @@ These are the section headers that we use:
 - Added new status `draft` for the `Response` model.
 - Added `LabelSelectionQuestionSettings` class allowing to create label selection (single-choice) questions in the API ([#3005])
 - Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API ([#3010]).
+- Added `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoint ([#3068]).
 
 ### Changed
 
