@@ -41,7 +41,7 @@ class WorkspaceUserPolicy:
         return actor.role == UserRole.admin
 
     @classmethod
-    async def delete(cls, workspace_user: WorkspaceUser) -> PolicyAction:
+    def delete(cls, workspace_user: WorkspaceUser) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.role == UserRole.admin
 
