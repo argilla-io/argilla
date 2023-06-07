@@ -563,15 +563,7 @@ class FeedbackDataset:
                     datasets_api_v1.add_question(
                         client=httpx_client,
                         id=argilla_id,
-                        question=question.dict(
-                            include={
-                                "name": True,
-                                "title": True,
-                                "description": True,
-                                "required": True,
-                                "settings": True,
-                            }
-                        ),
+                        question=question.dict(include={"name", "title", "description", "required", "settings"}),
                     )
                 except Exception as e:
                     delete_and_raise_exception(
