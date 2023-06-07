@@ -28,7 +28,7 @@ from pydantic import (
 from tqdm import tqdm
 
 import argilla as rg
-from argilla.client.feedback.card import ArgillaDatasetCard
+from argilla.client.feedback.card import ArgillaDatasetCard, size_categories_parser
 from argilla.client.feedback.constants import (
     FETCHING_BATCH_SIZE,
     FIELD_TYPE_TO_PYTHON_TYPE,
@@ -780,7 +780,7 @@ class FeedbackDataset:
         if generate_card:
             card = ArgillaDatasetCard.from_template(
                 card_data=DatasetCardData(
-                    size_categories=["1K<n<10K"],
+                    size_categories=size_categories_parser(len(self.records)),
                     tags=["rlfh", "argilla", "human-feedback"],
                 ),
                 repo_id=repo_id,
