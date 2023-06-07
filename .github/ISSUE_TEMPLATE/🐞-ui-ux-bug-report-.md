@@ -1,9 +1,9 @@
 ---
-name: "\U0001FAB2 Bug report"
-about: Report bugs and unexpected behavior
+name: "\U0001F41E UI/UX Bug report "
+about: UI or UX bugs and unexpected behavior
 title: "[BUG]"
-labels: "bug \U0001FAB2"
-assignees: ''
+labels: "bug \U0001FAB2, ui, ux"
+assignees: Amelie-V
 
 ---
 
