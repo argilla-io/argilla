@@ -8,7 +8,7 @@
 
 This dataset has been created with [Argilla](https://docs.argilla.io).
 
-As shown in the [dataset description section](#dataset-description), this dataset can be loaded into Argilla, or used directly with the `datasets` library.
+As shown in the sections below, this dataset can be loaded into Argilla as explained in [Load with Argilla](#load-with-argilla), or used directly with the `datasets` library in [Load with `datasets`](#load-with-datasets).
 
 ## Dataset Description
 
