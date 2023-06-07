@@ -613,7 +613,7 @@ export default {
   }
   &__guidelines-link {
     margin: 0;
-    @include font-size(13px);
+    @include font-size(14px);
     color: $black-37;
     a {
       color: $black-37;
