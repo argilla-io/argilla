@@ -3,8 +3,8 @@
     <BaseIconWithBadge
       ref="iconRef"
       class="icon-search"
-      :icon="iconType"
       :class="classType"
+      :icon="iconType"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
