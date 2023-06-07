@@ -34,7 +34,6 @@ from argilla.client.feedback.constants import (
     PUSHING_BATCH_SIZE,
 )
 from argilla.client.feedback.schemas import (
-    FIELD_TYPE_TO_PYTHON_TYPE,
     FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,

@@ -24,7 +24,6 @@ from argilla.client.feedback.constants import (
     FIELD_TYPE_TO_PYTHON_TYPE,
 )
 from argilla.client.feedback.schemas import (
-    FIELD_TYPE_TO_PYTHON_TYPE,
     FieldSchema,
 )
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
