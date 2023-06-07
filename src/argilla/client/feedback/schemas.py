@@ -146,12 +146,12 @@ class RatingQuestion(QuestionSchema):
 class _LabelQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({})
     labels: List[str] = Field(unique_items=True)
-    visible_labels: Optional[PositiveInt] = None
+    visible_labels: Optional[PositiveInt] = 20
 
     @root_validator
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels", [])]
-        values["settings"]["visible_options"] = values.get("visible_labels", None)
+        values["settings"]["visible_options"] = values.get("visible_labels", 20)
         return values
 
 
