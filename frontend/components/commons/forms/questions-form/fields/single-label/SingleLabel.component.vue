@@ -1,21 +1,10 @@
 <template>
   <div class="wrapper">
-    <div class="title-area --body1">
-      <span v-text="title" v-optional-field="isRequired ? false : true" />
-
-      <BaseIconWithBadge
-        class="icon-info"
-        v-if="!!tooltipMessage"
-        icon="info"
-        :id="`${title}Rating`"
-        :show-badge="false"
-        iconColor="#acacac"
-        badge-vertical-position="top"
-        badge-horizontal-position="right"
-        badge-border-color="white"
-        v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF' }"
-      />
-    </div>
+    <QuestionHeaderComponent
+      :title="title"
+      :isRequired="isRequired"
+      :tooltipMessage="description"
+    />
 
     <LabelSelectionComponent
       v-model="uniqueOptions"
@@ -48,7 +37,7 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    tooltipMessage: {
+    description: {
       type: String,
       default: () => "",
     },
@@ -89,41 +78,5 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  .title-area {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: $black-87;
-  }
-}
-
-.icon {
-  color: $black-37;
-}
-
-.info-icon {
-  display: flex;
-  flex-basis: 37px;
-}
-
-span {
-  word-break: break-word;
-}
-
-.icon-info {
-  display: inline-flex;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  padding: 0;
-  overflow: inherit;
-  &[data-title] {
-    position: relative;
-    overflow: visible;
-    &:before,
-    &:after {
-      margin-top: 0;
-    }
-  }
 }
 </style>
