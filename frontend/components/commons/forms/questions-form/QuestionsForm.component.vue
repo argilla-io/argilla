@@ -7,7 +7,7 @@
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
-        <p class="questions-form__title --body1 --medium">
+        <p class="questions-form__title --heading5 --medium">
           Submit your feedback
         </p>
         <p class="questions-form__guidelines-link">

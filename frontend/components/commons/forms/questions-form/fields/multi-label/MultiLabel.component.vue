@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <div class="title-area --body1">
+    <div class="title-area --body1 --medium">
       <span v-text="title" v-optional-field="isRequired ? false : true" />
 
       <BaseIconWithBadge
