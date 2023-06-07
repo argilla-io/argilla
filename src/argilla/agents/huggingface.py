@@ -19,7 +19,7 @@ from transformers.tools import (  # noqa
     TranslationTool,
 )
 from transformers import Tool, HfAgent
-from typing import List, Union
+from typing import List, Optional, Union
 
 
 class ArgillaTextClassificationTool(Tool):
@@ -84,21 +84,18 @@ class ArgillaTextQATool(Tool):
 
 
 class ArgillaHFAgent(HfAgent):
-    def __init__(self, *args, **kwargs):
-        if "additional_tools" in kwargs:
-            if not kwargs["additional_tools"]:
-                kwargs["additional_tools"] = []
-        else:
-            kwargs["additional_tools"] = []
+    def __init__(self, *args, additional_tools: Optional[List[Tool]] = None, **kwargs):
+        if additional_tools is None:
+            additional_tools = []
         argilla_text_classification_logger = ArgillaTextClassificationTool()
         argilla_text_summarization_logger = ArgillaTextSummarizationTool()
         argilla_text_translator_logger = ArgillaTextTranslationTool()
         argilla_text_qa_logger = ArgillaTextQATool()
-        kwargs["additional_tools"].append(argilla_text_classification_logger)
-        kwargs["additional_tools"].append(argilla_text_summarization_logger)
-        kwargs["additional_tools"].append(argilla_text_translator_logger)
-        kwargs["additional_tools"].append(argilla_text_qa_logger)
-        super().__init__(*args, **kwargs)
+        additional_tools.append(argilla_text_classification_logger)
+        additional_tools.append(argilla_text_summarization_logger)
+        additional_tools.append(argilla_text_translator_logger)
+        additional_tools.append(argilla_text_qa_logger)
+        super().__init__(*args, additional_tools=additional_tools, **kwargs)
 
     def run(self, task, *, return_code=False, remote=False, **kwargs):
         task = task + "\n Log the outputs of intermediate steps Using the Argilla logging tools."
