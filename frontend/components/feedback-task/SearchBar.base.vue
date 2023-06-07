@@ -35,11 +35,11 @@
       ref="searchRef"
       class="searchbar__input"
       type="text"
-      v-model.trim.lazy="searchValue"
+      v-model.trim="searchValue"
       :placeholder="placeholder"
       :aria-description="description"
       autocomplete="off"
-      @keydown.enter.exact="looseFocus"
+      @keydown.enter.exact="applySearch"
       @keydown.arrow-right.stop=""
       @keydown.arrow-left.stop=""
       @keydown.delete.exact.stop=""
@@ -65,17 +65,16 @@ export default {
       default: "Introduce your text",
     },
   },
-  computed: {
-    searchValue: {
-      get() {
-        return this.value;
-      },
-      set(value) {
-        this.$emit("input", value);
-      },
-    },
+  data() {
+    return {
+      searchValue: this.value ?? "",
+    };
   },
   methods: {
+    applySearch() {
+      this.$emit("input", this.searchValue);
+      this.looseFocus();
+    },
     looseFocus() {
       this.$refs.searchRef.blur();
     },
@@ -83,7 +82,10 @@ export default {
       this.$refs.searchRef.focus();
     },
     resetValue() {
-      this.value?.length && this.$emit("input", "");
+      if (this.searchValue?.length) {
+        this.searchValue = "";
+        this.$emit("input", "");
+      }
     },
   },
 };
