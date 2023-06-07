@@ -37,7 +37,7 @@ dependencies:
       - cleanlab~=2.0.0 # With this version, tests are failing
       - datasets>1.17.0,!= 2.3.2 # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
       - huggingface_hub
-      - flair==0.12
+      - flair>=0.12.2
       - faiss-cpu
       - flyingsquid
       - pgmpy
