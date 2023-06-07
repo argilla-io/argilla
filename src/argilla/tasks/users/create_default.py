@@ -37,7 +37,7 @@ def create_default(
             User(
                 first_name="",
                 username=DEFAULT_USERNAME,
-                role=UserRole.admin,
+                role=UserRole.owner,
                 api_key=api_key,
                 password_hash=accounts.hash_password(password),
                 workspaces=[Workspace(name=DEFAULT_USERNAME)],
@@ -46,7 +46,7 @@ def create_default(
         session.commit()
 
         if not quiet:
-            typer.echo("User with default credentials succesfully created:")
+            typer.echo("User with default credentials successfully created:")
             typer.echo(f"• username: {DEFAULT_USERNAME!r}")
             typer.echo(f"• password: {password!r}")
             typer.echo(f"• api_key:  {api_key!r}")

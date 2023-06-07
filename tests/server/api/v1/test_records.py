@@ -118,8 +118,8 @@ def test_create_record_response_with_required_questions(
     client: TestClient,
     db: Session,
     mock_search_engine: SearchEngine,
-    admin: User,
-    admin_auth_header: dict,
+    owner,
+    owner_auth_header,
     create_questions_func: Callable[["Dataset"], None],
     response_status: str,
     responses: dict,
@@ -129,7 +129,7 @@ def test_create_record_response_with_required_questions(
     record = RecordFactory.create(dataset=dataset)
 
     response_json = {**responses, "status": response_status}
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     response_body = response.json()
     assert response.status_code == 201
@@ -139,7 +139,7 @@ def test_create_record_response_with_required_questions(
         "id": str(UUID(response_body["id"])),
         "values": responses["values"],
         "status": response_status,
-        "user_id": str(admin.id),
+        "user_id": str(owner.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -149,7 +149,7 @@ def test_create_record_response_with_required_questions(
     )
 
 
-def test_create_submitted_record_response_with_missing_required_questions(client: TestClient, admin_auth_header: dict):
+def test_create_submitted_record_response_with_missing_required_questions(client: TestClient, owner_auth_header):
     dataset = DatasetFactory.create()
     create_text_questions(dataset)
 
@@ -159,7 +159,7 @@ def test_create_submitted_record_response_with_missing_required_questions(client
         "status": "submitted",
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
     assert response.status_code == 422
     assert response.json() == {"detail": "Missing required question: 'input_ok'"}
 
@@ -214,8 +214,8 @@ def test_create_record_response_with_missing_required_questions(
     client: TestClient,
     db: Session,
     mock_search_engine: SearchEngine,
-    admin: User,
-    admin_auth_header: dict,
+    owner,
+    owner_auth_header,
     create_questions_func: Callable[["Dataset"], None],
     response_status: str,
     responses: dict,
@@ -225,7 +225,7 @@ def test_create_record_response_with_missing_required_questions(
     record = RecordFactory.create(dataset=dataset)
 
     response_json = {**responses, "status": response_status}
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     response_body = response.json()
     assert response.status_code == 201
@@ -235,7 +235,7 @@ def test_create_record_response_with_missing_required_questions(
         "id": str(UUID(response_body["id"])),
         "values": responses["values"],
         "status": response_status,
-        "user_id": str(admin.id),
+        "user_id": str(owner.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -245,7 +245,7 @@ def test_create_record_response_with_missing_required_questions(
     )
 
 
-def test_create_record_response_with_extra_question_responses(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_record_response_with_extra_question_responses(client: TestClient, db: Session, owner_auth_header):
     dataset = DatasetFactory.create()
     create_text_questions(dataset)
     record = RecordFactory.create(dataset=dataset)
@@ -257,7 +257,7 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
         },
         "status": "submitted",
     }
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Error: found responses for non configured questions: ['unknown_question']"}
@@ -322,7 +322,7 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
 def test_create_record_response_with_wrong_response_value(
     client: TestClient,
     db: Session,
-    admin_auth_header: dict,
+    owner_auth_header,
     create_questions_func: Callable[["Dataset"], None],
     responses: dict,
     expected_error_msg: str,
@@ -332,7 +332,7 @@ def test_create_record_response_with_wrong_response_value(
     record = RecordFactory.create(dataset=dataset)
 
     response_json = {**responses, "status": "submitted"}
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert response.json() == {"detail": expected_error_msg}
@@ -355,7 +355,7 @@ def test_create_record_response_without_authentication(client: TestClient, db: S
 
 
 @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
-def test_create_record_response(client: TestClient, db: Session, admin: User, admin_auth_header: dict, status: str):
+def test_create_record_response(client: TestClient, db: Session, owner, owner_auth_header, status: str):
     dataset = DatasetFactory.create()
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
@@ -369,7 +369,7 @@ def test_create_record_response(client: TestClient, db: Session, admin: User, ad
         "status": status,
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 201
     assert db.query(Response).count() == 1
@@ -383,7 +383,7 @@ def test_create_record_response(client: TestClient, db: Session, admin: User, ad
             "output_ok": {"value": "yes"},
         },
         "status": status,
-        "user_id": str(admin.id),
+        "user_id": str(owner.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -396,8 +396,8 @@ def test_create_record_response(client: TestClient, db: Session, admin: User, ad
 def test_create_record_response_without_values(
     client: TestClient,
     db: Session,
-    admin: User,
-    admin_auth_header: dict,
+    owner,
+    owner_auth_header,
     status: str,
     expected_status_code: int,
     expected_response_count: int,
@@ -405,7 +405,7 @@ def test_create_record_response_without_values(
     record = RecordFactory.create()
     response_json = {"status": status}
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == expected_status_code
     assert db.query(Response).count() == expected_response_count
@@ -417,7 +417,7 @@ def test_create_record_response_without_values(
             "id": str(UUID(response_body["id"])),
             "values": None,
             "status": "discarded",
-            "user_id": str(admin.id),
+            "user_id": str(owner.id),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
@@ -425,12 +425,12 @@ def test_create_record_response_without_values(
 
 @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
 def test_create_record_submitted_response_with_wrong_values(
-    client: TestClient, db: Session, admin_auth_header: dict, status: str
+    client: TestClient, db: Session, owner_auth_header, status: str
 ):
     record = RecordFactory.create()
     response_json = {"status": status, "values": {"wrong_question": {"value": "wrong value"}}}
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
@@ -492,9 +492,9 @@ def test_create_record_response_as_annotator_from_different_workspace(client: Te
     assert db.query(Response).count() == 0
 
 
-def test_create_record_response_already_created(client: TestClient, db: Session, admin: User, admin_auth_header: dict):
+def test_create_record_response_already_created(client: TestClient, db: Session, owner, owner_auth_header):
     record = RecordFactory.create()
-    ResponseFactory.create(record=record, user=admin)
+    ResponseFactory.create(record=record, user=owner)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
@@ -503,26 +503,26 @@ def test_create_record_response_already_created(client: TestClient, db: Session,
         "status": "submitted",
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 409
     assert db.query(Response).count() == 1
 
 
-def test_create_record_response_with_invalid_values(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_record_response_with_invalid_values(client: TestClient, db: Session, owner_auth_header):
     record = RecordFactory.create()
     response_json = {
         "values": "invalid",
         "status": "submitted",
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert db.query(Response).count() == 0
 
 
-def test_create_record_response_with_invalid_status(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_record_response_with_invalid_status(client: TestClient, db: Session, owner_auth_header):
     record = RecordFactory.create()
     response_json = {
         "values": {
@@ -532,13 +532,13 @@ def test_create_record_response_with_invalid_status(client: TestClient, db: Sess
         "status": "invalid",
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert db.query(Response).count() == 0
 
 
-def test_create_record_response_with_nonexistent_record_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_record_response_with_nonexistent_record_id(client: TestClient, db: Session, owner_auth_header):
     RecordFactory.create()
     response_json = {
         "values": {
@@ -548,7 +548,7 @@ def test_create_record_response_with_nonexistent_record_id(client: TestClient, d
         "status": "submitted",
     }
 
-    response = client.post(f"/api/v1/records/{uuid4()}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{uuid4()}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 404
     assert db.query(Response).count() == 0

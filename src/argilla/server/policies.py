@@ -34,15 +34,15 @@ PolicyAction = Callable[[User], bool]
 class WorkspaceUserPolicy:
     @classmethod
     def list(cls, actor: User) -> bool:
-        return actor.role == UserRole.admin
+        return actor.role == UserRole.owner
 
     @classmethod
     def create(cls, actor: User) -> bool:
-        return actor.role == UserRole.admin
+        return actor.role == UserRole.owner
 
     @classmethod
     def delete(cls, workspace_user: WorkspaceUser) -> PolicyAction:
-        return lambda actor: actor.role == UserRole.admin
+        return lambda actor: actor.role == UserRole.owner
 
 
 class WorkspacePolicy:
@@ -52,20 +52,18 @@ class WorkspacePolicy:
 
     @classmethod
     def create(cls, actor: User) -> bool:
-        # TODO: Once we receive ORM User models instead of Pydantic schema for current_user we can
-        # change role checks to use `actor.is_admin` or `actor.is_annotator`
-        return actor.role == UserRole.admin
+        return actor.is_owner
 
     @classmethod
     def delete(cls, workspace: Workspace) -> PolicyAction:
-        return lambda actor: actor.role == UserRole.admin
+        return lambda actor: actor.role == UserRole.owner
 
 
 class WorkspacePolicyV1:
     @classmethod
     def get(cls, workspace: Workspace) -> PolicyAction:
         return lambda actor: (
-            actor.is_admin
+            actor.is_owner
             or bool(
                 accounts.get_workspace_user_by_workspace_id_and_user_id(
                     Session.object_session(actor),
@@ -79,15 +77,15 @@ class WorkspacePolicyV1:
 class UserPolicy:
     @classmethod
     def list(cls, actor: User) -> bool:
-        return actor.role == UserRole.admin
+        return actor.role == UserRole.owner
 
     @classmethod
     def create(cls, actor: User) -> bool:
-        return actor.role == UserRole.admin
+        return actor.role == UserRole.owner
 
     @classmethod
     def delete(cls, user: User) -> PolicyAction:
-        return lambda actor: actor.role == UserRole.admin
+        return lambda actor: actor.role == UserRole.owner
 
 
 class DatasetPolicy:
@@ -97,36 +95,38 @@ class DatasetPolicy:
 
     @classmethod
     def get(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin or dataset.workspace in [ws.name for ws in actor.workspaces]
+        return lambda actor: actor.is_owner or dataset.workspace in [ws.name for ws in actor.workspaces]
 
     @classmethod
     def create(cls, user: User) -> bool:
-        return user.is_admin
+        return user.is_owner
 
     @classmethod
     def update(cls, dataset: Dataset) -> PolicyAction:
         is_get_allowed = cls.get(dataset)
-        return lambda actor: actor.is_admin or is_get_allowed(actor)
+        return lambda actor: actor.is_owner or is_get_allowed(actor)
 
     @classmethod
     def delete(cls, dataset: Dataset) -> PolicyAction:
+        # TODO: Review created_by logic !!!
         is_get_allowed = cls.get(dataset)
-        return lambda actor: actor.is_admin or (is_get_allowed(actor) and actor.username == dataset.created_by)
+        return lambda actor: actor.is_owner or (is_get_allowed(actor) and actor.username == dataset.created_by)
 
     @classmethod
     def open(cls, dataset: Dataset) -> PolicyAction:
+        # TODO: Review created_by logic !!!
         is_get_allowed = cls.get(dataset)
-        return lambda actor: actor.is_admin or (is_get_allowed(actor) and actor.username == dataset.created_by)
+        return lambda actor: actor.is_owner or (is_get_allowed(actor) and actor.username == dataset.created_by)
 
     @classmethod
     def close(cls, dataset: Dataset) -> PolicyAction:
         is_get_allowed = cls.get(dataset)
-        return lambda actor: actor.is_admin or (is_get_allowed(actor) and actor.username == dataset.created_by)
+        return lambda actor: actor.is_owner or (is_get_allowed(actor) and actor.username == dataset.created_by)
 
     @classmethod
     def copy(cls, dataset: Dataset) -> PolicyAction:
         is_get_allowed = cls.get(dataset)
-        return lambda actor: actor.is_admin or is_get_allowed(actor) and cls.create(actor)
+        return lambda actor: actor.is_owner or is_get_allowed(actor) and cls.create(actor)
 
 
 class DatasetPolicyV1:
@@ -137,7 +137,7 @@ class DatasetPolicyV1:
     @classmethod
     def get(cls, dataset: Dataset) -> PolicyAction:
         return lambda actor: (
-            actor.is_admin
+            actor.is_owner
             or bool(
                 accounts.get_workspace_user_by_workspace_id_and_user_id(
                     Session.object_session(actor),
@@ -149,28 +149,28 @@ class DatasetPolicyV1:
 
     @classmethod
     def list_dataset_records_will_all_responses(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin
+        return lambda actor: actor.is_owner
 
     @classmethod
     def create(cls, actor: User) -> bool:
-        return actor.is_admin
+        return actor.is_owner
 
     @classmethod
     def create_field(cls, actor: User) -> bool:
-        return actor.is_admin
+        return actor.is_owner
 
     @classmethod
     def create_question(cls, actor: User) -> bool:
-        return actor.is_admin
+        return actor.is_owner
 
     @classmethod
     def create_records(cls, actor: User) -> bool:
-        return actor.is_admin
+        return actor.is_owner
 
     @classmethod
     def search_records(cls, dataset: Dataset) -> PolicyAction:
         return lambda actor: (
-            actor.is_admin
+            actor.is_owner
             or bool(
                 accounts.get_workspace_user_by_workspace_id_and_user_id(
                     Session.object_session(actor),
@@ -182,30 +182,30 @@ class DatasetPolicyV1:
 
     @classmethod
     def publish(cls, actor: User) -> bool:
-        return actor.is_admin
+        return actor.is_owner
 
     @classmethod
     def delete(cls, actor: User) -> bool:
-        return actor.is_admin
+        return actor.is_owner
 
 
 class FieldPolicyV1:
     @classmethod
     def delete(cls, actor: User) -> bool:
-        return actor.is_admin
+        return actor.is_owner
 
 
 class QuestionPolicyV1:
     @classmethod
     def delete(cls, actor: User) -> bool:
-        return actor.is_admin
+        return actor.is_owner
 
 
 class RecordPolicyV1:
     @classmethod
     def create_response(cls, record: Record) -> PolicyAction:
         return lambda actor: (
-            actor.is_admin
+            actor.is_owner
             or bool(
                 accounts.get_workspace_user_by_workspace_id_and_user_id(
                     Session.object_session(actor),
@@ -219,11 +219,11 @@ class RecordPolicyV1:
 class ResponsePolicyV1:
     @classmethod
     def update(cls, response: Response) -> PolicyAction:
-        return lambda actor: actor.is_admin or actor.id == response.user_id
+        return lambda actor: actor.is_owner or actor.id == response.user_id
 
     @classmethod
     def delete(cls, response: Response) -> PolicyAction:
-        return lambda actor: actor.is_admin or actor.id == response.user_id
+        return lambda actor: actor.is_owner or actor.id == response.user_id
 
 
 class DatasetSettingsPolicy:
@@ -233,11 +233,11 @@ class DatasetSettingsPolicy:
 
     @classmethod
     def save(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin
+        return lambda actor: actor.is_owner
 
     @classmethod
     def delete(cls, dataset: Dataset) -> PolicyAction:
-        return lambda actor: actor.is_admin
+        return lambda actor: actor.is_owner
 
 
 def authorize(actor: User, policy_action: PolicyAction) -> None:

@@ -191,16 +191,16 @@ def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
         )
 
 
-def test_log_data_in_several_workspaces(mocked_client: SecuredClient, admin: User, db: Session):
+def test_log_data_in_several_workspaces(mocked_client: SecuredClient, owner, db: Session):
     workspace_name = "my-fun-workspace"
     dataset_name = "test_log_data_in_several_workspaces"
     text = "This is a text"
 
-    for ws_name in [workspace_name, admin.username]:
+    for ws_name in [workspace_name, owner.username]:
         workspace = accounts.create_workspace(db, WorkspaceCreate(name=ws_name))
-        accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=admin.id))
+        accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=owner.id))
 
-    api = Argilla(api_key=admin.api_key)
+    api = Argilla(api_key=owner.api_key)
 
     current_workspace = api.get_workspace()
     for ws in [current_workspace, workspace_name]:

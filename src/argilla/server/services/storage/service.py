@@ -92,7 +92,7 @@ class RecordsStorageService:
                 status=TaskStatus.discarded,
             )
         else:
-            if not user.is_admin and user.username != dataset.created_by:
+            if not user.is_owner and user.username != dataset.created_by:
                 raise ForbiddenOperationError(
                     "You don't have the necessary permissions to delete records on this dataset. "
                     "Only dataset creators or administrators can delete datasets"

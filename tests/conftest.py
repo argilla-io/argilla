@@ -34,7 +34,7 @@ from opensearchpy import OpenSearch
 from sqlalchemy import create_engine
 
 from tests.database import TestSession
-from tests.factories import AdminFactory, AnnotatorFactory, UserFactory
+from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 from tests.helpers import SecuredClient
 
 if TYPE_CHECKING:
@@ -122,8 +122,8 @@ def opensearch(elasticsearch_config):
 
 
 @pytest.fixture(scope="function")
-def admin() -> User:
-    return AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
+def owner() -> User:
+    return OwnerFactory.create(first_name="Owner", username="owner", api_key="owner.apikey")
 
 
 @pytest.fixture(scope="function")
@@ -142,8 +142,8 @@ def mock_user() -> User:
 
 
 @pytest.fixture(scope="function")
-def admin_auth_header(admin: User) -> Dict[str, str]:
-    return {API_KEY_HEADER_NAME: admin.api_key}
+def owner_auth_header(owner: User) -> Dict[str, str]:
+    return {API_KEY_HEADER_NAME: owner.api_key}
 
 
 @pytest.fixture(scope="function")
@@ -151,7 +151,7 @@ def argilla_user() -> User:
     return UserFactory.create(
         first_name="Argilla",
         username="argilla",
-        role=UserRole.admin,
+        role=UserRole.owner,
         password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
         api_key=DEFAULT_API_KEY,
         workspaces=[Workspace(name="argilla")],

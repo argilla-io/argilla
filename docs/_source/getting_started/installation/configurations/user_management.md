@@ -13,7 +13,7 @@ An Argilla user is defined by the following fields:
 - `username`: The username used as login for Argilla's UI.
 - `first_name`: The user's first name.
 - `last_name` (optional): The user's last name.
-- `role`: The user's role in Argilla. Available roles are: "admin" and "annotator". Only "admin" users can create and delete workspaces and datasets, and change the dataset settings, like the labeling schema.
+- `role`: The user's role in Argilla. Available roles are: "owner" and "annotator". Only "owner" users can create and delete workspaces and datasets, and change the dataset settings, like the labeling schema.
 - `workspaces`: The workspaces where the user has read and write access (both from the UI and the Python client). Read more about workspaces and users below.
 - `api_key`: The API key to interact with Argilla API, mainly through the Python client but also via HTTP for advanced users. It is automatically generated when a user is created.
 
@@ -42,7 +42,7 @@ rg.set_workspace("my_private_workspace")
 
 ## Default user
 
-By default, if the Argilla instance has no users, the following default admin user will be configured:
+By default, if the Argilla instance has no users, the following default owner user will be configured:
 
 - username: `argilla`
 - password: `1234`
@@ -167,7 +167,7 @@ Options:
   --username TEXT           Username as a lowercase string without spaces
                             allowing letters, numbers, dashes and underscores.
 
-  --role [admin|annotator]  Role for the user.  [default: annotator]
+  --role [owner|annotator]  Role for the user.  [default: annotator]
   --password TEXT           Password as a string with a minimum length of 8
                             characters.
 
@@ -181,12 +181,12 @@ Options:
   --help                    Show this message and exit.
 ```
 
-#### Creating an admin user
+#### Creating an owner user
 
 **CLI:**
 
 ```bash
-python -m argilla users create --role admin --first-name Hulio --last-name Ramos --username hurra --password abcde123
+python -m argilla users create --role owner --first-name Hulio --last-name Ramos --username hurra --password abcde123
 ```
 
 ```
@@ -194,7 +194,7 @@ User succesfully created:
 • first_name: 'Hulio'
 • last_name: 'Ramos'
 • username: 'hurra'
-• role: 'admin'
+• role: 'owner'
 • api_key: 'eZDbiNZSZuTyLnVxtxUQ5K4M4WHmPBvIvnc3wofqT7ZPmS33FERjgNd9IECsAdC4qEaks4yVxjomkbDXcjfUoiuotA2-mrdcSZCVUDGGbQE'
 • workspaces: []
 ```
@@ -205,14 +205,14 @@ User succesfully created:
 auth_headers = {"X-Argilla-API-Key": "argilla.apikey"}
 http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 
-response = http.post("/api/users", json={"role": "admin", "first_name": "Hulio", "last_name": "Ramos", "username": "hurra", "password": "abcde123"})
+response = http.post("/api/users", json={"role": "owner", "first_name": "Hulio", "last_name": "Ramos", "username": "hurra", "password": "abcde123"})
 repsonse.json()
 ```
 ```json
 {
    "id":"8e62808e-df44-4135-87bd-d022f1d9fcf0",
    "username":"hurra",
-   "role":"admin",
+   "role":"owner",
    "full_name":"Hulio Ramos",
    "workspaces":[],
    "api_key":"67Ae7sRYpvu98MqMMkrPNtYx-pyjrRCiyieiwXsE7qP2npG8Eo_8cGpx4EZKJ_APt1FQ7qtX5jcnrUBLq7iW6N5KRhd32pBfHLFHHbnqIK4",
@@ -247,7 +247,7 @@ The workspace `ws` is automatically created and assigned to the user.
 ```python
 import httpx
 
-api_key = <admin-api-key>
+api_key = <owner-api-key>
 auth_headers = {"X-Argilla-API-Key": api_key}
 http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 
@@ -306,7 +306,7 @@ users = http.get("/api/users").json()
    {
       "id":"8e62808e-df44-4135-87bd-d022f1d9fcf0",
       "username":"hurra",
-      "role":"admin",
+      "role":"owner",
       "full_name":"Hulio Ramos",
       "workspaces":[
 
@@ -379,7 +379,7 @@ The migration tasks can create users and workspaces automatically from a yaml fi
   disabled: False
 ```
 
-The user role will be computed depending on how workspaces are setup for each user. If no `workspace` attribute is defined, the user will be considered an `admin`. Otherwise, the assigned user role will be `annotator`.
+The user role will be computed depending on how workspaces are setup for each user. If no `workspace` attribute is defined, the user will be considered an `owner`. Otherwise, the assigned user role will be `annotator`.
 
 The task will also create an extra workspace for each user named after their username.
 
@@ -405,7 +405,7 @@ http.get("/api/users").json()
    {
       "id":"8e4da958-1dba-44d9-82f3-ea2ec3beecdf",
       "username":"john",
-      "role":"admin",
+      "role":"owner",
       "full_name":"John Doe None",
       "workspaces":[
          "john"

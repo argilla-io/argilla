@@ -144,7 +144,7 @@ class DatasetsService:
             raise ForbiddenOperationError("You don't have the necessary permissions to list datasets.")
 
         accessible_workspace_names = [
-            ws.name for ws in (accounts.list_workspaces(self._db) if user.is_admin else user.workspaces)
+            ws.name for ws in (accounts.list_workspaces(self._db) if user.is_owner else user.workspaces)
         ]
 
         if workspaces:

@@ -74,7 +74,7 @@ def list_current_user_datasets(
 ):
     authorize(current_user, DatasetPolicyV1.list)
 
-    if current_user.is_admin:
+    if current_user.is_owner:
         return Datasets(items=datasets.list_datasets(db))
     else:
         return Datasets(items=current_user.datasets)

@@ -52,7 +52,7 @@ class DatasetStatus(str, Enum):
 
 
 class UserRole(str, Enum):
-    admin = "admin"
+    owner = "owner"
     annotator = "annotator"
 
 
@@ -277,8 +277,8 @@ class User(Base):
     )
 
     @property
-    def is_admin(self):
-        return self.role == UserRole.admin
+    def is_owner(self):
+        return self.role == UserRole.owner
 
     @property
     def is_annotator(self):
