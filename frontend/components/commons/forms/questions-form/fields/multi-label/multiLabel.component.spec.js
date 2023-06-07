@@ -3,7 +3,11 @@ import MultiLabelComponent from "./MultiLabel.component";
 
 let wrapper = null;
 const options = {
-  stubs: ["LabelSelectionComponent", "BaseIconWithBadge"],
+  stubs: [
+    "QuestionHeaderComponent",
+    "LabelSelectionComponent",
+    "BaseIconWithBadge",
+  ],
   directives: {
     "optional-field"() {
       // this directive is used to show '(optional)' at the end of a question optional
@@ -56,16 +60,18 @@ afterEach(() => {
 });
 
 describe("MultiLabelComponent", () => {
-  it("render by default the title of the question and the LabelSelectionComponent", () => {
+  it("render by default the QuestionHeader and the LabelSelectionComponent", () => {
     expect(wrapper.is(MultiLabelComponent)).toBe(true);
+
+    const QuestionHeaderWrapper = wrapper.findComponent({
+      name: "QuestionHeaderComponent",
+    });
+    expect(QuestionHeaderWrapper.exists()).toBe(true);
+
     const labelSelectionWrapper = wrapper.findComponent({
       name: "LabelSelectionComponent",
     });
     expect(labelSelectionWrapper.exists()).toBe(true);
-    const baseIconWithBadgeWrapper = wrapper.findComponent({
-      name: "BaseIconWithBadge",
-    });
-    expect(baseIconWithBadgeWrapper.exists()).toBe(false);
 
     expect(wrapper.vm.uniqueOptions).toStrictEqual([
       {
@@ -87,58 +93,16 @@ describe("MultiLabelComponent", () => {
         is_selected: false,
       },
     ]);
-    expect(wrapper.vm.showSearch).toBe(false);
+    expect(wrapper.vm.showSearch).toBe(true);
     expect(wrapper.vm.maxOptionsToShowBeforeCollapse).toBe(-1);
-
-    const titleWrapper = wrapper.find(".title-area > span");
-    expect(titleWrapper.text()).toBe("This is the question");
-  });
-  it("render the title of the question, a tooltip if there is a props tooltipMessage and the LabelSelectionComponent", () => {
-    expect(wrapper.is(MultiLabelComponent)).toBe(true);
-
-    expect(wrapper.vm.isMultipleSelection).toBe(true);
-
-    const baseIconWithBadgeWrapper = wrapper.findComponent({
-      name: "BaseIconWithBadge",
-    });
-    expect(baseIconWithBadgeWrapper.exists()).toBe(false);
-
-    expect(wrapper.vm.uniqueOptions).toStrictEqual([
-      {
-        id: "sentiment_positive",
-        value: "positive",
-        text: "Positive",
-        is_selected: false,
-      },
-      {
-        id: "sentiment_very_positive",
-        value: "very_positive",
-        text: "Very Positive",
-        is_selected: false,
-      },
-      {
-        id: "sentiment_negative",
-        value: "negative",
-        text: "Negative",
-        is_selected: false,
-      },
-    ]);
-    expect(wrapper.vm.showSearch).toBe(false);
-    expect(wrapper.vm.maxOptionsToShowBeforeCollapse).toBe(-1);
-
-    const titleWrapper = wrapper.find(".title-area > span");
-    expect(titleWrapper.text()).toBe("This is the question");
   });
   it("update the maxOptionsToShowBeforeCollapse depending of the value of the props visibleOptions", async () => {
     expect(wrapper.vm.maxOptionsToShowBeforeCollapse).toBe(-1);
     await wrapper.setProps({ visibleOptions: 12 });
     expect(wrapper.vm.maxOptionsToShowBeforeCollapse).toBe(12);
-  });
-  it("render the BaseIconWithBadge after the title if tooltipMessage is not null", async () => {
-    await wrapper.setProps({ tooltipMessage: "this is a tooltip" });
-    const baseIconWithBadgeWrapper = wrapper.findComponent({
-      name: "BaseIconWithBadge",
-    });
-    expect(baseIconWithBadgeWrapper.exists()).toBe(true);
+
+    expect(
+      wrapper.findComponent({ name: "QuestionHeaderComponent" }).exists()
+    ).toBe(true);
   });
 });
