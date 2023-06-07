@@ -75,7 +75,7 @@ The **questions** are the questions that will be asked to the annotators. They c
 
 | Question Name | Title | Type | Required | Description | Values/Labels |
 | ------------- | ----- | ---- | -------- | ----------- | ------------- |
-{% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.__class__.__name__  }} | {{ question.required | default(true, true) }} | {{ question.description | default("N/A", true) }} | {% if question.settings.type == 'rating' %}[{% for value in question.settings.options %} {{ value.value }} {% endfor %}]{% else %} N/A {% endif %} |
+{% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.__class__.__name__  }} | {{ question.required | default(true, true) }} | {{ question.description | default("N/A", true) }} | {% if question.settings.type == 'rating' %}{{ question.settings.options | map(attribute="value") | list }}{% else %} N/A {% endif %} |
 {% endfor %}
 
 Finally, the **guidelines** are just a plain string that can be used to provide instructions to the annotators. Find those in the [annotation guidelines](#annotation-guidelines) section.
@@ -104,7 +104,7 @@ Among the dataset fields, we differentiate between the following:
 
 * **Questions:** These are the questions that will be asked to the annotators. They can be of different types, such as rating, text, single choice, or multiple choice.
     {% for question in argilla_questions %}
-    * {% if question.required == false %}(optional) {% endif %}**{{ question.name }}** is of type `{{ question.__class__.__name__ }}`{% if question.settings.type == 'rating' %} with the following allowed values [{% for value in question.settings.options %} {{ value.value }} {% endfor %}]{% endif %}{% if question.description %}, and description "{{ question.description }}"{% endif %}.{% endfor %}
+    * {% if question.required == false %}(optional) {% endif %}**{{ question.name }}** is of type `{{ question.__class__.__name__ }}`{% if question.settings.type == 'rating' %} with the following allowed values {{ question.settings.options | map(attribute="value") | list }}{% endif %}{% if question.description %}, and description "{{ question.description }}"{% endif %}.{% endfor %}
 
 Additionally, we also have one more field which is optional and is the following:
 
