@@ -777,22 +777,23 @@ class FeedbackDataset:
             )
 
         if generate_card:
-            explained_guidelines = f"## Guidelines\n\n{self.guidelines if self.guidelines else 'There are no guidelines defined for this `FeedbackDataset`.'}\n\n"
+            explained_guidelines = f"## Annotation guidelines\n\n{self.guidelines if self.guidelines else 'There are no annotation guidelines defined for this `FeedbackDataset`.'}"
 
-            explained_fields = ["## Fields\n\n"]
+            explained_fields = ["## Fields\n"]
             for field in self.fields:
                 explained_fields.append(
-                    f"* `{'(optional)' if not field.required else ''} {field.name}` is of type `{type(field).__name__}`\n"
+                    f"\n* `{'(optional)' if not field.required else ''} {field.name}` is of type `{type(field).__name__}`."
                 )
+            explained_fields = "".join(explained_fields)
 
-            explained_questions = ["## Questions\n\n"]
+            explained_questions = ["## Questions\n"]
             for question in self.questions:
                 explained_question = f"* `{'(optional)' if not question.required else ''} {question.name}` is of type `{type(question).__name__}`"
                 if question.settings["type"] == "rating":
                     explained_question += f" with the following allowed values: {[option['value'] for option in question.settings['options']]}"
                 if question.description:
                     explained_question += f" with the following description: '{question.description}'"
-                explained_questions.append(f"{explained_question}.\n")
+                explained_questions.append(f"\n{explained_question}.")
             explained_questions = "".join(explained_questions)
 
             loading_guide = (
@@ -811,10 +812,7 @@ class FeedbackDataset:
             )
 
             card = DatasetCard(
-                f"{explained_guidelines}\n\n"
-                f"{explained_fields}\n\n"
-                f"{explained_questions}\n\n"
-                f"{loading_guide}\n\n"
+                f"{explained_guidelines}\n\n" f"{explained_fields}\n\n" f"{explained_questions}\n\n" f"{loading_guide}"
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
