@@ -110,8 +110,9 @@ async def get_user_by_api_key(db: "AsyncSession", api_key: str) -> Union[User, N
     return result.scalar_one_or_none()
 
 
-def list_users(db: Session):
-    return db.query(User).order_by(User.inserted_at.asc()).all()
+async def list_users(db: "AsyncSession") -> List[User]:
+    result = await db.execute(select(User).order_by(User.inserted_at.asc()).options(selectinload(User.workspaces)))
+    return result.scalars().all()
 
 
 async def create_user(db: "AsyncSession", user_create: UserCreate) -> User:

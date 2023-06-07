@@ -73,10 +73,12 @@ async def whoami(
 
 
 @router.get("/users", response_model=List[User], response_model_exclude_none=True)
-def list_users(*, db: Session = Depends(get_db), current_user: models.User = Security(auth.get_current_user)):
-    authorize(current_user, UserPolicy.list)
+async def list_users(
+    *, db: AsyncSession = Depends(get_async_db), current_user: models.User = Security(auth.get_current_user)
+):
+    await authorize(current_user, UserPolicy.list)
 
-    users = accounts.list_users(db)
+    users = await accounts.list_users(db)
 
     return parse_obj_as(List[User], users)
 
