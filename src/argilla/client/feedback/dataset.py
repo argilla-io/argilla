@@ -743,7 +743,7 @@ class FeedbackDataset:
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
         import huggingface_hub
-        from huggingface_hub import DatasetCard, HfApi
+        from huggingface_hub import DatasetCard, DatasetCardData, HfApi
         from packaging.version import parse as parse_version
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
@@ -777,6 +777,11 @@ class FeedbackDataset:
             )
 
         if generate_card:
+            yaml_metadata = DatasetCardData(
+                size_categories=["1K<n<10K"],
+                tags=["rlfh", "argilla", "human-feedback"],
+            ).to_yaml()
+
             explained_guidelines = f"## Annotation guidelines\n\n{self.guidelines if self.guidelines else 'There are no annotation guidelines defined for this `FeedbackDataset`.'}"
 
             explained_fields = ["## Fields\n"]
@@ -812,7 +817,12 @@ class FeedbackDataset:
             )
 
             card = DatasetCard(
-                f"{explained_guidelines}\n\n" f"{explained_fields}\n\n" f"{explained_questions}\n\n" f"{loading_guide}"
+                f"---\n{yaml_metadata}\n---\n\n"
+                f"# Dataset card for `{repo_id.split('/')[-1]}`\n\n"
+                f"{explained_guidelines}\n\n"
+                f"{explained_fields}\n\n"
+                f"{explained_questions}\n\n"
+                f"{loading_guide}"
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
