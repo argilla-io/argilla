@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import asyncio
+import inspect
+
 import factory
 from argilla.server.models import (
     Dataset,
@@ -30,7 +33,35 @@ from argilla.server.models import (
 from tests.database import TestSession
 
 
-class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
+class AsyncSQLAlchemyModelFactory(factory.alchemy.SQLAlchemyModelFactory):
+    @classmethod
+    async def _save(cls, model_class, session, args, kwargs):
+        session_persistence = cls._meta.sqlalchemy_session_persistence
+        obj = model_class(*args, **kwargs)
+        session.add(obj)
+        if session_persistence == "flush":
+            await session.flush()
+        elif session_persistence == "commit":
+            await session.commit()
+        return obj
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        session = cls._meta.sqlalchemy_session()
+
+        async def coro():
+            for key, value in kwargs.items():
+                # Check if the fields received are awaitable which means they are another async factory
+                if inspect.isawaitable(value):
+                    kwargs[key] = await value
+            return await cls._save(model_class, session, args, kwargs)
+
+        if session is None:
+            raise RuntimeError("No session provided.")
+        return asyncio.create_task(coro())
+
+
+class BaseFactory(AsyncSQLAlchemyModelFactory):
     class Meta:
         sqlalchemy_session = TestSession
         sqlalchemy_session_persistence = "flush"
