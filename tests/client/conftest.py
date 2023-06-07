@@ -21,8 +21,9 @@ import pytest
 from argilla.client.sdk.datasets.models import TaskType
 
 if TYPE_CHECKING:
-    from argilla.client.feedback import FieldSchema, QuestionSchema
-from argilla.client.feedback import (
+    from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
+
+from argilla.client.feedback.schemas import (
     FeedbackRecord,
     RatingQuestion,
     TextField,
@@ -387,7 +388,7 @@ def feedback_dataset_guidelines() -> str:
 
 
 @pytest.fixture
-def feedback_dataset_fields() -> List["FieldSchema"]:
+def feedback_dataset_fields() -> List["AllowedFieldTypes"]:
     return [
         TextField(name="text", required=True),
         TextField(name="label", required=True),
@@ -395,7 +396,7 @@ def feedback_dataset_fields() -> List["FieldSchema"]:
 
 
 @pytest.fixture
-def feedback_dataset_questions() -> List["QuestionSchema"]:
+def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
     return [
         TextQuestion(name="question-1", required=True),
         RatingQuestion(name="question-2", values=[0, 1], required=True),

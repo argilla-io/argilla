@@ -21,10 +21,10 @@ from argilla.client import api
 from pydantic import ValidationError
 
 if TYPE_CHECKING:
-    from argilla.client.feedback import FieldSchema, QuestionSchema
+    from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
 
-from argilla.client.feedback import (
-    FeedbackDataset,
+from argilla.client.feedback.dataset import FeedbackDataset
+from argilla.client.feedback.schemas import (
     FeedbackDatasetConfig,
     FeedbackRecord,
     RatingQuestion,
@@ -122,8 +122,8 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions")
 def test_records(
     feedback_dataset_guidelines: str,
-    feedback_dataset_fields: List["FieldSchema"],
-    feedback_dataset_questions: List["QuestionSchema"],
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
 ) -> None:
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -253,8 +253,8 @@ def test_format_as(
 def test_push_to_argilla_and_from_argilla(
     mocked_client,
     feedback_dataset_guidelines: str,
-    feedback_dataset_fields: List["FieldSchema"],
-    feedback_dataset_questions: List["QuestionSchema"],
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
     api.active_api()
@@ -323,8 +323,8 @@ def test_push_to_huggingface_and_from_huggingface(
     mocked_client,
     monkeypatch,
     feedback_dataset_guidelines: str,
-    feedback_dataset_fields: List["FieldSchema"],
-    feedback_dataset_questions: List["QuestionSchema"],
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
     api.active_api()
@@ -360,3 +360,6 @@ def test_push_to_huggingface_and_from_huggingface(
     assert isinstance(dataset_from_huggingface, FeedbackDataset)
     assert dataset_from_huggingface.guidelines == dataset.guidelines
     assert len(dataset_from_huggingface.fields) == len(dataset.fields)
+    assert all(original_field in dataset_from_huggingface.fields for original_field in dataset.fields)
+    assert len(dataset_from_huggingface.questions) == len(dataset.questions)
+    assert all(original_question in dataset_from_huggingface.questions for original_question in dataset.questions)

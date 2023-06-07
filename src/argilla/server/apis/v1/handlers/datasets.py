@@ -314,6 +314,7 @@ async def search_dataset_records(
     query: SearchRecordsQuery,
     include: List[RecordInclude] = Query([]),
     response_status: Optional[ResponseStatusFilter] = Query(None),
+    offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
@@ -337,6 +338,7 @@ async def search_dataset_records(
         dataset=dataset,
         query=search_engine_query,
         user_response_status_filter=user_response_status_filter,
+        offset=offset,
         limit=limit,
     )
 
