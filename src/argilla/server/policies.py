@@ -14,7 +14,7 @@
 
 from typing import Awaitable, Callable
 
-from sqlalchemy.orm.session import Session
+from sqlalchemy.ext.asyncio import async_object_session
 
 from argilla.server.contexts import accounts
 from argilla.server.errors import ForbiddenOperationError
@@ -72,8 +72,9 @@ class WorkspacePolicyV1:
     def get(cls, workspace: Workspace) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_admin or bool(
-                accounts.get_workspace_user_by_workspace_id_and_user_id(
-                    Session.object_session(actor),
+                await accounts.get_workspace_user_by_workspace_id_and_user_id(
+                    # Session.object_session(actor),
+                    async_object_session(actor),
                     workspace.id,
                     actor.id,
                 )
@@ -171,7 +172,7 @@ class DatasetPolicyV1:
         async def is_allowed(actor: User) -> bool:
             return actor.is_admin or bool(
                 await accounts.get_workspace_user_by_workspace_id_and_user_id(
-                    Session.object_session(actor),
+                    async_object_session(actor),
                     dataset.workspace_id,
                     actor.id,
                 )
@@ -207,7 +208,7 @@ class DatasetPolicyV1:
         async def is_allowed(actor: User) -> bool:
             return actor.is_admin or bool(
                 accounts.get_workspace_user_by_workspace_id_and_user_id(
-                    Session.object_session(actor),
+                    async_object_session(actor),
                     dataset.workspace_id,
                     actor.id,
                 )
@@ -242,7 +243,7 @@ class RecordPolicyV1:
         async def is_allowed(actor: User) -> bool:
             return actor.is_admin or bool(
                 accounts.get_workspace_user_by_workspace_id_and_user_id(
-                    Session.object_session(actor),
+                    async_object_session(actor),
                     record.dataset.workspace_id,
                     actor.id,
                 )
