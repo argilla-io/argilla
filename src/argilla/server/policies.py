@@ -228,8 +228,10 @@ class QuestionPolicyV1:
 
 class RecordPolicyV1:
     @classmethod
-    def create_response(cls, actor: User) -> bool:
-        return True
+    def create_response(cls, record: Record) -> PolicyAction:
+        return lambda actor: (
+            actor.is_owner or _exists_workspace_user_by_user_and_workspace_id(actor, record.dataset.workspace_id)
+        )
 
 
 class ResponsePolicyV1:

@@ -43,7 +43,7 @@ async def create_record_response(
             detail=f"Record with id `{record_id}` not found",
         )
 
-    authorize(current_user, RecordPolicyV1.create_response)
+    authorize(current_user, RecordPolicyV1.create_response(record))
 
     if datasets.get_response_by_record_id_and_user_id(db, record_id, current_user.id):
         raise HTTPException(
