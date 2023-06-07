@@ -778,21 +778,23 @@ class FeedbackDataset:
 
         if generate_card:
             explained_guidelines = f"## Guidelines\n\n{self.guidelines if self.guidelines else 'There are no guidelines defined for this `FeedbackDataset`.'}\n\n"
-            explained_fields = "## Fields\n\n" + "".join(
-                [
-                    f"* `{field.name}` is of type `{FIELD_TYPE_TO_PYTHON_TYPE[field.settings['type']].__name__}`\n"
-                    for field in self.fields
-                ]
-            )
+
+            explained_fields = ["## Fields\n\n"]
+            for field in self.fields:
+                explained_fields.append(
+                    f"* `{'(optional)' if not field.required else ''} {field.name}` is of type `{type(field).__name__}`\n"
+                )
+
             explained_questions = ["## Questions\n\n"]
             for question in self.questions:
-                explained_question = f"* `{question.name}` is of type `{type(question).__name__}`"
+                explained_question = f"* `{'(optional)' if not question.required else ''} {question.name}` is of type `{type(question).__name__}`"
                 if question.settings["type"] == "rating":
                     explained_question += f" with the following allowed values: {[option['value'] for option in question.settings['options']]}"
                 if question.description:
                     explained_question += f" with the following description: '{question.description}'"
                 explained_questions.append(f"{explained_question}.\n")
             explained_questions = "".join(explained_questions)
+
             loading_guide = (
                 "## Load with Argilla\n\nTo load this dataset with Argilla, you'll just need to "
                 "install Argilla as `pip install argilla --upgrade` and then use the following code:\n\n"
@@ -807,6 +809,7 @@ class FeedbackDataset:
                 f"ds = load_dataset({repo_id!r})\n"
                 "```"
             )
+
             card = DatasetCard(
                 f"{explained_guidelines}\n\n"
                 f"{explained_fields}\n\n"
