@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "argilla"
 description = "Open-source tool for exploring, labeling, and monitoring data for NLP projects."
 readme = "README.md"
-requires-python = ">=3.7"
-license = {text = "Apache-2.0"}
+requires-python = ">=3.7"  # TODO: upgrade minimum Python version to 3.8, and pin maximum to < 3.12
+license = { text = "Apache-2.0" }
 keywords = [
     "data-science",
     "natural-language-processing",
@@ -17,14 +17,10 @@ keywords = [
     "knowledged-graph",
     "developers-tools",
     "human-in-the-loop",
-    "mlops"
+    "mlops",
 ]
-authors = [
-    {name = "argilla", email = "contact@argilla.io"}
-]
-maintainers = [
-    {name = "argilla", email = "contact@argilla.io"}
-]
+authors = [{ name = "argilla", email = "contact@argilla.io" }]
+maintainers = [{ name = "argilla", email = "contact@argilla.io" }]
 dependencies = [
     # Client
     "httpx >= 0.15,< 0.24",
@@ -46,7 +42,7 @@ dependencies = [
     # for logging, tracebacks, printing, progressbars
     "rich <= 13.0.1",
     # for CLI
-    "typer >= 0.6.0, < 1.0.0"
+    "typer >= 0.6.0, < 1.0.0",
 ]
 dynamic = ["version"]
 
@@ -67,23 +63,51 @@ server = [
     # metrics
     "scikit-learn >= 0.24.2",
     # Statics server
-    "aiofiles>=0.6,<22.2",
-    "PyYAML>=5.4.1,<6.1.0",
+    "aiofiles >= 0.6,< 22.2",
+    "PyYAML >= 5.4.1,< 6.1.0",
     # security dependencies
-    "python-multipart~=0.0.5",
-    "python-jose[cryptography]>=3.2,<3.4",
-    "passlib[bcrypt]~=1.7.4",
+    "python-multipart ~= 0.0.5",
+    "python-jose[cryptography] >= 3.2,< 3.4",
+    "passlib[bcrypt] ~= 1.7.4",
     # Info status
-    "psutil >= 5.8,< 5.10",
+    "psutil >= 5.8, <5.10",
     # Telemetry
-    "segment-analytics-python == 2.2.0"
+    "segment-analytics-python == 2.2.0",
 ]
 postgresql = [
-   "psycopg2 ~= 2.9.5"
+    "psycopg2 ~= 2.9.5; sys_platform != 'darwin'",
+    # If we're on macOS, then install `psycopg2-binary` instead
+    "psycopg2-binary ~= 2.9.5; sys_platform == 'darwin'",
 ]
-listeners = [
-    "schedule ~= 1.1.0",
-    "prodict ~= 0.8.0"
+listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-asyncio",
+    "factory_boy ~= 3.2.1",
+    "cleanlab ~= 2.0.0",
+    # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
+    "datasets > 1.17.0,!= 2.3.2",
+    # TODO: some backward comp. problems introduced in 0.5.0. 0.13 does not match with setfit
+    "huggingface_hub >= 0.5.0,< 0.13",
+    # Version 0.12 fixes a known installation issue related to `sentencepiece` and `tokenizers`, more at https://github.com/flairNLP/flair/issues/3129
+    "flair >= 0.12.2",  # Version 0.12.2 relaxes the `huggingface_hub` dependency
+    "faiss-cpu",
+    "flyingsquid",
+    "pgmpy",
+    "plotly >= 4.1.0",
+    "snorkel >= 0.9.7",
+    "spacy == 3.5.0",
+    # Should match the `spaCy` version
+    "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz",
+    "transformers[torch] >= 4.19.0",
+    "evaluate",
+    "seqeval",
+    "setfit",
+    "span_marker",
+    "openai",
+    "rich == 13.0.1",
 ]
 
 [project.urls]
@@ -92,15 +116,13 @@ documentation = "https://docs.argilla.io"
 repository = "https://github.com/argilla-io/argilla"
 
 [tool.setuptools.dynamic]
-version = {attr = "argilla.__version__"}
+version = { attr = "argilla.__version__" }
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
-testpaths = [
-    "tests"
-]
+testpaths = ["tests"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -112,7 +134,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
     "if _TYPE_CHECKING:",
-    "if typing.TYPE_CHECKING:"
+    "if typing.TYPE_CHECKING:",
 ]
 
 [tool.isort]

@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 from time import sleep
 
 
@@ -42,6 +43,7 @@ def test_flair_monitoring(mocked_client, monkeypatch):
 
     sleep(1)  # wait for the consumer time
     detected_labels = sentence.get_labels("ner")
+    detected_spans = sentence.get_spans("ner")
     records = rg.load(dataset)
     assert len(records) == 1
 
@@ -50,8 +52,11 @@ def test_flair_monitoring(mocked_client, monkeypatch):
     assert record.tokens == [token.text for token in sentence.tokens]
 
     assert len(record.prediction) == len(detected_labels)
-    for (label, start, end, score), span in zip(record.prediction, detected_labels):
-        assert label == span.value
-        assert start == span.span.start_pos
-        assert end == span.span.end_pos
-        assert score == span.score
+    assert len(record.prediction) == len(detected_spans)
+    for (label, start, end, score), detected_label, detected_span in zip(
+        record.prediction, detected_labels, detected_spans
+    ):
+        assert label == detected_label.value
+        assert start == detected_span.start_position
+        assert end == detected_span.end_position
+        assert score == detected_label.score
