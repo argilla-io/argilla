@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="session")
 def event_loop() -> Generator["asyncio.AbstractEventLoop", None, None]:
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    loop = asyncio.get_event_loop_policy().get_event_loop()
     yield loop
     loop.close()
 
@@ -90,10 +90,10 @@ def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
 
 @pytest.fixture(scope="function")
 def client(request, mock_search_engine: SearchEngine) -> Generator[TestClient, None, None]:
-    session = TestSession()
-
-    def override_get_async_db():
+    async def override_get_async_db():
+        session = TestSession()
         yield session
+        await session.close()
 
     async def override_get_search_engine():
         yield mock_search_engine
@@ -133,8 +133,7 @@ def opensearch(elasticsearch_config):
 
 @pytest_asyncio.fixture(scope="function")
 async def admin() -> User:
-    admin = await AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
-    return admin
+    return await AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
 
 
 @pytest.fixture(scope="function")
