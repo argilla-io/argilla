@@ -11,12 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 import tempfile
-from typing import TYPE_CHECKING, Dict, Generator
+from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 
 import argilla as rg
 import httpx
 import pytest
+import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import active_api
 from argilla.client.apis.datasets import TextClassificationSettings
@@ -24,14 +26,14 @@ from argilla.client.client import Argilla
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
-from argilla.server.database import Base, get_db
+from argilla.server.database import Base, get_async_db
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
 from fastapi.testclient import TestClient
 from opensearchpy import OpenSearch
-from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from tests.database import TestSession
 from tests.factories import AdminFactory, AnnotatorFactory, UserFactory
@@ -41,36 +43,44 @@ if TYPE_CHECKING:
     from unittest.mock import MagicMock
 
     from pytest_mock import MockerFixture
-    from sqlalchemy import Connection
+    from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
     from sqlalchemy.orm import Session
 
 
 @pytest.fixture(scope="session")
-def connection() -> Generator["Connection", None, None]:
+def event_loop() -> Generator["asyncio.AbstractEventLoop", None, None]:
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest_asyncio.fixture(scope="session")
+async def connection() -> AsyncGenerator["AsyncConnection", None]:
     # Create a temp directory to store a SQLite database used for testing
     with tempfile.TemporaryDirectory() as tmpdir:
-        database_url = f"sqlite:///{tmpdir}/test.db"
-        engine = create_engine(database_url, connect_args={"check_same_thread": False})
-        conn = engine.connect()
+        database_url = f"sqlite+aiosqlite:///{tmpdir}/test.db"
+        engine = create_async_engine(database_url, connect_args={"check_same_thread": False})
+        conn = await engine.connect()
         TestSession.configure(bind=conn)
-        Base.metadata.create_all(conn)
+        await conn.run_sync(Base.metadata.create_all)
 
         yield conn
 
-        Base.metadata.drop_all(conn)
-        conn.close()
-        engine.dispose()
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.close()
+        await engine.dispose()
 
 
-@pytest.fixture(autouse=True)
-def db(connection: "Connection") -> Generator["Session", None, None]:
-    nested_transaction = connection.begin_nested()
+@pytest_asyncio.fixture(autouse=True)
+async def db(connection: "AsyncConnection") -> AsyncGenerator["AsyncSession", None]:
+    nested_transaction = await connection.begin_nested()
     session = TestSession()
 
     yield session
 
-    session.close()
-    nested_transaction.rollback()
+    await session.close()
+    await TestSession.remove()
+    await nested_transaction.rollback()
 
 
 @pytest.fixture(scope="function")
@@ -82,13 +92,13 @@ def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
 def client(request, mock_search_engine: SearchEngine) -> Generator[TestClient, None, None]:
     session = TestSession()
 
-    def override_get_db():
+    def override_get_async_db():
         yield session
 
     async def override_get_search_engine():
         yield mock_search_engine
 
-    argilla_app.dependency_overrides[get_db] = override_get_db
+    argilla_app.dependency_overrides[get_async_db] = override_get_async_db
     argilla_app.dependency_overrides[get_search_engine] = override_get_search_engine
 
     raise_server_exceptions = request.param if hasattr(request, "param") else False
@@ -121,9 +131,10 @@ def opensearch(elasticsearch_config):
         client.indices.delete(index=index_info["index"])
 
 
-@pytest.fixture(scope="function")
-def admin() -> User:
-    return AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
+@pytest_asyncio.fixture(scope="function")
+async def admin() -> User:
+    admin = await AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
+    return admin
 
 
 @pytest.fixture(scope="function")

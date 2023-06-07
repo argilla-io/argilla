@@ -12,6 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from sqlalchemy import orm
+import asyncio
 
-TestSession = orm.scoped_session(orm.sessionmaker())
+from sqlalchemy import orm
+from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
+
+TestSession = async_scoped_session(
+    orm.sessionmaker(class_=AsyncSession), lambda: asyncio.current_task(loop=asyncio.get_event_loop())
+)
