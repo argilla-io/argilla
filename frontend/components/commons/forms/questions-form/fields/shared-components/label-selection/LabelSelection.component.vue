@@ -59,6 +59,7 @@
         />
       </div>
     </transition-group>
+    <i class="no-result" v-if="!filteredOptions.length" />
   </div>
 </template>
 
@@ -248,6 +249,10 @@ input[type="checkbox"] {
 .label-active {
   color: white;
   background: #4c4ea3;
+}
+.no-result {
+  display: block;
+  height: $base-space * 4;
 }
 .cursor-pointer {
   cursor: pointer;
