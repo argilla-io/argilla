@@ -24,7 +24,7 @@ from argilla.server.search_engine import (
     TextQuery,
     UserResponseStatusFilter,
 )
-from opensearchpy import OpenSearch, RequestError
+from opensearchpy import OpenSearch, RequestError, helpers
 from sqlalchemy.orm import Session
 
 from tests.factories import (
@@ -40,7 +40,35 @@ from tests.factories import (
 )
 
 
-@pytest_asyncio.fixture()
+@pytest.fixture(scope="function")
+def dataset_for_pagination(opensearch: OpenSearch):
+    dataset = DatasetFactory.create()
+    records = RecordFactory.create_batch(size=100, dataset=dataset)
+    index_name = f"rg.{dataset.id}"
+
+    opensearch.indices.create(index=index_name, body={"mappings": {"properties": {"id": {"type": "keyword"}}}})
+
+    bulk_actions = [
+        {
+            "_op_type": "index",
+            "_id": record.id,
+            "_index": index_name,
+            "id": record.id,
+            "fields": {"text": "The same text for all documents"},
+        }
+        for record in records
+    ]
+
+    helpers.bulk(client=opensearch, actions=bulk_actions)
+
+    opensearch.indices.refresh(index=index_name)
+
+    yield dataset
+
+    opensearch.indices.delete(index=index_name)
+
+
+@pytest_asyncio.fixture(scope="function")
 async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
     text_question = TextQuestionFactory()
     rating_question = RatingQuestionFactory()
@@ -77,6 +105,30 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
                     "textId": "00003",
                     "text": "I deposited cash into my account a week ago and it is still not available,"
                     " please tell me why? I need the cash back now.",
+                    "label": "negative",
+                },
+            ),
+            RecordFactory(
+                dataset=dataset,
+                fields={
+                    "textId": "00004",
+                    "text": "Why was I charged for getting cash?",
+                    "label": "neutral",
+                },
+            ),
+            RecordFactory(
+                dataset=dataset,
+                fields={
+                    "textId": "00005",
+                    "text": "I tried to make a payment with my card and it was declined.",
+                    "label": "negative",
+                },
+            ),
+            RecordFactory(
+                dataset=dataset,
+                fields={
+                    "textId": "00006",
+                    "text": "My credit card was declined when I tried to make a payment.",
                     "label": "negative",
                 },
             ),
@@ -231,23 +283,23 @@ class TestSuiteElasticSearchEngine:
     @pytest.mark.parametrize(
         ("query", "expected_items"),
         [
-            ("card", 2),
+            ("card", 4),
             ("account", 1),
-            ("payment", 2),
-            ("cash", 2),
-            ("negative", 2),
+            ("payment", 4),
+            ("cash", 3),
+            ("negative", 4),
             ("00000", 1),
-            ("card payment", 2),
+            ("card payment", 4),
             ("nothing", 0),
-            (SearchQuery(text=TextQuery(q="card")), 2),
+            (SearchQuery(text=TextQuery(q="card")), 4),
             (SearchQuery(text=TextQuery(q="account")), 1),
-            (SearchQuery(text=TextQuery(q="payment")), 2),
-            (SearchQuery(text=TextQuery(q="cash")), 2),
-            (SearchQuery(text=TextQuery(q="card payment")), 2),
+            (SearchQuery(text=TextQuery(q="payment")), 4),
+            (SearchQuery(text=TextQuery(q="cash")), 3),
+            (SearchQuery(text=TextQuery(q="card payment")), 4),
             (SearchQuery(text=TextQuery(q="nothing")), 0),
-            (SearchQuery(text=TextQuery(q="negative", field="label")), 2),
+            (SearchQuery(text=TextQuery(q="negative", field="label")), 4),
             (SearchQuery(text=TextQuery(q="00000", field="textId")), 1),
-            (SearchQuery(text=TextQuery(q="card payment", field="text")), 2),
+            (SearchQuery(text=TextQuery(q="card payment", field="text")), 4),
         ],
     )
     async def test_search_with_query_string(
@@ -306,7 +358,25 @@ class TestSuiteElasticSearchEngine:
             query=SearchQuery(text=TextQuery(q="payment")),
             user_response_status_filter=UserResponseStatusFilter(user=user, status=status),
         )
-        assert len(result.items) == 2
+        assert len(result.items) == 4
+
+    @pytest.mark.parametrize(("offset", "limit"), [(0, 50), (10, 5), (0, 0), (90, 100)])
+    async def test_search_with_pagination(
+        self,
+        elastic_search_engine: SearchEngine,
+        opensearch: OpenSearch,
+        dataset_for_pagination: Dataset,
+        offset: int,
+        limit: int,
+    ):
+        results = await elastic_search_engine.search(
+            dataset_for_pagination, query="documents", offset=offset, limit=limit
+        )
+
+        assert len(results.items) == min(len(dataset_for_pagination.records) - offset, limit)
+
+        records = sorted(dataset_for_pagination.records, key=lambda r: r.id)
+        assert [record.id for record in records[offset : offset + limit]] == [item.record_id for item in results.items]
 
     async def test_add_records(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
         text_fields = TextFieldFactory.create_batch(5)
