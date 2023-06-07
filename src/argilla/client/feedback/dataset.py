@@ -784,10 +784,11 @@ class FeedbackDataset:
                     tags=["rlfh", "argilla", "human-feedback"],
                 ),
                 repo_id=repo_id,
-                dataset_name=repo_id.split("/")[-1],
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
-                data_instance=self.records[0].dict(),
+                argilla_guidelines=self.guidelines,
+                argilla_record=self.records[0].dict(),
+                huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 

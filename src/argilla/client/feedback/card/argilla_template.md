@@ -4,11 +4,19 @@
 {{ card_data }}
 ---
 
-# Dataset Card for {{ dataset_name }}
+# Dataset Card for {{ repo_id.split("/")[-1] }}
 
 This dataset has been created with [Argilla](https://docs.argilla.io).
 
 As shown in the [dataset description section](#dataset-description), this dataset can be loaded into Argilla, or used directly with the `datasets` library.
+
+## Table of Contents
+
+- [Dataset Description](#dataset-description)
+- [Dataset Structure](#dataset-structure)
+- [Dataset Creation](#dataset-creation)
+- [Considerations for Using the Data](#considerations-for-using-the-data)
+- [Additional Information](#additional-information)
 
 ## Dataset Description
 
@@ -82,10 +90,16 @@ Finally, the **guidelines** are just a plain string that can be used to provide 
 
 ### Data Instances
 
-An example of a dataset instance looks as follows:
+An example of a dataset instance in Argilla looks as follows:
 
 ```json
-{{ data_instance | tojson(indent=4) }}
+{{ argilla_record | tojson(indent=4) }}
+```
+
+While the same record in HuggingFace `datasets` looks as follows:
+
+```json
+{{ huggingface_record | tojson(indent=4) }}
 ```
 
 ### Data Fields
@@ -128,7 +142,7 @@ The dataset contains a single split, which is `train`.
 
 #### Annotation guidelines
 
-{{ annotation_guidelines_section | default("[More Information Needed]", true)}}
+{{ argilla_guidelines | default("[More Information Needed]", true)}}
 
 #### Annotation process
 
