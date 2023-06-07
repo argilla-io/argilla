@@ -16,6 +16,7 @@ import asyncio
 import inspect
 
 import factory
+from argilla.server.database import Base
 from argilla.server.models import (
     Dataset,
     Field,
@@ -29,6 +30,7 @@ from argilla.server.models import (
     Workspace,
     WorkspaceUser,
 )
+from sqlalchemy.ext.asyncio import async_object_session
 
 from tests.database import TestSession
 
@@ -54,6 +56,13 @@ class AsyncSQLAlchemyModelFactory(factory.alchemy.SQLAlchemyModelFactory):
                 # Check if the fields received are awaitable which means they are another async factory
                 if inspect.isawaitable(value):
                     kwargs[key] = await value
+                # This is a hacky way to make sure that the session is the same for all the objects
+                # that are passed to the factory.
+                if isinstance(value, Base):
+                    old_session = async_object_session(value)
+                    if old_session.sync_session.hash_key != session.sync_session.hash_key:
+                        old_session.expunge(value)
+                        session.merge(value)
             return await cls._save(model_class, session, args, kwargs)
 
         if session is None:
