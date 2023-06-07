@@ -176,13 +176,22 @@ class Dataset(Base):
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
     fields: Mapped[List["Field"]] = relationship(
-        back_populates="dataset", passive_deletes=True, order_by=Field.inserted_at.asc()
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Field.inserted_at.asc(),
     )
     questions: Mapped[List["Question"]] = relationship(
-        back_populates="dataset", passive_deletes=True, order_by=Question.inserted_at.asc()
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Question.inserted_at.asc(),
     )
     records: Mapped[List["Record"]] = relationship(
-        back_populates="dataset", passive_deletes=True, order_by=Record.inserted_at.asc()
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Record.inserted_at.asc(),
     )
 
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
