@@ -59,6 +59,7 @@
         />
       </div>
     </transition-group>
+    <i class="no-result" v-if="!filteredOptions.length" />
   </div>
 </template>
 
@@ -201,10 +202,15 @@ export default {
   .--more {
     border-radius: 20px;
     border: 1px solid $black-10;
-    @include font-size(12px);
     padding: 2px 4px;
+    color: $black-54;
+    @include font-size(12px);
+  }
+  .--less {
+    @include font-size(14px);
   }
   .svg-icon {
+    color: $black-37;
     border-radius: $border-radius;
   }
 }
@@ -243,6 +249,10 @@ input[type="checkbox"] {
 .label-active {
   color: white;
   background: #4c4ea3;
+}
+.no-result {
+  display: block;
+  height: $base-space * 4;
 }
 .cursor-pointer {
   cursor: pointer;
