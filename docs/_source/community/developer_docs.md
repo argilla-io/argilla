@@ -39,7 +39,7 @@ git remote add upstream https://github.com/argilla-io/argilla.git
 Now go ahead and create a new conda environment in which the development will take place and activate it:
 
 ```sh
-conda env create -f .github/environment_dev.yml
+conda env create -f environment_dev.yml
 conda activate argilla
 ```
 

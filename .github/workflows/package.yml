@@ -80,11 +80,11 @@ jobs:
         id: cache
         with:
           path: ${{ env.CONDA }}/envs
-          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('.github/environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
 
       - name: Update environment
         if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
-        run: mamba env update -n argilla -f .github/environment_dev.yml
+        run: mamba env update -n argilla -f environment_dev.yml
 
       - name: Cache pip 👜
         uses: actions/cache@v2
@@ -164,11 +164,11 @@ jobs:
         id: cache
         with:
           path: ${{ env.CONDA }}/envs
-          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('.github/environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
 
       - name: Update environment
         if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
-        run: mamba env update -n argilla -f .github/environment_dev.yml
+        run: mamba env update -n argilla -f environment_dev.yml
 
       - name: Cache pip 👜
         uses: actions/cache@v2
