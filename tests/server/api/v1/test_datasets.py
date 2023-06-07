@@ -2477,6 +2477,7 @@ def test_search_dataset_records(
             )
         ),
         user_response_status_filter=None,
+        offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
     assert response.status_code == 200
@@ -2490,7 +2491,6 @@ def test_search_dataset_records(
                         "output": "Hello",
                     },
                     "external_id": records[0].external_id,
-                    "responses": [],
                     "inserted_at": records[0].inserted_at.isoformat(),
                     "updated_at": records[0].updated_at.isoformat(),
                 },
@@ -2504,7 +2504,6 @@ def test_search_dataset_records(
                         "output": "Hi",
                     },
                     "external_id": records[1].external_id,
-                    "responses": [],
                     "inserted_at": records[1].inserted_at.isoformat(),
                     "updated_at": records[1].updated_at.isoformat(),
                 },
@@ -2543,6 +2542,7 @@ def test_search_dataset_records_including_responses(
             )
         ),
         user_response_status_filter=None,
+        offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
     assert response.status_code == 200
@@ -2622,32 +2622,40 @@ def test_search_dataset_records_with_response_status_filter(
         dataset=dataset,
         query=Query(text=TextQuery(q="Hello", field="input")),
         user_response_status_filter=UserResponseStatusFilter(user=admin, status=ResponseStatus.submitted),
+        offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
     assert response.status_code == 200
 
 
-def test_search_dataset_records_with_limit(
+def test_search_dataset_records_with_offset_and_limit(
     client: TestClient, mock_search_engine: SearchEngine, admin: User, admin_auth_header: dict
 ):
-    dataset, _, _ = create_dataset_for_search(user=admin)
-    mock_search_engine.search.return_value = SearchResponses(items=[])
+    dataset, records, _ = create_dataset_for_search(user=admin)
+    mock_search_engine.search.return_value = SearchResponses(
+        items=[
+            SearchResponseItem(record_id=records[0].id, score=14.2),
+            SearchResponseItem(record_id=records[1].id, score=12.2),
+        ]
+    )
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search",
         headers=admin_auth_header,
         json=query_json,
-        params={"limit": 10},
+        params={"offset": 0, "limit": 5},
     )
 
     mock_search_engine.search.assert_called_once_with(
         dataset=dataset,
         query=Query(text=TextQuery(q="Hello", field="input")),
         user_response_status_filter=None,
-        limit=10,
+        offset=0,
+        limit=5,
     )
     assert response.status_code == 200
+    assert len(response.json()["items"]) == 2
 
 
 def test_search_dataset_records_as_annotator(client: TestClient, admin: User, mock_search_engine: SearchEngine):
@@ -2677,6 +2685,7 @@ def test_search_dataset_records_as_annotator(client: TestClient, admin: User, mo
             )
         ),
         user_response_status_filter=None,
+        offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
     assert response.status_code == 200
