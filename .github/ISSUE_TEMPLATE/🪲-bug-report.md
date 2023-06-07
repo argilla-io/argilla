@@ -1,11 +1,13 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: bug
+name: "\U0001FAB2 Bug report"
+about: Report bugs and unexpected behavior
+title: "[BUG]"
+labels: "bug \U0001FAB2"
 assignees: ''
 
 ---
+
+<!--  Ask David for help you to contribute https://calendly.com/argilla-office-hours/30min or feel free to submit a pull request straight away: https://github.com/argilla-io/argilla/pulls or  -->
 
 **Describe the bug**
 A clear and concise description of what the bug is.
