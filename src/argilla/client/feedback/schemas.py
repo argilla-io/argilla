@@ -37,7 +37,7 @@ PUSHING_BATCH_SIZE = 32
 
 
 class ValueSchema(BaseModel):
-    value: Union[StrictStr, StrictInt]
+    value: Union[StrictStr, StrictInt, List[str]]
 
 
 class ResponseSchema(BaseModel):
