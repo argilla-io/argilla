@@ -36,8 +36,8 @@ To collect feedback for your dataset, you need to formulate questions. The Feedb
 
 - `RatingQuestion`: These questions require annotators to select one option from a list of integer values. This type is useful for collecting numerical scores.
 - `TextQuestion`: These questions offer annotators a free-text area where they can enter any text. This type is useful for collecting natural language data, such as corrections or explanations.
-
-We have plans to expand the range of supported question types in future releases of the Feedback Task.
+- `LabelQuestion`: These questions ask annotators to choose one label from a list of options. This type is useful for text classification tasks.
+- `MultiLabelQuestion`: These questions ask annotators to choose all applicable labels from a list of options. This type is useful for multi-label text classification tasks.
 
 You can define your questions using the Python SDK and set up the following configurations:
 
@@ -46,30 +46,15 @@ You can define your questions using the Python SDK and set up the following conf
 - `required` (optional): Whether the question is required or not. Defaults to `True`. Note that at least one question must be required.
 - `description` (optional): The text to be displayed in the question tooltip in the UI. You can use it to give more context or information to annotators.
 
-Additionally, if the question is a `RatingQuestion`, you'll also need to specify:
+The following arguments apply to specific question types:
 
 - `values`: The rating options to answer the `RatingQuestion`. It can be any list of unique integers. It doesn't matter whether these are positive, negative, sequential or not.
+- `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions.
+- `visible_labels`: In `LabelQuestion` and `MultiLabelQuestion` this is the number of questions that will be visible in the UI. Any labels above this number will be collapsed.
 
-```python
-# list of questions to display in the feedback form
-questions =[
-    rg.RatingQuestion(
-        name="rating",
-        title="Rate the quality of the response:",
-        description="1 = very bad - 5= very good",
-        required=True,
-        values=[1, 2, 3, 4, 5]
-    ),
-    rg.TextQuestion(
-        name="corrected-text",
-        title="Provide a correction to the response:",
-        required=False
-    )
-]
-```
+Check out the following tabs to learn how to set up questions according to their type:
 
-```{note}
-The order of the questions in the UI follows the order in which these are added to the `questions` atrribute in the Python SDK.
+```{include} /_common/tabs/question_settings.md
 ```
 
 ## Define `guidelines`
@@ -116,6 +101,10 @@ dataset = rg.FeedbackDataset(
 ```
 
 ```{note}
+Fields and questions in the UI follow the order in which these are added to the `fields` and `questions` atrributes in the Python SDK.
+```
+
+```{hint}
 If you are working as part of an annotation team and you would like to control how much overlap you'd like to have between your annotators, you should consider the different workflows in the [Set up your annotation team guide](set_up_annotation_team.ipynb) before configuring and pushing your dataset.
 ```
 
