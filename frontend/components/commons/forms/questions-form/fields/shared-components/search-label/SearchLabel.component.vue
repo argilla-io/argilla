@@ -6,8 +6,8 @@
   >
     <BaseIconWithBadge
       class="icon-search"
-      :class="value?.length ? '--close' : '--search'"
-      :icon="value?.length ? 'close' : 'search'"
+      :class="classType"
+      :icon="iconType"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
@@ -54,6 +54,14 @@ export default {
     placeholder: {
       type: String,
       default: () => "",
+    },
+  },
+  computed: {
+    iconType() {
+      return this.value?.length ? "close" : "search";
+    },
+    classType() {
+      return this.value?.length ? "--close" : "--search";
     },
   },
   methods: {
