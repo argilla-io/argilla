@@ -60,6 +60,10 @@ class AsyncSQLAlchemyModelFactory(factory.alchemy.SQLAlchemyModelFactory):
             raise RuntimeError("No session provided.")
         return asyncio.create_task(coro())
 
+    @classmethod
+    async def create_batch(cls, size, **kwargs):
+        return [await cls.create(**kwargs) for _ in range(size)]
+
 
 class BaseFactory(AsyncSQLAlchemyModelFactory):
     class Meta:
