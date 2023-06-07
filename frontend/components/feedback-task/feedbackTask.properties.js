@@ -27,7 +27,7 @@ const LABEL_PROPERTIES = Object.freeze({
 });
 
 // NOTE - this threshold is used to show the search filter component for component from questionForm component
-const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 12;
+const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
 
 export {
   COMPONENT_TYPE,
