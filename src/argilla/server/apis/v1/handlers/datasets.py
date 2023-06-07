@@ -81,6 +81,7 @@ async def list_current_user_datasets(
         dataset_list = await datasets.list_datasets(db)
         return Datasets(items=dataset_list)
 
+    await current_user.awaitable_attrs.datasets
     return Datasets(items=current_user.datasets)
 
 
