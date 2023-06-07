@@ -30,7 +30,7 @@
           v-model="input.options[0].value"
           :useMarkdown="input.settings.use_markdown"
           :isRequired="input.is_required"
-          :tooltipMessage="input.description"
+          :description="input.description"
           @on-error="onError"
         />
 
@@ -40,7 +40,7 @@
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
-          :tooltipMessage="input.description"
+          :description="input.description"
           :visibleOptions="input.settings.visible_options"
         />
 
@@ -50,7 +50,7 @@
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
-          :tooltipMessage="input.description"
+          :description="input.description"
           :visibleOptions="input.settings.visible_options"
         />
 
@@ -59,7 +59,7 @@
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
-          :tooltipMessage="input.description"
+          :description="input.description"
           @on-error="onError"
         />
       </div>
