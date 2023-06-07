@@ -73,7 +73,6 @@ class WorkspacePolicyV1:
         async def is_allowed(actor: User) -> bool:
             return actor.is_admin or bool(
                 await accounts.get_workspace_user_by_workspace_id_and_user_id(
-                    # Session.object_session(actor),
                     async_object_session(actor),
                     workspace.id,
                     actor.id,
