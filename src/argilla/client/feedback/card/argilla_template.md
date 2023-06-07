@@ -10,14 +10,6 @@ This dataset has been created with [Argilla](https://docs.argilla.io).
 
 As shown in the [dataset description section](#dataset-description), this dataset can be loaded into Argilla, or used directly with the `datasets` library.
 
-## Table of Contents
-
-- [Dataset Description](#dataset-description)
-- [Dataset Structure](#dataset-structure)
-- [Dataset Creation](#dataset-creation)
-- [Considerations for Using the Data](#considerations-for-using-the-data)
-- [Additional Information](#additional-information)
-
 ## Dataset Description
 
 - **Homepage:** {{ homepage_url | default("https://argilla.io", true)}}
