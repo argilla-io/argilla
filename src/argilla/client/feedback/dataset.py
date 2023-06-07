@@ -744,7 +744,7 @@ class FeedbackDataset:
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
         import huggingface_hub
-        from huggingface_hub import DatasetCard, DatasetCardData, HfApi
+        from huggingface_hub import DatasetCardData, HfApi
         from packaging.version import parse as parse_version
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
