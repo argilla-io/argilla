@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "argilla"
 description = "Open-source tool for exploring, labeling, and monitoring data for NLP projects."
-readme = ".github/README.md"
+readme = "README.md"
 requires-python = ">=3.7"
 license = {text = "Apache-2.0"}
 keywords = [
