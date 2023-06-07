@@ -93,11 +93,11 @@ def create(
 ):
     """Creates a new user in the Argilla database with provided parameters"""
     with SessionLocal() as session:
-        if accounts.get_user_by_username(session, username):
+        if accounts.get_user_by_username_sync(session, username):
             typer.echo(f"User with username {username!r} already exists in database. Skipping...")
             return
 
-        if accounts.get_user_by_api_key(session, api_key):
+        if accounts.get_user_by_api_key_sync(session, api_key):
             typer.echo(f"User with api_key {api_key!r} already exists in database. Skipping...")
             return
 
