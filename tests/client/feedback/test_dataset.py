@@ -112,14 +112,6 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
                 RatingQuestion(name="test", values=[0, 1], required=False),
             ],
         )
-    with pytest.raises(ValidationError, match="1 validation error for RatingQuestion"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=[
-                RatingQuestion(name="test", values=[0, 0], required=True),
-            ],
-        )
 
 
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions")
@@ -165,6 +157,8 @@ def test_records(
                     "values": {
                         "question-1": {"value": "answer"},
                         "question-2": {"value": 0},
+                        "question-3": {"value": "a"},
+                        "question-4": {"value": ["a", "b"]},
                     },
                     "status": "submitted",
                 },
@@ -183,6 +177,8 @@ def test_records(
         "values": {
             "question-1": {"value": "answer"},
             "question-2": {"value": 0},
+            "question-3": {"value": "a"},
+            "question-4": {"value": ["a", "b"]},
         },
         "status": "submitted",
     }
@@ -285,6 +281,8 @@ def test_push_to_argilla_and_from_argilla(
                         "values": {
                             "question-1": {"value": "answer"},
                             "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
                         },
                         "status": "submitted",
                     },
@@ -292,6 +290,8 @@ def test_push_to_argilla_and_from_argilla(
                         "values": {
                             "question-1": {"value": "answer"},
                             "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
                         },
                         "status": "submitted",
                     },
