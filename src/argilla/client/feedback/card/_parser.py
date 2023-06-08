@@ -23,7 +23,6 @@ AVAILABLE_SIZE_CATEGORIES = {
     10_000_000_000: "1B<n<10B",
     100_000_000_000: "10B<n<100B",
     1_000_000_000_000: "100B<n<1T",
-    10_000_000_000_000: "n>1T",
 }
 
 
@@ -31,4 +30,4 @@ def size_categories_parser(input_size: int) -> str:
     for size, category in AVAILABLE_SIZE_CATEGORIES.items():
         if input_size < size:
             return category
-    return "other"
+    return "n>1T"
