@@ -1,4 +1,4 @@
-Are you unsure about what these NLP Tasks entail, take a look at our [terminology](/getting_started/terminology) section.
+Are you unsure about what these NLP Tasks entail, take a look at our [terminology](/reference/terminology) section.
 
 
 ````{grid} 1 1 3 3

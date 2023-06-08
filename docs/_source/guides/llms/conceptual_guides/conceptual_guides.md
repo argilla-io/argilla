@@ -35,7 +35,6 @@ Introduction to the main components to build human-in-the-loop workflows for LLM
 
 
 ```{toctree}
-:maxdepth: 2
 :hidden:
 
 rlhf

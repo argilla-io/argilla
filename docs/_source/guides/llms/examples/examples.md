@@ -13,7 +13,6 @@ Learn how to set up a project to curate a public dataset that can be used to fin
 ````
 
 ```{toctree}
-:maxdepth: 2
 :hidden:
 
 curating-feedback-instructiondataset
