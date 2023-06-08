@@ -18,6 +18,11 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Changed
+
+- All docker related files have been moved into the `docker` folder
+- `release.Dockerfile` have been renamed to `Dockerfile`
+
 ## [1.9.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
 ### Added
