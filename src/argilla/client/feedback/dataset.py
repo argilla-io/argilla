@@ -35,9 +35,13 @@ from argilla.client.feedback.constants import (
 )
 from argilla.client.feedback.schemas import (
     FIELD_TYPE_TO_PYTHON_TYPE,
+    AllowedFieldTypes,
+    AllowedQuestionTypes,
     FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,
+    LabelQuestion,
+    MultiLabelQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
@@ -81,7 +85,8 @@ class FeedbackDataset:
         TypeError: if `guidelines` is not a string.
         TypeError: if `fields` is not a list of `FieldSchema`.
         ValueError: if `fields` does not contain at least one required field.
-        TypeError: if `questions` is not a list of `TextQuestion` and/or `RatingQuestion`.
+        TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
+            `LabelQuestion`, and/or `MultiLabelQuestion`.
         ValueError: if `questions` does not contain at least one required question.
 
     Examples:
@@ -104,17 +109,21 @@ class FeedbackDataset:
         ...             required=True,
         ...             values=[1, 2, 3, 4, 5],
         ...         ),
+        ...         rg.LabelQuestion(
+        ...             name="question-3",
+        ...             description="This is the third question",
+        ...             required=True,
+        ...             labels=["positive", "negative"],
+        ...         ),
+        ...         rg.MultiLabelQuestion(
+        ...             name="question-4",
+        ...             description="This is the fourth question",
+        ...             required=True,
+        ...             labels=["category-1", "category-2", "category-3"],
+        ...         ),
         ...     ],
         ...     guidelines="These are the annotation guidelines.",
         ... )
-        >>> dataset.guidelines
-        "These are the annotation guidelines."
-        >>> dataset.fields
-        [TextField(name="text", title="Text", required=True, settings={"type": "text"}), TextField(name="label", title="Label", required=True, settings={"type": "text"})]
-        >>> dataset.questions
-        [TextQuestion(name="question-1", title="Question 1", description="This is the first question", required=True, settings={"type": "text"}), RatingQuestion(name="question-2", title="Question 2", description="This is the second question", required=True, settings={"type": "rating"}, values=[1, 2, 3, 4, 5])]
-        >>> dataset.records
-        []
         >>> dataset.add_records(
         ...     [
         ...         rg.FeedbackRecord(
@@ -125,13 +134,13 @@ class FeedbackDataset:
         ...     ]
         ... )
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5), "question-3": ValueSchema(value="positive"), "question-4": ValueSchema(value=["category-1"])})], external_id="entry-1")]
         >>> dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
         >>> dataset.argilla_id
         "..."
         >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5), "question-3": ValueSchema(value="positive"), "question-4": ValueSchema(value=["category-1"])})], external_id="entry-1")]
     """
 
     argilla_id: Optional[str] = None
@@ -139,8 +148,8 @@ class FeedbackDataset:
     def __init__(
         self,
         *,
-        fields: List[FieldSchema],
-        questions: List[Union[TextQuestion, RatingQuestion]],
+        fields: List[AllowedFieldTypes],
+        questions: List[AllowedQuestionTypes],
         guidelines: Optional[str] = None,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.
@@ -153,7 +162,8 @@ class FeedbackDataset:
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
             ValueError: if `fields` does not contain at least one required field.
-            TypeError: if `questions` is not a list of `TextQuestion` and/or `RatingQuestion`.
+            TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
+                `LabelQuestion`, and/or `MultiLabelQuestion`.
             ValueError: if `questions` does not contain at least one required question.
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
@@ -178,6 +188,18 @@ class FeedbackDataset:
             ...             required=True,
             ...             values=[1, 2, 3, 4, 5],
             ...         ),
+            ...         rg.LabelQuestion(
+            ...             name="question-3",
+            ...             description="This is the third question",
+            ...             required=True,
+            ...             labels=["positive", "negative"],
+            ...         ),
+            ...         rg.MultiLabelQuestion(
+            ...             name="question-4",
+            ...             description="This is the fourth question",
+            ...             required=True,
+            ...             labels=["category-1", "category-2", "category-3"],
+            ...         ),
             ...     ],
             ...     guidelines="These are the annotation guidelines.",
             ... )
@@ -199,9 +221,10 @@ class FeedbackDataset:
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
         any_required = False
         for question in questions:
-            if not isinstance(question, (TextQuestion, RatingQuestion)):
+            if not isinstance(question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion)):
                 raise TypeError(
-                    "Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`, got a"
+                    "Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`,"
+                    " `LabelQuestion`, and/or `MultiLabelQuestion` got a"
                     f" question in the list with type {type(question)} instead."
                 )
             if not any_required and question.required:
@@ -369,22 +392,32 @@ class FeedbackDataset:
             ...             required=True,
             ...             values=[1, 2, 3, 4, 5],
             ...         ),
+            ...         rg.LabelQuestion(
+            ...             name="question-3",
+            ...             description="This is the third question",
+            ...             required=True,
+            ...             labels=["positive", "negative"],
+            ...         ),
+            ...         rg.MultiLabelQuestion(
+            ...             name="question-4",
+            ...             description="This is the fourth question",
+            ...             required=True,
+            ...             labels=["category-1", "category-2", "category-3"],
+            ...         ),
             ...     ],
             ...     guidelines="These are the annotation guidelines.",
             ... )
-            >>> dataset.records
-            []
             >>> dataset.add_records(
             ...     [
             ...         rg.FeedbackRecord(
             ...             fields={"text": "This is the first record", "label": "positive"},
-            ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
+            ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}, "question-3": {"value": "positive"}, "question-4": {"value": ["category-1"]}}}],
             ...             external_id="entry-1",
             ...         ),
             ...     ]
             ... )
             >>> dataset.records
-            [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
+            [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5), "question-3": ValueSchema(value="positive"), "question-4": ValueSchema(value=["category-1"])})], external_id="entry-1")]
         """
         if isinstance(records, list):
             if len(records) == 0:
@@ -527,7 +560,11 @@ class FeedbackDataset:
 
             for question in self.questions:
                 try:
-                    datasets_api_v1.add_question(client=httpx_client, id=argilla_id, question=question.dict())
+                    datasets_api_v1.add_question(
+                        client=httpx_client,
+                        id=argilla_id,
+                        question=question.dict(include={"name", "title", "description", "required", "settings"}),
+                    )
                 except Exception as e:
                     delete_and_raise_exception(
                         dataset_id=argilla_id,
@@ -643,10 +680,15 @@ class FeedbackDataset:
                 question = RatingQuestion.construct(**question.dict())
             elif question.settings["type"] == "text":
                 question = TextQuestion.construct(**question.dict())
+            elif question.settings["type"] == "label_selection":
+                question = LabelQuestion.construct(**question.dict())
+            elif question.settings["type"] == "multi_label_selection":
+                question = MultiLabelQuestion.construct(**question.dict())
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    " version, supported question types are: `RatingQuestion` and `TextQuestion`."
+                    " version, supported question types are: `RatingQuestion`, `TextQuestion`,"
+                    " `LabelQuestion`, and/or `MultiLabelQuestion`."
                 )
             questions.append(question)
         self = cls(
@@ -693,11 +735,23 @@ class FeedbackDataset:
                 if field.name not in dataset:
                     dataset[field.name] = []
             for question in self.questions:
+                if question.settings["type"] in ["text", "label_selection"]:
+                    value = Value(dtype="string")
+                elif question.settings["type"] == "rating":
+                    value = Value(dtype="int32")
+                elif question.settings["type"] == "multi_label_selection":
+                    value = Sequence(Value(dtype="string"))
+                else:
+                    raise ValueError(
+                        f"Question {question.name} has an unsupported type: {question.settings['type']}, for the"
+                        " moment only the following types are supported: 'text', 'rating', 'label_selection', and"
+                        " 'multi_label_selection'"
+                    )
                 # TODO(alvarobartt): if we constraint ranges from 0 to N, then we can use `ClassLabel` for ratings
                 features[question.name] = Sequence(
                     {
                         "user_id": Value(dtype="string"),
-                        "value": Value(dtype="string" if question.settings["type"] == "text" else "int32"),
+                        "value": value,
                         "status": Value(dtype="string"),
                     },
                     id="question",

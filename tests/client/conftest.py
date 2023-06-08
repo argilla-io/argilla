@@ -25,6 +25,8 @@ if TYPE_CHECKING:
 
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
+    LabelQuestion,
+    MultiLabelQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
@@ -400,6 +402,8 @@ def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
     return [
         TextQuestion(name="question-1", required=True),
         RatingQuestion(name="question-2", values=[0, 1], required=True),
+        LabelQuestion(name="question-3", labels=["a", "b", "c"], required=True),
+        MultiLabelQuestion(name="question-4", labels=["a", "b", "c"], required=True),
     ]
 
 
@@ -408,8 +412,32 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
     return [
         FeedbackRecord(
             fields={"text": "This is a positive example", "label": "positive"},
+            responses=[
+                {
+                    "values": {
+                        "question-1": {"value": "This is a response to question 1"},
+                        "question-2": {"value": 1},
+                        "question-3": {"value": "a"},
+                        "question-4": {"value": ["a", "b"]},
+                    },
+                    "status": "submitted",
+                }
+            ],
+            external_id="1",
         ),
         FeedbackRecord(
             fields={"text": "This is a negative example", "label": "negative"},
+            responses=[
+                {
+                    "values": {
+                        "question-1": {"value": "This is a response to question 1"},
+                        "question-2": {"value": 1},
+                        "question-3": {"value": "a"},
+                        "question-4": {"value": ["a", "b"]},
+                    },
+                    "status": "submitted",
+                }
+            ],
+            external_id="2",
         ),
     ]
