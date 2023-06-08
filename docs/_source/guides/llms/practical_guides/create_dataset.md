@@ -50,7 +50,7 @@ The following arguments apply to specific question types:
 
 - `values`: The rating options to answer the `RatingQuestion`. It can be any list of unique integers. It doesn't matter whether these are positive, negative, sequential or not.
 - `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions.
-- `visible_labels`: In `LabelQuestion` and `MultiLabelQuestion` this is the number of questions that will be visible in the UI. Any labels above this number will be collapsed.
+- `visible_labels`: In `LabelQuestion` and `MultiLabelQuestion` this is the number of labels that will be visible in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
 
 Check out the following tabs to learn how to set up questions according to their type:
 

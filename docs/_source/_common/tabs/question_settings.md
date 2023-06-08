@@ -28,12 +28,11 @@ rg.TextQuestion(
 
 ```python
 rg.LabelQuestion(
-    name="truthfulness",
-    title="Is this text truthful?",
-    description="Select 'No' if the text contains any information that not real or is incorrect, otherwise select 'Yes'.",
+    name="relevant",
+    title="Is the response relevant for the given prompt?",
+    labels=["Yes","No"],
     required=True,
-    labels=["Yes", "No"],
-    visible_labels=2
+    visible_labels=None
 )
 ```
 :::
@@ -43,11 +42,11 @@ rg.LabelQuestion(
 ```python
 rg.MultiLabelQuestion(
     name="content_class",
-    title="Does the text contain any of the following?",
+    title="Does the response include any of the following?",
     description="Select all that apply",
-    required=True,
-    labels=["Hate speech", "Sexual content", "Violent content", "PII"],
-    visible_labels=2
+    labels=["Hate speech", "Sexual content", "Violent content", "PII", "Untruthful info", "Not English", "Inappropriate content"],
+    required=False,
+    visible_labels=4
 )
 ```
 :::
