@@ -78,7 +78,7 @@ class FieldSchema(BaseModel):
     name: str
     title: Optional[str] = None
     required: bool = True
-    settings: Dict[str, Any]
+    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
 
     @validator("title", always=True)
     def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
@@ -92,7 +92,7 @@ class FieldSchema(BaseModel):
 
 
 class TextField(FieldSchema):
-    settings: Dict[str, Any] = Field({"type": "text"})
+    settings: Dict[str, Any] = Field({"type": "text"}, allow_mutation=False)
     use_markdown: bool = False
 
     @root_validator
@@ -109,7 +109,7 @@ class QuestionSchema(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     required: bool = True
-    settings: Dict[str, Any]
+    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
 
     @validator("title", always=True)
     def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
@@ -124,7 +124,7 @@ class QuestionSchema(BaseModel):
 
 # TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
 class TextQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({"type": "text", "use_markdown": False})
+    settings: Dict[str, Any] = Field({"type": "text", "use_markdown": False}, allow_mutation=False)
     use_markdown: bool = False
 
     @root_validator
@@ -134,7 +134,7 @@ class TextQuestion(QuestionSchema):
 
 
 class RatingQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({"type": "rating"})
+    settings: Dict[str, Any] = Field({"type": "rating"}, allow_mutation=False)
     values: List[int] = Field(unique_items=True)
 
     @root_validator
@@ -144,7 +144,7 @@ class RatingQuestion(QuestionSchema):
 
 
 class _LabelQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({})
+    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
     labels: List[str] = Field(unique_items=True)
     label_mapping: Dict[str, str] = Field(default_factory=dict)
     visible_labels: Optional[PositiveInt] = 20
