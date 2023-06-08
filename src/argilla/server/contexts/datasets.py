@@ -108,6 +108,8 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
         dataset.status = DatasetStatus.ready
         await search_engine.create_index(dataset)
         await db.commit()
+        if is_unit_test():
+            await db.refresh(dataset)
     except:
         await db.rollback()
         raise

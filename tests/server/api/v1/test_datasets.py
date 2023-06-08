@@ -1193,7 +1193,6 @@ async def test_get_current_user_dataset_metrics_annotator_from_different_workspa
 
 
 @pytest.mark.asyncio
-@pytest.mark.meca
 async def test_get_current_user_dataset_metrics_with_nonexistent_dataset_id(
     client: TestClient, admin_auth_header: dict
 ):
@@ -1205,7 +1204,6 @@ async def test_get_current_user_dataset_metrics_with_nonexistent_dataset_id(
 
 
 @pytest.mark.asyncio
-@pytest.mark.meca
 async def test_create_dataset(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
     workspace = await WorkspaceFactory.create()
     dataset_json = {"name": "name", "guidelines": "guidelines", "workspace_id": str(workspace.id)}
@@ -2784,7 +2782,7 @@ async def test_search_dataset_records_with_offset_and_limit(
 @pytest.mark.asyncio
 async def test_search_dataset_records_as_annotator(client: TestClient, admin: User, mock_search_engine: SearchEngine):
     dataset, records, _ = await create_dataset_for_search(user=admin)
-    annotator = awaitAnnotatorFactory.create(workspaces=[dataset.workspace])
+    annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
 
     mock_search_engine.search.return_value = SearchResponses(
         items=[
@@ -2818,7 +2816,8 @@ async def test_search_dataset_records_as_annotator(client: TestClient, admin: Us
 @pytest.mark.asyncio
 async def test_search_dataset_records_as_annotator_from_different_workspace(client: TestClient):
     dataset, _, _ = await create_dataset_for_search()
-    annotator = await AnnotatorFactory.create(workspaces=[WorkspaceFactory.create()])
+    workspace = await WorkspaceFactory.create()
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
 
     query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
     response = client.post(
