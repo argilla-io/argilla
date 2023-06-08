@@ -15,8 +15,9 @@
         :recordId="recordId"
         :recordStatus="record.record_status"
         :initialInputs="questionsWithRecordAnswers"
-        @on-submit-responses="onActionInResponses('SUBMIT')"
-        @on-discard-responses="onActionInResponses('DISCARD')"
+        @on-submit-responses="goToNextPageAndRefreshMetrics"
+        @on-discard-responses="goToNextPageAndRefreshMetrics"
+        @on-clear-responses="refreshMetrics"
         @on-question-form-touched="onQuestionFormTouched"
       />
     </template>
@@ -50,6 +51,7 @@ import {
   isRecordWithRecordIndexByDatasetIdExists,
   isAnyRecordByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
+import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
 import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
@@ -169,17 +171,34 @@ export default {
       return this.record?.record_fields ?? [];
     },
     questionsWithRecordAnswers() {
+      // TODO - do this in a hook instead of computed => it's expensive
       return this.questions?.map((question) => {
         const correspondingResponseToQuestion =
           this.recordResponsesFromCurrentUser.find(
             (recordResponse) => question.name === recordResponse.question_name
           );
+
         if (correspondingResponseToQuestion) {
+          const formattedOptions = correspondingResponseToQuestion.options.map(
+            (option) => {
+              return { ...option, is_selected: option.is_selected || false };
+            }
+          );
           return {
             ...question,
             response_id: correspondingResponseToQuestion.id,
-            options: correspondingResponseToQuestion.options,
+            options: formattedOptions,
           };
+        }
+        if (
+          question.component_type === COMPONENT_TYPE.RATING ||
+          question.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
+          question.component_type === COMPONENT_TYPE.MULTI_LABEL
+        ) {
+          const formattedOptions = question.options.map((option) => {
+            return { ...option, is_selected: false };
+          });
+          return { ...question, options: formattedOptions, response_id: null };
         }
         return { ...question, response_id: null };
       });
@@ -233,6 +252,8 @@ export default {
   async created() {
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
     this.currentPage = this.pageFromQuery;
+
+    await this.refreshMetrics();
   },
   mounted() {
     this.$root.$on("go-to-next-page", () => {
@@ -244,6 +265,40 @@ export default {
     this.$root.$on("status-filter-changed", this.onStatusFilterChanged);
   },
   methods: {
+    async refreshMetrics() {
+      const datasetMetrics = await this.fetchMetrics();
+
+      const formattedMetrics = this.factoryDatasetMetricsForOrm(datasetMetrics);
+
+      await upsertDatasetMetrics(formattedMetrics);
+    },
+    async fetchMetrics() {
+      try {
+        const { data } = await this.$axios.get(
+          `/v1/me/datasets/${this.datasetId}/metrics`
+        );
+
+        return data;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    factoryDatasetMetricsForOrm({ records, responses, user_id }) {
+      const {
+        count: responsesCount,
+        submitted: responsesSubmitted,
+        discarded: responsesDiscarded,
+      } = responses;
+
+      return {
+        dataset_id: this.datasetId,
+        user_id: user_id ?? this.userId,
+        total_record: records?.count ?? 0,
+        responses_count: responsesCount,
+        responses_submitted: responsesSubmitted,
+        responses_discarded: responsesDiscarded,
+      };
+    },
     async applyStatusFilter(status) {
       this.recordStatusToFilterWith = status;
       this.currentPage = 1;
@@ -311,15 +366,9 @@ export default {
         });
       }
     },
-    async onActionInResponses(typeOfAction) {
-      switch (typeOfAction) {
-        case "SUBMIT":
-        case "DISCARD":
-          this.setCurrentPage(this.currentPage + 1);
-          break;
-        default:
-        // do nothing
-      }
+    async goToNextPageAndRefreshMetrics() {
+      this.setCurrentPage(this.currentPage + 1);
+      await this.refreshMetrics();
     },
     async initRecordsInDatabase(
       offset,
@@ -436,26 +485,39 @@ export default {
                   );
 
                 switch (correspondingComponentTypeOfTheAnswer) {
+                  case COMPONENT_TYPE.MULTI_LABEL:
+                    optionsByQuestionName.forEach(({ id, text, value }) => {
+                      const isValueInRecordResponse =
+                        recordResponseByQuestionName.value.includes(value);
+
+                      formattedOptionsWithRecordResponse.push({
+                        id,
+                        text,
+                        value,
+                        is_selected: isValueInRecordResponse,
+                      });
+                    });
+                    break;
                   case COMPONENT_TYPE.SINGLE_LABEL:
                   case COMPONENT_TYPE.RATING:
                     // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
                     formattedOptionsWithRecordResponse =
                       optionsByQuestionName.map(({ id, text, value }) => {
-                        if (text === recordResponseByQuestionName.value) {
+                        if (value === recordResponseByQuestionName.value) {
                           return {
                             id,
                             text,
-                            value: true,
+                            value,
+                            is_selected: true,
                           };
                         }
-                        return { id, text, value };
+                        return { id, text, value, is_selected: false };
                       });
                     break;
                   case COMPONENT_TYPE.FREE_TEXT:
                     formattedOptionsWithRecordResponse = [
                       {
                         id: questionName,
-                        text: recordResponseByQuestionName.value,
                         value: recordResponseByQuestionName.value,
                       },
                     ];
@@ -515,6 +577,7 @@ export default {
 }
 .question-form {
   border: 1px solid transparent;
+  background: palette(white);
   &.--pending {
     border-color: transparent;
   }

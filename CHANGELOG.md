@@ -20,16 +20,30 @@ These are the section headers that we use:
 
 ## [1.9.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
-## Added
+### Added
 
 - Added boolean `use_markdown` property to `TextFieldSettings` model.
 - Added boolean `use_markdown` property to `TextQuestionSettings` model.
+- Added new status `draft` for the `Response` model.
+- Added `LabelSelectionQuestionSettings` class allowing to create label selection (single-choice) questions in the API ([#3005])
+- Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API ([#3010]).
+- Added `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoint ([#3068]).
+
+### Changed
+
+- Updated `GET /api/v1/me/datasets/:dataset_id/metrics` output payload to include the count of responses with `draft` status.
 - Added `LabelSelectionQuestionSettings` class allowing to create label selection (single-choice) questions in the API.
 - Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API.
+- Database setup for unit tests. Now the unit tests use a different database than the one used by the local Argilla server (Closes [#2987]).
+- Updated `alembic` setup to be able to autogenerate revision/migration scripts using SQLAlchemy metadata from Argilla server models ([#3044])
+- Improved `DatasetCard` generation on `FeedbackDataset.push_to_huggingface` when `generate_card=True`, following the official HuggingFace Hub template, but suited to `FeedbackDataset`s from Argilla ([#3110])
 
-## Changed
+### Fixed
 
-- Database setup for unit tests. Now the unit tests use a different database than the one used by the local Argilla server ([#2987]).
+- Disallow `fields` and `questions` in `FeedbackDataset` with the same name ([#3126]).
+- Keep `visible_labels=None` if `None` is specified in `LabelQuestion` or `MultiLabelQuestion`, otherwise, use default 20 ([#3126]).
+
+[#3126]: https://github.com/argilla-io/argilla/pull/3126
 
 ## [1.8.0](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 

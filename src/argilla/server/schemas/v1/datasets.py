@@ -17,15 +17,23 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, PositiveInt, conlist, constr, validator
+from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
+
+from argilla.server.search_engine import Query
 
 try:
     from typing import Annotated, Literal
 except ImportError:
     from typing_extensions import Annotated, Literal
 
-from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
+from argilla.server.models import (
+    DatasetStatus,
+    FieldType,
+    QuestionSettings,
+    QuestionType,
+    ResponseStatus,
+)
 
 DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
 DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
@@ -97,6 +105,7 @@ class ResponseMetrics(BaseModel):
     count: int
     submitted: int
     discarded: int
+    draft: int
 
 
 class Metrics(BaseModel):
@@ -140,16 +149,32 @@ class FieldCreate(BaseModel):
     settings: TextFieldSettings
 
 
-class TextQuestionSettings(BaseModel):
+class TextQuestionSettingsCreate(BaseModel):
     type: Literal[QuestionType.text]
     use_markdown: bool = False
+
+
+class UniqueValuesCheckerMixin(BaseModel):
+    @root_validator
+    def check_unique_values(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        options = values.get("options", [])
+        seen = set()
+        duplicates = set()
+        for option in options:
+            if option.value in seen:
+                duplicates.add(option.value)
+            else:
+                seen.add(option.value)
+        if duplicates:
+            raise ValueError(f"Option values must be unique, found duplicates: {duplicates}")
+        return values
 
 
 class RatingQuestionSettingsOption(BaseModel):
     value: int
 
 
-class RatingQuestionSettings(BaseModel):
+class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.rating]
     options: conlist(
         item_type=RatingQuestionSettingsOption,
@@ -175,7 +200,7 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
     ] = None
 
 
-class LabelSelectionQuestionSettings(BaseModel):
+class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.label_selection]
     options: conlist(
         item_type=LabelSelectionQuestionSettingsOption,
@@ -185,16 +210,16 @@ class LabelSelectionQuestionSettings(BaseModel):
     visible_options: Optional[PositiveInt] = None
 
 
-class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
+class MultiLabelSelectionQuestionSettingsCreate(LabelSelectionQuestionSettingsCreate):
     type: Literal[QuestionType.multi_label_selection]
 
 
-QuestionSettings = Annotated[
+QuestionSettingsCreate = Annotated[
     Union[
-        TextQuestionSettings,
-        RatingQuestionSettings,
-        LabelSelectionQuestionSettings,
-        MultiLabelSelectionQuestionSettings,
+        TextQuestionSettingsCreate,
+        RatingQuestionSettingsCreate,
+        LabelSelectionQuestionSettingsCreate,
+        MultiLabelSelectionQuestionSettingsCreate,
     ],
     PydanticField(discriminator="type"),
 ]
@@ -235,7 +260,7 @@ class QuestionCreate(BaseModel):
         )
     ]
     required: Optional[bool]
-    settings: QuestionSettings
+    settings: QuestionSettingsCreate
 
 
 class ResponseValue(BaseModel):
@@ -260,12 +285,6 @@ class Response(BaseModel):
 
 class RecordInclude(str, Enum):
     responses = "responses"
-
-
-class ResponseStatusFilter(str, Enum):
-    missing = "missing"
-    submitted = "submitted"
-    discarded = "discarded"
 
 
 class Record(BaseModel):
@@ -323,3 +342,16 @@ class RecordCreate(BaseModel):
 
 class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+
+
+class SearchRecordsQuery(BaseModel):
+    query: Query
+
+
+class SearchRecord(BaseModel):
+    record: Record
+    query_score: Optional[float]
+
+
+class SearchRecordsResult(BaseModel):
+    items: List[SearchRecord]

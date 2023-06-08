@@ -1,6 +1,6 @@
 <template>
   <div class="text_field_component">
-    <div class="title-area --body1">
+    <div class="title-area --body2">
       <span v-text="title" />
       <BaseActionTooltip tooltip="Copied" tooltip-position="left">
         <BaseButton
@@ -8,12 +8,15 @@
           class="text_field_component__copy-button"
           @click.prevent="$copyToClipboard(fieldText)"
         >
-          <svgicon name="copy" width="16" height="16" />
+          <svgicon color="#acacac" name="copy" width="18" height="18" />
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <transition name="fade" :key="fieldText" appear>
-      <div class="content-area --body1" v-if="fieldText" v-text="fieldText" />
+    <transition name="fade" v-if="fieldText" appear mode="out-in">
+      <div class="content-area --body1" :key="fieldText">
+        <div v-if="!useMarkdown" v-text="fieldText" />
+        <BaseRenderMarkdownComponent v-else :markdown="fieldText" />
+      </div>
     </transition>
   </div>
 </template>
@@ -29,6 +32,10 @@ export default {
     fieldText: {
       type: String,
       required: true,
+    },
+    useMarkdown: {
+      type: Boolean,
+      default: false,
     },
   },
 };
@@ -47,7 +54,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     gap: $base-space;
-    color: $black-37;
+    color: $black-87;
   }
   .content-area {
     white-space: pre-wrap;
@@ -59,9 +66,9 @@ export default {
 }
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 1s;
+  transition: all 0.2s;
 }
-.fade-enter,
+.fade-enter-from,
 .fade-leave-to {
   opacity: 0;
 }
