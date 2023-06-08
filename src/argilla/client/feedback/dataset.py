@@ -43,8 +43,11 @@ from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
     LabelQuestion,
+    LabelQuestionStrategy,
     MultiLabelQuestion,
+    MultiLabelQuestionStrategy,
     RatingQuestion,
+    RatingQuestionStrategy,
     TextField,
     TextQuestion,
     TrainingDataForTextClassification,
@@ -67,6 +70,19 @@ if TYPE_CHECKING:
     )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class ListGetter(list):
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return super().__getitem__(index)
+        elif isinstance(index, str):
+            for item in self.list:
+                if item.name == index:
+                    return item
+            raise KeyError(f"Item with name {index} not found in list")
+        else:
+            raise TypeError("Index must be either an integer or a string")
 
 
 class FeedbackDataset:
@@ -209,6 +225,8 @@ class FeedbackDataset:
         """
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
+
+        fields = ListGetter(fields)
         any_required = False
         unique_names = set()
         for field in fields:
@@ -226,6 +244,8 @@ class FeedbackDataset:
 
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
+
+        questions = ListGetter(questions)
         any_required = False
         unique_names = set()
         for question in questions:
@@ -946,6 +966,19 @@ class FeedbackDataset:
         del hfds
         return cls
 
+    def unify_responses(
+        self,
+        field: Union[LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
+        in_place: bool = False,
+    ):
+        if isinstance(strategy, str):
+            strategy = LabelQuestionStrategy(strategy)
+        unified_records = strategy.unify_responses(self.__records, field)
+        if in_place:
+            self.__records = unified_records
+        return unified_records
+
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
@@ -961,17 +994,24 @@ class FeedbackDataset:
         if fetch_records:
             self.fetch_records()
 
-        relevant_data = self.get_relevant_data_for_training(training_data, "FCFS")
+        if isinstance(training_data, TrainingDataForTextClassification):
+            unified_records = self.unify_responses(training_data.label, training_data.label_strategy, in_place=False)
+        else:
+            raise ValueError(f"Training data {training_data} is not supported yet")
+
+        formatted_records = self._format_records_for_training(unified_records)
 
         if framework == Framework.AUTOTRAIN:
             import pandas as pd
 
-            return pd.DataFrame(relevant_data)
+            return pd.DataFrame(formatted_records)
 
         else:
             raise NotImplementedError(f"Framework {framework} is not supported yet")
 
-    def get_relevant_data_for_training(self, training_data, strategy="FCFS"):
+    def _format_records_for_training(
+        self, records: List[FeedbackRecord], training_data: TrainingDataForTextClassification
+    ):
         # TODO: implement other strategies besides first come first serve
         # TODO: think about ID usage per field and response
         relevant_fields = list([getattr(training_data, field).name for field in training_data.__fields__])
