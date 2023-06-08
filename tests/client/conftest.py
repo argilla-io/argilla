@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, List
 import argilla as rg
 import pytest
 from argilla.client.sdk.datasets.models import TaskType
+from datasets import Dataset
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
@@ -440,3 +441,18 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
             external_id="2",
         ),
     ]
+
+
+@pytest.fixture
+def feedback_dataset_huggingface() -> Dataset:
+    return Dataset.from_dict(
+        {
+            "text": ["This is a positive example"],
+            "label": ["positive"],
+            "question-1": [{"user_id": [None], "value": ["This is a response to question 1"], "status": ["submitted"]}],
+            "question-2": [{"user_id": [None], "value": [1], "status": ["submitted"]}],
+            "question-3": [{"user_id": [None], "value": ["a"], "status": ["submitted"]}],
+            "question-4": [{"user_id": [None], "value": [["a", "b"]], "status": ["submitted"]}],
+            "external_id": ["1"],
+        }
+    )
