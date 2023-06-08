@@ -17,7 +17,4 @@ import asyncio
 from sqlalchemy import orm
 from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
-TestSession = async_scoped_session(
-    orm.sessionmaker(class_=AsyncSession),
-    lambda: asyncio.current_task(loop=asyncio.get_event_loop_policy().get_event_loop()),
-)
+TestSession = async_scoped_session(orm.sessionmaker(class_=AsyncSession), asyncio.current_task)
