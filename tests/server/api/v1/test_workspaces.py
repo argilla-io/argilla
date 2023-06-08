@@ -14,6 +14,7 @@
 
 from uuid import uuid4
 
+import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -21,8 +22,9 @@ from sqlalchemy.orm import Session
 from tests.factories import AnnotatorFactory, WorkspaceFactory
 
 
-def test_get_workspace(client: TestClient, admin_auth_header: dict):
-    workspace = WorkspaceFactory.create(name="workspace")
+@pytest.mark.asyncio
+async def test_get_workspace(client: TestClient, admin_auth_header: dict):
+    workspace = await WorkspaceFactory.create(name="workspace")
 
     response = client.get(f"/api/v1/workspaces/{workspace.id}", headers=admin_auth_header)
 
@@ -35,17 +37,19 @@ def test_get_workspace(client: TestClient, admin_auth_header: dict):
     }
 
 
-def test_get_workspace_without_authentication(client: TestClient, db: Session):
-    workspace = WorkspaceFactory.create()
+@pytest.mark.asyncio
+async def test_get_workspace_without_authentication(client: TestClient):
+    workspace = await WorkspaceFactory.create()
 
     response = client.get(f"/api/v1/workspaces/{workspace.id}")
 
     assert response.status_code == 401
 
 
-def test_get_workspace_as_annotator(client: TestClient, db: Session):
-    workspace = WorkspaceFactory.create(name="workspace")
-    annotator = AnnotatorFactory.create(workspaces=[workspace])
+@pytest.mark.asyncio
+async def test_get_workspace_as_annotator(client: TestClient):
+    workspace = await WorkspaceFactory.create(name="workspace")
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
 
     response = client.get(f"/api/v1/workspaces/{workspace.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
@@ -53,17 +57,20 @@ def test_get_workspace_as_annotator(client: TestClient, db: Session):
     assert response.json()["name"] == "workspace"
 
 
-def test_get_workspace_as_annotator_from_different_workspace(client: TestClient, db: Session):
-    workspace = WorkspaceFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+@pytest.mark.asyncio
+async def test_get_workspace_as_annotator_from_different_workspace(client: TestClient):
+    workspace = await WorkspaceFactory.create()
+    another_workspace = await WorkspaceFactory.create()
+    annotator = await AnnotatorFactory.create(workspaces=[another_workspace])
 
     response = client.get(f"/api/v1/workspaces/{workspace.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 403
 
 
-def test_get_workspace_with_nonexistent_workspace_id(client: TestClient, db: Session, admin_auth_header: dict):
-    WorkspaceFactory.create()
+@pytest.mark.asyncio
+async def test_get_workspace_with_nonexistent_workspace_id(client: TestClient, admin_auth_header: dict):
+    await WorkspaceFactory.create()
 
     response = client.get(f"/api/v1/workspaces/{uuid4()}", headers=admin_auth_header)
 
