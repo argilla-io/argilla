@@ -93,7 +93,6 @@ def client(request, mock_search_engine: SearchEngine) -> Generator[TestClient, N
     async def override_get_async_db():
         session = TestSession()
         yield session
-        await session.close()
 
     async def override_get_search_engine():
         yield mock_search_engine
