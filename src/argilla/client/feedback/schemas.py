@@ -102,9 +102,6 @@ class TextField(FieldSchema):
         return values
 
 
-FIELD_TYPE_TO_PYTHON_TYPE = {"text": str}
-
-
 class QuestionSchema(BaseModel):
     name: str
     title: Optional[str] = None
@@ -164,7 +161,9 @@ class _LabelQuestion(QuestionSchema):
             ]
         if isinstance(values.get("labels"), list):
             values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels")]
-        values["settings"]["visible_options"] = values.get("visible_labels", 20)
+        values["settings"]["visible_options"] = values.get(
+            "visible_labels"
+        )  # `None` is a possible value, which means all labels are visible
         return values
 
 

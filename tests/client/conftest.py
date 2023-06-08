@@ -15,10 +15,10 @@
 import datetime
 from typing import TYPE_CHECKING, List
 
-import argilla
 import argilla as rg
 import pytest
 from argilla.client.sdk.datasets.models import TaskType
+from datasets import Dataset
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
@@ -76,10 +76,10 @@ def gutenberg_spacy_ner(mocked_client):
         revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
 
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = rg.read_datasets(dataset_ds, task="TokenClassification")
 
-    argilla.delete(dataset)
-    argilla.log(name=dataset, records=dataset_rb)
+    rg.delete(dataset)
+    rg.log(name=dataset, records=dataset_rb)
 
     return dataset
 
@@ -441,3 +441,18 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
             external_id="2",
         ),
     ]
+
+
+@pytest.fixture
+def feedback_dataset_huggingface() -> Dataset:
+    return Dataset.from_dict(
+        {
+            "text": ["This is a positive example"],
+            "label": ["positive"],
+            "question-1": [{"user_id": [None], "value": ["This is a response to question 1"], "status": ["submitted"]}],
+            "question-2": [{"user_id": [None], "value": [1], "status": ["submitted"]}],
+            "question-3": [{"user_id": [None], "value": ["a"], "status": ["submitted"]}],
+            "question-4": [{"user_id": [None], "value": [["a", "b"]], "status": ["submitted"]}],
+            "external_id": ["1"],
+        }
+    )

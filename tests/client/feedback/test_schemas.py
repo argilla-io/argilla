@@ -88,6 +88,14 @@ def test_label_question_errors(
                 "visible_options": 5,
             },
         ),
+        (
+            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": None},
+            {
+                "type": "label_selection",
+                "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+                "visible_options": None,
+            },
+        ),
     ],
 )
 def test_label_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[str, Any]) -> None:
@@ -161,6 +169,14 @@ def test_multi_label_question_errors(
                 "type": "multi_label_selection",
                 "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
                 "visible_options": 5,
+            },
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": None},
+            {
+                "type": "multi_label_selection",
+                "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+                "visible_options": None,
             },
         ),
     ],
