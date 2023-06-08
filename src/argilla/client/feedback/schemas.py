@@ -148,18 +148,26 @@ class _LabelQuestion(QuestionSchema):
     labels: Union[List[str], Dict[str, str]] = Field(unique_items=True, min_items=2)
     visible_labels: Optional[conint(ge=3)] = 20
 
+    @validator("labels", always=True)
+    def labels_dict_must_be_valid(cls, v: Union[List[str], Dict[str, str]]) -> Union[List[str], Dict[str, str]]:
+        if isinstance(v, list):
+            return v
+        if isinstance(v, dict):
+            if len(v.keys()) < 2:
+                raise ValueError("ensure this dict has at least 2 items")
+            if len(set(v.values())) != len(v.values()):
+                raise ValueError("ensure this dict has unique values")
+            return v
+        raise TypeError("ensure this value is a list or a dict")
+
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(values.get("labels"), dict):
             values["settings"]["options"] = [
                 {"value": key, "text": value} for key, value in values.get("labels").items()
             ]
-        elif isinstance(values.get("labels"), list):
+        if isinstance(values.get("labels"), list):
             values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels")]
-        else:
-            raise ValueError(
-                f"Invalid `labels` value: {values.get('labels')} of type: {type(values.get('labels'))}. It must be a list or a dictionary of `str` values."
-            )
         values["settings"]["visible_options"] = values.get("visible_labels", 20)
         return values
 
