@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 
 from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.contexts import accounts, datasets
-from argilla.server.database import get_async_db, get_db
+from argilla.server.database import get_async_db
 from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import User
