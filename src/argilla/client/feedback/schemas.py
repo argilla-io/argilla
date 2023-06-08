@@ -28,6 +28,7 @@ from pydantic import (
     StrictInt,
     StrictStr,
     conint,
+    conlist,
     root_validator,
     validator,
 )
@@ -145,7 +146,7 @@ class RatingQuestion(QuestionSchema):
 
 class _LabelQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
-    labels: Union[List[str], Dict[str, str]] = Field(unique_items=True, min_items=2)
+    labels: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
     visible_labels: Optional[conint(ge=3)] = 20
 
     @validator("labels", always=True)
