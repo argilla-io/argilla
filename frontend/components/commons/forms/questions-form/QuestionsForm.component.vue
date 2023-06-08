@@ -164,13 +164,15 @@ export default {
       return isEqual(this.initialInputs, this.inputs);
     },
     isSomeRequiredQuestionHaveNoAnswer() {
-      return this.inputs.some(
-        (input) =>
-          input.is_required &&
-          input.options.every(
-            (option) => !option.is_selected || option.value.length === 0
-          )
-      );
+      return this.inputs
+        .filter((input) => input.is_required)
+        .some((input) => {
+          if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
+            return input.options[0].value.length === 0;
+          } else {
+            return input.options.every((option) => !option.is_selected);
+          }
+        });
     },
     isRecordDiscarded() {
       return this.recordStatus === RECORD_STATUS.DISCARDED;
