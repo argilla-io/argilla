@@ -12,7 +12,7 @@ rg.RatingQuestion(
 )
 ```
 
-![Rating Question](../../_static/images/llms/questions/rating_question.png)
+![Rating question](/_static/images/llms/questions/rating_question.png)
 :::
 
 :::{tab-item} Text
@@ -25,7 +25,7 @@ rg.TextQuestion(
     use_markdown=True
 )
 ```
-![Text Question](../../_static/images/llms/questions/text_question.png)
+![Text Question](/_static/images/llms/questions/text_question.png)
 :::
 
 :::{tab-item} Label
@@ -40,7 +40,7 @@ rg.LabelQuestion(
 )
 ```
 
-![Label Question](../../_static/images/llms/questions/label_question.png)
+![Label Question](/_static/images/llms/questions/label_question.png)
 :::
 
 :::{tab-item} Multi-label
@@ -56,7 +56,7 @@ rg.MultiLabelQuestion(
 )
 ```
 
-![Multi-label Question](../../_static/images/llms/questions/multilabel_question.png)
+![Multi-label Question](/_static/images/llms/questions/multilabel_question.png)
 :::
 
 ::::
