@@ -135,7 +135,7 @@ class TextQuestion(QuestionSchema):
 
 class RatingQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "rating"}, allow_mutation=False)
-    values: List[int] = Field(unique_items=True)
+    values: List[int] = Field(unique_items=True, min_items=2)
 
     @root_validator
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -145,7 +145,7 @@ class RatingQuestion(QuestionSchema):
 
 class _LabelQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
-    labels: List[str] = Field(unique_items=True)
+    labels: List[str] = Field(unique_items=True, min_items=2)
     label_mapping: Dict[str, str] = Field(default_factory=dict)
     visible_labels: Optional[conint(ge=3)] = 20
 
