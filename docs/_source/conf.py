@@ -123,7 +123,9 @@ services:
 nbsphinx_execute = "never"
 
 # open html file as Python string
-getting_started_html = open("./_common/getting_started.html", "r", encoding="utf8").read()
+getting_started_html = open(
+    "./_common/getting_started.html", "r", encoding="utf8"
+).read()
 next_steps_html = open("./_common/next_steps.html", "r", encoding="utf8").read()
 
 # Plotly + Hide input/output prompts (cell counts)
@@ -140,7 +142,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 if not os.getenv("READTHEDOCS"):
-    notfound_urls_prefix = None
+    notfound_urls_prefix = ""
 else:
     lang, docs_version = (
         os.getenv("READTHEDOCS_LANGUAGE", "en"),

@@ -120,7 +120,6 @@ Unstructured provides open-source components for pre-processing text documents s
 ````
 
 ```{toctree}
-:maxdepth: 1
 :hidden:
 
 fastapi.md
