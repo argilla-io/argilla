@@ -128,8 +128,9 @@ async def delete_dataset(db: Session, search_engine: SearchEngine, dataset: Data
     return dataset
 
 
-def get_field_by_id(db: Session, field_id: UUID):
-    return db.get(Field, field_id)
+async def get_field_by_id(db: Session, field_id: UUID) -> Union[Field, None]:
+    result = await db.execute(select(Field).filter_by(id=field_id).options(selectinload(Field.dataset)))
+    return result.scalar_one_or_none()
 
 
 async def get_field_by_name_and_dataset_id(db: "AsyncSession", name: str, dataset_id: UUID) -> Union[Field, None]:
@@ -156,13 +157,12 @@ async def create_field(db: "AsyncSession", dataset: Dataset, field_create: Field
     return field
 
 
-def delete_field(db: Session, field: Field):
+async def delete_field(db: "AsyncSession", field: Field) -> Field:
     if field.dataset.is_ready:
         raise ValueError("Fields cannot be deleted for a published dataset")
 
-    db.delete(field)
-    db.commit()
-
+    await db.delete(field)
+    await db.commit()
     return field
 
 
@@ -205,8 +205,11 @@ def delete_question(db: Session, question: Question):
     return question
 
 
-def get_record_by_id(db: Session, record_id: UUID):
-    return db.get(Record, record_id)
+async def get_record_by_id(db: "AsyncSession", record_id: UUID) -> Union[Record, None]:
+    result = await db.execute(
+        select(Record).filter_by(id=record_id).options(selectinload(Record.dataset).selectinload(Dataset.questions))
+    )
+    return result.scalar_one_or_none()
 
 
 async def get_records_by_ids(
@@ -337,12 +340,20 @@ async def create_records(
         raise
 
 
-def get_response_by_id(db: Session, response_id: UUID):
-    return db.get(Response, response_id)
+async def get_response_by_id(db: Session, response_id: UUID) -> Union[Response, None]:
+    result = await db.execute(
+        select(Response)
+        .filter_by(id=response_id)
+        .options(selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions))
+    )
+    return result.scalar_one_or_none()
 
 
-def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):
-    return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
+async def get_response_by_record_id_and_user_id(
+    db: "AsyncSession", record_id: UUID, user_id: UUID
+) -> Union[Response, None]:
+    result = await db.execute(select(Response).filter_by(record_id=record_id, user_id=user_id))
+    return result.scalar_one_or_none()
 
 
 def list_responses_by_record_id(db: Session, record_id: UUID):
@@ -381,8 +392,8 @@ def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, 
 
 
 async def create_response(
-    db: Session, search_engine: SearchEngine, record: Record, user: User, response_create: ResponseCreate
-):
+    db: "AsyncSession", search_engine: SearchEngine, record: Record, user: User, response_create: ResponseCreate
+) -> Response:
     validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
 
     response = Response(
@@ -392,42 +403,47 @@ async def create_response(
         user_id=user.id,
     )
 
-    db.add(response)
-    db.flush([response])
-    # TODO: Rollback
-    await search_engine.update_record_response(response)
-
-    db.commit()
-    db.refresh(response)
+    try:
+        db.add(response)
+        await db.flush([response])
+        await search_engine.update_record_response(response)
+        await db.commit()
+        await db.refresh(response)
+    except Exception:
+        await db.rollback()
+        raise
 
     return response
 
 
 async def update_response(
-    db: Session, search_engine: SearchEngine, response: Response, response_update: ResponseUpdate
+    db: "AsyncSession", search_engine: SearchEngine, response: Response, response_update: ResponseUpdate
 ):
     validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
 
     response.values = jsonable_encoder(response_update.values)
     response.status = response_update.status
 
-    db.flush([response])
-    # TODO: Rollback
-    await search_engine.update_record_response(response)
-
-    db.commit()
-    db.refresh(response)
+    try:
+        await db.flush([response])
+        await search_engine.update_record_response(response)
+        await db.commit()
+        await db.refresh(response)
+    except Exception:
+        await db.rollback()
+        raise
 
     return response
 
 
-async def delete_response(db: Session, search_engine: SearchEngine, response: Response):
-    db.delete(response)
-    # TODO: Rollback
-    await search_engine.delete_record_response(response)
-
-    db.commit()
-
+async def delete_response(db: "AsyncSession", search_engine: SearchEngine, response: Response) -> Response:
+    try:
+        await db.delete(response)
+        await search_engine.delete_record_response(response)
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        raise
     return response
 
 
