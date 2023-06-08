@@ -13,23 +13,90 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import TYPE_CHECKING, Type
 from uuid import uuid4
 
+import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Question
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select
 
-from tests.factories import AnnotatorFactory, DatasetFactory, TextQuestionFactory
+from tests.factories import (
+    AnnotatorFactory,
+    DatasetFactory,
+    LabelSelectionQuestionFactory,
+    MultiLabelSelectionQuestionFactory,
+    RatingQuestionFactory,
+    TextQuestionFactory,
+)
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from tests.factories import QuestionFactory as QuestionFactoryType
 
 
-def test_delete_question(client: TestClient, db: Session, admin_auth_header: dict):
-    question = TextQuestionFactory.create(name="name", title="title", description="description")
+@pytest.mark.parametrize(
+    "QuestionFactory, expected_settings",
+    [
+        (TextQuestionFactory, {"type": "text", "use_markdown": False}),
+        (
+            RatingQuestionFactory,
+            {
+                "type": "rating",
+                "options": [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                    {"value": 4},
+                    {"value": 5},
+                    {"value": 6},
+                    {"value": 7},
+                    {"value": 8},
+                    {"value": 9},
+                    {"value": 10},
+                ],
+            },
+        ),
+        (
+            LabelSelectionQuestionFactory,
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "option1", "text": "Option 1", "description": None},
+                    {"value": "option2", "text": "Option 2", "description": None},
+                    {"value": "option3", "text": "Option 3", "description": None},
+                ],
+            },
+        ),
+        (
+            MultiLabelSelectionQuestionFactory,
+            {
+                "type": "multi_label_selection",
+                "options": [
+                    {"value": "option1", "text": "Option 1", "description": None},
+                    {"value": "option2", "text": "Option 2", "description": None},
+                    {"value": "option3", "text": "Option 3", "description": None},
+                ],
+            },
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_delete_question(
+    client: TestClient,
+    db: "AsyncSession",
+    admin_auth_header: dict,
+    QuestionFactory: Type["QuestionFactoryType"],
+    expected_settings: dict,
+):
+    question = await QuestionFactory.create(name="name", title="title", description="description")
 
     response = client.delete(f"/api/v1/questions/{question.id}", headers=admin_auth_header)
 
     assert response.status_code == 200
-    assert db.query(Question).count() == 0
+    assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
     response_body = response.json()
     assert response_body == {
@@ -38,46 +105,55 @@ def test_delete_question(client: TestClient, db: Session, admin_auth_header: dic
         "title": "title",
         "description": "description",
         "required": False,
-        "settings": {"type": "text", "use_markdown": False},
+        "settings": expected_settings,
         "dataset_id": str(question.dataset_id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
 
 
-def test_delete_question_without_authentication(client: TestClient, db: Session):
-    question = TextQuestionFactory.create()
+@pytest.mark.asyncio
+async def test_delete_question_without_authentication(client: TestClient, db: "AsyncSession"):
+    question = await TextQuestionFactory.create()
 
     response = client.delete(f"/api/v1/questions/{question.id}")
 
     assert response.status_code == 401
-    assert db.query(Question).count() == 1
+    assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
-def test_delete_question_as_annotator(client: TestClient, db: Session):
-    annotator = AnnotatorFactory.create()
-    question = TextQuestionFactory.create()
+@pytest.mark.asyncio
+async def test_delete_question_as_annotator(client: TestClient, db: "AsyncSession"):
+    annotator = await AnnotatorFactory.create()
+    question = await TextQuestionFactory.create()
 
     response = client.delete(f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 403
-    assert db.query(Question).count() == 1
+    assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
-def test_delete_question_belonging_to_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
-    question = TextQuestionFactory.create(dataset=DatasetFactory.build(status=DatasetStatus.ready))
+@pytest.mark.asyncio
+async def test_delete_question_belonging_to_published_dataset(
+    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+):
+    dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+    question = await TextQuestionFactory.create(dataset=dataset)
 
     response = client.delete(f"/api/v1/questions/{question.id}", headers=admin_auth_header)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Questions cannot be deleted for a published dataset"}
-    assert db.query(Question).count() == 1
+    assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
-def test_delete_question_with_nonexistent_question_id(client: TestClient, db: Session, admin_auth_header: dict):
-    TextQuestionFactory.create()
+@pytest.mark.asyncio
+async def test_delete_question_with_nonexistent_question_id(
+    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+):
+    await TextQuestionFactory.create()
 
     response = client.delete(f"/api/v1/questions/{uuid4()}", headers=admin_auth_header)
 
     assert response.status_code == 404
-    assert db.query(Question).count() == 1
+    assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
