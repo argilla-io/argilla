@@ -64,6 +64,9 @@
 </template>
 
 <script>
+// NOTE - this threshold is used to show the search filter component for component from questionForm component
+const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
+
 export default {
   name: "LabelSelectionComponent",
   props: {
@@ -82,10 +85,6 @@ export default {
     componentId: {
       type: String,
       required: true,
-    },
-    showSearch: {
-      type: Boolean,
-      default: () => false,
     },
     multiple: {
       type: Boolean,
@@ -135,6 +134,12 @@ export default {
     showCollapseButton() {
       if (this.maxOptionsToShowBeforeCollapse === -1) return false;
       return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
+    },
+    showSearch() {
+      return (
+        this.options.length >= OPTIONS_THRESHOLD_TO_ENABLE_SEARCH ||
+        this.showCollapseButton
+      );
     },
     textToShowInTheCollapseButton() {
       if (this.isExpanded) {
