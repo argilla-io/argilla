@@ -13,23 +13,29 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
+import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Field
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select
 
 from tests.factories import AnnotatorFactory, DatasetFactory, TextFieldFactory
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
-def test_delete_field(client: TestClient, db: Session, admin_auth_header: dict):
-    field = TextFieldFactory.create(name="name", title="title")
+
+@pytest.mark.asyncio
+async def test_delete_field(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+    field = await TextFieldFactory.create(name="name", title="title")
 
     response = client.delete(f"/api/v1/fields/{field.id}", headers=admin_auth_header)
 
     assert response.status_code == 200
-    assert db.query(Field).count() == 0
+    assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
     response_body = response.json()
     assert response_body == {
@@ -44,39 +50,46 @@ def test_delete_field(client: TestClient, db: Session, admin_auth_header: dict):
     }
 
 
-def test_delete_field_without_authentication(client: TestClient, db: Session):
-    field = TextFieldFactory.create()
+@pytest.mark.asyncio
+async def test_delete_field_without_authentication(client: TestClient, db: "AsyncSession"):
+    field = await TextFieldFactory.create()
 
     response = client.delete(f"/api/v1/fields/{field.id}")
 
     assert response.status_code == 401
-    assert db.query(Field).count() == 1
+    assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 
-def test_delete_field_as_annotator(client: TestClient, db: Session):
-    annotator = AnnotatorFactory.create()
-    field = TextFieldFactory.create()
+@pytest.mark.asyncio
+async def test_delete_field_as_annotator(client: TestClient, db: "AsyncSession"):
+    annotator = await AnnotatorFactory.create()
+    field = await TextFieldFactory.create()
 
     response = client.delete(f"/api/v1/fields/{field.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 403
-    assert db.query(Field).count() == 1
+    assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 
-def test_delete_field_belonging_to_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
-    field = TextFieldFactory.create(dataset=DatasetFactory.build(status=DatasetStatus.ready))
+@pytest.mark.asyncio
+async def test_delete_field_belonging_to_published_dataset(
+    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+):
+    dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+    field = await TextFieldFactory.create(dataset=dataset)
 
     response = client.delete(f"/api/v1/fields/{field.id}", headers=admin_auth_header)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Fields cannot be deleted for a published dataset"}
-    assert db.query(Field).count() == 1
+    assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 
-def test_delete_field_with_nonexistent_field_id(client: TestClient, db: Session, admin_auth_header: dict):
-    TextFieldFactory.create()
+@pytest.mark.asyncio
+async def test_delete_field_with_nonexistent_field_id(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+    await TextFieldFactory.create()
 
     response = client.delete(f"/api/v1/fields/{uuid4()}", headers=admin_auth_header)
 
     assert response.status_code == 404
-    assert db.query(Field).count() == 1
+    assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
