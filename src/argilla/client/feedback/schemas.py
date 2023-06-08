@@ -151,14 +151,10 @@ class _LabelQuestion(QuestionSchema):
 
     @validator("labels", always=True)
     def labels_dict_must_be_valid(cls, v: Union[List[str], Dict[str, str]]) -> Union[List[str], Dict[str, str]]:
-        if isinstance(v, list):
-            return v
         if isinstance(v, dict):
-            if len(v.keys()) < 2:
-                raise ValueError("ensure this dict has at least 2 items")
-            if len(set(v.values())) != len(v.values()):
-                raise ValueError("ensure this dict has unique values")
-            return v
+            assert len(v.keys()) > 1, "ensure this dict has at least 2 items"
+            assert len(set(v.values())) == len(v.values()), "ensure this dict has unique values"
+        return v
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
