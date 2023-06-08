@@ -27,6 +27,9 @@ from pydantic import (
     Field,
     StrictInt,
     StrictStr,
+    conint,
+    conlist,
+    root_validator,
     validator,
 )
 
@@ -35,7 +38,7 @@ PUSHING_BATCH_SIZE = 32
 
 
 class ValueSchema(BaseModel):
-    value: Union[StrictStr, StrictInt]
+    value: Union[StrictStr, StrictInt, List[str]]
 
 
 class ResponseSchema(BaseModel):
@@ -75,74 +78,103 @@ class FeedbackRecord(BaseModel):
 class FieldSchema(BaseModel):
     name: str
     title: Optional[str] = None
-    required: Optional[bool] = True
-    settings: Dict[str, Any]
+    required: bool = True
+    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
 
     @validator("title", always=True)
     def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if not v:
-            return values["name"].capitalize()
+            return values.get("name").capitalize()
         return v
+
+    class Config:
+        validate_assignment = True
+        extra = Extra.forbid
 
 
 class TextField(FieldSchema):
-    settings: Dict[str, Any] = Field({"type": "text"})
+    settings: Dict[str, Any] = Field({"type": "text"}, allow_mutation=False)
     use_markdown: bool = False
 
-    @validator("use_markdown", always=True)
-    def update_settings_with_use_markdown(cls, v: bool, values: Dict[str, Any]) -> bool:
-        if v:
-            values["settings"]["use_markdown"] = v
-        return False
+    @root_validator(skip_on_failure=True)
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["use_markdown"] = values.get("use_markdown", False)
+        return values
 
 
 class QuestionSchema(BaseModel):
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
-    required: Optional[bool] = True
-    settings: Dict[str, Any]
+    required: bool = True
+    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
 
     @validator("title", always=True)
     def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if not v:
-            return values["name"].capitalize()
+            return values.get("name").capitalize()
         return v
+
+    class Config:
+        validate_assignment = True
+        extra = Extra.forbid
 
 
 # TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
 class TextQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({"type": "text", "use_markdown": False})
+    settings: Dict[str, Any] = Field({"type": "text", "use_markdown": False}, allow_mutation=False)
     use_markdown: bool = False
 
-    @validator("use_markdown", always=True)
-    def update_settings_with_use_markdown(cls, v: bool, values: Dict[str, Any]) -> bool:
-        if v:
-            values["settings"]["use_markdown"] = v
-        return False
-
-    class Config:
-        validate_assignment = True
-        extra = Extra.forbid
+    @root_validator(skip_on_failure=True)
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["use_markdown"] = values.get("use_markdown", False)
+        return values
 
 
 class RatingQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({"type": "rating"})
-    values: List[int] = Field(unique_items=True)
+    settings: Dict[str, Any] = Field({"type": "rating"}, allow_mutation=False)
+    values: List[int] = Field(unique_items=True, min_items=2)
 
-    @validator("values", always=True)
-    def update_settings_with_values(cls, v: List[int], values: Dict[str, Any]) -> List[int]:
-        if v:
-            values["settings"]["options"] = [{"value": value} for value in v]
+    @root_validator(skip_on_failure=True)
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["options"] = [{"value": value} for value in values.get("values")]
+        return values
+
+
+class _LabelQuestion(QuestionSchema):
+    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
+    labels: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
+    visible_labels: Optional[conint(ge=3)] = 20
+
+    @validator("labels", always=True)
+    def labels_dict_must_be_valid(cls, v: Union[List[str], Dict[str, str]]) -> Union[List[str], Dict[str, str]]:
+        if isinstance(v, dict):
+            assert len(v.keys()) > 1, "ensure this dict has at least 2 items"
+            assert len(set(v.values())) == len(v.values()), "ensure this dict has unique values"
         return v
 
-    class Config:
-        validate_assignment = True
-        extra = Extra.forbid
+    @root_validator(skip_on_failure=True)
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(values.get("labels"), dict):
+            values["settings"]["options"] = [
+                {"value": key, "text": value} for key, value in values.get("labels").items()
+            ]
+        if isinstance(values.get("labels"), list):
+            values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels")]
+        values["settings"]["visible_options"] = values.get("visible_labels", 20)
+        return values
+
+
+class LabelQuestion(_LabelQuestion):
+    settings: Dict[str, Any] = Field({"type": "label_selection"})
+
+
+class MultiLabelQuestion(_LabelQuestion):
+    settings: Dict[str, Any] = Field({"type": "multi_label_selection"})
 
 
 AllowedFieldTypes = TextField
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion]
+AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion]
 
 
 class FeedbackDatasetConfig(BaseModel):

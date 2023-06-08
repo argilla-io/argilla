@@ -94,7 +94,10 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
             fields=feedback_dataset_fields,
             questions=None,
         )
-    with pytest.raises(TypeError, match="Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`"):
+    with pytest.raises(
+        TypeError,
+        match="Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`, `LabelQuestion`, and/or `MultiLabelQuestion`",
+    ):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
@@ -107,14 +110,6 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
             questions=[
                 TextQuestion(name="test", required=False),
                 RatingQuestion(name="test", values=[0, 1], required=False),
-            ],
-        )
-    with pytest.raises(ValidationError, match="1 validation error for RatingQuestion"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=[
-                RatingQuestion(name="test", values=[0, 0], required=True),
             ],
         )
 
@@ -162,6 +157,8 @@ def test_records(
                     "values": {
                         "question-1": {"value": "answer"},
                         "question-2": {"value": 0},
+                        "question-3": {"value": "a"},
+                        "question-4": {"value": ["a", "b"]},
                     },
                     "status": "submitted",
                 },
@@ -180,6 +177,8 @@ def test_records(
         "values": {
             "question-1": {"value": "answer"},
             "question-2": {"value": 0},
+            "question-3": {"value": "a"},
+            "question-4": {"value": ["a", "b"]},
         },
         "status": "submitted",
     }
@@ -282,6 +281,8 @@ def test_push_to_argilla_and_from_argilla(
                         "values": {
                             "question-1": {"value": "answer"},
                             "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
                         },
                         "status": "submitted",
                     },
@@ -289,6 +290,8 @@ def test_push_to_argilla_and_from_argilla(
                         "values": {
                             "question-1": {"value": "answer"},
                             "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
                         },
                         "status": "submitted",
                     },
