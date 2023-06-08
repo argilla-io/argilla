@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
@@ -49,8 +48,6 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 LIST_RECORDS_LIMIT = 20
-
-_LOGGER = logging.getLogger("argilla.server")
 
 
 async def get_dataset_by_id(
@@ -166,8 +163,9 @@ async def delete_field(db: "AsyncSession", field: Field) -> Field:
     return field
 
 
-def get_question_by_id(db: Session, question_id: UUID):
-    return db.get(Question, question_id)
+async def get_question_by_id(db: Session, question_id: UUID) -> Union[Question, None]:
+    result = await db.execute(select(Question).filter_by(id=question_id).options(selectinload(Question.dataset)))
+    return result.scalar_one_or_none()
 
 
 async def get_question_by_name_and_dataset_id(db: "AsyncSession", name: str, dataset_id: UUID) -> Union[Question, None]:
@@ -195,13 +193,12 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
     return question
 
 
-def delete_question(db: Session, question: Question):
+async def delete_question(db: "AsyncSession", question: Question) -> Question:
     if question.dataset.is_ready:
         raise ValueError("Questions cannot be deleted for a published dataset")
 
-    db.delete(question)
-    db.commit()
-
+    await db.delete(question)
+    await db.commit()
     return question
 
 
