@@ -223,7 +223,7 @@ jobs:
         uses: actions/setup-node@v2
         if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
         with:
-          node-version: "16"
+          node-version: "14"
       - name: Build Package 🍟
         if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
         run: |
