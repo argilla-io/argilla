@@ -405,7 +405,7 @@ export default {
           // 1/ push formatted object corresponding to recordResponse which have been remove from api
           this.currentInputsWithNoResponses.forEach((input) => {
             formattedRecordResponsesForOrm.push({
-              id: input.response_id,
+              id: responsesFromApi.id,
               question_name: input.name,
               options: input.options,
               record_id: this.recordId,
