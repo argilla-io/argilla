@@ -15,9 +15,9 @@
         :recordId="recordId"
         :recordStatus="record.record_status"
         :initialInputs="questionsWithRecordAnswers"
-        @on-submit-responses="onActionInResponses('SUBMIT')"
-        @on-discard-responses="onActionInResponses('DISCARD')"
-        @on-clear-responses="onActionInResponses('CLEAR')"
+        @on-submit-responses="goToNextPageAndRefreshMetrics"
+        @on-discard-responses="goToNextPageAndRefreshMetrics"
+        @on-clear-responses="refreshMetrics"
         @on-question-form-touched="onQuestionFormTouched"
       />
     </template>
@@ -366,19 +366,9 @@ export default {
         });
       }
     },
-    async onActionInResponses(typeOfAction) {
-      switch (typeOfAction) {
-        case "SUBMIT":
-        case "DISCARD":
-          this.setCurrentPage(this.currentPage + 1);
-          await this.refreshMetrics();
-          break;
-        case "CLEAR":
-          await this.refreshMetrics();
-          break;
-        default:
-        // the action is unknown => do nothing
-      }
+    async goToNextPageAndRefreshMetrics() {
+      this.setCurrentPage(this.currentPage + 1);
+      await this.refreshMetrics();
     },
     async initRecordsInDatabase(
       offset,
