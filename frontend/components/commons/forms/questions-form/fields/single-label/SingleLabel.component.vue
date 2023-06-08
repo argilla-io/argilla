@@ -10,14 +10,12 @@
       v-model="uniqueOptions"
       :multiple="false"
       :componentId="questionId"
-      :showSearch="showSearch"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
     />
   </div>
 </template>
 
 <script>
-import { OPTIONS_THRESHOLD_TO_ENABLE_SEARCH } from "@/components/feedback-task/feedbackTask.properties";
 export default {
   name: "SingleLabelComponent",
   props: {
@@ -63,9 +61,6 @@ export default {
     }, []);
   },
   computed: {
-    showSearch() {
-      return this.uniqueOptions.length >= OPTIONS_THRESHOLD_TO_ENABLE_SEARCH;
-    },
     maxOptionsToShowBeforeCollapse() {
       return this.visibleOptions ?? -1;
     },
