@@ -37,6 +37,13 @@ These are the section headers that we use:
 - Database setup for unit tests. Now the unit tests use a different database than the one used by the local Argilla server (Closes [#2987]).
 - Updated `alembic` setup to be able to autogenerate revision/migration scripts using SQLAlchemy metadata from Argilla server models ([#3044])
 
+### Fixed
+
+- Disallow `fields` and `questions` in `FeedbackDataset` with the same name ([#3126]).
+- Keep `visible_labels=None` if `None` is specified in `LabelQuestion` or `MultiLabelQuestion`, otherwise, use default 20 ([#3126]).
+
+[#3126]: https://github.com/argilla-io/argilla/pull/3126
+
 ## [1.8.0](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
 ### Added

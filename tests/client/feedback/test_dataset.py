@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, List
 import datasets
 import pytest
 from argilla.client import api
-from pydantic import ValidationError
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
@@ -84,6 +83,15 @@ def test_init_wrong_fields(feedback_dataset_guidelines: str, feedback_dataset_qu
             fields=[TextField(name="test", required=False)],
             questions=feedback_dataset_questions,
         )
+    with pytest.raises(ValueError, match="Expected `fields` to have unique names"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=[
+                TextField(name="test", required=True),
+                TextField(name="test", required=True),
+            ],
+            questions=feedback_dataset_questions,
+        )
 
 
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields")
@@ -108,8 +116,17 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[
-                TextQuestion(name="test", required=False),
-                RatingQuestion(name="test", values=[0, 1], required=False),
+                TextQuestion(name="question-1", required=False),
+                RatingQuestion(name="question-2", values=[0, 1], required=False),
+            ],
+        )
+    with pytest.raises(ValueError, match="Expected `questions` to have unique names"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=[
+                TextQuestion(name="question-1", required=True),
+                TextQuestion(name="question-1", required=True),
             ],
         )
 
