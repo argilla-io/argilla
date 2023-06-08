@@ -162,6 +162,7 @@ export default {
   },
   beforeDestroy() {
     this.$root.$off("reset-status-filter");
+    this.$root.$off("reset-search-filter");
   },
 };
 </script>
