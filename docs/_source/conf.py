@@ -123,9 +123,7 @@ services:
 nbsphinx_execute = "never"
 
 # open html file as Python string
-getting_started_html = open(
-    "./_common/getting_started.html", "r", encoding="utf8"
-).read()
+getting_started_html = open("./_common/getting_started.html", "r", encoding="utf8").read()
 next_steps_html = open("./_common/next_steps.html", "r", encoding="utf8").read()
 
 # Plotly + Hide input/output prompts (cell counts)
