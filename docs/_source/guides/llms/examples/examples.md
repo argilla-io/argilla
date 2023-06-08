@@ -10,8 +10,8 @@ Here you can find end-to-end examples to help you get started with curanting dat
 Learn how to set up a project to curate a public dataset that can be used to fine-tune an instruction-following model.
 
 ```
-```{grid-item-card} rain a Reward Model for RLHF
-:link: curating-feedback-instructiondataset.html
+```{grid-item-card} Train a Reward Model for RLHF
+:link: train-reward-model-rlhf.html
 
 Learn how to collect comparison or human preference data and train a reward model with the trl library.
 
