@@ -19,9 +19,9 @@ from uuid import UUID
 from pydantic import BaseModel, Field, conlist
 
 try:
-    from typing import Literal
+    from typing import Annotated, Literal
 except ImportError:
-    from typing_extensions import Literal
+    from typing_extensions import Annotated, Literal
 
 from argilla.server.models import QuestionType
 
@@ -40,13 +40,40 @@ class RatingQuestionSettings(BaseModel):
     options: conlist(item_type=RatingQuestionSettingsOption)
 
 
+class LabelSelectionQuestionSettingsOption(BaseModel):
+    value: str
+    text: str
+    description: Optional[str] = None
+
+
+class LabelSelectionQuestionSettings(BaseModel):
+    type: Literal[QuestionType.label_selection]
+    options: conlist(item_type=LabelSelectionQuestionSettingsOption)
+
+
+class MultiLabelSelectionQuestionSettings(BaseModel):
+    type: Literal[QuestionType.multi_label_selection]
+    options: conlist(item_type=LabelSelectionQuestionSettingsOption)
+
+
+QuestionSettings = Annotated[
+    Union[
+        TextQuestionSettings,
+        RatingQuestionSettings,
+        LabelSelectionQuestionSettings,
+        MultiLabelSelectionQuestionSettings,
+    ],
+    Field(..., discriminator="type"),
+]
+
+
 class Question(BaseModel):
     id: UUID
     name: str
     title: str
     description: Optional[str]
     required: bool
-    settings: Union[TextQuestionSettings, RatingQuestionSettings] = Field(..., discriminator="type")
+    settings: QuestionSettings
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
