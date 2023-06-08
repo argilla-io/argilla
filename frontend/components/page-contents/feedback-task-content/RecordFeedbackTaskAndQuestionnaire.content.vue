@@ -17,6 +17,7 @@
         :initialInputs="questionsWithRecordAnswers"
         @on-submit-responses="onActionInResponses('SUBMIT')"
         @on-discard-responses="onActionInResponses('DISCARD')"
+        @on-clear-responses="onActionInResponses('CLEAR')"
         @on-question-form-touched="onQuestionFormTouched"
       />
     </template>
@@ -50,6 +51,7 @@ import {
   isRecordWithRecordIndexByDatasetIdExists,
   isAnyRecordByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
+import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
 import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
 import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
@@ -250,6 +252,8 @@ export default {
   async created() {
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
     this.currentPage = this.pageFromQuery;
+
+    await this.refreshMetrics();
   },
   mounted() {
     this.$root.$on("go-to-next-page", () => {
@@ -261,6 +265,40 @@ export default {
     this.$root.$on("status-filter-changed", this.onStatusFilterChanged);
   },
   methods: {
+    async refreshMetrics() {
+      const datasetMetrics = await this.fetchMetrics();
+
+      const formattedMetrics = this.factoryDatasetMetricsForOrm(datasetMetrics);
+
+      await upsertDatasetMetrics(formattedMetrics);
+    },
+    async fetchMetrics() {
+      try {
+        const { data } = await this.$axios.get(
+          `/v1/me/datasets/${this.datasetId}/metrics`
+        );
+
+        return data;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    factoryDatasetMetricsForOrm({ records, responses, user_id }) {
+      const {
+        count: responsesCount,
+        submitted: responsesSubmitted,
+        discarded: responsesDiscarded,
+      } = responses;
+
+      return {
+        dataset_id: this.datasetId,
+        user_id: user_id ?? this.userId,
+        total_record: records?.count ?? 0,
+        responses_count: responsesCount,
+        responses_submitted: responsesSubmitted,
+        responses_discarded: responsesDiscarded,
+      };
+    },
     async applyStatusFilter(status) {
       this.recordStatusToFilterWith = status;
       this.currentPage = 1;
@@ -333,9 +371,13 @@ export default {
         case "SUBMIT":
         case "DISCARD":
           this.setCurrentPage(this.currentPage + 1);
+          await this.refreshMetrics();
+          break;
+        case "CLEAR":
+          await this.refreshMetrics();
           break;
         default:
-        // do nothing
+        // the action is unknown => do nothing
       }
     },
     async initRecordsInDatabase(
