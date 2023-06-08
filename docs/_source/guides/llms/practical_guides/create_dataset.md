@@ -37,8 +37,8 @@ To collect feedback for your dataset, you need to formulate questions. The Feedb
 
 - `RatingQuestion`: These questions require annotators to select one option from a list of integer values. This type is useful for collecting numerical scores.
 - `TextQuestion`: These questions offer annotators a free-text area where they can enter any text. This type is useful for collecting natural language data, such as corrections or explanations.
-- `LabelQuestion`: These questions ask annotators to choose one label from a list of options. This type is useful for text classification tasks. In the UI, the labels of the `LabelQuestion` will have rounded corners.
-- `MultiLabelQuestion`: These questions ask annotators to choose all applicable labels from a list of options. This type is useful for multi-label text classification tasks. In the UI, the labels of the `MultiLabelQuestion` will have square corners.
+- `LabelQuestion`: These questions ask annotators to choose one label from a list of options. This type is useful for text classification tasks. In the UI, the labels of the `LabelQuestion` will have a rounded shape.
+- `MultiLabelQuestion`: These questions ask annotators to choose all applicable labels from a list of options. This type is useful for multi-label text classification tasks. In the UI, the labels of the `MultiLabelQuestion` will have a squared shape.
 
 You can define your questions using the Python SDK and set up the following configurations:
 
@@ -50,7 +50,7 @@ You can define your questions using the Python SDK and set up the following conf
 The following arguments apply to specific question types:
 
 - `values`: The rating options to answer the `RatingQuestion`. It can be any list of unique integers. It doesn't matter whether these are positive, negative, sequential or not.
-- `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions.
+- `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
 - `visible_labels` (optional): In `LabelQuestion` and `MultiLabelQuestion` this is the number of labels that will be visible in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
 - `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`.
 

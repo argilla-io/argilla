@@ -45,7 +45,7 @@ rg.MultiLabelQuestion(
     name="content_class",
     title="Does the response include any of the following?",
     description="Select all that apply",
-    labels=["Hate speech", "Sexual content", "Violent content", "PII", "Untruthful info", "Not English", "Inappropriate content"],
+    labels={"hate": "Hate Speech" , "sexual": "Sexual content", "violent": "Violent content", "pii": "Personal information", "untruthful": "Untruthful info", "not_english": "Not English", "inappropriate": "Inappropriate content"},
     required=False,
     visible_labels=4
 )
