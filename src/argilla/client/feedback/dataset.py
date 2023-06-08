@@ -40,9 +40,9 @@ from argilla.client.feedback.schemas import (
     FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,
+    LabelQuestion,
     MultiLabelQuestion,
     RatingQuestion,
-    SingleLabelQuestion,
     TextField,
     TextQuestion,
 )
@@ -86,7 +86,7 @@ class FeedbackDataset:
         TypeError: if `fields` is not a list of `FieldSchema`.
         ValueError: if `fields` does not contain at least one required field.
         TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
-            `SingleLabelQuestion`, and/or `MultiLabelQuestion`.
+            `LabelQuestion`, and/or `MultiLabelQuestion`.
         ValueError: if `questions` does not contain at least one required question.
 
     Examples:
@@ -109,7 +109,7 @@ class FeedbackDataset:
         ...             required=True,
         ...             values=[1, 2, 3, 4, 5],
         ...         ),
-        ...         rg.SingleLabelQuestion(
+        ...         rg.LabelQuestion(
         ...             name="question-3",
         ...             description="This is the third question",
         ...             required=True,
@@ -163,7 +163,7 @@ class FeedbackDataset:
             TypeError: if `fields` is not a list of `FieldSchema`.
             ValueError: if `fields` does not contain at least one required field.
             TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
-                `SingleLabelQuestion`, and/or `MultiLabelQuestion`.
+                `LabelQuestion`, and/or `MultiLabelQuestion`.
             ValueError: if `questions` does not contain at least one required question.
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
@@ -188,7 +188,7 @@ class FeedbackDataset:
             ...             required=True,
             ...             values=[1, 2, 3, 4, 5],
             ...         ),
-            ...         rg.SingleLabelQuestion(
+            ...         rg.LabelQuestion(
             ...             name="question-3",
             ...             description="This is the third question",
             ...             required=True,
@@ -221,10 +221,10 @@ class FeedbackDataset:
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
         any_required = False
         for question in questions:
-            if not isinstance(question, (TextQuestion, RatingQuestion, SingleLabelQuestion, MultiLabelQuestion)):
+            if not isinstance(question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion)):
                 raise TypeError(
                     "Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`,"
-                    " `SingleLabelQuestion`, and/or `MultiLabelQuestion` got a"
+                    " `LabelQuestion`, and/or `MultiLabelQuestion` got a"
                     f" question in the list with type {type(question)} instead."
                 )
             if not any_required and question.required:
@@ -392,7 +392,7 @@ class FeedbackDataset:
             ...             required=True,
             ...             values=[1, 2, 3, 4, 5],
             ...         ),
-            ...         rg.SingleLabelQuestion(
+            ...         rg.LabelQuestion(
             ...             name="question-3",
             ...             description="This is the third question",
             ...             required=True,
@@ -681,14 +681,14 @@ class FeedbackDataset:
             elif question.settings["type"] == "text":
                 question = TextQuestion.construct(**question.dict())
             elif question.settings["type"] == "label_selection":
-                question = SingleLabelQuestion.construct(**question.dict())
+                question = LabelQuestion.construct(**question.dict())
             elif question.settings["type"] == "multi_label_selection":
                 question = MultiLabelQuestion.construct(**question.dict())
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
                     " version, supported question types are: `RatingQuestion`, `TextQuestion`,"
-                    "`SingleLabelQuestion`, and/or `MultiLabelQuestion`."
+                    " `LabelQuestion`, and/or `MultiLabelQuestion`."
                 )
             questions.append(question)
         self = cls(

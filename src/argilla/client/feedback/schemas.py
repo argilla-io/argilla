@@ -155,7 +155,7 @@ class _LabelQuestion(QuestionSchema):
         return values
 
 
-class SingleLabelQuestion(_LabelQuestion):
+class LabelQuestion(_LabelQuestion):
     settings: Dict[str, Any] = Field({"type": "label_selection"})
 
 
@@ -164,7 +164,7 @@ class MultiLabelQuestion(_LabelQuestion):
 
 
 AllowedFieldTypes = TextField
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, SingleLabelQuestion, MultiLabelQuestion]
+AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion]
 
 
 class FeedbackDatasetConfig(BaseModel):
