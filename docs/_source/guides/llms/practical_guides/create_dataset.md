@@ -37,8 +37,8 @@ To collect feedback for your dataset, you need to formulate questions. The Feedb
 
 - `RatingQuestion`: These questions require annotators to select one option from a list of integer values. This type is useful for collecting numerical scores.
 - `TextQuestion`: These questions offer annotators a free-text area where they can enter any text. This type is useful for collecting natural language data, such as corrections or explanations.
-- `LabelQuestion`: These questions ask annotators to choose one label from a list of options. This type is useful for text classification tasks.
-- `MultiLabelQuestion`: These questions ask annotators to choose all applicable labels from a list of options. This type is useful for multi-label text classification tasks.
+- `LabelQuestion`: These questions ask annotators to choose one label from a list of options. This type is useful for text classification tasks. In the UI, the labels of the `LabelQuestion` will have rounded corners.
+- `MultiLabelQuestion`: These questions ask annotators to choose all applicable labels from a list of options. This type is useful for multi-label text classification tasks. In the UI, the labels of the `MultiLabelQuestion` will have square corners.
 
 You can define your questions using the Python SDK and set up the following configurations:
 
