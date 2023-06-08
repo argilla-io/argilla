@@ -250,7 +250,7 @@ jobs:
       matrix:
         include:
           - image: argilla/argilla-server
-            dockerfile: docker/release.Dockerfile
+            dockerfile: docker/Dockerfile
             readme: README.md
             platforms: linux/amd64
 
