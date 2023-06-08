@@ -241,7 +241,7 @@ class RecordPolicyV1:
     def create_response(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_admin or bool(
-                accounts.get_workspace_user_by_workspace_id_and_user_id(
+                await accounts.get_workspace_user_by_workspace_id_and_user_id(
                     async_object_session(actor),
                     record.dataset.workspace_id,
                     actor.id,
