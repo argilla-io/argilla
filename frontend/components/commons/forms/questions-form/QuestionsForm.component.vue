@@ -385,6 +385,7 @@ export default {
     formatResponsesApiForOrm(responsesFromApi) {
       const formattedRecordResponsesForOrm = [];
       if (responsesFromApi.values) {
+        // TODO - simplify if/else by one loop
         if (Object.keys(responsesFromApi.values).length === 0) {
           // IF responses.value  is an empty object, init formatted responses with questions data
           this.inputs.forEach(
@@ -405,7 +406,7 @@ export default {
           // 1/ push formatted object corresponding to recordResponse which have been remove from api
           this.currentInputsWithNoResponses.forEach((input) => {
             formattedRecordResponsesForOrm.push({
-              id: input.response_id,
+              id: responsesFromApi.id,
               question_name: input.name,
               options: input.options,
               record_id: this.recordId,
