@@ -83,7 +83,7 @@ class FieldSchema(BaseModel):
     @validator("title", always=True)
     def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if not v:
-            return values["name"].capitalize()
+            return values.get("name").capitalize()
         return v
 
     class Config:
@@ -114,7 +114,7 @@ class QuestionSchema(BaseModel):
     @validator("title", always=True)
     def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if not v:
-            return values["name"].capitalize()
+            return values.get("name").capitalize()
         return v
 
     class Config:
@@ -139,7 +139,7 @@ class RatingQuestion(QuestionSchema):
 
     @root_validator
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        values["settings"]["options"] = [{"value": value} for value in values.get("values", [])]
+        values["settings"]["options"] = [{"value": value} for value in values.get("values")]
         return values
 
 
@@ -150,13 +150,15 @@ class _LabelQuestion(QuestionSchema):
 
     @root_validator
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        if isinstance(values["labels"], dict):
-            values["settings"]["options"] = [{"value": key, "text": value} for key, value in values["labels"].items()]
-        elif isinstance(values["labels"], list):
-            values["settings"]["options"] = [{"value": label, "text": label} for label in values["labels"]]
+        if isinstance(values.get("labels"), dict):
+            values["settings"]["options"] = [
+                {"value": key, "text": value} for key, value in values.get("labels").items()
+            ]
+        elif isinstance(values.get("labels"), list):
+            values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels")]
         else:
             raise ValueError(
-                f"Invalid `labels` value: {values['labels']}. It must be a list or a dictionary of `str` values."
+                f"Invalid `labels` value: {values.get('labels')} of type: {type(values.get('labels'))}. It must be a list or a dictionary of `str` values."
             )
         values["settings"]["visible_options"] = values.get("visible_labels", 20)
         return values
