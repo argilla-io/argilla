@@ -72,8 +72,10 @@ if _TYPE_CHECKING:
         LabelQuestion,
         MultiLabelQuestion,
         RatingQuestion,
+        ResponseSchema,
         TextField,
         TextQuestion,
+        ValueSchema,
     )
     from argilla.client.models import (
         Text2TextRecord,

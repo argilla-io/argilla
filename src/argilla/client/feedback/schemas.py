@@ -38,10 +38,43 @@ PUSHING_BATCH_SIZE = 32
 
 
 class ValueSchema(BaseModel):
+    """A value schema for a record.
+
+    Args:
+        value: The value of the record.
+
+    Examples:
+        >>> import argilla as rg
+        >>> value = rg.ValueSchema(value="Yes")
+        >>> # or use a dict
+        >>> value = {"value": "Yes"}
+    """
+
     value: Union[StrictStr, StrictInt, List[str]]
 
 
 class ResponseSchema(BaseModel):
+    """A response schema for a record.
+
+    Args:
+        user_id: The user id of the response.
+        values: The values of the response.
+        status: The status of the response. It can be either `submitted` or `discarded`.
+
+    Examples:
+        >>> import argilla as rg
+        >>> response = rg.ResponseSchema(
+        ...     user_id="user_id",
+        ...     values={"question-1": {"value": "response-1"}}
+        ... )
+        >>> # or use a ValueSchema directly
+        >>> response = rg.ResponseSchema(
+        ...     user_id="user_id",
+        ...     values={"question-1": rg.ValueSchema(value="response-1")}
+        ... )
+
+    """
+
     user_id: Optional[UUID] = None
     values: Dict[str, ValueSchema]
     status: Literal["submitted", "discarded"] = "submitted"
@@ -59,6 +92,29 @@ class ResponseSchema(BaseModel):
 
 
 class FeedbackRecord(BaseModel):
+    """A feedback record.
+
+    Args:
+        fields: The fields of the record.
+        responses: The responses of the record.
+        external_id: The external id of the record.
+
+    Examples:
+        >>> import argilla as rg
+        >>> rg.FeedbackRecord(
+        ...     fields={"text": "This is the first record", "label": "positive"},
+        ...     responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
+        ...     external_id="entry-1",
+        ... )
+        >>> # or use a ResponseSchema directly
+        >>> rg.FeedbackRecord(
+        ...     fields={"text": "This is the first record", "label": "positive"},
+        ...     responses=[rg.ResponseSchema(values={"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}))],
+        ...     external_id="entry-1",
+        ... )
+
+    """
+
     fields: Dict[str, str]
     responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
@@ -76,6 +132,25 @@ class FeedbackRecord(BaseModel):
 
 
 class FieldSchema(BaseModel):
+    """A field schema for a feedback dataset.
+
+    Args:
+        name: The name of the field.
+        title: The title of the field.
+        required: Whether the field is required or not.
+        settings: The settings of the field.
+
+    Examples:
+        >>> import argilla as rg
+        >>> field = rg.FieldSchema(
+        ...     name="text",
+        ...     title="Human prompt",
+        ...     required=True,
+        ...     settings={"type": "text"}
+        ... )
+
+    """
+
     name: str
     title: Optional[str] = None
     required: bool = True
@@ -93,6 +168,27 @@ class FieldSchema(BaseModel):
 
 
 class TextField(FieldSchema):
+    """A text field schema for a feedback dataset.
+
+    Args:
+        name: The name of the field.
+        title: The title of the field.
+        required: Whether the field is required or not.
+        settings: The settings of the field.
+        use_markdown: Whether the field should use markdown or not.
+
+    Examples:
+        >>> import argilla as rg
+        >>> field = rg.FieldSchema(
+        ...     name="text",
+        ...     title="Human prompt",
+        ...     required=True,
+        ...     settings={"type": "text"},
+        ...     use_markdown=True
+        ... )
+
+    """
+
     settings: Dict[str, Any] = Field({"type": "text"}, allow_mutation=False)
     use_markdown: bool = False
 
@@ -103,6 +199,27 @@ class TextField(FieldSchema):
 
 
 class QuestionSchema(BaseModel):
+    """A question schema for a feedback dataset.
+
+    Args:
+        name: The name of the question.
+        title: The title of the question.
+        description: The description of the question.
+        required: Whether the question is required or not.
+        settings: The settings of the question.
+
+    Examples:
+        >>> import argilla as rg
+        >>> question = rg.QuestionSchema(
+        ...     name="relevant",
+        ...     title="Is the response relevant for the given prompt?",
+        ...     description="Select all that apply",
+        ...     required=True,
+        ...     settings={"type": "text", "use_markdown": False}
+        ... )
+
+    """
+
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
@@ -122,6 +239,29 @@ class QuestionSchema(BaseModel):
 
 # TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
 class TextQuestion(QuestionSchema):
+    """A text question schema for a feedback dataset.
+
+    Args:
+        name: The name of the question.
+        title: The title of the question.
+        description: The description of the question.
+        required: Whether the question is required or not.
+        settings: The settings of the question.
+        use_markdown: Whether the field should use markdown or not.
+
+    Examples:
+        >>> import argilla as rg
+        >>> question = rg.TextQuestion(
+        ...     name="relevant",
+        ...     title="Is the response relevant for the given prompt?",
+        ...     description="Select all that apply",
+        ...     required=True,
+        ...     settings={"type": "text", "use_markdown": False},
+        ...     use_markdown=True
+        ... )
+
+    """
+
     settings: Dict[str, Any] = Field({"type": "text", "use_markdown": False}, allow_mutation=False)
     use_markdown: bool = False
 
@@ -132,6 +272,29 @@ class TextQuestion(QuestionSchema):
 
 
 class RatingQuestion(QuestionSchema):
+    """A rating question schema for a feedback dataset.
+
+    Args:
+        name: The name of the question.
+        title: The title of the question.
+        description: The description of the question.
+        required: Whether the question is required or not.
+        settings: The settings of the question.
+        values: The values of the rating question.
+
+    Examples:
+        >>> import argilla as rg
+        >>> question = rg.RatingQuestion(
+        ...     name="relevant",
+        ...     title="Is the response relevant for the given prompt?",
+        ...     description="Select all that apply",
+        ...     required=True,
+        ...     settings={"type": "rating"},
+        ...     values=[1, 2, 3, 4, 5]
+        ... )
+
+    """
+
     settings: Dict[str, Any] = Field({"type": "rating"}, allow_mutation=False)
     values: List[int] = Field(unique_items=True, min_items=2)
 
@@ -142,6 +305,41 @@ class RatingQuestion(QuestionSchema):
 
 
 class _LabelQuestion(QuestionSchema):
+    """A label question schema for a feedback dataset.
+
+    Args:
+        name: The name of the question.
+        title: The title of the question.
+        description: The description of the question.
+        required: Whether the question is required or not.
+        settings: The settings of the question.
+        labels: The labels of the label question.
+        visible_labels: The number of visible labels of the label question.
+
+    Examples:
+        >>> import argilla as rg
+        >>> question = rg.LabelQuestion(
+        ...     name="relevant",
+        ...     title="Is the response relevant for the given prompt?",
+        ...     description="Select all that apply",
+        ...     required=True,
+        ...     settings={"type": "label_selection"},
+        ...     labels=["Yes", "No"],
+        ...     visible_labels=None
+        ... )
+        >>> # or use a dict
+        >>> question = rg.LabelQuestion(
+        ...     name="relevant",
+        ...     title="Is the response relevant for the given prompt?",
+        ...     description="Select all that apply",
+        ...     required=True,
+        ...     settings={"type": "label_selection"},
+        ...     labels={"yes": "Yes", "no": "No"},
+        ...     visible_labels=None
+        ... )
+
+    """
+
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
     labels: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
     visible_labels: Optional[conint(ge=3)] = 20
@@ -168,10 +366,80 @@ class _LabelQuestion(QuestionSchema):
 
 
 class LabelQuestion(_LabelQuestion):
+    """A label question schema for a feedback dataset.
+
+    Args:
+        name: The name of the question.
+        title: The title of the question.
+        description: The description of the question.
+        required: Whether the question is required or not.
+        settings: The settings of the question.
+        labels: The labels of the label question.
+        visible_labels: The number of visible labels of the label question.
+
+    Examples:
+        >>> import argilla as rg
+        >>> question = rg.LabelQuestion(
+        ...     name="relevant",
+        ...     title="Is the response relevant for the given prompt?",
+        ...     description="Select all that apply",
+        ...     required=True,
+        ...     settings={"type": "label_selection"},
+        ...     labels=["Yes", "No"],
+        ...     visible_labels=None
+        ... )
+        >>> # or use a dict
+        >>> question = rg.LabelQuestion(
+        ...     name="relevant",
+        ...     title="Is the response relevant for the given prompt?",
+        ...     description="Select all that apply",
+        ...     required=True,
+        ...     settings={"type": "label_selection"},
+        ...     labels={"yes": "Yes", "no": "No"},
+        ...     visible_labels=None
+        ... )
+
+    """
+
     settings: Dict[str, Any] = Field({"type": "label_selection"})
 
 
 class MultiLabelQuestion(_LabelQuestion):
+    """A multi label question schema for a feedback dataset.
+
+    Args:
+        name: The name of the question.
+        title: The title of the question.
+        description: The description of the question.
+        required: Whether the question is required or not.
+        settings: The settings of the question.
+        labels: The labels of the label question.
+        visible_labels: The number of visible labels of the label question.
+
+    Examples:
+        >>> import argilla as rg
+        >>> question = rg.MultiLabelQuestion(
+        ...     name="relevant",
+        ...     title="Is the response relevant for the given prompt?",
+        ...     description="Select all that apply",
+        ...     required=True,
+        ...     settings={"type": "multi_label_selection"},
+        ...     labels=["Yes", "No"],
+        ...     visible_labels=None
+        ... )
+        >>> # or use a dict
+        >>> question = rg.MultiLabelQuestion(
+        ...     name="relevant",
+        ...     title="Is the response relevant for the given prompt?",
+        ...     description="Select all that apply",
+        ...     required=True,
+        ...     settings={"type": "multi_label_selection"},
+        ...     labels={"yes": "Yes", "no": "No"},
+        ...     visible_labels=None
+        ... )
+
+    """
+
     settings: Dict[str, Any] = Field({"type": "multi_label_selection"})
 
 
@@ -180,6 +448,52 @@ AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiL
 
 
 class FeedbackDatasetConfig(BaseModel):
+    """A feedback dataset config.
+
+    Args:
+        fields: The fields of the feedback dataset.
+        questions: The questions of the feedback dataset.
+        guidelines: The guidelines of the feedback dataset.
+
+    Examples:
+        >>> import argilla as rg
+        >>> config = rg.FeedbackDatasetConfig(
+        ...     fields=[
+        ...         rg.TextField(name="text", title="Human prompt"),
+        ...     ],
+        ...     questions =[
+        ...         rg.TextQuestion(
+        ...             name="question-1",
+        ...             description="This is the first question",
+        ...             required=True,
+        ...         ),
+        ...         rg.RatingQuestion(
+        ...             name="question-2",
+        ...             description="This is the second question",
+        ...             required=True,
+        ...             values=[1, 2, 3, 4, 5],
+        ...         ),
+        ...         rg.LabelQuestion(
+        ...             name="relevant",
+        ...             title="Is the response relevant for the given prompt?",
+        ...             labels=["Yes","No"],
+        ...             required=True,
+        ...             visible_labels=None
+        ...         ),
+        ...         rg.MultiLabelQuestion(
+        ...             name="content_class",
+        ...             title="Does the response include any of the following?",
+        ...             description="Select all that apply",
+        ...             labels={"hate": "Hate Speech" , "sexual": "Sexual content", "violent": "Violent content", "pii": "Personal information", "untruthful": "Untruthful info", "not_english": "Not English", "inappropriate": "Inappropriate content"},
+        ...             required=False,
+        ...             visible_labels=4
+        ...         ),
+        ...     ],
+        ...     guidelines="Add some guidelines for the annotation team here."
+        ... )
+
+    """
+
     fields: List[AllowedFieldTypes]
     questions: List[AllowedQuestionTypes]
     guidelines: Optional[str] = None
