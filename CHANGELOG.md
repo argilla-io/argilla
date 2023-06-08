@@ -18,7 +18,7 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-## [1.9.0-dev](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
+## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
 
 ### Added
 
