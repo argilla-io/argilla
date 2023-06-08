@@ -14,10 +14,10 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import datasets
-from argilla.server.database import get_db
+from argilla.server.database import get_async_db
 from argilla.server.models import User
 from argilla.server.policies import RecordPolicyV1, authorize
 from argilla.server.schemas.v1.records import Response, ResponseCreate
@@ -30,22 +30,22 @@ router = APIRouter(tags=["records"])
 @router.post("/records/{record_id}/responses", status_code=status.HTTP_201_CREATED, response_model=Response)
 async def create_record_response(
     *,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     record_id: UUID,
     response_create: ResponseCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = datasets.get_record_by_id(db, record_id)
+    record = await datasets.get_record_by_id(db, record_id)
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Record with id `{record_id}` not found",
         )
 
-    authorize(current_user, RecordPolicyV1.create_response(record))
+    await authorize(current_user, RecordPolicyV1.create_response(record))
 
-    if datasets.get_response_by_record_id_and_user_id(db, record_id, current_user.id):
+    if await datasets.get_response_by_record_id_and_user_id(db, record_id, current_user.id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Response already exists for record with id `{record_id}` and by user with id `{current_user.id}`",
