@@ -29,6 +29,7 @@ These are the section headers that we use:
 - Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API ([#3010](https://github.com/argilla-io/argilla/pull/3010)).
 - Added `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoint ([#3068](https://github.com/argilla-io/argilla/pull/3068)).
 - Added new components in feedback task Question form: MultiLabel ([#3064](https://github.com/argilla-io/argilla/pull/3064)) and SingleLabel ([#3016](https://github.com/argilla-io/argilla/pull/3016)).
+- Added docstring added Pydantic Docstrings to the `argilla/client/feedback/schemas.py` ([#3136](https://github.com/argilla-io/argilla/pull/3137))
 
 ### Changed
 

@@ -48,6 +48,7 @@ class ValueSchema(BaseModel):
         >>> value = rg.ValueSchema(value="Yes")
         >>> # or use a dict
         >>> value = {"value": "Yes"}
+
     """
 
     value: Union[StrictStr, StrictInt, List[str]]
