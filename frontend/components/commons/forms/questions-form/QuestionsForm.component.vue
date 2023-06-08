@@ -119,7 +119,6 @@ import {
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
-import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
 
 export default {
   name: "QuestionsFormComponent",
@@ -215,12 +214,9 @@ export default {
       this.emitIsQuestionsFormUntouched(isFormUntouched);
     },
   },
-  async created() {
+  created() {
     this.COMPONENT_TYPE = COMPONENT_TYPE;
     this.onReset();
-
-    // NOTE - Update dataset Metrics orm
-    await this.refreshMetrics();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
@@ -290,8 +286,6 @@ export default {
           values: responseValues,
         });
 
-        await this.refreshMetrics();
-
         await updateRecordStatusByRecordId(
           this.recordId,
           RECORD_STATUS.DISCARDED
@@ -318,8 +312,6 @@ export default {
           status: RESPONSE_STATUS_FOR_API.SUBMITTED,
           values: responseValues,
         });
-
-        await this.refreshMetrics();
 
         await updateRecordStatusByRecordId(
           this.recordId,
@@ -351,8 +343,7 @@ export default {
           RECORD_STATUS.PENDING
         );
 
-        // NOTE - Update dataset Metrics orm
-        await this.refreshMetrics();
+        this.$emit("on-clear-responses");
         this.onReset();
       } catch (err) {
         console.log(err);
@@ -370,42 +361,8 @@ export default {
         this.isError = false;
       }
     },
-    async refreshMetrics() {
-      const datasetMetrics = await this.fetchMetrics();
-
-      const formattedMetrics = this.factoryDatasetMetricsForOrm(datasetMetrics);
-
-      await upsertDatasetMetrics(formattedMetrics);
-    },
     async deleteResponsesByResponseId(responseId) {
       return await this.$axios.delete(`/v1/responses/${responseId}`);
-    },
-    async fetchMetrics() {
-      try {
-        const { data } = await this.$axios.get(
-          `/v1/me/datasets/${this.datasetId}/metrics`
-        );
-
-        return data;
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    factoryDatasetMetricsForOrm({ records, responses, user_id }) {
-      const {
-        count: responsesCount,
-        submitted: responsesSubmitted,
-        discarded: responsesDiscarded,
-      } = responses;
-
-      return {
-        dataset_id: this.datasetId,
-        user_id: user_id ?? this.userId,
-        total_record: records?.count ?? 0,
-        responses_count: responsesCount,
-        responses_submitted: responsesSubmitted,
-        responses_discarded: responsesDiscarded,
-      };
     },
     async updateResponsesInOrm(responsesFromApi) {
       const newResponseToUpsertInOrm =
