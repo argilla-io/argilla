@@ -735,11 +735,23 @@ class FeedbackDataset:
                 if field.name not in dataset:
                     dataset[field.name] = []
             for question in self.questions:
+                if question.settings["type"] in ["text", "label_selection"]:
+                    value = Value(dtype="string")
+                elif question.settings["type"] == "rating":
+                    value = Value(dtype="int32")
+                elif question.settings["type"] == "multi_label_selection":
+                    value = Sequence(Value(dtype="string"))
+                else:
+                    raise ValueError(
+                        f"Question {question.name} has an unsupported type: {question.settings['type']}, for the"
+                        " moment only the following types are supported: 'text', 'rating', 'label_selection', and"
+                        " 'multi_label_selection'"
+                    )
                 # TODO(alvarobartt): if we constraint ranges from 0 to N, then we can use `ClassLabel` for ratings
                 features[question.name] = Sequence(
                     {
                         "user_id": Value(dtype="string"),
-                        "value": Value(dtype="string" if question.settings["type"] == "text" else "int32"),
+                        "value": value,
                         "status": Value(dtype="string"),
                     },
                     id="question",
