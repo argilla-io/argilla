@@ -385,6 +385,7 @@ export default {
     formatResponsesApiForOrm(responsesFromApi) {
       const formattedRecordResponsesForOrm = [];
       if (responsesFromApi.values) {
+        // TODO - simplify if/else by one loop
         if (Object.keys(responsesFromApi.values).length === 0) {
           // IF responses.value  is an empty object, init formatted responses with questions data
           this.inputs.forEach(
