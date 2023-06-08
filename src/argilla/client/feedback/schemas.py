@@ -158,7 +158,6 @@ class _LabelQuestion(QuestionSchema):
             if len(set(v.values())) != len(v.values()):
                 raise ValueError("ensure this dict has unique values")
             return v
-        raise TypeError("ensure this value is a list or a dict")
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
