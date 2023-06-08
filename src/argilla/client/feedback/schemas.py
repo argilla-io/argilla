@@ -146,11 +146,18 @@ class RatingQuestion(QuestionSchema):
 class _LabelQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({})
     labels: List[str] = Field(unique_items=True)
+    label_mapping: Dict[str, str] = Field(default_factory=dict)
     visible_labels: Optional[PositiveInt] = 20
 
     @root_validator
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels", [])]
+        values["settings"]["options"] = [
+            {
+                "value": label,
+                "text": label if not values["label_mapping"] else values["label_mapping"].get(label, label),
+            }
+            for label in values.get("labels", [])
+        ]
         values["settings"]["visible_options"] = values.get("visible_labels", 20)
         return values
 
