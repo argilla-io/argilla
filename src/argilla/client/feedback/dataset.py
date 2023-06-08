@@ -207,9 +207,13 @@ class FeedbackDataset:
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
         any_required = False
+        unique_names = set()
         for field in fields:
             if not isinstance(field, FieldSchema):
                 raise TypeError(f"Expected `fields` to be a list of `FieldSchema`, got {type(field)} instead.")
+            if field.name in unique_names:
+                raise ValueError(f"Expected `fields` to have unique names, got {field.name} twice instead.")
+            unique_names.add(field.name)
             if not any_required and field.required:
                 any_required = True
         if not any_required:
@@ -220,6 +224,7 @@ class FeedbackDataset:
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
         any_required = False
+        unique_names = set()
         for question in questions:
             if not isinstance(question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion)):
                 raise TypeError(
@@ -227,6 +232,9 @@ class FeedbackDataset:
                     " `LabelQuestion`, and/or `MultiLabelQuestion` got a"
                     f" question in the list with type {type(question)} instead."
                 )
+            if question.name in unique_names:
+                raise ValueError(f"Expected `questions` to have unique names, got {question.name} twice instead.")
+            unique_names.add(question.name)
             if not any_required and question.required:
                 any_required = True
         if not any_required:
