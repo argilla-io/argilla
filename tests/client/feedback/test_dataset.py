@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, List
 import datasets
 import pytest
 from argilla.client import api
-from pydantic import ValidationError
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
