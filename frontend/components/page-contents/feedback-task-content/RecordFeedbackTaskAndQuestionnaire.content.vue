@@ -101,6 +101,17 @@ export default {
         },
       });
     },
+    async searchTextToFilterWith(newValue) {
+      await this.$router.push({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          _search: newValue,
+          _status: this.recordStatusToFilterWith,
+          _page: this.currentPage,
+        },
+      });
+    },
   },
   data() {
     return {
@@ -278,12 +289,13 @@ export default {
     },
     async applySearchFilter(searchFilter) {
       console.log("apply: ", searchFilter);
-      // this.searchTextToFilterWith = searchFilter;
-      // this.currentPage = 1;
+      // NOTE - the order of both next line is important because of the watcher update
+      this.currentPage = 1;
+      this.searchTextToFilterWith = searchFilter;
 
-      // await this.$fetch();
+      await this.$fetch();
 
-      // this.reRenderQuestionForm++;
+      this.reRenderQuestionForm++;
     },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
@@ -384,14 +396,27 @@ export default {
     },
     async initRecordsInDatabase(
       offset,
-      status = this.recordStatusFilterValueForGetRecords
+      status = this.recordStatusFilterValueForGetRecords,
+      searchText = this.searchTextToFilterWith
     ) {
-      // FETCH records from offset, status + 10 next records
-      const { items: records } = await this.getRecords(
-        this.datasetId,
-        offset,
-        status
-      );
+      let records = [];
+
+      if (isNil(searchText) || !searchText.length) {
+        // FETCH records from offset, status + 10 next records
+        ({ items: records } = await this.getRecords(
+          this.datasetId,
+          offset,
+          status
+        ));
+      } else {
+        ({ items: records } = await this.searchRecords(
+          this.datasetId,
+          offset,
+          status,
+          searchText
+        ));
+      }
+
       // FORMAT records for orm
       const formattedRecords = this.factoryRecordsForOrm(records, offset);
 
@@ -414,6 +439,38 @@ export default {
         };
         const { data } = await this.$axios.get(url, { params });
         return data;
+      } catch (err) {
+        console.warn(err);
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
+        };
+      }
+    },
+    async searchRecords(
+      datasetId,
+      offset,
+      responseStatus,
+      searchText,
+      numberOfRecordsToFetch = 10
+    ) {
+      try {
+        const url = `/v1/me/datasets/${datasetId}/records/search?include=responses&response_status=${responseStatus}&limit=${numberOfRecordsToFetch}&offset=${offset}`;
+
+        const body = JSON.parse(
+          JSON.stringify({
+            query: {
+              text: {
+                q: searchText,
+              },
+            },
+          })
+        );
+
+        const { data } = await this.$axios.post(url, body);
+        const { items } = data;
+
+        const formattedItems = items.map((item) => item.record);
+        return { items: formattedItems };
       } catch (err) {
         console.warn(err);
         throw {
