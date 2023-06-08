@@ -25,9 +25,9 @@ from pydantic import (
     BaseModel,
     Extra,
     Field,
-    PositiveInt,
     StrictInt,
     StrictStr,
+    conint,
     root_validator,
     validator,
 )
@@ -147,7 +147,7 @@ class _LabelQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
     labels: List[str] = Field(unique_items=True)
     label_mapping: Dict[str, str] = Field(default_factory=dict)
-    visible_labels: Optional[PositiveInt] = 20
+    visible_labels: Optional[conint(ge=3)] = 20
 
     @root_validator
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
