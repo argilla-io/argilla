@@ -206,7 +206,7 @@ class DatasetPolicyV1:
     def search_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_admin or bool(
-                accounts.get_workspace_user_by_workspace_id_and_user_id(
+                await accounts.get_workspace_user_by_workspace_id_and_user_id(
                     async_object_session(actor),
                     dataset.workspace_id,
                     actor.id,
