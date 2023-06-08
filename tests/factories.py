@@ -62,7 +62,7 @@ class AsyncSQLAlchemyModelFactory(factory.alchemy.SQLAlchemyModelFactory):
                     old_session = async_object_session(value)
                     if old_session.sync_session.hash_key != session.sync_session.hash_key:
                         old_session.expunge(value)
-                        session.merge(value)
+                        value = await old_session.merge(value)
             return await cls._save(model_class, session, args, kwargs)
 
         if session is None:
