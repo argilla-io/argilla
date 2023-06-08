@@ -95,7 +95,7 @@ class TextField(FieldSchema):
     settings: Dict[str, Any] = Field({"type": "text"}, allow_mutation=False)
     use_markdown: bool = False
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         values["settings"]["use_markdown"] = values.get("use_markdown", False)
         return values
@@ -127,7 +127,7 @@ class TextQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "text", "use_markdown": False}, allow_mutation=False)
     use_markdown: bool = False
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         values["settings"]["use_markdown"] = values.get("use_markdown", False)
         return values
@@ -137,7 +137,7 @@ class RatingQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "rating"}, allow_mutation=False)
     values: List[int] = Field(unique_items=True, min_items=2)
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         values["settings"]["options"] = [{"value": value} for value in values.get("values")]
         return values
@@ -148,7 +148,7 @@ class _LabelQuestion(QuestionSchema):
     labels: Union[List[str], Dict[str, str]] = Field(unique_items=True, min_items=2)
     visible_labels: Optional[conint(ge=3)] = 20
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(values.get("labels"), dict):
             values["settings"]["options"] = [
