@@ -24,8 +24,9 @@ A **Question** represents a specific query or instruction presented to labelers 
 
 - **TextQuestion**: This type of question is suitable for collecting natural language feedback or textual responses from labelers. It allows them to provide detailed and descriptive feedback in response to the question.
 - **RatingQuestion**: This type of question is designed for capturing numerical rating feedback. Labelers can rate a given aspect or attribute using a predefined scale or set of options. It is useful for obtaining quantitative feedback or evaluating specific criteria.
-
-In addition to TextQuestions and RatingQuestions, Argilla Feedback also supports other question types such as **RankingQuestions** and **LabelSelection** questions. These question types cater to specific use cases, such as text classification tasks or ranking preferences among options.
+- **LabelQuestion**: This type of question is designed for capturing feedback in the form of a single label. Labelers can classify a given aspect or attribute using a predefined set of options. It is useful for obtaining a classification where options are mutually exclusive.
+- **MultiLabelQuestion**: This type of question is designed for capturing feedback in the form of one or multiple labels. Labelers can classify a given aspect or attribute using a predefined set of options. It is useful for obtaining a classification where options are not exclusive.
+- **RankingQuestion** (upcoming): This type of question is designed for capturing labeler's preferences. Labelers can order a predefined set of options according to their preference or relevance. It is useful for obtaining feedback on labeler's preference among multiple options.
 
 ## Response
 
