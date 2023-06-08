@@ -19,7 +19,8 @@ rg.RatingQuestion(
 rg.TextQuestion(
     name="corrected-text",
     title="Provide a correction to the response:",
-    required=False
+    required=False,
+    use_markdown=True
 )
 ```
 :::

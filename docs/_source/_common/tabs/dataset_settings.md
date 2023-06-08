@@ -9,7 +9,7 @@ dataset = rg.FeedbackDataset(
     guidelines="Add some guidelines for the annotation team here.",
     fields=[
         rg.TextField(name="prompt", title="Human prompt"),
-        rg.TextField(name="output", title="Generated output")
+        rg.TextField(name="output", title="Generated output", use_markdown=True)
     ],
     questions =[
         rg.RatingQuestion(
@@ -22,7 +22,8 @@ dataset = rg.FeedbackDataset(
         rg.TextQuestion(
             name="corrected-text",
             title="Provide a correction to the response:",
-            required=False
+            required=False,
+            use_markdown=True
         ),
         rg.LabelQuestion(
             name="relevant",
