@@ -59,10 +59,14 @@
         />
       </div>
     </transition-group>
+    <i class="no-result" v-if="!filteredOptions.length" />
   </div>
 </template>
 
 <script>
+// NOTE - this threshold is used to show the search filter component for component from questionForm component
+const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
+
 export default {
   name: "LabelSelectionComponent",
   props: {
@@ -81,10 +85,6 @@ export default {
     componentId: {
       type: String,
       required: true,
-    },
-    showSearch: {
-      type: Boolean,
-      default: () => false,
     },
     multiple: {
       type: Boolean,
@@ -134,6 +134,12 @@ export default {
     showCollapseButton() {
       if (this.maxOptionsToShowBeforeCollapse === -1) return false;
       return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
+    },
+    showSearch() {
+      return (
+        this.options.length >= OPTIONS_THRESHOLD_TO_ENABLE_SEARCH ||
+        this.showCollapseButton
+      );
     },
     textToShowInTheCollapseButton() {
       if (this.isExpanded) {
@@ -201,10 +207,15 @@ export default {
   .--more {
     border-radius: 20px;
     border: 1px solid $black-10;
-    @include font-size(12px);
     padding: 2px 4px;
+    color: $black-54;
+    @include font-size(12px);
+  }
+  .--less {
+    @include font-size(14px);
   }
   .svg-icon {
+    color: $black-37;
     border-radius: $border-radius;
   }
 }
@@ -243,6 +254,10 @@ input[type="checkbox"] {
 .label-active {
   color: white;
   background: #4c4ea3;
+}
+.no-result {
+  display: block;
+  height: $base-space * 4;
 }
 .cursor-pointer {
   cursor: pointer;
