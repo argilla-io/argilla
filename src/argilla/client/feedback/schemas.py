@@ -102,9 +102,6 @@ class TextField(FieldSchema):
         return values
 
 
-FIELD_TYPE_TO_PYTHON_TYPE = {"text": str}
-
-
 class QuestionSchema(BaseModel):
     name: str
     title: Optional[str] = None

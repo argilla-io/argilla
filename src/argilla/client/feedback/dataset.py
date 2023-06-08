@@ -28,13 +28,13 @@ from pydantic import (
 from tqdm import tqdm
 
 import argilla as rg
+from argilla.client.feedback.card import ArgillaDatasetCard, size_categories_parser
 from argilla.client.feedback.constants import (
     FETCHING_BATCH_SIZE,
     FIELD_TYPE_TO_PYTHON_TYPE,
     PUSHING_BATCH_SIZE,
 )
 from argilla.client.feedback.schemas import (
-    FIELD_TYPE_TO_PYTHON_TYPE,
     AllowedFieldTypes,
     AllowedQuestionTypes,
     FeedbackDatasetConfig,
@@ -806,7 +806,7 @@ class FeedbackDataset:
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
         import huggingface_hub
-        from huggingface_hub import DatasetCard, HfApi
+        from huggingface_hub import DatasetCardData, HfApi
         from packaging.version import parse as parse_version
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
@@ -840,37 +840,17 @@ class FeedbackDataset:
             )
 
         if generate_card:
-            explained_fields = "## Fields\n\n" + "".join(
-                [
-                    f"* `{field.name}` is of type {FIELD_TYPE_TO_PYTHON_TYPE[field.settings['type']]}\n"
-                    for field in self.fields
-                ]
-            )
-            explained_questions = "## Questions\n\n" + "".join(
-                [
-                    f"* `{question.name}` {': ' + question.description if question.description else None}\n"
-                    for question in self.questions
-                ]
-            )
-            loading_guide = (
-                "## Load with Argilla\n\nTo load this dataset with Argilla, you'll just need to "
-                "install Argilla as `pip install argilla --upgrade` and then use the following code:\n\n"
-                "```python\n"
-                "import argilla as rg\n\n"
-                f"ds = rg.FeedbackDataset.from_huggingface({repo_id!r})\n"
-                "```\n\n"
-                "## Load with Datasets\n\nTo load this dataset with Datasets, you'll just need to "
-                "install Datasets as `pip install datasets --upgrade` and then use the following code:\n\n"
-                "```python\n"
-                "from datasets import load_dataset\n\n"
-                f"ds = load_dataset({repo_id!r})\n"
-                "```"
-            )
-            card = DatasetCard(
-                f"## Guidelines\n\n{self.guidelines}\n\n"
-                f"{explained_fields}\n\n"
-                f"{explained_questions}\n\n"
-                f"{loading_guide}\n\n"
+            card = ArgillaDatasetCard.from_template(
+                card_data=DatasetCardData(
+                    size_categories=size_categories_parser(len(self.records)),
+                    tags=["rlfh", "argilla", "human-feedback"],
+                ),
+                repo_id=repo_id,
+                argilla_fields=self.fields,
+                argilla_questions=self.questions,
+                argilla_guidelines=self.guidelines,
+                argilla_record=self.records[0].dict(),
+                huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 

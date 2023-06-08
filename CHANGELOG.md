@@ -36,6 +36,7 @@ These are the section headers that we use:
 - Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API.
 - Database setup for unit tests. Now the unit tests use a different database than the one used by the local Argilla server (Closes [#2987]).
 - Updated `alembic` setup to be able to autogenerate revision/migration scripts using SQLAlchemy metadata from Argilla server models ([#3044])
+- Improved `DatasetCard` generation on `FeedbackDataset.push_to_huggingface` when `generate_card=True`, following the official HuggingFace Hub template, but suited to `FeedbackDataset`s from Argilla ([#3110])
 
 ### Fixed
 
