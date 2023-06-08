@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import warnings
+from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
@@ -186,3 +187,90 @@ class FeedbackDatasetConfig(BaseModel):
 
     class Config:
         smart_union = True
+
+
+class RatingQuestionStrategy(Enum):
+    """
+    Options:
+        - MAX: the maximum value of the ratings
+        - MIN: the minimum value of the ratings
+        - MEAN: the mean value of the ratings
+        - MAJORITY: the majority value of the ratings
+    """
+
+    MEAN: str = "mean"
+    MAJORITY: str = "majority"
+    MAX: str = "max"
+    MIN: str = "min"
+
+
+class LabelQuestionStrategy(Enum):
+    """
+    Options:
+        - MAJORITY: the majority value of the labels
+        - MAJORITY_WEIGHTED: the majority value of the labels, weighted by annotator's confidence
+        - DISAGREEMENT: preserve the natural disagreement between annotators
+    """
+
+    MAJORITY: str = "majority"
+    MAJORITY_WEIGHTED: str = "majority_weighted"
+    DISAGREEMENT: str = "disagreement"
+
+
+class MultiLabelQuestionStrategy(LabelQuestionStrategy):
+    pass
+
+
+MultiLabelQuestionStrategy.__doc__ = LabelQuestionStrategy.__doc__
+
+
+class TrainingDataForTextClassification(BaseModel):
+    """Training data for text classification
+
+    Args:
+        text: TextField
+        label: Union[RatingQuestion, LabelQuestion, MultiLabelQuestion]
+        label_strategy: Union[RatingQuestionStrategy, LabelQuestionStrategy] = None
+
+    Examples:
+        >>> from argilla import TextField, LabelQuestion, LabelQuestionStrategy, TrainingDataForTextClassification
+        >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
+        >>> training_data = TrainingDataForTextClassification(
+        ...     text=dataset.fields[0],
+        ...     label=dataset.questions[0],
+        ...     label_strategy=LabelQuestionStrategy.MAJORITY
+        ... )
+
+    """
+
+    text: TextField
+    label: Union[RatingQuestion, LabelQuestion, MultiLabelQuestion]
+    label_strategy: Union[RatingQuestionStrategy, LabelQuestionStrategy] = None
+
+    @root_validator(skip_on_failure=True)
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(values.get("label"), RatingQuestion):
+            if values.get("label_strategy") is None:
+                warnings.warn(
+                    "`label_strategy` not provided, so it will be set to `RatingQuestionStrategy.MEAN`.",
+                    stacklevel=2,
+                )
+            else:
+                assert isinstance(values.get("label_strategy"), RatingQuestionStrategy), "invalid `label_strategy`"
+        elif isinstance(values.get("label"), LabelQuestion):
+            if values.get("label_strategy") is None:
+                warnings.warn(
+                    "`label_strategy` not provided, so it will be set to `LabelQuestionStrategy.MAJORITY`.",
+                    stacklevel=2,
+                )
+            else:
+                assert isinstance(values.get("label_strategy"), LabelQuestionStrategy), "invalid `label_strategy`"
+        elif isinstance(values.get("label"), MultiLabelQuestion):
+            if values.get("label_strategy") is None:
+                warnings.warn(
+                    "`label_strategy` not provided, so it will be set to `MultiLabelQuestionStrategy.MAJORITY`.",
+                    stacklevel=2,
+                )
+            else:
+                assert isinstance(values.get("label_strategy"), MultiLabelQuestionStrategy), "invalid `label_strategy`"
+        return values
