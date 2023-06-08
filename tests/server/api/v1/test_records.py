@@ -491,7 +491,8 @@ async def test_create_record_response_as_annotator(client: TestClient, db: "Asyn
 @pytest.mark.asyncio
 async def test_create_record_response_as_annotator_from_different_workspace(client: TestClient, db: "AsyncSession"):
     record = await RecordFactory.create()
-    annotator = await AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    workspace = await WorkspaceFactory.create()
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},

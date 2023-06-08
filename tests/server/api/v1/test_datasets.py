@@ -212,7 +212,8 @@ async def test_list_dataset_fields_as_annotator(client: TestClient):
 @pytest.mark.asyncio
 async def test_list_dataset_fields_as_annotator_from_different_workspace(client: TestClient):
     dataset = await DatasetFactory.create()
-    annotator = await AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    workspace = await WorkspaceFactory.create()
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
 
     response = client.get(f"/api/v1/datasets/{dataset.id}/fields", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
@@ -1028,7 +1029,8 @@ async def test_list_current_user_dataset_records_as_annotator_with_include_respo
 @pytest.mark.asyncio
 async def test_list_current_user_dataset_records_as_annotator_from_different_workspace(client: TestClient):
     dataset = await DatasetFactory.create()
-    annotator = await AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    workspace = await WorkspaceFactory.create()
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
 
     response = client.get(f"/api/v1/me/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
@@ -1087,7 +1089,8 @@ async def test_get_dataset_as_annotator(client: TestClient):
 @pytest.mark.asyncio
 async def test_get_dataset_as_annotator_from_different_workspace(client: TestClient):
     dataset = await DatasetFactory.create()
-    annotator = await AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    workspace = await WorkspaceFactory.create()
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
 
     response = client.get(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
@@ -1185,7 +1188,8 @@ async def test_get_current_user_dataset_metrics_as_annotator(client: TestClient)
 @pytest.mark.asyncio
 async def test_get_current_user_dataset_metrics_annotator_from_different_workspace(client: TestClient):
     dataset = await DatasetFactory.create()
-    annotator = await AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    workspace = await WorkspaceFactory.create()
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
 
     response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
