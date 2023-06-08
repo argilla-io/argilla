@@ -15,7 +15,6 @@
 import datetime
 from typing import TYPE_CHECKING, List
 
-import argilla
 import argilla as rg
 import pytest
 from argilla.client.sdk.datasets.models import TaskType
@@ -76,10 +75,10 @@ def gutenberg_spacy_ner(mocked_client):
         revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
 
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = rg.read_datasets(dataset_ds, task="TokenClassification")
 
-    argilla.delete(dataset)
-    argilla.log(name=dataset, records=dataset_rb)
+    rg.delete(dataset)
+    rg.log(name=dataset, records=dataset_rb)
 
     return dataset
 
