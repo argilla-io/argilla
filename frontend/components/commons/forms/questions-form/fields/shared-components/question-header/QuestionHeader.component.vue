@@ -45,14 +45,8 @@ export default {
 
 <style lang="scss" scoped>
 .title-area {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   color: $black-87;
-}
-
-span {
-  word-break: break-word;
+  font-weight: 500;
 }
 
 .icon {
@@ -64,6 +58,10 @@ span {
   flex-basis: 37px;
 }
 
+span {
+  word-break: break-word;
+}
+
 .icon-info {
   display: inline-flex;
   width: 20px;
@@ -71,6 +69,7 @@ span {
   margin: 0;
   padding: 0;
   overflow: inherit;
+  vertical-align: middle;
   &[data-title] {
     position: relative;
     overflow: visible;

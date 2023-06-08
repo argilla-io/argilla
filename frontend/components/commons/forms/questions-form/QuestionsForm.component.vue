@@ -7,7 +7,7 @@
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
-        <p class="questions-form__title --body1 --medium">
+        <p class="questions-form__title --heading5 --medium">
           Submit your feedback
         </p>
         <p class="questions-form__guidelines-link">
@@ -613,7 +613,7 @@ export default {
   }
   &__guidelines-link {
     margin: 0;
-    @include font-size(13px);
+    @include font-size(14px);
     color: $black-37;
     a {
       color: $black-37;
@@ -627,7 +627,7 @@ export default {
   &__content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: $base-space * 4;
     padding: $base-space * 3;
     overflow: auto;
   }

@@ -1,5 +1,9 @@
 <template>
-  <div class="search-area" @click="focusInSearch">
+  <div
+    class="search-area"
+    :class="{ '--focused': isFocused }"
+    @click="focusInSearch"
+  >
     <BaseIconWithBadge
       ref="iconRef"
       class="icon-search"
@@ -18,6 +22,8 @@
       :value="value"
       :ref="searchRef"
       :placeholder="placeholder"
+      @focus="isFocused = true"
+      @blur="isFocused = false"
       @input="$emit('input', $event.target.value)"
       @keydown.shift.backspace.exact="looseFocus"
       @keydown.shift.space.exact="looseFocus"
@@ -32,6 +38,11 @@
 <script>
 export default {
   name: "SearchLabelComponent",
+  data() {
+    return {
+      isFocused: false,
+    };
+  },
   props: {
     value: {
       type: String,
@@ -91,8 +102,8 @@ export default {
       padding: 2px;
     }
   }
-  &:hover {
-    border-color: $black-20;
+  &.--focused {
+    border-color: $primary-color;
   }
 }
 
@@ -103,6 +114,9 @@ export default {
   border-radius: 10px;
   &:focus-visible {
     outline: 0;
+  }
+  @include input-placeholder {
+    color: $black-37;
   }
 }
 </style>
