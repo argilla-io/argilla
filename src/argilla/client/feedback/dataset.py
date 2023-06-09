@@ -77,7 +77,7 @@ class ListGetter(list):
         if isinstance(index, int):
             return super().__getitem__(index)
         elif isinstance(index, str):
-            for item in self.list:
+            for item in self:
                 if item.name == index:
                     return item
             raise KeyError(f"Item with name {index} not found in list")
@@ -999,15 +999,16 @@ class FeedbackDataset:
         else:
             raise ValueError(f"Training data {training_data} is not supported yet")
 
-        formatted_records = self._format_records_for_training(unified_records)
+        return unified_records
+        # formatted_records = self._format_records_for_training(unified_records)
 
-        if framework == Framework.AUTOTRAIN:
-            import pandas as pd
+        # if framework == Framework.AUTOTRAIN:
+        #     import pandas as pd
 
-            return pd.DataFrame(formatted_records)
+        #     return pd.DataFrame(formatted_records)
 
-        else:
-            raise NotImplementedError(f"Framework {framework} is not supported yet")
+        # else:
+        #     raise NotImplementedError(f"Framework {framework} is not supported yet")
 
     def _format_records_for_training(
         self, records: List[FeedbackRecord], training_data: TrainingDataForTextClassification

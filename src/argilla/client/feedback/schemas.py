@@ -204,14 +204,30 @@ class RatingQuestionStrategy(Enum):
     MIN: str = "min"
 
     def unify_responses(self, responses: List[FeedbackRecord], field: RatingQuestion):
+        """Unify responses for a rating question
+
+        Args:
+            responses (List[FeedbackRecord]): list of feedback records
+            field (RatingQuestion): rating question
+
+        Examples:
+            >>> from argilla import TextField, RatingQuestion, RatingQuestionStrategy, TrainingDataForTextClassification
+            >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
+            >>> training_data = TrainingDataForTextClassification(
+            ...     text=dataset.fields[0],
+            ...     label=dataset.questions[0],
+            ...     label_strategy=RatingQuestionStrategy.MAJORITY
+            ... )
+            >>> training_data.label_strategy.unify_responses(responses=dataset.records, field=dataset.questions[0])
+        """
         if self.value == self.MEAN.value:
-            return self._mean(responses)
+            return self._mean(responses, field)
         elif self.value == self.MAJORITY.value:
-            return self._majority(responses)
+            return self._majority(responses, field)
         elif self.value == self.MAX.value:
-            return self._max(responses)
+            return self._max(responses, field)
         elif self.value == self.MIN.value:
-            return self._min(responses)
+            return self._min(responses, field)
 
     def _mean(self, responses: List[FeedbackRecord], field: RatingQuestion):
         pass
@@ -226,7 +242,33 @@ class RatingQuestionStrategy(Enum):
         pass
 
 
-class LabelQuestionStrategy(Enum):
+class LabelQuestionStrategyMixin(object):
+    def unify_responses(self, responses: List[FeedbackRecord], field: Union[LabelQuestion, MultiLabelQuestion]):
+        """Unify responses for a rating question
+
+        Args:
+            responses (List[FeedbackRecord]): list of feedback records
+            field (RatingQuestion): rating question
+
+        Examples:
+            >>> from argilla import TextField, RatingQuestion, RatingQuestionStrategy, TrainingDataForTextClassification
+            >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
+            >>> training_data = TrainingDataForTextClassification(
+            ...     text=dataset.fields[0],
+            ...     label=dataset.questions[0],
+            ...     label_strategy=LabelQuestionStrategy.MAJORITY # or MultiLabelQuestionStrategy.MAJORITY
+            ... )
+            >>> training_data.label_strategy.unify_responses(responses=dataset.records, field=dataset.questions[0])
+        """
+        if self.value == self.MAJORITY.value:
+            return self._majority(responses, field)
+        elif self.value == self.MAJORITY_WEIGHTED.value:
+            return self._majority_weighted(responses, field)
+        elif self.value == self.DISAGREEMENT.value:
+            return self._disagreement(responses, field)
+
+
+class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     """
     Options:
         - "majority": the majority value of the labels
@@ -238,14 +280,6 @@ class LabelQuestionStrategy(Enum):
     MAJORITY_WEIGHTED: str = "majority_weighted"
     DISAGREEMENT: str = "disagreement"
 
-    def unify_responses(self, responses: List[FeedbackRecord], field: Union[LabelQuestion, MultiLabelQuestion]):
-        if self.value == self.MAJORITY.value:
-            return self._majority(responses)
-        elif self.value == self.MAJORITY_WEIGHTED.value:
-            return self._majority_weighted(responses)
-        elif self.value == self.DISAGREEMENT.value:
-            return self._disagreement(responses)
-
     def _majority(self, responses: List[FeedbackRecord], field: LabelQuestion):
         pass
 
@@ -256,13 +290,17 @@ class LabelQuestionStrategy(Enum):
         pass
 
 
-class MultiLabelQuestionStrategy(LabelQuestionStrategy):
+class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     """
     Options:
         - "majority": the majority value of the labels
         - "majority_weighted": the majority value of the labels, weighted by annotator's confidence
         - "disagreement": preserve the natural disagreement between annotators
     """
+
+    MAJORITY: str = "majority"
+    MAJORITY_WEIGHTED: str = "majority_weighted"
+    DISAGREEMENT: str = "disagreement"
 
     def _majority(self, responses: List[FeedbackRecord], field: MultiLabelQuestion):
         pass
@@ -299,15 +337,17 @@ class TrainingDataForTextClassification(BaseModel):
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        print(values)
         if isinstance(values.get("label"), RatingQuestion):
             if values.get("label_strategy") is None:
                 warnings.warn(
                     "`label_strategy` not provided, so it will be set to `RatingQuestionStrategy.MEAN`.",
                     stacklevel=2,
                 )
+                values["label_strategy"] = RatingQuestionStrategy("mean")
+            elif isinstance(values.get("label_strategy"), str):
+                values["label_strategy"] = RatingQuestionStrategy(values.get("label_strategy"))
             else:
-                if isinstance(values.get("label_strategy"), str):
-                    values["label_strategy"] = RatingQuestionStrategy(values.get("label_strategy"))
                 assert isinstance(values.get("label_strategy"), RatingQuestionStrategy), "invalid `label_strategy`"
         elif isinstance(values.get("label"), LabelQuestion):
             if values.get("label_strategy") is None:
@@ -315,9 +355,10 @@ class TrainingDataForTextClassification(BaseModel):
                     "`label_strategy` not provided, so it will be set to `LabelQuestionStrategy.MAJORITY`.",
                     stacklevel=2,
                 )
+                values["label_strategy"] = LabelQuestionStrategy("majority")
+            elif isinstance(values.get("label_strategy"), str):
+                values["label_strategy"] = LabelQuestionStrategy(values.get("label_strategy"))
             else:
-                if isinstance(values.get("label_strategy"), str):
-                    values["label_strategy"] = LabelQuestionStrategy(values.get("label_strategy"))
                 assert isinstance(values.get("label_strategy"), LabelQuestionStrategy), "invalid `label_strategy`"
         elif isinstance(values.get("label"), MultiLabelQuestion):
             if values.get("label_strategy") is None:
@@ -325,8 +366,9 @@ class TrainingDataForTextClassification(BaseModel):
                     "`label_strategy` not provided, so it will be set to `MultiLabelQuestionStrategy.MAJORITY`.",
                     stacklevel=2,
                 )
-                if isinstance(values.get("label_strategy"), str):
-                    values["label_strategy"] = MultiLabelQuestionStrategy(values.get("label_strategy"))
+                values["label_strategy"] = MultiLabelQuestionStrategy("majority")
+            elif isinstance(values.get("label_strategy"), str):
+                values["label_strategy"] = MultiLabelQuestionStrategy(values.get("label_strategy"))
             else:
                 assert isinstance(values.get("label_strategy"), MultiLabelQuestionStrategy), "invalid `label_strategy`"
         return values
