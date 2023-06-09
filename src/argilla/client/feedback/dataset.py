@@ -974,9 +974,9 @@ class FeedbackDataset:
     ):
         if isinstance(strategy, str):
             strategy = LabelQuestionStrategy(strategy)
-        unified_records = strategy.unify_responses(self.__records, field)
+        unified_records = strategy.unify_responses(self.records, field)
         if in_place:
-            self.__records = unified_records
+            self.records = unified_records
         return unified_records
 
     def prepare_for_training(

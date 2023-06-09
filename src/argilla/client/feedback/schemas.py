@@ -12,7 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import random
 import warnings
+from collections import Counter
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
@@ -74,6 +76,11 @@ class FeedbackRecord(BaseModel):
 
     class Config:
         extra = Extra.ignore
+
+
+class UnifiedFeedbackRecord(BaseModel):
+    fields: Dict[str, str]
+    unified_response: Optional[Dict[str, Any]] = {}
 
 
 class FieldSchema(BaseModel):
@@ -203,7 +210,7 @@ class RatingQuestionStrategy(Enum):
     MAX: str = "max"
     MIN: str = "min"
 
-    def unify_responses(self, responses: List[FeedbackRecord], field: RatingQuestion):
+    def unify_responses(self, records: List[FeedbackRecord], field: RatingQuestion):
         """Unify responses for a rating question
 
         Args:
@@ -220,30 +227,58 @@ class RatingQuestionStrategy(Enum):
             ... )
             >>> training_data.label_strategy.unify_responses(responses=dataset.records, field=dataset.questions[0])
         """
-        if self.value == self.MEAN.value:
-            return self._mean(responses, field)
-        elif self.value == self.MAJORITY.value:
-            return self._majority(responses, field)
-        elif self.value == self.MAX.value:
-            return self._max(responses, field)
-        elif self.value == self.MIN.value:
-            return self._min(responses, field)
+        if self.value == self.MAJORITY.value:
+            return self._majority(records, field)
+        else:
+            return self._aggregate(records, field)
 
-    def _mean(self, responses: List[FeedbackRecord], field: RatingQuestion):
-        pass
+    def _aggregate(self, records: List[FeedbackRecord], field: RatingQuestion):
+        unified_records = []
+        for rec in records:
+            # only allow for submitted responses
+            responses = [resp for resp in rec.responses if resp.status == "submitted"]
+            # get responses with a value that is most frequent
+            ratings = [resp.values[field.name].value for resp in responses]
+            # unified response
+            if self.value == self.MEAN.value:
+                unified_value = sum(ratings) / len(ratings)
+            elif self.value == self.MAX.value:
+                unified_value = max(ratings)
+            elif self.value == self.MIN.value:
+                unified_value = min(ratings)
+            else:
+                raise ValueError("Invalid aggregation method")
+            unified_record = UnifiedFeedbackRecord(fields=rec.fields)
+            unified_record.unified_response.update({field.name: {"value": unified_value, "strategy": self.value}})
+            unified_records.append(unified_record)
+        return unified_records
 
-    def _majority(self, responses: List[FeedbackRecord], field: RatingQuestion):
-        pass
+    def _majority(self, records: List[FeedbackRecord], field: RatingQuestion):
+        unified_records = []
+        for rec in records:
+            counter = Counter()
+            # only allow for submitted responses
+            responses = [resp for resp in rec.responses if resp.status == "submitted"]
+            # get responses with a value that is most frequent
+            for resp in responses:
+                counter.update([resp.values[field.name].value])
+            # Find the maximum count
+            max_count = max(counter.values())
+            # Get a list of values with the maximum count
+            most_common_values = [value for value, count in counter.items() if count == max_count]
+            if len(most_common_values) > 1:
+                majority_value = random.choice(most_common_values)
+            else:
+                majority_value = counter.most_common(1)[0][0]
 
-    def _max(self, responses: List[FeedbackRecord], field: RatingQuestion):
-        pass
-
-    def _min(self, responses: List[FeedbackRecord], field: RatingQuestion):
-        pass
+            unified_record = UnifiedFeedbackRecord(fields=rec.fields)
+            unified_record.unified_response.update({field.name: {"value": majority_value, "strategy": self.value}})
+            unified_records.append(unified_record)
+        return unified_records
 
 
 class LabelQuestionStrategyMixin(object):
-    def unify_responses(self, responses: List[FeedbackRecord], field: Union[LabelQuestion, MultiLabelQuestion]):
+    def unify_responses(self, records: List[FeedbackRecord], field: Union[LabelQuestion, MultiLabelQuestion]):
         """Unify responses for a rating question
 
         Args:
@@ -261,11 +296,25 @@ class LabelQuestionStrategyMixin(object):
             >>> training_data.label_strategy.unify_responses(responses=dataset.records, field=dataset.questions[0])
         """
         if self.value == self.MAJORITY.value:
-            return self._majority(responses, field)
+            return self._majority(records, field)
         elif self.value == self.MAJORITY_WEIGHTED.value:
-            return self._majority_weighted(responses, field)
+            return self._majority_weighted(records, field)
         elif self.value == self.DISAGREEMENT.value:
-            return self._disagreement(responses, field)
+            return self._disagreement(records, field)
+
+    def _disagreement(self, records: List[FeedbackRecord], field: LabelQuestion):
+        unified_records = []
+        for rec in records:
+            # only allow for submitted responses
+            responses = [resp for resp in rec.responses if resp.status == "submitted"]
+            # get responses with a value that is most frequent
+            for resp in responses:
+                unified_record = UnifiedFeedbackRecord(fields=rec.fields)
+                unified_record.unified_response.update(
+                    {field.name: {"value": resp.values[field.name].value, "strategy": self.value}}
+                )
+            unified_records.append(unified_record)
+        return unified_records
 
 
 class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
@@ -280,14 +329,31 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     MAJORITY_WEIGHTED: str = "majority_weighted"
     DISAGREEMENT: str = "disagreement"
 
-    def _majority(self, responses: List[FeedbackRecord], field: LabelQuestion):
-        pass
+    def _majority(self, records: List[FeedbackRecord], field: LabelQuestion):
+        unified_records = []
+        for rec in records:
+            counter = Counter()
+            # only allow for submitted responses
+            responses = [resp for resp in rec.responses if resp.status == "submitted"]
+            # get responses with a value that is most frequent
+            for resp in responses:
+                counter.update([resp.values[field.name].value])
+            # Find the maximum count
+            max_count = max(counter.values())
+            # Get a list of values with the maximum count
+            most_common_values = [value for value, count in counter.items() if count == max_count]
+            if len(most_common_values) > 1:
+                majority_value = random.choice(most_common_values)
+            else:
+                majority_value = counter.most_common(1)[0][0]
 
-    def _majority_weighted(self, responses: List[FeedbackRecord], field: LabelQuestion):
-        pass
+            unified_record = UnifiedFeedbackRecord(fields=rec.fields)
+            unified_record.unified_response.update({field.name: {"value": majority_value, "strategy": self.value}})
+            unified_records.append(unified_record)
+        return unified_records
 
-    def _disagreement(self, responses: List[FeedbackRecord], field: LabelQuestion):
-        pass
+    def _majority_weighted(self, records: List[FeedbackRecord], field: LabelQuestion):
+        raise NotImplementedError("Not implemented yet")
 
 
 class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
@@ -302,14 +368,32 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     MAJORITY_WEIGHTED: str = "majority_weighted"
     DISAGREEMENT: str = "disagreement"
 
-    def _majority(self, responses: List[FeedbackRecord], field: MultiLabelQuestion):
-        pass
+    def _majority(self, records: List[FeedbackRecord], field: MultiLabelQuestion):
+        unified_records = []
+        for rec in records:
+            counter = Counter()
+            # only allow for submitted responses
+            responses = [resp for resp in rec.responses if resp.status == "submitted"]
+            # get responses with a value that is most frequent
+            for resp in responses:
+                if isinstance(resp.values[field.name].value, list):
+                    for value in resp.values[field.name].value:
+                        counter.update([value])
+                else:
+                    counter.update([resp.values[field.name].value])
+            # check if there is a majority based on the number of responses
+            majority = int(len(responses) // 2) + 1
+            majority_value = []
+            for value, count in counter.items():
+                if count >= majority:
+                    majority_value.append(value)
+            unified_record = UnifiedFeedbackRecord(fields=rec.fields)
+            unified_record.unified_response.update({field.name: {"value": majority_value, "strategy": self.value}})
+            unified_records.append(unified_record)
+        return unified_records
 
-    def _majority_weighted(self, responses: List[FeedbackRecord], field: MultiLabelQuestion):
-        pass
-
-    def _disagreement(self, responses: List[FeedbackRecord], field: MultiLabelQuestion):
-        pass
+    def _majority_weighted(self, records: List[FeedbackRecord], field: MultiLabelQuestion):
+        raise NotImplementedError("Not implemented yet")
 
 
 class TrainingDataForTextClassification(BaseModel):
@@ -337,7 +421,6 @@ class TrainingDataForTextClassification(BaseModel):
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        print(values)
         if isinstance(values.get("label"), RatingQuestion):
             if values.get("label_strategy") is None:
                 warnings.warn(
