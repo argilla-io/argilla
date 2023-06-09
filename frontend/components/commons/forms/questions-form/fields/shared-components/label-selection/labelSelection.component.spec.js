@@ -1,6 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
 import LabelSelectionComponent from "./LabelSelection.component";
-import SearchLabelComponent from "../search-label/SearchLabel.component";
 
 let wrapper = null;
 const options = {
@@ -21,6 +20,7 @@ afterEach(() => {
 describe("LabelSelectionComponent in Single Selection mode", () => {
   it("render the component", () => {
     expect(wrapper.is(LabelSelectionComponent)).toBe(true);
+
     expect(wrapper.vm.showSearch).toBe(false);
     expect(wrapper.vm.multiple).toBe(false);
     expect(wrapper.vm.searchInput).toBe(``);
@@ -29,7 +29,9 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(wrapper.vm.maxOptionsToShowBeforeCollapse).toBe(-1);
     expect(wrapper.vm.searchRef).toBe(`componentIdSearchFilterRef`);
 
-    const searchWrapper = wrapper.findComponent(SearchLabelComponent);
+    const searchWrapper = wrapper.findComponent({
+      name: "SearchLabelComponent",
+    });
     const showLessButtonWrapper = wrapper.findComponent({
       ref: "showLessButtonRef",
     });
@@ -57,7 +59,9 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(wrapper.vm.multiple).toBe(false);
 
     // by default there is no search
-    const searchWrapper = wrapper.findComponent(SearchLabelComponent);
+    const searchWrapper = wrapper.findComponent({
+      name: "SearchLabelComponent",
+    });
     expect(searchWrapper.exists()).toBe(false);
 
     // by default there is no collapse button
@@ -99,7 +103,9 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(wrapper.vm.multiple).toBe(false);
 
     // by default there is no search
-    const searchWrapper = wrapper.findComponent(SearchLabelComponent);
+    const searchWrapper = wrapper.findComponent({
+      name: "SearchLabelComponent",
+    });
     expect(searchWrapper.exists()).toBe(false);
 
     // by default there is no collapse button
@@ -150,8 +156,10 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(wrapper.vm.multiple).toBe(false);
 
     // by default there is no search
-    const searchWrapper = wrapper.findComponent(SearchLabelComponent);
-    expect(searchWrapper.exists()).toBe(false);
+    const searchWrapper = wrapper.findComponent({
+      name: "SearchLabelComponent",
+    });
+    expect(searchWrapper.exists()).toBe(true);
 
     // by default there is no collapse button
     const showLessButtonWrapper = wrapper.findComponent({
@@ -541,8 +549,10 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
     expect(wrapper.vm.multiple).toBe(true);
 
     // by default there is no search
-    const searchWrapper = wrapper.findComponent(SearchLabelComponent);
-    expect(searchWrapper.exists()).toBe(false);
+    const searchWrapper = wrapper.findComponent({
+      name: "SearchLabelComponent",
+    });
+    expect(searchWrapper.exists()).toBe(true);
 
     // by default there is no collapse button
     const showLessButtonWrapper = wrapper.findComponent({
