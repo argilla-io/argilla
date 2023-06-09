@@ -69,6 +69,8 @@ if _TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
     from argilla.client.feedback.schemas import (
         FeedbackRecord,
+        LabelQuestion,
+        MultiLabelQuestion,
         RatingQuestion,
         TextField,
         TextQuestion,
@@ -127,6 +129,8 @@ _import_structure = {
         "RatingQuestion",
         "TextField",
         "TextQuestion",
+        "LabelQuestion",
+        "MultiLabelQuestion",
     ],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],

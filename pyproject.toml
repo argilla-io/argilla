@@ -115,8 +115,14 @@ homepage = "https://www.argilla.io"
 documentation = "https://docs.argilla.io"
 repository = "https://github.com/argilla-io/argilla"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.setuptools.dynamic]
 version = { attr = "argilla.__version__" }
+
+[tool.setuptools.package-data]
+"argilla.client.feedback.card" = ["argilla_template.md"]
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
