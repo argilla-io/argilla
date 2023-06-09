@@ -23,7 +23,7 @@
   >
     <BaseIconWithBadge
       class="searchbar__icon"
-      :icon="searchValue?.length ? 'close' : 'search'"
+      :icon="iconType"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
@@ -63,6 +63,11 @@ export default {
     description: {
       type: String,
       default: "Introduce your text",
+    },
+  },
+  computed: {
+    iconType() {
+      return this.searchValue?.length ? "close" : "search";
     },
   },
   watch: {
