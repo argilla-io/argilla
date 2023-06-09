@@ -92,14 +92,14 @@ export default {
         id: "searchText",
         name: "Search",
         componentType: "searchBar",
-        order: 0,
+        order: 1,
         placeholder: "Introduce a query",
       },
       statusSelector: {
         id: "statusSelector",
         name: "Status Selector",
         componentType: "statusSelector",
-        order: 1,
+        order: 0,
         options: [
           {
             id: "pending",
