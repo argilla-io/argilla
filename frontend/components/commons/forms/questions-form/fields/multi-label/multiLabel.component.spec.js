@@ -93,7 +93,6 @@ describe("MultiLabelComponent", () => {
         is_selected: false,
       },
     ]);
-    expect(wrapper.vm.showSearch).toBe(true);
     expect(wrapper.vm.maxOptionsToShowBeforeCollapse).toBe(-1);
   });
   it("update the maxOptionsToShowBeforeCollapse depending of the value of the props visibleOptions", async () => {
@@ -101,8 +100,14 @@ describe("MultiLabelComponent", () => {
     await wrapper.setProps({ visibleOptions: 12 });
     expect(wrapper.vm.maxOptionsToShowBeforeCollapse).toBe(12);
 
-    expect(
-      wrapper.findComponent({ name: "QuestionHeaderComponent" }).exists()
-    ).toBe(true);
+    const QuestionHeaderWrapper = wrapper.findComponent({
+      name: "QuestionHeaderComponent",
+    });
+    expect(QuestionHeaderWrapper.exists()).toBe(true);
+
+    const labelSelectionWrapper = wrapper.findComponent({
+      name: "LabelSelectionComponent",
+    });
+    expect(labelSelectionWrapper.exists()).toBe(true);
   });
 });
