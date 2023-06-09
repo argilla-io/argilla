@@ -304,14 +304,13 @@ export default {
       this.$root.$emit("reset-search-filter");
     },
     async onSearchFilterChanged(newSearchValue) {
-      console.log(newSearchValue);
-
       const localApplySearchFilter = this.applySearchFilter;
       const localEmitResetSearchFilter = this.emitResetSearchFilter;
 
-      // console.log(this.searchTextToFilterWith);
-
-      if (this.questionFormTouched) {
+      if (
+        this.questionFormTouched &&
+        newSearchValue !== this.searchFilterFromQuery
+      ) {
         Notification.dispatch("notify", {
           message: "Your changes will be lost if you apply the search filter",
           numberOfChars: 500,
