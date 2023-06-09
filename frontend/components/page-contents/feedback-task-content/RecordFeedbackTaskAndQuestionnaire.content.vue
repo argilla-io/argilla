@@ -229,7 +229,12 @@ export default {
       });
     },
     noRecordsMessage() {
-      return `You have no ${this.recordStatusToFilterWith} records`;
+      if (
+        isNil(this.searchTextToFilterWith) ||
+        this.searchTextToFilterWith.length === 0
+      )
+        return `You have no ${this.recordStatusToFilterWith} records`;
+      return `You have no ${this.recordStatusToFilterWith} records matching the search input : ${this.searchTextToFilterWith}`;
     },
     statusClass() {
       return `--${this.record.record_status.toLowerCase()}`;
