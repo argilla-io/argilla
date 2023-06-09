@@ -18,10 +18,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Security
 from pydantic import parse_obj_as
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from argilla.server.contexts import accounts
-from argilla.server.database import get_async_db, get_db
+from argilla.server.database import get_async_db
 from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import WorkspacePolicy, WorkspaceUserPolicy, authorize
 from argilla.server.security import auth
@@ -128,7 +127,6 @@ async def create_workspace_user(
     workspace_user = await accounts.create_workspace_user(
         db, WorkspaceUserCreate(workspace_id=workspace_id, user_id=user_id)
     )
-    await user.awaitable_attrs.workspaces
 
     return User.from_orm(workspace_user.user)
 

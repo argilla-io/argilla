@@ -44,11 +44,9 @@ async def create_workspace_user(db: "AsyncSession", workspace_user_create: Works
         workspace_id=workspace_user_create.workspace_id,
         user_id=workspace_user_create.user_id,
     )
-
     db.add(workspace_user)
     await db.commit()
-    # db.refresh(workspace_user)
-
+    await db.refresh(workspace_user, attribute_names=["workspace", "user"])
     return workspace_user
 
 
@@ -74,11 +72,9 @@ async def list_workspaces(db: "AsyncSession") -> List[Workspace]:
 
 async def create_workspace(db: "AsyncSession", workspace_create: WorkspaceCreate) -> Workspace:
     workspace = Workspace(name=workspace_create.name)
-
     db.add(workspace)
     await db.commit()
     await db.refresh(workspace)
-
     return workspace
 
 
@@ -123,11 +119,9 @@ async def create_user(db: "AsyncSession", user_create: UserCreate) -> User:
         role=user_create.role,
         password_hash=hash_password(user_create.password),
     )
-
     db.add(user)
     await db.commit()
     await user.awaitable_attrs.workspaces
-
     return user
 
 
