@@ -93,7 +93,7 @@ export default {
         name: "Search",
         componentType: "searchBar",
         order: 0,
-        placeholder: "Introduce your query",
+        placeholder: "Introduce a query",
       },
       statusSelector: {
         id: "statusSelector",

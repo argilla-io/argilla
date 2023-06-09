@@ -62,7 +62,7 @@ export default {
     },
     description: {
       type: String,
-      default: "Introduce your text",
+      default: "Introduce a text",
     },
   },
   data() {
