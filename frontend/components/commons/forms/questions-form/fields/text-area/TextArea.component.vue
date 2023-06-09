@@ -1,24 +1,20 @@
 <template>
   <div class="wrapper">
-    <div class="title-area --body2">
-      <span v-text="title" v-optional-field="isRequired ? false : true" />
-
-      <BaseIconWithBadge
-        class="icon-info"
-        v-if="isIcon"
-        icon="info"
-        :id="`${title}TextArea`"
-        :show-badge="false"
-        iconColor="#acacac"
-        badge-vertical-position="top"
-        badge-horizontal-position="right"
-        badge-border-color="white"
-        v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF' }"
-      />
-    </div>
+    <QuestionHeaderComponent
+      :title="title"
+      :isRequired="isRequired"
+      :tooltipMessage="description"
+    />
 
     <div class="container" :class="isFocused ? '--focused' : null">
+      <BaseRenderMarkdownComponent
+        v-if="useMarkdown && !isFocused"
+        class="textarea--markdown"
+        :markdown="value"
+        @click.native="setFocus(true)"
+      />
       <ContentEditableFeedbackTask
+        v-else
         class="textarea"
         :annotationEnabled="true"
         :annotations="[]"
@@ -32,8 +28,6 @@
 </template>
 
 <script>
-import "assets/icons/info";
-
 export default {
   name: "TextAreaComponent",
   props: {
@@ -45,10 +39,6 @@ export default {
       type: String,
       default: () => "",
     },
-    optionId: {
-      type: String,
-      default: () => "optionId",
-    },
     placeholder: {
       type: String,
       default: () => "",
@@ -57,13 +47,13 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    isIcon: {
-      type: Boolean,
-      default: () => false,
-    },
-    tooltipMessage: {
+    description: {
       type: String,
       default: () => "",
+    },
+    useMarkdown: {
+      type: Boolean,
+      default: () => false,
     },
   },
   data: () => {
@@ -71,13 +61,14 @@ export default {
       isFocused: false,
     };
   },
+  model: {
+    prop: "value",
+    event: "on-change-value",
+  },
   methods: {
     onChangeTextArea(newText) {
       const isAnyText = newText?.length;
-      this.$emit("on-change-value", {
-        id: this.optionId,
-        text: isAnyText ? newText : "",
-      });
+      this.$emit("on-change-value", isAnyText ? newText : "");
 
       if (this.isRequired) {
         this.$emit("on-error", !isAnyText);
@@ -94,14 +85,7 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: $base-space;
-}
-.title-area {
-  display: flex;
-  align-items: center;
-  gap: $base-space;
-  color: $black-87;
-  font-weight: 500;
+  gap: 12px;
 }
 
 .container {
@@ -119,26 +103,14 @@ export default {
   }
 }
 
-.icon {
-  color: $black-37;
-}
 .textarea {
   display: flex;
   flex: 0 0 100%;
-}
-
-.icon-info {
-  display: inline-flex;
-  margin: 0;
-  padding: 0;
-  overflow: inherit;
-  &[data-title] {
-    position: relative;
-    overflow: visible;
-    &:before,
-    &:after {
-      margin-top: 0;
-    }
+  &--markdown {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: $base-space;
   }
 }
 </style>

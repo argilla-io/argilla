@@ -18,10 +18,37 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
+
+### Added
+
+- Added boolean `use_markdown` property to `TextFieldSettings` model.
+- Added boolean `use_markdown` property to `TextQuestionSettings` model.
+- Added new status `draft` for the `Response` model.
+- Added `LabelSelectionQuestionSettings` class allowing to create label selection (single-choice) questions in the API ([#3005](https://github.com/argilla-io/argilla/pull/3005))
+- Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API ([#3010](https://github.com/argilla-io/argilla/pull/3010)).
+- Added `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoint ([#3068](https://github.com/argilla-io/argilla/pull/3068)).
+- Added new components in feedback task Question form: MultiLabel ([#3064](https://github.com/argilla-io/argilla/pull/3064)) and SingleLabel ([#3016](https://github.com/argilla-io/argilla/pull/3016)).
+- Added docstrings to the `pydantic.BaseModel`s defined at `argilla/client/feedback/schemas.py` ([#3137](https://github.com/argilla-io/argilla/pull/3137))
+
+### Changed
+
+- Updated `GET /api/v1/me/datasets/:dataset_id/metrics` output payload to include the count of responses with `draft` status.
+- Added `LabelSelectionQuestionSettings` class allowing to create label selection (single-choice) questions in the API.
+- Added `MultiLabelSelectionQuestionSettings` class allowing to create multi-label selection (multi-choice) questions in the API.
+- Database setup for unit tests. Now the unit tests use a different database than the one used by the local Argilla server (Closes [#2987](https://github.com/argilla-io/argilla/issues/2987)).
+- Updated `alembic` setup to be able to autogenerate revision/migration scripts using SQLAlchemy metadata from Argilla server models ([#3044](https://github.com/argilla-io/argilla/pull/3044))
+- Improved `DatasetCard` generation on `FeedbackDataset.push_to_huggingface` when `generate_card=True`, following the official HuggingFace Hub template, but suited to `FeedbackDataset`s from Argilla ([#3110](https://github.com/argilla-io/argilla/pull/3100))
+
+### Fixed
+
+- Disallow `fields` and `questions` in `FeedbackDataset` with the same name ([#3126]).
+
+[#3126]: https://github.com/argilla-io/argilla/pull/3126
 
 ## [1.8.0](https://github.com/argilla-io/argilla/compare/v1.7.0...v1.8.0)
 
-## Added
+### Added
 
 - `/api/v1/datasets` new endpoint to list and create datasets ([#2615]).
 - `/api/v1/datasets/{dataset_id}` new endpoint to get and delete datasets ([#2615]).
@@ -46,7 +73,6 @@ These are the section headers that we use:
 - Added `ArgillaPeftTrainer` for text and token classificaiton [#2854](https://github.com/argilla-io/argilla/issues/2854)
 - Added `predict_proba()` method to `ArgillaSetFitTrainer`
 - Added `ArgillaAutoTrainTrainer` for Text Classification [#2664](https://github.com/argilla-io/argilla/issues/2664)
-
 - New `database revisions` command showing database revisions info
 
 [#2615]: https://github.com/argilla-io/argilla/issues/2615

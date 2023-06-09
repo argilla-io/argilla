@@ -15,6 +15,7 @@ class DatasetQuestion extends Model {
       is_required: this.boolean(false),
       component_type: this.string(null).nullable(),
       description: this.string(null).nullable(),
+      settings: this.attr(null),
     };
   }
 }

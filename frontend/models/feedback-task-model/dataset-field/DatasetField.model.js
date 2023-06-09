@@ -12,6 +12,7 @@ class DatasetField extends Model {
       title: this.string(""),
       is_required: this.boolean(false),
       component_type: this.string(null).nullable(),
+      settings: this.attr(null),
     };
   }
 }

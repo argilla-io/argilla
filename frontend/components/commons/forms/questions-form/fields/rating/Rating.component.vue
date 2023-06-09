@@ -1,15 +1,13 @@
 <template>
-  <MonoSelectionComponent
-    :title="title"
-    :initialOptions="initialOptions"
-    :isRequired="isRequired"
-    :colorHighlight="colorHighlight"
-    :isIcon="isIcon"
-    :tooltipMessage="tooltipMessage"
-    backgroundColor="#E0E0FF"
-    borderColor="#CDCDFF"
-    @on-change="onChangeRating"
-  />
+  <div class="wrapper">
+    <QuestionHeaderComponent
+      :title="title"
+      :isRequired="isRequired"
+      :tooltipMessage="description"
+    />
+
+    <RatingMonoSelectionComponent v-model="options" />
+  </div>
 </template>
 
 <script>
@@ -20,7 +18,7 @@ export default {
       type: String,
       required: true,
     },
-    initialOptions: {
+    options: {
       type: Array,
       required: true,
     },
@@ -28,22 +26,17 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    isIcon: {
-      type: Boolean,
-      default: () => false,
-    },
-    tooltipMessage: {
+    description: {
       type: String,
       default: () => "",
     },
-    colorHighlight: {
-      type: String,
-      default: () => "black",
-    },
+  },
+  model: {
+    prop: "options",
+    event: "on-change-rating",
   },
   methods: {
     onChangeRating(newOptions) {
-      // TODO - refactor with a v-model instead of props/emit
       this.$emit("on-change-rating", newOptions);
 
       const isAnyRatingSelected = this.isAnyRatingSelected(newOptions);
@@ -57,3 +50,11 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>

@@ -1,11 +1,15 @@
 <template>
   <div class="record">
     <StatusTag class="record__status" :title="recordStatus" />
-    <div v-for="{ id, title, field_text, component_type } in fields" :key="id">
+    <div
+      v-for="{ id, title, field_text, component_type, settings } in fields"
+      :key="id"
+    >
       <TextFieldComponent
         v-if="component_type === FIELD_COMPONENT_TYPE.TEXT_FIELD"
         :title="title"
         :fieldText="field_text"
+        :useMarkdown="settings.use_markdown"
       />
     </div>
   </div>

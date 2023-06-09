@@ -13,11 +13,9 @@
 #  limitations under the License.
 
 from enum import Enum
-from typing import Any, List, Union
+from typing import Any, Generic, List, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field, parse_obj_as
-from sqlalchemy import JSON, ForeignKey, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from pydantic import BaseModel, Field
 
 try:
     from typing import Annotated, Literal
@@ -28,6 +26,8 @@ except ImportError:
 class QuestionType(str, Enum):
     text = "text"
     rating = "rating"
+    label_selection = "label_selection"
+    multi_label_selection = "multi_label_selection"
 
 
 class ResponseValue(BaseModel):
@@ -52,12 +52,12 @@ class RatingQuestionSettingsOption(BaseModel):
     value: int
 
 
-class RatingQuestionSettings(BaseQuestionSettings):
-    type: Literal[QuestionType.rating]
-    options: List[RatingQuestionSettingsOption]
+T = TypeVar("T")
 
+
+class ValidOptionCheckerMixin(BaseQuestionSettings, Generic[T]):
     @property
-    def option_values(self) -> List[int]:
+    def option_values(self) -> List[T]:
         return [option.value for option in self.options]
 
     def check_response(self, response: ResponseValue):
@@ -65,4 +65,42 @@ class RatingQuestionSettings(BaseQuestionSettings):
             raise ValueError(f"{response.value!r} is not a valid option.\nValid options are: {self.option_values!r}")
 
 
-QuestionSettings = Annotated[Union[TextQuestionSettings, RatingQuestionSettings], Field(..., discriminator="type")]
+class RatingQuestionSettings(ValidOptionCheckerMixin[int]):
+    type: Literal[QuestionType.rating]
+    options: List[RatingQuestionSettingsOption]
+
+
+class LabelSelectionQuestionSettingsOption(BaseModel):
+    value: str
+    text: str
+    description: Optional[str] = None
+
+
+class LabelSelectionQuestionSettings(ValidOptionCheckerMixin[str]):
+    type: Literal[QuestionType.label_selection]
+    options: List[LabelSelectionQuestionSettingsOption]
+    visible_options: Optional[int] = None
+
+
+class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
+    type: Literal[QuestionType.multi_label_selection]
+
+    def check_response(self, response: ResponseValue):
+        if not isinstance(response.value, list):
+            raise ValueError(f"Expected list of values, found {type(response.value)}")
+        if len(response.value) == 0:
+            raise ValueError("Expected list of values, found empty list")
+        invalid_options = sorted(list(set(response.value) - set(self.option_values)))
+        if invalid_options:
+            raise ValueError(f"{invalid_options!r} are not valid options.\nValid options are: {self.option_values!r}")
+
+
+QuestionSettings = Annotated[
+    Union[
+        TextQuestionSettings,
+        RatingQuestionSettings,
+        LabelSelectionQuestionSettings,
+        MultiLabelSelectionQuestionSettings,
+    ],
+    Field(..., discriminator="type"),
+]

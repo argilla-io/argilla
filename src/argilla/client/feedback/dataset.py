@@ -14,9 +14,7 @@
 
 import logging
 import tempfile
-import warnings
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
-from uuid import UUID
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 try:
     from typing import Literal
@@ -24,19 +22,34 @@ except ImportError:
     from typing_extensions import Literal
 
 from pydantic import (
-    BaseModel,
-    Extra,
-    Field,
-    StrictInt,
-    StrictStr,
     ValidationError,
-    create_model,
     parse_obj_as,
-    validator,
 )
 from tqdm import tqdm
 
 import argilla as rg
+from argilla.client.feedback.card import ArgillaDatasetCard, size_categories_parser
+from argilla.client.feedback.constants import (
+    FETCHING_BATCH_SIZE,
+    FIELD_TYPE_TO_PYTHON_TYPE,
+    PUSHING_BATCH_SIZE,
+)
+from argilla.client.feedback.schemas import (
+    AllowedFieldTypes,
+    AllowedQuestionTypes,
+    FeedbackDatasetConfig,
+    FeedbackRecord,
+    FieldSchema,
+    LabelQuestion,
+    MultiLabelQuestion,
+    RatingQuestion,
+    TextField,
+    TextQuestion,
+)
+from argilla.client.feedback.utils import (
+    feedback_dataset_in_argilla,
+    generate_pydantic_schema,
+)
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.utils.dependency import requires_version
 
@@ -50,110 +63,7 @@ if TYPE_CHECKING:
         FeedbackQuestionModel,
     )
 
-FETCHING_BATCH_SIZE = 250
-PUSHING_BATCH_SIZE = 32
-
 _LOGGER = logging.getLogger(__name__)
-
-
-class ValueSchema(BaseModel):
-    value: Union[StrictStr, StrictInt]
-
-
-class ResponseSchema(BaseModel):
-    user_id: Optional[UUID] = None
-    values: Dict[str, ValueSchema]
-    status: Literal["submitted", "discarded"] = "submitted"
-
-    @validator("user_id", always=True)
-    def user_id_must_have_value(cls, v):
-        if not v:
-            warnings.warn(
-                "`user_id` not provided, so it will be set to `None`. Which is not an"
-                " issue, unless you're planning to log the response in Argilla, as "
-                " it will be automatically set to the active `user_id`.",
-                stacklevel=2,
-            )
-        return v
-
-
-class FeedbackRecord(BaseModel):
-    fields: Dict[str, str]
-    responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
-    external_id: Optional[str] = None
-
-    @validator("responses", always=True)
-    def responses_must_be_a_list(cls, v):
-        if not v:
-            return []
-        if isinstance(v, ResponseSchema):
-            return [v]
-        return v
-
-    class Config:
-        extra = Extra.ignore
-
-
-class FieldSchema(BaseModel):
-    name: str
-    title: Optional[str] = None
-    required: Optional[bool] = True
-    settings: Dict[str, Any]
-
-    @validator("title", always=True)
-    def title_must_have_value(cls, v, values):
-        if not v:
-            return values["name"].capitalize()
-        return v
-
-
-class TextField(FieldSchema):
-    settings: Dict[str, Any] = Field({"type": "text"}, const=True)
-
-
-FIELD_TYPE_TO_PYTHON_TYPE = {"text": str}
-
-
-class QuestionSchema(BaseModel):
-    name: str
-    title: Optional[str] = None
-    description: Optional[str] = None
-    required: Optional[bool] = True
-    settings: Dict[str, Any]
-
-    @validator("title", always=True)
-    def title_must_have_value(cls, v, values):
-        if not v:
-            return values["name"].capitalize()
-        return v
-
-
-# TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
-class TextQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({"type": "text"}, const=True)
-
-
-class RatingQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field({"type": "rating"})
-    values: List[int] = Field(unique_items=True)
-
-    @validator("values", always=True)
-    def update_settings_with_values(cls, v, values):
-        if v:
-            values["settings"]["options"] = [{"value": value} for value in v]
-        return v
-
-    class Config:
-        validate_assignment = True
-
-
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion]
-
-
-class FeedbackDatasetConfig(BaseModel):
-    fields: List[FieldSchema]
-    questions: List[AllowedQuestionTypes]
-    guidelines: Optional[str] = None
 
 
 class FeedbackDataset:
@@ -175,7 +85,8 @@ class FeedbackDataset:
         TypeError: if `guidelines` is not a string.
         TypeError: if `fields` is not a list of `FieldSchema`.
         ValueError: if `fields` does not contain at least one required field.
-        TypeError: if `questions` is not a list of `TextQuestion` and/or `RatingQuestion`.
+        TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
+            `LabelQuestion`, and/or `MultiLabelQuestion`.
         ValueError: if `questions` does not contain at least one required question.
 
     Examples:
@@ -198,17 +109,21 @@ class FeedbackDataset:
         ...             required=True,
         ...             values=[1, 2, 3, 4, 5],
         ...         ),
+        ...         rg.LabelQuestion(
+        ...             name="question-3",
+        ...             description="This is the third question",
+        ...             required=True,
+        ...             labels=["positive", "negative"],
+        ...         ),
+        ...         rg.MultiLabelQuestion(
+        ...             name="question-4",
+        ...             description="This is the fourth question",
+        ...             required=True,
+        ...             labels=["category-1", "category-2", "category-3"],
+        ...         ),
         ...     ],
         ...     guidelines="These are the annotation guidelines.",
         ... )
-        >>> dataset.guidelines
-        "These are the annotation guidelines."
-        >>> dataset.fields
-        [TextField(name="text", title="Text", required=True, settings={"type": "text"}), TextField(name="label", title="Label", required=True, settings={"type": "text"})]
-        >>> dataset.questions
-        [TextQuestion(name="question-1", title="Question 1", description="This is the first question", required=True, settings={"type": "text"}), RatingQuestion(name="question-2", title="Question 2", description="This is the second question", required=True, settings={"type": "rating"}, values=[1, 2, 3, 4, 5])]
-        >>> dataset.records
-        []
         >>> dataset.add_records(
         ...     [
         ...         rg.FeedbackRecord(
@@ -219,13 +134,13 @@ class FeedbackDataset:
         ...     ]
         ... )
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5), "question-3": ValueSchema(value="positive"), "question-4": ValueSchema(value=["category-1"])})], external_id="entry-1")]
         >>> dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
         >>> dataset.argilla_id
         "..."
         >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
         >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
+        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5), "question-3": ValueSchema(value="positive"), "question-4": ValueSchema(value=["category-1"])})], external_id="entry-1")]
     """
 
     argilla_id: Optional[str] = None
@@ -233,7 +148,7 @@ class FeedbackDataset:
     def __init__(
         self,
         *,
-        fields: List[FieldSchema],
+        fields: List[AllowedFieldTypes],
         questions: List[AllowedQuestionTypes],
         guidelines: Optional[str] = None,
     ) -> None:
@@ -247,7 +162,8 @@ class FeedbackDataset:
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
             ValueError: if `fields` does not contain at least one required field.
-            TypeError: if `questions` is not a list of `TextQuestion` and/or `RatingQuestion`.
+            TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
+                `LabelQuestion`, and/or `MultiLabelQuestion`.
             ValueError: if `questions` does not contain at least one required question.
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
@@ -272,6 +188,18 @@ class FeedbackDataset:
             ...             required=True,
             ...             values=[1, 2, 3, 4, 5],
             ...         ),
+            ...         rg.LabelQuestion(
+            ...             name="question-3",
+            ...             description="This is the third question",
+            ...             required=True,
+            ...             labels=["positive", "negative"],
+            ...         ),
+            ...         rg.MultiLabelQuestion(
+            ...             name="question-4",
+            ...             description="This is the fourth question",
+            ...             required=True,
+            ...             labels=["category-1", "category-2", "category-3"],
+            ...         ),
             ...     ],
             ...     guidelines="These are the annotation guidelines.",
             ... )
@@ -279,9 +207,13 @@ class FeedbackDataset:
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
         any_required = False
+        unique_names = set()
         for field in fields:
             if not isinstance(field, FieldSchema):
                 raise TypeError(f"Expected `fields` to be a list of `FieldSchema`, got {type(field)} instead.")
+            if field.name in unique_names:
+                raise ValueError(f"Expected `fields` to have unique names, got {field.name} twice instead.")
+            unique_names.add(field.name)
             if not any_required and field.required:
                 any_required = True
         if not any_required:
@@ -292,12 +224,17 @@ class FeedbackDataset:
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
         any_required = False
+        unique_names = set()
         for question in questions:
-            if not isinstance(question, (TextQuestion, RatingQuestion)):
+            if not isinstance(question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion)):
                 raise TypeError(
-                    "Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`, got a"
+                    "Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`,"
+                    " `LabelQuestion`, and/or `MultiLabelQuestion` got a"
                     f" question in the list with type {type(question)} instead."
                 )
+            if question.name in unique_names:
+                raise ValueError(f"Expected `questions` to have unique names, got {question.name} twice instead.")
+            unique_names.add(question.name)
             if not any_required and question.required:
                 any_required = True
         if not any_required:
@@ -399,7 +336,7 @@ class FeedbackDataset:
 
         # TODO(alvarobartt): create `ArgillaMixIn` and `HuggingFaceMixIn` classes to inherit their specific methods
         if self.argilla_id:
-            httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+            httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
             first_batch = datasets_api_v1.get_records(
                 client=httpx_client, id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE
             ).parsed
@@ -463,22 +400,32 @@ class FeedbackDataset:
             ...             required=True,
             ...             values=[1, 2, 3, 4, 5],
             ...         ),
+            ...         rg.LabelQuestion(
+            ...             name="question-3",
+            ...             description="This is the third question",
+            ...             required=True,
+            ...             labels=["positive", "negative"],
+            ...         ),
+            ...         rg.MultiLabelQuestion(
+            ...             name="question-4",
+            ...             description="This is the fourth question",
+            ...             required=True,
+            ...             labels=["category-1", "category-2", "category-3"],
+            ...         ),
             ...     ],
             ...     guidelines="These are the annotation guidelines.",
             ... )
-            >>> dataset.records
-            []
             >>> dataset.add_records(
             ...     [
             ...         rg.FeedbackRecord(
             ...             fields={"text": "This is the first record", "label": "positive"},
-            ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
+            ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}, "question-3": {"value": "positive"}, "question-4": {"value": ["category-1"]}}}],
             ...             external_id="entry-1",
             ...         ),
             ...     ]
             ... )
             >>> dataset.records
-            [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5)})])]
+            [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5), "question-3": ValueSchema(value="positive"), "question-4": ValueSchema(value=["category-1"])})], external_id="entry-1")]
         """
         if isinstance(records, list):
             if len(records) == 0:
@@ -540,7 +487,7 @@ class FeedbackDataset:
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
         """
-        httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
         if not name or (not name and not workspace):
             if self.argilla_id is None:
@@ -621,7 +568,11 @@ class FeedbackDataset:
 
             for question in self.questions:
                 try:
-                    datasets_api_v1.add_question(client=httpx_client, id=argilla_id, question=question.dict())
+                    datasets_api_v1.add_question(
+                        client=httpx_client,
+                        id=argilla_id,
+                        question=question.dict(include={"name", "title", "description", "required", "settings"}),
+                    )
                 except Exception as e:
                     delete_and_raise_exception(
                         dataset_id=argilla_id,
@@ -705,7 +656,7 @@ class FeedbackDataset:
             >>> rg.init(...)
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my_dataset")
         """
-        httpx_client: "httpx.Client" = rg.active_client()._client.httpx
+        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
         dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if not dataset_exists:
@@ -737,10 +688,15 @@ class FeedbackDataset:
                 question = RatingQuestion.construct(**question.dict())
             elif question.settings["type"] == "text":
                 question = TextQuestion.construct(**question.dict())
+            elif question.settings["type"] == "label_selection":
+                question = LabelQuestion.construct(**question.dict())
+            elif question.settings["type"] == "multi_label_selection":
+                question = MultiLabelQuestion.construct(**question.dict())
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    " version, supported question types are: `RatingQuestion` and `TextQuestion`."
+                    " version, supported question types are: `RatingQuestion`, `TextQuestion`,"
+                    " `LabelQuestion`, and/or `MultiLabelQuestion`."
                 )
             questions.append(question)
         self = cls(
@@ -787,11 +743,23 @@ class FeedbackDataset:
                 if field.name not in dataset:
                     dataset[field.name] = []
             for question in self.questions:
+                if question.settings["type"] in ["text", "label_selection"]:
+                    value = Value(dtype="string")
+                elif question.settings["type"] == "rating":
+                    value = Value(dtype="int32")
+                elif question.settings["type"] == "multi_label_selection":
+                    value = Sequence(Value(dtype="string"))
+                else:
+                    raise ValueError(
+                        f"Question {question.name} has an unsupported type: {question.settings['type']}, for the"
+                        " moment only the following types are supported: 'text', 'rating', 'label_selection', and"
+                        " 'multi_label_selection'"
+                    )
                 # TODO(alvarobartt): if we constraint ranges from 0 to N, then we can use `ClassLabel` for ratings
                 features[question.name] = Sequence(
                     {
                         "user_id": Value(dtype="string"),
-                        "value": Value(dtype="string" if question.settings["type"] == "text" else "int32"),
+                        "value": value,
                         "status": Value(dtype="string"),
                     },
                     id="question",
@@ -838,7 +806,7 @@ class FeedbackDataset:
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
         import huggingface_hub
-        from huggingface_hub import DatasetCard, HfApi
+        from huggingface_hub import DatasetCardData, HfApi
         from packaging.version import parse as parse_version
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
@@ -872,37 +840,17 @@ class FeedbackDataset:
             )
 
         if generate_card:
-            explained_fields = "## Fields\n\n" + "".join(
-                [
-                    f"* `{field.name}` is of type {FIELD_TYPE_TO_PYTHON_TYPE[field.settings['type']]}\n"
-                    for field in self.fields
-                ]
-            )
-            explained_questions = "## Questions\n\n" + "".join(
-                [
-                    f"* `{question.name}` {': ' + question.description if question.description else None}\n"
-                    for question in self.questions
-                ]
-            )
-            loading_guide = (
-                "## Load with Argilla\n\nTo load this dataset with Argilla, you'll just need to "
-                "install Argilla as `pip install argilla --upgrade` and then use the following code:\n\n"
-                "```python\n"
-                "import argilla as rg\n\n"
-                f"ds = rg.FeedbackDataset.from_huggingface({repo_id!r})\n"
-                "```\n\n"
-                "## Load with Datasets\n\nTo load this dataset with Datasets, you'll just need to "
-                "install Datasets as `pip install datasets --upgrade` and then use the following code:\n\n"
-                "```python\n"
-                "from datasets import load_dataset\n\n"
-                f"ds = load_dataset({repo_id!r})\n"
-                "```"
-            )
-            card = DatasetCard(
-                f"## Guidelines\n\n{self.guidelines}\n\n"
-                f"{explained_fields}\n\n"
-                f"{explained_questions}\n\n"
-                f"{loading_guide}\n\n"
+            card = ArgillaDatasetCard.from_template(
+                card_data=DatasetCardData(
+                    size_categories=size_categories_parser(len(self.records)),
+                    tags=["rlfh", "argilla", "human-feedback"],
+                ),
+                repo_id=repo_id,
+                argilla_fields=self.fields,
+                argilla_questions=self.questions,
+                argilla_guidelines=self.guidelines,
+                argilla_record=self.records[0].dict(),
+                huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
@@ -994,161 +942,3 @@ class FeedbackDataset:
             )
         del hfds
         return cls
-
-
-def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "FieldsSchema") -> BaseModel:
-    """Generates a `pydantic.BaseModel` schema from a list of `FieldSchema` objects to validate
-    the fields of a `FeedbackDataset` object before inserting them.
-
-    Args:
-        fields: the list of `FieldSchema` objects to generate the schema from.
-        name: the name of the `pydantic.BaseModel` schema to generate. Defaults to "FieldsSchema".
-
-    Returns:
-        A `pydantic.BaseModel` schema to validate the fields of a `FeedbackDataset` object before
-        inserting them.
-
-    Raises:
-        ValueError: if one of the fields has an unsupported type.
-
-    Examples:
-        >>> from argilla.client.feedback import TextField, generate_pydantic_schema
-        >>> fields = [
-        ...     TextField(name="text", required=True),
-        ...     TextField(name="label", required=True),
-        ... ]
-        >>> FieldsSchema = generate_pydantic_schema(fields)
-        >>> FieldsSchema(text="Hello", label="World")
-        FieldsSchema(text='Hello', label='World')
-    """
-    fields_schema = {}
-    for field in fields:
-        if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
-            raise ValueError(
-                f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment only the"
-                f" following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
-            )
-        fields_schema.update(
-            {field.name: (FIELD_TYPE_TO_PYTHON_TYPE[field.settings["type"]], ... if field.required else None)}
-        )
-    return create_model(name, **fields_schema)
-
-
-def create_feedback_dataset(
-    name: str,
-    fields: List[FieldSchema],
-    questions: List[QuestionSchema],
-    workspace: Union[str, rg.Workspace] = None,
-    guidelines: Optional[str] = None,
-) -> FeedbackDataset:
-    """Creates a `FeedbackDataset` object and pushes it to Argilla.
-
-    Args:
-        name: the name of dataset in Argilla (must be unique per workspace).
-        fields: the list of `FieldSchema` objects to define the schema of the records pushed to Argilla.
-        questions: the list of `QuestionSchema` objects to define the questions to ask to the annotator.
-        workspace: the name of the workspace in Argilla where to push the dataset. Defaults to the default workspace.
-        guidelines: the annotation guidelines to help the annotator understand the dataset to annotate and how to annotate it.
-            Defaults to `None`.
-
-    Returns:
-        The `FeedbackDataset` object created and pushed to Argilla.
-
-    Raises:
-        ValueError: if one of the fields has an unsupported type.
-        Exception: if the dataset could not be pushed to Argilla.
-
-    Examples:
-        >>> import argilla as rg
-        >>> rg.init(api_url="...", api_key="...")
-        >>> fds = rg.create_feedback_dataset(
-        ...     name="my-dataset",
-        ...     fields=[
-        ...         rg.TextField(name="text", required=True),
-        ...         rg.TextField(name="label", required=True),
-        ...     ],
-        ...     questions=[
-        ...         rg.TextQuestion(
-        ...             name="question-1",
-        ...             description="This is the first question",
-        ...             required=True,
-        ...         ),
-        ...         rg.RatingQuestion(
-        ...             name="question-2",
-        ...             description="This is the second question",
-        ...             required=True,
-        ...             values=[1, 2, 3, 4, 5],
-        ...         ),
-        ...     ],
-        ...     guidelines="These are the annotation guidelines.",
-        ... )
-    """
-    fds = FeedbackDataset(
-        fields=fields,
-        questions=questions,
-        guidelines=guidelines,
-    )
-    fds.push_to_argilla(name=name, workspace=workspace)
-    return fds
-
-
-def feedback_dataset_in_argilla(
-    name: Optional[str] = None,
-    *,
-    workspace: Optional[Union[str, rg.Workspace]] = None,
-    id: Optional[str] = None,
-) -> Tuple[bool, Optional[FeedbackDataset]]:
-    """Checks whether a `FeedbackDataset` exists in Argilla or not, based on the `name`, `id`, or the combination of
-    `name` and `workspace`.
-
-    Args:
-        name: the name of the `FeedbackDataset` in Argilla.
-        workspace: the name of the workspace in Argilla where the `FeedbackDataset` is located.
-        id: the Argilla ID of the `FeedbackDataset`.
-
-    Returns:
-        A tuple with a boolean indicating whether the `FeedbackDataset` exists in Argilla or not, and the `FeedbackDataset`
-        object if it exists, `None` otherwise.
-
-    Raises:
-        ValueError: if the `workspace` is not a `rg.Workspace` instance or a string.
-        Exception: if the `FeedbackDataset` could not be listed from Argilla.
-
-    Examples:
-        >>> import argilla as rg
-        >>> rg.init(api_url="...", api_key="...")
-        >>> from argilla.client.feedback import feedback_dataset_in_argilla
-        >>> fds_exists, fds_cls = feedback_dataset_in_argilla(name="my-dataset")
-    """
-    assert name or (name and workspace) or id, (
-        "You must provide either the `name` and `workspace` (the latter just if"
-        " applicable, if not the default `workspace` will be used) or the `id`, which"
-        " is the Argilla ID of the `rg.FeedbackDataset`."
-    )
-
-    httpx_client: "httpx.Client" = rg.active_client()._client.httpx
-
-    if name or (name and workspace):
-        if workspace is None:
-            workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
-
-        if isinstance(workspace, str):
-            workspace = rg.Workspace.from_name(workspace)
-
-        if not isinstance(workspace, rg.Workspace):
-            raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
-
-        try:
-            datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
-        except Exception as e:
-            raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
-
-        for dataset in datasets:
-            if dataset.name == name and dataset.workspace_id == workspace.id:
-                return (True, dataset)
-        return (False, None)
-    else:
-        try:
-            return (True, datasets_api_v1.get_dataset(client=httpx_client, id=id).parsed)
-        except:
-            return (False, None)

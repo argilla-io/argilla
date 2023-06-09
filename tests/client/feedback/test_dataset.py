@@ -18,13 +18,12 @@ from typing import TYPE_CHECKING, List
 import datasets
 import pytest
 from argilla.client import api
-from pydantic import ValidationError
 
 if TYPE_CHECKING:
-    from argilla.client.feedback import FieldSchema, QuestionSchema
+    from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
 
-from argilla.client.feedback import (
-    FeedbackDataset,
+from argilla.client.feedback.dataset import FeedbackDataset
+from argilla.client.feedback.schemas import (
     FeedbackDatasetConfig,
     FeedbackRecord,
     RatingQuestion,
@@ -84,6 +83,15 @@ def test_init_wrong_fields(feedback_dataset_guidelines: str, feedback_dataset_qu
             fields=[TextField(name="test", required=False)],
             questions=feedback_dataset_questions,
         )
+    with pytest.raises(ValueError, match="Expected `fields` to have unique names"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=[
+                TextField(name="test", required=True),
+                TextField(name="test", required=True),
+            ],
+            questions=feedback_dataset_questions,
+        )
 
 
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields")
@@ -94,7 +102,10 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
             fields=feedback_dataset_fields,
             questions=None,
         )
-    with pytest.raises(TypeError, match="Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`"):
+    with pytest.raises(
+        TypeError,
+        match="Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`, `LabelQuestion`, and/or `MultiLabelQuestion`",
+    ):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
@@ -105,16 +116,17 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[
-                TextQuestion(name="test", required=False),
-                RatingQuestion(name="test", values=[0, 1], required=False),
+                TextQuestion(name="question-1", required=False),
+                RatingQuestion(name="question-2", values=[0, 1], required=False),
             ],
         )
-    with pytest.raises(ValidationError, match="1 validation error for RatingQuestion"):
+    with pytest.raises(ValueError, match="Expected `questions` to have unique names"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[
-                RatingQuestion(name="test", values=[0, 0], required=True),
+                TextQuestion(name="question-1", required=True),
+                TextQuestion(name="question-1", required=True),
             ],
         )
 
@@ -122,8 +134,8 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions")
 def test_records(
     feedback_dataset_guidelines: str,
-    feedback_dataset_fields: List["FieldSchema"],
-    feedback_dataset_questions: List["QuestionSchema"],
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
 ) -> None:
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -162,6 +174,8 @@ def test_records(
                     "values": {
                         "question-1": {"value": "answer"},
                         "question-2": {"value": 0},
+                        "question-3": {"value": "a"},
+                        "question-4": {"value": ["a", "b"]},
                     },
                     "status": "submitted",
                 },
@@ -180,6 +194,8 @@ def test_records(
         "values": {
             "question-1": {"value": "answer"},
             "question-2": {"value": 0},
+            "question-3": {"value": "a"},
+            "question-4": {"value": ["a", "b"]},
         },
         "status": "submitted",
     }
@@ -253,8 +269,8 @@ def test_format_as(
 def test_push_to_argilla_and_from_argilla(
     mocked_client,
     feedback_dataset_guidelines: str,
-    feedback_dataset_fields: List["FieldSchema"],
-    feedback_dataset_questions: List["QuestionSchema"],
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
     api.active_api()
@@ -282,6 +298,8 @@ def test_push_to_argilla_and_from_argilla(
                         "values": {
                             "question-1": {"value": "answer"},
                             "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
                         },
                         "status": "submitted",
                     },
@@ -289,6 +307,8 @@ def test_push_to_argilla_and_from_argilla(
                         "values": {
                             "question-1": {"value": "answer"},
                             "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
                         },
                         "status": "submitted",
                     },
@@ -323,8 +343,8 @@ def test_push_to_huggingface_and_from_huggingface(
     mocked_client,
     monkeypatch,
     feedback_dataset_guidelines: str,
-    feedback_dataset_fields: List["FieldSchema"],
-    feedback_dataset_questions: List["QuestionSchema"],
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
     api.active_api()
@@ -360,3 +380,6 @@ def test_push_to_huggingface_and_from_huggingface(
     assert isinstance(dataset_from_huggingface, FeedbackDataset)
     assert dataset_from_huggingface.guidelines == dataset.guidelines
     assert len(dataset_from_huggingface.fields) == len(dataset.fields)
+    assert all(original_field in dataset_from_huggingface.fields for original_field in dataset.fields)
+    assert len(dataset_from_huggingface.questions) == len(dataset.questions)
+    assert all(original_question in dataset_from_huggingface.questions for original_question in dataset.questions)
