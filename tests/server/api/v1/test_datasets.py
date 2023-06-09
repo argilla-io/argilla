@@ -30,7 +30,6 @@ from argilla.server.models import (
     Response,
     ResponseStatus,
     User,
-    Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
     DATASET_CREATE_GUIDELINES_MAX_LENGTH,
@@ -58,7 +57,6 @@ from argilla.server.search_engine import (
 )
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
-from sqlalchemy.orm import selectinload
 
 from tests.factories import (
     AnnotatorFactory,
