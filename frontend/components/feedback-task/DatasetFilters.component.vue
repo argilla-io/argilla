@@ -2,18 +2,18 @@
   <div class="filters">
     <span
       class="filters__component"
-      v-for="filterObj in sortedFiltersValue"
-      :key="filterObj.id"
+      v-for="{ id, componentType, placeholder, options } in sortedFiltersValue"
+      :key="id"
     >
       <SearchBarBase
-        v-if="filterObj.componentType === 'searchBar'"
-        :placeholder="filterObj.placeholder"
+        v-if="componentType === 'searchBar'"
+        :placeholder="placeholder"
         v-model="searchInput"
       />
 
       <StatusFilter
-        v-if="filterObj.componentType === 'statusSelector'"
-        :options="filterObj.options"
+        v-if="componentType === 'statusSelector'"
+        :options="options"
         v-model="selectedStatus"
       />
     </span>
