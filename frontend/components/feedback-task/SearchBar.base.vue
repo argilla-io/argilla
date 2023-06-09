@@ -18,7 +18,7 @@
 <template>
   <div
     class="search-area"
-    :class="{ active: value?.length }"
+    :class="{ active: isSearchActive }"
     @click="focusInSearch"
   >
     <BaseIconWithBadge
@@ -65,7 +65,15 @@ export default {
       default: "Introduce your text",
     },
   },
+  data() {
+    return {
+      searchValue: "",
+    };
+  },
   computed: {
+    isSearchActive() {
+      return this.value?.length;
+    },
     iconType() {
       return this.searchValue?.length ? "close" : "search";
     },
