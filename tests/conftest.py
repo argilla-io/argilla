@@ -73,14 +73,14 @@ async def connection() -> AsyncGenerator["AsyncConnection", None]:
 
 @pytest_asyncio.fixture(autouse=True)
 async def db(connection: "AsyncConnection") -> AsyncGenerator["AsyncSession", None]:
-    nested_transaction = await connection.begin_nested()
+    await connection.begin_nested()
     session = TestSession()
 
     yield session
 
     await session.close()
     await TestSession.remove()
-    await nested_transaction.rollback()
+    await connection.rollback()
 
 
 @pytest.fixture(scope="function")
