@@ -1,4 +1,3 @@
-:::{eval-rst}
 .. include:: getting_started/argilla.md
    :parser: myst_parser.sphinx_
 
@@ -15,8 +14,8 @@
 
 
 .. toctree::
-   :maxdepth: 3
    :caption: LLMs
+   :maxdepth: 3
    :hidden:
 
    guides/llms/conceptual_guides/conceptual_guides
@@ -24,8 +23,8 @@
    guides/llms/examples/examples
 
 .. toctree::
-   :maxdepth: 3
    :caption: Guides
+   :maxdepth: 3
    :hidden:
 
    guides/log_load_and_prepare_data
@@ -42,8 +41,8 @@
 
 
 .. toctree::
-   :maxdepth: 4
    :caption: Tutorials
+   :maxdepth: 3
    :hidden:
 
    tutorials/tutorials
@@ -53,8 +52,8 @@
    tutorials/techniques/techniques.md
 
 .. toctree::
-   :maxdepth: 4
    :caption: Reference
+   :maxdepth: 3
    :glob:
    :hidden:
 
@@ -66,8 +65,8 @@
    reference/terminology
 
 .. toctree::
-   :maxdepth: 2
    :caption: Community
+   :maxdepth: 3
    :hidden:
 
    Slack <https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>
@@ -77,4 +76,3 @@
    community/contributing
    community/migration-rubrix.md
 
-:::

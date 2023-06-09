@@ -10,6 +10,7 @@ Vue.directive("optional-field", {
       const textWrapper = document.createElement("span");
       textWrapper.style.fontSize = "0.8em";
       textWrapper.style.color = "rgba(0, 0, 0, 0.87)";
+      textWrapper.style.fontWeight = "400";
 
       textWrapper.appendChild(text);
       element.appendChild(textWrapper);

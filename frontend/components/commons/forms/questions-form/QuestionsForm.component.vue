@@ -7,7 +7,7 @@
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
-        <p class="questions-form__title --body1 --medium">
+        <p class="questions-form__title --heading5 --medium">
           Submit your feedback
         </p>
         <p class="questions-form__guidelines-link">
@@ -30,7 +30,7 @@
           v-model="input.options[0].value"
           :useMarkdown="input.settings.use_markdown"
           :isRequired="input.is_required"
-          :tooltipMessage="input.description"
+          :description="input.description"
           @on-error="onError"
         />
 
@@ -40,7 +40,7 @@
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
-          :tooltipMessage="input.description"
+          :description="input.description"
           :visibleOptions="input.settings.visible_options"
         />
 
@@ -50,7 +50,7 @@
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
-          :tooltipMessage="input.description"
+          :description="input.description"
           :visibleOptions="input.settings.visible_options"
         />
 
@@ -59,7 +59,7 @@
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
-          :tooltipMessage="input.description"
+          :description="input.description"
           @on-error="onError"
         />
       </div>
@@ -119,7 +119,6 @@ import {
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
-import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
 
 export default {
   name: "QuestionsFormComponent",
@@ -165,13 +164,15 @@ export default {
       return isEqual(this.initialInputs, this.inputs);
     },
     isSomeRequiredQuestionHaveNoAnswer() {
-      return this.inputs.some(
-        (input) =>
-          input.is_required &&
-          input.options.every(
-            (option) => !option.is_selected || option.value.length === 0
-          )
-      );
+      return this.inputs
+        .filter((input) => input.is_required)
+        .some((input) => {
+          if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
+            return input.options[0].value.length === 0;
+          } else {
+            return input.options.every((option) => !option.is_selected);
+          }
+        });
     },
     isRecordDiscarded() {
       return this.recordStatus === RECORD_STATUS.DISCARDED;
@@ -215,12 +216,9 @@ export default {
       this.emitIsQuestionsFormUntouched(isFormUntouched);
     },
   },
-  async created() {
+  created() {
     this.COMPONENT_TYPE = COMPONENT_TYPE;
     this.onReset();
-
-    // NOTE - Update dataset Metrics orm
-    await this.refreshMetrics();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
@@ -290,8 +288,6 @@ export default {
           values: responseValues,
         });
 
-        await this.refreshMetrics();
-
         await updateRecordStatusByRecordId(
           this.recordId,
           RECORD_STATUS.DISCARDED
@@ -318,8 +314,6 @@ export default {
           status: RESPONSE_STATUS_FOR_API.SUBMITTED,
           values: responseValues,
         });
-
-        await this.refreshMetrics();
 
         await updateRecordStatusByRecordId(
           this.recordId,
@@ -351,8 +345,7 @@ export default {
           RECORD_STATUS.PENDING
         );
 
-        // NOTE - Update dataset Metrics orm
-        await this.refreshMetrics();
+        this.$emit("on-clear-responses");
         this.onReset();
       } catch (err) {
         console.log(err);
@@ -370,42 +363,8 @@ export default {
         this.isError = false;
       }
     },
-    async refreshMetrics() {
-      const datasetMetrics = await this.fetchMetrics();
-
-      const formattedMetrics = this.factoryDatasetMetricsForOrm(datasetMetrics);
-
-      await upsertDatasetMetrics(formattedMetrics);
-    },
     async deleteResponsesByResponseId(responseId) {
       return await this.$axios.delete(`/v1/responses/${responseId}`);
-    },
-    async fetchMetrics() {
-      try {
-        const { data } = await this.$axios.get(
-          `/v1/me/datasets/${this.datasetId}/metrics`
-        );
-
-        return data;
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    factoryDatasetMetricsForOrm({ records, responses, user_id }) {
-      const {
-        count: responsesCount,
-        submitted: responsesSubmitted,
-        discarded: responsesDiscarded,
-      } = responses;
-
-      return {
-        dataset_id: this.datasetId,
-        user_id: user_id ?? this.userId,
-        total_record: records?.count ?? 0,
-        responses_count: responsesCount,
-        responses_submitted: responsesSubmitted,
-        responses_discarded: responsesDiscarded,
-      };
     },
     async updateResponsesInOrm(responsesFromApi) {
       const newResponseToUpsertInOrm =
@@ -428,6 +387,7 @@ export default {
     formatResponsesApiForOrm(responsesFromApi) {
       const formattedRecordResponsesForOrm = [];
       if (responsesFromApi.values) {
+        // TODO - simplify if/else by one loop
         if (Object.keys(responsesFromApi.values).length === 0) {
           // IF responses.value  is an empty object, init formatted responses with questions data
           this.inputs.forEach(
@@ -448,7 +408,7 @@ export default {
           // 1/ push formatted object corresponding to recordResponse which have been remove from api
           this.currentInputsWithNoResponses.forEach((input) => {
             formattedRecordResponsesForOrm.push({
-              id: input.response_id,
+              id: responsesFromApi.id,
               question_name: input.name,
               options: input.options,
               record_id: this.recordId,
@@ -613,7 +573,7 @@ export default {
   }
   &__guidelines-link {
     margin: 0;
-    @include font-size(13px);
+    @include font-size(14px);
     color: $black-37;
     a {
       color: $black-37;
@@ -627,7 +587,7 @@ export default {
   &__content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: $base-space * 4;
     padding: $base-space * 3;
     overflow: auto;
   }

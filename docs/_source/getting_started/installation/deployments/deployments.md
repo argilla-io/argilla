@@ -52,7 +52,6 @@
 ````
 
 ```{toctree}
-:maxdepth: 2
 :hidden:
 
 docker.md

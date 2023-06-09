@@ -1,21 +1,10 @@
 <template>
   <div class="wrapper">
-    <div class="title-area --body1">
-      <span v-text="title" v-optional-field="isRequired ? false : true" />
-
-      <BaseIconWithBadge
-        class="icon-info"
-        v-if="isIcon"
-        icon="info"
-        :id="`${title}TextArea`"
-        :show-badge="false"
-        iconColor="#acacac"
-        badge-vertical-position="top"
-        badge-horizontal-position="right"
-        badge-border-color="white"
-        v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF' }"
-      />
-    </div>
+    <QuestionHeaderComponent
+      :title="title"
+      :isRequired="isRequired"
+      :tooltipMessage="description"
+    />
 
     <div class="container" :class="isFocused ? '--focused' : null">
       <BaseRenderMarkdownComponent
@@ -39,8 +28,6 @@
 </template>
 
 <script>
-import "assets/icons/info";
-
 export default {
   name: "TextAreaComponent",
   props: {
@@ -60,11 +47,7 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    isIcon: {
-      type: Boolean,
-      default: () => false,
-    },
-    tooltipMessage: {
+    description: {
       type: String,
       default: () => "",
     },
@@ -104,12 +87,6 @@ export default {
   flex-direction: column;
   gap: 12px;
 }
-.title-area {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: $black-87;
-}
 
 .container {
   display: flex;
@@ -126,9 +103,6 @@ export default {
   }
 }
 
-.icon {
-  color: $black-37;
-}
 .textarea {
   display: flex;
   flex: 0 0 100%;
@@ -137,23 +111,6 @@ export default {
     flex: 1;
     flex-direction: column;
     padding: $base-space;
-  }
-}
-
-.icon-info {
-  display: inline-flex;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  padding: 0;
-  overflow: inherit;
-  &[data-title] {
-    position: relative;
-    overflow: visible;
-    &:before,
-    &:after {
-      margin-top: 0;
-    }
   }
 }
 </style>

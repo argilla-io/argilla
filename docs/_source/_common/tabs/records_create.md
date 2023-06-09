@@ -17,7 +17,7 @@ record = rg.FeedbackRecord(
 )
 ```
 
-![text2text_record](../../_static/images/llms/feedback-record.jpeg)
+![text2text_record](/_static/images/llms/feedback-record.jpeg)
 :::
 
 
@@ -33,7 +33,7 @@ rec = rg.TextClassificationRecord(
 )
 rg.log(records=rec, name="my_dataset")
 ```
-![single_textclass_record](../../_static/reference/webapp/features-single_textclass_record.png)
+![single_textclass_record](/_static/reference/webapp/features-single_textclass_record.png)
 :::
 
 :::{tab-item} Text Classification (multi-label)
@@ -48,7 +48,7 @@ rec = rg.TextClassificationRecord(
 )
 rg.log(records=rec, name="my_dataset")
 ```
-![multi_textclass_record](../../_static/reference/webapp/features-multi_textclass_record.png)
+![multi_textclass_record](/_static/reference/webapp/features-multi_textclass_record.png)
 :::
 
 
@@ -64,7 +64,7 @@ record = rg.TokenClassificationRecord(
 )
 rg.log(records=rec, name="my_dataset")
 ```
-![tokclass_record](../../_static/reference/webapp/features-tokclass_record.png)
+![tokclass_record](/_static/reference/webapp/features-tokclass_record.png)
 :::
 
 :::{tab-item} Text2Text
@@ -78,7 +78,7 @@ record = rg.Text2TextRecord(
 rg.log(records=rec, name="my_dataset")
 ```
 
-![text2text_record](../../_static/reference/webapp/features-text2text_record.png)
+![text2text_record](/_static/reference/webapp/features-text2text_record.png)
 :::
 
 ::::
