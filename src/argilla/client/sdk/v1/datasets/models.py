@@ -36,7 +36,7 @@ class FeedbackDatasetModel(BaseModel):
 
 
 class FeedbackValueModel(BaseModel):
-    value: Union[StrictStr, StrictInt]
+    value: Union[StrictStr, StrictInt, List[str]]
 
 
 class FeedbackResponseModel(BaseModel):
