@@ -41,7 +41,7 @@ class ValueSchema(BaseModel):
     """A value schema for a record.
 
     Args:
-        value: The value of the record.
+        value (Union[StrictStr, StrictInt, List[str]]): The value of the record.
 
     Examples:
         >>> import argilla as rg
@@ -58,9 +58,9 @@ class ResponseSchema(BaseModel):
     """A response schema for a record.
 
     Args:
-        user_id: The user id of the response.
-        values: The values of the response.
-        status: The status of the response. It can be either `submitted` or `discarded`.
+        user_id (Optional[UUID]): The user id of the response. Defaults to None.
+        values (Dict[str, ValueSchema]): The values of the response. Defaults to None.
+        status (Literal["submitted", "discarded"]): The status of the response. It can be either `submitted` or `discarded`. Defaults to "submitted".
 
     Examples:
         >>> import argilla as rg
@@ -96,9 +96,9 @@ class FeedbackRecord(BaseModel):
     """A feedback record.
 
     Args:
-        fields: The fields of the record.
-        responses: The responses of the record.
-        external_id: The external id of the record.
+        fields (Dict[str, str]): The fields of the record.
+        responses (Optional[Union[ResponseSchema, List[ResponseSchema]]]): The responses of the record. Defaults to None.
+        external_id (Optional[str]): The external id of the record. Defaults to None.
 
     Examples:
         >>> import argilla as rg
@@ -136,18 +136,16 @@ class FieldSchema(BaseModel):
     """A field schema for a feedback dataset.
 
     Args:
-        name: The name of the field.
-        title: The title of the field.
-        required: Whether the field is required or not.
-        settings: The settings of the field.
+        name (str): The name of the field.
+        title (Optional[str]): The title of the field. Defaults to None.
+        required (bool): Whether the field is required or not. Defaults to True.
 
     Examples:
         >>> import argilla as rg
         >>> field = rg.FieldSchema(
         ...     name="text",
         ...     title="Human prompt",
-        ...     required=True,
-        ...     settings={"type": "text"}
+        ...     required=True
         ... )
 
     """
@@ -172,11 +170,10 @@ class TextField(FieldSchema):
     """A text field schema for a feedback dataset.
 
     Args:
-        name: The name of the field.
-        title: The title of the field.
-        required: Whether the field is required or not.
-        settings: The settings of the field.
-        use_markdown: Whether the field should use markdown or not.
+        name (str): The name of the field.
+        title (Optional[str]): The title of the field. Defaults to None.
+        required (bool): Whether the field is required or not. Defaults to True.
+        use_markdown (bool): Whether the field should use markdown or not. Defaults to False.
 
     Examples:
         >>> import argilla as rg
@@ -184,7 +181,6 @@ class TextField(FieldSchema):
         ...     name="text",
         ...     title="Human prompt",
         ...     required=True,
-        ...     settings={"type": "text"},
         ...     use_markdown=True
         ... )
 
@@ -203,11 +199,10 @@ class QuestionSchema(BaseModel):
     """A question schema for a feedback dataset.
 
     Args:
-        name: The name of the question.
-        title: The title of the question.
-        description: The description of the question.
-        required: Whether the question is required or not.
-        settings: The settings of the question.
+        name (str): The name of the question.
+        title (Optional[str]): The title of the question. Defaults to None.
+        description (Optional[str]): The description of the question. Defaults to None.
+        required (bool): Whether the question is required or not. Defaults to True.
 
     Examples:
         >>> import argilla as rg
@@ -215,8 +210,7 @@ class QuestionSchema(BaseModel):
         ...     name="relevant",
         ...     title="Is the response relevant for the given prompt?",
         ...     description="Select all that apply",
-        ...     required=True,
-        ...     settings={"type": "text", "use_markdown": False}
+        ...     required=True
         ... )
 
     """
@@ -243,12 +237,11 @@ class TextQuestion(QuestionSchema):
     """A text question schema for a feedback dataset.
 
     Args:
-        name: The name of the question.
-        title: The title of the question.
-        description: The description of the question.
-        required: Whether the question is required or not.
-        settings: The settings of the question.
-        use_markdown: Whether the field should use markdown or not.
+        name (str): The name of the question.
+        title (Optional[str]): The title of the question. Defaults to None.
+        description (Optional[str]): The description of the question. Defaults to None.
+        required (bool): Whether the question is required or not. Defaults to True.
+        use_markdown (bool): Whether the field should use markdown or not. Defaults to False.
 
     Examples:
         >>> import argilla as rg
@@ -257,7 +250,6 @@ class TextQuestion(QuestionSchema):
         ...     title="Is the response relevant for the given prompt?",
         ...     description="Select all that apply",
         ...     required=True,
-        ...     settings={"type": "text", "use_markdown": False},
         ...     use_markdown=True
         ... )
 
@@ -276,12 +268,11 @@ class RatingQuestion(QuestionSchema):
     """A rating question schema for a feedback dataset.
 
     Args:
-        name: The name of the question.
-        title: The title of the question.
-        description: The description of the question.
-        required: Whether the question is required or not.
-        settings: The settings of the question.
-        values: The values of the rating question.
+        name (str): The name of the question.
+        title (Optional[str]): The title of the question. Defaults to None.
+        description (Optional[str]): The description of the question. Defaults to None.
+        required (bool): Whether the question is required or not. Defaults to True.
+        values (List[int]): The values of the rating question.
 
     Examples:
         >>> import argilla as rg
@@ -290,7 +281,6 @@ class RatingQuestion(QuestionSchema):
         ...     title="Is the response relevant for the given prompt?",
         ...     description="Select all that apply",
         ...     required=True,
-        ...     settings={"type": "rating"},
         ...     values=[1, 2, 3, 4, 5]
         ... )
 
@@ -306,41 +296,6 @@ class RatingQuestion(QuestionSchema):
 
 
 class _LabelQuestion(QuestionSchema):
-    """A label question schema for a feedback dataset.
-
-    Args:
-        name: The name of the question.
-        title: The title of the question.
-        description: The description of the question.
-        required: Whether the question is required or not.
-        settings: The settings of the question.
-        labels: The labels of the label question.
-        visible_labels: The number of visible labels of the label question.
-
-    Examples:
-        >>> import argilla as rg
-        >>> question = rg.LabelQuestion(
-        ...     name="relevant",
-        ...     title="Is the response relevant for the given prompt?",
-        ...     description="Select all that apply",
-        ...     required=True,
-        ...     settings={"type": "label_selection"},
-        ...     labels=["cat-1", "cat-2"],
-        ...     visible_labels=None
-        ... )
-        >>> # or use a dict
-        >>> question = rg.LabelQuestion(
-        ...     name="relevant",
-        ...     title="Is the response relevant for the given prompt?",
-        ...     description="Select all that apply",
-        ...     required=True,
-        ...     settings={"type": "label_selection"},
-        ...     labels={"cat-1": "Category 1", "cat-2": "Category 2"},
-        ...     visible_labels=None
-        ... )
-
-    """
-
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
     labels: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
     visible_labels: Optional[conint(ge=3)] = 20
@@ -370,13 +325,13 @@ class LabelQuestion(_LabelQuestion):
     """A label question schema for a feedback dataset.
 
     Args:
-        name: The name of the question.
-        title: The title of the question.
-        description: The description of the question.
-        required: Whether the question is required or not.
-        settings: The settings of the question.
-        labels: The labels of the label question.
-        visible_labels: The number of visible labels of the label question.
+        name (str): The name of the question.
+        title (Optional[str]): The title of the question. Defaults to None.
+        description (Optional[str]): The description of the question. Defaults to None.
+        required (bool): Whether the question is required or not. Defaults to True.
+        labels: (Union[Dict[str, str],conlist(str)])The labels of the label question.
+        visible_labels (conint(ge=3)): The number of visible labels of the label question. Defaults to 20.
+            visible_labels=None implies that ALL the labels will be shown by default, which is not recommended if labels>20
 
     Examples:
         >>> import argilla as rg
@@ -385,7 +340,6 @@ class LabelQuestion(_LabelQuestion):
         ...     title="Is the response relevant for the given prompt?",
         ...     description="Select all that apply",
         ...     required=True,
-        ...     settings={"type": "label_selection"},
         ...     labels=["Yes", "No"],
         ...     visible_labels=None
         ... )
@@ -395,7 +349,6 @@ class LabelQuestion(_LabelQuestion):
         ...     title="Is the response relevant for the given prompt?",
         ...     description="Select all that apply",
         ...     required=True,
-        ...     settings={"type": "label_selection"},
         ...     labels={"yes": "Yes", "no": "No"},
         ...     visible_labels=None
         ... )
@@ -409,13 +362,13 @@ class MultiLabelQuestion(_LabelQuestion):
     """A multi label question schema for a feedback dataset.
 
     Args:
-        name: The name of the question.
-        title: The title of the question.
-        description: The description of the question.
-        required: Whether the question is required or not.
-        settings: The settings of the question.
-        labels: The labels of the label question.
-        visible_labels: The number of visible labels of the label question.
+        name (str): The name of the question.
+        title (Optional[str]): The title of the question. Defaults to None.
+        description (Optional[str]): The description of the question. Defaults to None.
+        required (bool): Whether the question is required or not. Defaults to True.
+        labels: (Union[Dict[str, str],conlist(str)])The labels of the label question.
+        visible_labels (conint(ge=3)): The number of visible labels of the label question. Defaults to 20.
+            visible_labels=None implies that ALL the labels will be shown by default, which is not recommended if labels>20
 
     Examples:
         >>> import argilla as rg
@@ -424,7 +377,6 @@ class MultiLabelQuestion(_LabelQuestion):
         ...     title="Is the response relevant for the given prompt?",
         ...     description="Select all that apply",
         ...     required=True,
-        ...     settings={"type": "multi_label_selection"},
         ...     labels=["Yes", "No"],
         ...     visible_labels=None
         ... )
@@ -434,7 +386,6 @@ class MultiLabelQuestion(_LabelQuestion):
         ...     title="Is the response relevant for the given prompt?",
         ...     description="Select all that apply",
         ...     required=True,
-        ...     settings={"type": "multi_label_selection"},
         ...     labels={"yes": "Yes", "no": "No"},
         ...     visible_labels=None
         ... )
@@ -452,9 +403,9 @@ class FeedbackDatasetConfig(BaseModel):
     """`FeedbackDatasetConfig`
 
     Args:
-        fields: The fields of the feedback dataset.
-        questions: The questions of the feedback dataset.
-        guidelines: the guidelines of the feedback dataset. Defaults to None.
+        fields (List[AllowedFieldTypes]): The fields of the feedback dataset.
+        questions (List[AllowedQuestionTypes]): The questions of the feedback dataset.
+        guidelines (Optional[str]): the guidelines of the feedback dataset. Defaults to None.
 
     Examples:
         >>> import argilla as rg
