@@ -65,10 +65,13 @@ export default {
       default: "Introduce your text",
     },
   },
-  data() {
-    return {
-      searchValue: this.value ?? "",
-    };
+  watch: {
+    value: {
+      immediate: true,
+      handler(newValue) {
+        this.searchValue = newValue ?? "";
+      },
+    },
   },
   methods: {
     applySearch() {
