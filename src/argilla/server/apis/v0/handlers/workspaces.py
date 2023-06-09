@@ -146,7 +146,7 @@ async def delete_workspace_user(
     await authorize(current_user, WorkspaceUserPolicy.delete(workspace_user))
 
     user = await workspace_user.awaitable_attrs.user
-    await user.awaitable_attrs.workspaces
     await accounts.delete_workspace_user(db, workspace_user)
+    await user.awaitable_attrs.workspaces
 
     return User.from_orm(user)
