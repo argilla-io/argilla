@@ -325,7 +325,7 @@ class _LabelQuestion(QuestionSchema):
         ...     description="Select all that apply",
         ...     required=True,
         ...     settings={"type": "label_selection"},
-        ...     labels=["Yes", "No"],
+        ...     labels=["cat-1", "cat-2"],
         ...     visible_labels=None
         ... )
         >>> # or use a dict
@@ -335,7 +335,7 @@ class _LabelQuestion(QuestionSchema):
         ...     description="Select all that apply",
         ...     required=True,
         ...     settings={"type": "label_selection"},
-        ...     labels={"yes": "Yes", "no": "No"},
+        ...     labels={"cat-1": "Category 1", "cat-2": "Category 2"},
         ...     visible_labels=None
         ... )
 
@@ -449,12 +449,12 @@ AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiL
 
 
 class FeedbackDatasetConfig(BaseModel):
-    """A feedback dataset config.
+    """`FeedbackDatasetConfig`
 
     Args:
         fields: The fields of the feedback dataset.
         questions: The questions of the feedback dataset.
-        guidelines: The guidelines of the feedback dataset.
+        guidelines: the guidelines of the feedback dataset. Defaults to None.
 
     Examples:
         >>> import argilla as rg
@@ -485,7 +485,7 @@ class FeedbackDatasetConfig(BaseModel):
         ...             name="content_class",
         ...             title="Does the response include any of the following?",
         ...             description="Select all that apply",
-        ...             labels={"hate": "Hate Speech" , "sexual": "Sexual content", "violent": "Violent content", "pii": "Personal information", "untruthful": "Untruthful info", "not_english": "Not English", "inappropriate": "Inappropriate content"},
+        ...             labels={"cat-1": "Category 1" , "cat-2": "Category 2"},
         ...             required=False,
         ...             visible_labels=4
         ...         ),
