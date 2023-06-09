@@ -329,7 +329,7 @@ class LabelQuestion(_LabelQuestion):
         title (Optional[str]): The title of the question. Defaults to None.
         description (Optional[str]): The description of the question. Defaults to None.
         required (bool): Whether the question is required or not. Defaults to True.
-        labels: (Union[Dict[str, str],conlist(str)])The labels of the label question.
+        labels (Union[Dict[str, str],conlist(str)]): The labels of the label question.
         visible_labels (conint(ge=3)): The number of visible labels of the label question. Defaults to 20.
             visible_labels=None implies that ALL the labels will be shown by default, which is not recommended if labels>20
 
@@ -366,7 +366,7 @@ class MultiLabelQuestion(_LabelQuestion):
         title (Optional[str]): The title of the question. Defaults to None.
         description (Optional[str]): The description of the question. Defaults to None.
         required (bool): Whether the question is required or not. Defaults to True.
-        labels: (Union[Dict[str, str],conlist(str)])The labels of the label question.
+        labels (Union[Dict[str, str],conlist(str)]): The labels of the label question.
         visible_labels (conint(ge=3)): The number of visible labels of the label question. Defaults to 20.
             visible_labels=None implies that ALL the labels will be shown by default, which is not recommended if labels>20
 
