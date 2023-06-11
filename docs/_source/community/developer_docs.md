@@ -8,7 +8,7 @@ Here we provide some guides for the development of *Argilla*.
 
 Argilla supports ElasticSearch and OpenSearch as his main search engine. One of the two is required to correctly run Argilla in your development environment.
 
-For more information please visit our [Setup and Installation](../getting_started/installation/installation.md) section.
+For more information please visit our [Setup and Installation](../getting_started/installation/deployments/deployments.md) section.
 
 ### SQLite
 
