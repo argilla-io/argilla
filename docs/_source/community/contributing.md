@@ -57,7 +57,7 @@ Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?
 
 ### Make Changes
 
-- Create [a fork](https://github.com/argilla-io/argilla/fork) of our `development` branch.
+- Create [a fork](https://github.com/argilla-io/argilla/fork) of our `develop` branch.
   - Note, for updates solely to the documentation, you are allowed to work in the `main` branch.
 - To start working on code changes, we suggest, you take a look at our tutorial on setting up the [development environment](./developer_docs.md).
 - Work on your awesome contribution and adhere to our formatting guidelines.
