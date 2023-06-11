@@ -79,6 +79,12 @@ In the new Conda environment, *Argilla* will already be installed in [editable m
 with all the server dependencies. But if you're willing to install any other dependency you can do so via `pip` to install your own, or just
 see the available extras besides the `server` extras, which are: `listeners`, `postgresql`, and `tests`; all those installable as `pip install -e ".[<EXTRA_NAME>]"`.
 
+
+### Running tests
+To make sure there are no breaking changes, you should run all the tests as follows:
+```sh
+pytest tests
+```
 ### Code formatting tools
 
 To keep a consistent code format, we use [pre-commit](https://pre-commit.com) hooks. So on, you first need to install
