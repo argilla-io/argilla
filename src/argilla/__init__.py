@@ -75,10 +75,10 @@ if _TYPE_CHECKING:
         MultiLabelQuestionStrategy,
         RatingQuestion,
         RatingQuestionStrategy,
-        TrainingDataForTextClassification,
         ResponseSchema,
         TextField,
         TextQuestion,
+        TrainingDataForTextClassification,
         ValueSchema,
     )
     from argilla.client.models import (
