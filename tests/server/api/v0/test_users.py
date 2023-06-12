@@ -20,6 +20,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from tests.factories import (
+    AdminFactory,
     AnnotatorFactory,
     OwnerFactory,
     UserFactory,
@@ -58,6 +59,21 @@ def test_me_as_owner(client: TestClient, db: Session):
     assert response_body["workspaces"] == ["workspace-a", "workspace-b", "workspace-c"]
 
 
+def test_me_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create(
+        workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
+    )
+    WorkspaceFactory.create(name="workspace-c")
+
+    response = client.get("/api/me", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 200
+
+    response_body = response.json()
+    assert response_body["id"] == str(admin.id)
+    assert response_body["workspaces"] == ["workspace-a", "workspace-b"]
+
+
 def test_me_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create(
         workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
@@ -89,6 +105,14 @@ def test_list_users_without_authentication(client: TestClient):
     response = client.get("/api/users")
 
     assert response.status_code == 401
+
+
+def test_list_users_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+
+    response = client.get("/api/users", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 403
 
 
 def test_list_users_as_annotator(client: TestClient, db: Session):
@@ -139,6 +163,16 @@ def test_create_user_without_authentication(client: TestClient, db: Session):
 
     assert response.status_code == 401
     assert db.query(User).count() == 0
+
+
+def test_create_user_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+    user = {"first_name": "first-name", "username": "username", "password": "12345678"}
+
+    response = client.post("/api/users", headers={API_KEY_HEADER_NAME: admin.api_key}, json=user)
+
+    assert response.status_code == 403
+    assert db.query(User).count() == 1
 
 
 def test_create_user_as_annotator(client: TestClient, db: Session):
@@ -234,6 +268,16 @@ def test_delete_user_without_authentication(client: TestClient, db: Session):
 
     assert response.status_code == 401
     assert db.query(User).count() == 1
+
+
+def test_delete_user_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+    user = UserFactory.create()
+
+    response = client.delete(f"/api/users/{user.id}", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 403
+    assert db.query(User).count() == 2
 
 
 def test_delete_user_as_annotator(client: TestClient, db: Session):
