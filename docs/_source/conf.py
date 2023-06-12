@@ -140,7 +140,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 if not os.getenv("READTHEDOCS"):
-    notfound_urls_prefix = None
+    notfound_urls_prefix = ""
 else:
     lang, docs_version = (
         os.getenv("READTHEDOCS_LANGUAGE", "en"),
