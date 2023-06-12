@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Record, Response, User
+from argilla.server.models import Record, Response, User, UserRole
 from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -32,6 +32,7 @@ from tests.factories import (
     RecordFactory,
     ResponseFactory,
     TextQuestionFactory,
+    UserFactory,
     WorkspaceFactory,
 )
 
@@ -437,13 +438,14 @@ def test_create_record_submitted_response_with_wrong_values(
     assert db.query(Response).count() == 0
 
 
-def test_create_record_response_as_annotator(client: TestClient, db: Session):
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
+def test_create_record_response_for_user_role(client: TestClient, db: Session, role: UserRole):
     dataset = DatasetFactory.create()
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
     record = RecordFactory.create(dataset=dataset)
-    annotator = AnnotatorFactory.create(workspaces=[record.dataset.workspace])
+    user = UserFactory.create(workspaces=[record.dataset.workspace], role=role)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
@@ -453,7 +455,7 @@ def test_create_record_response_as_annotator(client: TestClient, db: Session):
     }
 
     response = client.post(
-        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=response_json
+        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: user.api_key}, json=response_json
     )
 
     assert response.status_code == 201
@@ -467,15 +469,18 @@ def test_create_record_response_as_annotator(client: TestClient, db: Session):
             "output_ok": {"value": "yes"},
         },
         "status": "submitted",
-        "user_id": str(annotator.id),
+        "user_id": str(user.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
 
 
-def test_create_record_response_as_annotator_from_different_workspace(client: TestClient, db: Session):
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+def test_create_record_response_as_restricted_user_from_different_workspace(
+    client: TestClient, db: Session, role: UserRole
+):
     record = RecordFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    user = UserFactory.create(workspaces=[WorkspaceFactory.build()], role=role)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
@@ -485,7 +490,7 @@ def test_create_record_response_as_annotator_from_different_workspace(client: Te
     }
 
     response = client.post(
-        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=response_json
+        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: user.api_key}, json=response_json
     )
 
     assert response.status_code == 403
