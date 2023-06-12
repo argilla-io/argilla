@@ -28,8 +28,6 @@ const authMock = {
   },
 };
 
-beforeEach(() => {});
-
 describe("QuestionsFormComponent when initialInputs is empty", () => {
   it("render the component", () => {
     const options = {
