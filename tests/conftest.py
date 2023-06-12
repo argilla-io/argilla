@@ -21,6 +21,7 @@ from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import active_api
 from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla
+from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
@@ -34,7 +35,12 @@ from opensearchpy import OpenSearch
 from sqlalchemy import create_engine
 
 from tests.database import TestSession
-from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
+from tests.factories import (
+    AnnotatorFactory,
+    OwnerFactory,
+    UserFactory,
+    WorkspaceFactory,
+)
 from tests.helpers import SecuredClient
 
 if TYPE_CHECKING:
@@ -151,7 +157,7 @@ def argilla_user() -> User:
     return UserFactory.create(
         first_name="Argilla",
         username="argilla",
-        role=UserRole.owner,
+        role=UserRole.admin,  # Force to use an admin user
         password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
         api_key=DEFAULT_API_KEY,
         workspaces=[Workspace(name="argilla")],
@@ -171,28 +177,30 @@ def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
 
 
 @pytest.fixture
-def api() -> Argilla:
-    return Argilla()
+def api(argilla_user: User) -> Argilla:
+    return Argilla(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
 
 @pytest.mark.parametrize("client", [True], indirect=True)
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mocked_client(
     db: "Session", monkeypatch, test_telemetry: "MagicMock", argilla_user: User, client: TestClient
 ) -> SecuredClient:
-    client_ = SecuredClient(client)
+    # client_ = SecuredClient(client)
+    client_ = client
 
     real_whoami = users_api.whoami
 
-    def whoami_mocked(client):
+    def whoami_mocked(client: AuthenticatedClient):
+        client_.headers.update(client.httpx.headers)
         monkeypatch.setattr(client, "__httpx__", client_)
+
         return real_whoami(client)
 
     monkeypatch.setattr(users_api, "whoami", whoami_mocked)
 
     monkeypatch.setattr(httpx, "post", client_.post)
     monkeypatch.setattr(httpx, "patch", client_.patch)
-    monkeypatch.setattr(httpx.AsyncClient, "post", client_.post_async)
     monkeypatch.setattr(httpx, "get", client_.get)
     monkeypatch.setattr(httpx, "delete", client_.delete)
     monkeypatch.setattr(httpx, "put", client_.put)

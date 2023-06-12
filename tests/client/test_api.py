@@ -43,16 +43,19 @@ from argilla.client.sdk.commons.errors import (
     UnauthorizedApiError,
     ValidationApiError,
 )
+from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import User
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
 from argilla.server.contexts import accounts
+from argilla.server.models import UserRole
 from argilla.server.security.model import WorkspaceCreate, WorkspaceUserCreate
 from httpx import ConnectError
 from sqlalchemy.orm import Session
 
+from tests.factories import UserFactory, WorkspaceFactory
 from tests.helpers import SecuredClient
 from tests.server.test_api import create_some_data_for_text_classification
 
@@ -171,45 +174,42 @@ def test_trailing_slash(mock_init_ok):
     assert api.active_api()._client.base_url == "http://mock.com"
 
 
-def test_log_something(mocked_client):
+def test_log_something(argilla_user: User):
     dataset_name = "test-dataset"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
 
-    api.init()
+    api = Argilla(api_key=argilla_user.api_key, workspace=argilla_user.username)
+    api.delete(dataset_name)
+
     response = api.log(name=dataset_name, records=rg.TextClassificationRecord(inputs={"text": "This is a test"}))
 
     assert response.processed == 1
     assert response.failed == 0
 
-    response = mocked_client.post(f"/api/datasets/{dataset_name}/TextClassification:search")
-    assert response.status_code == 200, response.json()
-
-    results = TextClassificationSearchResults.parse_obj(response.json())
+    results = api.search.search_records(dataset_name, task=TaskType.text_classification)
     assert results.total == 1
     assert len(results.records) == 1
     assert results.records[0].inputs["text"] == "This is a test"
 
 
-def test_load_empty_string(mocked_client):
+def test_load_empty_string(argilla_user: User):
     dataset_name = "test-dataset"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
+
+    api = Argilla(api_key=argilla_user.api_key, workspace=argilla_user.username)
+    api.delete(dataset_name)
 
     api.log(name=dataset_name, records=rg.TextClassificationRecord(inputs={"text": "This is a test"}))
     assert len(api.load(name=dataset_name, query="")) == 1
     assert len(api.load(name=dataset_name, query="  ")) == 1
 
 
-def test_load_limits(mocked_client, supported_vector_search):
+def test_load_limits(argilla_user: User, supported_vector_search: bool):
     dataset = "test_load_limits"
-    api_ds_prefix = f"/api/datasets/{dataset}"
-    mocked_client.delete(api_ds_prefix)
 
-    create_some_data_for_text_classification(
-        mocked_client,
-        dataset,
-        n=50,
-        with_vectors=supported_vector_search,
-    )
+    api = Argilla(api_key=argilla_user.api_key)
+    api.delete(dataset)
+    # TODO: Unify headers and all HTTP config in httpx inner client
+    api.http_client.httpx.headers.update(api.http_client.headers)
+    create_some_data_for_text_classification(api.http_client.httpx, dataset, n=50, with_vectors=supported_vector_search)
 
     limit_data_to = 10
     ds = api.load(name=dataset, limit=limit_data_to)
@@ -268,10 +268,12 @@ def test_large_batch_size_warning(mocked_client, caplog: pytest.LogCaptureFixtur
     assert "batch size is noticeably large" in caplog.record_tuples[0][2]
 
 
-def test_log_background(mocked_client):
+def test_log_background(argilla_user: User):
     """Verify that logs can be delayed via the background parameter."""
     dataset_name = "test_log_background"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
+
+    api = Argilla(api_key=argilla_user.api_key)
+    api.delete(dataset_name)
 
     # Log in the background, and extract the future
     sample_text = "Sample text for testing"
@@ -464,68 +466,68 @@ def test_log_with_wrong_name(mocked_client):
         api.log(name="anotherWrongName", records=["whatever"])
 
 
-def test_dataset_copy(mocked_client):
-    dataset = "test_dataset_copy"
-    dataset_copy = "test_dataset_copy_new"
-    other_workspace = "test_dataset_copy_ws"
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+def test_dataset_copy(role: UserRole):
+    dataset_name = "test_dataset_copy"
+    dataset_copy_name = "test_dataset_copy_new"
 
-    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={other_workspace}")
-    mocked_client.delete(f"/api/datasets/{dataset_copy}")
-    mocked_client.delete(f"/api/datasets/{dataset}")
+    workspace = WorkspaceFactory.create()
+    user = UserFactory.create(role=role, workspaces=[workspace])
+
+    api = Argilla(api_key=user.api_key, workspace=workspace.name)
+
+    api.delete(dataset_name, workspace=workspace.name)
+    api.delete(dataset_copy_name, workspace=workspace.name)
 
     record = rg.TextClassificationRecord(
-        id=0,
-        text="This is the record input",
-        annotation_agent="test",
-        annotation=["T"],
+        id=0, text="This is the record input", annotation_agent="test", annotation=["T"]
     )
-    api.log(record, name=dataset)
+    api.log(record, name=dataset_name)
+    api.copy(dataset_name, name_of_copy=dataset_copy_name)
 
-    api.copy(dataset, name_of_copy=dataset_copy)
-    ds, ds_copy = api.load(name=dataset), api.load(name=dataset_copy)
+    ds, ds_copy = api.load(name=dataset_name), api.load(name=dataset_copy_name)
     df, df_copy = ds.to_pandas(), ds_copy.to_pandas()
 
     assert df.equals(df_copy)
 
-    api.log(record, name=dataset_copy)
+    api.log(record, name=dataset_copy_name)
 
     with pytest.raises(AlreadyExistsApiError):
-        api.copy(dataset, name_of_copy=dataset_copy)
-    with pytest.raises(NotFoundApiError, match=other_workspace):
-        api.copy(dataset, name_of_copy=dataset_copy, workspace=other_workspace)
+        api.copy(dataset_name, name_of_copy=dataset_copy_name)
+    with pytest.raises(NotFoundApiError, match="other-workspace"):
+        api.copy(dataset_name, name_of_copy=dataset_copy_name, workspace="other-workspace")
 
 
-def test_dataset_copy_to_another_workspace(mocked_client, argilla_user: User, db: Session):
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+def test_dataset_copy_to_another_workspace(role: UserRole):
     dataset_name = "test_dataset_copy_to_another_workspace"
     dataset_copy = "new_dataset"
-    new_workspace_name = "my-fun-workspace"
 
-    workspace = accounts.create_workspace(db, WorkspaceCreate(name=new_workspace_name))
-    accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=argilla_user.id))
+    workspace = WorkspaceFactory.create()
+    workspace_02 = WorkspaceFactory.create()
+    user = UserFactory.create(role=role, workspaces=[workspace, workspace_02])
 
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
-    mocked_client.delete(f"/api/datasets/{dataset_copy}")
-    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace_name}")
+    api = Argilla(api_key=user.api_key, workspace=workspace.name)
 
-    api = Argilla(api_key=argilla_user.api_key)
+    api.delete(dataset_name, workspace=workspace.name)
+    api.delete(dataset_copy, workspace=workspace.name)
+    api.delete(dataset_name, workspace=workspace_02.name)
+    api.delete(dataset_copy, workspace=workspace_02.name)
 
     api.log(
-        rg.TextClassificationRecord(
-            id=0,
-            text="This is the record input",
-            annotation_agent="test",
-            annotation=["T"],
-        ),
+        rg.TextClassificationRecord(id=0, text="This is the record input", annotation_agent="test", annotation=["T"]),
         name=dataset_name,
     )
     ds = api.load(dataset_name)
     df = ds.to_pandas()
-    api.copy(dataset_name, name_of_copy=dataset_copy, workspace=new_workspace_name)
-    api.set_workspace(new_workspace_name)
+
+    api.copy(dataset_name, name_of_copy=dataset_copy, workspace=workspace_02.name)
+
+    api.set_workspace(workspace_02.name)
     df_copy = api.load(dataset_copy).to_pandas()
     assert df.equals(df_copy)
     with pytest.raises(AlreadyExistsApiError):
-        api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=new_workspace_name)
+        api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=workspace_02.name)
 
 
 def test_update_record(mocked_client):
@@ -578,14 +580,13 @@ def test_text_classifier_with_inputs_list(mocked_client):
     assert records[0]["inputs"]["text"] == expected_inputs
 
 
-def test_load_with_ids_list(mocked_client, supported_vector_search, api):
+def test_load_with_ids_list(api: Argilla, supported_vector_search: bool):
     dataset = "test_load_with_ids_list"
-
-    mocked_client.delete(f"/api/datasets/{dataset}")
+    api.delete(name=dataset)
 
     expected_data = 100
     create_some_data_for_text_classification(
-        mocked_client,
+        api.client,
         dataset,
         n=expected_data,
         with_vectors=supported_vector_search,
@@ -594,14 +595,14 @@ def test_load_with_ids_list(mocked_client, supported_vector_search, api):
     assert len(ds) == 2
 
 
-def test_load_with_query(mocked_client, supported_vector_search, api):
+def test_load_with_query(supported_vector_search, api: Argilla):
     dataset = "test_load_with_query"
-    mocked_client.delete(f"/api/datasets/{dataset}")
+    api.delete(dataset)
     sleep(1)
 
     expected_data = 4
     create_some_data_for_text_classification(
-        mocked_client,
+        api.client,
         dataset,
         n=expected_data,
         with_vectors=supported_vector_search,
@@ -612,9 +613,9 @@ def test_load_with_query(mocked_client, supported_vector_search, api):
     assert ds.id.iloc[0] == 1
 
 
-def test_load_with_sort(mocked_client, supported_vector_search, api):
+def test_load_with_sort(supported_vector_search, api: Argilla):
     dataset = "test_load_with_sort"
-    mocked_client.delete(f"/api/datasets/{dataset}")
+    api.delete(dataset)
     sleep(1)
 
     expected_data = 4
@@ -631,14 +632,14 @@ def test_load_with_sort(mocked_client, supported_vector_search, api):
     assert all([(ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
 
 
-def test_load_as_pandas(mocked_client, supported_vector_search, api):
+def test_load_as_pandas(supported_vector_search, api: Argilla):
     dataset = "test_load_as_pandas"
-    mocked_client.delete(f"/api/datasets/{dataset}")
+    api.delete(dataset)
     sleep(1)
 
     expected_data = 4
     server_vectors_cfg = create_some_data_for_text_classification(
-        mocked_client,
+        api.client,
         dataset,
         n=expected_data,
         with_vectors=supported_vector_search,
@@ -684,7 +685,7 @@ def test_token_classification_spans(span, valid):
             )
 
 
-def test_load_text2text(mocked_client, supported_vector_search):
+def test_load_text2text(supported_vector_search, api: Argilla):
     vectors = {"bert_uncased": [1.2, 3.4, 6.4, 6.4]}
 
     records = []
@@ -715,9 +716,9 @@ def test_load_text2text(mocked_client, supported_vector_search):
             assert record.vectors["bert_uncased"] == vectors["bert_uncased"]
 
 
-def test_client_workspace(mocked_client, api):
+def test_client_workspace(api: Argilla, argilla_user: User):
     workspace = api.get_workspace()
-    assert workspace == "argilla"
+    assert workspace == argilla_user.username
 
     with pytest.raises(Exception, match="Must provide a workspace"):
         api.set_workspace(None)
@@ -725,18 +726,12 @@ def test_client_workspace(mocked_client, api):
     with pytest.raises(Exception, match="Wrong provided workspace not-found"):
         api.set_workspace("not-found")
 
-    api.set_workspace("argilla")
-    assert api.get_workspace() == "argilla"
+    api.set_workspace(argilla_user.username)
+    assert api.get_workspace() == argilla_user.username
 
 
-def test_load_sort(mocked_client):
-    records = [
-        rg.TextClassificationRecord(
-            text="test text",
-            id=i,
-        )
-        for i in ["1str", 1, 2, 11, "2str", "11str"]
-    ]
+def test_load_sort(api: Argilla):
+    records = [rg.TextClassificationRecord(text="test text", id=i) for i in ["1str", 1, 2, 11, "2str", "11str"]]
 
     dataset = "test_load_sort"
     api.delete(dataset)

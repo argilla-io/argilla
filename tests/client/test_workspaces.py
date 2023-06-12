@@ -16,17 +16,20 @@
 import pytest
 from argilla.client import api
 from argilla.client.workspaces import Workspace
+from argilla.server.models import User
+
+from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 
-def test_workspace_cls_init(mocked_client):
-    the_api = api.active_api()
-    workspace = the_api.http_client.post("/api/workspaces", json={"name": "test_workspace"})
-    assert workspace["name"] == "test_workspace"
+def test_workspace_cls_init(argilla_user: User):
+    workspace = WorkspaceFactory.create()
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=argilla_user.id)
 
-    api.init(api_key="argilla.apikey")
-    workspace = Workspace.from_name("test_workspace")
-    assert workspace.name == "test_workspace"
-    assert isinstance(workspace.id, str)
+    api.init(api_key=argilla_user.api_key)
+    found_workspace = Workspace.from_name(workspace.name)
+
+    assert found_workspace.name == workspace.name
+    assert isinstance(found_workspace.id, str)
 
     with pytest.raises(ValueError):
         Workspace.from_name("this_workspace_does_not_exist")
