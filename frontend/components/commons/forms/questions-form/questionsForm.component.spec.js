@@ -9,7 +9,7 @@ import MultiLabelComponent from "./fields/multi-label/MultiLabel.component";
 jest.mock(
   "@/models/feedback-task-model/record-response/recordResponse.queries",
   () => ({
-    getRecordResponsesIdByRecordId: ({ userId, recordId }) => "response-id",
+    getRecordResponsesIdByRecordId: () => "response-id",
   })
 );
 
