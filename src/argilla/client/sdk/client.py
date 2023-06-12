@@ -96,6 +96,7 @@ class Client(_ClientCommonDefaults, _Client):
             cookies=self.get_cookies(),
             timeout=self.get_timeout(),
         )
+        # TODO: Remove this NOW!!!!
         self.__http_async__ = httpx.AsyncClient(
             base_url=self.base_url,
             headers=self.get_headers(),

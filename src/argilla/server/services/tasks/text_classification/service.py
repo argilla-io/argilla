@@ -84,6 +84,9 @@ class TextClassificationService:
         dataset: ServiceTextClassificationDataset,
         records: List[ServiceTextClassificationRecord],
     ):
+        if not records:
+            return BulkResponse(dataset=dataset.name, processed=0)
+
         # TODO(@frascuchon): This will moved to dataset settings validation once DatasetSettings join the game!
         self._check_multi_label_integrity(dataset, records)
 
@@ -92,11 +95,7 @@ class TextClassificationService:
             records=records,
             record_type=ServiceTextClassificationRecord,
         )
-        return BulkResponse(
-            dataset=dataset.name,
-            processed=len(records),
-            failed=failed,
-        )
+        return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
     def search(
         self,

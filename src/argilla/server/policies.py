@@ -152,6 +152,12 @@ class DatasetPolicy:
             and _exists_workspace_user_by_user_and_workspace_name(actor, dataset.workspace)
         )
 
+    @classmethod
+    def delete_records(cls, dataset: DatasetDB) -> PolicyAction:
+        return lambda actor: actor.is_owner or (
+            actor.is_admin and _exists_workspace_user_by_user_and_workspace_name(actor, dataset.workspace)
+        )
+
 
 class DatasetPolicyV1:
     @classmethod
