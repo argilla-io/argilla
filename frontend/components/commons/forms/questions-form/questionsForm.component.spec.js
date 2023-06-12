@@ -741,4 +741,7 @@ describe("QuestionsFormComponent when initialInputs is empty", () => {
     });
     expect(childNodes.length).toBe(2);
   });
+  it.skip("update the input object regarding the value emitted by the question components", () => {
+    // TODO - do a test of the 4 components
+  });
 });
