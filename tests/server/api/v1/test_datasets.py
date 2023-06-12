@@ -29,6 +29,7 @@ from argilla.server.models import (
     Response,
     ResponseStatus,
     User,
+    UserRole,
     Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
@@ -59,6 +60,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from tests.factories import (
+    AdminFactory,
     AnnotatorFactory,
     DatasetFactory,
     FieldFactory,
@@ -70,7 +72,9 @@ from tests.factories import (
     ResponseFactory,
     TextFieldFactory,
     TextQuestionFactory,
+    UserFactory,
     WorkspaceFactory,
+    WorkspaceUserFactory,
 )
 
 if TYPE_CHECKING:
@@ -124,15 +128,16 @@ def test_list_current_user_datasets_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
-def test_list_current_user_datasets_as_annotator(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_list_current_user_datasets_as_restricted_user_role(client: TestClient, role: UserRole):
     workspace = WorkspaceFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[workspace])
+    user = UserFactory.create(workspaces=[workspace], role=role)
 
     DatasetFactory.create(name="dataset-a", workspace=workspace)
     DatasetFactory.create(name="dataset-b", workspace=workspace)
     DatasetFactory.create(name="dataset-c")
 
-    response = client.get("/api/v1/me/datasets", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get("/api/v1/me/datasets", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 200
 
@@ -183,16 +188,17 @@ def test_list_dataset_fields_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
-def test_list_dataset_fields_as_annotator(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_list_dataset_fields_as_restricted_user_role(client: TestClient, role: UserRole):
     dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+    user = UserFactory.create(workspaces=[dataset.workspace], role=role)
     TextFieldFactory.create(name="text-field-a", dataset=dataset)
     TextFieldFactory.create(name="text-field-b", dataset=dataset)
 
     other_dataset = DatasetFactory.create()
     TextFieldFactory.create_batch(size=2, dataset=other_dataset)
 
-    response = client.get(f"/api/v1/datasets/{dataset.id}/fields", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/datasets/{dataset.id}/fields", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 200
 
@@ -200,11 +206,12 @@ def test_list_dataset_fields_as_annotator(client: TestClient):
     assert [field["name"] for field in response_body["items"]] == ["text-field-a", "text-field-b"]
 
 
-def test_list_dataset_fields_as_annotator_from_different_workspace(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_list_dataset_fields_as_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
     dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    user = UserFactory.create(workspaces=[WorkspaceFactory.build()], role=role)
 
-    response = client.get(f"/api/v1/datasets/{dataset.id}/fields", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/datasets/{dataset.id}/fields", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 403
 
@@ -337,15 +344,16 @@ def test_list_dataset_questions_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
-def test_list_dataset_questions_as_annotator(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_list_dataset_questions_as_restricted_user(client: TestClient, role: UserRole):
     dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+    user = UserFactory.create(workspaces=[dataset.workspace], role=role)
     TextQuestionFactory.create(name="text-question", dataset=dataset)
     RatingQuestionFactory.create(name="rating-question", dataset=dataset)
     TextQuestionFactory.create()
     RatingQuestionFactory.create()
 
-    response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 200
 
@@ -353,11 +361,12 @@ def test_list_dataset_questions_as_annotator(client: TestClient):
     assert [question["name"] for question in response_body["items"]] == ["text-question", "rating-question"]
 
 
-def test_list_dataset_questions_as_annotator_from_different_workspace(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_list_dataset_questions_as_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
     dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    user = UserFactory.create(workspaces=[WorkspaceFactory.build()], role=role)
 
-    response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/datasets/{dataset.id}/questions", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 403
 
@@ -572,6 +581,22 @@ def test_list_dataset_records_without_authentication(client: TestClient):
     response = client.get(f"/api/v1/datasets/{dataset.id}/records")
 
     assert response.status_code == 401
+
+
+def test_list_dataset_records_as_admin(client: TestClient):
+    workspace = WorkspaceFactory.create()
+    admin = AdminFactory.create(workspaces=[workspace])
+    dataset = DatasetFactory.create(workspace=workspace)
+
+    RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+    RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
+    RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+
+    other_dataset = DatasetFactory.create()
+    RecordFactory.create_batch(size=2, dataset=other_dataset)
+
+    response = client.get(f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: admin.api_key})
+    assert response.status_code == 200
 
 
 def test_list_dataset_records_as_annotator(client: TestClient):
@@ -842,9 +867,10 @@ def test_list_current_user_dataset_records_without_authentication(client: TestCl
     assert response.status_code == 401
 
 
-def test_list_current_user_dataset_records_as_annotator(client: TestClient, owner):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_list_current_user_dataset_records_as_restricted_user(client: TestClient, role: UserRole):
     workspace = WorkspaceFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[workspace])
+    user = UserFactory.create(workspaces=[workspace], role=role)
     dataset = DatasetFactory.create(workspace=workspace)
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
@@ -853,7 +879,7 @@ def test_list_current_user_dataset_records_as_annotator(client: TestClient, owne
     other_dataset = DatasetFactory.create()
     RecordFactory.create_batch(size=2, dataset=other_dataset)
 
-    response = client.get(f"/api/v1/me/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 200
     assert response.json() == {
@@ -883,9 +909,13 @@ def test_list_current_user_dataset_records_as_annotator(client: TestClient, owne
     }
 
 
-def test_list_current_user_dataset_records_as_annotator_with_include_responses(client: TestClient, owner):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_list_current_user_dataset_records_as_restricted_user_with_include_responses(
+    client: TestClient, owner: User, role: UserRole
+):
     dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+
+    user = UserFactory.create(workspaces=[dataset.workspace], role=role)
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
@@ -901,7 +931,7 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(c
     response_a_annotator = ResponseFactory.create(
         status="discarded",
         record=record_a,
-        user=annotator,
+        user=user,
     )
     response_b_owner = ResponseFactory.create(
         values={
@@ -917,7 +947,7 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(c
             "output_ok": {"value": "no"},
         },
         record=record_b,
-        user=annotator,
+        user=user,
     )
     response_b_other = ResponseFactory.create(
         values={
@@ -933,7 +963,7 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(c
     response = client.get(
         f"/api/v1/me/datasets/{dataset.id}/records",
         params={"include": RecordInclude.responses.value},
-        headers={API_KEY_HEADER_NAME: annotator.api_key},
+        headers={API_KEY_HEADER_NAME: user.api_key},
     )
 
     assert response.status_code == 200
@@ -948,7 +978,7 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(c
                         "id": str(response_a_annotator.id),
                         "values": None,
                         "status": "discarded",
-                        "user_id": str(annotator.id),
+                        "user_id": str(user.id),
                         "inserted_at": response_a_annotator.inserted_at.isoformat(),
                         "updated_at": response_a_annotator.updated_at.isoformat(),
                     }
@@ -968,7 +998,7 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(c
                             "output_ok": {"value": "no"},
                         },
                         "status": "submitted",
-                        "user_id": str(annotator.id),
+                        "user_id": str(user.id),
                         "inserted_at": response_b_annotator.inserted_at.isoformat(),
                         "updated_at": response_b_annotator.updated_at.isoformat(),
                     },
@@ -988,11 +1018,14 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(c
     }
 
 
-def test_list_current_user_dataset_records_as_annotator_from_different_workspace(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_list_current_user_dataset_records_as_restricted_user_from_different_workspace(
+    client: TestClient, role: UserRole
+):
     dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    user = UserFactory.create(workspaces=[WorkspaceFactory.build()], role=role)
 
-    response = client.get(f"/api/v1/me/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 403
 
@@ -1030,21 +1063,23 @@ def test_get_dataset_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
-def test_get_dataset_as_annotator(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_get_dataset_as_restricted_user(client: TestClient, role: UserRole):
     dataset = DatasetFactory.create(name="dataset")
-    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+    user = UserFactory.create(workspaces=[dataset.workspace], role=role)
 
-    response = client.get(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 200
     assert response.json()["name"] == "dataset"
 
 
-def test_get_dataset_as_annotator_from_different_workspace(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_get_dataset_as_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
     dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    user = UserFactory.create(workspaces=[WorkspaceFactory.build()], role=role)
 
-    response = client.get(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 403
 
@@ -1102,29 +1137,30 @@ def test_get_current_user_dataset_metrics_without_authentication(client: TestCli
     assert response.status_code == 401
 
 
-def test_get_current_user_dataset_metrics_as_annotator(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_get_current_user_dataset_metrics_as_restricted_user(client: TestClient, role: UserRole):
     dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+    user = UserFactory.create(workspaces=[dataset.workspace], role=role)
     record_a = RecordFactory.create(dataset=dataset)
     record_b = RecordFactory.create(dataset=dataset)
     record_c = RecordFactory.create(dataset=dataset)
     record_d = RecordFactory.create(dataset=dataset)
     RecordFactory.create_batch(2, dataset=dataset)
-    ResponseFactory.create(record=record_a, user=annotator)
-    ResponseFactory.create(record=record_b, user=annotator)
-    ResponseFactory.create(record=record_c, user=annotator, status=ResponseStatus.discarded)
-    ResponseFactory.create(record=record_d, user=annotator, status=ResponseStatus.draft)
+    ResponseFactory.create(record=record_a, user=user)
+    ResponseFactory.create(record=record_b, user=user)
+    ResponseFactory.create(record=record_c, user=user, status=ResponseStatus.discarded)
+    ResponseFactory.create(record=record_d, user=user, status=ResponseStatus.draft)
 
     other_dataset = DatasetFactory.create()
     other_record_a = RecordFactory.create(dataset=other_dataset)
     other_record_b = RecordFactory.create(dataset=other_dataset)
     other_record_c = RecordFactory.create(dataset=other_dataset)
     RecordFactory.create_batch(3, dataset=other_dataset)
-    ResponseFactory.create(record=other_record_a, user=annotator)
+    ResponseFactory.create(record=other_record_a, user=user)
     ResponseFactory.create(record=other_record_b)
     ResponseFactory.create(record=other_record_c, status=ResponseStatus.discarded)
 
-    response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 200
     assert response.json() == {
@@ -1133,11 +1169,12 @@ def test_get_current_user_dataset_metrics_as_annotator(client: TestClient):
     }
 
 
-def test_get_current_user_dataset_metrics_annotator_from_different_workspace(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+def test_get_current_user_dataset_metrics_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
     dataset = DatasetFactory.create()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build()])
+    user = UserFactory.create(workspaces=[WorkspaceFactory.build()], role=role)
 
-    response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 403
 
@@ -1193,6 +1230,17 @@ def test_create_dataset_without_authentication(client: TestClient, db: Session):
 
     assert response.status_code == 401
     assert db.query(Dataset).count() == 0
+
+
+def test_create_dataset_as_admin(client: TestClient, db: Session):
+    workspace = WorkspaceFactory.create()
+    admin = AdminFactory.create(workspaces=[workspace])
+
+    dataset_json = {"name": "name", "workspace_id": str(workspace.id)}
+    response = client.post("/api/v1/datasets", headers={API_KEY_HEADER_NAME: admin.api_key}, json=dataset_json)
+
+    assert response.status_code == 201
+    assert db.query(Dataset).count() == 1
 
 
 def test_create_dataset_as_annotator(client: TestClient, db: Session):
@@ -1272,6 +1320,26 @@ def test_create_dataset_field_without_authentication(client: TestClient, db: Ses
 
     assert response.status_code == 401
     assert db.query(Field).count() == 0
+
+
+def test_create_dataset_field_as_admin(client: TestClient, db: Session):
+    workspace = WorkspaceFactory.create()
+    admin = AdminFactory.create(workspaces=[workspace])
+    dataset = DatasetFactory.create(workspace=workspace)
+    field_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/fields",
+        headers={API_KEY_HEADER_NAME: admin.api_key},
+        json=field_json,
+    )
+
+    assert response.status_code == 201
+    assert db.query(Field).count() == 1
 
 
 def test_create_dataset_field_as_annotator(client: TestClient, db: Session):
@@ -1558,6 +1626,47 @@ def test_create_dataset_question_without_authentication(client: TestClient, db: 
     response = client.post(f"/api/v1/datasets/{dataset.id}/questions", json=question_json)
 
     assert response.status_code == 401
+    assert db.query(Question).count() == 0
+
+
+def test_create_dataset_question_as_admin(client: TestClient, db: Session):
+    workspace = WorkspaceFactory.create()
+    admin = AdminFactory.create(workspaces=[workspace])
+    dataset = DatasetFactory.create(workspace=workspace)
+    question_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/questions",
+        headers={API_KEY_HEADER_NAME: admin.api_key},
+        json=question_json,
+    )
+
+    assert response.status_code == 201
+    assert db.query(Question).count() == 1
+
+
+def test_create_dataset_question_as_admin_for_different_workspace(client: TestClient, db: Session):
+    workspace = WorkspaceFactory.create()
+    admin = AdminFactory.create(workspaces=[workspace])
+
+    dataset = DatasetFactory.create()
+    question_json = {
+        "name": "name",
+        "title": "title",
+        "settings": {"type": "text"},
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/questions",
+        headers={API_KEY_HEADER_NAME: admin.api_key},
+        json=question_json,
+    )
+
+    assert response.status_code == 403
     assert db.query(Question).count() == 0
 
 
@@ -2122,6 +2231,74 @@ def test_create_dataset_records_without_authentication(client: TestClient, db: S
     assert db.query(Response).count() == 0
 
 
+def test_create_dataset_records_as_admin(client: TestClient, db: Session):
+    dataset = DatasetFactory.create(status=DatasetStatus.ready)
+    admin = AdminFactory.create(workspaces=[dataset.workspace])
+
+    TextFieldFactory.create(name="input", dataset=dataset)
+    TextFieldFactory.create(name="output", dataset=dataset)
+
+    TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+    records_json = {
+        "items": [
+            {
+                "fields": {"input": "Say Hello", "output": "Hello"},
+                "external_id": "1",
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                        "status": "submitted",
+                        "user_id": str(admin.id),
+                    }
+                ],
+            },
+            {
+                "fields": {"input": "Say Hello", "output": "Hi"},
+            },
+            {
+                "fields": {"input": "Say Pello", "output": "Hello World"},
+                "external_id": "3",
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
+                        "status": "submitted",
+                        "user_id": str(admin.id),
+                    }
+                ],
+            },
+            {
+                "fields": {"input": "Say Hello", "output": "Good Morning"},
+                "responses": [
+                    {
+                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}},
+                        "status": "discarded",
+                        "user_id": str(admin.id),
+                    }
+                ],
+            },
+            {
+                "fields": {"input": "Say Hello", "output": "Say Hello"},
+                "responses": [
+                    {
+                        "user_id": str(admin.id),
+                        "status": "discarded",
+                    }
+                ],
+            },
+        ]
+    }
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: admin.api_key}, json=records_json
+    )
+
+    assert response.status_code == 204
+    assert db.query(Record).count() == 5
+    assert db.query(Response).count() == 4
+
+
 def test_create_dataset_records_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create()
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
@@ -2394,7 +2571,7 @@ def test_create_dataset_records_with_nonexistent_dataset_id(client: TestClient, 
     assert db.query(Response).count() == 0
 
 
-def create_dataset_for_search(user: Optional[User] = None) -> Tuple[Dataset, List[Record]]:
+def create_dataset_for_search(user: Optional[User] = None) -> Tuple[Dataset, List[Record], List[Response]]:
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextFieldFactory.create(name="input", dataset=dataset)
     TextFieldFactory.create(name="output", dataset=dataset)
@@ -2642,9 +2819,12 @@ def test_search_dataset_records_with_offset_and_limit(
     assert len(response.json()["items"]) == 2
 
 
-def test_search_dataset_records_as_annotator(client: TestClient, owner, mock_search_engine: SearchEngine):
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+def test_search_dataset_records_as_restricted_user(
+    client: TestClient, owner: User, mock_search_engine: SearchEngine, role: UserRole
+):
     dataset, records, _ = create_dataset_for_search(user=owner)
-    annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
+    user = UserFactory.create(workspaces=[dataset.workspace], role=role)
 
     mock_search_engine.search.return_value = SearchResponses(
         items=[
@@ -2656,7 +2836,7 @@ def test_search_dataset_records_as_annotator(client: TestClient, owner, mock_sea
     query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search",
-        headers={API_KEY_HEADER_NAME: annotator.api_key},
+        headers={API_KEY_HEADER_NAME: user.api_key},
         json=query_json,
     )
 
@@ -2675,14 +2855,15 @@ def test_search_dataset_records_as_annotator(client: TestClient, owner, mock_sea
     assert response.status_code == 200
 
 
-def test_search_dataset_records_as_annotator_from_different_workspace(client: TestClient):
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+def test_search_dataset_records_as_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
     dataset, _, _ = create_dataset_for_search()
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.create()])
+    user = UserFactory.create(workspaces=[WorkspaceFactory.create()], role=role)
 
     query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search",
-        headers={API_KEY_HEADER_NAME: annotator.api_key},
+        headers={API_KEY_HEADER_NAME: user.api_key},
         json=query_json,
     )
 
@@ -2754,6 +2935,21 @@ def test_publish_dataset_without_authentication(client: TestClient, db: Session)
 
     assert response.status_code == 401
     assert db.get(Dataset, dataset.id).status == "draft"
+
+
+def test_publish_dataset_as_admin(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    TextFieldFactory.create(dataset=dataset)
+    RatingQuestionFactory.create(dataset=dataset)
+    admin = AdminFactory.create(workspaces=[dataset.workspace])
+
+    response = client.put(f"/api/v1/datasets/{dataset.id}/publish", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 200
+    assert db.get(Dataset, dataset.id).status == "ready"
+
+    response_body = response.json()
+    assert response_body["status"] == "ready"
 
 
 def test_publish_dataset_as_annotator(client: TestClient, db: Session):
@@ -2873,6 +3069,16 @@ def test_delete_dataset_without_authentication(client: TestClient, db: Session, 
     assert db.query(Dataset).count() == 1
 
     assert not mock_search_engine.delete_index.called
+
+
+def test_delete_dataset_as_admin(client: TestClient, db: Session):
+    dataset = DatasetFactory.create()
+    admin = AdminFactory.create(workspaces=[dataset.workspace])
+
+    response = client.delete(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 200
+    assert db.query(Dataset).count() == 0
 
 
 def test_delete_dataset_as_annotator(client: TestClient, db: Session):
