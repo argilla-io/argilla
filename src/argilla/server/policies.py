@@ -63,7 +63,10 @@ class WorkspaceUserPolicy:
 
     @classmethod
     def delete(cls, workspace_user: WorkspaceUser) -> PolicyAction:
-        return lambda actor: actor.role == UserRole.owner
+        return lambda actor: actor.role == UserRole.owner or (
+            actor.role == UserRole.admin
+            and _exists_workspace_user_by_user_and_workspace_id(actor, workspace_user.workspace_id)
+        )
 
 
 class WorkspacePolicy:
