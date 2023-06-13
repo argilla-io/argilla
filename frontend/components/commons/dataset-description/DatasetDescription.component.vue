@@ -1,7 +1,7 @@
 <template>
   <div class="description">
     <h2 class="--heading5 --semibold description__title" v-text="title" />
-    <BaseRenderMarkdownComponent
+    <RenderMarkdownBaseComponent
       class="--body1 description__text"
       :class="{ '--light': isColorLight }"
       :markdown="datasetDescription"
