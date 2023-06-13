@@ -4,7 +4,7 @@
 
 ## Home page
 
-![Home page](../../_static/reference/webapp/pages-homepage.png)
+![Home page](/_static/reference/webapp/pages-homepage.png)
 
 The _Home page_ is mainly a **filterable, searchable and sortable list** of **datasets**.
 It is the **entry point** to the Argilla web app and is composed of the following three components.
@@ -20,7 +20,6 @@ The list consists of following columns:
 
 - **Name**: The name of the dataset, can be sorted alphabetically.
 - **Workspace**: A filterable column showing the workspace to which the dataset belongs.
-- **Task**: The [task](../../guides/task_examples.ipynb) of the dataset. This is a filterable column.
 - **Tags**: User defined tags for the dataset.
 - **Created at**: When was the dataset first logged by the client.
 - **Updated at**: When was the dataset last modified, either via the Argilla web app or the client.
@@ -36,10 +35,10 @@ You can find a user icon and a refresh button on the top right:
 ## Dataset
 
 ```{note}
-For a description of the UI and features related to the new Feedback Task datasets, please check [this guide](../../guides/llms/practical_guides/annotate_dataset.ipynb).
+For a description of the UI and features related to the new Feedback Task datasets, please check [this guide](/guides/llms/practical_guides/annotate_dataset.md).
 ```
 
-![Dataset page](../../_static/reference/webapp/pages-dataset_page.png)
+![Dataset page](/_static/reference/webapp/pages-dataset_page.png)
 
 The _Dataset_ page is the main page of the Argilla web app.
 From here you can access most of Argilla's features, like **exploring and annotating** the records of your dataset.
@@ -50,8 +49,8 @@ The page is composed of 4 major components:
 
 
 Argilla's _search bar_ is a powerful tool that allows you to thoroughly explore your dataset, and quickly navigate through the records.
-You can either fuzzy search the contents of your records, or use the more advanced [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax) of Elasticsearch to take full advantage of Argilla's [data models](../python/python_client.rst#module-argilla.client.models).
-You can find more information about how to use the search bar in our detailed [search guide](search_records.md).
+You can either fuzzy search the contents of your records, or use the more advanced [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax) of Elasticsearch to take full advantage of Argilla's [data models](/reference/python/python_client.rst).
+You can find more information about how to use the search bar in our detailed [search guide]( /guides/query_datasets.md).
 
 ### Filters
 
@@ -66,9 +65,9 @@ On the right side of the filters, the info button can be used to open a small ov
 ### Record cards
 
 The record cards are at the heart of the _Dataset_ page and contain your data.
-There are three different flavors of record cards depending on the [task](../../guides/task_examples.ipynb) of your dataset.
+There are three different flavors of record cards depending on the task of your dataset.
 All of them share the same basic structure showing the input text and a horizontal ellipsis (or "kebab menu") on the top right that lets you access the record's metadata.
-Predictions and annotations are shown depending on the current [mode](#modes) and [task](../../guides/task_examples.ipynb) of the dataset.
+Predictions and annotations are shown depending on the current [mode](#modes) and task of the dataset.
 
 ```{hint}
 Use the menu on the bottom left corner of the page to select how many record cards you want to see per page: 1, 20, 50 or 100. This allows you to annotate record by record or in bigger bulks.
@@ -113,7 +112,7 @@ The right sidebar is divided into three sections.
 
 This section of the sidebar lets you switch between the different Argilla modes that are covered extensively in their respective guides:
 
-- **Hand labeling**: this mode lets you conveniently [annotate your data](./features.md#annotate-records)
+- **Hand labeling**: this mode lets you conveniently [annotate your data](/reference/webapp/features.md#annotate-records)
 - **Weak labeling**: this mode helps you to [define rules](./features.md#weak-labeling) to automatically label your data (Text Classification only)
 - **Explore**: this mode is for [exploring your dataset](./features.md#explore-records) and gain valuable insights
 
@@ -128,7 +127,7 @@ There are three different kind of _metrics_:
 - **Overall rule metrics**: see aggregated metrics about your defined rules (only visible in the _Define rules_ mode)
 - **Stats**: check the keywords of your dataset (text classification, text generation) or the mentions of your annotations and predictions (token classification)
 
-You can find more information about each metric in our dedicated [metrics guide](view_dataset_metrics.md).
+You can find more information about each metric in our dedicated [metrics guide](/guides/measure_datasets_with_metrics).
 
 #### Refresh
 
@@ -137,7 +136,7 @@ For example, if you are annotating and use the [Status filter](./features.md) to
 
 
 ## Dataset settings
-![Dataset page](../../_static/reference/webapp/pages-dataset_settings.png)
+![Dataset page](/_static/reference/webapp/pages-dataset_settings.png)
 
 You can access this page by clicking on the settings icon next to the user icon inside of the Dataset view.
 
@@ -148,17 +147,17 @@ In this page, you will be able to access the settings of a specific dataset and 
 Soon you will be able to edit this information.
 
 ### Labels
-Here you can [define your labeling schema](../../guides/log_load_and_prepare_data.ipynb#update-a-dataset) for this dataset, see the current one and add new labels to it.
+Here you can [define your labeling schema](/guides/log_load_and_prepare_data) for this dataset, see the current one and add new labels to it.
 
 ### Danger zone
 In this area, you will find a button to delete the current dataset.
 
 ## User settings
-![User settings page](../../_static/images/reference/ui/user_settings_page.png)
+![User settings page](/_static/images/reference/ui/user_settings_page.png)
 
 You can access this page by clicking on your user icon in the top right corner and selecting "My settings" in the dropdown.
 
-In this page, you will be able to access your user settings and copy your API key. Learn more about how to [set up users](../../getting_started/installation/configurations/user_management.md).
+In this page, you will be able to access your user settings and copy your API key. Learn more about how to [set up users](/getting_started/installation/configurations/user_management.md).
 
 ### Role
 

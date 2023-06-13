@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, List
 import datasets
 import pytest
 from argilla.client import api
-from pydantic import ValidationError
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
@@ -84,6 +83,15 @@ def test_init_wrong_fields(feedback_dataset_guidelines: str, feedback_dataset_qu
             fields=[TextField(name="test", required=False)],
             questions=feedback_dataset_questions,
         )
+    with pytest.raises(ValueError, match="Expected `fields` to have unique names"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=[
+                TextField(name="test", required=True),
+                TextField(name="test", required=True),
+            ],
+            questions=feedback_dataset_questions,
+        )
 
 
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields")
@@ -94,7 +102,10 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
             fields=feedback_dataset_fields,
             questions=None,
         )
-    with pytest.raises(TypeError, match="Expected `questions` to be a list of `TextQuestion` and/or `RatingQuestion`"):
+    with pytest.raises(
+        TypeError,
+        match="Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`, `LabelQuestion`, and/or `MultiLabelQuestion`",
+    ):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
@@ -105,16 +116,17 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[
-                TextQuestion(name="test", required=False),
-                RatingQuestion(name="test", values=[0, 1], required=False),
+                TextQuestion(name="question-1", required=False),
+                RatingQuestion(name="question-2", values=[0, 1], required=False),
             ],
         )
-    with pytest.raises(ValidationError, match="1 validation error for RatingQuestion"):
+    with pytest.raises(ValueError, match="Expected `questions` to have unique names"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[
-                RatingQuestion(name="test", values=[0, 0], required=True),
+                TextQuestion(name="question-1", required=True),
+                TextQuestion(name="question-1", required=True),
             ],
         )
 
@@ -162,6 +174,8 @@ def test_records(
                     "values": {
                         "question-1": {"value": "answer"},
                         "question-2": {"value": 0},
+                        "question-3": {"value": "a"},
+                        "question-4": {"value": ["a", "b"]},
                     },
                     "status": "submitted",
                 },
@@ -180,6 +194,8 @@ def test_records(
         "values": {
             "question-1": {"value": "answer"},
             "question-2": {"value": 0},
+            "question-3": {"value": "a"},
+            "question-4": {"value": ["a", "b"]},
         },
         "status": "submitted",
     }
@@ -282,6 +298,8 @@ def test_push_to_argilla_and_from_argilla(
                         "values": {
                             "question-1": {"value": "answer"},
                             "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
                         },
                         "status": "submitted",
                     },
@@ -289,6 +307,8 @@ def test_push_to_argilla_and_from_argilla(
                         "values": {
                             "question-1": {"value": "answer"},
                             "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
                         },
                         "status": "submitted",
                     },

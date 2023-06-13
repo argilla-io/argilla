@@ -24,10 +24,10 @@ try:
     from flair import __version__ as _flair_version
     from flair.data import Sentence
     from flair.models import SequenceTagger
-except ModuleNotFoundError:
+except (ImportError, ModuleNotFoundError):
+    _flair_version = None
     Sentence = MissingType
     SequenceTagger = MissingType
-    _flair_version = None
 
 
 class FlairMonitor(BaseMonitor):
@@ -46,11 +46,13 @@ class FlairMonitor(BaseMonitor):
                     prediction=[
                         (
                             label.value,
-                            label.span.start_pos,
-                            label.span.end_pos,
+                            span.start_position,
+                            span.end_position,
                             label.score,
                         )
-                        for label in sentence.get_labels(self.__model__.tag_type)
+                        for label, span in zip(
+                            sentence.get_labels(self.__model__.tag_type), sentence.get_spans(self.__model__.tag_type)
+                        )
                     ],
                 )
                 for sentence, meta in data
@@ -63,7 +65,7 @@ class FlairMonitor(BaseMonitor):
         metadata = kwargs.pop("metadata", None)
         result = self.__model__.predict(sentences, *args, **kwargs)
 
-        if isinstance(sentences, Sentence):
+        if not isinstance(sentences, list):
             sentences = [sentences]
 
         if not metadata:
