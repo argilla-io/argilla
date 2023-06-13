@@ -14,6 +14,7 @@
 
 import random
 import warnings
+from abc import abstractmethod
 from collections import Counter
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
@@ -480,10 +481,10 @@ class FeedbackDatasetConfig(BaseModel):
 class RatingQuestionStrategy(Enum):
     """
     Options:
-        - "mean": the maximum value of the ratings
-        - "majority": the minimum value of the ratings
-        - "max": the mean value of the ratings
-        - "min": the majority value of the ratings
+        - "mean": the mean value of the ratings
+        - "majority": the majority value of the ratings
+        - "max": the max value of the ratings
+        - "min": the min value of the ratings
     """
 
     MEAN: str = "mean"
@@ -492,34 +493,26 @@ class RatingQuestionStrategy(Enum):
     MIN: str = "min"
 
     def unify_responses(self, records: List[FeedbackRecord], field: RatingQuestion):
-        """Unify responses for a rating question
-
-        Args:
-            responses (List[FeedbackRecord]): list of feedback records
-            field (RatingQuestion): rating question
-
-        Examples:
-            >>> from argilla import TextField, RatingQuestion, RatingQuestionStrategy, TrainingDataForTextClassification
-            >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
-            >>> training_data = TrainingDataForTextClassification(
-            ...     text=dataset.fields[0],
-            ...     label=dataset.questions[0],
-            ...     label_strategy=RatingQuestionStrategy.MAJORITY
-            ... )
-            >>> training_data.label_strategy.unify_responses(responses=dataset.records, field=dataset.questions[0])
-        """
         UnificationValueSchema.update_forward_refs()
+        # check if field is a str or a RatingQuestion
+        if isinstance(field, str):
+            pass
+        elif isinstance(field, RatingQuestion):
+            field = field.name
+        else:
+            raise ValueError("Invalid field type. Must be a str or RatingQuestion")
+        # choose correct unification method
         if self.value == self.MAJORITY.value:
             return self._majority(records, field)
         else:
             return self._aggregate(records, field)
 
-    def _aggregate(self, records: List[FeedbackRecord], field: RatingQuestion):
+    def _aggregate(self, records: List[FeedbackRecord], field: str):
         for rec in records:
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
-            ratings = [resp.values[field.name].value for resp in responses]
+            ratings = [resp.values[field].value for resp in responses]
             # unified response
             if self.value == self.MEAN.value:
                 unified_value = sum(ratings) / len(ratings)
@@ -529,17 +522,17 @@ class RatingQuestionStrategy(Enum):
                 unified_value = min(ratings)
             else:
                 raise ValueError("Invalid aggregation method")
-            rec.unified_responses = {field.name: UnificationValueSchema(value=unified_value, strategy=self.value)}
+            rec.unified_responses = {field: UnificationValueSchema(value=unified_value, strategy=self.value)}
         return records
 
-    def _majority(self, records: List[FeedbackRecord], field: RatingQuestion):
+    def _majority(self, records: List[FeedbackRecord], field: str):
         for rec in records:
             counter = Counter()
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
             for resp in responses:
-                counter.update([resp.values[field.name].value])
+                counter.update([resp.values[field].value])
             # Find the maximum count
             max_count = max(counter.values())
             # Get a list of values with the maximum count
@@ -548,29 +541,21 @@ class RatingQuestionStrategy(Enum):
                 majority_value = random.choice(most_common_values)
             else:
                 majority_value = counter.most_common(1)[0][0]
-            rec.unified_responses = {field.name: [UnificationValueSchema(value=majority_value, strategy=self.value)]}
+            rec.unified_responses = {field: [UnificationValueSchema(value=majority_value, strategy=self.value)]}
         return records
 
 
 class LabelQuestionStrategyMixin:
-    def unify_responses(self, records: List[FeedbackRecord], field: Union[LabelQuestion, MultiLabelQuestion]):
-        """Unify responses for a rating question
-
-        Args:
-            responses (List[FeedbackRecord]): list of feedback records
-            field (RatingQuestion): rating question
-
-        Examples:
-            >>> from argilla import TextField, RatingQuestion, RatingQuestionStrategy, TrainingDataForTextClassification
-            >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
-            >>> training_data = TrainingDataForTextClassification(
-            ...     text=dataset.fields[0],
-            ...     label=dataset.questions[0],
-            ...     label_strategy=LabelQuestionStrategy.MAJORITY # or MultiLabelQuestionStrategy.MAJORITY
-            ... )
-            >>> training_data.label_strategy.unify_responses(responses=dataset.records, field=dataset.questions[0])
-        """
+    def unify_responses(self, records: List[FeedbackRecord], field: Union[str, LabelQuestion, MultiLabelQuestion]):
         UnificationValueSchema.update_forward_refs()
+        # check if field is a str or a LabelQuestion
+        if isinstance(field, (LabelQuestion, MultiLabelQuestion)):
+            field = field.name
+        elif isinstance(field, str):
+            pass
+        else:
+            raise ValueError("Invalid field type. Must be a str, LabelQuestion, MultiLabelQuestion")
+        # choose correct unification method
         if self.value == self.MAJORITY.value:
             return self._majority(records, field)
         elif self.value == self.MAJORITY_WEIGHTED.value:
@@ -578,16 +563,23 @@ class LabelQuestionStrategyMixin:
         elif self.value == self.DISAGREEMENT.value:
             return self._disagreement(records, field)
 
-    def _disagreement(self, records: List[FeedbackRecord], field: LabelQuestion):
+    @abstractmethod
+    def _majority(self, records: List[FeedbackRecord], field: str):
+        """Must be implemented by subclasses"""
+
+    @abstractmethod
+    def _majority_weighted(self, records: List[FeedbackRecord], field: str):
+        """Must be implemented by subclasses"""
+
+    def _disagreement(self, records: List[FeedbackRecord], field: str):
         unified_records = []
         for rec in records:
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
             rec.unified_responses = {
-                field.name: [
-                    UnificationValueSchema(value=resp.values[field.name].value, strategy=self.value)
-                    for resp in responses
+                field: [
+                    UnificationValueSchema(value=resp.values[field].value, strategy=self.value) for resp in responses
                 ]
             }
         return unified_records
@@ -605,14 +597,14 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     MAJORITY_WEIGHTED: str = "majority_weighted"
     DISAGREEMENT: str = "disagreement"
 
-    def _majority(self, records: List[FeedbackRecord], field: LabelQuestion):
+    def _majority(self, records: List[FeedbackRecord], field: str):
         for rec in records:
             counter = Counter()
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
             for resp in responses:
-                counter.update([resp.values[field.name].value])
+                counter.update([resp.values[field].value])
             # Find the maximum count
             max_count = max(counter.values())
             # Get a list of values with the maximum count
@@ -622,7 +614,7 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             else:
                 majority_value = counter.most_common(1)[0][0]
 
-            rec.unified_responses = {field.name: [UnificationValueSchema(value=majority_value, strategy=self.value)]}
+            rec.unified_responses = {field: [UnificationValueSchema(value=majority_value, strategy=self.value)]}
         return rec
 
     def _majority_weighted(self, records: List[FeedbackRecord], field: LabelQuestion):
@@ -641,29 +633,98 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     MAJORITY_WEIGHTED: str = "majority_weighted"
     DISAGREEMENT: str = "disagreement"
 
-    def _majority(self, records: List[FeedbackRecord], field: MultiLabelQuestion):
+    def _majority(self, records: List[FeedbackRecord], field: str):
         for rec in records:
             counter = Counter()
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
             for resp in responses:
-                if isinstance(resp.values[field.name].value, list):
-                    for value in resp.values[field.name].value:
+                if isinstance(resp.values[field].value, list):
+                    for value in resp.values[field].value:
                         counter.update([value])
                 else:
-                    counter.update([resp.values[field.name].value])
+                    counter.update([resp.values[field].value])
             # check if there is a majority based on the number of responses
             majority = int(len(responses) // 2) + 1
             majority_value = []
             for value, count in counter.items():
                 if count >= majority:
                     majority_value.append(value)
-            rec.unified_responses = {field.name: UnificationValueSchema(value=majority_value, strategy=self.value)}
+            rec.unified_responses = {field: UnificationValueSchema(value=majority_value, strategy=self.value)}
         return records
 
     def _majority_weighted(self, records: List[FeedbackRecord], field: MultiLabelQuestion):
         raise NotImplementedError("Not implemented yet")
+
+
+class RatingQuestionUnification(BaseModel):
+    """Rating unification for a rating question
+
+    Args:
+        question (RatingQuestion): rating question
+        strategy (Union[str, RatingQuestionStrategy]): unification strategy. Defaults to "mean".
+            mean (str): the mean value of the ratings.
+            majority (str): the majority value of the ratings.
+            max (str): the max value of the ratings
+            min (str): the min value of the ratings
+
+    Examples:
+        >>> from argilla import RatingQuestion, RatingUnification, RatingQuestionStrategy
+        >>> RatingUnification(question=RatingQuestion(...), strategy="mean")
+        >>> # or use a RatingQuestionStrategy
+        >>> RatingUnification(question=RatingQuestion(...), strategy=RatingQuestionStrategy.MEAN)
+    """
+
+    question: RatingQuestion
+    strategy: Union[str, RatingQuestionStrategy] = "mean"
+
+    @validator("strategy", always=True)
+    def strategy_must_be_valid(cls, v: Union[str, RatingQuestionStrategy]) -> RatingQuestionStrategy:
+        if isinstance(v, str):
+            return RatingQuestionStrategy(v)
+        return v
+
+
+class LabelQuestionUnification(BaseModel):
+    """Label unification for a label question
+
+    Args:
+        question (Union[LabelQuestion, MultiLabelQuestion]): label question
+        strategy (Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy]): unification strategy. Defaults to "majority".
+            majority (str): the majority value of the labels
+            majority_weighted (str): the majority value of the labels, weighted by annotator's confidence
+            disagreement (str): preserve the natural disagreement between annotators
+
+    Examples:
+        >>> from argilla import LabelQuestion, LabelUnification, LabelQuestionStrategy
+        >>> LabelUnification(question=LabelQuestion(...), strategy="majority")
+        >>> # or use a LabelQuestionStrategy
+        >>> LabelUnification(question=LabelQuestion(...), strategy=LabelQuestionStrategy.MAJORITY)
+    """
+
+    question: Union[LabelQuestion, MultiLabelQuestion]
+    strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy] = "majority"
+
+    @root_validator
+    def strategy_must_be_valid_and_align_with_question(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        strategy = values.get("strategy", "majority")
+        question = values["question"]
+        if isinstance(question, LabelQuestion):
+            if isinstance(strategy, str):
+                strategy = LabelQuestionStrategy(strategy)
+            elif isinstance(strategy, MultiLabelQuestionStrategy):
+                raise ValueError("LabelQuestionStrategy is not compatible with MultiLabelQuestion")
+        elif isinstance(question, MultiLabelQuestion):
+            if isinstance(strategy, str):
+                strategy = MultiLabelQuestionStrategy(strategy)
+            elif isinstance(strategy, LabelQuestionStrategy):
+                raise ValueError("MultiLabelQuestionStrategy is not compatible with LabelQuestion")
+        values["strategy"] = strategy
+        return values
+
+
+MultiLabelQuestionUnification = LabelQuestionUnification
 
 
 class TrainingDataForTextClassification(BaseModel):
@@ -671,57 +732,22 @@ class TrainingDataForTextClassification(BaseModel):
 
     Args:
         text: TextField
-        label: Union[RatingQuestion, LabelQuestion, MultiLabelQuestion]
-        label_strategy: Union[RatingQuestionStrategy, LabelQuestionStrategy] = None
+        label: Union[RatingUnification, LabelUnification, MultiLabelUnification]
 
     Examples:
-        >>> from argilla import TextField, LabelQuestion, LabelQuestionStrategy, TrainingDataForTextClassification
+        >>> from argilla import LabelQuestion, TrainingDataForTextClassification
         >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
+        >>> label = RatingQuestionUnification(question=dataset.questions[0], strategy="mean")
         >>> training_data = TrainingDataForTextClassification(
         ...     text=dataset.fields[0],
-        ...     label=dataset.questions[0],
-        ...     label_strategy=LabelQuestionStrategy.MAJORITY
+        ...     label=label
         ... )
+        >>> dataset.prepare_training_data(training_data=training_data)
 
     """
 
     text: TextField
-    label: Union[str, RatingQuestion, LabelQuestion, MultiLabelQuestion]
-    label_strategy: Union[RatingQuestionStrategy, LabelQuestionStrategy] = None
+    label: Union[RatingQuestionUnification, LabelQuestionUnification]
 
-    @root_validator(skip_on_failure=True)
-    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        if isinstance(values.get("label"), RatingQuestion):
-            if values.get("label_strategy") is None:
-                warnings.warn(
-                    "`label_strategy` not provided, so it will be set to `RatingQuestionStrategy.MEAN`.",
-                    stacklevel=2,
-                )
-                values["label_strategy"] = RatingQuestionStrategy("mean")
-            elif isinstance(values.get("label_strategy"), str):
-                values["label_strategy"] = RatingQuestionStrategy(values.get("label_strategy"))
-            else:
-                assert isinstance(values.get("label_strategy"), RatingQuestionStrategy), "invalid `label_strategy`"
-        elif isinstance(values.get("label"), LabelQuestion):
-            if values.get("label_strategy") is None:
-                warnings.warn(
-                    "`label_strategy` not provided, so it will be set to `LabelQuestionStrategy.MAJORITY`.",
-                    stacklevel=2,
-                )
-                values["label_strategy"] = LabelQuestionStrategy("majority")
-            elif isinstance(values.get("label_strategy"), str):
-                values["label_strategy"] = LabelQuestionStrategy(values.get("label_strategy"))
-            else:
-                assert isinstance(values.get("label_strategy"), LabelQuestionStrategy), "invalid `label_strategy`"
-        elif isinstance(values.get("label"), MultiLabelQuestion):
-            if values.get("label_strategy") is None:
-                warnings.warn(
-                    "`label_strategy` not provided, so it will be set to `MultiLabelQuestionStrategy.MAJORITY`.",
-                    stacklevel=2,
-                )
-                values["label_strategy"] = MultiLabelQuestionStrategy("majority")
-            elif isinstance(values.get("label_strategy"), str):
-                values["label_strategy"] = MultiLabelQuestionStrategy(values.get("label_strategy"))
-            else:
-                assert isinstance(values.get("label_strategy"), MultiLabelQuestionStrategy), "invalid `label_strategy`"
-        return values
+    def unify_responses(self, responses: List[FeedbackRecord]):
+        self.label.strategy.unify_responses(responses=responses, field=self.label.question)

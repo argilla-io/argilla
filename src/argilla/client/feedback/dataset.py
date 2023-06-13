@@ -965,12 +965,14 @@ class FeedbackDataset:
 
     def unify_responses(
         self,
-        field: Union[LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
         strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
     ):
+        if isinstance(question, str):
+            question = self.question_by_name(question)
         if isinstance(strategy, str):
             strategy = LabelQuestionStrategy(strategy)
-        strategy.unify_responses(self.records, field)
+        strategy.unify_responses(self.records, question)
 
     def prepare_for_training(
         self,
@@ -988,7 +990,7 @@ class FeedbackDataset:
             self.fetch_records()
 
         if isinstance(training_data, TrainingDataForTextClassification):
-            self.unify_responses(training_data.label, training_data.label_strategy)
+            self.unify_responses(question=training_data.label.question, strategy=training_data.label.strategy)
         else:
             raise ValueError(f"Training data {training_data} is not supported yet")
 
