@@ -55,11 +55,11 @@
 ```{toctree}
 :hidden:
 
+python.md
 docker.md
 docker-quickstart.md
 docker_compose.md
 cloud_providers.md
-python.md
 huggingface-spaces.md
 google-colab.md
 ```
