@@ -118,7 +118,7 @@ def create_user(
         json=user.dict(exclude_none=True),
     )
 
-    if response.status_code == 201:
+    if response.status_code == 200:
         parsed_response = UserModel.construct(**response.json())
         return Response(
             status_code=response.status_code,
