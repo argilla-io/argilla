@@ -352,7 +352,9 @@ async def search_dataset_records(
             record=record.__dict__, query_score=record_id_score_map[record.id]["query_score"]
         )
 
-    return SearchRecordsResult(items=[record["search_record"] for record in record_id_score_map.values()])
+    return SearchRecordsResult(
+        items=[record["search_record"] for record in record_id_score_map.values()], total=search_responses.total
+    )
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)
