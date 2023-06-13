@@ -27,6 +27,7 @@ from argilla.server.security.model import (
     UserCreate,
     WorkspaceCreate,
 )
+from argilla.tasks.users.utils import get_or_new_workspace
 
 USER_API_KEY_MIN_LENGTH = 8
 
@@ -118,7 +119,7 @@ def create(
             role=user_create.role,
             password_hash=accounts.hash_password(user_create.password),
             api_key=user_create.api_key,
-            workspaces=[_get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
+            workspaces=[get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
         )
 
         session.add(user)

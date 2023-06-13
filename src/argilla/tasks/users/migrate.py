@@ -23,6 +23,7 @@ from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.security.auth_provider.local.settings import settings
 from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
+from argilla.tasks.users.utils import get_or_new_workspace
 
 
 class WorkspaceCreate(BaseModel):
@@ -79,7 +80,7 @@ class UsersMigrator:
             role=user_create.role,
             api_key=user_create.api_key,
             password_hash=user_create.password_hash,
-            workspaces=[self._get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
+            workspaces=[get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
         )
 
     def _user_role(self, user: dict):
@@ -95,9 +96,6 @@ class UsersMigrator:
             return workspace_names
         else:
             return [user["username"]] + workspace_names
-
-    def _get_or_new_workspace(self, session: Session, workspace_name: str):
-        return session.query(Workspace).filter_by(name=workspace_name).first() or Workspace(name=workspace_name)
 
 
 def migrate():
