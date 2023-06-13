@@ -50,7 +50,6 @@ Multimodality at your fingertips:
 ````
 
 ```{toctree}
-:maxdepth: 2
 :hidden:
 
 elasticsearch.md
