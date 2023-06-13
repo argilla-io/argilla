@@ -34,7 +34,7 @@ Again, as with the `text` field, you can also use the white space analyzer to pe
 
 - `inputs.subject.exact:NEWS`
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} metadata and filters
@@ -59,7 +59,7 @@ Inclusive ranges are specified with square brackets and exclusive ranges are wit
 - `event_timestamp:[1984-01-01T01:01:01.000000 TO *]`
 - `last_updated:{* TO 1984-01-01T01:01:01.000000}`
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} operators
@@ -73,7 +73,7 @@ Following examples showcase the power of these operators:
 - `metadata.split:train AND text:fox`: Returns records that contain the word *fox* and that have the metadata *"split: train"*.
 - `NOT _exists_:metadata.split` : Returns records that don't have a metadata *split*.
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} regex
@@ -84,7 +84,7 @@ Regular expression patterns can be embedded in the query string by wrapping them
 
 The supported regular expression syntax is explained in the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/regexp-syntax.html).
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} fuzzy
@@ -94,7 +94,7 @@ This is useful to cover human misspellings:
 
 - `text:quikc~`: Matches quick and quikc.
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} wildcards
@@ -105,7 +105,7 @@ Wildcard searches can be run on individual search terms, using `?` to replace a 
 - `text.exact:"Lazy Dog*"`: Matches, for example, *"Lazy Dog"*, *"Lazy Dog."*, or *"Lazy Dogs"*.
 - `inputs.\*:news`: Searches all input fields for the word *news*.
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 ::::
@@ -153,7 +153,7 @@ You can see how the `text.exact` field can be used to search in a more fine-grai
 
 ### TextClassificationRecord's `inputs`
 
-For [text classification records](../../reference/python/python_client.rst) you can take advantage of the multiple `inputs` when performing a search.
+For [text classification records](/reference/python/python_client.rst) you can take advantage of the multiple `inputs` when performing a search.
 For example, if we uploaded records with `inputs={"subject": ..., "body": ...}`, you can direct your searches to only one of those inputs by specifying the `inputs.subject` or `inputs.body` field in your query.
 So to look for records in which the *subject* contains the word *news*, you would search for
 
@@ -185,7 +185,7 @@ This means you cannot search for single words in them, and capitalization and pu
 You can, however, use wild cards.
 
 ```{warning}
-The metadata field has by default a maximum length of 128 characters and a field limit of 50. If you wish to change these values, you can do so by setting your own `ARGILLA_METADATA_FIELD_LENGTH` in the server environment variables. Learn more [here](../getting_started/installation/configurations/server_configuration.md#environment-variables)
+The metadata field has by default a maximum length of 128 characters and a field limit of 50. If you wish to change these values, you can do so by setting your own `ARGILLA_METADATA_FIELD_LENGTH` in the server environment variables. Learn more [here](../getting_started/installation/configurations/server_configuration.md)
 ```
 
 ### Non-searchable metadata fields

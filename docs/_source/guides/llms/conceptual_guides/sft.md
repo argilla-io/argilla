@@ -2,7 +2,7 @@
 This guide explains how to implement workflows for collecting demonstration data. As covered in the ["Data Collection for Large Language Models" guide](rlhf.md), the importance of demonstration data - **prompts and demonstrations** - is paramount for improving LLMs. This data aids in supervised fine-tuning, also known as instruction-tuning or behavior cloning, where models learn to respond based on human examples. Despite being seen as labor-intensive, recent research like the LIMA work indicates that even a small set of 1,000 diverse, high-quality examples can efficiently train a model. Argilla Feedback was developed to **simplify this process, distributing it among multiple labelers in your organization**.
 
 :::{tip}
-You can add unlimited users to your Argilla instance and datasets so Argilla can be seamlessly used to **distribute the workload among hundreds of labelers or experts within your organization**. Similar efforts include Dolly from Databricks or OpenAssistant. If you’d like help setting up such an effort, reach out to us and we’ll gladly help out.
+You can add unlimited users to Argilla datasets so it can be seamlessly used to **distribute the workload among hundreds of labelers or experts within your organization**. Similar efforts include Dolly from Databricks or OpenAssistant. If you’d like help setting up such an effort, [reach out to us and we’ll gladly help out](https://tally.so/r/mBzNde).
 :::
 
 The following figure illustrates the steps to collect feedback from a team of labelers and perform supervised fine-tuning. The steps are: **configure the dataset**, **add records**, **labelers write demonstrations**, **prepare the dataset**, and **fine-tune the SFT model**.
@@ -32,7 +32,7 @@ questions =[
 ]
 ```
 
-Argilla Datasets are composed of **records**. A **record** is a data point that can be labeled by one or more labelers. A record consists of one or more **fields**. These fields and the order in which they are presented to labelers are fully configurable. In this case, we want to show labelers a prompt. We’ll just need to define a **********text field.********** This is how you can define this field:
+Argilla Datasets are composed of **records**. A **record** is a data point that can be labeled by one or more labelers. A record consists of one or more **fields**. These fields and the order in which they are presented to labelers are fully configurable. In this case, we want to show labelers a prompt. We’ll just need to define a *text field*. This is how you can define this field:
 
 ```python
 fields = [
@@ -63,7 +63,7 @@ Important features for the resulting dataset include diversity, consistent compl
 For collecting **prompts** or instructions, there are at least the following options:
 
 ### Use an existing internal database of prompts or user queries related to your use case
-If your goal is to fine-tune an LLM for your use case, this is the best option. As shown by the recent “LIMA: Less is More for Alignment” paper, you can get good results by collecting a diverse, high-quality, consistent dataset of 1,000-5,000 examples. Previous research recommends using 10,000 to 20,000 examples.
+If your goal is to fine-tune an LLM for your use case, this is the best option. As shown by the recent “LIMA: Less is More for Alignment” paper, you can get good results by collecting a diverse, high-quality, consistent dataset of 1,000-5,000 examples. Previous research uses 13,000 to 20,000 examples.
 
 
 :::{tip}

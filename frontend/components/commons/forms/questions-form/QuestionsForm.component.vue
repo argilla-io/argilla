@@ -101,6 +101,7 @@
 </template>
 
 <script>
+import "assets/icons/external";
 import { isEqual, cloneDeep } from "lodash";
 import { Notification } from "@/models/Notifications";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
@@ -164,13 +165,15 @@ export default {
       return isEqual(this.initialInputs, this.inputs);
     },
     isSomeRequiredQuestionHaveNoAnswer() {
-      return this.inputs.some(
-        (input) =>
-          input.is_required &&
-          input.options.every(
-            (option) => !option.is_selected || option.value.length === 0
-          )
-      );
+      return this.inputs
+        .filter((input) => input.is_required)
+        .some((input) => {
+          if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
+            return input.options[0].value.length === 0;
+          } else {
+            return input.options.every((option) => !option.is_selected);
+          }
+        });
     },
     isRecordDiscarded() {
       return this.recordStatus === RECORD_STATUS.DISCARDED;
@@ -385,6 +388,7 @@ export default {
     formatResponsesApiForOrm(responsesFromApi) {
       const formattedRecordResponsesForOrm = [];
       if (responsesFromApi.values) {
+        // TODO - simplify if/else by one loop
         if (Object.keys(responsesFromApi.values).length === 0) {
           // IF responses.value  is an empty object, init formatted responses with questions data
           this.inputs.forEach(
@@ -405,7 +409,7 @@ export default {
           // 1/ push formatted object corresponding to recordResponse which have been remove from api
           this.currentInputsWithNoResponses.forEach((input) => {
             formattedRecordResponsesForOrm.push({
-              id: input.response_id,
+              id: responsesFromApi.id,
               question_name: input.name,
               options: input.options,
               record_id: this.recordId,
