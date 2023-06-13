@@ -84,6 +84,7 @@ if _TYPE_CHECKING:
         TokenAttributions,
         TokenClassificationRecord,
     )
+    from argilla.client.users import User
     from argilla.client.workspaces import Workspace
     from argilla.datasets import (
         TextClassificationSettings,
@@ -136,6 +137,9 @@ _import_structure = {
         "TextQuestion",
         "ValueSchema",
     ],
+    "client.users": [
+        "User"
+    ],  # TODO(alvarobartt): it's still using API v0 so it can be included in the Argilla class, as done with `list_workspaces`
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [
