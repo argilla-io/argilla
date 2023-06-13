@@ -5,7 +5,7 @@ let wrapper = null;
 const options = {
   stubs: [
     "QuestionHeaderComponent",
-    "BaseRenderMarkdownComponent",
+    "RenderMarkdownBaseComponent",
     "ContentEditableFeedbackTask",
   ],
   propsData: {
@@ -46,7 +46,7 @@ describe("TextAreaComponent", () => {
     expect(containerWrapper.exists()).toBe(true);
 
     const BaseRenderMarkdownWrapper = wrapper.findComponent({
-      name: "BaseRenderMarkdownComponent",
+      name: "RenderMarkdownBaseComponent",
     });
     expect(BaseRenderMarkdownWrapper.exists()).toBe(false);
 
@@ -86,7 +86,7 @@ describe("TextAreaComponent", () => {
     expect(QuestionHeaderWrapper.exists()).toBe(true);
 
     const BaseRenderMarkdownWrapper = wrapper.findComponent({
-      name: "BaseRenderMarkdownComponent",
+      name: "RenderMarkdownBaseComponent",
     });
     expect(BaseRenderMarkdownWrapper.exists()).toBe(true);
 
