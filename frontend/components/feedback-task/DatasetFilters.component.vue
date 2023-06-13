@@ -82,7 +82,7 @@ export default {
     selectedStatus(newValue) {
       this.$root.$emit("status-filter-changed", newValue);
     },
-    async searchInput(searchInput) {
+    searchInput(searchInput) {
       this.$root.$emit("search-filter-changed", searchInput);
     },
   },
