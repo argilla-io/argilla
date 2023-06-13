@@ -72,19 +72,6 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class ListGetter(list):
-    def __getitem__(self, index):
-        if isinstance(index, int):
-            return super().__getitem__(index)
-        elif isinstance(index, str):
-            for item in self:
-                if item.name == index:
-                    return item
-            raise KeyError(f"Item with name {index} not found in list")
-        else:
-            raise TypeError("Index must be either an integer or a string")
-
-
 class FeedbackDataset:
     """Class to work with `FeedbackDataset`s either locally, or remotely (Argilla or HuggingFace Hub).
 
@@ -226,7 +213,6 @@ class FeedbackDataset:
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
 
-        fields = ListGetter(fields)
         any_required = False
         unique_names = set()
         for field in fields:
@@ -245,7 +231,6 @@ class FeedbackDataset:
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
 
-        questions = ListGetter(questions)
         any_required = False
         unique_names = set()
         for question in questions:
@@ -333,10 +318,22 @@ class FeedbackDataset:
         """Returns the fields that define the schema of the records in the dataset."""
         return self.__fields
 
+    def field_by_name(self, name: str) -> Dict[str, FieldSchema]:
+        for item in self.__fields:
+            if item.name == name:
+                return item
+        raise KeyError(f"Item with name '{name}' not found in list")
+
     @property
     def questions(self) -> List["FeedbackQuestionModel"]:
         """Returns the questions that will be used to annotate the dataset."""
         return self.__questions
+
+    def question_by_name(self, name: str) -> Dict[str, "FeedbackQuestionModel"]:
+        for item in self.__questions:
+            if item.name == name:
+                return item
+        raise KeyError(f"Item with name '{name}' not found in list")
 
     @property
     def records(self) -> List[FeedbackRecord]:
