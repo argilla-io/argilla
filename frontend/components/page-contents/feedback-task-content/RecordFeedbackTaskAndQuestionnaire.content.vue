@@ -81,40 +81,6 @@ export default {
       },
     },
   },
-  watch: {
-    async currentPage(newValue) {
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _page: newValue,
-          _status: this.recordStatusToFilterWith,
-        },
-      });
-    },
-    async recordStatusToFilterWith(newValue) {
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _search: "",
-          _status: newValue,
-          _page: this.currentPage,
-        },
-      });
-    },
-    async searchTextToFilterWith(newValue) {
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _search: newValue,
-          _status: this.recordStatusToFilterWith,
-          _page: this.currentPage,
-        },
-      });
-    },
-  },
   data() {
     return {
       reRenderQuestionForm: 1,
@@ -122,9 +88,18 @@ export default {
       recordStatusToFilterWith: null,
       searchTextToFilterWith: null,
       currentPage: null,
+      totalRecords: null,
+      numberOfFetch: 0,
     };
   },
   computed: {
+    filterParams() {
+      return {
+        _search: this.searchTextToFilterWith,
+        _page: this.currentPage,
+        _status: this.recordStatusToFilterWith,
+      };
+    },
     userId() {
       return this.$auth.user.id;
     },
@@ -255,7 +230,6 @@ export default {
       return isNil(_page) ? 1 : +_page;
     },
   },
-
   async fetch() {
     await this.cleanRecordOrm();
 
@@ -269,6 +243,52 @@ export default {
       await this.initRecordsInDatabase(0);
       this.currentPage = 1;
     }
+
+    this.numberOfFetch++;
+  },
+  watch: {
+    async currentPage(newValue) {
+      await this.$router.push({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          _page: newValue,
+          _status: this.recordStatusToFilterWith,
+        },
+      });
+    },
+    async recordStatusToFilterWith(newValue) {
+      await this.$router.push({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          _search: "",
+          _status: newValue,
+          _page: this.currentPage,
+        },
+      });
+    },
+    async searchTextToFilterWith(newValue) {
+      await this.$router.push({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          _search: newValue,
+          _status: this.recordStatusToFilterWith,
+          _page: this.currentPage,
+        },
+      });
+    },
+    numberOfFetch(newValue) {
+      const isFetchCalledForTheFirstTime = newValue === 1;
+
+      if (isFetchCalledForTheFirstTime) {
+        this.checkAndEmitTotalRecords({
+          searchFilter: this.searchTextToFilterWith,
+          value: this.totalRecords,
+        });
+      }
+    },
   },
   async created() {
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
@@ -328,6 +348,11 @@ export default {
 
       await this.$fetch();
 
+      this.checkAndEmitTotalRecords({
+        searchFilter: this.searchTextToFilterWith,
+        value: this.totalRecords,
+      });
+
       this.reRenderQuestionForm++;
     },
     async applySearchFilter(searchFilter) {
@@ -337,6 +362,8 @@ export default {
 
       await this.$fetch();
 
+      this.checkAndEmitTotalRecords({ searchFilter, value: this.totalRecords });
+
       this.reRenderQuestionForm++;
     },
     emitResetStatusFilter() {
@@ -344,6 +371,14 @@ export default {
     },
     emitResetSearchFilter() {
       this.$root.$emit("reset-search-filter");
+    },
+    checkAndEmitTotalRecords({ searchFilter, value }) {
+      // NOTE - update the totalRecords to show ONLY if a search input is applied
+      if (searchFilter?.length) {
+        this.$root.$emit("total-records", value);
+      } else {
+        this.$root.$emit("total-records", null);
+      }
     },
     async onSearchFilterChanged(newSearchValue) {
       const localApplySearchFilter = this.applySearchFilter;
@@ -435,6 +470,7 @@ export default {
       searchText = this.searchTextToFilterWith
     ) {
       let records = [];
+      let totalRecords = null;
 
       if (isNil(searchText) || !searchText.length) {
         // FETCH records from offset, status + 10 next records
@@ -444,13 +480,15 @@ export default {
           status
         ));
       } else {
-        ({ items: records } = await this.searchRecords(
+        ({ items: records, totalRecords } = await this.searchRecords(
           this.datasetId,
           offset,
           status,
           searchText
         ));
       }
+
+      this.totalRecords = isNil(totalRecords) ? null : totalRecords;
 
       // FORMAT records for orm
       const formattedRecords = this.factoryRecordsForOrm(records, offset);
@@ -509,10 +547,10 @@ export default {
         };
 
         const { data } = await this.$axios.post(url, body, { params });
-        const { items } = data;
+        const { items, total: totalRecords } = data;
 
         const formattedItems = items.map((item) => item.record);
-        return { items: formattedItems };
+        return { items: formattedItems, totalRecords };
       } catch (err) {
         console.warn(err);
         throw {
