@@ -331,7 +331,6 @@ export default {
       this.reRenderQuestionForm++;
     },
     async applySearchFilter(searchFilter) {
-      console.log("apply: ", searchFilter);
       // NOTE - the order of both next line is important because of the watcher update
       this.currentPage = 1;
       this.searchTextToFilterWith = searchFilter;
