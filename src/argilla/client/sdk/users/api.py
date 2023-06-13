@@ -115,7 +115,7 @@ def create_user(
 
     response = client.post(
         url=url,
-        json=user.dict(ignore_none=True),
+        json=user.dict(exclude_none=True),
     )
 
     if response.status_code == 201:
