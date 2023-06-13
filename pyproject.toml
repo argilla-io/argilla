@@ -99,8 +99,6 @@ tests = [
     "plotly >= 4.1.0",
     "snorkel >= 0.9.7",
     "spacy == 3.5.0",
-    # Should match the `spaCy` version
-    "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz",
     "transformers[torch] >= 4.19.0",
     "evaluate",
     "seqeval",
