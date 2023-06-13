@@ -7,7 +7,7 @@
     />
 
     <div class="container" :class="isFocused ? '--focused' : null">
-      <BaseRenderMarkdownComponent
+      <RenderMarkdownBaseComponent
         v-if="useMarkdown && !isFocused"
         class="textarea--markdown"
         :markdown="value"
