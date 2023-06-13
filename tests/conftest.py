@@ -33,9 +33,10 @@ from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
 from fastapi.testclient import TestClient
 from opensearchpy import OpenSearch
+from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from tests.database import TestSession
+from tests.database import SyncTestSession, TestSession
 from tests.factories import AdminFactory, AnnotatorFactory, UserFactory
 from tests.helpers import SecuredClient
 
@@ -43,6 +44,7 @@ if TYPE_CHECKING:
     from unittest.mock import MagicMock
 
     from pytest_mock import MockerFixture
+    from sqlalchemy import Connection
     from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
     from sqlalchemy.orm import Session
 
@@ -55,7 +57,7 @@ def event_loop() -> Generator["asyncio.AbstractEventLoop", None, None]:
 
 
 @pytest_asyncio.fixture(scope="session")
-async def connection() -> AsyncGenerator["AsyncConnection", None]:
+async def connection(request) -> AsyncGenerator["AsyncConnection", None]:
     # Create a temp directory to store a SQLite database used for testing
     with tempfile.TemporaryDirectory() as tmpdir:
         database_url = f"sqlite+aiosqlite:///{tmpdir}/test.db"
@@ -72,7 +74,7 @@ async def connection() -> AsyncGenerator["AsyncConnection", None]:
 
 
 @pytest_asyncio.fixture(autouse=True)
-async def db(connection: "AsyncConnection") -> AsyncGenerator["AsyncSession", None]:
+async def db(connection: "AsyncConnection", request) -> AsyncGenerator["AsyncSession", None]:
     await connection.begin_nested()
     session = TestSession()
 
@@ -81,6 +83,33 @@ async def db(connection: "AsyncConnection") -> AsyncGenerator["AsyncSession", No
     await session.close()
     await TestSession.remove()
     await connection.rollback()
+
+
+@pytest.fixture
+def sync_connection() -> Generator["Connection", None, None]:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        database_url = f"sqlite:///{tmpdir}/test.db"
+        engine = create_engine(database_url, connect_args={"check_same_thread": False})
+        conn = engine.connect()
+        SyncTestSession.configure(bind=conn)
+        Base.metadata.create_all(engine)
+
+        yield conn
+
+        Base.metadata.drop_all(engine)
+        conn.close()
+        engine.dispose()
+
+
+@pytest.fixture
+def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
+    session = SyncTestSession()
+
+    yield session
+
+    session.close()
+    SyncTestSession.remove()
+    sync_connection.rollback()
 
 
 @pytest.fixture(scope="function")

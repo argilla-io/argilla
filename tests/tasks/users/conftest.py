@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(autouse=True)
-def mock_session_local(mocker: "MockerFixture", db: "Session") -> None:
-    mocker.patch.object(db, "close", side_effect=lambda: None)
-    mocker.patch("argilla.tasks.users.create.SessionLocal", return_value=db)
-    mocker.patch("argilla.tasks.users.create_default.SessionLocal", return_value=db)
-    mocker.patch("argilla.tasks.users.migrate.SessionLocal", return_value=db)
+def mock_session_local(mocker: "MockerFixture", sync_db: "Session") -> None:
+    sync_db.close = mocker.MagicMock()
+    mocker.patch("argilla.tasks.users.create.SessionLocal", return_value=sync_db)
+    mocker.patch("argilla.tasks.users.create_default.SessionLocal", return_value=sync_db)
+    mocker.patch("argilla.tasks.users.migrate.SessionLocal", return_value=sync_db)

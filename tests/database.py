@@ -18,3 +18,4 @@ from sqlalchemy import orm
 from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
 TestSession = async_scoped_session(orm.sessionmaker(class_=AsyncSession), asyncio.current_task)
+SyncTestSession = orm.scoped_session(orm.sessionmaker(class_=orm.Session))
