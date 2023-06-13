@@ -489,7 +489,7 @@ export default {
       numberOfRecordsToFetch = 10
     ) {
       try {
-        const url = `/v1/me/datasets/${datasetId}/records/search?include=responses&response_status=${responseStatus}&limit=${numberOfRecordsToFetch}&offset=${offset}`;
+        const url = `/v1/me/datasets/${datasetId}/records/search`;
 
         const body = JSON.parse(
           JSON.stringify({
@@ -501,7 +501,14 @@ export default {
           })
         );
 
-        const { data } = await this.$axios.post(url, body);
+        const params = {
+          include: "responses",
+          response_status: responseStatus,
+          limit: numberOfRecordsToFetch,
+          offset,
+        };
+
+        const { data } = await this.$axios.post(url, body, { params });
         const { items } = data;
 
         const formattedItems = items.map((item) => item.record);
