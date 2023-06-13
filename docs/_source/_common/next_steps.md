@@ -5,3 +5,5 @@
 
 ⭐ Argilla [Github repo](https://github.com/argilla-io/argilla) to stay updated about new releases and tutorials.
 
+
+🎁 We've just printed stickers! Would you like some? [Order stickers for free](https://tally.so/r/nr5gg2)
