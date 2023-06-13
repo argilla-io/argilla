@@ -34,7 +34,6 @@ from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
-    BaseClientError,
     ForbiddenApiError,
     GenericApiError,
     HttpResponseError,
