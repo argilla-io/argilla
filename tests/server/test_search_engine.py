@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import random
+from typing import TYPE_CHECKING
 
 import pytest
 import pytest_asyncio
@@ -39,11 +40,15 @@ from tests.factories import (
     UserFactory,
 )
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
-@pytest.fixture(scope="function")
-def dataset_for_pagination(opensearch: OpenSearch):
-    dataset = DatasetFactory.create()
-    records = RecordFactory.create_batch(size=100, dataset=dataset)
+
+@pytest_asyncio.fixture(scope="function")
+async def dataset_for_pagination(opensearch: OpenSearch):
+    dataset = await DatasetFactory.create(fields=[], questions=[])
+    records = await RecordFactory.create_batch(size=100, dataset=dataset)
+    await dataset.awaitable_attrs.records
     index_name = f"rg.{dataset.id}"
 
     opensearch.indices.create(index=index_name, body={"mappings": {"properties": {"id": {"type": "keyword"}}}})
@@ -69,12 +74,17 @@ def dataset_for_pagination(opensearch: OpenSearch):
 
 
 @pytest_asyncio.fixture(scope="function")
-async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
-    text_question = TextQuestionFactory()
-    rating_question = RatingQuestionFactory()
+@pytest.mark.asyncio
+async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine) -> Dataset:
+    text_question = await TextQuestionFactory()
+    rating_question = await RatingQuestionFactory()
 
-    dataset = DatasetFactory.create(
-        fields=[TextFieldFactory(name="textId"), TextFieldFactory(name="text"), TextFieldFactory(name="label")],
+    dataset = await DatasetFactory.create(
+        fields=[
+            await TextFieldFactory.create(name="textId"),
+            await TextFieldFactory.create(name="text"),
+            await TextFieldFactory.create(name="label"),
+        ],
         questions=[text_question, rating_question],
     )
 
@@ -83,23 +93,26 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
     await elastic_search_engine.add_records(
         dataset,
         records=[
-            RecordFactory(
+            await RecordFactory.create(
                 dataset=dataset,
                 fields={"textId": "00000", "text": "My card payment had the wrong exchange rate", "label": "negative"},
+                responses=[],
             ),
-            RecordFactory(
+            await RecordFactory.create(
                 dataset=dataset,
                 fields={
                     "textId": "00001",
                     "text": "I believe that a card payment I made was cancelled.",
                     "label": "neutral",
                 },
+                responses=[],
             ),
-            RecordFactory(
+            await RecordFactory.create(
                 dataset=dataset,
                 fields={"textId": "00002", "text": "Why was I charged for getting cash?", "label": "neutral"},
+                responses=[],
             ),
-            RecordFactory(
+            await RecordFactory.create(
                 dataset=dataset,
                 fields={
                     "textId": "00003",
@@ -107,33 +120,38 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
                     " please tell me why? I need the cash back now.",
                     "label": "negative",
                 },
+                responses=[],
             ),
-            RecordFactory(
+            await RecordFactory.create(
                 dataset=dataset,
                 fields={
                     "textId": "00004",
                     "text": "Why was I charged for getting cash?",
                     "label": "neutral",
                 },
+                responses=[],
             ),
-            RecordFactory(
+            await RecordFactory.create(
                 dataset=dataset,
                 fields={
                     "textId": "00005",
                     "text": "I tried to make a payment with my card and it was declined.",
                     "label": "negative",
                 },
+                responses=[],
             ),
-            RecordFactory(
+            await RecordFactory.create(
                 dataset=dataset,
                 fields={
                     "textId": "00006",
                     "text": "My credit card was declined when I tried to make a payment.",
                     "label": "negative",
                 },
+                responses=[],
             ),
         ],
     )
+    await dataset.awaitable_attrs.records
 
     return dataset
 
@@ -141,14 +159,18 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
 @pytest.mark.asyncio
 class TestSuiteElasticSearchEngine:
     async def test_get_index_or_raise(self, elastic_search_engine: SearchEngine):
-        dataset = DatasetFactory.create()
+        dataset = await DatasetFactory.create()
         with pytest.raises(
             ValueError, match=f"Cannot access to index for dataset {dataset.id}: the specified index does not exist"
         ):
             await elastic_search_engine._get_index_or_raise(dataset)
 
-    async def test_create_index_for_dataset(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
-        dataset = DatasetFactory.create()
+    async def test_create_index_for_dataset(
+        self, elastic_search_engine: SearchEngine, db: "AsyncSession", opensearch: OpenSearch
+    ):
+        dataset = await DatasetFactory.create()
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
         await elastic_search_engine.create_index(dataset)
 
         index_name = f"rg.{dataset.id}"
@@ -174,8 +196,10 @@ class TestSuiteElasticSearchEngine:
         opensearch: OpenSearch,
         db: Session,
     ):
-        text_fields = TextFieldFactory.create_batch(5)
-        dataset = DatasetFactory.create(fields=text_fields)
+        text_fields = await TextFieldFactory.create_batch(5)
+        dataset = await DatasetFactory.create(fields=text_fields)
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
 
         await elastic_search_engine.create_index(dataset)
 
@@ -203,17 +227,17 @@ class TestSuiteElasticSearchEngine:
         self,
         elastic_search_engine: SearchEngine,
         opensearch: OpenSearch,
-        db: Session,
         text_ann_size: int,
         rating_ann_size: int,
     ):
-        text_questions = TextQuestionFactory.create_batch(size=text_ann_size)
-        rating_questions = RatingQuestionFactory.create_batch(size=rating_ann_size)
-        label_questions = LabelSelectionQuestionFactory.create_batch(size=text_ann_size)
-        multilabel_questions = MultiLabelSelectionQuestionFactory.create_batch(size=rating_ann_size)
+        text_questions = await TextQuestionFactory.create_batch(size=text_ann_size)
+        rating_questions = await RatingQuestionFactory.create_batch(size=rating_ann_size)
+        label_questions = await LabelSelectionQuestionFactory.create_batch(size=text_ann_size)
+        multilabel_questions = await MultiLabelSelectionQuestionFactory.create_batch(size=rating_ann_size)
 
         all_questions = text_questions + rating_questions + label_questions + multilabel_questions
-        dataset = DatasetFactory.create(questions=all_questions)
+        dataset = await DatasetFactory.create(questions=all_questions)
+        await dataset.awaitable_attrs.fields
 
         await elastic_search_engine.create_index(dataset)
 
@@ -271,7 +295,9 @@ class TestSuiteElasticSearchEngine:
     async def test_create_index_with_existing_index(
         self, elastic_search_engine: SearchEngine, opensearch: OpenSearch, db: Session
     ):
-        dataset = DatasetFactory.create()
+        dataset = await DatasetFactory.create()
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
         await elastic_search_engine.create_index(dataset)
 
         index_name = f"rg.{dataset.id}"
@@ -341,8 +367,8 @@ class TestSuiteElasticSearchEngine:
         status: ResponseStatusFilter,
     ):
         index_name = f"rg.{test_banking_sentiment_dataset.id}"
-        user = UserFactory.create()
-        another_user = UserFactory.create()
+        user = await UserFactory.create()
+        another_user = await UserFactory.create()
 
         if status != ResponseStatusFilter.missing:
             for record in test_banking_sentiment_dataset.records:
@@ -379,14 +405,15 @@ class TestSuiteElasticSearchEngine:
         assert [record.id for record in records[offset : offset + limit]] == [item.record_id for item in results.items]
 
     async def test_add_records(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
-        text_fields = TextFieldFactory.create_batch(5)
-        dataset = DatasetFactory.create(fields=text_fields)
-
-        records = RecordFactory.create_batch(
+        text_fields = await TextFieldFactory.create_batch(5)
+        dataset = await DatasetFactory.create(fields=text_fields, questions=[])
+        records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
             fields={field.name: f"This is the value for {field.name}" for field in text_fields},
+            responses=[],
         )
+
         await elastic_search_engine.create_index(dataset)
         await elastic_search_engine.add_records(dataset, records)
 
@@ -400,13 +427,14 @@ class TestSuiteElasticSearchEngine:
         self,
         elastic_search_engine: SearchEngine,
         opensearch: OpenSearch,
-        db: Session,
         test_banking_sentiment_dataset: Dataset,
     ):
         record = test_banking_sentiment_dataset.records[0]
         question = test_banking_sentiment_dataset.questions[0]
 
-        response = ResponseFactory.create(record=record, values={question.name: {"value": "test"}})
+        response = await ResponseFactory.create(record=record, values={question.name: {"value": "test"}})
+        record = await response.awaitable_attrs.record
+        await record.awaitable_attrs.dataset
         await elastic_search_engine.update_record_response(response)
 
         index_name = f"rg.{test_banking_sentiment_dataset.id}"
@@ -444,7 +472,9 @@ class TestSuiteElasticSearchEngine:
         record = test_banking_sentiment_dataset.records[0]
         question = test_banking_sentiment_dataset.questions[0]
 
-        response = ResponseFactory.create(record=record, values={question.name: {"value": "test"}})
+        response = await ResponseFactory.create(record=record, values={question.name: {"value": "test"}})
+        record = await response.awaitable_attrs.record
+        await record.awaitable_attrs.dataset
         await elastic_search_engine.update_record_response(response)
 
         index_name = f"rg.{test_banking_sentiment_dataset.id}"
