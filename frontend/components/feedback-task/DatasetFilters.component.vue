@@ -7,8 +7,9 @@
     >
       <SearchBarBase
         v-if="componentType === 'searchBar'"
-        :placeholder="placeholder"
         v-model="searchInput"
+        :placeholder="placeholder"
+        :additionalInfo="additionalInfoForSearchComponent"
       />
 
       <StatusFilter
@@ -21,6 +22,7 @@
 </template>
 
 <script>
+import { isNil } from "lodash";
 import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import {
   upsertDatasetFilters,
@@ -46,6 +48,7 @@ export default {
       selectedStatus: null,
       searchInput: null,
       sortedFiltersValue: [],
+      totalRecords: null,
     };
   },
   beforeMount() {
@@ -58,12 +61,22 @@ export default {
     this.$root.$on("reset-search-filter", () => {
       this.searchInput = this.searchFromRoute;
     });
+    this.$root.$on("total-records", (newTotalRecords) => {
+      this.totalRecords = newTotalRecords;
+    });
 
     this.sortedFiltersValue = Object.values(this.filters).sort((a, b) =>
       a.order > b.order ? -1 : 1
     );
   },
   computed: {
+    additionalInfoForSearchComponent() {
+      if (isNil(this.totalRecords)) return null;
+
+      if ([0, 1].includes(this.totalRecords))
+        return `${this.totalRecords} record`;
+      return `${this.totalRecords} records`;
+    },
     filtersFromVuex() {
       return getFiltersByDatasetId(
         this.datasetId,
@@ -163,6 +176,7 @@ export default {
   beforeDestroy() {
     this.$root.$off("reset-status-filter");
     this.$root.$off("reset-search-filter");
+    this.$root.$off("total-records");
   },
 };
 </script>
