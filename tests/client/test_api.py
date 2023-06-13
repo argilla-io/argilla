@@ -818,32 +818,7 @@ def test_not_aligned_argilla_versions(monkeypatch):
         Argilla()
 
 
-def test_aligned_argilla_versions(monkeypatch):
-    from argilla import __version__ as rg_version
-
-    def mock_get_info(*args, **kwargs):
-        return ApiInfo(version=rg_version)
-
-    def mock_whoami(*args, **kwargs) -> Response:
-        return Response(
-            status_code=200,
-            content=b"",
-            headers={},
-            parsed=UserModel(
-                id=uuid4(),
-                username="mock_username",
-                first_name="mock_first_name",
-                role="admin",
-                api_key="mock_api_key",
-                workspaces=["mock_workspace"],
-                inserted_at=datetime.datetime.now(),
-                updated_at=datetime.datetime.now(),
-            ),
-        )
-
-    monkeypatch.setattr(Status, "get_info", mock_get_info)
-    monkeypatch.setattr(users_api, "whoami", mock_whoami)
-
+def test_aligned_argilla_versions(mock_init_ok):
     with pytest.warns(None) as record:
         Argilla()
     assert len(record) == 0
