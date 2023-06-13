@@ -48,7 +48,7 @@ https://github.com/argilla-io/argilla/assets/1107111/49e28d64-9799-4cac-be49-19d
 <a href="https://docs.argilla.io">📄 Documentation</a> | </span>
 <a href="#-quickstart">🚀 Quickstart</a> <span> | </span>
 <a href="#-cheatsheet">🎼 Cheatsheet</a> <span> | </span>
-<a href="#-contribute">🫱🏾‍🫲🏼 Contribute</a>
+<a href="#-contribute">🫱🏾‍🫲🏼 Contribute</a> <span> | </span>
 <a href="#-roadmap">🗺️ Roadmap</a>
 </p>
 </h3>
@@ -67,15 +67,11 @@ There are different options to get started:
 
 ## 🎼 Cheatsheet
 
-<h3><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/python.html"> Install our Python package</a></h3>
+<h3><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/python.html"> Python package</a></h3>
 
 
 ```bash
 pip install argilla
-# pip install argilla[listeners] # use argilla.listeners background processes
-# pip install argilla[server] # running FastAPI locally
-# pip install argilla[postgresql] # use PostgreSQL instead of SQLite as database
-# pip install argilla[tests] # running tests locally
 ```
 
 <hr>
