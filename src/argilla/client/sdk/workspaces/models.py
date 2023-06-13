@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +13,13 @@
 #  limitations under the License.
 
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class WorkspaceModel(BaseModel):
-    id: str
+    id: UUID
     name: str
     inserted_at: datetime
     updated_at: datetime
