@@ -14,18 +14,19 @@
 #  limitations under the License.
 
 import pytest
-from argilla.client import api
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User
 
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 
-def test_workspace_cls_init(argilla_user: User):
-    workspace = WorkspaceFactory.create()
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=argilla_user.id)
+def test_workspace_cls_init(owner: User):
+    import argilla as rg
 
-    api.init(api_key=argilla_user.api_key)
+    workspace = WorkspaceFactory.create()
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+
+    rg.init(api_key=owner.api_key)
     found_workspace = Workspace.from_name(workspace.name)
 
     assert found_workspace.name == workspace.name

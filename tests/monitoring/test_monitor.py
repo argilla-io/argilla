@@ -15,13 +15,14 @@
 import warnings
 
 import argilla
+from argilla.server.models import User
 
 
 class MockModel:
     pass
 
 
-def test_monitor_with_non_supported_model():
+def test_monitor_with_non_supported_model(argilla_user: User):
     with warnings.catch_warnings(record=True) as warning_list:
         model = MockModel()
 
@@ -32,10 +33,10 @@ def test_monitor_with_non_supported_model():
         assert (
             warn_text == "The provided task model is not supported by monitoring module. "
             "Predictions won't be logged into argilla."
-        )
+        ), [warning.message.args[0] for warning in warning_list]
 
 
-def test_monitor_non_supported_huggingface_model():
+def test_monitor_non_supported_huggingface_model(argilla_user: User):
     with warnings.catch_warnings(record=True) as warning_list:
         from transformers import (
             AutoModelForTokenClassification,

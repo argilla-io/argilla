@@ -209,7 +209,7 @@ def test_get_records(role: UserRole):
     user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
-    response = get_records(client=api.client.httpx, id=dataset.id)
+    response = get_records(client=api.http_client.httpx, id=dataset.id)
 
     assert response.status_code == 200
     assert isinstance(response.parsed, FeedbackRecordsModel)

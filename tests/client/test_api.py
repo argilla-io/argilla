@@ -28,13 +28,11 @@ from argilla._constants import (
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
 )
-from argilla.client import api
 from argilla.client.apis.status import ApiInfo, Status
 from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
-    BaseClientError,
     ForbiddenApiError,
     GenericApiError,
     HttpResponseError,
@@ -46,17 +44,10 @@ from argilla.client.sdk.commons.errors import (
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import User
-from argilla.server.apis.v0.models.text_classification import (
-    TextClassificationSearchResults,
-)
-from argilla.server.contexts import accounts
 from argilla.server.models import UserRole
-from argilla.server.security.model import WorkspaceCreate, WorkspaceUserCreate
 from httpx import ConnectError
-from sqlalchemy.orm import Session
 
 from tests.factories import UserFactory, WorkspaceFactory
-from tests.helpers import SecuredClient
 from tests.server.test_api import create_some_data_for_text_classification
 
 
@@ -109,9 +100,9 @@ def mock_response_token_401(monkeypatch):
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
 
-def test_init_uppercase_workspace(mocked_client):
+def test_init_uppercase_workspace(argilla_user: Argilla):
     with pytest.raises(InputValueError):
-        api.init(workspace="UPPERCASE_WORKSPACE")
+        rg.init(workspace="UPPERCASE_WORKSPACE")
 
 
 @pytest.mark.skip(reason="Mock response is not working")
@@ -121,9 +112,9 @@ def test_init_correct(mock_init_ok):
     It checks if the _client created is a argillaClient object.
     """
 
-    client = api.active_client()
+    client = rg.active_client()
 
-    assert api.active_api().http_client == AuthenticatedClient(
+    assert rg.active_client().http_client == AuthenticatedClient(
         base_url="http://localhost:6900",
         token=DEFAULT_API_KEY,
         timeout=60.0,
@@ -134,8 +125,8 @@ def test_init_correct(mock_init_ok):
     api_key = "mock_api_key"
     workspace_name = client.user.workspaces[0]
 
-    api.init(api_url=url, api_key=api_key, workspace=workspace_name, timeout=42)
-    assert api.active_api().http_client == AuthenticatedClient(
+    rg.init(api_url=url, api_key=api_key, workspace=workspace_name, timeout=42)
+    assert rg.active_client().http_client == AuthenticatedClient(
         base_url=url,
         token=api_key,
         timeout=42,
@@ -156,8 +147,8 @@ def test_init_environment_url(mock_init_ok, monkeypatch):
     monkeypatch.setenv("ARGILLA_API_KEY", api_key)
     monkeypatch.setenv("ARGILLA_WORKSPACE", workspace_name)
 
-    api.init()
-    assert api.active_api()._client == AuthenticatedClient(
+    rg.init()
+    assert rg.active_client()._client == AuthenticatedClient(
         base_url=url,
         token=api_key,
         timeout=60,
@@ -170,8 +161,8 @@ def test_trailing_slash(mock_init_ok):
 
     It checks the trailing slash is removed in all cases
     """
-    api.init(api_url="http://mock.com/")
-    assert api.active_api()._client.base_url == "http://mock.com"
+    rg.init(api_url="http://mock.com/")
+    assert rg.active_client()._client.base_url == "http://mock.com"
 
 
 def test_log_something(argilla_user: User):
@@ -207,9 +198,8 @@ def test_load_limits(argilla_user: User, supported_vector_search: bool):
 
     api = Argilla(api_key=argilla_user.api_key)
     api.delete(dataset)
-    # TODO: Unify headers and all HTTP config in httpx inner client
-    api.http_client.httpx.headers.update(api.http_client.headers)
-    create_some_data_for_text_classification(api.http_client.httpx, dataset, n=50, with_vectors=supported_vector_search)
+
+    create_some_data_for_text_classification(api.http_client, dataset, n=50, with_vectors=supported_vector_search)
 
     limit_data_to = 10
     ds = api.load(name=dataset, limit=limit_data_to)
@@ -219,51 +209,51 @@ def test_load_limits(argilla_user: User, supported_vector_search: bool):
     assert len(ds) == limit_data_to
 
 
-def test_log_records_with_too_long_text(mocked_client):
+def test_log_records_with_too_long_text(api: Argilla):
     dataset_name = "test_log_records_with_too_long_text"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    api.delete(dataset_name)
     item = rg.TextClassificationRecord(inputs={"text": "This is a toooooo long text\n" * 10000})
 
     api.log([item], name=dataset_name)
 
 
-def test_not_found_response(mocked_client):
+def test_not_found_response(api: Argilla):
     with pytest.raises(NotFoundApiError):
         api.load(name="not-found")
 
 
-def test_log_without_name(mocked_client):
+def test_log_without_name(argilla_user: User):
     with pytest.raises(
         InputValueError,
         match="Empty dataset name has been passed as argument.",
     ):
-        api.log(
+        rg.log(
             rg.TextClassificationRecord(inputs={"text": "This is a single record. Only this. No more."}),
             name=None,
         )
 
 
-def test_log_passing_empty_records_list(mocked_client):
+def test_log_passing_empty_records_list(argilla_user: User):
     with pytest.raises(
         InputValueError,
         match="Empty record list has been passed as argument.",
     ):
-        api.log(records=[], name="ds")
+        rg.log(records=[], name="ds")
 
 
-def test_log_deprecated_chunk_size(mocked_client):
+def test_log_deprecated_chunk_size(argilla_user: User):
     dataset_name = "test_log_deprecated_chunk_size"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    rg.delete(dataset_name)
     record = rg.TextClassificationRecord(text="My text")
     with pytest.warns(FutureWarning, match="`chunk_size`.*`batch_size`"):
-        api.log(records=[record], name=dataset_name, chunk_size=100)
+        rg.log(records=[record], name=dataset_name, chunk_size=100)
 
 
-def test_large_batch_size_warning(mocked_client, caplog: pytest.LogCaptureFixture):
+def test_large_batch_size_warning(argilla_user: User, caplog: pytest.LogCaptureFixture):
     dataset_name = "test_large_batch_size_warning"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    rg.delete(dataset_name)
     record = rg.TextClassificationRecord(text="My text")
-    api.log(records=[record], name=dataset_name, batch_size=10000)
+    rg.log(records=[record], name=dataset_name, batch_size=10000)
     assert len(caplog.record_tuples) == 1
     assert "batch size is noticeably large" in caplog.record_tuples[0][2]
 
@@ -295,9 +285,9 @@ def test_log_background(argilla_user: User):
     assert dataset[0].text == sample_text
 
 
-def test_log_background_with_error(mocked_client: SecuredClient, monkeypatch: Any):
+def test_log_background_with_error(monkeypatch, argilla_user: User):
     dataset_name = "test_log_background_with_error"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    rg.delete(dataset_name)
 
     # Log in the background, and extract the future
     sample_text = "Sample text for testing"
@@ -305,9 +295,9 @@ def test_log_background_with_error(mocked_client: SecuredClient, monkeypatch: An
     def raise_http_error(*args, **kwargs):
         raise httpx.ConnectError("Mock error", request=None)
 
-    monkeypatch.setattr(api.active_client().http_client, "post", raise_http_error)
+    monkeypatch.setattr(rg.active_client().http_client, "post", raise_http_error)
 
-    future = api.log(rg.TextClassificationRecord(text=sample_text), name=dataset_name, background=True)
+    future = rg.log(rg.TextClassificationRecord(text=sample_text), name=dataset_name, background=True)
     with pytest.raises(ConnectError):
         try:
             future.result()
@@ -326,7 +316,7 @@ def test_log_background_with_error(mocked_client: SecuredClient, monkeypatch: An
         (413, HttpResponseError),
     ],
 )
-def test_delete_with_errors(mocked_client, monkeypatch, status, error_type):
+def test_delete_with_errors(monkeypatch, argilla_user: User, status, error_type):
     def send_mock_response_with_http_status(status: int):
         def inner(*args, **kwargs):
             return httpx.Response(
@@ -338,7 +328,7 @@ def test_delete_with_errors(mocked_client, monkeypatch, status, error_type):
 
     with pytest.raises(error_type):
         monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
-        api.delete("dataset")
+        rg.delete("dataset")
 
 
 @pytest.mark.parametrize(
@@ -350,25 +340,26 @@ def test_delete_with_errors(mocked_client, monkeypatch, status, error_type):
         ("text2text_records", rg.DatasetForText2Text),
     ],
 )
-def test_general_log_load(mocked_client, request, records, dataset_class):
+def test_general_log_load(argilla_user: User, request, records, dataset_class):
     dataset_names = [
         f"test_general_log_load_{dataset_class.__name__.lower()}_" + input_type
         for input_type in ["single", "list", "dataset"]
     ]
+
     for name in dataset_names:
-        mocked_client.delete(f"/api/datasets/{name}")
+        rg.delete(name)
 
     records = request.getfixturevalue(records)
 
     # log single records
-    api.log(records[0], name=dataset_names[0])
-    dataset = api.load(dataset_names[0])
+    rg.log(records[0], name=dataset_names[0])
+    dataset = rg.load(dataset_names[0])
     records[0].metrics = dataset[0].metrics
     assert dataset[0] == records[0]
 
     # log list of records
-    api.log(records, name=dataset_names[1])
-    dataset = api.load(dataset_names[1])
+    rg.log(records, name=dataset_names[1])
+    dataset = rg.load(dataset_names[1])
     # check if returned records can be converted to other formats
     assert isinstance(dataset.to_datasets(), datasets.Dataset)
     assert isinstance(dataset.to_pandas(), pd.DataFrame)
@@ -378,8 +369,8 @@ def test_general_log_load(mocked_client, request, records, dataset_class):
         assert record == expected
 
     # log dataset
-    api.log(dataset_class(records), name=dataset_names[2])
-    dataset = api.load(dataset_names[2])
+    rg.log(dataset_class(records), name=dataset_names[2])
+    dataset = rg.load(dataset_names[2])
     assert len(dataset) == len(records)
     for record, expected in zip(dataset, records):
         record.metrics = expected.metrics
@@ -388,49 +379,47 @@ def test_general_log_load(mocked_client, request, records, dataset_class):
 
 @pytest.mark.parametrize(
     "records, dataset_class",
-    [
-        ("singlelabel_textclassification_records", rg.DatasetForTextClassification),
-    ],
+    [("singlelabel_textclassification_records", rg.DatasetForTextClassification)],
 )
-def test_log_load_with_workspace(mocked_client, request, records, dataset_class):
+def test_log_load_with_workspace(argilla_user: User, request, records, dataset_class):
     dataset_names = [
         f"test_general_log_load_{dataset_class.__name__.lower()}_" + input_type
         for input_type in ["single", "list", "dataset"]
     ]
     for name in dataset_names:
-        mocked_client.delete(f"/api/datasets/{name}")
+        rg.delete(name)
 
     records = request.getfixturevalue(records)
 
-    api.log(records, name=dataset_names[0], workspace="argilla")
-    ds = api.load(dataset_names[0], workspace="argilla")
-    api.delete_records(dataset_names[0], ids=[rec.id for rec in ds][:1], workspace="argilla")
-    api.delete(dataset_names[0], workspace="argilla")
+    rg.log(records, name=dataset_names[0], workspace="argilla")
+    ds = rg.load(dataset_names[0], workspace="argilla")
+    rg.delete_records(dataset_names[0], ids=[rec.id for rec in ds][:1], workspace="argilla")
+    rg.delete(dataset_names[0], workspace="argilla")
 
 
-def test_passing_wrong_iterable_data(mocked_client):
+def test_passing_wrong_iterable_data(argilla_user: User):
     dataset_name = "test_log_single_records"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    rg.delete(dataset_name)
     with pytest.raises(Exception, match="Unknown record type"):
-        api.log({"a": "010", "b": 100}, name=dataset_name)
+        rg.log({"a": "010", "b": 100}, name=dataset_name)
 
 
-def test_log_with_generator(mocked_client, monkeypatch):
+def test_log_with_generator(argilla_user: User):
     dataset_name = "test_log_with_generator"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    rg.delete(dataset_name)
 
     def generator(items: int = 10) -> Iterable[rg.TextClassificationRecord]:
         for i in range(0, items):
             yield rg.TextClassificationRecord(id=i, inputs={"text": "The text data"})
 
-    api.log(generator(), name=dataset_name)
+    rg.log(generator(), name=dataset_name)
 
 
-def test_create_ds_with_wrong_name(mocked_client):
+def test_create_ds_with_wrong_name(argilla_user: User):
     dataset_name = "Test Create_ds_with_wrong_name"
 
     with pytest.raises(InputValueError):
-        api.log(
+        rg.log(
             rg.TextClassificationRecord(
                 inputs={"text": "The text data"},
             ),
@@ -438,11 +427,11 @@ def test_create_ds_with_wrong_name(mocked_client):
         )
 
 
-def test_delete_dataset(mocked_client):
+def test_delete_dataset(argilla_user: User):
     dataset_name = "test_delete_dataset"
-    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    rg.delete(dataset_name)
 
-    api.log(
+    rg.log(
         rg.TextClassificationRecord(
             id=0,
             inputs={"text": "The text data"},
@@ -451,19 +440,19 @@ def test_delete_dataset(mocked_client):
         ),
         name=dataset_name,
     )
-    api.load(name=dataset_name)
-    api.delete(name=dataset_name)
+    rg.load(name=dataset_name)
+    rg.delete(name=dataset_name)
     sleep(1)
     with pytest.raises(NotFoundApiError):
-        api.load(name=dataset_name)
+        rg.load(name=dataset_name)
 
 
-def test_log_with_wrong_name(mocked_client):
+def test_log_with_wrong_name(argilla_user: User):
     with pytest.raises(InputValueError):
-        api.log(name="Bad name", records=["whatever"])
+        rg.log(name="Bad name", records=["whatever"])
 
     with pytest.raises(InputValueError):
-        api.log(name="anotherWrongName", records=["whatever"])
+        rg.log(name="anotherWrongName", records=["whatever"])
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
@@ -530,15 +519,15 @@ def test_dataset_copy_to_another_workspace(role: UserRole):
         api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=workspace_02.name)
 
 
-def test_update_record(mocked_client):
+def test_update_record(argilla_user: User):
     dataset = "test_update_record"
-    mocked_client.delete(f"/api/datasets/{dataset}")
+    rg.delete(dataset)
 
     expected_inputs = ["This is a text"]
     record = rg.TextClassificationRecord(id=0, inputs=expected_inputs, annotation_agent="test", annotation=["T"])
-    api.log(record, name=dataset)
+    rg.log(record, name=dataset)
 
-    df = api.load(name=dataset)
+    df = rg.load(name=dataset)
     df = df.to_pandas()
     records = df.to_dict(orient="records")
     assert len(records) == 1
@@ -546,9 +535,9 @@ def test_update_record(mocked_client):
     # This record will be partially updated
     record = rg.TextClassificationRecord(id=0, inputs=expected_inputs, metadata={"a": "value"})
 
-    api.log(record, name=dataset)
+    rg.log(record, name=dataset)
 
-    df = api.load(name=dataset)
+    df = rg.load(name=dataset)
     df = df.to_pandas()
     records = df.to_dict(orient="records")
 
@@ -558,12 +547,13 @@ def test_update_record(mocked_client):
     assert records[0]["metadata"] == {"a": "value"}
 
 
-def test_text_classifier_with_inputs_list(mocked_client):
+def test_text_classifier_with_inputs_list(argilla_user: User):
     dataset = "test_text_classifier_with_inputs_list"
-    mocked_client.delete(f"/api/datasets/{dataset}")
+
+    rg.delete(dataset)
 
     expected_inputs = ["A", "List", "of", "values"]
-    api.log(
+    rg.log(
         rg.TextClassificationRecord(
             id=0,
             inputs=expected_inputs,
@@ -573,7 +563,7 @@ def test_text_classifier_with_inputs_list(mocked_client):
         name=dataset,
     )
 
-    df = api.load(name=dataset)
+    df = rg.load(name=dataset)
     df = df.to_pandas()
     records = df.to_dict(orient="records")
     assert len(records) == 1

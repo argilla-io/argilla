@@ -18,7 +18,7 @@ import argilla as rg
 import httpx
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla.client.api import active_api
+from argilla.client.api import ArgillaSingleton
 from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
@@ -154,7 +154,7 @@ def owner_auth_header(owner: User) -> Dict[str, str]:
 
 @pytest.fixture(scope="function")
 def argilla_user() -> User:
-    return UserFactory.create(
+    user = UserFactory.create(
         first_name="Argilla",
         username="argilla",
         role=UserRole.admin,  # Force to use an admin user
@@ -162,6 +162,8 @@ def argilla_user() -> User:
         api_key=DEFAULT_API_KEY,
         workspaces=[Workspace(name="argilla")],
     )
+    yield user
+    ArgillaSingleton.clear()
 
 
 @pytest.fixture(scope="function")
@@ -169,11 +171,31 @@ def argilla_auth_header(argilla_user: User) -> Dict[str, str]:
     return {API_KEY_HEADER_NAME: argilla_user.api_key}
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
     telemetry._CLIENT = TelemetryClient(disable_send=True)
 
     return mocker.spy(telemetry._CLIENT, "track_data")
+
+
+@pytest.fixture(autouse=True)
+def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "MagicMock", client: TestClient):
+    real_whoami = users_api.whoami
+
+    def whoami_mocked(*args, **kwargs):
+        client_arg = args[-1] if args else kwargs["client"]
+
+        monkeypatch.setattr(client_arg, "__httpx__", client)
+        return real_whoami(client_arg)
+
+    monkeypatch.setattr(users_api, "whoami", whoami_mocked)
+
+    monkeypatch.setattr(httpx, "post", client.post)
+    monkeypatch.setattr(httpx, "patch", client.patch)
+    monkeypatch.setattr(httpx, "get", client.get)
+    monkeypatch.setattr(httpx, "delete", client.delete)
+    monkeypatch.setattr(httpx, "put", client.put)
+    monkeypatch.setattr(httpx, "stream", client.stream)
 
 
 @pytest.fixture
@@ -181,20 +203,16 @@ def api(argilla_user: User) -> Argilla:
     return Argilla(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
 
-@pytest.mark.parametrize("client", [True], indirect=True)
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def mocked_client(
-    db: "Session", monkeypatch, test_telemetry: "MagicMock", argilla_user: User, client: TestClient
+    monkeypatch, using_test_client_from_argilla_python_client, argilla_user: User, client: TestClient
 ) -> SecuredClient:
-    # client_ = SecuredClient(client)
-    client_ = client
+    client_ = SecuredClient(client, argilla_user)
 
     real_whoami = users_api.whoami
 
     def whoami_mocked(client: AuthenticatedClient):
-        client_.headers.update(client.httpx.headers)
         monkeypatch.setattr(client, "__httpx__", client_)
-
         return real_whoami(client)
 
     monkeypatch.setattr(users_api, "whoami", whoami_mocked)
@@ -204,7 +222,8 @@ def mocked_client(
     monkeypatch.setattr(httpx, "get", client_.get)
     monkeypatch.setattr(httpx, "delete", client_.delete)
     monkeypatch.setattr(httpx, "put", client_.put)
-    monkeypatch.setattr(httpx, "stream", client_.stream)
+
+    from argilla.client.api import active_api
 
     rb_api = active_api()
     monkeypatch.setattr(rb_api._client, "__httpx__", client_)
