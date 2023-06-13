@@ -1,24 +1,33 @@
 <template>
-  <MonoSelectionComponent
-    :title="title"
-    :initialOptions="initialOptions"
-    :isRequired="isRequired"
-    :isIcon="tooltipMessage"
-    :tooltipMessage="tooltipMessage"
-    :colorHighlight="colorHighlight"
-    @on-change="onChangeSingleLabel"
-  />
+  <div class="wrapper">
+    <QuestionHeaderComponent
+      :title="title"
+      :isRequired="isRequired"
+      :tooltipMessage="description"
+    />
+
+    <LabelSelectionComponent
+      v-model="uniqueOptions"
+      :multiple="false"
+      :componentId="questionId"
+      :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
+    />
+  </div>
 </template>
 
 <script>
 export default {
-  name: "RatingComponent",
+  name: "SingleLabelComponent",
   props: {
+    questionId: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
     },
-    initialOptions: {
+    options: {
       type: Array,
       required: true,
     },
@@ -26,32 +35,43 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    isIcon: {
-      type: Boolean,
-      default: () => false,
-    },
-    tooltipMessage: {
+    description: {
       type: String,
       default: () => "",
     },
-    colorHighlight: {
-      type: String,
-      default: () => "black",
+    visibleOptions: {
+      type: Number | null,
+      required: false,
     },
   },
-  methods: {
-    onChangeSingleLabel(newOptions) {
-      this.$emit("on-change-single-label", newOptions);
-      const isAnySingleLabelSelected =
-        this.isAnySingleLabelSelected(newOptions);
-
-      if (this.isRequired) {
-        this.$emit("on-error", !isAnySingleLabelSelected);
+  model: {
+    prop: "options",
+  },
+  data() {
+    return {
+      uniqueOptions: [],
+    };
+  },
+  beforeMount() {
+    this.uniqueOptions = this.options.reduce((accumulator, current) => {
+      if (!accumulator.find((item) => item.id === current.id)) {
+        accumulator.push(current);
       }
-    },
-    isAnySingleLabelSelected(options) {
-      return options.some((option) => option.value);
+      return accumulator;
+    }, []);
+  },
+  computed: {
+    maxOptionsToShowBeforeCollapse() {
+      return this.visibleOptions ?? -1;
     },
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>

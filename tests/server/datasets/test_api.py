@@ -28,15 +28,13 @@ from tests.factories import WorkspaceUserFactory
 
 
 @pytest.fixture(scope="function")
-def dataset_name(test_client: TestClient, argilla_user: User, argilla_auth_header: dict):
+def dataset_name(client: TestClient, argilla_user: User, argilla_auth_header: dict):
     dataset_name = "test_dataset"
     try:
-        test_client.delete(
-            f"/api/datasets/{dataset_name}?workspace={argilla_user.username}", headers=argilla_auth_header
-        )
+        client.delete(f"/api/datasets/{dataset_name}?workspace={argilla_user.username}", headers=argilla_auth_header)
         yield dataset_name
     finally:
-        test_client.delete(
+        client.delete(
             f"/api/datasets/{dataset_name}?workspace={argilla_user.username}",
             headers=argilla_auth_header,
         )
@@ -63,14 +61,14 @@ def create_mock_dataset(
     assert response.status_code == 200, response.json()
 
 
-def test_delete_dataset(test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str):
+def test_delete_dataset(client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str):
     workspace_name = argilla_user.username
 
-    create_mock_dataset(test_client, dataset_name=dataset_name, workspace=workspace_name, headers=argilla_auth_header)
+    create_mock_dataset(client, dataset_name=dataset_name, workspace=workspace_name, headers=argilla_auth_header)
 
-    delete_dataset(test_client, dataset_name=dataset_name, workspace=workspace_name, headers=argilla_auth_header)
+    delete_dataset(client, dataset_name=dataset_name, workspace=workspace_name, headers=argilla_auth_header)
 
-    response = test_client.get(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=argilla_auth_header)
+    response = client.get(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=argilla_auth_header)
     assert response.status_code == 404, response.json()
 
     assert response.json() == {
@@ -81,8 +79,8 @@ def test_delete_dataset(test_client: TestClient, argilla_user: User, argilla_aut
     }
 
 
-def test_delete_dataset_with_missing_workspace(test_client: TestClient, argilla_user: User, argilla_auth_header: dict):
-    response = test_client.delete("/api/datasets/dataset", headers=argilla_auth_header)
+def test_delete_dataset_with_missing_workspace(client: TestClient, argilla_user: User, argilla_auth_header: dict):
+    response = client.delete("/api/datasets/dataset", headers=argilla_auth_header)
 
     assert response.status_code == 400
     assert response.json() == {
@@ -93,7 +91,7 @@ def test_delete_dataset_with_missing_workspace(test_client: TestClient, argilla_
     }
 
 
-def test_create_dataset(test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str):
+def test_create_dataset(client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str):
     workspace_name = argilla_user.username
 
     request = dict(
@@ -103,7 +101,7 @@ def test_create_dataset(test_client: TestClient, argilla_user: User, argilla_aut
         metadata={"config": {"the": "config"}},
     )
 
-    response = test_client.post(f"/api/datasets?workspace={workspace_name}", json=request, headers=argilla_auth_header)
+    response = client.post(f"/api/datasets?workspace={workspace_name}", json=request, headers=argilla_auth_header)
     assert response.status_code == 200
 
     dataset = Dataset.parse_obj(response.json())
@@ -118,13 +116,13 @@ def test_create_dataset(test_client: TestClient, argilla_user: User, argilla_aut
 
 
 def test_create_dataset_with_already_created_error(
-    test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str
+    client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str
 ):
     workspace_name = argilla_user.username
 
-    create_mock_dataset(test_client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=workspace_name)
+    create_mock_dataset(client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=workspace_name)
 
-    response = test_client.post(
+    response = client.post(
         f"/api/datasets?workspace={workspace_name}",
         json={"name": dataset_name, "task": TaskType.text_classification},
         headers=argilla_auth_header,
@@ -132,12 +130,10 @@ def test_create_dataset_with_already_created_error(
     assert response.status_code == 409
 
 
-def test_create_workspace_with_missing_workspace(
-    test_client: TestClient, argilla_user: User, argilla_auth_header: dict
-):
+def test_create_workspace_with_missing_workspace(client: TestClient, argilla_user: User, argilla_auth_header: dict):
     dataset_name = "missing-workspace-dataset"
 
-    response = test_client.post(
+    response = client.post(
         "/api/datasets",
         json={"name": dataset_name, "task": TaskType.text_classification},
         headers=argilla_auth_header,
@@ -147,16 +143,16 @@ def test_create_workspace_with_missing_workspace(
 
 
 def test_create_dataset_using_several_workspaces(
-    test_client: TestClient, argilla_user: User, mock_user: User, argilla_auth_header: dict, dataset_name: str
+    client: TestClient, argilla_user: User, mock_user: User, argilla_auth_header: dict, dataset_name: str
 ):
     mock_auth_headers = {API_KEY_HEADER_NAME: mock_user.api_key}
     for workspace in mock_user.workspaces:
-        delete_dataset(test_client, dataset_name=dataset_name, workspace=workspace.name, headers=mock_auth_headers)
+        delete_dataset(client, dataset_name=dataset_name, workspace=workspace.name, headers=mock_auth_headers)
 
         request = dict(name=dataset_name, task=TaskType.text_classification)
 
         workspace = workspace.name
-        response = test_client.post(f"/api/datasets?workspace={workspace}", json=request, headers=mock_auth_headers)
+        response = client.post(f"/api/datasets?workspace={workspace}", json=request, headers=mock_auth_headers)
 
         assert response.status_code == 200, response.json()
 
@@ -167,7 +163,7 @@ def test_create_dataset_using_several_workspaces(
         assert dataset.owner == workspace
         assert dataset.task == TaskType.text_classification
 
-        response = test_client.post(f"/api/datasets?workspace={workspace}", json=request, headers=mock_auth_headers)
+        response = client.post(f"/api/datasets?workspace={workspace}", json=request, headers=mock_auth_headers)
 
         assert response.status_code == 409, response.json()
 
@@ -177,7 +173,7 @@ def test_create_dataset_using_several_workspaces(
                 another_ws = ws.name
                 break
 
-        response = test_client.post(f"/api/datasets?workspace={another_ws}", json=request, headers=mock_auth_headers)
+        response = client.post(f"/api/datasets?workspace={another_ws}", json=request, headers=mock_auth_headers)
 
         assert response.status_code == 200, response.json()
 
@@ -190,11 +186,11 @@ def test_create_dataset_using_several_workspaces(
 
 
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification, TaskType.text2text])
-def test_dataset_naming_validation(test_client: TestClient, argilla_user: User, argilla_auth_header: dict, task):
+def test_dataset_naming_validation(client: TestClient, argilla_user: User, argilla_auth_header: dict, task):
     request = TextClassificationBulkRequest(records=[])
     dataset_name = "Wrong dataset name"
 
-    response = test_client.post(
+    response = client.post(
         f"/api/datasets/{dataset_name}/{task}:bulk?workspace={argilla_user.username}",
         json=request.dict(by_alias=True),
         headers=argilla_auth_header,
@@ -219,12 +215,10 @@ def test_dataset_naming_validation(test_client: TestClient, argilla_user: User, 
     }
 
 
-def test_list_datasets(test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str):
-    create_mock_dataset(
-        test_client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username
-    )
+def test_list_datasets(client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str):
+    create_mock_dataset(client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username)
 
-    response = test_client.get(f"/api/datasets?workspace={argilla_user.username}", headers=argilla_auth_header)
+    response = client.get(f"/api/datasets?workspace={argilla_user.username}", headers=argilla_auth_header)
     assert response.status_code == 200
 
     datasets = [Dataset.parse_obj(item) for item in response.json()]
@@ -235,25 +229,23 @@ def test_list_datasets(test_client: TestClient, argilla_user: User, argilla_auth
         assert ds.id
 
 
-def test_list_datasets_without_workspace(test_client: TestClient, argilla_user: User, argilla_auth_header: dict):
-    response = test_client.get("/api/datasets", headers=argilla_auth_header)
+def test_list_datasets_without_workspace(client: TestClient, argilla_user: User, argilla_auth_header: dict):
+    response = client.get("/api/datasets", headers=argilla_auth_header)
 
     assert response.status_code == 200
 
 
-def test_update_dataset(test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str):
-    create_mock_dataset(
-        test_client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username
-    )
+def test_update_dataset(client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str):
+    create_mock_dataset(client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username)
 
-    response = test_client.patch(
+    response = client.patch(
         f"/api/datasets/{dataset_name}?workspace={argilla_user.username}",
         json={"metadata": {"new": "value"}},
         headers=argilla_auth_header,
     )
     assert response.status_code == 200
 
-    response = test_client.get(
+    response = client.get(
         f"/api/datasets/{dataset_name}?workspace={argilla_user.username}", headers=argilla_auth_header
     )
     assert response.status_code == 200, response.json()
@@ -263,7 +255,7 @@ def test_update_dataset(test_client: TestClient, argilla_user: User, argilla_aut
 
 
 def test_update_dataset_by_annotator(
-    test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str, annotator: User
+    client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str, annotator: User
 ):
     workspace_name = argilla_user.username
 
@@ -272,9 +264,9 @@ def test_update_dataset_by_annotator(
             WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=annotator.id)
             break
 
-    create_mock_dataset(test_client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=workspace_name)
+    create_mock_dataset(client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=workspace_name)
 
-    response = test_client.patch(
+    response = client.patch(
         f"/api/datasets/{dataset_name}?workspace={workspace_name}",
         json={"metadata": {"new": "metadata"}},
         headers={API_KEY_HEADER_NAME: annotator.api_key},
@@ -284,13 +276,11 @@ def test_update_dataset_by_annotator(
 
 
 def test_update_dataset_by_annotator_without_permissions(
-    test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str, annotator: User
+    client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str, annotator: User
 ):
-    create_mock_dataset(
-        test_client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username
-    )
+    create_mock_dataset(client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username)
 
-    response = test_client.patch(
+    response = client.patch(
         f"/api/datasets/{dataset_name}?workspace={argilla_user.username}",
         json={"metadata": {"new": "metadata"}},
         headers={API_KEY_HEADER_NAME: annotator.api_key},
@@ -300,16 +290,14 @@ def test_update_dataset_by_annotator_without_permissions(
 
 
 def test_update_dataset_by_annotator_without_changes(
-    test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str, annotator: User
+    client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str, annotator: User
 ):
     for workspace in argilla_user.workspaces:
         WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=annotator.id)
 
-    create_mock_dataset(
-        test_client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username
-    )
+    create_mock_dataset(client, dataset_name=dataset_name, headers=argilla_auth_header, workspace=argilla_user.username)
 
-    response = test_client.get(
+    response = client.get(
         f"/api/datasets/{dataset_name}?workspace={argilla_user.username}", headers=argilla_auth_header
     )
     assert response.status_code == 200
@@ -317,7 +305,7 @@ def test_update_dataset_by_annotator_without_changes(
     created_dataset = response.json()
     created_dataset.pop("last_updated")
 
-    response = test_client.patch(
+    response = client.patch(
         f"/api/datasets/{dataset_name}?workspace={argilla_user.username}",
         json={},
         headers={API_KEY_HEADER_NAME: annotator.api_key},
@@ -331,17 +319,15 @@ def test_update_dataset_by_annotator_without_changes(
     assert updated_dataset == created_dataset
 
 
-def test_open_and_close_dataset(
-    test_client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str
-):
+def test_open_and_close_dataset(client: TestClient, argilla_user: User, argilla_auth_header: dict, dataset_name: str):
     workspace_name = argilla_user.username
     endpoint_url = f"/api/datasets/{dataset_name}:{{action}}?workspace={workspace_name}"
 
-    create_mock_dataset(test_client, dataset_name=dataset_name, workspace=workspace_name, headers=argilla_auth_header)
+    create_mock_dataset(client, dataset_name=dataset_name, workspace=workspace_name, headers=argilla_auth_header)
 
-    assert test_client.put(endpoint_url.format(action="close"), headers=argilla_auth_header).status_code == 200
+    assert client.put(endpoint_url.format(action="close"), headers=argilla_auth_header).status_code == 200
 
-    response = test_client.post(
+    response = client.post(
         f"/api/datasets/{dataset_name}/TextClassification:search?workspace={workspace_name}",
         headers=argilla_auth_header,
     )
@@ -350,9 +336,9 @@ def test_open_and_close_dataset(
         "detail": {"code": "argilla.api.errors::ClosedDatasetError", "params": {"name": dataset_name}}
     }
 
-    assert test_client.put(endpoint_url.format(action="open"), headers=argilla_auth_header).status_code == 200
+    assert client.put(endpoint_url.format(action="open"), headers=argilla_auth_header).status_code == 200
     assert (
-        test_client.post(
+        client.post(
             f"/api/datasets/{dataset_name}/TextClassification:search?workspace={workspace_name}",
             headers=argilla_auth_header,
         ).status_code
@@ -361,13 +347,13 @@ def test_open_and_close_dataset(
 
 
 def test_delete_records(
-    test_client: TestClient, argilla_user: User, mock_user: User, argilla_auth_header: dict, dataset_name: str
+    client: TestClient, argilla_user: User, mock_user: User, argilla_auth_header: dict, dataset_name: str
 ):
     for workspace in argilla_user.workspaces:
         WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=mock_user.id)
 
     create_mock_dataset(
-        test_client,
+        client,
         dataset_name=dataset_name,
         workspace=argilla_user.username,
         headers=argilla_auth_header,
@@ -379,7 +365,7 @@ def test_delete_records(
             for i in range(1, 100)
         ],
     )
-    response = test_client.request(
+    response = client.request(
         "DELETE",
         url=f"/api/datasets/{dataset_name}/data?workspace={argilla_user.username}",
         json={"ids": [1]},
@@ -389,7 +375,7 @@ def test_delete_records(
     assert response.status_code == 200
     assert response.json() == {"matched": 1, "processed": 1}
 
-    response = test_client.delete(
+    response = client.delete(
         f"/api/datasets/{dataset_name}/data?workspace={argilla_user.username}",
         headers={API_KEY_HEADER_NAME: mock_user.api_key},
     )
@@ -405,7 +391,7 @@ def test_delete_records(
         }
     }
 
-    response = test_client.delete(
+    response = client.delete(
         f"/api/datasets/{dataset_name}/data?mark_as_discarded=true&workspace={argilla_user.username}",
         headers={API_KEY_HEADER_NAME: mock_user.api_key},
     )

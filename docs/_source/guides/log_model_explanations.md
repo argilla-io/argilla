@@ -1,4 +1,4 @@
-# 🕵️ Explain predictions and bias
+# 🕵️ Bias and Ethics
 
 Explainability and bias are becoming more and more important in the world of data. Luckily, Argilla was developed with data-centricity in mind, which means we have some nice tailormade features that deal with these topics.
 

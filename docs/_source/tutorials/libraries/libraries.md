@@ -111,10 +111,15 @@ SHAP (SHapley Additive exPlanations) is a game theoretic approach to explain the
 
 OpenAI is a suite of APIs powered by large language and vision models which perform a variety of natural language and visual tasks.
 ```
+
+```{grid-item-card} Unstructured
+:link: unstructured.md
+
+Unstructured provides open-source components for pre-processing text documents such as PDFs, HTML and Word Documents.
+```
 ````
 
 ```{toctree}
-:maxdepth: 1
 :hidden:
 
 fastapi.md
@@ -144,4 +149,5 @@ transformersinterpret
 cleanlab
 shap
 openai
+unstructured
 ```

@@ -44,10 +44,20 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             self._column_mapping = {"text": "text", "label": "label"}
         self.init_training_args()
 
-    def init_training_args(self):
+    def init_training_args(self) -> None:
         from setfit import SetFitModel, SetFitTrainer
 
-        self.setfit_model_kwargs = get_default_args(SetFitModel.from_pretrained)
+        # SetFit only: we get both the HuggingFace Hub args and the SetFit-specific args
+        # We get the default args for `_from_pretrained` first to override the shared args
+        # with the HuggingFace Hub specific args
+        self.setfit_model_kwargs = get_default_args(SetFitModel._from_pretrained)
+        self.setfit_model_kwargs.update(get_default_args(SetFitModel.from_pretrained))
+
+        # Due to an inconsistency between `pretrained_model_name_or_path` with both `model_id` and `revision`
+        # we pop both `model_id` and `revision`
+        self.setfit_model_kwargs.pop("model_id", None)
+        self.setfit_model_kwargs.pop("revision", None)
+
         self.setfit_model_kwargs["pretrained_model_name_or_path"] = self._model
         self.setfit_model_kwargs["multi_target_strategy"] = self.multi_target_strategy
         self.setfit_model_kwargs["device"] = self.device
@@ -62,18 +72,14 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
 
     def update_config(
         self,
-        **setfit_kwargs,
-    ):
+        **kwargs,
+    ) -> None:
         """
         Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
-        from setfit import SetFitTrainer
-
-        self.setfit_model_kwargs.update(setfit_kwargs)
-
-        self.setfit_trainer_kwargs.update(setfit_kwargs)
-        self.setfit_trainer_kwargs = filter_allowed_args(SetFitTrainer.__init__, **self.setfit_trainer_kwargs)
+        self.setfit_model_kwargs.update((k, v) for k, v in kwargs.items() if k in self.setfit_model_kwargs)
+        self.setfit_trainer_kwargs.update((k, v) for k, v in kwargs.items() if k in self.setfit_trainer_kwargs)
 
     def __repr__(self):
         formatted_string = []
@@ -133,20 +139,15 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             text = [text]
             str_input = True
 
-        predictions = self._setfit_model(text, **kwargs)
+        predictions = self._setfit_model.predict_proba(text, **kwargs)
 
         formatted_prediction = []
         for val, pred in zip(text, predictions):
-            if self._multi_label:
-                pred = [self._id2label[idx] for idx, p in enumerate(pred) if p == 1]
-                if as_argilla_records:
-                    pred = self._record_class(
-                        text=val, prediction=[(p, 1) for p in pred], multi_label=self._multi_label
-                    )
-            else:
-                pred = self._id2label[int(pred)]
-                if as_argilla_records:
-                    pred = self._record_class(text=val, prediction=[(pred, 1)])
+            pred = {self._id2label[idx]: float(p) for idx, p in enumerate(pred)}
+            if as_argilla_records:
+                pred = self._record_class(
+                    text=val, prediction=[(k, v) for k, v in pred.items()], multi_label=self._multi_label
+                )
             formatted_prediction.append(pred)
 
         if str_input:

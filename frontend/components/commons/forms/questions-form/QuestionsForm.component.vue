@@ -1,13 +1,13 @@
 <template>
   <form
+    :key="renderForm"
     class="questions-form"
     :class="{ '--edited-form': !isFormUntouched }"
     @submit.prevent="onSubmit"
-    :key="renderForm"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
-        <p class="questions-form__title --body1 --medium">
+        <p class="questions-form__title --heading5 --medium">
           Submit your feedback
         </p>
         <p class="questions-form__guidelines-link">
@@ -18,49 +18,48 @@
               params: { id: datasetId },
             }"
             target="_blank"
-            >annotation guidelines <svgicon name="external-link" width="12"
-          /></NuxtLink>
+            >annotation guidelines <svgicon name="external-link" width="12" />
+          </NuxtLink>
         </p>
       </div>
       <div class="form-group" v-for="input in inputs" :key="input.id">
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
           :title="input.question"
-          :optionId="`${input.name}_0`"
           :placeholder="input.placeholder"
-          :value="input.options[0].text"
+          v-model="input.options[0].value"
+          :useMarkdown="input.settings.use_markdown"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
-          :tooltipMessage="input.description"
-          @on-change-value="
-            onChangeTextArea({ newOptions: $event, idComponent: input.id })
-          "
+          :description="input.description"
           @on-error="onError"
         />
 
         <SingleLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
+          :questionId="input.id"
           :title="input.question"
-          :initialOptions="input.options"
+          v-model="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
-          :tooltipMessage="input.description"
-          @on-change-single-label="
-            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
-          "
-          @on-error="onError"
+          :description="input.description"
+          :visibleOptions="input.settings.visible_options"
+        />
+
+        <MultiLabelComponent
+          v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
+          :questionId="input.id"
+          :title="input.question"
+          v-model="input.options"
+          :isRequired="input.is_required"
+          :description="input.description"
+          :visibleOptions="input.settings.visible_options"
         />
 
         <RatingComponent
           v-if="input.component_type === COMPONENT_TYPE.RATING"
           :title="input.question"
-          :initialOptions="input.options"
+          v-model="input.options"
           :isRequired="input.is_required"
-          :isIcon="!!input.description"
-          :tooltipMessage="input.description"
-          @on-change-rating="
-            onChangeMonoSelection({ newOptions: $event, idComponent: input.id })
-          "
+          :description="input.description"
           @on-error="onError"
         />
       </div>
@@ -102,6 +101,7 @@
 </template>
 
 <script>
+import "assets/icons/external-link";
 import { isEqual, cloneDeep } from "lodash";
 import { Notification } from "@/models/Notifications";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
@@ -120,7 +120,6 @@ import {
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
-import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
 
 export default {
   name: "QuestionsFormComponent",
@@ -166,13 +165,15 @@ export default {
       return isEqual(this.initialInputs, this.inputs);
     },
     isSomeRequiredQuestionHaveNoAnswer() {
-      return this.inputs.some(
-        (input) =>
-          input.is_required &&
-          input.options.every(
-            (option) => !option.value || option.value.length === 0
-          )
-      );
+      return this.inputs
+        .filter((input) => input.is_required)
+        .some((input) => {
+          if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
+            return input.options[0].value.length === 0;
+          } else {
+            return input.options.every((option) => !option.is_selected);
+          }
+        });
     },
     isRecordDiscarded() {
       return this.recordStatus === RECORD_STATUS.DISCARDED;
@@ -201,23 +202,30 @@ export default {
 
       return isButtonDisable;
     },
+    currentInputsWithNoResponses() {
+      return this.inputs.filter(
+        (input) =>
+          (input.component_type === COMPONENT_TYPE.RATING ||
+            input.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
+            input.component_type === COMPONENT_TYPE.MULTI_LABEL) &&
+          input.options.every((option) => !option.is_selected)
+      );
+    },
   },
   watch: {
     isFormUntouched(isFormUntouched) {
-      this.emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched);
+      this.emitIsQuestionsFormUntouched(isFormUntouched);
     },
   },
-  async created() {
+  created() {
     this.COMPONENT_TYPE = COMPONENT_TYPE;
     this.onReset();
-
-    // NOTE - Update dataset Metrics orm
-    await this.refreshMetrics();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
+    this.emitIsQuestionsFormUntouched(true); // NOTE - ensure that on destroy, all parents and siblings have the flag well reinitiate
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
@@ -241,15 +249,7 @@ export default {
         default:
       }
     },
-    onChangeTextArea({ newOptions, idComponent }) {
-      const component = this.inputs.find(({ id }) => id === idComponent);
-      // NOTE - formatting to the standard options
-      component.options = [{ ...newOptions, value: newOptions.text }];
-    },
-    onChangeMonoSelection({ newOptions, idComponent }) {
-      const component = this.inputs.find(({ id }) => id === idComponent);
-      component.options = newOptions;
-    },
+
     async sendBackendRequest(responseValues) {
       try {
         let responseData = null;
@@ -289,8 +289,6 @@ export default {
           values: responseValues,
         });
 
-        await this.refreshMetrics();
-
         await updateRecordStatusByRecordId(
           this.recordId,
           RECORD_STATUS.DISCARDED
@@ -317,8 +315,6 @@ export default {
           status: RESPONSE_STATUS_FOR_API.SUBMITTED,
           values: responseValues,
         });
-
-        await this.refreshMetrics();
 
         await updateRecordStatusByRecordId(
           this.recordId,
@@ -350,8 +346,7 @@ export default {
           RECORD_STATUS.PENDING
         );
 
-        // NOTE - Update dataset Metrics orm
-        await this.refreshMetrics();
+        this.$emit("on-clear-responses");
         this.onReset();
       } catch (err) {
         console.log(err);
@@ -369,42 +364,8 @@ export default {
         this.isError = false;
       }
     },
-    async refreshMetrics() {
-      const datasetMetrics = await this.fetchMetrics();
-
-      const formattedMetrics = this.factoryDatasetMetricsForOrm(datasetMetrics);
-
-      await upsertDatasetMetrics(formattedMetrics);
-    },
     async deleteResponsesByResponseId(responseId) {
       return await this.$axios.delete(`/v1/responses/${responseId}`);
-    },
-    async fetchMetrics() {
-      try {
-        const { data } = await this.$axios.get(
-          `/v1/me/datasets/${this.datasetId}/metrics`
-        );
-
-        return data;
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    factoryDatasetMetricsForOrm({ records, responses, user_id }) {
-      const {
-        count: responsesCount,
-        submitted: responsesSubmitted,
-        discarded: responsesDiscarded,
-      } = responses;
-
-      return {
-        dataset_id: this.datasetId,
-        user_id: user_id ?? this.userId,
-        total_record: records?.count ?? 0,
-        responses_count: responsesCount,
-        responses_submitted: responsesSubmitted,
-        responses_discarded: responsesDiscarded,
-      };
     },
     async updateResponsesInOrm(responsesFromApi) {
       const newResponseToUpsertInOrm =
@@ -427,6 +388,7 @@ export default {
     formatResponsesApiForOrm(responsesFromApi) {
       const formattedRecordResponsesForOrm = [];
       if (responsesFromApi.values) {
+        // TODO - simplify if/else by one loop
         if (Object.keys(responsesFromApi.values).length === 0) {
           // IF responses.value  is an empty object, init formatted responses with questions data
           this.inputs.forEach(
@@ -442,6 +404,20 @@ export default {
           );
         } else {
           // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
+
+          // TODO - remove both loop with only one loop over the form object ( this.inputs)
+          // 1/ push formatted object corresponding to recordResponse which have been remove from api
+          this.currentInputsWithNoResponses.forEach((input) => {
+            formattedRecordResponsesForOrm.push({
+              id: responsesFromApi.id,
+              question_name: input.name,
+              options: input.options,
+              record_id: this.recordId,
+              user_id: this.userId,
+            });
+          });
+
+          // 2/ loop over the responseFromApi
           Object.entries(responsesFromApi.values).map(
             ([questionName, newResponse]) => {
               const componentType =
@@ -456,20 +432,46 @@ export default {
                 );
 
               switch (componentType) {
+                case COMPONENT_TYPE.MULTI_LABEL:
                 case COMPONENT_TYPE.SINGLE_LABEL:
+                  formattedOptions = formattedOptions.map((option) => {
+                    const currentOptionsFromForm = this.inputs.find(
+                      (input) => input.name === questionName
+                    )?.options;
+                    const currentOption = currentOptionsFromForm.find(
+                      (currentOption) => currentOption.id === option.id
+                    );
+
+                    return {
+                      id: option.id,
+                      text: option.text,
+                      is_selected: currentOption.is_selected,
+                      value: option.value,
+                    };
+                  });
+                  break;
                 case COMPONENT_TYPE.RATING:
                   formattedOptions = formattedOptions.map((option) => {
-                    if (option.text === newResponse.value) {
-                      return { id: option.id, text: option.text, value: true };
-                    }
-                    return { id: option.id, text: option.text, value: false };
+                    const currentOptionsFromForm = this.inputs.find(
+                      (input) => input.name === questionName
+                    )?.options;
+
+                    const currentOption = currentOptionsFromForm.find(
+                      (currentOption) => currentOption.id === option.id
+                    );
+
+                    return {
+                      id: option.id,
+                      text: option.text,
+                      is_selected: currentOption.is_selected,
+                      value: option.text,
+                    };
                   });
                   break;
                 case COMPONENT_TYPE.FREE_TEXT:
                   formattedOptions = [
                     {
                       id: formattedOptions[0].id,
-                      text: newResponse.value,
                       value: newResponse.value,
                     },
                   ];
@@ -496,25 +498,44 @@ export default {
       let responseByQuestionName = {};
 
       this.inputs.forEach((input) => {
-        let selectedOption = null;
         switch (input.component_type) {
+          case COMPONENT_TYPE.MULTI_LABEL: {
+            const selectedOptions =
+              input.options?.filter((option) => option.is_selected) ?? false;
+
+            if (selectedOptions?.length) {
+              responseByQuestionName[input.name] = {
+                value: selectedOptions.map((option) => option.value),
+              };
+            }
+            break;
+          }
           case COMPONENT_TYPE.SINGLE_LABEL:
-          case COMPONENT_TYPE.RATING:
-            selectedOption = input.options?.find((option) => option.value);
+          case COMPONENT_TYPE.RATING: {
+            const selectedOption =
+              input.options?.find((option) => option.is_selected) ?? false;
+
+            if (selectedOption) {
+              responseByQuestionName[input.name] = {
+                value: selectedOption.value,
+              };
+            }
             break;
-          case COMPONENT_TYPE.FREE_TEXT:
-            selectedOption = input.options[0];
+          }
+          case COMPONENT_TYPE.FREE_TEXT: {
+            const selectedOption = input.options[0] ?? false;
+
+            if (selectedOption) {
+              responseByQuestionName[input.name] = {
+                value: selectedOption.value,
+              };
+            }
             break;
+          }
           default:
             console.log(
               `The component type ${input.component_type} is unknown, the response can't be save`
             );
-        }
-
-        const isSelectedOptionNotEmpty = selectedOption ?? false;
-
-        if (isSelectedOptionNotEmpty) {
-          responseByQuestionName[input.name] = { value: selectedOption.text };
         }
       });
       return responseByQuestionName;
@@ -526,7 +547,7 @@ export default {
         type: typeOfToast,
       });
     },
-    emitIsQuestionsFormUntouchedByBusEvent(isFormUntouched) {
+    emitIsQuestionsFormUntouched(isFormUntouched) {
       this.$emit("on-question-form-touched", !isFormUntouched);
       // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);
@@ -545,30 +566,29 @@ export default {
   border-radius: $border-radius-m;
   box-shadow: $shadow;
   &__header {
-    display: flex;
     align-items: baseline;
-    gap: $base-space * 2;
   }
   &__title {
-    margin: 0;
+    margin: 0 0 calc($base-space / 2) 0;
     color: $black-87;
   }
   &__guidelines-link {
     margin: 0;
-    @include font-size(13px);
+    @include font-size(14px);
     color: $black-37;
     a {
       color: $black-37;
       outline: 0;
+      text-decoration: none;
       &:hover {
-        color: $black-54;
+        text-decoration: underline;
       }
     }
   }
   &__content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: $base-space * 4;
     padding: $base-space * 3;
     overflow: auto;
   }

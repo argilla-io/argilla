@@ -34,6 +34,7 @@ from argilla._constants import (
 from argilla.client.apis.datasets import Datasets
 from argilla.client.apis.metrics import MetricsAPI
 from argilla.client.apis.search import Search, VectorSearch
+from argilla.client.apis.status import Status
 from argilla.client.datasets import (
     Dataset,
     DatasetForText2Text,
@@ -52,7 +53,6 @@ from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import bulk
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
-    BaseClientError,
     InputValueError,
     NotFoundApiError,
 )
@@ -64,14 +64,15 @@ from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
 )
-from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
+from argilla.client.sdk.text2text.models import (
+    Text2TextRecord as SdkText2TextRecord,
+)
 from argilla.client.sdk.text_classification import api as text_classification_api
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     LabelingRule,
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
-    TextClassificationQuery,
 )
 from argilla.client.sdk.text_classification.models import (
     TextClassificationRecord as SdkTextClassificationRecord,
@@ -79,7 +80,6 @@ from argilla.client.sdk.text_classification.models import (
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
-    TokenClassificationQuery,
 )
 from argilla.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
@@ -87,7 +87,6 @@ from argilla.client.sdk.token_classification.models import (
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel
-from argilla.utils import setup_loop_in_thread
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -139,6 +138,25 @@ class Argilla:
         self._user = users_api.whoami(client=self._client.httpx).parsed
         self.set_workspace(workspace or self._user.username)
 
+        self._check_argilla_versions()
+
+    def _check_argilla_versions(self):
+        from argilla import __version__ as rg_version
+
+        api_info = Status(self.http_client).get_info()
+
+        client_version = rg_version.split(".")[:2]
+        server_version = api_info.version.split(".")[:2]
+        if client_version != server_version:
+            warnings.warn(
+                message=f"You're connecting to Argilla Server {api_info.version} using a different client version "
+                f"({rg_version}).\n"
+                "This may lead to potential compatibility issues during your experience.\n"
+                "To ensure a seamless and optimized connection, we highly recommend "
+                "aligning your client version with the server version.",
+                category=UserWarning,
+            )
+
     def __del__(self):
         if hasattr(self, "_client"):
             del self._client
@@ -160,12 +178,12 @@ class Argilla:
     @property
     def datasets(self) -> Datasets:
         """Datasets API primitives"""
-        return Datasets(client=self._client)
+        return Datasets(client=self.http_client)
 
     @property
     def search(self):
         """Search API primitives"""
-        return Search(client=self._client)
+        return Search(client=self.http_client)
 
     @property
     def metrics(self):
@@ -197,7 +215,7 @@ class Argilla:
 
         if workspace != self.get_workspace():
             if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
-                self._client.headers[WORKSPACE_HEADER_NAME] = workspace
+                self.http_client.headers[WORKSPACE_HEADER_NAME] = workspace
             else:
                 raise Exception(f"Wrong provided workspace {workspace}")
 
@@ -207,7 +225,7 @@ class Argilla:
         Returns:
             The name of the active workspace as a string.
         """
-        return self._client.headers.get(WORKSPACE_HEADER_NAME)
+        return self.http_client.headers.get(WORKSPACE_HEADER_NAME)
 
     def list_workspaces(self) -> List[WorkspaceModel]:
         """Lists all the availble workspaces for the current user.
@@ -216,7 +234,7 @@ class Argilla:
             A list of `WorkspaceModel` objects, containing the workspace
             attributes: name, id, created_at, and updated_at.
         """
-        return workspaces_api.list_workspaces(client=self._client.httpx).parsed
+        return workspaces_api.list_workspaces(client=self.http_client.httpx).parsed
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
@@ -228,7 +246,7 @@ class Argilla:
 
         """
         datasets_api.copy_dataset(
-            client=self._client,
+            client=self.http_client,
             name=dataset,
             json_body=CopyDatasetRequest(name=name_of_copy, target_workspace=workspace),
         )
@@ -242,7 +260,7 @@ class Argilla:
         if workspace is not None:
             self.set_workspace(workspace)
 
-        datasets_api.delete_dataset(client=self._client, name=name)
+        datasets_api.delete_dataset(client=self.http_client, name=name)
 
     def log(
         self,
@@ -371,7 +389,7 @@ class Argilla:
                 batch_id, batch = batch_info
 
                 bulk_result = bulk(
-                    client=self._client,
+                    client=self.http_client,
                     name=name,
                     json_body=bulk_class(
                         tags=tags, metadata=metadata, records=[creation_class.from_client(r) for r in batch]
@@ -396,7 +414,7 @@ class Argilla:
             workspace = self.get_workspace()
             if not workspace:  # Just for backward comp. with datasets with no workspaces
                 workspace = "-"
-            url = f"{self._client.base_url}/datasets/{workspace}/{name}"
+            url = f"{self.http_client.base_url}/datasets/{workspace}/{name}"
             rprint(f"{processed} records logged to [link={url}]{url}[/link]")
 
         # Creating a composite BulkResponse with the total processed and failed
@@ -513,8 +531,8 @@ class Argilla:
         )
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
-        response = datasets_api.get_dataset(self._client, name)
-        response = metrics_api.get_dataset_metrics(self._client, name=name, task=response.parsed.task)
+        response = datasets_api.get_dataset(self.http_client, name)
+        response = metrics_api.get_dataset_metrics(self.http_client, name=name, task=response.parsed.task)
 
         return response.parsed
 
@@ -532,13 +550,13 @@ class Argilla:
         interval: Optional[float] = None,
         size: Optional[int] = None,
     ) -> MetricResults:
-        response = datasets_api.get_dataset(self._client, name)
+        response = datasets_api.get_dataset(self.http_client, name)
 
         metric_ = self.get_metric(name, metric=metric)
         assert metric_ is not None, f"Metric {metric} not found !!!"
 
         response = metrics_api.compute_metric(
-            self._client,
+            self.http_client,
             name=name,
             task=response.parsed.task,
             metric=metric,
@@ -554,7 +572,7 @@ class Argilla:
         for rule in rules:
             try:
                 text_classification_api.add_dataset_labeling_rule(
-                    self._client,
+                    self.http_client,
                     name=dataset,
                     rule=rule,
                 )
@@ -572,34 +590,34 @@ class Argilla:
         for rule in rules:
             try:
                 text_classification_api.update_dataset_labeling_rule(
-                    self._client,
+                    self.http_client,
                     name=dataset,
                     rule=rule,
                 )
             except NotFoundApiError:
                 _LOGGER.info(f"Rule {rule} does not exists, creating...")
-                text_classification_api.add_dataset_labeling_rule(self._client, name=dataset, rule=rule)
+                text_classification_api.add_dataset_labeling_rule(self.http_client, name=dataset, rule=rule)
             except Exception as ex:
                 _LOGGER.warning(f"Cannot update rule {rule}: {ex}")
 
     def delete_dataset_labeling_rules(self, dataset: str, rules: List[LabelingRule]):
         for rule in rules:
             try:
-                text_classification_api.delete_dataset_labeling_rule(self._client, name=dataset, rule=rule)
+                text_classification_api.delete_dataset_labeling_rule(self.http_client, name=dataset, rule=rule)
             except Exception as ex:
                 _LOGGER.warning(f"Cannot delete rule {rule}: {ex}")
         """Deletes the dataset labeling rules"""
         for rule in rules:
-            text_classification_api.delete_dataset_labeling_rule(self._client, name=dataset, rule=rule)
+            text_classification_api.delete_dataset_labeling_rule(self.http_client, name=dataset, rule=rule)
 
     def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
-        response = text_classification_api.fetch_dataset_labeling_rules(self._client, name=dataset)
+        response = text_classification_api.fetch_dataset_labeling_rules(self.http_client, name=dataset)
 
         return [LabelingRule.parse_obj(data) for data in response.parsed]
 
     def rule_metrics_for_dataset(self, dataset: str, rule: LabelingRule) -> LabelingRuleMetricsSummary:
         response = text_classification_api.dataset_rule_metrics(
-            self._client, name=dataset, query=rule.query, label=rule.label
+            self.http_client, name=dataset, query=rule.query, label=rule.label
         )
 
         return LabelingRuleMetricsSummary.parse_obj(response.parsed)

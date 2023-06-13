@@ -15,8 +15,9 @@
         :recordId="recordId"
         :recordStatus="record.record_status"
         :initialInputs="questionsWithRecordAnswers"
-        @on-submit-responses="onActionInResponses('SUBMIT')"
-        @on-discard-responses="onActionInResponses('DISCARD')"
+        @on-submit-responses="goToNextPageAndRefreshMetrics"
+        @on-discard-responses="goToNextPageAndRefreshMetrics"
+        @on-clear-responses="refreshMetrics"
         @on-question-form-touched="onQuestionFormTouched"
       />
     </template>
@@ -50,7 +51,9 @@ import {
   isRecordWithRecordIndexByDatasetIdExists,
   isAnyRecordByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
-
+import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
+import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 
@@ -94,7 +97,19 @@ export default {
         path: this.$route.path,
         query: {
           ...this.$route.query,
+          _search: "",
           _status: newValue,
+          _page: this.currentPage,
+        },
+      });
+    },
+    async searchTextToFilterWith(newValue) {
+      await this.$router.push({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          _search: newValue,
+          _status: this.recordStatusToFilterWith,
           _page: this.currentPage,
         },
       });
@@ -105,12 +120,16 @@ export default {
       reRenderQuestionForm: 1,
       questionFormTouched: false,
       recordStatusToFilterWith: null,
+      searchTextToFilterWith: null,
       currentPage: null,
     };
   },
   computed: {
     userId() {
       return this.$auth.user.id;
+    },
+    noMoreDataMessage() {
+      return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
     },
     recordStatusFilterValueForGetRecords() {
       // NOTE - this is only used to fetch record, this is why the return value is in lowercase
@@ -165,17 +184,34 @@ export default {
       return this.record?.record_fields ?? [];
     },
     questionsWithRecordAnswers() {
+      // TODO - do this in a hook instead of computed => it's expensive
       return this.questions?.map((question) => {
         const correspondingResponseToQuestion =
           this.recordResponsesFromCurrentUser.find(
             (recordResponse) => question.name === recordResponse.question_name
           );
+
         if (correspondingResponseToQuestion) {
+          const formattedOptions = correspondingResponseToQuestion.options.map(
+            (option) => {
+              return { ...option, is_selected: option.is_selected || false };
+            }
+          );
           return {
             ...question,
             response_id: correspondingResponseToQuestion.id,
-            options: correspondingResponseToQuestion.options,
+            options: formattedOptions,
           };
+        }
+        if (
+          question.component_type === COMPONENT_TYPE.RATING ||
+          question.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
+          question.component_type === COMPONENT_TYPE.MULTI_LABEL
+        ) {
+          const formattedOptions = question.options.map((option) => {
+            return { ...option, is_selected: false };
+          });
+          return { ...question, options: formattedOptions, response_id: null };
         }
         return { ...question, response_id: null };
       });
@@ -195,7 +231,12 @@ export default {
       });
     },
     noRecordsMessage() {
-      return `You have no ${this.recordStatusToFilterWith} records`;
+      if (
+        isNil(this.searchTextToFilterWith) ||
+        this.searchTextToFilterWith.length === 0
+      )
+        return `You have no ${this.recordStatusToFilterWith} records`;
+      return `You have no ${this.recordStatusToFilterWith} records matching the search input : ${this.searchTextToFilterWith}`;
     },
     statusClass() {
       return `--${this.record.record_status.toLowerCase()}`;
@@ -206,6 +247,9 @@ export default {
     statusFilterFromQuery() {
       return this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
     },
+    searchFilterFromQuery() {
+      return this.$route.query?._search ?? "";
+    },
     pageFromQuery() {
       const { _page } = this.$route.query;
       return isNil(_page) ? 1 : +_page;
@@ -213,6 +257,8 @@ export default {
   },
 
   async fetch() {
+    await this.cleanRecordOrm();
+
     await this.initRecordsInDatabase(this.currentPage - 1);
 
     const offset = this.currentPage - 1;
@@ -225,10 +271,11 @@ export default {
     }
   },
   async created() {
-    this.noMoreDataMessage = "There is no more data";
-
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
+    this.searchTextToFilterWith = this.searchFilterFromQuery;
     this.currentPage = this.pageFromQuery;
+
+    await this.refreshMetrics();
   },
   mounted() {
     this.$root.$on("go-to-next-page", () => {
@@ -238,20 +285,89 @@ export default {
       this.setCurrentPage(this.currentPage - 1);
     });
     this.$root.$on("status-filter-changed", this.onStatusFilterChanged);
+    this.$root.$on("search-filter-changed", this.onSearchFilterChanged);
   },
   methods: {
+    async refreshMetrics() {
+      const datasetMetrics = await this.fetchMetrics();
+
+      const formattedMetrics = this.factoryDatasetMetricsForOrm(datasetMetrics);
+
+      await upsertDatasetMetrics(formattedMetrics);
+    },
+    async fetchMetrics() {
+      try {
+        const { data } = await this.$axios.get(
+          `/v1/me/datasets/${this.datasetId}/metrics`
+        );
+
+        return data;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    factoryDatasetMetricsForOrm({ records, responses, user_id }) {
+      const {
+        count: responsesCount,
+        submitted: responsesSubmitted,
+        discarded: responsesDiscarded,
+      } = responses;
+
+      return {
+        dataset_id: this.datasetId,
+        user_id: user_id ?? this.userId,
+        total_record: records?.count ?? 0,
+        responses_count: responsesCount,
+        responses_submitted: responsesSubmitted,
+        responses_discarded: responsesDiscarded,
+      };
+    },
     async applyStatusFilter(status) {
       this.recordStatusToFilterWith = status;
       this.currentPage = 1;
 
-      await deleteAllRecords();
       await this.$fetch();
 
       this.reRenderQuestionForm++;
-      this.questionFormTouched = false;
+    },
+    async applySearchFilter(searchFilter) {
+      // NOTE - the order of both next line is important because of the watcher update
+      this.currentPage = 1;
+      this.searchTextToFilterWith = searchFilter;
+
+      await this.$fetch();
+
+      this.reRenderQuestionForm++;
     },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
+    },
+    emitResetSearchFilter() {
+      this.$root.$emit("reset-search-filter");
+    },
+    async onSearchFilterChanged(newSearchValue) {
+      const localApplySearchFilter = this.applySearchFilter;
+      const localEmitResetSearchFilter = this.emitResetSearchFilter;
+
+      if (
+        this.questionFormTouched &&
+        newSearchValue !== this.searchFilterFromQuery
+      ) {
+        Notification.dispatch("notify", {
+          message: "Your changes will be lost if you apply the search filter",
+          numberOfChars: 500,
+          type: "warning",
+          buttonText: LABEL_PROPERTIES.CONTINUE,
+          async onClick() {
+            await localApplySearchFilter(newSearchValue);
+          },
+          onClose() {
+            localEmitResetSearchFilter();
+          },
+        });
+      } else {
+        await this.applySearchFilter(newSearchValue);
+      }
     },
     async onStatusFilterChanged(newStatus) {
       if (this.recordStatusToFilterWith === newStatus) {
@@ -309,26 +425,33 @@ export default {
         });
       }
     },
-    async onActionInResponses(typeOfAction) {
-      switch (typeOfAction) {
-        case "SUBMIT":
-        case "DISCARD":
-          this.setCurrentPage(this.currentPage + 1);
-          break;
-        default:
-        // do nothing
-      }
+    async goToNextPageAndRefreshMetrics() {
+      this.setCurrentPage(this.currentPage + 1);
+      await this.refreshMetrics();
     },
     async initRecordsInDatabase(
       offset,
-      status = this.recordStatusFilterValueForGetRecords
+      status = this.recordStatusFilterValueForGetRecords,
+      searchText = this.searchTextToFilterWith
     ) {
-      // FETCH records from offset, status + 10 next records
-      const { items: records } = await this.getRecords(
-        this.datasetId,
-        offset,
-        status
-      );
+      let records = [];
+
+      if (isNil(searchText) || !searchText.length) {
+        // FETCH records from offset, status + 10 next records
+        ({ items: records } = await this.getRecords(
+          this.datasetId,
+          offset,
+          status
+        ));
+      } else {
+        ({ items: records } = await this.searchRecords(
+          this.datasetId,
+          offset,
+          status,
+          searchText
+        ));
+      }
+
       // FORMAT records for orm
       const formattedRecords = this.factoryRecordsForOrm(records, offset);
 
@@ -351,6 +474,45 @@ export default {
         };
         const { data } = await this.$axios.get(url, { params });
         return data;
+      } catch (err) {
+        console.warn(err);
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
+        };
+      }
+    },
+    async searchRecords(
+      datasetId,
+      offset,
+      responseStatus,
+      searchText,
+      numberOfRecordsToFetch = 10
+    ) {
+      try {
+        const url = `/v1/me/datasets/${datasetId}/records/search`;
+
+        const body = JSON.parse(
+          JSON.stringify({
+            query: {
+              text: {
+                q: searchText,
+              },
+            },
+          })
+        );
+
+        const params = {
+          include: "responses",
+          response_status: responseStatus,
+          limit: numberOfRecordsToFetch,
+          offset,
+        };
+
+        const { data } = await this.$axios.post(url, body, { params });
+        const { items } = data;
+
+        const formattedItems = items.map((item) => item.record);
+        return { items: formattedItems };
       } catch (err) {
         console.warn(err);
         throw {
@@ -434,26 +596,39 @@ export default {
                   );
 
                 switch (correspondingComponentTypeOfTheAnswer) {
+                  case COMPONENT_TYPE.MULTI_LABEL:
+                    optionsByQuestionName.forEach(({ id, text, value }) => {
+                      const isValueInRecordResponse =
+                        recordResponseByQuestionName.value.includes(value);
+
+                      formattedOptionsWithRecordResponse.push({
+                        id,
+                        text,
+                        value,
+                        is_selected: isValueInRecordResponse,
+                      });
+                    });
+                    break;
                   case COMPONENT_TYPE.SINGLE_LABEL:
                   case COMPONENT_TYPE.RATING:
                     // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
                     formattedOptionsWithRecordResponse =
                       optionsByQuestionName.map(({ id, text, value }) => {
-                        if (text === recordResponseByQuestionName.value) {
+                        if (value === recordResponseByQuestionName.value) {
                           return {
                             id,
                             text,
-                            value: true,
+                            value,
+                            is_selected: true,
                           };
                         }
-                        return { id, text, value };
+                        return { id, text, value, is_selected: false };
                       });
                     break;
                   case COMPONENT_TYPE.FREE_TEXT:
                     formattedOptionsWithRecordResponse = [
                       {
                         id: questionName,
-                        text: recordResponseByQuestionName.value,
                         value: recordResponseByQuestionName.value,
                       },
                     ];
@@ -478,11 +653,20 @@ export default {
 
       return { formattedRecordResponsesForOrm, recordStatus };
     },
+    async cleanRecordOrm() {
+      await deleteAllRecords();
+      await deleteRecordResponsesByUserIdAndResponseId(
+        this.userId,
+        this.datasetId
+      );
+      await deleteAllRecordFields();
+    },
   },
   beforeDestroy() {
     this.$root.$off("go-to-next-page");
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
+    this.$root.$off("search-filter-changed");
   },
 };
 </script>
@@ -505,6 +689,7 @@ export default {
 }
 .question-form {
   border: 1px solid transparent;
+  background: palette(white);
   &.--pending {
     border-color: transparent;
   }

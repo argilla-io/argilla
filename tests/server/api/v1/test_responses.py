@@ -13,10 +13,12 @@
 #  limitations under the License.
 
 from datetime import datetime
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Response, ResponseStatus
+from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -29,7 +31,7 @@ from tests.factories import (
 )
 
 
-def test_update_response(client: TestClient, db: Session, admin_auth_header: dict):
+def test_update_response(client: TestClient, db: Session, mock_search_engine: SearchEngine, admin_auth_header: dict):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
@@ -37,41 +39,31 @@ def test_update_response(client: TestClient, db: Session, admin_auth_header: dic
 
     response = ResponseFactory.create(
         record=record,
-        values={
-            "input_ok": {"value": "no"},
-            "output_ok": {"value": "no"},
-        },
-        status="submitted",
+        values={"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
+        status=ResponseStatus.submitted,
     )
     response_json = {
-        "values": {
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
+        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
         "status": "submitted",
     }
 
     resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
 
     assert resp.status_code == 200
-    assert db.get(Response, response.id).values == {
-        "input_ok": {"value": "yes"},
-        "output_ok": {"value": "yes"},
-    }
+    assert db.get(Response, response.id).values == {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
 
     resp_body = resp.json()
     assert resp_body == {
         "id": str(response.id),
-        "values": {
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
+        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
         "status": "submitted",
         "record_id": str(response.record_id),
         "user_id": str(response.user_id),
         "inserted_at": response.inserted_at.isoformat(),
         "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
     }
+
+    mock_search_engine.update_record_response.assert_called_once_with(response)
 
 
 def test_update_response_without_authentication(client: TestClient, db: Session):
@@ -325,13 +317,15 @@ def test_update_response_with_nonexistent_response_id(client: TestClient, db: Se
     }
 
 
-def test_delete_response(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_response(client: TestClient, mock_search_engine: SearchEngine, db: Session, admin_auth_header: dict):
     response = ResponseFactory.create()
 
     resp = client.delete(f"/api/v1/responses/{response.id}", headers=admin_auth_header)
 
     assert resp.status_code == 200
     assert db.query(Response).count() == 0
+
+    mock_search_engine.delete_record_response.assert_called_once_with(response)
 
 
 def test_delete_response_without_authentication(client: TestClient, db: Session):

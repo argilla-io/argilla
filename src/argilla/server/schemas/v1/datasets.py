@@ -17,15 +17,23 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, conlist, constr, validator
-from pydantic import Field as ModelField
+from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
+from pydantic import Field as PydanticField
+
+from argilla.server.search_engine import Query
 
 try:
     from typing import Annotated, Literal
 except ImportError:
     from typing_extensions import Annotated, Literal
 
-from argilla.server.models import DatasetStatus, FieldType, QuestionType, ResponseStatus
+from argilla.server.models import (
+    DatasetStatus,
+    FieldType,
+    QuestionSettings,
+    QuestionType,
+    ResponseStatus,
+)
 
 DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
 DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
@@ -46,6 +54,16 @@ QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
+
+LABEL_SELECTION_OPTIONS_MIN_ITEMS = 2
+LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
+LABEL_SELECTION_VALUE_MIN_LENGHT = 1
+LABEL_SELECTION_VALUE_MAX_LENGHT = 200
+LABEL_SELECTION_TEXT_MIN_LENGTH = 1
+LABEL_SELECTION_TEXT_MAX_LENGTH = 500
+LABEL_SELECTION_DESCRIPTION_MIN_LENGTH = 1
+LABEL_SELECTION_DESCRIPTION_MAX_LENGTH = 1000
+LABEL_SELECTION_LABEL_DESCRIPTION_MAX_LENGTH = 100
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
@@ -87,6 +105,7 @@ class ResponseMetrics(BaseModel):
     count: int
     submitted: int
     discarded: int
+    draft: int
 
 
 class Metrics(BaseModel):
@@ -130,16 +149,32 @@ class FieldCreate(BaseModel):
     settings: TextFieldSettings
 
 
-class TextQuestionSettings(BaseModel):
+class TextQuestionSettingsCreate(BaseModel):
     type: Literal[QuestionType.text]
     use_markdown: bool = False
+
+
+class UniqueValuesCheckerMixin(BaseModel):
+    @root_validator
+    def check_unique_values(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        options = values.get("options", [])
+        seen = set()
+        duplicates = set()
+        for option in options:
+            if option.value in seen:
+                duplicates.add(option.value)
+            else:
+                seen.add(option.value)
+        if duplicates:
+            raise ValueError(f"Option values must be unique, found duplicates: {duplicates}")
+        return values
 
 
 class RatingQuestionSettingsOption(BaseModel):
     value: int
 
 
-class RatingQuestionSettings(BaseModel):
+class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.rating]
     options: conlist(
         item_type=RatingQuestionSettingsOption,
@@ -148,13 +183,55 @@ class RatingQuestionSettings(BaseModel):
     )
 
 
+class LabelSelectionQuestionSettingsOption(BaseModel):
+    value: constr(
+        min_length=LABEL_SELECTION_VALUE_MIN_LENGHT,
+        max_length=LABEL_SELECTION_VALUE_MAX_LENGHT,
+    )
+    text: constr(
+        min_length=LABEL_SELECTION_TEXT_MIN_LENGTH,
+        max_length=LABEL_SELECTION_TEXT_MAX_LENGTH,
+    )
+    description: Optional[
+        constr(
+            min_length=LABEL_SELECTION_DESCRIPTION_MIN_LENGTH,
+            max_length=LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
+        )
+    ] = None
+
+
+class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
+    type: Literal[QuestionType.label_selection]
+    options: conlist(
+        item_type=LabelSelectionQuestionSettingsOption,
+        min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
+        max_items=LABEL_SELECTION_OPTIONS_MAX_ITEMS,
+    )
+    visible_options: Optional[PositiveInt] = None
+
+
+class MultiLabelSelectionQuestionSettingsCreate(LabelSelectionQuestionSettingsCreate):
+    type: Literal[QuestionType.multi_label_selection]
+
+
+QuestionSettingsCreate = Annotated[
+    Union[
+        TextQuestionSettingsCreate,
+        RatingQuestionSettingsCreate,
+        LabelSelectionQuestionSettingsCreate,
+        MultiLabelSelectionQuestionSettingsCreate,
+    ],
+    PydanticField(discriminator="type"),
+]
+
+
 class Question(BaseModel):
     id: UUID
     name: str
     title: str
     description: Optional[str]
     required: bool
-    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
+    settings: QuestionSettings
     inserted_at: datetime
     updated_at: datetime
 
@@ -183,7 +260,7 @@ class QuestionCreate(BaseModel):
         )
     ]
     required: Optional[bool]
-    settings: Union[TextQuestionSettings, RatingQuestionSettings] = ModelField(..., discriminator="type")
+    settings: QuestionSettingsCreate
 
 
 class ResponseValue(BaseModel):
@@ -208,12 +285,6 @@ class Response(BaseModel):
 
 class RecordInclude(str, Enum):
     responses = "responses"
-
-
-class ResponseStatusFilter(str, Enum):
-    missing = "missing"
-    submitted = "submitted"
-    discarded = "discarded"
 
 
 class Record(BaseModel):
@@ -248,7 +319,7 @@ class UserDiscardedResponseCreate(BaseModel):
 
 UserResponseCreate = Annotated[
     Union[UserSubmittedResponseCreate, UserDiscardedResponseCreate],
-    ModelField(discriminator="status"),
+    PydanticField(discriminator="status"),
 ]
 
 
@@ -271,3 +342,16 @@ class RecordCreate(BaseModel):
 
 class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+
+
+class SearchRecordsQuery(BaseModel):
+    query: Query
+
+
+class SearchRecord(BaseModel):
+    record: Record
+    query_score: Optional[float]
+
+
+class SearchRecordsResult(BaseModel):
+    items: List[SearchRecord]
