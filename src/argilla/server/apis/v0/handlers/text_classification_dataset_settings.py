@@ -51,7 +51,7 @@ def configure_router(router: APIRouter):
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_current_user),
     ) -> TextClassificationSettings:
-        found_ds = datasets.find_by_name(
+        found_ds = await datasets.find_by_name(
             user=current_user,
             name=name,
             workspace=ws_params.workspace,
@@ -79,7 +79,7 @@ def configure_router(router: APIRouter):
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         current_user: User = Security(auth.get_current_user),
     ) -> TextClassificationSettings:
-        found_ds = datasets.find_by_name(
+        found_ds = await datasets.find_by_name(
             user=current_user,
             name=name,
             task=task,
@@ -127,7 +127,7 @@ def configure_router(router: APIRouter):
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         user: User = Security(auth.get_current_user),
     ) -> None:
-        found_ds = datasets.find_by_name(
+        found_ds = await datasets.find_by_name(
             user=user,
             name=name,
             task=task,

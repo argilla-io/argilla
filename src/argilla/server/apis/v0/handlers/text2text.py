@@ -13,11 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import itertools
-from typing import Iterable, Optional
-
 from fastapi import APIRouter, Depends, Query, Security
-from fastapi.responses import StreamingResponse
 
 from argilla.server.apis.v0.handlers import metrics
 from argilla.server.apis.v0.models.commons.model import BulkResponse
@@ -40,7 +36,7 @@ from argilla.server.errors import EntityNotFoundError
 from argilla.server.models import User
 from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
-from argilla.server.services.datasets import DatasetsService, ServiceBaseDataset
+from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.tasks.text2text import Text2TextService
 from argilla.server.services.tasks.text2text.models import (
     ServiceText2TextQuery,
@@ -78,13 +74,13 @@ def configure_router():
         task = task_type
         workspace = common_params.workspace
         try:
-            dataset = datasets.find_by_name(
+            dataset = await datasets.find_by_name(
                 current_user,
                 name=name,
                 task=task,
                 workspace=workspace,
             )
-            datasets.update(
+            await datasets.update(
                 user=current_user,
                 dataset=dataset,
                 tags=bulk.tags,
@@ -92,7 +88,7 @@ def configure_router():
             )
         except EntityNotFoundError:
             dataset = CreateDatasetRequest(name=name, workspace=workspace, task=task, **bulk.dict())
-            dataset = datasets.create_dataset(user=current_user, dataset=dataset)
+            dataset = await datasets.create_dataset(user=current_user, dataset=dataset)
 
         result = await service.add_records(
             dataset=dataset,
@@ -110,7 +106,7 @@ def configure_router():
         response_model_exclude_none=True,
         operation_id="search_records",
     )
-    def search_records(
+    async def search_records(
         name: str,
         search: Text2TextSearchRequest = None,
         common_params: CommonTaskHandlerDependencies = Depends(),
@@ -122,7 +118,7 @@ def configure_router():
     ) -> Text2TextSearchResults:
         search = search or Text2TextSearchRequest()
         query = search.query or Text2TextQuery()
-        dataset = datasets.find_by_name(
+        dataset = await datasets.find_by_name(
             user=current_user,
             name=name,
             task=task_type,
