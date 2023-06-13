@@ -21,5 +21,5 @@ if TYPE_CHECKING:
 
 
 def get_or_new_workspace(session: "Session", workspace_name: str) -> Workspace:
-    workspace = session.get(Workspace).filter_by(name=workspace_name).first()
+    workspace = session.query(Workspace).filter_by(name=workspace_name).first()
     return workspace or Workspace(name=workspace_name)
