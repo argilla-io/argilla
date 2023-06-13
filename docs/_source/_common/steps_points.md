@@ -1,4 +1,4 @@
-Are you unsure about what these MLOps Steps entail, take a look at our [terminology](/getting_started/terminology) section.
+Are you unsure about what these MLOps Steps entail, take a look at our [terminology](/reference/terminology) section.
 
 ````{grid}  1 1 4 4
 :class-container: tuto-section-2

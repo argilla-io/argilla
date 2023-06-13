@@ -1,11 +1,13 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: bug
-assignees: ''
+name: "\U0001F41E UI/UX Bug report "
+about: UI or UX bugs and unexpected behavior
+title: "[BUG]"
+labels: "bug \U0001FAB2, ui, ux"
+assignees: Amelie-V
 
 ---
+
+<!--  Ask David for help you to contribute https://calendly.com/argilla-office-hours/30min or feel free to submit a pull request straight away: https://github.com/argilla-io/argilla/pulls or  -->
 
 **Describe the bug**
 A clear and concise description of what the bug is.

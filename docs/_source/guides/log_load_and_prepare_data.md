@@ -55,7 +55,7 @@ rec = rg.TextClassificationRecord(
 )
 rg.log(records=rec, name="my_dataset")
 ```
-![single_textclass_record](../../_static/reference/webapp/features-single_textclass_record.png)
+![single_textclass_record](/_static/reference/webapp/features-single_textclass_record.png)
 :::
 
 :::{tab-item} Text Classification (multi-label)
@@ -70,7 +70,7 @@ rec = rg.TextClassificationRecord(
 )
 rg.log(records=rec, name="my_dataset")
 ```
-![multi_textclass_record](../../_static/reference/webapp/features-multi_textclass_record.png)
+![multi_textclass_record](/_static/reference/webapp/features-multi_textclass_record.png)
 :::
 
 
@@ -86,7 +86,7 @@ record = rg.TokenClassificationRecord(
 )
 rg.log(records=rec, name="my_dataset")
 ```
-![tokclass_record](../../_static/reference/webapp/features-tokclass_record.png)
+![tokclass_record](/_static/reference/webapp/features-tokclass_record.png)
 :::
 
 :::{tab-item} Text2Text
@@ -100,7 +100,7 @@ record = rg.Text2TextRecord(
 rg.log(records=rec, name="my_dataset")
 ```
 
-![text2text_record](../../_static/reference/webapp/features-text2text_record.png)
+![text2text_record](/_static/reference/webapp/features-text2text_record.png)
 :::
 
 ::::
@@ -137,7 +137,7 @@ You can set your labels using the code below or from the [Dataset settings page]
 
 If you forget to define a labeling schema, Argilla will aggregate the labels it finds in the dataset automatically, but you will need to validate it. To do this, go to your [Dataset settings page](../reference/webapp/pages.md#dataset-settings) and click _Save schema_.
 
-![Schema not saved](../../_source/_static/images/guides/guides-define_schema.png)
+![Schema not saved](/_static/images/guides/guides-define_schema.png)
 
 ::::{tab-set}
 
