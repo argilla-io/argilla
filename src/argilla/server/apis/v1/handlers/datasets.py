@@ -319,7 +319,7 @@ async def search_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset(db, dataset_id)
+    dataset = await _get_dataset(db, dataset_id, with_fields=True)
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
     search_engine_query = query.query
