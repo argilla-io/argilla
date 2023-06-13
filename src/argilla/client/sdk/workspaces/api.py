@@ -17,7 +17,6 @@ from typing import List, Union
 
 import httpx
 
-from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors_handler import handle_response_error
 from argilla.client.sdk.commons.models import (
     ErrorMessage,
