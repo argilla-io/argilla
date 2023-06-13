@@ -202,6 +202,7 @@ class SearchEngine:
             size=limit,
             _source=False,
             sort="_score:desc,id:asc",
+            track_total_hits=True,
         )
 
         items = [
