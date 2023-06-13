@@ -2580,7 +2580,8 @@ async def test_search_dataset_records(
         items=[
             SearchResponseItem(record_id=records[0].id, score=14.2),
             SearchResponseItem(record_id=records[1].id, score=12.2),
-        ]
+        ],
+        total=2,
     )
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
@@ -2629,7 +2630,8 @@ async def test_search_dataset_records(
                 },
                 "query_score": 12.2,
             },
-        ]
+        ],
+        "total": 2,
     }
 
 
@@ -2643,7 +2645,8 @@ async def test_search_dataset_records_including_responses(
         items=[
             SearchResponseItem(record_id=records[0].id, score=14.2),
             SearchResponseItem(record_id=records[1].id, score=12.2),
-        ]
+        ],
+        total=2,
     )
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
@@ -2721,7 +2724,8 @@ async def test_search_dataset_records_including_responses(
                 },
                 "query_score": 12.2,
             },
-        ]
+        ],
+        "total": 2,
     }
 
 
@@ -2759,7 +2763,8 @@ async def test_search_dataset_records_with_offset_and_limit(
         items=[
             SearchResponseItem(record_id=records[0].id, score=14.2),
             SearchResponseItem(record_id=records[1].id, score=12.2),
-        ]
+        ],
+        total=2,
     )
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
@@ -2778,7 +2783,9 @@ async def test_search_dataset_records_with_offset_and_limit(
         limit=5,
     )
     assert response.status_code == 200
-    assert len(response.json()["items"]) == 2
+    response_json = response.json()
+    assert len(response_json["items"]) == 2
+    assert response_json["total"] == 2
 
 
 @pytest.mark.asyncio
@@ -2790,7 +2797,8 @@ async def test_search_dataset_records_as_annotator(client: TestClient, admin: Us
         items=[
             SearchResponseItem(record_id=records[0].id, score=14.2),
             SearchResponseItem(record_id=records[1].id, score=12.2),
-        ]
+        ],
+        total=2,
     )
 
     query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
