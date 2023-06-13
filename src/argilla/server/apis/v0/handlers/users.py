@@ -19,12 +19,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request, Security
 from pydantic import parse_obj_as
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from argilla.server import models
 from argilla.server.commons import telemetry
 from argilla.server.contexts import accounts
-from argilla.server.database import get_async_db, get_db
+from argilla.server.database import get_async_db
 from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import UserPolicy, authorize
 from argilla.server.security import auth
