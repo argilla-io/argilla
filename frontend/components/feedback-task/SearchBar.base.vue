@@ -16,87 +16,99 @@
   -->
 
 <template>
-  <form @submit.prevent="searchText(query)">
-    <div class="searchbar" :class="{ active: query }" :style="searchBarStyles">
-      <BaseIcon
-        v-if="!query"
-        icon-name="search"
-        icon-width="20"
-        icon-height="20"
-      />
-      <BaseButton
-        v-else
-        class="searchbar__button"
-        @click="removeCurrentSearchText()"
-      >
-        <BaseIcon
-          class="searchbar__button__icon"
-          icon-name="close"
-          icon-width="20"
-          icon-height="20"
-        />
-      </BaseButton>
-      <label class="searchbar__label" for="query" v-text="description" />
-      <input
-        ref="input"
-        class="searchbar__input"
-        type="text"
-        name="query"
-        id="query"
-        v-model.lazy="query"
-        :placeholder="placeholder"
-        autocomplete="off"
-      />
-    </div>
-  </form>
+  <div
+    class="search-area"
+    :class="{ active: isSearchActive }"
+    @click="focusInSearch"
+  >
+    <BaseIconWithBadge
+      class="searchbar__icon"
+      :icon="iconType"
+      :show-badge="false"
+      iconColor="#acacac"
+      badge-vertical-position="top"
+      badge-horizontal-position="right"
+      badge-border-color="white"
+      @click-icon="resetValue"
+    />
+    <input
+      ref="searchRef"
+      class="searchbar__input"
+      type="text"
+      v-model.trim="searchValue"
+      :placeholder="placeholder"
+      :aria-description="description"
+      autocomplete="off"
+      @keydown.enter.exact="applySearch"
+      @keydown.arrow-right.stop=""
+      @keydown.arrow-left.stop=""
+      @keydown.delete.exact.stop=""
+      @keydown.enter.exact.stop=""
+    />
+  </div>
 </template>
 
 <script>
 export default {
+  name: "SearchBarComponent",
   props: {
-    currentSearchText: {
+    value: {
       type: String,
       default: "",
     },
     placeholder: {
       type: String,
-      default: "Introduce your text:",
+      default: "",
     },
     description: {
       type: String,
-      default: "Introduce your text",
-    },
-    bgColor: {
-      type: String,
-      default: "#ffffff",
+      default: "Introduce a text",
     },
   },
-  data: () => ({
-    query: "",
-  }),
+  data() {
+    return {
+      searchValue: "",
+    };
+  },
   computed: {
-    searchBarStyles() {
-      return { backgroundColor: this.bgColor };
+    isSearchActive() {
+      return this.value?.length;
+    },
+    iconType() {
+      return this.searchValue?.length ? "close" : "search";
+    },
+  },
+  watch: {
+    value: {
+      immediate: true,
+      handler(newValue) {
+        this.searchValue = newValue ?? "";
+      },
     },
   },
   methods: {
-    searchText(query) {
-      this.$refs.input.blur();
-      this.$emit("on-search-text", query);
+    applySearch() {
+      this.$emit("input", this.searchValue);
+      this.looseFocus();
     },
-    removeCurrentSearchText() {
-      this.query = "";
-      this.$emit("on-search-text", "");
+    looseFocus() {
+      this.$refs.searchRef.blur();
     },
-  },
-  created() {
-    this.query = this.currentSearchText;
+    focusInSearch() {
+      this.$refs.searchRef.focus();
+    },
+    resetValue() {
+      if (this.searchValue?.length) {
+        this.searchValue = "";
+        this.$emit("input", "");
+      }
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.searchbar {
+.search-area {
   display: flex;
   flex: 1;
   align-items: center;
@@ -111,22 +123,17 @@ export default {
     box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
   }
-  &__button.button {
+  button {
     display: flex;
     padding: 0;
     &:hover {
       background: $black-4;
     }
   }
-  &__button {
-    &__icon {
-      padding: calc($base-space / 2);
-    }
+  &__icon {
+    padding: calc($base-space / 2);
   }
-  &__label {
-    @extend %visuallyhidden;
-  }
-  &__input {
+  input {
     width: 100%;
     height: 1rem;
     padding: 0;
