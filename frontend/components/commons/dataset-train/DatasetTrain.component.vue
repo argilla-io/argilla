@@ -3,7 +3,7 @@
     <base-spinner v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error" class="snippet__container">
       <BaseTabs
-        v-if="snippetsTabs"
+        v-if="snippetsTabs.length"
         class="training-snippets__tabs"
         :tabs="sortedSnippetsTabs"
         :active-tab="visibleTab"
