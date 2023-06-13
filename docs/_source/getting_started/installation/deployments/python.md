@@ -1,5 +1,5 @@
 (install-from-develop)=
-# Python package
+# Python
 
 As with other packages, we provide a simple and intuitive installment via `pypi`.
 

@@ -3,7 +3,7 @@
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
-```{grid-item-card} Python package
+```{grid-item-card} Python
 :link: python.md
 
 - package extras
