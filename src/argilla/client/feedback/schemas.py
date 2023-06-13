@@ -57,7 +57,7 @@ class ValueSchema(BaseModel):
     value: Union[StrictStr, StrictInt, List[str]]
 
 
-class UnificationValueSchema(BaseModel):
+class UnificationValueSchema(ValueSchema):
     """A value schema for a unification value.
 
     Args:
