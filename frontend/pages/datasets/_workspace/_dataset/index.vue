@@ -58,7 +58,7 @@
       <DatasetTrainComponent
         :datasetTask="dataset.task"
         :datasetName="datasetName"
-        :workspaceName="datasetWorkspace"
+        :workspaceName="workspace"
       />
     </BaseModal>
   </div>
