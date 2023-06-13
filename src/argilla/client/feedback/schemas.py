@@ -57,6 +57,23 @@ class ValueSchema(BaseModel):
     value: Union[StrictStr, StrictInt, List[str]]
 
 
+class UnificationValueSchema(BaseModel):
+    """A value schema for a unification value.
+
+    Args:
+        value (Union[StrictStr, StrictInt, List[str]]): The unification value of the record.
+        strategy (Literal["mean", "majority", "max", "min"]): The strategy to unify the responses. Defaults to "majority".
+
+    Examples:
+        >>> import argilla as rg
+        >>> value = rg.UnificationValueSchema(value="Yes", strategy="majority")
+        >>> # or use a dict
+        >>> value = {"value": "Yes", "strategy": "majority"}
+    """
+
+    strategy: Union["RatingQuestionStrategy", "LabelQuestionStrategy", "MultiLabelQuestionStrategy"]
+
+
 class ResponseSchema(BaseModel):
     """A response schema for a record.
 
@@ -102,6 +119,7 @@ class FeedbackRecord(BaseModel):
         fields (Dict[str, str]): The fields of the record.
         responses (Optional[Union[ResponseSchema, List[ResponseSchema]]]): The responses of the record. Defaults to None.
         external_id (Optional[str]): The external id of the record. Defaults to None.
+        unified_responses (Optional[Dict[str, List[UnificationValueSchema]]]): The unified responses of the record. Defaults to None.
 
     Examples:
         >>> import argilla as rg
@@ -122,6 +140,7 @@ class FeedbackRecord(BaseModel):
     fields: Dict[str, str]
     responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
+    unified_responses: Optional[Dict[str, List[UnificationValueSchema]]] = None
 
     @validator("responses", always=True)
     def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
@@ -133,11 +152,7 @@ class FeedbackRecord(BaseModel):
 
     class Config:
         extra = Extra.ignore
-
-
-class UnifiedFeedbackRecord(BaseModel):
-    fields: Dict[str, str]
-    unified_response: Optional[Dict[str, Any]] = {}
+        fields = {"unified_responses": {"exclude": True}}
 
 
 class FieldSchema(BaseModel):
@@ -493,13 +508,13 @@ class RatingQuestionStrategy(Enum):
             ... )
             >>> training_data.label_strategy.unify_responses(responses=dataset.records, field=dataset.questions[0])
         """
+        UnificationValueSchema.update_forward_refs()
         if self.value == self.MAJORITY.value:
             return self._majority(records, field)
         else:
             return self._aggregate(records, field)
 
     def _aggregate(self, records: List[FeedbackRecord], field: RatingQuestion):
-        unified_records = []
         for rec in records:
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
@@ -514,13 +529,10 @@ class RatingQuestionStrategy(Enum):
                 unified_value = min(ratings)
             else:
                 raise ValueError("Invalid aggregation method")
-            unified_record = UnifiedFeedbackRecord(fields=rec.fields)
-            unified_record.unified_response.update({field.name: {"value": unified_value, "strategy": self.value}})
-            unified_records.append(unified_record)
-        return unified_records
+            rec.unified_responses = {field.name: UnificationValueSchema(value=unified_value, strategy=self.value)}
+        return records
 
     def _majority(self, records: List[FeedbackRecord], field: RatingQuestion):
-        unified_records = []
         for rec in records:
             counter = Counter()
             # only allow for submitted responses
@@ -536,14 +548,11 @@ class RatingQuestionStrategy(Enum):
                 majority_value = random.choice(most_common_values)
             else:
                 majority_value = counter.most_common(1)[0][0]
-
-            unified_record = UnifiedFeedbackRecord(fields=rec.fields)
-            unified_record.unified_response.update({field.name: {"value": majority_value, "strategy": self.value}})
-            unified_records.append(unified_record)
-        return unified_records
+            rec.unified_responses = {field.name: [UnificationValueSchema(value=majority_value, strategy=self.value)]}
+        return records
 
 
-class LabelQuestionStrategyMixin(object):
+class LabelQuestionStrategyMixin:
     def unify_responses(self, records: List[FeedbackRecord], field: Union[LabelQuestion, MultiLabelQuestion]):
         """Unify responses for a rating question
 
@@ -561,6 +570,7 @@ class LabelQuestionStrategyMixin(object):
             ... )
             >>> training_data.label_strategy.unify_responses(responses=dataset.records, field=dataset.questions[0])
         """
+        UnificationValueSchema.update_forward_refs()
         if self.value == self.MAJORITY.value:
             return self._majority(records, field)
         elif self.value == self.MAJORITY_WEIGHTED.value:
@@ -574,12 +584,12 @@ class LabelQuestionStrategyMixin(object):
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
-            for resp in responses:
-                unified_record = UnifiedFeedbackRecord(fields=rec.fields)
-                unified_record.unified_response.update(
-                    {field.name: {"value": resp.values[field.name].value, "strategy": self.value}}
-                )
-            unified_records.append(unified_record)
+            rec.unified_responses = {
+                field.name: [
+                    UnificationValueSchema(value=resp.values[field.name].value, strategy=self.value)
+                    for resp in responses
+                ]
+            }
         return unified_records
 
 
@@ -596,7 +606,6 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     DISAGREEMENT: str = "disagreement"
 
     def _majority(self, records: List[FeedbackRecord], field: LabelQuestion):
-        unified_records = []
         for rec in records:
             counter = Counter()
             # only allow for submitted responses
@@ -613,10 +622,8 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             else:
                 majority_value = counter.most_common(1)[0][0]
 
-            unified_record = UnifiedFeedbackRecord(fields=rec.fields)
-            unified_record.unified_response.update({field.name: {"value": majority_value, "strategy": self.value}})
-            unified_records.append(unified_record)
-        return unified_records
+            rec.unified_responses = {field.name: [UnificationValueSchema(value=majority_value, strategy=self.value)]}
+        return rec
 
     def _majority_weighted(self, records: List[FeedbackRecord], field: LabelQuestion):
         raise NotImplementedError("Not implemented yet")
@@ -635,7 +642,6 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     DISAGREEMENT: str = "disagreement"
 
     def _majority(self, records: List[FeedbackRecord], field: MultiLabelQuestion):
-        unified_records = []
         for rec in records:
             counter = Counter()
             # only allow for submitted responses
@@ -653,10 +659,8 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             for value, count in counter.items():
                 if count >= majority:
                     majority_value.append(value)
-            unified_record = UnifiedFeedbackRecord(fields=rec.fields)
-            unified_record.unified_response.update({field.name: {"value": majority_value, "strategy": self.value}})
-            unified_records.append(unified_record)
-        return unified_records
+            rec.unified_responses = {field.name: UnificationValueSchema(value=majority_value, strategy=self.value)}
+        return records
 
     def _majority_weighted(self, records: List[FeedbackRecord], field: MultiLabelQuestion):
         raise NotImplementedError("Not implemented yet")
