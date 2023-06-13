@@ -49,6 +49,7 @@
 </template>
 
 <script>
+import "assets/icons/chevron-down";
 export default {
   props: {
     options: {

@@ -25,6 +25,10 @@ These are the section headers that we use:
 
 [#3094]: https://github.com/argilla-io/argilla/issues/3094
 
+### Fixed
+
+- Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.
+
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
 
 ### Added

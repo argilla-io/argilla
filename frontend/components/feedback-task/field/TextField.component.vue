@@ -15,7 +15,7 @@
     <transition name="fade" v-if="fieldText" appear mode="out-in">
       <div class="content-area --body1" :key="fieldText">
         <div v-if="!useMarkdown" v-text="fieldText" />
-        <BaseRenderMarkdownComponent v-else :markdown="fieldText" />
+        <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
       </div>
     </transition>
   </div>
