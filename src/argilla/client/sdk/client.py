@@ -47,6 +47,10 @@ class _ClientCommonDefaults:
     def get_timeout(self) -> float:
         return self.timeout
 
+    def update_headers(self, headers: Dict[str, str]):
+        self.headers.update(headers)
+        self.httpx.headers.update(self.get_headers())
+
     @property
     def httpx(self):
         return self.__httpx__
