@@ -89,7 +89,7 @@ export default {
   },
   data() {
     return {
-      visibleTrainModal: false,
+      visibleTrainModal: false, // TODO - encapsulate this logic in datasetTrain.component and create new datasetTrain.modal
     };
   },
   computed: {

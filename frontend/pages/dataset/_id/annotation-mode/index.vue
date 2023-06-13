@@ -71,7 +71,7 @@ export default {
   data() {
     return {
       areResponsesUntouched: true, // NOTE - this flag is used to show or to not show a toast when questionnaire is touched (to prevent loosing current modification)
-      visibleTrainModal: false,
+      visibleTrainModal: false, // TODO - encapsulate this logic in datasetTrain.component and create new datasetTrain.modal
     };
   },
   beforeRouteLeave(to, from, next) {
