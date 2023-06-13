@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import "assets/icons/external";
+import "assets/icons/external-link";
 import { isEqual, cloneDeep } from "lodash";
 import { Notification } from "@/models/Notifications";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
