@@ -18,7 +18,12 @@ from typing import TYPE_CHECKING, Generator
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
-from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncAttrs,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 import argilla
@@ -44,9 +49,7 @@ engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 async_engine = create_async_engine(settings.database_url_async)
-AsyncSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, expire_on_commit=False, bind=async_engine, class_=AsyncSession
-)
+AsyncSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=async_engine)
 
 
 def get_db() -> Generator["Session", None, None]:
