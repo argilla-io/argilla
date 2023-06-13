@@ -47,6 +47,14 @@ export default {
       type: String,
       required: true,
     },
+    workspaceName: {
+      type: String,
+      required: true,
+    },
+    datasetName: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -84,6 +92,8 @@ export default {
           return "token-classification";
         case "Text2Text":
           return "text2text";
+        case "FeedbackTask":
+          return "feedback-task";
       }
     },
     parsedSnippet() {
@@ -111,12 +121,6 @@ export default {
           (library) => library.attributes.title === this.visibleTab.name
         ) || {}
       );
-    },
-    workspaceName() {
-      return this.$route.params.workspace;
-    },
-    datasetName() {
-      return this.$route.params.dataset;
     },
   },
   methods: {
