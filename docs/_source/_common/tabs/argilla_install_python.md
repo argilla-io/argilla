@@ -10,9 +10,9 @@ pip install argilla
 
 :::{tab-item} With extras
 ```
-pip install argilla[listeners] # argilla.listeners background processes
+pip install argilla[listeners] # use argilla.listeners background processes
 pip install argilla[server] # running FastAPI locally
-pip install argilla[postgresql] # replace sqlite with postgres for data management
+pip install argilla[postgresql] # use PostgreSQL instead of SQLite as database
 pip install argilla[tests] # running tests locally
 ```
 :::
