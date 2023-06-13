@@ -51,7 +51,7 @@ export default {
   components: {
     HeaderAndTopAndOneColumn,
   },
-  data: () => {
+  data() {
     return {
       areResponsesUntouched: true, // NOTE - this flag is used to show or to not show a toast when questionnaire is touched (to prevent loosing current modification)
     };
