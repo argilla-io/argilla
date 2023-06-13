@@ -155,9 +155,9 @@ def admin_auth_header(admin: User) -> Dict[str, str]:
     return {API_KEY_HEADER_NAME: admin.api_key}
 
 
-@pytest.fixture(scope="function")
-def argilla_user() -> User:
-    return UserFactory.create(
+@pytest_asyncio.fixture(scope="function")
+async def argilla_user() -> User:
+    return await UserFactory.create(
         first_name="Argilla",
         username="argilla",
         role=UserRole.admin,
@@ -214,7 +214,7 @@ def mocked_client(
 
 
 @pytest.fixture
-def dataset_token_classification(mocked_client):
+def dataset_token_classification(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
     dataset = "gutenberg_spacy_ner"
@@ -242,7 +242,7 @@ def dataset_token_classification(mocked_client):
 
 
 @pytest.fixture
-def dataset_text_classification(mocked_client):
+def dataset_text_classification(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
     dataset = "banking_sentiment_setfit"
@@ -262,7 +262,7 @@ def dataset_text_classification(mocked_client):
 
 
 @pytest.fixture
-def dataset_text_classification_multi_label(mocked_client):
+def dataset_text_classification_multi_label(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
     dataset = "research_titles_multi_label"
@@ -280,7 +280,7 @@ def dataset_text_classification_multi_label(mocked_client):
 
 
 @pytest.fixture
-def dataset_text2text(mocked_client):
+def dataset_text2text(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
     dataset = "news_summary"
