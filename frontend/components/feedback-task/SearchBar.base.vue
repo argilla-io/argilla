@@ -48,7 +48,11 @@
       @keydown.enter.exact.stop=""
     />
 
-    <span class="search-area__additional-info" v-text="additionalInfo" />
+    <span
+      class="search-area__additional-info"
+      v-if="!searchValueIsEmpty"
+      v-text="additionalInfo"
+    />
 
     <BaseIconWithBadge
       v-if="showDelete"
@@ -99,6 +103,9 @@ export default {
     },
     isActiveSearchEmpty() {
       return isNil(this.value) || this.value.length === 0;
+    },
+    searchValueIsEmpty() {
+      return isNil(this.searchValue) || this.searchValue.length === 0;
     },
     showDelete() {
       if (isNil(this.searchValue)) return false;
