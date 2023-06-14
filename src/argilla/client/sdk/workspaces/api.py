@@ -40,7 +40,7 @@ def list_workspaces(client: httpx.Client) -> Response[Union[List[WorkspaceModel]
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [WorkspaceModel(**workspace) for workspace in response.json()]
+        parsed_response = [WorkspaceModel.construct(**workspace) for workspace in response.json()]
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -68,7 +68,7 @@ def create_workspace(
     response = client.post(url=url, json={"name": name})
 
     if response.status_code == 200:
-        parsed_response = WorkspaceModel(**response.json())
+        parsed_response = WorkspaceModel.construct(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -125,7 +125,7 @@ def create_workspace_user(
     response = client.post(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceUserModel(**response.json())
+        parsed_response = WorkspaceUserModel.construct(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -154,7 +154,7 @@ def delete_workspace_user(
     response = client.delete(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceUserModel(**response.json())
+        parsed_response = WorkspaceUserModel.construct(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
