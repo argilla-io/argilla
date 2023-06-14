@@ -13,15 +13,11 @@
 #  limitations under the License.
 
 import tempfile
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Type
 
 import datasets
 import pytest
 from argilla.client import api
-
-if TYPE_CHECKING:
-    from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
-
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackDatasetConfig,
@@ -30,6 +26,11 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
+
+    from tests.helpers import SecuredClient
 
 
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions")
@@ -161,6 +162,7 @@ def test_records(
         "text": "A",
         "label": "B",
     }
+    assert dataset.records[0].metadata is None
     assert dataset.records[0].responses == []
 
     dataset.add_records(
@@ -170,6 +172,7 @@ def test_records(
                     "text": "C",
                     "label": "D",
                 },
+                metadata={"unit": "test"},
                 responses={
                     "values": {
                         "question-1": {"value": "answer"},
@@ -189,6 +192,7 @@ def test_records(
         "text": "C",
         "label": "D",
     }
+    assert dataset.records[1].metadata == {"unit": "test"}
     assert dataset.records[1].responses[0].dict() == {
         "user_id": None,
         "values": {
@@ -238,13 +242,13 @@ def test_records(
     "feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions", "feedback_dataset_records"
 )
 def test_format_as(
-    mocked_client,
-    format_as,
-    expected_output,
-    feedback_dataset_guidelines,
-    feedback_dataset_fields,
-    feedback_dataset_questions,
-    feedback_dataset_records,
+    mocked_client: "SecuredClient",
+    format_as: str,
+    expected_output: Type[datasets.Dataset],
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
     api.active_api()
     api.init(api_key="argilla.apikey")
@@ -267,7 +271,7 @@ def test_format_as(
     "feedback_dataset_records",
 )
 def test_push_to_argilla_and_from_argilla(
-    mocked_client,
+    mocked_client: "SecuredClient",
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -340,8 +344,8 @@ def test_push_to_argilla_and_from_argilla(
     "feedback_dataset_records",
 )
 def test_push_to_huggingface_and_from_huggingface(
-    mocked_client,
-    monkeypatch,
+    mocked_client: "SecuredClient",
+    monkeypatch: pytest.MonkeyPatch,
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
