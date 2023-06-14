@@ -28,7 +28,7 @@ These are the section headers that we use:
 
 - Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.
 - Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
-- Allow load feedback datasets from Argilla and push them back in Argilla with different name/workspace (Closes [#3189](https://github.com/argilla-io/argilla/issues/3189))
+- Allow flow `FeedbackDataset.from_argilla` -> `FeedbackDataset.push_to_argilla` under different dataset names and/or workspaces ([#3192](https://github.com/argilla-io/argilla/issues/3192))
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
 
