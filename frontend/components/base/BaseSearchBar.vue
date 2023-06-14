@@ -28,8 +28,8 @@
       class="search-area__icon --close"
       name="close"
       color="#acacac"
-      width="16"
-      height="16"
+      width="14"
+      height="14"
       @click="filter = undefined"
     />
   </base-input-container>
