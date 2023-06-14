@@ -168,7 +168,7 @@ export default {
     }
   }
   &__additional-info {
-    @include font-size(12px);
+    @include font-size(13px);
     color: rgba(0, 0, 0, 0.37);
     text-wrap: nowrap;
   }
