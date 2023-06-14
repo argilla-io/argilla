@@ -206,7 +206,7 @@ auth_headers = {"X-Argilla-API-Key": "argilla.apikey"}
 http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 
 response = http.post("/api/users", json={"role": "admin", "first_name": "Hulio", "last_name": "Ramos", "username": "hurra", "password": "abcde123"})
-repsonse.json()
+response.json()
 ```
 ```json
 {
