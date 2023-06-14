@@ -269,7 +269,7 @@ class ResponsePolicyV1:
 
 class DatasetSettingsPolicy:
     @classmethod
-    async def list(cls, dataset: Dataset) -> PolicyAction:
+    def list(cls, dataset: Dataset) -> PolicyAction:
         return DatasetPolicy.get(dataset)
 
     @classmethod
