@@ -132,10 +132,10 @@ export default {
   align-items: center;
   gap: $base-space * 1.5;
   padding: $base-space * 1.2 $base-space * 1.5;
-  box-shadow: $shadow-300;
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius-l;
   background: palette(white);
+  box-shadow: $shadow-300;
   transition: all 0.2s ease;
   &:hover {
     border: 1px solid rgba(0, 0, 0, 0.1);
