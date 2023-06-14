@@ -228,7 +228,7 @@ class DatasetsService:
         if not settings:
             raise EntityNotFoundError(name=dataset.name, type=class_type)
 
-        if not is_authorized(user, DatasetSettingsPolicy.list(dataset)):
+        if not await is_authorized(user, DatasetSettingsPolicy.list(dataset)):
             raise ForbiddenOperationError("You don't have the necessary permissions to list settings for this dataset.")
         return class_type.parse_obj(settings.dict())
 
@@ -238,14 +238,14 @@ class DatasetsService:
     async def save_settings(
         self, user: User, dataset: ServiceDataset, settings: ServiceDatasetSettings
     ) -> ServiceDatasetSettings:
-        if not is_authorized(user, DatasetSettingsPolicy.save(dataset)):
+        if not await is_authorized(user, DatasetSettingsPolicy.save(dataset)):
             raise ForbiddenOperationError("You don't have the necessary permissions to save settings for this dataset.")
 
         self.__dao__.save_settings(dataset=dataset, settings=settings)
         return settings
 
     async def delete_settings(self, user: User, dataset: ServiceDataset) -> None:
-        if not is_authorized(user, DatasetSettingsPolicy.delete(dataset)):
+        if not await is_authorized(user, DatasetSettingsPolicy.delete(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to delete settings for this dataset."
             )
