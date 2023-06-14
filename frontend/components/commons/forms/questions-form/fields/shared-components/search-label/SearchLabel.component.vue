@@ -1,20 +1,18 @@
 <template>
   <div
     class="search-area"
-    :class="{ '--focused': isFocused }"
+    :class="{ '--focused': isFocused || value }"
     @click="focusInSearch"
   >
     <BaseIconWithBadge
-      ref="iconRef"
-      class="icon-search"
-      :class="classType"
-      :icon="iconType"
+      ref="iconSearchRef"
+      class="search-area__icon --search"
+      icon="search"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
-      @click-icon="resetValue"
     />
     <input
       class="search-input"
@@ -31,6 +29,18 @@
       @keydown.arrow-left.stop=""
       @keydown.delete.exact.stop=""
       @keydown.enter.exact.stop=""
+    />
+    <BaseIconWithBadge
+      v-if="value"
+      ref="iconCloseRef"
+      class="search-area__icon --close"
+      icon="close"
+      :show-badge="false"
+      iconColor="#acacac"
+      badge-vertical-position="top"
+      badge-horizontal-position="right"
+      badge-border-color="white"
+      @click-icon="resetValue"
     />
   </div>
 </template>
@@ -57,14 +67,6 @@ export default {
       default: () => "",
     },
   },
-  computed: {
-    iconType() {
-      return this.value?.length ? "close" : "search";
-    },
-    classType() {
-      return this.value?.length ? "--close" : "--search";
-    },
-  },
   methods: {
     looseFocus() {
       this.$refs[this.searchRef].blur();
@@ -89,21 +91,30 @@ export default {
   border: 1px solid $black-10;
   border-radius: 20px;
   overflow: hidden;
-  .icon-search {
+  box-shadow: $shadow-300;
+  transition: all 0.2s ease-out;
+  &:hover {
+    box-shadow: $shadow-400;
+    transition: all 0.2s ease-in;
+  }
+  &__icon {
+    flex-shrink: 0;
     padding: 0;
     background: transparent;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     transition: none;
     &.--search {
       cursor: default;
     }
     &.--close {
-      padding: 2px;
+      height: 12px;
+      width: 12px;
     }
   }
   &.--focused {
     border-color: $primary-color;
+    box-shadow: $shadow-300;
   }
 }
 
@@ -112,6 +123,7 @@ export default {
   width: 100%;
   border: none;
   border-radius: 10px;
+  line-height: 28px;
   &:focus-visible {
     outline: 0;
   }
