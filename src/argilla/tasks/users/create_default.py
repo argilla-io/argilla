@@ -37,7 +37,7 @@ def create_default(
             User(
                 first_name="",
                 username=DEFAULT_USERNAME,
-                role=UserRole.owner,
+                role=UserRole.admin,
                 api_key=api_key,
                 password_hash=accounts.hash_password(password),
                 workspaces=[Workspace(name=DEFAULT_USERNAME)],

@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import pytest
 from argilla.server.contexts import accounts
 from argilla.server.models import User, UserRole, Workspace
 from click.testing import CliRunner
@@ -21,10 +21,12 @@ from typer import Typer
 from tests.factories import UserFactory, WorkspaceFactory
 
 
-def test_create(db: Session, cli_runner: CliRunner, cli: Typer):
+@pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
+def test_create(db: Session, cli_runner: CliRunner, cli: Typer, role_string: str):
     result = cli_runner.invoke(
         cli,
-        "users create --first-name first-name --username username --role owner --password 12345678 --workspace workspace",
+        f"users create --first-name first-name --username username --role {role_string} "
+        "--password 12345678 --workspace workspace",
     )
 
     assert result.exit_code == 0
@@ -35,7 +37,7 @@ def test_create(db: Session, cli_runner: CliRunner, cli: Typer):
     assert user
     assert user.first_name == "first-name"
     assert user.username == "username"
-    assert user.role.value == UserRole.owner.value
+    assert user.role.value == UserRole(role_string).value
     assert accounts.verify_password("12345678", user.password_hash)
     assert user.api_key
     assert [ws.name for ws in user.workspaces] == ["workspace"]
@@ -57,11 +59,12 @@ def test_create_with_default_role(db: Session, cli_runner: CliRunner, cli: Typer
     assert user.role == UserRole.annotator
 
 
-def test_create_with_input_role(db: Session, cli_runner: CliRunner, cli: Typer):
+@pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
+def test_create_with_input_role(db: Session, cli_runner: CliRunner, cli: Typer, role_string: str):
     result = cli_runner.invoke(
         cli,
         "users create --first-name first-name --username username --password 12345678",
-        input="owner\n",
+        input=f"{role_string}\n",
     )
 
     assert result.exit_code == 0
@@ -70,7 +73,19 @@ def test_create_with_input_role(db: Session, cli_runner: CliRunner, cli: Typer):
 
     user = db.query(User).filter_by(username="username").first()
     assert user
-    assert user.role.value == UserRole.owner.value
+    assert user.role.value == UserRole(role_string).value
+
+
+def test_create_with_invalid_role(db: Session, cli_runner: CliRunner, cli: Typer):
+    result = cli_runner.invoke(
+        cli,
+        "users create --first-name first-name --username username --role bad_role "
+        "--password 12345678 --workspace workspace",
+    )
+
+    assert result.exit_code == 2
+    assert db.query(User).count() == 0
+    assert db.query(Workspace).count() == 0
 
 
 def test_create_with_input_password(db: Session, cli_runner: CliRunner, cli: Typer):
