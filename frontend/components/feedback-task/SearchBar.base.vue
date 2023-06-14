@@ -29,7 +29,7 @@
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
-      @click-icon="resetValue"
+      @click-icon="applySearch"
     />
     <input
       ref="searchRef"
