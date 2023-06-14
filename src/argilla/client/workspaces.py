@@ -23,12 +23,11 @@ if TYPE_CHECKING:
 
 from datetime import datetime
 
-from pydantic.error_wrappers import ValidationError
-
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     BaseClientError,
     NotFoundApiError,
+    ValidationApiError,
 )
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.workspaces import api as workspaces_api
@@ -52,8 +51,9 @@ class Workspace:
         updated_at: the datetime when the workspace was last updated.
 
     Raises:
-        ValueError: if the workspace does not exist in the current Argilla account.
-        ValidationError: if the ID provided is not a valid UUID.
+        ValueError: if the workspace does not exist in the current Argilla account,
+            if both `name` and `id` are provided, or if none of them is provided, or
+            if the provided `id` is not a valid UUID.
         RuntimeError: if there was an error while retrieving the workspace/s from Argilla.
 
     Examples:
@@ -84,7 +84,7 @@ class Workspace:
 
         Raises:
             ValueError: if the workspace does not exist in the current Argilla account.
-            ValidationError: if the ID provided is not a valid UUID.
+            ValidationApiError: if the ID provided is not a valid UUID.
             RuntimeError: if there was an error while retrieving the workspace/s from Argilla.
 
         Examples:
@@ -107,13 +107,13 @@ class Workspace:
                     " make sure that the ID you provided is a valid one. Otherwise,"
                     " you can create a new one via the `Workspace.create` method."
                 ) from e
-            except ValidationError as e:
-                raise ValidationError(
+            except ValidationApiError as e:
+                raise ValueError(
                     "The ID you provided is not a valid UUID, so please make sure"
                     " that the ID you provided is a valid one."
-                )
+                ) from e
             except BaseClientError as e:
-                raise RuntimeError("Error while retrieving workspace with id=`{id}` from Argilla.") from e
+                raise RuntimeError(f"Error while retrieving workspace with id=`{id}` from Argilla.") from e
         elif name is not None:
             try:
                 workspaces = workspaces_api.list_workspaces(active_client().http_client.httpx).parsed
@@ -202,7 +202,7 @@ class Workspace:
         except NotFoundApiError as e:
             raise ValueError(
                 f"Either the user with id=`{id}` doesn't exist in Argilla, or it doesn't belong to workspace with id=`{self.id}`."
-            )
+            ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while deleting user with id=`{id}` from workspace with id=`{self.id}`.") from e
 
@@ -232,7 +232,7 @@ class Workspace:
             ).parsed
         except AlreadyExistsApiError as e:
             raise ValueError(f"Workspace with name=`{name}` already exists, so please use a different name.") from e
-        except (ValidationError, BaseClientError) as e:
+        except (ValidationApiError, BaseClientError) as e:
             raise RuntimeError(f"Error while creating workspace with name=`{name}`.") from e
 
         instance = cls.__new__(cls)
