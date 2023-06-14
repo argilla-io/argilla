@@ -16,17 +16,22 @@
   -->
 
 <template>
-  <base-input-container class="searchbar">
-    <svgicon v-if="!filter" name="search" width="20" height="40" />
+  <base-input-container class="search-area" :class="filter ? 'active' : null">
+    <svgicon name="search" width="20" height="20" color="#acacac" />
+    <base-input
+      class="search-area__input"
+      v-model="filter"
+      :placeholder="placeholder"
+    />
     <svgicon
-      v-else
-      class="searchbar__button"
+      v-if="filter"
+      class="search-area__icon --close"
       name="close"
-      width="20"
+      color="#acacac"
+      width="14"
       height="14"
       @click="filter = undefined"
     />
-    <base-input v-model="filter" :placeholder="placeholder" />
   </base-input-container>
 </template>
 <script>
@@ -41,7 +46,9 @@ export default {
     },
   },
   data() {
-    return { filter: this.value };
+    return {
+      filter: this.value,
+    };
   },
   watch: {
     filter(val) {
@@ -51,25 +58,47 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.searchbar {
-  width: 285px;
-  min-height: 43px;
-  border: none;
-  padding: 0 1em;
+.search-area {
   display: flex;
+  min-width: 300px;
   align-items: center;
+  gap: $base-space * 1.5;
+  padding: $base-space * 1.2 $base-space * 1.5;
+  box-shadow: $shadow-300;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: $border-radius-l;
+  background: palette(white);
   transition: all 0.2s ease;
-  margin-right: auto;
-  margin-left: 0;
-  pointer-events: all;
-  border-radius: $border-radius;
-  @include font-size(14px);
-  .svg-icon {
-    fill: $black-54;
-    margin: auto 1em auto 1em;
+  &:hover {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow-500;
+    transition: all 0.2s ease;
   }
-  &__button {
-    cursor: pointer;
+  &.active,
+  &.re-input-focused {
+    border: 1px solid $primary-color;
+    box-shadow: $shadow-300;
+  }
+  &__icon {
+    display: flex;
+    flex-shrink: 0;
+    padding: 0;
+    &.--close {
+      width: $base-space * 1.6;
+      cursor: pointer;
+    }
+  }
+  &__input.input {
+    width: 100%;
+    height: auto;
+    padding: 0;
+    border: none;
+    outline: 0;
+    background: none;
+    line-height: 1rem;
+    @include input-placeholder {
+      color: $black-37;
+    }
   }
 }
 </style>

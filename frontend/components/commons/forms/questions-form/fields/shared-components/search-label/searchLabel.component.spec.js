@@ -42,18 +42,16 @@ describe("LabelSelectionComponent", () => {
 
     expect(textInput.attributes("type")).toBe("text");
     expect(textInput.element.value).toBe("");
-    expect(wrapper.vm.iconType).toBe("search");
   });
   it("fill the text input with the props value and render a close button if value.length > 0", async () => {
-    expect(wrapper.vm.iconType).toBe("search");
-    const textInput = wrapper.find('input[type="text"]');
-
     await wrapper.setProps({
       value: "the text written by the user",
     });
     await wrapper.vm.$nextTick();
+    const closeButton = wrapper.findComponent({ ref: "iconCloseRef" });
+    const textInput = wrapper.find('input[type="text"]');
+    expect(closeButton.exists()).toBe(true);
     expect(textInput.element.value).toBe("the text written by the user");
-    expect(wrapper.vm.iconType).toBe("close");
   });
   it("emit when user write in the text input", async () => {
     const textInput = wrapper.find('input[type="text"]');
@@ -64,44 +62,43 @@ describe("LabelSelectionComponent", () => {
     expect(wrapper.emitted("input")[0]).toStrictEqual(["some value"]);
   });
   it("focus on input text when user click on icon", async () => {
-    const BaseIconWithBadgeWrapper = wrapper.findComponent({ ref: "iconRef" });
+    const BaseSearchIconWithBadgeWrapper = wrapper.findComponent({
+      ref: "iconSearchRef",
+    });
     const textInput = wrapper.find('input[type="text"]');
 
-    expect(BaseIconWithBadgeWrapper.exists()).toBe(true);
+    expect(BaseSearchIconWithBadgeWrapper.exists()).toBe(true);
     expect(textInput.exists()).toBe(true);
-    await BaseIconWithBadgeWrapper.trigger("click");
+    await BaseSearchIconWithBadgeWrapper.trigger("click");
 
     await wrapper.vm.$nextTick();
 
     expect(spyFocusInSearchMethod).toHaveBeenCalled();
   });
   it("not reset the value when user click on BaseIcon component and there was no value in the input", async () => {
-    const BaseIconWithBadgeWrapper = wrapper.findComponent({ ref: "iconRef" });
+    const BaseSearchIconWithBadgeWrapper = wrapper.findComponent({
+      ref: "iconCloseRef",
+    });
     const textInput = wrapper.find('input[type="text"]');
-
-    expect(BaseIconWithBadgeWrapper.exists()).toBe(true);
+    expect(BaseSearchIconWithBadgeWrapper.exists()).toBe(false);
     expect(textInput.exists()).toBe(true);
     expect(textInput.element.value).toBe("");
-
-    await BaseIconWithBadgeWrapper.vm.$emit("click-icon");
     await wrapper.vm.$nextTick();
-
-    expect(spyResetValueMethod).toHaveBeenCalled();
     expect(wrapper.emitted("input")).toBeFalsy();
   });
   it("reset the value when user click on BaseIcon component and there is value in the input", async () => {
-    const BaseIconWithBadgeWrapper = wrapper.findComponent({ ref: "iconRef" });
-    const textInput = wrapper.find('input[type="text"]');
-
-    expect(BaseIconWithBadgeWrapper.exists()).toBe(true);
-    expect(textInput.exists()).toBe(true);
-    expect(textInput.element.value).toBe("");
-
     await wrapper.setProps({
       value: "the text written by the user",
     });
-    await BaseIconWithBadgeWrapper.vm.$emit("click-icon");
+    const BaseCloseIconWithBadgeWrapper = wrapper.findComponent({
+      ref: "iconCloseRef",
+    });
+    await BaseCloseIconWithBadgeWrapper.vm.$emit("click-icon");
     await wrapper.vm.$nextTick();
+    const textInput = wrapper.find('input[type="text"]');
+
+    expect(BaseCloseIconWithBadgeWrapper.exists()).toBe(true);
+    expect(textInput.exists()).toBe(true);
 
     expect(spyResetValueMethod).toHaveBeenCalled();
     expect(wrapper.emitted("input")[0]).toStrictEqual([""]);

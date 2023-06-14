@@ -188,4 +188,7 @@ export default {
   align-items: center;
   padding: $base-space * 2 0;
 }
+.search-area {
+  width: clamp(300px, 30vw, 800px);
+}
 </style>
