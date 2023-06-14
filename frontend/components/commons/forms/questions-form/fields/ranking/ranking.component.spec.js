@@ -3,7 +3,7 @@ import RankingComponent from "./Ranking.component";
 
 let wrapper = null;
 
-const options = {};
+const options = { stubs: ["QuestionHeaderComponent"] };
 
 beforeEach(() => {
   wrapper = shallowMount(RankingComponent, options);
