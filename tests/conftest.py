@@ -37,7 +37,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from tests.database import SyncTestSession, TestSession
-from tests.factories import AdminFactory, AnnotatorFactory, UserFactory
+from tests.factories import (
+    AdminFactory,
+    AnnotatorFactory,
+    UserFactory,
+    WorkspaceFactory,
+)
 from tests.helpers import SecuredClient
 
 if TYPE_CHECKING:
@@ -164,18 +169,22 @@ async def admin() -> User:
     return await AdminFactory.create(first_name="Admin", username="admin", api_key="admin.apikey")
 
 
-@pytest.fixture(scope="function")
-def annotator() -> User:
-    return AnnotatorFactory.create(first_name="Annotator", username="annotator", api_key="annotator.apikey")
+@pytest_asyncio.fixture(scope="function")
+async def annotator() -> User:
+    return await AnnotatorFactory.create(first_name="Annotator", username="annotator", api_key="annotator.apikey")
 
 
-@pytest.fixture(scope="function")
-def mock_user() -> User:
-    return UserFactory.create(
+@pytest_asyncio.fixture(scope="function")
+async def mock_user() -> User:
+    workspace_a = await WorkspaceFactory.create(name="workspace-a")
+    workspace_b = await WorkspaceFactory.create(name="workspace-b")
+    return await UserFactory.create(
         first_name="Mock",
         username="mock-user",
         password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
         api_key="mock-user.apikey",
+        workspaces=[workspace_a, workspace_b],
+        role=UserRole.admin,
     )
 
 
