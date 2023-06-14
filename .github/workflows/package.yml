@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [ 8.5, 8.2, 7.17, 7.14 ]
+        version: [ 8.8, 8.5, 8.0, 7.17]
     defaults:
       run:
         shell: bash -l {0}
