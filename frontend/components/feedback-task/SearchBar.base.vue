@@ -55,7 +55,7 @@
     />
 
     <BaseIconWithBadge
-      v-if="isSearchActive"
+      v-if="showDelete"
       class="searchbar__icon"
       icon="close"
       :show-badge="false"
@@ -69,6 +69,8 @@
 </template>
 
 <script>
+import { isNil } from "lodash";
+
 export default {
   name: "SearchBarComponent",
   props: {
@@ -97,14 +99,24 @@ export default {
   },
   computed: {
     isSearchActive() {
-      return this.value?.length;
+      return this.value?.length ?? false;
+    },
+    isActiveSearchEmpty() {
+      return isNil(this.value) || this.value.length === 0;
+    },
+    showDelete() {
+      if (isNil(this.searchValue)) return false;
+      if (this.isActiveSearchEmpty && this.searchValue.length === 0)
+        return false;
+
+      return true;
     },
   },
   watch: {
     value: {
       immediate: true,
       handler(newValue) {
-        this.searchValue = newValue ?? "";
+        this.searchValue = newValue;
       },
     },
   },
@@ -120,10 +132,8 @@ export default {
       this.$refs.searchRef.focus();
     },
     resetValue() {
-      if (this.searchValue?.length) {
-        this.searchValue = "";
-        this.$emit("input", "");
-      }
+      this.searchValue = "";
+      this.$emit("input", "");
     },
   },
 };
