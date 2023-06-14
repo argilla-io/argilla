@@ -71,10 +71,9 @@ export default {
   },
   computed: {
     additionalInfoForSearchComponent() {
-      if (isNil(this.totalRecords)) return null;
+      if (isNil(this.totalRecords) || this.totalRecords === 0) return null;
 
-      if ([0, 1].includes(this.totalRecords))
-        return `${this.totalRecords} record`;
+      if (this.totalRecords === 1) return `${this.totalRecords} record`;
       return `${this.totalRecords} records`;
     },
     filtersFromVuex() {
