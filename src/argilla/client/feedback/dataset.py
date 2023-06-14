@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import json
 import logging
 import tempfile
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
@@ -730,7 +731,7 @@ class FeedbackDataset:
         if format == "datasets":
             from datasets import Dataset, Features, Sequence, Value
 
-            dataset = {}
+            dataset = {"metadata": []}
             features = {}
             for field in self.fields:
                 if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
@@ -783,7 +784,13 @@ class FeedbackDataset:
                         ]
                         or None
                     )
+                dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
                 dataset["external_id"].append(record.external_id or None)
+
+            if len(dataset["metadata"]) > 0:
+                features["metadata"] = Value(dtype="string")
+            else:
+                del dataset["metadata"]
 
             return Dataset.from_dict(
                 dataset,
