@@ -17,7 +17,7 @@
 
 <template>
   <base-input-container class="search-area" :class="filter ? 'active' : null">
-    <svgicon name="search" width="22" height="22" color="#acacac" />
+    <svgicon name="search" width="20" height="20" color="#acacac" />
     <base-input
       class="search-area__input"
       v-model="filter"
@@ -63,7 +63,7 @@ export default {
   min-width: 300px;
   align-items: center;
   gap: $base-space * 1.5;
-  padding: $base-space * 1.3 $base-space * 1.5;
+  padding: $base-space * 1.2 $base-space * 1.5;
   box-shadow: $shadow-300;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: $border-radius-l;
@@ -84,7 +84,7 @@ export default {
     flex-shrink: 0;
     padding: 0;
     &.--close {
-      width: $base-space * 2;
+      width: $base-space * 1.6;
       cursor: pointer;
     }
   }

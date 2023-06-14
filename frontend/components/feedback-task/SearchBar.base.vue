@@ -131,7 +131,7 @@ export default {
   min-width: 300px;
   align-items: center;
   gap: $base-space * 1.5;
-  padding: $base-space * 1.3 $base-space * 1.5;
+  padding: $base-space * 1.2 $base-space * 1.5;
   box-shadow: $shadow-300;
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius-l;
@@ -150,8 +150,10 @@ export default {
     display: flex;
     flex-shrink: 0;
     padding: 0;
+    width: 20px;
+    height: 20px;
     &.--close {
-      width: $base-space * 2;
+      width: $base-space * 1.6;
     }
   }
   &__input {
