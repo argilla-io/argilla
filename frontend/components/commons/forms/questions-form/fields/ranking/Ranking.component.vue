@@ -1,6 +1,10 @@
 <template>
   <div class="wrapper">
-    <QuestionHeaderComponent :title="title" :isRequired="isRequired" />
+    <QuestionHeaderComponent
+      :title="title"
+      :isRequired="isRequired"
+      :tooltipMessage="description"
+    />
   </div>
 </template>
 
