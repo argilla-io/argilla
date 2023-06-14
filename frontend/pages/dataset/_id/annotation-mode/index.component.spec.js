@@ -47,6 +47,7 @@ jest.mock(
 describe("AnnotationModePage", () => {
   it("not render the layout while the data are in fetching state", () => {
     const options = {
+      stubs: ["BaseModal", "DatasetTrainComponent"],
       mocks: {
         $route,
         $fetchState: {
@@ -75,6 +76,8 @@ describe("AnnotationModePage", () => {
         "CenterFeedbackTaskContent",
         "DatasetFiltersComponent",
         "PaginationFeedbackTaskComponent",
+        "BaseModal",
+        "DatasetTrainComponent",
       ],
       mocks: {
         $route,
