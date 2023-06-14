@@ -318,6 +318,18 @@ class RatingQuestion(QuestionSchema):
         values["settings"]["options"] = [{"value": value} for value in values.get("values")]
         return values
 
+    @property
+    def __all_labels__(self):
+        return [entry["value"] for entry in self.settings["options"]]
+
+    @property
+    def label2id(self):
+        return {label: idx for idx, label in enumerate(self.__all_labels__)}
+
+    @property
+    def id2label(self):
+        return {idx: label for idx, label in enumerate(self.__all_labels__)}
+
 
 class _LabelQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
@@ -343,6 +355,18 @@ class _LabelQuestion(QuestionSchema):
             "visible_labels"
         )  # `None` is a possible value, which means all labels are visible
         return values
+
+    @property
+    def __all_labels__(self):
+        return [entry["value"] for entry in self.settings["options"]]
+
+    @property
+    def __label2id__(self):
+        return {label: idx for idx, label in enumerate(self.__all_labels__)}
+
+    @property
+    def __id2label__(self):
+        return {idx: label for idx, label in enumerate(self.__all_labels__)}
 
 
 class LabelQuestion(_LabelQuestion):
@@ -725,29 +749,3 @@ class LabelQuestionUnification(BaseModel):
 
 
 MultiLabelQuestionUnification = LabelQuestionUnification
-
-
-class TrainingDataForTextClassification(BaseModel):
-    """Training data for text classification
-
-    Args:
-        text: TextField
-        label: Union[RatingUnification, LabelUnification, MultiLabelUnification]
-
-    Examples:
-        >>> from argilla import LabelQuestion, TrainingDataForTextClassification
-        >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
-        >>> label = RatingQuestionUnification(question=dataset.questions[0], strategy="mean")
-        >>> training_data = TrainingDataForTextClassification(
-        ...     text=dataset.fields[0],
-        ...     label=label
-        ... )
-        >>> dataset.prepare_training_data(training_data=training_data)
-
-    """
-
-    text: TextField
-    label: Union[RatingQuestionUnification, LabelQuestionUnification]
-
-    def unify_responses(self, responses: List[FeedbackRecord]):
-        self.label.strategy.unify_responses(responses=responses, field=self.label.question)

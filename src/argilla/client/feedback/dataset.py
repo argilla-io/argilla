@@ -16,8 +16,6 @@ import logging
 import tempfile
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
-from argilla.client.models import Framework
-
 try:
     from typing import Literal
 except ImportError:
@@ -50,8 +48,8 @@ from argilla.client.feedback.schemas import (
     RatingQuestionStrategy,
     TextField,
     TextQuestion,
-    TrainingDataForTextClassification,
 )
+from argilla.client.feedback.training import FeedbackDatasetTrainingMixin
 from argilla.client.feedback.utils import (
     feedback_dataset_in_argilla,
     generate_pydantic_schema,
@@ -72,7 +70,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset:
+class FeedbackDataset(FeedbackDatasetTrainingMixin):
     """Class to work with `FeedbackDataset`s either locally, or remotely (Argilla or HuggingFace Hub).
 
     Args:
@@ -968,88 +966,9 @@ class FeedbackDataset:
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
         strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
     ):
+        """Unify responses for a given question using a given strategy"""
         if isinstance(question, str):
             question = self.question_by_name(question)
         if isinstance(strategy, str):
             strategy = LabelQuestionStrategy(strategy)
         strategy.unify_responses(self.records, question)
-
-    def prepare_for_training(
-        self,
-        framework: Union[Framework, str],
-        training_data: TrainingDataForTextClassification,
-        train_size: Optional[float] = 1,
-        test_size: Optional[float] = None,
-        seed: Optional[int] = None,
-        fetch_records: bool = True,
-    ):
-        if isinstance(framework, str):
-            framework = Framework(framework)
-
-        if fetch_records:
-            self.fetch_records()
-
-        if isinstance(training_data, TrainingDataForTextClassification):
-            self.unify_responses(question=training_data.label.question, strategy=training_data.label.strategy)
-        else:
-            raise ValueError(f"Training data {training_data} is not supported yet")
-
-        return self.records
-        # formatted_records = self._format_records_for_training(unified_records)
-
-        # if framework == Framework.AUTOTRAIN:
-        #     import pandas as pd
-
-        #     return pd.DataFrame(formatted_records)
-
-        # else:
-        #     raise NotImplementedError(f"Framework {framework} is not supported yet")
-
-    def _format_records_for_training(
-        self, records: List[FeedbackRecord], training_data: TrainingDataForTextClassification
-    ):
-        # TODO: implement other strategies besides first come first serve
-        # TODO: think about ID usage per field and response
-        relevant_fields = list([getattr(training_data, field).name for field in training_data.__fields__])
-
-        total_data = []
-        for rec in self.records:
-            # get relevant (fixed) fields
-            relevant_data = {k: v for k, v in rec["fields"].items() if k in relevant_fields}
-
-            # check if we require responses
-            missing_fields = set(relevant_fields) - set(relevant_data.keys())
-
-            if not missing_fields:
-                total_data.append(relevant_data)
-                continue
-            else:
-                # check if there are responses
-                if not rec["responses"]:
-                    continue
-                for res in rec["responses"]:
-                    for missing_field in missing_fields:
-                        value = res["values"].get(missing_field, {})
-                        if value.get("value"):
-                            relevant_data[missing_field] = value["value"]
-                if missing_fields - set(relevant_data.keys()):
-                    continue
-                else:
-                    total_data.append(relevant_data)
-        return total_data
-
-    def prepare_for_training_with_autotrain(
-        self,
-        training_data: TrainingDataForTextClassification,
-        train_size: Optional[float] = 1,
-        test_size: Optional[float] = None,
-        seed: Optional[int] = None,
-    ):
-        relevant_fields = ["id"] + list(training_data.__fields__.keys())
-        total_data = []
-        for rec in self.records:
-            relevant_data = {k: v for k, v in rec["fields"].items() if k in relevant_fields}
-            relevant_data["id"] = rec["id"]
-            total_data.append(relevant_data)
-
-        return total_data

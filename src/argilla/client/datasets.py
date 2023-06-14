@@ -428,6 +428,8 @@ class DatasetBase:
             train_size = 1
         if test_size is None:
             test_size = 1 - train_size
+        if test_size == 0:
+            test_size = None
 
         # check if all numbers are larger than 0
         assert [abs(train_size), abs(test_size)] == [train_size, test_size], ValueError(
@@ -448,9 +450,6 @@ class DatasetBase:
         # turn the string into a Framework instance and trigger error if str is not valid
         if isinstance(framework, str):
             framework = Framework(framework)
-
-        if test_size == 0:
-            test_size = None
 
         # prepare for training for the right method
         if framework in [
