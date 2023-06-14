@@ -15,27 +15,30 @@
 import warnings
 
 import argilla
+from argilla.server.models import User
 
 
 class MockModel:
     pass
 
 
-def test_monitor_with_non_supported_model():
+def test_monitor_with_non_supported_model(argilla_user: User):
     with warnings.catch_warnings(record=True) as warning_list:
         model = MockModel()
 
         maybe_monitored = argilla.monitor(model, dataset="mock")
         assert model == maybe_monitored
-        assert len(warning_list) == 1
-        warn_text = warning_list[0].message.args[0]
-        assert (
-            warn_text == "The provided task model is not supported by monitoring module. "
-            "Predictions won't be logged into argilla."
+
+        assert any(
+            [
+                warning.message.args[0] == "The provided task model is not supported by monitoring module. "
+                "Predictions won't be logged into argilla."
+                for warning in warning_list
+            ]
         )
 
 
-def test_monitor_non_supported_huggingface_model():
+def test_monitor_non_supported_huggingface_model(argilla_user: User):
     with warnings.catch_warnings(record=True) as warning_list:
         from transformers import (
             AutoModelForTokenClassification,
@@ -49,9 +52,10 @@ def test_monitor_non_supported_huggingface_model():
         nlp = pipeline("ner", model=model, tokenizer=tokenizer)
         maybe_monitored = argilla.monitor(nlp, dataset="ds")
         assert nlp == maybe_monitored
-        assert len(warning_list) == 1
-        warn_text = warning_list[0].message.args[0]
-        assert (
-            warn_text == "The provided task model is not supported by monitoring module. "
-            "Predictions won't be logged into argilla."
+        assert any(
+            [
+                warning.message.args[0] == "The provided task model is not supported by monitoring module. "
+                "Predictions won't be logged into argilla."
+                for warning in warning_list
+            ]
         )

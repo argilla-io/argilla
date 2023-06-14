@@ -15,23 +15,14 @@
 
 import pytest
 from argilla._constants import DEFAULT_API_KEY
+from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.workspaces.api import list_workspaces
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 
 
-@pytest.fixture
-def sdk_client():
-    return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY).httpx
-
-
-def test_list_workspaces(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "get", mocked_client.get)
-
-    workspace_name = "test_workspace"
-    mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-
-    response = list_workspaces(client=sdk_client)
+def test_list_workspaces(api: Argilla) -> None:
+    response = list_workspaces(client=api.http_client.httpx)
 
     assert response.status_code == 200
     assert isinstance(response.parsed, list)

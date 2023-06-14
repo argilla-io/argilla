@@ -18,6 +18,13 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Changed
+
+- The role system now support three different roles `owner`, `admin` and `annotator` ([#3094])
+- `admin` role is scoped to workspace-level operations ([#3094])
+
+[#3094]: https://github.com/argilla-io/argilla/issues/3094
+
 ### Fixed
 
 - Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.

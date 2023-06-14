@@ -62,6 +62,10 @@ class OwnerFactory(UserFactory):
     role = UserRole.owner
 
 
+class AdminFactory(UserFactory):
+    role = UserRole.admin
+
+
 class AnnotatorFactory(UserFactory):
     role = UserRole.annotator
 

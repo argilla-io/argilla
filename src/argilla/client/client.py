@@ -216,7 +216,7 @@ class Argilla:
 
         if workspace != self.get_workspace():
             if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
-                self.http_client.headers[WORKSPACE_HEADER_NAME] = workspace
+                self.http_client.update_headers({WORKSPACE_HEADER_NAME: workspace})
             else:
                 raise Exception(f"Wrong provided workspace {workspace}")
 

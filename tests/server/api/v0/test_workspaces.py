@@ -21,6 +21,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from tests.factories import (
+    AdminFactory,
     AnnotatorFactory,
     UserFactory,
     WorkspaceFactory,
@@ -46,6 +47,14 @@ def test_list_workspaces_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
+def test_list_workspaces_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+
+    response = client.get("/api/workspaces", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 200
+
+
 def test_list_workspaces_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create()
 
@@ -69,6 +78,15 @@ def test_create_workspace_without_authentication(client: TestClient, db: Session
     response = client.post("/api/workspaces", json={"name": "workspace"})
 
     assert response.status_code == 401
+    assert db.query(Workspace).count() == 0
+
+
+def test_create_workspace_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+
+    response = client.post("/api/workspaces", headers={API_KEY_HEADER_NAME: admin.api_key}, json={"name": "workspaces"})
+
+    assert response.status_code == 403
     assert db.query(Workspace).count() == 0
 
 
@@ -151,6 +169,29 @@ def test_list_workspace_users_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
+def test_list_workspace_users_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+    workspace = WorkspaceFactory.create()
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=admin.id)
+
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=UserFactory.create(username="username-a").id)
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=UserFactory.create(username="username-b").id)
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=UserFactory.create(username="username-c").id)
+
+    response = client.get(f"/api/workspaces/{workspace.id}/users", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 200
+    assert db.query(WorkspaceUser).count() == 4
+
+    response_body = response.json()
+    assert list(map(lambda u: u["username"], response_body)) == [
+        admin.username,
+        "username-a",
+        "username-b",
+        "username-c",
+    ]
+
+
 def test_list_workspace_users_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create()
     workspace = WorkspaceFactory.create()
@@ -180,6 +221,19 @@ def test_create_workspace_user_without_authentication(client: TestClient, db: Se
     response = client.post(f"/api/workspaces/{workspace.id}/users/{owner.id}")
 
     assert response.status_code == 401
+    assert db.query(WorkspaceUser).count() == 0
+
+
+def test_create_workspace_user_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+    workspace = WorkspaceFactory.create()
+    user = UserFactory.create()
+
+    response = client.post(
+        f"/api/workspaces/{workspace.id}/users/{user.id}", headers={API_KEY_HEADER_NAME: admin.api_key}
+    )
+
+    assert response.status_code == 403
     assert db.query(WorkspaceUser).count() == 0
 
 
@@ -251,6 +305,25 @@ def test_delete_workspace_user_without_authentication(client: TestClient, db: Se
 
     assert response.status_code == 401
     assert db.query(WorkspaceUser).count() == 1
+
+
+def test_delete_workspace_user_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+    workspace = WorkspaceFactory.create()
+
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=admin.id)
+    workspace_user = WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=UserFactory.create().id)
+
+    response = client.delete(
+        f"/api/workspaces/{workspace_user.workspace_id}/users/{workspace_user.user_id}",
+        headers={API_KEY_HEADER_NAME: admin.api_key},
+    )
+
+    assert response.status_code == 200
+    assert db.query(WorkspaceUser).count() == 1
+
+    response_body = response.json()
+    assert response_body["id"] == str(workspace_user.user_id)
 
 
 def test_delete_workspace_user_as_annotator(client: TestClient, db: Session):
