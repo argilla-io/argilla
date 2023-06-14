@@ -169,7 +169,7 @@ class DatasetsService:
         if not is_authorized(user, DatasetPolicy.open(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to open this dataset. "
-                "Only  administrators can open datasets"
+                "Only administrators can open datasets"
             )
         self.__dao__.open(dataset)
 

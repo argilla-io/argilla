@@ -36,18 +36,16 @@ PolicyAction = Callable[[User], bool]
 
 
 def _exists_workspace_user_by_user_and_workspace_id(user: User, workspace_id: UUID) -> bool:
-    return bool(
-        accounts.get_workspace_user_by_workspace_id_and_user_id(Session.object_session(user), workspace_id, user.id)
-    )
+    return accounts.get_workspace_user_by_workspace_id_and_user_id(Session.object_session(user), workspace_id, user.id) is not None
 
 
 def _exists_workspace_user_by_user_and_workspace_name(user: User, workspace_name: str) -> bool:
     db = Session.object_session(user)
 
     workspace = accounts.get_workspace_by_name(db, workspace_name)
-    return (
-        bool(accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace.id, user.id)) if workspace else False
-    )
+    if workspace is None:
+        return False
+    return accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace.id, user.id) is not None
 
 
 class WorkspaceUserPolicy:
