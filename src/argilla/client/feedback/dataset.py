@@ -489,7 +489,7 @@ class FeedbackDataset:
         """
         httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
-        if not name or (not name and not workspace):
+        if name is None:
             if self.argilla_id is None:
                 _LOGGER.warning(
                     "No `name` or `workspace` have been provided, and no dataset has"
@@ -515,19 +515,19 @@ class FeedbackDataset:
                 self.__records += self.__new_records
                 self.__new_records = []
             except Exception as e:
-                Exception(
+                raise Exception(
                     "Failed while adding new records to the current `FeedbackTask`"
                     f" dataset in Argilla with exception: {e}"
                 )
-        elif name or (name and workspace):
+        else:
             if workspace is None:
                 workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
 
             if isinstance(workspace, str):
                 workspace = rg.Workspace.from_name(workspace)
 
-            dataset_exists, _ = feedback_dataset_in_argilla(name=name, workspace=workspace)
-            if dataset_exists:
+            dataset = feedback_dataset_in_argilla(name=name, workspace=workspace)
+            if dataset is not None:
                 raise RuntimeError(
                     f"Dataset with name=`{name}` and workspace=`{workspace.name}`"
                     " already exists in Argilla, please choose another name and/or"
@@ -611,12 +611,10 @@ class FeedbackDataset:
 
             if self.argilla_id is not None:
                 _LOGGER.warning(
-                    "Since the current object is already a `FeedbackDataset` pushed to"
-                    " Argilla, you'll keep on interacting with the same dataset in"
-                    " Argilla, even though the one you just pushed holds a different"
-                    f" ID ({argilla_id}). So on, if you want to switch to the newly"
-                    " pushed `FeedbackDataset` instead, please use"
-                    f" `FeedbackDataset.from_argilla(id='{argilla_id}')`."
+                    "Since the current object is already a `FeedbackDataset` pushed to Argilla, you'll keep on"
+                    " interacting with the same dataset in Argilla, even though the one you just pushed holds a"
+                    f" different ID ({argilla_id}). So on, if you want to switch to the newly  pushed `FeedbackDataset`"
+                    f" instead, please use `FeedbackDataset.from_argilla(id='{argilla_id}')`."
                 )
                 return
             self.argilla_id = argilla_id
@@ -656,8 +654,8 @@ class FeedbackDataset:
         """
         httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
-        dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
-        if not dataset_exists:
+        existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
+        if existing_dataset is None:
             raise ValueError(
                 f"Could not find a `FeedbackTask` dataset in Argilla with name='{name}'."
                 if name and not workspace
