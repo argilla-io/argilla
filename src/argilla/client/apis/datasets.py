@@ -316,13 +316,13 @@ class Datasets(AbstractApi):
         try:
             with api_compatibility(self, min_version="1.4"):
                 self.http_client.patch(
-                    f"{self._API_PREFIX}/{dataset.name}/{dataset.task}/settings",
+                    f"{self._API_PREFIX}/{dataset.name}/{dataset.task.value}/settings",
                     json=settings_.dict(),
                 )
         except ApiCompatibilityError:
             with api_compatibility(self, min_version="0.15"):
                 self.http_client.put(
-                    f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
+                    f"{self._API_PREFIX}/{dataset.task.value}/{dataset.name}/settings",
                     json=settings_.dict(),
                 )
 
@@ -339,7 +339,7 @@ class Datasets(AbstractApi):
         dataset = self.find_by_name(name)
         try:
             with api_compatibility(self, min_version="1.0"):
-                response = self.http_client.get(f"{self._API_PREFIX}/{dataset.name}/{dataset.task}/settings")
+                response = self.http_client.get(f"{self._API_PREFIX}/{dataset.name}/{dataset.task.value}/settings")
                 return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)
         except NotFoundApiError:
             return None

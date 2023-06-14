@@ -164,7 +164,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
                     (entity["label"], entity["char_start_index"], entity["char_end_index"], entity["score"])
                     for entity in entities
                 ]
-                encoding = self._span_marker_model.tokenizer(sentence, return_batch_encoding=True)["batch_encoding"]
+                encoding = self._span_marker_model.tokenizer.tokenizer(sentence)
                 word_ids = sorted(set(encoding.word_ids()) - {None})
                 tokens = []
                 for word_id in word_ids:

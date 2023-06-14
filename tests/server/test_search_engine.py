@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import random
+from typing import Generator
 
 import pytest
 import pytest_asyncio
@@ -41,7 +42,7 @@ from tests.factories import (
 
 
 @pytest.fixture(scope="function")
-def dataset_for_pagination(opensearch: OpenSearch):
+def dataset_for_pagination(opensearch: OpenSearch) -> Generator[Dataset, None, None]:
     dataset = DatasetFactory.create()
     records = RecordFactory.create_batch(size=100, dataset=dataset)
     index_name = f"rg.{dataset.id}"
@@ -315,6 +316,7 @@ class TestSuiteElasticSearchEngine:
         result = await elastic_search_engine.search(test_banking_sentiment_dataset, query=query)
 
         assert len(result.items) == expected_items
+        assert result.total == expected_items
 
         scores = [item.score > 0 for item in result.items]
         assert all(map(lambda s: s > 0, scores))
@@ -359,6 +361,7 @@ class TestSuiteElasticSearchEngine:
             user_response_status_filter=UserResponseStatusFilter(user=user, status=status),
         )
         assert len(result.items) == 4
+        assert result.total == 4
 
     @pytest.mark.parametrize(("offset", "limit"), [(0, 50), (10, 5), (0, 0), (90, 100)])
     async def test_search_with_pagination(
@@ -374,6 +377,7 @@ class TestSuiteElasticSearchEngine:
         )
 
         assert len(results.items) == min(len(dataset_for_pagination.records) - offset, limit)
+        assert results.total == 100
 
         records = sorted(dataset_for_pagination.records, key=lambda r: r.id)
         assert [record.id for record in records[offset : offset + limit]] == [item.record_id for item in results.items]

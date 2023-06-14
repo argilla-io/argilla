@@ -355,3 +355,4 @@ class SearchRecord(BaseModel):
 
 class SearchRecordsResult(BaseModel):
     items: List[SearchRecord]
+    total: int = 0
