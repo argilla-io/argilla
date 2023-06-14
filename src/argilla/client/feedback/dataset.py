@@ -866,7 +866,7 @@ class FeedbackDataset:
     @classmethod
     @requires_version("datasets")
     @requires_version("huggingface_hub")
-    def from_huggingface(cls, repo_id: str, *args, **kwargs) -> "FeedbackDataset":
+    def from_huggingface(cls, repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 
         Args:
@@ -942,9 +942,15 @@ class FeedbackDataset:
                             "values": {},
                         }
                     responses[user_id]["values"].update({question.name: {"value": value}})
+
+            metadata = None
+            if "metadata" in hfds[index] and hfds[index]["metadata"] is not None:
+                metadata = json.loads(hfds[index]["metadata"])
+
             cls.__records.append(
                 FeedbackRecord(
                     fields={field.name: hfds[index][field.name] for field in cls.fields},
+                    metadata=metadata,
                     responses=list(responses.values()) or None,
                     external_id=hfds[index]["external_id"],
                 )
