@@ -22,7 +22,7 @@
     @click="focusInSearch"
   >
     <BaseIconWithBadge
-      class="searchbar__icon"
+      class="search-area__icon"
       icon="search"
       :show-badge="false"
       iconColor="#acacac"
@@ -33,7 +33,7 @@
     />
     <input
       ref="searchRef"
-      class="searchbar__input"
+      class="search-area__input"
       type="text"
       v-model.trim="searchValue"
       :placeholder="placeholder"
@@ -48,15 +48,11 @@
       @keydown.enter.exact.stop=""
     />
 
-    <span
-      class="additional-info"
-      v-if="isSearchActive"
-      v-text="additionalInfo"
-    />
+    <span class="search-area__additional-info" v-text="additionalInfo" />
 
     <BaseIconWithBadge
       v-if="showDelete"
-      class="searchbar__icon"
+      class="search-area__icon --close"
       icon="close"
       :show-badge="false"
       iconColor="#acacac"
@@ -142,50 +138,49 @@ export default {
 <style lang="scss" scoped>
 .search-area {
   display: flex;
-  width: 300px;
+  min-width: 300px;
   align-items: center;
-  gap: $base-space;
-  padding: $base-space * 1.4;
-  filter: drop-shadow(0px 1px 2px rgba(185, 185, 185, 0.5));
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 25px;
+  gap: $base-space * 1.5;
+  padding: $base-space * 1.2 $base-space * 1.5;
+  border: 1px solid palette(grey, 600);
+  border-radius: $border-radius-l;
   background: palette(white);
+  box-shadow: $shadow-300;
   transition: all 0.2s ease;
   &:hover {
     border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0px 8px 20px rgba(93, 105, 151, 0.3);
+    box-shadow: $shadow-500;
     transition: all 0.2s ease;
   }
-  button {
+  &.active {
+    border: 1px solid $primary-color;
+    box-shadow: $shadow-300;
+  }
+  &__icon.button {
     display: flex;
+    flex-shrink: 0;
     padding: 0;
-    &:hover {
-      background: $black-4;
+    width: 20px;
+    height: 20px;
+    &.--close {
+      width: $base-space * 1.6;
     }
   }
-  input {
+  &__input {
     width: 100%;
-    height: 1rem;
     padding: 0;
     border: none;
     outline: 0;
     background: none;
     line-height: 1rem;
+    @include input-placeholder {
+      color: $black-37;
+    }
   }
-}
-
-.searchbar__icon {
-  width: 36px;
-}
-
-.additional-info {
-  font-size: 14px;
-  font-size: 0.875rem;
-  color: rgba(0, 0, 0, 0.37);
-  text-wrap: nowrap;
-}
-
-.active {
-  border: 1px solid #3e5cc9;
+  &__additional-info {
+    @include font-size(13px);
+    color: rgba(0, 0, 0, 0.37);
+    text-wrap: nowrap;
+  }
 }
 </style>
