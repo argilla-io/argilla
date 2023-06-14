@@ -18,18 +18,18 @@
 <template>
   <div
     class="search-area"
-    :class="{ active: isSearchActive }"
+    :class="{ active: isSearchActive || searchHasFocus }"
     @click="focusInSearch"
   >
     <BaseIconWithBadge
       class="searchbar__icon"
-      :icon="iconType"
+      icon="search"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
-      @click-icon="resetValue"
+      @click-icon="applySearch"
     />
     <input
       ref="searchRef"
@@ -39,11 +39,31 @@
       :placeholder="placeholder"
       :aria-description="description"
       autocomplete="off"
+      @focus="searchHasFocus = true"
+      @blur="searchHasFocus = false"
       @keydown.enter.exact="applySearch"
       @keydown.arrow-right.stop=""
       @keydown.arrow-left.stop=""
       @keydown.delete.exact.stop=""
       @keydown.enter.exact.stop=""
+    />
+
+    <span
+      class="additional-info"
+      v-if="isSearchActive"
+      v-text="additionalInfo"
+    />
+
+    <BaseIconWithBadge
+      v-if="isSearchActive"
+      class="searchbar__icon"
+      icon="close"
+      :show-badge="false"
+      iconColor="#acacac"
+      badge-vertical-position="top"
+      badge-horizontal-position="right"
+      badge-border-color="white"
+      @click-icon="resetValue"
     />
   </div>
 </template>
@@ -55,6 +75,10 @@ export default {
     value: {
       type: String,
       default: "",
+    },
+    additionalInfo: {
+      type: String | null,
+      default: null,
     },
     placeholder: {
       type: String,
@@ -68,14 +92,12 @@ export default {
   data() {
     return {
       searchValue: "",
+      searchHasFocus: false,
     };
   },
   computed: {
     isSearchActive() {
       return this.value?.length;
-    },
-    iconType() {
-      return this.searchValue?.length ? "close" : "search";
     },
   },
   watch: {
@@ -110,17 +132,18 @@ export default {
 <style lang="scss" scoped>
 .search-area {
   display: flex;
-  flex: 1;
+  width: 300px;
   align-items: center;
   gap: $base-space;
-  width: 300px;
   padding: $base-space * 1.4;
+  filter: drop-shadow(0px 1px 2px rgba(185, 185, 185, 0.5));
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 25px;
   background: palette(white);
-  border-radius: $border-radius-s;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
   transition: all 0.2s ease;
   &:hover {
-    box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 8px 20px rgba(93, 105, 151, 0.3);
     transition: all 0.2s ease;
   }
   button {
@@ -129,9 +152,6 @@ export default {
     &:hover {
       background: $black-4;
     }
-  }
-  &__icon {
-    padding: calc($base-space / 2);
   }
   input {
     width: 100%;
@@ -142,5 +162,20 @@ export default {
     background: none;
     line-height: 1rem;
   }
+}
+
+.searchbar__icon {
+  width: 36px;
+}
+
+.additional-info {
+  font-size: 14px;
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.37);
+  text-wrap: nowrap;
+}
+
+.active {
+  border: 1px solid #3e5cc9;
 }
 </style>

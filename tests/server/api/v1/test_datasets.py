@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Tuple, Type
+from typing import List, Optional, Tuple, Type
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
@@ -76,9 +76,6 @@ from tests.factories import (
     WorkspaceFactory,
     WorkspaceUserFactory,
 )
-
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
 
 
 def test_list_current_user_datasets(client: TestClient, owner_auth_header):
@@ -2621,7 +2618,8 @@ def test_search_dataset_records(client: TestClient, mock_search_engine: SearchEn
         items=[
             SearchResponseItem(record_id=records[0].id, score=14.2),
             SearchResponseItem(record_id=records[1].id, score=12.2),
-        ]
+        ],
+        total=2,
     )
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
@@ -2670,7 +2668,8 @@ def test_search_dataset_records(client: TestClient, mock_search_engine: SearchEn
                 },
                 "query_score": 12.2,
             },
-        ]
+        ],
+        "total": 2,
     }
 
 
@@ -2683,7 +2682,8 @@ def test_search_dataset_records_including_responses(
         items=[
             SearchResponseItem(record_id=records[0].id, score=14.2),
             SearchResponseItem(record_id=records[1].id, score=12.2),
-        ]
+        ],
+        total=2,
     )
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
@@ -2761,7 +2761,8 @@ def test_search_dataset_records_including_responses(
                 },
                 "query_score": 12.2,
             },
-        ]
+        ],
+        "total": 2,
     }
 
 
@@ -2769,7 +2770,7 @@ def test_search_dataset_records_with_response_status_filter(
     client: TestClient, mock_search_engine: SearchEngine, owner, owner_auth_header
 ):
     dataset, _, _ = create_dataset_for_search(user=owner)
-    mock_search_engine.search.return_value = SearchResponses(items=[])
+    mock_search_engine.search.return_value = SearchResponses(items=[], total=0)
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
     response = client.post(
@@ -2797,7 +2798,8 @@ def test_search_dataset_records_with_offset_and_limit(
         items=[
             SearchResponseItem(record_id=records[0].id, score=14.2),
             SearchResponseItem(record_id=records[1].id, score=12.2),
-        ]
+        ],
+        total=2,
     )
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
@@ -2816,7 +2818,9 @@ def test_search_dataset_records_with_offset_and_limit(
         limit=5,
     )
     assert response.status_code == 200
-    assert len(response.json()["items"]) == 2
+    response_json = response.json()
+    assert len(response_json["items"]) == 2
+    assert response_json["total"] == 2
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
@@ -2830,7 +2834,8 @@ def test_search_dataset_records_as_restricted_user(
         items=[
             SearchResponseItem(record_id=records[0].id, score=14.2),
             SearchResponseItem(record_id=records[1].id, score=12.2),
-        ]
+        ],
+        total=2,
     )
 
     query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}

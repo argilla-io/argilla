@@ -25,9 +25,16 @@ These are the section headers that we use:
 
 [#3094]: https://github.com/argilla-io/argilla/issues/3094
 
+## [1.10.0](https://github.com/argilla-io/argilla/compare/v1.9.0...v1.10.0)
+
+### Changed
+
+- Updated `SearchEngine` and `POST /api/v1/me/datasets/{dataset_id}/records/search` to return the `total` number of records matching the search query ([#3166](https://github.com/argilla-io/argilla/pull/3166))
+
 ### Fixed
 
 - Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.
+- Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
 

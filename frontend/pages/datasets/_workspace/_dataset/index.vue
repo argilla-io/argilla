@@ -55,7 +55,11 @@
       allow-close
       @close-modal="showTrainModal(false)"
     >
-      <DatasetTrainComponent :datasetTask="dataset.task" />
+      <DatasetTrainComponent
+        :datasetTask="dataset.task"
+        :datasetName="datasetName"
+        :workspaceName="workspace"
+      />
     </BaseModal>
   </div>
 </template>
@@ -85,7 +89,7 @@ export default {
   },
   data() {
     return {
-      visibleTrainModal: false,
+      visibleTrainModal: false, // TODO - encapsulate this logic in datasetTrain.component and create new datasetTrain.modal
     };
   },
   computed: {
