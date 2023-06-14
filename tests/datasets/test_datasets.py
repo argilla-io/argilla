@@ -68,11 +68,12 @@ def test_list_dataset(mocked_client):
         assert ds["owner"] == ds["workspace"]
 
 
-def test_delete_dataset_by_non_creator(mocked_client, mock_user, argilla_user, db: Session):
+@pytest.mark.asyncio
+async def test_delete_dataset_by_non_creator(mocked_client, mock_user, argilla_user, db: Session):
     dataset = "test_delete_dataset_by_non_creator"
 
     for workspace in argilla_user.workspaces:
-        accounts.create_workspace_user(db, WorkspaceUserCreate(user_id=mock_user.id, workspace_id=workspace.id))
+        await accounts.create_workspace_user(db, WorkspaceUserCreate(user_id=mock_user.id, workspace_id=workspace.id))
 
     rg = Argilla()
 

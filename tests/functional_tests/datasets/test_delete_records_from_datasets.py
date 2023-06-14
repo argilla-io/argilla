@@ -49,11 +49,12 @@ def test_delete_records_from_dataset(mocked_client):
     assert len(ds) == 49
 
 
-def test_delete_records_without_permission(mocked_client, argilla_user, mock_user):
+@pytest.mark.asyncio
+async def test_delete_records_without_permission(mocked_client, argilla_user, mock_user):
     dataset = "test_delete_records_without_permission"
 
     for workspace in argilla_user.workspaces:
-        WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=mock_user.id)
+        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=mock_user.id)
 
     argilla_client = Argilla()
 

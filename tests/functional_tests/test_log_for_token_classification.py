@@ -18,7 +18,6 @@ from argilla.client import api
 from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
-from datasets import load_dataset
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient
