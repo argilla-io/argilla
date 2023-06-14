@@ -5,6 +5,7 @@
     @click="focusInSearch"
   >
     <BaseIconWithBadge
+      ref="iconSearchRef"
       class="search-area__icon --search"
       icon="search"
       :show-badge="false"
@@ -31,6 +32,7 @@
     />
     <BaseIconWithBadge
       v-if="value"
+      ref="iconCloseRef"
       class="search-area__icon --close"
       icon="close"
       :show-badge="false"
