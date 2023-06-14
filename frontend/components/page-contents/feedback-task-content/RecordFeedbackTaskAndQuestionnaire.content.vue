@@ -248,6 +248,7 @@ export default {
   },
   watch: {
     async currentPage(newValue) {
+      // TODO - regroup in a common watcher hover filterParams computed
       await this.$router.push({
         path: this.$route.path,
         query: {
@@ -258,6 +259,7 @@ export default {
       });
     },
     async recordStatusToFilterWith(newValue) {
+      // TODO - regroup in a common watcher hover filterParams computed
       await this.$router.push({
         path: this.$route.path,
         query: {
@@ -269,6 +271,7 @@ export default {
       });
     },
     async searchTextToFilterWith(newValue) {
+      // TODO - regroup in a common watcher hover filterParams computed
       await this.$router.push({
         path: this.$route.path,
         query: {
