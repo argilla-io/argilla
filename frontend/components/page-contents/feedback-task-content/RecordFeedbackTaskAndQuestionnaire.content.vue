@@ -262,8 +262,8 @@ export default {
         path: this.$route.path,
         query: {
           ...this.$route.query,
-          _search: "",
           _status: newValue,
+          _search: this.searchTextToFilterWith,
           _page: this.currentPage,
         },
       });
