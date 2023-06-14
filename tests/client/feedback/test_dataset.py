@@ -337,6 +337,31 @@ def test_push_to_argilla_and_from_argilla(
     assert len(dataset_from_argilla.records[-1].responses) == 1  # Since the second one was discarded as `user_id=None`
 
 
+def test_copy_dataset_in_argilla(
+    mocked_client,
+    argilla_user: User,
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+) -> None:
+    api.active_api()
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records)
+    dataset.push_to_argilla(name="test-dataset")
+
+    same_dataset = FeedbackDataset.from_argilla("test-dataset")
+    same_dataset.push_to_argilla("copy-dataset")
+
+    assert same_dataset.argilla_id is not None
+
+
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",

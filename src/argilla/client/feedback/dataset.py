@@ -11,11 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import json
 import logging
 import tempfile
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from uuid import UUID
 
 try:
     from typing import Literal
@@ -143,7 +143,7 @@ class FeedbackDataset:
         [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5), "question-3": ValueSchema(value="positive"), "question-4": ValueSchema(value=["category-1"])})], external_id="entry-1")]
     """
 
-    argilla_id: Optional[str] = None
+    argilla_id: Optional[UUID] = None
 
     def __init__(
         self,
@@ -466,7 +466,7 @@ class FeedbackDataset:
         else:
             self.__new_records = records
 
-    def iter(self, batch_size: Optional[int] = FETCHING_BATCH_SIZE) -> Iterator[FeedbackRecord]:
+    def iter(self, batch_size: Optional[int] = FETCHING_BATCH_SIZE) -> Iterator[List[FeedbackRecord]]:
         """Returns an iterator over the records in the dataset.
 
         Args:
@@ -544,7 +544,7 @@ class FeedbackDataset:
                     f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}"
                 ) from e
 
-            def delete_and_raise_exception(dataset_id: str, exception: Exception) -> None:
+            def delete_and_raise_exception(dataset_id: UUID, exception: Exception) -> None:
                 try:
                     datasets_api_v1.delete_dataset(client=httpx_client, id=dataset_id)
                 except Exception as e:
@@ -556,7 +556,7 @@ class FeedbackDataset:
 
             for field in self.fields:
                 try:
-                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=field.dict())
+                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=json.loads(field.json()))
                 except Exception as e:
                     delete_and_raise_exception(
                         dataset_id=argilla_id,
@@ -569,9 +569,7 @@ class FeedbackDataset:
             for question in self.questions:
                 try:
                     datasets_api_v1.add_question(
-                        client=httpx_client,
-                        id=argilla_id,
-                        question=question.dict(include={"name", "title", "description", "required", "settings"}),
+                        client=httpx_client, id=argilla_id, question=json.loads(question.json())
                     )
                 except Exception as e:
                     delete_and_raise_exception(
@@ -597,7 +595,7 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=[record.dict() for record in batch],
+                        records=[json.loads(record.json()) for record in batch],
                     )
                 except Exception as e:
                     delete_and_raise_exception(
