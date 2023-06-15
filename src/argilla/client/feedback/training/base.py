@@ -17,7 +17,6 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
-from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.training.schemas import (
     TrainingTaskMapingForTextClassification,
 )
@@ -33,7 +32,7 @@ if TYPE_CHECKING:
 class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
-        dataset: FeedbackDataset,
+        dataset: "rg.FeedbackDataset",
         training_task_mapping: TrainingTaskMapingForTextClassification,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
@@ -231,7 +230,7 @@ _________________________________________________________________
 class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
-        feedback_dataset: FeedbackDataset,
+        feedback_dataset: "rg.FeedbackDataset",
         training_task_mapping: TrainingTaskMapingForTextClassification,
         prepared_data=None,
         model: str = None,
