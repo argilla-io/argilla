@@ -50,7 +50,7 @@
 
     <span
       class="search-area__additional-info"
-      v-if="!searchValueIsEmpty"
+      v-if="localAdditionalInfo"
       v-text="additionalInfo"
     />
 
@@ -95,6 +95,7 @@ export default {
   data() {
     return {
       searchValue: "",
+      localAdditionalInfo: "",
       searchHasFocus: false,
     };
   },
@@ -109,11 +110,7 @@ export default {
       return isNil(this.searchValue) || this.searchValue.length === 0;
     },
     showDelete() {
-      if (isNil(this.searchValue)) return false;
-      if (this.isActiveSearchEmpty && this.searchValue.length === 0)
-        return false;
-
-      return true;
+      return !this.searchValueIsEmpty || !this.isActiveSearchEmpty;
     },
   },
   watch: {
@@ -123,6 +120,12 @@ export default {
         this.searchValue = newValue;
       },
     },
+    additionalInfo: {
+      inmediate :true,
+      handler(newValue) {
+        this.localAdditionalInfo = newValue;
+      }
+    }
   },
   methods: {
     applySearch() {
@@ -137,6 +140,7 @@ export default {
     },
     resetValue() {
       this.searchValue = "";
+      this.localAdditionalInfo = "";
       this.$emit("input", "");
     },
   },
