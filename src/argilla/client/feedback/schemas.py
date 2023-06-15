@@ -141,7 +141,7 @@ class FeedbackRecord(BaseModel):
     fields: Dict[str, str]
     responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
-    unified_responses: Optional[Dict[str, List[UnificatiedValueSchema]]] = None
+    unified_responses: Optional[Dict[str, List[UnificatiedValueSchema]]] = {}
 
     @validator("responses", always=True)
     def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
@@ -536,17 +536,17 @@ class RatingQuestionStrategy(Enum):
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
-            ratings = [resp.values[question].value for resp in responses]
+            ratings = [int(resp.values[question].value) for resp in responses]
             # unified response
             if self.value == self.MEAN.value:
-                unified_value = sum(ratings) / len(ratings)
+                unified_value = str(int(sum(ratings) / len(ratings)))
             elif self.value == self.MAX.value:
-                unified_value = max(ratings)
+                unified_value = str(max(ratings))
             elif self.value == self.MIN.value:
-                unified_value = min(ratings)
+                unified_value = str(min(ratings))
             else:
                 raise ValueError("Invalid aggregation method")
-            rec.unified_responses = {question: UnificatiedValueSchema(value=unified_value, strategy=self.value)}
+            rec.unified_responses[question] = [UnificatiedValueSchema(value=unified_value, strategy=self.value)]
         return records
 
     def _majority(self, records: List[FeedbackRecord], question: str):
@@ -565,7 +565,7 @@ class RatingQuestionStrategy(Enum):
                 majority_value = random.choice(most_common_values)
             else:
                 majority_value = counter.most_common(1)[0][0]
-            rec.unified_responses = {question: [UnificatiedValueSchema(value=majority_value, strategy=self.value)]}
+            rec.unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
         return records
 
 
@@ -601,11 +601,10 @@ class LabelQuestionStrategyMixin:
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
-            rec.unified_responses = {
-                question: [
-                    UnificatiedValueSchema(value=resp.values[question].value, strategy=self.value) for resp in responses
-                ]
-            }
+            rec.unified_responses[question] = [
+                UnificatiedValueSchema(value=resp.values[question].value, strategy=self.value) for resp in responses
+            ]
+
         return unified_records
 
 
@@ -638,7 +637,7 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             else:
                 majority_value = counter.most_common(1)[0][0]
 
-            rec.unified_responses = {question: [UnificatiedValueSchema(value=majority_value, strategy=self.value)]}
+            rec.unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
         return rec
 
     def _majority_weighted(self, records: List[FeedbackRecord], question: LabelQuestion):
@@ -675,7 +674,7 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             for value, count in counter.items():
                 if count >= majority:
                     majority_value.append(value)
-            rec.unified_responses = {question: UnificatiedValueSchema(value=majority_value, strategy=self.value)}
+            rec.unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
         return records
 
     def _majority_weighted(self, records: List[FeedbackRecord], question: MultiLabelQuestion):
