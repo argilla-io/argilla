@@ -321,10 +321,10 @@ class FeedbackDataset:
         return self.__fields
 
     def field_by_name(self, name: str) -> Dict[str, FieldSchema]:
-        for item in self.__fields:
+        for item in self.fields:
             if item.name == name:
                 return item
-        raise KeyError(f"Item with name '{name}' not found in list")
+        raise KeyError(f"Field with name '{name}' not found in self.fields")
 
     @property
     def questions(self) -> List["FeedbackQuestionModel"]:
@@ -332,10 +332,10 @@ class FeedbackDataset:
         return self.__questions
 
     def question_by_name(self, name: str) -> Dict[str, "FeedbackQuestionModel"]:
-        for item in self.__questions:
+        for item in self.questions:
             if item.name == name:
                 return item
-        raise KeyError(f"Item with name '{name}' not found in list")
+        raise KeyError(f"Question with name '{name}' not found in self.questions")
 
     @property
     def records(self) -> List[FeedbackRecord]:
