@@ -492,16 +492,15 @@ class FeedbackDataset:
         if name is None:
             if self.argilla_id is None:
                 _LOGGER.warning(
-                    "No `name` or `workspace` have been provided, and no dataset has"
-                    " been pushed to Argilla yet, so no records will be pushed to"
-                    " Argilla."
+                    "No `name` has been provided, and no dataset has been pushed to Argilla yet, so no records will be"
+                    " pushed to Argilla."
                 )
                 return
 
             if len(self.__new_records) < 1:
                 _LOGGER.warning(
-                    "No new records have been added to the current `FeedbackTask`"
-                    " dataset, so no records will be pushed to Argilla."
+                    "No new records have been added to the current `FeedbackTask` dataset, so no records will be pushed"
+                    " to Argilla."
                 )
                 return
 
@@ -516,8 +515,7 @@ class FeedbackDataset:
                 self.__new_records = []
             except Exception as e:
                 raise Exception(
-                    "Failed while adding new records to the current `FeedbackTask`"
-                    f" dataset in Argilla with exception: {e}"
+                    f"Failed while adding new records to the current `FeedbackTask` dataset in Argilla with exception: {e}"
                 ) from e
         else:
             if workspace is None:
@@ -529,9 +527,8 @@ class FeedbackDataset:
             dataset = feedback_dataset_in_argilla(name=name, workspace=workspace)
             if dataset is not None:
                 raise RuntimeError(
-                    f"Dataset with name=`{name}` and workspace=`{workspace.name}`"
-                    " already exists in Argilla, please choose another name and/or"
-                    " workspace."
+                    f"Dataset with name=`{name}` and workspace=`{workspace.name}` already exists in Argilla, please"
+                    " choose another name and/or workspace."
                 )
 
             try:
@@ -544,24 +541,24 @@ class FeedbackDataset:
                     f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}"
                 ) from e
 
-            def delete_and_raise_exception(dataset_id: UUID, exception: Exception) -> None:
+            def delete_dataset(dataset_id: UUID) -> None:
                 try:
                     datasets_api_v1.delete_dataset(client=httpx_client, id=dataset_id)
                 except Exception as e:
                     raise Exception(
-                        f"Failed while deleting the `FeedbackTask` dataset with ID '{dataset_id}' from Argilla with exception: {e}"
+                        f"Failed while deleting the `FeedbackTask` dataset with ID '{dataset_id}' from Argilla with"
+                        f" exception: {e}"
                     ) from e
-                raise exception
 
             for field in self.fields:
                 try:
                     datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=json.loads(field.json()))
                 except Exception as e:
-                    exc = Exception(
-                        f"Failed while adding the field '{field.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
-                    )
-                    exc.__cause__ = e
-                    delete_and_raise_exception(dataset_id=argilla_id, exception=exc)
+                    delete_dataset(dataset_id=argilla_id)
+                    raise Exception(
+                        f"Failed while adding the field '{field.name}' to the `FeedbackTask` dataset in Argilla with"
+                        f" exception: {e}"
+                    ) from e
 
             for question in self.questions:
                 try:
@@ -569,18 +566,19 @@ class FeedbackDataset:
                         client=httpx_client, id=argilla_id, question=json.loads(question.json())
                     )
                 except Exception as e:
-                    exc = Exception(
-                        f"Failed while adding the question '{question.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
-                    )
-                    exc.__cause__ = e
-                    delete_and_raise_exception(dataset_id=argilla_id, exception=exc)
+                    delete_dataset(dataset_id=argilla_id)
+                    raise Exception(
+                        f"Failed while adding the question '{question.name}' to the `FeedbackTask` dataset in Argilla"
+                        f" with exception: {e}"
+                    ) from e
 
             try:
                 datasets_api_v1.publish_dataset(client=httpx_client, id=argilla_id)
             except Exception as e:
-                exc = Exception(f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}")
-                exc.__cause__ = e
-                delete_and_raise_exception(dataset_id=argilla_id, exception=exc)
+                delete_dataset(dataset_id=argilla_id)
+                raise Exception(
+                    f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"
+                ) from e
 
             for batch in self.iter():
                 try:
@@ -590,11 +588,10 @@ class FeedbackDataset:
                         records=[json.loads(record.json()) for record in batch],
                     )
                 except Exception as e:
-                    exc = Exception(
+                    delete_dataset(dataset_id=argilla_id)
+                    raise Exception(
                         f"Failed while adding the records to the `FeedbackTask` dataset in Argilla with exception: {e}"
-                    )
-                    exc.__cause__ = e
-                    delete_and_raise_exception(dataset_id=argilla_id, exception=exc)
+                    ) from e
 
             self.__records += self.__new_records
             self.__new_records = []
