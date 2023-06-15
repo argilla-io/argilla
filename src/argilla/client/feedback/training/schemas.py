@@ -82,7 +82,7 @@ class TrainingData(ABC):
         """Overwritten by subclasses"""
 
 
-class TrainingDataForTextClassification(BaseModel, TrainingData):
+class TrainingTaskMapingForTextClassification(BaseModel, TrainingData):
     """Training data for text classification
 
     Args:
@@ -90,10 +90,10 @@ class TrainingDataForTextClassification(BaseModel, TrainingData):
         label: Union[RatingUnification, LabelUnification, MultiLabelUnification]
 
     Examples:
-        >>> from argilla import LabelQuestion, TrainingDataForTextClassification
+        >>> from argilla import LabelQuestion, TrainingTaskMapingForTextClassification
         >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
         >>> label = RatingQuestionUnification(question=dataset.questions[0], strategy="mean")
-        >>> training_data = TrainingDataForTextClassification(
+        >>> training_data = TrainingTaskMapingForTextClassification(
         ...     text=dataset.fields[0],
         ...     label=label
         ... )
@@ -128,11 +128,21 @@ class TrainingDataForTextClassification(BaseModel, TrainingData):
         from sklearn.model_selection import train_test_split
 
         # TODO: Stratify by label
+        # TODO: provide label overview
         return train_test_split(
             data,
             train_size=train_size,
             shuffle=True,
             random_state=seed,
+        )
+
+    def __repr__(self) -> str:
+        return (
+            "TrainingTaskMapingForTextClassification",
+            f"\n\t text={self.text.name}",
+            f"\n\t label={self.label.question.name}",
+            f"\n\t multi_label={self.__multi_label__}",
+            f"\n\t all_labels={self.__all_labels__}",
         )
 
     @requires_version("datasets>1.17.0")
@@ -143,15 +153,16 @@ class TrainingDataForTextClassification(BaseModel, TrainingData):
 
         multi_label = isinstance(self.label.question, MultiLabelQuestion)
 
-        datasets_dict = {"text": [], "label": []}
+        datasets_dict = {"id": [], "text": [], "label": []}
         for entry in data:
+            datasets_dict["id"].append("None")
             datasets_dict["text"].append(entry["text"])
             datasets_dict["label"].append(entry["label"])
 
         all_labels = self.label.question.__all_labels__
         class_label = datasets.ClassLabel(names=all_labels)
         feature_dict = {
-            # "id": datasets.Value("string"),
+            "id": datasets.Value("string"),
             "text": datasets.Value("string"),
             "label": [class_label] if multi_label else class_label,
         }
@@ -168,7 +179,7 @@ class TrainingDataForTextClassification(BaseModel, TrainingData):
             feature_dict["binarized_label"] = feature_dict["label"]
             ds = datasets.Dataset.from_dict(
                 {
-                    # "id": ds["id"],
+                    "id": ds["id"],
                     "text": ds["text"],
                     "label": labels,
                     "binarized_label": binarized_labels,

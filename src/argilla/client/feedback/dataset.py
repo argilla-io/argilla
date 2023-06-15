@@ -21,6 +21,7 @@ try:
 except ImportError:
     from typing_extensions import Literal
 
+
 from pydantic import (
     ValidationError,
     parse_obj_as,
@@ -49,15 +50,16 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.training import FeedbackDatasetTrainingMixin
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskMapingForTextClassification,
+)
 from argilla.client.feedback.utils import (
     feedback_dataset_in_argilla,
     generate_pydantic_schema,
 )
 from argilla.client.models import Framework
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.client.training import TrainingDataForTextClassification
-from argilla.utils.dependency import requires_version
+from argilla.utils.dependency import require_version, requires_version
 
 if TYPE_CHECKING:
     import httpx
@@ -72,7 +74,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset(FeedbackDatasetTrainingMixin):
+class FeedbackDataset:
     """Class to work with `FeedbackDataset`s either locally, or remotely (Argilla or HuggingFace Hub).
 
     Args:
@@ -978,7 +980,7 @@ class FeedbackDataset(FeedbackDatasetTrainingMixin):
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
-        training_data: TrainingDataForTextClassification,
+        training_task_mapping: TrainingTaskMapingForTextClassification,
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
@@ -1007,12 +1009,14 @@ class FeedbackDataset(FeedbackDatasetTrainingMixin):
         if fetch_records:
             self.fetch_records()
 
-        if isinstance(training_data, TrainingDataForTextClassification):
-            self.unify_responses(question=training_data.label.question, strategy=training_data.label.strategy)
+        if isinstance(training_task_mapping, TrainingTaskMapingForTextClassification):
+            self.unify_responses(
+                question=training_task_mapping.label.question, strategy=training_task_mapping.label.strategy
+            )
         else:
-            raise ValueError(f"Training data {type(training_data)} is not supported yet")
+            raise ValueError(f"Training data {type(training_task_mapping)} is not supported yet")
 
-        data = training_data._format_data(self.records)
+        data = training_task_mapping._format_data(self.records)
         if framework in [
             Framework.TRANSFORMERS,
             Framework.SETFIT,
@@ -1020,26 +1024,30 @@ class FeedbackDataset(FeedbackDatasetTrainingMixin):
             Framework.PEFT,
             Framework.AUTOTRAIN,
         ]:
-            return training_data._prepare_for_training_with_transformers(data=data, train_size=train_size, seed=seed)
+            return training_task_mapping._prepare_for_training_with_transformers(
+                data=data, train_size=train_size, seed=seed
+            )
         elif framework is Framework.SPACY:
             require_version("spacy")
             import spacy
 
             if lang is None:
-                warnings.warn("spaCy `lang` is not provided. Using `en`(English) as default language.")
+                _LOGGER.warn("spaCy `lang` is not provided. Using `en`(English) as default language.")
                 lang = spacy.blank("en")
             elif lang.isinstance(str):
                 if len(lang) == 2:
                     lang = spacy.blank(lang)
                 else:
                     lang = spacy.load(lang)
-            return training_data._prepare_for_training_with_spacy(
+            return training_task_mapping._prepare_for_training_with_spacy(
                 data=data, train_size=train_size, seed=seed, lang=lang
             )
         elif framework is Framework.SPARK_NLP:
-            return training_data._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+            return training_task_mapping._prepare_for_training_with_spark_nlp(
+                data=data, train_size=train_size, seed=seed
+            )
         elif framework is Framework.OPENAI:
-            return training_data._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+            return training_task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
         else:
             raise NotImplementedError(
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
