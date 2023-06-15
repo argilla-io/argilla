@@ -184,7 +184,6 @@ async def mock_user() -> User:
         password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
         api_key="mock-user.apikey",
         workspaces=[workspace_a, workspace_b],
-        role=UserRole.admin,
     )
 
 

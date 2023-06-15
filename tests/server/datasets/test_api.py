@@ -24,7 +24,12 @@ from argilla.server.models import User
 from argilla.server.schemas.datasets import Dataset
 from starlette.testclient import TestClient
 
-from tests.factories import AnnotatorFactory, WorkspaceUserFactory
+from tests.factories import (
+    AdminFactory,
+    AnnotatorFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 
 @pytest.fixture(scope="function")
@@ -142,11 +147,14 @@ def test_create_workspace_with_missing_workspace(client: TestClient, argilla_use
     assert response.status_code == 400
 
 
-def test_create_dataset_using_several_workspaces(
-    client: TestClient, argilla_user: User, mock_user: User, argilla_auth_header: dict, dataset_name: str
-):
-    mock_auth_headers = {API_KEY_HEADER_NAME: mock_user.api_key}
-    for workspace in mock_user.workspaces:
+@pytest.mark.asyncio
+async def test_create_dataset_using_several_workspaces(client: TestClient, dataset_name: str):
+    workspace_a = await WorkspaceFactory.create()
+    workspace_b = await WorkspaceFactory.create()
+    user = await AdminFactory.create(workspaces=[workspace_a, workspace_b])
+
+    mock_auth_headers = {API_KEY_HEADER_NAME: user.api_key}
+    for workspace in user.workspaces:
         workspace_name = workspace.name
         delete_dataset(client, dataset_name=dataset_name, workspace=workspace_name, headers=mock_auth_headers)
 
@@ -158,7 +166,7 @@ def test_create_dataset_using_several_workspaces(
 
         dataset = Dataset.parse_obj(response.json())
 
-        assert dataset.created_by == mock_user.username
+        assert dataset.created_by == user.username
         assert dataset.name == dataset_name
         assert dataset.owner == workspace_name
         assert dataset.task == TaskType.text_classification
@@ -168,7 +176,7 @@ def test_create_dataset_using_several_workspaces(
         assert response.status_code == 409, response.json()
 
         another_ws = None
-        for ws in mock_user.workspaces:
+        for ws in user.workspaces:
             if ws.name != workspace_name:
                 another_ws = ws.name
                 break
@@ -179,7 +187,7 @@ def test_create_dataset_using_several_workspaces(
 
         dataset = Dataset.parse_obj(response.json())
 
-        assert dataset.created_by == mock_user.username
+        assert dataset.created_by == user.username
         assert dataset.name == dataset_name
         assert dataset.workspace == another_ws
         assert dataset.task == TaskType.text_classification
