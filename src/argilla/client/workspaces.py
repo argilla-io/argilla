@@ -112,9 +112,7 @@ class Workspace:
         Returns:
             A list of `WorkspaceUserModel` instances.
         """
-        if not hasattr(self, "__users") or self.__users is None:
-            self.__users = workspaces_api.list_workspace_users(self.__client, self.id).parsed
-        return self.__users
+        return workspaces_api.list_workspace_users(self.__client, self.id).parsed
 
     def __str__(self) -> str:
         return (
@@ -123,11 +121,11 @@ class Workspace:
         )
 
     # TODO(alvarobartt): also allow user addition via name (which is more user-friendly)
-    def add_user(self, id: str) -> None:
+    def add_user(self, user_id: str) -> None:
         """Adds an existing user to the workspace in Argilla.
 
         Args:
-            id: the ID of the user to be added to the workspace. The user must exist in Argilla.
+            user_id: the ID of the user to be added to the workspace. The user must exist in Argilla.
 
         Raises:
             ValueError: if the user with the provided ID already exists in the workspace.
@@ -139,28 +137,23 @@ class Workspace:
             >>> workspace.add_user("my-user-id")
         """
         try:
-            created_user = workspaces_api.create_workspace_user(
+            workspaces_api.create_workspace_user(
                 client=self.__client,
                 id=self.id,
-                user_id=id,
+                user_id=user_id,
             )
         except AlreadyExistsApiError as e:
-            raise ValueError(f"User with id=`{id}` already exists in workspace with id=`{self.id}`.") from e
+            raise ValueError(f"User with id=`{user_id}` already exists in workspace with id=`{self.id}`.") from e
         except BaseClientError as e:
-            raise RuntimeError(f"Error while adding user with id=`{id}` to workspace with id=`{self.id}`.") from e
-
-        if len(self.users) == 0:
-            self.__users = [created_user]
-        else:
-            self.__users.append(created_user)
+            raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
 
     # TODO(alvarobartt): also allow user addition via name (which is more user-friendly)
-    def delete_user(self, id: str) -> None:
+    def delete_user(self, user_id: str) -> None:
         """Deletes an existing user from the workspace in Argilla. Note that the user
         will not be deleted from Argilla, but just from the workspace.
 
         Args:
-            id: the ID of the user to be deleted from the workspace. The user must exist in Argilla.
+            user_id: the ID of the user to be deleted from the workspace. The user must exist in Argilla.
 
         Raises:
             ValueError: if the user with the provided ID doesn't exist in the workspace.
@@ -175,17 +168,17 @@ class Workspace:
             workspaces_api.delete_workspace_user(
                 client=self.__client,
                 id=self.id,
-                user_id=id,
+                user_id=user_id,
             )
         except NotFoundApiError as e:
             raise ValueError(
-                f"Either the user with id=`{id}` doesn't exist in Argilla, or it doesn't belong to workspace with"
+                f"Either the user with id=`{user_id}` doesn't exist in Argilla, or it doesn't belong to workspace with"
                 f" id=`{self.id}`."
             ) from e
         except BaseClientError as e:
-            raise RuntimeError(f"Error while deleting user with id=`{id}` from workspace with id=`{self.id}`.") from e
-
-        self.__users = [user for user in self.users if user.id != id]
+            raise RuntimeError(
+                f"Error while deleting user with id=`{user_id}` from workspace with id=`{self.id}`."
+            ) from e
 
     @staticmethod
     def __active_client() -> "httpx.Client":
