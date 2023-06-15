@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from typing import Union
+from uuid import UUID
 
 import httpx
 
@@ -27,7 +28,7 @@ from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 def get_workspace(
     client: httpx.Client,
-    id: str,
+    id: UUID,
 ) -> Response[Union[WorkspaceModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/workspaces/{id}` endpoint to retrieve a workspace.
 
@@ -39,12 +40,12 @@ def get_workspace(
         A `Response` object with the parsed response, containing a `parsed` attribute with the
         parsed response if the request was successful, which is an instance of `WorkspaceModel`.
     """
-    url = "/api/v1/workspaces/{id}".format(id=id)
+    url = f"/api/v1/workspaces/{id}"
 
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceModel.construct(**response.json())
+        parsed_response = WorkspaceModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,

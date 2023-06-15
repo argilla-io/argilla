@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from typing import List, Union
+from uuid import UUID
 
 import httpx
 
@@ -40,7 +41,7 @@ def list_workspaces(client: httpx.Client) -> Response[Union[List[WorkspaceModel]
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [WorkspaceModel.construct(**workspace) for workspace in response.json()]
+        parsed_response = [WorkspaceModel(**workspace) for workspace in response.json()]
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -68,7 +69,7 @@ def create_workspace(
     response = client.post(url=url, json={"name": name})
 
     if response.status_code == 200:
-        parsed_response = WorkspaceModel.construct(**response.json())
+        parsed_response = WorkspaceModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -79,7 +80,7 @@ def create_workspace(
 
 
 def list_workspace_users(
-    client: httpx.Client, id: str
+    client: httpx.Client, id: UUID
 ) -> Response[Union[List[WorkspaceUserModel], ErrorMessage, HTTPValidationError]]:
     """Sends a request to `GET /api/workspaces/{id}/users` to list all the users in the workspace.
 
@@ -96,7 +97,7 @@ def list_workspace_users(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [WorkspaceUserModel.construct(**workspace) for workspace in response.json()]
+        parsed_response = [WorkspaceUserModel(**workspace) for workspace in response.json()]
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -107,7 +108,7 @@ def list_workspace_users(
 
 
 def create_workspace_user(
-    client: httpx.Client, id: str, user_id: str
+    client: httpx.Client, id: UUID, user_id: UUID
 ) -> Response[Union[WorkspaceUserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a request to `POST /api/workspaces/{id}/users/{user_id}` to add a new user to the workspace.
 
@@ -120,12 +121,12 @@ def create_workspace_user(
         A Response object with the parsed response, containing a `parsed` attribute with the
         parsed response if the request was successful, which is a `WorkspaceUserModel` object.
     """
-    url = f"/api/workspaces/{id}/users/{user_id}".format(id=id, user_id=user_id)
+    url = f"/api/workspaces/{id}/users/{user_id}"
 
     response = client.post(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceUserModel.construct(**response.json())
+        parsed_response = WorkspaceUserModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -136,7 +137,7 @@ def create_workspace_user(
 
 
 def delete_workspace_user(
-    client: httpx.Client, id: str, user_id: str
+    client: httpx.Client, id: UUID, user_id: UUID
 ) -> Response[Union[WorkspaceUserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a request to `DELETE /api/workspaces/{id}/users/{user_id}` to remove a user from the workspace.
 
@@ -149,12 +150,12 @@ def delete_workspace_user(
         A Response object with the parsed response, containing a `parsed` attribute with the
         parsed response if the request was successful, which is a `WorkspaceUserModel` object.
     """
-    url = f"/api/workspaces/{id}/users/{user_id}".format(id=id, user_id=user_id)
+    url = f"/api/workspaces/{id}/users/{user_id}"
 
     response = client.delete(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceUserModel.construct(**response.json())
+        parsed_response = WorkspaceUserModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
