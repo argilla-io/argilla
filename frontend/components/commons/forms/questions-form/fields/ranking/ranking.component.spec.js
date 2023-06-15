@@ -29,6 +29,9 @@ describe("RankingComponent", () => {
   it("render the component", () => {
     expect(wrapper.is(RankingComponent)).toBe(true);
 
+    const classWrapper = wrapper.find(".wrapper");
+    expect(classWrapper.exists()).toBe(true);
+
     const QuestionHeaderWrapper = wrapper.findComponent(
       QuestionHeaderComponentStub
     );
@@ -37,6 +40,7 @@ describe("RankingComponent", () => {
 
     expect(wrapper.vm.isRequired).toBe(false);
     expect(wrapper.vm.description).toBe("");
+    expect(wrapper.vm.ranking).toBe([]);
   });
   it("has a title prop as required and must be a string", () => {
     expect(RankingComponent.props.title).toMatchObject({
@@ -71,10 +75,22 @@ describe("RankingComponent", () => {
       wrapper.findComponent(QuestionHeaderComponentStub).props("tooltipMessage")
     ).toBe(wrapper.vm.description);
   });
-  it("has a settings prop with as required and must be an object", () => {
-    expect(RankingComponent.props.settings).toMatchObject({
-      type: Object,
-      required: true,
-    });
+  it("has a settings prop with as required and must be an object with a validator", () => {
+    expect(RankingComponent.props.settings.type).toBe(Object);
+    expect(RankingComponent.props.settings.required).toBe(true);
+
+
+    // FIXME
+    expect(
+      JSON.stringify(RankingComponent.props.settings.validator)
+    ).toStrictEqual(
+      JSON.stringify((settings) => {
+        const settingsKeys = Object.keys(settings);
+        const checkAllKeysOfSettingsAreValid = settingsKeys.every((key) =>
+          ["type", "options", "ranking_slots"].includes(key)
+        );
+        return checkAllKeysOfSettingsAreValid;
+      })
+    );
   });
 });

@@ -27,7 +27,42 @@ export default {
     settings: {
       type: Object,
       required: true,
+      validator: (settings) => {
+        const settingsKeys = Object.keys(settings);
+        const checkAllKeysOfSettingsAreValid = settingsKeys.every((key) =>
+          ["type", "options", "ranking_slots"].includes(key)
+        );
+        return checkAllKeysOfSettingsAreValid;
+      },
     },
+  },
+  data() {
+    return {
+      ranking: [],
+    };
+  },
+  beforeMount() {
+    // this.ranking = [
+    //   {
+    //     index: 1,
+    //     items: [
+    //       {
+    //         title: "item 1",
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     index: 2,
+    //     items: [
+    //       {
+    //         title: "item 2",
+    //       },
+    //       {
+    //         title: "item 3",
+    //       },
+    //     ],
+    //   },
+    // ];
   },
 };
 </script>
