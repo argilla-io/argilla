@@ -23,6 +23,8 @@ These are the section headers that we use:
 ### Added
 
 - Added search component for feedback task ([#3138](https://github.com/argilla-io/argilla/pull/3138))
+- Added markdown support for dataset guidelines ([#3153](https://github.com/argilla-io/argilla/pull/3153))
+- Added Train button for feedbacck task ([#3170](https://github.com/argilla-io/argilla/pull/3170))
 
 ### Changed
 
@@ -78,7 +80,7 @@ These are the section headers that we use:
 - `/api/v1/responses/{response_id}` new endpoint to update and delete a response ([#2615])
 - `/api/v1/datasets/{dataset_id}/records` new endpoint to create and list dataset records ([#2615])
 - `/api/v1/me/datasets` new endpoint to list user visible datasets ([#2615])
-- `/api/v1/me/dataset/{dataset_id}/records` new endpoint to list  dataset records with user responses ([#2615])
+- `/api/v1/me/dataset/{dataset_id}/records` new endpoint to list dataset records with user responses ([#2615])
 - `/api/v1/me/datasets/{dataset_id}/metrics` new endpoint to get the dataset user metrics ([#2615])
 - `/api/v1/me/records/{record_id}/responses` new endpoint to create record user responses ([#2615])
 - showing new feedback task datasets in datasets list ([#2719])
@@ -105,7 +107,6 @@ These are the section headers that we use:
 - `token_length` metrics function returns empty data ([#3045])
 - `mention_length` metrics function returns empty data ([#3045])
 - `entity_density` metrics function returns empty data ([#3045])
-
 
 ### Deprecated
 
@@ -179,6 +180,7 @@ These are the section headers that we use:
 - Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
 
 ### Fixes
+
 - Now the `prepare_for_training` method is working when `multi_label=True`. Closes [#2606](https://github.com/argilla-io/argilla/issues/2606)
 
 ### Changed
@@ -201,8 +203,6 @@ These are the section headers that we use:
 - The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
-
-
 
 ## [1.5.1](https://github.com/argilla-io/argilla/compare/v1.5.0...v1.5.1) - 2023-03-30
 
