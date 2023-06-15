@@ -290,3 +290,25 @@ class Workspace:
             "create it via the `Workspace.create` method as follows:"
             f" `Workspace(name=`{name}`)`."
         )
+
+    @classmethod
+    def list(cls) -> List["Workspace"]:
+        """Lists all the workspaces in Argilla.
+
+        Returns:
+            A list of `Workspace` instances.
+
+        Raises:
+            RuntimeError: if there was an error while listing the workspaces.
+
+        Examples:
+            >>> from argilla import rg
+            >>> workspaces = rg.Workspace.list()
+        """
+        client = cls.__active_client()
+        try:
+            workspaces = workspaces_api.list_workspaces(client).parsed
+        except Exception as e:
+            raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
+
+        return [cls(client, **workspace.dict()) for workspace in workspaces]
