@@ -19,7 +19,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
-from pydantic.utils import GetterDict
 
 from argilla.server.search_engine import Query
 
@@ -288,15 +287,6 @@ class RecordInclude(str, Enum):
     responses = "responses"
 
 
-class RecordGetterDict(GetterDict):
-    def get(self, key: Any, default: Any = None) -> Any:
-        if key == "metadata":
-            return getattr(self._obj, "metadata_", {})
-        if key == "responses" and "responses" not in self._obj.__dict__:
-            return None
-        return super().get(key, default)
-
-
 class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
@@ -310,7 +300,6 @@ class Record(BaseModel):
 
     class Config:
         orm_mode = True
-        getter_dict = RecordGetterDict
 
     @classmethod
     def from_orm(cls: Type["Record"], obj: Any) -> "Record":
