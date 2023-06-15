@@ -20,6 +20,10 @@ These are the section headers that we use:
 
 ## [1.10.0](https://github.com/argilla-io/argilla/compare/v1.9.0...v1.10.0)
 
+### Added
+
+- Added search component for feedback task ([#3138](https://github.com/argilla-io/argilla/pull/3138))
+
 ### Changed
 
 - Updated `SearchEngine` and `POST /api/v1/me/datasets/{dataset_id}/records/search` to return the `total` number of records matching the search query ([#3166](https://github.com/argilla-io/argilla/pull/3166))
@@ -42,7 +46,6 @@ These are the section headers that we use:
 - Added `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoint ([#3068](https://github.com/argilla-io/argilla/pull/3068)).
 - Added new components in feedback task Question form: MultiLabel ([#3064](https://github.com/argilla-io/argilla/pull/3064)) and SingleLabel ([#3016](https://github.com/argilla-io/argilla/pull/3016)).
 - Added docstrings to the `pydantic.BaseModel`s defined at `argilla/client/feedback/schemas.py` ([#3137](https://github.com/argilla-io/argilla/pull/3137))
-- Added search component for feedback task ([#3138](https://github.com/argilla-io/argilla/pull/3138))
 
 ### Changed
 
