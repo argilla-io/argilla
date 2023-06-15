@@ -5,6 +5,8 @@
       :isRequired="isRequired"
       :tooltipMessage="description"
     />
+
+    <dndSelectionComponent :listOfItems="ranking" />
   </div>
 </template>
 
@@ -24,6 +26,10 @@ export default {
       type: String,
       default: "",
     },
+    values: {
+      type: Array,
+      required: true,
+    },
     settings: {
       type: Object,
       required: true,
@@ -41,28 +47,53 @@ export default {
       ranking: [],
     };
   },
+  created() {
+    this.initialSettings = {
+      options: [
+        {
+          value: "label-01",
+          text: "My label",
+          description: "This is an optional field",
+        },
+        { value: "label-02", text: "My other Label" },
+        { value: "label-03", text: "Wat?!" },
+        { value: "label-04", text: "Ough!" },
+      ],
+      ranking_slots: [
+        {
+          text: "First place",
+        },
+        {
+          text: "Second place",
+        },
+        {
+          text: "Out of top 2",
+        },
+      ],
+    };
+  },
   beforeMount() {
-    // this.ranking = [
-    //   {
-    //     index: 1,
-    //     items: [
-    //       {
-    //         title: "item 1",
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     index: 2,
-    //     items: [
-    //       {
-    //         title: "item 2",
-    //       },
-    //       {
-    //         title: "item 3",
-    //       },
-    //     ],
-    //   },
-    // ];
+    this.ranking = [
+      {
+        index: 1,
+        items: [
+          {
+            title: "item 1",
+          },
+        ],
+      },
+      {
+        index: 2,
+        items: [
+          {
+            title: "item 2",
+          },
+          {
+            title: "item 3",
+          },
+        ],
+      },
+    ];
   },
 };
 </script>

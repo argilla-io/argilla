@@ -4,15 +4,24 @@ import RankingComponent from "./Ranking.component";
 let wrapper = null;
 
 const QuestionHeaderComponentStub = {
-  name: "child-component",
+  name: "QuestionHeaderComponent",
   template: "<div />",
   props: ["title", "isRequired", "tooltipMessage"],
 };
+const dndSelectionComponentStub = {
+  name: "dndSelectionBaseComponent",
+  template: "<div />",
+  props: ["listOfItems"],
+};
 
 const options = {
-  stubs: { QuestionHeaderComponent: QuestionHeaderComponentStub },
+  stubs: {
+    QuestionHeaderComponent: QuestionHeaderComponentStub,
+    dndSelectionComponent: dndSelectionComponentStub,
+  },
   propsData: {
     title: "This is the title",
+    values: [],
     settings: {},
   },
 };
@@ -35,12 +44,45 @@ describe("RankingComponent", () => {
     const QuestionHeaderWrapper = wrapper.findComponent(
       QuestionHeaderComponentStub
     );
-
     expect(QuestionHeaderWrapper.exists()).toBe(true);
+
+    const dndSelectionWrapper = wrapper.findComponent(
+      dndSelectionComponentStub
+    );
+    expect(dndSelectionWrapper.exists()).toBe(true);
 
     expect(wrapper.vm.isRequired).toBe(false);
     expect(wrapper.vm.description).toBe("");
-    expect(wrapper.vm.ranking).toStrictEqual([]);
+
+    // TODO - replace mock by empty list (see two next lines)
+    // expect(wrapper.vm.ranking).toStrictEqual([]);
+    expect(wrapper.vm.ranking).toStrictEqual([
+      {
+        index: 1,
+        items: [
+          {
+            title: "item 1",
+          },
+        ],
+      },
+      {
+        index: 2,
+        items: [
+          {
+            title: "item 2",
+          },
+          {
+            title: "item 3",
+          },
+        ],
+      },
+    ]);
+  });
+  it("has a values prop as required and must be a array", () => {
+    expect(RankingComponent.props.values).toMatchObject({
+      type: Array,
+      required: true,
+    });
   });
   it("has a title prop as required and must be a string", () => {
     expect(RankingComponent.props.title).toMatchObject({
@@ -79,7 +121,6 @@ describe("RankingComponent", () => {
     expect(RankingComponent.props.settings.type).toBe(Object);
     expect(RankingComponent.props.settings.required).toBe(true);
 
-
     // FIXME
     expect(
       JSON.stringify(RankingComponent.props.settings.validator)
@@ -92,5 +133,10 @@ describe("RankingComponent", () => {
         return checkAllKeysOfSettingsAreValid;
       })
     );
+  });
+  it("pass the ranking list to the component dndSelectionBaseComponent", () => {
+    expect(
+      wrapper.findComponent(dndSelectionComponentStub).props("listOfItems")
+    ).toStrictEqual(wrapper.vm.ranking);
   });
 });
