@@ -98,11 +98,11 @@ export default {
     };
   },
   computed: {
-    isSearchActive() {
-      return this.value?.length ?? false;
-    },
     isActiveSearchEmpty() {
       return isNil(this.value) || this.value.length === 0;
+    },
+    isSearchActive() {
+      return !this.isActiveSearchEmpty;
     },
     searchValueIsEmpty() {
       return isNil(this.searchValue) || this.searchValue.length === 0;
