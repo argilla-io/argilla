@@ -100,17 +100,14 @@ export default {
     };
   },
   computed: {
-    isActiveSearchEmpty() {
-      return isNil(this.value) || this.value.length === 0;
-    },
     isSearchActive() {
-      return !this.isActiveSearchEmpty;
+      return !(isNil(this.value) || this.value.length === 0);
     },
-    searchValueIsEmpty() {
-      return isNil(this.searchValue) || this.searchValue.length === 0;
+    hasSearchBarInput() {
+      return !(isNil(this.searchValue) || this.searchValue.length === 0);
     },
     showDelete() {
-      return !this.searchValueIsEmpty || !this.isActiveSearchEmpty;
+      return this.hasSearchBarInput || this.isSearchActive;
     },
   },
   watch: {
