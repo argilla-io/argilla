@@ -48,8 +48,8 @@ https://github.com/argilla-io/argilla/assets/1107111/49e28d64-9799-4cac-be49-19d
 <a href="https://docs.argilla.io">📄 Documentation</a> | </span>
 <a href="#-quickstart">🚀 Quickstart</a> <span> | </span>
 <a href="#-cheatsheet">🎼 Cheatsheet</a> <span> | </span>
-<a href="#-principles">📏 Principles</a> | </span>
-<a href="#-contribute">🫱🏾‍🫲🏼 Contribute</a>
+<a href="#-contribute">🫱🏾‍🫲🏼 Contribute</a> <span> | </span>
+<a href="#-roadmap">🗺️ Roadmap</a>
 </p>
 </h3>
 
@@ -67,6 +67,14 @@ There are different options to get started:
 
 ## 🎼 Cheatsheet
 
+<h3><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/python.html"> Python package</a></h3>
+
+
+```bash
+pip install argilla
+```
+
+<hr>
 
 <h3><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker-quickstart.html"> Deploy Locally</a></h3>
 
@@ -223,3 +231,8 @@ We love contributors and have launched a [collaboration with JustDiggit](https:/
 <img  src="https://contrib.rocks/image?repo=argilla-io/argilla" />
 
 </a>
+
+## 🗺️ Roadmap
+
+We continuously work on updating [our plans and our roadmap](https://github.com/orgs/argilla-io/projects/10/views/1) and we love to discuss those with our community. Feel encouraged to participate.
+
