@@ -135,7 +135,7 @@ class Workspace:
 
         Examples:
             >>> from argilla import rg
-            >>> workspace = rg.Workspace("my-workspace")
+            >>> workspace = rg.Workspace.from_name("my-workspace")
             >>> workspace.add_user("my-user-id")
         """
         try:
@@ -168,7 +168,7 @@ class Workspace:
 
         Examples:
             >>> from argilla import rg
-            >>> workspace = rg.Workspace("my-workspace")
+            >>> workspace = rg.Workspace.from_name("my-workspace")
             >>> workspace.delete_user("my-user-id")
         """
         try:
