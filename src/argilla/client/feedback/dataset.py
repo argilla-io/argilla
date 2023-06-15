@@ -518,7 +518,7 @@ class FeedbackDataset:
                 raise Exception(
                     "Failed while adding new records to the current `FeedbackTask`"
                     f" dataset in Argilla with exception: {e}"
-                )
+                ) from e
         else:
             if workspace is None:
                 workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
@@ -549,22 +549,19 @@ class FeedbackDataset:
                     datasets_api_v1.delete_dataset(client=httpx_client, id=dataset_id)
                 except Exception as e:
                     raise Exception(
-                        "Failed while deleting the `FeedbackTask` dataset with ID"
-                        f" '{dataset_id}' from Argilla with exception: {e}"
-                    )
+                        f"Failed while deleting the `FeedbackTask` dataset with ID '{dataset_id}' from Argilla with exception: {e}"
+                    ) from e
                 raise exception
 
             for field in self.fields:
                 try:
                     datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=json.loads(field.json()))
                 except Exception as e:
-                    delete_and_raise_exception(
-                        dataset_id=argilla_id,
-                        exception=Exception(
-                            f"Failed while adding the field '{field.name}' to the"
-                            f" `FeedbackTask` dataset in Argilla with exception: {e}"
-                        ),
+                    exc = Exception(
+                        f"Failed while adding the field '{field.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
                     )
+                    exc.__cause__ = e
+                    delete_and_raise_exception(dataset_id=argilla_id, exception=exc)
 
             for question in self.questions:
                 try:
@@ -572,23 +569,18 @@ class FeedbackDataset:
                         client=httpx_client, id=argilla_id, question=json.loads(question.json())
                     )
                 except Exception as e:
-                    delete_and_raise_exception(
-                        dataset_id=argilla_id,
-                        exception=Exception(
-                            f"Failed while adding the question '{question.name}' to the"
-                            f" `FeedbackTask` dataset in Argilla with exception: {e}"
-                        ),
+                    exc = Exception(
+                        f"Failed while adding the question '{question.name}' to the `FeedbackTask` dataset in Argilla with exception: {e}"
                     )
+                    exc.__cause__ = e
+                    delete_and_raise_exception(dataset_id=argilla_id, exception=exc)
 
             try:
                 datasets_api_v1.publish_dataset(client=httpx_client, id=argilla_id)
             except Exception as e:
-                delete_and_raise_exception(
-                    dataset_id=argilla_id,
-                    exception=Exception(
-                        f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"
-                    ),
-                )
+                exc = Exception(f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}")
+                exc.__cause__ = e
+                delete_and_raise_exception(dataset_id=argilla_id, exception=exc)
 
             for batch in self.iter():
                 try:
@@ -598,13 +590,11 @@ class FeedbackDataset:
                         records=[json.loads(record.json()) for record in batch],
                     )
                 except Exception as e:
-                    delete_and_raise_exception(
-                        dataset_id=argilla_id,
-                        exception=Exception(
-                            "Failed while adding the records to the `FeedbackTask`"
-                            f" dataset in Argilla with exception: {e}"
-                        ),
+                    exc = Exception(
+                        f"Failed while adding the records to the `FeedbackTask` dataset in Argilla with exception: {e}"
                     )
+                    exc.__cause__ = e
+                    delete_and_raise_exception(dataset_id=argilla_id, exception=exc)
 
             self.__records += self.__new_records
             self.__new_records = []
