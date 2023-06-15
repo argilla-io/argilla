@@ -18,10 +18,13 @@ from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     LabelQuestionStrategy,
+    LabelQuestionUnification,
     MultiLabelQuestion,
     MultiLabelQuestionStrategy,
+    MultiLabelQuestionUnification,
     RatingQuestion,
     RatingQuestionStrategy,
+    RatingQuestionUnification,
     UnificatiedValueSchema,
 )
 
@@ -52,12 +55,12 @@ def test_rating_question_strategy(strategy, unified_response):
         "required": True,
         "values": ["1", "2"],
     }
-    field = RatingQuestion(**rating_question_payload)
+    question = RatingQuestion(**rating_question_payload)
     strategy = RatingQuestionStrategy(strategy)
-    strategy.unify_responses([record], field)
-    print(record.unified_responses)
+    strategy.unify_responses([record], question)
     unified_response = [UnificatiedValueSchema(**resp) for resp in unified_response]
     assert record.unified_responses[question_name] == unified_response
+    assert RatingQuestionUnification(question=question, strategy=strategy)
 
 
 @pytest.mark.parametrize(
@@ -91,12 +94,12 @@ def test_label_question_strategy(strategy, unified_response):
         "required": True,
         "labels": ["1", "2"],
     }
-    field = LabelQuestion(**rating_question_payload)
+    question = LabelQuestion(**rating_question_payload)
     strategy = LabelQuestionStrategy(strategy)
-    strategy.unify_responses([record], field)
-    print(record.unified_responses)
+    strategy.unify_responses([record], question)
     unified_response = [UnificatiedValueSchema(**resp) for resp in unified_response]
     assert record.unified_responses[question_name] == unified_response
+    assert LabelQuestionUnification(question=question, strategy=strategy)
 
 
 @pytest.mark.parametrize(
@@ -130,9 +133,17 @@ def test_multi_label_question_strategy(strategy, unified_response):
         "required": True,
         "labels": ["1", "2"],
     }
-    field = MultiLabelQuestion(**rating_question_payload)
+    question = MultiLabelQuestion(**rating_question_payload)
     strategy = MultiLabelQuestionStrategy(strategy)
-    strategy.unify_responses([record], field)
-    print(record.unified_responses)
+    strategy.unify_responses([record], question)
     unified_response = [UnificatiedValueSchema(**resp) for resp in unified_response]
     assert record.unified_responses[question_name] == unified_response
+    assert MultiLabelQuestionUnification(question=question, strategy=strategy)
+
+
+def test_label_question_strategy_not_implemented():
+    with pytest.raises(NotImplementedError):
+        LabelQuestionStrategy._majority_weighted("mock", "mock")
+
+    with pytest.raises(NotImplementedError):
+        MultiLabelQuestionStrategy._majority_weighted("mock", "mock")

@@ -640,6 +640,7 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             rec.unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
         return rec
 
+    @classmethod
     def _majority_weighted(self, records: List[FeedbackRecord], question: LabelQuestion):
         raise NotImplementedError("Not implemented yet")
 
@@ -677,6 +678,7 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             rec.unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
         return records
 
+    @classmethod
     def _majority_weighted(self, records: List[FeedbackRecord], question: MultiLabelQuestion):
         raise NotImplementedError("Not implemented yet")
 
@@ -736,13 +738,15 @@ class LabelQuestionUnification(BaseModel):
         if isinstance(question, LabelQuestion):
             if isinstance(strategy, str):
                 strategy = LabelQuestionStrategy(strategy)
-            elif isinstance(strategy, MultiLabelQuestionStrategy):
-                raise ValueError("LabelQuestionStrategy is not compatible with MultiLabelQuestion")
+            if strategy.value in LabelQuestionStrategy.__members__:
+                raise ValueError(f"Only LabelQuestionStrategy is compatible with LabelQuestion not {strategy}")
         elif isinstance(question, MultiLabelQuestion):
             if isinstance(strategy, str):
                 strategy = MultiLabelQuestionStrategy(strategy)
-            elif isinstance(strategy, LabelQuestionStrategy):
-                raise ValueError("MultiLabelQuestionStrategy is not compatible with LabelQuestion")
+            if strategy.value in MultiLabelQuestionStrategy.__members__:
+                raise ValueError(
+                    f"Only MultiLabelQuestionStrategy is compatible with MultiLabelQuestion not {strategy}"
+                )
         values["strategy"] = strategy
         return values
 
