@@ -40,7 +40,7 @@ describe("RankingComponent", () => {
 
     expect(wrapper.vm.isRequired).toBe(false);
     expect(wrapper.vm.description).toBe("");
-    expect(wrapper.vm.ranking).toBe([]);
+    expect(wrapper.vm.ranking).toStrictEqual([]);
   });
   it("has a title prop as required and must be a string", () => {
     expect(RankingComponent.props.title).toMatchObject({
