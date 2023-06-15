@@ -603,7 +603,7 @@ class FeedbackDataset:
                 _LOGGER.warning(
                     "Since the current object is already a `FeedbackDataset` pushed to Argilla, you'll keep on"
                     " interacting with the same dataset in Argilla, even though the one you just pushed holds a"
-                    f" different ID ({argilla_id}). So on, if you want to switch to the newly  pushed `FeedbackDataset`"
+                    f" different ID ({argilla_id}). So on, if you want to switch to the newly pushed `FeedbackDataset`"
                     f" instead, please use `FeedbackDataset.from_argilla(id='{argilla_id}')`."
                 )
                 return
