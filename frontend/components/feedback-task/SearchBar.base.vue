@@ -103,11 +103,11 @@ export default {
     isSearchActive() {
       return !(isNil(this.value) || this.value.length === 0);
     },
-    hasSearchBarInput() {
-      return !(isNil(this.searchValue) || this.searchValue.length === 0);
+    isSearchValueEmpty() {
+      return isNil(this.searchValue) || this.searchValue.length === 0;
     },
     showDelete() {
-      return this.hasSearchBarInput || this.isSearchActive;
+      return !this.isSearchValueEmpty || this.isSearchActive;
     },
   },
   watch: {
