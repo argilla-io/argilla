@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
 import os
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
@@ -23,6 +22,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskMapingForTextClassification,
 )
 from argilla.client.models import Framework
+from argilla.training import ArgillaTrainer as ArgillaTrainerV1
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -30,10 +30,7 @@ if TYPE_CHECKING:
     import spacy
 
 
-class ArgillaTrainer(object):
-    _logger = logging.getLogger("ArgillaTrainer")
-    _logger.setLevel(logging.INFO)
-
+class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
         dataset: FeedbackDataset,
@@ -216,17 +213,6 @@ _________________________________________________________________
 `trainer.predict(text, as_argilla_records=True)` to make predictions.
 `trainer.save(output_dir)` to save the model manually."""
 
-    def update_config(self, *args, **kwargs):
-        """
-        It updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
-        """
-        self._trainer.update_config(*args, **kwargs)
-        self._logger.info(
-            "Updated parameters:\n"
-            + "_________________________________________________________________\n"
-            + f"{self._trainer}"
-        )
-
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
         `predict` takes a string or list of strings and returns a list of dictionaries, each dictionary
@@ -240,25 +226,6 @@ _________________________________________________________________
           A list of predictions or Argilla records.
         """
         return self._trainer.predict(text=text, as_argilla_records=False, **kwargs)
-
-    def train(self, output_dir: str = None):
-        """
-        `train` takes in a path to a file and trains the model. If a path is provided,
-        the model is saved to that path.
-
-        Args:
-          output_dir (str): The path to the model file.
-        """
-        self._trainer.train(output_dir)
-
-    def save(self, output_dir: str):
-        """
-        Saves the model to the specified path.
-
-        Args:
-          output_dir (str): The path to the directory where the model will be saved.
-        """
-        self._trainer.save(output_dir)
 
 
 class ArgillaTrainerSkeleton(ABC):
