@@ -12,9 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import warnings
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
 from uuid import UUID
 
 from argilla.client import active_client
@@ -70,7 +69,7 @@ class Workspace:
     updated_at: datetime
 
     def __init__(
-        self, client: "httpx.Client", *, id: UUID, name: str, inserted_at: datetime, updated_at: datetime
+        self, client: "httpx.Client", *, id: Union[str, UUID], name: str, inserted_at: datetime, updated_at: datetime
     ) -> None:
         """Initializes a `Workspace` instance. Ideally this class should not be instantiated
         directly, instead you should use one of the following classmethods:
@@ -101,7 +100,7 @@ class Workspace:
             ... )
         """
         self.client = client
-        self.id = id
+        self.id = id if isinstance(id, UUID) else UUID(id)
         self.name = name
         self.inserted_at = inserted_at
         self.updated_at = updated_at
