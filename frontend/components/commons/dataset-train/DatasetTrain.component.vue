@@ -3,7 +3,7 @@
     <base-spinner v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error" class="snippet__container">
       <BaseTabs
-        v-if="snippetsTabs"
+        v-if="snippetsTabs.length"
         class="training-snippets__tabs"
         :tabs="sortedSnippetsTabs"
         :active-tab="visibleTab"
@@ -40,10 +40,19 @@
 </template>
 
 <script>
+//TODO - ceate new component for feedback task
 import { cloneDeep } from "lodash";
 export default {
   props: {
     datasetTask: {
+      type: String,
+      required: true,
+    },
+    workspaceName: {
+      type: String,
+      required: true,
+    },
+    datasetName: {
       type: String,
       required: true,
     },
@@ -84,6 +93,8 @@ export default {
           return "token-classification";
         case "Text2Text":
           return "text2text";
+        case "FeedbackTask":
+          return "feedback-task";
       }
     },
     parsedSnippet() {
@@ -111,12 +122,6 @@ export default {
           (library) => library.attributes.title === this.visibleTab.name
         ) || {}
       );
-    },
-    workspaceName() {
-      return this.$route.params.workspace;
-    },
-    datasetName() {
-      return this.$route.params.dataset;
     },
   },
   methods: {
