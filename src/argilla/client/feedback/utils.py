@@ -111,10 +111,10 @@ def feedback_dataset_in_argilla(
 
     if (name and workspace) or name:
         if workspace is None:
-            workspace = rg.Workspace(rg.active_client().get_workspace())
+            workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
 
         if isinstance(workspace, str):
-            workspace = rg.Workspace(workspace)
+            workspace = rg.Workspace.from_name(workspace)
 
         if not isinstance(workspace, rg.Workspace):
             raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")

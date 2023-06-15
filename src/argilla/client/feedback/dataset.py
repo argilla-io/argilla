@@ -520,10 +520,10 @@ class FeedbackDataset:
                 )
         elif name or (name and workspace):
             if workspace is None:
-                workspace = rg.Workspace(rg.active_client().get_workspace())
+                workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
 
             if isinstance(workspace, str):
-                workspace = rg.Workspace(workspace)
+                workspace = rg.Workspace.from_name(workspace)
 
             dataset_exists, _ = feedback_dataset_in_argilla(name=name, workspace=workspace)
             if dataset_exists:
