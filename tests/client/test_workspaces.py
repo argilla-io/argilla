@@ -106,3 +106,11 @@ def test_workspace_delete_user(mocked_client: SecuredClient) -> None:
 
     with pytest.raises(ValueError, match="Either the user with id="):
         workspace.delete_user(user.id)
+
+
+def test_workspace_list(mocked_client: SecuredClient) -> None:
+    WorkspaceFactory.create(name="test_workspace")
+
+    api.init(api_key="argilla.apikey")
+    workspaces = Workspace.list()
+    assert any(ws.name == "test_workspace" for ws in workspaces)
