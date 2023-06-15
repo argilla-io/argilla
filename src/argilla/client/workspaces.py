@@ -43,7 +43,7 @@ class Workspace:
         id: the ID of the workspace to be managed. Defaults to None.
 
     Attributes:
-        client: the `httpx.Client` initialized to interact with the Argilla API.
+        __client: the `httpx.Client` initialized to interact with the Argilla API.
         id: the ID of the workspace.
         name: the name of the workspace.
         users: the list of users linked to the workspace. Defaults to None.
@@ -61,7 +61,7 @@ class Workspace:
         []
     """
 
-    client: "httpx.Client"
+    __client: "httpx.Client"
     id: UUID
     name: str
     users: Optional[List["WorkspaceUserModel"]] = None
@@ -99,7 +99,7 @@ class Workspace:
             ...     updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0),
             ... )
         """
-        self.client = client
+        self.__client = client
         self.id = id if isinstance(id, UUID) else UUID(id)
         self.name = name
         self.inserted_at = inserted_at
@@ -113,7 +113,7 @@ class Workspace:
             A list of `WorkspaceUserModel` instances.
         """
         if not hasattr(self, "__users") or self.__users is None:
-            self.__users = workspaces_api.list_workspace_users(self.client, self.id).parsed
+            self.__users = workspaces_api.list_workspace_users(self.__client, self.id).parsed
         return self.__users
 
     def __str__(self) -> str:
@@ -140,7 +140,7 @@ class Workspace:
         """
         try:
             created_user = workspaces_api.create_workspace_user(
-                client=self.client,
+                client=self.__client,
                 id=self.id,
                 user_id=id,
             )
@@ -173,7 +173,7 @@ class Workspace:
         """
         try:
             workspaces_api.delete_workspace_user(
-                client=self.client,
+                client=self.__client,
                 id=self.id,
                 user_id=id,
             )
