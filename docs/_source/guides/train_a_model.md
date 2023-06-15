@@ -20,7 +20,7 @@ The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It 
 | Framework/Task    | TextClassification | TokenClassification | Text2Text | Feedback  |
 |-------------------|--------------------|---------------------|-----------|-----------|
 | OpenAI            | ✔️                  |                     | ✔️         |           |
-| AutoTrai          | ✔️                  | ✔️                   | ✔️         |           |
+| AutoTrain         | ✔️                  | ✔️                   | ✔️         |           |
 | SetFit            | ✔️                  |                     |           |           |
 | spaCy             | ✔️                  | ✔️                   |           |           |
 | Transformers      | ✔️                  | ✔️                   |           |           |

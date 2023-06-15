@@ -45,7 +45,7 @@ rg.set_workspace("my_private_workspace")
 By default, if the Argilla instance has no users, the following default admin user will be configured:
 
 - username: `argilla`
-- password: `1234`
+- password: `12345678`
 - api_key: `argilla.apikey`
 
 For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
@@ -206,7 +206,7 @@ auth_headers = {"X-Argilla-API-Key": "argilla.apikey"}
 http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
 
 response = http.post("/api/users", json={"role": "admin", "first_name": "Hulio", "last_name": "Ramos", "username": "hurra", "password": "abcde123"})
-repsonse.json()
+response.json()
 ```
 ```json
 {

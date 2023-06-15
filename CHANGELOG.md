@@ -18,6 +18,8 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
+
 ## [1.10.0](https://github.com/argilla-io/argilla/compare/v1.9.0...v1.10.0)
 
 ### Changed
@@ -28,6 +30,7 @@ These are the section headers that we use:
 
 - Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.
 - Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
+- Allow flow `FeedbackDataset.from_argilla` -> `FeedbackDataset.push_to_argilla` under different dataset names and/or workspaces ([#3192](https://github.com/argilla-io/argilla/issues/3192))
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
 
@@ -54,6 +57,7 @@ These are the section headers that we use:
 ### Fixed
 
 - Disallow `fields` and `questions` in `FeedbackDataset` with the same name ([#3126]).
+- Fixed broken links in the documentation and updated the development branch name from `development` to `develop` ([#3145]).
 
 [#3126]: https://github.com/argilla-io/argilla/pull/3126
 
