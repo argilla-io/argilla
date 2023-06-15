@@ -107,3 +107,14 @@ ds = rg.load(dataset)
 new_dataset = "my-new-dataset"
 rg.log(ds, new_dataset)
 ```
+
+#### Feedback datasets
+
+If you are using new feedback datasets and you want to update the search engine info, you should copy your dataset:
+
+```python
+import argilla as rg
+
+dataset = rg.FeedbackDataset.from_argilla(name="feedback-dataset")
+dataset.push_to_argilla(name=f"{dataset.name}_copy")
+```
