@@ -118,11 +118,11 @@ export default {
       },
     },
     additionalInfo: {
-      inmediate :true,
+      inmediate: true,
       handler(newValue) {
         this.localAdditionalInfo = newValue;
-      }
-    }
+      },
+    },
   },
   methods: {
     applySearch() {
