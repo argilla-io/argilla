@@ -188,8 +188,8 @@ export default {
   }
   &__additional-info {
     @include font-size(13px);
-    color: rgba(0, 0, 0, 0.37);
-    text-wrap: nowrap;
+    color: $black-37;
+    white-space: nowrap;
   }
 }
 </style>
