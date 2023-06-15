@@ -45,7 +45,7 @@ rg.set_workspace("my_private_workspace")
 By default, if the Argilla instance has no users, the following default admin user will be configured:
 
 - username: `argilla`
-- password: `1234`
+- password: `12345678`
 - api_key: `argilla.apikey`
 
 For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
