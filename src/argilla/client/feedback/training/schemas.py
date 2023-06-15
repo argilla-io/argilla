@@ -13,9 +13,8 @@
 #  limitations under the License.
 
 import logging
-import warnings
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple, Union
+from typing import List, Tuple, Union
 
 import pandas as pd
 from pydantic import BaseModel
@@ -23,17 +22,11 @@ from pydantic import BaseModel
 from argilla._constants import OPENAI_SEPARATOR, OPENAI_WHITESPACE
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
-    LabelQuestion,
-    LabelQuestionStrategy,
     LabelQuestionUnification,
     MultiLabelQuestion,
-    MultiLabelQuestionStrategy,
-    RatingQuestion,
-    RatingQuestionStrategy,
     RatingQuestionUnification,
     TextField,
 )
-from argilla.client.models import Framework
 from argilla.utils.dependency import require_version, requires_version
 
 _LOGGER = logging.getLogger(__name__)
@@ -110,6 +103,22 @@ class TrainingDataForTextClassification(BaseModel, TrainingData):
 
     text: TextField
     label: Union[RatingQuestionUnification, LabelQuestionUnification]
+
+    @property
+    def __multi_label__(self):
+        return isinstance(self.label.question, MultiLabelQuestion)
+
+    @property
+    def __all_labels__(self):
+        return self.label.question.__all_labels__
+
+    @property
+    def __label2id__(self):
+        return self.label.question.__label2id__
+
+    @property
+    def __id2label__(self):
+        return self.label.question.__id2label__
 
     def unify_responses(self, responses: List[FeedbackRecord]):
         self.label.strategy.unify_responses(responses=responses, field=self.label.question)
@@ -265,95 +274,3 @@ class TrainingDataForTextClassification(BaseModel, TrainingData):
             return _prepare(train_data), _prepare(test_data)
         else:
             return _prepare(data)
-
-
-def validate_train_test_split(train_size, test_size):
-    if train_size is None:
-        train_size = 1
-    if test_size is None:
-        test_size = 1 - train_size
-
-    # check if all numbers are larger than 0
-    if not [abs(train_size), abs(test_size)] == [train_size, test_size]:
-        raise ValueError("`train_size` and `test_size` must be larger than 0.")
-    # check if train sizes sum up to 1
-    if not (train_size + test_size) == 1:
-        raise ValueError("`train_size` and `test_size` must sum to 1.")
-
-    if test_size == 0:
-        test_size = None
-
-    return train_size, test_size
-
-
-class FeedbackDatasetTrainingMixin:
-    records: List[FeedbackRecord]
-
-    @abstractmethod
-    def unify_responses(
-        self,
-        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
-        strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
-    ):
-        """Overwritten by subclasses"""
-
-    @abstractmethod
-    def stratify_unified_responses(self, *args, **kwargs):
-        pass
-
-    def prepare_for_training(
-        self,
-        framework: Union[Framework, str],
-        training_data: TrainingDataForTextClassification,
-        train_size: Optional[float] = 1,
-        test_size: Optional[float] = None,
-        seed: Optional[int] = None,
-        fetch_records: bool = True,
-        lang: Optional[str] = None,
-    ):
-        if isinstance(framework, str):
-            framework = Framework(framework)
-
-        # validate train and test sizes
-        train_size, _ = validate_train_test_split(train_size, test_size)
-
-        if fetch_records:
-            self.fetch_records()
-
-        if isinstance(training_data, TrainingDataForTextClassification):
-            self.unify_responses(question=training_data.label.question, strategy=training_data.label.strategy)
-        else:
-            raise ValueError(f"Training data {type(training_data)} is not supported yet")
-
-        data = training_data._format_data(self.records)
-        if framework in [
-            Framework.TRANSFORMERS,
-            Framework.SETFIT,
-            Framework.SPAN_MARKER,
-            Framework.PEFT,
-            Framework.AUTOTRAIN,
-        ]:
-            return training_data._prepare_for_training_with_transformers(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.SPACY:
-            require_version("spacy")
-            import spacy
-
-            if lang is None:
-                warnings.warn("spaCy `lang` is not provided. Using `en`(English) as default language.")
-                lang = spacy.blank("en")
-            elif lang.isinstance(str):
-                if len(lang) == 2:
-                    lang = spacy.blank(lang)
-                else:
-                    lang = spacy.load(lang)
-            return training_data._prepare_for_training_with_spacy(
-                data=data, train_size=train_size, seed=seed, lang=lang
-            )
-        elif framework is Framework.SPARK_NLP:
-            return training_data._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.OPENAI:
-            return training_data._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
-        else:
-            raise NotImplementedError(
-                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
-            )
