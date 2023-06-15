@@ -997,7 +997,7 @@ class FeedbackDataset:
             test_size = 1 - train_size
 
         # check if all numbers are larger than 0
-        if not [abs(train_size), abs(test_size)] == [train_size, test_size]:
+        if not [abs(train_size or 1), abs(test_size or 0)] == [train_size, test_size]:
             raise ValueError("`train_size` and `test_size` must be larger than 0.")
         # check if train sizes sum up to 1
         if not (train_size + test_size) == 1:

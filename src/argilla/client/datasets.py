@@ -432,7 +432,7 @@ class DatasetBase:
             test_size = None
 
         # check if all numbers are larger than 0
-        assert [abs(train_size), abs(test_size)] == [train_size, test_size], ValueError(
+        assert [abs(train_size or 1), abs(test_size or 0)] == [train_size, test_size], ValueError(
             "`train_size` and `test_size` must be larger than 0."
         )
 
