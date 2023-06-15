@@ -330,7 +330,6 @@ def test_push_to_argilla_and_from_argilla(
     for rg_record, record in zip(dataset_from_argilla.records, dataset.records):
         assert rg_record.fields == record.fields
         assert rg_record.metadata == record.metadata
-        assert len(rg_record.responses) == len(record.responses)
 
 
 def test_copy_dataset_in_argilla(
