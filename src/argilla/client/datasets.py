@@ -428,11 +428,9 @@ class DatasetBase:
             train_size = 1
         if test_size is None:
             test_size = 1 - train_size
-        if test_size == 0:
-            test_size = None
 
         # check if all numbers are larger than 0
-        assert [abs(train_size or 1), abs(test_size or 0)] == [train_size, test_size], ValueError(
+        assert [abs(train_size), abs(test_size)] == [train_size, test_size], ValueError(
             "`train_size` and `test_size` must be larger than 0."
         )
 
@@ -441,6 +439,9 @@ class DatasetBase:
 
         # check for annotations
         assert any([rec.annotation for rec in self._records]), ValueError("Dataset has no annotations.")
+
+        if test_size == 0:
+            test_size = None
 
         # shuffle records
         shuffled_records = self._records.copy()
