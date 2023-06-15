@@ -1,6 +1,6 @@
 # Developer documentation
 
-Here we provide some guides for the development of *Argilla*.
+Here we provide some guides for the development of _Argilla_.
 
 ## Requirements
 
@@ -20,7 +20,7 @@ By default the database file will be created at `~/.argilla/argilla.db`, this ca
 
 ### Forking and config your Argilla Git repository
 
-To set up your system for *Argilla* development, you first of all have to
+To set up your system for _Argilla_ development, you first of all have to
 [fork](https://guides.github.com/activities/forking) our [repository](https://github.com/argilla-io/argilla)
 and clone the fork to your computer:
 
@@ -75,7 +75,7 @@ conda env create -f environment_dev.yml
 conda activate argilla
 ```
 
-In the new Conda environment, *Argilla* will already be installed in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#install-editable)
+In the new Conda environment, _Argilla_ will already be installed in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#install-editable)
 with all the server dependencies. But if you're willing to install any other dependency you can do so via `pip` to install your own, or just
 see the available extras besides the `server` extras, which are: `listeners`, `postgresql`, and `tests`; all those installable as `pip install -e ".[<EXTRA_NAME>]"`.
 
@@ -172,22 +172,20 @@ Finally to run the web app now simply execute:
 python -m argilla
 ```
 
-Congrats, you are ready to take *Argilla* to the next level 🚀
+Congrats, you are ready to take _Argilla_ to the next level 🚀
 
 ## Building the documentation
 
-To build the documentation, make sure you set up your system for *Argilla* development.
-Then go to the `docs/_source` folder in your cloned repo and execute the ``make html`` command:
+To build the documentation, make sure you set up your system by installing the required dependencies:
 
-```sh
-cd docs/_source
-make html
+```
+pip install -r docs/_source/requirements.txt
+```
+
+Then use `sphinx-autobuild` to continuously deploy the webpage using the following command::
+
+```
+sphinx-autobuild docs/_source docs/_build/html
 ```
 
 This will create a `_build/html` folder in which you can find the `index.html` file of the documentation.
-
-Alternatively, you can use install and `sphinx-autobuild` to continuously deploy the webpage using the following command:
-
-```sh
-sphinx-autobuild docs/_source docs/_build/html
-```
