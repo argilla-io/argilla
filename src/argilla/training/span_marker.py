@@ -27,7 +27,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSpanMarkerTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("span_marker")
+    require_version("span_marker>=1.2")
     require_version("transformers>=4.19.0")  # <- required for span_marker evaluation
 
     def __init__(self, *args, **kwargs) -> None:
@@ -145,6 +145,8 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
         Returns:
           A list of predictions
         """
+        from datasets import Dataset
+
         if self._span_marker_model is None:
             self._logger.warning("Using model without fine-tuning.")
             self.init_model()
@@ -164,7 +166,10 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
                     (entity["label"], entity["char_start_index"], entity["char_end_index"], entity["score"])
                     for entity in entities
                 ]
-                encoding = self._span_marker_model.tokenizer(sentence, return_batch_encoding=True)["batch_encoding"]
+                dataset = Dataset.from_dict({"tokens": text})
+                encoding = self._span_marker_model.tokenizer({"tokens": dataset["tokens"]}, return_batch_encoding=True)[
+                    "batch_encoding"
+                ]
                 word_ids = sorted(set(encoding.word_ids()) - {None})
                 tokens = []
                 for word_id in word_ids:
