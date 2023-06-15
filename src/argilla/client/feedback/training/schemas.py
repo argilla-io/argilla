@@ -253,7 +253,7 @@ class TrainingTaskMapingForTextClassification(BaseModel, TrainingData):
         """
         separator = OPENAI_SEPARATOR
         whitespace = OPENAI_WHITESPACE
-        label2id = self.label.question.__label2id__
+        label2id = self.__label2id__
 
         if len(data) * train_size <= len(label2id) * 100:
             _LOGGER.warning("OpenAI recommends at least 100 examples per class for training a classification model.")
@@ -264,10 +264,16 @@ class TrainingTaskMapingForTextClassification(BaseModel, TrainingData):
                 prompt = entry["text"]
                 prompt += separator  # needed for better performance
 
-                if multi_label:
-                    completion = " ".join([str(label2id[annotation]) for annotation in entry["label"]])
-                else:
-                    completion = str(label2id[entry["label"]])
+                try:
+                    if multi_label:
+                        completion = " ".join([str(label2id[str(annotation)]) for annotation in entry["label"]])
+                    else:
+                        completion = str(label2id[str(entry["label"])])
+                except KeyError:
+                    if multi_label:
+                        completion = " ".join([str(label2id[int(annotation)]) for annotation in entry["label"]])
+                    else:
+                        completion = str(label2id[int(entry["label"])])
 
                 jsonl.append(
                     {

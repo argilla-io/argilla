@@ -13,137 +13,216 @@
 #  limitations under the License.
 
 
+import pandas as pd
 import pytest
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
+import spacy
+from argilla import (
     LabelQuestion,
-    LabelQuestionStrategy,
     LabelQuestionUnification,
     MultiLabelQuestion,
-    MultiLabelQuestionStrategy,
     MultiLabelQuestionUnification,
     RatingQuestion,
-    RatingQuestionStrategy,
     RatingQuestionUnification,
-    UnificatiedValueSchema,
+    TextField,
+    TrainingTaskMapingForTextClassification,
 )
+from argilla.client.models import Framework
+from datasets import Dataset, DatasetDict
+from spacy.tokens import DocBin
+
+rating_question_payload = {
+    "name": "label",
+    "description": "label",
+    "required": True,
+    "values": ["1", "2"],
+}
+label_question_payload = {
+    "name": "label",
+    "description": "label",
+    "required": True,
+    "labels": ["1", "2"],
+}
 
 
 @pytest.mark.parametrize(
-    "strategy, unified_response",
+    "framework, label, train_size, seed, expected",
     [
-        ("mean", [{"value": str(int(5 / 3)), "strategy": "mean"}]),
-        ("majority", [{"value": "2", "strategy": "majority"}]),
-        ("max", [{"value": "2", "strategy": "max"}]),
-        ("min", [{"value": "1", "strategy": "min"}]),
-    ],
-)
-def test_rating_question_strategy(strategy, unified_response):
-    question_name = "rating"
-    rating_records_payload = {
-        "fields": {"text": "This is the first record", "label": "positive"},
-        "responses": [
-            {"values": {question_name: {"value": "1"}}},
-            {"values": {question_name: {"value": "2"}}},
-            {"values": {question_name: {"value": "2"}}},
-        ],
-    }
-    record = FeedbackRecord(**rating_records_payload)
-    rating_question_payload = {
-        "name": question_name,
-        "description": question_name,
-        "required": True,
-        "values": ["1", "2"],
-    }
-    question = RatingQuestion(**rating_question_payload)
-    strategy = RatingQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
-    unified_response = [UnificatiedValueSchema(**resp) for resp in unified_response]
-    assert record.unified_responses[question_name] == unified_response
-    assert RatingQuestionUnification(question=question, strategy=strategy)
-
-
-@pytest.mark.parametrize(
-    "strategy, unified_response",
-    [
-        ("majority", [{"value": "2", "strategy": "majority"}]),
         (
-            "disagreement",
-            [
-                {"value": "1", "strategy": "disagreement"},
-                {"value": "2", "strategy": "disagreement"},
-                {"value": "2", "strategy": "disagreement"},
-            ],
+            Framework("spacy"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            0.5,
+            None,
+            (DocBin, DocBin),
+        ),
+        (
+            Framework("spacy"),
+            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            (DocBin, DocBin),
+        ),
+        (
+            Framework("spacy"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            (DocBin, DocBin),
+        ),
+        (
+            Framework("spacy"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            1,
+            42,
+            DocBin,
+        ),
+        (Framework("spacy"), LabelQuestionUnification(question=LabelQuestion(**label_question_payload)), 1, 42, DocBin),
+        (
+            Framework("spacy"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            1,
+            42,
+            DocBin,
+        ),
+        (
+            Framework("openai"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            0.5,
+            None,
+            (list, list),
+        ),
+        (
+            Framework("openai"),
+            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            (list, list),
+        ),
+        (
+            Framework("openai"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            (list, list),
+        ),
+        (
+            Framework("openai"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            1,
+            42,
+            list,
+        ),
+        (Framework("openai"), LabelQuestionUnification(question=LabelQuestion(**label_question_payload)), 1, 42, list),
+        (
+            Framework("openai"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            1,
+            42,
+            list,
+        ),
+        (
+            Framework("transformers"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            0.5,
+            None,
+            DatasetDict,
+        ),
+        (
+            Framework("transformers"),
+            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            DatasetDict,
+        ),
+        (
+            Framework("transformers"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            DatasetDict,
+        ),
+        (
+            Framework("transformers"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            1,
+            42,
+            Dataset,
+        ),
+        (
+            Framework("transformers"),
+            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            1,
+            42,
+            Dataset,
+        ),
+        (
+            Framework("transformers"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            1,
+            42,
+            Dataset,
+        ),
+        (
+            Framework("spark-nlp"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            0.5,
+            None,
+            (pd.DataFrame, pd.DataFrame),
+        ),
+        (
+            Framework("spark-nlp"),
+            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            (pd.DataFrame, pd.DataFrame),
+        ),
+        (
+            Framework("spark-nlp"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            (pd.DataFrame, pd.DataFrame),
+        ),
+        (
+            Framework("spark-nlp"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            1,
+            42,
+            pd.DataFrame,
+        ),
+        (
+            Framework("spark-nlp"),
+            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            1,
+            42,
+            pd.DataFrame,
+        ),
+        (
+            Framework("spark-nlp"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            1,
+            42,
+            pd.DataFrame,
         ),
     ],
 )
-def test_label_question_strategy(strategy, unified_response):
-    question_name = "rating"
-    rating_records_payload = {
-        "fields": {"text": "This is the first record", "label": "positive"},
-        "responses": [
-            {"values": {question_name: {"value": "1"}}},
-            {"values": {question_name: {"value": "2"}}},
-            {"values": {question_name: {"value": "2"}}},
-        ],
-    }
-    record = FeedbackRecord(**rating_records_payload)
-    rating_question_payload = {
-        "name": question_name,
-        "description": question_name,
-        "required": True,
-        "labels": ["1", "2"],
-    }
-    question = LabelQuestion(**rating_question_payload)
-    strategy = LabelQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
-    unified_response = [UnificatiedValueSchema(**resp) for resp in unified_response]
-    assert record.unified_responses[question_name] == unified_response
-    assert LabelQuestionUnification(question=question, strategy=strategy)
-
-
-@pytest.mark.parametrize(
-    "strategy, unified_response",
-    [
-        ("majority", [{"value": ["1"], "strategy": "majority"}]),
-        (
-            "disagreement",
-            [
-                {"value": ["1"], "strategy": "disagreement"},
-                {"value": ["1", "2"], "strategy": "disagreement"},
-                {"value": ["1"], "strategy": "disagreement"},
-            ],
-        ),
-    ],
-)
-def test_multi_label_question_strategy(strategy, unified_response):
-    question_name = "rating"
-    rating_records_payload = {
-        "fields": {"text": "This is the first record", "label": "positive"},
-        "responses": [
-            {"values": {question_name: {"value": ["1"]}}},
-            {"values": {question_name: {"value": ["1", "2"]}}},
-            {"values": {question_name: {"value": ["1"]}}},
-        ],
-    }
-    record = FeedbackRecord(**rating_records_payload)
-    rating_question_payload = {
-        "name": question_name,
-        "description": question_name,
-        "required": True,
-        "labels": ["1", "2"],
-    }
-    question = MultiLabelQuestion(**rating_question_payload)
-    strategy = MultiLabelQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
-    unified_response = [UnificatiedValueSchema(**resp) for resp in unified_response]
-    assert record.unified_responses[question_name] == unified_response
-    assert MultiLabelQuestionUnification(question=question, strategy=strategy)
-
-
-def test_label_question_strategy_not_implemented():
-    with pytest.raises(NotImplementedError):
-        LabelQuestionStrategy._majority_weighted("mock", "mock")
-
-    with pytest.raises(NotImplementedError):
-        MultiLabelQuestionStrategy._majority_weighted("mock", "mock")
+def test_training_task_mapping_for_text_classification(framework, label, train_size, seed, expected):
+    data = [{"text": "This is a text", "label": "1"}, {"text": "This is a text", "label": "2"}]
+    field = TextField(name="text")
+    task_mapping = TrainingTaskMapingForTextClassification(text=field, label=label)
+    if framework == Framework.SPACY:
+        data = task_mapping._prepare_for_training_with_spacy(
+            data=data, train_size=train_size, seed=seed, lang=spacy.blank("en")
+        )
+    elif framework == Framework.OPENAI:
+        data = task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+    elif framework == Framework.TRANSFORMERS:
+        data = task_mapping._prepare_for_training_with_transformers(data=data, train_size=train_size, seed=seed)
+    elif framework == Framework.SPARK_NLP:
+        data = task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+    else:
+        raise ValueError(f"Framework {framework} not supported")
+    if isinstance(data, tuple):
+        for d, e in zip(data, expected):
+            assert isinstance(d, e)
+    else:
+        assert isinstance(data, expected)

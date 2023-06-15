@@ -323,11 +323,11 @@ class RatingQuestion(QuestionSchema):
         return [entry["value"] for entry in self.settings["options"]]
 
     @property
-    def label2id(self):
+    def __label2id__(self):
         return {label: idx for idx, label in enumerate(self.__all_labels__)}
 
     @property
-    def id2label(self):
+    def __id2label__(self):
         return {idx: label for idx, label in enumerate(self.__all_labels__)}
 
 
