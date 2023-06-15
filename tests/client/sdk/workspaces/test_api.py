@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import UUID
+
 import pytest
 from argilla._constants import DEFAULT_API_KEY
-from argilla.client import active_client
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.workspaces.api import (
     create_workspace,
@@ -110,7 +111,7 @@ def test_create_workspace_user(
     response = create_workspace_user(client=sdk_client, id=workspace["id"], user_id=user["id"])
     assert response.status_code == 200
     assert isinstance(response.parsed, WorkspaceUserModel)
-    assert response.parsed.id == user["id"]
+    assert response.parsed.id == UUID(user["id"])
     assert response.parsed.workspaces[0] == workspace["name"]
 
 
