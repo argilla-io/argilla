@@ -30,9 +30,9 @@ class FeedbackDatasetModel(BaseModel):
     name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_ ]+$")
     guidelines: Optional[str] = None
     status: Optional[str] = None
-    workspace_id: Optional[str] = None
-    created_at: datetime
-    last_updated: datetime
+    workspace_id: Optional[UUID] = None
+    inserted_at: datetime
+    updated_at: datetime
 
 
 class FeedbackValueModel(BaseModel):

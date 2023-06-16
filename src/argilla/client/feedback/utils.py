@@ -100,11 +100,18 @@ def feedback_dataset_in_argilla(
         >>> from argilla.client.feedback.dataset import feedback_dataset_in_argilla
         >>> dataset = feedback_dataset_in_argilla(name="my-dataset")
     """
-    httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
+    assert (name and workspace) or name or id, (
+        "You must provide either the `name` and `workspace` (the latter just if"
+        " applicable, if not the default `workspace` will be used) or the `id`, which"
+        " is the Argilla ID of the `rg.FeedbackDataset`."
+    )
+
+    client = rg.active_client()
+    httpx_client: "httpx.Client" = client.http_client.httpx
 
     if name:
         if workspace is None:
-            workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
+            workspace = rg.Workspace.from_name(client.get_workspace())
         elif isinstance(workspace, str):
             workspace = rg.Workspace.from_name(workspace)
         elif not isinstance(workspace, rg.Workspace):
