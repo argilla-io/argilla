@@ -22,19 +22,18 @@ from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
 from tests.helpers import SecuredClient
 
 
-def test_workspace_init(mocked_client: SecuredClient) -> None:
-    workspace = WorkspaceFactory.create(name="test_workspace")
+def test_workspace_init() -> None:
+    with pytest.raises(
+        Exception,
+        match=r"`Workspace` cannot be initialized via the `__init__` method | you should use `Workspace.from_name\('test_workspace'\)`",
+    ):
+        Workspace(name="test_workspace")
 
-    api.init(api_key="argilla.apikey")
-    workspace = Workspace(
-        client=api.active_client().http_client.httpx,
-        name=workspace.name,
-        id=workspace.id,
-        inserted_at=workspace.inserted_at,
-        updated_at=workspace.updated_at,
-    )
-    assert workspace.name == "test_workspace"
-    assert isinstance(workspace.id, UUID)
+    with pytest.raises(
+        Exception,
+        match=r"`Workspace` cannot be initialized via the `__init__` method | you should use `Workspace.from_id\('00000000-0000-0000-0000-000000000000'\)`",
+    ):
+        Workspace(id="00000000-0000-0000-0000-000000000000")
 
 
 def test_workspace_from_name(mocked_client: SecuredClient) -> None:
