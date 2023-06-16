@@ -35,6 +35,7 @@ from argilla.server.schemas.v1.datasets import (
     Question,
     QuestionCreate,
     Questions,
+    Record,
     RecordInclude,
     Records,
     RecordsCreate,
@@ -127,7 +128,7 @@ def list_current_user_dataset_records(
         db, dataset_id, current_user.id, include=include, response_status=response_status, offset=offset, limit=limit
     )
 
-    return Records(items=[record.__dict__ for record in records])
+    return Records(items=records)
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -146,7 +147,7 @@ def list_dataset_records(
 
     records = datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
 
-    return Records(items=[record.__dict__ for record in records])
+    return Records(items=records)
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
@@ -349,7 +350,7 @@ async def search_dataset_records(
 
     for record in records:
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=record.__dict__, query_score=record_id_score_map[record.id]["query_score"]
+            record=Record.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
         )
 
     return SearchRecordsResult(
