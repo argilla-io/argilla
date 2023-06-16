@@ -13,6 +13,7 @@ pip install argilla
 pip install argilla[listeners] # use argilla.listeners background processes
 pip install argilla[server] # running FastAPI locally
 pip install argilla[postgresql] # use PostgreSQL instead of SQLite as database
+pip install argilla[integrations] # use integrations with other libraries/frameworks
 pip install argilla[tests] # running tests locally
 ```
 :::
