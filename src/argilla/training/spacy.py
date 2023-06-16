@@ -46,7 +46,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
                 A `rg.TextClassificationRecord`, `rg.TokenClassificationRecord`, or `rg.Text2TextRecord`
                 object. Defaults to None.
             model:
-                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_lg". Defaults to None.
+                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_sm". Defaults to None.
             seed: A `int` with the seed for the random number generator. Defaults to None.
             multi_label: A `bool` indicating whether the task is multi-label or not. Defaults to False.
             language:
@@ -143,10 +143,10 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         if not self._model:
             self._logger.warn(
                 "`model` is not specified and it's recommended to specify the"
-                " `spaCy` model to use. Using `en_core_web_lg` as the default model"
+                " `spaCy` model to use. Using `en_core_web_sm` as the default model"
                 " instead."
             )
-            self._model = "en_core_web_lg"
+            self._model = "en_core_web_sm"
         self.config["paths"]["vectors"] = self._model
         if self.use_gpu:
             self.config["system"]["gpu_allocator"] = (

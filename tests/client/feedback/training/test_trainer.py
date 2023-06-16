@@ -67,7 +67,7 @@ def test_prepare_for_training_text_classification(
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
     )
-    dataset.add_records(records=feedback_dataset_records)
+    dataset.add_records(records=feedback_dataset_records * 5)
 
     questions = [
         question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
@@ -75,7 +75,7 @@ def test_prepare_for_training_text_classification(
     label = LabelQuestionUnification(question=questions[0])
     training_task_mapping = TrainingTaskMapingForTextClassification(text=dataset.fields[0], label=label)
 
-    if framework in [Framework("spark-nlp"), Framework("span_marker")]:
+    if framework in [Framework("spark-nlp"), Framework("span_marker"), Framework("autotrain")]:
         with pytest.raises(NotImplementedError):
             trainer = ArgillaTrainer(
                 dataset=dataset, training_task_mapping=training_task_mapping, framework=framework, fetch_records=False
@@ -86,5 +86,4 @@ def test_prepare_for_training_text_classification(
         trainer = ArgillaTrainer(
             dataset=dataset, training_task_mapping=training_task_mapping, framework=framework, fetch_records=False
         )
-        if framework in [Framework("openai"), Framework("autotrain")]:
-            trainer.train("tmp")
+        trainer.train("tmp")

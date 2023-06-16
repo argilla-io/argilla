@@ -56,8 +56,7 @@ class TrainingData(ABC):
 
     @property
     def supported_frameworks(self):
-        names = []
-        return [Framework(name) for name in names]
+        return []
 
     def test_framework_support(self, framework: Union[str, Framework]):
         if isinstance(framework, str):

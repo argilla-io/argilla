@@ -24,6 +24,7 @@ from argilla.training.autotrain_advanced import (
 
 class ArgillaAutoTrainTrainer(ArgillaAutoTrainTrainerV1, ArgillaTrainerSkeleton):
     def __init__(self, *args, **kwargs):
+        raise NotImplementedError("ArgillaAutoTrainTrainer is not supported by `autotrain-advanced`.")
         ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
 
         self._workspace = str(uuid4())[:8]

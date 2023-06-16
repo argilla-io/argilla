@@ -37,7 +37,7 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, ArgillaTrainerSkeleton):
                 A `rg.TextClassificationRecord`, `rg.TokenClassificationRecord`, or `rg.Text2TextRecord`
                 object. Defaults to None.
             model:
-                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_lg". Defaults to None.
+                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_sm". Defaults to None.
             seed: A `int` with the seed for the random number generator. Defaults to None.
             multi_label: A `bool` indicating whether the task is multi-label or not. Defaults to False.
             language:
