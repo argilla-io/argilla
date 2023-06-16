@@ -22,9 +22,9 @@ These are the section headers that we use:
 
 ### Added
 
-- Added search component for feedback task ([#3138](https://github.com/argilla-io/argilla/pull/3138))
-- Added markdown support for dataset guidelines ([#3153](https://github.com/argilla-io/argilla/pull/3153))
-- Added Train button for feedbacck task ([#3170](https://github.com/argilla-io/argilla/pull/3170))
+- Added search component for feedback datasets ([#3138](https://github.com/argilla-io/argilla/pull/3138))
+- Added markdown support for feedback dataset guidelines ([#3153](https://github.com/argilla-io/argilla/pull/3153))
+- Added Train button for feedbacck datasets ([#3170](https://github.com/argilla-io/argilla/pull/3170))
 
 ### Changed
 
