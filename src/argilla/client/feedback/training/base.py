@@ -113,7 +113,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             )
 
         elif framework is Framework.AUTOTRAIN:
-            if self._rg_dataset_type is not rg.DatasetForTextClassification:
+            if not isinstance(training_task_mapping, TrainingTaskMapingForTextClassification):
                 raise NotImplementedError(f"{Framework.AUTOTRAIN} only supports `TextClassification` tasks.")
             from argilla.client.feedback.training.frameworks.autotrain_advanced import (
                 ArgillaAutoTrainTrainer,
@@ -156,10 +156,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 ArgillaOpenAITrainer,
             )
 
-            if self._rg_dataset_type is rg.DatasetForTokenClassification:
-                raise NotImplementedError(f"{Framework.OPENAI} does not support `TokenClassification` tasks.")
-            elif self._rg_dataset_type is rg.DatasetForTextClassification and self._multi_label:
-                raise NotImplementedError(f"{Framework.OPENAI} does not support multi-label TextClassification tasks.")
             self._trainer = ArgillaOpenAITrainer(
                 feedback_dataset=self._dataset,
                 training_task_mapping=self._training_task_mapping,
@@ -168,8 +164,9 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.SPAN_MARKER:
-            if self._rg_dataset_type is not rg.DatasetForTokenClassification:
-                raise NotImplementedError(f"{Framework.SPAN_MARKER} only supports `TokenClassification` tasks.")
+            if not isinstance(training_task_mapping, TrainingTaskMapingForTextClassification):
+                raise NotImplementedError(f"{Framework.SPAN_MARKER} only supports `TextClassification` tasks.")
+
             from argilla.client.feedback.training.frameworks.span_marker import (
                 ArgillaSpanMarkerTrainer,
             )
@@ -181,6 +178,8 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 seed=self._seed,
                 model=self._model,
             )
+        else:
+            raise NotImplementedError(f"{framework} is not a valid framework.")
 
         self._logger.info(self)
 

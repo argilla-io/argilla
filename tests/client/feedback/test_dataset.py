@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 import tempfile
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 import datasets
 import pytest
 from argilla.client import api
+from argilla.client.sdk.commons.errors import NotFoundApiError
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
@@ -26,10 +27,17 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackDatasetConfig,
     FeedbackRecord,
+    LabelQuestion,
+    LabelQuestionUnification,
+    MultiLabelQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
 )
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskMapingForTextClassification,
+)
+from argilla.client.models import Framework
 
 
 @pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions")
@@ -383,3 +391,39 @@ def test_push_to_huggingface_and_from_huggingface(
     assert all(original_field in dataset_from_huggingface.fields for original_field in dataset.fields)
     assert len(dataset_from_huggingface.questions) == len(dataset.questions)
     assert all(original_question in dataset_from_huggingface.questions for original_question in dataset.questions)
+
+
+@pytest.mark.parametrize(
+    "framework", [Framework("spacy"), Framework("transformers"), Framework("spark-nlp"), Framework("openai")]
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_prepare_for_training_text_classification(
+    framework: Union[Framework, str],
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+) -> None:
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records)
+
+    questions = [
+        question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    training_task_mapping = TrainingTaskMapingForTextClassification(text=dataset.fields[0], label=label)
+
+    dataset.prepare_for_training(framework=framework, training_task_mapping=training_task_mapping, fetch_records=False)
+    with pytest.raises(NotFoundApiError):
+        dataset.prepare_for_training(
+            framework=framework, training_task_mapping=training_task_mapping, fetch_records=True
+        )

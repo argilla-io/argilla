@@ -1025,7 +1025,7 @@ class FeedbackDataset:
             Framework.AUTOTRAIN,
         ]:
             return training_task_mapping._prepare_for_training_with_transformers(
-                data=data, train_size=train_size, seed=seed
+                data=data, train_size=train_size, seed=seed, framework=framework
             )
         elif framework is Framework.SPACY:
             require_version("spacy")

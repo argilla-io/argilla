@@ -23,7 +23,7 @@ from argilla.training.span_marker import (
 
 class ArgillaSpanMarkerTrainer(ArgillaSpanMarkerTrainerV1, ArgillaTrainerSkeleton):
     def __init__(self, *args, **kwargs) -> None:
-        ArgillaTrainerSkeleton.__init__(*args, **kwargs)
+        ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
 
         import torch
         from span_marker import SpanMarkerModel

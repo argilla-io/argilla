@@ -37,6 +37,19 @@ Vectors = Dict[str, List[float]]
 
 
 class Framework(Enum):
+    """Frameworks supported by Argilla
+
+    Options:
+        transformers: Transformers
+        peft: PEFT Transformers library
+        setfit: SetFit Transformers library
+        spacy: Spacy Explosion
+        span_marker: SpanMarker Tom Aarsen library
+        spark-nlp: Spark NLP John Snow Labs library
+        openai: OpenAI LLMs
+        autotrain: AutoTrain Transformers library
+    """
+
     TRANSFORMERS = "transformers"
     PEFT = "peft"
     SETFIT = "setfit"

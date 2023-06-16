@@ -734,7 +734,7 @@ class LabelQuestionUnification(BaseModel):
     @root_validator
     def strategy_must_be_valid_and_align_with_question(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         strategy = values.get("strategy", "majority")
-        question = values["question"]
+        question = values.get("question")
         if isinstance(question, LabelQuestion):
             if isinstance(strategy, str):
                 strategy = LabelQuestionStrategy(strategy)

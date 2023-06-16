@@ -27,6 +27,7 @@ from argilla.client.feedback.schemas import (
     RatingQuestionUnification,
     TextField,
 )
+from argilla.client.models import Framework
 from argilla.utils.dependency import require_version, requires_version
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,6 +53,17 @@ class TrainingData(ABC):
         df = df.explode(list(explode_columns))
         df = df.drop_duplicates()
         return df.to_dict(orient="records")
+
+    @property
+    def supported_frameworks(self):
+        names = []
+        return [Framework(name) for name in names]
+
+    def test_framework_support(self, framework: Union[str, Framework]):
+        if isinstance(framework, str):
+            framework = Framework(framework)
+        if framework not in self.supported_frameworks:
+            raise NotImplementedError(f"Framework {framework} is not supported for this {self.__class__}.")
 
     @abstractmethod
     def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
@@ -105,6 +117,11 @@ class TrainingTaskMapingForTextClassification(BaseModel, TrainingData):
     label: Union[RatingQuestionUnification, LabelQuestionUnification]
 
     @property
+    def supported_frameworks(self):
+        names = ["transformers", "spacy", "openai", "setfit", "peft", "autotrain", "spark-nlp"]
+        return [Framework(name) for name in names]
+
+    @property
     def __multi_label__(self):
         return isinstance(self.label.question, MultiLabelQuestion)
 
@@ -147,8 +164,9 @@ class TrainingTaskMapingForTextClassification(BaseModel, TrainingData):
 
     @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_transformers(
-        self, data: List[dict], train_size: float, seed: int
+        self, data: List[dict], train_size: float, seed: int, framework: Union[str, Framework]
     ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
+        self.test_framework_support(framework)
         import datasets
 
         multi_label = isinstance(self.label.question, MultiLabelQuestion)
@@ -243,14 +261,6 @@ class TrainingTaskMapingForTextClassification(BaseModel, TrainingData):
     def _prepare_for_training_with_openai(
         self, data: List[dict], train_size: float, seed: int
     ) -> Union[List[dict], Tuple[List[dict], List[dict]]]:
-        """Prepares the dataset for training using the "openai" framework.
-
-        Args:
-            **kwargs: Specific to the task of the dataset.
-
-        Returns:
-            A pd.DataFrame.
-        """
         separator = OPENAI_SEPARATOR
         whitespace = OPENAI_WHITESPACE
         label2id = self.__label2id__

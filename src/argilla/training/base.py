@@ -125,8 +125,6 @@ class ArgillaTrainer(object):
             )
 
         if framework is Framework.SETFIT:
-            if self._rg_dataset_type is not rg.DatasetForTextClassification:
-                raise NotImplementedError(f"{Framework.SETFIT} only supports `TextClassification` tasks.")
             from argilla.training.setfit import ArgillaSetFitTrainer
 
             self._trainer = ArgillaSetFitTrainer(
@@ -195,10 +193,6 @@ class ArgillaTrainer(object):
         elif framework is Framework.OPENAI:
             from argilla.training.openai import ArgillaOpenAITrainer
 
-            if self._rg_dataset_type is rg.DatasetForTokenClassification:
-                raise NotImplementedError(f"{Framework.OPENAI} does not support `TokenClassification` tasks.")
-            elif self._rg_dataset_type is rg.DatasetForTextClassification and self._multi_label:
-                raise NotImplementedError(f"{Framework.OPENAI} does not support multi-label TextClassification tasks.")
             self._trainer = ArgillaOpenAITrainer(
                 name=self._name,
                 workspace=self._workspace,
@@ -320,6 +314,14 @@ class ArgillaTrainerSkeleton(ABC):
         self._record_class = record_class
         self._multi_label = multi_label
         self._settings = settings
+        if self._settings:
+            self._label_list = self._settings.labels
+            self._label2id = self._settings.label2id
+            self._id2label = self._settings.id2label
+        else:
+            self._label_list = None
+            self._label2id = None
+            self._id2label = None
         self._model = model
         self._seed = seed
 

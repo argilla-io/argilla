@@ -59,7 +59,7 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, ArgillaTrainerSkeleton):
             >>> trainer.train()
             >>> trainer.save("./model")
         """
-        ArgillaTrainerSkeleton.__init__(*args, **kwargs)
+        ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
         import spacy
 
         self._nlp = None

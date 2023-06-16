@@ -14,6 +14,7 @@
 
 import logging
 
+from argilla import TextClassificationRecord
 from argilla.client.feedback.training.frameworks.transformers import (
     ArgillaTransformersTrainer,
 )
@@ -36,6 +37,10 @@ class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
         self.multi_target_strategy = None
         self._column_mapping = None
         ArgillaTransformersTrainer.__init__(self, *args, **kwargs)
+
+        if self._record_class is not TextClassificationRecord:
+            raise NotImplementedError("SetFit only supports.")
+
         if self._multi_label:
             self._column_mapping = {"text": "text", "binarized_label": "label"}
             self.multi_target_strategy = "one-vs-rest"

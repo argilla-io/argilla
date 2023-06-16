@@ -26,7 +26,8 @@ class ArgillaAutoTrainTrainer(ArgillaAutoTrainTrainerV1, ArgillaTrainerSkeleton)
     def __init__(self, *args, **kwargs):
         ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
 
-        self.project_name = f"{self._workspace}_{self._name}_{str(uuid4())[:8]}"
+        self._workspace = str(uuid4())[:8]
+        self.project_name = self._workspace
 
         if self._seed:
             self._logger.warning("Setting a seed is not supported by `autotrain-advanced`.")
@@ -73,5 +74,5 @@ class ArgillaAutoTrainTrainer(ArgillaAutoTrainTrainerV1, ArgillaTrainerSkeleton)
 
         self.init_training_args()
 
-        self.prepare_dataset(data_dict=data_dict)
+        self.prepare_dataset(data_dict)
         self.initialize_project()

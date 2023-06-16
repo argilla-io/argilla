@@ -24,7 +24,7 @@ from argilla.utils.dependency import require_version
 
 
 class AutoTrainMixIn:
-    def prepare_dataset(self, data_dict_params: Optional[dict] = {}) -> None:
+    def prepare_dataset(self, data_dict: Optional[dict] = {}) -> None:
         """
         This function prepares a dataset for autotrain using a dictionary of data and specific column
         mappings.
@@ -41,7 +41,7 @@ class AutoTrainMixIn:
             token=self.HF_TOKEN,
             username=self.AUTOTRAIN_USERNAME,
             project_name=self.project_name,
-            **data_dict_params,
+            **data_dict,
             percent_valid=None,
             column_mapping={
                 "text": "text",

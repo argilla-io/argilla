@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 
+from argilla import TextClassificationRecord, TokenClassificationRecord
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.training.openai import ArgillaOpenAITrainer as ArgillaOpenAITrainerV1
 
@@ -20,6 +21,11 @@ from argilla.training.openai import ArgillaOpenAITrainer as ArgillaOpenAITrainer
 class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
     def __init__(self, *args, **kwargs):
         ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
+
+        if self._record_class is TokenClassificationRecord:
+            raise NotImplementedError("OpenAI does not support `TokenClassification` tasks.")
+        elif self._record_class is TextClassificationRecord and self._multi_label:
+            raise NotImplementedError("OpenAI does not support multi-label TextClassification tasks.")
 
         self.sleep_timer = 10
         self.device = None
