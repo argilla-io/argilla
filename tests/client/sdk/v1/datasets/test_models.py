@@ -12,30 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.sdk.v1.datasets.models import (
-    FeedbackDatasetModel as ClientSchema,
-)
-from argilla.client.sdk.v1.datasets.models import (
-    FeedbackFieldModel as ClientFieldSchema,
-)
+from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel as ClientSchema
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackQuestionModel as ClientQuestionSchema,
 )
-from argilla.client.sdk.v1.datasets.models import (
-    FeedbackRecordsModel as ClientRecordsSchema,
-)
-from argilla.server.schemas.v1.datasets import (
-    Dataset as ServerSchema,
-)
-from argilla.server.schemas.v1.datasets import (
-    Field as ServerFieldSchema,
-)
-from argilla.server.schemas.v1.datasets import (
-    Question as ServerQuestionSchema,
-)
-from argilla.server.schemas.v1.datasets import (
-    Records as ServerRecordsSchema,
-)
+from argilla.server.schemas.v1.datasets import Dataset as ServerSchema
+from argilla.server.schemas.v1.datasets import Question as ServerQuestionSchema
 
 
 def test_feedback_dataset_schema(helpers) -> None:

@@ -24,6 +24,7 @@ from argilla.server.daos.backend.base import WrongLogDataError
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.errors import BulkDataError, ForbiddenOperationError
 from argilla.server.models import User
+from argilla.server.policies import DatasetPolicy, is_authorized
 from argilla.server.services.datasets import ServiceDataset
 from argilla.server.services.search.model import ServiceBaseRecordsQuery
 from argilla.server.services.tasks.commons import ServiceRecord
@@ -92,10 +93,10 @@ class RecordsStorageService:
                 status=TaskStatus.discarded,
             )
         else:
-            if not user.is_admin and user.username != dataset.created_by:
+            if not is_authorized(user, DatasetPolicy.delete_records(dataset)):
                 raise ForbiddenOperationError(
                     "You don't have the necessary permissions to delete records on this dataset. "
-                    "Only dataset creators or administrators can delete datasets"
+                    "Only administrators can delete datasets"
                 )
 
             processed, deleted = await self.__dao__.delete_records_by_query(dataset, query=query)

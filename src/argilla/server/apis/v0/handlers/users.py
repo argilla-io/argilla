@@ -59,12 +59,12 @@ async def whoami(
     user = User.from_orm(current_user)
     # TODO: The current client checks if a user can work on a specific workspace
     #  by using workspaces info returning in `/api/me`.
-    #  Returning all workspaces from the `/api/me` for admin users keeps the
+    #  Returning all workspaces from the `/api/me` for owner users keeps the
     #  backward compatibility with the client flow.
     #  This logic will be removed in future versions, when python client
     #  start using the list workspaces (`/api/workspaces`) endpoint to handle
     #  accessible workspaces for connected user.
-    if current_user.is_admin:
+    if current_user.is_owner:
         workspaces = accounts.list_workspaces(db)
         user.workspaces = [workspace.name for workspace in workspaces]
 
