@@ -8,7 +8,7 @@ Here we provide some guides for the development of *Argilla*.
 
 Argilla supports ElasticSearch and OpenSearch as his main search engine. One of the two is required to correctly run Argilla in your development environment.
 
-For more information please visit our [Setup and Installation](../getting_started/installation/installation.md) section.
+For more information please visit our [Setup and Installation](../getting_started/installation/deployments/deployments.md) section.
 
 ### SQLite
 
@@ -59,11 +59,10 @@ Or installing just the `server` extra:
 pip install -e ".[server]"
 ```
 
-Or installing all the extras, that are also required to run the tests via `pytest` to make sure that the implemented features or the
-bug fixes work as expected, and that the unit/integration tests are passing.
+Or installing all the extras, that are also required to run the tests via `pytest` to make sure that the implemented features or the bug fixes work as expected, and that the unit/integration tests are passing.
 
 ```sh
-pip install -e ".[server,listeners,postgresql,tests]"
+pip install -e ".[server,listeners,postgresql,integrations,tests]"
 ```
 
 #### Via `conda`

@@ -23,12 +23,13 @@
 | [🚀 Quickstart](/getting_started/quickstart)                                    | **Install** Argilla and end-to-end **toy examples**               |
 | [🎼 Cheatsheet](/getting_started/cheatsheet)                                    | Brief **code snippets** for our main functionalities              |
 | [🔧 Installation](/getting_started/installation/deployments/deployments)        | **Everything deployment**: Docker, Kubernetes, Cloud and way more |
-| [⚙️ Configuration](/getting_started/installation/configurations/configurations) | User management and **deployment tweaking**                       |
-| [💥 LLMs](/guides/llms/conceptual_guides/conceptual_guides)                                        | Generative AI, **ChatGPT and friends**                            |
+| [⚙️ Configuration](/getting_started/installation/configurations/configurations)  | User management and **deployment tweaking**                       |
+| [💥 LLMs](/guides/llms/conceptual_guides/conceptual_guides)                     | Generative AI, **ChatGPT and friends**                            |
 | [🦮 Guides](/guides/log_load_and_prepare_data)                                  | **Conceptual overview** of our main functionalities               |
 | [🧗‍♀️ Tutorials](/tutorials/tutorials)                                            | Specific **applied end-to-end examples**                          |
 | [🏷️ References](/reference/python/index)                                        | Itemized information and **API docs**                             |
 | [🏘️ Community](/community/contributing)                                         | Everything about for **developers and contributing**              |
+| [🗺️ Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1)            | Our **future plans**                                              |
 
 ## 📏 Principles
 
@@ -53,5 +54,8 @@ We love contributors and have launched a [collaboration with JustDiggit](https:/
 </a>
 
 ```{include} /_common/next_steps.md
-
 ```
+
+## 🗺️ Roadmap
+
+We continuously work on updating [our plans and our roadmap](https://github.com/orgs/argilla-io/projects/10/views/1) and we love to discuss those with our community. Feel encouraged to participate.

@@ -18,7 +18,15 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
+
 ## [1.10.0](https://github.com/argilla-io/argilla/compare/v1.9.0...v1.10.0)
+
+### Added
+
+- Added search component for feedback datasets ([#3138](https://github.com/argilla-io/argilla/pull/3138))
+- Added markdown support for feedback dataset guidelines ([#3153](https://github.com/argilla-io/argilla/pull/3153))
+- Added Train button for feedback datasets ([#3170](https://github.com/argilla-io/argilla/pull/3170))
 
 ### Changed
 
@@ -26,6 +34,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Replaced Enum for string value in URLs for client API calls (Closes [#3149](https://github.com/argilla-io/argilla/issues/3149))
 - Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.
 - Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
 - Allow flow `FeedbackDataset.from_argilla` -> `FeedbackDataset.push_to_argilla` under different dataset names and/or workspaces ([#3192](https://github.com/argilla-io/argilla/issues/3192))
@@ -55,6 +64,7 @@ These are the section headers that we use:
 ### Fixed
 
 - Disallow `fields` and `questions` in `FeedbackDataset` with the same name ([#3126]).
+- Fixed broken links in the documentation and updated the development branch name from `development` to `develop` ([#3145]).
 
 [#3126]: https://github.com/argilla-io/argilla/pull/3126
 
@@ -73,7 +83,7 @@ These are the section headers that we use:
 - `/api/v1/responses/{response_id}` new endpoint to update and delete a response ([#2615])
 - `/api/v1/datasets/{dataset_id}/records` new endpoint to create and list dataset records ([#2615])
 - `/api/v1/me/datasets` new endpoint to list user visible datasets ([#2615])
-- `/api/v1/me/dataset/{dataset_id}/records` new endpoint to list  dataset records with user responses ([#2615])
+- `/api/v1/me/dataset/{dataset_id}/records` new endpoint to list dataset records with user responses ([#2615])
 - `/api/v1/me/datasets/{dataset_id}/metrics` new endpoint to get the dataset user metrics ([#2615])
 - `/api/v1/me/records/{record_id}/responses` new endpoint to create record user responses ([#2615])
 - showing new feedback task datasets in datasets list ([#2719])
@@ -100,7 +110,6 @@ These are the section headers that we use:
 - `token_length` metrics function returns empty data ([#3045])
 - `mention_length` metrics function returns empty data ([#3045])
 - `entity_density` metrics function returns empty data ([#3045])
-
 
 ### Deprecated
 
@@ -174,6 +183,7 @@ These are the section headers that we use:
 - Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
 
 ### Fixes
+
 - Now the `prepare_for_training` method is working when `multi_label=True`. Closes [#2606](https://github.com/argilla-io/argilla/issues/2606)
 
 ### Changed
@@ -196,8 +206,6 @@ These are the section headers that we use:
 - The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
-
-
 
 ## [1.5.1](https://github.com/argilla-io/argilla/compare/v1.5.0...v1.5.1) - 2023-03-30
 
