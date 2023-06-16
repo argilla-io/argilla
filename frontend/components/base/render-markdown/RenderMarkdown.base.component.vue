@@ -27,6 +27,7 @@ export default {
     const parsed = marked.parse(this.markdown, {
       headerIds: false,
       mangle: false,
+      breaks: true,
     });
     this.markdownToHtml = DOMPurify.sanitize(parsed);
   },
@@ -37,8 +38,13 @@ export default {
   white-space: normal;
   word-break: break-word;
   :deep() {
+    hr {
+      width: 100%;
+    }
+    blockquote {
+      font-style: italic;
+    }
     pre {
-      overflow: scroll;
       white-space: pre-wrap;
       word-break: break-all;
     }
