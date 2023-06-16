@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Iterator, List, Optional, Union
 from uuid import UUID
 
 from argilla.client import active_client
@@ -69,41 +69,39 @@ class Workspace:
     updated_at: datetime
 
     def __init__(
-        self, client: "httpx.Client", *, id: Union[str, UUID], name: str, inserted_at: datetime, updated_at: datetime
+        self,
+        name: Optional[str] = None,
+        *,
+        id: Optional[Union[str, UUID]] = None,
     ) -> None:
-        """Initializes a `Workspace` instance. Ideally this class should not be instantiated
-        directly, instead you should use one of the following classmethods:
+        """Doesn't initialize the `Workspace`, as it needs to be instantiated via any of
+        the following classmethods, as the Argilla API is required.
             - `Workspace.create` to create a new workspace in Argilla
             - `Workspace.from_name` to get an existing workspace from Argilla by its name
             - `Workspace.from_id` to get an existing workspace from Argilla by its ID
+            - `Workspace.list` to list all the workspaces in Argilla
 
         Args:
-            client: the `httpx.Client` initialized to interact with the Argilla API.
-            name: the name of the workspace to be managed.
-            id: the ID of the workspace to be managed.
-            inserted_at: the datetime when the workspace was created.
-            updated_at: the datetime when the workspace was last updated.
+            name: the name of the workspace to be managed. Defaults to None.
+            id: the ID of the workspace to be managed. Defaults to None.
 
         Raises:
-            ValueError: if the workspace does not exist in the current Argilla account.
-            ValidationApiError: if the ID provided is not a valid UUID.
-            RuntimeError: if there was an error while retrieving the workspace/s from Argilla.
-
-        Examples:
-            >>> from argilla import rg
-            >>> workspace = rg.Workspace(
-            ...     client=rg.active_client().http_client.httpx,
-            ...     name="my-workspace",
-            ...     id="...",
-            ...     inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0),
-            ...     updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0),
-            ... )
+            Exception: if the `Workspace` is initialized via the `__init__` method.
         """
-        self.__client = client
-        self.id = id if isinstance(id, UUID) else UUID(id)
-        self.name = name
-        self.inserted_at = inserted_at
-        self.updated_at = updated_at
+        error_msg = (
+            "`Workspace` cannot be initialized via the `__init__` method, as it needs"
+            " to send requests to the Argilla API, so it can just be instantiated via"
+            " the following classmethods: `Workspace.create`, `Workspace.from_name`,"
+            " `Workspace.from_id` and `Workspace.list`; note that it must exist in"
+            " advance in Argilla."
+        )
+        if id is not None:
+            error_msg += " As the `id` argument is not None, you should use" f" `Workspace.from_id('{id}')` instead."
+        if name is not None:
+            error_msg += (
+                " As the `name` argument is not None, you should use" f" `Workspace.from_name('{name}')` instead."
+            )
+        raise Exception(error_msg)
 
     @property
     def users(self) -> List["WorkspaceUserModel"]:
@@ -116,11 +114,10 @@ class Workspace:
 
     def __str__(self) -> str:
         return (
-            f"Workspace(id={self.id}, name={self.name}, users={self.users}, insterted_at={self.inserted_at},"
-            f" updated_at={self.updated_at}"
+            f"Workspace(id={self.id}, name={self.name}, users={self.users},"
+            f" insterted_at={self.inserted_at}, updated_at={self.updated_at}"
         )
 
-    # TODO(alvarobartt): also allow user addition via name (which is more user-friendly)
     def add_user(self, user_id: str) -> None:
         """Adds an existing user to the workspace in Argilla.
 
@@ -143,11 +140,12 @@ class Workspace:
                 user_id=user_id,
             )
         except AlreadyExistsApiError as e:
-            raise ValueError(f"User with id=`{user_id}` already exists in workspace with id=`{self.id}`.") from e
+            raise ValueError(f"User with id=`{user_id}` already exists in workspace with" f" id=`{self.id}`.") from e
         except BaseClientError as e:
-            raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
+            raise RuntimeError(
+                f"Error while adding user with id=`{user_id}` to workspace with" f" id=`{self.id}`."
+            ) from e
 
-    # TODO(alvarobartt): also allow user addition via name (which is more user-friendly)
     def delete_user(self, user_id: str) -> None:
         """Deletes an existing user from the workspace in Argilla. Note that the user
         will not be deleted from Argilla, but just from the workspace.
@@ -172,12 +170,12 @@ class Workspace:
             )
         except NotFoundApiError as e:
             raise ValueError(
-                f"Either the user with id=`{user_id}` doesn't exist in Argilla, or it doesn't belong to workspace with"
-                f" id=`{self.id}`."
+                f"Either the user with id=`{user_id}` doesn't exist in Argilla, or it"
+                f" doesn't belong to workspace with id=`{self.id}`."
             ) from e
         except BaseClientError as e:
             raise RuntimeError(
-                f"Error while deleting user with id=`{user_id}` from workspace with id=`{self.id}`."
+                f"Error while deleting user with id=`{user_id}` from workspace with" f" id=`{self.id}`."
             ) from e
 
     @staticmethod
@@ -205,12 +203,14 @@ class Workspace:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.create("my-workspace")
         """
-        client = cls.__active_client()
+        instance = cls.__new__(cls)
+        instance.__client = cls.__active_client()
         try:
-            workspace = workspaces_api.create_workspace(client=client, name=name).parsed
-            return cls(client, **workspace.dict())
+            ws = workspaces_api.create_workspace(client=instance.__client, name=name).parsed
+            instance.__dict__.update(ws.dict())
+            return instance
         except AlreadyExistsApiError as e:
-            raise ValueError(f"Workspace with name=`{name}` already exists, so please use a different name.") from e
+            raise ValueError(f"Workspace with name=`{name}` already exists, so please use a" " different name.") from e
         except (ValidationApiError, BaseClientError) as e:
             raise RuntimeError(f"Error while creating workspace with name=`{name}`.") from e
 
@@ -233,10 +233,12 @@ class Workspace:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.from_id("my-workspace-id")
         """
-        client = cls.__active_client()
+        instance = cls.__new__(cls)
+        instance.__client = cls.__active_client()
         try:
-            workspace = workspaces_api_v1.get_workspace(client, id).parsed
-            return cls(client, **workspace.dict())
+            ws = workspaces_api_v1.get_workspace(instance.__client, id).parsed
+            instance.__dict__.update(ws.dict())
+            return instance
         except NotFoundApiError as e:
             raise ValueError(
                 f"Workspace with id=`{id}` doesn't exist in Argilla, so please"
@@ -245,7 +247,8 @@ class Workspace:
             ) from e
         except ValidationApiError as e:
             raise ValueError(
-                "The ID you provided is not a valid UUID, so please make sure that the ID you provided is a valid one."
+                "The ID you provided is not a valid UUID, so please make sure that the"
+                " ID you provided is a valid one."
             ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while retrieving workspace with id=`{id}` from Argilla.") from e
@@ -268,24 +271,26 @@ class Workspace:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.from_name("my-workspace")
         """
-        client = cls.__active_client()
+        instance = cls.__new__(cls)
+        instance.__client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(client).parsed
+            workspaces = workspaces_api.list_workspaces(instance.__client).parsed
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
 
-        for workspace in workspaces:
-            if workspace.name == name:
-                return cls(client, **workspace.dict())
+        for ws in workspaces:
+            if ws.name == name:
+                instance.__dict__.update(ws.dict())
+                return instance
 
         raise ValueError(
             f"Workspace with name=`{name}` doesn't exist in Argilla, so please"
             "create it via the `Workspace.create` method as follows:"
-            f" `Workspace(name=`{name}`)`."
+            f" `Workspace.create('{name}')`."
         )
 
     @classmethod
-    def list(cls) -> List["Workspace"]:
+    def list(cls) -> Iterator["Workspace"]:
         """Lists all the workspaces in Argilla.
 
         Returns:
@@ -301,7 +306,11 @@ class Workspace:
         client = cls.__active_client()
         try:
             workspaces = workspaces_api.list_workspaces(client).parsed
+            for ws in workspaces:
+                instance = cls.__new__(cls)
+                instance.__client = client
+                instance.__dict__.update(ws.dict())
+                yield instance
+            return instance
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
-
-        return [cls(client, **workspace.dict()) for workspace in workspaces]
