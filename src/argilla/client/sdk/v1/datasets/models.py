@@ -31,8 +31,8 @@ class FeedbackDatasetModel(BaseModel):
     guidelines: Optional[str] = None
     status: Optional[str] = None
     workspace_id: Optional[UUID] = None
-    created_at: datetime
-    last_updated: datetime
+    inserted_at: datetime
+    updated_at: datetime
 
 
 class FeedbackValueModel(BaseModel):
