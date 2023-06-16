@@ -370,7 +370,7 @@ def test_list_dataset_questions_with_nonexistent_dataset_id(client: TestClient, 
 def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata={"unit": "test"}, dataset=dataset)
+    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
     other_dataset = DatasetFactory.create()
@@ -412,7 +412,7 @@ def test_list_dataset_records(client: TestClient, admin_auth_header: dict):
 def test_list_dataset_records_with_include_responses(client: TestClient, admin_auth_header: dict):
     dataset = DatasetFactory.create()
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata={"unit": "test"}, dataset=dataset)
+    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
     response_a = ResponseFactory.create(
@@ -597,7 +597,7 @@ def test_list_current_user_dataset_records(client: TestClient, admin_auth_header
     dataset = DatasetFactory.create()
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_b = RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
-    record_c = RecordFactory.create(fields={"record_c": "value_c"}, metadata={"unit": "test"}, dataset=dataset)
+    record_c = RecordFactory.create(fields={"record_c": "value_c"}, metadata_={"unit": "test"}, dataset=dataset)
 
     other_dataset = DatasetFactory.create()
     RecordFactory.create_batch(size=2, dataset=other_dataset)
@@ -641,7 +641,7 @@ def test_list_current_user_dataset_records_with_include_responses(
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata={"unit": "test"}, dataset=dataset)
+    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
     response_a_annotator = ResponseFactory.create(
@@ -858,7 +858,7 @@ def test_list_current_user_dataset_records_as_annotator(client: TestClient, admi
     annotator = AnnotatorFactory.create(workspaces=[workspace])
     dataset = DatasetFactory.create(workspace=workspace)
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata={"unit": "test"}, dataset=dataset)
+    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
     other_dataset = DatasetFactory.create()
@@ -901,7 +901,7 @@ def test_list_current_user_dataset_records_as_annotator_with_include_responses(c
     dataset = DatasetFactory.create()
     annotator = AnnotatorFactory.create(workspaces=[dataset.workspace])
     record_a = RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata={"unit": "test"}, dataset=dataset)
+    record_b = RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
     record_c = RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
     response_a_admin = ResponseFactory.create(
@@ -2431,7 +2431,7 @@ def create_dataset_for_search(user: Optional[User] = None) -> Tuple[Dataset, Lis
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
     records = [
         RecordFactory.create(dataset=dataset, fields={"input": "Say Hello", "output": "Hello"}),
-        RecordFactory.create(dataset=dataset, metadata={"unit": "test"}, fields={"input": "Hello", "output": "Hi"}),
+        RecordFactory.create(dataset=dataset, metadata_={"unit": "test"}, fields={"input": "Hello", "output": "Hi"}),
         RecordFactory.create(dataset=dataset, fields={"input": "Say Goodbye", "output": "Goodbye"}),
         RecordFactory.create(dataset=dataset, fields={"input": "Say bye", "output": "Bye"}),
     ]
