@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import pytest
 from argilla._constants import DEFAULT_API_KEY
 from argilla.client.client import Argilla
@@ -36,8 +38,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackQuestionModel,
     FeedbackRecordsModel,
 )
-from argilla.server.models import DatasetStatus, User, UserRole
-from starlette.testclient import TestClient
+from argilla.server.models import DatasetStatus, UserRole
 
 from tests.factories import (
     AdminFactory,

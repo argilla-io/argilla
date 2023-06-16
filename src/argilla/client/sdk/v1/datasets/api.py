@@ -15,6 +15,7 @@
 
 import warnings
 from typing import Any, Dict, List, Optional, Union
+from uuid import UUID
 
 import httpx
 
@@ -35,7 +36,7 @@ from argilla.client.sdk.v1.datasets.models import (
 def create_dataset(
     client: httpx.Client,
     name: str,
-    workspace_id: str,
+    workspace_id: UUID,
     guidelines: Optional[str] = None,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST reques to `/api/v1/datasets` endpoint to create a new `FeedbackTask` dataset.
@@ -71,7 +72,7 @@ def create_dataset(
 
 def get_dataset(
     client: httpx.Client,
-    id: str,
+    id: UUID,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}` endpoint to retrieve a `FeedbackTask` dataset.
 
@@ -100,7 +101,7 @@ def get_dataset(
 
 def delete_dataset(
     client: httpx.Client,
-    id: str,
+    id: UUID,
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     """Sends a DELETE request to `/api/v1/datasets/{id}` endpoint to delete a `FeedbackTask` dataset.
 
@@ -126,7 +127,7 @@ def delete_dataset(
 
 def publish_dataset(
     client: httpx.Client,
-    id: str,
+    id: UUID,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     """Sends a PUT request to `/api/v1/datasets/{id}/publish` endpoint to publish a `FeedbackTask` dataset.
     Publishing in Argilla means setting the status of the dataset from `draft` to `ready`, so that
@@ -183,7 +184,7 @@ def list_datasets(
 
 def get_records(
     client: httpx.Client,
-    id: str,
+    id: UUID,
     offset: int = 0,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
@@ -219,7 +220,7 @@ def get_records(
 
 def add_records(
     client: httpx.Client,
-    id: str,
+    id: UUID,
     records: List[Dict[str, Any]],
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/records` endpoint to add a list of `FeedbackTask` records.
@@ -245,7 +246,8 @@ def add_records(
             if response["user_id"] is None:
                 if response_without_user_id:
                     warnings.warn(
-                        f"Multiple responses without `user_id` found in record {record}, so just the first one will be used while the rest will be ignored."
+                        f"Multiple responses without `user_id` found in record {record}, so just the first one will be"
+                        " used while the rest will be ignored."
                     )
                     continue
                 else:
@@ -269,7 +271,7 @@ def add_records(
 
 def get_fields(
     client: httpx.Client,
-    id: str,
+    id: UUID,
 ) -> Response[Union[List[FeedbackFieldModel], ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/fields` endpoint to retrieve a list of `FeedbackTask` fields.
 
@@ -298,7 +300,7 @@ def get_fields(
 
 def add_field(
     client: httpx.Client,
-    id: str,
+    id: UUID,
     field: Dict[str, Any],
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/fields` endpoint to add a `FeedbackTask` field.
@@ -326,7 +328,7 @@ def add_field(
 
 def get_questions(
     client: httpx.Client,
-    id: str,
+    id: UUID,
 ) -> Response[Union[List[FeedbackQuestionModel], ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/questions` endpoint to retrieve a list of `FeedbackTask` questions.
 
@@ -355,7 +357,7 @@ def get_questions(
 
 def add_question(
     client: httpx.Client,
-    id: str,
+    id: UUID,
     question: Dict[str, Any],
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/questions` endpoint to add a question to the `FeedbackTask` dataset.

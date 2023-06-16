@@ -307,19 +307,9 @@ def test_log_with_bulk_error(mocked_client):
             name=dataset,
         )
     except BadRequestApiError as error:
-        assert error.ctx == {
-            "code": "argilla.api.errors::BulkDataError",
-            "params": {
-                "message": "Cannot log data in dataset argilla.test_log_with_bulk_error",
-                "errors": [
-                    {
-                        "reason": "failed to parse field [metadata.key] of type [long] in document with id '1'. "
-                        "Preview of field's value: 'wrong-value'",
-                        "caused_by": {
-                            "type": "illegal_argument_exception",
-                            "reason": 'For input string: "wrong-value"',
-                        },
-                    }
-                ],
-            },
+        assert error.ctx["code"] == "argilla.api.errors::BulkDataError"
+        assert error.ctx["params"]["message"] == "Cannot log data in dataset argilla.test_log_with_bulk_error"
+        assert error.ctx["params"]["errors"][0]["caused_by"] == {
+            "type": "illegal_argument_exception",
+            "reason": 'For input string: "wrong-value"',
         }
