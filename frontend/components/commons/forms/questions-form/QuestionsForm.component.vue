@@ -62,6 +62,12 @@
           :description="input.description"
           @on-error="onError"
         />
+
+        <RankingComponent
+          :title="input.question"
+          :isRequired="input.is_required"
+          :description="input.description"
+        />
       </div>
     </div>
     <div class="footer-form">

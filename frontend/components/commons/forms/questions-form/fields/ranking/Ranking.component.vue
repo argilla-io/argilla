@@ -6,11 +6,14 @@
       :tooltipMessage="description"
     />
 
-    <dndSelectionComponent :listOfItems="ranking" />
+    <DndSelectionComponent :ranking="ranking" />
   </div>
 </template>
 
 <script>
+import { factoryRanking } from "./ranking-adapter";
+import { settingsFake } from "./ranking-fakes";
+
 export default {
   name: "RankingComponent",
   props: {
@@ -26,76 +29,34 @@ export default {
       type: String,
       default: "",
     },
-    values: {
-      type: Array,
-      required: true,
-    },
-    settings: {
-      type: Object,
-      required: true,
-      validator: (settings) => {
-        const settingsKeys = Object.keys(settings);
-        const checkAllKeysOfSettingsAreValid = settingsKeys.every((key) =>
-          ["type", "options", "ranking_slots"].includes(key)
-        );
-        return checkAllKeysOfSettingsAreValid;
-      },
-    },
+    // values: {
+    //   type: Array,
+    //   required: true,
+    // },
+    // settings: {
+    //   type: Object,
+    //   required: true,
+    //   validator: (settings) => {
+    //     const settingsKeys = Object.keys(settings);
+    //     const checkAllKeysOfSettingsAreValid = settingsKeys.every((key) =>
+    //       ["type", "options", "ranking_slots"].includes(key)
+    //     );
+    //     return checkAllKeysOfSettingsAreValid;
+    //   },
+    // },
   },
   data() {
     return {
-      ranking: [],
+      ranking: factoryRanking(settingsFake),
     };
-  },
-  created() {
-    this.initialSettings = {
-      options: [
-        {
-          value: "label-01",
-          text: "My label",
-          description: "This is an optional field",
-        },
-        { value: "label-02", text: "My other Label" },
-        { value: "label-03", text: "Wat?!" },
-        { value: "label-04", text: "Ough!" },
-      ],
-      ranking_slots: [
-        {
-          text: "First place",
-        },
-        {
-          text: "Second place",
-        },
-        {
-          text: "Out of top 2",
-        },
-      ],
-    };
-  },
-  beforeMount() {
-    this.ranking = [
-      {
-        index: 1,
-        items: [
-          {
-            title: "item 1",
-          },
-        ],
-      },
-      {
-        index: 2,
-        items: [
-          {
-            title: "item 2",
-          },
-          {
-            title: "item 3",
-          },
-        ],
-      },
-    ];
   },
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>
