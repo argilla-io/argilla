@@ -25,6 +25,7 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.workspaces import api as workspaces_api
+from argilla.client.sdk.workspaces.models import WorkspaceModel
 
 if TYPE_CHECKING:
     import httpx
@@ -187,6 +188,17 @@ class Workspace:
             raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
 
     @classmethod
+    def __new_instance(
+        cls, client: Optional["httpx.Client"] = None, ws: Optional[WorkspaceModel] = None
+    ) -> "Workspace":
+        """Returns a new `Workspace` instance."""
+        instance = cls.__new__(cls)
+        instance.__client = client or cls.__active_client()
+        if isinstance(ws, WorkspaceModel):
+            instance.__dict__.update(ws.dict())
+        return instance
+
+    @classmethod
     def create(cls, name: str) -> "Workspace":
         """Creates a new workspace in Argilla.
 
@@ -203,12 +215,10 @@ class Workspace:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.create("my-workspace")
         """
-        instance = cls.__new__(cls)
-        instance.__client = cls.__active_client()
+        client = cls.__active_client()
         try:
-            ws = workspaces_api.create_workspace(client=instance.__client, name=name).parsed
-            instance.__dict__.update(ws.dict())
-            return instance
+            ws = workspaces_api.create_workspace(client, name).parsed
+            return cls.__new_instance(client, ws)
         except AlreadyExistsApiError as e:
             raise ValueError(f"Workspace with name=`{name}` already exists, so please use a" " different name.") from e
         except (ValidationApiError, BaseClientError) as e:
@@ -233,12 +243,10 @@ class Workspace:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.from_id("my-workspace-id")
         """
-        instance = cls.__new__(cls)
-        instance.__client = cls.__active_client()
+        client = cls.__active_client()
         try:
-            ws = workspaces_api_v1.get_workspace(instance.__client, id).parsed
-            instance.__dict__.update(ws.dict())
-            return instance
+            ws = workspaces_api_v1.get_workspace(client, id).parsed
+            return cls.__new_instance(client, ws)
         except NotFoundApiError as e:
             raise ValueError(
                 f"Workspace with id=`{id}` doesn't exist in Argilla, so please"
@@ -271,17 +279,15 @@ class Workspace:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.from_name("my-workspace")
         """
-        instance = cls.__new__(cls)
-        instance.__client = cls.__active_client()
+        client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(instance.__client).parsed
+            workspaces = workspaces_api.list_workspaces(client).parsed
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
 
         for ws in workspaces:
             if ws.name == name:
-                instance.__dict__.update(ws.dict())
-                return instance
+                return cls.__new_instance(client, ws)
 
         raise ValueError(
             f"Workspace with name=`{name}` doesn't exist in Argilla, so please"
@@ -307,10 +313,6 @@ class Workspace:
         try:
             workspaces = workspaces_api.list_workspaces(client).parsed
             for ws in workspaces:
-                instance = cls.__new__(cls)
-                instance.__client = client
-                instance.__dict__.update(ws.dict())
-                yield instance
-            return instance
+                yield cls.__new_instance(client, ws)
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
