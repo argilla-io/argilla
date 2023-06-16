@@ -53,14 +53,14 @@ def create_dataset(
     """
     url = "/api/v1/datasets"
 
-    body = {"name": name, "workspace_id": workspace_id}
+    body = {"name": name, "workspace_id": str(workspace_id)}
     if guidelines is not None:
         body.update({"guidelines": guidelines})
 
     response = client.post(url=url, json=body)
 
     if response.status_code == 201:
-        parsed_response = FeedbackDatasetModel.construct(**response.json())
+        parsed_response = FeedbackDatasetModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -89,7 +89,7 @@ def get_dataset(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = FeedbackDatasetModel.construct(**response.json())
+        parsed_response = FeedbackDatasetModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -146,7 +146,7 @@ def publish_dataset(
     response = client.put(url=url)
 
     if response.status_code == 200:
-        parsed_response = FeedbackDatasetModel.construct(**response.json())
+        parsed_response = FeedbackDatasetModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -172,7 +172,7 @@ def list_datasets(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [FeedbackDatasetModel.construct(**dataset) for dataset in response.json()["items"]]
+        parsed_response = [FeedbackDatasetModel(**dataset) for dataset in response.json()["items"]]
         return Response(
             status_code=response.status_code,
             content=response.content,
