@@ -83,11 +83,10 @@ export default {
   },
   async mounted() {
     try {
-      fetch("deployment.json")
-        .then((r) => r.json())
-        .then(({ deployment }) => {
-          this.deployment = deployment;
-        });
+      const response = await fetch("deployment.json");
+      const { deployment } = await response.json();
+
+      this.deployment = deployment;
     } catch (e) {
       this.deployment = null;
     }
