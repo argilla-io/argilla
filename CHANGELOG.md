@@ -28,6 +28,7 @@ These are the section headers that we use:
 
 - Added `metadata` attribute to the `Record` of the `FeedbackDataset` ([#3194](https://github.com/argilla-io/argilla/pull/3194))
 - New `users update` command to update the role for an existing user ([#3188](https://github.com/argilla-io/argilla/pull/3188))
+- New `Workspace` class to allow users manage their Argilla workspaces and the users assigned to those workspaces via the Python client ([#3180](https://github.com/argilla-io/argilla/pull/3180))
 
 ### Changed
 
@@ -46,7 +47,6 @@ These are the section headers that we use:
 ### Changed
 
 - Updated `SearchEngine` and `POST /api/v1/me/datasets/{dataset_id}/records/search` to return the `total` number of records matching the search query ([#3166](https://github.com/argilla-io/argilla/pull/3166))
-- Extended `Workspace` class to allow users manage their Argilla workspaces and the users assigned to those workspaces via the Python client ([#3180](https://github.com/argilla-io/argilla/pull/3180))
 
 ### Fixed
 
