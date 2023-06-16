@@ -189,3 +189,7 @@ sphinx-autobuild docs/_source docs/_build/html
 ```
 
 This will create a `_build/html` folder in which you can find the `index.html` file of the documentation.
+
+## Troubleshooting
+
+If you get warnings while building documentation then you can handle them this way: If they are `toctree` warnings then they can be ignored and If they are import errors then they can be resolved by installing `autodoc` and `argilla` from `environment_dev.yml.`
