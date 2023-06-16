@@ -65,6 +65,7 @@ These are the section headers that we use:
 ### Fixed
 
 - Disallow `fields` and `questions` in `FeedbackDataset` with the same name ([#3126]).
+- Fixed broken links in the documentation and updated the development branch name from `development` to `develop` ([#3145]).
 
 [#3126]: https://github.com/argilla-io/argilla/pull/3126
 
