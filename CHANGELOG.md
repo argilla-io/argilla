@@ -24,7 +24,7 @@ These are the section headers that we use:
 
 - Added search component for feedback datasets ([#3138](https://github.com/argilla-io/argilla/pull/3138))
 - Added markdown support for feedback dataset guidelines ([#3153](https://github.com/argilla-io/argilla/pull/3153))
-- Added Train button for feedbacck datasets ([#3170](https://github.com/argilla-io/argilla/pull/3170))
+- Added Train button for feedback datasets ([#3170](https://github.com/argilla-io/argilla/pull/3170))
 
 ### Changed
 
@@ -32,6 +32,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Replaced Enum for string value in URLs for client API calls (Closes [#3149](https://github.com/argilla-io/argilla/issues/3149))
 - Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.
 - Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
 - Allow flow `FeedbackDataset.from_argilla` -> `FeedbackDataset.push_to_argilla` under different dataset names and/or workspaces ([#3192](https://github.com/argilla-io/argilla/issues/3192))
