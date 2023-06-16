@@ -291,7 +291,7 @@ class RecordInclude(str, Enum):
 class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
-            return getattr(self._obj, "metadata_", {})
+            return getattr(self._obj, "metadata_", None)
         if key == "responses" and "responses" not in self._obj.__dict__:
             return default
         return super().get(key, default)
