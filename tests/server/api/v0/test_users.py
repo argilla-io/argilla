@@ -22,25 +22,41 @@ from sqlalchemy.orm import Session
 from tests.factories import (
     AdminFactory,
     AnnotatorFactory,
+    OwnerFactory,
     UserFactory,
     WorkspaceFactory,
     WorkspaceUserFactory,
 )
 
 
-def test_me(client: TestClient, admin: User, admin_auth_header: dict):
-    response = client.get("/api/me", headers=admin_auth_header)
+def test_me(client: TestClient, owner, owner_auth_header):
+    response = client.get("/api/me", headers=owner_auth_header)
 
     assert response.status_code == 200
 
     response_body = response.json()
-    assert response_body["id"] == str(admin.id)
+    assert response_body["id"] == str(owner.id)
 
 
 def test_me_without_authentication(client: TestClient):
     response = client.get("/api/me")
 
     assert response.status_code == 401
+
+
+def test_me_as_owner(client: TestClient, db: Session):
+    owner = OwnerFactory.create(
+        workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
+    )
+    WorkspaceFactory.create(name="workspace-c")
+
+    response = client.get("/api/me", headers={API_KEY_HEADER_NAME: owner.api_key})
+
+    assert response.status_code == 200
+
+    response_body = response.json()
+    assert response_body["id"] == str(owner.id)
+    assert response_body["workspaces"] == ["workspace-a", "workspace-b", "workspace-c"]
 
 
 def test_me_as_admin(client: TestClient, db: Session):
@@ -55,7 +71,7 @@ def test_me_as_admin(client: TestClient, db: Session):
 
     response_body = response.json()
     assert response_body["id"] == str(admin.id)
-    assert response_body["workspaces"] == ["workspace-a", "workspace-b", "workspace-c"]
+    assert response_body["workspaces"] == ["workspace-a", "workspace-b"]
 
 
 def test_me_as_annotator(client: TestClient, db: Session):
@@ -73,22 +89,30 @@ def test_me_as_annotator(client: TestClient, db: Session):
     assert response_body["workspaces"] == ["workspace-a", "workspace-b"]
 
 
-def test_list_users(client: TestClient, admin_auth_header: dict):
+def test_list_users(client: TestClient, owner_auth_header: dict):
     UserFactory.create(username="username-a")
     UserFactory.create(username="username-b")
 
-    response = client.get("/api/users", headers=admin_auth_header)
+    response = client.get("/api/users", headers=owner_auth_header)
 
     assert response.status_code == 200
 
     response_body = response.json()
-    assert list(map(lambda user: user["username"], response_body)) == ["admin", "username-a", "username-b"]
+    assert list(map(lambda user: user["username"], response_body)) == ["owner", "username-a", "username-b"]
 
 
 def test_list_users_without_authentication(client: TestClient):
     response = client.get("/api/users")
 
     assert response.status_code == 401
+
+
+def test_list_users_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+
+    response = client.get("/api/users", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 403
 
 
 def test_list_users_as_annotator(client: TestClient, db: Session):
@@ -99,10 +123,10 @@ def test_list_users_as_annotator(client: TestClient, db: Session):
     assert response.status_code == 403
 
 
-def test_create_user(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user(client: TestClient, db: Session, owner_auth_header):
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 200
     assert db.query(User).count() == 2
@@ -116,10 +140,10 @@ def test_create_user(client: TestClient, db: Session, admin_auth_header: dict):
     assert response_body["role"] == UserRole.annotator.value
 
 
-def test_create_user_with_non_default_role(client: TestClient, db: Session, admin_auth_header: dict):
-    user = {"first_name": "first-name", "username": "username", "password": "12345678", "role": UserRole.admin.value}
+def test_create_user_with_non_default_role(client: TestClient, db: Session, owner_auth_header):
+    user = {"first_name": "first-name", "username": "username", "password": "12345678", "role": UserRole.owner.value}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 200
     assert db.query(User).count() == 2
@@ -129,7 +153,7 @@ def test_create_user_with_non_default_role(client: TestClient, db: Session, admi
 
     response_body = response.json()
     assert response_body["username"] == "username"
-    assert response_body["role"] == UserRole.admin.value
+    assert response_body["role"] == UserRole.owner.value
 
 
 def test_create_user_without_authentication(client: TestClient, db: Session):
@@ -139,6 +163,16 @@ def test_create_user_without_authentication(client: TestClient, db: Session):
 
     assert response.status_code == 401
     assert db.query(User).count() == 0
+
+
+def test_create_user_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+    user = {"first_name": "first-name", "username": "username", "password": "12345678"}
+
+    response = client.post("/api/users", headers={API_KEY_HEADER_NAME: admin.api_key}, json=user)
+
+    assert response.status_code == 403
+    assert db.query(User).count() == 1
 
 
 def test_create_user_as_annotator(client: TestClient, db: Session):
@@ -151,74 +185,74 @@ def test_create_user_as_annotator(client: TestClient, db: Session):
     assert db.query(User).count() == 1
 
 
-def test_create_user_with_existent_username(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user_with_existent_username(client: TestClient, db: Session, owner_auth_header):
     UserFactory.create(username="username")
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 409
     assert db.query(User).count() == 2
 
 
-def test_create_user_with_invalid_min_length_first_name(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user_with_invalid_min_length_first_name(client: TestClient, db: Session, owner_auth_header):
     user = {"first_name": "", "username": "username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert db.query(User).count() == 1
 
 
-def test_create_user_with_invalid_min_length_last_name(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user_with_invalid_min_length_last_name(client: TestClient, db: Session, owner_auth_header):
     user = {"first_name": "first-name", "last_name": "", "username": "username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert db.query(User).count() == 1
 
 
-def test_create_user_with_invalid_username(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user_with_invalid_username(client: TestClient, db: Session, owner_auth_header):
     user = {"first_name": "first-name", "username": "invalid username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert db.query(User).count() == 1
 
 
-def test_create_user_with_invalid_role(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user_with_invalid_role(client: TestClient, db: Session, owner_auth_header):
     user = {"first_name": "first-name", "username": "username", "password": "12345678", "role": "invalid role"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert db.query(User).count() == 1
 
 
-def test_create_user_with_invalid_min_password_length(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user_with_invalid_min_password_length(client: TestClient, db: Session, owner_auth_header):
     user = {"first_name": "first-name", "username": "username", "password": "1234"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert db.query(User).count() == 1
 
 
-def test_create_user_with_invalid_max_password_length(client: TestClient, db: Session, admin_auth_header: dict):
+def test_create_user_with_invalid_max_password_length(client: TestClient, db: Session, owner_auth_header):
     user = {"first_name": "first-name", "username": "username", "password": "p" * 101}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert db.query(User).count() == 1
 
 
-def test_delete_user(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_user(client: TestClient, db: Session, owner_auth_header):
     user = UserFactory.create()
 
-    response = client.delete(f"/api/users/{user.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/users/{user.id}", headers=owner_auth_header)
 
     assert response.status_code == 200
     assert db.query(User).count() == 1
@@ -236,6 +270,16 @@ def test_delete_user_without_authentication(client: TestClient, db: Session):
     assert db.query(User).count() == 1
 
 
+def test_delete_user_as_admin(client: TestClient, db: Session):
+    admin = AdminFactory.create()
+    user = UserFactory.create()
+
+    response = client.delete(f"/api/users/{user.id}", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 403
+    assert db.query(User).count() == 2
+
+
 def test_delete_user_as_annotator(client: TestClient, db: Session):
     annotator = AnnotatorFactory.create()
     user = UserFactory.create()
@@ -246,8 +290,8 @@ def test_delete_user_as_annotator(client: TestClient, db: Session):
     assert db.query(User).count() == 2
 
 
-def test_delete_user_with_nonexistent_user_id(client: TestClient, db: Session, admin_auth_header: dict):
-    response = client.delete(f"/api/users/{uuid4()}", headers=admin_auth_header)
+def test_delete_user_with_nonexistent_user_id(client: TestClient, db: Session, owner_auth_header):
+    response = client.delete(f"/api/users/{uuid4()}", headers=owner_auth_header)
 
     assert response.status_code == 404
     assert db.query(User).count() == 1

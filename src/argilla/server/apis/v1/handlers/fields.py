@@ -34,9 +34,9 @@ def delete_field(
     field_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, FieldPolicyV1.delete)
-
     field = datasets.get_field_by_id(db, field_id)
+
+    authorize(current_user, FieldPolicyV1.delete(field))
     if not field:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
