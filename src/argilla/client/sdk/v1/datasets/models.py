@@ -51,6 +51,7 @@ class FeedbackResponseModel(BaseModel):
 class FeedbackItemModel(BaseModel):
     id: UUID
     fields: Dict[str, Any]
+    metadata: Optional[Dict[str, Any]] = None
     external_id: Optional[str] = None
     responses: Optional[List[FeedbackResponseModel]] = []
     inserted_at: datetime

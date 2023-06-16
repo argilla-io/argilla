@@ -365,14 +365,22 @@ class Argilla:
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
             creation_class = CreationTextClassificationRecord
+            task = TaskType.text_classification
         elif record_type is TokenClassificationRecord:
             bulk_class = TokenClassificationBulkData
             creation_class = CreationTokenClassificationRecord
+            task = TaskType.token_classification
         elif record_type is Text2TextRecord:
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
+            task = TaskType.text2text
         else:
             raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
+
+        try:
+            self.datasets.create(name=name, task=task, workspace=workspace)
+        except AlreadyExistsApiError:
+            pass
 
         results = []
         with Progress() as progress_bar:

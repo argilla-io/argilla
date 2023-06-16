@@ -286,6 +286,7 @@ async def create_records(
 
         record = Record(
             fields=record_create.fields,
+            metadata_=record_create.metadata,
             external_id=record_create.external_id,
             dataset_id=dataset.id,
         )
