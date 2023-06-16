@@ -128,7 +128,7 @@ def list_current_user_dataset_records(
         db, dataset_id, current_user.id, include=include, response_status=response_status, offset=offset, limit=limit
     )
 
-    return Records.from_orm(records)
+    return Records(items=records)
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -147,7 +147,7 @@ def list_dataset_records(
 
     records = datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
 
-    return Records.from_orm(records)
+    return Records(items=records)
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
