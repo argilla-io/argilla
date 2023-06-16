@@ -46,7 +46,7 @@ def create_default(
         session.commit()
 
         if not quiet:
-            typer.echo("User with default credentials succesfully created:")
+            typer.echo("User with default credentials successfully created:")
             typer.echo(f"• username: {DEFAULT_USERNAME!r}")
             typer.echo(f"• password: {password!r}")
             typer.echo(f"• api_key:  {api_key!r}")

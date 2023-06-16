@@ -29,10 +29,10 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.asyncio
-async def test_delete_field(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+async def test_delete_field(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     field = await TextFieldFactory.create(name="name", title="title")
 
-    response = client.delete(f"/api/v1/fields/{field.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/fields/{field.id}", headers=owner_auth_header)
 
     assert response.status_code == 200
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
@@ -73,12 +73,12 @@ async def test_delete_field_as_annotator(client: TestClient, db: "AsyncSession")
 
 @pytest.mark.asyncio
 async def test_delete_field_belonging_to_published_dataset(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     field = await TextFieldFactory.create(dataset=dataset)
 
-    response = client.delete(f"/api/v1/fields/{field.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/fields/{field.id}", headers=owner_auth_header)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Fields cannot be deleted for a published dataset"}
@@ -86,10 +86,10 @@ async def test_delete_field_belonging_to_published_dataset(
 
 
 @pytest.mark.asyncio
-async def test_delete_field_with_nonexistent_field_id(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+async def test_delete_field_with_nonexistent_field_id(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     await TextFieldFactory.create()
 
-    response = client.delete(f"/api/v1/fields/{uuid4()}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/fields/{uuid4()}", headers=owner_auth_header)
 
     assert response.status_code == 404
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1

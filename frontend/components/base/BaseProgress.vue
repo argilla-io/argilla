@@ -102,7 +102,6 @@ export default {
   position: relative;
   overflow: hidden;
   background: #a1a2cc;
-  border-top-left-radius: 0;
   border-top-right-radius: 10px;
   border-top-left-radius: 0;
   border-bottom-right-radius: 10px;

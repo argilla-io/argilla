@@ -123,7 +123,6 @@ export default {
   position: relative;
   color: $black-54;
   &__header {
-    height: 100%;
     width: auto;
     height: 45px;
     border: 1px solid palette(grey, 600);
@@ -185,7 +184,6 @@ export default {
     top: calc(100% + 10px);
     left: 0;
     margin-top: 0;
-    box-shadow: $shadow;
     padding: 10px 20px 20px 20px;
     z-index: 3;
     transform: translate(0);

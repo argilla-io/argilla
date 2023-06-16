@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Record, Response, User
+from argilla.server.models import Record, Response, User, UserRole
 from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
@@ -33,6 +33,7 @@ from tests.factories import (
     RecordFactory,
     ResponseFactory,
     TextQuestionFactory,
+    UserFactory,
     WorkspaceFactory,
 )
 
@@ -123,8 +124,8 @@ async def test_create_record_response_with_required_questions(
     client: TestClient,
     db: "AsyncSession",
     mock_search_engine: SearchEngine,
-    admin: User,
-    admin_auth_header: dict,
+    owner: User,
+    owner_auth_header: dict,
     create_questions_func: Callable[["Dataset"], Awaitable[None]],
     response_status: str,
     responses: dict,
@@ -134,7 +135,7 @@ async def test_create_record_response_with_required_questions(
     record = await RecordFactory.create(dataset=dataset)
 
     response_json = {**responses, "status": response_status}
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     response_body = response.json()
     assert response.status_code == 201
@@ -144,7 +145,7 @@ async def test_create_record_response_with_required_questions(
         "id": str(UUID(response_body["id"])),
         "values": responses["values"],
         "status": response_status,
-        "user_id": str(admin.id),
+        "user_id": str(owner.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -155,7 +156,7 @@ async def test_create_record_response_with_required_questions(
 
 @pytest.mark.asyncio
 async def test_create_submitted_record_response_with_missing_required_questions(
-    client: TestClient, admin_auth_header: dict
+    client: TestClient, owner_auth_header: dict
 ):
     dataset = await DatasetFactory.create()
     await create_text_questions(dataset)
@@ -166,7 +167,7 @@ async def test_create_submitted_record_response_with_missing_required_questions(
         "status": "submitted",
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
     assert response.status_code == 422
     assert response.json() == {"detail": "Missing required question: 'input_ok'"}
 
@@ -222,8 +223,8 @@ async def test_create_record_response_with_missing_required_questions(
     client: TestClient,
     db: "AsyncSession",
     mock_search_engine: SearchEngine,
-    admin: User,
-    admin_auth_header: dict,
+    owner: User,
+    owner_auth_header: dict,
     create_questions_func: Callable[["Dataset"], Awaitable[None]],
     response_status: str,
     responses: dict,
@@ -233,7 +234,7 @@ async def test_create_record_response_with_missing_required_questions(
     record = await RecordFactory.create(dataset=dataset)
 
     response_json = {**responses, "status": response_status}
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     response_body = response.json()
     assert response.status_code == 201
@@ -243,7 +244,7 @@ async def test_create_record_response_with_missing_required_questions(
         "id": str(UUID(response_body["id"])),
         "values": responses["values"],
         "status": response_status,
-        "user_id": str(admin.id),
+        "user_id": str(owner.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -253,7 +254,7 @@ async def test_create_record_response_with_missing_required_questions(
 
 
 @pytest.mark.asyncio
-async def test_create_record_response_with_extra_question_responses(client: TestClient, admin_auth_header: dict):
+async def test_create_record_response_with_extra_question_responses(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     await create_text_questions(dataset)
     record = await RecordFactory.create(dataset=dataset)
@@ -265,7 +266,7 @@ async def test_create_record_response_with_extra_question_responses(client: Test
         },
         "status": "submitted",
     }
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Error: found responses for non configured questions: ['unknown_question']"}
@@ -330,7 +331,7 @@ async def test_create_record_response_with_extra_question_responses(client: Test
 @pytest.mark.asyncio
 async def test_create_record_response_with_wrong_response_value(
     client: TestClient,
-    admin_auth_header: dict,
+    owner_auth_header: dict,
     create_questions_func: Callable[["Dataset"], None],
     responses: dict,
     expected_error_msg: str,
@@ -340,7 +341,7 @@ async def test_create_record_response_with_wrong_response_value(
     record = await RecordFactory.create(dataset=dataset)
 
     response_json = {**responses, "status": "submitted"}
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert response.json() == {"detail": expected_error_msg}
@@ -366,7 +367,7 @@ async def test_create_record_response_without_authentication(client: TestClient,
 @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
 @pytest.mark.asyncio
 async def test_create_record_response(
-    client: TestClient, db: "AsyncSession", admin: User, admin_auth_header: dict, status: str
+    client: TestClient, db: "AsyncSession", owner: User, owner_auth_header: dict, status: str
 ):
     dataset = await DatasetFactory.create()
     await TextQuestionFactory.create(name="input_ok", dataset=dataset)
@@ -381,7 +382,7 @@ async def test_create_record_response(
         "status": status,
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 201
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
@@ -395,7 +396,7 @@ async def test_create_record_response(
             "output_ok": {"value": "yes"},
         },
         "status": status,
-        "user_id": str(admin.id),
+        "user_id": str(owner.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
@@ -409,8 +410,8 @@ async def test_create_record_response(
 async def test_create_record_response_without_values(
     client: TestClient,
     db: "AsyncSession",
-    admin: User,
-    admin_auth_header: dict,
+    owner: User,
+    owner_auth_header: dict,
     status: str,
     expected_status_code: int,
     expected_response_count: int,
@@ -418,7 +419,7 @@ async def test_create_record_response_without_values(
     record = await RecordFactory.create()
     response_json = {"status": status}
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == expected_status_code
     assert (await db.execute(select(func.count(Response.id)))).scalar() == expected_response_count
@@ -430,7 +431,7 @@ async def test_create_record_response_without_values(
             "id": str(UUID(response_body["id"])),
             "values": None,
             "status": "discarded",
-            "user_id": str(admin.id),
+            "user_id": str(owner.id),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
@@ -439,26 +440,27 @@ async def test_create_record_response_without_values(
 @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
 @pytest.mark.asyncio
 async def test_create_record_submitted_response_with_wrong_values(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict, status: str
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict, status: str
 ):
     record = await RecordFactory.create()
     response_json = {"status": status, "values": {"wrong_question": {"value": "wrong value"}}}
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
 @pytest.mark.asyncio
-async def test_create_record_response_as_annotator(client: TestClient, db: "AsyncSession"):
+async def test_create_record_response_for_user_role(client: TestClient, db: Session, role: UserRole):
     dataset = await DatasetFactory.create()
     await TextQuestionFactory.create(name="input_ok", dataset=dataset)
     await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
     record = await RecordFactory.create(dataset=dataset)
-    annotator = await AnnotatorFactory.create(workspaces=[record.dataset.workspace])
+    user = await UserFactory.create(workspaces=[record.dataset.workspace], role=role)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
@@ -468,7 +470,7 @@ async def test_create_record_response_as_annotator(client: TestClient, db: "Asyn
     }
 
     response = client.post(
-        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=response_json
+        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: user.api_key}, json=response_json
     )
 
     assert response.status_code == 201
@@ -482,17 +484,19 @@ async def test_create_record_response_as_annotator(client: TestClient, db: "Asyn
             "output_ok": {"value": "yes"},
         },
         "status": "submitted",
-        "user_id": str(annotator.id),
+        "user_id": str(user.id),
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
 
 
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
 @pytest.mark.asyncio
-async def test_create_record_response_as_annotator_from_different_workspace(client: TestClient, db: "AsyncSession"):
+async def test_create_record_response_as_restricted_user_from_different_workspace(
+    client: TestClient, db: Session, role: UserRole
+):
     record = await RecordFactory.create()
-    workspace = await WorkspaceFactory.create()
-    annotator = await AnnotatorFactory.create(workspaces=[workspace])
+    user = await UserFactory.create(workspaces=[WorkspaceFactory.build()], role=role)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
@@ -502,7 +506,7 @@ async def test_create_record_response_as_annotator_from_different_workspace(clie
     }
 
     response = client.post(
-        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=response_json
+        f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: user.api_key}, json=response_json
     )
 
     assert response.status_code == 403
@@ -511,10 +515,10 @@ async def test_create_record_response_as_annotator_from_different_workspace(clie
 
 @pytest.mark.asyncio
 async def test_create_record_response_already_created(
-    client: TestClient, db: "AsyncSession", admin: User, admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner: User, owner_auth_header: dict
 ):
     record = await RecordFactory.create()
-    await ResponseFactory.create(record=record, user=admin)
+    await ResponseFactory.create(record=record, user=owner)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},
@@ -523,7 +527,7 @@ async def test_create_record_response_already_created(
         "status": "submitted",
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 409
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
@@ -531,7 +535,7 @@ async def test_create_record_response_already_created(
 
 @pytest.mark.asyncio
 async def test_create_record_response_with_invalid_values(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     record = await RecordFactory.create()
     response_json = {
@@ -539,7 +543,7 @@ async def test_create_record_response_with_invalid_values(
         "status": "submitted",
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
@@ -547,7 +551,7 @@ async def test_create_record_response_with_invalid_values(
 
 @pytest.mark.asyncio
 async def test_create_record_response_with_invalid_status(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     record = await RecordFactory.create()
     response_json = {
@@ -558,7 +562,7 @@ async def test_create_record_response_with_invalid_status(
         "status": "invalid",
     }
 
-    response = client.post(f"/api/v1/records/{record.id}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
@@ -566,7 +570,7 @@ async def test_create_record_response_with_invalid_status(
 
 @pytest.mark.asyncio
 async def test_create_record_response_with_nonexistent_record_id(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     await RecordFactory.create()
     response_json = {
@@ -577,7 +581,7 @@ async def test_create_record_response_with_nonexistent_record_id(
         "status": "submitted",
     }
 
-    response = client.post(f"/api/v1/records/{uuid4()}/responses", headers=admin_auth_header, json=response_json)
+    response = client.post(f"/api/v1/records/{uuid4()}/responses", headers=owner_auth_header, json=response_json)
 
     assert response.status_code == 404
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0

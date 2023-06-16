@@ -18,17 +18,20 @@ from uuid import uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import DatasetStatus, Response, ResponseStatus
+from argilla.server.models import DatasetStatus, Response, ResponseStatus, UserRole
 from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
 from tests.factories import (
+    AdminFactory,
     AnnotatorFactory,
     DatasetFactory,
     RecordFactory,
     ResponseFactory,
     TextQuestionFactory,
+    UserFactory,
+    WorkspaceFactory,
 )
 
 if TYPE_CHECKING:
@@ -37,7 +40,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.asyncio
 async def test_update_response(
-    client: TestClient, db: "AsyncSession", mock_search_engine: SearchEngine, admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
 ):
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     await TextQuestionFactory.create(name="input_ok", dataset=dataset)
@@ -54,7 +57,7 @@ async def test_update_response(
         "status": "submitted",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 200
     assert (await db.get(Response, response.id)).values == {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
@@ -101,7 +104,7 @@ async def test_update_response_without_authentication(client: TestClient, db: "A
 
 @pytest.mark.asyncio
 async def test_update_response_from_submitted_to_discarded(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     await TextQuestionFactory.create(name="input_ok", dataset=dataset)
@@ -124,7 +127,7 @@ async def test_update_response_from_submitted_to_discarded(
         "status": "discarded",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 200
 
@@ -152,7 +155,7 @@ async def test_update_response_from_submitted_to_discarded(
 
 @pytest.mark.asyncio
 async def test_update_response_from_submitted_to_discarded_without_values(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     response = await ResponseFactory.create(
         values={
@@ -165,7 +168,7 @@ async def test_update_response_from_submitted_to_discarded_without_values(
         "status": "discarded",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 200
 
@@ -187,14 +190,14 @@ async def test_update_response_from_submitted_to_discarded_without_values(
 
 @pytest.mark.asyncio
 async def test_update_response_from_discarded_to_submitted(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     response = await ResponseFactory.create(status="discarded")
     response_json = {
         "status": "submitted",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 422
 
@@ -218,11 +221,11 @@ async def test_update_response_from_discarded_to_submitted_without_values(
 
 
 @pytest.mark.asyncio
-async def test_update_response_with_wrong_values(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+async def test_update_response_with_wrong_values(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     response = await ResponseFactory.create(status="discarded")
     response_json = {"status": "submitted", "values": {"wrong_question": {"value": "wrong value"}}}
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 422
     assert resp.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
@@ -313,7 +316,7 @@ async def test_update_response_as_annotator_for_different_user_response(client: 
 
 @pytest.mark.asyncio
 async def test_update_response_with_nonexistent_response_id(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     response = await ResponseFactory.create(
         values={
@@ -330,7 +333,7 @@ async def test_update_response_with_nonexistent_response_id(
         "status": "submitted",
     }
 
-    resp = client.put(f"/api/v1/responses/{uuid4()}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{uuid4()}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 404
     assert (await db.get(Response, response.id)).values == {
@@ -341,11 +344,11 @@ async def test_update_response_with_nonexistent_response_id(
 
 @pytest.mark.asyncio
 async def test_delete_response(
-    client: TestClient, mock_search_engine: SearchEngine, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
 ):
     response = await ResponseFactory.create()
 
-    resp = client.delete(f"/api/v1/responses/{response.id}", headers=admin_auth_header)
+    resp = client.delete(f"/api/v1/responses/{response.id}", headers=owner_auth_header)
 
     assert resp.status_code == 200
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
@@ -363,12 +366,27 @@ async def test_delete_response_without_authentication(client: TestClient, db: "A
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
 
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
 @pytest.mark.asyncio
-async def test_delete_response_as_annotator(client: TestClient, db: "AsyncSession"):
-    annotator = await AnnotatorFactory.create()
-    response = await ResponseFactory.create(user=annotator)
+async def test_delete_response_as_restricted_user(client: TestClient, db: "AsyncSession", role: UserRole):
+    user = await UserFactory.create(role=role)
+    response = await ResponseFactory.create(user=user)
 
-    resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+
+    assert resp.status_code == 200
+    assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
+
+
+@pytest.mark.asyncio
+async def test_delete_response_as_admin_for_different_user_response(client: TestClient, db: "AsyncSession"):
+    workspace = await WorkspaceFactory.create()
+    admin = await AdminFactory.create(workspaces=[workspace])
+    dataset = await DatasetFactory.create(workspace=workspace)
+    record = await RecordFactory.create(dataset=dataset)
+    response = await ResponseFactory.create(record=record)
+
+    resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: admin.api_key})
 
     assert resp.status_code == 200
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
@@ -387,11 +405,11 @@ async def test_delete_response_as_annotator_for_different_user_response(client: 
 
 @pytest.mark.asyncio
 async def test_delete_response_with_nonexistent_response_id(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     await ResponseFactory.create()
 
-    resp = client.delete(f"/api/v1/responses/{uuid4()}", headers=admin_auth_header)
+    resp = client.delete(f"/api/v1/responses/{uuid4()}", headers=owner_auth_header)
 
     assert resp.status_code == 404
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1

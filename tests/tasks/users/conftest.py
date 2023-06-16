@@ -25,5 +25,6 @@ if TYPE_CHECKING:
 def mock_session_local(mocker: "MockerFixture", sync_db: "Session") -> None:
     sync_db.close = mocker.MagicMock()
     mocker.patch("argilla.tasks.users.create.SessionLocal", return_value=sync_db)
+    mocker.patch("argilla.tasks.users.update.SessionLocal", return_value=sync_db)
     mocker.patch("argilla.tasks.users.create_default.SessionLocal", return_value=sync_db)
     mocker.patch("argilla.tasks.users.migrate.SessionLocal", return_value=sync_db)

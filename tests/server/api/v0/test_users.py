@@ -24,6 +24,7 @@ from sqlalchemy import func, select
 from tests.factories import (
     AdminFactory,
     AnnotatorFactory,
+    OwnerFactory,
     UserFactory,
     WorkspaceFactory,
     WorkspaceUserFactory,
@@ -33,13 +34,13 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-def test_me(client: TestClient, admin: User, admin_auth_header: dict):
-    response = client.get("/api/me", headers=admin_auth_header)
+def test_me(client: TestClient, owner, owner_auth_header):
+    response = client.get("/api/me", headers=owner_auth_header)
 
     assert response.status_code == 200
 
     response_body = response.json()
-    assert response_body["id"] == str(admin.id)
+    assert response_body["id"] == str(owner.id)
 
 
 def test_me_without_authentication(client: TestClient):
@@ -49,10 +50,26 @@ def test_me_without_authentication(client: TestClient):
 
 
 @pytest.mark.asyncio
+async def test_me_as_owner(client: TestClient, db: "AsyncSession"):
+    owner = await OwnerFactory.create(
+        workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
+    )
+    await WorkspaceFactory.create(name="workspace-c")
+
+    response = client.get("/api/me", headers={API_KEY_HEADER_NAME: owner.api_key})
+
+    assert response.status_code == 200
+
+    response_body = response.json()
+    assert response_body["id"] == str(owner.id)
+    assert response_body["workspaces"] == ["workspace-a", "workspace-b", "workspace-c"]
+
+
+@pytest.mark.asyncio
 async def test_me_as_admin(client: TestClient, db: "AsyncSession"):
     workspace_a = await WorkspaceFactory.create(name="workspace-a")
     workspace_b = await WorkspaceFactory.create(name="workspace-b")
-    admin = await AdminFactory.create(workspaces=[workspace_a, workspace_b])
+    admin = AdminFactory.create(workspaces=[workspace_a, workspace_b])
     await WorkspaceFactory.create(name="workspace-c")
 
     response = client.get("/api/me", headers={API_KEY_HEADER_NAME: admin.api_key})
@@ -61,7 +78,7 @@ async def test_me_as_admin(client: TestClient, db: "AsyncSession"):
 
     response_body = response.json()
     assert response_body["id"] == str(admin.id)
-    assert response_body["workspaces"] == ["workspace-a", "workspace-b", "workspace-c"]
+    assert response_body["workspaces"] == ["workspace-a", "workspace-b"]
 
 
 @pytest.mark.asyncio
@@ -81,16 +98,16 @@ async def test_me_as_annotator(client: TestClient, db: "AsyncSession"):
 
 
 @pytest.mark.asyncio
-async def test_list_users(client: TestClient, admin_auth_header: dict):
+async def test_list_users(client: TestClient, owner_auth_header: dict):
     await UserFactory.create(username="username-a")
     await UserFactory.create(username="username-b")
 
-    response = client.get("/api/users", headers=admin_auth_header)
+    response = client.get("/api/users", headers=owner_auth_header)
 
     assert response.status_code == 200
 
     response_body = response.json()
-    assert list(map(lambda user: user["username"], response_body)) == ["admin", "username-a", "username-b"]
+    assert list(map(lambda user: user["username"], response_body)) == ["owner", "username-a", "username-b"]
 
 
 def test_list_users_without_authentication(client: TestClient):
@@ -100,7 +117,16 @@ def test_list_users_without_authentication(client: TestClient):
 
 
 @pytest.mark.asyncio
-async def test_list_users_as_annotator(client: TestClient):
+async def test_list_users_as_admin(client: TestClient, db: "AsyncSession"):
+    admin = await AdminFactory.create()
+
+    response = client.get("/api/users", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_list_users_as_annotator(client: TestClient, db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
 
     response = client.get("/api/users", headers={API_KEY_HEADER_NAME: annotator.api_key})
@@ -109,10 +135,10 @@ async def test_list_users_as_annotator(client: TestClient):
 
 
 @pytest.mark.asyncio
-async def test_create_user(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+async def test_create_user(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 200
     assert (await db.execute(select(func.count(User.id)))).scalar() == 2
@@ -127,10 +153,10 @@ async def test_create_user(client: TestClient, db: "AsyncSession", admin_auth_he
 
 
 @pytest.mark.asyncio
-async def test_create_user_with_non_default_role(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
-    user = {"first_name": "first-name", "username": "username", "password": "12345678", "role": UserRole.admin.value}
+async def test_create_user_with_non_default_role(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
+    user = {"first_name": "first-name", "username": "username", "password": "12345678", "role": UserRole.owner.value}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 200
     assert (await db.execute(select(func.count(User.id)))).scalar() == 2
@@ -140,7 +166,7 @@ async def test_create_user_with_non_default_role(client: TestClient, db: "AsyncS
 
     response_body = response.json()
     assert response_body["username"] == "username"
-    assert response_body["role"] == UserRole.admin.value
+    assert response_body["role"] == UserRole.owner.value
 
 
 @pytest.mark.asyncio
@@ -154,8 +180,19 @@ async def test_create_user_without_authentication(client: TestClient, db: "Async
 
 
 @pytest.mark.asyncio
+async def test_create_user_as_admin(client: TestClient, db: "AsyncSession"):
+    admin = AdminFactory.create()
+    user = {"first_name": "first-name", "username": "username", "password": "12345678"}
+
+    response = client.post("/api/users", headers={API_KEY_HEADER_NAME: admin.api_key}, json=user)
+
+    assert response.status_code == 403
+    assert db.query(User).count() == 1
+
+
+@pytest.mark.asyncio
 async def test_create_user_as_annotator(client: TestClient, db: "AsyncSession"):
-    annotator = await AnnotatorFactory.create()
+    annotator = AnnotatorFactory.create()
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
     response = client.post("/api/users", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=user)
@@ -165,11 +202,11 @@ async def test_create_user_as_annotator(client: TestClient, db: "AsyncSession"):
 
 
 @pytest.mark.asyncio
-async def test_create_user_with_existent_username(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+async def test_create_user_with_existent_username(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     await UserFactory.create(username="username")
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 409
     assert (await db.execute(select(func.count(User.id)))).scalar() == 2
@@ -177,43 +214,41 @@ async def test_create_user_with_existent_username(client: TestClient, db: "Async
 
 @pytest.mark.asyncio
 async def test_create_user_with_invalid_min_length_first_name(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     user = {"first_name": "", "username": "username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
 @pytest.mark.asyncio
-async def test_create_user_with_invalid_min_length_last_name(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
-):
+async def test_create_user_with_invalid_min_length_last_name(client: TestClient, db: "AsyncSession", owner_auth_header):
     user = {"first_name": "first-name", "last_name": "", "username": "username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
 @pytest.mark.asyncio
-async def test_create_user_with_invalid_username(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+async def test_create_user_with_invalid_username(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     user = {"first_name": "first-name", "username": "invalid username", "password": "12345678"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
 @pytest.mark.asyncio
-async def test_create_user_with_invalid_role(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+async def test_create_user_with_invalid_role(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     user = {"first_name": "first-name", "username": "username", "password": "12345678", "role": "invalid role"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
@@ -221,11 +256,11 @@ async def test_create_user_with_invalid_role(client: TestClient, db: "AsyncSessi
 
 @pytest.mark.asyncio
 async def test_create_user_with_invalid_min_password_length(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     user = {"first_name": "first-name", "username": "username", "password": "1234"}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
@@ -233,21 +268,21 @@ async def test_create_user_with_invalid_min_password_length(
 
 @pytest.mark.asyncio
 async def test_create_user_with_invalid_max_password_length(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     user = {"first_name": "first-name", "username": "username", "password": "p" * 101}
 
-    response = client.post("/api/users", headers=admin_auth_header, json=user)
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
 @pytest.mark.asyncio
-async def test_delete_user(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
+async def test_delete_user(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     user = await UserFactory.create()
 
-    response = client.delete(f"/api/users/{user.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/users/{user.id}", headers=owner_auth_header)
 
     assert response.status_code == 200
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
@@ -267,6 +302,17 @@ async def test_delete_user_without_authentication(client: TestClient, db: "Async
 
 
 @pytest.mark.asyncio
+async def test_delete_user_as_admin(client: TestClient, db: "AsyncSession"):
+    admin = await AdminFactory.create()
+    user = await UserFactory.create()
+
+    response = client.delete(f"/api/users/{user.id}", headers={API_KEY_HEADER_NAME: admin.api_key})
+
+    assert response.status_code == 403
+    assert (await db.execute(select(func.count(User.id)))).scalar() == 2
+
+
+@pytest.mark.asyncio
 async def test_delete_user_as_annotator(client: TestClient, db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     user = await UserFactory.create()
@@ -278,8 +324,8 @@ async def test_delete_user_as_annotator(client: TestClient, db: "AsyncSession"):
 
 
 @pytest.mark.asyncio
-async def test_delete_user_with_nonexistent_user_id(client: TestClient, db: "AsyncSession", admin_auth_header: dict):
-    response = client.delete(f"/api/users/{uuid4()}", headers=admin_auth_header)
+async def test_delete_user_with_nonexistent_user_id(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
+    response = client.delete(f"/api/users/{uuid4()}", headers=owner_auth_header)
 
     assert response.status_code == 404
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1

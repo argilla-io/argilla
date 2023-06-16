@@ -87,13 +87,13 @@ if TYPE_CHECKING:
 async def test_delete_question(
     client: TestClient,
     db: "AsyncSession",
-    admin_auth_header: dict,
+    owner_auth_header: dict,
     QuestionFactory: Type["QuestionFactoryType"],
     expected_settings: dict,
 ):
     question = await QuestionFactory.create(name="name", title="title", description="description")
 
-    response = client.delete(f"/api/v1/questions/{question.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/questions/{question.id}", headers=owner_auth_header)
 
     assert response.status_code == 200
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
@@ -135,12 +135,12 @@ async def test_delete_question_as_annotator(client: TestClient, db: "AsyncSessio
 
 @pytest.mark.asyncio
 async def test_delete_question_belonging_to_published_dataset(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     question = await TextQuestionFactory.create(dataset=dataset)
 
-    response = client.delete(f"/api/v1/questions/{question.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/questions/{question.id}", headers=owner_auth_header)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Questions cannot be deleted for a published dataset"}
@@ -149,11 +149,11 @@ async def test_delete_question_belonging_to_published_dataset(
 
 @pytest.mark.asyncio
 async def test_delete_question_with_nonexistent_question_id(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     await TextQuestionFactory.create()
 
-    response = client.delete(f"/api/v1/questions/{uuid4()}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/questions/{uuid4()}", headers=owner_auth_header)
 
     assert response.status_code == 404
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1

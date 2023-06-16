@@ -93,14 +93,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$sidebar-button-size: 45px;
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: 1em;
   top: 0;
-  width: $sidebar-button-size;
-  min-width: $sidebar-button-size;
+  width: 45px;
   min-height: calc(100vh - $topbarHeight);
   min-width: $sidebarMenuWidth;
   background: palette(grey, 700);

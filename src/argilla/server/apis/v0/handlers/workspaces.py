@@ -90,7 +90,7 @@ async def list_workspace_users(
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, WorkspaceUserPolicy.list)
+    await authorize(current_user, WorkspaceUserPolicy.list(workspace_id))
 
     workspace = await accounts.get_workspace_by_id(db, workspace_id)
     if not workspace:

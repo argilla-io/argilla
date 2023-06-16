@@ -192,6 +192,10 @@ class UserFactory(BaseFactory):
     password_hash = "$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw."
 
 
+class OwnerFactory(UserFactory):
+    role = UserRole.owner
+
+
 class AdminFactory(UserFactory):
     role = UserRole.admin
 

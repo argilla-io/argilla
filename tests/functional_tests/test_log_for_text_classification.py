@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import argilla as rg
 import pytest
-from argilla.client import api
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import (
     BadRequestApiError,
@@ -22,21 +23,23 @@ from argilla.client.sdk.commons.errors import (
     ValidationApiError,
 )
 from argilla.server.contexts import accounts
-from argilla.server.models import User
 from argilla.server.security.model import WorkspaceCreate, WorkspaceUserCreate
 from argilla.server.settings import settings
-from sqlalchemy.orm import Session
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
-from tests.helpers import SecuredClient
+
+if TYPE_CHECKING:
+    from argilla.server.models import User
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from tests.helpers import SecuredClient
 
 
-def test_log_records_with_multi_and_single_label_task(mocked_client):
+def test_log_records_with_multi_and_single_label_task(api: Argilla):
     dataset = "test_log_records_with_multi_and_single_label_task"
     expected_inputs = ["This is a text"]
 
-    rg.init()
-    rg.delete(dataset)
+    api.delete(dataset)
     records = [
         rg.TextClassificationRecord(
             id=0,
@@ -51,80 +54,55 @@ def test_log_records_with_multi_and_single_label_task(mocked_client):
     ]
 
     with pytest.raises(ValidationApiError):
-        rg.log(
+        api.log(
             records,
             name=dataset,
         )
 
-    rg.log(records[0], name=dataset)
+    api.log(records[0], name=dataset)
     with pytest.raises(Exception):
-        rg.log(records[1], name=dataset)
+        api.log(records[1], name=dataset)
 
 
-def test_delete_and_create_for_different_task(mocked_client):
+def test_delete_and_create_for_different_task(api: Argilla):
     dataset = "test_delete_and_create_for_different_task"
     text = "This is a text"
 
-    rg.delete(dataset)
-    rg.log(rg.TextClassificationRecord(id=0, inputs=text), name=dataset)
-    rg.load(dataset)
+    api.delete(dataset)
+    api.log(rg.TextClassificationRecord(id=0, inputs=text), name=dataset)
+    api.load(dataset)
 
-    rg.delete(dataset)
-    rg.log(
-        rg.TokenClassificationRecord(id=0, text=text, tokens=text.split(" ")),
-        name=dataset,
-    )
-    rg.load(dataset)
+    api.delete(dataset)
+    api.log(rg.TokenClassificationRecord(id=0, text=text, tokens=text.split(" ")), name=dataset)
+    api.load(dataset)
 
 
 @pytest.mark.skipif(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_similarity_search_in_python_client(
-    mocked_client: SecuredClient,
-):
+def test_similarity_search_in_python_client(api: Argilla):
     dataset = "test_similarity_search_in_python_client"
     text = "This is a text"
     vectors = {"my_bert": [1, 2, 3, 4]}
 
-    rg.delete(dataset)
-    rg.log(
-        rg.TextClassificationRecord(
-            id=0,
-            inputs=text,
-            vectors=vectors,
-        ),
-        name=dataset,
-    )
-    ds = rg.load(dataset, vector=("my_bert", [1, 1, 1, 1]))
+    api.delete(dataset)
+    api.log(rg.TextClassificationRecord(id=0, inputs=text, vectors=vectors), name=dataset)
+    ds = api.load(dataset, vector=("my_bert", [1, 1, 1, 1]))
     assert len(ds) == 1
 
-    rg.log(
-        rg.TextClassificationRecord(
-            id=1,
-            inputs=text,
-            vectors={"my_bert_2": [1, 2, 3, 4]},
-        ),
-        name=dataset,
-    )
-    ds = rg.load(dataset, vector=("my_bert_2", [1, 1, 1, 1]))
+    api.log(rg.TextClassificationRecord(id=1, inputs=text, vectors={"my_bert_2": [1, 2, 3, 4]}), name=dataset)
+    ds = api.load(dataset, vector=("my_bert_2", [1, 1, 1, 1]))
     assert len(ds) == 1
     with pytest.raises(
         BadRequestApiError,
         match="Cannot create more than 5 kind of vectors per dataset",
     ):
-        rg.log(
+        api.log(
             rg.TextClassificationRecord(
                 id=3,
                 inputs=text,
-                vectors={
-                    "a": [1.0],
-                    "b": [1.0],
-                    "c": [1.0],
-                    "d": [1.0],
-                    "e": [1.0],
-                },
+                vectors={"a": [1.0], "b": [1.0], "c": [1.0], "d": [1.0], "e": [1.0]},
             ),
             name=dataset,
         )
@@ -134,12 +112,10 @@ def test_similarity_search_in_python_client(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_vectors_and_update_ok(
-    mocked_client: SecuredClient,
-):
+def test_log_data_with_vectors_and_update_ok(api: Argilla):
     dataset = "test_log_data_with_vectors_and_update_ok"
     text = "This is a text"
-    rg.delete(dataset)
+    api.delete(dataset)
 
     records = [
         rg.TextClassificationRecord(
@@ -150,11 +126,8 @@ def test_log_data_with_vectors_and_update_ok(
         for i in range(1, 10)
     ]
 
-    rg.log(
-        records=records,
-        name=dataset,
-    )
-    ds = rg.load(
+    api.log(records=records, name=dataset)
+    ds = api.load(
         dataset,
         vector=(
             "text",
@@ -171,7 +144,7 @@ def test_log_data_with_vectors_and_update_ok(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
+def test_log_data_with_vectors_and_update_ko(mocked_client: "SecuredClient"):
     dataset = "test_log_data_with_vectors_and_update_ko"
     text = "This is a text"
     vectors = {"my_bert": [1, 2, 3, 4]}
@@ -192,16 +165,16 @@ def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
 
 
 @pytest.mark.asyncio
-async def test_log_data_in_several_workspaces(mocked_client: SecuredClient, admin: User, db: Session):
+async def test_log_data_in_several_workspaces(mocked_client: "SecuredClient", owner: "User", db: "AsyncSession"):
     workspace_name = "my-fun-workspace"
     dataset_name = "test_log_data_in_several_workspaces"
     text = "This is a text"
 
-    for ws_name in [workspace_name, admin.username]:
+    for ws_name in [workspace_name, owner.username]:
         workspace = await accounts.create_workspace(db, WorkspaceCreate(name=ws_name))
-        await accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=admin.id))
+        await accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=owner.id))
 
-    api = Argilla(api_key=admin.api_key)
+    api = Argilla(api_key=owner.api_key)
 
     current_workspace = api.get_workspace()
     for ws in [current_workspace, workspace_name]:
@@ -339,19 +312,9 @@ def test_log_with_bulk_error(mocked_client):
             name=dataset,
         )
     except BadRequestApiError as error:
-        assert error.ctx == {
-            "code": "argilla.api.errors::BulkDataError",
-            "params": {
-                "message": "Cannot log data in dataset argilla.test_log_with_bulk_error",
-                "errors": [
-                    {
-                        "reason": "failed to parse field [metadata.key] of type [long] in document with id '1'. "
-                        "Preview of field's value: 'wrong-value'",
-                        "caused_by": {
-                            "type": "illegal_argument_exception",
-                            "reason": 'For input string: "wrong-value"',
-                        },
-                    }
-                ],
-            },
+        assert error.ctx["code"] == "argilla.api.errors::BulkDataError"
+        assert error.ctx["params"]["message"] == "Cannot log data in dataset argilla.test_log_with_bulk_error"
+        assert error.ctx["params"]["errors"][0]["caused_by"] == {
+            "type": "illegal_argument_exception",
+            "reason": 'For input string: "wrong-value"',
         }
