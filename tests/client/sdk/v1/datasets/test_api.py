@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import pytest
 from argilla._constants import DEFAULT_API_KEY
 from argilla.client.sdk.client import AuthenticatedClient
@@ -36,22 +38,27 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackRecordsModel,
 )
 
+if TYPE_CHECKING:
+    from tests.helpers import SecuredClient
+
 
 @pytest.fixture
-def sdk_client():
+def sdk_client() -> AuthenticatedClient:
     return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY).httpx
 
 
-def test_list_datasets(mocked_client, sdk_client, monkeypatch) -> None:
+def test_list_datasets(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "get", mocked_client.get)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
 
     response = list_datasets(client=sdk_client)
@@ -61,16 +68,18 @@ def test_list_datasets(mocked_client, sdk_client, monkeypatch) -> None:
     assert isinstance(response.parsed[0], FeedbackDatasetModel)
 
 
-def test_get_datasets(mocked_client, sdk_client, monkeypatch) -> None:
+def test_get_datasets(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "get", mocked_client.get)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -80,11 +89,13 @@ def test_get_datasets(mocked_client, sdk_client, monkeypatch) -> None:
     assert response.parsed.name == dataset_name
 
 
-def test_create_dataset(mocked_client, sdk_client, monkeypatch) -> None:
+def test_create_dataset(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "post", mocked_client.post)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
@@ -94,16 +105,18 @@ def test_create_dataset(mocked_client, sdk_client, monkeypatch) -> None:
     assert response.parsed.name == dataset_name
 
 
-def test_delete_dataset(mocked_client, sdk_client, monkeypatch) -> None:
+def test_delete_dataset(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "delete", mocked_client.delete)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -115,16 +128,18 @@ def test_delete_dataset(mocked_client, sdk_client, monkeypatch) -> None:
     assert len(mocked_response.json()["items"]) < 1
 
 
-def test_publish_dataset(mocked_client, sdk_client, monkeypatch) -> None:
+def test_publish_dataset(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "put", mocked_client.put)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -150,16 +165,18 @@ def test_publish_dataset(mocked_client, sdk_client, monkeypatch) -> None:
     assert response.parsed.status == "ready"
 
 
-def test_add_field(mocked_client, sdk_client, monkeypatch) -> None:
+def test_add_field(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "post", mocked_client.post)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -171,16 +188,18 @@ def test_add_field(mocked_client, sdk_client, monkeypatch) -> None:
     assert response.status_code == 201
 
 
-def test_get_fields(mocked_client, sdk_client, monkeypatch) -> None:
+def test_get_fields(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "get", mocked_client.get)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -196,16 +215,18 @@ def test_get_fields(mocked_client, sdk_client, monkeypatch) -> None:
     assert isinstance(response.parsed[0], FeedbackFieldModel)
 
 
-def test_add_question(mocked_client, sdk_client, monkeypatch) -> None:
+def test_add_question(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "post", mocked_client.post)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -223,16 +244,18 @@ def test_add_question(mocked_client, sdk_client, monkeypatch) -> None:
     assert response.status_code == 201
 
 
-def test_get_questions(mocked_client, sdk_client, monkeypatch) -> None:
+def test_get_questions(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "get", mocked_client.get)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -254,16 +277,18 @@ def test_get_questions(mocked_client, sdk_client, monkeypatch) -> None:
     assert isinstance(response.parsed[0], FeedbackQuestionModel)
 
 
-def test_add_records(mocked_client, sdk_client, monkeypatch) -> None:
+def test_add_records(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "post", mocked_client.post)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -283,20 +308,26 @@ def test_add_records(mocked_client, sdk_client, monkeypatch) -> None:
     )
     mocked_client.put(f"/api/v1/datasets/{dataset_id}/publish")
 
-    response = add_records(client=sdk_client, id=dataset_id, records=[{"fields": {"test_field": "test_value"}}])
+    response = add_records(
+        client=sdk_client,
+        id=dataset_id,
+        records=[{"fields": {"test_field": "test_value"}, "metadata": {"unit": "test"}}],
+    )
     assert response.status_code == 204
 
 
-def test_get_records(mocked_client, sdk_client, monkeypatch) -> None:
+def test_get_records(
+    mocked_client: "SecuredClient", sdk_client: AuthenticatedClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(sdk_client, "get", mocked_client.get)
 
     workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
+    mocked_response = mocked_client.post("/api/workspaces", json={"name": workspace_name})
     workspace_id = mocked_response.json()["id"]
 
     dataset_name = "test_dataset"
     mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+        "/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
     )
     dataset_id = mocked_response.json()["id"]
 
@@ -316,7 +347,8 @@ def test_get_records(mocked_client, sdk_client, monkeypatch) -> None:
     )
     mocked_client.put(f"/api/v1/datasets/{dataset_id}/publish")
     mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/records", json={"items": [{"fields": {"test_field": "test_value"}}]}
+        f"/api/v1/datasets/{dataset_id}/records",
+        json={"items": [{"fields": {"test_field": "test_value"}, "metadata": {"unit": "test"}}]},
     )
 
     response = get_records(client=sdk_client, id=dataset_id)
