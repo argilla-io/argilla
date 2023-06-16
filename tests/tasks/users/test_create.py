@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import pytest
 from argilla.server.contexts import accounts
 from argilla.server.models import User, UserRole, Workspace
 from click.testing import CliRunner
@@ -21,10 +21,12 @@ from typer import Typer
 from tests.factories import UserFactory, WorkspaceFactory
 
 
-def test_create(db: Session, cli_runner: CliRunner, cli: Typer):
+@pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
+def test_create(db: Session, cli_runner: CliRunner, cli: Typer, role_string: str):
     result = cli_runner.invoke(
         cli,
-        "users create --first-name first-name --username username --role admin --password 12345678 --workspace workspace",
+        f"users create --first-name first-name --username username --role {role_string} "
+        "--password 12345678 --workspace workspace",
     )
 
     assert result.exit_code == 0
@@ -35,7 +37,7 @@ def test_create(db: Session, cli_runner: CliRunner, cli: Typer):
     assert user
     assert user.first_name == "first-name"
     assert user.username == "username"
-    assert user.role.value == UserRole.admin.value
+    assert user.role.value == UserRole(role_string).value
     assert accounts.verify_password("12345678", user.password_hash)
     assert user.api_key
     assert [ws.name for ws in user.workspaces] == ["workspace"]
@@ -57,11 +59,12 @@ def test_create_with_default_role(db: Session, cli_runner: CliRunner, cli: Typer
     assert user.role == UserRole.annotator
 
 
-def test_create_with_input_role(db: Session, cli_runner: CliRunner, cli: Typer):
+@pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
+def test_create_with_input_role(db: Session, cli_runner: CliRunner, cli: Typer, role_string: str):
     result = cli_runner.invoke(
         cli,
         "users create --first-name first-name --username username --password 12345678",
-        input="admin\n",
+        input=f"{role_string}\n",
     )
 
     assert result.exit_code == 0
@@ -70,13 +73,25 @@ def test_create_with_input_role(db: Session, cli_runner: CliRunner, cli: Typer):
 
     user = db.query(User).filter_by(username="username").first()
     assert user
-    assert user.role.value == UserRole.admin.value
+    assert user.role.value == UserRole(role_string).value
+
+
+def test_create_with_invalid_role(db: Session, cli_runner: CliRunner, cli: Typer):
+    result = cli_runner.invoke(
+        cli,
+        "users create --first-name first-name --username username --role bad_role "
+        "--password 12345678 --workspace workspace",
+    )
+
+    assert result.exit_code == 2
+    assert db.query(User).count() == 0
+    assert db.query(Workspace).count() == 0
 
 
 def test_create_with_input_password(db: Session, cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "users create --first-name first-name --username username --role admin",
+        "users create --first-name first-name --username username --role owner",
         input="12345678\n12345678\n",
     )
 
@@ -91,7 +106,7 @@ def test_create_with_input_password(db: Session, cli_runner: CliRunner, cli: Typ
 
 def test_create_with_invalid_password(db: Session, cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
-        cli, "users create --first-name first-name --username username --password 1234 --role admin"
+        cli, "users create --first-name first-name --username username --password 1234 --role owner"
     )
 
     assert result.exit_code == 1
@@ -111,7 +126,7 @@ def test_create_with_input_username(db: Session, cli_runner: CliRunner, cli: Typ
 
 def test_create_with_invalid_username(db: Session, cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
-        cli, "users create --first-name first-name --username Invalid-Username --password 12345678 --role admin"
+        cli, "users create --first-name first-name --username Invalid-Username --password 12345678 --role owner"
     )
 
     assert result.exit_code == 1
@@ -123,7 +138,7 @@ def test_create_with_existing_username(db: Session, cli_runner: CliRunner, cli: 
     UserFactory.create(username="username")
 
     result = cli_runner.invoke(
-        cli, "users create --first-name first-name --username username --role admin --password 12345678"
+        cli, "users create --first-name first-name --username username --role owner --password 12345678"
     )
 
     assert result.exit_code == 0
@@ -135,7 +150,7 @@ def test_create_with_existing_username(db: Session, cli_runner: CliRunner, cli: 
 def test_create_with_last_name(db: Session, cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "users create --first-name first-name --last-name last-name --username username --password 12345678 --role admin",
+        "users create --first-name first-name --last-name last-name --username username --password 12345678 --role owner",
     )
 
     assert result.exit_code == 0
@@ -150,7 +165,7 @@ def test_create_with_last_name(db: Session, cli_runner: CliRunner, cli: Typer):
 def test_create_with_api_key(db: Session, cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "users create --first-name first-name --username username --role admin --password 12345678 --api-key abcdefgh",
+        "users create --first-name first-name --username username --role owner --password 12345678 --api-key abcdefgh",
     )
 
     assert result.exit_code == 0
@@ -164,7 +179,7 @@ def test_create_with_api_key(db: Session, cli_runner: CliRunner, cli: Typer):
 
 def test_create_with_invalid_api_key(db: Session, cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
-        cli, "users create --first-name first-name --username username --role admin --password 12345678 --api-key abc"
+        cli, "users create --first-name first-name --username username --role owner --password 12345678 --api-key abc"
     )
 
     assert result.exit_code == 1
@@ -177,7 +192,7 @@ def test_create_with_existing_api_key(db: Session, cli_runner: CliRunner, cli: T
 
     result = cli_runner.invoke(
         cli,
-        "users create --first-name first-name --username username --role admin --password 12345678 --api-key abcdefgh",
+        "users create --first-name first-name --username username --role owner --password 12345678 --api-key abcdefgh",
     )
 
     assert result.exit_code == 0
@@ -189,7 +204,8 @@ def test_create_with_existing_api_key(db: Session, cli_runner: CliRunner, cli: T
 def test_create_with_multiple_workspaces(db: Session, cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "users create --first-name first-name --username username --role admin --password 12345678 --workspace workspace-a --workspace workspace-b",
+        "users create --first-name first-name --username username --role owner --password 12345678 "
+        "--workspace workspace-a --workspace workspace-b",
     )
 
     assert result.exit_code == 0
@@ -207,7 +223,8 @@ def test_create_with_existent_workspaces(db: Session, cli_runner: CliRunner, cli
 
     result = cli_runner.invoke(
         cli,
-        "users create --first-name first-name --username username --role admin --password 12345678 --workspace workspace-a --workspace workspace-b --workspace workspace-c",
+        "users create --first-name first-name --username username --role owner --password 12345678 "
+        "--workspace workspace-a --workspace workspace-b --workspace workspace-c",
     )
 
     assert result.exit_code == 0
@@ -222,7 +239,8 @@ def test_create_with_existent_workspaces(db: Session, cli_runner: CliRunner, cli
 def test_create_with_invalid_workspaces(db: Session, cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "users create --first-name first-name --username username --role admin --password 12345678 --workspace workspace-a --workspace 'invalid workspace' --workspace workspace-c",
+        "users create --first-name first-name --username username --role owner --password 12345678 "
+        "--workspace workspace-a --workspace 'invalid workspace' --workspace workspace-c",
     )
 
     assert result.exit_code == 1

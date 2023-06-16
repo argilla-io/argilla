@@ -15,53 +15,54 @@ import argilla
 import pytest
 from argilla import TokenClassificationRecord
 from argilla.client import api
+from argilla.client.api import ArgillaSingleton
+from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
-from datasets import load_dataset
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient
 
 
-def test_log_with_empty_text(mocked_client):
+def test_log_with_empty_text(api: Argilla):
     dataset = "test_log_with_empty_text"
     text = " "
 
-    argilla.delete(dataset)
+    api.delete(dataset)
     with pytest.raises(Exception, match="The provided `text` contains only whitespaces."):
-        argilla.log(
+        api.log(
             TokenClassificationRecord(id=0, text=text, tokens=["a", "b", "c"]),
             name=dataset,
         )
 
 
-def test_log_with_empty_tokens_list(mocked_client):
+def test_log_with_empty_tokens_list(api: Argilla):
     dataset = "test_log_with_empty_text"
     text = "The text"
 
-    argilla.delete(dataset)
+    api.delete(dataset)
     with pytest.raises(
         Exception,
         match="At least one token should be provided",
     ):
-        argilla.log(
+        api.log(
             TokenClassificationRecord(id=0, text=text, tokens=[]),
             name=dataset,
         )
 
 
-def test_call_metrics_with_no_api_client_initialized(mocked_client):
+def test_call_metrics_with_no_api_client_initialized(api: Argilla):
     for metric in ALL_METRICS:
         if metric == entity_consistency:
             continue
 
-        api.ArgillaSingleton.clear()
+        ArgillaSingleton.clear()
         with pytest.raises(NotFoundApiError):
             metric("not_found")
 
 
-def test_log_record_that_makes_me_cry(mocked_client):
+def test_log_record_that_makes_me_cry(api: Argilla):
     dataset = "test_log_record_that_makes_me_cry"
     record = TokenClassificationRecord(
         text="'Secret Story : Última hora' debuta con un pobre 8.7% en el access de Telecinco.. . "
@@ -108,10 +109,10 @@ def test_log_record_that_makes_me_cry(mocked_client):
         status="Default",
         event_timestamp=None,
     )
-    argilla.delete(dataset)
-    argilla.log(record, name=dataset)
+    api.delete(dataset)
+    api.log(record, name=dataset)
 
-    records = argilla.load(dataset)
+    records = api.load(dataset)
     assert len(records) == 1
     assert records[0].text == record.text
     assert records[0].tokens == record.tokens
@@ -155,7 +156,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
     }
 
 
-def test_search_keywords(mocked_client, api):
+def test_search_keywords(api: Argilla):
     dataset = "test_search_keywords"
     from datasets import load_dataset
 
@@ -184,11 +185,8 @@ def test_search_keywords(mocked_client, api):
     assert {"listened", "listen"} == top_keywords, top_keywords
 
 
-@pytest.mark.skipif(
-    condition=not SUPPORTED_VECTOR_SEARCH,
-    reason="Vector search not supported",
-)
-def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient, api):
+@pytest.mark.skipif(condition=not SUPPORTED_VECTOR_SEARCH, reason="Vector search not supported")
+def test_log_data_with_vectors_and_update_ok(api: Argilla):
     dataset = "test_log_data_with_vectors_and_update_ok"
     text = "This is a text"
     api.delete(dataset)
@@ -220,26 +218,11 @@ def test_log_data_with_vectors_and_update_ok(mocked_client: SecuredClient, api):
     assert ds[0].id == 3
 
 
-def test_logging_data_with_concurrency(mocked_client):
-    from datasets import load_dataset
-
-    dataset = "test_logging_data_with_concurrency"
-    dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
-
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
-
-    api.delete(dataset)
-    api.log(name=dataset, records=dataset_rb, batch_size=int(len(dataset_ds) / 4), num_threads=4)
-
-    ds = api.load(name=dataset)
-    assert len(dataset_ds) == len(ds)
-
-
 @pytest.mark.skipif(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_vectors_and_partial_update_ok(mocked_client: SecuredClient, api):
+def test_log_data_with_vectors_and_partial_update_ok(api: Argilla):
     dataset = "test_log_data_and_partial_update_ok"
     text = "This is a text"
     expected_n_records = 10
@@ -283,3 +266,18 @@ def test_log_data_with_vectors_and_partial_update_ok(mocked_client: SecuredClien
     assert all(map(lambda r: r.annotation_agent == "mock_test", ds))
     assert all(map(lambda r: "test-vector" in r.vectors, ds))
     assert all(map(lambda r: r.metadata == {"a": "value"}, ds))
+
+
+def test_logging_data_with_concurrency(api: Argilla):
+    from datasets import load_dataset
+
+    dataset = "test_logging_data_with_concurrency"
+    dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
+
+    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+
+    api.delete(dataset)
+    api.log(name=dataset, records=dataset_rb, batch_size=int(len(dataset_ds) / 4), num_threads=4)
+
+    ds = api.load(name=dataset)
+    assert len(dataset_ds) == len(ds)

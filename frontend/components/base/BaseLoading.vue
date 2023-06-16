@@ -94,7 +94,6 @@ export default {
 .spinner {
   width: 200px;
   height: 80px;
-  position: relative;
   margin: auto;
   text-align: center;
   display: flex;

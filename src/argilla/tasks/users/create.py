@@ -69,7 +69,6 @@ def create(
         help="Username as a lowercase string without spaces allowing letters, numbers, dashes and underscores.",
     ),
     role: UserRole = typer.Option(
-        callback=role_callback,
         prompt=True,
         default=UserRole.annotator.value,
         show_default=True,

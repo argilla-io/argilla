@@ -15,8 +15,8 @@
 from uuid import UUID
 
 import pytest
-from argilla.client import api
 from argilla.client.workspaces import Workspace
+from argilla.server.models import User
 
 from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
 from tests.helpers import SecuredClient

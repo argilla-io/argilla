@@ -52,6 +52,7 @@ class DatasetStatus(str, Enum):
 
 
 class UserRole(str, Enum):
+    owner = "owner"
     admin = "admin"
     annotator = "annotator"
 
@@ -276,6 +277,10 @@ class User(Base):
         viewonly=True,
         order_by=Dataset.inserted_at.asc(),
     )
+
+    @property
+    def is_owner(self):
+        return self.role == UserRole.owner
 
     @property
     def is_admin(self):
