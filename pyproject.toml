@@ -80,12 +80,7 @@ postgresql = [
     "psycopg2-binary ~= 2.9.5; sys_platform == 'darwin'",
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
-tests = [
-    "pytest",
-    "pytest-cov",
-    "pytest-mock",
-    "pytest-asyncio",
-    "factory_boy ~= 3.2.1",
+integrations = [
     "cleanlab ~= 2.0.0",
     # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
     "datasets > 1.17.0,!= 2.3.2",
@@ -105,7 +100,13 @@ tests = [
     "setfit",
     "span_marker",
     "openai",
-    "rich == 13.0.1",
+]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-asyncio",
+    "factory_boy ~= 3.2.1",
 ]
 
 [project.urls]
