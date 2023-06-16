@@ -20,6 +20,10 @@ These are the section headers that we use:
 
 ## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
 
+### Fixed
+
+- Replaced `np.float` alias by `float` to avoid `AttributeError` when using `find_label_errors` function with `numpy>=1.24.0` ([#3214](https://github.com/argilla-io/argilla/pull/3214)).
+
 ## [1.10.0](https://github.com/argilla-io/argilla/compare/v1.9.0...v1.10.0)
 
 ### Added
