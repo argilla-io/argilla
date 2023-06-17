@@ -16,12 +16,9 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
-
 from pydantic import BaseModel
+
+from argilla.server.models.models import UserRole
 
 
 class WorkspaceModel(BaseModel):
@@ -38,7 +35,7 @@ class WorkspaceUserModel(BaseModel):
     last_name: Optional[str]
     full_name: Optional[str]
     username: str
-    role: Literal["admin", "annotator"]
+    role: UserRole
     workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime
