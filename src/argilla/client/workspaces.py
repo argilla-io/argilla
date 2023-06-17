@@ -24,8 +24,9 @@ from argilla.client.sdk.commons.errors import (
     ValidationApiError,
 )
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel as WorkspaceModelV1
 from argilla.client.sdk.workspaces import api as workspaces_api
-from argilla.client.sdk.workspaces.models import WorkspaceModel
+from argilla.client.sdk.workspaces.models import WorkspaceModel as WorkspaceModelV0
 
 if TYPE_CHECKING:
     import httpx
@@ -189,12 +190,12 @@ class Workspace:
 
     @classmethod
     def __new_instance(
-        cls, client: Optional["httpx.Client"] = None, ws: Optional[WorkspaceModel] = None
+        cls, client: Optional["httpx.Client"] = None, ws: Optional[Union[WorkspaceModelV0, WorkspaceModelV1]] = None
     ) -> "Workspace":
         """Returns a new `Workspace` instance."""
         instance = cls.__new__(cls)
         instance.__client = client or cls.__active_client()
-        if isinstance(ws, WorkspaceModel):
+        if isinstance(ws, (WorkspaceModelV0, WorkspaceModelV1)):
             instance.__dict__.update(ws.dict())
         return instance
 
