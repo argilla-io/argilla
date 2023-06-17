@@ -98,11 +98,9 @@ class Workspace:
             " advance in Argilla."
         )
         if id is not None:
-            error_msg += " As the `id` argument is not None, you should use" f" `Workspace.from_id('{id}')` instead."
+            error_msg += f" As the `id` argument is not None, you should use `Workspace.from_id('{id}')` instead."
         if name is not None:
-            error_msg += (
-                " As the `name` argument is not None, you should use" f" `Workspace.from_name('{name}')` instead."
-            )
+            error_msg += f" As the `name` argument is not None, you should use `Workspace.from_name('{name}')` instead."
         raise Exception(error_msg)
 
     @property
@@ -142,11 +140,9 @@ class Workspace:
                 user_id=user_id,
             )
         except AlreadyExistsApiError as e:
-            raise ValueError(f"User with id=`{user_id}` already exists in workspace with" f" id=`{self.id}`.") from e
+            raise ValueError(f"User with id=`{user_id}` already exists in workspace with id=`{self.id}`.") from e
         except BaseClientError as e:
-            raise RuntimeError(
-                f"Error while adding user with id=`{user_id}` to workspace with" f" id=`{self.id}`."
-            ) from e
+            raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
 
     def delete_user(self, user_id: str) -> None:
         """Deletes an existing user from the workspace in Argilla. Note that the user
@@ -177,7 +173,7 @@ class Workspace:
             ) from e
         except BaseClientError as e:
             raise RuntimeError(
-                f"Error while deleting user with id=`{user_id}` from workspace with" f" id=`{self.id}`."
+                f"Error while deleting user with id=`{user_id}` from workspace with id=`{self.id}`."
             ) from e
 
     @staticmethod
@@ -221,7 +217,7 @@ class Workspace:
             ws = workspaces_api.create_workspace(client, name).parsed
             return cls.__new_instance(client, ws)
         except AlreadyExistsApiError as e:
-            raise ValueError(f"Workspace with name=`{name}` already exists, so please use a" " different name.") from e
+            raise ValueError(f"Workspace with name=`{name}` already exists, so please use a different name.") from e
         except (ValidationApiError, BaseClientError) as e:
             raise RuntimeError(f"Error while creating workspace with name=`{name}`.") from e
 
