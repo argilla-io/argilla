@@ -12,23 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import pytest
 from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.users.api import whoami
 from argilla.client.sdk.users.models import UserModel
+from httpx import ConnectError
 
 
 def test_whoami(api: Argilla):
-    user = whoami(client=api.http_client)
-    assert isinstance(user, User)
-
-
-def test_whoami_with_auth_error(api: Argilla):
-    with pytest.raises(UnauthorizedApiError):
-        api.http_client.token = "wrong_token"
-        whoami(api.http_client)
+    user = whoami(client=api.http_client.httpx).parsed
+    assert isinstance(user, UserModel)
 
 
 def test_whoami_with_connection_error():
-    with pytest.raises(BaseClientError):
-        whoami(AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey"))
+    with pytest.raises(ConnectError):
+        whoami(AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey").httpx)

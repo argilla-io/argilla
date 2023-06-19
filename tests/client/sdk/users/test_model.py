@@ -15,6 +15,8 @@
 from argilla.client.sdk.users.models import UserModel as ClientUser
 from argilla.server.security.model import User as ServerUser
 
+from tests.client.sdk.conftest import Helpers
 
-def test_users_schema(helpers):
+
+def test_users_schema(helpers: Helpers):
     assert helpers.are_compatible_api_schemas(ClientUser.schema(), ServerUser.schema())
