@@ -36,9 +36,6 @@ from argilla.server.schemas.v1.datasets import (
     DATASET_CREATE_GUIDELINES_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
-    LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
-    LABEL_SELECTION_TEXT_MAX_LENGTH,
-    LABEL_SELECTION_VALUE_MAX_LENGHT,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
@@ -46,6 +43,9 @@ from argilla.server.schemas.v1.datasets import (
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
     RECORDS_CREATE_MIN_ITEMS,
+    VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
+    VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
+    VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
     RecordInclude,
 )
 from argilla.server.search_engine import (
@@ -1851,7 +1851,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {
             "type": "label_selection",
             "options": [
-                {"value": "".join(["a" for _ in range(LABEL_SELECTION_VALUE_MAX_LENGHT + 1)]), "text": "a"},
+                {"value": "".join(["a" for _ in range(VALUE_TEXT_OPTION_VALUE_MAX_LENGTH + 1)]), "text": "a"},
                 {"value": "b", "text": "b"},
             ],
         },
@@ -1862,7 +1862,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {
             "type": "label_selection",
             "options": [
-                {"value": "a", "text": "".join(["a" for _ in range(LABEL_SELECTION_TEXT_MAX_LENGTH + 1)])},
+                {"value": "a", "text": "".join(["a" for _ in range(VALUE_TEXT_OPTION_TEXT_MAX_LENGTH + 1)])},
                 {"value": "b", "text": "b"},
             ],
         },
@@ -1876,7 +1876,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
                 {
                     "value": "a",
                     "text": "a",
-                    "description": "".join(["a" for _ in range(LABEL_SELECTION_DESCRIPTION_MAX_LENGTH + 1)]),
+                    "description": "".join(["a" for _ in range(VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH + 1)]),
                 },
                 {"value": "b", "text": "b"},
             ],

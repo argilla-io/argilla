@@ -255,6 +255,8 @@ class SearchEngine:
             return {"type": "text", "index": False}
         elif settings.type in [QuestionType.label_selection, QuestionType.multi_label_selection]:
             return {"type": "keyword"}
+        elif settings.type == QuestionType.ranking:
+            return {"type": "nested"}
         else:
             raise ValueError(f"ElasticSearch mappings for Question of type {settings.type} cannot be generated")
 
