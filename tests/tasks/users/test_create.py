@@ -81,7 +81,7 @@ def test_create_with_input_role(sync_db: "Session", cli_runner: CliRunner, cli: 
     assert user.role.value == UserRole(role_string).value
 
 
-def test_create_with_invalid_role(db: Session, cli_runner: CliRunner, cli: Typer):
+def test_create_with_invalid_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
         "users create --first-name first-name --username username --role bad_role "
@@ -89,8 +89,8 @@ def test_create_with_invalid_role(db: Session, cli_runner: CliRunner, cli: Typer
     )
 
     assert result.exit_code == 2
-    assert db.query(User).count() == 0
-    assert db.query(Workspace).count() == 0
+    assert sync_db.query(User).count() == 0
+    assert sync_db.query(Workspace).count() == 0
 
 
 def test_create_with_input_password(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
