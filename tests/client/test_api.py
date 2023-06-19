@@ -130,7 +130,7 @@ def mock_response_token_401(monkeypatch):
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
 
-def test_init_uppercase_workspace(argilla_user: Argilla):
+def test_init_uppercase_workspace(argilla_user: User):
     with pytest.raises(InputValueError):
         rg.init(workspace="UPPERCASE_WORKSPACE")
 
