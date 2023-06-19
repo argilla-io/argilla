@@ -178,14 +178,18 @@ def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
 
 
 @pytest.fixture(autouse=True)
-def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "MagicMock", client: TestClient):
-    real_whoami = users_api.whoami
+def using_test_client_from_argilla_python_client(
+    monkeypatch, test_telemetry: "MagicMock", argilla_user: User, client: TestClient
+):
+    client_ = SecuredClient(client, argilla_user)
+
+    whoami_fn = users_api.whoami
 
     def whoami_mocked(*args, **kwargs):
         client_arg = args[-1] if args else kwargs["client"]
 
-        monkeypatch.setattr(client_arg, "__httpx__", client)
-        return real_whoami(client_arg)
+        monkeypatch.setattr(client_arg, "get", client_.get)
+        return whoami_fn(client_arg)
 
     monkeypatch.setattr(users_api, "whoami", whoami_mocked)
 
