@@ -33,7 +33,11 @@ These are the section headers that we use:
 
 - The role system now support three different roles `owner`, `admin` and `annotator` ([#3104](https://github.com/argilla-io/argilla/pull/3104))
 - `admin` role is scoped to workspace-level operations ([#3115](https://github.com/argilla-io/argilla/pull/3115))
-- Default argilla user has the `admin` role instead of `owner` one ([#3188](https://github.com/argilla-io/argilla/pull/33188))
+- Default argilla user has the `admin` role instead of `owner` one ([#3188](https://github.com/argilla-io/argilla/pull/3188))
+
+### Deprecated
+
+- As of Python 3.7 end-of-life (EOL) on 2023-06-27, Argilla will no longer support Python 3.7 ([#3188](https://github.com/argilla-io/argilla/pull/33188)). More information at https://peps.python.org/pep-0537/
 
 ## [1.10.0](https://github.com/argilla-io/argilla/compare/v1.9.0...v1.10.0)
 
@@ -129,7 +133,7 @@ These are the section headers that we use:
 
 ### Deprecated
 
-- Using argilla with python 3.7 runtime is deprecated and support will be removed from version 1.9.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
+- Using Argilla with Python 3.7 runtime is deprecated and support will be removed from version 1.11.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
 - `tokens_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
 - `token_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
 - `mention_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
