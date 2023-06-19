@@ -63,7 +63,7 @@ def event_loop() -> Generator["asyncio.AbstractEventLoop", None, None]:
 
 
 @pytest_asyncio.fixture(scope="session")
-async def connection(request) -> AsyncGenerator["AsyncConnection", None]:
+async def connection() -> AsyncGenerator["AsyncConnection", None]:
     # Create a temp directory to store a SQLite database used for testing
     with tempfile.TemporaryDirectory() as tmpdir:
         database_url = f"sqlite+aiosqlite:///{tmpdir}/test.db"
@@ -80,7 +80,7 @@ async def connection(request) -> AsyncGenerator["AsyncConnection", None]:
 
 
 @pytest_asyncio.fixture(autouse=True)
-async def db(connection: "AsyncConnection", request) -> AsyncGenerator["AsyncSession", None]:
+async def db(connection: "AsyncConnection") -> AsyncGenerator["AsyncSession", None]:
     await connection.begin_nested()
     session = TestSession()
 
