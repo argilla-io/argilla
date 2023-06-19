@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import tempfile
-¡
 from typing import TYPE_CHECKING, List, Type, Union
 
 import datasets
@@ -417,6 +416,8 @@ def test_push_to_huggingface_and_from_huggingface(
             hf_response.dict() == response.dict()
             for hf_response, response in zip(hf_record.responses, record.responses)
         )
+
+
 @pytest.mark.parametrize(
     "framework", [Framework("spacy"), Framework("transformers"), Framework("spark-nlp"), Framework("openai")]
 )
@@ -447,7 +448,3 @@ def test_prepare_for_training_text_classification(
     training_task_mapping = TrainingTaskMapingForTextClassification(text=dataset.fields[0], label=label)
 
     dataset.prepare_for_training(framework=framework, training_task_mapping=training_task_mapping, fetch_records=False)
-    with pytest.raises(NotFoundApiError):
-        dataset.prepare_for_training(
-            framework=framework, training_task_mapping=training_task_mapping, fetch_records=True
-

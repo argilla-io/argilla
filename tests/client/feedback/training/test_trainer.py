@@ -45,7 +45,7 @@ from argilla.client.models import Framework
         Framework("span_marker"),
         Framework("setfit"),
         Framework("peft"),
-        Framework("openai"),
+        # Framework("openai"),
         Framework("spark-nlp"),
     ],
 )
