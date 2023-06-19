@@ -24,10 +24,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from tests.factories import (
-    AnnotatorFactory,
     DatasetFactory,
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
+    RankingQuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
@@ -58,6 +58,11 @@ def create_label_selection_questions(dataset: "Dataset") -> None:
 def create_multi_label_selection_questions(dataset: "Dataset") -> None:
     MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question_1", dataset=dataset, required=True)
     MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question_2", dataset=dataset)
+
+
+def create_ranking_question(dataset: "Dataset") -> None:
+    RankingQuestionFactory.create(name="ranking_question_1", dataset=dataset, required=True)
+    RankingQuestionFactory.create(name="ranking_question_2", dataset=dataset)
 
 
 @pytest.mark.parametrize("response_status", ["submitted", "discarded", "draft"])
@@ -111,6 +116,20 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
                 "values": {
                     "input_ok": {"value": "yes"},
                 },
+            },
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_1": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 2},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    },
+                }
             },
         ),
     ],
@@ -207,6 +226,20 @@ def test_create_submitted_record_response_with_missing_required_questions(client
                 "values": {
                     "multi_label_selection_question_2": {"value": ["option1", "option2"]},
                 },
+            },
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_2": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 2},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    },
+                }
             },
         ),
     ],
@@ -317,6 +350,31 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
             create_multi_label_selection_questions,
             {"values": {"multi_label_selection_question_1": {"value": []}}},
             "Expected list of values, found empty list",
+        ),
+        (create_ranking_question, {"values": {"ranking_question_1": {"value": "wrong-type"}}}),
+        (create_ranking_question, {"values": {"ranking_question_1": {"value": []}}}),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_1": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                        ]
+                    }
+                }
+            },
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": [
+                    {"value": "completion-b", "rank": 1},
+                    {"value": "completion-c", "rank": 2},
+                    {"value": "completion-a", "rank": 3},
+                    {"value": "completion-z", "rank": 4},
+                ]
+            },
         ),
     ],
 )
