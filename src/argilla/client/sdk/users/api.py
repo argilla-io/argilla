@@ -42,7 +42,7 @@ def whoami(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = UserModel.construct(**response.json())
+        parsed_response = UserModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -69,7 +69,7 @@ def list_users(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [UserModel.construct(**user) for user in response.json()]
+        parsed_response = [UserModel(**user) for user in response.json()]
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -119,7 +119,7 @@ def create_user(
     )
 
     if response.status_code == 200:
-        parsed_response = UserModel.construct(**response.json())
+        parsed_response = UserModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
@@ -148,7 +148,7 @@ def delete_user(
     response = client.delete(url=url)
 
     if response.status_code == 200:
-        parsed_response = UserModel.construct(**response.json())
+        parsed_response = UserModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
