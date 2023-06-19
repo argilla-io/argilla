@@ -47,6 +47,10 @@ class _ClientCommonDefaults:
     def get_timeout(self) -> float:
         return self.timeout
 
+    def update_headers(self, headers: Dict[str, str]):
+        self.headers.update(headers)
+        self.httpx.headers.update(self.get_headers())
+
     @property
     def httpx(self):
         return self.__httpx__
@@ -96,6 +100,7 @@ class Client(_ClientCommonDefaults, _Client):
             cookies=self.get_cookies(),
             timeout=self.get_timeout(),
         )
+        # TODO: Remove this NOW!!!!
         self.__http_async__ = httpx.AsyncClient(
             base_url=self.base_url,
             headers=self.get_headers(),

@@ -90,6 +90,7 @@ class SearchResponseItem:
 @dataclasses.dataclass
 class SearchResponses:
     items: List[SearchResponseItem]
+    total: int = 0
 
 
 @dataclasses.dataclass
@@ -201,13 +202,15 @@ class SearchEngine:
             size=limit,
             _source=False,
             sort="_score:desc,id:asc",
+            track_total_hits=True,
         )
 
         items = [
             SearchResponseItem(record_id=UUID(hit["_id"]), score=hit["_score"]) for hit in response["hits"]["hits"]
         ]
+        total = response["hits"]["total"]["value"]
 
-        return SearchResponses(items=items)
+        return SearchResponses(items=items, total=total)
 
     @staticmethod
     def _text_query_builder(dataset: Dataset, text: TextQuery) -> dict:

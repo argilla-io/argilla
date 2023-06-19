@@ -23,10 +23,10 @@ from sqlalchemy.orm import Session
 from tests.factories import AnnotatorFactory, DatasetFactory, TextQuestionFactory
 
 
-def test_delete_question(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_question(client: TestClient, db: Session, owner_auth_header):
     question = TextQuestionFactory.create(name="name", title="title", description="description")
 
-    response = client.delete(f"/api/v1/questions/{question.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/questions/{question.id}", headers=owner_auth_header)
 
     assert response.status_code == 200
     assert db.query(Question).count() == 0
@@ -64,20 +64,20 @@ def test_delete_question_as_annotator(client: TestClient, db: Session):
     assert db.query(Question).count() == 1
 
 
-def test_delete_question_belonging_to_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_question_belonging_to_published_dataset(client: TestClient, db: Session, owner_auth_header):
     question = TextQuestionFactory.create(dataset=DatasetFactory.build(status=DatasetStatus.ready))
 
-    response = client.delete(f"/api/v1/questions/{question.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/questions/{question.id}", headers=owner_auth_header)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Questions cannot be deleted for a published dataset"}
     assert db.query(Question).count() == 1
 
 
-def test_delete_question_with_nonexistent_question_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_question_with_nonexistent_question_id(client: TestClient, db: Session, owner_auth_header):
     TextQuestionFactory.create()
 
-    response = client.delete(f"/api/v1/questions/{uuid4()}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/questions/{uuid4()}", headers=owner_auth_header)
 
     assert response.status_code == 404
     assert db.query(Question).count() == 1

@@ -18,12 +18,46 @@
 <template>
   <div
     class="search-area"
-    :class="{ active: isSearchActive }"
+    :class="{ active: isSearchActive || searchHasFocus }"
     @click="focusInSearch"
   >
     <BaseIconWithBadge
-      class="searchbar__icon"
-      :icon="iconType"
+      class="search-area__icon"
+      icon="search"
+      :show-badge="false"
+      iconColor="#acacac"
+      badge-vertical-position="top"
+      badge-horizontal-position="right"
+      badge-border-color="white"
+      @click-icon="applySearch"
+    />
+    <input
+      ref="searchRef"
+      class="search-area__input"
+      type="text"
+      v-model.trim="searchValue"
+      :placeholder="placeholder"
+      :aria-description="description"
+      autocomplete="off"
+      @focus="searchHasFocus = true"
+      @blur="searchHasFocus = false"
+      @keydown.enter.exact="applySearch"
+      @keydown.arrow-right.stop=""
+      @keydown.arrow-left.stop=""
+      @keydown.delete.exact.stop=""
+      @keydown.enter.exact.stop=""
+    />
+
+    <span
+      class="search-area__additional-info"
+      v-if="localAdditionalInfo"
+      v-text="additionalInfo"
+    />
+
+    <BaseIconWithBadge
+      v-if="showDelete"
+      class="search-area__icon --close"
+      icon="close"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
@@ -31,30 +65,23 @@
       badge-border-color="white"
       @click-icon="resetValue"
     />
-    <input
-      ref="searchRef"
-      class="searchbar__input"
-      type="text"
-      v-model.trim="searchValue"
-      :placeholder="placeholder"
-      :aria-description="description"
-      autocomplete="off"
-      @keydown.enter.exact="applySearch"
-      @keydown.arrow-right.stop=""
-      @keydown.arrow-left.stop=""
-      @keydown.delete.exact.stop=""
-      @keydown.enter.exact.stop=""
-    />
   </div>
 </template>
 
 <script>
+import { isNil } from "lodash";
+// TODO - manage only empty strings and not null in the  search component
+
 export default {
   name: "SearchBarComponent",
   props: {
     value: {
       type: String,
       default: "",
+    },
+    additionalInfo: {
+      type: String | null,
+      default: null,
     },
     placeholder: {
       type: String,
@@ -68,21 +95,32 @@ export default {
   data() {
     return {
       searchValue: "",
+      localAdditionalInfo: "",
+      searchHasFocus: false,
     };
   },
   computed: {
     isSearchActive() {
-      return this.value?.length;
+      return !(isNil(this.value) || this.value.length === 0);
     },
-    iconType() {
-      return this.searchValue?.length ? "close" : "search";
+    isSearchValueEmpty() {
+      return isNil(this.searchValue) || this.searchValue.length === 0;
+    },
+    showDelete() {
+      return !this.isSearchValueEmpty || this.isSearchActive;
     },
   },
   watch: {
     value: {
       immediate: true,
       handler(newValue) {
-        this.searchValue = newValue ?? "";
+        this.searchValue = newValue;
+      },
+    },
+    additionalInfo: {
+      inmediate: true,
+      handler(newValue) {
+        this.localAdditionalInfo = newValue;
       },
     },
   },
@@ -98,10 +136,9 @@ export default {
       this.$refs.searchRef.focus();
     },
     resetValue() {
-      if (this.searchValue?.length) {
-        this.searchValue = "";
-        this.$emit("input", "");
-      }
+      this.searchValue = "";
+      this.localAdditionalInfo = "";
+      this.$emit("input", "");
     },
   },
 };
@@ -110,37 +147,49 @@ export default {
 <style lang="scss" scoped>
 .search-area {
   display: flex;
-  flex: 1;
+  min-width: 300px;
   align-items: center;
-  gap: $base-space;
-  width: 300px;
-  padding: $base-space * 1.4;
+  gap: $base-space * 1.5;
+  padding: $base-space * 1.2 $base-space * 1.5;
+  border: 1px solid palette(grey, 600);
+  border-radius: $border-radius-l;
   background: palette(white);
-  border-radius: $border-radius-s;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
+  box-shadow: $shadow-300;
   transition: all 0.2s ease;
   &:hover {
-    box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow-500;
     transition: all 0.2s ease;
   }
-  button {
+  &.active {
+    border: 1px solid $primary-color;
+    box-shadow: $shadow-300;
+  }
+  &__icon.button {
     display: flex;
+    flex-shrink: 0;
     padding: 0;
-    &:hover {
-      background: $black-4;
+    width: 20px;
+    height: 20px;
+    &.--close {
+      width: $base-space * 1.6;
     }
   }
-  &__icon {
-    padding: calc($base-space / 2);
-  }
-  input {
+  &__input {
     width: 100%;
-    height: 1rem;
     padding: 0;
     border: none;
     outline: 0;
     background: none;
     line-height: 1rem;
+    @include input-placeholder {
+      color: $black-37;
+    }
+  }
+  &__additional-info {
+    @include font-size(13px);
+    color: $black-37;
+    white-space: nowrap;
   }
 }
 </style>

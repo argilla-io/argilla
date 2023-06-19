@@ -5,7 +5,24 @@
         :key="datasetName && workspace"
         :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
+        :showTrainButton="true"
+        @on-click-train="showTrainModal(true)"
       />
+      <BaseModal
+        :modal-custom="true"
+        :prevent-body-scroll="true"
+        modal-class="modal-auto"
+        modal-position="modal-top-center"
+        :modal-visible="visibleTrainModal"
+        allow-close
+        @close-modal="showTrainModal(false)"
+      >
+        <DatasetTrainComponent
+          datasetTask="FeedbackTask"
+          :datasetName="datasetName"
+          :workspaceName="workspace"
+        />
+      </BaseModal>
     </template>
     <template v-slot:sidebar-right>
       <SidebarFeedbackTaskComponent
@@ -54,6 +71,7 @@ export default {
   data() {
     return {
       areResponsesUntouched: true, // NOTE - this flag is used to show or to not show a toast when questionnaire is touched (to prevent loosing current modification)
+      visibleTrainModal: false, // TODO - encapsulate this logic in datasetTrain.component and create new datasetTrain.modal
     };
   },
   beforeRouteLeave(to, from, next) {
@@ -229,6 +247,9 @@ export default {
           eventToFireOnClick();
         },
       });
+    },
+    showTrainModal(value) {
+      this.visibleTrainModal = value;
     },
   },
   destroyed() {

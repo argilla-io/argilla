@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +13,33 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import List, Optional
+from uuid import UUID
+
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 from pydantic import BaseModel
 
 
 class WorkspaceModel(BaseModel):
-    id: str
+    id: UUID
     name: str
+    inserted_at: datetime
+    updated_at: datetime
+
+
+# TODO(alvarobartt): replace with the `pydantic.BaseModel` created at https://github.com/argilla-io/argilla/pull/3169 once is merged
+class WorkspaceUserModel(BaseModel):
+    id: UUID
+    first_name: str
+    last_name: Optional[str]
+    full_name: Optional[str]
+    username: str
+    role: Literal["admin", "annotator"]
+    workspaces: Optional[List[str]]
+    api_key: str
     inserted_at: datetime
     updated_at: datetime

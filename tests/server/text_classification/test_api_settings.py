@@ -134,17 +134,17 @@ def log_some_data(mocked_client, name):
 # TODO: These tests are the same for token an text classification. We will move them to a common test_dataset_settings
 #  module where settings will be tested in a per-task fashion.
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
-def test_save_settings_as_annotator(client: TestClient, argilla_auth_header: dict, task: TaskType):
+def test_save_settings_as_annotator(client: TestClient, owner_auth_header: dict, task: TaskType):
     dataset_name = "test_save_settings_as_annotator"
     workspace_name = "workspace-a"
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build(name=workspace_name)])
 
-    client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=argilla_auth_header)
+    client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=owner_auth_header)
 
     response = client.post(
         "/api/datasets",
         json={"name": dataset_name, "task": task, "workspace": workspace_name},
-        headers=argilla_auth_header,
+        headers=owner_auth_header,
     )
     assert response.status_code == 200
 
@@ -164,17 +164,17 @@ def test_save_settings_as_annotator(client: TestClient, argilla_auth_header: dic
 
 
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
-def test_delete_settings_as_annotator(client: TestClient, argilla_auth_header: dict, task: TaskType):
+def test_delete_settings_as_annotator(client: TestClient, owner_auth_header: dict, task: TaskType):
     dataset_name = "test_delete_settings_as_annotator"
     workspace_name = "workspace-a"
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build(name=workspace_name)])
 
-    client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=argilla_auth_header)
+    client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=owner_auth_header)
 
     response = client.post(
         "/api/datasets",
         json={"name": dataset_name, "task": task, "workspace": workspace_name},
-        headers=argilla_auth_header,
+        headers=owner_auth_header,
     )
     assert response.status_code == 200
 
@@ -193,24 +193,24 @@ def test_delete_settings_as_annotator(client: TestClient, argilla_auth_header: d
 
 
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
-def test_get_settings_as_annotator(client: TestClient, argilla_auth_header: dict, task: TaskType):
+def test_get_settings_as_annotator(client: TestClient, owner_auth_header: dict, task: TaskType):
     dataset_name = "test_get_settings_as_annotator"
     workspace_name = "workspace-a"
     annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build(name=workspace_name)])
 
-    client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=argilla_auth_header)
+    client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=owner_auth_header)
 
     response = client.post(
         "/api/datasets",
         json={"name": dataset_name, "task": task, "workspace": workspace_name},
-        headers=argilla_auth_header,
+        headers=owner_auth_header,
     )
     assert response.status_code == 200
 
     response = client.put(
         f"/api/datasets/{dataset_name}/{task}/settings?workspace={workspace_name}",
         json={"label_schema": {"labels": ["Label1", "Label2"]}},
-        headers=argilla_auth_header,
+        headers=owner_auth_header,
     )
 
     stored_settings = response.json()

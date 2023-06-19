@@ -12,15 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla._constants import DEFAULT_API_KEY
+from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.users.api import whoami
 from argilla.client.sdk.users.models import UserModel
 
 
-def test_whoami(monkeypatch, mocked_client) -> None:
-    httpx_client = AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
-    monkeypatch.setattr(httpx_client, "get", mocked_client.get)
-    response = whoami(client=httpx_client)
-    assert response.status_code == 200
-    assert isinstance(response.parsed, UserModel)
+def test_whoami(api: Argilla):
+    user = whoami(client=api.http_client)
+    assert isinstance(user, User)
+
+
+def test_whoami_with_auth_error(api: Argilla):
+    with pytest.raises(UnauthorizedApiError):
+        api.http_client.token = "wrong_token"
+        whoami(api.http_client)
+
+
+def test_whoami_with_connection_error():
+    with pytest.raises(BaseClientError):
+        whoami(AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey"))

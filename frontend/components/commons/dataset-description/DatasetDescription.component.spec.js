@@ -3,6 +3,7 @@ import DatasetDescription from "./DatasetDescription.component";
 
 let wrapper = null;
 const options = {
+  stubs: ["RenderMarkdownBaseComponent"],
   propsData: {
     datasetDescription: "Lorem ipsum",
   },
