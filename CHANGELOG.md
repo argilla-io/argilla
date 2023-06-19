@@ -33,7 +33,8 @@ These are the section headers that we use:
 
 - The role system now support three different roles `owner`, `admin` and `annotator` ([#3104](https://github.com/argilla-io/argilla/pull/3104))
 - `admin` role is scoped to workspace-level operations ([#3115](https://github.com/argilla-io/argilla/pull/3115))
-- Default argilla user has the `admin` role instead of `owner` one ([#3188](https://github.com/argilla-io/argilla/pull/33188))
+- Default argilla user has the `admin` role instead of `owner` one ([#3188](https://github.com/argilla-io/argilla/pull/3188))
+
 
 ## [1.10.0](https://github.com/argilla-io/argilla/compare/v1.9.0...v1.10.0)
 
