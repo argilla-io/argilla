@@ -201,9 +201,9 @@ async def test_list_workspace_users_as_admin(client: TestClient, db: "AsyncSessi
     user_a = await UserFactory.create(username="username-a")
     user_b = await UserFactory.create(username="username-b")
     user_c = await UserFactory.create(username="username-c")
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user_a.id)
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user_b.id)
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user_c.id)
+    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user_a.id)
+    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user_b.id)
+    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user_c.id)
 
     response = client.get(f"/api/workspaces/{workspace.id}/users", headers={API_KEY_HEADER_NAME: admin.api_key})
 
@@ -237,7 +237,7 @@ async def test_create_workspace_user(client: TestClient, db: "AsyncSession", own
 
     assert response.status_code == 200
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1
-    assert await db.execute(select(WorkspaceUser).filter_by(workspace_id=workspace.id, user_id=owner.id)).scalar_one()
+    assert (await db.execute(select(WorkspaceUser).filter_by(workspace_id=workspace.id, user_id=owner.id))).scalar_one()
 
     response_body = response.json()
     assert response_body["id"] == str(owner.id)

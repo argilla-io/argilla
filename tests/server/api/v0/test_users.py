@@ -50,10 +50,10 @@ def test_me_without_authentication(client: TestClient):
 
 
 @pytest.mark.asyncio
-async def test_me_as_owner(client: TestClient, db: "AsyncSession"):
-    owner = await OwnerFactory.create(
-        workspaces=[WorkspaceFactory.build(name="workspace-a"), WorkspaceFactory.build(name="workspace-b")]
-    )
+async def test_me_as_owner(client: TestClient):
+    workspace_a = await WorkspaceFactory.create(name="workspace-a")
+    workspace_b = await WorkspaceFactory.create(name="workspace-b")
+    owner = await OwnerFactory.create(workspaces=[workspace_a, workspace_b])
     await WorkspaceFactory.create(name="workspace-c")
 
     response = client.get("/api/me", headers={API_KEY_HEADER_NAME: owner.api_key})
@@ -66,10 +66,10 @@ async def test_me_as_owner(client: TestClient, db: "AsyncSession"):
 
 
 @pytest.mark.asyncio
-async def test_me_as_admin(client: TestClient, db: "AsyncSession"):
+async def test_me_as_admin(client: TestClient):
     workspace_a = await WorkspaceFactory.create(name="workspace-a")
     workspace_b = await WorkspaceFactory.create(name="workspace-b")
-    admin = AdminFactory.create(workspaces=[workspace_a, workspace_b])
+    admin = await AdminFactory.create(workspaces=[workspace_a, workspace_b])
     await WorkspaceFactory.create(name="workspace-c")
 
     response = client.get("/api/me", headers={API_KEY_HEADER_NAME: admin.api_key})
@@ -181,18 +181,18 @@ async def test_create_user_without_authentication(client: TestClient, db: "Async
 
 @pytest.mark.asyncio
 async def test_create_user_as_admin(client: TestClient, db: "AsyncSession"):
-    admin = AdminFactory.create()
+    admin = await AdminFactory.create()
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
     response = client.post("/api/users", headers={API_KEY_HEADER_NAME: admin.api_key}, json=user)
 
     assert response.status_code == 403
-    assert db.query(User).count() == 1
+    assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
 @pytest.mark.asyncio
 async def test_create_user_as_annotator(client: TestClient, db: "AsyncSession"):
-    annotator = AnnotatorFactory.create()
+    annotator = await AnnotatorFactory.create()
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
     response = client.post("/api/users", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=user)
