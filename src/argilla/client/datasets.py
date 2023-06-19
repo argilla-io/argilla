@@ -458,7 +458,7 @@ class DatasetBase:
             Framework.SETFIT,
             Framework.SPAN_MARKER,
             Framework.PEFT,
-            Framework.AUTOTRAIN,
+            # Framework.AUTOTRAIN,
         ]:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
         elif framework is Framework.SPACY and lang is None:

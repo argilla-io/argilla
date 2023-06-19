@@ -216,7 +216,9 @@ def test_training_task_mapping_for_text_classification(framework, label, train_s
     elif framework == Framework.OPENAI:
         data = task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
     elif framework == Framework.TRANSFORMERS:
-        data = task_mapping._prepare_for_training_with_transformers(data=data, train_size=train_size, seed=seed)
+        data = task_mapping._prepare_for_training_with_transformers(
+            data=data, train_size=train_size, seed=seed, framework=Framework.TRANSFORMERS
+        )
     elif framework == Framework.SPARK_NLP:
         data = task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
     else:

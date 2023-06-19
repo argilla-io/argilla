@@ -150,21 +150,21 @@ class ArgillaTrainer(object):
                 seed=self._seed,
                 model=self.model,
             )
-        elif framework is Framework.AUTOTRAIN:
-            if self._rg_dataset_type is not rg.DatasetForTextClassification:
-                raise NotImplementedError(f"{Framework.AUTOTRAIN} only supports `TextClassification` tasks.")
-            from argilla.training.autotrain_advanced import ArgillaAutoTrainTrainer
+        # elif framework is Framework.AUTOTRAIN:
+        #     if self._rg_dataset_type is not rg.DatasetForTextClassification:
+        #         raise NotImplementedError(f"{Framework.AUTOTRAIN} only supports `TextClassification` tasks.")
+        #     from argilla.training.autotrain_advanced import ArgillaAutoTrainTrainer
 
-            self._trainer = ArgillaAutoTrainTrainer(
-                name=self._name,
-                workspace=self._workspace,
-                record_class=self._rg_dataset_type._RECORD_TYPE,
-                dataset=self.dataset_full_prepared,
-                multi_label=self._multi_label,
-                settings=self._settings,
-                seed=self._seed,
-                model=self.model,
-            )
+        #     self._trainer = ArgillaAutoTrainTrainer(
+        #         name=self._name,
+        #         workspace=self._workspace,
+        #         record_class=self._rg_dataset_type._RECORD_TYPE,
+        #         dataset=self.dataset_full_prepared,
+        #         multi_label=self._multi_label,
+        #         settings=self._settings,
+        #         seed=self._seed,
+        #         model=self.model,
+        #     )
         elif framework is Framework.PEFT:
             from argilla.training.peft import ArgillaPeftTrainer
 
@@ -315,9 +315,9 @@ class ArgillaTrainerSkeleton(ABC):
         self._multi_label = multi_label
         self._settings = settings
         if self._settings:
-            self._label_list = self._settings.labels
             self._label2id = self._settings.label2id
             self._id2label = self._settings.id2label
+            self._label_list = list(self._label2id.keys())
         else:
             self._label_list = None
             self._label2id = None

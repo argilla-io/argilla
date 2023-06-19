@@ -112,20 +112,20 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
 
-        elif framework is Framework.AUTOTRAIN:
-            if not isinstance(training_task_mapping, TrainingTaskMapingForTextClassification):
-                raise NotImplementedError(f"{Framework.AUTOTRAIN} only supports `TextClassification` tasks.")
-            from argilla.client.feedback.training.frameworks.autotrain_advanced import (
-                ArgillaAutoTrainTrainer,
-            )
+        # elif framework is Framework.AUTOTRAIN:
+        #     if not isinstance(training_task_mapping, TrainingTaskMapingForTextClassification):
+        #         raise NotImplementedError(f"{Framework.AUTOTRAIN} only supports `TextClassification` tasks.")
+        #     from argilla.client.feedback.training.frameworks.autotrain_advanced import (
+        #         ArgillaAutoTrainTrainer,
+        #     )
 
-            self._trainer = ArgillaAutoTrainTrainer(
-                feedback_dataset=self._dataset,
-                training_task_mapping=self._training_task_mapping,
-                prepared_data=self._prepared_data,
-                seed=self._seed,
-                model=self._model,
-            )
+        #     self._trainer = ArgillaAutoTrainTrainer(
+        #         feedback_dataset=self._dataset,
+        #         training_task_mapping=self._training_task_mapping,
+        #         prepared_data=self._prepared_data,
+        #         seed=self._seed,
+        #         model=self._model,
+        #     )
         elif framework is Framework.PEFT:
             from argilla.client.feedback.training.frameworks.peft import (
                 ArgillaPeftTrainer,

@@ -41,7 +41,7 @@ from argilla.client.models import Framework
         Framework("spacy"),
         Framework("transformers"),
         Framework("spark-nlp"),
-        Framework("autotrain"),
+        # Framework("autotrain"),
         Framework("span_marker"),
         Framework("setfit"),
         Framework("peft"),
@@ -75,7 +75,7 @@ def test_prepare_for_training_text_classification(
     label = LabelQuestionUnification(question=questions[0])
     training_task_mapping = TrainingTaskMapingForTextClassification(text=dataset.fields[0], label=label)
 
-    if framework in [Framework("spark-nlp"), Framework("span_marker"), Framework("autotrain")]:
+    if framework in [Framework("spark-nlp"), Framework("span_marker")]:
         with pytest.raises(NotImplementedError):
             trainer = ArgillaTrainer(
                 dataset=dataset, training_task_mapping=training_task_mapping, framework=framework, fetch_records=False

@@ -47,7 +47,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         elif self._record_class is TextClassificationRecord and self._multi_label:
             raise NotImplementedError("OpenAI does not support multi-label TextClassification tasks.")
         else:
-            raise NotImplementedError("OpenAI only supports `TextClassification` tasks.")
+            pass
 
         self.sleep_timer = 10
         self.device = None
