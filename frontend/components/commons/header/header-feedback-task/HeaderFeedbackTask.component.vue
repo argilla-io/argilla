@@ -8,6 +8,7 @@
     />
     <template v-if="datasetId">
       <BaseButton
+        ref="trainButtonRef"
         class="header__button small"
         @on-click="onClickTrain"
         v-if="isAdminOrOwnerRole && showTrainButton"
@@ -23,7 +24,7 @@
         />
       </NuxtLink>
     </template>
-    <user />
+    <User />
   </BaseTopbarBrand>
 </template>
 
