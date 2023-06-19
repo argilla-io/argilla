@@ -81,12 +81,15 @@ If you feel that the disagreement between annotators is too high, especially for
 
 ## Solve disagreements
 
-In this section, we explore some techniques you can use to solve disagreements in the responses. These are not the only possible techniques and you should choose them carefully according to the needs of your project and annotation team.
+In this section, we explore some techniques you can use to solve disagreements in the responses. These are not the only possible techniques and you should choose them carefully according to the needs of your project and annotation team. Even though there are many ways in which you can unify responses, we offer support for some of them out-of-the box. There are two main ways to do this.
+
+```{include} /_common/tabs/unfication_strategies.md
+```
 
 Once you have unified your responses, you will have a dataset that"s ready for [fine-tuning](fine_tune.ipynb). Remember to save your unified dataset following one of the methods explained in [Export a Feedback dataset](export_dataset.ipynb).
 
+### Unifying RatingQuestions
 
-### Unifying ratings
 #### Majority vote
 If a record has more than 2 submitted responses, you can take the most popular option as the final score. In the case of a tie, you can break it by choosing a random option or the lowest / highest score.
 
@@ -96,7 +99,7 @@ For this technique, you can take all responses and calculate the mean score. Tha
 #### Lowest / highest score
 Depending on how the question is formulated, you can take the `max` or `min` value. That will be the final rating.
 
-### Unifying texts
+### Unifying TextQuestions
 #### Rate / rank the responses
 Make a new dataset that includes the texts you have collected in the record fields and ask your annotation team to rate or rank the responses. Then choose the response with the highest score. If there is a tie, choose one of the options randomly or consider duplicating the record as explained [below](#duplicate-the-record).
 
@@ -109,7 +112,7 @@ You can use the answers to other questions as quality markers. For example, you 
 #### Duplicate the record
 You may consider that the different answers given by your annotation team are all valid options. In this case, you can duplicate the record to keep each answer. Again, this method does not guarantee the quality of the text, so it is recommended to check the quality of the text, for example using a rating question.
 
-### Unifying labels
+### Unifying LabelQuestions
 #### Majority vote for single label questions
 As with the rating, labels can be aggregated using the most popular option. For this option, we recommend that you have more than 2 submitted responses. In the case of a tie, you can break it by choosing a random option.
 

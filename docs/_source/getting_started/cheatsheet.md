@@ -218,7 +218,7 @@ rg.log(records_for_training, name="majority_voter_results")
 
 ## Train Models
 
-We love our open-source training libraries as much as you do, so we provide integrations with all of them to limit the time you spend on data preparation and have more fun with actual training. As of now, we support `spacy`, `transformers`, `setfit`, `openai`, `autotrain`, and way more. Want to get to know all support? Take a look [here](/guides/train_a_model.md).
+We love our open-source training libraries as much as you do, so we provide integrations with all of them to limit the time you spend on data preparation and have more fun with actual training. As of now, we support `spacy`, `transformers`, `setfit`, `openai`, `autotrain`, and way more. Want to get to know all support? For the `FeedbackDataset`: take a look [here](/guides/train_a_model.md). For the `TextClassificationDataset` or the `TokenClassificationDataset` take a look [here](/guides/llms/fine_tune_others.md).
 
 ```python
 from argilla.training import ArgillaTrainer

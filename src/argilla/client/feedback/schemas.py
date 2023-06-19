@@ -614,6 +614,11 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
         - "majority": the majority value of the labels
         - "majority_weighted": the majority value of the labels, weighted by annotator's confidence
         - "disagreement": preserve the natural disagreement between annotators
+
+    Examples:
+        >>> from argilla import LabelQuestion, LabelQuestionStrategy
+        >>> strategy = LabelQuestionStrategy("majority")
+        >>> records = strategy.unify_responses(records, question=LabelQuestion(...))
     """
 
     MAJORITY: str = "majority"
@@ -730,6 +735,9 @@ class LabelQuestionUnification(BaseModel):
 
     question: Union[LabelQuestion, MultiLabelQuestion]
     strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy] = "majority"
+
+    def unify_responses(self, records: List[FeedbackRecord]):
+        return self.strategy.unify_responses(records, self.question)
 
     @root_validator
     def strategy_must_be_valid_and_align_with_question(cls, values: Dict[str, Any]) -> Dict[str, Any]:
