@@ -15,14 +15,14 @@
 from uuid import UUID
 
 import pytest
+from argilla.client.api import ArgillaSingleton
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User
 
-from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
-from tests.helpers import SecuredClient
+from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 
-def test_workspace_init() -> None:
+def test_workspace_cls_init() -> None:
     with pytest.raises(
         Exception,
         match=r"`Workspace` cannot be initialized via the `__init__` method | you should use `Workspace.from_name\('test_workspace'\)`",
@@ -36,24 +36,26 @@ def test_workspace_init() -> None:
         Workspace(id="00000000-0000-0000-0000-000000000000")
 
 
-def test_workspace_from_name(mocked_client: SecuredClient) -> None:
-    WorkspaceFactory.create(name="test_workspace")
+def test_workspace_from_name(owner: User):
+    workspace = WorkspaceFactory.create(name="test_workspace")
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+    ArgillaSingleton.init(api_key=owner.api_key)
 
-    api.init(api_key="argilla.apikey")
-    workspace = Workspace.from_name("test_workspace")
-    assert workspace.name == "test_workspace"
-    assert isinstance(workspace.id, UUID)
-
-
-def test_workspace_from_name_errors(mocked_client: SecuredClient) -> None:
-    api.init(api_key="argilla.apikey")
+    found_workspace = Workspace.from_name(workspace.name)
+    assert found_workspace.name == workspace.name
+    assert isinstance(found_workspace.id, UUID)
 
     with pytest.raises(ValueError, match="Workspace with name="):
         Workspace.from_name("non-existing-workspace")
 
 
-def test_workspace_from_id_errors(mocked_client: SecuredClient) -> None:
-    api.init(api_key="argilla.apikey")
+def test_workspace_from_id(owner: User):
+    workspace = WorkspaceFactory.create(name="test_workspace")
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    found_workspace = Workspace.from_id(workspace.id)
+    assert found_workspace.name == "test_workspace"
+    assert isinstance(found_workspace.id, UUID)
 
     with pytest.raises(ValueError, match="The ID you provided is not a valid UUID"):
         Workspace.from_id(id="non-valid-uuid")
@@ -62,54 +64,58 @@ def test_workspace_from_id_errors(mocked_client: SecuredClient) -> None:
         Workspace.from_id(id="00000000-0000-0000-0000-000000000000")
 
 
-def test_workspace_create(mocked_client: SecuredClient) -> None:
-    api.init(api_key="argilla.apikey")
-    workspace = Workspace.create("test_workspace")
+def test_workspace_create(owner: User) -> None:
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    workspace = Workspace.create(name="test_workspace")
     assert workspace.name == "test_workspace"
     assert isinstance(workspace.id, UUID)
 
-    the_api = api.active_api()
-    workspaces = the_api.http_client.get("/api/workspaces")
+    with pytest.raises(ValueError, match="Workspace with name=`test_workspace` already exists"):
+        Workspace.create("test_workspace")
+
+    api = ArgillaSingleton.get()
+    workspaces = api.http_client.get("/api/workspaces")
     assert any(ws["name"] == "test_workspace" for ws in workspaces)
 
 
-def test_workspace_add_user(mocked_client: SecuredClient) -> None:
+def test_workspace_list(owner: User) -> None:
     WorkspaceFactory.create(name="test_workspace")
-    user = UserFactory.create(username="test_user")
+    ArgillaSingleton.init(api_key=owner.api_key)
 
-    api.init(api_key="argilla.apikey")
+    workspaces = Workspace.list()
+    assert any(ws.name == "test_workspace" for ws in workspaces)
+
+
+def test_workspace_add_user(owner: User) -> None:
+    workspace = WorkspaceFactory.create(name="test_workspace")
+    ArgillaSingleton.init(api_key=owner.api_key)
+
     workspace = Workspace.from_name("test_workspace")
     assert workspace.name == "test_workspace"
     assert isinstance(workspace.id, UUID)
-    workspace.add_user(user.id)
-    assert any(user.username == "test_user" for user in workspace.users)
+
+    workspace.add_user(owner.id)
+    assert any(user.username == owner.username for user in workspace.users)
 
     with pytest.raises(ValueError, match="User with id="):
-        workspace.add_user(user.id)
+        workspace.add_user(owner.id)
 
     workspace = Workspace.from_name("test_workspace")
     assert isinstance(workspace.users, list)
-    assert any(user.username == "test_user" for user in workspace.users)
+    assert any(user.username == owner.username for user in workspace.users)
 
 
-def test_workspace_delete_user(mocked_client: SecuredClient) -> None:
+def test_workspace_delete_user(owner: User) -> None:
     workspace = WorkspaceFactory.create(name="test_workspace")
-    user = UserFactory.create(first_name="test", username="test_user", api_key="test_user.apikey")
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user.id)
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+    ArgillaSingleton.init(api_key=owner.api_key)
 
-    api.init(api_key="argilla.apikey")
     workspace = Workspace.from_name("test_workspace")
-    assert any("test_user" == user.username for user in workspace.users)
-    workspace.delete_user(user.id)
-    assert not any(user.username == "test_user" for user in workspace.users)
+    assert any(user.username == "owner" for user in workspace.users)
+
+    workspace.delete_user(owner.id)
+    assert not any(user.username == owner.username for user in workspace.users)
 
     with pytest.raises(ValueError, match="Either the user with id="):
-        workspace.delete_user(user.id)
-
-
-def test_workspace_list(mocked_client: SecuredClient) -> None:
-    WorkspaceFactory.create(name="test_workspace")
-
-    api.init(api_key="argilla.apikey")
-    workspaces = Workspace.list()
-    assert any(ws.name == "test_workspace" for ws in workspaces)
+        workspace.delete_user(owner.id)
