@@ -182,14 +182,14 @@ To build the documentation, make sure you set up your system by installing the r
 pip install -r docs/_source/requirements.txt
 ```
 
-Then use `sphinx-autobuild` to continuously deploy the webpage using the following command::
+Then use `sphinx-autobuild` to continuously deploy the webpage using the following command:
 
 ```
-sphinx-autobuild docs/_source docs/_build/html
+sphinx-autobuild ∑ docs/_build/html
 ```
 
-This will create a `_build/html` folder in which you can find the `index.html` file of the documentation.
+This will create a `_build/html` folder that is served at [http://127.0.0.1:8000](http://127.0.0.1:8000). Also, it starts watching for changes in the `docs/source` directory. When a change is detected in `docs/source`, the documentation is rebuilt and any open browser windows are reloaded automatically. KeyboardInterrupt (ctrl+c) will stop the server.
 
-## Troubleshooting
+### Troubleshooting
 
-If you get warnings while building documentation then you can handle them this way: If they are `toctree` warnings then they can be ignored and If they are import errors then they can be resolved by installing `autodoc` and `argilla` from `environment_dev.yml.`
+If you get warnings while building documentation then you can handle them this way: If they are `toctree` warnings then they can be ignored and If they are import errors then they can be resolved by installing `autodoc` and `argilla` from `docs/_source/requirements.txt`
