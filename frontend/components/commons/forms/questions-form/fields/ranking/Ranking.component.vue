@@ -6,13 +6,12 @@
       :tooltipMessage="description"
     />
 
-    <DndSelectionComponent :ranking="ranking" />
+    <DndSelectionComponent :ranking="ranking" @onChanged="onChanged" />
   </div>
 </template>
 
 <script>
-import { factoryRanking } from "./ranking-adapter";
-import { settingsFake } from "./ranking-fakes";
+import { adaptQuestionsToSots } from "./ranking-adapter";
 
 export default {
   name: "RankingComponent",
@@ -29,26 +28,26 @@ export default {
       type: String,
       default: "",
     },
-    // values: {
-    //   type: Array,
-    //   required: true,
-    // },
-    // settings: {
-    //   type: Object,
-    //   required: true,
-    //   validator: (settings) => {
-    //     const settingsKeys = Object.keys(settings);
-    //     const checkAllKeysOfSettingsAreValid = settingsKeys.every((key) =>
-    //       ["type", "options", "ranking_slots"].includes(key)
-    //     );
-    //     return checkAllKeysOfSettingsAreValid;
-    //   },
-    // },
+    options: {
+      type: Array,
+      required: true,
+    },
+  },
+  model: {
+    prop: "options",
   },
   data() {
     return {
-      ranking: factoryRanking(settingsFake),
+      ranking: adaptQuestionsToSots({ options: this.options }),
     };
+  },
+  methods: {
+    onChanged(newQuestionRanked) {
+      this.options = this.options.map((option) => ({
+        ...option,
+        ranking: newQuestionRanked.getRanking(option),
+      }));
+    },
   },
 };
 </script>

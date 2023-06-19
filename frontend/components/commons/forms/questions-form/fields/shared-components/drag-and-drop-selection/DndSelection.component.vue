@@ -7,33 +7,33 @@
         :group="{ name: 'question' }"
         :sort="false"
       >
-        <div v-for="item in ranking.questions" :key="item.name">
-          <div class="draggable__rank-card">{{ item.name }}</div>
+        <div v-for="item in ranking.questions" :key="item.value">
+          <div class="draggable__rank-card">{{ item.text }}</div>
         </div>
       </draggable>
     </div>
 
     <div class="draggable__slots-container">
-      <v-flex
+      <div
         class="draggable__slot"
         v-for="slot in ranking.slots"
         :key="slot.index"
       >
-        <span>
-          {{ slot.name }}
-        </span>
+        <span> #{{ slot.ranking }} </span>
 
         <draggable
           class="draggable__questions-ranked"
           :list="slot.items"
           group="question"
           :sort="false"
+          @add="onMoveEnd"
+          @remove="onMoveEnd"
         >
-          <v-flex v-for="item in slot.items" :key="item.name">
-            <div class="draggable__ranked-card">{{ item.name }}</div>
-          </v-flex>
+          <div v-for="item in slot.items" :key="item.value">
+            <div class="draggable__ranked-card">{{ item.text }}</div>
+          </div>
         </draggable>
-      </v-flex>
+      </div>
     </div>
   </div>
 </template>
@@ -45,6 +45,11 @@ export default {
     ranking: {
       type: Object,
       required: true,
+    },
+  },
+  methods: {
+    onMoveEnd() {
+      this.$emit("onChanged", this.ranking);
     },
   },
 };

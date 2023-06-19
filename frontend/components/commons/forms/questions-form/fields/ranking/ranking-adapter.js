@@ -1,20 +1,23 @@
-export const factoryRanking = ({ options }) => {
+export const adaptQuestionsToSots = ({ options }) => {
   const slots = options.map((_, index) => {
     const id = index + 1;
     return {
-      index: id,
-      name: `#${id}`,
+      ranking: id,
       items: [],
     };
   });
 
-  const questions = options.map((option, index) => ({
-    id: index + 1,
-    name: option.text,
-  }));
+  const questions = options.map((o) => o);
+
+  const getRanking = (option) => {
+    return slots.find((slot) =>
+      slot.items.some((item) => item.value === option.value)
+    )?.ranking;
+  };
 
   return {
     slots,
     questions,
+    getRanking,
   };
 };

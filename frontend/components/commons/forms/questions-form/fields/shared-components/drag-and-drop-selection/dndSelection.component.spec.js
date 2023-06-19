@@ -18,9 +18,9 @@ describe("DndSelectionComponent", () => {
   it("render the component", () => {
     expect(wrapper.is(DndSelectionComponent)).toBe(true);
   });
-  it("has a listOfItems prop as required and must be an array", () => {
-    expect(DndSelectionComponent.props.listOfItems).toMatchObject({
-      type: Array,
+  it("has a ranking prop as required and must be an Object", () => {
+    expect(DndSelectionComponent.props.ranking).toMatchObject({
+      type: Object,
       required: true,
     });
   });
