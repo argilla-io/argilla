@@ -759,13 +759,12 @@ class FeedbackDataset:
                     dataset[question.name].append(
                         [
                             {
-                                "user_id": r.user_id,
-                                "value": r.values[question.name].value,
-                                "status": r.status,
+                                "user_id": r.user_id or None,
+                                "value": r.values[question.name].value or None,
+                                "status": r.status or None,
                             }
                             for r in record.responses
                         ]
-                        or None
                     )
                 dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
                 dataset["external_id"].append(record.external_id or None)
