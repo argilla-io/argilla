@@ -17,13 +17,8 @@ import warnings
 from abc import abstractmethod
 from collections import Counter
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
-
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
 
 from pydantic import (
     BaseModel,
@@ -118,6 +113,7 @@ class FeedbackRecord(BaseModel):
 
     Args:
         fields (Dict[str, str]): The fields of the record.
+        metadata (Optional[Dict[str, Any]]): The metadata of the record. Defaults to None.
         responses (Optional[Union[ResponseSchema, List[ResponseSchema]]]): The responses of the record. Defaults to None.
         external_id (Optional[str]): The external id of the record. Defaults to None.
         unified_responses (Optional[Dict[str, List[UnificatiedValueSchema]]]): The unified responses of the record. Defaults to None.
@@ -126,12 +122,14 @@ class FeedbackRecord(BaseModel):
         >>> import argilla as rg
         >>> rg.FeedbackRecord(
         ...     fields={"text": "This is the first record", "label": "positive"},
+        ...     metadata={"first": True, "nested": {"more": "stuff"}},
         ...     responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
         ...     external_id="entry-1",
         ... )
         >>> # or use a ResponseSchema directly
         >>> rg.FeedbackRecord(
         ...     fields={"text": "This is the first record", "label": "positive"},
+        ...     metadata={"first": True, "nested": {"more": "stuff"}},
         ...     responses=[rg.ResponseSchema(values={"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}))],
         ...     external_id="entry-1",
         ... )
@@ -139,6 +137,7 @@ class FeedbackRecord(BaseModel):
     """
 
     fields: Dict[str, str]
+    metadata: Optional[Dict[str, Any]] = None
     responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
     unified_responses: Optional[Dict[str, List[UnificatiedValueSchema]]] = {}

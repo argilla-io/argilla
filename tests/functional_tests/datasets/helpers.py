@@ -14,10 +14,11 @@
 
 import argilla as rg
 from argilla import Text2TextRecord, TextClassificationRecord, TokenClassificationRecord
+from argilla.client.client import Argilla
 from argilla.server.commons.models import TaskType
 
 
-def create_dataset(task: TaskType):
+def create_dataset(client: Argilla, task: TaskType):
     def text_class(idx):
         return TextClassificationRecord(
             id=idx,
@@ -38,7 +39,7 @@ def create_dataset(task: TaskType):
         )
 
     dataset = "test_dataset"
-    rg.delete(dataset)
+    client.delete(dataset)
 
     if task == TaskType.text_classification:
         record_builder = text_class
@@ -49,9 +50,6 @@ def create_dataset(task: TaskType):
 
     records = [record_builder(i) for i in range(0, 50)]
 
-    rg.log(
-        name=dataset,
-        records=records,
-    )
+    client.log(name=dataset, records=records)
 
     return dataset

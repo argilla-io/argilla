@@ -16,8 +16,8 @@ from argilla.server.models import User
 from fastapi.testclient import TestClient
 
 
-def test_create_security_token(client: TestClient, admin: User):
-    response = client.post("/api/security/token", data={"username": admin.username, "password": "1234"})
+def test_create_security_token(client: TestClient, owner):
+    response = client.post("/api/security/token", data={"username": owner.username, "password": "1234"})
 
     assert response.status_code == 200
 
@@ -32,8 +32,8 @@ def test_create_security_token_with_empty_username(client: TestClient):
     assert response.status_code == 422
 
 
-def test_create_security_token_with_empty_password(client: TestClient, admin: User):
-    response = client.post("/api/security/token", data={"username": admin.username, "password": ""})
+def test_create_security_token_with_empty_password(client: TestClient, owner):
+    response = client.post("/api/security/token", data={"username": owner.username, "password": ""})
 
     assert response.status_code == 422
 
@@ -44,7 +44,7 @@ def test_create_security_token_with_invalid_username(client: TestClient):
     assert response.status_code == 401
 
 
-def test_create_security_token_with_invalid_password(client: TestClient, admin: User):
-    response = client.post("/api/security/token", data={"username": admin.username, "password": "invalid"})
+def test_create_security_token_with_invalid_password(client: TestClient, owner):
+    response = client.post("/api/security/token", data={"username": owner.username, "password": "invalid"})
 
     assert response.status_code == 401

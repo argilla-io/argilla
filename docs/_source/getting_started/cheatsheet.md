@@ -2,10 +2,9 @@
 
 ## Installation
 
-First things first!
-```bash
-pip install argilla
+```{include} /_common/tabs/argilla_install_python.md
 ```
+
 
 ```{include} /_common/tabs/argilla_install.md
 ```

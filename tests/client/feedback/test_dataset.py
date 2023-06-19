@@ -13,16 +13,12 @@
 #  limitations under the License.
 
 import tempfile
-from typing import TYPE_CHECKING, List, Union
+¡
+from typing import TYPE_CHECKING, List, Type, Union
 
 import datasets
 import pytest
 from argilla.client import api
-from argilla.client.sdk.commons.errors import NotFoundApiError
-
-if TYPE_CHECKING:
-    from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
-
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackDatasetConfig,
@@ -39,10 +35,17 @@ from argilla.client.feedback.training.schemas import (
 )
 from argilla.client.models import Framework
 
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.server.models import User
 
-@pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions")
+    from tests.helpers import SecuredClient
+
+
 def test_init(
-    feedback_dataset_guidelines: str, feedback_dataset_fields: list, feedback_dataset_questions: list
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
 ) -> None:
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -55,8 +58,9 @@ def test_init(
     assert dataset.questions == feedback_dataset_questions
 
 
-@pytest.mark.usefixtures("feedback_dataset_fields", "feedback_dataset_questions")
-def test_init_wrong_guidelines(feedback_dataset_fields: list, feedback_dataset_questions: list) -> None:
+def test_init_wrong_guidelines(
+    feedback_dataset_fields: List["AllowedFieldTypes"], feedback_dataset_questions: List["AllowedQuestionTypes"]
+) -> None:
     with pytest.raises(TypeError, match="Expected `guidelines` to be"):
         FeedbackDataset(
             guidelines=[],
@@ -71,8 +75,9 @@ def test_init_wrong_guidelines(feedback_dataset_fields: list, feedback_dataset_q
         )
 
 
-@pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_questions")
-def test_init_wrong_fields(feedback_dataset_guidelines: str, feedback_dataset_questions: list) -> None:
+def test_init_wrong_fields(
+    feedback_dataset_guidelines: str, feedback_dataset_questions: List["AllowedQuestionTypes"]
+) -> None:
     with pytest.raises(TypeError, match="Expected `fields` to be a list"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
@@ -102,8 +107,9 @@ def test_init_wrong_fields(feedback_dataset_guidelines: str, feedback_dataset_qu
         )
 
 
-@pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields")
-def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset_fields: list) -> None:
+def test_init_wrong_questions(
+    feedback_dataset_guidelines: str, feedback_dataset_fields: List["AllowedFieldTypes"]
+) -> None:
     with pytest.raises(TypeError, match="Expected `questions` to be a list, got"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
@@ -139,7 +145,6 @@ def test_init_wrong_questions(feedback_dataset_guidelines: str, feedback_dataset
         )
 
 
-@pytest.mark.usefixtures("feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions")
 def test_records(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
@@ -169,6 +174,7 @@ def test_records(
         "text": "A",
         "label": "B",
     }
+    assert dataset.records[0].metadata is None
     assert dataset.records[0].responses == []
 
     dataset.add_records(
@@ -178,6 +184,7 @@ def test_records(
                     "text": "C",
                     "label": "D",
                 },
+                metadata={"unit": "test"},
                 responses={
                     "values": {
                         "question-1": {"value": "answer"},
@@ -197,6 +204,7 @@ def test_records(
         "text": "C",
         "label": "D",
     }
+    assert dataset.records[1].metadata == {"unit": "test"}
     assert dataset.records[1].responses[0].dict() == {
         "user_id": None,
         "values": {
@@ -242,17 +250,14 @@ def test_records(
 
 
 @pytest.mark.parametrize("format_as,expected_output", [("datasets", datasets.Dataset)])
-@pytest.mark.usefixtures(
-    "feedback_dataset_guidelines", "feedback_dataset_fields", "feedback_dataset_questions", "feedback_dataset_records"
-)
 def test_format_as(
-    mocked_client,
-    format_as,
-    expected_output,
-    feedback_dataset_guidelines,
-    feedback_dataset_fields,
-    feedback_dataset_questions,
-    feedback_dataset_records,
+    mocked_client: "SecuredClient",
+    format_as: str,
+    expected_output: Type[datasets.Dataset],
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
     api.active_api()
     api.init(api_key="argilla.apikey")
@@ -268,14 +273,8 @@ def test_format_as(
     assert isinstance(ds, expected_output)
 
 
-@pytest.mark.usefixtures(
-    "feedback_dataset_guidelines",
-    "feedback_dataset_fields",
-    "feedback_dataset_questions",
-    "feedback_dataset_records",
-)
 def test_push_to_argilla_and_from_argilla(
-    mocked_client,
+    mocked_client: "SecuredClient",
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -332,24 +331,43 @@ def test_push_to_argilla_and_from_argilla(
 
     assert dataset_from_argilla.guidelines == dataset.guidelines
     assert len(dataset_from_argilla.fields) == len(dataset.fields)
-    assert [field.name for field in dataset_from_argilla.fields] == [field.name for field in dataset.fields]
     assert len(dataset_from_argilla.questions) == len(dataset.questions)
-    assert [question.name for question in dataset_from_argilla.questions] == [
-        question.name for question in dataset.questions
-    ]
     assert len(dataset_from_argilla.records) == len(dataset.records)
     assert len(dataset_from_argilla.records[-1].responses) == 1  # Since the second one was discarded as `user_id=None`
 
+    for rg_record, record in zip(dataset_from_argilla.records, dataset.records):
+        assert rg_record.fields == record.fields
+        assert rg_record.metadata == record.metadata
 
-@pytest.mark.usefixtures(
-    "feedback_dataset_guidelines",
-    "feedback_dataset_fields",
-    "feedback_dataset_questions",
-    "feedback_dataset_records",
-)
+
+def test_copy_dataset_in_argilla(
+    mocked_client: "SecuredClient",
+    argilla_user: "User",
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+) -> None:
+    api.active_api()
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records)
+    dataset.push_to_argilla(name="test-dataset")
+
+    same_dataset = FeedbackDataset.from_argilla("test-dataset")
+    same_dataset.push_to_argilla("copy-dataset")
+
+    assert same_dataset.argilla_id is not None
+
+
 def test_push_to_huggingface_and_from_huggingface(
-    mocked_client,
-    monkeypatch,
+    mocked_client: "SecuredClient",
+    monkeypatch: pytest.MonkeyPatch,
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -391,8 +409,14 @@ def test_push_to_huggingface_and_from_huggingface(
     assert all(original_field in dataset_from_huggingface.fields for original_field in dataset.fields)
     assert len(dataset_from_huggingface.questions) == len(dataset.questions)
     assert all(original_question in dataset_from_huggingface.questions for original_question in dataset.questions)
-
-
+    for hf_record, record in zip(dataset_from_huggingface.records, dataset.records):
+        assert hf_record.fields == record.fields
+        assert hf_record.metadata == record.metadata
+        assert len(hf_record.responses) == len(record.responses)
+        assert all(
+            hf_response.dict() == response.dict()
+            for hf_response, response in zip(hf_record.responses, record.responses)
+        )
 @pytest.mark.parametrize(
     "framework", [Framework("spacy"), Framework("transformers"), Framework("spark-nlp"), Framework("openai")]
 )
@@ -426,4 +450,4 @@ def test_prepare_for_training_text_classification(
     with pytest.raises(NotFoundApiError):
         dataset.prepare_for_training(
             framework=framework, training_task_mapping=training_task_mapping, fetch_records=True
-        )
+

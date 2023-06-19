@@ -216,7 +216,7 @@ class Argilla:
 
         if workspace != self.get_workspace():
             if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
-                self.http_client.headers[WORKSPACE_HEADER_NAME] = workspace
+                self.http_client.update_headers({WORKSPACE_HEADER_NAME: workspace})
             else:
                 raise Exception(f"Wrong provided workspace {workspace}")
 
@@ -365,14 +365,22 @@ class Argilla:
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
             creation_class = CreationTextClassificationRecord
+            task = TaskType.text_classification
         elif record_type is TokenClassificationRecord:
             bulk_class = TokenClassificationBulkData
             creation_class = CreationTokenClassificationRecord
+            task = TaskType.token_classification
         elif record_type is Text2TextRecord:
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
+            task = TaskType.text2text
         else:
             raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
+
+        try:
+            self.datasets.create(name=name, task=task, workspace=workspace)
+        except AlreadyExistsApiError:
+            pass
 
         results = []
         with Progress() as progress_bar:

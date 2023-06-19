@@ -423,6 +423,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                     "status": "submitted",
                 }
             ],
+            metadata={"unit": "test"},
             external_id="1",
         ),
         FeedbackRecord(
@@ -438,6 +439,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                     "status": "submitted",
                 }
             ],
+            metadata={"another unit": "test"},
             external_id="2",
         ),
         FeedbackRecord(

@@ -28,7 +28,7 @@ Check the Feedback Task UI and the available shortcuts.
 Collect annotations and solve disagreements.
 ```
 ```{grid-item-card} Export a Feedback Dataset
-:link: import_export_dataset.html
+:link: export_dataset.html
 
 Export your dataset and save it in the Hugging Face Hub or locally.
 

@@ -13,22 +13,22 @@
 #  limitations under the License.
 
 import pytest
+from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import BaseClientError, UnauthorizedApiError
 from argilla.client.sdk.users.api import whoami
 from argilla.client.sdk.users.models import User
 
 
-def test_whoami(mocked_client, sdk_client):
-    user = whoami(client=sdk_client)
+def test_whoami(api: Argilla):
+    user = whoami(client=api.http_client)
     assert isinstance(user, User)
 
 
-def test_whoami_with_auth_error(monkeypatch, mocked_client):
+def test_whoami_with_auth_error(api: Argilla):
     with pytest.raises(UnauthorizedApiError):
-        sdk_client = AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey")
-        monkeypatch.setattr(sdk_client, "__httpx__", mocked_client)
-        whoami(sdk_client)
+        api.http_client.token = "wrong_token"
+        whoami(api.http_client)
 
 
 def test_whoami_with_connection_error():
