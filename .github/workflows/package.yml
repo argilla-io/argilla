@@ -106,10 +106,6 @@ jobs:
           alembic upgrade head
           pytest --cov=argilla --cov-report=xml
 
-      - name: Setup tmate session
-        if: always()
-        uses: mxschmitt/action-tmate@v3
-
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         if: steps.filter.outputs.python_code == 'true' && matrix.version == '8.5'
