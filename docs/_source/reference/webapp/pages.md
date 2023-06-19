@@ -161,7 +161,7 @@ In this page, you will be able to access your user settings and copy your API ke
 
 ### Role
 
-You can see your user role next to the user icon. The roles can be `admin` or `annotator`.
+You can see your user role next to the user icon. The roles can be `owner` or `annotator`.
 
 ### Username, name and surname
 

@@ -129,7 +129,6 @@ $checkbox-color-dark: $primary-color;
     border: 1px solid $checkbox-color;
     text-align: center;
     vertical-align: middle;
-    text-align: center;
     margin-right: 0;
     margin-left: auto;
     .svg-icon {

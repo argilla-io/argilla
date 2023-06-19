@@ -52,6 +52,7 @@ class DatasetStatus(str, Enum):
 
 
 class UserRole(str, Enum):
+    owner = "owner"
     admin = "admin"
     annotator = "annotator"
 
@@ -114,6 +115,7 @@ class Record(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     fields: Mapped[dict] = mapped_column(JSON, default={})
+    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
     external_id: Mapped[Optional[str]] = mapped_column(index=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
@@ -275,6 +277,10 @@ class User(Base):
         viewonly=True,
         order_by=Dataset.inserted_at.asc(),
     )
+
+    @property
+    def is_owner(self):
+        return self.role == UserRole.owner
 
     @property
     def is_admin(self):

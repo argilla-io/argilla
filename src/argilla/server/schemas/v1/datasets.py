@@ -14,11 +14,12 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 from uuid import UUID
 
 from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
+from pydantic.utils import GetterDict
 
 from argilla.server.search_engine import Query
 
@@ -287,9 +288,19 @@ class RecordInclude(str, Enum):
     responses = "responses"
 
 
+class RecordGetterDict(GetterDict):
+    def get(self, key: str, default: Any) -> Any:
+        if key == "metadata":
+            return getattr(self._obj, "metadata_", None)
+        if key == "responses" and "responses" not in self._obj.__dict__:
+            return default
+        return super().get(key, default)
+
+
 class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
+    metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     # TODO: move `responses` to `response` since contextualized endpoint will contains only the user response
     # response: Optional[Response]
@@ -299,6 +310,7 @@ class Record(BaseModel):
 
     class Config:
         orm_mode = True
+        getter_dict = RecordGetterDict
 
 
 class Records(BaseModel):
@@ -325,6 +337,7 @@ UserResponseCreate = Annotated[
 
 class RecordCreate(BaseModel):
     fields: Dict[str, Any]
+    metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
 
