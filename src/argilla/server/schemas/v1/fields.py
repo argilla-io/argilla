@@ -13,14 +13,10 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel
-
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
 
 from argilla.server.models import FieldType
 
