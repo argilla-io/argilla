@@ -20,11 +20,12 @@ from argilla.server.models import User
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 
-def test_workspace_cls_init(owner: User):
+@pytest.mark.asyncio
+async def test_workspace_cls_init(owner: User):
     import argilla as rg
 
-    workspace = WorkspaceFactory.create()
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+    workspace = await WorkspaceFactory.create()
+    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
 
     rg.init(api_key=owner.api_key)
     found_workspace = Workspace.from_name(workspace.name)

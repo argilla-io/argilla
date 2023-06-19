@@ -456,12 +456,13 @@ def test_log_with_wrong_name(argilla_user: User):
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-def test_dataset_copy(role: UserRole):
+@pytest.mark.asyncio
+async def test_dataset_copy(role: UserRole):
     dataset_name = "test_dataset_copy"
     dataset_copy_name = "test_dataset_copy_new"
 
-    workspace = WorkspaceFactory.create()
-    user = UserFactory.create(role=role, workspaces=[workspace])
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[workspace])
 
     api = Argilla(api_key=user.api_key, workspace=workspace.name)
 
