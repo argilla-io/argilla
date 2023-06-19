@@ -496,7 +496,8 @@ async def test_create_record_response_as_restricted_user_from_different_workspac
     client: TestClient, db: Session, role: UserRole
 ):
     record = await RecordFactory.create()
-    user = await UserFactory.create(workspaces=[WorkspaceFactory.build()], role=role)
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(workspaces=[workspace], role=role)
     response_json = {
         "values": {
             "input_ok": {"value": "yes"},

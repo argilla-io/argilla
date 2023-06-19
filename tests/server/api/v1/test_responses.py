@@ -204,14 +204,14 @@ async def test_update_response_from_discarded_to_submitted(
 
 @pytest.mark.asyncio
 async def test_update_response_from_discarded_to_submitted_without_values(
-    client: TestClient, db: "AsyncSession", admin_auth_header: dict
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
     response = await ResponseFactory.create(status="discarded")
     response_json = {
         "status": "submitted",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 422
 

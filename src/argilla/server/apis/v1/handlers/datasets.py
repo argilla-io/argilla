@@ -288,7 +288,7 @@ async def create_dataset_records(
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset(db, dataset_id)
+    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True)
 
     await authorize(current_user, DatasetPolicyV1.create_records(dataset))
 
@@ -375,7 +375,7 @@ async def publish_dataset(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset(db, dataset_id)
+    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True)
 
     await authorize(current_user, DatasetPolicyV1.publish(dataset))
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.

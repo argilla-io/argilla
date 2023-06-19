@@ -43,10 +43,10 @@ async def _exists_workspace_user_by_user_and_workspace_id(user: User, workspace_
 
 async def _exists_workspace_user_by_user_and_workspace_name(user: User, workspace_name: str) -> bool:
     db = async_object_session(user)
-    workspace = accounts.get_workspace_by_name(db, workspace_name)
+    workspace = await accounts.get_workspace_by_name(db, workspace_name)
     if workspace is None:
         return False
-    return accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace.id, user.id) is not None
+    return await accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace.id, user.id) is not None
 
 
 class WorkspaceUserPolicy:
@@ -123,7 +123,7 @@ class DatasetPolicy:
         return True
 
     @classmethod
-    async def get(cls, dataset: DatasetDB) -> PolicyAction:
+    def get(cls, dataset: DatasetDB) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace)
 
