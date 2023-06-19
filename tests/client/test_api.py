@@ -17,7 +17,7 @@ import concurrent.futures
 import datetime
 import re
 from time import sleep
-from typing import Any, Iterable
+from typing import Iterable
 from uuid import uuid4
 
 import argilla as rg
@@ -46,8 +46,8 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import User
-from argilla.server.models import UserRole
+from argilla.client.sdk.users.models import UserModel
+from argilla.server.models import User, UserRole
 from httpx import ConnectError
 
 from tests.factories import UserFactory, WorkspaceFactory
