@@ -125,7 +125,7 @@ class DatasetPolicy:
     @classmethod
     def get(cls, dataset: DatasetDB) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace)
+            return actor.is_owner or await _exists_workspace_user_by_user_and_workspace_name(actor, dataset.workspace)
 
         return is_allowed
 
