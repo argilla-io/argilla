@@ -54,9 +54,10 @@ def create_mock_dataset(
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-def test_delete_dataset(client: TestClient, owner_auth_header: dict, role: UserRole):
-    dataset = DatasetFactory.create()
-    user = UserFactory(role=role, workspaces=[dataset.workspace])
+@pytest.mark.asyncio
+async def test_delete_dataset(client: TestClient, owner_auth_header: dict, role: UserRole):
+    dataset = await DatasetFactory.create()
+    user = await UserFactory(role=role, workspaces=[dataset.workspace])
     api_auth_headers = {API_KEY_HEADER_NAME: user.api_key}
 
     create_mock_dataset(client, dataset_name=dataset.name, workspace=dataset.workspace.name, headers=owner_auth_header)
@@ -87,12 +88,13 @@ def test_delete_dataset_with_missing_workspace(client: TestClient, owner_auth_he
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-def test_create_dataset(client: TestClient, owner_auth_header: dict, role: UserRole):
-    dataset = DatasetFactory.create()
+@pytest.mark.asyncio
+async def test_create_dataset(client: TestClient, owner_auth_header: dict, role: UserRole):
+    dataset = await DatasetFactory.create()
     workspace_name = dataset.workspace.name
     delete_dataset(client, dataset_name=dataset.name, workspace=workspace_name, headers=owner_auth_header)
 
-    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     request = dict(
         name=dataset.name,
@@ -117,9 +119,10 @@ def test_create_dataset(client: TestClient, owner_auth_header: dict, role: UserR
     assert created_dataset.task == TaskType.text_classification
 
 
-def test_create_dataset_with_already_created_error(client: TestClient, owner_auth_header: dict):
-    workspace = WorkspaceFactory.create()
-    dataset = DatasetFactory.create()
+@pytest.mark.asyncio
+async def test_create_dataset_with_already_created_error(client: TestClient, owner_auth_header: dict):
+    workspace = await WorkspaceFactory.create()
+    dataset = await DatasetFactory.create()
 
     create_mock_dataset(client, dataset_name=dataset.name, headers=owner_auth_header, workspace=workspace.name)
 
@@ -186,11 +189,12 @@ async def test_create_dataset_using_several_workspaces(client: TestClient, role:
 
 
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification, TaskType.text2text])
-def test_dataset_naming_validation(client: TestClient, owner_auth_header: dict, task):
+@pytest.mark.asyncio
+async def test_dataset_naming_validation(client: TestClient, owner_auth_header: dict, task):
     request = TextClassificationBulkRequest(records=[])
     dataset_name = "Wrong dataset name"
 
-    workspace = WorkspaceFactory.create()
+    workspace = await WorkspaceFactory.create()
 
     response = client.post(
         f"/api/datasets/{dataset_name}/{task}:bulk?workspace={workspace.name}",
@@ -217,9 +221,10 @@ def test_dataset_naming_validation(client: TestClient, owner_auth_header: dict, 
     }
 
 
-def test_list_datasets(client: TestClient, owner_auth_header: dict):
-    workspace = WorkspaceFactory.create()
-    dataset = DatasetFactory.create()
+@pytest.mark.asyncio
+async def test_list_datasets(client: TestClient, owner_auth_header: dict):
+    workspace = await WorkspaceFactory.create()
+    dataset = await DatasetFactory.create()
     create_mock_dataset(client, dataset_name=dataset.name, headers=owner_auth_header, workspace=workspace.name)
 
     response = client.get(f"/api/datasets?workspace={workspace.name}", headers=owner_auth_header)
@@ -234,9 +239,10 @@ def test_list_datasets(client: TestClient, owner_auth_header: dict):
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-def test_list_datasets_without_workspace(client: TestClient, owner_auth_header: dict, role: UserRole):
-    dataset = DatasetFactory.create()
-    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
+@pytest.mark.asyncio
+async def test_list_datasets_without_workspace(client: TestClient, owner_auth_header: dict, role: UserRole):
+    dataset = await DatasetFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     create_mock_dataset(client, dataset.name, headers=owner_auth_header, workspace=dataset.workspace.name)
     response = client.get("/api/datasets", headers={API_KEY_HEADER_NAME: user.api_key})
@@ -245,12 +251,13 @@ def test_list_datasets_without_workspace(client: TestClient, owner_auth_header: 
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-def test_update_dataset(client: TestClient, owner_auth_header: dict, role: UserRole):
-    dataset = DatasetFactory.create()
+@pytest.mark.asyncio
+async def test_update_dataset(client: TestClient, owner_auth_header: dict, role: UserRole):
+    dataset = await DatasetFactory.create()
     workspace_name = dataset.workspace.name
     create_mock_dataset(client, dataset_name=dataset.name, headers=owner_auth_header, workspace=workspace_name)
 
-    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
     response = client.patch(
         f"/api/datasets/{dataset.name}?workspace={workspace_name}",
         json={"metadata": {"new": "value"}},
@@ -319,12 +326,13 @@ async def test_update_dataset_by_restricted_user_without_changes(
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-def test_open_and_close_dataset(client: TestClient, owner_auth_header: dict, role: UserRole):
-    dataset = DatasetFactory.create()
+@pytest.mark.asyncio
+async def test_open_and_close_dataset(client: TestClient, owner_auth_header: dict, role: UserRole):
+    dataset = await DatasetFactory.create()
     workspace_name = dataset.workspace.name
     create_mock_dataset(client, dataset_name=dataset.name, headers=owner_auth_header, workspace=workspace_name)
 
-    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
     endpoint_url = f"/api/datasets/{dataset.name}:{{action}}?workspace={workspace_name}"
 
     assert client.put(endpoint_url.format(action="close"), headers=owner_auth_header).status_code == 200
@@ -349,6 +357,7 @@ def test_open_and_close_dataset(client: TestClient, owner_auth_header: dict, rol
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+@pytest.mark.asyncio
 async def test_delete_records(client: TestClient, owner_auth_header: dict, role: UserRole):
     dataset = await DatasetFactory.create()
     records = [{"id": i, "inputs": {"text": f"This is a text for id {i}"}} for i in range(1, 100)]
