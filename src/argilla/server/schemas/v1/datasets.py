@@ -14,7 +14,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
@@ -24,9 +24,9 @@ from pydantic.utils import GetterDict
 from argilla.server.search_engine import Query
 
 try:
-    from typing import Annotated, Literal
+    from typing import Annotated
 except ImportError:
-    from typing_extensions import Annotated, Literal
+    from typing_extensions import Annotated
 
 from argilla.server.models import (
     DatasetStatus,
