@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import tempfile
 from typing import TYPE_CHECKING, Dict, Generator
 
@@ -21,7 +22,6 @@ from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import ArgillaSingleton
 from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla
-from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
@@ -39,7 +39,6 @@ from tests.factories import (
     AnnotatorFactory,
     OwnerFactory,
     UserFactory,
-    WorkspaceFactory,
 )
 from tests.helpers import SecuredClient
 
