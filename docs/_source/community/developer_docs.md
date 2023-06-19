@@ -184,7 +184,7 @@ pip install -r docs/_source/requirements.txt
 Then use `sphinx-autobuild` to continuously deploy the webpage using the following command:
 
 ```
-sphinx-autobuild ∑ docs/_build/html
+sphinx-autobuild docs/_source docs/_build/html
 ```
 
 This will create a `_build/html` folder that is served at [http://127.0.0.1:8000](http://127.0.0.1:8000). Also, it starts watching for changes in the `docs/source` directory. When a change is detected in `docs/source`, the documentation is rebuilt and any open browser windows are reloaded automatically. KeyboardInterrupt (ctrl+c) will stop the server.
