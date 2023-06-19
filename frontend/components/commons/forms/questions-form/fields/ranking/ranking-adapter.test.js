@@ -44,4 +44,17 @@ describe("Ranking adapter should", () => {
 
     expect(rankingExpected).toBe(2);
   });
+
+  it("get the same ranking when slot has two questions ranked", () => {
+    const { slots, questions, getRanking } = adaptQuestionsToSots(settingsFake);
+
+    slots[1].items.push(questions[0]);
+    slots[1].items.push(questions[1]);
+
+    const rankingExpectedOne = getRanking(questions[0]);
+    const rankingExpectedTwo = getRanking(questions[0]);
+
+    expect(rankingExpectedOne).toBe(2);
+    expect(rankingExpectedTwo).toBe(2);
+  });
 });

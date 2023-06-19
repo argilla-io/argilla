@@ -9,20 +9,19 @@ const QuestionHeaderComponentStub = {
   props: ["title", "isRequired", "tooltipMessage"],
 };
 const dndSelectionComponentStub = {
-  name: "dndSelectionBaseComponent",
+  name: "DndSelectionBaseComponent",
   template: "<div />",
-  props: ["listOfItems"],
+  props: ["ranking"],
 };
 
 const options = {
   stubs: {
     QuestionHeaderComponent: QuestionHeaderComponentStub,
-    dndSelectionComponent: dndSelectionComponentStub,
+    DndSelectionComponent: dndSelectionComponentStub,
   },
   propsData: {
     title: "This is the title",
-    values: [],
-    settings: {},
+    options: [],
   },
 };
 
@@ -53,36 +52,6 @@ describe("RankingComponent", () => {
 
     expect(wrapper.vm.isRequired).toBe(false);
     expect(wrapper.vm.description).toBe("");
-
-    // TODO - replace mock by empty list (see two next lines)
-    // expect(wrapper.vm.ranking).toStrictEqual([]);
-    expect(wrapper.vm.ranking).toStrictEqual([
-      {
-        index: 1,
-        items: [
-          {
-            title: "item 1",
-          },
-        ],
-      },
-      {
-        index: 2,
-        items: [
-          {
-            title: "item 2",
-          },
-          {
-            title: "item 3",
-          },
-        ],
-      },
-    ]);
-  });
-  it("has a values prop as required and must be a array", () => {
-    expect(RankingComponent.props.values).toMatchObject({
-      type: Array,
-      required: true,
-    });
   });
   it("has a title prop as required and must be a string", () => {
     expect(RankingComponent.props.title).toMatchObject({
@@ -117,26 +86,9 @@ describe("RankingComponent", () => {
       wrapper.findComponent(QuestionHeaderComponentStub).props("tooltipMessage")
     ).toBe(wrapper.vm.description);
   });
-  it("has a settings prop with as required and must be an object with a validator", () => {
-    expect(RankingComponent.props.settings.type).toBe(Object);
-    expect(RankingComponent.props.settings.required).toBe(true);
-
-    // FIXME
-    expect(
-      JSON.stringify(RankingComponent.props.settings.validator)
-    ).toStrictEqual(
-      JSON.stringify((settings) => {
-        const settingsKeys = Object.keys(settings);
-        const checkAllKeysOfSettingsAreValid = settingsKeys.every((key) =>
-          ["type", "options", "ranking_slots"].includes(key)
-        );
-        return checkAllKeysOfSettingsAreValid;
-      })
-    );
-  });
   it("pass the ranking list to the component dndSelectionBaseComponent", () => {
     expect(
-      wrapper.findComponent(dndSelectionComponentStub).props("listOfItems")
+      wrapper.findComponent(dndSelectionComponentStub).props("ranking")
     ).toStrictEqual(wrapper.vm.ranking);
   });
 });

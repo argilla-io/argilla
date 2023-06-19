@@ -3,7 +3,7 @@ import DndSelectionComponent from "./DndSelection.component";
 
 let wrapper = null;
 const options = {
-  propsData: { listOfItems: [] },
+  propsData: { ranking: {} },
 };
 
 beforeEach(() => {
