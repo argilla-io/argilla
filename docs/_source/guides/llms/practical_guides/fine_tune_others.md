@@ -8,8 +8,10 @@ After [collecting the responses](/guides/llms/practical_guides/collect_responses
 
 Text classification is a widely used NLP task where labels are assigned to text. Major companies rely on it for various applications. Sentiment analysis, a popular form of text classification, assigns labels like 🙂 positive, 🙁 negative, or 😐 neutral to text. Additionally, we distinguish between single- and multi-label text classification.
 
+#### Single-label
 Single-label text classification refers to the task of assigning a single category or label to a given text sample. Each text is associated with only one predefined class or category. For example, in sentiment analysis, a single-label text classification task would involve assigning labels such as "positive," "negative," or "neutral" to individual texts based on their sentiment.
 
+#### Multi-label
 Multi-label text classification is generally more complex than single-label classification due to the challenge of determining and predicting multiple relevant labels for each text. It finds applications in various domains, including document tagging, topic labeling, and content recommendation systems.
 
 ### Training
@@ -20,11 +22,43 @@ Data for the training text classification using our `FeedbackDataset` is defined
 
 Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practical_guides/collect_responses) and so do `RatingQuestions`s, `LabelQuestion`s and `MultiLabelQuestion`s. Therefore, we first need to define a `*QuestionUnification`, that takes one of the questions and one of their associated stategies. Note that `RatingQuestion`s can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both `LabelQuestion`s and `MultiLabelQuestion`s can be resolved using a "majority"-, or "disagreement"-strategy.
 
+
+::::{tab-set}
+
+:::{tab-item} RatingQuestion
+```python
+from argilla import RatingQuestion, RatingUnification
+
+label_unification = RatingUnification(
+    question=LabelQuestion(...),
+    strategy="majority" # or "min", "max", "disagreement"
+)
+```
+:::
+
+:::{tab-item} LabelQuestion
 ```python
 from argilla import LabelQuestion, LabelUnification
 
-label_unification = LabelUnification(question=LabelQuestion(...), strategy="majority")
+label_unification = LabelUnification(
+    question=LabelQuestion(...),
+    strategy="majority" # or "disagreement"
+)
 ```
+:::
+
+:::{tab-item} MultiLabelQuestion
+```python
+from argilla import MultiLabelQuestion, MultiLabelUnification
+
+label_unification = MultiLabelUnification(
+    question=MultiLabelQuestion(...),
+    strategy="majority" # or "disagreement"
+)
+```
+:::
+
+::::
 
 #### Define a task mapping
 
@@ -68,7 +102,10 @@ The `FeedbackDataset` also allows for custom workflows via the `prepare_for_trai
 ```python
 training_task_mapping = ...
 dataset = ...
-dataset.prepare_for_training(framework="setfit", training_task_mapping=training_task_mapping)
+dataset.prepare_for_training(
+    framework="setfit",
+    training_task_mapping=training_task_mapping
+)
 ```
 ````
 
@@ -118,8 +155,15 @@ dataset.add_records(
     ]
 )
 
-label_unification = rg.LabelQuestionUnification(question=dataset.question_by_name("relevant"), strategy="majority")
-training_task_mapping = rg.TrainingTaskMapingForTextClassification(text=dataset.field_by_name("text"), label=label_unification)
+label_unification = rg.LabelQuestionUnification(
+    question=dataset.question_by_name("relevant"),
+    strategy="majority"
+)
+
+training_task_mapping = rg.TrainingTaskMapingForTextClassification(
+    text=dataset.field_by_name("text"),
+    label=label_unification
+)
 
 trainer = rg.ArgillaTrainer(
     dataset=dataset,
