@@ -12,42 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import asyncio
 import inspect
 
-# class AsyncSQLAlchemyModelFactory(factory.alchemy.SQLAlchemyModelFactory):
-#     @classmethod
-#     async def _save(cls, model_class, session, args, kwargs):
-#         session_persistence = cls._meta.sqlalchemy_session_persistence
-#         obj = model_class(*args, **kwargs)
-#         session.add(obj)
-#         if session_persistence == "flush":
-#             await session.flush()
-#         elif session_persistence == "commit":
-#             await session.commit()
-#         return obj
-#     @classmethod
-#     def _create(cls, model_class, *args, **kwargs):
-#         session = cls._meta.sqlalchemy_session()
-#         async def coro():
-#             for key, value in kwargs.items():
-#                 # Check if the fields received are awaitable which means they are another async factory
-#                 if inspect.isawaitable(value):
-#                     kwargs[key] = await value
-#                 # This is a hacky way to make sure that the session is the same for all the objects
-#                 # that are passed to the factory.
-#                 if isinstance(value, Base):
-#                     old_session = async_object_session(value)
-#                     if old_session.sync_session.hash_key != session.sync_session.hash_key:
-#                         old_session.expunge(value)
-#                         value = await old_session.merge(value)
-#             return await cls._save(model_class, session, args, kwargs)
-#         if session is None:
-#             raise RuntimeError("No session provided.")
-#         return asyncio.create_task(coro())
-#     @classmethod
-#     async def create_batch(cls, size, **kwargs):
-#         return [await cls.create(**kwargs) for _ in range(size)]
 import factory
 from argilla.server.database import Base
 from argilla.server.models import (
@@ -67,7 +33,7 @@ from factory.alchemy import SESSION_PERSISTENCE_COMMIT, SESSION_PERSISTENCE_FLUS
 from factory.builder import BuildStep, StepBuilder, parse_declarations
 from sqlalchemy.ext.asyncio import async_object_session
 
-from tests.database import TestSession
+from tests.database import SyncTestSession, TestSession
 
 
 # https://github.com/FactoryBoy/factory_boy/issues/679#issuecomment-1348746070
@@ -170,6 +136,12 @@ class BaseFactory(AsyncSQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "flush"
 
 
+class BaseSyncFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        sqlalchemy_session = SyncTestSession
+        sqlalchemy_session_persistence = "flush"
+
+
 class WorkspaceUserFactory(BaseFactory):
     class Meta:
         model = WorkspaceUser
@@ -183,6 +155,16 @@ class WorkspaceFactory(BaseFactory):
 
 
 class UserFactory(BaseFactory):
+    class Meta:
+        model = User
+
+    first_name = factory.Faker("first_name")
+    username = factory.Sequence(lambda n: f"username-{n}")
+    api_key = factory.Sequence(lambda n: f"api-key-{n}")
+    password_hash = "$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw."
+
+
+class UserSyncFactory(BaseSyncFactory):
     class Meta:
         model = User
 
