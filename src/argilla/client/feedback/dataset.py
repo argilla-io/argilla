@@ -510,7 +510,7 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=self.argilla_id,
-                        records=[record.dict() for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]],
+                        records=[record.dict() for record in tqdm(self.__new_records[i : i + PUSHING_BATCH_SIZE])],
                     )
                 self.__records += self.__new_records
                 self.__new_records = []
@@ -597,7 +597,7 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=[record.dict() for record in batch],
+                        records=[record.dict() for record in tqdm(batch)],
                     )
                 except Exception as e:
                     delete_and_raise_exception(
