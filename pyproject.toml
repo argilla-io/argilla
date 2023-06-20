@@ -80,6 +80,8 @@ postgresql = [
     "psycopg2 ~= 2.9.5; sys_platform != 'darwin'",
     # If we're on macOS, then install `psycopg2-binary` instead
     "psycopg2-binary ~= 2.9.5; sys_platform == 'darwin'",
+    # Async PostgreSQL
+    "asyncpg >=0.27.0"
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 integrations = [
