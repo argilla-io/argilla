@@ -29,33 +29,7 @@ from argilla.server.models import UserRole
 if TYPE_CHECKING:
     import httpx
 
-"""The `Workspace` class is used to manage workspaces in Argilla. It provides
-    methods to create new workspaces, adding users to them, listing the linked users,
-    and deleting users from the workspace. While it's not allowed to delete a workspace
-    neither to update the workspace name.
-
-    Args:
-        name: the name of the workspace to be managed. Defaults to None.
-        id: the ID of the workspace to be managed. Defaults to None.
-
-    Attributes:
-        __client: the `httpx.Client` initialized to interact with the Argilla API.
-        id: the ID of the workspace.
-        name: the name of the workspace.
-        users: the list of users linked to the workspace. Defaults to None.
-        inserted_at: the datetime when the workspace was created.
-        updated_at: the datetime when the workspace was last updated.
-
-    Examples:
-        >>> from argilla import rg
-        >>> workspace = rg.Workspace.from_name("my-workspace") # or `Workspace.from_id("...")`
-        >>> workspace.add_user("my-user")
-        >>> print(workspace.users)
-        [WorkspaceUserModel(id='...', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', username='my-user', role='annotator', workspaces=['my-workspace'], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))]
-        >>> workspace.delete_user("my-user")
-        >>> print(workspace.users)
-        []
-    """
+    from argilla.client.sdk.client import AuthenticatedClient
 
 
 class User:
@@ -141,10 +115,13 @@ class User:
         )
 
     @staticmethod
-    def __active_client() -> "httpx.Client":
+    def __active_client(httpx: bool = True) -> Union["httpx.Client", "AuthenticatedClient"]:
         """Returns the active Argilla `httpx.Client` instance."""
         try:
-            return active_client().http_client.httpx
+            client = active_client().http_client
+            if httpx:
+                client = client.httpx
+            return client
         except Exception as e:
             raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
 
@@ -279,10 +256,10 @@ class User:
             >>> from argilla import rg
             >>> user = rg.User.me()
         """
-        client = cls.__active_client()
+        client = cls.__active_client(httpx=False)
         try:
-            user = users_api.whoami(client).parsed
-            return cls.__new_instance(client, user)
+            user = users_api.whoami(client)  # .parsed
+            return cls.__new_instance(client.httpx, user)
         except Exception as e:
             raise RuntimeError("Error while retrieving the current user from Argilla.") from e
 
