@@ -18,7 +18,8 @@ from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.server.contexts import accounts
-from argilla.server.security.model import User, WorkspaceUserCreate
+from argilla.server.models import User
+from argilla.server.security.model import WorkspaceUserCreate
 from sqlalchemy.orm import Session
 
 
