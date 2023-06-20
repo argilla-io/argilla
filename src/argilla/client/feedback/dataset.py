@@ -891,7 +891,7 @@ class FeedbackDataset:
             repo_type="dataset",
             **hub_auth,
         )
-        with open(config_path, "rb") as f:
+        with open(config_path, "r") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
 
         cls = cls(
