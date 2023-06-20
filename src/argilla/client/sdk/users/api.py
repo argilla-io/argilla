@@ -16,6 +16,7 @@ from typing import List, Literal, Optional, Union
 
 import httpx
 
+from argilla.client.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors_handler import handle_response_error
 from argilla.client.sdk.commons.models import (
     ErrorMessage,
@@ -25,8 +26,10 @@ from argilla.client.sdk.commons.models import (
 from argilla.client.sdk.users.models import UserCreateModel, UserModel
 
 
+# TODO(alvarobartt,frascuchon): use `httpx.Client` instead of `AuthenticatedClient` and
+# fix mock in `tests/conftest.py` to use `httpx.Client` instead of `AuthenticatedClient`
 def whoami(
-    client: httpx.Client,
+    client: AuthenticatedClient,
 ) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/me` endpoint to get the current user information.
 
@@ -39,7 +42,7 @@ def whoami(
     """
     url = "/api/me"
 
-    response = client.get(url=url)
+    response = client.httpx.get(url=url)
 
     if response.status_code == 200:
         parsed_response = UserModel(**response.json())

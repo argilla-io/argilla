@@ -135,7 +135,7 @@ class Argilla:
             headers=headers.copy(),
         )
 
-        self._user = users_api.whoami(client=self.http_client.httpx).parsed
+        self._user = users_api.whoami(client=self.http_client).parsed
         self.set_workspace(workspace or self._user.username)
 
         self._check_argilla_versions()
