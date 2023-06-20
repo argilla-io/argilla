@@ -24,7 +24,8 @@ export default {
     },
   },
   created() {
-    const parsed = marked.parse(this.markdown, {
+    const cleanMarkdown = this.markdown.replace(/[^\S\r\n]+$/gm, "");
+    const parsed = marked.parse(cleanMarkdown, {
       headerIds: false,
       mangle: false,
       breaks: true,
