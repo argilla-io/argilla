@@ -12,8 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import pytest
 from argilla._constants import DEFAULT_API_KEY
+from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.v1.datasets.api import (
     add_field,
@@ -35,183 +38,127 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackQuestionModel,
     FeedbackRecordsModel,
 )
+from argilla.server.models import DatasetStatus, UserRole
+
+from tests.factories import (
+    AdminFactory,
+    DatasetFactory,
+    RatingQuestionFactory,
+    RecordFactory,
+    TextFieldFactory,
+    UserFactory,
+    WorkspaceFactory,
+)
 
 
-@pytest.fixture
-def sdk_client():
-    return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY).httpx
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
+def test_list_datasets(role: UserRole) -> None:
+    dataset = DatasetFactory.create()
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = list_datasets(client=api.client.httpx)
 
-def test_list_datasets(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "get", mocked_client.get)
-
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
-
-    dataset_name = "test_dataset"
-    mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
-    )
-
-    response = list_datasets(client=sdk_client)
     assert response.status_code == 200
     assert isinstance(response.parsed, list)
     assert len(response.parsed) > 0
     assert isinstance(response.parsed[0], FeedbackDatasetModel)
 
 
-def test_get_datasets(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "get", mocked_client.get)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
+def test_get_datasets(role: UserRole) -> None:
+    dataset = DatasetFactory.create()
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = get_dataset(client=api.client.httpx, id=dataset.id)
 
-    dataset_name = "test_dataset"
-    mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
-    )
-    dataset_id = mocked_response.json()["id"]
-
-    response = get_dataset(client=sdk_client, id=dataset_id)
     assert response.status_code == 200
     assert isinstance(response.parsed, FeedbackDatasetModel)
-    assert response.parsed.name == dataset_name
+    assert response.parsed.name == dataset.name
 
 
-def test_create_dataset(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "post", mocked_client.post)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+def test_create_dataset(role: UserRole) -> None:
+    workspace = WorkspaceFactory.create()
 
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
+    user = UserFactory.create(role=role, workspaces=[workspace])
 
-    dataset_name = "test_dataset"
-    response = create_dataset(client=sdk_client, name=dataset_name, workspace_id=workspace_id)
+    api = Argilla(api_key=user.api_key, workspace=workspace.name)
+    response = create_dataset(client=api.client.httpx, name="dataset_name", workspace_id=str(workspace.id))
+
     assert response.status_code == 201
     assert isinstance(response.parsed, FeedbackDatasetModel)
-    assert response.parsed.name == dataset_name
+    assert response.parsed.name == "dataset_name"
 
 
-def test_delete_dataset(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "delete", mocked_client.delete)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+def test_delete_dataset(role: UserRole):
+    dataset = DatasetFactory.create()
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = delete_dataset(client=api.client.httpx, id=dataset.id)
 
-    dataset_name = "test_dataset"
-    mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
-    )
-    dataset_id = mocked_response.json()["id"]
-
-    response = delete_dataset(client=sdk_client, id=dataset_id)
     assert response.status_code == 200
 
-    mocked_response = mocked_client.get("/api/v1/me/datasets")
-    assert mocked_response.status_code == 200
-    assert len(mocked_response.json()["items"]) < 1
+    response = api.client.httpx.get("/api/v1/me/datasets")
+    assert response.status_code == 200
+    assert len(response.json()["items"]) < 1
 
 
-def test_publish_dataset(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "put", mocked_client.put)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+def test_publish_dataset(role: UserRole):
+    dataset = DatasetFactory.create(fields=[TextFieldFactory.create()], questions=[RatingQuestionFactory.create()])
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = publish_dataset(client=api.client.httpx, id=dataset.id)
 
-    dataset_name = "test_dataset"
-    mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
-    )
-    dataset_id = mocked_response.json()["id"]
-
-    mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/fields",
-        json={"name": "test_field", "title": "text_field", "required": True, "settings": {"type": "text"}},
-    )
-    mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/questions",
-        json={
-            "name": "test_question",
-            "title": "text_question",
-            "description": "test_description",
-            "required": True,
-            "settings": {"type": "text"},
-        },
-    )
-
-    response = publish_dataset(client=sdk_client, id=dataset_id)
     assert response.status_code == 200
     assert isinstance(response.parsed, FeedbackDatasetModel)
-    assert response.parsed.name == dataset_name
+    assert response.parsed.name == dataset.name
     assert response.parsed.status == "ready"
 
 
-def test_add_field(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "post", mocked_client.post)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+def test_add_field(role: UserRole):
+    dataset = DatasetFactory.create(fields=[TextFieldFactory.create()], questions=[RatingQuestionFactory.create()])
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
-
-    dataset_name = "test_dataset"
-    mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
-    )
-    dataset_id = mocked_response.json()["id"]
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
 
     response = add_field(
-        client=sdk_client,
-        id=dataset_id,
+        client=api.client.httpx,
+        id=dataset.id,
         field={"name": "test_field", "title": "text_field", "required": True, "settings": {"type": "text"}},
     )
     assert response.status_code == 201
 
 
-def test_get_fields(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "get", mocked_client.get)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
+def test_get_fields(role: UserRole):
+    dataset = DatasetFactory.create(fields=[TextFieldFactory.create()], questions=[RatingQuestionFactory.create()])
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = get_fields(client=api.client.httpx, id=dataset.id)
 
-    dataset_name = "test_dataset"
-    mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
-    )
-    dataset_id = mocked_response.json()["id"]
-
-    mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/fields",
-        json={"name": "test_field", "title": "text_field", "required": True, "settings": {"type": "text"}},
-    )
-
-    response = get_fields(client=sdk_client, id=dataset_id)
     assert response.status_code == 200
     assert isinstance(response.parsed, list)
     assert len(response.parsed) > 0
     assert isinstance(response.parsed[0], FeedbackFieldModel)
 
 
-def test_add_question(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "post", mocked_client.post)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+def test_add_question(role: UserRole):
+    dataset = DatasetFactory.create(fields=[TextFieldFactory.create()], questions=[RatingQuestionFactory.create()])
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
-
-    dataset_name = "test_dataset"
-    mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
-    )
-    dataset_id = mocked_response.json()["id"]
-
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
     response = add_question(
-        client=sdk_client,
-        id=dataset_id,
+        client=api.client.httpx,
+        id=dataset.id,
         question={
             "name": "test_question",
             "title": "text_question",
@@ -223,103 +170,48 @@ def test_add_question(mocked_client, sdk_client, monkeypatch) -> None:
     assert response.status_code == 201
 
 
-def test_get_questions(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "get", mocked_client.get)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
+def test_get_questions(role: UserRole):
+    dataset = DatasetFactory.create(fields=[TextFieldFactory.create()], questions=[RatingQuestionFactory.create()])
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = get_questions(client=api.client.httpx, id=dataset.id)
 
-    dataset_name = "test_dataset"
-    mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
-    )
-    dataset_id = mocked_response.json()["id"]
-
-    mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/questions",
-        json={
-            "name": "test_question",
-            "title": "text_question",
-            "description": "test_description",
-            "required": True,
-            "settings": {"type": "text"},
-        },
-    )
-
-    response = get_questions(client=sdk_client, id=dataset_id)
     assert response.status_code == 200
     assert isinstance(response.parsed, list)
     assert len(response.parsed) > 0
     assert isinstance(response.parsed[0], FeedbackQuestionModel)
 
 
-def test_add_records(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "post", mocked_client.post)
-
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
-
-    dataset_name = "test_dataset"
-    mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+def test_add_records(role: UserRole):
+    dataset = DatasetFactory.create(
+        status=DatasetStatus.ready,
+        fields=[TextFieldFactory.create(name="test_field")],
+        questions=[RatingQuestionFactory.create()],
     )
-    dataset_id = mocked_response.json()["id"]
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/fields",
-        json={"name": "test_field", "title": "text_field", "required": True, "settings": {"type": "text"}},
-    )
-    mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/questions",
-        json={
-            "name": "test_question",
-            "title": "text_question",
-            "description": "test_description",
-            "required": True,
-            "settings": {"type": "text"},
-        },
-    )
-    mocked_client.put(f"/api/v1/datasets/{dataset_id}/publish")
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = add_records(client=api.client.httpx, id=dataset.id, records=[{"fields": {"test_field": "test_value"}}])
 
-    response = add_records(client=sdk_client, id=dataset_id, records=[{"fields": {"test_field": "test_value"}}])
     assert response.status_code == 204
 
 
-def test_get_records(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "get", mocked_client.get)
-
-    workspace_name = "test_workspace"
-    mocked_response = mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-    workspace_id = mocked_response.json()["id"]
-
-    dataset_name = "test_dataset"
-    mocked_response = mocked_client.post(
-        f"/api/v1/datasets", json={"name": dataset_name, "guidelines": None, "workspace_id": workspace_id}
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+def test_get_records(role: UserRole):
+    dataset = DatasetFactory.create(
+        status=DatasetStatus.ready,
+        fields=[TextFieldFactory.create(name="test_field")],
+        questions=[RatingQuestionFactory.create()],
+        records=RecordFactory.create_batch(size=10),
     )
-    dataset_id = mocked_response.json()["id"]
+    user = UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/fields",
-        json={"name": "test_field", "title": "text_field", "required": True, "settings": {"type": "text"}},
-    )
-    mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/questions",
-        json={
-            "name": "test_question",
-            "title": "text_question",
-            "description": "test_description",
-            "required": True,
-            "settings": {"type": "text"},
-        },
-    )
-    mocked_client.put(f"/api/v1/datasets/{dataset_id}/publish")
-    mocked_client.post(
-        f"/api/v1/datasets/{dataset_id}/records", json={"items": [{"fields": {"test_field": "test_value"}}]}
-    )
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = get_records(client=api.http_client.httpx, id=dataset.id)
 
-    response = get_records(client=sdk_client, id=dataset_id)
     assert response.status_code == 200
     assert isinstance(response.parsed, FeedbackRecordsModel)
     assert len(response.parsed.items) > 0

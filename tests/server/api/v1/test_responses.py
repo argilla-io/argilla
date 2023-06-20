@@ -16,22 +16,26 @@ from datetime import datetime
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
+import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import DatasetStatus, Response, ResponseStatus
+from argilla.server.models import DatasetStatus, Response, ResponseStatus, UserRole
 from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from tests.factories import (
+    AdminFactory,
     AnnotatorFactory,
     DatasetFactory,
     RecordFactory,
     ResponseFactory,
     TextQuestionFactory,
+    UserFactory,
+    WorkspaceFactory,
 )
 
 
-def test_update_response(client: TestClient, db: Session, mock_search_engine: SearchEngine, admin_auth_header: dict):
+def test_update_response(client: TestClient, db: Session, mock_search_engine: SearchEngine, owner_auth_header):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
@@ -47,7 +51,7 @@ def test_update_response(client: TestClient, db: Session, mock_search_engine: Se
         "status": "submitted",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 200
     assert db.get(Response, response.id).values == {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
@@ -91,7 +95,7 @@ def test_update_response_without_authentication(client: TestClient, db: Session)
     }
 
 
-def test_update_response_from_submitted_to_discarded(client: TestClient, db: Session, admin_auth_header: dict):
+def test_update_response_from_submitted_to_discarded(client: TestClient, db: Session, owner_auth_header):
     dataset = DatasetFactory.create(status=DatasetStatus.ready)
     TextQuestionFactory.create(name="input_ok", dataset=dataset)
     TextQuestionFactory.create(name="output_ok", dataset=dataset)
@@ -113,7 +117,7 @@ def test_update_response_from_submitted_to_discarded(client: TestClient, db: Ses
         "status": "discarded",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 200
 
@@ -139,9 +143,7 @@ def test_update_response_from_submitted_to_discarded(client: TestClient, db: Ses
     }
 
 
-def test_update_response_from_submitted_to_discarded_without_values(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
+def test_update_response_from_submitted_to_discarded_without_values(client: TestClient, db: Session, owner_auth_header):
     response = ResponseFactory.create(
         values={
             "input_ok": {"value": "no"},
@@ -153,7 +155,7 @@ def test_update_response_from_submitted_to_discarded_without_values(
         "status": "discarded",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 200
 
@@ -173,26 +175,24 @@ def test_update_response_from_submitted_to_discarded_without_values(
     }
 
 
-def test_update_response_from_discarded_to_submitted(client: TestClient, db: Session, admin_auth_header: dict):
+def test_update_response_from_discarded_to_submitted(client: TestClient, db: Session, owner_auth_header):
     response = ResponseFactory.create(status="discarded")
     response_json = {
         "status": "submitted",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 422
 
 
-def test_update_response_from_discarded_to_submitted_without_values(
-    client: TestClient, db: Session, admin_auth_header: dict
-):
+def test_update_response_from_discarded_to_submitted_without_values(client: TestClient, db: Session, owner_auth_header):
     response = ResponseFactory.create(status="discarded")
     response_json = {
         "status": "submitted",
     }
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 422
 
@@ -201,11 +201,11 @@ def test_update_response_from_discarded_to_submitted_without_values(
     assert response.status == ResponseStatus.discarded
 
 
-def test_update_response_with_wrong_values(client: TestClient, db: Session, admin_auth_header: dict):
+def test_update_response_with_wrong_values(client: TestClient, db: Session, owner_auth_header):
     response = ResponseFactory.create(status="discarded")
     response_json = {"status": "submitted", "values": {"wrong_question": {"value": "wrong value"}}}
 
-    resp = client.put(f"/api/v1/responses/{response.id}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 422
     assert resp.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
@@ -292,7 +292,7 @@ def test_update_response_as_annotator_for_different_user_response(client: TestCl
     }
 
 
-def test_update_response_with_nonexistent_response_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_update_response_with_nonexistent_response_id(client: TestClient, db: Session, owner_auth_header):
     response = ResponseFactory.create(
         values={
             "input_ok": {"value": "no"},
@@ -308,7 +308,7 @@ def test_update_response_with_nonexistent_response_id(client: TestClient, db: Se
         "status": "submitted",
     }
 
-    resp = client.put(f"/api/v1/responses/{uuid4()}", headers=admin_auth_header, json=response_json)
+    resp = client.put(f"/api/v1/responses/{uuid4()}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 404
     assert db.get(Response, response.id).values == {
@@ -317,10 +317,10 @@ def test_update_response_with_nonexistent_response_id(client: TestClient, db: Se
     }
 
 
-def test_delete_response(client: TestClient, mock_search_engine: SearchEngine, db: Session, admin_auth_header: dict):
+def test_delete_response(client: TestClient, mock_search_engine: SearchEngine, db: Session, owner_auth_header):
     response = ResponseFactory.create()
 
-    resp = client.delete(f"/api/v1/responses/{response.id}", headers=admin_auth_header)
+    resp = client.delete(f"/api/v1/responses/{response.id}", headers=owner_auth_header)
 
     assert resp.status_code == 200
     assert db.query(Response).count() == 0
@@ -337,11 +337,23 @@ def test_delete_response_without_authentication(client: TestClient, db: Session)
     assert db.query(Response).count() == 1
 
 
-def test_delete_response_as_annotator(client: TestClient, db: Session):
-    annotator = AnnotatorFactory.create()
-    response = ResponseFactory.create(user=annotator)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+def test_delete_response_as_restricted_user(client: TestClient, db: Session, role: UserRole):
+    user = UserFactory.create(role=role)
+    response = ResponseFactory.create(user=user)
 
-    resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+
+    assert resp.status_code == 200
+    assert db.query(Response).count() == 0
+
+
+def test_delete_response_as_admin_for_different_user_response(client: TestClient, db: Session):
+    workspace = WorkspaceFactory.create()
+    admin = AdminFactory.create(workspaces=[workspace])
+    response = ResponseFactory.create(record=RecordFactory.create(dataset=DatasetFactory.create(workspace=workspace)))
+
+    resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: admin.api_key})
 
     assert resp.status_code == 200
     assert db.query(Response).count() == 0
@@ -357,10 +369,10 @@ def test_delete_response_as_annotator_for_different_user_response(client: TestCl
     assert db.query(Response).count() == 1
 
 
-def test_delete_response_with_nonexistent_response_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_response_with_nonexistent_response_id(client: TestClient, db: Session, owner_auth_header):
     ResponseFactory.create()
 
-    resp = client.delete(f"/api/v1/responses/{uuid4()}", headers=admin_auth_header)
+    resp = client.delete(f"/api/v1/responses/{uuid4()}", headers=owner_auth_header)
 
     assert resp.status_code == 404
     assert db.query(Response).count() == 1

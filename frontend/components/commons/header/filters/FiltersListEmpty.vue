@@ -86,7 +86,6 @@ export default {
 .show-more:after,
 .filter {
   &__dummy {
-    height: 100%;
     width: auto;
     height: 45px;
     border: 1px solid palette(grey, 600);

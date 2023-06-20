@@ -16,7 +16,7 @@ marked.use(
   })
 );
 export default {
-  name: "BaseRenderMarkdownComponent",
+  name: "RenderMarkdownBaseComponent",
   props: {
     markdown: {
       type: String,
@@ -35,7 +35,7 @@ export default {
 <style lang="scss" scoped>
 .markdown-render {
   white-space: normal;
-  word-break: break-all;
+  word-break: break-word;
   :deep() {
     pre {
       overflow: scroll;

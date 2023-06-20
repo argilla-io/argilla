@@ -84,7 +84,7 @@ class UsersMigrator:
 
     def _user_role(self, user: dict):
         if user.get("workspaces") is None:
-            return UserRole.admin
+            return UserRole.owner
         else:
             return UserRole.annotator
 

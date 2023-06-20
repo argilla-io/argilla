@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from pydantic import (
     BaseModel,
@@ -78,7 +78,7 @@ def feedback_dataset_in_argilla(
     *,
     workspace: Optional[Union[str, rg.Workspace]] = None,
     id: Optional[str] = None,
-) -> Tuple[bool, Optional["FeedbackDatasetModel"]]:
+) -> Union["FeedbackDatasetModel", None]:
     """Checks whether a `FeedbackDataset` exists in Argilla or not, based on the `name`, `id`, or the combination of
     `name` and `workspace`.
 
@@ -88,8 +88,7 @@ def feedback_dataset_in_argilla(
         id: the Argilla ID of the `FeedbackDataset`.
 
     Returns:
-        A tuple with a boolean indicating whether the `FeedbackDataset` exists in Argilla or not, and the `FeedbackDatasetModel`
-        object if the `FeedbackDataset` exists, `None` otherwise.
+        The `FeedbackDataset` if it exists in Argilla, `None` otherwise.
 
     Raises:
         ValueError: if the `workspace` is not a `rg.Workspace` instance or a string.
@@ -99,7 +98,7 @@ def feedback_dataset_in_argilla(
         >>> import argilla as rg
         >>> rg.init(api_url="...", api_key="...")
         >>> from argilla.client.feedback.dataset import feedback_dataset_in_argilla
-        >>> fds_exists, fds_cls = feedback_dataset_in_argilla(name="my-dataset")
+        >>> dataset = feedback_dataset_in_argilla(name="my-dataset")
     """
     assert (name and workspace) or name or id, (
         "You must provide either the `name` and `workspace` (the latter just if"
@@ -107,16 +106,15 @@ def feedback_dataset_in_argilla(
         " is the Argilla ID of the `rg.FeedbackDataset`."
     )
 
-    httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
+    client = rg.active_client()
+    httpx_client: "httpx.Client" = client.http_client.httpx
 
-    if (name and workspace) or name:
+    if name:
         if workspace is None:
-            workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
-
-        if isinstance(workspace, str):
+            workspace = rg.Workspace.from_name(client.get_workspace())
+        elif isinstance(workspace, str):
             workspace = rg.Workspace.from_name(workspace)
-
-        if not isinstance(workspace, rg.Workspace):
+        elif not isinstance(workspace, rg.Workspace):
             raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
 
         try:
@@ -126,10 +124,12 @@ def feedback_dataset_in_argilla(
 
         for dataset in datasets:
             if dataset.name == name and dataset.workspace_id == workspace.id:
-                return True, dataset
-        return False, None
-    else:
+                return dataset
+        return None
+    elif id:
         try:
-            return True, datasets_api_v1.get_dataset(client=httpx_client, id=id).parsed
-        except:
-            return False, None
+            return datasets_api_v1.get_dataset(client=httpx_client, id=id).parsed
+        except Exception:
+            return None
+    else:
+        raise ValueError("You must provide either the `name` and `workspace` or the `id` of the `FeedbackDataset`.")

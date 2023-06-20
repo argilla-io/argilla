@@ -108,3 +108,18 @@ You can use the answers to other questions as quality markers. For example, you 
 
 #### Duplicate the record
 You may consider that the different answers given by your annotation team are all valid options. In this case, you can duplicate the record to keep each answer. Again, this method does not guarantee the quality of the text, so it is recommended to check the quality of the text, for example using a rating question.
+
+### Unifying labels
+#### Majority vote for single label questions
+As with the rating, labels can be aggregated using the most popular option. For this option, we recommend that you have more than 2 submitted responses. In the case of a tie, you can break it by choosing a random option.
+
+#### Majority vote for multi-label questions
+If you are aggregating labels from a multi-label question, it would be more correct to calculate the majority vote per label. That means that for each label you need to check whether the majority of the annotators selected that specific label or not.
+
+#### Weighted majority vote
+You may decide to give some of your annotators more weight than others when aggregating labels so that their decisions count more than others. Some reasons to consider a weighted majority might be: because some annotators tend to have better agreement with ground truth annotations, they are experts or they represent the demographic target for specific questions.
+
+If you want to choose this option, first calculate a score from 0 to 1 for each annotator, then apply these weights to their responses. Finally, sum all the values and choose the option with the highest score.
+
+#### Train with disagreements
+If your labels are meant to solve highly subjective tasks, like sentiment analysis or abusive language detection, you may want to consider other options that preserve the natural disagreement between annotators during training. This is specially helpful to avoid diluting the feedback of minorities within your annotation team. If you want to learn more about this approach, we recommend checking the different methods discussed in [Davani et al. (2021)](https://arxiv.org/pdf/2110.05719.pdf).

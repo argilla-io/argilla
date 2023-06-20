@@ -35,15 +35,6 @@ try:
 except ModuleNotFoundError:
     pass
 
-# TODO: Remove this warning once https://github.com/argilla-io/argilla/issues/2902 is tackled
-if _sys.version_info < (3, 8):
-    warnings.warn(
-        message="Python 3.7 is coming to its end-of-life and will be no longer supported in the upcoming release of Argilla. "
-        "To ensure compatibility and uninterrupted service, we kindly request that you migrate to Argilla with"
-        " Python 3.8 or higher.",
-        category=DeprecationWarning,
-    )
-
 __version__ = _version.version
 
 if _TYPE_CHECKING:
@@ -72,8 +63,10 @@ if _TYPE_CHECKING:
         LabelQuestion,
         MultiLabelQuestion,
         RatingQuestion,
+        ResponseSchema,
         TextField,
         TextQuestion,
+        ValueSchema,
     )
     from argilla.client.models import (
         Text2TextRecord,
@@ -126,11 +119,13 @@ _import_structure = {
     "client.feedback.dataset": ["FeedbackDataset"],
     "client.feedback.schemas": [
         "FeedbackRecord",
-        "RatingQuestion",
-        "TextField",
-        "TextQuestion",
         "LabelQuestion",
         "MultiLabelQuestion",
+        "RatingQuestion",
+        "ResponseSchema",
+        "TextField",
+        "TextQuestion",
+        "ValueSchema",
     ],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],

@@ -81,37 +81,25 @@ export default {
       },
     },
   },
-  watch: {
-    async currentPage(newValue) {
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _page: newValue,
-          _status: this.recordStatusToFilterWith,
-        },
-      });
-    },
-    async recordStatusToFilterWith(newValue) {
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _status: newValue,
-          _page: this.currentPage,
-        },
-      });
-    },
-  },
   data() {
     return {
       reRenderQuestionForm: 1,
       questionFormTouched: false,
       recordStatusToFilterWith: null,
+      searchTextToFilterWith: null,
       currentPage: null,
+      totalRecords: null,
+      numberOfFetch: 0,
     };
   },
   computed: {
+    filterParams() {
+      return {
+        _search: this.searchTextToFilterWith,
+        _page: this.currentPage,
+        _status: this.recordStatusToFilterWith,
+      };
+    },
     userId() {
       return this.$auth.user.id;
     },
@@ -218,7 +206,12 @@ export default {
       });
     },
     noRecordsMessage() {
-      return `You have no ${this.recordStatusToFilterWith} records`;
+      if (
+        isNil(this.searchTextToFilterWith) ||
+        this.searchTextToFilterWith.length === 0
+      )
+        return `You have no ${this.recordStatusToFilterWith} records`;
+      return `You have no ${this.recordStatusToFilterWith} records matching the search input`;
     },
     statusClass() {
       return `--${this.record.record_status.toLowerCase()}`;
@@ -229,12 +222,14 @@ export default {
     statusFilterFromQuery() {
       return this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
     },
+    searchFilterFromQuery() {
+      return this.$route.query?._search ?? "";
+    },
     pageFromQuery() {
       const { _page } = this.$route.query;
       return isNil(_page) ? 1 : +_page;
     },
   },
-
   async fetch() {
     await this.cleanRecordOrm();
 
@@ -248,9 +243,59 @@ export default {
       await this.initRecordsInDatabase(0);
       this.currentPage = 1;
     }
+
+    this.numberOfFetch++;
+  },
+  watch: {
+    async currentPage(newValue) {
+      // TODO - regroup in a common watcher hover filterParams computed
+      await this.$router.push({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          _page: newValue,
+          _status: this.recordStatusToFilterWith,
+        },
+      });
+    },
+    async recordStatusToFilterWith(newValue) {
+      // TODO - regroup in a common watcher hover filterParams computed
+      await this.$router.push({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          _status: newValue,
+          _search: this.searchTextToFilterWith,
+          _page: this.currentPage,
+        },
+      });
+    },
+    async searchTextToFilterWith(newValue) {
+      // TODO - regroup in a common watcher hover filterParams computed
+      await this.$router.push({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          _search: newValue,
+          _status: this.recordStatusToFilterWith,
+          _page: this.currentPage,
+        },
+      });
+    },
+    numberOfFetch(newValue) {
+      const isFetchCalledForTheFirstTime = newValue === 1;
+
+      if (isFetchCalledForTheFirstTime) {
+        this.checkAndEmitTotalRecords({
+          searchFilter: this.searchTextToFilterWith,
+          value: this.totalRecords,
+        });
+      }
+    },
   },
   async created() {
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
+    this.searchTextToFilterWith = this.searchFilterFromQuery;
     this.currentPage = this.pageFromQuery;
 
     await this.refreshMetrics();
@@ -263,6 +308,7 @@ export default {
       this.setCurrentPage(this.currentPage - 1);
     });
     this.$root.$on("status-filter-changed", this.onStatusFilterChanged);
+    this.$root.$on("search-filter-changed", this.onSearchFilterChanged);
   },
   methods: {
     async refreshMetrics() {
@@ -305,10 +351,61 @@ export default {
 
       await this.$fetch();
 
+      this.checkAndEmitTotalRecords({
+        searchFilter: this.searchTextToFilterWith,
+        value: this.totalRecords,
+      });
+
+      this.reRenderQuestionForm++;
+    },
+    async applySearchFilter(searchFilter) {
+      // NOTE - the order of both next line is important because of the watcher update
+      this.currentPage = 1;
+      this.searchTextToFilterWith = searchFilter;
+
+      await this.$fetch();
+
+      this.checkAndEmitTotalRecords({ searchFilter, value: this.totalRecords });
+
       this.reRenderQuestionForm++;
     },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
+    },
+    emitResetSearchFilter() {
+      this.$root.$emit("reset-search-filter");
+    },
+    checkAndEmitTotalRecords({ searchFilter, value }) {
+      // NOTE - update the totalRecords to show ONLY if a search input is applied
+      if (searchFilter?.length) {
+        this.$root.$emit("total-records", value);
+      } else {
+        this.$root.$emit("total-records", null);
+      }
+    },
+    async onSearchFilterChanged(newSearchValue) {
+      const localApplySearchFilter = this.applySearchFilter;
+      const localEmitResetSearchFilter = this.emitResetSearchFilter;
+
+      if (
+        this.questionFormTouched &&
+        newSearchValue !== this.searchFilterFromQuery
+      ) {
+        Notification.dispatch("notify", {
+          message: "Your changes will be lost if you apply the search filter",
+          numberOfChars: 500,
+          type: "warning",
+          buttonText: LABEL_PROPERTIES.CONTINUE,
+          async onClick() {
+            await localApplySearchFilter(newSearchValue);
+          },
+          onClose() {
+            localEmitResetSearchFilter();
+          },
+        });
+      } else {
+        await this.applySearchFilter(newSearchValue);
+      }
     },
     async onStatusFilterChanged(newStatus) {
       if (this.recordStatusToFilterWith === newStatus) {
@@ -372,14 +469,30 @@ export default {
     },
     async initRecordsInDatabase(
       offset,
-      status = this.recordStatusFilterValueForGetRecords
+      status = this.recordStatusFilterValueForGetRecords,
+      searchText = this.searchTextToFilterWith
     ) {
-      // FETCH records from offset, status + 10 next records
-      const { items: records } = await this.getRecords(
-        this.datasetId,
-        offset,
-        status
-      );
+      let records = [];
+      let totalRecords = null;
+
+      if (isNil(searchText) || !searchText.length) {
+        // FETCH records from offset, status + 10 next records
+        ({ items: records } = await this.getRecords(
+          this.datasetId,
+          offset,
+          status
+        ));
+      } else {
+        ({ items: records, totalRecords } = await this.searchRecords(
+          this.datasetId,
+          offset,
+          status,
+          searchText
+        ));
+      }
+
+      this.totalRecords = isNil(totalRecords) ? null : totalRecords;
+
       // FORMAT records for orm
       const formattedRecords = this.factoryRecordsForOrm(records, offset);
 
@@ -402,6 +515,45 @@ export default {
         };
         const { data } = await this.$axios.get(url, { params });
         return data;
+      } catch (err) {
+        console.warn(err);
+        throw {
+          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
+        };
+      }
+    },
+    async searchRecords(
+      datasetId,
+      offset,
+      responseStatus,
+      searchText,
+      numberOfRecordsToFetch = 10
+    ) {
+      try {
+        const url = `/v1/me/datasets/${datasetId}/records/search`;
+
+        const body = JSON.parse(
+          JSON.stringify({
+            query: {
+              text: {
+                q: searchText,
+              },
+            },
+          })
+        );
+
+        const params = {
+          include: "responses",
+          response_status: responseStatus,
+          limit: numberOfRecordsToFetch,
+          offset,
+        };
+
+        const { data } = await this.$axios.post(url, body, { params });
+        const { items, total: totalRecords } = data;
+
+        const formattedItems = items.map((item) => item.record);
+        return { items: formattedItems, totalRecords };
       } catch (err) {
         console.warn(err);
         throw {
@@ -555,6 +707,7 @@ export default {
     this.$root.$off("go-to-next-page");
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
+    this.$root.$off("search-filter-changed");
   },
 };
 </script>

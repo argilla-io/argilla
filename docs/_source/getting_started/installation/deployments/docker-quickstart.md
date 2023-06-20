@@ -17,11 +17,11 @@ Apple Silicon M1/M2 users might have issues with this deployment. To resolve thi
 
 </div>
 
-This will run the latest quickstart docker image with 2 users `admin` and `argilla`. The password for these users is `12345678`. You can also configure these [environment variables](#environment-variables) as per your needs.
+This will run the latest quickstart docker image with 2 users `owner` and `argilla`. The password for these users is `12345678`. You can also configure these [environment variables](#environment-variables) as per your needs.
 
 ## Environment Variables
 
-- `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
+- `ADMIN_USERNAME`: The owner username to log in Argilla. The default onwer username is `admin`. By setting up
   a custom username you can use your own username to log in to the app.
 - `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key

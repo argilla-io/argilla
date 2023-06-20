@@ -3,6 +3,12 @@
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
+```{grid-item-card} Python
+:link: python.md
+
+- package extras
+- install from `develop`
+```
 ```{grid-item-card} Docker
 :link: docker.md
 
@@ -29,11 +35,6 @@
 - Azure
 - Google Cloud Platform (GCP)
 ```
-```{grid-item-card} From Development
-:link: from_development.md
-
-- install from `develop`
-```
 ```{grid-item-card} HugginFace Spaces
 :link: huggingface-spaces.md
 
@@ -52,14 +53,13 @@
 ````
 
 ```{toctree}
-:maxdepth: 2
 :hidden:
 
+python.md
 docker.md
 docker-quickstart.md
 docker_compose.md
 cloud_providers.md
-from_development.md
 huggingface-spaces.md
 google-colab.md
 ```
