@@ -64,10 +64,11 @@
         />
 
         <RankingComponent
+          v-if="input.component_type === COMPONENT_TYPE.RANKING"
           :title="input.question"
           :isRequired="input.is_required"
           :description="input.description"
-          v-model="rankingOptionsFake"
+          v-model="input.options"
         />
       </div>
     </div>
@@ -127,7 +128,7 @@ import {
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
-import { settingsFake } from "./fields/ranking/ranking-fakes";
+// import { settingsFake } from "./fields/ranking/ranking-fakes";
 
 export default {
   name: "QuestionsFormComponent",
@@ -154,7 +155,7 @@ export default {
       inputs: [],
       renderForm: 0,
       isError: false,
-      rankingOptionsFake: settingsFake.options,
+      // rankingOptionsFake: settingsFake.options,
     };
   },
   computed: {
@@ -179,6 +180,9 @@ export default {
         .some((input) => {
           if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
             return input.options[0].value.length === 0;
+          }
+          if (input.component_type === COMPONENT_TYPE.RANKING) {
+            return input.options.some((option) => !option.rank);
           }
 
           return input.options.every((option) => !option.is_selected);
