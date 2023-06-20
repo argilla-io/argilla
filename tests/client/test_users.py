@@ -12,12 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from argilla.client.api import ArgillaSingleton
 from argilla.client.users import User
-from argilla.server.models import User as UserModel
+
+if TYPE_CHECKING:
+    from argilla.server.models import User as ServerUser
 
 from tests.factories import UserFactory
 
@@ -36,7 +39,7 @@ def test_user_cls_init() -> None:
         User(id="00000000-0000-0000-0000-000000000000")
 
 
-def test_user_from_name(owner: UserModel):
+def test_user_from_name(owner: "ServerUser"):
     new_user = UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -48,7 +51,7 @@ def test_user_from_name(owner: UserModel):
         User.from_name("non-existing-user")
 
 
-def test_user_from_id(owner: UserModel):
+def test_user_from_id(owner: "ServerUser"):
     new_user = UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -60,7 +63,7 @@ def test_user_from_id(owner: UserModel):
         User.from_id(id="00000000-0000-0000-0000-000000000000")
 
 
-def test_user_create(owner: UserModel) -> None:
+def test_user_create(owner: "ServerUser") -> None:
     ArgillaSingleton.init(api_key=owner.api_key)
 
     with pytest.warns(UserWarning):
@@ -71,7 +74,7 @@ def test_user_create(owner: UserModel) -> None:
         User.create("test_user", password="test_password")
 
 
-def test_user_list(owner: UserModel) -> None:
+def test_user_list(owner: "ServerUser") -> None:
     UserFactory.create(username="user_1")
     UserFactory.create(username="user_2")
     ArgillaSingleton.init(api_key=owner.api_key)
@@ -80,7 +83,7 @@ def test_user_list(owner: UserModel) -> None:
     assert all(user.username in ["user_1", "user_2", owner.username] for user in users)
 
 
-def test_user_delete_user(owner: UserModel) -> None:
+def test_user_delete_user(owner: "ServerUser") -> None:
     new_user = UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
