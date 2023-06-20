@@ -7,7 +7,6 @@
     />
 
     <DndSelectionComponent :ranking="ranking" @onChanged="onChanged" />
-    {{ this.options }}
   </div>
 </template>
 
@@ -36,6 +35,7 @@ export default {
   },
   model: {
     prop: "options",
+    event: "on-change",
   },
   data() {
     return {
@@ -44,10 +44,13 @@ export default {
   },
   methods: {
     onChanged(newQuestionRanked) {
-      this.options = this.options.map((option) => ({
-        ...option,
-        rank: newQuestionRanked.getRanking(option),
-      }));
+      this.$emit(
+        "on-change",
+        this.options.map((option) => ({
+          ...option,
+          rank: newQuestionRanked.getRanking(option),
+        }))
+      );
     },
   },
 };
