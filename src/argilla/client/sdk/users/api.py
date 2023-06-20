@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Literal, Optional, Union
+from typing import List, Optional, Union
 
 import httpx
 
@@ -24,6 +24,7 @@ from argilla.client.sdk.commons.models import (
     Response,
 )
 from argilla.client.sdk.users.models import UserCreateModel, UserModel
+from argilla.server.models import UserRole
 
 
 # TODO(alvarobartt,frascuchon): use `httpx.Client` instead of `AuthenticatedClient` and
@@ -92,7 +93,7 @@ def create_user(
     username: str,
     password: str,
     last_name: Optional[str] = None,
-    role: Literal["admin", "annotator"] = "annotator",
+    role: UserRole = "annotator",
 ) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/users` endpoint to create a new user.
 
