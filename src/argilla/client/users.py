@@ -24,8 +24,7 @@ from argilla.client.sdk.commons.errors import (
     NotFoundApiError,
 )
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import UserCreateModel, UserModel
-from argilla.server.models import UserRole
+from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRoles
 
 if TYPE_CHECKING:
     import httpx
@@ -68,7 +67,7 @@ class User:
     first_name: str
     last_name: Optional[str]
     full_name: Optional[str]
-    role: UserRole
+    role: UserRoles
     workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime
@@ -148,12 +147,12 @@ class User:
             raise RuntimeError(f"Error while deleting user with username=`{self.username}` from Argilla.") from e
 
     @classmethod
-    def __new_instance(cls, client: Optional["httpx.Client"] = None, ws: Optional["UserModel"] = None) -> "User":
+    def __new_instance(cls, client: Optional["httpx.Client"] = None, user: Optional["UserModel"] = None) -> "User":
         """Returns a new `User` instance."""
         instance = cls.__new__(cls)
         instance.__client = client or cls.__active_client()
-        if isinstance(ws, UserModel):
-            instance.__dict__.update(ws.dict())
+        if isinstance(user, UserModel):
+            instance.__dict__.update(user.dict())
         return instance
 
     @classmethod
@@ -163,7 +162,7 @@ class User:
         password: Union[str, UUID],
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
-        role: Optional[UserRole] = None,
+        role: Optional[UserRoles] = None,
     ) -> "User":
         if not first_name:
             warnings.warn(
@@ -172,7 +171,7 @@ class User:
             first_name = username
         if not role:
             warnings.warn("Since the `role` hasn't been provided, it will be set to `annotator`.")
-            role = "annotator"
+            role = UserRoles.annotator
 
         client = cls.__active_client()
         try:

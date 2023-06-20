@@ -23,8 +23,7 @@ from argilla.client.sdk.commons.models import (
     HTTPValidationError,
     Response,
 )
-from argilla.client.sdk.users.models import UserCreateModel, UserModel
-from argilla.server.models import UserRole
+from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRoles
 
 
 # TODO(alvarobartt,frascuchon): use `httpx.Client` instead of `AuthenticatedClient` and
@@ -32,7 +31,6 @@ from argilla.server.models import UserRole
 def whoami(
     client: AuthenticatedClient,
 ) -> UserModel:
-    # ) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/me` endpoint to get the current user information.
 
     Args:
@@ -40,24 +38,11 @@ def whoami(
 
     Returns:
         A `UserModel` instance with the current user information.
-    # Returns:
-    #     A `Response` object containing a `parsed` attribute with the parsed response if
-    #     the request was successful, which is an instance of `UserModel`.
     """
     url = "/api/me"
 
     response = client.get(url)
     return UserModel(**response)
-
-    # if response.status_code == 200:
-    #     parsed_response = UserModel(**response.json())
-    #     return Response(
-    #         status_code=response.status_code,
-    #         content=response.content,
-    #         headers=response.headers,
-    #         parsed=parsed_response,
-    #     )
-    # return handle_response_error(response)
 
 
 def list_users(
@@ -93,7 +78,7 @@ def create_user(
     username: str,
     password: str,
     last_name: Optional[str] = None,
-    role: UserRole = "annotator",
+    role: UserRoles = UserRoles.annotator,
 ) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/users` endpoint to create a new user.
 

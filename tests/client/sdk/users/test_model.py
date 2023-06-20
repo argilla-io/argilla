@@ -13,10 +13,16 @@
 #  limitations under the License.
 
 from argilla.client.sdk.users.models import UserModel as ClientUser
+from argilla.client.sdk.users.models import UserRoles as ClientUserRoles
+from argilla.server.models import UserRole as ServerUserRoles
 from argilla.server.security.model import User as ServerUser
 
 from tests.client.sdk.conftest import Helpers
 
 
-def test_users_schema(helpers: Helpers):
+def test_users_schema(helpers: Helpers) -> None:
     assert helpers.are_compatible_api_schemas(ClientUser.schema(), ServerUser.schema())
+
+
+def test_user_roles_enums() -> None:
+    assert ClientUserRoles.__members__.keys() == ServerUserRoles.__members__.keys()

@@ -13,19 +13,24 @@
 #  limitations under the License.
 
 from datetime import datetime
+from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from argilla.server.models import UserRole as Roles
+
+class UserRoles(str, Enum):
+    owner = "owner"
+    admin = "admin"
+    annotator = "annotator"
 
 
 class UserCreateModel(BaseModel):
     first_name: str = Field(min_length=1)
     last_name: Optional[str] = Field(min_length=1)
     username: str = Field(min_length=1, regex=r"^(?!-|_)[a-z0-9-_]+$")
-    role: Roles = "annotator"
+    role: UserRoles = UserRoles.annotator
     password: str = Field(min_length=8, max_length=100)
 
     # TODO(alvarobartt): confirm with @frascuchon
@@ -39,7 +44,7 @@ class UserModel(BaseModel):
     last_name: Optional[str]
     full_name: Optional[str]
     username: str
-    role: Roles
+    role: UserRoles
     workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime
