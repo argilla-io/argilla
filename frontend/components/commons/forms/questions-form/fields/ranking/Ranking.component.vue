@@ -42,6 +42,11 @@ export default {
       ranking: adaptQuestionsToSlots({ options: this.options }),
     };
   },
+  computed: {
+    optionsHasAllResponsesWithRank() {
+      return this.options.every((option) => option.rank);
+    },
+  },
   methods: {
     onChanged(newQuestionRanked) {
       this.$emit(
