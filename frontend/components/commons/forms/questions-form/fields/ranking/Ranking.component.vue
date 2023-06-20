@@ -6,7 +6,7 @@
       :tooltipMessage="description"
     />
 
-    <DndSelectionComponent :ranking="ranking" @onChanged="onChanged" />
+    <DndSelectionComponent :ranking="ranking" @on-reorder="onChanged" />
   </div>
 </template>
 

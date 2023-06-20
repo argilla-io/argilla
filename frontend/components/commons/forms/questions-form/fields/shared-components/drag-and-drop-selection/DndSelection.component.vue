@@ -49,7 +49,7 @@ export default {
   },
   methods: {
     onMoveEnd() {
-      this.$emit("onChanged", this.ranking);
+      this.$emit("on-reorder", this.ranking);
     },
   },
 };
