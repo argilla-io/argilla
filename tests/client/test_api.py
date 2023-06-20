@@ -66,20 +66,15 @@ def mock_init_ok(monkeypatch):
         return ApiInfo(version=rg_version)
 
     def mock_whoami(*args, **kwargs) -> Response:
-        return Response(
-            status_code=200,
-            content=b"",
-            headers={},
-            parsed=UserModel(
-                id=uuid4(),
-                username="mock_username",
-                first_name="mock_first_name",
-                role="admin",
-                api_key="mock_api_key",
-                workspaces=["mock_workspace"],
-                inserted_at=datetime.datetime.now(),
-                updated_at=datetime.datetime.now(),
-            ),
+        return UserModel(
+            id=uuid4(),
+            username="mock_username",
+            first_name="mock_first_name",
+            role="admin",
+            api_key="mock_api_key",
+            workspaces=["mock_workspace"],
+            inserted_at=datetime.datetime.now(),
+            updated_at=datetime.datetime.now(),
         )
 
     monkeypatch.setattr(Status, "get_info", mock_get_info)
@@ -111,20 +106,15 @@ def mock_response_token_401(monkeypatch):
         if kwargs["url"] == "fake_url/api/me":
             raise UnauthorizedApiError()
         elif kwargs["url"] == "fake_url/api/docs/spec.json":
-            return Response(
-                status_code=200,
-                content=b"",
-                headers={},
-                parsed=UserModel(
-                    id=uuid4(),
-                    username="mock_username",
-                    first_name="mock_first_name",
-                    role="admin",
-                    api_key="mock_api_key",
-                    workspaces=["mock_workspace"],
-                    inserted_at=datetime.datetime.now(),
-                    updated_at=datetime.datetime.now(),
-                ),
+            return UserModel(
+                id=uuid4(),
+                username="mock_username",
+                first_name="mock_first_name",
+                role="admin",
+                api_key="mock_api_key",
+                workspaces=["mock_workspace"],
+                inserted_at=datetime.datetime.now(),
+                updated_at=datetime.datetime.now(),
             )
 
     monkeypatch.setattr(users_api, "whoami", mock_get)
@@ -778,20 +768,15 @@ def test_not_aligned_argilla_versions(monkeypatch):
         return ApiInfo(version="1.0.0")
 
     def mock_whoami(*args, **kwargs) -> Response:
-        return Response(
-            status_code=200,
-            content=b"",
-            headers={},
-            parsed=UserModel(
-                id=uuid4(),
-                username="mock_username",
-                first_name="mock_first_name",
-                role="admin",
-                api_key="mock_api_key",
-                workspaces=["mock_workspace"],
-                inserted_at=datetime.datetime.now(),
-                updated_at=datetime.datetime.now(),
-            ),
+        return UserModel(
+            id=uuid4(),
+            username="mock_username",
+            first_name="mock_first_name",
+            role="admin",
+            api_key="mock_api_key",
+            workspaces=["mock_workspace"],
+            inserted_at=datetime.datetime.now(),
+            updated_at=datetime.datetime.now(),
         )
 
     monkeypatch.setattr(Status, "get_info", mock_get_info)
