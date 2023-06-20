@@ -21,7 +21,7 @@ import pytest
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import ArgillaSingleton
 from argilla.client.apis.datasets import TextClassificationSettings
-from argilla.client.client import Argilla
+from argilla.client.client import Argilla, AuthenticatedClient
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
@@ -178,18 +178,14 @@ def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
 
 
 @pytest.fixture(autouse=True)
-def using_test_client_from_argilla_python_client(
-    monkeypatch, test_telemetry: "MagicMock", argilla_user: User, client: TestClient
-):
-    client_ = SecuredClient(client, argilla_user)
-
-    whoami_fn = users_api.whoami
+def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "MagicMock", client: TestClient):
+    real_whoami = users_api.whoami
 
     def whoami_mocked(*args, **kwargs):
         client_arg = args[-1] if args else kwargs["client"]
 
-        monkeypatch.setattr(client_arg, "get", client_.get)
-        return whoami_fn(client_arg)
+        monkeypatch.setattr(client_arg, "__httpx__", client)
+        return real_whoami(client_arg)
 
     monkeypatch.setattr(users_api, "whoami", whoami_mocked)
 
@@ -212,8 +208,13 @@ def mocked_client(
 ) -> SecuredClient:
     client_ = SecuredClient(client, argilla_user)
 
-    whoami_fn = users_api.whoami
-    monkeypatch.setattr(users_api, "whoami", lambda client: whoami_fn(client_))
+    real_whoami = users_api.whoami
+
+    def whoami_mocked(client: AuthenticatedClient):
+        monkeypatch.setattr(client, "__httpx__", client_)
+        return real_whoami(client)
+
+    monkeypatch.setattr(users_api, "whoami", whoami_mocked)
 
     monkeypatch.setattr(httpx, "post", client_.post)
     monkeypatch.setattr(httpx, "patch", client_.patch)
@@ -224,7 +225,7 @@ def mocked_client(
     from argilla.client.api import active_api
 
     rb_api = active_api()
-    monkeypatch.setattr(rb_api._client, "__httpx__", client_)
+    monkeypatch.setattr(rb_api.http_client, "__httpx__", client_)
 
     return client_
 
