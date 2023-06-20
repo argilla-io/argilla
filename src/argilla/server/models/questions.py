@@ -13,14 +13,14 @@
 #  limitations under the License.
 
 from enum import Enum
-from typing import Any, Generic, List, Optional, TypeVar, Union
+from typing import Any, Generic, List, Literal, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
 try:
-    from typing import Annotated, Literal
+    from typing import Annotated
 except ImportError:
-    from typing_extensions import Annotated, Literal
+    from typing_extensions import Annotated
 
 
 class QuestionType(str, Enum):
