@@ -242,6 +242,48 @@ def test_create_submitted_record_response_with_missing_required_questions(client
                 }
             },
         ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_2": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 1},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    },
+                }
+            },
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_2": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 3},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    },
+                }
+            },
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_2": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 1},
+                            {"value": "completion-a", "rank": 1},
+                        ]
+                    },
+                }
+            },
+        ),
     ],
 )
 def test_create_record_response_with_missing_required_questions(
