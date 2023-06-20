@@ -125,6 +125,12 @@ class RankingQuestionSettings(ValidOptionCheckerMixin[str]):
         if not isinstance(response.value, list):
             raise ValueError(f"This Ranking question expects a list of values, found {type(response.value)}")
 
+        if len(response.value) != len(self.option_values):
+            raise ValueError(
+                f"This Ranking question expects a list containing {len(self.option_values)} values, found a list of"
+                f" {len(response.value)} values"
+            )
+
         values = []
         ranks = []
         for response_option in response.value:
