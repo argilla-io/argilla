@@ -13,8 +13,8 @@
 #  limitations under the License.
 
 from argilla.client.sdk.users.models import UserModel as ClientUser
-from argilla.client.sdk.users.models import UserRoles as ClientUserRoles
-from argilla.server.models import UserRole as ServerUserRoles
+from argilla.client.sdk.users.models import UserRole as ClientUserRole
+from argilla.server.models import UserRole as ServerUserRole
 from argilla.server.security.model import User as ServerUser
 
 from tests.client.sdk.conftest import Helpers
@@ -25,4 +25,4 @@ def test_users_schema(helpers: Helpers) -> None:
 
 
 def test_user_roles_enums() -> None:
-    assert ClientUserRoles.__members__.keys() == ServerUserRoles.__members__.keys()
+    assert ClientUserRole.__members__.keys() == ServerUserRole.__members__.keys()

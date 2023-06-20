@@ -24,7 +24,7 @@ from argilla.client.sdk.commons.errors import (
     NotFoundApiError,
 )
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRoles
+from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 
 if TYPE_CHECKING:
     import httpx
@@ -67,7 +67,7 @@ class User:
     first_name: str
     last_name: Optional[str]
     full_name: Optional[str]
-    role: UserRoles
+    role: UserRole
     workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime
@@ -162,7 +162,7 @@ class User:
         password: Union[str, UUID],
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
-        role: Optional[UserRoles] = None,
+        role: Optional[UserRole] = None,
     ) -> "User":
         if not first_name:
             warnings.warn(
@@ -171,7 +171,7 @@ class User:
             first_name = username
         if not role:
             warnings.warn("Since the `role` hasn't been provided, it will be set to `annotator`.")
-            role = UserRoles.annotator
+            role = UserRole.annotator
 
         client = cls.__active_client()
         try:

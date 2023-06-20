@@ -20,7 +20,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class UserRoles(str, Enum):
+class UserRole(str, Enum):
     owner = "owner"
     admin = "admin"
     annotator = "annotator"
@@ -30,7 +30,7 @@ class UserCreateModel(BaseModel):
     first_name: str = Field(min_length=1)
     last_name: Optional[str] = Field(min_length=1)
     username: str = Field(min_length=1, regex=r"^(?!-|_)[a-z0-9-_]+$")
-    role: UserRoles = UserRoles.annotator
+    role: UserRole = UserRole.annotator
     password: str = Field(min_length=8, max_length=100)
 
     # TODO(alvarobartt): confirm with @frascuchon
@@ -44,7 +44,7 @@ class UserModel(BaseModel):
     last_name: Optional[str]
     full_name: Optional[str]
     username: str
-    role: UserRoles
+    role: UserRole
     workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime

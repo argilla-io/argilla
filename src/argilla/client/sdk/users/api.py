@@ -23,7 +23,7 @@ from argilla.client.sdk.commons.models import (
     HTTPValidationError,
     Response,
 )
-from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRoles
+from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 
 
 # TODO(alvarobartt,frascuchon): use `httpx.Client` instead of `AuthenticatedClient` and
@@ -78,7 +78,7 @@ def create_user(
     username: str,
     password: str,
     last_name: Optional[str] = None,
-    role: UserRoles = UserRoles.annotator,
+    role: UserRole = UserRole.annotator,
 ) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/users` endpoint to create a new user.
 
