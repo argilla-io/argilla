@@ -541,7 +541,7 @@ export default {
             }
             break;
           }
-          case COMPONENT_TYPE.RAKING: {
+          case COMPONENT_TYPE.RANKING: {
             responseByQuestionName[input.name] = {
               value: input.options,
             };
