@@ -18,6 +18,7 @@ from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.server.contexts import accounts
+from argilla.server.models import User
 from argilla.server.security.model import WorkspaceUserCreate
 from sqlalchemy.orm import Session
 
@@ -35,8 +36,10 @@ from sqlalchemy.orm import Session
         ),
     ],
 )
-def test_settings_workflow(mocked_client, settings_, wrong_settings):
+def test_settings_workflow(argilla_user: User, settings_, wrong_settings):
     dataset = "test-dataset"
+
+    rg.init(api_key=argilla_user.api_key, workspace=argilla_user.username)
     workspace = rg.get_workspace()
 
     rg.delete(dataset)
