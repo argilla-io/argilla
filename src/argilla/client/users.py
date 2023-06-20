@@ -19,6 +19,7 @@ from uuid import UUID
 
 from argilla.client import active_client
 from argilla.client.sdk.commons.errors import (
+    AlreadyExistsApiError,
     BaseClientError,
     NotFoundApiError,
 )
@@ -139,7 +140,12 @@ class User:
         try:
             users_api.delete_user(self.__client, user_id=self.id)
         except NotFoundApiError as e:
-            raise BaseClientError(f"The user '{self.username}' cannot be deleted from Argilla.") from e
+            raise ValueError(
+                f"User with username=`{self.username}` doesn't exist in Argilla, so please"
+                " make sure that the name you provided is a valid one."
+            ) from e
+        except BaseClientError as e:
+            raise RuntimeError(f"Error while deleting user with username=`{self.username}` from Argilla.") from e
 
     @classmethod
     def __new_instance(cls, client: Optional["httpx.Client"] = None, ws: Optional["UserModel"] = None) -> "User":
@@ -181,6 +187,11 @@ class User:
                 ).dict(),
             ).parsed
             return cls.__new_instance(client, user)
+        except AlreadyExistsApiError as e:
+            raise ValueError(
+                f"User with username=`{username}` already exists in Argilla, so please"
+                " make sure that the name you provided is a unique one."
+            ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while creating user with username=`{username}` in Argilla.") from e
 
@@ -205,10 +216,16 @@ class User:
         client = cls.__active_client()
         try:
             users = users_api.list_users(client).parsed
-            user = next(filter(lambda u: u.id == id, users))
+            try:
+                user = next(filter(lambda u: u.id == id, users))
+            except StopIteration as e:
+                raise ValueError(
+                    f"User with id=`{id}` doesn't exist in Argilla, so please"
+                    " make sure that the ID you provided is a valid one."
+                ) from e
             return cls.__new_instance(client, user)
         except BaseClientError as e:
-            raise RuntimeError(f"Error while retrieving user with ID=`{id}` from Argilla.") from e
+            raise RuntimeError(f"Error while retrieving user with id=`{id}` from Argilla.") from e
 
     @classmethod
     def from_name(cls, name: str) -> "User":
@@ -231,16 +248,22 @@ class User:
         client = cls.__active_client()
         try:
             users = users_api.list_users(client).parsed
-            user = next(filter(lambda u: u.username == name, users))
+            try:
+                user = next(filter(lambda u: u.username == name, users))
+            except StopIteration as e:
+                raise ValueError(
+                    f"User with username=`{name}` doesn't exist in Argilla, so please"
+                    " make sure that the name you provided is a valid one."
+                ) from e
             return cls.__new_instance(client, user)
         except NotFoundApiError as e:
             raise ValueError(
-                f"User with name=`{name}` doesn't exist in Argilla, so please"
+                f"User with username=`{name}` doesn't exist in Argilla, so please"
                 " make sure that the name you provided is a valid one. Otherwise,"
                 " you can create a new one via the `User.create` method."
             ) from e
         except BaseClientError as e:
-            raise RuntimeError(f"Error while retrieving user with name=`{name}` from Argilla.") from e
+            raise RuntimeError(f"Error while retrieving user with username=`{name}` from Argilla.") from e
 
     @classmethod
     def me(cls) -> "User":
