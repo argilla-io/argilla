@@ -1,15 +1,15 @@
-import { adaptQuestionsToSots } from "./ranking-adapter";
+import { adaptQuestionsToSlots } from "./ranking-adapter";
 import { settingsFake } from "./ranking-fakes";
 
 describe("Ranking adapter should", () => {
   it("get the same slots quantity that questions has", () => {
-    const { slots, questions } = adaptQuestionsToSots(settingsFake);
+    const { slots, questions } = adaptQuestionsToSlots(settingsFake);
 
     expect(slots.length).toBe(questions.length);
   });
 
   it("has get adapted options as a question with name", () => {
-    const { questions } = adaptQuestionsToSots(settingsFake);
+    const { questions } = adaptQuestionsToSlots(settingsFake);
 
     expect(questions[0].text).toBe("My label");
     expect(questions[1].text).toBe("Other Label");
@@ -18,7 +18,7 @@ describe("Ranking adapter should", () => {
   });
 
   it("has a question id property based on index iteration", () => {
-    const { questions } = adaptQuestionsToSots(settingsFake);
+    const { questions } = adaptQuestionsToSlots(settingsFake);
 
     expect(questions[0].value).toBe("label-01");
     expect(questions[1].value).toBe("label-02");
@@ -27,7 +27,7 @@ describe("Ranking adapter should", () => {
   });
 
   it("has slot name created based on index iteration", () => {
-    const { slots } = adaptQuestionsToSots(settingsFake);
+    const { slots } = adaptQuestionsToSlots(settingsFake);
 
     expect(slots[0].ranking).toBe(1);
     expect(slots[1].ranking).toBe(2);
@@ -36,7 +36,8 @@ describe("Ranking adapter should", () => {
   });
 
   it("get ranking correctly based on question", () => {
-    const { slots, questions, getRanking } = adaptQuestionsToSots(settingsFake);
+    const { slots, questions, getRanking } =
+      adaptQuestionsToSlots(settingsFake);
 
     slots[1].items.push(questions[0]);
 
@@ -46,7 +47,8 @@ describe("Ranking adapter should", () => {
   });
 
   it("get the same ranking when slot has two questions ranked", () => {
-    const { slots, questions, getRanking } = adaptQuestionsToSots(settingsFake);
+    const { slots, questions, getRanking } =
+      adaptQuestionsToSlots(settingsFake);
 
     slots[1].items.push(questions[0]);
     slots[1].items.push(questions[1]);

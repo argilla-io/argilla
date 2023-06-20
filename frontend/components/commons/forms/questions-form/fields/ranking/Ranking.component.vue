@@ -7,11 +7,12 @@
     />
 
     <DndSelectionComponent :ranking="ranking" @onChanged="onChanged" />
+    {{ this.options }}
   </div>
 </template>
 
 <script>
-import { adaptQuestionsToSots } from "./ranking-adapter";
+import { adaptQuestionsToSlots } from "./ranking-adapter";
 
 export default {
   name: "RankingComponent",
@@ -38,14 +39,14 @@ export default {
   },
   data() {
     return {
-      ranking: adaptQuestionsToSots({ options: this.options }),
+      ranking: adaptQuestionsToSlots({ options: this.options }),
     };
   },
   methods: {
     onChanged(newQuestionRanked) {
       this.options = this.options.map((option) => ({
         ...option,
-        ranking: newQuestionRanked.getRanking(option),
+        rank: newQuestionRanked.getRanking(option),
       }));
     },
   },

@@ -7,8 +7,8 @@
         :group="{ name: 'question' }"
         :sort="false"
       >
-        <div v-for="item in ranking.questions" :key="item.value">
-          <div class="draggable__rank-card">{{ item.text }}</div>
+        <div v-for="{ text, value } in ranking.questions" :key="value">
+          <div class="draggable__rank-card" v-text="text" />
         </div>
       </draggable>
     </div>
@@ -16,21 +16,21 @@
     <div class="draggable__slots-container">
       <div
         class="draggable__slot"
-        v-for="slot in ranking.slots"
-        :key="slot.index"
+        v-for="{ index, ranking, items } in ranking.slots"
+        :key="index"
       >
-        <span> #{{ slot.ranking }} </span>
+        <span> #{{ ranking }} </span>
 
         <draggable
           class="draggable__questions-ranked"
-          :list="slot.items"
+          :list="items"
           group="question"
           :sort="false"
           @add="onMoveEnd"
           @remove="onMoveEnd"
         >
-          <div v-for="item in slot.items" :key="item.value">
-            <div class="draggable__ranked-card">{{ item.text }}</div>
+          <div v-for="{ text, value } in items" :key="value">
+            <div class="draggable__ranked-card" v-text="text" />
           </div>
         </draggable>
       </div>

@@ -1,4 +1,4 @@
-export const adaptQuestionsToSots = ({ options }) => {
+export const adaptQuestionsToSlots = ({ options }) => {
   const slots = options.map((_, index) => {
     const id = index + 1;
     return {
