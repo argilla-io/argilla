@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import json
 import logging
 import tempfile
@@ -752,15 +753,16 @@ class FeedbackDataset:
                     dataset[field.name].append(record.fields[field.name])
                 for question in self.questions:
                     dataset[question.name].append(
-                        [
-                            {
-                                "user_id": r.user_id,
-                                "value": r.values[question.name].value,
-                                "status": r.status,
-                            }
-                            for r in record.responses
-                        ]
-                        or None
+                        {
+                            "user_id": [r.user_id for r in record.responses],
+                            "value": [
+                                r.values[question.name].value if question.name in r.values else None
+                                for r in record.responses
+                            ],
+                            "status": [r.status for r in record.responses],
+                        }
+                        if record.responses
+                        else None
                     )
                 dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
                 dataset["external_id"].append(record.external_id or None)
@@ -838,7 +840,7 @@ class FeedbackDataset:
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
                 argilla_guidelines=self.guidelines,
-                argilla_record=self.records[0].dict(),
+                argilla_record=json.loads(self.records[0].json()),
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
@@ -887,7 +889,7 @@ class FeedbackDataset:
             repo_type="dataset",
             **hub_auth,
         )
-        with open(config_path, "rb") as f:
+        with open(config_path, "r") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
 
         cls = cls(
