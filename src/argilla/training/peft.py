@@ -81,7 +81,7 @@ class ArgillaPeftTrainer(ArgillaTransformersTrainer):
         self._transformers_tokenizer = AutoTokenizer.from_pretrained(
             config.base_model_name_or_path, add_prefix_space=True
         )
-        self._transformers_model = model
+        self._transformers_model = model.to(self.device)
 
     def init_pipeline(self):
         pass
@@ -154,6 +154,7 @@ class ArgillaPeftTrainer(ArgillaTransformersTrainer):
             inputs_with_offsets = self._transformers_tokenizer(
                 text, truncation=True, padding="longest", return_offsets_mapping=True, return_tensors="pt"
             )
+            inputs_with_offsets = {k: v.to(self.device) for k, v in inputs_with_offsets.items()}
             offsets = inputs_with_offsets["offset_mapping"]
 
             # Perform the forward pass through the model

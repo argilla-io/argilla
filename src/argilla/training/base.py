@@ -169,6 +169,8 @@ class ArgillaTrainer(object):
             from argilla.training.peft import ArgillaPeftTrainer
 
             self._trainer = ArgillaPeftTrainer(
+                name=self._name,
+                workspace=self._workspace,
                 record_class=self._rg_dataset_type._RECORD_TYPE,
                 dataset=self.dataset_full_prepared,
                 multi_label=self._multi_label,
