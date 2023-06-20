@@ -137,7 +137,7 @@ class User:
             >>> user.delete()
         """
         try:
-            users_api.delete_user(self.__client, id=self.id)
+            users_api.delete_user(self.__client, user_id=self.id)
         except NotFoundApiError as e:
             raise BaseClientError(f"The user '{self.username}' cannot be deleted from Argilla.") from e
 
