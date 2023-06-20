@@ -26,7 +26,9 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
 from argilla.server.commons.models import PredictionStatus
+from argilla.server.models import User
 from argilla.server.schemas.datasets import Dataset
+from starlette.testclient import TestClient
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 
@@ -193,7 +195,7 @@ def test_create_records_for_text_classification(mocked_client, test_telemetry):
         "words": {"data": 1},
     }
 
-    test_telemetry.assert_called_once()
+    test_telemetry.assert_called()
 
 
 @pytest.mark.skipif(

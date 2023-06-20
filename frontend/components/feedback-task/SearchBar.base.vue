@@ -48,10 +48,14 @@
       @keydown.enter.exact.stop=""
     />
 
-    <span class="search-area__additional-info" v-text="additionalInfo" />
+    <span
+      class="search-area__additional-info"
+      v-if="localAdditionalInfo"
+      v-text="additionalInfo"
+    />
 
     <BaseIconWithBadge
-      v-if="isSearchActive"
+      v-if="showDelete"
       class="search-area__icon --close"
       icon="close"
       :show-badge="false"
@@ -65,6 +69,9 @@
 </template>
 
 <script>
+import { isNil } from "lodash";
+// TODO - manage only empty strings and not null in the  search component
+
 export default {
   name: "SearchBarComponent",
   props: {
@@ -88,19 +95,32 @@ export default {
   data() {
     return {
       searchValue: "",
+      localAdditionalInfo: "",
       searchHasFocus: false,
     };
   },
   computed: {
     isSearchActive() {
-      return this.value?.length;
+      return !(isNil(this.value) || this.value.length === 0);
+    },
+    isSearchValueEmpty() {
+      return isNil(this.searchValue) || this.searchValue.length === 0;
+    },
+    showDelete() {
+      return !this.isSearchValueEmpty || this.isSearchActive;
     },
   },
   watch: {
     value: {
       immediate: true,
       handler(newValue) {
-        this.searchValue = newValue ?? "";
+        this.searchValue = newValue;
+      },
+    },
+    additionalInfo: {
+      inmediate: true,
+      handler(newValue) {
+        this.localAdditionalInfo = newValue;
       },
     },
   },
@@ -116,10 +136,9 @@ export default {
       this.$refs.searchRef.focus();
     },
     resetValue() {
-      if (this.searchValue?.length) {
-        this.searchValue = "";
-        this.$emit("input", "");
-      }
+      this.searchValue = "";
+      this.localAdditionalInfo = "";
+      this.$emit("input", "");
     },
   },
 };
@@ -169,8 +188,8 @@ export default {
   }
   &__additional-info {
     @include font-size(13px);
-    color: rgba(0, 0, 0, 0.37);
-    text-wrap: nowrap;
+    color: $black-37;
+    white-space: nowrap;
   }
 }
 </style>
