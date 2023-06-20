@@ -2,6 +2,12 @@
 
 After [collecting the responses](/guides/llms/practical_guides/collect_responses) from our `FeedbackDataset` we can start fine-tuning our basic models. Due to the customizability of the `FeedbackDataset`, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the text classification task. We will add additional support for other tasks in the future.
 
+Generally, this is as easy as one-two-three but does slightly differ per task.
+
+1. First, we define a unification strategy for responses to `questions` we want to use.
+2. Next, we then define a task-mapping. This mapping defines which `fields` and `questions` we want to use from our dataset for the downstream training task. These mappings are then used for retrieving data from a dataset and initializing the training.
+3. Lastly, we initialize the `ArgillaTrainer` and forward the task mapping, unification strategies and training framework.
+
 ## Text classification
 
 ### Background
@@ -16,12 +22,21 @@ Multi-label text classification is generally more complex than single-label clas
 
 ### Training
 
-Data for the training text classification using our `FeedbackDataset` is defined by configuring a `TrainingTaskMapingForTextClassification`. This mapping defines which `fields` and `questions` we want to use from our dataset. For this task, we allow for mapping a `*Field` to a `text`-value and allow for mapping a `RatingQuestion`, `LabelQuestion` or `MultiLabelQuestion` to a `label`-value. These mappings are then used for retrieving data from a dataset and initializing the training.
+Data for the training text classification using our `FeedbackDataset` is defined by following three easy steps.
+
+1. We need to define unification strategies a `RatingUnification`, a `LabelUnification` or a `MultiLabelUnification`.
+
+2.  For this task, we assume we need a `text-label`-pair for defining a text classification task. We allow mapping for creating a `TrainingTaskMapingForTextClassification` by mapping `*Field` to a `text`-value and allow for mapping a `RatingUnification`, `LabelUnification` or a `MultiLabelUnification` to a `label`-value.
+
+3.  We then define an `ArgillaTrainer` instance with support for "openai", "setfit", "peft", "spacy" and "transformers".
 
 #### Unify responses
 
-Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practical_guides/collect_responses) and so do `RatingQuestions`s, `LabelQuestion`s and `MultiLabelQuestion`s. Therefore, we first need to define a `*QuestionUnification`, that takes one of the questions and one of their associated stategies. Note that `RatingQuestion`s can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both `LabelQuestion`s and `MultiLabelQuestion`s can be resolved using a "majority"-, or "disagreement"-strategy.
+Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practical_guides/collect_responses) and so do `RatingQuestions`s, `LabelQuestion`s and `MultiLabelQuestion`s. Therefore, we first need to define a `*QuestionUnification`, which takes one of the questions and one of their associated strategies.
 
+````{note}
+Note that `RatingQuestion`s can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both `LabelQuestion`s and `MultiLabelQuestion`s can be resolved using a "majority"-, or "disagreement"-strategy.
+````
 
 ::::{tab-set}
 
@@ -70,7 +85,8 @@ from argilla import FeedbackDataset, TrainingTaskMapingForTextClassification
 label_unification = ...
 dataset = FeedbackDataset(...)
 training_task_mapping = TrainingTaskMapingForTextClassification(
-    text=dataset.field_by_name("my_text_field"), label=label_unification
+    text=dataset.field_by_name("my_text_field"),
+    label=label_unification
 )
 ```
 
@@ -134,11 +150,11 @@ dataset.add_records(
     records=[
         rg.FeedbackRecord(
             fields={"text": "What is your favorite color?"},
-            responses=[{"values": {"relevant": {"value": "yes"}}}]
+            responses=[{"values": {"relevant": {"value": "no"}}}]
         ),
         rg.FeedbackRecord(
             fields={"text": "What do you think about the new iPhone?"},
-            responses=[{"values": {"relevant": {"value": "no"}}}]
+            responses=[{"values": {"relevant": {"value": "yes"}}}]
         ),
         rg.FeedbackRecord(
             fields={"text": "What is your feeling about the technology?"},
@@ -147,9 +163,9 @@ dataset.add_records(
                        {"values": {"relevant": {"value": "yes"}}}]
         ),
         rg.FeedbackRecord(
-            fields={"text": "Jesus Christ!"},
+            fields={"text": "When do you expect to buy a new phone?"},
             responses=[{"values": {"relevant": {"value": "no"}}},
-                       {"values": {"relevant": {"value": "no"}}}]
+                       {"values": {"relevant": {"value": "yes"}}}]
         )
 
     ]
