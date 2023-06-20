@@ -19,7 +19,6 @@ as well as in the `_import_structure` dictionary.
 """
 
 import sys as _sys
-import warnings
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from argilla.logging import configure_logging as _configure_logging
@@ -128,9 +127,7 @@ _import_structure = {
         "TextQuestion",
         "ValueSchema",
     ],
-    "client.users": [
-        "User"
-    ],  # TODO(alvarobartt): it's still using API v0 so it can be included in the Argilla class, as done with `list_workspaces`
+    "client.users": ["User"],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [
