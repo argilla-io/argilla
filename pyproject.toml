@@ -133,6 +133,9 @@ log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
 
+[tool.coverage.run]
+concurrency = ["greenlet", "thread", "multiprocessing"]
+
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
