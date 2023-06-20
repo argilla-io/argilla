@@ -85,7 +85,7 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 
 <hr>
 <h3><a href="https://argilla.io/blog/launching-argilla-huggingface-hub/">Deploy on Hugging Face Hub</a></h3>
-
+WARNING: Hugging Face Spacese spaces don't have data retention by default and reset after 48 hours but this can be enabled within the settings on Hugging Face.
 <a href="https://argilla.io/blog/launching-argilla-huggingface-hub/"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
 
 <hr>

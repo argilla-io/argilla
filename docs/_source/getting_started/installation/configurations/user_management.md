@@ -62,7 +62,7 @@ User with default credentials succesfully created:
 ```
 
 :::{note}
-To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`.
+To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey` and for the quickstart image the default user API key is `admin.apikey`.
 Otherwise, connections will fail with an Unauthorized server error.
 :::
 

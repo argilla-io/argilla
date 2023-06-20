@@ -2,6 +2,10 @@
 
 Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers`, `hub`, and `setfit`), and now it can also be deployed using the Hub's Spaces.
 
+```{warning}
+**Hugging Face Spaces are reset** every 48 hours (without activity) and **do not have data retention**, so make sure to export your data after annotating or enable data retention within the spaces config.
+```
+
 In this guide, you'll learn to deploy your own Argilla app and use it for data labeling workflows right from the Hub.
 
 ## Your first Argilla Space
