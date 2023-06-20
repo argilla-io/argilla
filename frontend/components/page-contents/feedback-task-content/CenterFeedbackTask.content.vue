@@ -45,7 +45,7 @@ export default {
             description: "This is an optional field",
           },
           { value: "label-02", text: "My other Label" },
-          { value: "label-03", text: "Wat?!", rank: 2 },
+          { value: "label-03", text: "Wat?!" },
           { value: "label-04", text: "Ough!" },
         ],
       },
