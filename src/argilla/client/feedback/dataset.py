@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import json
 import logging
 import tempfile
@@ -844,7 +845,7 @@ class FeedbackDataset:
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
                 argilla_guidelines=self.guidelines,
-                argilla_record=self.records[0].dict(),
+                argilla_record=json.loads(self.records[0].json()),
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
@@ -893,7 +894,7 @@ class FeedbackDataset:
             repo_type="dataset",
             **hub_auth,
         )
-        with open(config_path, "rb") as f:
+        with open(config_path, "r") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
 
         cls = cls(
