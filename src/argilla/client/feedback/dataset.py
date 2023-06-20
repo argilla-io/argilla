@@ -757,14 +757,16 @@ class FeedbackDataset:
                     dataset[field.name].append(record.fields[field.name])
                 for question in self.questions:
                     dataset[question.name].append(
-                        [
-                            {
-                                "user_id": r.user_id or None,
-                                "value": r.values[question.name].value or None,
-                                "status": r.status or None,
-                            }
-                            for r in record.responses
-                        ]
+                        {
+                            "user_id": [r.user_id for r in record.responses],
+                            "value": [
+                                r.values[question.name].value if question.name in r.values else None
+                                for r in record.responses
+                            ],
+                            "status": [r.status for r in record.responses],
+                        }
+                        if record.responses
+                        else None
                     )
                 dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
                 dataset["external_id"].append(record.external_id or None)
