@@ -219,6 +219,34 @@ user = rg.User.create(
 )
 ```
 
+### Get a `User` by username
+
+#### Python client
+
+You can get a user by username using the `from_name` classmethod in the `User` class.
+
+```python
+import argilla as rg
+
+rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+
+user = rg.User.from_name("new-user")
+```
+
+### Get a `User` by id
+
+#### Python client
+
+You can get a user by id using the `from_id` classmethod in the `User` class.
+
+```python
+import argilla as rg
+
+rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+
+user = rg.User.from_id("new-user")
+```
+
 ### Assign a `User` to a `Workspace`
 
 #### CLI
