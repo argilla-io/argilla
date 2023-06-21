@@ -472,7 +472,12 @@ class FeedbackDataset:
         for i in range(0, len(self.records), batch_size):
             yield self.records[i : i + batch_size]
 
-    def push_to_argilla(self, name: Optional[str] = None, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
+    def push_to_argilla(
+        self,
+        name: Optional[str] = None,
+        workspace: Optional[Union[str, rg.Workspace]] = None,
+        show_progress: bool = False,
+    ) -> None:
         """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
         with the new records.
 
@@ -483,6 +488,7 @@ class FeedbackDataset:
             name: the name of the dataset to push to Argilla. If not provided, the `argilla_id` will be used if the dataset
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
+            show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
         """
         client: "ArgillaClient" = rg.active_client()
         httpx_client: "httpx.Client" = client.http_client.httpx
@@ -507,7 +513,14 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=self.argilla_id,
-                        records=[record.dict() for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]],
+                        records=[
+                            record.dict()
+                            for record in tqdm(
+                                self.__new_records[i : i + PUSHING_BATCH_SIZE],
+                                desc="Pushing records to Argilla...",
+                                disable=show_progress,
+                            )
+                        ],
                     )
                 self.__records += self.__new_records
                 self.__new_records = []
@@ -581,7 +594,10 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=[record.dict() for record in batch],
+                        records=[
+                            record.dict()
+                            for record in tqdm(batch, desc="Pushing records to Argilla...", disable=show_progress)
+                        ],
                     )
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
