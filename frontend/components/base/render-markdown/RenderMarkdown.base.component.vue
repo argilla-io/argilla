@@ -23,9 +23,14 @@ export default {
       required: true,
     },
   },
+  methods: {
+    cleanMarkdown(markdown) {
+      return markdown.replace(/[^\S\r\n]+$/gm, "");
+    },
+  },
   created() {
-    const cleanMarkdown = this.markdown.replace(/[^\S\r\n]+$/gm, "");
-    const parsed = marked.parse(cleanMarkdown, {
+    const cleanedMarkdown = this.cleanMarkdown(this.markdown);
+    const parsed = marked.parse(cleanedMarkdown, {
       headerIds: false,
       mangle: false,
       breaks: true,
