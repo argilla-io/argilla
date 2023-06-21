@@ -51,4 +51,11 @@ describe("RenderMarkdownBaseComponent", () => {
 `);
     expect(cleanedMarkdownText).not.toBe(`# example<script><TABLE>`);
   });
+  it("render correct html", () => {
+    expect(wrapper.html()).toBe(
+      `<div class="markdown-render">
+  <h1>example</h1>
+</div>`
+    );
+  });
 });
