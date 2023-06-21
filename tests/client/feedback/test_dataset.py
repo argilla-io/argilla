@@ -387,6 +387,7 @@ def test_copy_dataset_in_argilla(
     assert same_dataset.argilla_id is not None
 
     same_dataset = FeedbackDataset.from_argilla("copy-dataset")
+    assert same_dataset.argilla_id != dataset.argilla_id
     assert same_dataset.fields == dataset.fields
     assert same_dataset.questions == dataset.questions
 
