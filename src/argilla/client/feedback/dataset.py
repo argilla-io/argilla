@@ -505,7 +505,7 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=self.argilla_id,
-                        records=[record.dict() for record in tqdm(self.__new_records[i : i + PUSHING_BATCH_SIZE])],
+                        records=[record.dict() for record in tqdm(self.__new_records[i : i + PUSHING_BATCH_SIZE], desc="Pushing records to Argilla...")],
                     )
                 self.__records += self.__new_records
                 self.__new_records = []
