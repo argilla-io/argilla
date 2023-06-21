@@ -137,7 +137,7 @@ def test_init_wrong_questions(
         )
 
 
-def test_records(
+def test_add_records(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
