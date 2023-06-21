@@ -49,7 +49,7 @@ Creating a workspace in Argilla is now as easy as calling the `create` method fr
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 workspace = rg.Workspace.create("new-workspace")
 ```
@@ -63,7 +63,7 @@ You can also list all the existing workspaces in Argilla using the `list` method
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 workspaces = rg.Workspace.list()
 for workspace in workspaces:
@@ -79,7 +79,7 @@ You can get a workspace by its name using the `from_name` method. It must exist 
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 workspace = rg.Workspace.from_name("new-workspace")
 ```
@@ -97,7 +97,7 @@ The `id` of a workspace is a UUID, and it is generated automatically when you cr
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 workspace = rg.Workspace.from_id("00000000-0000-0000-0000-000000000000")
 ```
@@ -115,7 +115,7 @@ As of the 1.11.0 version of the Python client, to add and delete users from a `W
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 workspace = rg.Workspace.from_name("new-workspace")
 
