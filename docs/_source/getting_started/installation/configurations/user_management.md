@@ -1,46 +1,49 @@
 # User Management
 
-This guide explains how to setup the users and team workspaces for your Argilla instance.
+This guide explains how to setup and manage the users in Argilla via the Python client and the CLI.
 
-Let's first describe Argilla's user management model:
+:::{note}
+The `User` class for user management has been included as of the Argilla 1.11.0 release, and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
+:::
 
-## User management model
+## User Model
 
-### `User`
+A user in Argilla is an authorized person who can access the UI and use the Python client and CLI in a running Argilla instance.
 
-An Argilla user is defined by the following fields:
+We differentiate between three types of users depending on their role:
 
-- `username`: The username used as login for Argilla's UI.
-- `first_name`: The user's first name.
-- `last_name` (optional): The user's last name.
-- `role`: The user's role in Argilla. Available roles are: "owner" and "annotator". Only "owner" users can create and delete workspaces and datasets, and change the dataset settings, like the labeling schema.
-- `workspaces`: The workspaces where the user has read and write access (both from the UI and the Python client). Read more about workspaces and users below.
-- `api_key`: The API key to interact with Argilla API, mainly through the Python client but also via HTTP for advanced users. It is automatically generated when a user is created.
+- **Owner**: The owner is the user who created the Argilla instance. It has full access to all workspaces and can create new users and workspaces.
+- **Admin**: An admin user can access all workspaces, but cannot create new users or workspaces.
+- **Annotator**: An annotator user can only access the workspaces it has been assigned to.
 
-### `Workspace`
+An Argilla user composed of the following attributes:
 
-A workspace is a "space" inside your Argilla instance where authorized users can collaborate. It is accessible through the UI and the Python client.
-
-You can assign users to workspaces when you create a new user, or by using the proper API endpoint. "Admin" users have access to ALL defined workspaces.
-
-The Python client gives developers the ability to log, load, and copy datasets from and to different workspaces.
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `id` | `UUID` | The unique identifier of the user. |
+| `username` | `str` | The username used as login for Argilla's UI. |
+| `first_name` | `str` | The user's first name. |
+| `last_name` | `str` | The user's last name. |
+| `full_name` | `str` | The user's full name, which is the concatenation of `first_name` and `last_name`. |
+| `role` | `str` | The user's role in Argilla. Available roles are: "owner", "admin" and "annotator". |
+| `workspaces` | `List[str]` | The workspace names where the user has read and write access (both from the UI and the Python client). |
+| `api_key` | `str` | The API key to interact with Argilla API, mainly through the Python client but also via HTTP for advanced users. It is automatically generated when a user is created. |
+| `inserted_at` | `datetime` | The date and time when the user was created. |
+| `updated_at` | `datetime` | The date and time when the user was last updated. |
 
 ### Python client
 
-The Python client gives developers the ability to log, load, and copy datasets from and to different workspace. Check out the [Python Reference](../reference/python/python_client.rst) for the parameter and methods related to workspaces.
-Some examples are:
+The `User` class in the Python client gives developers with `owner` role the ability to create and manage users in Argilla. Check the [User - Python Reference](../reference/python/python_users.rst) to see the attributes, arguments, and methods of the `User` class.
 
-```python
-import argilla as rg
+## How to guide
 
-# After this init, all logging and loading will use the specified workspace
-rg.init(workspace="my_shared_workspace")
+### Get/Create default `User`
 
-# Setting the workspace explicitly will also affect all logging and loading
-rg.set_workspace("my_private_workspace")
-```
+:::{note}
+To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`. Otherwise, connections will fail with an Unauthorized server error.
+:::
 
-## Default user
+#### CLI
 
 By default, if the Argilla instance has no users, the following default owner user will be configured:
 
@@ -61,10 +64,54 @@ User with default credentials succesfully created:
 • api_key:  'new-api-key'
 ```
 
+#### Python client
+
+You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`.
+
+```python
+import argilla as rg
+
+rg.init(api_url="<API_URL>", api_key="<API_KEY>")
+
+user = rg.User.me()
+```
+
+### List `User`s
+
+#### Python client
+
+You can list all the existing users in Argilla calling the `list` classmethod of the `User` class.
+
 :::{note}
-To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`.
-Otherwise, connections will fail with an Unauthorized server error.
+Just the "owner" can list all the users in Argilla.
 :::
+
+```python
+import argilla as rg
+
+rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+
+users = rg.User.list()
+```
+
+### Delete a `User`
+
+#### Python client
+
+You can delete an existing user from Argilla calling the `delete` method on the `User` class.
+
+:::{note}
+Just the "owner" can delete users in Argilla.
+:::
+
+```python
+import argilla as rg
+
+rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+
+user = rg.User.from_name("existing-user")
+user.delete()
+```
 
 ## Add new users and workspaces
 
@@ -242,113 +289,9 @@ User successfully created:
 
 The workspace `ws` is automatically created and assigned to the user.
 
-**Python:**
+#### Python client
 
-```python
-import httpx
-
-api_key = <owner-api-key>
-auth_headers = {"X-Argilla-API-Key": api_key}
-http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
-
-# Create the user
-user = http.post("/api/users", json={"role": "annotator", "first_name": "Nick", "last_name": "Name", "username": "nick", "password": "11223344"}).json()
-```
-```json
-{
-   "id":"75190fff-d4b9-4625-b7d3-4cfe3c659054",
-   "username":"nick",
-   "role":"annotator",
-   "full_name":"Nick Name",
-   "workspaces":[],
-   "api_key":"SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA",
-   "inserted_at":"2023-03-16T11:17:35.462774",
-   "updated_at":"2023-03-16T11:17:35.462774"
-}
-```
-```python
-# Create the workspace
-workspace = http.post("/api/workspaces", json={"name": "ws"}).json()
-```
-```json
-{
-   "id":"1908bd1f-058b-4e01-82d1-3be7dfcc2a70",
-   "name":"ws",
-   "inserted_at":"2023-03-16T11:18:45.506912",
-   "updated_at":"2023-03-16T11:18:45.506912"
-}
-```
-```python
-# Assign user to workspace
-http.post(f"/api/workspaces/{workspace['id']}/users/{user['id']}")
-
-```
-```json
-{
-   "id":"75190fff-d4b9-4625-b7d3-4cfe3c659054",
-   "username":"nick",
-   "role":"annotator",
-   "full_name":"Nick Name",
-   "workspaces":["ws"],
-   "api_key":"SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA",
-   "inserted_at":"2023-03-16T11:17:35.462774",
-   "updated_at":"2023-03-16T11:17:35.462774"
-}
-```
-
-## Listing Argilla users
-
-````python
-users = http.get("/api/users").json()
-````
-```json
-[
-   {
-      "id":"8e62808e-df44-4135-87bd-d022f1d9fcf0",
-      "username":"hurra",
-      "role":"owner",
-      "full_name":"Hulio Ramos",
-      "workspaces":[
-
-      ],
-      "api_key":"67Ae7sRYpvu98MqMMkrPNtYx-pyjrRCiyieiwXsE7qP2npG8Eo_8cGpx4EZKJ_APt1FQ7qtX5jcnrUBLq7iW6N5KRhd32pBfHLFHHbnqIK4",
-      "inserted_at":"2023-03-16T11:11:59.871532",
-      "updated_at":"2023-03-16T11:11:59.871532"
-   },
-   {
-      "id":"75190fff-d4b9-4625-b7d3-4cfe3c659054",
-      "username":"nick",
-      "role":"annotator",
-      "full_name":"Nick Name",
-      "workspaces":[
-         "ws2"
-      ],
-      "api_key":"SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA",
-      "inserted_at":"2023-03-16T11:17:35.462774",
-      "updated_at":"2023-03-16T11:17:35.462774"
-   }
-]
-```
-
-## Delete a user
-
-```python
-http.delete("/api/users/75190fff-d4b9-4625-b7d3-4cfe3c659054").json()
-```
-```json
-{
-   "id":"75190fff-d4b9-4625-b7d3-4cfe3c659054",
-   "username":"nick2",
-   "role":"annotator",
-   "full_name":"Nick Name",
-   "workspaces":[
-      "ws2"
-   ],
-   "api_key":"SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM",
-   "inserted_at":"2023-03-16T11:17:35.462774",
-   "updated_at":"2023-03-16T11:17:35.462774"
-}
-```
+TODO
 
 ## Migrate users from the `users.yaml` file
 
