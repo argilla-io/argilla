@@ -1,4 +1,4 @@
-Are you unsure about what these techniques entail, take a look at our [terminology](/getting_started/terminology) section.
+Are you unsure about what these techniques entail, take a look at our [terminology](/reference/terminology) section.
 
 ````{grid} 1 1 3 3
 :class-container: tuto-section-2

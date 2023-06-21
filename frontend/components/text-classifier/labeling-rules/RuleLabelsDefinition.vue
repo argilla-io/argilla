@@ -343,7 +343,6 @@ export default {
     color: $black-37;
   }
   &__records {
-    margin-left: auto;
     margin-top: 0;
     white-space: nowrap;
     text-align: right;

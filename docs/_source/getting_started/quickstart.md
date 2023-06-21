@@ -21,7 +21,6 @@ An end-to-end workflow:
 ````
 
 ```{toctree}
-:maxdepth: 2
 :hidden:
 
 quickstart_installation

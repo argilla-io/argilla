@@ -15,7 +15,7 @@ repos:
         files: \.py$
         args:
           - --license-filepath
-          - src/license_header.txt
+          - license_header.txt
           - --fuzzy-match-generates-todo
           # - --remove-header
 
@@ -26,7 +26,7 @@ repos:
         additional_dependencies: ["typer==0.7.0"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.270
+    rev: v0.0.272
     hooks:
       # Simulate isort via (the much faster) ruff
       - id: ruff

@@ -1,35 +1,34 @@
-## 🎼 Cheatsheet
+# 🎼 Cheatsheet
 
-### Installation
+## Installation
 
-First things first!
-```bash
-pip install argilla
+```{include} /_common/tabs/argilla_install_python.md
 ```
+
 
 ```{include} /_common/tabs/argilla_install.md
 ```
 
-### Connect to Argilla
+## Connect to Argilla
 
 To get started with your data from our Python library, we first need to connect to our FastAPI server. This is done via `httpx` using an API key and a URL. Or take a more extensive look [here](/guides/log_load_and_prepare_data).
 
 ```{include} /_common/tabs/argilla_connect.md
 ```
 
-### Configure datasets
+## Configure datasets
 
 Before getting started with any textual data project, we advise setting up annotation guidelines and a labeling schema. Need some more context? Take look [here](/guides/log_load_and_prepare_data).
 
 ```{include} /_common/tabs/dataset_settings.md
 ```
 
-### Create records
+## Create records
 
 ```{include} /_common/tabs/records_create.md
 ```
 
-### Query datasets
+## Query datasets
 
 To search your data from the UI or the Python library, you need to be able to write Lucene Query Language (LQL), which is native to Elastic Search and Open Search. To know more about querying and searching, take a look [here](/guides/query_datasets.md).
 
@@ -53,7 +52,7 @@ Again, as with the `text` field, you can also use the white space analyzer to pe
 
 - `inputs.subject.exact:NEWS`
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} metadata and filters
@@ -78,7 +77,7 @@ Inclusive ranges are specified with square brackets and exclusive ranges are wit
 - `event_timestamp:[1984-01-01T01:01:01.000000 TO *]`
 - `last_updated:{* TO 1984-01-01T01:01:01.000000}`
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} operators
@@ -92,7 +91,7 @@ Following examples showcase the power of these operators:
 - `metadata.split:train AND text:fox`: Returns records that contain the word *fox* and that have the metadata *"split: train"*.
 - `NOT _exists_:metadata.split` : Returns records that don't have a metadata *split*.
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} regex
@@ -103,7 +102,7 @@ Regular expression patterns can be embedded in the query string by wrapping them
 
 The supported regular expression syntax is explained in the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/regexp-syntax.html).
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} fuzzy
@@ -113,7 +112,7 @@ This is useful to cover human misspellings:
 
 - `text:quikc~`: Matches quick and quikc.
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 :::{tab-item} wildcards
@@ -124,12 +123,12 @@ Wildcard searches can be run on individual search terms, using `?` to replace a 
 - `text.exact:"Lazy Dog*"`: Matches, for example, *"Lazy Dog"*, *"Lazy Dog."*, or *"Lazy Dogs"*.
 - `inputs.\*:news`: Searches all input fields for the word *news*.
 
-![text2text_record](../../_static/reference/webapp/features-search.png)
+![text2text_record](/_static/reference/webapp/features-search.png)
 :::
 
 ::::
 
-### Semantic search
+## Semantic search
 
 Semantic search or vector search is an amazingly powerful tool to sift through text based on sensical intuition instead of keywords. We use the native Elastic Search vector support to empower our users to navigate their records. Want to know more about this? Take a look [here](/guides/label_records_with_semanticsearch.md).
 
@@ -161,7 +160,7 @@ records = rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 
 <a href="https://docs.argilla.io/en/latest/guides/label_records_with_semanticsearch.html"><img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
 
-### Weak supervision
+## Weak supervision
 
 Weak supervision for NLP is like teaching a model with "approximate" answers instead of perfect ones. It uses clever tricks and shortcuts to avoid the need for labor-intensive labeling. It's like giving the model training wheels to learn on its own. While it's not as accurate as traditional supervision, it allows training on a much larger scale. Want to know more, look [here](/guides/programmatic_labeling_with_rules.md).
 
@@ -216,7 +215,7 @@ rg.log(records_for_training, name="majority_voter_results")
 
 <a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html"><img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
 
-### Train Models
+## Train Models
 
 We love our open-source training libraries as much as you do, so we provide integrations with all of them to limit the time you spend on data preparation and have more fun with actual training. As of now, we support `spacy`, `transformers`, `setfit`, `openai`, `autotrain`, and way more. Want to get to know all support? Take a look [here](/guides/train_a_model.md).
 

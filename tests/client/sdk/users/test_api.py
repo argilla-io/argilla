@@ -12,25 +12,103 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import uuid4
+
 import pytest
+from argilla.client.api import ArgillaSingleton
+from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
-from argilla.client.sdk.commons.errors import BaseClientError, UnauthorizedApiError
-from argilla.client.sdk.users.api import whoami
-from argilla.client.sdk.users.models import User
+from argilla.client.sdk.commons.errors import (
+    AlreadyExistsApiError,
+    BaseClientError,
+    ForbiddenApiError,
+    NotFoundApiError,
+    UnauthorizedApiError,
+)
+from argilla.client.sdk.users.api import create_user, delete_user, list_users, whoami
+from argilla.client.sdk.users.models import UserModel
+from argilla.server.models import User
+
+from tests.factories import UserFactory
 
 
-def test_whoami(mocked_client, sdk_client):
-    user = whoami(client=sdk_client)
-    assert isinstance(user, User)
+def test_whoami(api: Argilla) -> None:
+    user = whoami(client=api.http_client)
+    assert isinstance(user, UserModel)
 
 
-def test_whoami_with_auth_error(monkeypatch, mocked_client):
-    with pytest.raises(UnauthorizedApiError):
-        sdk_client = AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey")
-        monkeypatch.setattr(sdk_client, "__httpx__", mocked_client)
-        whoami(sdk_client)
-
-
-def test_whoami_with_connection_error():
-    with pytest.raises(BaseClientError):
+def test_whoami_errors() -> None:
+    with pytest.raises(
+        BaseClientError, match="Your Api endpoint at http://localhost:6900 is not available or not responding"
+    ):
         whoami(AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey"))
+
+
+def test_list_users(owner: User) -> None:
+    UserFactory.create(username="user_1")
+    UserFactory.create(username="user_2")
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
+
+    response = list_users(client=httpx_client)
+    assert response.status_code == 200
+    assert isinstance(response.parsed, list)
+    assert len(response.parsed) > 0
+    assert all(isinstance(user, UserModel) for user in response.parsed)
+    assert all(user.username in ["user_1", "user_2", owner.username] for user in response.parsed)
+
+
+@pytest.mark.parametrize("role", ["annotator", "admin", "owner"])
+def test_create_user(owner: User, role: str) -> None:
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
+
+    response = create_user(
+        client=httpx_client, first_name="user", username="user_1", password="user_password", role=role
+    )
+    assert response.status_code == 200
+    assert isinstance(response.parsed, UserModel)
+    assert response.parsed.role == role
+
+
+def test_create_user_errors(owner: User, annotator: User) -> None:
+    httpx_client = ArgillaSingleton.init(api_key=annotator.api_key).http_client.httpx
+    with pytest.raises(ForbiddenApiError):
+        create_user(
+            client=httpx_client, first_name="user", username="user_1", password="user_password", role="annotator"
+        )
+
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
+    with pytest.raises(AlreadyExistsApiError):
+        create_user(
+            client=httpx_client,
+            first_name="user",
+            username=annotator.username,
+            password="user_password",
+            role="annotator",
+        )
+
+
+def test_delete_user(owner: User) -> None:
+    user = UserFactory.create(username="user_1")
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
+
+    response = delete_user(client=httpx_client, user_id=user.id)
+    assert response.status_code == 200
+    assert isinstance(response.parsed, UserModel)
+
+
+def test_delete_user_errors(owner: User, annotator: User) -> None:
+    httpx_client = ArgillaSingleton.init(api_key=annotator.api_key).http_client.httpx
+    with pytest.raises(ForbiddenApiError):
+        delete_user(client=httpx_client, user_id=owner.id)
+
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
+    with pytest.raises(NotFoundApiError):
+        delete_user(client=httpx_client, user_id=str(uuid4()))
+
+    delete_user(client=httpx_client, user_id=annotator.id)
+    with pytest.raises(NotFoundApiError):
+        delete_user(client=httpx_client, user_id=annotator.id)
+
+    delete_user(client=httpx_client, user_id=owner.id)
+    with pytest.raises(UnauthorizedApiError):
+        delete_user(client=httpx_client, user_id=owner.id)

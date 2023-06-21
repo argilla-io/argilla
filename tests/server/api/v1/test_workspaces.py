@@ -21,10 +21,10 @@ from sqlalchemy.orm import Session
 from tests.factories import AnnotatorFactory, WorkspaceFactory
 
 
-def test_get_workspace(client: TestClient, admin_auth_header: dict):
+def test_get_workspace(client: TestClient, owner_auth_header):
     workspace = WorkspaceFactory.create(name="workspace")
 
-    response = client.get(f"/api/v1/workspaces/{workspace.id}", headers=admin_auth_header)
+    response = client.get(f"/api/v1/workspaces/{workspace.id}", headers=owner_auth_header)
 
     assert response.status_code == 200
     assert response.json() == {
@@ -62,9 +62,9 @@ def test_get_workspace_as_annotator_from_different_workspace(client: TestClient,
     assert response.status_code == 403
 
 
-def test_get_workspace_with_nonexistent_workspace_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_get_workspace_with_nonexistent_workspace_id(client: TestClient, db: Session, owner_auth_header):
     WorkspaceFactory.create()
 
-    response = client.get(f"/api/v1/workspaces/{uuid4()}", headers=admin_auth_header)
+    response = client.get(f"/api/v1/workspaces/{uuid4()}", headers=owner_auth_header)
 
     assert response.status_code == 404
