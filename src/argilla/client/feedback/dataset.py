@@ -650,7 +650,6 @@ class FeedbackDataset:
                 )
             )
 
-        cls.argilla_id = existing_dataset.id
         fields = []
         for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed:
             base_field = field.dict(include={"name", "title", "required"})
@@ -695,6 +694,7 @@ class FeedbackDataset:
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
         )
+        self.argilla_id = existing_dataset.id
         if with_records:
             self.fetch_records()
         return self
