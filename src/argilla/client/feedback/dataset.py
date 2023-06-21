@@ -550,7 +550,7 @@ class FeedbackDataset:
 
             for field in self.fields:
                 try:
-                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=json.loads(field.json()))
+                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=field.dict())
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
@@ -560,9 +560,7 @@ class FeedbackDataset:
 
             for question in self.questions:
                 try:
-                    datasets_api_v1.add_question(
-                        client=httpx_client, id=argilla_id, question=json.loads(question.json())
-                    )
+                    datasets_api_v1.add_question(client=httpx_client, id=argilla_id, question=question.dict())
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
@@ -583,7 +581,7 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=[json.loads(record.json()) for record in batch],
+                        records=[record.dict() for record in batch],
                     )
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
