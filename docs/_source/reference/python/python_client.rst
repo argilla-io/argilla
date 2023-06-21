@@ -39,7 +39,10 @@ Datasets
 .. _python ref feedbackdataset:
 
 FeedbackDataset
---------
+---------------
 
-.. automodule:: argilla.client.feedback
-   :members: FeedbackDataset, FeedbackDatasetConfig, RatingQuestion, TextQuestion, QuestionSchema, TextField, FieldSchema, OfflineFeedbackRecord, FeedbackRecord
+.. automodule:: argilla.client.feedback.feedback
+   :members: FeedbackDataset
+
+.. automodule:: argilla.client.feedback.schemas
+   :members: FeedbackDatasetConfig, RatingQuestion, TextQuestion, LabelQuestion, MultiLabelQuestion, QuestionSchema, TextField, FieldSchema, FeedbackRecord
