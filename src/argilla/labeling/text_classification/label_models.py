@@ -412,7 +412,7 @@ class MajorityVoter(LabelModel):
                 prediction[i] = equal_prob_idx[random_idx]
         else:
             raise NotImplementedError(
-                f"The tie break policy '{tie_break_policy.value}' is not implemented" " for MajorityVoter!"
+                f"The tie break policy '{tie_break_policy.value}' is not implemented for MajorityVoter!"
             )
 
         return annotation, prediction
@@ -648,9 +648,7 @@ class Snorkel(LabelModel):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
         if self._weak_labels.annotation().size == 0:
-            raise MissingAnnotationError(
-                "You need annotated records to compute scores/metrics for your label" " model."
-            )
+            raise MissingAnnotationError("You need annotated records to compute scores/metrics for your label model.")
 
         l_pred = self._weak_labels.matrix(has_annotation=True)
         if self._need_remap:
@@ -834,7 +832,7 @@ class FlyingSquid(LabelModel):
                 pred_for_rec = [(self._weak_labels.labels[i], prob[i]) for i in np.argsort(prob)[::-1]]
             else:
                 raise NotImplementedError(
-                    f"The tie break policy '{tie_break_policy.value}' is not" " implemented for FlyingSquid!"
+                    f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
                 )
 
             records_with_prediction.append(rec.copy(deep=True))
@@ -860,7 +858,7 @@ class FlyingSquid(LabelModel):
             NotFittedError: If the label model was still not fitted.
         """
         if not self._models:
-            raise NotFittedError("This FlyingSquid instance is not fitted yet. Call `fit` before using" " this model.")
+            raise NotFittedError("This FlyingSquid instance is not fitted yet. Call `fit` before using this model.")
         # create predictions for each label
         if self._weak_labels.cardinality > 2:
             probas = np.zeros((len(weak_label_matrix), self._weak_labels.cardinality))
@@ -945,7 +943,7 @@ class FlyingSquid(LabelModel):
                 prediction[i] = equal_prob_idx[random_idx]
         else:
             raise NotImplementedError(
-                f"The tie break policy '{tie_break_policy.value}' is not implemented" " for FlyingSquid!"
+                f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
             )
 
         return classification_report(

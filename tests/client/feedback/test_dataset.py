@@ -29,7 +29,7 @@ from argilla.client.feedback.schemas import (
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
-    from argilla.server.models import User
+    from argilla.server.models import User as ServerUser
 
     from tests.helpers import SecuredClient
 
@@ -334,7 +334,7 @@ def test_push_to_argilla_and_from_argilla(
 
 def test_copy_dataset_in_argilla(
     mocked_client: "SecuredClient",
-    argilla_user: "User",
+    argilla_user: "ServerUser",
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
