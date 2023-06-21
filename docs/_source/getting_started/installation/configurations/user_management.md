@@ -1,4 +1,4 @@
-# User Management
+docs/_source/getting_started/installation/configurations/user_management.md# User Management
 
 This guide explains how to setup and manage the users in Argilla via the Python client and the CLI.
 
@@ -13,8 +13,8 @@ A user in Argilla is an authorized person who can access the UI and use the Pyth
 We differentiate between three types of users depending on their role:
 
 - **Owner**: The owner is the user who created the Argilla instance. It has full access to all workspaces and can create new users and workspaces.
-- **Admin**: An admin user can access all workspaces, but cannot create new users or workspaces.
-- **Annotator**: An annotator user can only access the workspaces it has been assigned to.
+- **Admin**: An admin user can only access the workspaces it has been assigned to. Admin users can manage datasets on assigned workspaces.
+- **Annotator**: As admin users, an annotator user can only access the workspaces it has been assigned to.
 
 An Argilla user composed of the following attributes:
 
@@ -218,6 +218,24 @@ user = rg.User.create(
     role="admin",
 )
 ```
+
+### Update a `User`
+
+#### CLI
+
+You can change the assigned role for an existing user.
+
+```bash
+python -m argilla users update argilla --role owner
+```
+```bash
+User 'argilla' successfully updated:
+• role: 'admin' -> 'owner'
+```
+
+:::{note}
+You should use this command to review and migrate user roles from version <=1.10.0
+:::
 
 ### Get a `User` by username
 
