@@ -19,7 +19,7 @@ Common environment vars / settings
 import logging
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
 from pydantic import BaseSettings, Field, root_validator, validator
@@ -66,9 +66,6 @@ class Settings(BaseSettings):
     base_url: Optional[str] = Field(description="The default base url where server will be deployed")
     database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
 
-    elasticsearch: str = "http://localhost:9200"
-    elasticsearch_ssl_verify: bool = True
-    elasticsearch_ca_path: Optional[str] = None
     cors_origins: List[str] = ["*"]
 
     docs_enabled: bool = True
@@ -80,6 +77,10 @@ class Settings(BaseSettings):
         description="If enabled, try to migrate data from old rubrix installation",
     )
 
+    elasticsearch: str = "http://localhost:9200"
+    elasticsearch_ssl_verify: bool = True
+    elasticsearch_ca_path: Optional[str] = None
+    elasticsearch_extra_config: Optional[Dict[str, Any]] = Field(default_factory=dict)
     # Analyzer configuration
     default_es_search_analyzer: str = "standard"
     exact_es_search_analyzer: str = "whitespace"
