@@ -234,7 +234,7 @@ User 'argilla' successfully updated:
 ```
 
 :::{note}
-You should use this command to review and migrate user roles from version <=1.10.0
+You should use this command to review and migrate user roles from version `<=1.10.0`
 :::
 
 ### Get a `User` by username
