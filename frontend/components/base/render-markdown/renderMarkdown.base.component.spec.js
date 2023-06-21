@@ -49,5 +49,6 @@ describe("RenderMarkdownBaseComponent", () => {
     expect(cleanedMarkdownText).toBe(`# example<script><TABLE>
 
 `);
+    expect(cleanedMarkdownText).not.toBe(`# example<script><TABLE>`);
   });
 });
