@@ -6,13 +6,14 @@ You will need to decide the level of overlap before creating or pushing a datase
 ```
 
 ## Full overlap
-The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create a Feedback Dataset](create_dataset.md#push-to-argilla)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](../../../getting_started/installation/configurations/user_management.md#creating-an-annotator-user-assigned-to-a-workspace).
+
+The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create a Feedback Dataset](create_dataset.md#push-to-argilla)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](../../../getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).
 
 ## Zero overlap
 If you only want one annotation per record, we recommend that you split your records into chunks and assign each of them to a single annotator. Then, you can create several datasets, one in each annotator's personal workspace with the records assigned to them.
 
 ```{note}
-This assumes that each annotator has a personal workspace attached to their user. If this is not the case, learn how create a workspace and assign it to a user [here](../../../getting_started/installation/configurations/user_management.md#creating-an-annotator-user-assigned-to-a-workspace).
+This assumes that each annotator has a personal workspace attached to their user. If this is not the case, learn how create a workspace and assign it to a user [here](../../../getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).
 ```
 
 Here's how you can do this:
