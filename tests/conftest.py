@@ -22,8 +22,7 @@ import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import ArgillaSingleton
 from argilla.client.apis.datasets import TextClassificationSettings
-from argilla.client.client import Argilla
-from argilla.client.sdk.client import AuthenticatedClient
+from argilla.client.client import Argilla, AuthenticatedClient
 from argilla.client.sdk.users import api as users_api
 from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
@@ -267,7 +266,7 @@ def mocked_client(
     from argilla.client.api import active_api
 
     rb_api = active_api()
-    monkeypatch.setattr(rb_api._client, "__httpx__", client_)
+    monkeypatch.setattr(rb_api.http_client, "__httpx__", client_)
 
     return client_
 

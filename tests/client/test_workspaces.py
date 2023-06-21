@@ -22,7 +22,7 @@ from argilla.client.workspaces import Workspace
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 if TYPE_CHECKING:
-    from argilla.server.models import User
+    from argilla.server.models import User as ServerUser
 
 
 def test_workspace_cls_init() -> None:
@@ -40,9 +40,9 @@ def test_workspace_cls_init() -> None:
 
 
 @pytest.mark.asyncio
-async def test_workspace_from_name(owner: "User"):
+async def test_workspace_from_name(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
     ArgillaSingleton.init(api_key=owner.api_key)
 
     found_workspace = Workspace.from_name(workspace.name)
@@ -54,7 +54,7 @@ async def test_workspace_from_name(owner: "User"):
 
 
 @pytest.mark.asyncio
-async def test_workspace_from_id(owner: "User"):
+async def test_workspace_from_id(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -69,7 +69,7 @@ async def test_workspace_from_id(owner: "User"):
         Workspace.from_id(id="00000000-0000-0000-0000-000000000000")
 
 
-def test_workspace_create(owner: "User") -> None:
+def test_workspace_create(owner: "ServerUser") -> None:
     ArgillaSingleton.init(api_key=owner.api_key)
 
     workspace = Workspace.create(name="test_workspace")
@@ -85,7 +85,7 @@ def test_workspace_create(owner: "User") -> None:
 
 
 @pytest.mark.asyncio
-async def test_workspace_list(owner: "User") -> None:
+async def test_workspace_list(owner: "ServerUser") -> None:
     await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -94,7 +94,7 @@ async def test_workspace_list(owner: "User") -> None:
 
 
 @pytest.mark.asyncio
-async def test_workspace_add_user(owner: "User") -> None:
+async def test_workspace_add_user(owner: "ServerUser") -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -114,7 +114,7 @@ async def test_workspace_add_user(owner: "User") -> None:
 
 
 @pytest.mark.asyncio
-async def test_workspace_delete_user(owner: "User") -> None:
+async def test_workspace_delete_user(owner: "ServerUser") -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
     ArgillaSingleton.init(api_key=owner.api_key)
