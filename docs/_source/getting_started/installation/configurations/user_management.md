@@ -119,11 +119,11 @@ Path: /path/to/alembic/versions/1769ee58fbb4_create_workspaces_users_table.py
 
 ## How to guide
 
-### Get default `User`
-
 :::{note}
 To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`. Otherwise, connections will fail with an Unauthorized server error.
 :::
+
+### Get default `User`
 
 #### CLI
 
@@ -241,6 +241,8 @@ The workspace `ws` is automatically created and assigned to the user.
 
 #### Python client
 
+To assign a user to a workspace, you can use the `add_user` method in the `Workspace` class. For more information about workspaces, see the [Workspace Management](./workspace_management.md) guide.
+
 ```python
 import argilla as rg
 
@@ -257,7 +259,6 @@ user = rg.User.create(
 workspace = rg.Workspace.create(name="ws")
 workspace.add_user(user.id)
 ```
-
 
 ### List `User`s
 
