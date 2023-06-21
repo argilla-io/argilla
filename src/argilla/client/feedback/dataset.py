@@ -586,7 +586,7 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=[json.loads(record.dict()) for record in tqdm(batch)],
+                        records=[record.dict() for record in tqdm(batch)],
                     )
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
