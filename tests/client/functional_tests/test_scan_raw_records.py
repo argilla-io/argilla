@@ -22,11 +22,7 @@ from argilla.client.sdk.token_classification.models import TokenClassificationRe
     argnames="fields",
     argvalues=(set(), {"text"}, {"tokens"}),
 )
-def test_scan_records(
-    mocked_client,
-    gutenberg_spacy_ner,
-    fields,
-):
+def test_scan_records(gutenberg_spacy_ner, fields):
     import argilla as rg
     import pandas as pd
 

@@ -14,13 +14,8 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
-
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
 
 from pydantic import BaseModel, Field, StrictInt, StrictStr
 
@@ -30,9 +25,9 @@ class FeedbackDatasetModel(BaseModel):
     name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_ ]+$")
     guidelines: Optional[str] = None
     status: Optional[str] = None
-    workspace_id: Optional[str] = None
-    created_at: datetime
-    last_updated: datetime
+    workspace_id: Optional[UUID] = None
+    inserted_at: datetime
+    updated_at: datetime
 
 
 class FeedbackValueModel(BaseModel):
@@ -51,6 +46,7 @@ class FeedbackResponseModel(BaseModel):
 class FeedbackItemModel(BaseModel):
     id: UUID
     fields: Dict[str, Any]
+    metadata: Optional[Dict[str, Any]] = None
     external_id: Optional[str] = None
     responses: Optional[List[FeedbackResponseModel]] = []
     inserted_at: datetime

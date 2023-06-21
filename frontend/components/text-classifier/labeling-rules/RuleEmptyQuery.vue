@@ -101,10 +101,7 @@ export default {
       );
     },
     visibleLabels() {
-      const availableNonSelected =
-        this.shownLabels < this.filteredLabels.length
-          ? this.shownLabels
-          : this.shownLabels;
+      const availableNonSelected = this.shownLabels;
       let nonSelected = 0;
       return this.filteredLabels.filter((l) => {
         if (nonSelected < availableNonSelected) {

@@ -20,7 +20,37 @@ These are the section headers that we use:
 
 ## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
 
+### Fixed
+
+- Replaced `np.float` alias by `float` to avoid `AttributeError` when using `find_label_errors` function with `numpy>=1.24.0` ([#3214](https://github.com/argilla-io/argilla/pull/3214)).
+- Fixed `format_as("datasets")` when no responses or optional respones in `FeedbackRecord`, to set their value to what 🤗 Datasets expects instead of just `None` ([#3224](https://github.com/argilla-io/argilla/pull/3224)).
+- Fixed `push_to_huggingface()` when `generate_card=True` (default behaviour), as we were passing a sample record to the `ArgillaDatasetCard` class, and `UUID`s introduced in 1.10.0 ([#3192](https://github.com/argilla-io/argilla/pull/3192)), are not JSON-serializable ([#3231](https://github.com/argilla-io/argilla/pull/3231)).
+- Fixed `from_argilla` and `push_to_argilla` to ensure consistency on both field and question re-construction, and to ensure `UUID`s are properly serialized as `str`, respectively ([#3234](https://github.com/argilla-io/argilla/pull/3234)).
+
+### Added
+
+- Added `metadata` attribute to the `Record` of the `FeedbackDataset` ([#3194](https://github.com/argilla-io/argilla/pull/3194))
+- New `users update` command to update the role for an existing user ([#3188](https://github.com/argilla-io/argilla/pull/3188))
+- New `Workspace` class to allow users manage their Argilla workspaces and the users assigned to those workspaces via the Python client ([#3180](https://github.com/argilla-io/argilla/pull/3180))
+- Added `User` class to let users manage their Argilla users via the Python client ([#3169](https://github.com/argilla-io/argilla/pull/3169)).
+
+### Changed
+
+- The role system now support three different roles `owner`, `admin` and `annotator` ([#3104](https://github.com/argilla-io/argilla/pull/3104))
+- `admin` role is scoped to workspace-level operations ([#3115](https://github.com/argilla-io/argilla/pull/3115))
+- Default argilla user has the `admin` role instead of `owner` one ([#3188](https://github.com/argilla-io/argilla/pull/3188))
+
+### Deprecated
+
+- As of Python 3.7 end-of-life (EOL) on 2023-06-27, Argilla will no longer support Python 3.7 ([#3188](https://github.com/argilla-io/argilla/pull/33188)). More information at https://peps.python.org/pep-0537/
+
 ## [1.10.0](https://github.com/argilla-io/argilla/compare/v1.9.0...v1.10.0)
+
+### Added
+
+- Added search component for feedback datasets ([#3138](https://github.com/argilla-io/argilla/pull/3138))
+- Added markdown support for feedback dataset guidelines ([#3153](https://github.com/argilla-io/argilla/pull/3153))
+- Added Train button for feedback datasets ([#3170](https://github.com/argilla-io/argilla/pull/3170))
 
 ### Changed
 
@@ -28,6 +58,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Replaced Enum for string value in URLs for client API calls (Closes [#3149](https://github.com/argilla-io/argilla/issues/3149))
 - Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.
 - Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
 - Allow flow `FeedbackDataset.from_argilla` -> `FeedbackDataset.push_to_argilla` under different dataset names and/or workspaces ([#3192](https://github.com/argilla-io/argilla/issues/3192))
@@ -76,7 +107,7 @@ These are the section headers that we use:
 - `/api/v1/responses/{response_id}` new endpoint to update and delete a response ([#2615])
 - `/api/v1/datasets/{dataset_id}/records` new endpoint to create and list dataset records ([#2615])
 - `/api/v1/me/datasets` new endpoint to list user visible datasets ([#2615])
-- `/api/v1/me/dataset/{dataset_id}/records` new endpoint to list  dataset records with user responses ([#2615])
+- `/api/v1/me/dataset/{dataset_id}/records` new endpoint to list dataset records with user responses ([#2615])
 - `/api/v1/me/datasets/{dataset_id}/metrics` new endpoint to get the dataset user metrics ([#2615])
 - `/api/v1/me/records/{record_id}/responses` new endpoint to create record user responses ([#2615])
 - showing new feedback task datasets in datasets list ([#2719])
@@ -104,10 +135,9 @@ These are the section headers that we use:
 - `mention_length` metrics function returns empty data ([#3045])
 - `entity_density` metrics function returns empty data ([#3045])
 
-
 ### Deprecated
 
-- Using argilla with python 3.7 runtime is deprecated and support will be removed from version 1.9.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
+- Using Argilla with Python 3.7 runtime is deprecated and support will be removed from version 1.11.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
 - `tokens_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
 - `token_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
 - `mention_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
@@ -177,6 +207,7 @@ These are the section headers that we use:
 - Added `Argilla.training` module with support for `spacy`, `setfit`, and `transformers`. Closes [#2504](https://github.com/argilla-io/argilla/issues/2496)
 
 ### Fixes
+
 - Now the `prepare_for_training` method is working when `multi_label=True`. Closes [#2606](https://github.com/argilla-io/argilla/issues/2606)
 
 ### Changed
@@ -199,8 +230,6 @@ These are the section headers that we use:
 - The default value for old `API Key` constant. Closes [#2251](https://github.com/argilla-io/argilla/issues/2251)
 
 [#2564]: https://github.com/argilla-io/argilla/issues/2564
-
-
 
 ## [1.5.1](https://github.com/argilla-io/argilla/compare/v1.5.0...v1.5.1) - 2023-03-30
 

@@ -8,9 +8,10 @@
     />
     <template v-if="datasetId">
       <BaseButton
+        ref="trainButtonRef"
         class="header__button small"
         @on-click="onClickTrain"
-        v-if="isAdminRole && showTrainButton"
+        v-if="isAdminOrOwnerRole && showTrainButton"
       >
         <svgicon name="code" width="20" height="20" />Train
       </BaseButton>
@@ -23,7 +24,7 @@
         />
       </NuxtLink>
     </template>
-    <user />
+    <User />
   </BaseTopbarBrand>
 </template>
 
@@ -50,8 +51,9 @@ export default {
     };
   },
   computed: {
-    isAdminRole() {
-      return this.$auth.user.role === "admin";
+    isAdminOrOwnerRole() {
+      const role = this.$auth.user.role;
+      return role === "admin" || role === "owner";
     },
   },
   methods: {

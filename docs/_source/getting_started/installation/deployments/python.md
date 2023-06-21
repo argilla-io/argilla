@@ -14,6 +14,7 @@ Our Python package requires some extras that might be downloaded to facilitate m
 - `pip install "argilla[listeners]"`: the [argilla.listeners-module](/guides/schedule_jobs_with_listeners) allows for the usage of background processes to monitor dataset changes and schedule jobs.
 - `pip install "argilla[server]"`: the [Argilla FastAPI server](/getting_started/installation/configurations/server_configuration) can be deployed locally to test development changes or custom configs.
 - `pip install "argilla[postgresql]"`: the default data management is done with built-in `sqlite` but can be replaced with a [PostgreSQL database](/getting_started/installation/configurations/server_configuration).
+- `pip install "argilla[integrations]"`: [integrations](/tutorials/libraries) with other libraries/frameworks are available to use.
 - `pip install "argilla[tests]"` When [running tests](/community/developer_docs) as a developer, you might need third-party integration packages to test end-to-end workflows.
 
 ## Install from `develop`

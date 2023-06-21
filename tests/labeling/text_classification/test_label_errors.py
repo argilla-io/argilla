@@ -169,7 +169,8 @@ def test_construct_s_and_psx(records):
             [
                 list([0]),
                 list([0, 1]),
-            ]
+            ],
+            dtype=object,
         )
         psx_expected = np.array(
             [
