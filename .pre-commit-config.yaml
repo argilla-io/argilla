@@ -15,7 +15,7 @@ repos:
         files: \.py$
         args:
           - --license-filepath
-          - src/license_header.txt
+          - license_header.txt
           - --fuzzy-match-generates-todo
           # - --remove-header
 

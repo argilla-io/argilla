@@ -13,15 +13,10 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, conlist
-
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
 
 from argilla.server.models import QuestionType
 
