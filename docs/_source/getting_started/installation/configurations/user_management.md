@@ -155,7 +155,7 @@ You can get the current active user in Argilla using the `me` classmethod in the
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 user = rg.User.me()
 ```
@@ -208,7 +208,7 @@ You can also create a new user in Argilla using the `create` classmethod in the 
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 user = rg.User.create(
     username="new-user",
@@ -260,7 +260,7 @@ You can get a user by id using the `from_id` classmethod in the `User` class.
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 user = rg.User.from_id("new-user")
 ```
@@ -337,7 +337,7 @@ Just the "owner" can delete users in Argilla.
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 user = rg.User.from_name("existing-user")
 user.delete()
@@ -394,7 +394,7 @@ Ensure everything went as expected via the `User` class from the Python client:
 ```python
 import argilla as rg
 
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 users = rg.User.list()
 for user in users:
