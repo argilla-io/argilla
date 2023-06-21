@@ -1,4 +1,4 @@
-docs/_source/getting_started/installation/configurations/user_management.md# User Management
+# User Management
 
 This guide explains how to setup and manage the users in Argilla via the Python client and the CLI.
 
