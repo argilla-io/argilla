@@ -41,7 +41,7 @@ Datasets
 FeedbackDataset
 ---------------
 
-.. automodule:: argilla.client.feedback.feedback
+.. automodule:: argilla.client.feedback.dataset
    :members: FeedbackDataset
 
 .. automodule:: argilla.client.feedback.schemas
