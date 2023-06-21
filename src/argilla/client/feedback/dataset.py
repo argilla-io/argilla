@@ -488,6 +488,7 @@ class FeedbackDataset:
             name: the name of the dataset to push to Argilla. If not provided, the `argilla_id` will be used if the dataset
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
+            show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
         """
         client: "ArgillaClient" = rg.active_client()
         httpx_client: "httpx.Client" = client.http_client.httpx
