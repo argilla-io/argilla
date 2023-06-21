@@ -32,7 +32,7 @@ These are the section headers that we use:
 - New `users update` command to update the role for an existing user ([#3188](https://github.com/argilla-io/argilla/pull/3188))
 - New `Workspace` class to allow users manage their Argilla workspaces and the users assigned to those workspaces via the Python client ([#3180](https://github.com/argilla-io/argilla/pull/3180))
 - Added `User` class to let users manage their Argilla users via the Python client ([#3169](https://github.com/argilla-io/argilla/pull/3169)).
-- Added `tqdm` progress bar to `FeedbackDataset.push_to_argilla` when looping over the records to upload ([#3233](https://github.com/argilla-io/argilla/pull/3233)).
+- Added an option to display `tqdm` progress bar to `FeedbackDataset.push_to_argilla` when looping over the records to upload ([#3233](https://github.com/argilla-io/argilla/pull/3233)).
 
 ### Changed
 
