@@ -6,7 +6,7 @@ This guide explains how setup and manage the workspaces in Argilla via the Pytho
 The `Workspace` class for workspace management has been included as of the Argilla 1.11.0 release, and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
 :::
 
-## Model
+## Workspace Model
 
 A workspace is a "space" inside your Argilla instance where authorized users can collaborate. It is accessible through the UI and the Python client.
 
@@ -23,7 +23,7 @@ An Argilla workspace is composed of the following attributes:
 | `inserted_at` | `datetime` | The date and time when the workspace was created. |
 | `updated_at` | `datetime` | The date and time when the workspace was last updated. |
 
-## Python client
+### Python client
 
 The `Workspace` class in the Python client gives developers with `owner` role the ability to create and manage workspaces in Argilla, and the users that belong to them. Check the [Workspace - Python Reference](../reference/python/python_workspaces.rst) to see the attributes, arguments, and methods of the `Workspace` class.
 
@@ -37,7 +37,12 @@ The `Workspace` class in Argilla is composed of the following attributes:
 | `inserted_at` | `datetime` | The date and time when the workspace was created. |
 | `updated_at` | `datetime` | The date and time when the workspace was last updated. |
 
+
+## How to guide
+
 ### Create a new `Workspace`
+
+#### Python client
 
 Creating a workspace in Argilla is now as easy as calling the `create` method from the `Workspace` class. It will return a `Workspace` instance.
 
@@ -50,6 +55,8 @@ workspace = rg.Workspace.create("new-workspace")
 ```
 
 ### List all the existing `Workspaces`
+
+#### Python client
 
 You can also list all the existing workspaces in Argilla using the `list` method. It will return a list of `Workspace` instances.
 
@@ -65,6 +72,8 @@ for workspace in workspaces:
 
 ### Get a `Workspace` by name
 
+#### Python client
+
 You can get a workspace by its name using the `from_name` method. It must exist in advance in Argilla, otherwise an exception will be raised.
 
 ```python
@@ -76,6 +85,8 @@ workspace = rg.Workspace.from_name("new-workspace")
 ```
 
 ### Get a `Workspace` by id
+
+#### Python client
 
 Additionally, if you know the `id` of the workspace, you can get it directly using the `from_id` method. It must exist in advance in Argilla, otherwise an exception will be raised.
 
@@ -92,6 +103,8 @@ workspace = rg.Workspace.from_id("00000000-0000-0000-0000-000000000000")
 ```
 
 ### Add, list, or delete users from a `Workspace`
+
+#### Python client
 
 Once you instantiate a `Workspace` instance from a workspace in Argilla, you can add, list, or delete users from it. But note that just the `owner` has sufficient permissions to perform those operations.
 
