@@ -13,9 +13,11 @@ links:
 ```python
 import argilla as rg
 
-dataset = rg.FeedbackDataset.from_argilla("<my_dataset_name>", workspace="<my_workspace_name>")
-
-label_unification = LabelUnification(
+dataset = rg.FeedbackDataset.from_argilla(
+    name="<my_dataset_name>",
+    workspace="<my_workspace_name>"
+)
+label_unification = rg.LabelUnification(
     question=dataset.question_by_name("<my_question>"),
     strategy="majority"
 )
