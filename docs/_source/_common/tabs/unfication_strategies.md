@@ -1,4 +1,4 @@
-Use a `Feedbackdataset` directly:
+Use a `FeedbackDataset` directly:
 
 ```python
 from argilla import FeedbackDataset
