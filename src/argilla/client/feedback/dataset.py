@@ -53,6 +53,7 @@ if TYPE_CHECKING:
     import httpx
     from datasets import Dataset
 
+    from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.sdk.v1.datasets.models import (
         FeedbackDatasetModel,
         FeedbackFieldModel,
@@ -483,7 +484,8 @@ class FeedbackDataset:
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
         """
-        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
+        client: "ArgillaClient" = rg.active_client()
+        httpx_client: "httpx.Client" = client.http_client.httpx
 
         if name is None:
             if self.argilla_id is None:
@@ -515,7 +517,7 @@ class FeedbackDataset:
                 ) from e
         else:
             if workspace is None:
-                workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
+                workspace = rg.Workspace.from_name(client.get_workspace())
 
             if isinstance(workspace, str):
                 workspace = rg.Workspace.from_name(workspace)
