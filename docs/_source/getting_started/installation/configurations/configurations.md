@@ -24,12 +24,26 @@ Finetune your FastAPI deployment:
 :link: user_management.md
 
 Manage your Argilla users:
-- User management model
-- Default user
-- Add new users and workspaces
-- Listing Argilla users
+- User model
+- Prepare the DB
+- Get default user
+- Create a new user
+- Assign a user to a workspace
+- List all the existing users
 - Delete a user
-- Migrate users from the `users.yaml`
+- Migrate users from `users.yaml`
+- Migration users with Docker Compose
+```
+```{grid-item-card} Workspace Management
+:link: workspace_management.md
+
+Manage your Argilla workspaces:
+- Workspace model
+- Create a new workspace
+- List all the existing workspaces
+- Get a workspace by name
+- Get a workspace by id
+- Add, list, or delete users from a workspace
 ```
 
 ```{grid-item-card} Database Migrations
@@ -55,6 +69,7 @@ Multimodality at your fingertips:
 elasticsearch.md
 server_configuration.md
 user_management.md
+workspace_management.md
 database_migrations.md
 image_support.md
 ```
