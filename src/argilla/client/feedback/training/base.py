@@ -199,13 +199,13 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 task: {self._training_task_mapping}
                 train_size: {self._train_size}
                 seed: {self._seed}
-            
-            
+
+
             {self._trainer.__class__} info:
             _________________________________________________________________
             The parameters are configurable via `trainer.update_config()`:
                 {self._trainer}
-            
+
             Using the trainer:
             _________________________________________________________________
             `trainer.train(output_dir)` to train to start training. `output_dir` is the directory to save the model automatically.
