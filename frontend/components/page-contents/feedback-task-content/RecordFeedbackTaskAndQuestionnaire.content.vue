@@ -165,17 +165,16 @@ export default {
           this.recordResponsesFromCurrentUser.find(
             (recordResponse) => question.name === recordResponse.question_name
           );
-        // console.log(question, correspondingResponseToQuestion);
+
         if (correspondingResponseToQuestion) {
           let formattedOptions = [];
-          // console.log(formattedOptions);
 
           switch (question.component_type) {
             case COMPONENT_TYPE.RANKING:
-            case COMPONENT_TYPE.FREE_TEXT:
-              // console.log(correspondingResponseToQuestion)
               formattedOptions = correspondingResponseToQuestion.options;
               break;
+            case COMPONENT_TYPE.FREE_TEXT:
+            // TODO - remove is_selected from object pass to the free_text case and ensure we can submit a form with one text
             case COMPONENT_TYPE.SINGLE_LABEL:
             case COMPONENT_TYPE.MULTI_LABEL:
             case COMPONENT_TYPE.RATING:
@@ -206,6 +205,13 @@ export default {
         ) {
           const formattedOptions = question.options.map((option) => {
             return { ...option, is_selected: false };
+          });
+          return { ...question, options: formattedOptions, response_id: null };
+        }
+
+        if (question.component_type === COMPONENT_TYPE.RANKING) {
+          const formattedOptions = question.options.map((option) => {
+            return { ...option, rank: null };
           });
           return { ...question, options: formattedOptions, response_id: null };
         }
@@ -764,7 +770,10 @@ export default {
                   user_id: responsesByRecordAndUser.user_id ?? null,
                 });
 
-                console.log(formattedRecordResponsesForOrm);
+                console.log(
+                  correspondingComponentTypeOfTheAnswer,
+                  formattedRecordResponsesForOrm
+                );
               }
             );
           }
