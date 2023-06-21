@@ -297,11 +297,19 @@ async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
         retry_on_timeout=True,
         max_retries=5,
     )
-    search_engine = SearchEngine(
-        config,
-        es_number_of_shards=settings.es_records_index_shards,
-        es_number_of_replicas=settings.es_records_index_shards,
-    )
+    try:
+        search_engine = SearchEngine(
+            config={**config, **settings.elasticsearch_extra_config},
+            es_number_of_shards=settings.es_records_index_shards,
+            es_number_of_replicas=settings.es_records_index_shards,
+        )
+    except TypeError:
+        # Unexpected argument, we will try to setup search engine with the basic config
+        search_engine = SearchEngine(
+            config=config,
+            es_number_of_shards=settings.es_records_index_shards,
+            es_number_of_replicas=settings.es_records_index_shards,
+        )
     try:
         yield search_engine
     finally:
