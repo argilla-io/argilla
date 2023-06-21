@@ -8,7 +8,7 @@ dataset.unify_responses(question="question_name", strategy="majority")
 dataset.records[0].unified_response
 ```
 
-Or, you can use `FeedbackRecord`s in combination with a `*QuestionStrategy`.
+Or, you can use `FeedbackRecord`s in combination with a `QuestionStrategy`.
 
 ::::{tab-set}
 

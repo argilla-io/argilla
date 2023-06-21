@@ -190,26 +190,29 @@ class ArgillaTrainer(ArgillaTrainerV1):
         Returns:
           The trainer object.
         """
-        return f"""\
-ArgillaBaseTrainer info:
-_________________________________________________________________
-These baseline params are fixed:
-    dataset: {self._dataset}
-    task: {self._training_task_mapping}
-    train_size: {self._train_size}
-    seed: {self._seed}
-
-
-{self._trainer.__class__} info:
-_________________________________________________________________
-The parameters are configurable via `trainer.update_config()`:
-    {self._trainer}
-
-Using the trainer:
-_________________________________________________________________
-`trainer.train(output_dir)` to train to start training. `output_dir` is the directory to save the model automatically.
-`trainer.predict(text, as_argilla_records=True)` to make predictions.
-`trainer.save(output_dir)` to save the model manually."""
+        return textwrap.dedent(
+            f"""\
+            ArgillaBaseTrainer info:
+            _________________________________________________________________
+            These baseline params are fixed:
+                dataset: {self._dataset}
+                task: {self._training_task_mapping}
+                train_size: {self._train_size}
+                seed: {self._seed}
+            
+            
+            {self._trainer.__class__} info:
+            _________________________________________________________________
+            The parameters are configurable via `trainer.update_config()`:
+                {self._trainer}
+            
+            Using the trainer:
+            _________________________________________________________________
+            `trainer.train(output_dir)` to train to start training. `output_dir` is the directory to save the model automatically.
+            `trainer.predict(text, as_argilla_records=True)` to make predictions.
+            `trainer.save(output_dir)` to save the model manually.
+            """
+        )
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """

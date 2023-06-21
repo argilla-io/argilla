@@ -317,18 +317,6 @@ class RatingQuestion(QuestionSchema):
         values["settings"]["options"] = [{"value": value} for value in values.get("values")]
         return values
 
-    @property
-    def __all_labels__(self):
-        return [entry["value"] for entry in self.settings["options"]]
-
-    @property
-    def __label2id__(self):
-        return {label: idx for idx, label in enumerate(self.__all_labels__)}
-
-    @property
-    def __id2label__(self):
-        return {idx: label for idx, label in enumerate(self.__all_labels__)}
-
 
 class _LabelQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)

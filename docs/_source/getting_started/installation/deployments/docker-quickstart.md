@@ -1,6 +1,6 @@
 # Docker Quickstart
 
-Argilla is composed of a Python Server with Elasticsearch as the database layer, and a Python Client to create and manage datasets.
+Argilla is composed of a Python Server with Elasticsearch as the database layer, and a Python Client to create and manage datasets, users, and workspaces.
 
 To get started you just need to run the docker image with the following command:
 
