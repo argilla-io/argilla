@@ -29,10 +29,10 @@ describe("Ranking adapter should", () => {
   it("has slot name created based on index iteration", () => {
     const { slots } = adaptQuestionsToSlots(settingsFake);
 
-    expect(slots[0].ranking).toBe(1);
-    expect(slots[1].ranking).toBe(2);
-    expect(slots[2].ranking).toBe(3);
-    expect(slots[3].ranking).toBe(4);
+    expect(slots[0].rank).toBe(1);
+    expect(slots[1].rank).toBe(2);
+    expect(slots[2].rank).toBe(3);
+    expect(slots[3].rank).toBe(4);
   });
 
   it("get ranking correctly based on question", () => {
