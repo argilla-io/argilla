@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
-from typing import Tuple, Type
+from typing import Optional, Tuple, Type
 
 import httpx
 from opensearchpy import OpenSearch
@@ -38,6 +38,7 @@ class ClientAdapterFactory:
         ca_path: str,
         retry_on_timeout: bool = True,
         max_retries: int = 5,
+        extra_config: Optional[dict] = None,
     ) -> IClientAdapter:
         client_config = dict(
             hosts=hosts,
@@ -51,8 +52,12 @@ class ClientAdapterFactory:
 
         (client_class, support_vector_search) = cls._resolve_client_class_with_vector_support(version, distribution)
 
+        extra_config = extra_config or {}
+
         return client_class(
-            index_shards=index_shards, vector_search_supported=support_vector_search, config_backend=client_config
+            index_shards=index_shards,
+            vector_search_supported=support_vector_search,
+            config_backend={**client_config, **extra_config},
         )
 
     @classmethod
