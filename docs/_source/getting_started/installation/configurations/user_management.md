@@ -35,89 +35,9 @@ An Argilla user composed of the following attributes:
 
 The `User` class in the Python client gives developers with `owner` role the ability to create and manage users in Argilla. Check the [User - Python Reference](../reference/python/python_users.rst) to see the attributes, arguments, and methods of the `User` class.
 
-## How to guide
-
-### Get/Create default `User`
-
-:::{note}
-To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`. Otherwise, connections will fail with an Unauthorized server error.
-:::
-
-#### CLI
-
-By default, if the Argilla instance has no users, the following default owner user will be configured:
-
-- username: `argilla`
-- password: `12345678`
-- api_key: `argilla.apikey`
-
-For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
-
-```bash
-python -m argilla users create_default --password new-password --api-key new-api-key
-```
-
-```bash
-User with default credentials succesfully created:
-• username: 'argilla'
-• password: 'newpassword'
-• api_key:  'new-api-key'
-```
-
-#### Python client
-
-You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`.
-
-```python
-import argilla as rg
-
-rg.init(api_url="<API_URL>", api_key="<API_KEY>")
-
-user = rg.User.me()
-```
-
-### List `User`s
-
-#### Python client
-
-You can list all the existing users in Argilla calling the `list` classmethod of the `User` class.
-
-:::{note}
-Just the "owner" can list all the users in Argilla.
-:::
-
-```python
-import argilla as rg
-
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
-
-users = rg.User.list()
-```
-
-### Delete a `User`
-
-#### Python client
-
-You can delete an existing user from Argilla calling the `delete` method on the `User` class.
-
-:::{note}
-Just the "owner" can delete users in Argilla.
-:::
-
-```python
-import argilla as rg
-
-rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
-
-user = rg.User.from_name("existing-user")
-user.delete()
-```
-
-## Add new users and workspaces
-
 The above user management model is configured using the Argilla tasks, which server maintainers can define before launching an Argilla instance.
 
-### Prepare the database
+## Prepare the database
 
 First of all, you need to make sure that database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed.
 
@@ -138,7 +58,7 @@ INFO  [alembic.runtime.migration] Running upgrade 82a5a88a3fa5 -> 1769ee58fbb4, 
 It is important to launch this task prior to any other database action.
 :::
 
-#### Migrate to an specific version
+### Migrate DB to an specific version
 
 If you want to apply migrations corresponding to a specific version or revision, for example, to apply a version rollback, you can pass the `--revision` option to the database migrate command:
 ```bash
@@ -197,7 +117,54 @@ Path: /path/to/alembic/versions/1769ee58fbb4_create_workspaces_users_table.py
     Create Date: 2023-02-14 10:36:56.313539
 ```
 
-### Creating users
+## How to guide
+
+### Get default `User`
+
+:::{note}
+To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`. Otherwise, connections will fail with an Unauthorized server error.
+:::
+
+#### CLI
+
+By default, if the Argilla instance has no users, the following default owner user will be configured:
+
+- username: `argilla`
+- password: `12345678`
+- api_key: `argilla.apikey`
+
+For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
+
+```bash
+python -m argilla users create_default --password new-password --api-key new-api-key
+```
+
+Which should produce the following output:
+
+```bash
+User with default credentials succesfully created:
+• username: 'argilla'
+• password: 'newpassword'
+• api_key:  'new-api-key'
+```
+
+#### Python client
+
+You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`.
+
+```python
+import argilla as rg
+
+rg.init(api_url="<API_URL>", api_key="<API_KEY>")
+
+user = rg.User.me()
+```
+
+### Create a `User`
+
+#### CLI
+
+You can create a new user in Argilla using the `create` command in the `users` group.
 
 ```bash
 python -m argilla users create
@@ -228,50 +195,33 @@ Options:
   --help                    Show this message and exit.
 ```
 
-#### Creating an owner user
-
-**CLI:**
+So for example, to create a new user with `admin` role, you can run the following command:
 
 ```bash
-python -m argilla users create --role owner --first-name Hulio --last-name Ramos --username hurra --password abcde123
+python -m argilla users create --username new-user --first-name New --last-name User --password new-password --role admin
 ```
 
-```
-User succesfully created:
-• first_name: 'Hulio'
-• last_name: 'Ramos'
-• username: 'hurra'
-• role: 'owner'
-• api_key: 'eZDbiNZSZuTyLnVxtxUQ5K4M4WHmPBvIvnc3wofqT7ZPmS33FERjgNd9IECsAdC4qEaks4yVxjomkbDXcjfUoiuotA2-mrdcSZCVUDGGbQE'
-• workspaces: []
-```
+#### Python client
 
-**Python:**
+You can also create a new user in Argilla using the `create` classmethod in the `User` class.
 
 ```python
-auth_headers = {"X-Argilla-API-Key": "argilla.apikey"}
-http = httpx.Client(base_url="http://localhost:6900", headers=auth_headers)
+import argilla as rg
 
-response = http.post("/api/users", json={"role": "admin", "first_name": "Hulio", "last_name": "Ramos", "username": "hurra", "password": "abcde123"})
-response.json()
-```
-```json
-{
-   "id":"8e62808e-df44-4135-87bd-d022f1d9fcf0",
-   "username":"hurra",
-   "role":"owner",
-   "full_name":"Hulio Ramos",
-   "workspaces":[],
-   "api_key":"67Ae7sRYpvu98MqMMkrPNtYx-pyjrRCiyieiwXsE7qP2npG8Eo_8cGpx4EZKJ_APt1FQ7qtX5jcnrUBLq7iW6N5KRhd32pBfHLFHHbnqIK4",
-   "inserted_at":"2023-03-16T11:11:59.871532",
-   "updated_at":"2023-03-16T11:11:59.871532"
-}
+rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+
+user = rg.User.create(
+    username="new-user",
+    first_name="New",
+    last_name="User",
+    password="new-password",
+    role="admin",
+)
 ```
 
+### Assign a `User` to a `Workspace`
 
-#### Creating an annotator user assigned to a workspace
-
-**CLI:**
+#### CLI
 
 ```bash
 python -m argilla users create --role annotator --first-name Nick --last-name Name --username nick --password 11223344 --workspace ws
@@ -291,9 +241,62 @@ The workspace `ws` is automatically created and assigned to the user.
 
 #### Python client
 
-TODO
+```python
+import argilla as rg
 
-## Migrate users from the `users.yaml` file
+rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+
+user = rg.User.create(
+    username="nick",
+    first_name="Nick",
+    last_name="Name",
+    password="11223344",
+    role="annotator",
+)
+
+workspace = rg.Workspace.create(name="ws")
+workspace.add_user(user.id)
+```
+
+
+### List `User`s
+
+#### Python client
+
+You can list all the existing users in Argilla calling the `list` classmethod of the `User` class.
+
+:::{note}
+Just the "owner" can list all the users in Argilla.
+:::
+
+```python
+import argilla as rg
+
+rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+
+users = rg.User.list()
+```
+
+### Delete a `User`
+
+#### Python client
+
+You can delete an existing user from Argilla calling the `delete` method on the `User` class.
+
+:::{note}
+Just the "owner" can delete users in Argilla.
+:::
+
+```python
+import argilla as rg
+
+rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+
+user = rg.User.from_name("existing-user")
+user.delete()
+```
+
+### Migrate users from the `users.yaml` file
 
 The migration tasks can create users and workspaces automatically from a yaml file with the following format:
 
@@ -339,99 +342,24 @@ Migrating User with username 'daisy'
 Users migration process successfully finished
 ```
 
-```python
-http.get("/api/users").json()
-```
-
-```json
-[
-   {
-      "id":"8e4da958-1dba-44d9-82f3-ea2ec3beecdf",
-      "username":"john",
-      "role":"owner",
-      "full_name":"John Doe None",
-      "workspaces":[
-         "john"
-      ],
-      "api_key":"a14427ea-9197-11ec-b909-0242ac120002",
-      "inserted_at":"2023-03-16T11:31:12.979241",
-      "updated_at":"2023-03-16T11:31:12.979241"
-   },
-   {
-      "id":"0ed76afb-e9a5-409c-9716-ac7ae919afe8",
-      "username":"tanya",
-      "role":"annotator",
-      "full_name":"Tanya Franklin None",
-      "workspaces":[
-         "tanya",
-         "argilla",
-         "team"
-      ],
-      "api_key":"78a10b53-8db7-4ab5-9e9e-fbd4b7e76551",
-      "inserted_at":"2023-03-16T11:31:12.986146",
-      "updated_at":"2023-03-16T11:31:12.986146"
-   },
-   {
-      "id":"944e4f76-6cf9-4242-8568-41b2d683cd9f",
-      "username":"daisy",
-      "role":"annotator",
-      "full_name":"Daisy Gonzalez None",
-      "workspaces":[
-         "daisy",
-         "argilla",
-         "team",
-         "latam"
-      ],
-      "api_key":"a8168929-8668-494c-b7a5-98cd35740d9b",
-      "inserted_at":"2023-03-16T11:31:12.990718",
-      "updated_at":"2023-03-16T11:31:12.990718"
-   }
-]
-```
+Ensure everything went as expected via the `User` class from the Python client:
 
 ```python
-http.get("/api/workspaces").json()
+import argilla as rg
+
+rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
+
+users = rg.User.list()
+for user in users:
+   print(f"username={user.username} role={user.role} workspaces={user.workspaces}")
 ```
 
-```json
-[
-   {
-      "id":"96169426-c27b-48b7-a386-8f58193f8d64",
-      "name":"john",
-      "inserted_at":"2023-03-16T11:31:12.981784",
-      "updated_at":"2023-03-16T11:31:12.981784"
-   },
-   {
-      "id":"adc51bfb-3940-4f3a-ad2a-46bad05ffe90",
-      "name":"tanya",
-      "inserted_at":"2023-03-16T11:31:12.986924",
-      "updated_at":"2023-03-16T11:31:12.986924"
-   },
-   {
-      "id":"5d2e5fc1-179e-4b6a-8bc0-3eba4e85bba3",
-      "name":"argilla",
-      "inserted_at":"2023-03-16T11:31:12.986941",
-      "updated_at":"2023-03-16T11:31:12.986941"
-   },
-   {
-      "id":"abb6f7ca-9585-4499-a23b-4433be8c5a60",
-      "name":"team",
-      "inserted_at":"2023-03-16T11:31:12.986953",
-      "updated_at":"2023-03-16T11:31:12.986953"
-   },
-   {
-      "id":"3a2acec8-fc61-4704-993b-a8606dacaaf3",
-      "name":"daisy",
-      "inserted_at":"2023-03-16T11:31:12.991027",
-      "updated_at":"2023-03-16T11:31:12.991027"
-   },
-   {
-      "id":"bd314fdf-5f20-487a-989a-b628f2e2bbd6",
-      "name":"latam",
-      "inserted_at":"2023-03-16T11:31:12.991047",
-      "updated_at":"2023-03-16T11:31:12.991047"
-   }
-]
+Which should print:
+
+```
+username=john role=owner workspaces=['john']
+username=tanya role=annotator workspaces=['tanya', 'argilla', 'team']
+username=daisy role=annotator workspaces=['daisy', 'argilla', 'team', 'latam']
 ```
 
 ### Migrate users with Docker Compose
