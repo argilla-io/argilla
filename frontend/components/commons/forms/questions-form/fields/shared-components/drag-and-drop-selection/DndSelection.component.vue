@@ -16,10 +16,10 @@
     <div class="draggable__slots-container">
       <div
         class="draggable__slot"
-        v-for="{ index, ranking, items } in ranking.slots"
+        v-for="{ index, rank, items } in ranking.slots"
         :key="index"
       >
-        <span> #{{ ranking }} </span>
+        <span> #{{ rank }} </span>
 
         <draggable
           class="draggable__questions-ranked"
