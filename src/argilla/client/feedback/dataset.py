@@ -471,7 +471,12 @@ class FeedbackDataset:
         for i in range(0, len(self.records), batch_size):
             yield self.records[i : i + batch_size]
 
-    def push_to_argilla(self, name: Optional[str] = None, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
+    def push_to_argilla(
+        self,
+        name: Optional[str] = None,
+        workspace: Optional[Union[str, rg.Workspace]] = None,
+        show_progress: bool = False,
+    ) -> None:
         """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
         with the new records.
 
@@ -508,7 +513,9 @@ class FeedbackDataset:
                         records=[
                             record.dict()
                             for record in tqdm(
-                                self.__new_records[i : i + PUSHING_BATCH_SIZE], desc="Pushing records to Argilla..."
+                                self.__new_records[i : i + PUSHING_BATCH_SIZE],
+                                desc="Pushing records to Argilla...",
+                                disable=show_progress,
                             )
                         ],
                     )
