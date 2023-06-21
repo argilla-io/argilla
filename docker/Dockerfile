@@ -30,4 +30,4 @@ VOLUME $ARGILLA_HOME_PATH
 # Exposing ports
 EXPOSE 6900
 
-CMD ["/start_argilla_server.sh"]
+CMD /bin/bash /start_argilla_server.sh
