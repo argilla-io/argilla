@@ -31,6 +31,7 @@ These are the section headers that we use:
 - Added `metadata` attribute to the `Record` of the `FeedbackDataset` ([#3194](https://github.com/argilla-io/argilla/pull/3194))
 - New `users update` command to update the role for an existing user ([#3188](https://github.com/argilla-io/argilla/pull/3188))
 - New `Workspace` class to allow users manage their Argilla workspaces and the users assigned to those workspaces via the Python client ([#3180](https://github.com/argilla-io/argilla/pull/3180))
+- Added `User` class to let users manage their Argilla users via the Python client ([#3169](https://github.com/argilla-io/argilla/pull/3169)).
 
 ### Changed
 

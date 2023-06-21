@@ -12,11 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import concurrent.futures
 import datetime
 import re
 from time import sleep
-from typing import Any, Iterable
+from typing import Iterable
+from uuid import uuid4
 
 import argilla as rg
 import datasets
@@ -31,6 +33,7 @@ from argilla._constants import (
 from argilla.client.apis.status import ApiInfo, Status
 from argilla.client.client import Argilla
 from argilla.client.sdk.client import AuthenticatedClient
+from argilla.client.sdk.commons.api import Response
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     ForbiddenApiError,
@@ -43,8 +46,8 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import User
-from argilla.server.models import UserRole
+from argilla.client.sdk.users.models import UserModel
+from argilla.server.models import User, UserRole
 from httpx import ConnectError
 
 from tests.factories import UserFactory, WorkspaceFactory
@@ -57,14 +60,22 @@ def mock_init_ok(monkeypatch):
 
     It will return a 200 status code, emulating the correct login.
     """
-
     from argilla import __version__ as rg_version
 
     def mock_get_info(*args, **kwargs):
         return ApiInfo(version=rg_version)
 
-    def mock_whoami(*args, **kwargs):
-        return User(username="booohh", api_key="api-key", workspaces=["mock-workspace"])
+    def mock_whoami(*args, **kwargs) -> Response:
+        return UserModel(
+            id=uuid4(),
+            username="mock_username",
+            first_name="mock_first_name",
+            role="admin",
+            api_key="mock_api_key",
+            workspaces=["mock_workspace"],
+            inserted_at=datetime.datetime.now(),
+            updated_at=datetime.datetime.now(),
+        )
 
     monkeypatch.setattr(Status, "get_info", mock_get_info)
     monkeypatch.setattr(users_api, "whoami", mock_whoami)
@@ -95,12 +106,21 @@ def mock_response_token_401(monkeypatch):
         if kwargs["url"] == "fake_url/api/me":
             raise UnauthorizedApiError()
         elif kwargs["url"] == "fake_url/api/docs/spec.json":
-            return User(username="booohh", api_key="api-key")
+            return UserModel(
+                id=uuid4(),
+                username="mock_username",
+                first_name="mock_first_name",
+                role="admin",
+                api_key="mock_api_key",
+                workspaces=["mock_workspace"],
+                inserted_at=datetime.datetime.now(),
+                updated_at=datetime.datetime.now(),
+            )
 
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
 
-def test_init_uppercase_workspace(argilla_user: Argilla):
+def test_init_uppercase_workspace(argilla_user: User):
     with pytest.raises(InputValueError):
         rg.init(workspace="UPPERCASE_WORKSPACE")
 
@@ -139,7 +159,7 @@ def test_init_environment_url(mock_init_ok, monkeypatch):
 
     It checks the url in the environment variable gets passed to client.
     """
-    workspace_name = "mock-workspace"
+    workspace_name = "mock_workspace"
     url = "mock_url"
     api_key = "mock_api_key"
 
@@ -747,8 +767,17 @@ def test_not_aligned_argilla_versions(monkeypatch):
     def mock_get_info(*args, **kwargs):
         return ApiInfo(version="1.0.0")
 
-    def mock_whoami(*args, **kwargs):
-        return User(username="mock")
+    def mock_whoami(*args, **kwargs) -> Response:
+        return UserModel(
+            id=uuid4(),
+            username="mock_username",
+            first_name="mock_first_name",
+            role="admin",
+            api_key="mock_api_key",
+            workspaces=["mock_workspace"],
+            inserted_at=datetime.datetime.now(),
+            updated_at=datetime.datetime.now(),
+        )
 
     monkeypatch.setattr(Status, "get_info", mock_get_info)
     monkeypatch.setattr(users_api, "whoami", mock_whoami)
@@ -760,18 +789,7 @@ def test_not_aligned_argilla_versions(monkeypatch):
         Argilla()
 
 
-def test_aligned_argilla_versions(monkeypatch):
-    from argilla import __version__ as rg_version
-
-    def mock_get_info(*args, **kwargs):
-        return ApiInfo(version=rg_version)
-
-    def mock_whoami(*args, **kwargs):
-        return User(username="mock")
-
-    monkeypatch.setattr(Status, "get_info", mock_get_info)
-    monkeypatch.setattr(users_api, "whoami", mock_whoami)
-
+def test_aligned_argilla_versions(mock_init_ok):
     with pytest.warns(None) as record:
         Argilla()
     assert len(record) == 0
