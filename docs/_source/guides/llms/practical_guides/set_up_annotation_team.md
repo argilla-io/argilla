@@ -42,7 +42,7 @@ http=httpx.Client(base_url=rg_client.base_url, headers=auth_headers)
 users = http.get("/api/users").json()
 
 # filter users to get only those with annotator role
-users = [user for user in users if user['role']=='annotator']
+users = [user for user in users if user["role"]=="annotator"]
 ```
 
 2. Get a list of the records that each will annotate:
