@@ -24,6 +24,7 @@ from argilla.server.search_engine import (
     SearchEngine,
     TextQuery,
     UserResponseStatusFilter,
+    get_search_engine,
 )
 from opensearchpy import OpenSearch, RequestError, helpers
 from sqlalchemy.orm import Session
@@ -141,6 +142,35 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine):
 
 @pytest.mark.asyncio
 class TestSuiteElasticSearchEngine:
+    @pytest.mark.parametrize(
+        "extra_config",
+        [{"hosts": "http://wronghost"}, {"wrong_parameter": True}, {"extra_param": "extra"}],
+    )
+    async def test_create_search_engine(self, extra_config: dict):
+        from argilla.server.settings import settings
+
+        settings.elasticsearch_extra_config.update(extra_config)
+
+        async for search_engine in get_search_engine():
+            assert isinstance(search_engine, SearchEngine)
+            for key in extra_config:
+                if key in search_engine.config:  # Exclude unexpected values
+                    assert search_engine.config[key] == extra_config[key]
+
+    @pytest.mark.parametrize(
+        "extra_config",
+        [{"transport_class": "WrongArgType"}, {"hosts": 33}, {"auth": "wat?"}],
+    )
+    async def test_create_search_engine_with_wrong_args(self, extra_config: dict):
+        from argilla.server.settings import settings
+
+        settings.elasticsearch_extra_config.update(extra_config)
+
+        async for search_engine in get_search_engine():
+            assert isinstance(search_engine, SearchEngine)
+            for key in extra_config:
+                assert key not in search_engine.config or search_engine.config[key] != extra_config[key]
+
     async def test_get_index_or_raise(self, elastic_search_engine: SearchEngine):
         dataset = DatasetFactory.create()
         with pytest.raises(
