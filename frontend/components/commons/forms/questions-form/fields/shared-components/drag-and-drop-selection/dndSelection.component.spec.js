@@ -3,6 +3,7 @@ import DndSelectionComponent from "./DndSelection.component";
 
 let wrapper = null;
 const options = {
+  stubs: ["draggable"],
   propsData: { ranking: {} },
 };
 
