@@ -149,7 +149,7 @@ class TestSuiteElasticSearchEngine:
     async def test_create_search_engine(self, extra_config: dict):
         from argilla.server.settings import settings
 
-        settings.elasticsearch_extra_config.update(extra_config)
+        settings.opensearch_extra_args.update(extra_config)
 
         async for search_engine in get_search_engine():
             assert isinstance(search_engine, SearchEngine)
@@ -164,7 +164,7 @@ class TestSuiteElasticSearchEngine:
     async def test_create_search_engine_with_wrong_args(self, extra_config: dict):
         from argilla.server.settings import settings
 
-        settings.elasticsearch_extra_config.update(extra_config)
+        settings.elasticsearch_extra_args.update(extra_config)
 
         async for search_engine in get_search_engine():
             assert isinstance(search_engine, SearchEngine)
