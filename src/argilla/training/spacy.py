@@ -141,7 +141,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
         self.config["system"]["seed"] = self._seed or 42
         if not self._model:
-            self._logger.warn(
+            self._logger.warning(
                 "`model` is not specified and it's recommended to specify the"
                 " `spaCy` model to use. Using `en_core_web_sm` as the default model"
                 " instead."
@@ -201,7 +201,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         from spacy.training.initialize import init_nlp
         from spacy.training.loop import train as train_nlp
 
-        self._logger.warn(
+        self._logger.warning(
             "Note that the spaCy training is expected to be used through the CLI rather"
             " than programatically, so the dataset needs to be dumped into the disk and"
             " then loaded from disk. More information at"
@@ -245,7 +245,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             `List[BaseModel]` (if `as_argilla_records` is True) with the predictions.
         """
         if self._nlp is None:
-            self._logger.warn("Using model without fine-tuning.")
+            self._logger.warning("Using model without fine-tuning.")
             self.init_model()
 
         str_input = False
