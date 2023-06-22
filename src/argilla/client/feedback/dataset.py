@@ -1026,7 +1026,7 @@ class FeedbackDataset:
             import spacy
 
             if lang is None:
-                _LOGGER.warn("spaCy `lang` is not provided. Using `en`(English) as default language.")
+                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
                 lang = spacy.blank("en")
             elif lang.isinstance(str):
                 if len(lang) == 2:
