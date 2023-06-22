@@ -168,7 +168,7 @@ This task will ask you for the required information to create your user, includi
 Finally to run the web app now simply execute:
 
 ```sh
-python -m argilla
+python -m argilla server
 ```
 
 Congrats, you are ready to take _Argilla_ to the next level 🚀
