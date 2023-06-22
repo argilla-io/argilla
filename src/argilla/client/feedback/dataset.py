@@ -53,6 +53,7 @@ if TYPE_CHECKING:
     import httpx
     from datasets import Dataset
 
+    from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.sdk.v1.datasets.models import (
         FeedbackDatasetModel,
         FeedbackFieldModel,
@@ -471,7 +472,12 @@ class FeedbackDataset:
         for i in range(0, len(self.records), batch_size):
             yield self.records[i : i + batch_size]
 
-    def push_to_argilla(self, name: Optional[str] = None, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
+    def push_to_argilla(
+        self,
+        name: Optional[str] = None,
+        workspace: Optional[Union[str, rg.Workspace]] = None,
+        show_progress: bool = False,
+    ) -> None:
         """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
         with the new records.
 
@@ -482,8 +488,10 @@ class FeedbackDataset:
             name: the name of the dataset to push to Argilla. If not provided, the `argilla_id` will be used if the dataset
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
+            show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
         """
-        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
+        client: "ArgillaClient" = rg.active_client()
+        httpx_client: "httpx.Client" = client.http_client.httpx
 
         if name is None:
             if self.argilla_id is None:
@@ -505,7 +513,14 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=self.argilla_id,
-                        records=[record.dict() for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]],
+                        records=[
+                            record.dict()
+                            for record in tqdm(
+                                self.__new_records[i : i + PUSHING_BATCH_SIZE],
+                                desc="Pushing records to Argilla...",
+                                disable=show_progress,
+                            )
+                        ],
                     )
                 self.__records += self.__new_records
                 self.__new_records = []
@@ -515,7 +530,7 @@ class FeedbackDataset:
                 ) from e
         else:
             if workspace is None:
-                workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
+                workspace = rg.Workspace.from_name(client.get_workspace())
 
             if isinstance(workspace, str):
                 workspace = rg.Workspace.from_name(workspace)
@@ -548,7 +563,7 @@ class FeedbackDataset:
 
             for field in self.fields:
                 try:
-                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=json.loads(field.json()))
+                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=field.dict())
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
@@ -558,9 +573,7 @@ class FeedbackDataset:
 
             for question in self.questions:
                 try:
-                    datasets_api_v1.add_question(
-                        client=httpx_client, id=argilla_id, question=json.loads(question.json())
-                    )
+                    datasets_api_v1.add_question(client=httpx_client, id=argilla_id, question=question.dict())
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
@@ -581,7 +594,10 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=[json.loads(record.json()) for record in batch],
+                        records=[
+                            record.dict()
+                            for record in tqdm(batch, desc="Pushing records to Argilla...", disable=show_progress)
+                        ],
                     )
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
@@ -650,11 +666,11 @@ class FeedbackDataset:
                 )
             )
 
-        cls.argilla_id = existing_dataset.id
         fields = []
         for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed:
+            base_field = field.dict(include={"name", "title", "required"})
             if field.settings["type"] == "text":
-                field = TextField.construct(**field.dict())
+                field = TextField(**base_field, use_markdown=field.settings["use_markdown"])
             else:
                 raise ValueError(
                     f"Field '{field.name}' is not a supported field in the current Python package version,"
@@ -663,14 +679,25 @@ class FeedbackDataset:
             fields.append(field)
         questions = []
         for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed:
+            question_dict = question.dict(include={"name", "title", "description", "required"})
             if question.settings["type"] == "rating":
-                question = RatingQuestion.construct(**question.dict())
+                question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
             elif question.settings["type"] == "text":
-                question = TextQuestion.construct(**question.dict())
-            elif question.settings["type"] == "label_selection":
-                question = LabelQuestion.construct(**question.dict())
-            elif question.settings["type"] == "multi_label_selection":
-                question = MultiLabelQuestion.construct(**question.dict())
+                question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
+            elif question.settings["type"].__contains__("label_selection"):
+                if all([label["value"] == label["text"] for label in question.settings["options"]]):
+                    labels = [label["value"] for label in question.settings["options"]]
+                else:
+                    labels = {label["value"]: label["text"] for label in question.settings["options"]}
+
+                if question.settings["type"] == "label_selection":
+                    question = LabelQuestion(
+                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
+                    )
+                elif question.settings["type"] == "multi_label_selection":
+                    question = MultiLabelQuestion(
+                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
+                    )
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
@@ -683,6 +710,7 @@ class FeedbackDataset:
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
         )
+        self.argilla_id = existing_dataset.id
         if with_records:
             self.fetch_records()
         return self

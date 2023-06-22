@@ -99,7 +99,7 @@ export default {
       if (this.focus && event.target.isContentEditable) {
         event.preventDefault();
         const text = event.clipboardData?.getData("text/plain") ?? "";
-        document.execCommand("insertHtml", false, text);
+        document.execCommand("insertText", false, text);
       }
     },
     onClickOutside() {

@@ -256,6 +256,8 @@ def add_records(
                         active_user_id = client.get("api/me").json()["id"]
                     response["user_id"] = active_user_id
                     response_without_user_id = True
+            if isinstance(response["user_id"], UUID):
+                response["user_id"] = str(response["user_id"])
             cleaned_responses.append(response)
         record["responses"] = cleaned_responses
 
