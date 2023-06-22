@@ -18,6 +18,8 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
+
 ## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
 
 ### Fixed
