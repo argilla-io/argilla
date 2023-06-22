@@ -6,6 +6,10 @@ This guide explains how to setup and manage the users in Argilla via the Python 
 The `User` class for user management has been included as of the Argilla 1.11.0 release, and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
 :::
 
+:::{warning}
+As of Argilla 1.11.0 the default pool of users contains an owner user which uses the same credentials as the admin user from previous Argilla versions i.e. `admin` as username and `1234` as the password. So on, both `argilla/argilla-quickstart:latest` and `argilla/argilla-server:latest` Docker images will create now an "owner" user instead of an "admin" as before, but will use the same credentials. Note that the quickstart image uses the `api_key=admin.apikey` while the server uses `api_key=argilla.apikey`, unless explicitly modified.
+:::
+
 ## User Model
 
 A user in Argilla is an authorized person who can access the UI and use the Python client and CLI in a running Argilla instance.
