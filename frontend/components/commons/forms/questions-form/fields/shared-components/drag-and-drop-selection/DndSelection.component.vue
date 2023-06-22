@@ -84,7 +84,7 @@ $max-visible-card-items: 12;
   &__questions-container {
     width: 40%;
     min-width: 0;
-    height: ($card-height + $base-space) * $max-visible-card-items;
+    max-height: ($card-height + $base-space) * $max-visible-card-items;
     display: flex;
     flex-direction: column;
     gap: $cards-separation;
