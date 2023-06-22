@@ -47,7 +47,6 @@ class Framework(Enum):
         span_marker: SpanMarker Tom Aarsen library
         spark-nlp: Spark NLP John Snow Labs library
         openai: OpenAI LLMs
-        autotrain: AutoTrain Transformers library
     """
 
     TRANSFORMERS = "transformers"

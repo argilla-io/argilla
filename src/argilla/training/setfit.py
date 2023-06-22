@@ -136,7 +136,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
           A list of predictions
         """
         if self._setfit_model is None:
-            self._logger.warn("Using model without fine-tuning.")
+            self._logger.warning("Using model without fine-tuning.")
             self.init_model()
 
         str_input = False

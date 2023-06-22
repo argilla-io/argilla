@@ -19,7 +19,9 @@ import pytest
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
 
+import shutil
 import sys
+from pathlib import Path
 
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
@@ -30,9 +32,11 @@ from argilla.client.feedback.schemas import (
 )
 from argilla.client.feedback.training import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskMapingForTextClassification,
+    TrainingTaskMapping,
 )
 from argilla.client.models import Framework
+
+__OUTPUT_DIR__ = "tmp"
 
 
 @pytest.mark.parametrize(
@@ -73,7 +77,7 @@ def test_prepare_for_training_text_classification(
         question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
     ]
     label = LabelQuestionUnification(question=questions[0])
-    training_task_mapping = TrainingTaskMapingForTextClassification(text=dataset.fields[0], label=label)
+    training_task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
 
     if framework in [Framework("spark-nlp"), Framework("span_marker")]:
         with pytest.raises(NotImplementedError):
@@ -82,8 +86,12 @@ def test_prepare_for_training_text_classification(
             )
     else:
         if framework in [Framework("peft")] and sys.version_info < (3, 9):
-            return True
-        trainer = ArgillaTrainer(
-            dataset=dataset, training_task_mapping=training_task_mapping, framework=framework, fetch_records=False
-        )
-        trainer.train("tmp")
+            pass
+        else:
+            trainer = ArgillaTrainer(
+                dataset=dataset, training_task_mapping=training_task_mapping, framework=framework, fetch_records=False
+            )
+            trainer.train(__OUTPUT_DIR__)
+
+    if Path(__OUTPUT_DIR__).exists():
+        shutil.rmtree(__OUTPUT_DIR__)

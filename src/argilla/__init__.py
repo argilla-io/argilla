@@ -73,7 +73,7 @@ if _TYPE_CHECKING:
     )
     from argilla.client.feedback.training import (
         ArgillaTrainer,
-        TrainingTaskMapingForTextClassification,
+        TrainingTaskMapping,
     )
     from argilla.client.models import (
         Text2TextRecord,
@@ -124,7 +124,7 @@ _import_structure = {
         "read_pandas",
     ],
     "client.feedback.dataset": ["FeedbackDataset"],
-    "client.feedback.training": ["ArgillaTrainer", "TrainingTaskMapingForTextClassification"],
+    "client.feedback.training": ["ArgillaTrainer", "TrainingTaskMapping"],
     "client.feedback.schemas": [
         "FeedbackRecord",
         "LabelQuestion",

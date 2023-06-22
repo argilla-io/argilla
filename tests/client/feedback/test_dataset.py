@@ -30,7 +30,7 @@ from argilla.client.feedback.schemas import (
     TextQuestion,
 )
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskMapingForTextClassification,
+    TrainingTaskMapping,
 )
 from argilla.client.models import Framework
 
@@ -445,6 +445,6 @@ def test_prepare_for_training_text_classification(
         question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
     ]
     label = LabelQuestionUnification(question=questions[0])
-    training_task_mapping = TrainingTaskMapingForTextClassification(text=dataset.fields[0], label=label)
+    training_task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
 
     dataset.prepare_for_training(framework=framework, training_task_mapping=training_task_mapping, fetch_records=False)

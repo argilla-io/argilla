@@ -13,12 +13,13 @@
 #  limitations under the License.
 
 import os
+import textwrap
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskMapingForTextClassification,
+    TrainingTaskMappingForTextClassification,
 )
 from argilla.client.models import Framework
 from argilla.training import ArgillaTrainer as ArgillaTrainerV1
@@ -33,7 +34,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
         dataset: "rg.FeedbackDataset",
-        training_task_mapping: TrainingTaskMapingForTextClassification,
+        training_task_mapping: TrainingTaskMappingForTextClassification,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
         model: Optional[str] = None,
@@ -47,7 +48,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
         Args:
             dataset (FeedbackDataset): the dataset to be used for training.
-            training_task_mapping (TrainingTaskMapingForTextClassification): the training data to be used for training.
+            training_task_mapping (TrainingTaskMappingForTextClassification): the training data to be used for training.
             framework (str):
                 the framework to use for training. Currently, only "transformers", "setfit", and "spacy"
                 are supported.
@@ -86,7 +87,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             framework = Framework(framework)
 
         if framework is Framework.SETFIT:
-            if not isinstance(training_task_mapping, TrainingTaskMapingForTextClassification):
+            if not isinstance(training_task_mapping, TrainingTaskMappingForTextClassification):
                 raise NotImplementedError(f"{Framework.SETFIT} only supports `TextClassification` tasks.")
             from argilla.client.feedback.training.frameworks.setfit import (
                 ArgillaSetFitTrainer,
@@ -113,7 +114,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             )
 
         # elif framework is Framework.AUTOTRAIN:
-        #     if not isinstance(training_task_mapping, TrainingTaskMapingForTextClassification):
+        #     if not isinstance(training_task_mapping, TrainingTaskMappingForTextClassification):
         #         raise NotImplementedError(f"{Framework.AUTOTRAIN} only supports `TextClassification` tasks.")
         #     from argilla.client.feedback.training.frameworks.autotrain_advanced import (
         #         ArgillaAutoTrainTrainer,
@@ -164,7 +165,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.SPAN_MARKER:
-            if not isinstance(training_task_mapping, TrainingTaskMapingForTextClassification):
+            if not isinstance(training_task_mapping, TrainingTaskMappingForTextClassification):
                 raise NotImplementedError(f"{Framework.SPAN_MARKER} only supports `TextClassification` tasks.")
 
             from argilla.client.feedback.training.frameworks.span_marker import (
@@ -233,7 +234,7 @@ class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
         feedback_dataset: "rg.FeedbackDataset",
-        training_task_mapping: TrainingTaskMapingForTextClassification,
+        training_task_mapping: TrainingTaskMappingForTextClassification,
         prepared_data=None,
         model: str = None,
         seed: int = None,
@@ -247,7 +248,7 @@ class ArgillaTrainerSkeleton(ABC):
         self._seed = seed
         self._multi_label = False
         self._label_list = None
-        if isinstance(self._training_task_mapping, TrainingTaskMapingForTextClassification):
+        if isinstance(self._training_task_mapping, TrainingTaskMappingForTextClassification):
             self._multi_label = self._training_task_mapping.__multi_label__
             self._label_list = self._training_task_mapping.__all_labels__
             self._label2id = self._training_task_mapping.__label2id__

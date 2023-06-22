@@ -26,7 +26,7 @@ Data for the training text classification using our `FeedbackDataset` is defined
 
 1. We need to define unification strategies a `RatingUnification`, a `LabelUnification` or a `MultiLabelUnification`.
 
-2.  For this task, we assume we need a `text-label`-pair for defining a text classification task. We allow mapping for creating a `TrainingTaskMapingForTextClassification` by mapping `*Field` to a `text`-value and allow for mapping a `RatingUnification`, `LabelUnification` or a `MultiLabelUnification` to a `label`-value.
+2.  For this task, we assume we need a `text-label`-pair for defining a text classification task. We allow mapping for creating a `TrainingTaskMapping.for_text_classification` by mapping `*Field` to a `text`-value and allow for mapping a `RatingUnification`, `LabelUnification` or a `MultiLabelUnification` to a `label`-value.
 
 3.  We then define an `ArgillaTrainer` instance with support for "openai", "setfit", "peft", "spacy" and "transformers".
 
@@ -77,14 +77,14 @@ label_unification = MultiLabelUnification(
 
 #### Define a task mapping
 
-After defining the `unfication`, we can now define our `TrainingTaskMapingForTextClassification`.
+After defining the `unification`, we can now define our `TrainingTaskMapping.for_text_classification`.
 
 ```python
-from argilla import FeedbackDataset, TrainingTaskMapingForTextClassification
+from argilla import FeedbackDataset, TrainingTaskMapping
 
 label_unification = ...
 dataset = FeedbackDataset(...)
-training_task_mapping = TrainingTaskMapingForTextClassification(
+training_task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("my_text_field"),
     label=label_unification
 )
@@ -92,7 +92,7 @@ training_task_mapping = TrainingTaskMapingForTextClassification(
 
 #### Use ArgillaTrainer
 
-Next, we can use our `FeedbackDataset` and `TrainingTaskMapingForTextClassification` to initialize our `argilla.ArgillaTrainer`. We support the frameworks "openai", "setfit", "peft", "spacy" and "transformers".
+Next, we can use our `FeedbackDataset` and `TrainingTaskMappingForTextClassification` to initialize our `argilla.ArgillaTrainer`. We support the frameworks "openai", "setfit", "peft", "spacy" and "transformers".
 
 ````{note}
 This is a newer version and can be imported via `from argilla import ArgillaTrainer`. The old trainer can be imported via `from argilla.training import ArgillaTrainer`. Our docs, contain some [additional information on usage of the ArgillaTrainer](/guides/train_a_model).
@@ -176,7 +176,7 @@ label_unification = rg.LabelQuestionUnification(
     strategy="majority"
 )
 
-training_task_mapping = rg.TrainingTaskMapingForTextClassification(
+training_task_mapping = rg.TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("text"),
     label=label_unification
 )

@@ -45,7 +45,7 @@ from argilla.client.feedback.schemas import (
     TextQuestion,
 )
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskMapingForTextClassification,
+    TrainingTaskMappingForTextClassification,
 )
 from argilla.client.feedback.utils import (
     feedback_dataset_in_argilla,
@@ -974,7 +974,7 @@ class FeedbackDataset:
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
-        training_task_mapping: TrainingTaskMapingForTextClassification,
+        training_task_mapping: TrainingTaskMappingForTextClassification,
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
@@ -1003,7 +1003,7 @@ class FeedbackDataset:
         if fetch_records:
             self.fetch_records()
 
-        if isinstance(training_task_mapping, TrainingTaskMapingForTextClassification):
+        if isinstance(training_task_mapping, TrainingTaskMappingForTextClassification):
             self.unify_responses(
                 question=training_task_mapping.label.question, strategy=training_task_mapping.label.strategy
             )

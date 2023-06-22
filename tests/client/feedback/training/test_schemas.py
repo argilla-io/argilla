@@ -24,7 +24,7 @@ from argilla import (
     RatingQuestion,
     RatingQuestionUnification,
     TextField,
-    TrainingTaskMapingForTextClassification,
+    TrainingTaskMapping,
 )
 from argilla.client.models import Framework
 from datasets import Dataset, DatasetDict
@@ -208,7 +208,7 @@ label_question_payload = {
 def test_training_task_mapping_for_text_classification(framework, label, train_size, seed, expected):
     data = [{"text": "This is a text", "label": "1"}, {"text": "This is a text", "label": "2"}]
     field = TextField(name="text")
-    task_mapping = TrainingTaskMapingForTextClassification(text=field, label=label)
+    task_mapping = TrainingTaskMapping.for_text_classification(text=field, label=label)
     if framework == Framework.SPACY:
         data = task_mapping._prepare_for_training_with_spacy(
             data=data, train_size=train_size, seed=seed, lang=spacy.blank("en")

@@ -226,7 +226,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             for kwarg in ["logprobs", "max_tokens", "temperature", "n"]:
                 if kwarg in kwargs:
                     del kwargs[kwarg]
-                    self._logger.warn(f"Argument `{kwarg}` has default value for text classification. Deleting it.")
+                    self._logger.warning(f"Argument `{kwarg}` has default value for text classification. Deleting it.")
             kwargs["logprobs"] = len(self._settings.label_schema)
             kwargs["max_tokens"] = 1
             kwargs["temperature"] = 0
@@ -234,7 +234,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         else:
             if "stop" in kwargs:
                 del kwargs[kwarg]
-            self._logger.warn("Argument `stop` has default value for text classification. Deleting it.")
+            self._logger.warning("Argument `stop` has default value for text classification. Deleting it.")
             kwargs["stop"] = self._end_token
             if "logprobs" not in kwargs:
                 kwargs["logprobs"] = 1

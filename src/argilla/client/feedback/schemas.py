@@ -24,6 +24,7 @@ from pydantic import (
     BaseModel,
     Extra,
     Field,
+    PrivateAttr,
     StrictInt,
     StrictStr,
     conint,
@@ -116,7 +117,6 @@ class FeedbackRecord(BaseModel):
         metadata (Optional[Dict[str, Any]]): The metadata of the record. Defaults to None.
         responses (Optional[Union[ResponseSchema, List[ResponseSchema]]]): The responses of the record. Defaults to None.
         external_id (Optional[str]): The external id of the record. Defaults to None.
-        unified_responses (Optional[Dict[str, List[UnificatiedValueSchema]]]): The unified responses of the record. Defaults to None.
 
     Examples:
         >>> import argilla as rg
@@ -140,7 +140,7 @@ class FeedbackRecord(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
-    unified_responses: Optional[Dict[str, List[UnificatiedValueSchema]]] = {}
+    _unified_responses: Optional[Dict[str, List[UnificatiedValueSchema]]] = PrivateAttr(default={})
 
     @validator("responses", always=True)
     def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
@@ -152,7 +152,7 @@ class FeedbackRecord(BaseModel):
 
     class Config:
         extra = Extra.ignore
-        fields = {"unified_responses": {"exclude": True}}
+        fields = {"_unified_responses": {"exclude": True}}
 
 
 class FieldSchema(BaseModel):
@@ -311,6 +311,18 @@ class RatingQuestion(QuestionSchema):
 
     settings: Dict[str, Any] = Field({"type": "rating"}, allow_mutation=False)
     values: List[int] = Field(unique_items=True, min_items=2)
+
+    @property
+    def __all_labels__(self):
+        return [entry["value"] for entry in self.settings["options"]]
+
+    @property
+    def __label2id__(self):
+        return {label: idx for idx, label in enumerate(self.__all_labels__)}
+
+    @property
+    def __id2label__(self):
+        return {idx: label for idx, label in enumerate(self.__all_labels__)}
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -533,7 +545,7 @@ class RatingQuestionStrategy(Enum):
                 unified_value = str(min(ratings))
             else:
                 raise ValueError("Invalid aggregation method")
-            rec.unified_responses[question] = [UnificatiedValueSchema(value=unified_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnificatiedValueSchema(value=unified_value, strategy=self.value)]
         return records
 
     def _majority(self, records: List[FeedbackRecord], question: str):
@@ -552,7 +564,7 @@ class RatingQuestionStrategy(Enum):
                 majority_value = random.choice(most_common_values)
             else:
                 majority_value = counter.most_common(1)[0][0]
-            rec.unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
         return records
 
 
@@ -588,7 +600,7 @@ class LabelQuestionStrategyMixin:
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
-            rec.unified_responses[question] = [
+            rec._unified_responses[question] = [
                 UnificatiedValueSchema(value=resp.values[question].value, strategy=self.value) for resp in responses
             ]
 
@@ -629,7 +641,7 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             else:
                 majority_value = counter.most_common(1)[0][0]
 
-            rec.unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
         return rec
 
     @classmethod
@@ -667,7 +679,7 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             for value, count in counter.items():
                 if count >= majority:
                     majority_value.append(value)
-            rec.unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
         return records
 
     @classmethod

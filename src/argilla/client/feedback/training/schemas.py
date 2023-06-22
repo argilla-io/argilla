@@ -45,7 +45,7 @@ class TrainingData(ABC):
                     data[pydantic_field_name] = record.fields[pydantic_field_value.name]
                 else:
                     data[pydantic_field_name] = [
-                        resp.value for resp in record.unified_responses[pydantic_field_value.question.name]
+                        resp.value for resp in record._unified_responses[pydantic_field_value.question.name]
                     ]
                     explode_columns.add(pydantic_field_name)
             formatted_data.append(data)
@@ -93,7 +93,20 @@ class TrainingData(ABC):
         """Overwritten by subclasses"""
 
 
-class TrainingTaskMapingForTextClassification(BaseModel, TrainingData):
+class TrainingTaskMapping:
+    @classmethod
+    def for_text_classification(
+        cls,
+        text: TextField,
+        label: Union[LabelQuestionUnification, MultiLabelQuestion],
+    ) -> "TrainingTaskMappingForTextClassification":
+        return TrainingTaskMappingForTextClassification(
+            text=text,
+            label=label,
+        )
+
+
+class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
     """Training data for text classification
 
     Args:
@@ -101,10 +114,10 @@ class TrainingTaskMapingForTextClassification(BaseModel, TrainingData):
         label: Union[RatingUnification, LabelUnification, MultiLabelUnification]
 
     Examples:
-        >>> from argilla import LabelQuestion, TrainingTaskMapingForTextClassification
+        >>> from argilla import LabelQuestion, TrainingTaskMappingForTextClassification
         >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
         >>> label = RatingQuestionUnification(question=dataset.questions[0], strategy="mean")
-        >>> training_data = TrainingTaskMapingForTextClassification(
+        >>> training_data = TrainingTaskMappingForTextClassification(
         ...     text=dataset.fields[0],
         ...     label=label
         ... )
@@ -154,7 +167,7 @@ class TrainingTaskMapingForTextClassification(BaseModel, TrainingData):
 
     def __repr__(self) -> str:
         return (
-            "TrainingTaskMapingForTextClassification",
+            "TrainingTaskMappingForTextClassification",
             f"\n\t text={self.text.name}",
             f"\n\t label={self.label.question.name}",
             f"\n\t multi_label={self.__multi_label__}",
