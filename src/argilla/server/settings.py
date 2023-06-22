@@ -80,7 +80,8 @@ class Settings(BaseSettings):
     elasticsearch: str = "http://localhost:9200"
     elasticsearch_ssl_verify: bool = True
     elasticsearch_ca_path: Optional[str] = None
-    elasticsearch_extra_config: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    elasticsearch_extra_args: Dict[str, Any] = Field(default_factory=dict)
+    opensearch_extra_args: Dict[str, Any] = Field(default_factory=dict)
     # Analyzer configuration
     default_es_search_analyzer: str = "standard"
     exact_es_search_analyzer: str = "whitespace"
@@ -174,7 +175,6 @@ class Settings(BaseSettings):
         return self.elasticsearch
 
     class Config:
-        # TODO: include a common prefix for all argilla env vars.
         env_prefix = "ARGILLA_"
         fields = {
             # TODO(@frascuchon): Remove in 0.20.0
