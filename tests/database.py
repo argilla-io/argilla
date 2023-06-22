@@ -17,5 +17,17 @@ import asyncio
 from sqlalchemy import orm
 from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
 
-TestSession = async_scoped_session(orm.sessionmaker(class_=AsyncSession), asyncio.current_task)
-SyncTestSession = orm.scoped_session(orm.sessionmaker(class_=orm.Session))
+task = None
+
+
+def set_task(t: asyncio.Task):
+    global task
+    task = t
+
+
+def get_task() -> asyncio.Task:
+    return task
+
+
+TestSession = async_scoped_session(orm.sessionmaker(class_=AsyncSession, expire_on_commit=False), get_task)
+SyncTestSession = orm.scoped_session(orm.sessionmaker(class_=orm.Session, expire_on_commit=False))
