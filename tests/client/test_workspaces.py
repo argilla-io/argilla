@@ -23,6 +23,7 @@ from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def test_workspace_cls_init() -> None:
@@ -114,7 +115,7 @@ async def test_workspace_add_user(owner: "ServerUser") -> None:
 
 
 @pytest.mark.asyncio
-async def test_workspace_delete_user(owner: "ServerUser") -> None:
+async def test_workspace_delete_user(owner: "ServerUser", db: "AsyncSession") -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
     ArgillaSingleton.init(api_key=owner.api_key)

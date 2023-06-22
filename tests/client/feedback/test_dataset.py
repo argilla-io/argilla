@@ -30,6 +30,7 @@ from argilla.client.feedback.schemas import (
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.server.models import User as ServerUser
+    from sqlalchemy.ext.asyncio import AsyncSession
 
     from tests.helpers import SecuredClient
 
@@ -265,13 +266,15 @@ def test_format_as(
     assert isinstance(ds, expected_output)
 
 
-def test_push_to_argilla_and_from_argilla(
+@pytest.mark.asyncio
+async def test_push_to_argilla_and_from_argilla(
     mocked_client: "SecuredClient",
     argilla_user: "ServerUser",
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
+    db: "AsyncSession",
 ) -> None:
     api.active_api()
     api.init(api_key=argilla_user.api_key)
@@ -310,6 +313,8 @@ def test_push_to_argilla_and_from_argilla(
             ),
         ]
     )
+
+    await db.refresh(argilla_user, attribute_names=["datasets"])
 
     with pytest.raises(RuntimeError, match="already exists in Argilla, please choose another name and/or workspace"):
         dataset.push_to_argilla(name="test-dataset")
@@ -363,13 +368,15 @@ def test_push_to_argilla_and_from_argilla(
         assert rg_record.metadata == record.metadata
 
 
-def test_copy_dataset_in_argilla(
+@pytest.mark.asyncio
+async def test_copy_dataset_in_argilla(
     mocked_client: "SecuredClient",
     argilla_user: "ServerUser",
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
+    db: "AsyncSession",
 ) -> None:
     api.active_api()
     api.init(api_key=argilla_user.api_key)
@@ -382,9 +389,13 @@ def test_copy_dataset_in_argilla(
     dataset.add_records(records=feedback_dataset_records)
     dataset.push_to_argilla(name="test-dataset")
 
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+
     same_dataset = FeedbackDataset.from_argilla("test-dataset")
     same_dataset.push_to_argilla("copy-dataset")
     assert same_dataset.argilla_id is not None
+
+    await db.refresh(argilla_user, attribute_names=["datasets"])
 
     same_dataset = FeedbackDataset.from_argilla("copy-dataset")
     assert same_dataset.argilla_id != dataset.argilla_id

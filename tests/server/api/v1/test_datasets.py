@@ -20,7 +20,6 @@ from uuid import UUID, uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
-from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -31,7 +30,6 @@ from argilla.server.models import (
     ResponseStatus,
     User,
     UserRole,
-    Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
     DATASET_CREATE_GUIDELINES_MAX_LENGTH,

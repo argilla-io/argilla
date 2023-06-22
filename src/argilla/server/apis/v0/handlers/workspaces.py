@@ -127,6 +127,7 @@ async def create_workspace_user(
     workspace_user = await accounts.create_workspace_user(
         db, WorkspaceUserCreate(workspace_id=workspace_id, user_id=user_id)
     )
+    await db.refresh(user, attribute_names=["workspaces"])
 
     return User.from_orm(workspace_user.user)
 
@@ -147,6 +148,6 @@ async def delete_workspace_user(
 
     user = await workspace_user.awaitable_attrs.user
     await accounts.delete_workspace_user(db, workspace_user)
-    await user.awaitable_attrs.workspaces
+    await db.refresh(user, attribute_names=["workspaces"])
 
     return User.from_orm(user)
