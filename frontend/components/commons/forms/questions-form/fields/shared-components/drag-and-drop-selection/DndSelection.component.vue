@@ -1,17 +1,21 @@
 <template>
   <div class="draggable">
-    <div class="draggable__questions-container">
-      <draggable
-        class="draggable__questions"
-        :list="ranking.questions"
-        :group="{ name: 'question' }"
-        :sort="false"
+    <draggable
+      class="draggable__questions-container"
+      :list="ranking.questions"
+      :group="{ name: 'question' }"
+      :sort="false"
+    >
+      <div
+        v-for="{ text, value } in ranking.questions"
+        :key="value"
+        class="draggable__rank-card--unranked"
+        :title="text"
       >
-        <div v-for="{ text, value } in ranking.questions" :key="value">
-          <div class="draggable__rank-card" v-text="text" />
-        </div>
-      </draggable>
-    </div>
+        <svgicon width="7" name="draggable" />
+        <span class="draggable__rank-card__title" v-text="text" />
+      </div>
+    </draggable>
 
     <div class="draggable__slots-container">
       <div
@@ -19,18 +23,23 @@
         v-for="{ index, rank, items } in ranking.slots"
         :key="index"
       >
-        <span> #{{ rank }} </span>
-
+        <span class="draggable__slot-box--ranking" v-text="rank" />
         <draggable
-          class="draggable__questions-ranked"
+          class="draggable__slot-box"
           :list="items"
           group="question"
           :sort="false"
           @add="onMoveEnd"
           @remove="onMoveEnd"
         >
-          <div v-for="{ text, value } in items" :key="value">
-            <div class="draggable__ranked-card" v-text="text" />
+          <div
+            v-for="{ text, value } in items"
+            :key="value"
+            class="draggable__rank-card--ranked"
+            :title="text"
+          >
+            <svgicon width="7" name="draggable" />
+            <span class="draggable__rank-card__title" v-text="text" />
           </div>
         </draggable>
       </div>
@@ -39,6 +48,7 @@
 </template>
 
 <script>
+import "assets/icons/draggable";
 export default {
   name: "DndSelectionComponent",
   props: {
@@ -56,36 +66,34 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary-color: #4c4ea3;
-$cards-separation: 10px;
-$background-slot-color: #fafafa;
-$slot-height: 30px;
+$card-primary-color: palette(purple, 200);
+$card-secondary-color: palette(white);
+$card-ghost-color: palette(purple, 300);
+$card-empty-color: palette(purple, 400);
+$cards-separation: $base-space;
+$background-slot-color: $black-4;
+$slot-height: $base-space * 4;
+$card-height: $base-space * 4;
+$max-visible-card-items: 12;
 
 .draggable {
   user-select: none;
   display: flex;
   flex-direction: row-reverse;
-  gap: 5px;
-  height: 100%;
-
+  gap: $base-space;
   &__questions-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     width: 40%;
-    height: 100%;
-  }
-
-  &__slots-container {
-    width: 100%;
+    min-width: 0;
+    height: ($card-height + $base-space) * $max-visible-card-items;
     display: flex;
     flex-direction: column;
     gap: $cards-separation;
+    overflow: auto;
   }
 
-  &__questions {
-    width: 100%;
-    height: 150px;
+  &__slots-container {
+    width: 60%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: $cards-separation;
@@ -95,62 +103,89 @@ $slot-height: 30px;
     width: 100%;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: stretch;
     justify-items: center;
-    gap: 2px;
-
-    & span {
-      width: 10%;
-      height: 100%;
-      display: inline-flex;
-      align-items: center;
-      padding: 5px;
-      border-radius: 5px;
-      text-align: center;
-      background-color: $background-slot-color;
-      font-weight: bold;
-    }
+    gap: calc($base-space / 2);
   }
 
   &__rank-card {
-    cursor: move;
-    height: $slot-height;
+    height: $card-height;
     min-width: 50px;
-    padding: 5px;
-    color: $primary-color;
-    border-radius: 3px;
-    border: 1px solid $primary-color;
-    font-weight: bold;
-
-    &::before {
-      content: "⋮⋮ ";
-      color: gray;
+    display: flex;
+    align-items: center;
+    gap: $base-space;
+    padding: $base-space;
+    border-radius: $border-radius;
+    cursor: move;
+    &[draggable="true"] {
+      background: $card-ghost-color;
+      color: $card-primary-color;
+      box-shadow: $shadow-500;
+    }
+    &.ghost-ticket {
+      background: $card-empty-color;
+      color: $card-empty-color;
+      box-shadow: none;
+    }
+    &.sortable-ghost {
+      background: $card-empty-color;
+      color: $card-empty-color;
+      box-shadow: none;
+      &:hover {
+        box-shadow: none;
+      }
+    }
+    &--unranked {
+      @extend .draggable__rank-card;
+      background-color: $card-secondary-color;
+      color: $card-primary-color;
+      transition: box-shadow 0.2s ease-out;
+      &:hover {
+        box-shadow: $shadow-100;
+        transition: box-shadow 0.2s ease-in;
+      }
+    }
+    &--ranked {
+      @extend .draggable__rank-card;
+      background-color: $card-primary-color;
+      color: palette(white);
+    }
+    &__title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
     }
   }
 
-  &__ranked-card {
-    cursor: move;
-    height: $slot-height;
-    min-width: 50px;
-    padding: 5px;
-    background-color: $primary-color;
-    border-radius: 3px;
-    color: white;
-    font-weight: bold;
-
-    &::before {
-      content: "⋮⋮ ";
-    }
-  }
-
-  &__questions-ranked {
-    width: 100%;
+  &__slot-box {
+    width: calc(100% - $base-space * 6);
     min-height: $slot-height;
-    background-color: $background-slot-color;
-    border-radius: 5px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: calc($base-space / 2);
+    padding: $base-space;
+    background-color: $background-slot-color;
+    border-radius: $border-radius;
+    border: 1px solid transparent;
+    @supports (selector(:has(*))) {
+      &:has([draggable="true"]) {
+        border: 1px dashed $black-10;
+      }
+    }
+    &--ranking {
+      @extend .draggable__slot-box;
+      max-width: $base-space * 5;
+      align-items: center;
+      justify-content: space-around;
+      border-color: $black-10;
+      font-weight: bold;
+      color: $black-54;
+    }
+  }
+
+  .svg-icon {
+    flex-shrink: 0;
   }
 }
 </style>
