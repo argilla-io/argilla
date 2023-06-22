@@ -28,7 +28,6 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 import argilla
 from argilla.server.settings import settings
-from argilla.utils.utils import is_unit_test
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -69,7 +68,4 @@ async def get_async_db() -> Generator["AsyncSession", None, None]:
 
 
 class Base(AsyncAttrs, DeclarativeBase):
-    def __eq__(self, value: object) -> bool:
-        if is_unit_test():
-            return self.id == value.id
-        return super().__eq__(value)
+    pass

@@ -42,7 +42,6 @@ from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
-from argilla.utils.utils import is_unit_test
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -105,8 +104,6 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
         dataset.status = DatasetStatus.ready
         await search_engine.create_index(dataset)
         await db.commit()
-        if is_unit_test():
-            await db.refresh(dataset)
     except:
         await db.rollback()
         raise
@@ -329,10 +326,6 @@ async def create_records(
             await record.awaitable_attrs.responses
         await search_engine.add_records(dataset, records)
         await db.commit()
-        if is_unit_test():
-            await db.refresh(dataset)
-            for record in records:
-                await db.refresh(record)
     except:
         await db.rollback()
         raise

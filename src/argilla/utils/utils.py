@@ -166,8 +166,3 @@ def setup_loop_in_thread() -> Tuple[asyncio.AbstractEventLoop, threading.Thread]
         thread.start()
         __LOOP__, __THREAD__ = loop, thread
     return __LOOP__, __THREAD__
-
-
-def is_unit_test() -> bool:
-    """Returns True if the current process is running a unit test."""
-    return "pytest" in sys.modules
