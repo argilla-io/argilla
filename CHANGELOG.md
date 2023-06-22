@@ -18,7 +18,9 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
+### Added
+
+- Added `RankingQuestionSettings` class allowing to create ranking questions in the API using `POST /api/v1/datasets/{dataset_id}/questions` endpoint ([#3232](https://github.com/argilla-io/argilla/pull/3232))
 
 ## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
 
