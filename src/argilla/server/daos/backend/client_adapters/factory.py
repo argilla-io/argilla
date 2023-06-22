@@ -12,9 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
-from typing import Optional, Tuple, Type
+from typing import Tuple, Type, Union
 
-import httpx
 from opensearchpy import OpenSearch
 from packaging.version import parse
 
@@ -24,71 +23,68 @@ from argilla.server.daos.backend.client_adapters import (
     IClientAdapter,
     OpenSearchClient,
 )
+from argilla.server.daos.backend.client_adapters.elasticsearch import Elasticsearch
+from argilla.server.settings import settings
 
 _LOGGER = logging.getLogger("argilla")
 
 
 class ClientAdapterFactory:
     @classmethod
-    def get(
-        cls,
-        hosts: str,
-        index_shards: int,
-        ssl_verify: bool,
-        ca_path: str,
-        retry_on_timeout: bool = True,
-        max_retries: int = 5,
-        extra_config: Optional[dict] = None,
-    ) -> IClientAdapter:
+    def get(cls) -> IClientAdapter:
         client_config = dict(
-            hosts=hosts,
-            verify_certs=ssl_verify,
-            ca_certs=ca_path,
-            retry_on_timeout=retry_on_timeout,
-            max_retries=max_retries,
+            hosts=settings.elasticsearch,
+            verify_certs=settings.elasticsearch_ssl_verify,
+            ca_certs=settings.elasticsearch_ca_path,
+            retry_on_timeout=True,
+            max_retries=5,
         )
 
-        version, distribution = cls._fetch_cluster_version_info(client_config)
+        if settings.elasticsearch_extra_args:
+            client_config.update(settings.elasticsearch_extra_args)
+            client = Elasticsearch(**client_config)
+        else:
+            # See here https://opensearch.org/docs/latest/clients/index/#legacy-clients
+            client_config.update(settings.opensearch_extra_args)
+            client = OpenSearch(**client_config)
 
-        (client_class, support_vector_search) = cls._resolve_client_class_with_vector_support(version, distribution)
+        version, distribution = cls._fetch_cluster_version_info(client)
+        client.close()
 
-        extra_config = extra_config or {}
+        (adapter_class, support_vector_search) = cls._resolve_adapter_class_with_vector_support(version, distribution)
 
-        return client_class(
-            index_shards=index_shards,
+        return adapter_class(
+            index_shards=settings.es_records_index_shards,
             vector_search_supported=support_vector_search,
-            config_backend={**client_config, **extra_config},
+            config_backend=client_config,
         )
 
     @classmethod
-    def _resolve_client_class_with_vector_support(cls, version: str, distribution: str) -> Tuple[Type, bool]:
+    def _resolve_adapter_class_with_vector_support(cls, version: str, distribution: str) -> Tuple[Type, bool]:
         support_vector_search = True
 
         if distribution == "elasticsearch" and parse("8.5") <= parse(version):
             if parse("8.5") <= parse(ElasticsearchClient.ES_CLIENT_VERSION):
-                client_class = ElasticsearchClient
+                adapter_class = ElasticsearchClient
             else:
                 _LOGGER.warning(
                     "Elasticsearch 8.5 backend found but installed\n"
                     "client does not support vectors. Please upgrade your elasticsearch client\n"
                     "if you want to support similarity search in argilla."
                 )
-                client_class = OpenSearchClient
+                adapter_class = OpenSearchClient
                 support_vector_search = False
         elif distribution == "opensearch" and parse("2.2") <= parse(version):
-            client_class = OpenSearchClient
+            adapter_class = OpenSearchClient
         else:
-            client_class = OpenSearchClient
+            adapter_class = OpenSearchClient
             support_vector_search = False
 
-        return client_class, support_vector_search
+        return adapter_class, support_vector_search
 
     @classmethod
-    def _fetch_cluster_version_info(cls, client_config: dict) -> Tuple[str, str]:
+    def _fetch_cluster_version_info(cls, client: Union[Elasticsearch, OpenSearch]) -> Tuple[str, str]:
         try:
-            # All security config will be used here.
-            # See here https://opensearch.org/docs/latest/clients/index/#legacy-clients
-            client = OpenSearch(**client_config)
             data = client.info()
 
             version_info = data["version"]

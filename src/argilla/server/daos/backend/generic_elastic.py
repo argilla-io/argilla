@@ -92,13 +92,7 @@ class GenericElasticEngineBackend(LoggingMixin):
 
         if not cls._INSTANCE:
             instance = cls(
-                client=ClientAdapterFactory.get(
-                    hosts=settings.elasticsearch,
-                    index_shards=settings.es_records_index_shards,
-                    ssl_verify=settings.elasticsearch_ssl_verify,
-                    ca_path=settings.elasticsearch_ca_path,
-                    extra_config=settings.elasticsearch_extra_config,
-                ),
+                client=ClientAdapterFactory.get(),
                 metrics={**ALL_METRICS},
                 mappings={
                     TaskType.text_classification: text_classification_mappings(),
