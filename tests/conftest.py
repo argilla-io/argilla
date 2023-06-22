@@ -36,7 +36,7 @@ from opensearchpy import OpenSearch
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from tests.database import SyncTestSession, TestSession
+from tests.database import SyncTestSession, TestSession, set_task
 from tests.factories import (
     AnnotatorFactory,
     OwnerFactory,
@@ -63,6 +63,7 @@ def event_loop() -> Generator["asyncio.AbstractEventLoop", None, None]:
 
 @pytest_asyncio.fixture(scope="session")
 async def connection() -> AsyncGenerator["AsyncConnection", None]:
+    set_task(asyncio.current_task())
     # Create a temp directory to store a SQLite database used for testing
     with tempfile.TemporaryDirectory() as tmpdir:
         database_url = f"sqlite+aiosqlite:///{tmpdir}/test.db"

@@ -1275,6 +1275,8 @@ async def test_create_dataset(client: TestClient, db: "AsyncSession", owner_auth
     assert response.status_code == 201
     assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
 
+    await db.refresh(workspace)
+
     response_body = response.json()
     assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
     assert response_body == {
@@ -2130,6 +2132,9 @@ async def test_create_dataset_records_with_response_for_multiple_users(
     }
 
     response = client.post(f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json)
+
+    await db.refresh(annotator)
+    await db.refresh(owner)
 
     assert response.status_code == 204, response.json()
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 2
