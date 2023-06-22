@@ -1,6 +1,6 @@
 # Migration from Rubrix to Argilla
 
-If you have already running a Rubrix server and want to upgrade to the new Argilla server, this guide will help you understand and transition into Argilla.
+If you have already running a Rubrix server and want to upgrade this guide will help you understand and transition into Argilla.
 
 ## Python module and command
 
