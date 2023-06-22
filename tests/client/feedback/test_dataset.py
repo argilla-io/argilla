@@ -29,7 +29,7 @@ from argilla.client.feedback.schemas import (
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
-    from argilla.server.models import User
+    from argilla.server.models import User as ServerUser
 
     from tests.helpers import SecuredClient
 
@@ -137,7 +137,7 @@ def test_init_wrong_questions(
         )
 
 
-def test_records(
+def test_add_records(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -267,13 +267,14 @@ def test_format_as(
 
 def test_push_to_argilla_and_from_argilla(
     mocked_client: "SecuredClient",
+    argilla_user: "ServerUser",
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
     api.active_api()
-    api.init(api_key="argilla.apikey")
+    api.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -284,6 +285,36 @@ def test_push_to_argilla_and_from_argilla(
     dataset.push_to_argilla(name="test-dataset")
 
     assert dataset.argilla_id is not None
+
+    # Make sure UUID in `user_id` is pushed to Argilla with no issues as it should be
+    # converted to a string
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={
+                    "text": "E",
+                    "label": "F",
+                },
+                responses=[
+                    {
+                        "user_id": argilla_user.id,
+                        "values": {
+                            "question-1": {"value": "answer"},
+                            "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
+                        },
+                        "status": "submitted",
+                    },
+                ],
+            ),
+        ]
+    )
+
+    with pytest.raises(RuntimeError, match="already exists in Argilla, please choose another name and/or workspace"):
+        dataset.push_to_argilla(name="test-dataset")
+
+    dataset.push_to_argilla()
 
     dataset.add_records(
         [
@@ -334,7 +365,7 @@ def test_push_to_argilla_and_from_argilla(
 
 def test_copy_dataset_in_argilla(
     mocked_client: "SecuredClient",
-    argilla_user: "User",
+    argilla_user: "ServerUser",
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -353,8 +384,12 @@ def test_copy_dataset_in_argilla(
 
     same_dataset = FeedbackDataset.from_argilla("test-dataset")
     same_dataset.push_to_argilla("copy-dataset")
-
     assert same_dataset.argilla_id is not None
+
+    same_dataset = FeedbackDataset.from_argilla("copy-dataset")
+    assert same_dataset.argilla_id != dataset.argilla_id
+    assert same_dataset.fields == dataset.fields
+    assert same_dataset.questions == dataset.questions
 
 
 def test_push_to_huggingface_and_from_huggingface(

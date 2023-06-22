@@ -12,12 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
 from argilla.client.api import ArgillaSingleton
 from argilla.client.workspaces import Workspace
-from argilla.server.models import User
+
+if TYPE_CHECKING:
+    from argilla.server.models import User as ServerUser
 
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
@@ -36,7 +39,7 @@ def test_workspace_cls_init() -> None:
         Workspace(id="00000000-0000-0000-0000-000000000000")
 
 
-def test_workspace_from_name(owner: User):
+def test_workspace_from_name(owner: "ServerUser"):
     workspace = WorkspaceFactory.create(name="test_workspace")
     WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
     ArgillaSingleton.init(api_key=owner.api_key)
@@ -49,7 +52,7 @@ def test_workspace_from_name(owner: User):
         Workspace.from_name("non-existing-workspace")
 
 
-def test_workspace_from_id(owner: User):
+def test_workspace_from_id(owner: "ServerUser"):
     workspace = WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -64,7 +67,7 @@ def test_workspace_from_id(owner: User):
         Workspace.from_id(id="00000000-0000-0000-0000-000000000000")
 
 
-def test_workspace_create(owner: User) -> None:
+def test_workspace_create(owner: "ServerUser") -> None:
     ArgillaSingleton.init(api_key=owner.api_key)
 
     workspace = Workspace.create(name="test_workspace")
@@ -79,7 +82,7 @@ def test_workspace_create(owner: User) -> None:
     assert any(ws["name"] == "test_workspace" for ws in workspaces)
 
 
-def test_workspace_list(owner: User) -> None:
+def test_workspace_list(owner: "ServerUser") -> None:
     WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -87,7 +90,7 @@ def test_workspace_list(owner: User) -> None:
     assert any(ws.name == "test_workspace" for ws in workspaces)
 
 
-def test_workspace_add_user(owner: User) -> None:
+def test_workspace_add_user(owner: "ServerUser") -> None:
     workspace = WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -106,7 +109,7 @@ def test_workspace_add_user(owner: User) -> None:
     assert any(user.username == owner.username for user in workspace.users)
 
 
-def test_workspace_delete_user(owner: User) -> None:
+def test_workspace_delete_user(owner: "ServerUser") -> None:
     workspace = WorkspaceFactory.create(name="test_workspace")
     WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
     ArgillaSingleton.init(api_key=owner.api_key)

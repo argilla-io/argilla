@@ -11,6 +11,15 @@ sleep 30
 echo "Running database migrations"
 python3.9 -m argilla database migrate
 
+echo "Creating owner user"
+python3.9 -m argilla users create \
+  --first-name "Owner" \
+  --username "$OWNER_USERNAME" \
+  --password "$OWNER_PASSWORD" \
+  --api-key "$OWNER_API_KEY" \
+  --role owner \
+  --workspace "$ARGILLA_WORKSPACE"
+
 echo "Creating admin user"
 python3.9 -m argilla users create \
   --first-name "Admin" \
@@ -29,7 +38,7 @@ python3.9 -m argilla users create \
   --workspace "$ARGILLA_WORKSPACE"
 
 # Load data
-python3.9 /load_data.py "$ADMIN_API_KEY" "$LOAD_DATASETS" &
+python3.9 /load_data.py "$OWNER_API_KEY" "$LOAD_DATASETS" &
 
 # Start Argilla
 echo "Starting Argilla"
