@@ -17,6 +17,7 @@
 
 <template>
   <div class="container">
+    <BaseLoading v-if="hasAuthToken" />
     <form class="form" @submit.prevent="userLogin">
       <brand-logo class="form__logo" />
       <div class="form__content">
@@ -90,8 +91,15 @@ export default {
     } catch (e) {
       this.deployment = null;
     }
-    if (this.$auth.loggedIn) {
-      return;
+
+    if (this.hasAuthToken) {
+      // https://developer.mozilla.org/en-US/docs/Web/API/btoa
+      // eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiIxMjM0NTY3OCJ9
+      this.login = {
+        ...this.authToken,
+      };
+
+      this.userLogin();
     }
   },
   computed: {
@@ -101,6 +109,20 @@ export default {
           ? "Wrong username or password. Try again"
           : this.error;
       }
+    },
+    authToken() {
+      const rawAuthToken = this.$route.query.auth;
+
+      if (!rawAuthToken) return;
+
+      try {
+        const auth = JSON.parse(atob(rawAuthToken));
+
+        if (!!auth.username && !!auth.password) return auth;
+      } catch {}
+    },
+    hasAuthToken() {
+      return !!this.authToken;
     },
   },
   methods: {
