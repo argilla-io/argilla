@@ -14,7 +14,34 @@
 import pytest
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend import GenericElasticEngineBackend
+from argilla.server.daos.backend.client_adapters.factory import ClientAdapterFactory
 from argilla.server.daos.backend.generic_elastic import dataset_records_index
+
+
+@pytest.mark.parametrize(
+    "extra_config",
+    [{"hosts": "http://wronghost"}, {"wrong_parameter": True}, {"extra_param": "extra"}],
+)
+def test_create_backend_with_wrong_elasticsearch_extra_args(extra_config):
+    from argilla.server.settings import settings
+
+    settings.elasticsearch_extra_args.update(extra_config)
+
+    with pytest.raises(Exception):
+        ClientAdapterFactory.get()
+
+
+@pytest.mark.parametrize(
+    "extra_config",
+    [{"hosts": "http://wronghost"}, {"wrong_parameter": True}, {"extra_param": "extra"}],
+)
+def test_create_backend_with_wrong_opensearch_extra_args(extra_config):
+    from argilla.server.settings import settings
+
+    settings.opensearch_extra_args.update(extra_config)
+
+    with pytest.raises(Exception):
+        ClientAdapterFactory.get()
 
 
 @pytest.mark.skip("This test fails in CI randomly. We will enable again once we discover the problem")
