@@ -72,7 +72,7 @@ $card-ghost-color: palette(purple, 300);
 $card-empty-color: palette(purple, 400);
 $cards-separation: $base-space;
 $background-slot-color: $black-4;
-$slot-height: $base-space * 4;
+$slot-height: 50px;
 $card-height: $base-space * 4;
 $max-visible-card-items: 12;
 
