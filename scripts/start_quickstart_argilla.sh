@@ -11,13 +11,13 @@ sleep 30
 echo "Running database migrations"
 python3.9 -m argilla database migrate
 
-echo "Creating admin user"
+echo "Creating owner user"
 python3.9 -m argilla users create \
   --first-name "Admin" \
   --username "$ADMIN_USERNAME" \
   --password "$ADMIN_PASSWORD" \
   --api-key "$ADMIN_API_KEY" \
-  --role admin \
+  --role owner \
   --workspace "$ARGILLA_WORKSPACE"
 
 echo "Creating annotator user"
