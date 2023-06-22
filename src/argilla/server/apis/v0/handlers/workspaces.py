@@ -82,7 +82,7 @@ def delete_workspace(
 def list_workspace_users(
     *, db: Session = Depends(get_db), workspace_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
-    authorize(current_user, WorkspaceUserPolicy.list)
+    authorize(current_user, WorkspaceUserPolicy.list(workspace_id))
 
     workspace = accounts.get_workspace_by_id(db, workspace_id)
     if not workspace:

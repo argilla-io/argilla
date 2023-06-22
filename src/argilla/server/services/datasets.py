@@ -63,7 +63,7 @@ class DatasetsService:
         if not accounts.get_workspace_by_name(self._db, workspace_name=dataset.workspace):
             raise EntityNotFoundError(name=dataset.workspace, type=Workspace)
 
-        if not is_authorized(user, DatasetPolicy.create):
+        if not is_authorized(user, DatasetPolicy.create(workspace_name=dataset.workspace)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to create datasets. Only administrators can create datasets"
             )
@@ -109,7 +109,7 @@ class DatasetsService:
         if not is_authorized(user, DatasetPolicy.delete(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to delete this dataset. "
-                "Only dataset creators or administrators can delete datasets"
+                "Only administrators can delete datasets"
             )
         self.__dao__.delete_dataset(dataset)
 
@@ -125,7 +125,7 @@ class DatasetsService:
         if not is_authorized(user, DatasetPolicy.update(found)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to update this dataset. "
-                "Only dataset creators or administrators can update datasets"
+                "Only administrators can update datasets"
             )
 
         dataset.tags = {**found.tags, **(tags or {})}
@@ -144,7 +144,7 @@ class DatasetsService:
             raise ForbiddenOperationError("You don't have the necessary permissions to list datasets.")
 
         accessible_workspace_names = [
-            ws.name for ws in (accounts.list_workspaces(self._db) if user.is_admin else user.workspaces)
+            ws.name for ws in (accounts.list_workspaces(self._db) if user.is_owner else user.workspaces)
         ]
 
         if workspaces:
@@ -161,7 +161,7 @@ class DatasetsService:
         if not is_authorized(user, DatasetPolicy.close(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to close this dataset. "
-                "Only dataset creators or administrators can close datasets"
+                "Only administrators can close datasets"
             )
         self.__dao__.close(dataset)
 
@@ -169,7 +169,7 @@ class DatasetsService:
         if not is_authorized(user, DatasetPolicy.open(dataset)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to open this dataset. "
-                "Only dataset creators or administrators can open datasets"
+                "Only administrators can open datasets"
             )
         self.__dao__.open(dataset)
 
@@ -191,10 +191,10 @@ class DatasetsService:
         if self.__dao__.find_by_name_and_workspace(name=copy_name, workspace=target_workspace_name):
             raise EntityAlreadyExistsError(name=copy_name, workspace=target_workspace_name, type=Dataset)
 
-        if not is_authorized(user, DatasetPolicy.copy(dataset)):
+        if not is_authorized(user, DatasetPolicy.copy(dataset, target_workspace=target_workspace)):
             raise ForbiddenOperationError(
                 "You don't have the necessary permissions to copy this dataset. "
-                "Only dataset creators or administrators can copy datasets"
+                "Only administrators can copy datasets"
             )
 
         dataset_copy = dataset.copy()

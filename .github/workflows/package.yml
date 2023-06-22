@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [ 8.5, 8.2, 7.17, 7.14 ]
+        version: [ 8.8, 8.5, 8.0, 7.17]
     defaults:
       run:
         shell: bash -l {0}
@@ -105,7 +105,6 @@ jobs:
           pip install -e ".[server,listeners]"
           alembic upgrade head
           pytest --cov=argilla --cov-report=xml
-
 
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1

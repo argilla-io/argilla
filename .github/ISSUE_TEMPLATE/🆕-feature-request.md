@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-<!--  Ask David for help you to contribute https://calendly.com/argilla-office-hours/30min or feel free to submit a pull request straight away: https://github.com/argilla-io/argilla/pulls or  -->
+<!--  Ask David for help you to contribute https://calendly.com/argilla-office-hours/30min or feel free to submit a pull request straight away: https://github.com/argilla-io/argilla/pulls If you'd like to discuss your feature request or specific needs with our product team, contact Natalia Elvira in our slack community or book a slot with her: https://calendly.com/natalia-elvira/30min -->
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
