@@ -32,6 +32,10 @@ USER elasticsearch
 
 RUN echo "path.data: /data/elasticsearch" >> /usr/share/elasticsearch/config/elasticsearch.yml
 
+ENV OWNER_USERNAME=owner
+ENV OWNER_PASSWORD=12345678
+ENV OWNER_API_KEY=owner.apikey
+
 ENV ADMIN_USERNAME=admin
 ENV ADMIN_PASSWORD=12345678
 ENV ADMIN_API_KEY=admin.apikey
