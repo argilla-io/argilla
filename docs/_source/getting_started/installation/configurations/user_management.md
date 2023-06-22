@@ -7,9 +7,7 @@ The `User` class for user management has been included as of the Argilla 1.11.0 
 :::
 
 :::{warning}
-As of Argilla 1.11.0 the default pool of users contains an owner user which uses the same credentials as the admin user from previous Argilla versions i.e. `admin` as username and, in the quickstart `12345678` as the password, and `1234` in the server.
-
-So on, both `argilla/argilla-quickstart:latest` and `argilla/argilla-server:latest` Docker images will create now an "owner" user instead of an "admin" as before, but will use the same credentials. Note that the quickstart image uses the `api_key=admin.apikey` while the server uses `api_key=argilla.apikey`, unless explicitly modified.
+As of Argilla 1.11.0 the default pool of users in the quickstart contains also an owner user which uses the credentials: username `owner`, password `12345678`, and API key `owner.apikey`; while for the server image the default user is now an `owner` instead of an `admin` with the same credentials: username `argilla`, password `1234` and API key `argilla.apikey`.
 :::
 
 ## User Model
