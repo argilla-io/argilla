@@ -18,13 +18,15 @@ import pytest
 import spacy
 from argilla import (
     LabelQuestion,
-    LabelQuestionUnification,
     MultiLabelQuestion,
-    MultiLabelQuestionUnification,
     RatingQuestion,
-    RatingQuestionUnification,
     TextField,
     TrainingTaskMapping,
+)
+from argilla.client.feedback.unification import (
+    LabelQuestionUnification,
+    MultiLabelQuestionUnification,
+    RatingQuestionUnification,
 )
 from argilla.client.models import Framework
 from datasets import Dataset, DatasetDict

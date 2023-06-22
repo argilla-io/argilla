@@ -22,10 +22,15 @@ from pydantic import BaseModel
 from argilla._constants import OPENAI_SEPARATOR, OPENAI_WHITESPACE
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
-    LabelQuestionUnification,
+    LabelQuestion,
     MultiLabelQuestion,
-    RatingQuestionUnification,
+    RatingQuestion,
     TextField,
+)
+from argilla.client.feedback.unification import (
+    LabelQuestionUnification,
+    MultiLabelQuestionUnification,
+    RatingQuestionUnification,
 )
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_version, requires_version
@@ -98,11 +103,61 @@ class TrainingTaskMapping:
     def for_text_classification(
         cls,
         text: TextField,
-        label: Union[LabelQuestionUnification, MultiLabelQuestion],
+        label: Union[
+            RatingQuestion,
+            LabelQuestion,
+            MultiLabelQuestion,
+            RatingQuestionUnification,
+            LabelQuestionUnification,
+            MultiLabelQuestionUnification,
+        ],
+        label_strategy: str = None,
     ) -> "TrainingTaskMappingForTextClassification":
+        """
+        _summary_
+
+        Args:
+            text (TextField): The TextField to use for training.
+            label (Union[RatingQuestion, LabelQuestion, MultiLabelQuestion, RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification]): _description_
+            label_strategy (str, optional): A strategy to unify responses. Defaults to None. This means it will initialize the default strategy for the label type.
+
+        Raises:
+            ValueError: if label is not a valid type with the question type.
+            ValueError: if label_strategy is defined and label is alraedy a Unification class.
+
+        Returns:
+            TrainingTaskMappingForTextClassification: _description_
+
+        Examples:
+            >>> from argilla import LabelQuestion, TrainingTaskMapping
+            >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
+            >>> training_data = TrainingTaskMappingForTextClassification(
+            ...     text=dataset.fields[0],
+            ...     label=dataset.questions[0]
+            ... )
+            >>> dataset.prepare_training_data(training_data=training_data)
+
+        """
+        if isinstance(label, (LabelQuestionUnification, MultiLabelQuestionUnification, RatingQuestionUnification)):
+            if label_strategy is not None:
+                raise ValueError("label_strategy is already defined via Unification class.")
+        else:
+            unification_kwargs = {"question": label}
+            if label_strategy is not None:
+                unification_kwargs["strategy"] = label_strategy
+            else:
+                _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
+            if isinstance(label, RatingQuestion):
+                label = RatingQuestionUnification(**unification_kwargs)
+            elif isinstance(label, MultiLabelQuestion):
+                label = MultiLabelQuestionUnification(**unification_kwargs)
+            elif isinstance(label, LabelQuestion):
+                label = LabelQuestionUnification(**unification_kwargs)
+            raise ValueError(f"Label type {type(label)} is not supported.")
         return TrainingTaskMappingForTextClassification(
             text=text,
             label=label,
+            label_strategy=label_strategy,
         )
 
 

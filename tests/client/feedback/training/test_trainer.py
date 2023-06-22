@@ -27,13 +27,13 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
-    LabelQuestionUnification,
     MultiLabelQuestion,
 )
 from argilla.client.feedback.training import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTaskMapping,
 )
+from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
 
 __OUTPUT_DIR__ = "tmp"

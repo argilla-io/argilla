@@ -36,16 +36,18 @@ from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
     LabelQuestion,
-    LabelQuestionStrategy,
     MultiLabelQuestion,
-    MultiLabelQuestionStrategy,
     RatingQuestion,
-    RatingQuestionStrategy,
     TextField,
     TextQuestion,
 )
 from argilla.client.feedback.training.schemas import (
     TrainingTaskMappingForTextClassification,
+)
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RatingQuestionStrategy,
 )
 from argilla.client.feedback.utils import (
     feedback_dataset_in_argilla,
