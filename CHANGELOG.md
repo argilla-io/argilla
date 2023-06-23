@@ -32,7 +32,9 @@ These are the section headers that we use:
 - Fixed `from_argilla` and `push_to_argilla` to ensure consistency on both field and question re-construction, and to ensure `UUID`s are properly serialized as `str`, respectively ([#3234](https://github.com/argilla-io/argilla/pull/3234)).
 
 #### Docs
-- Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3241](https://github.com/argilla-io/argilla/pull/3234).
+
+- Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3241](https://github.com/argilla-io/argilla/pull/3241).
+- Fixed library buttons' formatting on Tutorials page [#2819](https://github.com/argilla-io/argilla/pull/2819).
 
 ### Added
 
@@ -74,6 +76,7 @@ These are the section headers that we use:
 ### Docs
 
 - Resolved typos in the docs ([#3238](https://github.com/argilla-io/argilla/issues/3238))
+- Fixed mention of master branch [#2324](https://github.com/argilla-io/argilla/pull/2324).
 
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
