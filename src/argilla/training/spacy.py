@@ -23,6 +23,8 @@ import argilla as rg
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
 
+__all__ = ["ArgillaSpaCyTrainer", "ArgillaSpaCyTransformersTrainer"]
+
 
 class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSpaCyTrainer")
@@ -261,3 +263,110 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
         if str_input:
             formatted_prediction = list(formatted_prediction)[0]
         return formatted_prediction
+
+
+class ArgillaSpaCyTrainer(_ArgillaSpaCyTrainerBase):
+    def __init__(self, freeze_tok2vec: bool = False, **kwargs) -> None:
+        """Initialize the `ArgillaSpaCyTrainer` class.
+
+        Args:
+            freeze_tok2vec: A `bool` indicating whether to freeze the `tok2vec` weights
+                during the training. Defaults to False.
+            **kwargs: The `ArgillaSpaCyTrainerBase` arguments.
+
+        Examples:
+            >>> from argilla import ArgillaSpaCyTrainer
+            >>> trainer = ArgillaSpaCyTrainer(
+        """
+        super().__init__(**kwargs)
+        self.freeze_tok2vec = freeze_tok2vec
+
+    def init_training_args(self) -> None:
+        from spacy.cli.init_config import init_config
+
+        # We generate the config with GPU just when we are using `spacy-transformers`,
+        # otherwise the default configuration will be messed up for `spacy`.
+        self.config = init_config(
+            lang=self.language,
+            pipeline=self._pipeline,
+            optimize=self.optimize,
+            gpu=False,
+        )
+
+        self.config["paths"]["train"] = self._train_dataset_path
+        self.config["paths"]["dev"] = self._eval_dataset_path
+        self.config["system"]["seed"] = self._seed or 42
+
+        # Now we can already set the GPU properties if we want to train/fine-tune a
+        # `spacy` model using the GPU, or a `spacy-transformers` model using the CPU.
+        self.config["system"]["gpu_allocator"] = (
+            ("pytorch" if self.has_torch else "tensorflow" if self.has_tensorflow else None) if self.use_gpu else None
+        )
+        self.config["nlp"]["batch_size"] = 128 if self.use_gpu else 1000
+
+        if "tok2vec" in self.config["nlp"]["pipeline"]:
+            # If we want to fine-tune the `tok2vec` component, then we need to set the
+            # `init_tok2vec` path to the model we want to fine-tune, and set the
+            # `include_static_vectors` to `True`.
+            if self.freeze_tok2vec is False:
+                self.config["paths"]["init_tok2vec"] = self._model
+                self.config["components"]["tok2vec"]["include_static_vectors"] = True
+            else:
+                # Otherwise, if we don't want to fine-tune the `tok2vec` component, then we
+                # need to set the `frozen_components` and `annotating_components` to
+                # `["tok2vec"]`.
+                self.config["training"]["frozen_components"] = ["tok2vec"]
+                self.config["training"]["annotating_components"] = ["tok2vec"]
+
+
+class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
+    require_version("spacy-transformers")
+
+    def __init__(self, update_transformer: bool = True, **kwargs) -> None:
+        """Initialize the `ArgillaSpaCyTransformersTrainer` class.
+
+        Args:
+            update_transformer: A `bool` indicating whether to update the transformer
+                weights during the training. Defaults to True.
+            **kwargs: The `ArgillaSpaCyTrainerBase` arguments.
+        """
+        super().__init__(**kwargs)
+        self.update_transformer = update_transformer
+
+    def init_training_args(self) -> None:
+        from spacy.cli.init_config import init_config
+
+        # We generate the config with GPU just when we are using `spacy-transformers`,
+        # otherwise the default configuration will be messed up for `spacy`.
+        self.config = init_config(
+            lang=self.language,
+            pipeline=self._pipeline,
+            optimize=self.optimize,
+            gpu=True,
+        )
+
+        self.config["paths"]["train"] = self._train_dataset_path
+        self.config["paths"]["dev"] = self._eval_dataset_path
+        self.config["system"]["seed"] = self._seed or 42
+
+        # Now we can already set the GPU properties if we want to train/fine-tune a
+        # `spacy` model using the GPU, or a `spacy-transformers` model using the CPU.
+        self.config["system"]["gpu_allocator"] = (
+            ("pytorch" if self.has_torch else "tensorflow" if self.has_tensorflow else None) if self.use_gpu else None
+        )
+        self.config["nlp"]["batch_size"] = 128 if self.use_gpu else 16
+
+        # If we use `spacy-transformers` then we need to set the `transformer` component
+        # in the pipeline, and we need to set the `name` of the model to load.
+        self.config["components"]["transformer"]["name"] = self._model
+        self.config["nlp"]["pipeline"] = ["transformer"] + self._pipeline
+
+        if "transformer" in self.config["nlp"]["pipeline"]:
+            # The `transformer` component cannot be frozen, but we can set the `grad_factor`
+            # to 0.0 to avoid updating the weights of the `transformer` component. Even though
+            # the computation of those weights will be performed, the gradients will be
+            # multiplied by 0.0, so the weights will not be updated.
+            # self.config["training"]["frozen_components"] = ["transformer"]
+            # self.config["training"]["annotating_components"] = ["transformer"]
+            if not self.update_transformer:
+                self.config["components"]["transformer"]["grad_factor"] = 0.0
