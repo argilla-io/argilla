@@ -49,14 +49,18 @@ class TrainingData(ABC):
                 if isinstance(pydantic_field_value, (TextField,)):
                     data[pydantic_field_name] = record.fields[pydantic_field_value.name]
                 else:
-                    data[pydantic_field_name] = [
-                        resp.value for resp in record._unified_responses[pydantic_field_value.question.name]
-                    ]
+                    if pydantic_field_value.question.name not in record._unified_responses:
+                        continue
+                    else:
+                        data[pydantic_field_name] = [
+                            resp.value for resp in record._unified_responses[pydantic_field_value.question.name]
+                        ]
                     explode_columns.add(pydantic_field_name)
             formatted_data.append(data)
         df = pd.DataFrame(formatted_data)
         df = df.explode(list(explode_columns))
         df = df.drop_duplicates()
+        df = df.dropna(how="any")
         return df.to_dict(orient="records")
 
     @property
@@ -153,7 +157,8 @@ class TrainingTaskMapping:
                 label = MultiLabelQuestionUnification(**unification_kwargs)
             elif isinstance(label, LabelQuestion):
                 label = LabelQuestionUnification(**unification_kwargs)
-            raise ValueError(f"Label type {type(label)} is not supported.")
+            else:
+                raise ValueError(f"Label type {type(label)} is not supported.")
         return TrainingTaskMappingForTextClassification(
             text=text,
             label=label,

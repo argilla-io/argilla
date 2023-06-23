@@ -18,12 +18,14 @@ import pytest
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
+    MultiLabelQuestion,
+    RatingQuestion,
+)
+from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     LabelQuestionUnification,
-    MultiLabelQuestion,
     MultiLabelQuestionStrategy,
     MultiLabelQuestionUnification,
-    RatingQuestion,
     RatingQuestionStrategy,
     RatingQuestionUnification,
     UnificatiedValueSchema,

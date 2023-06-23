@@ -22,9 +22,6 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackDatasetConfig,
     FeedbackRecord,
-    LabelQuestion,
-    LabelQuestionUnification,
-    MultiLabelQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
@@ -474,12 +471,8 @@ def test_prepare_for_training_text_classification(
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
     )
-    dataset.add_records(records=feedback_dataset_records)
-
-    questions = [
-        question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
-    ]
-    label = LabelQuestionUnification(question=questions[0])
+    dataset.add_records(feedback_dataset_records)
+    label = dataset.question_by_name("question-3")
     training_task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
 
     dataset.prepare_for_training(framework=framework, training_task_mapping=training_task_mapping, fetch_records=False)

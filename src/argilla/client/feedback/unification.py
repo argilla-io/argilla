@@ -78,10 +78,17 @@ class RatingQuestionStrategy(Enum):
 
     def _aggregate(self, records: List[FeedbackRecord], question: str):
         for rec in records:
+            if not rec.responses:
+                continue
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
-            ratings = [int(resp.values[question].value) for resp in responses]
+            ratings = []
+            for resp in responses:
+                if question in resp.values:
+                    ratings.append(int(resp.values[question].value))
+            if not ratings:
+                continue
             # unified response
             if self.value == self.MEAN.value:
                 unified_value = str(int(sum(ratings) / len(ratings)))
@@ -96,12 +103,17 @@ class RatingQuestionStrategy(Enum):
 
     def _majority(self, records: List[FeedbackRecord], question: str):
         for rec in records:
+            if not rec.responses:
+                continue
             counter = Counter()
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
             for resp in responses:
-                counter.update([resp.values[question].value])
+                if question in resp.values:
+                    counter.update([resp.values[question].value])
+            if not counter.values():
+                continue
             # Find the maximum count
             max_count = max(counter.values())
             # Get a list of values with the maximum count
@@ -143,13 +155,20 @@ class LabelQuestionStrategyMixin:
     def _disagreement(self, records: List[FeedbackRecord], question: str):
         unified_records = []
         for rec in records:
+            if not rec.responses:
+                continue
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
-            rec._unified_responses[question] = [
-                UnificatiedValueSchema(value=resp.values[question].value, strategy=self.value) for resp in responses
-            ]
-
+            if question not in rec._unified_responses:
+                rec._unified_responses[question] = []
+            for resp in responses:
+                if question not in resp.values:
+                    continue
+                else:
+                    rec._unified_responses[question].append(
+                        UnificatiedValueSchema(value=resp.values[question].value, strategy=self.value)
+                    )
         return unified_records
 
 
@@ -172,12 +191,17 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
 
     def _majority(self, records: List[FeedbackRecord], question: str):
         for rec in records:
+            if not rec.responses:
+                continue
             counter = Counter()
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
             for resp in responses:
-                counter.update([resp.values[question].value])
+                if question in resp.values:
+                    counter.update([resp.values[question].value])
+            if not counter.values():
+                continue
             # Find the maximum count
             max_count = max(counter.values())
             # Get a list of values with the maximum count
@@ -209,6 +233,8 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
 
     def _majority(self, records: List[FeedbackRecord], question: str):
         for rec in records:
+            if not rec.responses:
+                continue
             counter = Counter()
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
@@ -225,6 +251,7 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             for value, count in counter.items():
                 if count >= majority:
                     majority_value.append(value)
+
             rec._unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
         return records
 

@@ -421,7 +421,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-4": {"value": ["a", "b"]},
                     },
                     "status": "submitted",
-                }
+                },
             ],
             metadata={"unit": "test"},
             external_id="1",
