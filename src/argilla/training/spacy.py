@@ -15,7 +15,7 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel
 
@@ -35,6 +35,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         language: Optional[str] = None,
         gpu_id: Optional[int] = -1,
         model: Optional[str] = None,
+        optimize: Literal["efficiency", "accuracy"] = "efficiency",
         *args,
         **kwargs,
     ) -> None:
@@ -55,6 +56,12 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             gpu_id:
                 the GPU ID to use. Defaults to -1, which means that the CPU will be used by default.
                 GPU IDs start in 0, which stands for the default GPU in the system, if available.
+            optimize:
+                A `str` with the optimization strategy to use. Either "efficiency" or "accuracy".
+                Defaults to "efficiency", which means that the model will be smaller, faster,
+                and use less memory, but it will be less accurate. If "accuracy" is used, the model
+                will be larger, slower, and use more memory, but it will be more accurate.
+                Defaults to "efficiency".
 
         Raises:
             NotImplementedError: If `record_class` is `rg.Text2TextRecord`.
@@ -98,6 +105,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self._eval_dataset_path = "./dev.spacy" if self._eval_dataset else None
 
         self.language = language or "en"
+        self.optimize = optimize
 
         self.gpu_id = gpu_id
         self.use_gpu = False
