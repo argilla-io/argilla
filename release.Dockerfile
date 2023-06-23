@@ -1,13 +1,5 @@
 FROM python:3.9.16-slim
 
-# Environment Variables
-ENV ARGILLA_HOME_PATH=/var/lib/argilla
-ENV DEFAULT_USER_ENABLED=true
-ENV DEFAULT_USER_PASSWORD=1234
-ENV DEFAULT_USER_API_KEY=argilla.apikey
-ENV USERS_DB=/config/.users.yml
-ENV UVICORN_PORT=6900
-
 # Copying script for starting argilla server
 COPY scripts/start_argilla_server.sh /
 
@@ -22,6 +14,15 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /packages
+
+# Environment Variables
+ENV ARGILLA_HOME_PATH=/var/lib/argilla
+ENV DEFAULT_USER_ENABLED=true
+ENV DEFAULT_USER_PASSWORD=1234
+ENV DEFAULT_USER_API_KEY=argilla.apikey
+ENV USERS_DB=/config/.users.yml
+ENV UVICORN_PORT=6900
+ENV UVICORN_APP=argilla:app
 
 # Create argilla volume
 RUN mkdir -p "$ARGILLA_HOME_PATH"
