@@ -24,7 +24,7 @@ Multi-label text classification is generally more complex than single-label clas
 
 Data for the training text classification using our `FeedbackDataset` is defined by following three easy steps.
 
-1. We need to define unification strategies a `RatingStrategy`, a `LabelStrategy` or a `MultiLabelStrategy`.
+1. We need to define a unification strategy `RatingStrategy`, a `LabelStrategy` or a `MultiLabelStrategy`.
 
 2.  For this task, we assume we need a `text-label`-pair for defining a text classification task. We allow mapping for creating a `TrainingTaskMapping.for_text_classification` by mapping `*Field` to a `text`-value and allow for mapping a `RatingStrategy`, `LabelStrategy` or a `MultiLabelStrategy` to a `label`-value.
 
@@ -40,7 +40,7 @@ A brief shortcut that `RatingQuestion`s can be unified using a "majority"-, "min
 
 #### Define a task mapping
 
-After defining the `unification`, we can now define our `TrainingTaskMapping.for_text_classification`.
+Now we know which unification strategy to apply, we can now define our `TrainingTaskMapping.for_text_classification`.
 
 ::::{tab-set}
 
@@ -48,7 +48,9 @@ After defining the `unification`, we can now define our `TrainingTaskMapping.for
 ```python
 from argilla import FeedbackDataset, TrainingTaskMapping
 
-dataset = rg.FeedbackDataset.from_huggingface(repo_id="argilla/stackoverflow_feedback_demo")
+dataset = rg.FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
 training_task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("answer_quality"), # RatingQuestion

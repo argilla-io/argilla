@@ -16,7 +16,7 @@ wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla
 
 :::{tab-item} Hugging Face Spaces
 ```{warning}
-HuggingFace Spaces don't have persistent storage and will automatically reset after 48 hours of inactivity, which means all the data within the Space will be lost.
+HuggingFace Spaces don't have persistent storage and will automatically reset after 48 hours of inactivity, which means all the data within the Space will be lost. You can enable this via the Hugging Face Spaces settings.
 ```
 <a  href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
     <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
