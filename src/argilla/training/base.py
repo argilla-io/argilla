@@ -46,6 +46,7 @@ class ArgillaTrainer(object):
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
         gpu_id: Optional[int] = -1,
+        framework_kwargs: Optional[dict] = {},
         **load_kwargs: Optional[dict],
     ) -> None:
         """
@@ -106,7 +107,7 @@ class ArgillaTrainer(object):
                 self._settings = self.dataset_full._infer_settings_from_records()
 
         framework = Framework(framework)
-        if framework is Framework.SPACY:
+        if framework in [Framework.SPACY.value, Framework.SPACY_TRANSFORMERS.value]:
             import spacy
 
             self.dataset_full_prepared = self.dataset_full.prepare_for_training(
@@ -191,6 +192,22 @@ class ArgillaTrainer(object):
                 settings=self._settings,
                 seed=self._seed,
                 gpu_id=gpu_id,
+                **framework_kwargs,  # freeze_tok2vec
+            )
+        elif framework is Framework.SPACY_TRANSFORMERS:
+            from argilla.training.spacy import ArgillaSpaCyTransformersTrainer
+
+            self._trainer = ArgillaSpaCyTransformersTrainer(
+                name=self._name,
+                workspace=self._workspace,
+                record_class=self._rg_dataset_type._RECORD_TYPE,
+                dataset=self.dataset_full_prepared,
+                model=self.model,
+                multi_label=self._multi_label,
+                settings=self._settings,
+                seed=self._seed,
+                gpu_id=gpu_id,
+                **framework_kwargs,  # update_transformer
             )
         elif framework is Framework.OPENAI:
             from argilla.training.openai import ArgillaOpenAITrainer
