@@ -65,7 +65,6 @@ class Settings(BaseSettings):
     home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
     base_url: Optional[str] = Field(description="The default base url where server will be deployed")
     database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
-    database_url_async: Optional[str] = Field(description="The async database url that argilla will use as data store")
 
     elasticsearch: str = "http://localhost:9200"
     elasticsearch_ssl_verify: bool = True
@@ -130,14 +129,6 @@ class Settings(BaseSettings):
     def set_database_url_default(cls, database_url: str, values: dict) -> str:
         return database_url or f"sqlite:///{os.path.join(values['home_path'], 'argilla.db')}?check_same_thread=False"
 
-    @validator("database_url_async", always=True)
-    def set_database_url_async_default(cls, database_url_async: str, values: dict) -> str:
-        if database_url_async:
-            return database_url_async
-        database_url = values.get("database_url")
-        assert database_url, "database_url must be set"
-        return database_url.replace("sqlite:///", "sqlite+aiosqlite:///")
-
     @root_validator(skip_on_failure=True)
     def create_home_path(cls, values):
         Path(values["home_path"]).mkdir(parents=True, exist_ok=True)
@@ -173,6 +164,19 @@ class Settings(BaseSettings):
         if ns is None:
             return index_name.replace("<NAMESPACE>", "")
         return index_name.replace("<NAMESPACE>", f".{ns}")
+
+    @property
+    def database_url_async(self) -> str:
+        if self.database_url.startswith("sqlite:///"):
+            return self.database_url.replace("sqlite:///", "sqlite+aiosqlite:///")
+
+        if self.database_url.startswith("postgresql://"):
+            return self.database_url.replace("postgresql://", "postgresql+asyncpg://")
+
+        if self.database_url.startswith("mysql://"):
+            return self.database_url.replace("mysql://", "mysql+aiomysql://")
+
+        raise ValueError(f"Unsupported database url: '{self.database_url}'")
 
     def obfuscated_elasticsearch(self) -> str:
         """Returns configured elasticsearch url obfuscating the provided password, if any"""
