@@ -89,13 +89,13 @@ export default {
     if (!rawAuthToken) return;
 
     try {
-      const auth = JSON.parse(atob(rawAuthToken));
+      const [username, password] = atob(rawAuthToken).split(":");
 
-      if (auth.username && auth.password) {
+      if (username && password) {
         this.hasAuthToken = true;
 
         try {
-          await this.loginUser(auth);
+          await this.loginUser({ username, password });
         } catch {
           this.hasAuthToken = false;
         }

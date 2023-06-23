@@ -3,9 +3,7 @@ import Login from "./login.vue";
 
 const stubs = ["BaseLoading", "brand-logo", "geometric-shape-a", "base-button"];
 
-const validAuthToken = btoa(
-  JSON.stringify({ username: "USERNAME", password: "PASSWORD" })
-);
+const validAuthToken = btoa("USERNAME:PASSWORD");
 
 describe("Login page should", () => {
   it("still in the same page if the auth token is not valid", () => {
@@ -71,7 +69,7 @@ describe("Login page should", () => {
   });
 
   it("the auth token is not valid when the object has username but no password", () => {
-    const auth = btoa(JSON.stringify({ username: "USERNAME", password: "" }));
+    const auth = btoa("USERNAME:");
 
     const wrapper = shallowMount(Login, {
       stubs,
@@ -88,7 +86,7 @@ describe("Login page should", () => {
   });
 
   it("the auth token is not valid when the object has no username but password", () => {
-    const auth = btoa(JSON.stringify({ username: "", password: "PASSWORD" }));
+    const auth = btoa(":PASSWORD");
 
     const wrapper = shallowMount(Login, {
       stubs,
@@ -105,7 +103,7 @@ describe("Login page should", () => {
   });
 
   it("the auth token is not valid when the object has no username and no password", () => {
-    const auth = btoa(JSON.stringify({ username: "", password: "" }));
+    const auth = btoa(":");
 
     const wrapper = shallowMount(Login, {
       stubs,
@@ -122,7 +120,7 @@ describe("Login page should", () => {
   });
 
   it("the auth token is not valid when the object other object structure", () => {
-    const auth = btoa(JSON.stringify({ foo: "bar" }));
+    const auth = btoa("FOO");
 
     const wrapper = shallowMount(Login, {
       stubs,
@@ -139,16 +137,12 @@ describe("Login page should", () => {
   });
 
   it("show the loading logo when the token is valid", () => {
-    const auth = btoa(
-      JSON.stringify({ username: "USERNAME", password: "PASSWORD" })
-    );
-
     const wrapper = shallowMount(Login, {
       stubs,
       mocks: {
         $route: {
           query: {
-            auth,
+            auth: validAuthToken,
           },
         },
       },
