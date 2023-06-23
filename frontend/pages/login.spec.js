@@ -3,9 +3,13 @@ import Login from "./login.vue";
 
 const stubs = ["BaseLoading", "brand-logo", "geometric-shape-a", "base-button"];
 
+const validAuthToken = btoa(
+  JSON.stringify({ username: "USERNAME", password: "PASSWORD" })
+);
+
 describe("Login page should", () => {
   it("still in the same page if the auth token is not valid", () => {
-    const userLoginSpy = jest.spyOn(Login.methods, "userLogin");
+    const loginUserSpy = jest.spyOn(Login.methods, "loginUser");
 
     shallowMount(Login, {
       mocks: {
@@ -17,11 +21,11 @@ describe("Login page should", () => {
       },
     });
 
-    expect(userLoginSpy).toHaveBeenCalledTimes(0);
+    expect(loginUserSpy).toHaveBeenCalledTimes(0);
   });
 
   it("still in the same page if the auth token query params is empty", () => {
-    const userLoginSpy = jest.spyOn(Login.methods, "userLogin");
+    const loginUserSpy = jest.spyOn(Login.methods, "loginUser");
 
     shallowMount(Login, {
       mocks: {
@@ -31,46 +35,38 @@ describe("Login page should", () => {
       },
     });
 
-    expect(userLoginSpy).toHaveBeenCalledTimes(0);
+    expect(loginUserSpy).toHaveBeenCalledTimes(0);
   });
 
   it("try to login user when the auth token is valid", () => {
-    const userLoginSpy = jest.spyOn(Login.methods, "userLogin");
+    const loginUserSpy = jest.spyOn(Login.methods, "loginUser");
 
     shallowMount(Login, {
       stubs,
       mocks: {
         $route: {
           query: {
-            auth: "eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiIxMjM0NTY3OCJ9",
+            auth: validAuthToken,
           },
         },
       },
     });
 
-    expect(userLoginSpy).toHaveBeenCalledTimes(1);
+    expect(loginUserSpy).toHaveBeenCalledTimes(1);
   });
 
   it("the auth token is valid when the object has the username and password", () => {
-    const auth = btoa(
-      JSON.stringify({ username: "USERNAME", password: "PASSWORD" })
-    );
-
     const wrapper = shallowMount(Login, {
       stubs,
       mocks: {
         $route: {
           query: {
-            auth,
+            auth: validAuthToken,
           },
         },
       },
     });
 
-    expect(wrapper.vm.authToken).toEqual({
-      username: "USERNAME",
-      password: "PASSWORD",
-    });
     expect(wrapper.vm.hasAuthToken).toBeTruthy();
   });
 
@@ -88,7 +84,6 @@ describe("Login page should", () => {
       },
     });
 
-    expect(wrapper.vm.authToken).toBeUndefined();
     expect(wrapper.vm.hasAuthToken).toBeFalsy();
   });
 
@@ -106,7 +101,6 @@ describe("Login page should", () => {
       },
     });
 
-    expect(wrapper.vm.authToken).toBeUndefined();
     expect(wrapper.vm.hasAuthToken).toBeFalsy();
   });
 
@@ -124,7 +118,6 @@ describe("Login page should", () => {
       },
     });
 
-    expect(wrapper.vm.authToken).toBeUndefined();
     expect(wrapper.vm.hasAuthToken).toBeFalsy();
   });
 
@@ -142,7 +135,6 @@ describe("Login page should", () => {
       },
     });
 
-    expect(wrapper.vm.authToken).toBeUndefined();
     expect(wrapper.vm.hasAuthToken).toBeFalsy();
   });
 

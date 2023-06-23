@@ -18,7 +18,7 @@
 <template>
   <div class="container">
     <BaseLoading v-if="hasAuthToken" />
-    <form class="form" @submit.prevent="userLogin">
+    <form class="form" @submit.prevent="onLoginUser">
       <brand-logo class="form__logo" />
       <div class="form__content">
         <p class="form__title">Welcome</p>
@@ -80,7 +80,27 @@ export default {
         password: "",
       },
       deployment: false,
+      hasAuthToken: false,
     };
+  },
+  async created() {
+    const rawAuthToken = this.$route.query.auth;
+
+    if (!rawAuthToken) return;
+
+    try {
+      const auth = JSON.parse(atob(rawAuthToken));
+
+      if (auth.username && auth.password) {
+        this.hasAuthToken = true;
+
+        try {
+          await this.loginUser(auth);
+        } catch {
+          this.hasAuthToken = false;
+        }
+      }
+    } catch {}
   },
   async mounted() {
     try {
@@ -88,18 +108,8 @@ export default {
       const { deployment } = await response.json();
 
       this.deployment = deployment;
-    } catch (e) {
+    } catch {
       this.deployment = null;
-    }
-
-    if (this.hasAuthToken) {
-      // https://developer.mozilla.org/en-US/docs/Web/API/btoa
-      // eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiIxMjM0NTY3OCJ9
-      this.login = {
-        ...this.authToken,
-      };
-
-      this.userLogin();
     }
   },
   computed: {
@@ -110,20 +120,6 @@ export default {
           : this.error;
       }
     },
-    authToken() {
-      const rawAuthToken = this.$route.query.auth;
-
-      if (!rawAuthToken) return;
-
-      try {
-        const auth = JSON.parse(atob(rawAuthToken));
-
-        if (!!auth.username && !!auth.password) return auth;
-      } catch {}
-    },
-    hasAuthToken() {
-      return !!this.authToken;
-    },
   },
   methods: {
     nextRedirect() {
@@ -132,19 +128,22 @@ export default {
         path: redirect_url,
       });
     },
-    async userLogin() {
+    async loginUser(authData) {
+      await this.$store.dispatch("entities/deleteAll");
+      await this.$auth.loginWith("authProvider", {
+        data: this.encodedLoginData(authData),
+      });
+
+      this.nextRedirect();
+    },
+    async onLoginUser() {
       try {
-        await this.$store.dispatch("entities/deleteAll");
-        await this.$auth.loginWith("authProvider", {
-          data: this.encodedLoginData(),
-        });
-        this.nextRedirect();
+        await this.loginUser(this.login);
       } catch (err) {
         this.error = err;
       }
     },
-    encodedLoginData() {
-      const { username, password } = this.login;
+    encodedLoginData({ username, password }) {
       return `username=${encodeURIComponent(
         username
       )}&password=${encodeURIComponent(password)}`;
