@@ -173,3 +173,14 @@ class MultiLabelSelectionQuestionFactory(QuestionFactory):
             {"value": "option3", "text": "Option 3"},
         ],
     }
+
+
+class RankingQuestionFactory(QuestionFactory):
+    settings = {
+        "type": QuestionType.ranking.value,
+        "options": [
+            {"value": "completion-a", "text": "Completion A"},
+            {"value": "completion-b", "text": "Completion B"},
+            {"value": "completion-c", "text": "Completion C"},
+        ],
+    }

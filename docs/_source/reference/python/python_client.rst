@@ -3,7 +3,7 @@
 Client
 ======
 
-Here we describe the Python client of Argilla that we divide into three basic modules:
+Here we describe the Python client of Argilla that we divide into four basic modules:
 
 - :ref:`python ref methods`: These methods make up the interface to interact with Argilla's REST API.
 - :ref:`python ref records`: You need to wrap your data in these *Records* for Argilla to understand it.
@@ -39,7 +39,10 @@ Datasets
 .. _python ref feedbackdataset:
 
 FeedbackDataset
---------
+---------------
 
-.. automodule:: argilla.client.feedback
-   :members: FeedbackDataset, FeedbackDatasetConfig, RatingQuestion, TextQuestion, QuestionSchema, TextField, FieldSchema, OfflineFeedbackRecord, FeedbackRecord
+.. automodule:: argilla.client.feedback.dataset
+   :members: FeedbackDataset
+
+.. automodule:: argilla.client.feedback.schemas
+   :members: FeedbackDatasetConfig, RatingQuestion, TextQuestion, LabelQuestion, MultiLabelQuestion, QuestionSchema, TextField, FieldSchema, FeedbackRecord

@@ -18,6 +18,10 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Added
+
+- Added `RankingQuestionSettings` class allowing to create ranking questions in the API using `POST /api/v1/datasets/{dataset_id}/questions` endpoint ([#3232](https://github.com/argilla-io/argilla/pull/3232))
+
 ## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
 
 ### Fixed
@@ -42,7 +46,7 @@ These are the section headers that we use:
 
 - The role system now support three different roles `owner`, `admin` and `annotator` ([#3104](https://github.com/argilla-io/argilla/pull/3104))
 - `admin` role is scoped to workspace-level operations ([#3115](https://github.com/argilla-io/argilla/pull/3115))
-- Default argilla user has the `admin` role instead of `owner` one ([#3188](https://github.com/argilla-io/argilla/pull/3188))
+- The `owner` user is created among the default pool of users in the quickstart, and the default user in the server has now `owner` role ([#3248](https://github.com/argilla-io/argilla/pull/3248)), reverting ([#3188](https://github.com/argilla-io/argilla/pull/3188)).
 
 ### Deprecated
 
@@ -66,6 +70,11 @@ These are the section headers that we use:
 - Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.
 - Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
 - Allow flow `FeedbackDataset.from_argilla` -> `FeedbackDataset.push_to_argilla` under different dataset names and/or workspaces ([#3192](https://github.com/argilla-io/argilla/issues/3192))
+
+### Docs
+
+- Resolved typos in the docs ([#3238](https://github.com/argilla-io/argilla/issues/3238))
+
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
 
