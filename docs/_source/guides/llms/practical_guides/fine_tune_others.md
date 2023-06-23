@@ -48,7 +48,7 @@ Now we know which unification strategy to apply, we can now define our `Training
 ```python
 from argilla import FeedbackDataset, TrainingTaskMapping
 
-dataset = rg.FeedbackDataset.from_huggingface(
+dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
 training_task_mapping = TrainingTaskMapping.for_text_classification(
@@ -63,7 +63,9 @@ training_task_mapping = TrainingTaskMapping.for_text_classification(
 ```python
 from argilla import FeedbackDataset, TrainingTaskMapping
 
-dataset = rg.FeedbackDataset.from_huggingface(repo_id="argilla/stackoverflow_feedback_demo")
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
 training_task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("title_question_fit"), # LabelQuestion
@@ -76,7 +78,9 @@ training_task_mapping = TrainingTaskMapping.for_text_classification(
 ```python
 from argilla import FeedbackDataset, TrainingTaskMapping
 
-dataset = rg.FeedbackDataset.from_huggingface(repo_id="argilla/stackoverflow_feedback_demo")
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
 training_task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("tags"), # MultiLabelQuestion
@@ -98,9 +102,9 @@ This is a newer version and can be imported via `from argilla import ArgillaTrai
 ````
 
 ```python
-from argilla import ArgillaTrainer
+from argilla import ArgillaTrainer, FeedbackDataset, TrainingTaskMapping
 
-dataset = rg.FeedbackDataset.from_huggingface(
+dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
 training_task_mapping = TrainingTaskMapping.for_text_classification(
