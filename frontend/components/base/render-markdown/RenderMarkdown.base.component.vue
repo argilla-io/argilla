@@ -23,10 +23,17 @@ export default {
       required: true,
     },
   },
+  methods: {
+    cleanMarkdown(markdown) {
+      return markdown.replace(/[^\S\r\n]+$/gm, "");
+    },
+  },
   created() {
-    const parsed = marked.parse(this.markdown, {
+    const cleanedMarkdown = this.cleanMarkdown(this.markdown);
+    const parsed = marked.parse(cleanedMarkdown, {
       headerIds: false,
       mangle: false,
+      breaks: true,
     });
     this.markdownToHtml = DOMPurify.sanitize(parsed);
   },
@@ -37,8 +44,13 @@ export default {
   white-space: normal;
   word-break: break-word;
   :deep() {
+    hr {
+      width: 100%;
+    }
+    blockquote {
+      font-style: italic;
+    }
     pre {
-      overflow: scroll;
       white-space: pre-wrap;
       word-break: break-all;
     }
