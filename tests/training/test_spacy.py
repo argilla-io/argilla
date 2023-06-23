@@ -13,89 +13,98 @@
 #  limitations under the License.
 
 import argilla as rg
+import pytest
 from argilla.training import ArgillaTrainer
 
-from .helpers import cleanup_spacy_config, train_with_cleanup
-
-FRAMEWORK = "spacy"
-MODEL = "en_core_web_sm"
+from tests.training.helpers import cleanup_spacy_config, train_with_cleanup
 
 
-def test_update_config(dataset_text_classification):
-    trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
-    trainer.update_config(max_steps=15000)
-    assert trainer._trainer.config["training"]["max_steps"] == 15000
-    trainer.update_config(num_epochs=1000)
-    assert trainer._trainer.config["training"]["num_epochs"] == 1000
+@pytest.mark.parametrize(
+    "framework,model", [("spacy", "en_core_web_sm"), ("spacy-transformers", "prajjwal1/bert-tiny")]
+)
+class TestSpaCyTrainer:
+    def test_update_config(
+        framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
+    ) -> None:
+        trainer = ArgillaTrainer(name=dataset_text_classification, framework=framework, model=model)
+        trainer.update_config(max_steps=15000)
+        assert trainer._trainer.config["training"]["max_steps"] == 15000
+        trainer.update_config(num_epochs=1000)
+        assert trainer._trainer.config["training"]["num_epochs"] == 1000
 
+    def test_train_textcat(
+        framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
+    ) -> None:
+        trainer = ArgillaTrainer(name=dataset_text_classification, framework=framework, model=model)
+        trainer.update_config(max_steps=1)
+        output_dir = "tmp_spacy_train_textcat"
+        train_with_cleanup(trainer, output_dir)
+        record = trainer.predict("This is a text", as_argilla_records=True)
+        assert isinstance(record, rg.TextClassificationRecord)
+        assert record.multi_label is False
+        not_record = trainer.predict("This is a text", as_argilla_records=False)
+        assert isinstance(not_record.cats, dict)
+        train_with_cleanup(trainer, output_dir, train=False)
+        cleanup_spacy_config(trainer)
 
-def test_train_textcat(dataset_text_classification):
-    trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
-    trainer.update_config(max_steps=1)
-    output_dir = "tmp_spacy_train_textcat"
-    train_with_cleanup(trainer, output_dir)
-    record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TextClassificationRecord)
-    assert record.multi_label is False
-    not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert isinstance(not_record.cats, dict)
-    train_with_cleanup(trainer, output_dir, train=False)
-    cleanup_spacy_config(trainer)
+    def test_train_textcat_multi_label(
+        framework: str, model: str, dataset_text_classification_multi_label: rg.DatasetForTextClassification
+    ) -> None:
+        trainer = ArgillaTrainer(
+            name=dataset_text_classification_multi_label, train_size=0.5, framework=framework, model=model
+        )
+        output_dir = "tmp_spacy_train_multi_label"
+        trainer.update_config(max_steps=1)
+        train_with_cleanup(trainer, output_dir)
+        record = trainer.predict("This is a text", as_argilla_records=True)
+        assert isinstance(record, rg.TextClassificationRecord)
+        assert record.multi_label is True
+        not_record = trainer.predict("This is a text", as_argilla_records=False)
+        assert isinstance(not_record.cats, dict)
+        train_with_cleanup(trainer, output_dir, train=False)
+        cleanup_spacy_config(trainer)
 
+    def test_train_tokencat(
+        framework: str, model: str, dataset_token_classification: rg.DatasetForTokenClassification
+    ) -> None:
+        trainer = ArgillaTrainer(name=dataset_token_classification, framework=framework, model=model)
+        trainer.update_config(max_steps=1)
+        output_dir = "tmp_spacy_train_tokencat"
+        train_with_cleanup(trainer, output_dir)
+        record = trainer.predict("This is a text", as_argilla_records=True)
+        assert isinstance(record, rg.TokenClassificationRecord)
+        not_record = trainer.predict("This is a text", as_argilla_records=False)
+        assert not isinstance(not_record, rg.TokenClassificationRecord)
+        train_with_cleanup(trainer, output_dir, train=False)
+        cleanup_spacy_config(trainer)
 
-def test_train_textcat_multi_label(dataset_text_classification_multi_label):
-    trainer = ArgillaTrainer(
-        name=dataset_text_classification_multi_label, model=MODEL, train_size=0.5, framework=FRAMEWORK
-    )
-    output_dir = "tmp_spacy_train_multi_label"
-    trainer.update_config(max_steps=1)
-    train_with_cleanup(trainer, output_dir)
-    record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TextClassificationRecord)
-    assert record.multi_label is True
-    not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert isinstance(not_record.cats, dict)
-    train_with_cleanup(trainer, output_dir, train=False)
-    cleanup_spacy_config(trainer)
+    def test_init_with_gpu_id(
+        framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
+    ) -> None:
+        trainer = ArgillaTrainer(name=dataset_text_classification, gpu_id=0, framework=framework, model=model)
+        try:
+            import torch  # noqa
 
+            has_torch = True
+        except ImportError:
+            has_torch = False
 
-def test_train_tokencat(dataset_token_classification):
-    trainer = ArgillaTrainer(name=dataset_token_classification, model=MODEL, framework=FRAMEWORK)
-    trainer.update_config(max_steps=1)
-    output_dir = "tmp_spacy_train_tokencat"
-    train_with_cleanup(trainer, output_dir)
-    record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TokenClassificationRecord)
-    not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert not isinstance(not_record, rg.TokenClassificationRecord)
-    train_with_cleanup(trainer, output_dir, train=False)
-    cleanup_spacy_config(trainer)
+        try:
+            import tensorflow  # noqa
 
+            has_tensorflow = True
+        except ImportError:
+            has_tensorflow = False
 
-def test_init_with_gpu_id(dataset_text_classification):
-    trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK, gpu_id=0)
-    try:
-        import torch  # noqa
+        import spacy
 
-        has_torch = True
-    except ImportError:
-        has_torch = False
+        if not has_torch and not has_tensorflow:
+            assert trainer._trainer.gpu_id == -1
+        else:
+            assert trainer._trainer.use_gpu == spacy.prefer_gpu(0)
 
-    try:
-        import tensorflow  # noqa
-
-        has_tensorflow = True
-    except ImportError:
-        has_tensorflow = False
-
-    import spacy
-
-    if not has_torch and not has_tensorflow:
-        assert trainer._trainer.gpu_id == -1
-    else:
-        assert trainer._trainer.use_gpu == spacy.prefer_gpu(0)
-
-
-def test_predict_wo_training(dataset_text_classification):
-    trainer = ArgillaTrainer(name=dataset_text_classification, framework=FRAMEWORK, model=MODEL)
-    trainer._trainer.predict("This is a text")
+    def test_predict_wo_training(
+        framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
+    ) -> None:
+        trainer = ArgillaTrainer(name=dataset_text_classification, framework=framework, model=model)
+        trainer._trainer.predict("This is a text")
