@@ -64,9 +64,9 @@ async def create_multi_label_selection_questions(dataset: "Dataset") -> None:
     await MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question_2", dataset=dataset)
 
 
-def create_ranking_question(dataset: "Dataset") -> None:
-    RankingQuestionFactory.create(name="ranking_question_1", dataset=dataset, required=True)
-    RankingQuestionFactory.create(name="ranking_question_2", dataset=dataset)
+async def create_ranking_question(dataset: "Dataset") -> None:
+    await RankingQuestionFactory.create(name="ranking_question_1", dataset=dataset, required=True)
+    await RankingQuestionFactory.create(name="ranking_question_2", dataset=dataset)
 
 
 @pytest.mark.parametrize("response_status", ["submitted", "discarded", "draft"])
