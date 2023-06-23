@@ -40,7 +40,7 @@ class RatingQuestionSettings(BaseModel):
     options: conlist(item_type=RatingQuestionSettingsOption)
 
 
-class LabelSelectionQuestionSettingsOption(BaseModel):
+class ValueTextQuestionSettingsOption(BaseModel):
     value: str
     text: str
     description: Optional[str] = None
@@ -48,12 +48,17 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
 
 class LabelSelectionQuestionSettings(BaseModel):
     type: Literal[QuestionType.label_selection]
-    options: conlist(item_type=LabelSelectionQuestionSettingsOption)
+    options: conlist(item_type=ValueTextQuestionSettingsOption)
 
 
 class MultiLabelSelectionQuestionSettings(BaseModel):
     type: Literal[QuestionType.multi_label_selection]
-    options: conlist(item_type=LabelSelectionQuestionSettingsOption)
+    options: conlist(item_type=ValueTextQuestionSettingsOption)
+
+
+class RankingQuestionSettings(BaseModel):
+    type: Literal[QuestionType.ranking]
+    options: conlist(item_type=ValueTextQuestionSettingsOption)
 
 
 QuestionSettings = Annotated[
@@ -62,6 +67,7 @@ QuestionSettings = Annotated[
         RatingQuestionSettings,
         LabelSelectionQuestionSettings,
         MultiLabelSelectionQuestionSettings,
+        RankingQuestionSettings,
     ],
     Field(..., discriminator="type"),
 ]
