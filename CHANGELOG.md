@@ -40,6 +40,7 @@ These are the section headers that we use:
 ### Docs
 
 - Resolved typos in the docs ([#3238](https://github.com/argilla-io/argilla/issues/3238))
+- Fixed mention of master branch [#2324](https://github.com/argilla-io/argilla/pull/2324).
 
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
