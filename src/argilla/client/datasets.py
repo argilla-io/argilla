@@ -146,7 +146,7 @@ class DatasetBase:
             del ds_dict["metadata"]
             dataset = datasets.Dataset.from_dict(ds_dict)
             _LOGGER.warning(
-                "The 'metadata' of the records were removed, since it was incompatible" " with the 'datasets' format."
+                "The 'metadata' of the records were removed, since it was incompatible with the 'datasets' format."
             )
 
         return dataset

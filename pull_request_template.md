@@ -1,3 +1,5 @@
+<!-- Thanks for your contribution! As part of our Community Growers initiative 🌱, we're donating Justdiggit bunds in your name to reforest sub-Saharan Africa. To claim your Community Growers certificate, please contact David Berenstein in our Slack community or fill in this form https://tally.so/r/n9XrxK once your PR has been merged. -->
+
 # Description
 
 Please include a summary of the changes and the related issue. Please also include relevant motivation and context. List any dependencies that are required for this change.
@@ -24,11 +26,11 @@ Closes #<issue_number>
 
 **Checklist**
 
-- [ ] I have merged the original branch into my forked branch
 - [ ] I added relevant documentation
 - [ ] follows the style guidelines of this project
 - [ ] I did a self-review of my code
 - [ ] I made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] I filled out [the contributor form](https://tally.so/r/n9XrxK) (see text above)
 - [ ] I have added relevant notes to the CHANGELOG.md file (See https://keepachangelog.com/)

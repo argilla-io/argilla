@@ -19,7 +19,6 @@ as well as in the `_import_structure` dictionary.
 """
 
 import sys as _sys
-import warnings
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from argilla.logging import configure_logging as _configure_logging
@@ -82,6 +81,7 @@ if _TYPE_CHECKING:
         TokenAttributions,
         TokenClassificationRecord,
     )
+    from argilla.client.users import User
     from argilla.client.workspaces import Workspace
     from argilla.datasets import (
         TextClassificationSettings,
@@ -138,6 +138,7 @@ _import_structure = {
         "TextQuestion",
         "ValueSchema",
     ],
+    "client.users": ["User"],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [

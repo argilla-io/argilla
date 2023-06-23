@@ -13,12 +13,12 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import List, Literal, Optional
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
 
-from argilla.server.models.models import UserRole
+from argilla.client.sdk.users.models import UserRole
 
 
 class WorkspaceModel(BaseModel):
