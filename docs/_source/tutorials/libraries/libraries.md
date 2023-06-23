@@ -20,7 +20,7 @@ BentoML is an open platform that simplifies ML model deployment and enables you 
 DVC is built to make ML models shareable and reproducible. It is designed to handle large files, data sets, machine learning models, and metrics as well as code.
 ```
 ```{grid-item-card} Google Colab
-:link: dvc.md
+:link: colab.md
 
 Colab notebooks allow you to combine executable code and rich text in a single document, along with images, HTML, LaTeX and more.
 ```
@@ -39,7 +39,7 @@ Stanza is a collection of accurate and efficient tools for the linguistic analys
 
 Transformers provides APIs and tools to easily download and train state-of-the-art pretrained models.
 ```
-```{grid-item-card} Disaggregators
+```{grid-item-card} Hugging Face Disaggregators
 :link: disaggregators.md
 
 Addressing fairness and bias in machine learning models is more important than ever!
@@ -54,7 +54,7 @@ SentenceTransformers is a Python framework for state-of-the-art sentence, text a
 
 SetFit is an efficient and prompt-free framework for few-shot fine-tuning of Sentence Transformers.
 ```
-```{grid-item-card} flAIr
+```{grid-item-card} Flair
 :link: flair.md
 
 A very simple framework for state-of-the-art NLP. Developed by Humboldt University of Berlin and friends.
@@ -73,11 +73,6 @@ modAL is an active learning framework for Python3, designed with modularity, fle
 :link: classyclassification.md
 
 An intuitive approach to few-shot classification using sentence-transformers or spaCy models, or zero-shot classification with Huggingface.
-```
-```{grid-item-card} OpenAI
-:link: openai.md
-
-OpenAI is a suite of APIs powered by large language and vision models which perform a variety of natural language and visual tasks.
 ```
 
 ```{grid-item-card} Skweak
@@ -140,14 +135,13 @@ setfit.md
 smalltext.md
 modal.md
 classyclassification.md
-openai.md
 
 skweak.md
 snorkel.md
 
-transformersinterpret
-cleanlab
-shap
-openai
-unstructured
+transformersinterpret.md
+cleanlab.md
+shap.md
+openai.md
+unstructured.md
 ```
