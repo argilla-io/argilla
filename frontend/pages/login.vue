@@ -100,7 +100,9 @@ export default {
           this.hasAuthToken = false;
         }
       }
-    } catch {}
+    } catch {
+      /* lint:disable:no-empty */
+    }
   },
   async mounted() {
     try {
