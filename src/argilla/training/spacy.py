@@ -24,7 +24,7 @@ from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
 
 
-class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
+class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSpaCyTrainer")
     _logger.setLevel(logging.INFO)
 
@@ -39,15 +39,13 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         *args,
         **kwargs,
     ) -> None:
-        """Initialize the `ArgillaSpaCyTrainer` class.
+        """Initialize the `_ArgillaSpaCyTrainerBase` class.
 
         Args:
             dataset: A `spacy.tokens.DocBin` object or a tuple of `spacy.tokens.DocBin` objects.
             record_class:
                 A `rg.TextClassificationRecord`, `rg.TokenClassificationRecord`, or `rg.Text2TextRecord`
                 object. Defaults to None.
-            model:
-                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_lg". Defaults to None.
             seed: A `int` with the seed for the random number generator. Defaults to None.
             multi_label: A `bool` indicating whether the task is multi-label or not. Defaults to False.
             language:
@@ -56,6 +54,10 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             gpu_id:
                 the GPU ID to use. Defaults to -1, which means that the CPU will be used by default.
                 GPU IDs start in 0, which stands for the default GPU in the system, if available.
+            model:
+                A `str` with the `spaCy` model name to use. If it contains vectors it
+                can also be used for training/fine-tuning, e.g. "en_core_web_lg"
+                contains vectors, while "en_core_web_sm" doesn't. Defaults to None.
             optimize:
                 A `str` with the optimization strategy to use. Either "efficiency" or "accuracy".
                 Defaults to "efficiency", which means that the model will be smaller, faster,
@@ -64,22 +66,16 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
                 Defaults to "efficiency".
 
         Raises:
-            NotImplementedError: If `record_class` is `rg.Text2TextRecord`.
-
-        Example:
-            >>> from argilla import TokenClassificationRecord
-            >>> from argilla.training import ArgillaSpaCyTrainer
-            >>> dataset = ... # Load the dataset
-            >>> trainer = ArgillaSpaCyTrainer(dataset, record_class=TokenClassificationRecord)
-            >>> trainer.update_config(max_epochs=10)
-            >>> trainer.train()
-            >>> trainer.save("./model")
+            NotImplementedError: If the `record_class` is not supported or if the
+                `init_training_args` method has not been implemented.
         """
         super().__init__(*args, **kwargs)
         import spacy
 
         self._nlp = None
         self._model = model
+
+        self.config = {}
 
         if self._record_class == rg.TokenClassificationRecord:
             self._column_mapping = {
@@ -102,7 +98,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             self._dataset if isinstance(self._dataset, tuple) and len(self._dataset) > 1 else (self._dataset, None)
         )
         self._train_dataset_path = "./train.spacy"
-        self._eval_dataset_path = "./dev.spacy" if self._eval_dataset else None
+        self._eval_dataset_path = "./dev.spacy" if self._eval_dataset else "./train.spacy"
 
         self.language = language or "en"
         self.optimize = optimize
@@ -135,34 +131,6 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
                 self.gpu_id = -1
 
         self.init_training_args()
-
-    def init_training_args(self):
-        from spacy.cli.init_config import init_config
-
-        self.config = init_config(
-            lang=self.language,
-            pipeline=self._pipeline,
-            optimize="efficiency",
-        )
-
-        self.config["paths"]["train"] = self._train_dataset_path
-        self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
-        self.config["system"]["seed"] = self._seed or 42
-        if not self._model:
-            self._logger.warn(
-                "`model` is not specified and it's recommended to specify the"
-                " `spaCy` model to use. Using `en_core_web_lg` as the default model"
-                " instead."
-            )
-            self._model = "en_core_web_lg"
-        self.config["paths"]["vectors"] = self._model
-        if self.use_gpu:
-            self.config["system"]["gpu_allocator"] = (
-                "pytorch" if self.has_torch else "tensorflow" if self.has_tensorflow else None
-            )
-            self.config["nlp"]["batch_size"] = 128
-
-        self._nlp = None
 
     def init_model(self):
         import spacy
