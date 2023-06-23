@@ -79,16 +79,18 @@ fig.show()
 If you feel that the disagreement between annotators is too high, especially for questions that aren"t as subjective, this is a good sign that you should review your annotation guidelines and/or the questions and options.
 ```
 
-## Solve disagreements
+## Unifying Disagreements
 
-In this section, we explore some techniques you can use to solve disagreements in the responses. These are not the only possible techniques and you should choose them carefully according to the needs of your project and annotation team. Even though there are many ways in which you can unify responses, we offer support for some of them out-of-the box. There are two main ways to do this.
+In this section, we explore some techniques you can use to solve disagreements in the responses. These are not the only possible techniques and you should choose them carefully according to the needs of your project and annotation team. Even though there are many ways in which you can unify responses, we offer support for some of them out-of-the box. There are two some ways to do this per question
+
+### Code
 
 ```{include} /_common/tabs/unfication_strategies.md
 ```
 
 Once you have unified your responses, you will have a dataset that"s ready for [fine-tuning](fine_tune.ipynb). Remember to save your unified dataset following one of the methods explained in [Export a Feedback dataset](export_dataset.ipynb).
 
-### Unifying
+### Background
 
 #### TextQuestions
 

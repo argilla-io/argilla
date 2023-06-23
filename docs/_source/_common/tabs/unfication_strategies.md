@@ -1,26 +1,21 @@
-Use a `FeedbackDataset` directly:
-
-```python
-from argilla import FeedbackDataset
-
-dataset = Feedbackdataset(...)
-dataset.unify_responses(question="question_name", strategy="majority")
-dataset.records[0].unified_response
-```
-
-Or, you can use `FeedbackRecord`s in combination with a `QuestionStrategy`.
+You can unify responses by using a `FeedbackRecord`s in combination with a `QuestionStrategy`.
 
 ::::{tab-set}
 
 :::{tab-item} RatingQuestion
 
 ```python
-from argilla import RatingQuestion, RatingQuestionStrategy, FeedbackRecord
+from argilla import RatingQuestionStrategy, FeedbackRecord
 
-records = [FeedbackRecord(...)]
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
 strategy = RatingQuestionStrategy("majority") # "mean", "max", "min"
-records = strategy.unify_responses(records, question=RatingQuestion(...))
-records[0].unified_response
+dataset.unify_responses(
+    question=dataset.get_question_by_name("answer_quality")
+    strategy=strategy
+)
+dataset.records[0].unified_responses
 ```
 
 :::
@@ -28,12 +23,17 @@ records[0].unified_response
 :::{tab-item} LabelQuestion
 
 ```python
-from argilla import LabelQuestion, LabelQuestionStrategy, FeedbackRecord
+from argilla import RatingQuestionStrategy, FeedbackRecord
 
-records = [FeedbackRecord(...)]
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
 strategy = LabelQuestionStrategy("majority") # "disagreement", "majority_weighted (WIP)"
-records = strategy.unify_responses(records, question=LabelQuestion(...))
-records[0].unified_response
+dataset.unify_responses(
+    question=dataset.get_question_by_name("title_question_fit")
+    strategy=strategy
+)
+dataset.records[0].unified_responses
 ```
 
 :::
@@ -42,14 +42,23 @@ records[0].unified_response
 :::{tab-item} MultiLabelQuestion
 
 ```python
-from argilla import MultiLabelQuestion, MultiLabelQuestionStrategy, FeedbackRecord
+from argilla import RatingQuestionStrategy, FeedbackRecord
 
-records = [FeedbackRecord(...)]
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
 strategy = MultiLabelQuestionStrategy("majority") # "disagreement", "majority_weighted (WIP)"
-records = strategy.unify_responses(records, question=MultiLabelQuestion(...))
-records[0].unified_response
+dataset.unify_responses(
+    question=dataset.get_question_by_name("tags")
+    strategy=strategy
+)
+dataset.records[0].unified_responses
 ```
 
 :::
 
 ::::
+
+:::{note}
+You can also pass the `question` and `strategy` as string directly.
+:::

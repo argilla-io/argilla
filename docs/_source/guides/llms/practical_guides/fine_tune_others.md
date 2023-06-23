@@ -32,67 +32,60 @@ Data for the training text classification using our `FeedbackDataset` is defined
 
 #### Unify responses
 
-Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practical_guides/collect_responses) and so do `RatingQuestions`s, `LabelQuestion`s and `MultiLabelQuestion`s. Therefore, we first need to define a `*QuestionUnification`, which takes one of the questions and one of their associated strategies.
+Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practical_guides/collect_responses) and so do `RatingQuestions`s, `LabelQuestion`s and `MultiLabelQuestion`s. Therefore, records need to be unified by using a strategy, which takes one of the questions and one of their associated strategies. Luckily this is integrated within the `TrainingTaskMapping`-step underneath, but you can also do this individually as shown [here](/guides/llms/practical_guides/collect_responses).
 
 ````{note}
-Note that `RatingQuestion`s can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both `LabelQuestion`s and `MultiLabelQuestion`s can be resolved using a "majority"-, or "disagreement"-strategy.
+A brief shortcut that `RatingQuestion`s can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both `LabelQuestion`s and `MultiLabelQuestion`s can be resolved using a "majority"-, or "disagreement"-strategy.
 ````
+
+#### Define a task mapping
+
+After defining the `unification`, we can now define our `TrainingTaskMapping.for_text_classification`.
 
 ::::{tab-set}
 
 :::{tab-item} RatingQuestion
 ```python
-from argilla import RatingQuestion, RatingUnification
+from argilla import FeedbackDataset, TrainingTaskMapping
 
-label_unification = RatingUnification(
-    question=RatingQuestion(...),
-    strategy="majority", # or "min", "max", "disagreement"
-    label_strategy=""
+dataset = rg.FeedbackDataset.from_huggingface(repo_id="argilla/stackoverflow_feedback_demo")
+training_task_mapping = TrainingTaskMapping.for_text_classification(
+    text=dataset.field_by_name("title"),
+    label=dataset.question_by_name("answer_quality"), # RatingQuestion
+    label_strategy=None # default to "majority", or "min", "max", "disagreement"
 )
 ```
 :::
 
 :::{tab-item} LabelQuestion
 ```python
-from argilla import LabelQuestion, LabelUnification
+from argilla import FeedbackDataset, TrainingTaskMapping
 
-label_unification = LabelUnification(
-    question=LabelQuestion(...),
-    strategy="majority", # or "disagreement"
-    label_strategy=""
+dataset = rg.FeedbackDataset.from_huggingface(repo_id="argilla/stackoverflow_feedback_demo")
+training_task_mapping = TrainingTaskMapping.for_text_classification(
+    text=dataset.field_by_name("title"),
+    label=dataset.question_by_name("title_question_fit"), # LabelQuestion
+    label_strategy=None
 )
 ```
 :::
 
 :::{tab-item} MultiLabelQuestion
 ```python
-from argilla import MultiLabelQuestion, MultiLabelUnification
+from argilla import FeedbackDataset, TrainingTaskMapping
 
-label_unification = MultiLabelUnification(
-    question=MultiLabelQuestion(...),
-    strategy="majority", # or "disagreement"
-    label_strategy=""
+dataset = rg.FeedbackDataset.from_huggingface(repo_id="argilla/stackoverflow_feedback_demo")
+training_task_mapping = TrainingTaskMapping.for_text_classification(
+    text=dataset.field_by_name("title"),
+    label=dataset.question_by_name("tags"), # MultiLabelQuestion
+    label_strategy=None
 )
 ```
 :::
 
 ::::
 
-#### Define a task mapping
 
-After defining the `unification`, we can now define our `TrainingTaskMapping.for_text_classification`.
-
-```python
-from argilla import FeedbackDataset, TrainingTaskMapping
-
-label_unification = ...
-dataset = FeedbackDataset.from_hu
-training_task_mapping = TrainingTaskMapping.for_text_classification(
-    text=dataset.field_by_name("my_text_field"),
-    label=dataset.field_by_name("my_question_field"),
-    label_strategy=None
-)
-```
 
 #### Use ArgillaTrainer
 
@@ -105,8 +98,13 @@ This is a newer version and can be imported via `from argilla import ArgillaTrai
 ```python
 from argilla import ArgillaTrainer
 
-dataset = ...
-training_task_mapping = ...
+dataset = rg.FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
+training_task_mapping = TrainingTaskMapping.for_text_classification(
+    text=dataset.field_by_name("my_text_field"),
+    label=dataset.question_by_name("tags")
+)
 trainer = ArgillaTrainer(
     dataset=dataset,
     training_task_mapping=training_task_mapping,
@@ -121,7 +119,9 @@ trainer.train(output_dir="my_awesone_model")
 The `FeedbackDataset` also allows for custom workflows via the `prepare_for_training()`-method.
 ```python
 training_task_mapping = ...
-dataset = ...
+dataset = rg.FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
 dataset.prepare_for_training(
     framework="setfit",
     training_task_mapping=training_task_mapping
