@@ -18,8 +18,15 @@ import argilla
 import pytest
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
+from argilla.server.models import User, UserRole
 
-from tests.factories import WorkspaceUserFactory
+from tests.factories import (
+    AdminFactory,
+    AnnotatorFactory,
+    UserFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 
 def test_delete_records_from_dataset(mocked_client):
@@ -49,42 +56,34 @@ def test_delete_records_from_dataset(mocked_client):
     assert len(ds) == 49
 
 
-def test_delete_records_without_permission(mocked_client, argilla_user, mock_user):
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+def test_delete_records_without_permission(mocked_client, owner: User, role: UserRole):
     dataset = "test_delete_records_without_permission"
 
-    for workspace in argilla_user.workspaces:
-        WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=mock_user.id)
+    workspace = WorkspaceFactory.create()
 
-    argilla_client = Argilla()
+    argilla_client = Argilla(api_key=owner.api_key, workspace=workspace.name)
 
     argilla_client.delete(dataset)
-    argilla_client.log(
-        name=dataset,
-        records=[
-            argilla.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
-        ],
-    )
-    matched, processed = argilla_client.delete_records(
-        name=dataset,
-        ids=[10],
-        discard_only=True,
-    )
+    records = [
+        argilla.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
+    ]
+    argilla_client.log(name=dataset, records=records)
+
+    user = UserFactory.create(role=role, workspaces=[workspace])
+    argilla_client = Argilla(api_key=user.api_key, workspace=workspace.name)
+
+    matched, processed = argilla_client.delete_records(name=dataset, ids=[10], discard_only=True)
     assert matched, processed == (1, 1)
 
-    argilla_client = Argilla(api_key=mock_user.api_key, workspace="argilla")
+    annotator = AnnotatorFactory.create(workspaces=[workspace])
+
+    argilla_client = Argilla(api_key=annotator.api_key, workspace=workspace.name)
     with pytest.raises(ForbiddenApiError):
-        argilla_client.delete_records(
-            name=dataset,
-            query="id:10",
-            discard_only=False,
-            discard_when_forbidden=False,
-        )
+        argilla_client.delete_records(name=dataset, query="id:11", discard_only=False, discard_when_forbidden=False)
 
     matched, processed = argilla_client.delete_records(
-        name=dataset,
-        query="id:10",
-        discard_only=False,
-        discard_when_forbidden=True,
+        name=dataset, query="id:11", discard_only=False, discard_when_forbidden=True
     )
     assert matched, processed == (1, 1)
 

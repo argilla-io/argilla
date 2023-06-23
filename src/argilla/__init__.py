@@ -19,7 +19,6 @@ as well as in the `_import_structure` dictionary.
 """
 
 import sys as _sys
-import warnings
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from argilla.logging import configure_logging as _configure_logging
@@ -34,15 +33,6 @@ try:
     _install_rich()
 except ModuleNotFoundError:
     pass
-
-# TODO: Remove this warning once https://github.com/argilla-io/argilla/issues/2902 is tackled
-if _sys.version_info < (3, 8):
-    warnings.warn(
-        message="Python 3.7 is coming to its end-of-life and will be no longer supported in the upcoming release of Argilla. "
-        "To ensure compatibility and uninterrupted service, we kindly request that you migrate to Argilla with"
-        " Python 3.8 or higher.",
-        category=DeprecationWarning,
-    )
 
 __version__ = _version.version
 
@@ -84,6 +74,7 @@ if _TYPE_CHECKING:
         TokenAttributions,
         TokenClassificationRecord,
     )
+    from argilla.client.users import User
     from argilla.client.workspaces import Workspace
     from argilla.datasets import (
         TextClassificationSettings,
@@ -136,6 +127,7 @@ _import_structure = {
         "TextQuestion",
         "ValueSchema",
     ],
+    "client.users": ["User"],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [

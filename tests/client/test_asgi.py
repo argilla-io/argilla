@@ -22,16 +22,14 @@ from argilla.monitoring.asgi import (
     text_classification_mapper,
     token_classification_mapper,
 )
+from argilla.server.models import User
 from fastapi import FastAPI
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.testclient import TestClient
 
 
-def test_argilla_middleware_for_text_classification(
-    monkeypatch,
-    mocked_client,
-):
+def test_argilla_middleware_for_text_classification(argilla_user: User):
     expected_endpoint = "/predict"
     expected_endpoint_get = "/predict_get"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
@@ -103,10 +101,7 @@ def test_argilla_middleware_for_text_classification(
     assert len(df) == 3
 
 
-def test_argilla_middleware_for_token_classification(
-    monkeypatch,
-    mocked_client,
-):
+def test_argilla_middleware_for_token_classification(argilla_user: User):
     expected_endpoint = "/predict"
     expected_endpoint_get = "/predict_get"
     expected_dataset_name = "mlmodel_v3_monitor_ds"

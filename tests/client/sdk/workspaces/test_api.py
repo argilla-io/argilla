@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +12,68 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-from argilla._constants import DEFAULT_API_KEY
-from argilla.client.sdk.client import AuthenticatedClient
-from argilla.client.sdk.workspaces.api import list_workspaces
-from argilla.client.sdk.workspaces.models import WorkspaceModel
+from argilla.client.api import ArgillaSingleton
+from argilla.client.sdk.workspaces.api import (
+    create_workspace,
+    create_workspace_user,
+    delete_workspace_user,
+    list_workspace_users,
+    list_workspaces,
+)
+from argilla.client.sdk.workspaces.models import WorkspaceModel, WorkspaceUserModel
+from argilla.server.models import User
+
+from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 
-@pytest.fixture
-def sdk_client():
-    return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY).httpx
+def test_list_workspaces(owner: User) -> None:
+    WorkspaceFactory.create(name="test_workspace")
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
 
-
-def test_list_workspaces(mocked_client, sdk_client, monkeypatch) -> None:
-    monkeypatch.setattr(sdk_client, "get", mocked_client.get)
-
-    workspace_name = "test_workspace"
-    mocked_client.post(f"/api/workspaces", json={"name": workspace_name})
-
-    response = list_workspaces(client=sdk_client)
-
+    response = list_workspaces(client=httpx_client)
     assert response.status_code == 200
     assert isinstance(response.parsed, list)
     assert len(response.parsed) > 0
     assert isinstance(response.parsed[0], WorkspaceModel)
+
+
+def test_create_workspace(owner: User) -> None:
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
+
+    response = create_workspace(client=httpx_client, name="test_workspace")
+    assert response.status_code == 200
+    assert isinstance(response.parsed, WorkspaceModel)
+    assert response.parsed.name == "test_workspace"
+
+
+def test_list_workspace_users(owner: User) -> None:
+    workspace = WorkspaceFactory.create(name="test_workspace")
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
+
+    response = list_workspace_users(client=httpx_client, id=workspace.id)
+    assert response.status_code == 200
+    assert isinstance(response.parsed, list)
+    assert len(response.parsed) > 0
+    assert isinstance(response.parsed[0], WorkspaceUserModel)
+
+
+def test_create_workspace_user(owner: User) -> None:
+    workspace = WorkspaceFactory.create(name="test_workspace")
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
+
+    response = create_workspace_user(client=httpx_client, id=workspace.id, user_id=owner.id)
+    assert response.status_code == 200
+    assert isinstance(response.parsed, WorkspaceUserModel)
+    assert response.parsed.id == owner.id
+    assert response.parsed.workspaces[0] == workspace.name
+
+
+def test_delete_workspace_user(owner: User) -> None:
+    workspace = WorkspaceFactory.create(name="test_workspace")
+    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
+
+    response = delete_workspace_user(client=httpx_client, id=workspace.id, user_id=owner.id)
+    assert response.status_code == 200
+    assert response.parsed.workspaces == []

@@ -18,17 +18,15 @@ from argilla._constants import (
     DEFAULT_USERNAME,
     WORKSPACE_HEADER_NAME,
 )
+from argilla.server.models import User
 from fastapi import FastAPI
 from starlette.testclient import TestClient
 
 
 class SecuredClient:
-    def __init__(self, client: TestClient):
+    def __init__(self, client: TestClient, argilla_user: User):
         self._client = client
-        self._header = {
-            API_KEY_HEADER_NAME: DEFAULT_API_KEY,
-            WORKSPACE_HEADER_NAME: DEFAULT_USERNAME,
-        }
+        self._header = {API_KEY_HEADER_NAME: argilla_user.api_key, WORKSPACE_HEADER_NAME: argilla_user.username}
         self._current_user = None
 
     def update_api_key(self, api_key):

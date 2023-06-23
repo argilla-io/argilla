@@ -28,7 +28,7 @@ These are the section headers that we use:
 - Fixed `from_argilla` and `push_to_argilla` to ensure consistency on both field and question re-construction, and to ensure `UUID`s are properly serialized as `str`, respectively ([#3234](https://github.com/argilla-io/argilla/pull/3234)).
 
 #### Docs
-- Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3241](https://github.com/argilla-io/argilla/pull/3234).
+- Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3241](https://github.com/argilla-io/argilla/pull/3241).
 - Fixed library buttons' formatting on Tutorials page [#2819](https://github.com/argilla-io/argilla/pull/2819).
 
 ### Added
@@ -43,7 +43,7 @@ These are the section headers that we use:
 
 - The role system now support three different roles `owner`, `admin` and `annotator` ([#3104](https://github.com/argilla-io/argilla/pull/3104))
 - `admin` role is scoped to workspace-level operations ([#3115](https://github.com/argilla-io/argilla/pull/3115))
-- Default argilla user has the `admin` role instead of `owner` one ([#3188](https://github.com/argilla-io/argilla/pull/3188))
+- The `owner` user is created among the default pool of users in the quickstart, and the default user in the server has now `owner` role ([#3248](https://github.com/argilla-io/argilla/pull/3248)), reverting ([#3188](https://github.com/argilla-io/argilla/pull/3188)).
 
 ### Deprecated
 
@@ -147,7 +147,7 @@ These are the section headers that we use:
 
 ### Deprecated
 
-- Using argilla with python 3.7 runtime is deprecated and support will be removed from version 1.9.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
+- Using Argilla with Python 3.7 runtime is deprecated and support will be removed from version 1.11.0 ([#2902](https://github.com/argilla-io/argilla/issues/2902))
 - `tokens_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
 - `token_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])
 - `mention_length` metrics function has been deprecated and will be removed in 1.10.0 ([#3045])

@@ -85,7 +85,6 @@ from argilla.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
 )
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import User
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 
@@ -136,7 +135,7 @@ class Argilla:
             headers=headers.copy(),
         )
 
-        self._user: User = users_api.whoami(client=self._client)
+        self._user = users_api.whoami(client=self.http_client)  # .parsed
         self.set_workspace(workspace or self._user.username)
 
         self._check_argilla_versions()
@@ -216,7 +215,7 @@ class Argilla:
 
         if workspace != self.get_workspace():
             if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
-                self.http_client.headers[WORKSPACE_HEADER_NAME] = workspace
+                self.http_client.update_headers({WORKSPACE_HEADER_NAME: workspace})
             else:
                 raise Exception(f"Wrong provided workspace {workspace}")
 
@@ -365,14 +364,22 @@ class Argilla:
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
             creation_class = CreationTextClassificationRecord
+            task = TaskType.text_classification
         elif record_type is TokenClassificationRecord:
             bulk_class = TokenClassificationBulkData
             creation_class = CreationTokenClassificationRecord
+            task = TaskType.token_classification
         elif record_type is Text2TextRecord:
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
+            task = TaskType.text2text
         else:
             raise InputValueError(f"Unknown record type {record_type}. Available values are {Record.__args__}")
+
+        try:
+            self.datasets.create(name=name, task=task, workspace=workspace)
+        except AlreadyExistsApiError:
+            pass
 
         results = []
         with Progress() as progress_bar:

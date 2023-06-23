@@ -23,10 +23,10 @@ from sqlalchemy.orm import Session
 from tests.factories import AnnotatorFactory, DatasetFactory, TextFieldFactory
 
 
-def test_delete_field(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_field(client: TestClient, db: Session, owner_auth_header):
     field = TextFieldFactory.create(name="name", title="title")
 
-    response = client.delete(f"/api/v1/fields/{field.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/fields/{field.id}", headers=owner_auth_header)
 
     assert response.status_code == 200
     assert db.query(Field).count() == 0
@@ -63,20 +63,20 @@ def test_delete_field_as_annotator(client: TestClient, db: Session):
     assert db.query(Field).count() == 1
 
 
-def test_delete_field_belonging_to_published_dataset(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_field_belonging_to_published_dataset(client: TestClient, db: Session, owner_auth_header):
     field = TextFieldFactory.create(dataset=DatasetFactory.build(status=DatasetStatus.ready))
 
-    response = client.delete(f"/api/v1/fields/{field.id}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/fields/{field.id}", headers=owner_auth_header)
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Fields cannot be deleted for a published dataset"}
     assert db.query(Field).count() == 1
 
 
-def test_delete_field_with_nonexistent_field_id(client: TestClient, db: Session, admin_auth_header: dict):
+def test_delete_field_with_nonexistent_field_id(client: TestClient, db: Session, owner_auth_header):
     TextFieldFactory.create()
 
-    response = client.delete(f"/api/v1/fields/{uuid4()}", headers=admin_auth_header)
+    response = client.delete(f"/api/v1/fields/{uuid4()}", headers=owner_auth_header)
 
     assert response.status_code == 404
     assert db.query(Field).count() == 1
