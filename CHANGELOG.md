@@ -32,6 +32,7 @@ These are the section headers that we use:
 - Fixed `from_argilla` and `push_to_argilla` to ensure consistency on both field and question re-construction, and to ensure `UUID`s are properly serialized as `str`, respectively ([#3234](https://github.com/argilla-io/argilla/pull/3234)).
 
 #### Docs
+
 - Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3241](https://github.com/argilla-io/argilla/pull/3241).
 - Fixed library buttons' formatting on Tutorials page [#2819](https://github.com/argilla-io/argilla/pull/2819).
 
