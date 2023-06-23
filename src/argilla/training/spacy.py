@@ -213,8 +213,13 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             self._logger.info(f"Dumping the dev dataset to {self._eval_dataset_path}")
             self._eval_dataset.to_disk(self._eval_dataset_path)
 
+        # Both `init_nlp` and `train_nlp` must be executed in the same Jupyter Notebook
+        # cell if using the GPU, otherwise, since `thinc` is using `ContextVars` to
+        # store the `Config` object, the `Config` object will be lost between cells and
+        # the training will fail.
         self._nlp = init_nlp(self.config, use_gpu=self.gpu_id)
         self._nlp, _ = train_nlp(self._nlp, use_gpu=self.gpu_id, stdout=sys.stdout, stderr=sys.stderr)
+
         if output_dir:
             self.save(output_dir)
 
