@@ -17,13 +17,9 @@ dataset = rg.FeedbackDataset.from_argilla(
     name="<my_dataset_name>",
     workspace="<my_workspace_name>"
 )
-label_unification = rg.LabelUnification(
-    question=dataset.question_by_name("<my_question>"),
-    strategy="majority"
-)
 training_task_mapping = rg.TrainingTaskMapping.for_text_classification(
-    text=dataset.field_by_name("text"),
-    label=label_unification
+    text=dataset.field_by_name("<my_field>"),
+    label=dataset.question_by_name("<my_question>")
 )
 trainer = rg.ArgillaTrainer(
     dataset=dataset,

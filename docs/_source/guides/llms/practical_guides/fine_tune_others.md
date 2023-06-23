@@ -24,9 +24,9 @@ Multi-label text classification is generally more complex than single-label clas
 
 Data for the training text classification using our `FeedbackDataset` is defined by following three easy steps.
 
-1. We need to define unification strategies a `RatingUnification`, a `LabelUnification` or a `MultiLabelUnification`.
+1. We need to define unification strategies a `RatingStrategy`, a `LabelStrategy` or a `MultiLabelStrategy`.
 
-2.  For this task, we assume we need a `text-label`-pair for defining a text classification task. We allow mapping for creating a `TrainingTaskMapping.for_text_classification` by mapping `*Field` to a `text`-value and allow for mapping a `RatingUnification`, `LabelUnification` or a `MultiLabelUnification` to a `label`-value.
+2.  For this task, we assume we need a `text-label`-pair for defining a text classification task. We allow mapping for creating a `TrainingTaskMapping.for_text_classification` by mapping `*Field` to a `text`-value and allow for mapping a `RatingStrategy`, `LabelStrategy` or a `MultiLabelStrategy` to a `label`-value.
 
 3.  We then define an `ArgillaTrainer` instance with support for "openai", "setfit", "peft", "spacy" and "transformers".
 
@@ -45,8 +45,9 @@ Note that `RatingQuestion`s can be unified using a "majority"-, "min"-, "max"- o
 from argilla import RatingQuestion, RatingUnification
 
 label_unification = RatingUnification(
-    question=LabelQuestion(...),
-    strategy="majority" # or "min", "max", "disagreement"
+    question=RatingQuestion(...),
+    strategy="majority", # or "min", "max", "disagreement"
+    label_strategy=""
 )
 ```
 :::
@@ -57,7 +58,8 @@ from argilla import LabelQuestion, LabelUnification
 
 label_unification = LabelUnification(
     question=LabelQuestion(...),
-    strategy="majority" # or "disagreement"
+    strategy="majority", # or "disagreement"
+    label_strategy=""
 )
 ```
 :::
@@ -68,7 +70,8 @@ from argilla import MultiLabelQuestion, MultiLabelUnification
 
 label_unification = MultiLabelUnification(
     question=MultiLabelQuestion(...),
-    strategy="majority" # or "disagreement"
+    strategy="majority", # or "disagreement"
+    label_strategy=""
 )
 ```
 :::
@@ -83,10 +86,11 @@ After defining the `unification`, we can now define our `TrainingTaskMapping.for
 from argilla import FeedbackDataset, TrainingTaskMapping
 
 label_unification = ...
-dataset = FeedbackDataset(...)
+dataset = FeedbackDataset.from_hu
 training_task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("my_text_field"),
-    label=label_unification
+    label=dataset.field_by_name("my_question_field"),
+    label_strategy=None
 )
 ```
 

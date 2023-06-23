@@ -131,7 +131,7 @@ class TrainingTaskMapping:
         Examples:
             >>> from argilla import LabelQuestion, TrainingTaskMapping
             >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
-            >>> training_data = TrainingTaskMappingForTextClassification(
+            >>> training_data = TrainingTaskMapping.for_text_classification(
             ...     text=dataset.fields[0],
             ...     label=dataset.questions[0]
             ... )
