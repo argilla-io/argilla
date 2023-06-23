@@ -54,7 +54,7 @@ dataset = rg.FeedbackDataset.from_huggingface(
 training_task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("answer_quality"), # RatingQuestion
-    label_strategy=None # default to "majority", or "min", "max", "disagreement"
+    label_strategy=None # default to "majority", or use "min", "max", "disagreement"
 )
 ```
 :::
@@ -67,7 +67,7 @@ dataset = rg.FeedbackDataset.from_huggingface(repo_id="argilla/stackoverflow_fee
 training_task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("title_question_fit"), # LabelQuestion
-    label_strategy=None
+    label_strategy=None # default to "majority", or use "disagreement"
 )
 ```
 :::
@@ -80,7 +80,7 @@ dataset = rg.FeedbackDataset.from_huggingface(repo_id="argilla/stackoverflow_fee
 training_task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("tags"), # MultiLabelQuestion
-    label_strategy=None
+    label_strategy=None # default to "majority", or use "disagreement"
 )
 ```
 :::
