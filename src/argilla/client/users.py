@@ -124,7 +124,7 @@ class User:
     @property
     def workspaces(self) -> List[str]:
         try:
-            user = users_api.whoami(self.__client)
+            user = users_api.whoami(self.__client).parsed
             return user.workspaces
         except Exception as e:
             raise RuntimeError("Error while retrieving the current user workspaces from Argilla.") from e
@@ -285,7 +285,7 @@ class User:
         client = cls.__active_client()
         try:
             user = users_api.whoami(client).parsed
-            return cls.__new_instance(client.httpx, user)
+            return cls.__new_instance(client, user)
         except Exception as e:
             raise RuntimeError("Error while retrieving the current user from Argilla.") from e
 

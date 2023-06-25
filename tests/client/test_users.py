@@ -22,7 +22,7 @@ from argilla.client.users import User
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
 
-from tests.factories import UserFactory
+from tests.factories import UserFactory, WorkspaceFactory
 
 
 def test_user_cls_init() -> None:
@@ -61,6 +61,30 @@ def test_user_from_id(owner: "ServerUser"):
 
     with pytest.raises(ValueError, match="User with id="):
         User.from_id(id="00000000-0000-0000-0000-000000000000")
+
+
+def test_user_workspaces(owner: "ServerUser"):
+    workspaces = WorkspaceFactory.create_batch(3)
+
+    import argilla as rg
+
+    rg.init(api_key=owner.api_key)
+
+    user = rg.User.from_name(owner.username)
+
+    assert len(workspaces) == len(user.workspaces)
+    assert [ws.name for ws in workspaces] == user.workspaces
+
+
+def test_user_me(owner: "ServerUser"):
+    import argilla as rg
+
+    rg.init(api_key=owner.api_key)
+
+    user = rg.User.me()
+
+    assert user.id == owner.id
+    assert user.username == owner.username
 
 
 def test_user_create(owner: "ServerUser") -> None:
