@@ -28,6 +28,7 @@ from rich.progress import Progress
 
 from argilla._constants import (
     DEFAULT_API_KEY,
+    DEFAULT_USERNAME,
     ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
 )
@@ -136,7 +137,24 @@ class Argilla:
         )
 
         self._user = users_api.whoami(client=self.http_client)  # .parsed
-        self.set_workspace(workspace or self._user.username)
+
+        if not workspace and self._user.username == DEFAULT_USERNAME:
+            warnings.warn(
+                "Default user was detected and no workspace configuration was provided, so "
+                f"the default {DEFAULT_USERNAME!r} workspace will be used. "
+                "If you want to setup another workspace, use the `rg.set_workspace` function "
+                "or provide a different one on `rg.init`",
+                category=UserWarning,
+            )
+            workspace = DEFAULT_USERNAME
+        if workspace:
+            self.set_workspace(workspace or self._user.username)
+        else:
+            warnings.warn(
+                "No workspace configuration was detected. To work with Argilla datasets, "
+                "specify a valid workspace name on `rg.init` or set it up through the `rg.set_workspace` function. ",
+                category=UserWarning,
+            )
 
         self._check_argilla_versions()
 
@@ -214,10 +232,12 @@ class Argilla:
             )
 
         if workspace != self.get_workspace():
-            if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
-                self.http_client.update_headers({WORKSPACE_HEADER_NAME: workspace})
-            else:
-                raise Exception(f"Wrong provided workspace {workspace}")
+            # TODO(frascuchon): user should list ONLY their accessible workspaces
+            for ws in self.list_workspaces():
+                if ws.name == workspace:
+                    self.http_client.update_headers({WORKSPACE_HEADER_NAME: ws.name})
+                    return
+            raise ValueError(f"Wrong provided workspace {workspace!r}")
 
     def get_workspace(self) -> str:
         """Returns the name of the active workspace.
