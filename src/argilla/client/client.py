@@ -232,12 +232,10 @@ class Argilla:
             )
 
         if workspace != self.get_workspace():
-            # TODO(frascuchon): user should list ONLY their accessible workspaces
-            for ws in self.list_workspaces():
-                if ws.name == workspace:
-                    self.http_client.update_headers({WORKSPACE_HEADER_NAME: ws.name})
-                    return
-            raise ValueError(f"Wrong provided workspace {workspace!r}")
+            if workspace in [ws.name for ws in self.list_workspaces()]:
+                self.http_client.update_headers({WORKSPACE_HEADER_NAME: workspace})
+            else:
+                raise ValueError(f"Wrong provided workspace {workspace!r}")
 
     def get_workspace(self) -> str:
         """Returns the name of the active workspace.
@@ -248,13 +246,15 @@ class Argilla:
         return self.http_client.headers.get(WORKSPACE_HEADER_NAME)
 
     def list_workspaces(self) -> List[WorkspaceModel]:
-        """Lists all the availble workspaces for the current user.
+        """Lists all the available workspaces for the current user.
 
         Returns:
             A list of `WorkspaceModel` objects, containing the workspace
             attributes: name, id, created_at, and updated_at.
         """
-        return workspaces_api.list_workspaces(client=self.http_client.httpx).parsed
+        user_workspaces = users_api.whoami(self.http_client).workspaces
+        all_workspaces = workspaces_api.list_workspaces(client=self.http_client.httpx).parsed
+        return [workspace for workspace in all_workspaces if workspace.name in user_workspaces]
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
