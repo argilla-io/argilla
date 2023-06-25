@@ -22,6 +22,7 @@ from pydantic import (
     ValidationError,
     parse_obj_as,
 )
+from rich import print as rprint
 from tqdm import tqdm
 
 import argilla as rg
@@ -477,7 +478,7 @@ class FeedbackDataset:
         name: Optional[str] = None,
         workspace: Optional[Union[str, rg.Workspace]] = None,
         show_progress: bool = False,
-    ) -> None:
+    ) -> str:
         """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
         with the new records.
 
@@ -615,8 +616,10 @@ class FeedbackDataset:
                     f" different ID ({argilla_id}). So on, if you want to switch to the newly pushed `FeedbackDataset`"
                     f" instead, please use `FeedbackDataset.from_argilla(id='{argilla_id}')`."
                 )
-                return
-            self.argilla_id = argilla_id
+            self.argilla_id = self.argilla_id or argilla_id
+            url = f"{httpx_client.base_url}/dataset/{self.argilla_id}/annotation-mode"
+            rprint(f"Dataset Pushed to Argilla [link={url}]{url}")
+            return url
 
     @classmethod
     def from_argilla(
@@ -807,7 +810,7 @@ class FeedbackDataset:
         raise ValueError(f"Unsupported format '{format}'.")
 
     @requires_version("huggingface_hub")
-    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs) -> None:
+    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs) -> str:
         """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
         HuggingFace Hub, it will be updated instead. Note that some params as `private` have no effect at all
         when a dataset is previously uploaded to the HuggingFace Hub.
@@ -872,6 +875,9 @@ class FeedbackDataset:
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
+        url = f"https://huggingface.co/{repo_id}"
+        rprint(f"Dataset Pushed HuggingFace [link={url}]{url}")
+        return url
 
     @classmethod
     @requires_version("datasets")
