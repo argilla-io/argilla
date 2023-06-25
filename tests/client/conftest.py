@@ -423,21 +423,12 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                     "status": "submitted",
                 }
             ],
+            metadata={"unit": "test"},
             external_id="1",
         ),
         FeedbackRecord(
             fields={"text": "This is a negative example", "label": "negative"},
-            responses=[
-                {
-                    "values": {
-                        "question-1": {"value": "This is a response to question 1"},
-                        "question-2": {"value": 1},
-                        "question-3": {"value": "a"},
-                        "question-4": {"value": ["a", "b"]},
-                    },
-                    "status": "submitted",
-                }
-            ],
+            metadata={"another unit": "test"},
             external_id="2",
         ),
     ]

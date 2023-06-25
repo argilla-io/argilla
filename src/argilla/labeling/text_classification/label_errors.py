@@ -177,7 +177,7 @@ def _construct_s_and_psx(
     labels_mapping = {label: i for i, label in enumerate(sorted(labels))}
 
     s = np.empty(len(records), dtype=object) if records[0].multi_label else np.zeros(len(records), dtype=np.short)
-    psx = np.zeros((len(records), len(labels)), dtype=np.float)
+    psx = np.zeros((len(records), len(labels)), dtype=float)
 
     for i, rec, pred in zip(range(len(records)), records, predictions):
         try:

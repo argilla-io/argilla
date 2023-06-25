@@ -11,16 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import json
 import logging
 import tempfile
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Literal, Optional, Union
 from uuid import UUID
-
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
 
 from pydantic import (
     ValidationError,
@@ -57,6 +53,7 @@ if TYPE_CHECKING:
     import httpx
     from datasets import Dataset
 
+    from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.sdk.v1.datasets.models import (
         FeedbackDatasetModel,
         FeedbackFieldModel,
@@ -475,7 +472,12 @@ class FeedbackDataset:
         for i in range(0, len(self.records), batch_size):
             yield self.records[i : i + batch_size]
 
-    def push_to_argilla(self, name: Optional[str] = None, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
+    def push_to_argilla(
+        self,
+        name: Optional[str] = None,
+        workspace: Optional[Union[str, rg.Workspace]] = None,
+        show_progress: bool = False,
+    ) -> None:
         """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
         with the new records.
 
@@ -486,22 +488,23 @@ class FeedbackDataset:
             name: the name of the dataset to push to Argilla. If not provided, the `argilla_id` will be used if the dataset
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
+            show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
         """
-        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
+        client: "ArgillaClient" = rg.active_client()
+        httpx_client: "httpx.Client" = client.http_client.httpx
 
-        if not name or (not name and not workspace):
+        if name is None:
             if self.argilla_id is None:
                 _LOGGER.warning(
-                    "No `name` or `workspace` have been provided, and no dataset has"
-                    " been pushed to Argilla yet, so no records will be pushed to"
-                    " Argilla."
+                    "No `name` has been provided, and no dataset has been pushed to Argilla yet, so no records will be"
+                    " pushed to Argilla."
                 )
                 return
 
             if len(self.__new_records) < 1:
                 _LOGGER.warning(
-                    "No new records have been added to the current `FeedbackTask`"
-                    " dataset, so no records will be pushed to Argilla."
+                    "No new records have been added to the current `FeedbackTask` dataset, so no records will be pushed"
+                    " to Argilla."
                 )
                 return
 
@@ -510,28 +513,33 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=self.argilla_id,
-                        records=[record.dict() for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]],
+                        records=[
+                            record.dict()
+                            for record in tqdm(
+                                self.__new_records[i : i + PUSHING_BATCH_SIZE],
+                                desc="Pushing records to Argilla...",
+                                disable=show_progress,
+                            )
+                        ],
                     )
                 self.__records += self.__new_records
                 self.__new_records = []
             except Exception as e:
-                Exception(
-                    "Failed while adding new records to the current `FeedbackTask`"
-                    f" dataset in Argilla with exception: {e}"
-                )
-        elif name or (name and workspace):
+                raise Exception(
+                    f"Failed while adding new records to the current `FeedbackTask` dataset in Argilla with exception: {e}"
+                ) from e
+        else:
             if workspace is None:
-                workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
+                workspace = rg.Workspace.from_name(client.get_workspace())
 
             if isinstance(workspace, str):
                 workspace = rg.Workspace.from_name(workspace)
 
-            dataset_exists, _ = feedback_dataset_in_argilla(name=name, workspace=workspace)
-            if dataset_exists:
+            dataset = feedback_dataset_in_argilla(name=name, workspace=workspace)
+            if dataset is not None:
                 raise RuntimeError(
-                    f"Dataset with name=`{name}` and workspace=`{workspace.name}`"
-                    " already exists in Argilla, please choose another name and/or"
-                    " workspace."
+                    f"Dataset with name=`{name}` and workspace=`{workspace.name}` already exists in Argilla, please"
+                    " choose another name and/or workspace."
                 )
 
             try:
@@ -544,79 +552,68 @@ class FeedbackDataset:
                     f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}"
                 ) from e
 
-            def delete_and_raise_exception(dataset_id: UUID, exception: Exception) -> None:
+            def delete_dataset(dataset_id: UUID) -> None:
                 try:
                     datasets_api_v1.delete_dataset(client=httpx_client, id=dataset_id)
                 except Exception as e:
                     raise Exception(
-                        "Failed while deleting the `FeedbackTask` dataset with ID"
-                        f" '{dataset_id}' from Argilla with exception: {e}"
-                    )
-                raise exception
+                        f"Failed while deleting the `FeedbackTask` dataset with ID '{dataset_id}' from Argilla with"
+                        f" exception: {e}"
+                    ) from e
 
             for field in self.fields:
                 try:
-                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=json.loads(field.json()))
+                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=field.dict())
                 except Exception as e:
-                    delete_and_raise_exception(
-                        dataset_id=argilla_id,
-                        exception=Exception(
-                            f"Failed while adding the field '{field.name}' to the"
-                            f" `FeedbackTask` dataset in Argilla with exception: {e}"
-                        ),
-                    )
+                    delete_dataset(dataset_id=argilla_id)
+                    raise Exception(
+                        f"Failed while adding the field '{field.name}' to the `FeedbackTask` dataset in Argilla with"
+                        f" exception: {e}"
+                    ) from e
 
             for question in self.questions:
                 try:
-                    datasets_api_v1.add_question(
-                        client=httpx_client, id=argilla_id, question=json.loads(question.json())
-                    )
+                    datasets_api_v1.add_question(client=httpx_client, id=argilla_id, question=question.dict())
                 except Exception as e:
-                    delete_and_raise_exception(
-                        dataset_id=argilla_id,
-                        exception=Exception(
-                            f"Failed while adding the question '{question.name}' to the"
-                            f" `FeedbackTask` dataset in Argilla with exception: {e}"
-                        ),
-                    )
+                    delete_dataset(dataset_id=argilla_id)
+                    raise Exception(
+                        f"Failed while adding the question '{question.name}' to the `FeedbackTask` dataset in Argilla"
+                        f" with exception: {e}"
+                    ) from e
 
             try:
                 datasets_api_v1.publish_dataset(client=httpx_client, id=argilla_id)
             except Exception as e:
-                delete_and_raise_exception(
-                    dataset_id=argilla_id,
-                    exception=Exception(
-                        f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"
-                    ),
-                )
+                delete_dataset(dataset_id=argilla_id)
+                raise Exception(
+                    f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"
+                ) from e
 
             for batch in self.iter():
                 try:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=[json.loads(record.json()) for record in batch],
+                        records=[
+                            record.dict()
+                            for record in tqdm(batch, desc="Pushing records to Argilla...", disable=show_progress)
+                        ],
                     )
                 except Exception as e:
-                    delete_and_raise_exception(
-                        dataset_id=argilla_id,
-                        exception=Exception(
-                            "Failed while adding the records to the `FeedbackTask`"
-                            f" dataset in Argilla with exception: {e}"
-                        ),
-                    )
+                    delete_dataset(dataset_id=argilla_id)
+                    raise Exception(
+                        f"Failed while adding the records to the `FeedbackTask` dataset in Argilla with exception: {e}"
+                    ) from e
 
             self.__records += self.__new_records
             self.__new_records = []
 
             if self.argilla_id is not None:
                 _LOGGER.warning(
-                    "Since the current object is already a `FeedbackDataset` pushed to"
-                    " Argilla, you'll keep on interacting with the same dataset in"
-                    " Argilla, even though the one you just pushed holds a different"
-                    f" ID ({argilla_id}). So on, if you want to switch to the newly"
-                    " pushed `FeedbackDataset` instead, please use"
-                    f" `FeedbackDataset.from_argilla(id='{argilla_id}')`."
+                    "Since the current object is already a `FeedbackDataset` pushed to Argilla, you'll keep on"
+                    " interacting with the same dataset in Argilla, even though the one you just pushed holds a"
+                    f" different ID ({argilla_id}). So on, if you want to switch to the newly pushed `FeedbackDataset`"
+                    f" instead, please use `FeedbackDataset.from_argilla(id='{argilla_id}')`."
                 )
                 return
             self.argilla_id = argilla_id
@@ -656,8 +653,8 @@ class FeedbackDataset:
         """
         httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
 
-        dataset_exists, existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
-        if not dataset_exists:
+        existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
+        if existing_dataset is None:
             raise ValueError(
                 f"Could not find a `FeedbackTask` dataset in Argilla with name='{name}'."
                 if name and not workspace
@@ -669,11 +666,11 @@ class FeedbackDataset:
                 )
             )
 
-        cls.argilla_id = existing_dataset.id
         fields = []
         for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed:
+            base_field = field.dict(include={"name", "title", "required"})
             if field.settings["type"] == "text":
-                field = TextField.construct(**field.dict())
+                field = TextField(**base_field, use_markdown=field.settings["use_markdown"])
             else:
                 raise ValueError(
                     f"Field '{field.name}' is not a supported field in the current Python package version,"
@@ -682,14 +679,25 @@ class FeedbackDataset:
             fields.append(field)
         questions = []
         for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed:
+            question_dict = question.dict(include={"name", "title", "description", "required"})
             if question.settings["type"] == "rating":
-                question = RatingQuestion.construct(**question.dict())
+                question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
             elif question.settings["type"] == "text":
-                question = TextQuestion.construct(**question.dict())
-            elif question.settings["type"] == "label_selection":
-                question = LabelQuestion.construct(**question.dict())
-            elif question.settings["type"] == "multi_label_selection":
-                question = MultiLabelQuestion.construct(**question.dict())
+                question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
+            elif question.settings["type"].__contains__("label_selection"):
+                if all([label["value"] == label["text"] for label in question.settings["options"]]):
+                    labels = [label["value"] for label in question.settings["options"]]
+                else:
+                    labels = {label["value"]: label["text"] for label in question.settings["options"]}
+
+                if question.settings["type"] == "label_selection":
+                    question = LabelQuestion(
+                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
+                    )
+                elif question.settings["type"] == "multi_label_selection":
+                    question = MultiLabelQuestion(
+                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
+                    )
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
@@ -702,6 +710,7 @@ class FeedbackDataset:
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
         )
+        self.argilla_id = existing_dataset.id
         if with_records:
             self.fetch_records()
         return self
@@ -729,7 +738,7 @@ class FeedbackDataset:
         if format == "datasets":
             from datasets import Dataset, Features, Sequence, Value
 
-            dataset = {}
+            dataset = {"metadata": []}
             features = {}
             for field in self.fields:
                 if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
@@ -772,17 +781,24 @@ class FeedbackDataset:
                     dataset[field.name].append(record.fields[field.name])
                 for question in self.questions:
                     dataset[question.name].append(
-                        [
-                            {
-                                "user_id": r.user_id,
-                                "value": r.values[question.name].value,
-                                "status": r.status,
-                            }
-                            for r in record.responses
-                        ]
-                        or None
+                        {
+                            "user_id": [r.user_id for r in record.responses],
+                            "value": [
+                                r.values[question.name].value if question.name in r.values else None
+                                for r in record.responses
+                            ],
+                            "status": [r.status for r in record.responses],
+                        }
+                        if record.responses
+                        else None
                     )
+                dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
                 dataset["external_id"].append(record.external_id or None)
+
+            if len(dataset["metadata"]) > 0:
+                features["metadata"] = Value(dtype="string")
+            else:
+                del dataset["metadata"]
 
             return Dataset.from_dict(
                 dataset,
@@ -852,7 +868,7 @@ class FeedbackDataset:
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
                 argilla_guidelines=self.guidelines,
-                argilla_record=self.records[0].dict(),
+                argilla_record=json.loads(self.records[0].json()),
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
@@ -860,7 +876,7 @@ class FeedbackDataset:
     @classmethod
     @requires_version("datasets")
     @requires_version("huggingface_hub")
-    def from_huggingface(cls, repo_id: str, *args, **kwargs) -> "FeedbackDataset":
+    def from_huggingface(cls, repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 
         Args:
@@ -901,7 +917,7 @@ class FeedbackDataset:
             repo_type="dataset",
             **hub_auth,
         )
-        with open(config_path, "rb") as f:
+        with open(config_path, "r") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
 
         cls = cls(
@@ -936,9 +952,15 @@ class FeedbackDataset:
                             "values": {},
                         }
                     responses[user_id]["values"].update({question.name: {"value": value}})
+
+            metadata = None
+            if "metadata" in hfds[index] and hfds[index]["metadata"] is not None:
+                metadata = json.loads(hfds[index]["metadata"])
+
             cls.__records.append(
                 FeedbackRecord(
                     fields={field.name: hfds[index][field.name] for field in cls.fields},
+                    metadata=metadata,
                     responses=list(responses.values()) or None,
                     external_id=hfds[index]["external_id"],
                 )

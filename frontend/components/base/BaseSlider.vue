@@ -75,7 +75,6 @@ export default {
     height: 20px;
     width: 20px;
     line-height: 19px;
-    text-align: center;
     border-radius: $border-radius-s;
     text-align: center;
     margin-left: 1.5em;
@@ -84,7 +83,6 @@ export default {
     text-decoration: none;
     outline: none;
     @include font-size(13px);
-    background: transparent;
     transition: all 0.2s ease-in-out;
     background: palette(grey, 800);
     .svg-icon {

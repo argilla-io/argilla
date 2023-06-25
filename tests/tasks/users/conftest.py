@@ -25,5 +25,6 @@ if TYPE_CHECKING:
 def mock_session_local(mocker: "MockerFixture", db: "Session") -> None:
     mocker.patch.object(db, "close", side_effect=lambda: None)
     mocker.patch("argilla.tasks.users.create.SessionLocal", return_value=db)
+    mocker.patch("argilla.tasks.users.update.SessionLocal", return_value=db)
     mocker.patch("argilla.tasks.users.create_default.SessionLocal", return_value=db)
     mocker.patch("argilla.tasks.users.migrate.SessionLocal", return_value=db)

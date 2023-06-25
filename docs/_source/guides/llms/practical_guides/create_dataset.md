@@ -134,6 +134,7 @@ Take some time to inspect the data before adding it to the dataset in case this 
 The next step is to create records following Argilla's `FeedbackRecord` format. These are the attributes of a `FeedbackRecord`:
 
 - `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](#define-record-fields)).
+- `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. For example, the source of the record or the date it was created. If there is no metadata, this will be `None`.
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
 - `responses` (optional): A list of all responses to a record. There is no need to configure this when creating a record, it will be filled automatically with the responses collected from the Argilla UI.
 
@@ -144,6 +145,7 @@ record = rg.FeedbackRecord(
         "question": "Why can camels survive long without water?",
         "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time."
     },
+    metadata={"source": "encyclopedia"},
     external_id=None
 )
 ```

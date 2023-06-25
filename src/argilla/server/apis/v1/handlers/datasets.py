@@ -22,7 +22,7 @@ from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_clie
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_db
 from argilla.server.enums import ResponseStatusFilter
-from argilla.server.models import User
+from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
     Dataset,
@@ -35,6 +35,7 @@ from argilla.server.schemas.v1.datasets import (
     Question,
     QuestionCreate,
     Questions,
+    Record,
     RecordInclude,
     Records,
     RecordsCreate,
@@ -74,7 +75,7 @@ def list_current_user_datasets(
 ):
     authorize(current_user, DatasetPolicyV1.list)
 
-    if current_user.is_admin:
+    if current_user.is_owner:
         return Datasets(items=datasets.list_datasets(db))
     else:
         return Datasets(items=current_user.datasets)
@@ -127,7 +128,7 @@ def list_current_user_dataset_records(
         db, dataset_id, current_user.id, include=include, response_status=response_status, offset=offset, limit=limit
     )
 
-    return Records(items=[record.__dict__ for record in records])
+    return Records(items=records)
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -146,7 +147,7 @@ def list_dataset_records(
 
     records = datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
 
-    return Records(items=[record.__dict__ for record in records])
+    return Records(items=records)
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
@@ -181,13 +182,13 @@ def get_current_user_dataset_metrics(
         "responses": {
             "count": datasets.count_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
             "submitted": datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatusFilter.submitted
+                db, dataset_id, current_user.id, ResponseStatus(ResponseStatusFilter.submitted)
             ),
             "discarded": datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatusFilter.discarded
+                db, dataset_id, current_user.id, ResponseStatus(ResponseStatusFilter.discarded)
             ),
             "draft": datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatusFilter.draft
+                db, dataset_id, current_user.id, ResponseStatus(ResponseStatusFilter.draft)
             ),
         },
     }
@@ -200,7 +201,7 @@ def create_dataset(
     dataset_create: DatasetCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.create)
+    authorize(current_user, DatasetPolicyV1.create(dataset_create.workspace_id))
 
     if not accounts.get_workspace_by_id(db, dataset_create.workspace_id):
         raise HTTPException(
@@ -225,9 +226,9 @@ def create_dataset_field(
     field_create: FieldCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.create_field)
-
     dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.create_field(dataset))
 
     if datasets.get_field_by_name_and_dataset_id(db, field_create.name, dataset_id):
         raise HTTPException(
@@ -251,9 +252,9 @@ def create_dataset_question(
     question_create: QuestionCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.create_question)
-
     dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.create_question(dataset))
 
     if datasets.get_question_by_name_and_dataset_id(db, question_create.name, dataset_id):
         raise HTTPException(
@@ -279,9 +280,9 @@ async def create_dataset_records(
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.create_records)
-
     dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.create_records(dataset))
 
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
@@ -349,7 +350,7 @@ async def search_dataset_records(
 
     for record in records:
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=record.__dict__, query_score=record_id_score_map[record.id]["query_score"]
+            record=Record.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
         )
 
     return SearchRecordsResult(
@@ -366,10 +367,9 @@ async def publish_dataset(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.publish)
-
     dataset = _get_dataset(db, dataset_id)
 
+    authorize(current_user, DatasetPolicyV1.publish(dataset))
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
@@ -393,9 +393,9 @@ async def delete_dataset(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, DatasetPolicyV1.delete)
-
     dataset = _get_dataset(db, dataset_id)
+
+    authorize(current_user, DatasetPolicyV1.delete(dataset))
 
     await datasets.delete_dataset(db, search_engine, dataset=dataset)
 

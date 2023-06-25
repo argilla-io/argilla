@@ -69,7 +69,7 @@ def test_text_classification_text_inputs():
 
     with pytest.warns(
         FutureWarning,
-        match=("the `inputs` argument of the `TextClassificationRecord` will not accept" " strings."),
+        match=("the `inputs` argument of the `TextClassificationRecord` will not accept strings."),
     ):
         TextClassificationRecord(inputs="mock")
 

@@ -34,9 +34,9 @@ def delete_question(
     question_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, QuestionPolicyV1.delete)
-
     question = datasets.get_question_by_id(db, question_id)
+
+    authorize(current_user, QuestionPolicyV1.delete(question))
     if not question:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
