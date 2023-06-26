@@ -91,8 +91,7 @@ $radio-button-size: 20px;
     border-radius: 50%;
     transition: all 0.2s ease;
     input {
-      position: absolute;
-      left: -999em;
+      @extend %visuallyhidden;
     }
     &:before,
     &:after {
