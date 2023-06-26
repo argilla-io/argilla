@@ -32,6 +32,7 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.training import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTaskMapping,
+    TrainingTaskMappingForTextClassification,
 )
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
@@ -77,8 +78,16 @@ def test_prepare_for_training_text_classification(
     label = LabelQuestionUnification(question=questions[0])
     task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
 
-    if framework in [Framework("spark-nlp"), Framework("span_marker")]:
-        with pytest.raises(NotImplementedError):
+    if framework == Framework("span_marker"):
+        with pytest.raises(
+            NotImplementedError,
+            match=f"Framework {framework} is not supported for this {TrainingTaskMappingForTextClassification}.",
+        ):
+            trainer = ArgillaTrainer(
+                dataset=dataset, task_mapping=task_mapping, framework=framework, fetch_records=False
+            )
+    elif framework == Framework("spark-nlp"):
+        with pytest.raises(NotImplementedError, match=f"{framework} is not a valid framework."):
             trainer = ArgillaTrainer(
                 dataset=dataset, task_mapping=task_mapping, framework=framework, fetch_records=False
             )

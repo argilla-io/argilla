@@ -45,7 +45,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         if self._record_class is TokenClassificationRecord:
             raise NotImplementedError("OpenAI does not support `TokenClassification` tasks.")
         elif self._record_class is TextClassificationRecord and self._multi_label:
-            raise NotImplementedError("OpenAI does not support multi-label TextClassification tasks.")
+            raise NotImplementedError("OpenAI does not support `multi-label=True` TextClassification tasks.")
         else:
             pass
 

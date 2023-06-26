@@ -312,8 +312,8 @@ def test_multi_label_question_strategy(strategy, unified_response):
 
 
 def test_label_question_strategy_not_implemented():
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(NotImplementedError, match="'majority_weighted'-strategy not implemented yet"):
         LabelQuestionStrategy._majority_weighted("mock", "mock")
 
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(NotImplementedError, match="'majority_weighted'-strategy not implemented yet"):
         MultiLabelQuestionStrategy._majority_weighted("mock", "mock")

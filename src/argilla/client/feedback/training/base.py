@@ -149,9 +149,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.SPAN_MARKER:
-            if not isinstance(task_mapping, TrainingTaskMappingForTextClassification):
-                raise NotImplementedError(f"{Framework.SPAN_MARKER} only supports `TextClassification` tasks.")
-
             from argilla.client.feedback.training.frameworks.span_marker import (
                 ArgillaSpanMarkerTrainer,
             )
