@@ -121,24 +121,16 @@ export default {
   padding: 12px 24px;
   transition: all 0.4s $cb-normal;
   cursor: pointer;
-  &:focus {
-    outline: 2px solid $primary-color;
-  }
-  &::-moz-focus-inner {
-    border: 0;
-  }
-  @supports selector(:focus-visible) {
-    &:focus {
-      outline: 0;
-    }
-    &:focus-visible {
-      outline: 2px solid $primary-color;
-    }
-  }
   &[disabled] {
     opacity: 0.5;
     cursor: default;
     pointer-events: none;
+  }
+  &:focus {
+    outline: 2px solid $primary-color;
+  }
+  &:focus:not(:focus-visible) {
+    outline: none;
   }
 }
 .button {

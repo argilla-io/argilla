@@ -258,16 +258,9 @@ input[type="checkbox"] {
       outline: 2px solid palette(purple, 200);
     }
   }
-  @supports selector(:focus-visible) {
-    &:focus {
-      & + .label-text {
-        outline: 0;
-      }
-    }
-    &:focus-visible {
-      & + .label-text {
-        outline: 2px solid palette(purple, 200);
-      }
+  &:focus:not(:focus-visible) {
+    & + .label-text {
+      outline: none;
     }
   }
 }
