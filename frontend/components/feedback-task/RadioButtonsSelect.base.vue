@@ -25,7 +25,11 @@
         </BaseButton>
       </span>
       <span slot="dropdown-content">
-        <ul class="options">
+        <ul
+          class="options"
+          role="listbox"
+          :aria-activedescendant="selectedOption"
+        >
           <li
             v-for="{ id, name } in options"
             class="option"
@@ -39,6 +43,11 @@
               :model="id"
               :value="selectedOption"
               @change="changeOption(id)"
+              @keydown.native.space="changeOption(id)"
+              @keydown.native.enter="changeOption(id)"
+              :aria-selected="selectedOption === id"
+              tabindex="0"
+              role="option"
               >{{ name }}</BaseRadioButton
             >
           </li>
@@ -117,23 +126,32 @@ $selector-width: 160px;
 .option {
   padding: $base-space;
   border-radius: $border-radius;
+  &:focus {
+    outline: none;
+  }
   &.discarded {
-    &:hover {
+    &:hover,
+    &:focus-within {
       background: #f2f2f2;
     }
   }
   &.submitted {
-    &:hover {
+    &:hover,
+    &:focus-within {
       background: #ebf3ff;
     }
   }
   &.pending {
-    &:hover {
+    &:hover,
+    &:focus-within {
       background: #eeeeff;
     }
   }
   &__radio {
     margin: 0;
+    &:focus {
+      outline: none;
+    }
   }
 }
 .button.selected-option {
