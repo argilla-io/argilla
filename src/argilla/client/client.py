@@ -140,10 +140,10 @@ class Argilla:
 
         if not workspace and self._user.username == DEFAULT_USERNAME:
             warnings.warn(
-                "Default user was detected and no workspace configuration was provided, so "
-                f"the default {DEFAULT_USERNAME!r} workspace will be used. "
-                "If you want to setup another workspace, use the `rg.set_workspace` function "
-                "or provide a different one on `rg.init`",
+                "Default user was detected and no workspace configuration was provided,"
+                f" so the default {DEFAULT_USERNAME!r} workspace will be used. If you"
+                " want to setup another workspace, use the `rg.set_workspace` function"
+                " or provide a different one on `rg.init`",
                 category=UserWarning,
             )
             workspace = DEFAULT_USERNAME
@@ -151,8 +151,9 @@ class Argilla:
             self.set_workspace(workspace or self._user.username)
         else:
             warnings.warn(
-                "No workspace configuration was detected. To work with Argilla datasets, "
-                "specify a valid workspace name on `rg.init` or set it up through the `rg.set_workspace` function. ",
+                "No workspace configuration was detected. To work with Argilla "
+                " datasets, specify a valid workspace name on `rg.init` or set it"
+                " up through the `rg.set_workspace` function.",
                 category=UserWarning,
             )
 
