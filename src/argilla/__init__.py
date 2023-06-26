@@ -56,24 +56,6 @@ if _TYPE_CHECKING:
         read_datasets,
         read_pandas,
     )
-    from argilla.client.feedback.dataset import FeedbackDataset
-    from argilla.client.feedback.schemas import (
-        FeedbackRecord,
-        LabelQuestion,
-        LabelQuestionUnification,
-        MultiLabelQuestion,
-        MultiLabelQuestionUnification,
-        RatingQuestion,
-        RatingQuestionUnification,
-        ResponseSchema,
-        TextField,
-        TextQuestion,
-        ValueSchema,
-    )
-    from argilla.client.feedback.training import (
-        ArgillaTrainer,
-        TrainingTaskMapping,
-    )
     from argilla.client.models import (
         Text2TextRecord,
         TextClassificationRecord,
@@ -90,6 +72,21 @@ if _TYPE_CHECKING:
         configure_dataset_settings,
         load_dataset_settings,
     )
+    from argilla.feedback import (
+        ArgillaTrainer,
+        FeedbackDataset,
+        FeedbackRecord,
+        LabelQuestion,
+        LabelQuestionStrategy,
+        MultiLabelQuestion,
+        MultiLabelQuestionStrategy,
+        RatingQuestion,
+        RatingQuestionStrategy,
+        ResponseSchema,
+        TextField,
+        TextQuestion,
+        ValueSchema,
+    )
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
     from argilla.server.server import app
@@ -97,6 +94,21 @@ if _TYPE_CHECKING:
 
 # TODO: remove me
 _import_structure = {
+    "feedback": [
+        "ArgillaTrainer",
+        "LabelQuestionStrategy",
+        "MultiLabelQuestionStrategy",
+        "RatingQuestionStrategy",
+        "FeedbackDataset",
+        "FeedbackRecord",
+        "LabelQuestion",
+        "MultiLabelQuestion",
+        "RatingQuestion",
+        "ResponseSchema",
+        "TextField",
+        "TextQuestion",
+        "ValueSchema",
+    ],
     "client.api": [
         "copy",
         "delete",
@@ -122,18 +134,6 @@ _import_structure = {
         "DatasetForTokenClassification",
         "read_datasets",
         "read_pandas",
-    ],
-    "client.feedback.dataset": ["FeedbackDataset"],
-    "client.feedback.training": ["ArgillaTrainer", "TrainingTaskMapping"],
-    "client.feedback.schemas": [
-        "FeedbackRecord",
-        "LabelQuestion",
-        "MultiLabelQuestion",
-        "RatingQuestion",
-        "ResponseSchema",
-        "TextField",
-        "TextQuestion",
-        "ValueSchema",
     ],
     "client.users": ["User"],
     "client.workspaces": ["Workspace"],
