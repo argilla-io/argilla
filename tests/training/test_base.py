@@ -58,7 +58,7 @@ def test_base_token_classification(framework, dataset_token_classification):
         assert trainer._trainer._record_class is TokenClassificationRecord
 
     if framework == "setfit":
-        with pytest.raises(NotImplementedError, match="SetFit does not support token classification"):
+        with pytest.raises(NotImplementedError, match="SetFit only supports the `TextClassification` task."):
             _init_trainer(framework)
     else:
         _init_trainer(framework)
