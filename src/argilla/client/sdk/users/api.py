@@ -29,7 +29,7 @@ from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 
 # TODO(alvarobartt,frascuchon): use ONLY `httpx.Client` instead of `AuthenticatedClient` and
 # fix mock in `tests/conftest.py` to use `httpx.Client` instead of `AuthenticatedClient`
-def whoami(client: AuthenticatedClient) -> Union[UserModel, Response[UserModel]]:
+def whoami(client: AuthenticatedClient) -> UserModel:
     """Sends a GET request to `/api/me` endpoint to get the current user information.
 
     Args:
