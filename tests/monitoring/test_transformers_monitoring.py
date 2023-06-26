@@ -16,7 +16,7 @@ from typing import List, Union
 
 import argilla
 import pytest
-from argilla import TextClassificationRecord
+from argilla.client.models import TextClassificationRecord
 
 
 def test_classifier_monitoring_with_all_scores(

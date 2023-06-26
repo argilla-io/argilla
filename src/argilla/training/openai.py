@@ -19,6 +19,7 @@ from typing import List, Union
 import numpy as np
 
 from argilla._constants import OPENAI_END_TOKEN, OPENAI_SEPARATOR, OPENAI_WHITESPACE
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args
@@ -40,6 +41,13 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if self._record_class is TokenClassificationRecord:
+            raise NotImplementedError("OpenAI does not support `TokenClassification` tasks.")
+        elif self._record_class is TextClassificationRecord and self._multi_label:
+            raise NotImplementedError("OpenAI does not support `multi-label=True` TextClassification tasks.")
+        else:
+            pass
 
         self.sleep_timer = 10
         self.device = None
@@ -80,7 +88,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["training_file"] = training_file
         self.model_kwargs["validation_file"] = validation_file
         self.model_kwargs["model"] = model
-        if isinstance(self._settings, TextClassificationSettings):
+        if isinstance(self._record_class, TextClassificationRecord):
             self.model_kwargs["n_epochs"] = n_epochs or 4
         else:
             self.model_kwargs["n_epochs"] = n_epochs or 2
@@ -93,8 +101,8 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         self.model_kwargs["classification_betas"] = classification_betas
         self.model_kwargs["suffix"] = suffix
 
-        if isinstance(self._settings, TextClassificationSettings) and self._eval_dataset:
-            label_schema = self._settings.label_schema
+        if isinstance(self._record_class, TextClassificationRecord) and self._eval_dataset:
+            label_schema = self._label_list
             if len(label_schema) == 2:
                 self.model_kwargs["classification_positive_class"] = label_schema[0]
                 self.model_kwargs["compute_classification_metrics"] = True
@@ -140,7 +148,8 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         import openai
 
         for rec in dataset:
-            del rec["id"]
+            if "id" in rec:
+                del rec["id"]
         with open(file_name, "w") as f:
             for item in dataset:
                 f.write(json.dumps(item) + "\n")
@@ -217,7 +226,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             for kwarg in ["logprobs", "max_tokens", "temperature", "n"]:
                 if kwarg in kwargs:
                     del kwargs[kwarg]
-                    self._logger.warn(f"Argument `{kwarg}` has default value for text classification. Deleting it.")
+                    self._logger.warning(f"Argument `{kwarg}` has default value for text classification. Deleting it.")
             kwargs["logprobs"] = len(self._settings.label_schema)
             kwargs["max_tokens"] = 1
             kwargs["temperature"] = 0
@@ -225,7 +234,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         else:
             if "stop" in kwargs:
                 del kwargs[kwarg]
-            self._logger.warn("Argument `stop` has default value for text classification. Deleting it.")
+            self._logger.warning("Argument `stop` has default value for text classification. Deleting it.")
             kwargs["stop"] = self._end_token
             if "logprobs" not in kwargs:
                 kwargs["logprobs"] = 1
