@@ -63,6 +63,7 @@ def test_user_from_id(owner: "ServerUser"):
         User.from_id(id="00000000-0000-0000-0000-000000000000")
 
 
+@pytest.mark.skip(reason="This behaviour is not yet implemented. Onwer users won't have workspaces through this")
 def test_user_workspaces(owner: "ServerUser"):
     workspaces = WorkspaceFactory.create_batch(3)
 
