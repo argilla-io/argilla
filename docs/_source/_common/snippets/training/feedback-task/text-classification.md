@@ -11,17 +11,17 @@ links:
 ---
 
 ```python
-import argilla as rg
+import argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTaskMapping
 
-dataset = rg.FeedbackDataset.from_argilla(
+dataset = FeedbackDataset.from_argilla(
     name="<my_dataset_name>",
     workspace="<my_workspace_name>"
 )
-training_task_mapping = rg.TrainingTaskMapping.for_text_classification(
+training_task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("<my_field>"),
     label=dataset.question_by_name("<my_question>")
 )
-trainer = rg.ArgillaTrainer(
+trainer = ArgillaTrainer(
     dataset=dataset,
     training_task_mapping=training_task_mapping,
     framework="<my_framework>",

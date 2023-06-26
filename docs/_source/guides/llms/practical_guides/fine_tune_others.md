@@ -98,20 +98,20 @@ training_task_mapping = TrainingTaskMapping.for_text_classification(
 Next, we can use our `FeedbackDataset` and `TrainingTaskMappingForTextClassification` to initialize our `argilla.ArgillaTrainer`. We support the frameworks "openai", "setfit", "peft", "spacy" and "transformers".
 
 ````{note}
-This is a newer version and can be imported via `from argilla import ArgillaTrainer`. The old trainer can be imported via `from argilla.training import ArgillaTrainer`. Our docs, contain some [additional information on usage of the ArgillaTrainer](/guides/train_a_model).
+This is a newer version and can be imported via `from argilla.feedback import ArgillaTrainer`. The old trainer can be imported via `from argilla.training import ArgillaTrainer`. Our docs, contain some [additional information on usage of the ArgillaTrainer](/guides/train_a_model).
 ````
 
 ```python
-from argilla import ArgillaTrainer, FeedbackDataset, TrainingTaskMapping
+import argilla.feedback as rg
 
-dataset = FeedbackDataset.from_huggingface(
+dataset = rg.FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-training_task_mapping = TrainingTaskMapping.for_text_classification(
+training_task_mapping = rg.TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("my_text_field"),
     label=dataset.question_by_name("tags")
 )
-trainer = ArgillaTrainer(
+trainer = rg.ArgillaTrainer(
     dataset=dataset,
     training_task_mapping=training_task_mapping,
     framework="setfit",
@@ -140,7 +140,7 @@ dataset.prepare_for_training(
 Underneath, you can also find an end-to-end example of how to use the `ArgillaTrainer`.
 
 ```python
-import argilla as rg
+import argilla.feedback as rg
 
 dataset = rg.FeedbackDataset(
     guidelines="Add some guidelines for the annotation team here.",
@@ -181,14 +181,9 @@ dataset.add_records(
     ]
 )
 
-label_unification = rg.LabelQuestionUnification(
-    question=dataset.question_by_name("relevant"),
-    strategy="majority"
-)
-
 training_task_mapping = rg.TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("text"),
-    label=label_unification
+    label=dataset.question_by_name("relevant")
 )
 
 trainer = rg.ArgillaTrainer(

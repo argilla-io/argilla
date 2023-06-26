@@ -73,15 +73,11 @@ if _TYPE_CHECKING:
         load_dataset_settings,
     )
     from argilla.feedback import (
-        ArgillaTrainer,
         FeedbackDataset,
         FeedbackRecord,
         LabelQuestion,
-        LabelQuestionStrategy,
         MultiLabelQuestion,
-        MultiLabelQuestionStrategy,
         RatingQuestion,
-        RatingQuestionStrategy,
         ResponseSchema,
         TextField,
         TextQuestion,
