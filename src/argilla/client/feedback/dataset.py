@@ -618,7 +618,7 @@ class FeedbackDataset:
                 )
             self.argilla_id = self.argilla_id or argilla_id
             url = f"{httpx_client.base_url}/dataset/{self.argilla_id}/annotation-mode"
-            rprint(f"Dataset Pushed to Argilla [link={url}]{url}")
+            rprint(f"`FeedbackDataset` pushed to Argilla [link={url}]{name or dataset.name}[/link]")
             return url
 
     @classmethod
@@ -876,7 +876,7 @@ class FeedbackDataset:
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
         url = f"https://huggingface.co/{repo_id}"
-        rprint(f"Dataset Pushed HuggingFace [link={url}]{url}")
+        rprint(f"`FeedbackDataset` pushed to HuggingFace [link={url}]{repo_id}[/link]")
         return url
 
     @classmethod
