@@ -13,6 +13,8 @@
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
+      tabindex="-1"
+      aria-hidden="true"
     />
     <input
       class="search-input"
