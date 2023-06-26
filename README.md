@@ -85,7 +85,7 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 
 <hr>
 <h3><a href="https://argilla.io/blog/launching-argilla-huggingface-hub/">Deploy on Hugging Face Hub</a></h3>
-HuggingFace Spaces don't have persistent storage and will automatically reset after 48 hours of inactivity, which means all the data within the Space will be lost. You can enable this via the Hugging Face Spaces settings.
+HuggingFace Spaces now have persistent storage, and is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Space settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
 <a href="https://argilla.io/blog/launching-argilla-huggingface-hub/"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
 
 <hr>

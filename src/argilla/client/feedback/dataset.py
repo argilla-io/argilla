@@ -995,7 +995,7 @@ class FeedbackDataset:
         self,
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
         strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
-    ):
+    ) -> None:
         """Unify responses for a given question using a given strategy"""
         if isinstance(question, str):
             question = self.question_by_name(question)
