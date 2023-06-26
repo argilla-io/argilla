@@ -183,9 +183,9 @@ def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "M
 
     def whoami_mocked(*args, **kwargs):
         client_arg = args[-1] if args else kwargs["client"]
-        if isinstance(client_arg, AuthenticatedClient):
-            monkeypatch.setattr(client_arg, "__httpx__", client)
-            client.headers.update(client_arg.get_headers())
+
+        monkeypatch.setattr(client_arg, "__httpx__", client)
+        client.headers.update(client_arg.get_headers())
 
         return real_whoami(client_arg)
 

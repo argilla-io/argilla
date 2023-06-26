@@ -68,6 +68,7 @@ class User:
     last_name: Optional[str]
     full_name: Optional[str]
     role: UserRole
+    workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime
     updated_at: datetime
@@ -114,20 +115,15 @@ class User:
         )
 
     @staticmethod
-    def __active_client() -> Union["httpx.Client", "AuthenticatedClient"]:
+    def __active_client(httpx: bool = True) -> Union["httpx.Client", "AuthenticatedClient"]:
         """Returns the active Argilla `httpx.Client` instance."""
         try:
-            return active_client().http_client.httpx
+            client = active_client().http_client
+            if httpx:
+                client = client.httpx
+            return client
         except Exception as e:
             raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
-
-    @property
-    def workspaces(self) -> List[str]:
-        try:
-            user = users_api.whoami(self.__client).parsed
-            return user.workspaces
-        except Exception as e:
-            raise RuntimeError("Error while retrieving the current user workspaces from Argilla.") from e
 
     def delete(self) -> None:
         """Deletes the user from Argilla.
@@ -282,10 +278,10 @@ class User:
             >>> from argilla import rg
             >>> user = rg.User.me()
         """
-        client = cls.__active_client()
+        client = cls.__active_client(httpx=False)
         try:
-            user = users_api.whoami(client).parsed
-            return cls.__new_instance(client, user)
+            user = users_api.whoami(client)  # .parsed
+            return cls.__new_instance(client.httpx, user)
         except Exception as e:
             raise RuntimeError("Error while retrieving the current user from Argilla.") from e
 
