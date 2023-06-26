@@ -128,11 +128,8 @@ _import_structure = {
     "client.feedback.schemas": [
         "FeedbackRecord",
         "LabelQuestion",
-        "LabelQuestionUnification",
         "MultiLabelQuestion",
-        "MultiLabelQuestionUnification",
         "RatingQuestion",
-        "RatingQuestionUnification",
         "ResponseSchema",
         "TextField",
         "TextQuestion",
