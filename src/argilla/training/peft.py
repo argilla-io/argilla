@@ -17,7 +17,7 @@ from typing import List, Union
 
 import numpy as np
 
-import argilla as rg
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.transformers import ArgillaTransformersTrainer
 from argilla.training.utils import (
     filter_allowed_args,
@@ -55,9 +55,9 @@ class ArgillaPeftTrainer(ArgillaTransformersTrainer):
         from peft import LoraConfig, PeftConfig, PeftModel, get_peft_model
         from transformers import AutoTokenizer
 
-        if self._record_class == rg.TextClassificationRecord:
+        if self._record_class == TextClassificationRecord:
             self.lora_kwargs["task_type"] = "SEQ_CLS"
-        elif self._record_class == rg.TokenClassificationRecord:
+        elif self._record_class == TokenClassificationRecord:
             self.lora_kwargs["task_type"] = "TOKEN_CLS"
         else:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
@@ -73,7 +73,7 @@ class ArgillaPeftTrainer(ArgillaTransformersTrainer):
             )
             self._model_sub_class = model.__class__
             model = PeftModel.from_pretrained(model, self.model_kwargs["pretrained_model_name_or_path"])
-        except:
+        except Exception:
             config = LoraConfig(**self.lora_kwargs)
             model = self._model_class.from_pretrained(**self.model_kwargs, return_dict=True)
             self._model_sub_class = model.__class__
@@ -133,7 +133,7 @@ class ArgillaPeftTrainer(ArgillaTransformersTrainer):
             text = [text]
             str_input = True
 
-        if self._record_class == rg.TextClassificationRecord:
+        if self._record_class == TextClassificationRecord:
             inputs = self._transformers_tokenizer(text, truncation=True, padding="longest", return_tensors="pt")
 
             with torch.no_grad():
@@ -210,7 +210,7 @@ class ArgillaPeftTrainer(ArgillaTransformersTrainer):
             formatted_prediction = []
 
             for val, pred in zip(text, predictions):
-                if self._record_class == rg.TextClassificationRecord:
+                if self._record_class == TextClassificationRecord:
                     formatted_prediction.append(
                         self._record_class(
                             text=val,
@@ -218,7 +218,7 @@ class ArgillaPeftTrainer(ArgillaTransformersTrainer):
                             multi_label=self._multi_label,
                         )
                     )
-                elif self._record_class == rg.TokenClassificationRecord:
+                elif self._record_class == TokenClassificationRecord:
                     formatted_prediction.append(
                         self._record_class(
                             text=val,

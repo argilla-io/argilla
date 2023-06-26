@@ -17,7 +17,7 @@ from typing import List, Union
 
 from datasets import DatasetDict
 
-import argilla as rg
+from argilla.client.models import TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args, get_default_args
 from argilla.utils.dependency import require_version
@@ -27,6 +27,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSpanMarkerTrainer")
     _logger.setLevel(logging.INFO)
 
+    require_version("datasets")
     require_version("span_marker>=1.2")
     require_version("transformers>=4.19.0")  # <- required for span_marker evaluation
 
@@ -57,13 +58,13 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
             self._train_dataset = self._dataset
             self._eval_dataset = None
 
-        if self._record_class == rg.TokenClassificationRecord:
+        if self._record_class == TokenClassificationRecord:
             self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
             self._label_list = self._train_dataset.features["ner_tags"].feature.names
 
             self._model_class = SpanMarkerModel
         else:
-            raise NotImplementedError("rg.Text2TextRecord and rg.TextClassification are not supported.")
+            raise NotImplementedError("Text2TextRecord and TextClassification are not supported.")
 
         self.init_training_args()
 

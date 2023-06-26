@@ -51,7 +51,7 @@ from argilla import FeedbackDataset, TrainingTaskMapping
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-training_task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("answer_quality"), # RatingQuestion
     label_strategy=None # default to "majority", or use "min", "max", "disagreement"
@@ -66,7 +66,7 @@ from argilla import FeedbackDataset, TrainingTaskMapping
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-training_task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("title_question_fit"), # LabelQuestion
     label_strategy=None # default to "majority", or use "disagreement"
@@ -81,7 +81,7 @@ from argilla import FeedbackDataset, TrainingTaskMapping
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-training_task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("tags"), # MultiLabelQuestion
     label_strategy=None # default to "majority", or use "disagreement"
@@ -107,13 +107,13 @@ import argilla.feedback as rg
 dataset = rg.FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-training_task_mapping = rg.TrainingTaskMapping.for_text_classification(
+task_mapping = rg.TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("my_text_field"),
     label=dataset.question_by_name("tags")
 )
 trainer = rg.ArgillaTrainer(
     dataset=dataset,
-    training_task_mapping=training_task_mapping,
+    task_mapping=task_mapping,
     framework="setfit",
     fetch_records=False
 )
@@ -124,13 +124,13 @@ trainer.train(output_dir="my_awesone_model")
 ````{note}
 The `FeedbackDataset` also allows for custom workflows via the `prepare_for_training()`-method.
 ```python
-training_task_mapping = ...
+task_mapping = ...
 dataset = rg.FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
 dataset.prepare_for_training(
     framework="setfit",
-    training_task_mapping=training_task_mapping
+    task_mapping=task_mapping
 )
 ```
 ````
@@ -181,14 +181,14 @@ dataset.add_records(
     ]
 )
 
-training_task_mapping = rg.TrainingTaskMapping.for_text_classification(
+task_mapping = rg.TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("text"),
     label=dataset.question_by_name("relevant")
 )
 
 trainer = rg.ArgillaTrainer(
     dataset=dataset,
-    training_task_mapping=training_task_mapping,
+    task_mapping=task_mapping,
     framework="setfit",
     fetch_records=False
 )

@@ -21,8 +21,8 @@ from argilla import (
     MultiLabelQuestion,
     RatingQuestion,
     TextField,
-    TrainingTaskMapping,
 )
+from argilla.client.feedback.training.schemas import TrainingTaskMapping
 from argilla.client.feedback.unification import (
     LabelQuestionUnification,
     MultiLabelQuestionUnification,
@@ -207,7 +207,7 @@ label_question_payload = {
         ),
     ],
 )
-def test_training_task_mapping_for_text_classification(framework, label, train_size, seed, expected):
+def test_task_mapping_for_text_classification(framework, label, train_size, seed, expected):
     data = [{"text": "This is a text", "label": "1"}, {"text": "This is a text", "label": "2"}]
     field = TextField(name="text")
     task_mapping = TrainingTaskMapping.for_text_classification(text=field, label=label)

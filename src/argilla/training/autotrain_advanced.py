@@ -18,7 +18,7 @@ from uuid import uuid4
 
 from datasets import DatasetDict
 
-import argilla as rg
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
 
@@ -143,26 +143,20 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixIn):
         data_dict["train_data"] = [self._train_dataset.to_pandas()]
         self._num_samples += len(self._train_dataset)
 
-        if self._record_class == rg.TextClassificationRecord:
+        if self._record_class == TextClassificationRecord:
             if self._multi_label:
-                raise NotImplementedError("rg.TextClassificaiton multi_label is not supported by `autotrain-advanced`.")
+                raise NotImplementedError(
+                    "TextClassificaiton `multi_label=True` is not supported by `autotrain-advanced`."
+                )
             elif self._multi_label is False:
                 n_classes = len(self._train_dataset.features["label"].names)
-                if n_classes > 2:
-                    self.task = "text_multi_class_classification"
-                else:
-                    self.task = "text_binary_classification"
+                self.task = "text_multi_class_classification" if n_classes > 2 else "text_binary_classification"
                 self._id2label = dict(enumerate(self._train_dataset.features["label"].names))
                 self._label_list = self._train_dataset.features["label"].names
             self._label2id = {v: k for k, v in self._id2label.items()}
-        elif self._record_class == rg.TokenClassificationRecord:
-            self.task = "text_entity_extraction"
+        elif self._record_class == TokenClassificationRecord:
             raise NotImplementedError(
-                "rg.Text2TextRecord and rg.TokenClassificationRecord is not supported by `autotrain-advanced`."
-            )
-        else:
-            raise NotImplementedError(
-                "rg.Text2TextRecord and rg.TokenClassificationRecord is not supported by `autotrain-advanced`."
+                "`Text2Text` and `TokenClassification` tasks are not supported by `autotrain-advanced`."
             )
 
         self.init_training_args()

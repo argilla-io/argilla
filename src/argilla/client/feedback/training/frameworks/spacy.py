@@ -14,8 +14,8 @@
 
 from typing import Optional
 
-import argilla as rg
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.spacy import ArgillaSpaCyTrainer as ArgillaSpaCyTrainerV1
 from argilla.utils.dependency import require_version
 
@@ -34,7 +34,7 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, ArgillaTrainerSkeleton):
         Args:
             dataset: A `spacy.tokens.DocBin` object or a tuple of `spacy.tokens.DocBin` objects.
             record_class:
-                A `rg.TextClassificationRecord`, `rg.TokenClassificationRecord`, or `rg.Text2TextRecord`
+                A `TextClassificationRecord`, `TokenClassificationRecord`, or `Text2TextRecord`
                 object. Defaults to None.
             model:
                 A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_sm". Defaults to None.
@@ -48,7 +48,7 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, ArgillaTrainerSkeleton):
                 GPU IDs start in 0, which stands for the default GPU in the system, if available.
 
         Raises:
-            NotImplementedError: If `record_class` is `rg.Text2TextRecord`.
+            NotImplementedError: If `record_class` is `Text2TextRecord`.
 
         Example:
             >>> from argilla import TokenClassificationRecord
@@ -65,14 +65,14 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, ArgillaTrainerSkeleton):
         self._nlp = None
         self._model = model
 
-        if self._record_class == rg.TokenClassificationRecord:
+        if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
                 "text": "text",
                 "token": "tokens",
                 "ner_tags": "ner_tags",
             }
             self._pipeline = ["ner"]
-        elif self._record_class == rg.TextClassificationRecord:
+        elif self._record_class == TextClassificationRecord:
             if self._multi_label:
                 self._column_mapping = {"text": "text", "binarized_label": "label"}
                 self._pipeline = ["textcat_multilabel"]
@@ -80,7 +80,7 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, ArgillaTrainerSkeleton):
                 self._column_mapping = {"text": "text", "label": "label"}
                 self._pipeline = ["textcat"]
         else:
-            raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
+            raise NotImplementedError("`Text2TextRecord` is not supported yet.")
 
         self._train_dataset, self._eval_dataset = (
             self._dataset if isinstance(self._dataset, tuple) and len(self._dataset) > 1 else (self._dataset, None)

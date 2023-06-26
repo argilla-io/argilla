@@ -13,8 +13,8 @@
 #  limitations under the License.
 
 
-from argilla import TextClassificationRecord, TokenClassificationRecord
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.openai import ArgillaOpenAITrainer as ArgillaOpenAITrainerV1
 
 

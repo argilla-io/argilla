@@ -14,10 +14,10 @@
 
 import logging
 
-from argilla import TextClassificationRecord
 from argilla.client.feedback.training.frameworks.transformers import (
     ArgillaTransformersTrainer,
 )
+from argilla.client.models import TextClassificationRecord
 from argilla.training.setfit import ArgillaSetFitTrainer as ArgillaSetFitTrainerV1
 from argilla.utils.dependency import require_version
 
@@ -39,7 +39,7 @@ class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
         ArgillaTransformersTrainer.__init__(self, *args, **kwargs)
 
         if self._record_class is not TextClassificationRecord:
-            raise NotImplementedError("SetFit only supports.")
+            raise NotImplementedError("SetFit only supports the `TextClassification` task.")
 
         if self._multi_label:
             self._column_mapping = {"text": "text", "binarized_label": "label"}

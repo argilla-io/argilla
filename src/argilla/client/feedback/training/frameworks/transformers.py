@@ -61,11 +61,9 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
         else:
             raise NotImplementedError(f"We do not support {type(self._dataset)} yet.")
 
-        if isinstance(self._training_task_mapping, TrainingTaskMappingForTextClassification):
+        if isinstance(self._task_mapping, TrainingTaskMappingForTextClassification):
             self._model_class = AutoModelForSequenceClassification
         else:
-            raise NotImplementedError(
-                f"ArgillaTransformersTrainer does not support {type(self._training_task_mapping)} yet."
-            )
+            raise NotImplementedError(f"ArgillaTransformersTrainer does not support {type(self._task_mapping)} yet.")
 
         self.init_training_args()

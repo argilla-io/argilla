@@ -45,11 +45,9 @@ __OUTPUT_DIR__ = "tmp"
         Framework("spacy"),
         Framework("transformers"),
         Framework("spark-nlp"),
-        # Framework("autotrain"),
         Framework("span_marker"),
         Framework("setfit"),
         Framework("peft"),
-        # Framework("openai"),
         Framework("spark-nlp"),
     ],
 )
@@ -77,19 +75,19 @@ def test_prepare_for_training_text_classification(
         question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
     ]
     label = LabelQuestionUnification(question=questions[0])
-    training_task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
+    task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
 
     if framework in [Framework("spark-nlp"), Framework("span_marker")]:
         with pytest.raises(NotImplementedError):
             trainer = ArgillaTrainer(
-                dataset=dataset, training_task_mapping=training_task_mapping, framework=framework, fetch_records=False
+                dataset=dataset, task_mapping=task_mapping, framework=framework, fetch_records=False
             )
     else:
         if framework in [Framework("peft")] and sys.version_info < (3, 9):
             pass
         else:
             trainer = ArgillaTrainer(
-                dataset=dataset, training_task_mapping=training_task_mapping, framework=framework, fetch_records=False
+                dataset=dataset, task_mapping=task_mapping, framework=framework, fetch_records=False
             )
             trainer.train(__OUTPUT_DIR__)
 

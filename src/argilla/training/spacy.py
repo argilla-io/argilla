@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
-import argilla as rg
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
 
@@ -43,7 +43,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         Args:
             dataset: A `spacy.tokens.DocBin` object or a tuple of `spacy.tokens.DocBin` objects.
             record_class:
-                A `rg.TextClassificationRecord`, `rg.TokenClassificationRecord`, or `rg.Text2TextRecord`
+                A `TextClassificationRecord`, `TokenClassificationRecord`, or `Text2TextRecord`
                 object. Defaults to None.
             model:
                 A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_sm". Defaults to None.
@@ -74,14 +74,14 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self._nlp = None
         self._model = model
 
-        if self._record_class == rg.TokenClassificationRecord:
+        if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
                 "text": "text",
                 "token": "tokens",
                 "ner_tags": "ner_tags",
             }
             self._pipeline = ["ner"]
-        elif self._record_class == rg.TextClassificationRecord:
+        elif self._record_class == TextClassificationRecord:
             if self._multi_label:
                 self._column_mapping = {"text": "text", "binarized_label": "label"}
                 self._pipeline = ["textcat_multilabel"]

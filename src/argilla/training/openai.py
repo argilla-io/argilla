@@ -18,8 +18,8 @@ from typing import List, Union
 
 import numpy as np
 
-from argilla import TextClassificationRecord, TokenClassificationRecord
 from argilla._constants import OPENAI_END_TOKEN, OPENAI_SEPARATOR, OPENAI_WHITESPACE
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args

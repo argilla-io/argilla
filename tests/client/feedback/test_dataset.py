@@ -440,6 +440,7 @@ def test_push_to_huggingface_and_from_huggingface(
     assert all(original_field in dataset_from_huggingface.fields for original_field in dataset.fields)
     assert len(dataset_from_huggingface.questions) == len(dataset.questions)
     assert all(original_question in dataset_from_huggingface.questions for original_question in dataset.questions)
+
     for hf_record, record in zip(dataset_from_huggingface.records, dataset.records):
         assert hf_record.fields == record.fields
         assert hf_record.metadata == record.metadata
@@ -473,6 +474,6 @@ def test_prepare_for_training_text_classification(
     )
     dataset.add_records(feedback_dataset_records)
     label = dataset.question_by_name("question-3")
-    training_task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
+    task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
 
-    dataset.prepare_for_training(framework=framework, training_task_mapping=training_task_mapping, fetch_records=False)
+    dataset.prepare_for_training(framework=framework, task_mapping=task_mapping, fetch_records=False)

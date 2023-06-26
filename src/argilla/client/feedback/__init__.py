@@ -12,11 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.training import ArgillaTrainer, TrainingTaskMapping
+from argilla.client.feedback.training import (
+    ArgillaTrainer,
+    TrainingTaskMapping,
+    TrainingTaskMappingForTextClassification,
+)
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
     RatingQuestionStrategy,
+    UnificatiedValueSchema,
 )
 
 __all__ = [
@@ -25,4 +30,6 @@ __all__ = [
     "MultiLabelQuestionStrategy",
     "RatingQuestionStrategy",
     "TrainingTaskMapping",
+    "TrainingTaskMappingForTextClassification",
+    "UnificatiedValueSchema",
 ]
