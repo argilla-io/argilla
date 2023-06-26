@@ -252,11 +252,28 @@ export default {
 }
 
 input[type="checkbox"] {
-  display: none;
+  @extend %visuallyhidden;
+  &:focus {
+    & + .label-text {
+      outline: 2px solid palette(purple, 200);
+    }
+  }
+  @supports selector(:focus-visible) {
+    &:focus {
+      & + .label-text {
+        outline: 0;
+      }
+    }
+    &:focus-visible {
+      & + .label-text {
+        outline: 2px solid palette(purple, 200);
+      }
+    }
+  }
 }
 .label-active {
   color: white;
-  background: #4c4ea3;
+  background: palette(purple, 200);
 }
 .no-result {
   display: block;
