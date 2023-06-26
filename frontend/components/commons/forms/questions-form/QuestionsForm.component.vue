@@ -580,7 +580,8 @@ export default {
       color: $black-37;
       outline: 0;
       text-decoration: none;
-      &:hover {
+      &:hover,
+      &:focus {
         text-decoration: underline;
       }
     }
