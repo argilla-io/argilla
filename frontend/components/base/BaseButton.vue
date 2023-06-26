@@ -122,10 +122,18 @@ export default {
   transition: all 0.4s $cb-normal;
   cursor: pointer;
   &:focus {
-    outline: 0;
+    outline: 2px solid $primary-color;
   }
   &::-moz-focus-inner {
     border: 0;
+  }
+  @supports selector(:focus-visible) {
+    &:focus {
+      outline: 0;
+    }
+    &:focus-visible {
+      outline: 2px solid $primary-color;
+    }
   }
   &[disabled] {
     opacity: 0.5;
