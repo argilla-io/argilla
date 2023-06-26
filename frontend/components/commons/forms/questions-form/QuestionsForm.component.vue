@@ -128,7 +128,6 @@ import {
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
-// import { settingsFake } from "./fields/ranking/ranking-fakes";
 
 export default {
   name: "QuestionsFormComponent",
@@ -155,7 +154,6 @@ export default {
       inputs: [],
       renderForm: 0,
       isError: false,
-      // rankingOptionsFake: settingsFake.options,
     };
   },
   computed: {

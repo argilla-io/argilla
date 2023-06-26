@@ -29,28 +29,6 @@ export default {
     const { items: questions } = await this.getQuestions(this.datasetId);
     const { items: fields } = await this.getFields(this.datasetId);
 
-    // FIXME - to remove
-    questions.push({
-      id: "daboudi",
-      name: "my-ranking-question",
-      title: " The question title",
-      description: "The question description",
-      required: false,
-      settings: {
-        type: "ranking",
-        options: [
-          {
-            value: "label-01",
-            text: "My label",
-            description: "This is an optional field",
-          },
-          { value: "label-02", text: "My other Label" },
-          { value: "label-03", text: "Wat?!" },
-          { value: "label-04", text: "Ough!" },
-        ],
-      },
-    });
-
     // FORMAT questions AND fields to have the shape of ORM
     const formattedQuestionsForOrm = this.factoryQuestionsForOrm(questions);
     const formattedFieldsForOrm = this.factoryFieldsForOrm(fields);
