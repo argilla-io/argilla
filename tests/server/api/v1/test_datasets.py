@@ -36,9 +36,6 @@ from argilla.server.schemas.v1.datasets import (
     DATASET_CREATE_GUIDELINES_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
-    LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
-    LABEL_SELECTION_TEXT_MAX_LENGTH,
-    LABEL_SELECTION_VALUE_MAX_LENGHT,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
@@ -46,6 +43,9 @@ from argilla.server.schemas.v1.datasets import (
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
     RECORDS_CREATE_MIN_ITEMS,
+    VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
+    VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
+    VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
     RecordInclude,
 )
 from argilla.server.search_engine import (
@@ -74,7 +74,6 @@ from tests.factories import (
     TextQuestionFactory,
     UserFactory,
     WorkspaceFactory,
-    WorkspaceUserFactory,
 )
 
 
@@ -1444,31 +1443,6 @@ def test_create_dataset_field_with_invalid_settings(client: TestClient, db: Sess
     assert db.query(Field).count() == 0
 
 
-@pytest.mark.parametrize(
-    "settings",
-    [
-        {},
-        None,
-        {"type": "wrong-type"},
-        {"type": "text", "use_markdown": None},
-        {"type": "rating", "options": None},
-        {"type": "rating", "options": []},
-    ],
-)
-def test_create_dataset_field_with_invalid_settings(client: TestClient, db: Session, owner_auth_header, settings: dict):
-    dataset = DatasetFactory.create()
-    field_json = {
-        "name": "name",
-        "title": "Title",
-        "settings": settings,
-    }
-
-    response = client.post(f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json)
-
-    assert response.status_code == 422
-    assert db.query(Field).count() == 0
-
-
 def test_create_dataset_field_with_existent_name(client: TestClient, db: Session, owner_auth_header):
     field = FieldFactory.create(name="name")
     field_json = {
@@ -1552,18 +1526,9 @@ def test_create_dataset_field_with_nonexistent_dataset_id(client: TestClient, db
             {
                 "type": "label_selection",
                 "options": [
-                    {
-                        "value": "positive",
-                        "text": "Positive",
-                    },
-                    {
-                        "value": "negative",
-                        "text": "Negative",
-                    },
-                    {
-                        "value": "neutral",
-                        "text": "Neutral",
-                    },
+                    {"value": "positive", "text": "Positive"},
+                    {"value": "negative", "text": "Negative"},
+                    {"value": "neutral", "text": "Neutral"},
                 ],
             },
             {
@@ -1574,6 +1539,46 @@ def test_create_dataset_field_with_nonexistent_dataset_id(client: TestClient, db
                     {"value": "neutral", "text": "Neutral", "description": None},
                 ],
                 "visible_options": None,
+            },
+        ),
+        (
+            {
+                "type": "ranking",
+                "options": [
+                    {"value": "completion-a", "text": "Completion A", "description": "Completion A is the best"},
+                    {"value": "completion-b", "text": "Completion B", "description": "Completion B is the best"},
+                    {"value": "completion-c", "text": "Completion C", "description": "Completion C is the best"},
+                    {"value": "completion-d", "text": "Completion D", "description": "Completion D is the best"},
+                ],
+            },
+            {
+                "type": "ranking",
+                "options": [
+                    {"value": "completion-a", "text": "Completion A", "description": "Completion A is the best"},
+                    {"value": "completion-b", "text": "Completion B", "description": "Completion B is the best"},
+                    {"value": "completion-c", "text": "Completion C", "description": "Completion C is the best"},
+                    {"value": "completion-d", "text": "Completion D", "description": "Completion D is the best"},
+                ],
+            },
+        ),
+        (
+            {
+                "type": "ranking",
+                "options": [
+                    {"value": "completion-a", "text": "Completion A", "description": None},
+                    {"value": "completion-b", "text": "Completion b", "description": None},
+                    {"value": "completion-c", "text": "Completion C", "description": None},
+                    {"value": "completion-d", "text": "Completion D", "description": None},
+                ],
+            },
+            {
+                "type": "ranking",
+                "options": [
+                    {"value": "completion-a", "text": "Completion A", "description": None},
+                    {"value": "completion-b", "text": "Completion b", "description": None},
+                    {"value": "completion-c", "text": "Completion C", "description": None},
+                    {"value": "completion-d", "text": "Completion D", "description": None},
+                ],
             },
         ),
     ],
@@ -1851,7 +1856,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {
             "type": "label_selection",
             "options": [
-                {"value": "".join(["a" for _ in range(LABEL_SELECTION_VALUE_MAX_LENGHT + 1)]), "text": "a"},
+                {"value": "".join(["a" for _ in range(VALUE_TEXT_OPTION_VALUE_MAX_LENGTH + 1)]), "text": "a"},
                 {"value": "b", "text": "b"},
             ],
         },
@@ -1862,7 +1867,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
         {
             "type": "label_selection",
             "options": [
-                {"value": "a", "text": "".join(["a" for _ in range(LABEL_SELECTION_TEXT_MAX_LENGTH + 1)])},
+                {"value": "a", "text": "".join(["a" for _ in range(VALUE_TEXT_OPTION_TEXT_MAX_LENGTH + 1)])},
                 {"value": "b", "text": "b"},
             ],
         },
@@ -1876,7 +1881,7 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
                 {
                     "value": "a",
                     "text": "a",
-                    "description": "".join(["a" for _ in range(LABEL_SELECTION_DESCRIPTION_MAX_LENGTH + 1)]),
+                    "description": "".join(["a" for _ in range(VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH + 1)]),
                 },
                 {"value": "b", "text": "b"},
             ],
@@ -1886,6 +1891,31 @@ def test_create_dataset_question_with_nonexistent_dataset_id(client: TestClient,
             "options": [
                 {"value": "a", "text": "a", "description": "a"},
                 {"value": "b", "text": "b", "description": "b"},
+                {"value": "b", "text": "b", "description": "b"},
+            ],
+        },
+        {
+            "type": "ranking",
+            "options": [
+                {"value": "a", "text": "a", "description": "a"},
+            ],
+        },
+        {
+            "type": "ranking",
+            "options": [
+                {"value": "a", "text": "a", "description": "a"},
+                {"value": "b", "text": "b", "description": "b"},
+                {"value": "b", "text": "b", "description": "b"},
+            ],
+        },
+        {
+            "type": "ranking",
+            "options": [
+                {
+                    "value": "a",
+                    "text": "a",
+                    "description": "".join(["a" for _ in range(VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH + 1)]),
+                },
                 {"value": "b", "text": "b", "description": "b"},
             ],
         },

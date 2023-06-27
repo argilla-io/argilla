@@ -29,7 +29,7 @@ git clone https://github.com/[your-github-username]/argilla.git
 cd argilla
 ```
 
-To keep your fork's master branch up to date with our repo you should add it as an
+To keep your fork's main/develop branch up to date with our repo you should add it as an
 [upstream remote branch](https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik>):
 
 ```sh
@@ -162,7 +162,7 @@ This task will ask you for the required information to create your user, includi
 Finally to run the web app now simply execute:
 
 ```sh
-python -m argilla
+python -m argilla server
 ```
 
 Congrats, you are ready to take _Argilla_ to the next level 🚀
