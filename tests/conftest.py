@@ -18,6 +18,12 @@ from typing import TYPE_CHECKING, Dict, Generator
 import argilla as rg
 import httpx
 import pytest
+from argilla.client.api import log
+from argilla.client.api import delete 
+from argilla.client.datasets import read_datasets
+from argilla.datasets.__init__ import configure_dataset
+from argilla.client.models import TextClassificationRecord
+from argilla.client.models import Text2TextRecord
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import ArgillaSingleton
 from argilla.client.apis.datasets import TextClassificationSettings
@@ -243,7 +249,7 @@ def dataset_token_classification(mocked_client):
         revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
 
-    dataset_rb = rg.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = read_datasets(dataset_ds, task="TokenClassification")
     # Set annotations, required for training tests
     for rec in dataset_rb:
         # Strip off "score"
@@ -252,8 +258,8 @@ def dataset_token_classification(mocked_client):
         rec.prediction = []
         rec.prediction_agent = None
 
-    rg.delete(dataset)
-    rg.log(name=dataset, records=dataset_rb)
+    delete(dataset)
+    log(name=dataset, records=dataset_rb)
 
     return dataset
 
@@ -268,12 +274,12 @@ def dataset_text_classification(mocked_client):
         f"argilla/{dataset}",
         split="train[:100]",
     )
-    dataset_rb = [rg.TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
+    dataset_rb = [TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
     labels = set([rec.annotation for rec in dataset_rb])
-    rg.configure_dataset(dataset, settings=TextClassificationSettings(label_schema=labels))
+    configure_dataset(dataset, settings=TextClassificationSettings(label_schema=labels))
 
-    rg.delete(dataset)
-    rg.log(name=dataset, records=dataset_rb)
+    delete(dataset)
+    log(name=dataset, records=dataset_rb)
 
     return dataset
 
@@ -286,12 +292,12 @@ def dataset_text_classification_multi_label(mocked_client):
 
     dataset_ds = load_dataset("argilla/research_titles_multi-label", split="train[:100]")
 
-    dataset_rb = rg.read_datasets(dataset_ds, task="TextClassification")
+    dataset_rb = read_datasets(dataset_ds, task="TextClassification")
 
     dataset_rb = [rec for rec in dataset_rb if rec.annotation]
 
-    rg.delete(dataset)
-    rg.log(name=dataset, records=dataset_rb)
+    delete(dataset)
+    log(name=dataset, records=dataset_rb)
 
     return dataset
 
@@ -306,9 +312,9 @@ def dataset_text2text(mocked_client):
 
     records = []
     for entry in dataset_ds:
-        records.append(rg.Text2TextRecord(text=entry["text"], annotation=entry["prediction"][0]["text"]))
+        records.append(Text2TextRecord(text=entry["text"], annotation=entry["prediction"][0]["text"]))
 
-    rg.delete(dataset)
-    rg.log(name=dataset, records=records)
+    delete(dataset)
+    log(name=dataset, records=records)
 
     return dataset
