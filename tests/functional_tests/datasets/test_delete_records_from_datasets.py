@@ -14,7 +14,12 @@
 
 import time
 
-import argilla
+import argilla as rg
+from argilla.client.api import log
+from argilla.client.api import delete
+from argilla.client.api import load
+from argilla.client.api import delete_records
+from argilla.client.models import TextClassificationRecord
 import pytest
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
@@ -33,26 +38,26 @@ def test_delete_records_from_dataset(mocked_client):
     dataset = "test_delete_records_from_dataset"
     import argilla as rg
 
-    rg.delete(dataset)
-    rg.log(
+    delete(dataset)
+    log(
         name=dataset,
         records=[
-            rg.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
+            TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
         ],
     )
 
-    matched, processed = rg.delete_records(name=dataset, ids=[10], discard_only=True)
+    matched, processed = delete_records(name=dataset, ids=[10], discard_only=True)
     assert matched, processed == (1, 1)
 
-    ds = rg.load(name=dataset)
+    ds = load(name=dataset)
     assert len(ds) == 50
 
     time.sleep(1)
-    matched, processed = rg.delete_records(name=dataset, query="id:10", discard_only=False)
+    matched, processed = delete_records(name=dataset, query="id:10", discard_only=False)
     assert matched, processed == (1, 1)
 
     time.sleep(1)
-    ds = rg.load(name=dataset)
+    ds = load(name=dataset)
     assert len(ds) == 49
 
 
