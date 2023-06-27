@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import (
@@ -28,6 +28,10 @@ from pydantic import (
     root_validator,
     validator,
 )
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.unification import UnifiedValueSchema
+
 
 FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32
@@ -119,9 +123,7 @@ class FeedbackRecord(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
-    _unified_responses: Optional[
-        Dict[str, List["argilla.client.feedback.unificaiton.UnificatiedValueSchema"]]
-    ] = PrivateAttr(default={})
+    _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default={})
 
     @validator("responses", always=True)
     def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
