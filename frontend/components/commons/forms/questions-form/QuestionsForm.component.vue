@@ -22,7 +22,18 @@
           </NuxtLink>
         </p>
       </div>
-      <div class="form-group" v-for="input in inputs" :key="input.id">
+      <div
+        class="form-group"
+        v-for="(input, index) in inputs"
+        ref="inputs"
+        :key="input.id"
+        @keydown.arrow-down="
+          updateFocusedQuestionPosition(focusedQuestionPosition + 1)
+        "
+        @keydown.arrow-up="
+          updateFocusedQuestionPosition(focusedQuestionPosition - 1)
+        "
+      >
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
           :title="input.question"
@@ -30,6 +41,7 @@
           v-model="input.options[0].value"
           :useMarkdown="input.settings.use_markdown"
           :isRequired="input.is_required"
+          :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
         />
@@ -40,16 +52,17 @@
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
+          :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
         />
-
         <MultiLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
+          :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
         />
@@ -59,6 +72,7 @@
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
+          :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
         />
@@ -146,6 +160,7 @@ export default {
       inputs: [],
       renderForm: 0,
       isError: false,
+      focusedQuestionPosition: 0,
     };
   },
   computed: {
@@ -551,6 +566,16 @@ export default {
       this.$emit("on-question-form-touched", !isFormUntouched);
       // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);
+    },
+    checkIfQuestionIsFocused(index) {
+      return this.isRecordPending && index === this.focusedQuestionPosition;
+    },
+    updateFocusedQuestionPosition(index) {
+      const numberOfQuestions = this.inputs.length;
+      this.focusedQuestionPosition = Math.min(
+        numberOfQuestions - 1,
+        Math.max(0, index)
+      );
     },
   },
 };
