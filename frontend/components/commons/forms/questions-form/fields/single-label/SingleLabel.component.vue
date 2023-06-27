@@ -10,6 +10,7 @@
       v-model="uniqueOptions"
       :multiple="false"
       :componentId="questionId"
+      :isFocused="isFocused"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
     />
   </div>
@@ -32,6 +33,10 @@ export default {
       required: true,
     },
     isRequired: {
+      type: Boolean,
+      default: () => false,
+    },
+    isFocused: {
       type: Boolean,
       default: () => false,
     },
