@@ -440,6 +440,9 @@ class DatasetBase:
         # check for annotations
         assert any([rec.annotation for rec in self._records]), ValueError("Dataset has no annotations.")
 
+        if test_size == 0:
+            test_size = None
+
         # shuffle records
         shuffled_records = self._records.copy()
         seed = seed or random.randint(42, 1984)
@@ -449,16 +452,12 @@ class DatasetBase:
         if isinstance(framework, str):
             framework = Framework(framework)
 
-        if test_size == 0:
-            test_size = None
-
         # prepare for training for the right method
         if framework in [
             Framework.TRANSFORMERS,
             Framework.SETFIT,
             Framework.SPAN_MARKER,
             Framework.PEFT,
-            Framework.AUTOTRAIN,
         ]:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
         elif framework is Framework.SPACY and lang is None:

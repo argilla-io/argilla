@@ -42,12 +42,21 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskMappingForTextClassification,
+)
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RatingQuestionStrategy,
+)
 from argilla.client.feedback.utils import (
     feedback_dataset_in_argilla,
     generate_pydantic_schema,
 )
+from argilla.client.models import Framework
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.utils.dependency import requires_version
+from argilla.utils.dependency import require_version, requires_version
 
 if TYPE_CHECKING:
     import httpx
@@ -203,6 +212,7 @@ class FeedbackDataset:
         """
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
+
         any_required = False
         unique_names = set()
         for field in fields:
@@ -220,6 +230,7 @@ class FeedbackDataset:
 
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
+
         any_required = False
         unique_names = set()
         for question in questions:
@@ -307,10 +318,22 @@ class FeedbackDataset:
         """Returns the fields that define the schema of the records in the dataset."""
         return self.__fields
 
+    def field_by_name(self, name: str) -> Dict[str, FieldSchema]:
+        for item in self.fields:
+            if item.name == name:
+                return item
+        raise KeyError(f"Field with name '{name}' not found in self.fields")
+
     @property
     def questions(self) -> List["FeedbackQuestionModel"]:
         """Returns the questions that will be used to annotate the dataset."""
         return self.__questions
+
+    def question_by_name(self, name: str) -> Dict[str, "FeedbackQuestionModel"]:
+        for item in self.questions:
+            if item.name == name:
+                return item
+        raise KeyError(f"Question with name '{name}' not found in self.questions")
 
     @property
     def records(self) -> List[FeedbackRecord]:
@@ -967,3 +990,85 @@ class FeedbackDataset:
             )
         del hfds
         return cls
+
+    def unify_responses(
+        self,
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
+    ) -> None:
+        """Unify responses for a given question using a given strategy"""
+        if isinstance(question, str):
+            question = self.question_by_name(question)
+        if isinstance(strategy, str):
+            strategy = LabelQuestionStrategy(strategy)
+        strategy.unify_responses(self.records, question)
+
+    def prepare_for_training(
+        self,
+        framework: Union[Framework, str],
+        task_mapping: TrainingTaskMappingForTextClassification,
+        train_size: Optional[float] = 1,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+        fetch_records: bool = True,
+        lang: Optional[str] = None,
+    ):
+        if isinstance(framework, str):
+            framework = Framework(framework)
+
+        # validate train and test sizes
+        if train_size is None:
+            train_size = 1
+        if test_size is None:
+            test_size = 1 - train_size
+
+        # check if all numbers are larger than 0
+        if not [abs(train_size), abs(test_size)] == [train_size, test_size]:
+            raise ValueError("`train_size` and `test_size` must be larger than 0.")
+        # check if train sizes sum up to 1
+        if not (train_size + test_size) == 1:
+            raise ValueError("`train_size` and `test_size` must sum to 1.")
+
+        if test_size == 0:
+            test_size = None
+
+        if fetch_records:
+            self.fetch_records()
+
+        if isinstance(task_mapping, TrainingTaskMappingForTextClassification):
+            self.unify_responses(question=task_mapping.label.question, strategy=task_mapping.label.strategy)
+        else:
+            raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
+
+        data = task_mapping._format_data(self.records)
+        if framework in [
+            Framework.TRANSFORMERS,
+            Framework.SETFIT,
+            Framework.SPAN_MARKER,
+            Framework.PEFT,
+            # Framework.AUTOTRAIN,
+        ]:
+            return task_mapping._prepare_for_training_with_transformers(
+                data=data, train_size=train_size, seed=seed, framework=framework
+            )
+        elif framework is Framework.SPACY:
+            require_version("spacy")
+            import spacy
+
+            if lang is None:
+                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
+                lang = spacy.blank("en")
+            elif lang.isinstance(str):
+                if len(lang) == 2:
+                    lang = spacy.blank(lang)
+                else:
+                    lang = spacy.load(lang)
+            return task_mapping._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
+        elif framework is Framework.SPARK_NLP:
+            return task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.OPENAI:
+            return task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+        else:
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
+            )
