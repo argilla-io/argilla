@@ -15,13 +15,10 @@
 import time
 
 import argilla as rg
-from argilla.client.api import log
-from argilla.client.api import delete
-from argilla.client.api import load
-from argilla.client.api import delete_records
-from argilla.client.models import TextClassificationRecord
 import pytest
+from argilla.client.api import delete, delete_records, load, log
 from argilla.client.client import Argilla
+from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 from argilla.server.models import User, UserRole
 
@@ -41,9 +38,7 @@ def test_delete_records_from_dataset(mocked_client):
     delete(dataset)
     log(
         name=dataset,
-        records=[
-            TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
-        ],
+        records=[TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)],
     )
 
     matched, processed = delete_records(name=dataset, ids=[10], discard_only=True)

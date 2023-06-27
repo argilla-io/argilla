@@ -16,14 +16,15 @@ import datetime
 from typing import TYPE_CHECKING, List
 
 import argilla as rg
-from argilla.client.api import log
-from argilla.client.api import delete 
-from argilla.client.datasets import read_datasets
-from argilla.client.models import TextClassificationRecord
-from argilla.client.models import TokenClassificationRecord
-from argilla.client.models import Text2TextRecord
-from argilla.client.models import TokenAttributions
 import pytest
+from argilla.client.api import delete, log
+from argilla.client.datasets import read_datasets
+from argilla.client.models import (
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenAttributions,
+    TokenClassificationRecord,
+)
 from argilla.client.sdk.datasets.models import TaskType
 from datasets import Dataset
 

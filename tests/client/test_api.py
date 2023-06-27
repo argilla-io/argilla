@@ -29,17 +29,14 @@ from argilla._constants import (
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
 )
-from argilla.client.api import log
-from argilla.client.api import load
-from argilla.client.api import delete_records
-from argilla.client.api import delete 
-from argilla.client.api import init
-from argilla.client.api import active_client
-from argilla.client.datasets import DatasetForTextClassification
-from argilla.client.datasets import DatasetForText2Text
-from argilla.client.datasets import DatasetForTokenClassification
+from argilla.client.api import active_client, delete, delete_records, init, load, log
 from argilla.client.apis.status import ApiInfo, Status
 from argilla.client.client import Argilla
+from argilla.client.datasets import (
+    DatasetForText2Text,
+    DatasetForTextClassification,
+    DatasetForTokenClassification,
+)
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import Response
@@ -497,9 +494,7 @@ def test_dataset_copy(role: UserRole):
     api.delete(dataset_name, workspace=workspace.name)
     api.delete(dataset_copy_name, workspace=workspace.name)
 
-    record = TextClassificationRecord(
-        id=0, text="This is the record input", annotation_agent="test", annotation=["T"]
-    )
+    record = TextClassificationRecord(id=0, text="This is the record input", annotation_agent="test", annotation=["T"])
     api.log(record, name=dataset_name)
     api.copy(dataset_name, name_of_copy=dataset_copy_name)
 

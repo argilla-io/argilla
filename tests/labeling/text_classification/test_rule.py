@@ -14,9 +14,7 @@
 #  limitations under the License.
 import httpx
 import pytest
-from argilla.client.api import load
-from argilla.client.api import delete
-from argilla.client.api import copy
+from argilla.client.api import copy, delete, load
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,

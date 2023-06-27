@@ -15,10 +15,10 @@
 import argilla
 import argilla as rg
 import pytest
-from argilla.metrics.commons import keywords, records_status, text_length
-from argilla.client.api import log
-from argilla.client.api import delete
+from argilla.client.api import delete, log
 from argilla.client.models import TextClassificationRecord
+from argilla.metrics.commons import keywords, records_status, text_length
+
 
 @pytest.fixture
 def gutenberg_spacy_ner(mocked_client):

@@ -14,9 +14,9 @@
 
 
 import argilla as rg
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training import ArgillaTrainer
-from argilla.client.models import TextClassificationRecord
-from argilla.client.models import TokenClassificationRecord
+
 from .helpers import train_with_cleanup
 
 FRAMEWORK = "transformers"

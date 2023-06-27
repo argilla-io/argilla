@@ -14,12 +14,13 @@
 import argilla as rg
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
+from argilla.client.api import delete
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
 from starlette.testclient import TestClient
 
 from tests.factories import AnnotatorFactory, WorkspaceFactory
-from argilla.client.api import delete
+
 
 def create_dataset(client, name: str):
     response = client.post("/api/datasets", json={"name": name, "task": TaskType.text_classification})

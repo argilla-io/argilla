@@ -18,10 +18,8 @@ import argilla as rg
 import cleanlab
 import pytest
 from _pytest.logging import LogCaptureFixture
+from argilla.client.api import delete, load, log
 from argilla.client.models import TextClassificationRecord
-from argilla.client.api import log
-from argilla.client.api import load
-from argilla.client.api import delete 
 from argilla.labeling.text_classification import find_label_errors
 from argilla.labeling.text_classification.label_errors import (
     MissingPredictionError,

@@ -14,8 +14,8 @@
 #  limitations under the License.
 import argilla as rg
 from argilla.client import api
-from argilla.client.models import TextClassificationRecord
 from argilla.client.api import log
+from argilla.client.models import TextClassificationRecord
 from argilla.metrics.text_classification import f1, f1_multilabel
 
 

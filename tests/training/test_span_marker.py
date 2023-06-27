@@ -14,8 +14,9 @@
 
 
 import argilla as rg
-from argilla.training import ArgillaTrainer
 from argilla.client.models import TokenClassificationRecord
+from argilla.training import ArgillaTrainer
+
 from .helpers import train_with_cleanup
 
 FRAMEWORK = "span_marker"

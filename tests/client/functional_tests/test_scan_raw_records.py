@@ -14,8 +14,7 @@
 
 import argilla as rg
 import pytest
-from argilla.client.api import active_api
-from argilla.client.api import load
+from argilla.client.api import active_api, load
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord
 
 

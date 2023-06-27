@@ -15,8 +15,8 @@
 from typing import Dict, List, Optional, Union
 
 import argilla as rg
-from argilla.client.api import load
 from argilla.client import api
+from argilla.client.api import load
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import LabelingRule
 

@@ -14,14 +14,11 @@
 
 import argilla as rg
 import pytest
-from argilla.client.models import TextClassificationRecord
-from argilla.client.models import TokenClassificationRecord
-from argilla.client.api import log
-from argilla.client.api import load
-from argilla.client.api import delete
-from argilla.client.datasets import read_datasets
 from argilla.client import api
+from argilla.client.api import delete, load, log
 from argilla.client.client import Argilla
+from argilla.client.datasets import read_datasets
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.client.sdk.commons.errors import (
     BadRequestApiError,
     GenericApiError,
