@@ -169,12 +169,12 @@ export default {
         if (correspondingResponseToQuestion) {
           let formattedOptions = [];
 
+          // TODO - remove is_selected from object pass to the free_text case and ensure we can submit a form with one text
           switch (question.component_type) {
             case COMPONENT_TYPE.RANKING:
               formattedOptions = correspondingResponseToQuestion.options;
               break;
             case COMPONENT_TYPE.FREE_TEXT:
-            // TODO - remove is_selected from object pass to the free_text case and ensure we can submit a form with one text
             case COMPONENT_TYPE.SINGLE_LABEL:
             case COMPONENT_TYPE.MULTI_LABEL:
             case COMPONENT_TYPE.RATING:

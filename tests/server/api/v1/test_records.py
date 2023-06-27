@@ -24,10 +24,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from tests.factories import (
-    AnnotatorFactory,
     DatasetFactory,
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
+    RankingQuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
@@ -58,6 +58,11 @@ def create_label_selection_questions(dataset: "Dataset") -> None:
 def create_multi_label_selection_questions(dataset: "Dataset") -> None:
     MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question_1", dataset=dataset, required=True)
     MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question_2", dataset=dataset)
+
+
+def create_ranking_question(dataset: "Dataset") -> None:
+    RankingQuestionFactory.create(name="ranking_question_1", dataset=dataset, required=True)
+    RankingQuestionFactory.create(name="ranking_question_2", dataset=dataset)
 
 
 @pytest.mark.parametrize("response_status", ["submitted", "discarded", "draft"])
@@ -111,6 +116,20 @@ def create_multi_label_selection_questions(dataset: "Dataset") -> None:
                 "values": {
                     "input_ok": {"value": "yes"},
                 },
+            },
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_1": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 2},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    },
+                }
             },
         ),
     ],
@@ -209,6 +228,62 @@ def test_create_submitted_record_response_with_missing_required_questions(client
                 },
             },
         ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_2": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 2},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    },
+                }
+            },
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_2": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 1},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    },
+                }
+            },
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_2": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 3},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    },
+                }
+            },
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_2": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 1},
+                            {"value": "completion-a", "rank": 1},
+                        ]
+                    },
+                }
+            },
+        ),
     ],
 )
 def test_create_record_response_with_missing_required_questions(
@@ -302,7 +377,7 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
                     "multi_label_selection_question_1": {"value": "wrong-type"},
                 },
             },
-            "Expected list of values, found <class 'str'>",
+            "This MultiLabelSelection question expects a list of values, found <class 'str'>",
         ),
         (
             create_multi_label_selection_questions,
@@ -311,12 +386,111 @@ def test_create_record_response_with_extra_question_responses(client: TestClient
                     "multi_label_selection_question_1": {"value": ["option4", "option5"]},
                 },
             },
-            "['option4', 'option5'] are not valid options.\nValid options are: ['option1', 'option2', 'option3']",
+            "['option4', 'option5'] are not valid options for this MultiLabelSelection question.\nValid options are: ['option1', 'option2', 'option3']",
         ),
         (
             create_multi_label_selection_questions,
             {"values": {"multi_label_selection_question_1": {"value": []}}},
-            "Expected list of values, found empty list",
+            "This MultiLabelSelection question expects a list of values, found empty list",
+        ),
+        (
+            create_ranking_question,
+            {"values": {"ranking_question_1": {"value": "wrong-type"}}},
+            "This Ranking question expects a list of values, found <class 'str'>",
+        ),
+        (
+            create_ranking_question,
+            {"values": {"ranking_question_1": {"value": []}}},
+            "This Ranking question expects a list containing 3 values, found a list of 0 values",
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_1": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                        ]
+                    }
+                }
+            },
+            "This Ranking question expects a list containing 3 values, found a list of 1 values",
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_1": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 2},
+                            {"value": "completion-a", "rank": 3},
+                            {"value": "completion-z", "rank": 4},
+                        ],
+                    }
+                }
+            },
+            "This Ranking question expects a list containing 3 values, found a list of 4 values",
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_1": {
+                        "value": [
+                            {"value": "completion-b", "rank": 1},
+                            {"value": "completion-c", "rank": 2},
+                            {"value": "completion-a", "rank": 4},
+                        ]
+                    }
+                }
+            },
+            "[4] are not valid ranks for this Ranking question.\nValid ranks are: [1, 2, 3]",
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_1": {
+                        "value": [
+                            {"value": "completion-b"},
+                            {"value": "completion-c"},
+                            {"value": "completion-a"},
+                        ]
+                    }
+                }
+            },
+            "[None] are not valid ranks for this Ranking question.\nValid ranks are: [1, 2, 3]",
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_1": {
+                        "value": [
+                            {"value": "completion-z", "rank": 1},
+                            {"value": "completion-c", "rank": 2},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    }
+                }
+            },
+            "['completion-z'] are not valid options for this Ranking question.\nValid options are: ['completion-a', 'completion-b', 'completion-c']",
+        ),
+        (
+            create_ranking_question,
+            {
+                "values": {
+                    "ranking_question_1": {
+                        "value": [
+                            {"value": "completion-a", "rank": 1},
+                            {"value": "completion-c", "rank": 2},
+                            {"value": "completion-a", "rank": 3},
+                        ]
+                    }
+                }
+            },
+            "This Ranking question expects a list of unique values, but duplicates were found",
         ),
     ],
 )
