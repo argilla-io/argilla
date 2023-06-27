@@ -73,6 +73,7 @@
     "jest": "~27.4.5",
     "jest-serializer-vue": "^2.0.2",
     "prettier": "^2.2.1",
+    "typescript": "^5.1.3",
     "vue-jest": "^3.0.7"
   }
 }
