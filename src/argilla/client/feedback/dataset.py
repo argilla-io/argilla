@@ -1046,7 +1046,6 @@ class FeedbackDataset:
             Framework.SETFIT,
             Framework.SPAN_MARKER,
             Framework.PEFT,
-            # Framework.AUTOTRAIN,
         ]:
             return task_mapping._prepare_for_training_with_transformers(
                 data=data, train_size=train_size, seed=seed, framework=framework
