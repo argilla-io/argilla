@@ -415,7 +415,7 @@ username=daisy role=annotator workspaces=['daisy', 'argilla', 'team', 'latam']
 
 ### Migrate users with Docker Compose
 
-Make sure you create the YAML file above in the same folder as your `docker-compose.yaml`. You can download the `docker-compose.yaml` file from this [URL](https://raw.githubusercontent.com/argilla-io/argilla/main/docker-compose.yaml):
+Make sure you create the YAML file above in the same folder as your `docker-compose.yaml`. You can download the `docker-compose.yaml` file from this [URL](https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.yaml):
 
 Then open the provided `docker-compose.yaml` file and modify your Argilla instance as follows:
 

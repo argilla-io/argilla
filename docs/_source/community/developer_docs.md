@@ -93,12 +93,6 @@ Then, you can proceed with the `pre-commit` hooks installation by simply running
 pre-commit install
 ```
 
-Install the `commit-msg` hook if you want to check your commit messages too:
-
-```sh
-pre-commit install --hook-type commit-msg
-```
-
 ### Building Frontend static files
 
 Build the static UI files in case you want to work on the UI:

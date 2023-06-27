@@ -22,6 +22,11 @@ These are the section headers that we use:
 
 - Added `RankingQuestionSettings` class allowing to create ranking questions in the API using `POST /api/v1/datasets/{dataset_id}/questions` endpoint ([#3232](https://github.com/argilla-io/argilla/pull/3232))
 
+### Changed
+
+- All docker related files have been moved into the `docker` folder
+- `release.Dockerfile` have been renamed to `Dockerfile`
+
 ## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
 
 ### Fixed
@@ -34,7 +39,9 @@ These are the section headers that we use:
 #### Docs
 
 - Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3241](https://github.com/argilla-io/argilla/pull/3241).
-- Fixed library buttons' formatting on Tutorials page [#2819](https://github.com/argilla-io/argilla/pull/2819).
+- Fixed library buttons' formatting on Tutorials page ([#2819](https://github.com/argilla-io/argilla/pull/2819)).
+- Modified styling of error code outputs in notebooks ([#2707](https://github.com/argilla-io/argilla/issues/2707)).
+- Removed template notebook from table of contents ([#2567](https://github.com/argilla-io/argilla/pull/2567)).
 
 ### Added
 
@@ -75,8 +82,8 @@ These are the section headers that we use:
 
 ### Docs
 
-- Resolved typos in the docs ([#3238](https://github.com/argilla-io/argilla/issues/3238))
-- Fixed mention of master branch [#2324](https://github.com/argilla-io/argilla/pull/2324).
+- Resolved typos in the docs ([#3238](https://github.com/argilla-io/argilla/issues/3238)).
+- Fixed mention of master branch ([#2324](https://github.com/argilla-io/argilla/pull/2324)).
 
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
