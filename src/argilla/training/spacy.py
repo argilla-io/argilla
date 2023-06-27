@@ -278,8 +278,8 @@ class ArgillaSpaCyTrainer(_ArgillaSpaCyTrainerBase):
             >>> from argilla import ArgillaSpaCyTrainer
             >>> trainer = ArgillaSpaCyTrainer(
         """
-        super().__init__(**kwargs)
         self.freeze_tok2vec = freeze_tok2vec
+        super().__init__(**kwargs)
 
     def init_training_args(self) -> None:
         from spacy.cli.init_config import init_config
@@ -330,8 +330,8 @@ class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
                 weights during the training. Defaults to True.
             **kwargs: The `ArgillaSpaCyTrainerBase` arguments.
         """
-        super().__init__(**kwargs)
         self.update_transformer = update_transformer
+        super().__init__(**kwargs)
 
     def init_training_args(self) -> None:
         from spacy.cli.init_config import init_config
