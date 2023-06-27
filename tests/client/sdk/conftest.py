@@ -19,6 +19,12 @@ from typing import Any, Dict, List
 import argilla as rg
 import pytest
 from argilla._constants import DEFAULT_API_KEY
+from argilla.client.models import (
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenAttributions,
+    TokenClassificationRecord,
+)
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
@@ -143,9 +149,9 @@ def sdk_client(mocked_client, monkeypatch):
 
 @pytest.fixture
 def bulk_textclass_data():
-    explanation = {"text": [rg.TokenAttributions(token="test", attributions={"test": 0.5})]}
+    explanation = {"text": [TokenAttributions(token="test", attributions={"test": 0.5})]}
     records = [
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             text="test",
             prediction=[("test", 0.5)],
             prediction_agent="agent",
@@ -171,7 +177,7 @@ def bulk_textclass_data():
 @pytest.fixture
 def bulk_text2text_data():
     records = [
-        rg.Text2TextRecord(
+        Text2TextRecord(
             text="test",
             prediction=[("prueba", 0.5), ("intento", 0.5)],
             prediction_agent="agent",
@@ -195,7 +201,7 @@ def bulk_text2text_data():
 @pytest.fixture
 def bulk_tokenclass_data():
     records = [
-        rg.TokenClassificationRecord(
+        TokenClassificationRecord(
             text="a raw text",
             tokens=["a", "raw", "text"],
             prediction=[("test", 2, 5, 0.9)],

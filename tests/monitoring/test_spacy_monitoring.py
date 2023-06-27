@@ -16,16 +16,18 @@ import random
 from time import sleep
 
 import argilla as rg
+from argilla.client.api import delete, load
+from argilla.monitoring.model_monitor import monitor
 
 
 def test_spacy_ner_monitor(monkeypatch, mocked_client):
     dataset = "spacy-dataset"
-    rg.delete(dataset)
+    delete(dataset)
 
     import spacy
 
     nlp = spacy.load("en_core_web_sm")
-    nlp = rg.monitor(
+    nlp = monitor(
         nlp,
         dataset=dataset,
         sample_rate=0.5,
@@ -38,26 +40,26 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
         nlp("Paris is my favourite city")
 
     sleep(1)  # wait for the consumer time
-    df = rg.load(dataset)
+    df = load(dataset)
     df = df.to_pandas()
     assert len(df) == 11
     # assert 10 - std < len(df) < 10 + std
     assert df.text.unique().tolist() == ["Paris is my favourite city"]
 
-    rg.delete(dataset)
+    delete(dataset)
     list(nlp.pipe(["This is a text"] * 20))
 
     sleep(1)  # wait for the consumer time
-    df = rg.load(dataset)
+    df = load(dataset)
     df = df.to_pandas()
     assert len(df) == 6
     assert df.text.unique().tolist() == ["This is a text"]
 
-    rg.delete(dataset)
+    delete(dataset)
     list(nlp.pipe([("This is a text", {"meta": "data"})] * 20, as_tuples=True))
 
     sleep(1)  # wait for the consumer time
-    df = rg.load(dataset)
+    df = load(dataset)
     df = df.to_pandas()
     assert len(df) == 14
     for metadata in df.metadata.values.tolist():
