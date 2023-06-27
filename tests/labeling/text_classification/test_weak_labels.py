@@ -18,7 +18,7 @@ from typing import Callable, List, Optional, Union
 import numpy as np
 import pandas as pd
 import pytest
-from argilla import TextClassificationRecord
+from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,

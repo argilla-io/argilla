@@ -421,7 +421,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-4": {"value": ["a", "b"]},
                     },
                     "status": "submitted",
-                }
+                },
             ],
             metadata={"unit": "test"},
             external_id="1",
@@ -430,6 +430,51 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
             fields={"text": "This is a negative example", "label": "negative"},
             metadata={"another unit": "test"},
             external_id="2",
+        ),
+        FeedbackRecord(
+            fields={"text": "This is a negative example", "label": "negative"},
+            responses=[
+                {
+                    "values": {
+                        "question-1": {"value": "This is a response to question 1"},
+                        "question-2": {"value": 0},
+                        "question-3": {"value": "b"},
+                        "question-4": {"value": ["b", "c"]},
+                    },
+                    "status": "submitted",
+                }
+            ],
+            external_id="3",
+        ),
+        FeedbackRecord(
+            fields={"text": "This is a negative example", "label": "negative"},
+            responses=[
+                {
+                    "values": {
+                        "question-1": {"value": "This is a response to question 1"},
+                        "question-2": {"value": 0},
+                        "question-3": {"value": "c"},
+                        "question-4": {"value": ["a", "c"]},
+                    },
+                    "status": "submitted",
+                }
+            ],
+            external_id="4",
+        ),
+        FeedbackRecord(
+            fields={"text": "This is a negative example", "label": "negative"},
+            responses=[
+                {
+                    "values": {
+                        "question-1": {"value": "This is a response to question 1"},
+                        "question-2": {"value": 1},
+                        "question-3": {"value": "a"},
+                        "question-4": {"value": ["a"]},
+                    },
+                    "status": "submitted",
+                }
+            ],
+            external_id="5",
         ),
     ]
 

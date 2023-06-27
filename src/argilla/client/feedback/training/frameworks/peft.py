@@ -12,24 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.training import (
-    ArgillaTrainer,
-    TrainingTaskMapping,
-    TrainingTaskMappingForTextClassification,
-)
-from argilla.client.feedback.unification import (
-    LabelQuestionStrategy,
-    MultiLabelQuestionStrategy,
-    RatingQuestionStrategy,
-    UnificatiedValueSchema,
-)
 
-__all__ = [
-    "ArgillaTrainer",
-    "LabelQuestionStrategy",
-    "MultiLabelQuestionStrategy",
-    "RatingQuestionStrategy",
-    "TrainingTaskMapping",
-    "TrainingTaskMappingForTextClassification",
-    "UnificatiedValueSchema",
-]
+from argilla.client.feedback.training.frameworks.transformers import (
+    ArgillaTransformersTrainer,
+)
+from argilla.training.peft import ArgillaPeftTrainer as ArgillaPeftTrainerV1
+
+
+class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
+    def __init__(self, *args, **kwargs):
+        ArgillaTransformersTrainer.__init__(self, *args, **kwargs)
