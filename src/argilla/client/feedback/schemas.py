@@ -37,6 +37,11 @@ FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32
 
 
+class RankingValueSchema(BaseModel):
+    value: StrictStr
+    rank: conint(ge=1)
+
+
 class ValueSchema(BaseModel):
     """A value schema for a record.
 
@@ -51,7 +56,7 @@ class ValueSchema(BaseModel):
 
     """
 
-    value: Union[StrictStr, StrictInt, List[str]]
+    value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
 
 
 class ResponseSchema(BaseModel):
@@ -425,8 +430,30 @@ class MultiLabelQuestion(_LabelQuestion):
     settings: Dict[str, Any] = Field({"type": "multi_label_selection"})
 
 
+class RankingQuestion(QuestionSchema):
+    settings: Dict[str, Any] = Field({"type": "ranking"}, allow_mutation=False)
+    values: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
+
+    @validator("values", always=True)
+    def values_dict_must_be_valid(cls, v: Union[List[str], Dict[str, str]]) -> Union[List[str], Dict[str, str]]:
+        if isinstance(v, dict):
+            assert len(v.keys()) > 1, "ensure this dict has at least 2 items"
+            assert len(set(v.values())) == len(v.values()), "ensure this dict has unique values"
+        return v
+
+    @root_validator(skip_on_failure=True)
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(values.get("values"), dict):
+            values["settings"]["options"] = [
+                {"value": key, "text": value} for key, value in values.get("values").items()
+            ]
+        if isinstance(values.get("values"), list):
+            values["settings"]["options"] = [{"value": value, "text": value} for value in values.get("values")]
+        return values
+
+
 AllowedFieldTypes = TextField
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion]
+AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion]
 
 
 class FeedbackDatasetConfig(BaseModel):
