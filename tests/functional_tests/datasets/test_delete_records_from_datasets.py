@@ -14,9 +14,11 @@
 
 import time
 
-import argilla
+import argilla as rg
 import pytest
+from argilla.client.api import delete, delete_records, load, log
 from argilla.client.client import Argilla
+from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 from argilla.server.models import User, UserRole
 
@@ -33,26 +35,24 @@ def test_delete_records_from_dataset(mocked_client):
     dataset = "test_delete_records_from_dataset"
     import argilla as rg
 
-    rg.delete(dataset)
-    rg.log(
+    delete(dataset)
+    log(
         name=dataset,
-        records=[
-            rg.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
-        ],
+        records=[TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)],
     )
 
-    matched, processed = rg.delete_records(name=dataset, ids=[10], discard_only=True)
+    matched, processed = delete_records(name=dataset, ids=[10], discard_only=True)
     assert matched, processed == (1, 1)
 
-    ds = rg.load(name=dataset)
+    ds = load(name=dataset)
     assert len(ds) == 50
 
     time.sleep(1)
-    matched, processed = rg.delete_records(name=dataset, query="id:10", discard_only=False)
+    matched, processed = delete_records(name=dataset, query="id:10", discard_only=False)
     assert matched, processed == (1, 1)
 
     time.sleep(1)
-    ds = rg.load(name=dataset)
+    ds = load(name=dataset)
     assert len(ds) == 49
 
 
@@ -65,9 +65,7 @@ def test_delete_records_without_permission(mocked_client, owner: User, role: Use
     argilla_client = Argilla(api_key=owner.api_key, workspace=workspace.name)
 
     argilla_client.delete(dataset)
-    records = [
-        argilla.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
-    ]
+    records = [TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)]
     argilla_client.log(name=dataset, records=records)
 
     user = UserFactory.create(role=role, workspaces=[workspace])
@@ -95,7 +93,7 @@ def test_delete_records_with_unmatched_records(mocked_client, api):
     api.log(
         name=dataset,
         records=[
-            argilla.TextClassificationRecord(
+            TextClassificationRecord(
                 id=i,
                 text="This is the text",
                 metadata=dict(idx=i),

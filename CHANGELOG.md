@@ -35,14 +35,15 @@ These are the section headers that we use:
 - Fixed `format_as("datasets")` when no responses or optional respones in `FeedbackRecord`, to set their value to what 🤗 Datasets expects instead of just `None` ([#3224](https://github.com/argilla-io/argilla/pull/3224)).
 - Fixed `push_to_huggingface()` when `generate_card=True` (default behaviour), as we were passing a sample record to the `ArgillaDatasetCard` class, and `UUID`s introduced in 1.10.0 ([#3192](https://github.com/argilla-io/argilla/pull/3192)), are not JSON-serializable ([#3231](https://github.com/argilla-io/argilla/pull/3231)).
 - Fixed `from_argilla` and `push_to_argilla` to ensure consistency on both field and question re-construction, and to ensure `UUID`s are properly serialized as `str`, respectively ([#3234](https://github.com/argilla-io/argilla/pull/3234)).
+- Refactored usage of `import argilla as rg` to clarify package navigation ([#3279](https://github.com/argilla-io/argilla/pull/3279)).
 
 #### Docs
 
-- Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3241](https://github.com/argilla-io/argilla/pull/3241).
-- Fixed library buttons' formatting on Tutorials page ([#2819](https://github.com/argilla-io/argilla/pull/2819)).
-- Modified styling of error code outputs in notebooks ([#2707](https://github.com/argilla-io/argilla/issues/2707)).
+- Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3243](https://github.com/argilla-io/argilla/pull/3243).
+- Fixed library buttons' formatting on Tutorials page ([#3255](https://github.com/argilla-io/argilla/pull/3255)).
+- Modified styling of error code outputs in notebooks ([#3270](https://github.com/argilla-io/argilla/pull/3270)).
 - Added ElasticSearch and OpenSearch versions ([#3280](https://github.com/argilla-io/argilla/pull/3280)).
-- Removed template notebook from table of contents ([#2567](https://github.com/argilla-io/argilla/pull/2567)).
+- Removed template notebook from table of contents ([#3271](https://github.com/argilla-io/argilla/pull/3271)).
 
 ### Added
 
@@ -83,8 +84,8 @@ These are the section headers that we use:
 
 ### Docs
 
-- Resolved typos in the docs ([#3238](https://github.com/argilla-io/argilla/issues/3238)).
-- Fixed mention of master branch ([#2324](https://github.com/argilla-io/argilla/pull/2324)).
+- Resolved typos in the docs ([#3240](https://github.com/argilla-io/argilla/pull/3240)).
+- Fixed mention of master branch ([#3254](https://github.com/argilla-io/argilla/pull/3254)).
 
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
