@@ -25,13 +25,13 @@ import datasets
 import httpx
 import pandas as pd
 import pytest
-from argilla import TextClassificationRecord
 from argilla._constants import (
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client.apis.status import ApiInfo, Status
 from argilla.client.client import Argilla
+from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import Response
 from argilla.client.sdk.commons.errors import (

@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
-import argilla as rg
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
 
@@ -43,10 +43,10 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         Args:
             dataset: A `spacy.tokens.DocBin` object or a tuple of `spacy.tokens.DocBin` objects.
             record_class:
-                A `rg.TextClassificationRecord`, `rg.TokenClassificationRecord`, or `rg.Text2TextRecord`
+                A `TextClassificationRecord`, `TokenClassificationRecord`, or `Text2TextRecord`
                 object. Defaults to None.
             model:
-                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_lg". Defaults to None.
+                A `str` with either the `spaCy` model name if using the CPU e.g. "en_core_web_sm". Defaults to None.
             seed: A `int` with the seed for the random number generator. Defaults to None.
             multi_label: A `bool` indicating whether the task is multi-label or not. Defaults to False.
             language:
@@ -74,14 +74,14 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self._nlp = None
         self._model = model
 
-        if self._record_class == rg.TokenClassificationRecord:
+        if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
                 "text": "text",
                 "token": "tokens",
                 "ner_tags": "ner_tags",
             }
             self._pipeline = ["ner"]
-        elif self._record_class == rg.TextClassificationRecord:
+        elif self._record_class == TextClassificationRecord:
             if self._multi_label:
                 self._column_mapping = {"text": "text", "binarized_label": "label"}
                 self._pipeline = ["textcat_multilabel"]
@@ -141,12 +141,12 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         self.config["paths"]["dev"] = self._eval_dataset_path or self._train_dataset_path
         self.config["system"]["seed"] = self._seed or 42
         if not self._model:
-            self._logger.warn(
+            self._logger.warning(
                 "`model` is not specified and it's recommended to specify the"
-                " `spaCy` model to use. Using `en_core_web_lg` as the default model"
+                " `spaCy` model to use. Using `en_core_web_sm` as the default model"
                 " instead."
             )
-            self._model = "en_core_web_lg"
+            self._model = "en_core_web_sm"
         self.config["paths"]["vectors"] = self._model
         if self.use_gpu:
             self.config["system"]["gpu_allocator"] = (
@@ -201,7 +201,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
         from spacy.training.initialize import init_nlp
         from spacy.training.loop import train as train_nlp
 
-        self._logger.warn(
+        self._logger.warning(
             "Note that the spaCy training is expected to be used through the CLI rather"
             " than programatically, so the dataset needs to be dumped into the disk and"
             " then loaded from disk. More information at"
@@ -245,7 +245,7 @@ class ArgillaSpaCyTrainer(ArgillaTrainerSkeleton):
             `List[BaseModel]` (if `as_argilla_records` is True) with the predictions.
         """
         if self._nlp is None:
-            self._logger.warn("Using model without fine-tuning.")
+            self._logger.warning("Using model without fine-tuning.")
             self.init_model()
 
         str_input = False
