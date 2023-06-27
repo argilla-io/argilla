@@ -24,7 +24,7 @@ def create_dataset(client, name: str):
 
 def test_create_dataset_settings(mocked_client):
     name = "test_create_dataset_settings"
-    rgdelete(name)
+    delete(name)
     create_dataset(mocked_client, name)
 
     response = create_settings(mocked_client, name)
