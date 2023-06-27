@@ -15,6 +15,9 @@
 from time import sleep
 
 from argilla.server.models import User
+from argilla.client.api import delete
+from argilla.client.api import load
+from argilla.monitoring.model_monitor import monitor
 
 
 def test_flair_monitoring(monkeypatch, argilla_user: User):
@@ -25,11 +28,11 @@ def test_flair_monitoring(monkeypatch, argilla_user: User):
     dataset = "test_flair_monitoring"
     model = "flair/ner-english"
 
-    rg.delete(dataset)
+    delete(dataset)
 
     # load tagger
     tagger = SequenceTagger.load(model)
-    tagger = rg.monitor(
+    tagger = monitor(
         tagger,
         dataset=dataset,
         sample_rate=1.0,
@@ -46,7 +49,7 @@ def test_flair_monitoring(monkeypatch, argilla_user: User):
     sleep(1)  # wait for the consumer time
     detected_labels = sentence.get_labels("ner")
     detected_spans = sentence.get_spans("ner")
-    records = rg.load(dataset)
+    records = load(dataset)
     assert len(records) == 1
 
     record = records[0]

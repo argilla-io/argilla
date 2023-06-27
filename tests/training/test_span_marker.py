@@ -15,7 +15,7 @@
 
 import argilla as rg
 from argilla.training import ArgillaTrainer
-
+from argilla.client.models import TokenClassificationRecord
 from .helpers import train_with_cleanup
 
 FRAMEWORK = "span_marker"
@@ -38,9 +38,9 @@ def test_train_tokencat(dataset_token_classification) -> None:
     output_dir = f"tmp_{FRAMEWORK}_train_tokencat"
     train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TokenClassificationRecord)
+    assert isinstance(record, TokenClassificationRecord)
     not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert not isinstance(not_record, rg.TokenClassificationRecord)
+    assert not isinstance(not_record, TokenClassificationRecord)
     train_with_cleanup(trainer, output_dir, train=False)
 
 
@@ -50,9 +50,9 @@ def test_evaluate_train_test(dataset_token_classification) -> None:
     output_dir = f"tmp_{FRAMEWORK}_train_tokencat"
     train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TokenClassificationRecord)
+    assert isinstance(record, TokenClassificationRecord)
     not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert not isinstance(not_record, rg.TokenClassificationRecord)
+    assert not isinstance(not_record, TokenClassificationRecord)
     train_with_cleanup(trainer, output_dir, train=False)
 
 
@@ -60,22 +60,22 @@ def test_train_no_model(dataset_token_classification) -> None:
     trainer = ArgillaTrainer(name=dataset_token_classification, framework=FRAMEWORK)
     trainer.update_config(max_steps=1, num_train_epochs=1)
     record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TokenClassificationRecord)
+    assert isinstance(record, TokenClassificationRecord)
     not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert not isinstance(not_record, rg.TokenClassificationRecord)
+    assert not isinstance(not_record, TokenClassificationRecord)
 
 
 def test_various_inputs(dataset_token_classification) -> None:
     trainer = ArgillaTrainer(name=dataset_token_classification, model=MODEL, framework=FRAMEWORK)
     record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TokenClassificationRecord)
+    assert isinstance(record, TokenClassificationRecord)
     not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert not isinstance(not_record, rg.TokenClassificationRecord)
+    assert not isinstance(not_record, TokenClassificationRecord)
     record_list = trainer.predict(["This is a text"], as_argilla_records=True)
     assert isinstance(record_list, list)
     assert len(record_list) == 1
-    assert isinstance(record_list[0], rg.TokenClassificationRecord)
+    assert isinstance(record_list[0], TokenClassificationRecord)
     not_record_list = trainer.predict(["This is a text"], as_argilla_records=False)
     assert isinstance(not_record_list, list)
     assert len(not_record_list) == 1
-    assert not isinstance(not_record_list[0], rg.TokenClassificationRecord)
+    assert not isinstance(not_record_list[0], TokenClassificationRecord)

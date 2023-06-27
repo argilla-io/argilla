@@ -19,7 +19,7 @@ from argilla.server.models import User
 from starlette.testclient import TestClient
 
 from tests.factories import AnnotatorFactory, WorkspaceFactory
-
+from argilla.client.api import delete
 
 def create_dataset(client, name: str):
     response = client.post("/api/datasets", json={"name": name, "task": TaskType.text_classification})
@@ -28,7 +28,7 @@ def create_dataset(client, name: str):
 
 def test_create_dataset_settings(mocked_client):
     name = "test_create_dataset_settings"
-    rg.delete(name)
+    delete(name)
     create_dataset(mocked_client, name)
 
     response = create_settings(mocked_client, name)
@@ -49,7 +49,7 @@ def create_settings(mocked_client, name):
 
 def test_get_dataset_settings_not_found(mocked_client):
     name = "test_get_dataset_settings"
-    rg.delete(name)
+    delete(name)
     create_dataset(mocked_client, name)
 
     response = fetch_settings(mocked_client, name)
@@ -58,7 +58,7 @@ def test_get_dataset_settings_not_found(mocked_client):
 
 def test_delete_settings(mocked_client):
     name = "test_delete_settings"
-    rg.delete(name)
+    delete(name)
 
     create_dataset(mocked_client, name)
     assert create_settings(mocked_client, name).status_code == 200
@@ -70,7 +70,7 @@ def test_delete_settings(mocked_client):
 
 def test_validate_settings_when_logging_data(mocked_client):
     name = "test_validate_settings_when_logging_data"
-    rg.delete(name)
+    delete(name)
 
     create_dataset(mocked_client, name)
     assert create_settings(mocked_client, name).status_code == 200
@@ -93,7 +93,7 @@ def test_validate_settings_when_logging_data(mocked_client):
 def test_validate_settings_after_logging(mocked_client):
     name = "test_validate_settings_after_logging"
 
-    rg.delete(name)
+    delete(name)
     response = log_some_data(mocked_client, name)
     assert response.status_code == 200
 
