@@ -128,23 +128,15 @@ class Datasets(AbstractApi):
         dataset = get_dataset(self.http_client, name=name).parsed
         return self._DatasetApiModel.parse_obj(dataset)
 
-    def create(self, name: str, workspace: str, settings: Settings):
-        task = (
-            TaskType.text_classification
-            if isinstance(settings, TextClassificationSettings)
-            else TaskType.token_classification
-        )
-
+    def create(self, name: str, task: TaskType, workspace: str) -> _DatasetApiModel:
         try:
             with api_compatibility(self, min_version="1.4.0"):
                 dataset = self._DatasetApiModel(name=name, task=task, workspace=workspace)
                 self.http_client.post(f"{self._API_PREFIX}", json=dataset.dict())
-                self._save_settings(dataset, settings=settings)
         except ApiCompatibilityError:
-            with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
-                dataset = self._DatasetApiModel(name=name, task=task)
-                self.http_client.post(f"{self._API_PREFIX}?workspace={workspace}", json=dataset.dict())
-                self._save_settings(dataset, settings=settings)
+            dataset = self._DatasetApiModel(name=name, task=task)
+            self.http_client.post(f"{self._API_PREFIX}?workspace={workspace}", json=dataset.dict())
+        return dataset
 
     def configure(self, name: str, workspace: str, settings: Settings):
         """
@@ -157,10 +149,15 @@ class Datasets(AbstractApi):
             settings: The dataset settings
         """
         try:
-            self.create(name=name, workspace=workspace, settings=settings)
+            task = (
+                TaskType.text_classification
+                if isinstance(settings, TextClassificationSettings)
+                else TaskType.token_classification
+            )
+            ds = self.create(name=name, task=task, workspace=workspace)
         except AlreadyExistsApiError:
             ds = self.find_by_name(name)
-            self._save_settings(dataset=ds, settings=settings)
+        self._save_settings(dataset=ds, settings=settings)
 
     def scan(
         self,
@@ -308,7 +305,7 @@ class Datasets(AbstractApi):
     def _save_settings(self, dataset: _DatasetApiModel, settings: Settings):
         if __TASK_TO_SETTINGS__.get(dataset.task) != type(settings):
             raise ValueError(
-                f"The provided settings type {type(settings)} cannot be applied to dataset." " Task type mismatch"
+                f"The provided settings type {type(settings)} cannot be applied to dataset. Task type mismatch"
             )
 
         settings_ = self._SettingsApiModel(label_schema={"labels": [label for label in settings.label_schema]})

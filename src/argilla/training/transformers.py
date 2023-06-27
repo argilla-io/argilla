@@ -17,7 +17,7 @@ from typing import List, Union
 
 from datasets import DatasetDict
 
-import argilla as rg
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import (
     _apply_column_mapping,
@@ -71,7 +71,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             self._train_dataset = self._dataset
             self._eval_dataset = None
 
-        if self._record_class == rg.TextClassificationRecord:
+        if self._record_class == TextClassificationRecord:
             if self._multi_label:
                 self._id2label = dict(enumerate(self._train_dataset.features["label"][0].names))
                 self._label_list = self._train_dataset.features["label"][0].names
@@ -82,14 +82,14 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
             self._model_class = AutoModelForSequenceClassification
 
-        elif self._record_class == rg.TokenClassificationRecord:
+        elif self._record_class == TokenClassificationRecord:
             self._label_list = self._train_dataset.features["ner_tags"].feature.names
             self._id2label = dict(enumerate(self._label_list))
             self._label2id = {v: k for k, v in self._id2label.items()}
 
             self._model_class = AutoModelForTokenClassification
         else:
-            raise NotImplementedError("rg.Text2TextRecord is not supported.")
+            raise NotImplementedError("Text2TextRecord is not supported.")
 
         self.init_training_args()
 
@@ -103,7 +103,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 lambda x: {"float_label": x["label"].to(torch.float)}, remove_columns=["label"]
             ).rename_column("float_label", "label")
 
-        if self._record_class == rg.TextClassificationRecord:
+        if self._record_class == TextClassificationRecord:
             columns_mapping = {"text": "text", "label": "binarized_label"}
             if self._multi_label:
                 self._train_dataset = _apply_column_mapping(self._train_dataset, columns_mapping)
@@ -160,7 +160,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         else:
             device = -1
 
-        if self._record_class == rg.TextClassificationRecord:
+        if self._record_class == TextClassificationRecord:
             if transformers.__version__ >= "4.20.0":
                 kwargs = {"top_k": None}
             else:
@@ -172,7 +172,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 device=device,
                 **kwargs,
             )
-        elif self._record_class == rg.TokenClassificationRecord:
+        elif self._record_class == TokenClassificationRecord:
             self._pipeline = pipeline(
                 task="token-classification",
                 model=self._transformers_model,
@@ -237,7 +237,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             return tokenized_inputs
 
         # set correct tokenization
-        if self._record_class == rg.TextClassificationRecord:
+        if self._record_class == TextClassificationRecord:
             preprocess_function = text_classification_preprocess_function
             self._data_collator = DataCollatorWithPadding(tokenizer=self._transformers_tokenizer)
             if self._multi_label:
@@ -245,13 +245,13 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             else:
                 remove_columns = ["id", "text"]
             replace_labels = True
-        elif self._record_class == rg.TokenClassificationRecord:
+        elif self._record_class == TokenClassificationRecord:
             preprocess_function = token_classification_preprocess_function
             self._data_collator = DataCollatorForTokenClassification(tokenizer=self._transformers_tokenizer)
             remove_columns = ["id", "tokens", "ner_tags"]
             replace_labels = False
         else:
-            raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
+            raise NotImplementedError("`Text2TextRecord` is not supported yet.")
 
         self._tokenized_train_dataset = self._train_dataset.map(
             preprocess_function, batched=True, remove_columns=remove_columns
@@ -273,7 +273,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         import numpy as np
 
         func = None
-        if self._record_class == rg.TextClassificationRecord:
+        if self._record_class == TextClassificationRecord:
             accuracy = evaluate.load("accuracy")
             f1 = evaluate.load("f1", config_name="multilabel")
 
@@ -301,7 +301,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             else:
                 func = compute_metrics_text_classification
 
-        elif self._record_class == rg.TokenClassificationRecord:
+        elif self._record_class == TokenClassificationRecord:
             seqeval = evaluate.load("seqeval")
 
             def compute_metrics(p):
@@ -402,7 +402,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             formatted_prediction = []
 
             for val, pred in zip(text, predictions):
-                if self._record_class == rg.TextClassificationRecord:
+                if self._record_class == TextClassificationRecord:
                     formatted_prediction.append(
                         self._record_class(
                             text=val,
@@ -410,7 +410,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                             multi_label=self._multi_label,
                         )
                     )
-                elif self._record_class == rg.TokenClassificationRecord:
+                elif self._record_class == TokenClassificationRecord:
                     _pred = [(value["entity_group"], value["start"], value["end"]) for value in pred]
                     encoding = self._pipeline.tokenizer(val)
                     word_ids = sorted(set(encoding.word_ids()) - {None})

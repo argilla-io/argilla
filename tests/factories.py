@@ -58,6 +58,10 @@ class UserFactory(BaseFactory):
     password_hash = "$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw."
 
 
+class OwnerFactory(UserFactory):
+    role = UserRole.owner
+
+
 class AdminFactory(UserFactory):
     role = UserRole.admin
 
@@ -167,5 +171,16 @@ class MultiLabelSelectionQuestionFactory(QuestionFactory):
             {"value": "option1", "text": "Option 1"},
             {"value": "option2", "text": "Option 2"},
             {"value": "option3", "text": "Option 3"},
+        ],
+    }
+
+
+class RankingQuestionFactory(QuestionFactory):
+    settings = {
+        "type": QuestionType.ranking.value,
+        "options": [
+            {"value": "completion-a", "text": "Completion A"},
+            {"value": "completion-b", "text": "Completion B"},
+            {"value": "completion-c", "text": "Completion C"},
         ],
     }

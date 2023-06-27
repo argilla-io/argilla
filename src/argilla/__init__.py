@@ -19,7 +19,6 @@ as well as in the `_import_structure` dictionary.
 """
 
 import sys as _sys
-import warnings
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from argilla.logging import configure_logging as _configure_logging
@@ -34,15 +33,6 @@ try:
     _install_rich()
 except ModuleNotFoundError:
     pass
-
-# TODO: Remove this warning once https://github.com/argilla-io/argilla/issues/2902 is tackled
-if _sys.version_info < (3, 8):
-    warnings.warn(
-        message="Python 3.7 is coming to its end-of-life and will be no longer supported in the upcoming release of Argilla. "
-        "To ensure compatibility and uninterrupted service, we kindly request that you migrate to Argilla with"
-        " Python 3.8 or higher.",
-        category=DeprecationWarning,
-    )
 
 __version__ = _version.version
 
@@ -66,8 +56,24 @@ if _TYPE_CHECKING:
         read_datasets,
         read_pandas,
     )
-    from argilla.client.feedback.dataset import FeedbackDataset
-    from argilla.client.feedback.schemas import (
+    from argilla.client.models import (
+        Text2TextRecord,
+        TextClassificationRecord,
+        TextGenerationRecord,  # TODO Remove TextGenerationRecord
+        TokenAttributions,
+        TokenClassificationRecord,
+    )
+    from argilla.client.users import User
+    from argilla.client.workspaces import Workspace
+    from argilla.datasets import (
+        TextClassificationSettings,
+        TokenClassificationSettings,
+        configure_dataset,
+        configure_dataset_settings,
+        load_dataset_settings,
+    )
+    from argilla.feedback import (
+        FeedbackDataset,
         FeedbackRecord,
         LabelQuestion,
         MultiLabelQuestion,
@@ -77,21 +83,6 @@ if _TYPE_CHECKING:
         TextQuestion,
         ValueSchema,
     )
-    from argilla.client.models import (
-        Text2TextRecord,
-        TextClassificationRecord,
-        TextGenerationRecord,  # TODO Remove TextGenerationRecord
-        TokenAttributions,
-        TokenClassificationRecord,
-    )
-    from argilla.client.workspaces import Workspace
-    from argilla.datasets import (
-        TextClassificationSettings,
-        TokenClassificationSettings,
-        configure_dataset,
-        configure_dataset_settings,
-        load_dataset_settings,
-    )
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
     from argilla.server.server import app
@@ -99,6 +90,21 @@ if _TYPE_CHECKING:
 
 # TODO: remove me
 _import_structure = {
+    "feedback": [
+        "ArgillaTrainer",
+        "LabelQuestionStrategy",
+        "MultiLabelQuestionStrategy",
+        "RatingQuestionStrategy",
+        "FeedbackDataset",
+        "FeedbackRecord",
+        "LabelQuestion",
+        "MultiLabelQuestion",
+        "RatingQuestion",
+        "ResponseSchema",
+        "TextField",
+        "TextQuestion",
+        "ValueSchema",
+    ],
     "client.api": [
         "copy",
         "delete",
@@ -125,17 +131,7 @@ _import_structure = {
         "read_datasets",
         "read_pandas",
     ],
-    "client.feedback.dataset": ["FeedbackDataset"],
-    "client.feedback.schemas": [
-        "FeedbackRecord",
-        "LabelQuestion",
-        "MultiLabelQuestion",
-        "RatingQuestion",
-        "ResponseSchema",
-        "TextField",
-        "TextQuestion",
-        "ValueSchema",
-    ],
+    "client.users": ["User"],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [

@@ -14,18 +14,19 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
+from pydantic.utils import GetterDict
 
 from argilla.server.search_engine import Query
 
 try:
-    from typing import Annotated, Literal
+    from typing import Annotated
 except ImportError:
-    from typing_extensions import Annotated, Literal
+    from typing_extensions import Annotated
 
 from argilla.server.models import (
     DatasetStatus,
@@ -55,15 +56,18 @@ QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 100
 
+VALUE_TEXT_OPTION_VALUE_MIN_LENGHT = 1
+VALUE_TEXT_OPTION_VALUE_MAX_LENGTH = 200
+VALUE_TEXT_OPTION_TEXT_MIN_LENGTH = 1
+VALUE_TEXT_OPTION_TEXT_MAX_LENGTH = 500
+VALUE_TEXT_OPTION_DESCRIPTION_MIN_LENGTH = 1
+VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH = 1000
+
 LABEL_SELECTION_OPTIONS_MIN_ITEMS = 2
 LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
-LABEL_SELECTION_VALUE_MIN_LENGHT = 1
-LABEL_SELECTION_VALUE_MAX_LENGHT = 200
-LABEL_SELECTION_TEXT_MIN_LENGTH = 1
-LABEL_SELECTION_TEXT_MAX_LENGTH = 500
-LABEL_SELECTION_DESCRIPTION_MIN_LENGTH = 1
-LABEL_SELECTION_DESCRIPTION_MAX_LENGTH = 1000
-LABEL_SELECTION_LABEL_DESCRIPTION_MAX_LENGTH = 100
+
+RANKING_OPTIONS_MIN_ITEMS = 2
+
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
@@ -183,19 +187,19 @@ class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     )
 
 
-class LabelSelectionQuestionSettingsOption(BaseModel):
+class ValueTextQuestionSettingsOption(BaseModel):
     value: constr(
-        min_length=LABEL_SELECTION_VALUE_MIN_LENGHT,
-        max_length=LABEL_SELECTION_VALUE_MAX_LENGHT,
+        min_length=VALUE_TEXT_OPTION_VALUE_MIN_LENGHT,
+        max_length=VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
     )
     text: constr(
-        min_length=LABEL_SELECTION_TEXT_MIN_LENGTH,
-        max_length=LABEL_SELECTION_TEXT_MAX_LENGTH,
+        min_length=VALUE_TEXT_OPTION_TEXT_MIN_LENGTH,
+        max_length=VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
     )
     description: Optional[
         constr(
-            min_length=LABEL_SELECTION_DESCRIPTION_MIN_LENGTH,
-            max_length=LABEL_SELECTION_DESCRIPTION_MAX_LENGTH,
+            min_length=VALUE_TEXT_OPTION_DESCRIPTION_MIN_LENGTH,
+            max_length=VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
         )
     ] = None
 
@@ -203,7 +207,7 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
 class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.label_selection]
     options: conlist(
-        item_type=LabelSelectionQuestionSettingsOption,
+        item_type=ValueTextQuestionSettingsOption,
         min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
         max_items=LABEL_SELECTION_OPTIONS_MAX_ITEMS,
     )
@@ -214,12 +218,21 @@ class MultiLabelSelectionQuestionSettingsCreate(LabelSelectionQuestionSettingsCr
     type: Literal[QuestionType.multi_label_selection]
 
 
+class RankingQuestionSettingsCreate(UniqueValuesCheckerMixin):
+    type: Literal[QuestionType.ranking]
+    options: conlist(
+        item_type=ValueTextQuestionSettingsOption,
+        min_items=RANKING_OPTIONS_MIN_ITEMS,
+    )
+
+
 QuestionSettingsCreate = Annotated[
     Union[
         TextQuestionSettingsCreate,
         RatingQuestionSettingsCreate,
         LabelSelectionQuestionSettingsCreate,
         MultiLabelSelectionQuestionSettingsCreate,
+        RankingQuestionSettingsCreate,
     ],
     PydanticField(discriminator="type"),
 ]
@@ -287,9 +300,19 @@ class RecordInclude(str, Enum):
     responses = "responses"
 
 
+class RecordGetterDict(GetterDict):
+    def get(self, key: str, default: Any) -> Any:
+        if key == "metadata":
+            return getattr(self._obj, "metadata_", None)
+        if key == "responses" and "responses" not in self._obj.__dict__:
+            return default
+        return super().get(key, default)
+
+
 class Record(BaseModel):
     id: UUID
     fields: Dict[str, Any]
+    metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     # TODO: move `responses` to `response` since contextualized endpoint will contains only the user response
     # response: Optional[Response]
@@ -299,6 +322,7 @@ class Record(BaseModel):
 
     class Config:
         orm_mode = True
+        getter_dict = RecordGetterDict
 
 
 class Records(BaseModel):
@@ -325,6 +349,7 @@ UserResponseCreate = Annotated[
 
 class RecordCreate(BaseModel):
     fields: Dict[str, Any]
+    metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
 

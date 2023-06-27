@@ -1,6 +1,6 @@
 {
   "name": "argilla",
-  "version": "1.10.0",
+  "version": "1.12.0-dev",
   "private": true,
   "eslintIgnore": [
     "node_modules/**/*",

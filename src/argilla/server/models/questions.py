@@ -13,14 +13,14 @@
 #  limitations under the License.
 
 from enum import Enum
-from typing import Any, Generic, List, Optional, TypeVar, Union
+from typing import Any, Generic, List, Literal, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
 try:
-    from typing import Annotated, Literal
+    from typing import Annotated
 except ImportError:
-    from typing_extensions import Annotated, Literal
+    from typing_extensions import Annotated
 
 
 class QuestionType(str, Enum):
@@ -28,6 +28,7 @@ class QuestionType(str, Enum):
     rating = "rating"
     label_selection = "label_selection"
     multi_label_selection = "multi_label_selection"
+    ranking = "ranking"
 
 
 class ResponseValue(BaseModel):
@@ -70,7 +71,7 @@ class RatingQuestionSettings(ValidOptionCheckerMixin[int]):
     options: List[RatingQuestionSettingsOption]
 
 
-class LabelSelectionQuestionSettingsOption(BaseModel):
+class ValueTextQuestionSettingsOption(BaseModel):
     value: str
     text: str
     description: Optional[str] = None
@@ -78,8 +79,12 @@ class LabelSelectionQuestionSettingsOption(BaseModel):
 
 class LabelSelectionQuestionSettings(ValidOptionCheckerMixin[str]):
     type: Literal[QuestionType.label_selection]
-    options: List[LabelSelectionQuestionSettingsOption]
+    options: List[ValueTextQuestionSettingsOption]
     visible_options: Optional[int] = None
+
+
+def _are_all_elements_in_list(elements: List[T], list_: List[T]) -> List[T]:
+    return sorted(list(set(elements) - set(list_)))
 
 
 class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
@@ -87,12 +92,68 @@ class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
 
     def check_response(self, response: ResponseValue):
         if not isinstance(response.value, list):
-            raise ValueError(f"Expected list of values, found {type(response.value)}")
+            raise ValueError(
+                f"This MultiLabelSelection question expects a list of values, found {type(response.value)}"
+            )
+
         if len(response.value) == 0:
-            raise ValueError("Expected list of values, found empty list")
-        invalid_options = sorted(list(set(response.value) - set(self.option_values)))
+            raise ValueError("This MultiLabelSelection question expects a list of values, found empty list")
+
+        unique_values = set(response.value)
+        if len(unique_values) != len(response.value):
+            raise ValueError(
+                "This MultiLabelSelection question expects a list of unique values, but duplicates were found"
+            )
+
+        invalid_options = _are_all_elements_in_list(response.value, self.option_values)
         if invalid_options:
-            raise ValueError(f"{invalid_options!r} are not valid options.\nValid options are: {self.option_values!r}")
+            raise ValueError(
+                f"{invalid_options!r} are not valid options for this MultiLabelSelection question.\nValid options are:"
+                f" {self.option_values!r}"
+            )
+
+
+class RankingQuestionSettings(ValidOptionCheckerMixin[str]):
+    type: Literal[QuestionType.ranking]
+    options: List[ValueTextQuestionSettingsOption]
+
+    @property
+    def rank_values(self) -> List[int]:
+        return list(range(1, len(self.option_values) + 1))
+
+    def check_response(self, response: ResponseValue):
+        if not isinstance(response.value, list):
+            raise ValueError(f"This Ranking question expects a list of values, found {type(response.value)}")
+
+        if len(response.value) != len(self.option_values):
+            raise ValueError(
+                f"This Ranking question expects a list containing {len(self.option_values)} values, found a list of"
+                f" {len(response.value)} values"
+            )
+
+        values = []
+        ranks = []
+        for response_option in response.value:
+            values.append(response_option.get("value"))
+            ranks.append(response_option.get("rank"))
+
+        invalid_ranks = _are_all_elements_in_list(ranks, self.rank_values)
+        if invalid_ranks:
+            raise ValueError(
+                f"{invalid_ranks!r} are not valid ranks for this Ranking question.\nValid ranks are:"
+                f" {self.rank_values!r}"
+            )
+
+        invalid_values = _are_all_elements_in_list(values, self.option_values)
+        if invalid_values:
+            raise ValueError(
+                f"{invalid_values!r} are not valid options for this Ranking question.\nValid options are:"
+                f" {self.option_values!r}"
+            )
+
+        unique_values = set(values)
+        if len(response.value) != len(unique_values):
+            raise ValueError("This Ranking question expects a list of unique values, but duplicates were found")
 
 
 QuestionSettings = Annotated[
@@ -101,6 +162,7 @@ QuestionSettings = Annotated[
         RatingQuestionSettings,
         LabelSelectionQuestionSettings,
         MultiLabelSelectionQuestionSettings,
+        RankingQuestionSettings,
     ],
     Field(..., discriminator="type"),
 ]

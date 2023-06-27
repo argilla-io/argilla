@@ -13,18 +13,14 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
-
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
 
 from pydantic import (
     BaseModel,
     Extra,
     Field,
+    PrivateAttr,
     StrictInt,
     StrictStr,
     conint,
@@ -97,6 +93,7 @@ class FeedbackRecord(BaseModel):
 
     Args:
         fields (Dict[str, str]): The fields of the record.
+        metadata (Optional[Dict[str, Any]]): The metadata of the record. Defaults to None.
         responses (Optional[Union[ResponseSchema, List[ResponseSchema]]]): The responses of the record. Defaults to None.
         external_id (Optional[str]): The external id of the record. Defaults to None.
 
@@ -104,12 +101,14 @@ class FeedbackRecord(BaseModel):
         >>> import argilla as rg
         >>> rg.FeedbackRecord(
         ...     fields={"text": "This is the first record", "label": "positive"},
+        ...     metadata={"first": True, "nested": {"more": "stuff"}},
         ...     responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
         ...     external_id="entry-1",
         ... )
         >>> # or use a ResponseSchema directly
         >>> rg.FeedbackRecord(
         ...     fields={"text": "This is the first record", "label": "positive"},
+        ...     metadata={"first": True, "nested": {"more": "stuff"}},
         ...     responses=[rg.ResponseSchema(values={"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}))],
         ...     external_id="entry-1",
         ... )
@@ -117,8 +116,12 @@ class FeedbackRecord(BaseModel):
     """
 
     fields: Dict[str, str]
+    metadata: Optional[Dict[str, Any]] = None
     responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
+    _unified_responses: Optional[
+        Dict[str, List["argilla.client.feedback.unificaiton.UnificatiedValueSchema"]]
+    ] = PrivateAttr(default={})
 
     @validator("responses", always=True)
     def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
@@ -130,6 +133,7 @@ class FeedbackRecord(BaseModel):
 
     class Config:
         extra = Extra.ignore
+        fields = {"_unified_responses": {"exclude": True}}
 
 
 class FieldSchema(BaseModel):
@@ -289,6 +293,18 @@ class RatingQuestion(QuestionSchema):
     settings: Dict[str, Any] = Field({"type": "rating"}, allow_mutation=False)
     values: List[int] = Field(unique_items=True, min_items=2)
 
+    @property
+    def __all_labels__(self):
+        return [entry["value"] for entry in self.settings["options"]]
+
+    @property
+    def __label2id__(self):
+        return {label: idx for idx, label in enumerate(self.__all_labels__)}
+
+    @property
+    def __id2label__(self):
+        return {idx: label for idx, label in enumerate(self.__all_labels__)}
+
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         values["settings"]["options"] = [{"value": value} for value in values.get("values")]
@@ -319,6 +335,18 @@ class _LabelQuestion(QuestionSchema):
             "visible_labels"
         )  # `None` is a possible value, which means all labels are visible
         return values
+
+    @property
+    def __all_labels__(self):
+        return [entry["value"] for entry in self.settings["options"]]
+
+    @property
+    def __label2id__(self):
+        return {label: idx for idx, label in enumerate(self.__all_labels__)}
+
+    @property
+    def __id2label__(self):
+        return {idx: label for idx, label in enumerate(self.__all_labels__)}
 
 
 class LabelQuestion(_LabelQuestion):

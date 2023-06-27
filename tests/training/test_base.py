@@ -12,8 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as rg
 import pytest
+from argilla.client.datasets import (
+    DatasetForTextClassification,
+    DatasetForTokenClassification,
+)
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training import ArgillaTrainer
 
 
@@ -29,8 +33,8 @@ def test_base_text_classification_without_split(framework, dataset_text_classifi
     assert trainer._split_applied is False
     assert trainer._multi_label is False
     assert trainer._trainer._eval_dataset is None
-    assert trainer._rg_dataset_type == rg.DatasetForTextClassification
-    assert trainer._trainer._record_class == rg.TextClassificationRecord
+    assert trainer._rg_dataset_type == DatasetForTextClassification
+    assert trainer._trainer._record_class == TextClassificationRecord
 
 
 @pytest.mark.parametrize("framework", ["spacy", "transformers", "setfit"])
@@ -39,8 +43,8 @@ def test_base_text_classification_with_split(framework, dataset_text_classificat
     assert trainer._split_applied is True
     assert trainer._multi_label is False
     assert trainer._trainer._eval_dataset is not None
-    assert trainer._rg_dataset_type == rg.DatasetForTextClassification
-    assert trainer._trainer._record_class == rg.TextClassificationRecord
+    assert trainer._rg_dataset_type == DatasetForTextClassification
+    assert trainer._trainer._record_class == TextClassificationRecord
 
 
 @pytest.mark.parametrize("framework", ["spacy", "transformers", "setfit"])
@@ -50,11 +54,11 @@ def test_base_token_classification(framework, dataset_token_classification):
         assert trainer._split_applied is False
         assert trainer._multi_label is False
         assert trainer._trainer._eval_dataset is None
-        assert trainer._rg_dataset_type is rg.DatasetForTokenClassification
-        assert trainer._trainer._record_class is rg.TokenClassificationRecord
+        assert trainer._rg_dataset_type is DatasetForTokenClassification
+        assert trainer._trainer._record_class is TokenClassificationRecord
 
     if framework == "setfit":
-        with pytest.raises(NotImplementedError, match=f"{framework} only supports `TextClassification` tasks."):
+        with pytest.raises(NotImplementedError, match="SetFit only supports the `TextClassification` task."):
             _init_trainer(framework)
     else:
         _init_trainer(framework)

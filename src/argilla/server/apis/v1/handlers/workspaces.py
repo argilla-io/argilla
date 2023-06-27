@@ -34,13 +34,13 @@ def get_workspace(
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
+    authorize(current_user, WorkspacePolicyV1.get(workspace_id))
+
     workspace = accounts.get_workspace_by_id(db, workspace_id)
     if not workspace:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Workspace with id `{workspace_id}` not found",
         )
-
-    authorize(current_user, WorkspacePolicyV1.get(workspace))
 
     return workspace

@@ -17,7 +17,7 @@ from typing import List, Union
 
 from datasets import DatasetDict
 
-import argilla as rg
+from argilla.client.models import TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args, get_default_args
 from argilla.utils.dependency import require_version
@@ -27,7 +27,8 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSpanMarkerTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("span_marker")
+    require_version("datasets")
+    require_version("span_marker>=1.2")
     require_version("transformers>=4.19.0")  # <- required for span_marker evaluation
 
     def __init__(self, *args, **kwargs) -> None:
@@ -57,13 +58,13 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
             self._train_dataset = self._dataset
             self._eval_dataset = None
 
-        if self._record_class == rg.TokenClassificationRecord:
+        if self._record_class == TokenClassificationRecord:
             self._column_mapping = {"text": "text", "token": "tokens", "ner_tags": "ner_tags"}
             self._label_list = self._train_dataset.features["ner_tags"].feature.names
 
             self._model_class = SpanMarkerModel
         else:
-            raise NotImplementedError("rg.Text2TextRecord and rg.TextClassification are not supported.")
+            raise NotImplementedError("Text2TextRecord and TextClassification are not supported.")
 
         self.init_training_args()
 
@@ -145,6 +146,8 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
         Returns:
           A list of predictions
         """
+        from datasets import Dataset
+
         if self._span_marker_model is None:
             self._logger.warning("Using model without fine-tuning.")
             self.init_model()
@@ -164,7 +167,10 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
                     (entity["label"], entity["char_start_index"], entity["char_end_index"], entity["score"])
                     for entity in entities
                 ]
-                encoding = self._span_marker_model.tokenizer.tokenizer(sentence)
+                dataset = Dataset.from_dict({"tokens": text})
+                encoding = self._span_marker_model.tokenizer({"tokens": dataset["tokens"]}, return_batch_encoding=True)[
+                    "batch_encoding"
+                ]
                 word_ids = sorted(set(encoding.word_ids()) - {None})
                 tokens = []
                 for word_id in word_ids:
