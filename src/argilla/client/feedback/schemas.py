@@ -38,22 +38,24 @@ PUSHING_BATCH_SIZE = 32
 
 
 class RankingValueSchema(BaseModel):
+    """Schema for the `RankingQuestion` response value.
+
+    Note: we may have more than one record in the same rank.
+
+    Args:
+        value: The value of the record.
+        rank: The rank of the record.
+    """
+
     value: StrictStr
     rank: conint(ge=1)
 
 
 class ValueSchema(BaseModel):
-    """A value schema for a record.
+    """Schema for any `FeedbackRecord` response value.
 
     Args:
-        value (Union[StrictStr, StrictInt, List[str]]): The value of the record.
-
-    Examples:
-        >>> import argilla as rg
-        >>> value = rg.ValueSchema(value="Yes")
-        >>> # or use a dict
-        >>> value = {"value": "Yes"}
-
+        value: The value of the record.
     """
 
     value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
@@ -431,6 +433,14 @@ class MultiLabelQuestion(_LabelQuestion):
 
 
 class RankingQuestion(QuestionSchema):
+    """Schema for the `RankingQuestion` question-type.
+
+    Args:
+        settings: The settings for the question, including the type and options.
+        values: The values for the question, to be formatted and included as part of
+            the settings.
+    """
+
     settings: Dict[str, Any] = Field({"type": "ranking"}, allow_mutation=False)
     values: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
 
