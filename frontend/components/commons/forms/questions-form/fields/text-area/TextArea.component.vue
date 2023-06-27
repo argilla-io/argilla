@@ -11,7 +11,7 @@
         v-if="visibleMarkdown"
         class="textarea--markdown"
         :markdown="value"
-        @click.native="setEditionMode(true)"
+        @click.native="onChangeFocus(true)"
       />
       <ContentEditableFeedbackTask
         v-else
@@ -22,7 +22,7 @@
         :placeholder="placeholder"
         :isFocused="isFocused"
         @change-text="onChangeTextArea"
-        @on-change-focus="setEditionMode"
+        @on-change-focus="onChangeFocus"
       />
     </div>
   </div>
@@ -84,8 +84,13 @@ export default {
         this.$emit("on-error", !isAnyText);
       }
     },
-    setEditionMode(status) {
+    onChangeFocus(status) {
       this.isEditionModeActive = status;
+      if (status) {
+        this.$emit("on-focus");
+      } else {
+        this.$emit("on-blur");
+      }
     },
   },
 };

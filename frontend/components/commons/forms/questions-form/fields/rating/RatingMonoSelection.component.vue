@@ -3,11 +3,13 @@
     <div class="inputs-area">
       <div class="input-button" v-for="option in options" :key="option.id">
         <input
+          ref="options"
           type="checkbox"
           :name="option.text"
           :id="option.id"
           v-model="option.is_selected"
           @change="onSelect(option)"
+          @focus="onFocus"
         />
         <label
           class="label-text cursor-pointer"
@@ -28,10 +30,24 @@ export default {
       type: Array,
       required: true,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   model: {
     prop: "options",
     event: "on-change",
+  },
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        this.$nextTick(() => {
+          !!newValue && this.$refs?.options[0].focus();
+        });
+      },
+    },
   },
   methods: {
     onSelect({ id, is_selected }) {
@@ -45,6 +61,9 @@ export default {
       });
 
       this.$emit("on-change", this.options);
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };
@@ -89,11 +108,11 @@ input[type="checkbox"] {
       outline: 2px solid palette(purple, 200);
     }
   }
-  &:focus:not(:focus-visible) {
-    & + .label-text {
-      outline: none;
-    }
-  }
+  // &:focus:not(:focus-visible) {
+  //   & + .label-text {
+  //     outline: none;
+  //   }
+  // }
 }
 .label-active {
   color: white;

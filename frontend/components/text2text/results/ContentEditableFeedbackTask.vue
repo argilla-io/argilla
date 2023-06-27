@@ -53,11 +53,14 @@ export default {
       type: String,
       default: "",
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   data: () => {
     return {
       editableText: null,
-      focus: false,
     };
   },
   computed: {
@@ -69,6 +72,16 @@ export default {
     },
     sanitazedEditableText() {
       return DOMPurify.sanitize(this.editableText);
+    },
+  },
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        this.$nextTick(() => {
+          newValue && this.$refs.text.focus();
+        });
+      },
     },
   },
   mounted() {
@@ -92,11 +105,10 @@ export default {
       this.$emit("change-text", event.target.innerText);
     },
     setFocus(status) {
-      this.focus = status;
       this.$emit("on-change-focus", status);
     },
     pastePlainText(event) {
-      if (this.focus && event.target.isContentEditable) {
+      if (event.target.isContentEditable) {
         event.preventDefault();
         const text = event.clipboardData?.getData("text/plain") ?? "";
         document.execCommand("insertText", false, text);

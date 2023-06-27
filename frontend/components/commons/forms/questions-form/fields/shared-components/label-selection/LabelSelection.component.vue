@@ -43,11 +43,13 @@
         :key="option.id"
       >
         <input
+          ref="options"
           type="checkbox"
           :name="option.text"
           :id="option.id"
           v-model="option.is_selected"
           @change="onSelect(option)"
+          @focus="onFocus"
         />
         <label
           class="label-text cursor-pointer"
@@ -93,6 +95,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   model: {
     prop: "options",
@@ -106,6 +112,16 @@ export default {
   },
   created() {
     this.searchRef = `${this.componentId}SearchFilterRef`;
+  },
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        this.$nextTick(() => {
+          !!newValue && this.$refs?.options[0].focus();
+        });
+      },
+    },
   },
   computed: {
     filteredOptions() {
@@ -167,6 +183,9 @@ export default {
           return option;
         });
       }
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
     toggleShowLess() {
       this.isExpanded = !this.isExpanded;
@@ -258,11 +277,11 @@ input[type="checkbox"] {
       outline: 2px solid palette(purple, 200);
     }
   }
-  &:focus:not(:focus-visible) {
-    & + .label-text {
-      outline: none;
-    }
-  }
+  // &:focus:not(:focus-visible) {
+  //   & + .label-text {
+  //     outline: none;
+  //   }
+  // }
 }
 .label-active {
   color: white;
