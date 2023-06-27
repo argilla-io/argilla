@@ -19,7 +19,7 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from pydantic import parse_obj_as
-from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_
+from sqlalchemy import JSON, CheckConstraint, ForeignKey, Text, UniqueConstraint, and_
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -45,6 +45,11 @@ class ResponseStatus(str, Enum):
     draft = "draft"
     submitted = "submitted"
     discarded = "discarded"
+
+
+class SuggestionType(str, Enum):
+    model = "model"
+    human = "human"
 
 
 class DatasetStatus(str, Enum):
@@ -111,6 +116,23 @@ class Response(TimestampMixin, Base):
             f"Response(id={str(self.id)!r}, record_id={str(self.record_id)!r}, user_id={str(self.user_id)!r}, "
             f"status={self.status.value!r}, inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
+
+
+SuggestionTypeEnum = SAEnum(SuggestionType, name="suggestion_type_enum")
+
+
+class Suggestion(TimestampMixin, Base):
+    __tablename__ = "suggestions"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    value: Mapped[dict] = mapped_column(JSON)
+    score: Mapped[Optional[float]] = mapped_column(nullable=True)
+    agent: Mapped[Optional[str]] = mapped_column(nullable=True)
+    type: Mapped[Optional[SuggestionType]] = mapped_column(SuggestionTypeEnum, nullable=True, index=True)
+    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
+    question_id: Mapped[UUID] = mapped_column(ForeignKey("questions.id", ondelete="CASCADE"), index=True)
+
+    __table_args__ = (CheckConstraint("score IS NULL OR score >= 0 AND score <= 1", name="suggestion_score_check"),)
 
 
 class Record(TimestampMixin, Base):
