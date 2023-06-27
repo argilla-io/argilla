@@ -761,6 +761,11 @@ div.nbinput.container div.input_area {
   border: none !important;
 }
 
+div.nboutput.container div.output_area.stderr {
+  background: #fdd;
+  color: #484848
+}
+
 /* Tutorials sections */
 a [class^="tuto-section-"] {
   height: 14px;
