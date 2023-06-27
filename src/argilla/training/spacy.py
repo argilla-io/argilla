@@ -306,11 +306,9 @@ class ArgillaSpaCyTrainer(_ArgillaSpaCyTrainerBase):
 
         if "tok2vec" in self.config["nlp"]["pipeline"]:
             # If we want to fine-tune the `tok2vec` component, then we need to set the
-            # `init_tok2vec` path to the model we want to fine-tune, and set the
-            # `include_static_vectors` to `True`.
+            # `init_tok2vec` path to the model we want to fine-tune.
             if self.freeze_tok2vec is False:
                 self.config["paths"]["init_tok2vec"] = self._model
-                self.config["components"]["tok2vec"]["include_static_vectors"] = True
             else:
                 # Otherwise, if we don't want to fine-tune the `tok2vec` component, then we
                 # need to set the `frozen_components` and `annotating_components` to
