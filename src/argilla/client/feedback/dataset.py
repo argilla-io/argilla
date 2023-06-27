@@ -38,6 +38,7 @@ from argilla.client.feedback.schemas import (
     FieldSchema,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
@@ -234,10 +235,12 @@ class FeedbackDataset:
         any_required = False
         unique_names = set()
         for question in questions:
-            if not isinstance(question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion)):
+            if not isinstance(
+                question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion)
+            ):
                 raise TypeError(
                     "Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion` got a"
+                    " `LabelQuestion`, `MultiLabelQuestion`, and/or `RankingQuestion` got a"
                     f" question in the list with type {type(question)} instead."
                 )
             if question.name in unique_names:
@@ -707,7 +710,7 @@ class FeedbackDataset:
                 question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
             elif question.settings["type"] == "text":
                 question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
-            elif question.settings["type"].__contains__("label_selection"):
+            elif question.settings["type"] in ["label_selection", "multi_label_selection", "ranking"]:
                 if all([label["value"] == label["text"] for label in question.settings["options"]]):
                     labels = [label["value"] for label in question.settings["options"]]
                 else:
@@ -721,11 +724,13 @@ class FeedbackDataset:
                     question = MultiLabelQuestion(
                         **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
                     )
+                elif question.settings["type"] == "ranking":
+                    question = RankingQuestion(**question_dict, values=labels)
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
                     " version, supported question types are: `RatingQuestion`, `TextQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion`."
+                    " `LabelQuestion`, `MultiLabelQuestion`, and/or `RankingQuestion`."
                 )
             questions.append(question)
         self = cls(
