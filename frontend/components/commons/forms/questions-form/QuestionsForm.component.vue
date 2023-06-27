@@ -533,7 +533,7 @@ export default {
           case COMPONENT_TYPE.FREE_TEXT: {
             const text = input.options[0]?.value.trim();
 
-            if (!!text) {
+            if (text) {
               responseByQuestionName[input.name] = {
                 value: text,
               };
