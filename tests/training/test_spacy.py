@@ -24,7 +24,7 @@ from tests.training.helpers import cleanup_spacy_config, train_with_cleanup
 )
 class TestSpaCyTrainer:
     def test_update_config(
-        framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
+        self, framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
     ) -> None:
         trainer = ArgillaTrainer(name=dataset_text_classification, framework=framework, model=model)
         trainer.update_config(max_steps=15000)
@@ -33,7 +33,7 @@ class TestSpaCyTrainer:
         assert trainer._trainer.config["training"]["num_epochs"] == 1000
 
     def test_train_textcat(
-        framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
+        self, framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
     ) -> None:
         trainer = ArgillaTrainer(name=dataset_text_classification, framework=framework, model=model)
         trainer.update_config(max_steps=1)
@@ -48,7 +48,7 @@ class TestSpaCyTrainer:
         cleanup_spacy_config(trainer)
 
     def test_train_textcat_multi_label(
-        framework: str, model: str, dataset_text_classification_multi_label: rg.DatasetForTextClassification
+        self, framework: str, model: str, dataset_text_classification_multi_label: rg.DatasetForTextClassification
     ) -> None:
         trainer = ArgillaTrainer(
             name=dataset_text_classification_multi_label, train_size=0.5, framework=framework, model=model
@@ -65,7 +65,7 @@ class TestSpaCyTrainer:
         cleanup_spacy_config(trainer)
 
     def test_train_tokencat(
-        framework: str, model: str, dataset_token_classification: rg.DatasetForTokenClassification
+        self, framework: str, model: str, dataset_token_classification: rg.DatasetForTokenClassification
     ) -> None:
         trainer = ArgillaTrainer(name=dataset_token_classification, framework=framework, model=model)
         trainer.update_config(max_steps=1)
@@ -79,7 +79,7 @@ class TestSpaCyTrainer:
         cleanup_spacy_config(trainer)
 
     def test_init_with_gpu_id(
-        framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
+        self, framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
     ) -> None:
         trainer = ArgillaTrainer(name=dataset_text_classification, gpu_id=0, framework=framework, model=model)
         try:
@@ -104,7 +104,7 @@ class TestSpaCyTrainer:
             assert trainer._trainer.use_gpu == spacy.prefer_gpu(0)
 
     def test_predict_wo_training(
-        framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
+        self, framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
     ) -> None:
         trainer = ArgillaTrainer(name=dataset_text_classification, framework=framework, model=model)
         trainer._trainer.predict("This is a text")
