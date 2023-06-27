@@ -106,5 +106,7 @@ class TestSpaCyTrainer:
     def test_predict_wo_training(
         self, framework: str, model: str, dataset_text_classification: rg.DatasetForTextClassification
     ) -> None:
+        if framework == "spacy-transformers":
+            pytest.skip("Not all `transformers` can be loaded in `spacy`, as in this case `bert-tiny` used in tests")
         trainer = ArgillaTrainer(name=dataset_text_classification, framework=framework, model=model)
         trainer._trainer.predict("This is a text")
