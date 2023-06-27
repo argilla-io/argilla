@@ -782,13 +782,15 @@ class FeedbackDataset:
                     value = Value(dtype="string")
                 elif question.settings["type"] == "rating":
                     value = Value(dtype="int32")
-                elif question.settings["type"] == "multi_label_selection":
+                elif question.settings["type"] == "ranking":
+                    value = Sequence({"rank": Value(dtype="int32"), "value": Value(dtype="string")})
+                elif question.settings["type"] in "multi_label_selection":
                     value = Sequence(Value(dtype="string"))
                 else:
                     raise ValueError(
                         f"Question {question.name} has an unsupported type: {question.settings['type']}, for the"
-                        " moment only the following types are supported: 'text', 'rating', 'label_selection', and"
-                        " 'multi_label_selection'"
+                        " moment only the following types are supported: 'text', 'rating', 'label_selection',"
+                        " 'multi_label_selection', and 'ranking'."
                     )
                 # TODO(alvarobartt): if we constraint ranges from 0 to N, then we can use `ClassLabel` for ratings
                 features[question.name] = Sequence(
@@ -808,17 +810,24 @@ class FeedbackDataset:
                 for field in self.fields:
                     dataset[field.name].append(record.fields[field.name])
                 for question in self.questions:
+                    if not record.responses:
+                        dataset[question.name].append(None)
+                        continue
+                    responses = []
+                    for response in record.responses:
+                        if question.name not in response.values:
+                            responses.append(None)
+                            continue
+                        if question.settings["type"] == "ranking":
+                            responses.append([r.dict() for r in response.values[question.name].value])
+                        else:
+                            responses.append(response.values[question.name].value)
                     dataset[question.name].append(
                         {
                             "user_id": [r.user_id for r in record.responses],
-                            "value": [
-                                r.values[question.name].value if question.name in r.values else None
-                                for r in record.responses
-                            ],
+                            "value": responses,
                             "status": [r.status for r in record.responses],
                         }
-                        if record.responses
-                        else None
                     )
                 dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
                 dataset["external_id"].append(record.external_id or None)
@@ -979,6 +988,8 @@ class FeedbackDataset:
                             "status": status,
                             "values": {},
                         }
+                    if question.settings["type"] == "ranking":
+                        value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
                     responses[user_id]["values"].update({question.name: {"value": value}})
 
             metadata = None
