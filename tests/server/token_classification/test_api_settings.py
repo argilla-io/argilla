@@ -13,8 +13,9 @@
 #  limitations under the License.
 
 import argilla as rg
-from argilla.server.commons.models import TaskType
 from argilla.client.api import delete
+from argilla.server.commons.models import TaskType
+
 
 def create_dataset(client, name: str):
     response = client.post("/api/datasets", json={"name": name, "task": TaskType.token_classification})

@@ -14,14 +14,12 @@
 import argilla as rg
 import pytest
 from argilla.client import api
-from argilla.client.api import init
-from argilla.client.api import delete
-from argilla.client.api import get_workspace
+from argilla.client.api import delete, get_workspace, init
 from argilla.client.apis.datasets import Datasets
-from argilla.datasets.__init__ import configure_dataset
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
+from argilla.datasets.__init__ import configure_dataset
 from argilla.server.contexts import accounts
 from argilla.server.models import User
 from argilla.server.security.model import WorkspaceUserCreate

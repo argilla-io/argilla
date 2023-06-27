@@ -18,13 +18,13 @@ from typing import Any, Dict, List
 
 import argilla as rg
 import pytest
-from argilla.client.models import (
-    TokenAttributions,
-    TextClassificationRecord,
-    TokenClassificationRecord,
-    Text2TextRecord
-)
 from argilla._constants import DEFAULT_API_KEY
+from argilla.client.models import (
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenAttributions,
+    TokenClassificationRecord,
+)
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,

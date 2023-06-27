@@ -24,18 +24,17 @@ import pytest
 import spacy
 from argilla.client.datasets import (
     DatasetBase,
+    DatasetForText2Text,
+    DatasetForTextClassification,
     DatasetForTokenClassification,
     WrongRecordTypeError,
-    DatasetForTextClassification,
-    DatasetForText2Text,
     read_datasets,
-    read_pandas
-
+    read_pandas,
 )
 from argilla.client.models import (
+    Text2TextRecord,
     TextClassificationRecord,
     TokenClassificationRecord,
-    Text2TextRecord
 )
 from argilla.datasets import TextClassificationSettings
 
@@ -897,9 +896,7 @@ class TestDatasetForText2Text:
             assert rec == expected
 
     def test_prepare_for_training(self):
-        ds = DatasetForText2Text(
-            [Text2TextRecord(text="mock", annotation="mock"), Text2TextRecord(text="mock")] * 10
-        )
+        ds = DatasetForText2Text([Text2TextRecord(text="mock", annotation="mock"), Text2TextRecord(text="mock")] * 10)
         train = ds.prepare_for_training(train_size=1, seed=42)
 
         assert isinstance(train, datasets.Dataset)
@@ -917,9 +914,7 @@ class TestDatasetForText2Text:
             assert set(train_test[split].column_names) == set(["id", "text", "target"])
 
     def test_prepare_for_training_with_spacy(self):
-        ds = DatasetForText2Text(
-            [Text2TextRecord(text="mock", annotation="mock"), Text2TextRecord(text="mock")] * 10
-        )
+        ds = DatasetForText2Text([Text2TextRecord(text="mock", annotation="mock"), Text2TextRecord(text="mock")] * 10)
         with pytest.raises(NotImplementedError):
             ds.prepare_for_training("spacy", lang=spacy.blank("en"), train_size=1)
 
@@ -940,9 +935,7 @@ class TestDatasetForText2Text:
         assert jsonl[0]["prompt"] == "Michael is a professor at Harvard but"
 
     def test_prepare_for_training_with_spark_nlp(self):
-        ds = DatasetForText2Text(
-            [Text2TextRecord(text="mock", annotation="mock"), Text2TextRecord(text="mock")] * 10
-        )
+        ds = DatasetForText2Text([Text2TextRecord(text="mock", annotation="mock"), Text2TextRecord(text="mock")] * 10)
         df = ds.prepare_for_training("spark-nlp", train_size=1)
         assert list(df.columns) == ["id", "text", "target"]
 

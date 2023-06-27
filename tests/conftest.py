@@ -18,17 +18,14 @@ from typing import TYPE_CHECKING, Dict, Generator
 import argilla as rg
 import httpx
 import pytest
-from argilla.client.api import log
-from argilla.client.api import delete 
-from argilla.client.datasets import read_datasets
-from argilla.datasets.__init__ import configure_dataset
-from argilla.client.models import TextClassificationRecord
-from argilla.client.models import Text2TextRecord
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla.client.api import ArgillaSingleton
+from argilla.client.api import ArgillaSingleton, delete, log
 from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla, AuthenticatedClient
+from argilla.client.datasets import read_datasets
+from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
+from argilla.datasets.__init__ import configure_dataset
 from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
 from argilla.server.database import Base, get_db

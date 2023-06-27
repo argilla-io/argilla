@@ -17,9 +17,8 @@ import sys
 
 import argilla as rg
 import pytest
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training import ArgillaTrainer
-from argilla.client.models import TextClassificationRecord
-from argilla.client.models import TokenClassificationRecord
 
 from .helpers import train_with_cleanup
 

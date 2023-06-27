@@ -13,8 +13,9 @@
 #  limitations under the License.
 
 import argilla as rg
-from argilla.training import ArgillaTrainer
 from argilla.client.models import TextClassificationRecord
+from argilla.training import ArgillaTrainer
+
 from .helpers import train_with_cleanup
 
 FRAMEWORK = "setfit"

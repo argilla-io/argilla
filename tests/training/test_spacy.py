@@ -13,9 +13,9 @@
 #  limitations under the License.
 
 import argilla as rg
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training import ArgillaTrainer
-from argilla.client.models import TextClassificationRecord
-from argilla.client.models import TokenClassificationRecord
+
 from .helpers import cleanup_spacy_config, train_with_cleanup
 
 FRAMEWORK = "spacy"

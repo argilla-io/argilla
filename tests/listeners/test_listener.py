@@ -18,10 +18,9 @@ from typing import List
 import argilla as rg
 import pytest
 from argilla import RGListenerContext, listener
-from argilla.client.models import Record
-from argilla.client.api import log
-from argilla.client.api import delete
-from argilla.client.models import TextClassificationRecord
+from argilla.client.api import delete, log
+from argilla.client.models import Record, TextClassificationRecord
+
 
 def condition_check_params(search):
     if search:

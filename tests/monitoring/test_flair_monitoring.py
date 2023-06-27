@@ -14,10 +14,9 @@
 
 from time import sleep
 
-from argilla.server.models import User
-from argilla.client.api import delete
-from argilla.client.api import load
+from argilla.client.api import delete, load
 from argilla.monitoring.model_monitor import monitor
+from argilla.server.models import User
 
 
 def test_flair_monitoring(monkeypatch, argilla_user: User):

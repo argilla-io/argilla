@@ -15,9 +15,7 @@
 import argilla
 import argilla as rg
 import pytest
-from argilla.client.api import log
-from argilla.client.api import load
-from argilla.client.api import delete
+from argilla.client.api import delete, load, log
 from argilla.client.models import TokenClassificationRecord
 from argilla.metrics import entity_consistency
 from argilla.metrics.token_classification import (
