@@ -44,6 +44,8 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
+          @on-focus="updateFocusedQuestionPosition(index)"
+          @on-blur="updateFocusedQuestionPosition(null)"
         />
 
         <SingleLabelComponent
@@ -55,6 +57,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
+          @on-focus="updateFocusedQuestionPosition(index)"
         />
         <MultiLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
@@ -65,6 +68,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
+          @on-focus="updateFocusedQuestionPosition(index)"
         />
 
         <RatingComponent
@@ -75,6 +79,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
+          @on-focus="updateFocusedQuestionPosition(index)"
         />
       </div>
     </div>
