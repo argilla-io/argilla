@@ -6,12 +6,12 @@
       :tooltipMessage="description"
     />
 
-    <div class="container" :class="isFocused ? '--focused' : null">
+    <div class="container">
       <RenderMarkdownBaseComponent
-        v-if="useMarkdown && !isFocused"
+        v-if="visibleMarkdown"
         class="textarea--markdown"
         :markdown="value"
-        @click.native="setFocus(true)"
+        @click.native="setEditionMode(true)"
       />
       <ContentEditableFeedbackTask
         v-else
@@ -20,8 +20,9 @@
         :annotations="[]"
         :defaultText="value"
         :placeholder="placeholder"
+        :isFocused="isFocused"
         @change-text="onChangeTextArea"
-        @on-change-focus="setFocus"
+        @on-change-focus="setEditionMode"
       />
     </div>
   </div>
@@ -55,15 +56,24 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   data: () => {
     return {
-      isFocused: false,
+      isEditionModeActive: false,
     };
   },
   model: {
     prop: "value",
     event: "on-change-value",
+  },
+  computed: {
+    visibleMarkdown() {
+      return this.useMarkdown && !this.isEditionModeActive && !this.isFocused;
+    },
   },
   methods: {
     onChangeTextArea(newText) {
@@ -74,8 +84,8 @@ export default {
         this.$emit("on-error", !isAnyText);
       }
     },
-    setFocus(status) {
-      this.isFocused = status;
+    setEditionMode(status) {
+      this.isEditionModeActive = status;
     },
   },
 };
@@ -94,7 +104,7 @@ export default {
   border: 1px solid $black-20;
   border-radius: $border-radius-s;
   min-height: 10em;
-  &.--focused {
+  &:focus-within {
     border-color: $primary-color;
   }
   .content--exploration-mode & {
