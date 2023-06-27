@@ -16,7 +16,7 @@ import sys
 
 import numpy as np
 import pytest
-from argilla import TextClassificationRecord
+from argilla.client.models import TextClassificationRecord
 from argilla.labeling.text_classification import (
     FlyingSquid,
     Snorkel,
@@ -545,7 +545,7 @@ class TestFlyingSquid:
             FlyingSquid(None)
 
     def test_init(self, weak_labels):
-        label_model = FlyingSquid(weak_labels)
+        FlyingSquid(weak_labels)
 
         with pytest.raises(ValueError, match="must not contain 'm'"):
             FlyingSquid(weak_labels, m="mock")

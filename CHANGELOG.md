@@ -31,6 +31,12 @@ These are the section headers that we use:
 - Fixed `push_to_huggingface()` when `generate_card=True` (default behaviour), as we were passing a sample record to the `ArgillaDatasetCard` class, and `UUID`s introduced in 1.10.0 ([#3192](https://github.com/argilla-io/argilla/pull/3192)), are not JSON-serializable ([#3231](https://github.com/argilla-io/argilla/pull/3231)).
 - Fixed `from_argilla` and `push_to_argilla` to ensure consistency on both field and question re-construction, and to ensure `UUID`s are properly serialized as `str`, respectively ([#3234](https://github.com/argilla-io/argilla/pull/3234)).
 
+#### Docs
+
+- Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3241](https://github.com/argilla-io/argilla/pull/3241).
+- Fixed library buttons' formatting on Tutorials page [#2819](https://github.com/argilla-io/argilla/pull/2819).
+- Modified styling of error code outputs in notebooks ([#2707](https://github.com/argilla-io/argilla/issues/2707)).
+
 ### Added
 
 - Added `metadata` attribute to the `Record` of the `FeedbackDataset` ([#3194](https://github.com/argilla-io/argilla/pull/3194))
@@ -70,7 +76,8 @@ These are the section headers that we use:
 
 ### Docs
 
-- Resolved typos in the docs ([#3238](https://github.com/argilla-io/argilla/issues/3238))
+- Resolved typos in the docs ([#3238](https://github.com/argilla-io/argilla/issues/3238)).
+- Fixed mention of master branch ([#2324](https://github.com/argilla-io/argilla/pull/2324)).
 
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
