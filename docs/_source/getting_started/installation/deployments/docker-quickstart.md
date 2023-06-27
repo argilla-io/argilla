@@ -1,9 +1,8 @@
 # Docker Quickstart
 
-Argilla is composed of a Python Server with Elasticsearch as the database layer, and a Python Client to create and
-manage datasets.
+Argilla is composed of a Python Server with Elasticsearch as the database layer, and a Python Client to create and manage datasets, users, and workspaces.
 
-To get started you just need to run the docker image with following command:
+To get started you just need to run the docker image with the following command:
 
 ``` bash
   docker run -d --network argilla-net --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
@@ -42,7 +41,7 @@ This will run the latest quickstart docker image with 3 users `owner`, `admin` a
 - `ANNOTATOR_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password
   is `12345678`. By setting up a custom password you can use your own password to login into the app.
 - `LOAD_DATASETS`: This variables will allow you to load sample datasets. The default value will be `full`. The
-  supported values for this variable is as follows:
+  supported values for this variable are as follows:
     1. `single`: Load single datasets for Feedback task.
     2. `full`: Load all the sample datasets for NLP tasks (Feedback, TokenClassification, TextClassification, Text2Text)
     3. `none`: No datasets are loaded.

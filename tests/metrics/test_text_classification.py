@@ -13,8 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import argilla as rg
-from argilla import TextClassificationRecord
 from argilla.client import api
+from argilla.client.models import TextClassificationRecord
 from argilla.metrics.text_classification import f1, f1_multilabel
 
 

@@ -23,7 +23,7 @@ wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla
 Latest versions of docker should be executed without the dash '-', e.g:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 :::
 

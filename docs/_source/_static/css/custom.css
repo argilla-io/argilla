@@ -847,9 +847,9 @@ div[class*="tuto-section-"] {
   }
 }
 
-#libraries .sd-card-body {
+/* #libraries .sd-card-body {
   min-height: 150px;
-}
+} */
 .sd-card-body {
   background: var(--color-card-bg);
   color: var(--color-card-text);
