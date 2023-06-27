@@ -460,7 +460,7 @@ class DatasetBase:
             Framework.PEFT,
         ]:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
-        elif framework in [Framework.SPACY.value, Framework.SPACY_TRANSFORMERS.value] and lang is None:
+        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS] and lang is None:
             raise ValueError(
                 "Please provide a `spaCy` language model to prepare the dataset for"
                 " training with the `spaCy`/`spaCy-transformers` framework."
@@ -476,7 +476,7 @@ class DatasetBase:
                     shuffle=False,
                     random_state=seed,
                 )
-                if framework in [Framework.SPACY.value, Framework.SPACY_TRANSFORMERS.value]:
+                if framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
                     train_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_train)
                     test_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_test)
                     return train_docbin, test_docbin

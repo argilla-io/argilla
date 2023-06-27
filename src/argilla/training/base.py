@@ -116,7 +116,7 @@ class ArgillaTrainer(object):
                 self._settings = self.dataset_full._infer_settings_from_records()
 
         framework = Framework(framework)
-        if framework in [Framework.SPACY.value, Framework.SPACY_TRANSFORMERS.value]:
+        if framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
             import spacy
 
             self.dataset_full_prepared = self.dataset_full.prepare_for_training(
