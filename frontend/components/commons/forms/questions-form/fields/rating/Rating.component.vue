@@ -6,7 +6,7 @@
       :tooltipMessage="description"
     />
 
-    <RatingMonoSelectionComponent v-model="options" />
+    <RatingMonoSelectionComponent v-model="options" :isFocused="isFocused" />
   </div>
 </template>
 
@@ -23,6 +23,10 @@ export default {
       required: true,
     },
     isRequired: {
+      type: Boolean,
+      default: () => false,
+    },
+    isFocused: {
       type: Boolean,
       default: () => false,
     },
